@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4E8F105F-5899-477F-BC0C-399496435C2E}</ProjectGuid>
+    <RootNamespace>Serenity</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\boost155\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib\Bullet-Debug;$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);glew32.lib;SOIL.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletFileLoader_Debug.lib;BulletMultiThreaded_Debug.lib;BulletSoftBody_Debug.lib;BulletSoftBodySolvers_DX11_Debug.lib;BulletWorldImporter_Debug.lib;BulletXMLWorldImporter_Debug.lib;OpenGLSupport_Debug.lib;LinearMath_Debug.lib;sfml-audio-s-d.lib;sfml-graphics-s-d.lib;sfml-main-d.lib;sfml-network-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir “$(TargetDir)Shaders\”
+mkdir “$(TargetDir)Models\”
+mkdir “$(TargetDir)Textures\”
+xcopy "$(SolutionDir)dependencies\bin" "$(TargetDir)" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying Binary...</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\boost155\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-s.lib;sfml-graphics-s.lib;sfml-main.lib;sfml-network-s.lib;sfml-system-s.lib;sfml-window-s.lib;%(AdditionalDependencies);glew32.lib;glew32mx.lib;SOIL.lib;BulletCollision.lib;BulletDynamics.lib;BulletFileLoader.lib;BulletMultiThreaded.lib;BulletSoftBody.lib;BulletSoftBodySolvers_DX11.lib;BulletWorldImporter.lib;BulletXMLWorldImporter.lib;OpenGLSupport.lib;LinearMath.lib</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir “$(TargetDir)Shaders\”
+mkdir “$(TargetDir)Models\”
+mkdir “$(TargetDir)Textures\”
+xcopy "$(SolutionDir)dependencies\bin" "$(TargetDir)" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying Binary...</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Engine_Events.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GBuffer.cpp" />
+    <ClCompile Include="GLDebugDrawer.cpp" />
+    <ClCompile Include="GLDebugFont.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialComponent.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjectDynamic.cpp" />
+    <ClCompile Include="Engine_Renderer.cpp" />
+    <ClCompile Include="Engine_Resources.cpp" />
+    <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="TextureBuffer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Engine_Events.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="GLDebugDrawer.h" />
+    <ClInclude Include="GLDebugFont.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialComponent.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectDynamic.h" />
+    <ClInclude Include="Engine_Renderer.h" />
+    <ClInclude Include="Engine_Resources.h" />
+    <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Skybox.h" />
+    <ClInclude Include="TextureBuffer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\deferred_blur_frag.glsl" />
+    <None Include="Shaders\deferred_blur_horizontal.glsl" />
+    <None Include="Shaders\deferred_blur_vertical.glsl" />
+    <None Include="Shaders\deferred_final_frag.glsl" />
+    <None Include="Shaders\deferred_frag.glsl" />
+    <None Include="Shaders\deferred_frag_skybox.glsl" />
+    <None Include="Shaders\deferred_lighting_dir_frag.glsl" />
+    <None Include="Shaders\deferred_lighting_point_frag.glsl" />
+    <None Include="Shaders\deferred_lighting_vert.glsl" />
+    <None Include="Shaders\deferred_ssao_frag.glsl" />
+    <None Include="Shaders\frag.glsl" />
+    <None Include="Shaders\frag_skybox.glsl" />
+    <None Include="Shaders\vert.glsl" />
+    <None Include="Shaders\vert_skybox.glsl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

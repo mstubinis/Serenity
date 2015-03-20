@@ -1,3 +1,10 @@
+# Directories
+Debug/
+Release/
+
+# VS Stuff
+*.sdf
+
 # Compiled Object files
 *.slo
 *.lo

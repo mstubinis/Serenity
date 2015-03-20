@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Resource Files\Shaders">
+      <UniqueIdentifier>{e0f84799-9fed-4e2a-8dc2-73c7cbafece5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine">
+      <UniqueIdentifier>{1fa40977-5af4-4b4b-adf5-1fd56320d21e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\DeferredRendering">
+      <UniqueIdentifier>{38085e6a-1222-44e1-92ff-ee7d2416c392}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering">
+      <UniqueIdentifier>{2b413ee7-08eb-47dc-a422-3a6b052d31f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\ForwardRendering">
+      <UniqueIdentifier>{3449af22-024a-420d-a07b-d99f8da2eec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\LightingShaders">
+      <UniqueIdentifier>{4970b14b-ba45-4831-81da-db3cec9cd0d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Materials">
+      <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Engine">
+      <UniqueIdentifier>{7168ad54-1c5f-4245-b720-04bc4cb816bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\DeferredRendering">
+      <UniqueIdentifier>{02a33361-c515-464f-9369-19b4c3fe28b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Materials">
+      <UniqueIdentifier>{445d46fd-3b43-47ff-abec-53ef9754382a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Objects">
+      <UniqueIdentifier>{e30d7ba1-932e-40bc-b395-39b473e2b9f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Objects">
+      <UniqueIdentifier>{5abb8f18-0356-4634-9735-228221637c9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing">
+      <UniqueIdentifier>{3a26f670-b952-490c-86c3-73ce4e6e7a4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur">
+      <UniqueIdentifier>{62619f9d-393b-4dff-8c33-68bff6b11aba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO">
+      <UniqueIdentifier>{01d8a664-bbee-4225-8f52-3537791a4b3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Resources">
+      <UniqueIdentifier>{2c7a2015-6a8c-40cd-adb3-6dcd2c375a5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Resources">
+      <UniqueIdentifier>{86c0c58a-9f1b-485e-a9b8-189c23017025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Other">
+      <UniqueIdentifier>{80125bc3-e093-450f-a304-952592e3fe4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Other">
+      <UniqueIdentifier>{0ac16972-c034-4fa5-b1f8-7a195a864256}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectDynamic.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="GBuffer.cpp">
+      <Filter>Source Files\Engine\DeferredRendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files\Engine\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialComponent.cpp">
+      <Filter>Source Files\Engine\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>Source Files\Engine\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GLDebugDrawer.cpp">
+      <Filter>Source Files\Engine\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="GLDebugFont.cpp">
+      <Filter>Source Files\Engine\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureBuffer.cpp">
+      <Filter>Source Files\Engine\DeferredRendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Events.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Renderer.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Resources.cpp">
+      <Filter>Source Files\Engine\Resources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectDynamic.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>Header Files\Engine\DeferredRendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialComponent.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>Header Files\Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GLDebugDrawer.h">
+      <Filter>Header Files\Engine\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="GLDebugFont.h">
+      <Filter>Header Files\Engine\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureBuffer.h">
+      <Filter>Header Files\Engine\DeferredRendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Events.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Renderer.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Resources.h">
+      <Filter>Header Files\Engine\Resources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\frag.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
+    <None Include="Shaders\vert.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
+    <None Include="Shaders\frag_skybox.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
+    <None Include="Shaders\vert_skybox.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
+    <None Include="Shaders\deferred_lighting_vert.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
+    </None>
+    <None Include="Shaders\deferred_lighting_point_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
+    </None>
+    <None Include="Shaders\deferred_lighting_dir_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
+    </None>
+    <None Include="Shaders\deferred_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
+    </None>
+    <None Include="Shaders\deferred_frag_skybox.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
+    </None>
+    <None Include="Shaders\deferred_final_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
+    </None>
+    <None Include="Shaders\deferred_blur_vertical.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
+    </None>
+    <None Include="Shaders\deferred_blur_horizontal.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
+    </None>
+    <None Include="Shaders\deferred_blur_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
+    </None>
+    <None Include="Shaders\deferred_ssao_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO</Filter>
+    </None>
+  </ItemGroup>
+</Project>
