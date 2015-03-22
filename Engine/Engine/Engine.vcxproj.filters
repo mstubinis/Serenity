@@ -58,17 +58,14 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO">
       <UniqueIdentifier>{01d8a664-bbee-4225-8f52-3537791a4b3f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Resources">
-      <UniqueIdentifier>{2c7a2015-6a8c-40cd-adb3-6dcd2c375a5b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Engine\Resources">
-      <UniqueIdentifier>{86c0c58a-9f1b-485e-a9b8-189c23017025}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine\Other">
       <UniqueIdentifier>{80125bc3-e093-450f-a304-952592e3fe4e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Engine\Other">
       <UniqueIdentifier>{0ac16972-c034-4fa5-b1f8-7a195a864256}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\AtmopshericScattering">
+      <UniqueIdentifier>{9482e4ed-522e-4fe0-b336-5a2cc2814377}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -127,7 +124,7 @@
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine_Resources.cpp">
-      <Filter>Source Files\Engine\Resources</Filter>
+      <Filter>Source Files\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -186,7 +183,7 @@
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine_Resources.h">
-      <Filter>Header Files\Engine\Resources</Filter>
+      <Filter>Header Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -231,6 +228,12 @@
     </None>
     <None Include="Shaders\deferred_ssao_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO</Filter>
+    </None>
+    <None Include="Shaders\deferred_a_scatter_space_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\AtmopshericScattering</Filter>
+    </None>
+    <None Include="Shaders\deferred_a_scatter_space_vert.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\AtmopshericScattering</Filter>
     </None>
   </ItemGroup>
 </Project>

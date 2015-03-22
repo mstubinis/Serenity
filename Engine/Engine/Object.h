@@ -81,6 +81,7 @@ class Object{
 		const glm::vec3& Radius() const;
 		const glm::vec3& Color() const;
 		const glm::mat4& Model() const;
+		const glm::mat4& World() const;
 		std::string Name() const;
 		const Object* Parent() const;
 		std::vector<Object*> Children() const;

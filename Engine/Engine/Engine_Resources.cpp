@@ -18,6 +18,8 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Shader_Program("Deferred_Final","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_final_frag.glsl");
 	Add_Shader_Program("Deferred_Skybox","Shaders\\vert_skybox.glsl","Shaders\\deferred_frag_skybox.glsl");
 
+	Add_Shader_Program("Deferred_ASSpace","Shaders\\deferred_a_scatter_space_vert.glsl","Shaders\\deferred_a_scatter_space_frag.glsl");
+
 	Add_Shader_Program("Deferred_Light_Point","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_point_frag.glsl");
 	Add_Shader_Program("Deferred_Light_Dir","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_dir_frag.glsl");
 
@@ -26,6 +28,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("LightSphere","Models\\LightSphere.ply");
 	Add_Mesh("DEBUGLight","Models\\DEBUGLight.ply");
 	Add_Mesh("Ground","Models\\Ground.ply");
+	Add_Mesh("Planet","Models\\planet.ply");
 
 	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
 	Add_Material("Rock","Textures\\rock.png","Textures\\rockNormal.png","");

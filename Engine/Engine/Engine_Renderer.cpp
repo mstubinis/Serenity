@@ -79,25 +79,28 @@ void Renderer::Render(bool debug){
 		case RENDER_TYPE_DEFERRED:
 
 			m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_BLOOM);
-
 			this->Geometry_Pass(debug);
 			m_gBuffer->Stop();
+
 			m_gBuffer->Start(BUFFER_TYPE_LIGHTING);
 			this->Lighting_Pass();
 			m_gBuffer->Stop();
+
 			m_gBuffer->Start(BUFFER_TYPE_SSAO);
 			this->Pass_SSAO();
-
 			m_gBuffer->Stop();
 			m_gBuffer->Start(BUFFER_TYPE_FREE1);
 			this->Pass_Blur_Horizontal(m_gBuffer->Texture(BUFFER_TYPE_SSAO));
 			m_gBuffer->Stop();
 			m_gBuffer->Start(BUFFER_TYPE_SSAO);
 			this->Pass_Blur_Vertical(m_gBuffer->Texture(BUFFER_TYPE_FREE1));
-
-			
-
 			m_gBuffer->Stop();
+
+			m_gBuffer->Start(BUFFER_TYPE_FREE1);
+			this->Pass_AtmosphericScatteringSpace();
+			m_gBuffer->Stop();
+
+
 			this->Pass_Final();
 
 			break;
@@ -323,6 +326,70 @@ void Renderer::Pass_Blur_Vertical(GLuint texture){
 
 	glUseProgram(0);
 }
+void Renderer::Pass_AtmosphericScatteringSpace()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	GLuint shader = Resources->Get_Shader_Program("Deferred_ASSpace")->Get_Shader_Program();
+	glUseProgram(shader);
+
+	//
+	//vert
+	//
+
+	Object* obj = Resources->Objects.at(4);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(obj->World()));
+	/*
+	float Km = 0.0025f;
+	float Kr = 0.0015f;
+	float ESun = 10.0f;
+
+	glm::vec3 camPos = Resources->Current_Camera()->Position();
+	glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
+
+	glm::vec3 lightDir = Resources->Lights_Points.at(0)->Position;
+	lightDir = glm::normalize(lightDir);
+	glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
+
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / pow(0.650f, 4),1.0f / pow(0.570f, 4),1.0f / pow(0.475f, 4));
+	glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), camPos.x,camPos.y,camPos.z);
+
+	glUniform1f(glGetUniformLocation(shader,"fOuterRadius"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader,"fOuterRadius2"), 1.0f*1.0f);
+	glUniform1f(glGetUniformLocation(shader,"fInnerRadius"), 1.0f - 0.025f);
+	glUniform1f(glGetUniformLocation(shader,"fInnerRadius2"), (1.0f - 0.025f)*(1.0f - 0.025f));
+
+	glUniform1f(glGetUniformLocation(shader,"fKrESun"), Kr * ESun);
+	glUniform1f(glGetUniformLocation(shader,"fKmESun"), Km * ESun);
+	glUniform1f(glGetUniformLocation(shader,"fKr4PI"), Kr * 4 * 3.14159f);
+	glUniform1f(glGetUniformLocation(shader,"fKm4PI"), Km * 4 * 3.14159f);
+
+	float fScaledepth = 0.25f;
+	float fScale = 1.0f / (1.0f - (1.0f - 0.025f));
+
+	glUniform1f(glGetUniformLocation(shader,"fScaleDepth"),fScaledepth);
+	glUniform1f(glGetUniformLocation(shader,"fScale"),fScale);
+	glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / fScaleDepth);
+
+	float camHeight = glm::length(Resources->Current_Camera()->Position());
+	float camHeight2 = camHeight*camHeight;
+
+	glUniform1f(glGetUniformLocation(shader,"fCameraHeight"),camHeight);
+	glUniform1f(glGetUniformLocation(shader,"fCameraHeight2"), camHeight2);
+	*/
+	//
+	//frag
+	//
+	// Gravity
+	glUniform1f(glGetUniformLocation(shader,"g"),-0.98f);
+	glUniform1f(glGetUniformLocation(shader,"g2"), 0.9604f);
+
+	Resources->Get_Mesh("Planet")->Render();
+
+	glUseProgram(0);
+}
+void Renderer::Pass_AtmosphericScatteringGround()
+{
+}
 void Renderer::Pass_Final(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -331,11 +398,12 @@ void Renderer::Pass_Final(){
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
 
-	GLuint m_textureID[4];
+	GLuint m_textureID[5];
 	m_textureID[0] = glGetUniformLocation(shader,"gColorMap");
 	m_textureID[1] = glGetUniformLocation(shader,"gLightMap");
 	m_textureID[2] = glGetUniformLocation(shader,"gSSAOMap");
 	m_textureID[3] = glGetUniformLocation(shader,"gGlowMap");
+	m_textureID[4] = glGetUniformLocation(shader,"gASMap");
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -357,9 +425,14 @@ void Renderer::Pass_Final(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_BLOOM));
 	glUniform1i( m_textureID[3], 3 );
 
+	glActiveTexture(GL_TEXTURE4);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_FREE1));
+	glUniform1i( m_textureID[4], 4 );
+
 	Init_Quad();
 
-	for(unsigned int i = 0; i < 4; i++){
+	for(unsigned int i = 0; i < 5; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);

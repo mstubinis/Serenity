@@ -10,11 +10,11 @@ void Game::Init_Logic(){
 
 	new Skybox("Wasteland");
 	new ObjectDynamic(Resources->Default_Mesh(),Resources->Default_Material(),glm::vec3(0,0,-6));
-	new ObjectDynamic(Resources->Get_Mesh("Ground"),Resources->Get_Material("Stone"),glm::vec3(0,-2,0));
+	new ObjectDynamic(Resources->Get_Mesh("Planet"),Resources->Get_Material("Stone"),glm::vec3(0,0,0));
 
 	PointLight* pL = new PointLight();
 
-	pL->Position = glm::vec3(0,0,0);
+	pL->Position = glm::vec3(0,0,-2);
 	pL->Color = glm::vec3(1,1,1);
 	pL->AmbientIntensity = 0.2f;
 	pL->DiffuseIntensity = 0.3f;
@@ -23,16 +23,6 @@ void Game::Init_Logic(){
 	pL->Attenuation.Linear = 0.3f;
 	Resources->Lights_Points.push_back(pL);
 
-	PointLight* pL2 = new PointLight();
-
-	pL2->Position = glm::vec3(0,0,-4);
-	pL2->Color = glm::vec3(1,1,1);
-	pL2->AmbientIntensity = 0.2f;
-	pL2->DiffuseIntensity = 0.3f;
-	pL2->Attenuation.Constant = 0.3f;
-	pL2->Attenuation.Exp = 0.3f;
-	pL2->Attenuation.Linear = 0.3f;
-	Resources->Lights_Points.push_back(pL2);
 
 	DirectionalLight* dL = new DirectionalLight();
 

@@ -105,6 +105,7 @@ const glm::vec3& Object::Up() const { return m_Up; }
 const glm::vec3& Object::Radius() const { return m_Radius; }
 const glm::vec3& Object::Color() const { return m_Color; }
 const glm::mat4& Object::Model() const { return m_Model; }
+const glm::mat4& Object::World() const { return m_WorldMatrix; }
 std::string Object::Name() const { return m_Name; }
 const Object* Object::Parent() const { return m_Parent; }
 std::vector<Object*> Object::Children() const { return m_Children; }
