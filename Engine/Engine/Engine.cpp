@@ -139,7 +139,6 @@ void Engine::EngineClass::EDIT_Update(float dt, sf::Event e){
 }
 void Engine::EngineClass::Update(float dt,sf::Event e){
 	m_Timer += dt;
-	bullet->Update(dt);
 
 	if(m_MouseMoved == false && m_Timer > 0.165f){
 		m_MouseMoved = true;
@@ -150,6 +149,8 @@ void Engine::EngineClass::Update(float dt,sf::Event e){
 
 	for(auto object:Resources->Objects)
 		object->Update(dt);
+	bullet->Update(dt);
+	renderer->Update(dt);
 
 	Mouse_Difference *= (0.975f * (1-dt));
 }

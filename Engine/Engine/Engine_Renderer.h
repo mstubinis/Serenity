@@ -3,6 +3,7 @@
 #include "GBuffer.h"
 
 struct PointLight;
+class Object;
 
 //this class will control what rendering techniques to use (forward or deferred)
 
@@ -29,8 +30,8 @@ class Renderer{
 		void Pass_SSAO();
 		void Pass_Blur_Horizontal(GLuint texture);
 		void Pass_Blur_Vertical(GLuint texture);
-		void Pass_AtmosphericScatteringSpace();
-		void Pass_AtmosphericScatteringGround();
+		void Pass_AtmosphericScatteringSpace(Object*);
+		void Pass_AtmosphericScatteringGround(Object*);
 
 		void Pass_Final();
 
@@ -38,6 +39,7 @@ class Renderer{
 		Renderer(RENDER_TYPE = RENDER_TYPE_FORWARD);
 		~Renderer();
 
+		void Update(float);
 		void Render(bool debug = false);
 		void Set_Render_Type(RENDER_TYPE);
 

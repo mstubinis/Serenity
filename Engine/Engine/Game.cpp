@@ -8,13 +8,13 @@ Game::Game(){}
 Game::~Game(){}
 void Game::Init_Logic(){
 
-	new Skybox("Wasteland");
+	new Skybox("Skybox1");
 	new ObjectDynamic(Resources->Default_Mesh(),Resources->Default_Material(),glm::vec3(0,0,-6));
-	new ObjectDynamic(Resources->Get_Mesh("Planet"),Resources->Get_Material("Stone"),glm::vec3(0,0,0));
+	ObjectDynamic* planet = new ObjectDynamic(Resources->Get_Mesh("Planet"),Resources->Get_Material("Earth"),glm::vec3(0,0,0));
 
 	PointLight* pL = new PointLight();
 
-	pL->Position = glm::vec3(0,0,-2);
+	pL->Position = glm::vec3(0,0,-8);
 	pL->Color = glm::vec3(1,1,1);
 	pL->AmbientIntensity = 0.2f;
 	pL->DiffuseIntensity = 0.3f;
@@ -23,7 +23,7 @@ void Game::Init_Logic(){
 	pL->Attenuation.Linear = 0.3f;
 	Resources->Lights_Points.push_back(pL);
 
-
+	/*
 	DirectionalLight* dL = new DirectionalLight();
 
 	dL->Color = glm::vec3(1,1,1);
@@ -31,6 +31,7 @@ void Game::Init_Logic(){
 	dL->DiffuseIntensity = 0.4f;
 	dL->Direction = glm::vec3(-0.5,0.8,0.3);
 	Resources->Lights_Directional.push_back(dL);
+	*/
 }
 void Game::Init_Resources()
 {
@@ -40,13 +41,13 @@ void Game::Update(float dt){
 		exit(EXIT_SUCCESS);
 
 	if(Keyboard::IsKeyDown("w") == true)
-		Resources->Current_Camera()->Translate(0,0,12);
+		Resources->Current_Camera()->Translate(0,0,0.3);
 	if(Keyboard::IsKeyDown("s") == true)
-		Resources->Current_Camera()->Translate(0,0,-12);
+		Resources->Current_Camera()->Translate(0,0,-0.3);
 	if(Keyboard::IsKeyDown("a") == true)
-		Resources->Current_Camera()->Translate(-12,0,0);
+		Resources->Current_Camera()->Translate(-0.3,0,0);
 	if(Keyboard::IsKeyDown("d") == true)
-		Resources->Current_Camera()->Translate(12,0,0);
+		Resources->Current_Camera()->Translate(0.3,0,0);
 	if(Keyboard::IsKeyDown("q") == true)
 		Resources->Current_Camera()->Rotate(0,0,0.5f);
 	if(Keyboard::IsKeyDown("e") == true)

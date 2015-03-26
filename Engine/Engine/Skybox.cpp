@@ -5,7 +5,7 @@
 
 Skybox::Skybox(std::string name): Object(nullptr,nullptr,glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Skybox",true){
 	m_Position = glm::vec3(0,0,0);
-	m_Scale = glm::vec3(99,99,99);
+	m_Scale = glm::vec3(999,999,999);
 	m_WorldMatrix = m_Model = glm::mat4(1);
 	m_Mesh = Resources->Get_Mesh("Skybox");
 

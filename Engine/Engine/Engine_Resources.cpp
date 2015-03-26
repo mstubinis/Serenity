@@ -33,9 +33,10 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
 	Add_Material("Rock","Textures\\rock.png","Textures\\rockNormal.png","");
 	Add_Material("Stone","Textures\\stone.png","Textures\\stoneNormal.png","");
+	Add_Material("Earth","Textures\\earth.png","","");
 
-	m_Cameras["Default"] = new Camera(45.0f,float(window_x/window_y),0.1f,1000.0f);
-	m_Cameras["Debug"] = new Camera(45.0f,float(window_x/window_y),0.1f,1000.0f);
+	m_Cameras["Default"] = new Camera(45.0f,float(window_x/window_y),0.01f,1000.0f);
+	m_Cameras["Debug"] = new Camera(45.0f,float(window_x/window_y),0.01f,1000.0f);
 
 	Set_Active_Camera("Default");
 }

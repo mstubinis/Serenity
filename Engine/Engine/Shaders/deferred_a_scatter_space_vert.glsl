@@ -29,11 +29,9 @@ uniform float fScaleOverScaleDepth; // fScale / fScaleDepth
 
 out vec3 c0;
 out vec3 c1;
-
 out vec3 v3Direction;
-out vec3 v3LightDirection;
-
-out vec3 pos;
+out vec3 v3LightPosition;
+out float PixelToCamera;
 
 // The scale equation calculated by Vernier's Graphical Analysis
 float scale(float fCos){
@@ -92,16 +90,11 @@ void main(){
         v3SamplePoint += v3SampleRay;
     }
     // Finally, scale the Mie and Rayleigh colors
-
-	vec4 calculatedPos = MVP * vec4(position, 1.0);
-    gl_Position = calculatedPos;
-
-	pos = calculatedPos.xyz;
-	v3LightDirection = v3LightDir;
-	
+	gl_Position = MVP * vec4(position, 1.0);
+	v3LightPosition = v3LightDir;
+	v3Direction = v3CameraPos - v3Pos;
 	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
-
     c1 = v3FrontColor * fKmESun;
-    v3Direction = v3CameraPos - v3Pos;
 
+	PixelToCamera = length(v3Pos - v3CameraPos);
 }

@@ -1,14 +1,16 @@
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
+#include "Engine_Events.h"
 #include "ShaderProgram.h"
+
+#include <glm\gtc\constants.hpp>
 
 Renderer::Renderer(RENDER_TYPE type){
 
 	Resources->Load_Texture_Into_GLuint(RandomMapSSAO,"Textures\\SSAONormal.png");
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
+	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
 
 	Set_Render_Type(type);
 	m_EnableLighting = true;
@@ -20,6 +22,19 @@ Renderer::Renderer(RENDER_TYPE type){
 Renderer::~Renderer(){
 	delete m_gBuffer;
 }
+float outerRadius = 1.025f;
+float innerRadius = 0.985f;
+
+void Renderer::Update(float dt){
+	if(Engine::Events::Keyboard::IsKeyDown("f1") == true)
+		outerRadius += 0.0003f;
+	if(Engine::Events::Keyboard::IsKeyDown("f2") == true)
+		outerRadius -= 0.0003f;
+	if(Engine::Events::Keyboard::IsKeyDown("f3") == true)
+		innerRadius += 0.0003f;
+	if(Engine::Events::Keyboard::IsKeyDown("f4") == true)
+		innerRadius -= 0.0003f;
+}
 void Renderer::Geometry_Pass(bool debug){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -28,6 +43,9 @@ void Renderer::Geometry_Pass(bool debug){
     glDisable(GL_BLEND);
 	for(auto object:Resources->Objects){
 		object->Render(m_Type);
+		if(object == Resources->Objects.at(4)){
+			this->Pass_AtmosphericScatteringSpace(object);
+		}
 	}
 	if(debug){
 		GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
@@ -48,7 +66,6 @@ void Renderer::Geometry_Pass(bool debug){
 		}
 		glUseProgram(0);
 	}
-
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
 }
@@ -68,10 +85,10 @@ void Renderer::Render(bool debug){
 
 	switch(m_Type){
 		case RENDER_TYPE_FORWARD:
-			glDepthMask(GL_TRUE);
+			glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glClearColor(0,0,0,1);
-			glEnable(GL_DEPTH_TEST);
+
 			for(auto object:Resources->Objects){
 				object->Render();
 			}
@@ -95,11 +112,6 @@ void Renderer::Render(bool debug){
 			m_gBuffer->Start(BUFFER_TYPE_SSAO);
 			this->Pass_Blur_Vertical(m_gBuffer->Texture(BUFFER_TYPE_FREE1));
 			m_gBuffer->Stop();
-
-			m_gBuffer->Start(BUFFER_TYPE_FREE1);
-			this->Pass_AtmosphericScatteringSpace();
-			m_gBuffer->Stop();
-
 
 			this->Pass_Final();
 
@@ -326,22 +338,41 @@ void Renderer::Pass_Blur_Vertical(GLuint texture){
 
 	glUseProgram(0);
 }
-void Renderer::Pass_AtmosphericScatteringSpace()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
+void Renderer::Pass_AtmosphericScatteringSpace(Object* object){
+	//glClear(GL_COLOR_BUFFER_BIT);
+
 	GLuint shader = Resources->Get_Shader_Program("Deferred_ASSpace")->Get_Shader_Program();
 	glUseProgram(shader);
+
+	glCullFace(GL_FRONT);
+
+	glEnable(GL_BLEND);
+   	glBlendEquation(GL_FUNC_ADD);
+   	glBlendFunc(GL_ONE, GL_ONE);
 
 	//
 	//vert
 	//
 
-	Object* obj = Resources->Objects.at(4);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(obj->World()));
-	/*
+	float camHeight = glm::length(Resources->Current_Camera()->Position());
+	float camHeight2 = camHeight*camHeight;
+
 	float Km = 0.0025f;
 	float Kr = 0.0015f;
-	float ESun = 10.0f;
+	float ESun = 20.0f;
+
+	glm::mat4 f;
+	glm::mat4 obj = glm::mat4(1);
+
+	obj = glm::translate(obj, object->Position());
+	obj = glm::scale(obj,glm::vec3(outerRadius,outerRadius,outerRadius));
+
+	f = Resources->Current_Camera()->Calculate_Projection(obj);
+
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(f));
+
+
+	glUniform1i(glGetUniformLocation(shader,"nSamples"), 2);
 
 	glm::vec3 camPos = Resources->Current_Camera()->Position();
 	glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
@@ -350,44 +381,49 @@ void Renderer::Pass_AtmosphericScatteringSpace()
 	lightDir = glm::normalize(lightDir);
 	glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
-	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / pow(0.650f, 4),1.0f / pow(0.570f, 4),1.0f / pow(0.475f, 4));
-	glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), camPos.x,camPos.y,camPos.z);
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / pow(0.65f, 4),
+		                                  1.0f / pow(0.57f, 4),
+										  1.0f / pow(0.475f, 4));
+	glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z);
 
-	glUniform1f(glGetUniformLocation(shader,"fOuterRadius"), 1.0f);
-	glUniform1f(glGetUniformLocation(shader,"fOuterRadius2"), 1.0f*1.0f);
-	glUniform1f(glGetUniformLocation(shader,"fInnerRadius"), 1.0f - 0.025f);
-	glUniform1f(glGetUniformLocation(shader,"fInnerRadius2"), (1.0f - 0.025f)*(1.0f - 0.025f));
+
+	glUniform1f(glGetUniformLocation(shader,"fCameraHeight"),camHeight);
+	glUniform1f(glGetUniformLocation(shader,"fCameraHeight2"), camHeight2);
+
+	glUniform1f(glGetUniformLocation(shader,"fOuterRadius"), outerRadius);
+	glUniform1f(glGetUniformLocation(shader,"fOuterRadius2"), outerRadius*outerRadius);
+	glUniform1f(glGetUniformLocation(shader,"fInnerRadius"), innerRadius);
+	glUniform1f(glGetUniformLocation(shader,"fInnerRadius2"), innerRadius*innerRadius);
 
 	glUniform1f(glGetUniformLocation(shader,"fKrESun"), Kr * ESun);
 	glUniform1f(glGetUniformLocation(shader,"fKmESun"), Km * ESun);
+
 	glUniform1f(glGetUniformLocation(shader,"fKr4PI"), Kr * 4 * 3.14159f);
 	glUniform1f(glGetUniformLocation(shader,"fKm4PI"), Km * 4 * 3.14159f);
 
 	float fScaledepth = 0.25f;
-	float fScale = 1.0f / (1.0f - (1.0f - 0.025f));
+	float fScale = 1.0f / (outerRadius - innerRadius);
 
 	glUniform1f(glGetUniformLocation(shader,"fScaleDepth"),fScaledepth);
 	glUniform1f(glGetUniformLocation(shader,"fScale"),fScale);
-	glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / fScaleDepth);
+	glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / fScaledepth);
 
-	float camHeight = glm::length(Resources->Current_Camera()->Position());
-	float camHeight2 = camHeight*camHeight;
 
-	glUniform1f(glGetUniformLocation(shader,"fCameraHeight"),camHeight);
-	glUniform1f(glGetUniformLocation(shader,"fCameraHeight2"), camHeight2);
-	*/
 	//
 	//frag
 	//
 	// Gravity
-	glUniform1f(glGetUniformLocation(shader,"g"),-0.98f);
-	glUniform1f(glGetUniformLocation(shader,"g2"), 0.9604f);
+	float g = -0.98f;
+	glUniform1f(glGetUniformLocation(shader,"g"),g);
+	glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
 
 	Resources->Get_Mesh("Planet")->Render();
 
 	glUseProgram(0);
+
+	glCullFace(GL_BACK);
 }
-void Renderer::Pass_AtmosphericScatteringGround()
+void Renderer::Pass_AtmosphericScatteringGround(Object* object)
 {
 }
 void Renderer::Pass_Final(){
@@ -398,12 +434,11 @@ void Renderer::Pass_Final(){
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
 
-	GLuint m_textureID[5];
+	GLuint m_textureID[4];
 	m_textureID[0] = glGetUniformLocation(shader,"gColorMap");
 	m_textureID[1] = glGetUniformLocation(shader,"gLightMap");
 	m_textureID[2] = glGetUniformLocation(shader,"gSSAOMap");
 	m_textureID[3] = glGetUniformLocation(shader,"gGlowMap");
-	m_textureID[4] = glGetUniformLocation(shader,"gASMap");
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -425,14 +460,10 @@ void Renderer::Pass_Final(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_BLOOM));
 	glUniform1i( m_textureID[3], 3 );
 
-	glActiveTexture(GL_TEXTURE4);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_FREE1));
-	glUniform1i( m_textureID[4], 4 );
 
 	Init_Quad();
 
-	for(unsigned int i = 0; i < 5; i++){
+	for(unsigned int i = 0; i < 4; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
