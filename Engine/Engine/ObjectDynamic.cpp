@@ -45,8 +45,8 @@ glm::vec3 ObjectDynamic::Forward(btQuaternion& orientation) const{
 	float z = orientation.getZ();
 	float w = orientation.getW();
 	return glm::vec3( 2 * (x * z + w * y), 
-                    2 * (y * x - w * x),
-                    1 - 2 * (x * x + y * y));
+                      2 * (y * x - w * x),
+                      1 - 2 * (x * x + y * y));
 }
 glm::vec3 ObjectDynamic::Right(btQuaternion& orientation) const{
 	float x = orientation.getX();
@@ -54,8 +54,8 @@ glm::vec3 ObjectDynamic::Right(btQuaternion& orientation) const{
 	float z = orientation.getZ();
 	float w = orientation.getW();
     return glm::vec3( 1 - 2 * (y * y + z * z),
-                    2 * (x * y + w * z),
-                    2 * (x * z - w * y));
+                      2 * (x * y + w * z),
+                      2 * (x * z - w * y));
 }
 glm::vec3 ObjectDynamic::Up(btQuaternion& orientation) const{
 	float x = orientation.getX();
@@ -63,6 +63,6 @@ glm::vec3 ObjectDynamic::Up(btQuaternion& orientation) const{
 	float z = orientation.getZ();
 	float w = orientation.getW();
     return glm::vec3( 2 * (x * y - w * z), 
-                    1 - 2 * (x * x + z * z),
-                    2 * (y * z + w * x));
+                      1 - 2 * (x * x + z * z),
+                      2 * (y * z + w * x));
 }

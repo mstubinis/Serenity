@@ -64,7 +64,7 @@
     <Filter Include="Header Files\Engine\Other">
       <UniqueIdentifier>{0ac16972-c034-4fa5-b1f8-7a195a864256}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\AtmopshericScattering">
+    <Filter Include="Resource Files\Shaders\ForwardRendering\AtmopshericScattering">
       <UniqueIdentifier>{9482e4ed-522e-4fe0-b336-5a2cc2814377}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -229,11 +229,17 @@
     <None Include="Shaders\deferred_ssao_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO</Filter>
     </None>
-    <None Include="Shaders\deferred_a_scatter_space_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\AtmopshericScattering</Filter>
+    <None Include="Shaders\AS_groundFromSpace_frag.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
     </None>
-    <None Include="Shaders\deferred_a_scatter_space_vert.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\AtmopshericScattering</Filter>
+    <None Include="Shaders\AS_groundFromSpace_vert.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
+    </None>
+    <None Include="Shaders\AS_skyFromSpace_frag.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
+    </None>
+    <None Include="Shaders\AS_skyFromSpace_vert.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
     </None>
   </ItemGroup>
 </Project>

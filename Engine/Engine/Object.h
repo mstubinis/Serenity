@@ -10,32 +10,7 @@
 #include <glm\gtx\transform.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
-
-// Planned Object Heirarchy
-//                                                                                                                                                             
-//                                                                                                                               
-//                                                                                                                     
-//                                                                                                                        
-//                                                                                                                       
-//                                                                                                                                      
-//                                                                                                                             
-//                                                                                                   
-//                  (yes/no Collision detection,   
-//					    movement physics)     
-//                               |                                           
-// Object ---------------> ObjectDynamic
-//     |
-//     |
-//     |
-//     |
-//     -> Skybox
-//     |
-//     -> Camera                                                              
-//                                                                                                        
-//                                                                                                               
-//                                                                                                              
-//                                                                                                                   
-//                                                                                       
+                                                                                 
 class Object{
 	protected:
 		std::string m_Name;
@@ -68,6 +43,8 @@ class Object{
 		virtual void Pitch(float); void Yaw(float); virtual void Roll(float);
 
 		void Set_Position(float,float,float); void Set_Position(glm::vec3&);
+		void Set_Rotation(float,float,float); void Set_Rotation(glm::vec3&);
+		void Set_Scale(float,float,float); void Set_Scale(glm::vec3&);
 
 		void Add_Child(Object*);
 

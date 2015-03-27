@@ -138,8 +138,10 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClInclude Include="TextureBuffer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\deferred_a_scatter_space_frag.glsl" />
-    <None Include="Shaders\deferred_a_scatter_space_vert.glsl" />
+    <None Include="Shaders\AS_groundFromSpace_frag.glsl" />
+    <None Include="Shaders\AS_groundFromSpace_vert.glsl" />
+    <None Include="Shaders\AS_skyFromSpace_frag.glsl" />
+    <None Include="Shaders\AS_skyFromSpace_vert.glsl" />
     <None Include="Shaders\deferred_blur_frag.glsl" />
     <None Include="Shaders\deferred_blur_horizontal.glsl" />
     <None Include="Shaders\deferred_blur_vertical.glsl" />

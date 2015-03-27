@@ -41,13 +41,13 @@ void Game::Update(float dt){
 		exit(EXIT_SUCCESS);
 
 	if(Keyboard::IsKeyDown("w") == true)
-		Resources->Current_Camera()->Translate(0,0,0.3);
+		Resources->Current_Camera()->Translate(0,0,0.9f);
 	if(Keyboard::IsKeyDown("s") == true)
-		Resources->Current_Camera()->Translate(0,0,-0.3);
+		Resources->Current_Camera()->Translate(0,0,-0.9f);
 	if(Keyboard::IsKeyDown("a") == true)
-		Resources->Current_Camera()->Translate(-0.3,0,0);
+		Resources->Current_Camera()->Translate(-0.9f,0,0);
 	if(Keyboard::IsKeyDown("d") == true)
-		Resources->Current_Camera()->Translate(0.3,0,0);
+		Resources->Current_Camera()->Translate(0.9f,0,0);
 	if(Keyboard::IsKeyDown("q") == true)
 		Resources->Current_Camera()->Rotate(0,0,0.5f);
 	if(Keyboard::IsKeyDown("e") == true)

@@ -34,10 +34,14 @@ void Object::Translate(float x, float y, float z){
 void Object::Translate(glm::vec3& translation){ Translate(translation.x,translation.y,translation.z); }
 void Object::Rotate(float x, float y, float z){ Pitch(x); Yaw(y); Roll(z); }
 void Object::Rotate(glm::vec3& rotation){ Rotate(rotation.x,rotation.y,rotation.z); }
-void Object::Scale(float x, float y, float z){ m_Scale += x * Resources->dt; m_Scale += y * Resources->dt; m_Scale += z * Resources->dt; m_Calculate_Radius(); }
+void Object::Scale(float x, float y, float z){ m_Scale.x += x * Resources->dt; m_Scale.y += y * Resources->dt; m_Scale.z += z * Resources->dt; m_Calculate_Radius(); }
 void Object::Scale(glm::vec3& scale){ Scale(scale.x,scale.y,scale.z); }
 void Object::Set_Position(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; }
 void Object::Set_Position(glm::vec3& position){ Set_Position(position.x,position.y,position.z); }
+void Object::Set_Rotation(float x, float y, float z){ m_Rotation.x = x; m_Rotation.y = y; m_Rotation.z = z; }
+void Object::Set_Rotation(glm::vec3& rotation){ Set_Rotation(rotation.x,rotation.y,rotation.z); }
+void Object::Set_Scale(float x, float y, float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_Calculate_Radius(); }
+void Object::Set_Scale(glm::vec3& scale){ Set_Scale(scale.x,scale.y,scale.z); }
 void Object::Pitch(float amount){
 	glm::quat rotationQuaternion = glm::quat(-amount * Resources->dt,m_Right);
 	rotationQuaternion = glm::conjugate(rotationQuaternion);

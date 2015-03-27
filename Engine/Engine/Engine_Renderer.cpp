@@ -23,7 +23,7 @@ Renderer::~Renderer(){
 	delete m_gBuffer;
 }
 float outerRadius = 1.025f;
-float innerRadius = 0.985f;
+float innerRadius = 1.0f;
 
 void Renderer::Update(float dt){
 	if(Engine::Events::Keyboard::IsKeyDown("f1") == true)
@@ -44,7 +44,8 @@ void Renderer::Geometry_Pass(bool debug){
 	for(auto object:Resources->Objects){
 		object->Render(m_Type);
 		if(object == Resources->Objects.at(4)){
-			this->Pass_AtmosphericScatteringSpace(object);
+			Pass_AtmosphericScattering_GroundFromSpace(object);
+			Pass_AtmosphericScattering_SkyFromSpace(object);
 		}
 	}
 	if(debug){
@@ -338,10 +339,8 @@ void Renderer::Pass_Blur_Vertical(GLuint texture){
 
 	glUseProgram(0);
 }
-void Renderer::Pass_AtmosphericScatteringSpace(Object* object){
-	//glClear(GL_COLOR_BUFFER_BIT);
-
-	GLuint shader = Resources->Get_Shader_Program("Deferred_ASSpace")->Get_Shader_Program();
+void Renderer::Pass_AtmosphericScattering_SkyFromSpace(Object* object){
+	GLuint shader = Resources->Get_Shader_Program("AS_SkyFromSpace")->Get_Shader_Program();
 	glUseProgram(shader);
 
 	glCullFace(GL_FRONT);
@@ -354,8 +353,6 @@ void Renderer::Pass_AtmosphericScatteringSpace(Object* object){
 	//vert
 	//
 
-	float camHeight = glm::length(Resources->Current_Camera()->Position());
-	float camHeight2 = camHeight*camHeight;
 
 	float Km = 0.0025f;
 	float Kr = 0.0015f;
@@ -373,19 +370,23 @@ void Renderer::Pass_AtmosphericScatteringSpace(Object* object){
 
 
 	glUniform1i(glGetUniformLocation(shader,"nSamples"), 2);
+	glUniform1f(glGetUniformLocation(shader,"fSamples"), 2.0f);
 
-	glm::vec3 camPos = Resources->Current_Camera()->Position();
+	glm::vec3 camPos = Resources->Current_Camera()->Position() - object->Position();
 	glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
-	glm::vec3 lightDir = Resources->Lights_Points.at(0)->Position;
+	glm::vec3 lightDir = Resources->Lights_Points.at(0)->Position - object->Position();
 	lightDir = glm::normalize(lightDir);
 	glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
-	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / pow(0.65f, 4),
-		                                  1.0f / pow(0.57f, 4),
-										  1.0f / pow(0.475f, 4));
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),
+		                                  1.0f / glm::pow(0.57f, 4.0f),
+										  1.0f / glm::pow(0.475f, 4.0f));
+
 	glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z);
 
+	float camHeight = glm::length(camPos);
+	float camHeight2 = camHeight*camHeight;
 
 	glUniform1f(glGetUniformLocation(shader,"fCameraHeight"),camHeight);
 	glUniform1f(glGetUniformLocation(shader,"fCameraHeight2"), camHeight2);
@@ -408,7 +409,6 @@ void Renderer::Pass_AtmosphericScatteringSpace(Object* object){
 	glUniform1f(glGetUniformLocation(shader,"fScale"),fScale);
 	glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / fScaledepth);
 
-
 	//
 	//frag
 	//
@@ -416,15 +416,84 @@ void Renderer::Pass_AtmosphericScatteringSpace(Object* object){
 	float g = -0.98f;
 	glUniform1f(glGetUniformLocation(shader,"g"),g);
 	glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
+	glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
 
 	Resources->Get_Mesh("Planet")->Render();
 
 	glUseProgram(0);
 
 	glCullFace(GL_BACK);
+	glDisable(GL_BLEND);
 }
-void Renderer::Pass_AtmosphericScatteringGround(Object* object)
-{
+void Renderer::Pass_AtmosphericScattering_GroundFromSpace(Object* object){
+	GLuint shader = Resources->Get_Shader_Program("AS_GroundFromSpace")->Get_Shader_Program();
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+   	glBlendFunc(GL_ONE, GL_ONE);
+
+	//vert
+
+	float Km = 0.0025f;
+	float Kr = 0.0015f;
+	float ESun = 20.0f;
+
+	glm::mat4 f;
+	glm::mat4 obj = glm::mat4(1);
+
+	obj = glm::translate(obj, object->Position());
+	obj = glm::scale(obj,glm::vec3(innerRadius+0.001f,innerRadius+0.001f,innerRadius+0.001f));
+
+	f = Resources->Current_Camera()->Calculate_Projection(obj);
+
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(f));
+
+	glm::vec3 camPos = Resources->Current_Camera()->Position();
+	glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
+
+	glm::vec3 lightDir = Resources->Lights_Points.at(0)->Position - object->Position();
+	lightDir = glm::normalize(lightDir);
+	glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
+
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),
+		                                  1.0f / glm::pow(0.57f, 4.0f),
+										  1.0f / glm::pow(0.475f, 4.0f));
+
+	glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z);
+
+	float camHeight = glm::length(camPos);
+	float camHeight2 = camHeight*camHeight;
+
+	glUniform1f(glGetUniformLocation(shader,"fCameraHeight2"), camHeight2);
+
+	glUniform1f(glGetUniformLocation(shader,"fOuterRadius"), outerRadius);
+	glUniform1f(glGetUniformLocation(shader,"fOuterRadius2"), outerRadius*outerRadius);
+	glUniform1f(glGetUniformLocation(shader,"fInnerRadius"), innerRadius);
+	glUniform1f(glGetUniformLocation(shader,"fInnerRadius2"), innerRadius*innerRadius);
+
+	glUniform1f(glGetUniformLocation(shader,"fKrESun"), Kr * ESun);
+	glUniform1f(glGetUniformLocation(shader,"fKmESun"), Km * ESun);
+
+	glUniform1f(glGetUniformLocation(shader,"fKr4PI"), Kr * 4 * 3.14159f);
+	glUniform1f(glGetUniformLocation(shader,"fKm4PI"), Km * 4 * 3.14159f);
+
+	float fScaledepth = 0.25f;
+	float fScale = 1.0f / (outerRadius - innerRadius);
+
+	glUniform1f(glGetUniformLocation(shader,"fScaleDepth"),fScaledepth);
+	glUniform1f(glGetUniformLocation(shader,"fScale"),fScale);
+	glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / fScaledepth);
+
+	//
+	//frag
+	//
+	glUniform1f(glGetUniformLocation(shader,"fExposure"), 2.0f);
+
+	Resources->Get_Mesh("Planet")->Render();
+
+	glUseProgram(0);
+	glDisable(GL_BLEND);
 }
 void Renderer::Pass_Final(){
 	glClear(GL_COLOR_BUFFER_BIT);

@@ -24,7 +24,7 @@ void main(){
 		vec4 bloom = vec4(glow.r,glow.r,glow.r,1);
 		vec4 lightAndBloom = max(light,bloom);
 		vec4 Final = image*lightAndBloom;
-		gl_FragColor = image;
+		gl_FragColor = Final;
 		//gl_FragColor = AS;
 	}
 }
