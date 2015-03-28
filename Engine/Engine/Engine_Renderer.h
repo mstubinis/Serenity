@@ -30,8 +30,6 @@ class Renderer{
 		void Pass_SSAO();
 		void Pass_Blur_Horizontal(GLuint texture);
 		void Pass_Blur_Vertical(GLuint texture);
-		void Pass_AtmosphericScattering_GroundFromSpace(Object*);
-		void Pass_AtmosphericScattering_SkyFromSpace(Object*);
 
 		void Pass_Final();
 

@@ -24,7 +24,7 @@ Object::~Object()
 {
 }
 void Object::m_Calculate_Radius(){
-	m_Radius *= m_Scale;
+	m_Radius = m_Mesh->Radius() * m_Scale;
 }
 void Object::Translate(float x, float y, float z){ 
 	m_Position += glm::normalize(m_Forward) * (z * Resources->dt);

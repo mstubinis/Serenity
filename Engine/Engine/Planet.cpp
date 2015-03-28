@@ -54,13 +54,14 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
 
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3InvWavelength"), v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z);
 
+	float innerRadius = 1.0f;
+	float outerRadius = innerRadius + (m_AtmosphereHeight);
+
 	float camHeight = glm::length(camPos);
 	float camHeight2 = camHeight*camHeight;
 
 	glUniform1f(glGetUniformLocation(shaderProgram,"fCameraHeight2"), camHeight2);
 
-	float innerRadius = m_Radius.x;
-	float outerRadius = innerRadius + (m_AtmosphereHeight*m_Scale.x);
 
 	glUniform1f(glGetUniformLocation(shaderProgram,"fOuterRadius"), outerRadius);
 	glUniform1f(glGetUniformLocation(shaderProgram,"fOuterRadius2"), outerRadius*outerRadius);
@@ -100,7 +101,8 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
 	glm::mat4 obj = glm::mat4(1);
 
 	obj = glm::translate(obj, Position());
-	obj = glm::scale(obj,glm::vec3(outerRadius,outerRadius,outerRadius));
+	float radius = m_Radius.x + (m_AtmosphereHeight * m_Scale.x);
+	obj = glm::scale(obj,glm::vec3(radius,radius,radius));
 
 	f = Resources->Current_Camera()->Calculate_Projection(obj);
 

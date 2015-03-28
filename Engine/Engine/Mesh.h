@@ -30,13 +30,14 @@ class Mesh{
 		std::vector<glm::vec3> m_Binormals;
 		std::vector<glm::vec3> m_Tangents;
 
-		void GenerateQuad(const std::vector<glm::vec3>& pointData, const std::vector<glm::vec4>& colorData,const std::vector<glm::vec2>& uvData,const std::vector<glm::vec3>& normalData, const int index1,const int index2,const int index3,const int index4);
-		void GenerateTriangle(const std::vector<glm::vec3>& pointData, const std::vector<glm::vec4>& colorData,const std::vector<glm::vec2>& uvData,const std::vector<glm::vec3>& normalData,const int index1,const int index2,const int index3);
+		void GenerateQuad(Vertex&,Vertex&,Vertex&,Vertex&);
+		void GenerateTriangle(Vertex&,Vertex&,Vertex&);
 
 		void CalculateTangentBinormal(Vertex&, Vertex&, Vertex&);
 
 		void LoadFromFile(std::string);
 		void LoadFromPLY(std::string);
+		void LoadFromOBJ(std::string);
 
 		void Init();
 	public:

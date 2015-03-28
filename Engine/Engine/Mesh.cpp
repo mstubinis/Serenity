@@ -1,8 +1,10 @@
 #include "Mesh.h"
 #include "Engine_Resources.h"
 
-#include <iostream>
-#include <fstream>
+#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 Mesh::Mesh(int x, int y,int width, int height){
 	m_Points.push_back(glm::vec3(0,0,0));
@@ -72,143 +74,207 @@ void Mesh::LoadFromFile(std::string filename){
 	std::string extention;
 	for(unsigned int i = filename.length() - 4; i < filename.length(); i++)
 		extention += tolower(filename.at(i));
-	//if(extention == ".obj")
-		//LoadFromOBJ(filename);
+	if(extention == ".obj")
+		LoadFromOBJ(filename);
 	if(extention == ".ply")
 		LoadFromPLY(filename);
 }
 void Mesh::LoadFromPLY(std::string filename){
-	std::ifstream reader(filename);
-	std::string line;
 
+	bool StartReadingGeometryData = false;
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+
+	std::vector<Vertex> vertices;
+
+	for(std::string line; std::getline(str, line, '\n');){
+		if(StartReadingGeometryData == true){
+			int SlashCount = 0;
+			int whitespaceCount = 0;
+			int SpaceCount = 0;
+
+			std::string x; std::string y; std::string z; std::string w;
+			std::string uv1; std::string uv2;std::string uv3; std::string uv4;
+			std::string n1; std::string n2;std::string n3; std::string n4;
+
+			Vertex vert;
+
+			#pragma region Vertex
+			if(line[1] != ' '){
+				for(unsigned int i = 0; i < line.length(); i++){
+					if(line.at(i) == ' ') SpaceCount++;
+					if(SpaceCount == 0) x += line.at(i);
+					else if(SpaceCount == 1) y += line.at(i);
+					else if(SpaceCount == 2) z += line.at(i);
+					else if(SpaceCount == 3) n1 += line.at(i);
+					else if(SpaceCount == 4) n2 += line.at(i);
+					else if(SpaceCount == 5) n3 += line.at(i);
+					else if(SpaceCount == 6) uv1 += line.at(i);
+					else if(SpaceCount == 7) uv2 += line.at(i);
+				}
+				float xPos = static_cast<float>(::atof(x.c_str()));
+				float yPos = static_cast<float>(::atof(y.c_str()));
+				float zPos = static_cast<float>(::atof(z.c_str()));
+
+				float normX = static_cast<float>(::atof(n1.c_str()));
+				float normY = static_cast<float>(::atof(n2.c_str()));
+				float normZ = static_cast<float>(::atof(n3.c_str()));
+
+				float u = static_cast<float>(::atof(uv1.c_str()));
+				float v = static_cast<float>(::atof(uv2.c_str()));
+
+				vert.position = glm::vec3(xPos,yPos,zPos);
+				vert.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
+				vert.uv = glm::vec2(u,1-v);
+				vert.normal = glm::vec3(normX,normY,normZ);
+
+				vertices.push_back(vert);
+			}
+			#pragma endregion
+			#pragma region Indices
+			if((line[0] == '3' || line[0] == '4') && line[1] == ' '){
+				for(unsigned int i = 0; i < line.length(); i++)
+					if(line.at(i) == ' ') whitespaceCount++;
+				for(unsigned int i = 0; i < line.length(); i++){
+					if(line.at(i) == ' ') SpaceCount++;
+					if(SpaceCount == 1) x += line.at(i);
+					else if(SpaceCount == 2) y += line.at(i);
+					else if(SpaceCount == 3) z += line.at(i);
+					else if(SpaceCount == 4) w += line.at(i);
+				}
+				int index1 = static_cast<int>(::atof(x.c_str()));
+				int index2 = static_cast<int>(::atof(y.c_str()));
+				int index3 = static_cast<int>(::atof(z.c_str()));
+				int index4 = static_cast<int>(::atof(w.c_str()));
+				if(whitespaceCount == 4)
+					GenerateQuad(vertices[index1],vertices[index2],vertices[index3],vertices[index4]);
+				else
+					GenerateTriangle(vertices[index1],vertices[index2],vertices[index3]);
+			}
+			#pragma endregion
+		}
+		if(line == "end_header")
+			StartReadingGeometryData = true;
+	}
+}
+void Mesh::LoadFromOBJ(std::string filename){
 	std::vector<glm::vec3> pointData;
 	std::vector<glm::vec4> colorData;
 	std::vector<glm::vec2> uvData;
 	std::vector<glm::vec3> normalData;
 
+	std::vector<std::vector<glm::vec3>> listOfVerts;
+
 	bool StartReadingGeometryData = false;
-	#pragma region FileReading
-	if (reader.is_open()){
-		while (std::getline(reader, line)){
-			if(StartReadingGeometryData == true){
-				int SlashCount = 0;
-				int whitespaceCount = 0;
-				int SpaceCount = 0;
-
-				std::string x; std::string y; std::string z; std::string w;
-				std::string uv1; std::string uv2;std::string uv3; std::string uv4;
-				std::string n1; std::string n2;std::string n3; std::string n4;
-
-				#pragma region Vertex
-				if(line[1] != ' '){
-					for(unsigned int i = 0; i < line.length(); i++){
-						if(line.at(i) == ' ')
-							SpaceCount++;
-						if(SpaceCount == 0)
-							x += line.at(i);
-						else if(SpaceCount == 1)
-							y += line.at(i);
-						else if(SpaceCount == 2)
-							z += line.at(i);
-						else if(SpaceCount == 3)
-							n1 += line.at(i);
-						else if(SpaceCount == 4)
-							n2 += line.at(i);
-						else if(SpaceCount == 5)
-							n3 += line.at(i);
-						else if(SpaceCount == 6)
-							uv1 += line.at(i);
-						else if(SpaceCount == 7)
-							uv2 += line.at(i);
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+	int index = 1;
+	for(std::string line; std::getline(str, line, '\n');){
+		std::string x; std::string y; std::string z;
+		unsigned int whilespaceCount = 0;
+		unsigned int slashCount = 0;
+		if(line[0] == 'v'){ 
+			if(line[1] == ' '){//vertex point
+				for(auto c:line){
+					if(c == ' ')
+						whilespaceCount++;
+					else{
+						if(whilespaceCount == 1)
+							x += c;
+						else if(whilespaceCount == 2)
+							y += c;
+						else if(whilespaceCount == 3)
+							z += c;
 					}
-					float xPos = static_cast<float>(::atof(x.c_str()));
-					float yPos = static_cast<float>(::atof(y.c_str()));
-					float zPos = static_cast<float>(::atof(z.c_str()));
-
-					float normX = static_cast<float>(::atof(n1.c_str()));
-					float normY = static_cast<float>(::atof(n2.c_str()));
-					float normZ = static_cast<float>(::atof(n3.c_str()));
-
-					float u = static_cast<float>(::atof(uv1.c_str()));
-					float v = static_cast<float>(::atof(uv2.c_str()));
-
-					pointData.push_back(glm::vec3(xPos,yPos,zPos));
-					colorData.push_back(glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1));
-					uvData.push_back(glm::vec2(u,1-v));
-					normalData.push_back(glm::vec3(normX,normY,normZ));
 				}
-				#pragma endregion
-				#pragma region Indices
-				if((line[0] == '3' || line[0] == '4') && line[1] == ' '){
-					for(unsigned int i = 0; i < line.length(); i++)
-						if(line.at(i) == ' ')
-							whitespaceCount++;
-					for(unsigned int i = 0; i < line.length(); i++){
-						if(line.at(i) == ' ')
-							SpaceCount++;
-						if(SpaceCount == 1)
-							x += line.at(i);
-						else if(SpaceCount == 2)
-							y += line.at(i);
-						else if(SpaceCount == 3)
-							z += line.at(i);
-						else if(SpaceCount == 4)
-							w += line.at(i);
-					}
-					int index1 = static_cast<int>(::atof(x.c_str()));
-					int index2 = static_cast<int>(::atof(y.c_str()));
-					int index3 = static_cast<int>(::atof(z.c_str()));
-					int index4 = static_cast<int>(::atof(w.c_str()));
-					if(whitespaceCount == 4)
-						GenerateQuad(pointData,colorData,uvData,normalData,index1,index2,index3,index4);
-					else
-						GenerateTriangle(pointData,colorData,uvData,normalData,index1,index2,index3);
-				}
-				#pragma endregion
+				pointData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
 			}
-			if(line == "end_header")
-				StartReadingGeometryData = true;
+			else if(line[1] == 't'){
+				for(auto c:line){
+					if(c == ' ')
+						whilespaceCount++;
+					else{
+						if(whilespaceCount == 1)
+							x += c;
+						else if(whilespaceCount == 2)
+							y += c;
+					}
+				}
+				uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str()))));
+			}
+			else if(line[1] == 'n'){
+				for(auto c:line){
+					if(c == ' ')
+						whilespaceCount++;
+					else{
+						if(whilespaceCount == 1)
+							x += c;
+						else if(whilespaceCount == 2)
+							y += c;
+						else if(whilespaceCount == 3)
+							z += c;
+					}
+				}
+				normalData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+			}
+			index++;
+		}
+		//faces
+		else if(line[0] == 'f' && line[1] == ' '){
+			std::vector<glm::vec3> vertices;
+			for(auto c:line){
+				if(c == '/') {
+					slashCount++;
+				}
+				else if(c == ' '){ 
+					//global listOfVerts
+					if(whilespaceCount != 0){
+						glm::vec3 vertex = glm::vec3(static_cast<unsigned int>(::atoi(x.c_str())),static_cast<unsigned int>(::atoi(y.c_str())),static_cast<unsigned int>(::atoi(z.c_str())));
+						vertices.push_back(vertex);
+					}
+					whilespaceCount++;
+				}
+				else{
+					if(slashCount == 0)
+						x += c;
+					else if(slashCount == 1)
+						y += c;
+					else if(slashCount == 2)
+						z += c;
+				}
+			}
+			listOfVerts.push_back(vertices);
 		}
 	}
-	reader.close();
+	for(auto list:listOfVerts){
+		for(auto vertex:list)
+		{
+		}
+		if(list.size() == 4){//quad
+			//GenerateQuad(pointData,colorData,uvData,normalData,index1,index2,index3,index4);
+		}
+		else{//triangle
+			//GenerateTriangle(pointData,colorData,uvData,normalData,index1,index2,index3);
+		}
+	}
 }
 Mesh::~Mesh(){
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)
 		glDeleteBuffers(1, &m_buffers[i]);
 }
-void Mesh::GenerateTriangle(const std::vector<glm::vec3>& pointData, const std::vector<glm::vec4>& colorData,const std::vector<glm::vec2>& uvData,const std::vector<glm::vec3>& normalData,const int index1,const int index2,const int index3){
-	m_Colors.push_back(glm::vec4(colorData[index1].x,colorData[index1].y,colorData[index1].z,colorData[index1].a));
-	m_Points.push_back(glm::vec3(pointData[index1].x,pointData[index1].y,pointData[index1].z));
-	m_UVs.push_back(glm::vec2(uvData[index1].x,uvData[index1].y));
-	m_Normals.push_back(glm::vec3(normalData[index1].x,normalData[index1].y,normalData[index1].z));
+void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
+	m_Colors.push_back(v1.color);
+	m_Points.push_back(v1.position);
+	m_UVs.push_back(v1.uv);
+	m_Normals.push_back(v1.normal);
 
-	m_Colors.push_back(glm::vec4(colorData[index2].x,colorData[index2].y,colorData[index2].z,colorData[index2].a));
-	m_Points.push_back(glm::vec3(pointData[index2].x,pointData[index2].y,pointData[index2].z));
-	m_UVs.push_back(glm::vec2(uvData[index2].x,uvData[index2].y));
-	m_Normals.push_back(glm::vec3(normalData[index2].x,normalData[index2].y,normalData[index2].z));
+	m_Colors.push_back(v2.color);
+	m_Points.push_back(v2.position);
+	m_UVs.push_back(v2.uv);
+	m_Normals.push_back(v2.normal);
 
-	m_Colors.push_back(glm::vec4(colorData[index3].x,colorData[index3].y,colorData[index3].z,colorData[index3].a));
-	m_Points.push_back(glm::vec3(pointData[index3].x,pointData[index3].y,pointData[index3].z));
-	m_UVs.push_back(glm::vec2(uvData[index3].x,uvData[index3].y));
-	m_Normals.push_back(glm::vec3(normalData[index3].x,normalData[index3].y,normalData[index3].z));
-
-	Vertex v1, v2, v3;
-
-	v1.position = pointData[index1];
-	v2.position = pointData[index2];
-	v3.position = pointData[index3];
-
-	v1.color = colorData[index1];
-	v2.color = colorData[index2];
-	v3.color = colorData[index3];
-
-	v1.uv = uvData[index1];
-	v2.uv = uvData[index2];
-	v3.uv = uvData[index3];
-
-	v1.normal = normalData[index1];
-	v2.normal = normalData[index2];
-	v3.normal = normalData[index3];
+	m_Colors.push_back(v3.color);
+	m_Points.push_back(v3.position);
+	m_UVs.push_back(v3.uv);
+	m_Normals.push_back(v3.normal);
 
 	CalculateTangentBinormal(v1,v2,v3);
 
@@ -220,9 +286,9 @@ void Mesh::GenerateTriangle(const std::vector<glm::vec3>& pointData, const std::
 	m_Tangents.push_back(v2.tangent);
 	m_Tangents.push_back(v3.tangent);
 }
-void Mesh::GenerateQuad(const std::vector<glm::vec3>& pointData, const std::vector<glm::vec4>& colorData,const std::vector<glm::vec2>& uvData,const std::vector<glm::vec3>& normalData,const int index1,const int index2,const int index3,const int index4){
-	GenerateTriangle(pointData,colorData,uvData,normalData,index1,index2,index3);
-	GenerateTriangle(pointData,colorData,uvData,normalData,index1,index3,index4);
+void Mesh::GenerateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
+	GenerateTriangle(v1,v2,v3);
+	GenerateTriangle(v1,v3,v4);
 }
 void Mesh::Init(){
 
