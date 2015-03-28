@@ -20,8 +20,6 @@ void ResourceManager::INIT_Game_Resources(){
 
 	Add_Shader_Program("AS_SkyFromSpace","Shaders\\AS_skyFromSpace_vert.glsl","Shaders\\AS_skyFromSpace_frag.glsl");
 	Add_Shader_Program("AS_GroundFromSpace","Shaders\\AS_groundFromSpace_vert.glsl","Shaders\\AS_groundFromSpace_frag.glsl");
-	//Add_Shader_Program("ASSpace","Shaders\\a_scatter_space_vert.glsl","Shaders\\a_scatter_space_frag.glsl");
-	//Add_Shader_Program("ASGround","Shaders\\a_scatter_ground_vert.glsl","Shaders\\a_scatter_ground_frag.glsl");
 
 	Add_Shader_Program("Deferred_Light_Point","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_point_frag.glsl");
 	Add_Shader_Program("Deferred_Light_Dir","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_dir_frag.glsl");

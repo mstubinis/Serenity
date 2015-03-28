@@ -90,7 +90,7 @@ void Object::Render(Mesh* mesh, Material* material,RENDER_TYPE renderType){
 	glUniform3f(glGetUniformLocation(shaderProgram, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 
 	for(auto component:material->Components())
-		material->Bind_Texture(component.second);
+		material->Bind_Texture(component.second,shaderProgram);
 
 	mesh->Render();
 }

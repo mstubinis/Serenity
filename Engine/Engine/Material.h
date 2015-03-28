@@ -15,6 +15,6 @@ class Material{
 		MaterialComponents::MaterialComponent* Get_Component(MaterialComponents::MATERIAL_COMPONENT_TYPE);
 		void Add_Component(MaterialComponents::MATERIAL_COMPONENT_TYPE, std::string file);
 
-		void Bind_Texture(MaterialComponents::MaterialComponent*);
+		void Bind_Texture(MaterialComponents::MaterialComponent*,GLuint shader);
 };
 #endif

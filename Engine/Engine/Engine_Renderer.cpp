@@ -43,10 +43,6 @@ void Renderer::Geometry_Pass(bool debug){
     glDisable(GL_BLEND);
 	for(auto object:Resources->Objects){
 		object->Render(m_Type);
-		if(object == Resources->Objects.at(4)){
-			Pass_AtmosphericScattering_GroundFromSpace(object);
-			Pass_AtmosphericScattering_SkyFromSpace(object);
-		}
 	}
 	if(debug){
 		GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();

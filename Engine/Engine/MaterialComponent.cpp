@@ -8,7 +8,6 @@ MaterialComponent::MaterialComponent(MATERIAL_COMPONENT_TYPE type, std::string f
 	m_Texture = 0;
 	if(type == MATERIAL_COMPONENT_TEXTURE_DIFFUSE || type == MATERIAL_COMPONENT_TEXTURE_NORMAL || type == MATERIAL_COMPONENT_TEXTURE_GLOW){
 		m_TextureType = GL_TEXTURE_2D;
-		m_ShaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
 	}
 
 	if(m_TextureType == GL_TEXTURE_2D && file != "")
@@ -21,5 +20,4 @@ MaterialComponent::~MaterialComponent(){
 }
 GLuint MaterialComponent::Texture() const { return m_Texture; }
 MATERIAL_COMPONENT_TYPE MaterialComponent::Type() const { return m_Type; }
-GLuint MaterialComponent::Shader() const { return m_ShaderProgram; }
 GLuint MaterialComponent::TextureType() const { return m_TextureType; }

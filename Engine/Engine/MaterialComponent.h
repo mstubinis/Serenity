@@ -21,7 +21,6 @@ namespace MaterialComponents{
 	};
 	class MaterialComponent{
 		private:
-			GLuint m_ShaderProgram;
 			GLuint m_Texture;
 			GLuint m_TextureType;
 			MATERIAL_COMPONENT_TYPE m_Type;
@@ -31,7 +30,6 @@ namespace MaterialComponents{
 
 			GLuint Texture() const;
 			GLuint TextureType() const;
-			GLuint Shader() const;
 			MATERIAL_COMPONENT_TYPE Type() const;
 
 	};

@@ -1,8 +1,11 @@
 #version 330
 
 layout (location=0) in vec3 position;
+layout (location=1) in vec2 uv;
+layout (location=5) in vec4 color;
 
 uniform mat4 MVP;
+uniform mat4 World;
 
 uniform vec3 v3CameraPos;
 uniform vec3 v3LightDir;		// The direction vector to the light source 
@@ -24,6 +27,9 @@ const float fInvSamples = 0.25;
 
 out vec3 c0;
 out vec3 c1;
+
+out vec4 Color;
+out vec2 UV;
 
 float scale(float fCos)	{	
 	float x = 1.0 - fCos;	
@@ -72,5 +78,8 @@ void main(void)	{
 	c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);	
 	c1 = v3Attenuate;	
 	
-	gl_Position = MVP * vec4(position,1);
+	gl_Position = MVP * vec4(position, 1.0);
+
+	Color = color;
+	UV = uv;
 }
