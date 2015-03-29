@@ -80,12 +80,9 @@ void Mesh::LoadFromFile(std::string filename){
 		LoadFromPLY(filename);
 }
 void Mesh::LoadFromPLY(std::string filename){
-
 	bool StartReadingGeometryData = false;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-
 	std::vector<Vertex> vertices;
-
 	for(std::string line; std::getline(str, line, '\n');){
 		if(StartReadingGeometryData == true){
 			int SlashCount = 0;
@@ -97,7 +94,6 @@ void Mesh::LoadFromPLY(std::string filename){
 			std::string n1; std::string n2;std::string n3; std::string n4;
 
 			Vertex vert;
-
 			#pragma region Vertex
 			if(line[1] != ' '){
 				for(unsigned int i = 0; i < line.length(); i++){
@@ -187,7 +183,7 @@ void Mesh::LoadFromOBJ(std::string filename){
 				}
 				pointData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
 			}
-			else if(line[1] == 't'){
+			else if(line[1] == 't'){//vertex uv
 				for(auto c:line){
 					if(c == ' ')
 						whilespaceCount++;
@@ -198,9 +194,9 @@ void Mesh::LoadFromOBJ(std::string filename){
 							y += c;
 					}
 				}
-				uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str()))));
+				uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),1-static_cast<float>(::atof(y.c_str()))));
 			}
-			else if(line[1] == 'n'){
+			else if(line[1] == 'n'){//vertex norm
 				for(auto c:line){
 					if(c == ' ')
 						whilespaceCount++;
@@ -219,7 +215,9 @@ void Mesh::LoadFromOBJ(std::string filename){
 		}
 		//faces
 		else if(line[0] == 'f' && line[1] == ' '){
+			x = ""; y = ""; z = "";
 			std::vector<glm::vec3> vertices;
+			unsigned int count = 0;
 			for(auto c:line){
 				if(c == '/') {
 					slashCount++;
@@ -229,30 +227,61 @@ void Mesh::LoadFromOBJ(std::string filename){
 					if(whilespaceCount != 0){
 						glm::vec3 vertex = glm::vec3(static_cast<unsigned int>(::atoi(x.c_str())),static_cast<unsigned int>(::atoi(y.c_str())),static_cast<unsigned int>(::atoi(z.c_str())));
 						vertices.push_back(vertex);
+						x = ""; y = ""; z = "";
+						slashCount = 0;
 					}
 					whilespaceCount++;
 				}
 				else{
-					if(slashCount == 0)
-						x += c;
-					else if(slashCount == 1)
-						y += c;
-					else if(slashCount == 2)
-						z += c;
+					if(whilespaceCount > 0){
+						if(slashCount == 0)
+							x += c;
+						else if(slashCount == 1)
+							y += c;
+						else if(slashCount == 2)
+							z += c;
+					}
 				}
+				count++;
 			}
+
+			glm::vec3 vertex = glm::vec3(static_cast<unsigned int>(::atoi(x.c_str())),static_cast<unsigned int>(::atoi(y.c_str())),static_cast<unsigned int>(::atoi(z.c_str())));
+			vertices.push_back(vertex);
+			x = ""; y = ""; z = "";
+			slashCount = 0;
+
 			listOfVerts.push_back(vertices);
 		}
 	}
-	for(auto list:listOfVerts){
-		for(auto vertex:list)
-		{
-		}
-		if(list.size() == 4){//quad
-			//GenerateQuad(pointData,colorData,uvData,normalData,index1,index2,index3,index4);
+	for(auto face:listOfVerts){
+		Vertex v1,v2,v3,v4;
+
+		v1.position = pointData.at(face.at(0).x-1);
+		v2.position = pointData.at(face.at(1).x-1);
+		v3.position = pointData.at(face.at(2).x-1);
+
+		v1.uv = uvData.at(face.at(0).y-1);
+		v2.uv = uvData.at(face.at(1).y-1);
+		v3.uv = uvData.at(face.at(2).y-1);
+
+		v1.normal = normalData.at(face.at(0).z-1);
+		v2.normal = normalData.at(face.at(1).z-1);
+		v3.normal = normalData.at(face.at(2).z-1);
+
+		v1.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
+		v2.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
+		v3.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
+
+		if(face.size() == 4){//quad
+			v4.position = pointData.at(face.at(3).x-1);
+			v4.uv = uvData.at(face.at(3).y-1);
+			v4.normal = normalData.at(face.at(3).z-1);
+			v4.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
+
+			GenerateQuad(v1,v2,v3,v4);
 		}
 		else{//triangle
-			//GenerateTriangle(pointData,colorData,uvData,normalData,index1,index2,index3);
+			GenerateTriangle(v1,v2,v3);
 		}
 	}
 }

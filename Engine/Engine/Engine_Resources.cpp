@@ -24,7 +24,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Shader_Program("Deferred_Light_Point","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_point_frag.glsl");
 	Add_Shader_Program("Deferred_Light_Dir","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_dir_frag.glsl");
 
-	Add_Mesh("Default","Models\\Scar.ply");
+	Add_Mesh("Default","Models\\scar.obj");
 	Add_Mesh("Skybox","Models\\Skybox.ply");
 	Add_Mesh("LightSphere","Models\\LightSphere.ply");
 	Add_Mesh("DEBUGLight","Models\\DEBUGLight.ply");
