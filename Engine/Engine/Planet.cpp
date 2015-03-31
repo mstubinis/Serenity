@@ -13,21 +13,11 @@ void Planet::Update(float dt)
 {
 	Object::Update(dt);
 }
-void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
-{
+void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type){
 	if(mesh == nullptr)
 		return;
 
-	GLuint shaderProgram;
-	if(m_AtmosphereHeight <= 0.0f){
-		if(type == RENDER_TYPE_FORWARD)
-			shaderProgram = Resources->Get_Shader_Program("Default")->Get_Shader_Program();
-		else if(type == RENDER_TYPE_DEFERRED)
-			shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
-	}
-	else{
-		shaderProgram = Resources->Get_Shader_Program("AS_GroundFromSpace")->Get_Shader_Program();
-	}
+	GLuint shaderProgram = Resources->Get_Shader_Program("AS_GroundFromSpace")->Get_Shader_Program();
 
 	glUseProgram(shaderProgram);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
@@ -36,6 +26,15 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
 
 	for(auto component:mat->Components())
 		mat->Bind_Texture(component.second,shaderProgram);
+
+	if(m_AtmosphereHeight > 0){
+		glUniform1i(glGetUniformLocation(shaderProgram,"hasAtmosphere"),1);
+		glUniform1i(glGetUniformLocation(shaderProgram,"HasAtmosphere"),1);
+	}
+	else{
+		glUniform1i(glGetUniformLocation(shaderProgram,"hasAtmosphere"),0);
+		glUniform1i(glGetUniformLocation(shaderProgram,"HasAtmosphere"),0);
+	}
 
 	float Km = 0.0025f;
 	float Kr = 0.0015f;
@@ -82,6 +81,7 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
 	glUniform1f(glGetUniformLocation(shaderProgram,"fScaleOverScaleDepth"), fScale / fScaledepth);
 
 	glUniform1f(glGetUniformLocation(shaderProgram,"fExposure"), 2.0f);
+
 
 	mesh->Render();
 
@@ -140,7 +140,7 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
 	float g = -0.98f;
 	glUniform1f(glGetUniformLocation(shader,"g"),g);
 	glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
-	glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
+	glUniform1f(glGetUniformLocation(shader,"fExposure"),6.0f);
 
 	Resources->Get_Mesh("Planet")->Render();
 
@@ -149,7 +149,6 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type)
 	glCullFace(GL_BACK);
 	glDisable(GL_BLEND);
 }
-void Planet::Render(RENDER_TYPE type)
-{
+void Planet::Render(RENDER_TYPE type){
 	this->Render(m_Mesh,m_Material,type);
 }

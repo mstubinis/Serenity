@@ -3,7 +3,6 @@
 #include "Engine_Events.h"
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
-	m_State = ENGINE_STATE_PLAY;
 	m_DrawDebug = true;
 	INIT_Window(name,width,height);
 	INIT_Game();
@@ -53,8 +52,6 @@ void Engine::EngineClass::INIT_Game(){
 	game->Init_Resources();
 	game->Init_Logic();
 
-
-
 	glGenVertexArrays( 1, &m_vao );
 	glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
 }
@@ -103,39 +100,8 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	Engine::Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
 	Engine::Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
 
-	//Serenity::Events::Mouse::MouseProcessing::m_previousButton = Serenity::Events::Mouse::MouseButton::MOUSE_BUTTON_NONE;
-	//Serenity::Events::Mouse::MouseProcessing::m_currentButton = Serenity::Events::Mouse::MouseButton::MOUSE_BUTTON_NONE;
-
 	for(auto iterator:Engine::Events::Keyboard::KeyProcessing::m_KeyStatus){ iterator.second = false; }
 	for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
-}
-void Engine::EngineClass::EDIT_Update(float dt, sf::Event e){
-	m_Timer += dt;
-	#pragma region DebugCamera
-	//update debug camera
-	if(Events::Keyboard::IsKeyDown("q") == true)
-		Resources->Current_Camera()->Rotate(0,0,0.5f);
-	if(Events::Keyboard::IsKeyDown("e") == true)
-		Resources->Current_Camera()->Rotate(0,0,-0.5f);
-	if(m_MouseMoved == false && m_Timer > 0.165f){
-		m_MouseMoved = true;
-		m_Timer = 0;
-	}
-	if(Events::Mouse::IsMouseButtonDown("left") == true){
-		Resources->Current_Camera()->Translate(0,0,Mouse_Difference.y*0.2f);
-		if(Events::Mouse::IsMouseButtonDown("right") == true)
-			Resources->Current_Camera()->Translate(Mouse_Difference.x*0.2f,0,0);
-	}
-	else{
-		if(Events::Mouse::IsMouseButtonDown("right") == true)
-			Resources->Current_Camera()->Rotate(Mouse_Difference.y*0.005f,Mouse_Difference.x*0.005f,0);
-	}
-	#pragma endregion
-
-	for(auto object:Resources->Objects)
-		object->Update(dt);
-	//other stuff
-	Mouse_Difference *= (0.975f * (1-dt));
 }
 void Engine::EngineClass::Update(float dt,sf::Event e){
 	m_Timer += dt;
@@ -156,9 +122,6 @@ void Engine::EngineClass::Update(float dt,sf::Event e){
 }
 void Engine::EngineClass::Render(){
 	renderer->Render(m_DrawDebug);
-
-	if(m_DrawDebug)
-		bullet->Render();
 
 	Window->display();
 }
@@ -275,43 +238,11 @@ void Engine::EngineClass::Run(){
 		Resources->dt = clock.restart().asSeconds();
 		this->_EVENT_HANDLERS(event);
 
-		switch(m_State){
-			case ENGINE_STATE_EDIT:
-				EDIT_Update(Resources->dt,event);
-				if(Events::Keyboard::IsKeyDownOnce("p") == true){
-					this->_SWITCH_STATES(ENGINE_STATE_PLAY);
-				}
-				break;
-			case ENGINE_STATE_PLAY:
-				Update(Resources->dt,event);
-				if(Events::Keyboard::IsKeyDownOnce("p") == true){
-					this->_SWITCH_STATES(ENGINE_STATE_EDIT);
-				}
-				break;
-			case ENGINE_STATE_PAUSE:
-				break;
-			default:
-				break;
-		}
+		this->Update(Resources->dt,event);
+
 		this->_RESET_EVENTS();
 
 		Render();
-
-	}
-}
-void Engine::EngineClass::_SWITCH_STATES(ENGINE_STATE state){
-	m_State = state;
-	switch(m_State){
-		case ENGINE_STATE_EDIT:
-			Resources->Set_Active_Camera("Debug");
-			break;
-		case ENGINE_STATE_PLAY:
-			Resources->Set_Active_Camera("Default");
-			break;
-		case ENGINE_STATE_PAUSE:
-			break;
-		default:
-			break;
 	}
 }
 #pragma endregion

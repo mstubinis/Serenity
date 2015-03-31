@@ -19,8 +19,6 @@ class Renderer{
 
 		RENDER_TYPE m_Type;
 
-		float CalcPointLightBSphere(const PointLight* Light);
-
 		void Init_Quad();
 
 		void Pass_Light_Point();

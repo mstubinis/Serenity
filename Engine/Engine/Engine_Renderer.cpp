@@ -41,8 +41,6 @@ void Renderer::Geometry_Pass(bool debug){
 
 			glm::mat4 model = glm::mat4(1);
 			model = glm::translate(model, pointLight->Position);
-			float scl = CalcPointLightBSphere(pointLight);
-			model = glm::scale(model,glm::vec3(scl,scl,scl));
 
 			glm::mat4 MVP = Resources->Current_Camera()->Calculate_Projection(model);
 
@@ -79,12 +77,15 @@ void Renderer::Render(bool debug){
 			for(auto object:Resources->Objects){
 				object->Render();
 			}
+			if(debug)
+				bullet->Render();
+
 			break;
 		case RENDER_TYPE_DEFERRED:
-
 			m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_BLOOM);
 			this->Geometry_Pass(debug);
 			m_gBuffer->Stop();
+
 
 			m_gBuffer->Start(BUFFER_TYPE_LIGHTING);
 			this->Lighting_Pass();
@@ -106,14 +107,6 @@ void Renderer::Render(bool debug){
 		default:
 			break;
 	}
-}
-float Renderer::CalcPointLightBSphere(const PointLight* Light){
-   	float MaxChannel = std::max(std::max(Light->Color.x, Light->Color.y), Light->Color.z);
-   	float ret = (-Light->Attenuation.Linear + sqrtf(Light->Attenuation.Linear * Light->Attenuation.Linear -
-       	4 * Light->Attenuation.Exp * (Light->Attenuation.Exp - 256 * MaxChannel * Light->DiffuseIntensity))) 
-   	   	   	/
-   	   	2 * Light->Attenuation.Exp;
-   	return ret;
 }
 void Renderer::Pass_Light_Point(){
 	GLuint shader = Resources->Get_Shader_Program("Deferred_Light_Point")->Get_Shader_Program();

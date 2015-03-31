@@ -6,19 +6,10 @@ class Game;
 #include "Bullet.h"
 
 namespace Engine{
-
-	enum ENGINE_STATE{ ENGINE_STATE_PLAY,ENGINE_STATE_EDIT,ENGINE_STATE_PAUSE,
-		               ENGINE_STATE_NUMBER };
-
 	class EngineClass{
 		private:
-
-			ENGINE_STATE m_State;
-
 			void INIT_Window(std::string name, unsigned int width, unsigned int height);
 			void INIT_Game();
-
-			void EDIT_Update(float,sf::Event);
 
 			#pragma region Event Handlers
 			void EVENT_RESIZE(unsigned int width, unsigned int height);
@@ -43,7 +34,6 @@ namespace Engine{
 
 			void _EVENT_HANDLERS(sf::Event);
 			void _RESET_EVENTS();
-			void _SWITCH_STATES(ENGINE_STATE);
 
 			bool m_MouseMoved;
 			bool m_DrawDebug;

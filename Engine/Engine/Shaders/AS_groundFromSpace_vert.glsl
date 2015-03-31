@@ -2,7 +2,12 @@
 
 layout (location=0) in vec3 position;
 layout (location=1) in vec2 uv;
+layout (location=2) in vec3 normal;
+layout (location=3) in vec3 binormal;
+layout (location=4) in vec3 tangent;
 layout (location=5) in vec4 color;
+
+uniform int hasAtmosphere;
 
 uniform mat4 MVP;
 uniform mat4 World;
@@ -31,6 +36,11 @@ out vec3 c1;
 out vec4 Color;
 out vec2 UV;
 
+out vec3 Normals;
+out vec3 Binormals;
+out vec3 Tangents;
+
+
 float scale(float fCos)	{	
 	float x = 1.0 - fCos;	
 	return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));	
@@ -41,45 +51,50 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 	float fDet = max(0.0, B*B - 4.0 * C);
 	return 0.5 * (-B - sqrt(fDet));
 }
-void main(void)	{	
-	vec3 v3Pos = normalize(position);
-	vec3 v3Ray = v3Pos - v3CameraPos;
-	float fFar = length(v3Ray);	
-	v3Ray /= fFar;	
+void main(void)	{
+	if(hasAtmosphere == 1){
+		vec3 v3Pos = normalize(position);
+		vec3 v3Ray = v3Pos - v3CameraPos;
+		float fFar = length(v3Ray);	
+		v3Ray /= fFar;	
 	
-	float fNear = getNearIntersection(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2);
+		float fNear = getNearIntersection(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2);
 	
-	vec3 v3Start = v3CameraPos + v3Ray * fNear;	
-	fFar -= fNear;	
-	float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);	
-	float fCameraAngle = dot(-v3Ray, v3Pos);	
-	float fLightAngle = dot(v3LightDir, v3Pos);	
-	float fCameraScale = scale(fCameraAngle);	
-	float fLightScale = scale(fLightAngle);	
-	float fCameraOffset = fDepth*fCameraScale;	
-	float fTemp = (fLightScale + fCameraScale);	
+		vec3 v3Start = v3CameraPos + v3Ray * fNear;	
+		fFar -= fNear;	
+		float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);	
+		float fCameraAngle = dot(-v3Ray, v3Pos);	
+		float fLightAngle = dot(v3LightDir, v3Pos);	
+		float fCameraScale = scale(fCameraAngle);	
+		float fLightScale = scale(fLightAngle);	
+		float fCameraOffset = fDepth*fCameraScale;	
+		float fTemp = (fLightScale + fCameraScale);	
 	
-	float fSampleLength = fFar * fInvSamples;	
-	float fScaledLength = fSampleLength * fScale;	
-	vec3 v3SampleRay = v3Ray * fSampleLength;	
-	vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;	
+		float fSampleLength = fFar * fInvSamples;	
+		float fScaledLength = fSampleLength * fScale;	
+		vec3 v3SampleRay = v3Ray * fSampleLength;	
+		vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;	
 	
-	vec3 v3FrontColor = vec3(0,0,0);	
-	vec3 v3Attenuate;
-	for(int i = 0; i < iSamples; i++)	{	
-		float fHeight = length(v3SamplePoint);	
-		float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));	
-		float fScatter = fDepth*fTemp - fCameraOffset;	
-		v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI));	
-		v3FrontColor += v3Attenuate * (fDepth * fScaledLength);	
-		v3SamplePoint += v3SampleRay;	
-	}	
+		vec3 v3FrontColor = vec3(0,0,0);	
+		vec3 v3Attenuate;
+		for(int i = 0; i < iSamples; i++)	{	
+			float fHeight = length(v3SamplePoint);	
+			float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));	
+			float fScatter = fDepth*fTemp - fCameraOffset;	
+			v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI));	
+			v3FrontColor += v3Attenuate * (fDepth * fScaledLength);	
+			v3SamplePoint += v3SampleRay;	
+		}	
 	
-	c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);	
-	c1 = v3Attenuate;	
-	
+		c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);	
+		c1 = v3Attenuate;
+	}
 	gl_Position = MVP * vec4(position, 1.0);
 
 	Color = color;
 	UV = uv;
+
+	Normals = (World * vec4(normal,0.0)).xyz;
+	Binormals = (World * vec4(binormal,0.0)).xyz;
+	Tangents = (World * vec4(tangent,0.0)).xyz;
 }

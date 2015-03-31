@@ -13,6 +13,7 @@ void main(){
 	float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);	
 	float fRayleighPhase = 0.75 * (1.0 + fCos*fCos);	
 	float fMiePhase = 1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos*fCos) / pow(1.0 + g2 - 2.0*g*fCos, 1.5);	
-	gl_FragColor.rgb = 1.0 - exp( -fExposure * (fRayleighPhase * c0 + fMiePhase * c1) );
-	gl_FragColor.a = 1.0; 
+	vec3 color = 1.0 - exp( -fExposure * (fRayleighPhase * c0 + fMiePhase * c1) );
+	vec4 final = vec4(color,color.b);
+	gl_FragColor = final;
 }
