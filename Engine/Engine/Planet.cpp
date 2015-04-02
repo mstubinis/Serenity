@@ -43,7 +43,7 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type){
 	glm::vec3 camPos = Resources->Current_Camera()->Position() - Position();
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
-	glm::vec3 lightDir = Resources->Lights_Points.at(0)->Position - Position();
+	glm::vec3 lightDir = Resources->Lights.at(0)->Position() - Position();
 	lightDir = glm::normalize(lightDir);
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 

@@ -90,48 +90,37 @@ void Mesh::LoadFromPLY(std::string filename){
 			int SpaceCount = 0;
 
 			std::string x; std::string y; std::string z; std::string w;
-			std::string uv1; std::string uv2;std::string uv3; std::string uv4;
-			std::string n1; std::string n2;std::string n3; std::string n4;
+			std::string u; std::string v;
+			std::string n1; std::string n2;std::string n3;
 
 			Vertex vert;
 			#pragma region Vertex
 			if(line[1] != ' '){
 				for(unsigned int i = 0; i < line.length(); i++){
-					if(line.at(i) == ' ') SpaceCount++;
-					if(SpaceCount == 0) x += line.at(i);
+					if(line.at(i) == ' ')    SpaceCount++;
+					if(SpaceCount == 0)      x += line.at(i);
 					else if(SpaceCount == 1) y += line.at(i);
 					else if(SpaceCount == 2) z += line.at(i);
 					else if(SpaceCount == 3) n1 += line.at(i);
 					else if(SpaceCount == 4) n2 += line.at(i);
 					else if(SpaceCount == 5) n3 += line.at(i);
-					else if(SpaceCount == 6) uv1 += line.at(i);
-					else if(SpaceCount == 7) uv2 += line.at(i);
+					else if(SpaceCount == 6) u += line.at(i);
+					else if(SpaceCount == 7) v += line.at(i);
 				}
-				float xPos = static_cast<float>(::atof(x.c_str()));
-				float yPos = static_cast<float>(::atof(y.c_str()));
-				float zPos = static_cast<float>(::atof(z.c_str()));
-
-				float normX = static_cast<float>(::atof(n1.c_str()));
-				float normY = static_cast<float>(::atof(n2.c_str()));
-				float normZ = static_cast<float>(::atof(n3.c_str()));
-
-				float u = static_cast<float>(::atof(uv1.c_str()));
-				float v = static_cast<float>(::atof(uv2.c_str()));
-
-				vert.position = glm::vec3(xPos,yPos,zPos);
+				vert.position = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
 				vert.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-				vert.uv = glm::vec2(u,1-v);
-				vert.normal = glm::vec3(normX,normY,normZ);
-
+				vert.uv = glm::vec2(static_cast<float>(::atof(u.c_str())),1-static_cast<float>(::atof(v.c_str())));
+				vert.normal = glm::vec3( static_cast<float>(::atof(n1.c_str())),static_cast<float>(::atof(n2.c_str())),static_cast<float>(::atof(n3.c_str())));
 				vertices.push_back(vert);
 			}
 			#pragma endregion
 			#pragma region Indices
 			if((line[0] == '3' || line[0] == '4') && line[1] == ' '){
-				for(unsigned int i = 0; i < line.length(); i++)
-					if(line.at(i) == ' ') whitespaceCount++;
 				for(unsigned int i = 0; i < line.length(); i++){
-					if(line.at(i) == ' ') SpaceCount++;
+					if(line.at(i) == ' '){ 
+						SpaceCount++;
+						whitespaceCount++;
+					}
 					if(SpaceCount == 1) x += line.at(i);
 					else if(SpaceCount == 2) y += line.at(i);
 					else if(SpaceCount == 3) z += line.at(i);
@@ -154,68 +143,37 @@ void Mesh::LoadFromPLY(std::string filename){
 }
 void Mesh::LoadFromOBJ(std::string filename){
 	std::vector<glm::vec3> pointData;
-	std::vector<glm::vec4> colorData;
 	std::vector<glm::vec2> uvData;
 	std::vector<glm::vec3> normalData;
 
 	std::vector<std::vector<glm::vec3>> listOfVerts;
 
-	bool StartReadingGeometryData = false;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+
 	int index = 1;
 	for(std::string line; std::getline(str, line, '\n');){
 		std::string x; std::string y; std::string z;
 		unsigned int whilespaceCount = 0;
 		unsigned int slashCount = 0;
 		if(line[0] == 'v'){ 
-			if(line[1] == ' '){//vertex point
-				for(auto c:line){
-					if(c == ' ')
-						whilespaceCount++;
-					else{
-						if(whilespaceCount == 1)
-							x += c;
-						else if(whilespaceCount == 2)
-							y += c;
-						else if(whilespaceCount == 3)
-							z += c;
-					}
+			for(auto c:line){
+				if(c == ' ')                      whilespaceCount++;
+				else{
+					if(whilespaceCount == 1)      x += c;
+					else if(whilespaceCount == 2) y += c;
+					else if(whilespaceCount == 3) z += c;
 				}
+			}
+			if(line[1] == ' ')//vertex point
 				pointData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
-			}
-			else if(line[1] == 't'){//vertex uv
-				for(auto c:line){
-					if(c == ' ')
-						whilespaceCount++;
-					else{
-						if(whilespaceCount == 1)
-							x += c;
-						else if(whilespaceCount == 2)
-							y += c;
-					}
-				}
+			else if(line[1] == 't')//vertex uv
 				uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),1-static_cast<float>(::atof(y.c_str()))));
-			}
-			else if(line[1] == 'n'){//vertex norm
-				for(auto c:line){
-					if(c == ' ')
-						whilespaceCount++;
-					else{
-						if(whilespaceCount == 1)
-							x += c;
-						else if(whilespaceCount == 2)
-							y += c;
-						else if(whilespaceCount == 3)
-							z += c;
-					}
-				}
+			else if(line[1] == 'n')//vertex norm
 				normalData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
-			}
 			index++;
 		}
 		//faces
 		else if(line[0] == 'f' && line[1] == ' '){
-			x = ""; y = ""; z = "";
 			std::vector<glm::vec3> vertices;
 			unsigned int count = 0;
 			for(auto c:line){
@@ -225,7 +183,7 @@ void Mesh::LoadFromOBJ(std::string filename){
 				else if(c == ' '){ 
 					//global listOfVerts
 					if(whilespaceCount != 0){
-						glm::vec3 vertex = glm::vec3(static_cast<unsigned int>(::atoi(x.c_str())),static_cast<unsigned int>(::atoi(y.c_str())),static_cast<unsigned int>(::atoi(z.c_str())));
+						glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
 						vertices.push_back(vertex);
 						x = ""; y = ""; z = "";
 						slashCount = 0;
@@ -234,50 +192,42 @@ void Mesh::LoadFromOBJ(std::string filename){
 				}
 				else{
 					if(whilespaceCount > 0){
-						if(slashCount == 0)
-							x += c;
-						else if(slashCount == 1)
-							y += c;
-						else if(slashCount == 2)
-							z += c;
+						if(slashCount == 0)      x += c;
+						else if(slashCount == 1) y += c;
+						else if(slashCount == 2) z += c;
 					}
 				}
 				count++;
 			}
-
-			glm::vec3 vertex = glm::vec3(static_cast<unsigned int>(::atoi(x.c_str())),static_cast<unsigned int>(::atoi(y.c_str())),static_cast<unsigned int>(::atoi(z.c_str())));
+			glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
 			vertices.push_back(vertex);
-			x = ""; y = ""; z = "";
-			slashCount = 0;
-
 			listOfVerts.push_back(vertices);
 		}
 	}
 	for(auto face:listOfVerts){
 		Vertex v1,v2,v3,v4;
 
-		v1.position = pointData.at(face.at(0).x-1);
-		v2.position = pointData.at(face.at(1).x-1);
-		v3.position = pointData.at(face.at(2).x-1);
+		v1.position = pointData.at(static_cast<unsigned int>(face.at(0).x-1));
+		v2.position = pointData.at(static_cast<unsigned int>(face.at(1).x-1));
+		v3.position = pointData.at(static_cast<unsigned int>(face.at(2).x-1));
 
-		v1.uv = uvData.at(face.at(0).y-1);
-		v2.uv = uvData.at(face.at(1).y-1);
-		v3.uv = uvData.at(face.at(2).y-1);
+		v1.uv = uvData.at(static_cast<unsigned int>(face.at(0).y-1));
+		v2.uv = uvData.at(static_cast<unsigned int>(face.at(1).y-1));
+		v3.uv = uvData.at(static_cast<unsigned int>(face.at(2).y-1));
 
-		v1.normal = normalData.at(face.at(0).z-1);
-		v2.normal = normalData.at(face.at(1).z-1);
-		v3.normal = normalData.at(face.at(2).z-1);
+		v1.normal = normalData.at(static_cast<unsigned int>(face.at(0).z-1));
+		v2.normal = normalData.at(static_cast<unsigned int>(face.at(1).z-1));
+		v3.normal = normalData.at(static_cast<unsigned int>(face.at(2).z-1));
 
 		v1.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 		v2.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 		v3.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 
 		if(face.size() == 4){//quad
-			v4.position = pointData.at(face.at(3).x-1);
-			v4.uv = uvData.at(face.at(3).y-1);
-			v4.normal = normalData.at(face.at(3).z-1);
+			v4.position = pointData.at(static_cast<unsigned int>(face.at(3).x-1));
+			v4.uv = uvData.at(static_cast<unsigned int>(face.at(3).y-1));
+			v4.normal = normalData.at(static_cast<unsigned int>(face.at(3).z-1));
 			v4.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-
 			GenerateQuad(v1,v2,v3,v4);
 		}
 		else{//triangle

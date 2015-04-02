@@ -11,6 +11,6 @@ layout (location = 2) out vec4 GlowOut;
 
 void main(){
     DiffuseOut = texture(cubemap, TexCoord0);
-    NormalOut = vec4(1,1,1,1);
-	GlowOut = vec4(1,1,1,1);
+    NormalOut = vec4(1);
+	GlowOut = vec4(1);
 }

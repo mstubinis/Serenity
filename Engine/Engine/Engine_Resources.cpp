@@ -30,11 +30,13 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("DEBUGLight","Models\\DEBUGLight.ply");
 	Add_Mesh("Ground","Models\\Ground.ply");
 	Add_Mesh("Planet","Models\\planet.ply");
+	Add_Mesh("Voyager","Models\\voyager.obj");
 
 	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
 	Add_Material("Rock","Textures\\rock.png","Textures\\rockNormal.png","");
 	Add_Material("Stone","Textures\\stone.png","Textures\\stoneNormal.png","");
 	Add_Material("Earth","Textures\\earth.png","","");
+	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");
 
 	m_Cameras["Default"] = new Camera(45.0f,float(window_x/window_y),0.01f,1000.0f);
 	m_Cameras["Debug"] = new Camera(45.0f,float(window_x/window_y),0.01f,1000.0f);
@@ -54,14 +56,9 @@ ResourceManager::~ResourceManager(){
 	for(auto obj:Objects){
 		delete obj;
 	}
-	#pragma region Delete Lights
-	for(auto light:Lights_Points){
+	for(auto light:Lights){
 		delete light;
 	}
-	for(auto light:Lights_Directional){
-		delete light;
-	}
-	#pragma endregion
 	for(auto shaderP:m_ShaderPrograms){
 		delete shaderP.second;
 	}

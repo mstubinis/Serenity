@@ -2,11 +2,9 @@
 #define ENGINE_RENDER_H
 #include "GBuffer.h"
 
-struct PointLight;
+
 class Object;
-
 //this class will control what rendering techniques to use (forward or deferred)
-
 enum RENDER_TYPE {RENDER_TYPE_FORWARD,RENDER_TYPE_DEFERRED};
 class Renderer{
 	private:

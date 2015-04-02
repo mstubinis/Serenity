@@ -34,25 +34,25 @@ vec4 CalcLightInternal(BaseLight Light,vec3 LightDirection,vec3 WorldPos,vec3 No
     vec4 AmbientColor = vec4(Light.Color, 1.0) * Light.AmbientIntensity;
     float DiffuseFactor = dot(Normal, -LightDirection);
 
-    vec4 DiffuseColor  = vec4(0, 0, 0, 0);
-    vec4 SpecularColor = vec4(0, 0, 0, 0);
+    vec4 DiffuseColor  = vec4(0);
+    vec4 SpecularColor = vec4(0);
 
     if (DiffuseFactor > 0.0) {
         DiffuseColor = vec4(Light.Color, 1.0) * Light.DiffuseIntensity * DiffuseFactor;
 
         vec3 VertexToEye = normalize((gEyeWorldPos) - WorldPos);
         vec3 LightReflect = normalize(reflect(LightDirection, Normal));
+
         float SpecularFactor = dot(VertexToEye, LightReflect);
         SpecularFactor = pow(SpecularFactor, gSpecularPower);
         if (SpecularFactor > 0.0) {
             SpecularColor = vec4(Light.Color, 1.0) * gMatSpecularIntensity * SpecularFactor;
         }
     }
-
     return (AmbientColor + DiffuseColor + SpecularColor);
 }
 vec4 CalcPointLight(vec3 WorldPos, vec3 Normal){
-    vec3 LightDirection = WorldPos - gPointLight.Position;
+    vec3 LightDirection = (WorldPos - gPointLight.Position);
     float Distance = length(LightDirection);
     LightDirection = normalize(LightDirection);
 
@@ -76,6 +76,7 @@ void main(){
 	vec2 texCoord = CalcTexCoord();
 	vec3 position = decodeLocation(texCoord);
     vec3 normal = texture2D( gNormalMap, texCoord).xyz * 2 - 1;
+	normal = normalize(normal);
 
-	LightOut = CalcPointLight(position,normalize(normal));
+	LightOut = CalcPointLight(position,normal);
 }

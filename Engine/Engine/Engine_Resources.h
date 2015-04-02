@@ -39,8 +39,7 @@ class ResourceManager{
 
 		float dt;
 		std::vector<Object*> Objects;
-		std::vector<PointLight*> Lights_Points;
-		std::vector<DirectionalLight*> Lights_Directional;
+		std::vector<Light*> Lights;
 		Material* Default_Material(); Material* Get_Material(std::string);
 		Mesh* Default_Mesh(); Mesh* Get_Mesh(std::string);
 		Camera* Default_Camera(); Camera* Get_Camera(std::string); Camera* Current_Camera();

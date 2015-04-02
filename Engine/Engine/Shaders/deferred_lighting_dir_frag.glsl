@@ -28,8 +28,8 @@ vec4 CalcLightInternal(BaseLight Light,vec3 LightDirection,vec3 WorldPos,vec3 No
     vec4 AmbientColor = vec4(Light.Color, 1.0) * Light.AmbientIntensity;
     float DiffuseFactor = dot(Normal, -LightDirection);
 
-    vec4 DiffuseColor  = vec4(0, 0, 0, 0);
-    vec4 SpecularColor = vec4(0, 0, 0, 0);
+    vec4 DiffuseColor  = vec4(0);
+    vec4 SpecularColor = vec4(0);
 
     if (DiffuseFactor > 0.0) {
         DiffuseColor = vec4(Light.Color, 1.0) * Light.DiffuseIntensity * DiffuseFactor;
@@ -60,7 +60,7 @@ void main(){
     vec3 normal = texture2D( gNormalMap, texCoord).xyz * 2 - 1;
 
 	if(normal.r > 0.99 && normal.g > 0.99 && normal.b > 0.99) //find out why normal is not near or equal to white for skybox
-		LightOut = vec4(0,0,0,0);
+		LightOut = vec4(0);
 	else
 		LightOut = CalcDirectionalLight(position,normalize(normal));
 }

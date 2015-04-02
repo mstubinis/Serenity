@@ -39,7 +39,7 @@ void main(){
 	if(DiffuseMapEnabled == 1)
 		DiffuseOut = texture(DiffuseMap, UV) * vec4(Object_Color.xyz,1);
 	else
-		DiffuseOut = vec4(0,0,0,0);
+		DiffuseOut = vec4(0);
 
 	if(NormalMapEnabled == 1)
 		NormalOut = vec4(CalcBumpedNormal().xyz,0);

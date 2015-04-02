@@ -35,19 +35,10 @@ void Renderer::Geometry_Pass(bool debug){
 		object->Render(m_Type);
 	}
 	if(debug){
-		GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
-		glUseProgram(shaderProgram);
-		for(auto pointLight:Resources->Lights_Points){
-
-			glm::mat4 model = glm::mat4(1);
-			model = glm::translate(model, pointLight->Position);
-
-			glm::mat4 MVP = Resources->Current_Camera()->Calculate_Projection(model);
-
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP" ), 1, GL_FALSE, glm::value_ptr(MVP));
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "World" ), 1, GL_FALSE, glm::value_ptr(model));
-			glUniform3f(glGetUniformLocation(shaderProgram, "Object_Color"),1.0f,1.0f,1.0f);
-			Resources->Get_Mesh("DEBUGLight")->Render();
+		GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
+		glUseProgram(shader);
+		for(auto light:Resources->Lights){
+			light->RenderDebug(shader);
 		}
 		glUseProgram(0);
 	}
@@ -62,8 +53,8 @@ void Renderer::Lighting_Pass(){
     glClear(GL_COLOR_BUFFER_BIT);
 
 	this->Pass_Light_Point();
-	//this->Pass_Light_Dir();
-	//this->Pass_Light_Spot();
+	this->Pass_Light_Dir();
+	this->Pass_Light_Spot();
 }
 void Renderer::Set_Render_Type(RENDER_TYPE type){ m_Type = type; }
 void Renderer::Render(bool debug){
@@ -131,39 +122,8 @@ void Renderer::Pass_Light_Point(){
 		glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
 		glUniform1i( m_textureID[1], 1 );
 
-	struct {
-		GLuint Color;
-		GLuint AmbientIntensity;
-		GLuint DiffuseIntensity;
-		GLuint Position;
-		struct {
-			GLuint Constant;
-			GLuint Linear;
-			GLuint Exp;
-		} Atten;
-	} m_pointLightLocation;
-	for (auto light:Resources->Lights_Points) {
-
-		m_pointLightLocation.Color = glGetUniformLocation(shader,"gPointLight.Base.Color");
-		m_pointLightLocation.AmbientIntensity = glGetUniformLocation(shader,"gPointLight.Base.AmbientIntensity");
-		m_pointLightLocation.Position = glGetUniformLocation(shader,"gPointLight.Position");
-		m_pointLightLocation.DiffuseIntensity = glGetUniformLocation(shader,"gPointLight.Base.DiffuseIntensity");
-		m_pointLightLocation.Atten.Constant = glGetUniformLocation(shader,"gPointLight.Atten.Constant");
-		m_pointLightLocation.Atten.Linear = glGetUniformLocation(shader,"gPointLight.Atten.Linear");
-        m_pointLightLocation.Atten.Exp = glGetUniformLocation(shader,"gPointLight.Atten.Exp");
-
-		glUniform3f(m_pointLightLocation.Color, light->Color.x, light->Color.y,light->Color.z);
-        glUniform1f(m_pointLightLocation.AmbientIntensity, light->AmbientIntensity);
-        glUniform1f(m_pointLightLocation.DiffuseIntensity, light->DiffuseIntensity);
-        glUniform3f(m_pointLightLocation.Position, light->Position.x, light->Position.y, light->Position.z);
-        glUniform1f(m_pointLightLocation.Atten.Constant, light->Attenuation.Constant);
-        glUniform1f(m_pointLightLocation.Atten.Linear, light->Attenuation.Linear);
-        glUniform1f(m_pointLightLocation.Atten.Exp, light->Attenuation.Exp);
-
-        glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
-        glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 0.6f);
-
-		Init_Quad();
+	for (auto light:Resources->Lights) {
+		light->Render(LIGHT_TYPE_POINT,shader);
    	}
 
 	// Reset OpenGL state
@@ -197,29 +157,8 @@ void Renderer::Pass_Light_Dir(){
 		glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
 		glUniform1i( m_textureID[1], 1);
 
-	struct {
-		GLuint Color;
-		GLuint AmbientIntensity;
-		GLuint DiffuseIntensity;
-		GLuint Direction;
-	} m_DirLightLocation;
-	for (auto light:Resources->Lights_Directional) {
-
-		m_DirLightLocation.Color = glGetUniformLocation(shader,"gDirectionalLight.Base.Color");
-		m_DirLightLocation.AmbientIntensity = glGetUniformLocation(shader,"gDirectionalLight.Base.AmbientIntensity");
-		m_DirLightLocation.DiffuseIntensity = glGetUniformLocation(shader,"gDirectionalLight.Base.DiffuseIntensity");
-		m_DirLightLocation.Direction = glGetUniformLocation(shader,"gDirectionalLight.Direction");
-
-		glUniform3f(m_DirLightLocation.Color, light->Color.x, light->Color.y,light->Color.z);
-		glUniform3f(m_DirLightLocation.Direction, light->Direction.x, light->Direction.y,light->Direction.z);
-        glUniform1f(m_DirLightLocation.AmbientIntensity, light->AmbientIntensity);
-        glUniform1f(m_DirLightLocation.DiffuseIntensity, light->DiffuseIntensity);
-
-        glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
-        glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 0.6f);
-
-		Init_Quad();
-
+	for (auto light:Resources->Lights) {
+		light->Render(LIGHT_TYPE_DIRECTIONAL,shader);
    	}
 	// Reset OpenGL state
 	for(unsigned int i = 0; i < 2; i++){
