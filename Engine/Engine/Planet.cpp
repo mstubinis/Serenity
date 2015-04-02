@@ -2,7 +2,7 @@
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
 
-Planet::Planet(Material* mat, glm::vec3 pos, glm::vec3 scl, glm::vec3 rot, std::string name, bool add):Object(Resources->Get_Mesh("Planet"),mat,pos,scl,rot,name,add)
+Planet::Planet(std::string mat, glm::vec3 pos, glm::vec3 scl, glm::vec3 rot, std::string name, bool add):Object("Planet",mat,pos,scl,rot,name,add)
 {
 	m_AtmosphereHeight = 0.025f;
 }

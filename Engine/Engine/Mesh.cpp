@@ -83,6 +83,7 @@ void Mesh::LoadFromPLY(std::string filename){
 	bool StartReadingGeometryData = false;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 	std::vector<Vertex> vertices;
+	btTriangleMesh* mesh = new btTriangleMesh();
 	for(std::string line; std::getline(str, line, '\n');){
 		if(StartReadingGeometryData == true){
 			int SlashCount = 0;
@@ -131,15 +132,17 @@ void Mesh::LoadFromPLY(std::string filename){
 				int index3 = static_cast<int>(::atof(z.c_str()));
 				int index4 = static_cast<int>(::atof(w.c_str()));
 				if(whitespaceCount == 4)
-					GenerateQuad(vertices[index1],vertices[index2],vertices[index3],vertices[index4]);
+					GenerateQuad(mesh,vertices[index1],vertices[index2],vertices[index3],vertices[index4]);
 				else
-					GenerateTriangle(vertices[index1],vertices[index2],vertices[index3]);
+					GenerateTriangle(mesh,vertices[index1],vertices[index2],vertices[index3]);
 			}
 			#pragma endregion
 		}
 		if(line == "end_header")
 			StartReadingGeometryData = true;
 	}
+	m_Collision = new btBvhTriangleMeshShape(mesh, false);
+	delete mesh;
 }
 void Mesh::LoadFromOBJ(std::string filename){
 	std::vector<glm::vec3> pointData;
@@ -147,6 +150,7 @@ void Mesh::LoadFromOBJ(std::string filename){
 	std::vector<glm::vec3> normalData;
 
 	std::vector<std::vector<glm::vec3>> listOfVerts;
+	btTriangleMesh* mesh = new btTriangleMesh();
 
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
@@ -228,18 +232,21 @@ void Mesh::LoadFromOBJ(std::string filename){
 			v4.uv = uvData.at(static_cast<unsigned int>(face.at(3).y-1));
 			v4.normal = normalData.at(static_cast<unsigned int>(face.at(3).z-1));
 			v4.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-			GenerateQuad(v1,v2,v3,v4);
+			GenerateQuad(mesh,v1,v2,v3,v4);
 		}
 		else{//triangle
-			GenerateTriangle(v1,v2,v3);
+			GenerateTriangle(mesh,v1,v2,v3);
 		}
 	}
+	m_Collision = new btBvhTriangleMeshShape(mesh, false);
+	delete mesh;
 }
 Mesh::~Mesh(){
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)
 		glDeleteBuffers(1, &m_buffers[i]);
+	delete m_Collision;
 }
-void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
+void Mesh::GenerateTriangle(btTriangleMesh* mesh,Vertex& v1, Vertex& v2, Vertex& v3){
 	m_Colors.push_back(v1.color);
 	m_Points.push_back(v1.position);
 	m_UVs.push_back(v1.uv);
@@ -264,10 +271,17 @@ void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_Tangents.push_back(v1.tangent);
 	m_Tangents.push_back(v2.tangent);
 	m_Tangents.push_back(v3.tangent);
+
+
+	btVector3 bv1 = btVector3(v1.position.x,v1.position.y,v1.position.z);
+    btVector3 bv2 = btVector3(v2.position.x,v2.position.y,v2.position.z);
+    btVector3 bv3 = btVector3(v3.position.x,v3.position.y,v3.position.z);
+ 
+	mesh->addTriangle(bv1, bv2, bv3);
 }
-void Mesh::GenerateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
-	GenerateTriangle(v1,v2,v3);
-	GenerateTriangle(v1,v3,v4);
+void Mesh::GenerateQuad(btTriangleMesh* mesh,Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
+	GenerateTriangle(mesh,v1,v2,v3);
+	GenerateTriangle(mesh,v1,v3,v4);
 }
 void Mesh::Init(){
 

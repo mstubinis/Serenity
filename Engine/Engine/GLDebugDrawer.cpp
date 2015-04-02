@@ -13,7 +13,9 @@ void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
 		glVertex3d(to.getX(), to.getY(), to.getZ());
 	glEnd();
 }
-void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color){ drawLine(from,to,color,color); }
+void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color){ 
+	drawLine(from,to,color,color); 
+}
 void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVector3& color){
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
 	glPushMatrix ();
@@ -57,19 +59,17 @@ void GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btV
 		glVertex3d(c.getX(),c.getY(),c.getZ());
 	glEnd();
 }
-void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }
+void GLDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color){
+	btVector3 to=pointOnB+normalOnB*1;//distance;
+	const btVector3&from = pointOnB;
+	glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
+	glBegin(GL_LINES);
+		glVertex3d(from.getX(), from.getY(), from.getZ());
+		glVertex3d(to.getX(), to.getY(), to.getZ());
+	glEnd();
+}
+void GLDebugDrawer::reportErrorWarning(const char* warningString){}
 void GLDebugDrawer::draw3dText(const btVector3& location,const char* textString){
 	glRasterPos3f(location.x(),  location.y(),  location.z());
 }
-void GLDebugDrawer::reportErrorWarning(const char* warningString){}
-void GLDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color){
-	{
-		btVector3 to=pointOnB+normalOnB*1;//distance;
-		const btVector3&from = pointOnB;
-		glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
-		glBegin(GL_LINES);
-		glVertex3d(from.getX(), from.getY(), from.getZ());
-		glVertex3d(to.getX(), to.getY(), to.getZ());
-		glEnd();
-	}
-}
+void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }

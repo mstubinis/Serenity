@@ -6,6 +6,9 @@
 #include <GL\glew.h>
 #include <SFML\OpenGL.hpp>
 
+class btCollisionShape;
+class btTriangleMesh;
+
 const unsigned int NUM_VERTEX_DATA = 6;
 const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3,4};
 
@@ -21,6 +24,7 @@ struct Vertex{
 class Mesh{
 	private:
 		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormal, 4 - tangent, 5 - color
+		btCollisionShape* m_Collision;
 
 		glm::vec3 m_radius;
 		std::vector<glm::vec3> m_Points;
@@ -30,8 +34,8 @@ class Mesh{
 		std::vector<glm::vec3> m_Binormals;
 		std::vector<glm::vec3> m_Tangents;
 
-		void GenerateQuad(Vertex&,Vertex&,Vertex&,Vertex&);
-		void GenerateTriangle(Vertex&,Vertex&,Vertex&);
+		void GenerateQuad(btTriangleMesh*,Vertex&,Vertex&,Vertex&,Vertex&);
+		void GenerateTriangle(btTriangleMesh*,Vertex&,Vertex&,Vertex&);
 
 		void CalculateTangentBinormal(Vertex&, Vertex&, Vertex&);
 
@@ -47,6 +51,7 @@ class Mesh{
 
 		GLuint* VAO();
 		GLuint* Buffers();
+		btCollisionShape* Collision() const { return m_Collision; }
 
 		glm::vec3 Radius();
 

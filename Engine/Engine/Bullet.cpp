@@ -1,4 +1,6 @@
 #include "Bullet.h"
+#include "ShaderProgram.h"
+
 using namespace glm;
 
 Bullet::Bullet(){
@@ -7,11 +9,12 @@ Bullet::Bullet(){
 	m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
 	m_solver = new btSequentialImpulseConstraintSolver;
 	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);
-	m_dynamicsWorld->setGravity(btVector3(0,-1,0));
 
 	m_debugDrawer = new GLDebugDrawer();
 	m_debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE );
 	m_dynamicsWorld->setDebugDrawer(m_debugDrawer);
+
+	m_dynamicsWorld->setGravity(btVector3(0,0,0));
 }
 Bullet::~Bullet(){
 	delete m_debugDrawer;
@@ -25,4 +28,15 @@ void Bullet::Set_Gravity(float x,float y,float z){ m_dynamicsWorld->setGravity(b
 void Bullet::Set_Gravity(vec3 gravity){ Set_Gravity(gravity.x,gravity.y,gravity.z); }
 void Bullet::Add_Rigid_Body(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
 void Bullet::Update(float dt){ m_dynamicsWorld->stepSimulation(dt); }
-void Bullet::Render(){ m_dynamicsWorld->debugDrawWorld(); }
+void Bullet::Render(RENDER_TYPE renderType){
+	glm::mat4 model = glm::mat4();
+	GLuint shaderProgram;
+	if(renderType == RENDER_TYPE_FORWARD)
+		shaderProgram = Resources->Get_Shader_Program("Default")->Get_Shader_Program();
+	else if(renderType == RENDER_TYPE_DEFERRED)
+		shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
+
+	glm::mat4 world = Resources->Current_Camera()->Calculate_Projection(model);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP"), 1, GL_FALSE, glm::value_ptr(world));
+	m_dynamicsWorld->debugDrawWorld(); 
+}

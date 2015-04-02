@@ -4,7 +4,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 
-Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float clipEndVal): Object(nullptr,nullptr,glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Camera"){//create a perspective camera
+Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Camera"){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_ClipStart = clipStartVal;
@@ -17,7 +17,7 @@ Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float c
 	m_Friction = 0.001f;
 	Set_View();
 }
-Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float clipStartVal, float clipEndVal): Object(nullptr,nullptr,glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Camera"){//create an orthographic camera
+Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Camera"){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_ClipStart = clipStartVal;

@@ -146,9 +146,17 @@ void ResourceManager::Add_Shader_Program(std::string name, std::string vs, std::
 }
 #pragma region Getters
 Mesh* ResourceManager::Default_Mesh(){ return m_Meshes["Default"]; }
-Mesh* ResourceManager::Get_Mesh(std::string name){ return m_Meshes[name]; }
+Mesh* ResourceManager::Get_Mesh(std::string name){ 
+	if(name == "")
+		return nullptr;
+	return m_Meshes[name]; 
+}
 Material* ResourceManager::Default_Material(){ return m_Materials["Default"]; }
-Material* ResourceManager::Get_Material(std::string name){ return m_Materials[name]; }
+Material* ResourceManager::Get_Material(std::string name){ 
+	if(name == "")
+		return nullptr;
+	return m_Materials[name]; 
+}
 Camera* ResourceManager::Default_Camera(){ return m_Cameras["Default"]; }
 Camera* ResourceManager::Get_Camera(std::string name){ return m_Cameras[name]; }
 Camera* ResourceManager::Current_Camera(){ return m_Current_Camera; }

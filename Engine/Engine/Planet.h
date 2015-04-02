@@ -8,7 +8,7 @@ class Planet: public Object{
 		float m_AtmosphereHeight;
 	public:
 		Planet(
-				Material* = nullptr,
+				std::string = "",
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
 			    glm::vec3 = glm::vec3(0,0,0),   //Rotation

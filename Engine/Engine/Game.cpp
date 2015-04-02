@@ -10,8 +10,9 @@ Game::~Game(){}
 void Game::Init_Logic(){
 
 	new Skybox("Skybox1");
-	new ObjectDynamic(Resources->Get_Mesh("Voyager"),Resources->Get_Material("Voyager"),glm::vec3(0,0,-6));
-	Planet* planet = new Planet(Resources->Get_Material("Earth"),glm::vec3(-2,0,0));
+	new ObjectDynamic("Voyager","Voyager",glm::vec3(0,0,-6));
+	new ObjectDynamic("Voyager","Voyager",glm::vec3(3,0,-6));
+	//new Planet(Resources->Get_Material("Earth"),glm::vec3(-2,0,0));
 
 	PointLight* pL = new PointLight(glm::vec3(0,0,-8));
 
@@ -46,17 +47,17 @@ void Game::Update(float dt){
 		Resources->Current_Camera()->Rotate(0,0,-0.5f);
 
 	if(Keyboard::IsKeyDown("1") == true)
-		Resources->Lights.at(0)->Translate(0.1f,0,0);
+		Resources->Objects.at(3)->Translate(1,0,0);
 	if(Keyboard::IsKeyDown("2") == true)
-		Resources->Lights.at(0)->Translate(-0.1f,0,0);
+		Resources->Objects.at(3)->Translate(-1,0,0);
 	if(Keyboard::IsKeyDown("3") == true)
-		Resources->Lights.at(0)->Translate(0,0.1f,0);
+		Resources->Objects.at(3)->Translate(0,1,0);
 	if(Keyboard::IsKeyDown("4") == true)
-		Resources->Lights.at(0)->Translate(0,-0.1f,0);
+		Resources->Objects.at(3)->Translate(0,-1,0);
 	if(Keyboard::IsKeyDown("5") == true)
-		Resources->Lights.at(0)->Translate(0,0,0.1f);
+		Resources->Objects.at(3)->Translate(0,0,1);
 	if(Keyboard::IsKeyDown("6") == true)
-		Resources->Lights.at(0)->Translate(0,0,-0.1f);
+		Resources->Objects.at(3)->Translate(0,0,-1);
 
 	if(Keyboard::IsKeyDown("f1") == true)
 		Resources->Objects.at(4)->Scale(5,5,5);

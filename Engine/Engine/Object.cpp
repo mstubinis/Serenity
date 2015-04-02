@@ -2,20 +2,20 @@
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
 
-Object::Object(Mesh* mesh, Material* material, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation,std::string name,bool addToResources){
+Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, glm::vec3 rot,std::string name,bool addToResources){
+	Set_Mesh(Resources->Get_Mesh(mesh));
+	Set_Material(Resources->Get_Material(mat));
+
 	m_Name = name;
-	m_Position = position;
-	m_Scale = scale;
-	m_Rotation = rotation;
+	Object::Set_Position(pos);
+	Object::Set_Scale(scl);
+	Object::Set_Rotation(rot);
 	m_Model = m_WorldMatrix = glm::mat4(1);
 	m_Forward = glm::vec3(0,0,-1);
 	m_Right = glm::vec3(1,0,0);
 	m_Up = glm::vec3(0,1,0);
 	m_Color = glm::vec3(1,1,1);
 	m_Parent = nullptr;
-
-	Set_Mesh(mesh);
-	Set_Material(material);
 
 	if(addToResources == true)
 		Resources->Objects.push_back(this);
@@ -24,6 +24,10 @@ Object::~Object()
 {
 }
 void Object::m_Calculate_Radius(){
+	if(m_Mesh == nullptr){
+		m_Radius = glm::vec3(0,0,0);
+		return;
+	}
 	m_Radius = m_Mesh->Radius() * m_Scale;
 }
 void Object::Translate(float x, float y, float z){ 

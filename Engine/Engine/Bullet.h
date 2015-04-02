@@ -1,23 +1,22 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#include <glm\glm.hpp>
-
 #include <Bullet\btBulletCollisionCommon.h>
 #include <Bullet\btBulletDynamicsCommon.h>
+
+#include "Engine_Renderer.h"
+#include "Engine_Resources.h"
+
 #include <Bullet\LinearMath\btIDebugDraw.h>
-
-#include <SFML\OpenGL.hpp>
-
 #include "GLDebugDrawer.h"
 
 class Bullet{
 	private:
-		btBroadphaseInterface* m_broadphase;					    // Build the broadphase
+		btBroadphaseInterface* m_broadphase;					  // Build the broadphase
 		btDefaultCollisionConfiguration* m_collisionConfiguration;// collision configuration
-		btCollisionDispatcher* m_dispatcher;					    // dispatcher
-		btSequentialImpulseConstraintSolver* m_solver;		    // The actual physics solver
-		btDiscreteDynamicsWorld* m_dynamicsWorld;				    // The world.
+		btCollisionDispatcher* m_dispatcher;					  // dispatcher
+		btSequentialImpulseConstraintSolver* m_solver;		      // The actual physics solver
+		btDiscreteDynamicsWorld* m_dynamicsWorld;				  // The world.
 
 		GLDebugDrawer* m_debugDrawer;
 
@@ -29,7 +28,7 @@ class Bullet{
 		void Add_Rigid_Body(btRigidBody*);
 
 		void Update(float dt);
-		void Render();
+		void Render(RENDER_TYPE);
 };
 extern Bullet* bullet;
 #endif

@@ -27,8 +27,8 @@ class Object{
 
 	public:
 		Object(
-				Mesh* = nullptr,
-				Material* = nullptr,
+				std::string = "",
+				std::string = "",
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
 			    glm::vec3 = glm::vec3(0,0,0),   //Rotation
@@ -42,9 +42,9 @@ class Object{
 		virtual void Scale(float,float,float); virtual void Scale(glm::vec3&);
 		virtual void Pitch(float); void Yaw(float); virtual void Roll(float);
 
-		void Set_Position(float,float,float); void Set_Position(glm::vec3&);
-		void Set_Rotation(float,float,float); void Set_Rotation(glm::vec3&);
-		void Set_Scale(float,float,float); void Set_Scale(glm::vec3&);
+		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3&);
+		virtual void Set_Rotation(float,float,float); virtual void Set_Rotation(glm::vec3&);
+		virtual void Set_Scale(float,float,float); virtual void Set_Scale(glm::vec3&);
 
 		void Add_Child(Object*);
 

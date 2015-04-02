@@ -33,8 +33,9 @@ void Renderer::Geometry_Pass(bool debug){
     glDisable(GL_BLEND);
 	for(auto object:Resources->Objects){
 		object->Render(m_Type);
-	}
+	}	
 	if(debug){
+		bullet->Render(RENDER_TYPE_DEFERRED);
 		GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
 		glUseProgram(shader);
 		for(auto light:Resources->Lights){
@@ -69,7 +70,7 @@ void Renderer::Render(bool debug){
 				object->Render();
 			}
 			if(debug)
-				bullet->Render();
+				bullet->Render(RENDER_TYPE_FORWARD);
 
 			break;
 		case RENDER_TYPE_DEFERRED:
