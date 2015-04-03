@@ -20,7 +20,7 @@ void Game::Init_Logic(){
 	Resources->Current_Camera()->LookAt(player,true);
 	player->Add_Child(Resources->Current_Camera());
 
-	PointLight* pL = new PointLight(glm::vec3(0,0,-8));
+	SunLight* sun = new SunLight(glm::vec3(0,0,-8));
 }
 void Game::Init_Resources()
 {

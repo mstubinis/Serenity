@@ -1,12 +1,15 @@
 #include "Mesh.h"
 #include "Engine_Resources.h"
 
+#include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
 Mesh::Mesh(int x, int y,int width, int height){
+	m_Collision = nullptr;
+
 	m_Points.push_back(glm::vec3(0,0,0));
 	m_Points.push_back(glm::vec3(width,height,0));
 	m_Points.push_back(glm::vec3(0,height,0));
@@ -70,6 +73,7 @@ Mesh::Mesh(std::string filename){
 	Init();
 }
 void Mesh::LoadFromFile(std::string filename){
+	m_Collision = nullptr;
 	assert(filename.length() >= 4);
 	std::string extention;
 	for(unsigned int i = filename.length() - 4; i < filename.length(); i++)
@@ -147,12 +151,17 @@ void Mesh::LoadFromPLY(std::string filename){
 	
 }
 void Mesh::LoadFromOBJ(std::string filename){
+	std::string colFile = filename.substr(0,filename.size()-4);
+	colFile += "Col.obj";
+	if(boost::filesystem::exists(colFile)){
+		m_Collision = Mesh::LoadColFromOBJ(colFile);
+	}
+
 	std::vector<glm::vec3> pointData;
 	std::vector<glm::vec2> uvData;
 	std::vector<glm::vec3> normalData;
 
 	std::vector<std::vector<glm::vec3>> listOfVerts;
-	m_Collision = new btConvexHullShape();
 
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
@@ -175,8 +184,6 @@ void Mesh::LoadFromOBJ(std::string filename){
 				float y1 = static_cast<float>(::atof(y.c_str()));
 				float z1 = static_cast<float>(::atof(z.c_str()));
 				pointData.push_back(glm::vec3(x1,y1,z1));
-				btVector3 pos = btVector3(x1,y1,z1);
-				m_Collision->addPoint(pos);
 			}
 			else if(line[1] == 't')//vertex uv
 				uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),1-static_cast<float>(::atof(y.c_str()))));
@@ -246,6 +253,34 @@ void Mesh::LoadFromOBJ(std::string filename){
 			GenerateTriangle(v1,v2,v3);
 		}
 	}
+}
+btConvexHullShape* Mesh::LoadColFromOBJ(std::string filename){
+	btConvexHullShape* collision = new btConvexHullShape();
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+
+	for(std::string line; std::getline(str, line, '\n');){
+		std::string x; std::string y; std::string z;
+		unsigned int whilespaceCount = 0;
+		if(line[0] == 'v'){ 
+			for(auto c:line){
+				if(c == ' ')                      whilespaceCount++;
+				else{
+					if(whilespaceCount == 1)      x += c;
+					else if(whilespaceCount == 2) y += c;
+					else if(whilespaceCount == 3) z += c;
+				}
+			}
+			if(line[1] == ' '){//vertex point
+				float x1 = static_cast<float>(::atof(x.c_str()));
+				float y1 = static_cast<float>(::atof(y.c_str()));
+				float z1 = static_cast<float>(::atof(z.c_str()));
+
+				btVector3 pos = btVector3(x1,y1,z1);
+				collision->addPoint(pos);
+			}
+		}
+	}
+	return collision;
 }
 Mesh::~Mesh(){
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)

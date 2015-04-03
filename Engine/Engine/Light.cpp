@@ -35,62 +35,55 @@ void Init_Quad(){
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
-Light::Light(LIGHT_TYPE type){
+SunLight::SunLight(glm::vec3 pos,std::string name,LIGHT_TYPE type):Object("DEBUGLight","",pos,glm::vec3(1,1,1),glm::vec3(0,0,0),name,false){
 	m_Type = type;
-    m_Color = glm::vec3(1,1,1);
+
     m_AmbientIntensity = 0.2f;
     m_DiffuseIntensity = 0.4f;
+	m_Parent = nullptr;
 
 	Resources->Lights.push_back(this);
 }
-Light::~Light(){
+SunLight::~SunLight(){
 }
-void Light::Translate(float x, float y, float z){ m_Position.x += x; m_Position.y += y; m_Position.z += z; }
-void Light::Translate(glm::vec3 translation){ Light::Translate(translation.x,translation.y,translation.z); }
-void Light::Set_Position(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; }
-void Light::Set_Position(glm::vec3 position){ Light::Set_Position(position.x,position.y,position.z); }
-void Light::Set_Color(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
-void Light::Set_Color(glm::vec3 color){ Light::Set_Color(color.x,color.y,color.z); }
-void Light::Update(float dt)
-{
+void SunLight::Update(float dt){
+	Object::Update(dt);
 }
-void Light::Render(LIGHT_TYPE type,GLuint shader){ if(type != m_Type) return; }
-void Light::RenderDebug(GLuint shader){
-	glm::mat4 model = glm::mat4(1);
-	model = glm::translate(model, m_Position);
+void SunLight::Render(GLuint shader){ 
+	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
-	glm::mat4 MVP = Resources->Current_Camera()->Calculate_Projection(model);
+	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
+    glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
+    glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
+	glm::vec3 pos = Position();
+	glUniform3f(glGetUniformLocation(shader,"gPosition"), pos.x, pos.y, pos.z);
+
+    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
+    glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 0.6f);
+
+	Init_Quad();
+}
+void SunLight::RenderDebug(GLuint shader){
+	glm::mat4 MVP = Resources->Current_Camera()->Calculate_Projection(m_Model);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(MVP));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),1,1,1);
-	Resources->Get_Mesh("DEBUGLight")->Render();
+	m_Mesh->Render();
 }
-DirectionalLight::DirectionalLight(glm::vec3 dir): Light(LIGHT_TYPE_DIRECTIONAL){
+DirectionalLight::DirectionalLight(glm::vec3 dir): SunLight(glm::vec3(0,0,0),"Directional Light",LIGHT_TYPE_DIRECTIONAL){
 	m_Direction = dir;
 }
 DirectionalLight::~DirectionalLight()
 {
 }
-void DirectionalLight::Render(LIGHT_TYPE type, GLuint shader){
-	if(type != m_Type) return;
+void DirectionalLight::Render(GLuint shader){
+	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
-	struct {
-		GLuint Color;
-		GLuint AmbientIntensity;
-		GLuint DiffuseIntensity;
-		GLuint Direction;
-	} m_DirLightLocation;
-
-	m_DirLightLocation.Color = glGetUniformLocation(shader,"gDirectionalLight.Base.Color");
-	m_DirLightLocation.AmbientIntensity = glGetUniformLocation(shader,"gDirectionalLight.Base.AmbientIntensity");
-	m_DirLightLocation.DiffuseIntensity = glGetUniformLocation(shader,"gDirectionalLight.Base.DiffuseIntensity");
-	m_DirLightLocation.Direction = glGetUniformLocation(shader,"gDirectionalLight.Direction");
-
-	glUniform3f(m_DirLightLocation.Color, m_Color.x, m_Color.y, m_Color.z);
-	glUniform3f(m_DirLightLocation.Direction, m_Direction.x, m_Direction.y,m_Direction.z);
-    glUniform1f(m_DirLightLocation.AmbientIntensity, m_AmbientIntensity);
-    glUniform1f(m_DirLightLocation.DiffuseIntensity, m_DiffuseIntensity);
+	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
+	glUniform3f(glGetUniformLocation(shader,"gDirection"), m_Direction.x, m_Direction.y,m_Direction.z);
+    glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
+    glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
 
     glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
     glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 0.6f);
@@ -98,61 +91,39 @@ void DirectionalLight::Render(LIGHT_TYPE type, GLuint shader){
 	Init_Quad();
 }
 
-PointLight::PointLight(glm::vec3 pos): Light(LIGHT_TYPE_POINT){
-	m_Position = pos;
+PointLight::PointLight(glm::vec3 pos): SunLight(pos,"Point Light",LIGHT_TYPE_POINT){
 	m_Constant = 0.3f;
-	m_Linear = 0.01f;
+	m_Linear = 0.2f;
 	m_Exp = 0.3f;
 }
 PointLight::~PointLight(){
 }
-void PointLight::Render(LIGHT_TYPE type,GLuint shader){
-	if(type != m_Type) return;
+void PointLight::Render(GLuint shader){
+	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
-	struct {
-		GLuint Color;
-		GLuint AmbientIntensity;
-		GLuint DiffuseIntensity;
-		GLuint Position;
-		struct {
-			GLuint Constant;
-			GLuint Linear;
-			GLuint Exp;
-		} Atten;
-	} m_pointLightLocation;
-	for (auto light:Resources->Lights) {
+	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
+    glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
+    glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
 
-		m_pointLightLocation.Color = glGetUniformLocation(shader,"gPointLight.Base.Color");
-		m_pointLightLocation.AmbientIntensity = glGetUniformLocation(shader,"gPointLight.Base.AmbientIntensity");
-		m_pointLightLocation.Position = glGetUniformLocation(shader,"gPointLight.Position");
-		m_pointLightLocation.DiffuseIntensity = glGetUniformLocation(shader,"gPointLight.Base.DiffuseIntensity");
-		m_pointLightLocation.Atten.Constant = glGetUniformLocation(shader,"gPointLight.Atten.Constant");
-		m_pointLightLocation.Atten.Linear = glGetUniformLocation(shader,"gPointLight.Atten.Linear");
-        m_pointLightLocation.Atten.Exp = glGetUniformLocation(shader,"gPointLight.Atten.Exp");
+	glm::vec3 pos = Position();
+	glUniform3f(glGetUniformLocation(shader,"gPosition"), pos.x, pos.y, pos.z);
 
-		glUniform3f(m_pointLightLocation.Color, m_Color.x, m_Color.y, m_Color.z);
-        glUniform1f(m_pointLightLocation.AmbientIntensity, m_AmbientIntensity);
-        glUniform1f(m_pointLightLocation.DiffuseIntensity, m_DiffuseIntensity);
-		glUniform3f(m_pointLightLocation.Position, m_Position.x, m_Position.y, m_Position.z);
-		glUniform1f(m_pointLightLocation.Atten.Constant, m_Constant);
-        glUniform1f(m_pointLightLocation.Atten.Linear, m_Linear);
-        glUniform1f(m_pointLightLocation.Atten.Exp, m_Exp);
+	glUniform1f(glGetUniformLocation(shader,"gConstant"), m_Constant);
+    glUniform1f(glGetUniformLocation(shader,"gLinear"), m_Linear);
+    glUniform1f(glGetUniformLocation(shader,"gExp"), m_Exp);
 
-        glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
-        glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 0.6f);
+    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
+    glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 0.6f);
 
-		Init_Quad();
-   	}
+	Init_Quad();
 }
-
-SpotLight::SpotLight(glm::vec3 pos): PointLight(pos)
-{
+SpotLight::SpotLight(glm::vec3 pos): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);
     m_Cutoff = 0;
 }
 SpotLight::~SpotLight()
 {
 }
-void SpotLight::Render(LIGHT_TYPE type,GLuint shader)
+void SpotLight::Render(GLuint shader)
 {
 }

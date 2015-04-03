@@ -53,9 +53,7 @@ void Renderer::Lighting_Pass(){
    	glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT);
 
-	this->Pass_Light_Point();
-	this->Pass_Light_Dir();
-	this->Pass_Light_Spot();
+	this->Pass_Lighting();
 }
 void Renderer::Set_Render_Type(RENDER_TYPE type){ m_Type = type; }
 void Renderer::Render(bool debug){
@@ -100,8 +98,8 @@ void Renderer::Render(bool debug){
 			break;
 	}
 }
-void Renderer::Pass_Light_Point(){
-	GLuint shader = Resources->Get_Shader_Program("Deferred_Light_Point")->Get_Shader_Program();
+void Renderer::Pass_Lighting(){
+	GLuint shader = Resources->Get_Shader_Program("Deferred_Light")->Get_Shader_Program();
 	glm::vec3 camPos = Resources->Current_Camera()->Position();
 	glUseProgram(shader);
 
@@ -109,22 +107,18 @@ void Renderer::Pass_Light_Point(){
 	glUniform3f(glGetUniformLocation(shader,"gEyeWorldPos"), camPos.x, camPos.y, camPos.z);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_ViewProjInverted()));
 
-	GLuint m_textureID[2];
-	m_textureID[0] = glGetUniformLocation(shader,"gNormalMap");
-	m_textureID[1] = glGetUniformLocation(shader,"gPositionMap");
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_NORMAL));
+	glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 0 );
 
-		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_NORMAL));
-		glUniform1i( m_textureID[0], 0 );
-
-		glActiveTexture(GL_TEXTURE1);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
-		glUniform1i( m_textureID[1], 1 );
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
+	glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
 
 	for (auto light:Resources->Lights) {
-		light->Render(LIGHT_TYPE_POINT,shader);
+		light->Render(shader);
    	}
 
 	// Reset OpenGL state
@@ -135,43 +129,7 @@ void Renderer::Pass_Light_Point(){
 	}
 	glUseProgram(0);
 }
-void Renderer::Pass_Light_Dir(){
-	GLuint shader = Resources->Get_Shader_Program("Deferred_Light_Dir")->Get_Shader_Program();
-	glm::vec3 camPos = Resources->Current_Camera()->Position();
-	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
-	glUniform3f(glGetUniformLocation(shader,"gEyeWorldPos"), camPos.x, camPos.y, camPos.z);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_ViewProjInverted()));
-
-	GLuint m_textureID[2];
-	m_textureID[0] = glGetUniformLocation(shader,"gNormalMap");
-	m_textureID[1] = glGetUniformLocation(shader,"gPositionMap");
-
-		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_NORMAL));
-		glUniform1i( m_textureID[0], 0 );
-
-		glActiveTexture(GL_TEXTURE1);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
-		glUniform1i( m_textureID[1], 1);
-
-	for (auto light:Resources->Lights) {
-		light->Render(LIGHT_TYPE_DIRECTIONAL,shader);
-   	}
-	// Reset OpenGL state
-	for(unsigned int i = 0; i < 2; i++){
-		glActiveTexture(GL_TEXTURE0 + i);
-		glDisable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	glUseProgram(0);
-}
-void Renderer::Pass_Light_Spot()
-{
-}
 void Renderer::Pass_SSAO(){
 	glClear(GL_COLOR_BUFFER_BIT);
 

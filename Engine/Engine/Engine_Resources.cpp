@@ -21,8 +21,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Shader_Program("AS_SkyFromSpace","Shaders\\AS_skyFromSpace_vert.glsl","Shaders\\AS_skyFromSpace_frag.glsl");
 	Add_Shader_Program("AS_GroundFromSpace","Shaders\\AS_groundFromSpace_vert.glsl","Shaders\\AS_groundFromSpace_frag.glsl");
 
-	Add_Shader_Program("Deferred_Light_Point","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_point_frag.glsl");
-	Add_Shader_Program("Deferred_Light_Dir","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_dir_frag.glsl");
+	Add_Shader_Program("Deferred_Light","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_frag.glsl");
 
 	Add_Mesh("Default","Models\\scar.obj");
 	Add_Mesh("Skybox","Models\\Skybox.ply");

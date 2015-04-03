@@ -48,19 +48,25 @@ void Camera::LookAt(Object* target, bool targetUp){
 	if(!targetUp) m_View = glm::lookAt(m_Position,target->Position(),m_Up);
 	else m_View = glm::lookAt(m_Position,target->Position(),target->Up());
 }
-void Camera::Set_View(){ m_View = glm::lookAt(m_Position,m_Position + m_Forward,m_Up); }
+void Camera::Set_View(){
+	glm::vec3 p = Position();
+	m_View = glm::lookAt(p,p + m_Forward,m_Up); 
+}
 glm::mat4 Camera::Calculate_Projection(glm::mat4& modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ModelView(glm::mat4& modelMatrix){ return m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::Update(float dt){
 	if(m_Parent != nullptr){
-		m_Model = m_Parent->Model();
-		m_Model = glm::translate(m_Model, m_Position);
-
+		glm::mat4 newModel = m_Parent->Model();
+		newModel = glm::translate(newModel, m_Position);
+		m_Model = newModel;
 		LookAt(Position(),m_Parent->Position(), m_Parent->Up());
 	}
 	else{
-		m_Model = glm::translate(m_Model, m_Position);
+		glm::mat4 newModel = glm::mat4(1);
+		newModel = glm::mat4(1);
+		newModel = glm::translate(newModel, m_Position);
+		m_Model = newModel;
 		Set_View();
 	}
 }

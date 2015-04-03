@@ -89,11 +89,11 @@ ObjectDynamic::~ObjectDynamic(){
 void ObjectDynamic::Update(float dt){
 	m_RigidBody->activate();
 
-	m_RigidBody->getCenterOfMassTransform().getOpenGLMatrix(glm::value_ptr(m_Model));
-	glm::mat4 parent = glm::mat4(1);
+	m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(m_Model));
+	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr)
-		parent = m_Parent->Model();
-	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(parent * m_Model);
+		newModel = m_Parent->Model();
+	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(newModel * m_Model);
 }
 void ObjectDynamic::Render(Mesh* mesh, Material* material,RENDER_TYPE rType){
 	Object::Render(mesh,material,rType);

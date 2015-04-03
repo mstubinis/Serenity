@@ -69,7 +69,7 @@ void Object::Roll(float amount){
 void Object::Update(float dt){
 	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr)
-		m_Model = m_Parent->m_Model;
+		newModel = m_Parent->m_Model;
 
 	newModel = glm::translate(newModel, m_Position);
 	newModel *= glm::transpose(glm::lookAt(glm::vec3(0,0,0),m_Forward,m_Up));
@@ -104,8 +104,10 @@ void Object::Add_Child(Object* child){
 	child->m_Parent = this;
 	this->m_Children.push_back(child);
 }
+void Object::Set_Color(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
+void Object::Set_Color(glm::vec3& color){ Object::Set_Color(color.x,color.y,color.z); }
 #pragma region Getters
-glm::vec3 Object::Position() { return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+glm::vec3 Object::Position() const { return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 glm::vec3 Object::Scale() { return m_Scale; }
 glm::vec3 Object::Forward() { return m_Forward; }
 glm::vec3 Object::Right() { return m_Right; }

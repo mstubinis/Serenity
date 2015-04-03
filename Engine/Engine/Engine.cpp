@@ -115,6 +115,9 @@ void Engine::EngineClass::Update(float dt,sf::Event e){
 
 	for(auto object:Resources->Objects)
 		object->Update(dt);
+	for(auto light:Resources->Lights)
+		light->Update(dt);
+
 	bullet->Update(dt);
 	renderer->Update(dt);
 

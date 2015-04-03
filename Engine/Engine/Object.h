@@ -44,6 +44,7 @@ class Object{
 
 		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3&);
 		virtual void Set_Scale(float,float,float); virtual void Set_Scale(glm::vec3&);
+		virtual void Set_Color(float,float,float); virtual void Set_Color(glm::vec3&);
 
 		void Add_Child(Object*);
 
@@ -52,7 +53,7 @@ class Object{
 		virtual void Render(RENDER_TYPE = RENDER_TYPE_FORWARD);
 
 		#pragma region Getters
-		virtual glm::vec3 Position(); 
+		virtual glm::vec3 Position() const; 
 		virtual glm::vec3 Scale();
 		virtual glm::vec3 Forward(); 
 		virtual glm::vec3 Right(); 

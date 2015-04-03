@@ -211,12 +211,6 @@
     <None Include="Shaders\deferred_lighting_vert.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
     </None>
-    <None Include="Shaders\deferred_lighting_point_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
-    </None>
-    <None Include="Shaders\deferred_lighting_dir_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
-    </None>
     <None Include="Shaders\deferred_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering</Filter>
     </None>
@@ -249,6 +243,9 @@
     </None>
     <None Include="Shaders\AS_skyFromSpace_vert.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
+    </None>
+    <None Include="Shaders\deferred_lighting_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
     </None>
   </ItemGroup>
 </Project>

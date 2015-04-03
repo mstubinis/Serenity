@@ -44,6 +44,8 @@ class Mesh{
 		void LoadFromPLY(std::string);
 		void LoadFromOBJ(std::string);
 
+		btConvexHullShape* LoadColFromOBJ(std::string);
+
 		void Init();
 	public:
 		Mesh(int x, int y, int width, int height);

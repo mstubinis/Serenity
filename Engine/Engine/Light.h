@@ -2,42 +2,30 @@
 #define LIGHT_H
 #include "Object.h"
 
-enum LIGHT_TYPE {LIGHT_TYPE_POINT,LIGHT_TYPE_DIRECTIONAL, LIGHT_TYPE_SPOT};
+enum LIGHT_TYPE {LIGHT_TYPE_SUN,LIGHT_TYPE_POINT,LIGHT_TYPE_DIRECTIONAL, LIGHT_TYPE_SPOT};
 
-class Light{
+class SunLight: public Object{
 	protected:
 		LIGHT_TYPE m_Type;
-		glm::vec3 m_Position;
-		glm::vec3 m_Forward, m_Right, m_Up;
-
-		glm::vec3 m_Color;
 		float m_AmbientIntensity, m_DiffuseIntensity;
-
 	public:
-		Light(LIGHT_TYPE=LIGHT_TYPE_POINT);
-		~Light();
-
-		void Translate(float,float,float); void Translate(glm::vec3);
-		void Set_Position(float,float,float); void Set_Position(glm::vec3);
-		void Set_Color(float,float,float); void Set_Color(glm::vec3);
+		SunLight(glm::vec3 = glm::vec3(0,0,0),std::string = "Sun Light",LIGHT_TYPE=LIGHT_TYPE_SUN);
+		~SunLight();
 
 		void Update(float);
-		virtual void Render(LIGHT_TYPE,GLuint);
+		virtual void Render(GLuint);
 		void RenderDebug(GLuint);
-
-		const glm::vec3 Position() const { return m_Position; }
-		const glm::vec3 Color() const { return m_Color; }
 };
-class DirectionalLight: public Light{
+class DirectionalLight: public SunLight{
 	private:
         glm::vec3 m_Direction;
 	public:
 		DirectionalLight(glm::vec3 = glm::vec3(0,0,-1));
 		~DirectionalLight();
 
-		void Render(LIGHT_TYPE,GLuint);
+		void Render(GLuint);
 };
-class PointLight: public Light{
+class PointLight: public SunLight{
 	protected:
         float m_Constant, m_Linear, m_Exp;
 
@@ -45,9 +33,9 @@ class PointLight: public Light{
 		PointLight(glm::vec3 = glm::vec3(0,0,0));
 		~PointLight();
 
-		void Render(LIGHT_TYPE,GLuint);
+		void Render(GLuint);
 };
-class SpotLight: public PointLight{
+class SpotLight: public SunLight{
 	private:
 		glm::vec3 m_Direction;
 		float m_Cutoff;
@@ -56,6 +44,6 @@ class SpotLight: public PointLight{
 		SpotLight(glm::vec3);
 		~SpotLight();
 
-		void Render(LIGHT_TYPE,GLuint);
+		void Render(GLuint);
 };
 #endif

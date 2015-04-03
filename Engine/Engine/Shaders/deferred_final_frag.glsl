@@ -17,13 +17,11 @@ void main(){
 
 	if(lighting.r < 0.00001 && lighting.g < 0.00001 && lighting.b < 0.00001)
 		gl_FragColor = image;
-		//gl_FragColor = AS;
 	else{
 		vec4 light = max(vec4(0.05),lighting*ssao);
 		vec4 bloom = vec4(glow.r);
 		vec4 lightAndBloom = max(light,bloom);
 		vec4 Final = image*lightAndBloom;
 		gl_FragColor = Final;
-		//gl_FragColor = AS;
 	}
 }

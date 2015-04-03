@@ -19,9 +19,7 @@ class Renderer{
 
 		void Init_Quad();
 
-		void Pass_Light_Point();
-		void Pass_Light_Dir();
-		void Pass_Light_Spot();
+		void Pass_Lighting();
 
 		void Pass_SSAO();
 		void Pass_Blur_Horizontal(GLuint texture);
