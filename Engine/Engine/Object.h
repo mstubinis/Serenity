@@ -43,7 +43,6 @@ class Object{
 		virtual void Pitch(float); void Yaw(float); virtual void Roll(float);
 
 		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3&);
-		virtual void Set_Rotation(float,float,float); virtual void Set_Rotation(glm::vec3&);
 		virtual void Set_Scale(float,float,float); virtual void Set_Scale(glm::vec3&);
 
 		void Add_Child(Object*);
@@ -53,13 +52,16 @@ class Object{
 		virtual void Render(RENDER_TYPE = RENDER_TYPE_FORWARD);
 
 		#pragma region Getters
-		glm::vec3 Position(); const glm::vec3& Rotation() const; const glm::vec3& Scale() const;
-		const glm::vec3& Forward() const; const glm::vec3& Right() const; const glm::vec3& Up() const;
+		virtual glm::vec3 Position(); 
+		virtual glm::vec3 Scale();
+		virtual glm::vec3 Forward(); 
+		virtual glm::vec3 Right(); 
+		virtual glm::vec3 Up();
 		const glm::vec3& Radius() const;
 		const glm::vec3& Color() const;
 		const glm::mat4& Model() const;
 		const glm::mat4& World() const;
-		std::string Name() const;
+		const std::string Name() const;
 		const Object* Parent() const;
 		std::vector<Object*> Children() const;
 		#pragma endregion

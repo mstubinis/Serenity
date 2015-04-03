@@ -41,13 +41,28 @@ void Camera::Set_Aspect_Ratio(float ratio){
 	if(m_Type == CAMERA_TYPE_PERSPECTIVE)
 		Set_Perspective_Projection();
 }
+void Camera::LookAt(glm::vec3& target){ m_View = glm::lookAt(m_Position,target,m_Up); }
+void Camera::LookAt(glm::vec3& target,glm::vec3& up){ m_View = glm::lookAt(m_Position,target,up); }
+void Camera::LookAt(glm::vec3& eye,glm::vec3& target,glm::vec3& up){ m_View = glm::lookAt(eye,target,up); }
+void Camera::LookAt(Object* target, bool targetUp){
+	if(!targetUp) m_View = glm::lookAt(m_Position,target->Position(),m_Up);
+	else m_View = glm::lookAt(m_Position,target->Position(),target->Up());
+}
 void Camera::Set_View(){ m_View = glm::lookAt(m_Position,m_Position + m_Forward,m_Up); }
-void Camera::Set_View(glm::vec3 eyeVec, glm::vec3 centerVec, glm::vec3 upVec){ m_View = glm::lookAt(eyeVec,centerVec,upVec); }
-glm::mat4 Camera::Calculate_Projection(glm::mat4 modelMatrix){ return m_Projection * m_View * modelMatrix; }
-glm::mat4 Camera::Calculate_ModelView(glm::mat4 modelMatrix){ return m_View * modelMatrix; }
+glm::mat4 Camera::Calculate_Projection(glm::mat4& modelMatrix){ return m_Projection * m_View * modelMatrix; }
+glm::mat4 Camera::Calculate_ModelView(glm::mat4& modelMatrix){ return m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::Update(float dt){
-	Set_View();
+	if(m_Parent != nullptr){
+		m_Model = m_Parent->Model();
+		m_Model = glm::translate(m_Model, m_Position);
+
+		LookAt(Position(),m_Parent->Position(), m_Parent->Up());
+	}
+	else{
+		m_Model = glm::translate(m_Model, m_Position);
+		Set_View();
+	}
 }
 void Camera::Render(Mesh* mesh, Material* material){}
 void Camera::Render(){ Render(nullptr,nullptr); }
@@ -68,4 +83,4 @@ float Camera::Get_Angle_Between(Object* other) const{
 		return 0;
 	return angle;
 }
-glm::vec3 Camera::Position() const { return m_Position; }
+glm::vec3 Camera::Position() const { return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }

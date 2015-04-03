@@ -3,7 +3,7 @@
 #include "Engine_Events.h"
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
-	m_DrawDebug = true;
+	m_DrawDebug = false;
 	INIT_Window(name,width,height);
 	INIT_Game();
 

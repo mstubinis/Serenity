@@ -5,17 +5,18 @@
 Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, glm::vec3 rot,std::string name,bool addToResources){
 	Set_Mesh(Resources->Get_Mesh(mesh));
 	Set_Material(Resources->Get_Material(mat));
+	m_Parent = nullptr;
 
 	m_Name = name;
-	Object::Set_Position(pos);
-	Object::Set_Scale(scl);
-	Object::Set_Rotation(rot);
 	m_Model = m_WorldMatrix = glm::mat4(1);
 	m_Forward = glm::vec3(0,0,-1);
 	m_Right = glm::vec3(1,0,0);
 	m_Up = glm::vec3(0,1,0);
 	m_Color = glm::vec3(1,1,1);
-	m_Parent = nullptr;
+
+	Object::Set_Position(pos);
+	Object::Set_Scale(scl);
+	Object::Rotate(rot.x,rot.y,rot.z);
 
 	if(addToResources == true)
 		Resources->Objects.push_back(this);
@@ -42,8 +43,6 @@ void Object::Scale(float x, float y, float z){ m_Scale.x += x * Resources->dt; m
 void Object::Scale(glm::vec3& scale){ Scale(scale.x,scale.y,scale.z); }
 void Object::Set_Position(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; }
 void Object::Set_Position(glm::vec3& position){ Set_Position(position.x,position.y,position.z); }
-void Object::Set_Rotation(float x, float y, float z){ m_Rotation.x = x; m_Rotation.y = y; m_Rotation.z = z; }
-void Object::Set_Rotation(glm::vec3& rotation){ Set_Rotation(rotation.x,rotation.y,rotation.z); }
 void Object::Set_Scale(float x, float y, float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_Calculate_Radius(); }
 void Object::Set_Scale(glm::vec3& scale){ Set_Scale(scale.x,scale.y,scale.z); }
 void Object::Pitch(float amount){
@@ -68,13 +67,15 @@ void Object::Roll(float amount){
 	m_Right = glm::normalize(-glm::cross(m_Up,m_Forward));
 }
 void Object::Update(float dt){
-	m_Model = glm::mat4(1);
+	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr)
 		m_Model = m_Parent->m_Model;
 
-	m_Model = glm::translate(m_Model, m_Position);
-	m_Model *= glm::transpose(glm::lookAt(glm::vec3(0,0,0),m_Forward,m_Up));
-	m_Model = glm::scale(m_Model,m_Scale);
+	newModel = glm::translate(newModel, m_Position);
+	newModel *= glm::transpose(glm::lookAt(glm::vec3(0,0,0),m_Forward,m_Up));
+	newModel = glm::scale(newModel,m_Scale);
+
+	m_Model = newModel;
 
 	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(m_Model);
 }
@@ -105,16 +106,15 @@ void Object::Add_Child(Object* child){
 }
 #pragma region Getters
 glm::vec3 Object::Position() { return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
-const glm::vec3& Object::Rotation() const { return m_Rotation; }
-const glm::vec3& Object::Scale() const { return m_Scale; }
-const glm::vec3& Object::Forward() const { return m_Forward; }
-const glm::vec3& Object::Right() const { return m_Right; }
-const glm::vec3& Object::Up() const { return m_Up; }
+glm::vec3 Object::Scale() { return m_Scale; }
+glm::vec3 Object::Forward() { return m_Forward; }
+glm::vec3 Object::Right() { return m_Right; }
+glm::vec3 Object::Up() { return m_Up; }
 const glm::vec3& Object::Radius() const { return m_Radius; }
 const glm::vec3& Object::Color() const { return m_Color; }
 const glm::mat4& Object::Model() const { return m_Model; }
 const glm::mat4& Object::World() const { return m_WorldMatrix; }
-std::string Object::Name() const { return m_Name; }
+const std::string Object::Name() const { return m_Name; }
 const Object* Object::Parent() const { return m_Parent; }
 std::vector<Object*> Object::Children() const { return m_Children; }
 #pragma endregion
