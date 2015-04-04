@@ -12,11 +12,11 @@ const int GBUFFER_TYPES[] =		       {GL_RGBA8,		      //diffuse
 										GL_DEPTH_COMPONENT24};//depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			  //diffuse
-							            GL_RGB,			  //normals
-								        GL_RGB,			  //lighting
-								        GL_RGBA,		       //bloom + lightmap (1 channel)
-								        GL_RED,              //ssao
-								        GL_RGBA,			 //free1
+							            GL_RGB,			      //normals
+								        GL_RGB,			      //lighting
+								        GL_RGBA,		      //bloom + lightmap (1 channel)
+								        GL_RED,               //ssao
+								        GL_RGBA,			  //free1
 								        GL_DEPTH_COMPONENT};  //depth
 
 const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,     //diffuse

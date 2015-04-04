@@ -16,9 +16,6 @@ Renderer::Renderer(){
 Renderer::~Renderer(){
 	delete m_gBuffer;
 }
-void Renderer::Update(float dt){
-
-}
 void Renderer::Geometry_Pass(bool debug){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

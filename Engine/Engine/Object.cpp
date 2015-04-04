@@ -28,9 +28,7 @@ void Object::m_Calculate_Radius(){
 	}
 	m_Radius = m_Mesh->Radius() * m_Scale;
 }
-glm::vec3 Object::Forward(){
-	return glm::normalize(glm::cross(Right(),Up()));
-}
+glm::vec3 Object::Forward(){ return glm::normalize(glm::cross(Right(),Up())); }
 glm::vec3 Object::Right(){
 	float x = m_Orientation.x;
 	float y = m_Orientation.y;
@@ -55,7 +53,14 @@ void Object::Translate(float x, float y, float z){
 	m_Position += Up() * (y * Resources->dt);
 }
 void Object::Translate(glm::vec3& translation){ Translate(translation.x,translation.y,translation.z); }
-void Object::Rotate(float x, float y, float z){ Pitch(x); Yaw(y); Roll(z); }
+void Object::Rotate(float x, float y, float z){ 
+	float threshold = 0.025f;
+	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
+		return;
+	Pitch(x); 
+	Yaw(y); 
+	Roll(z); 
+}
 void Object::Rotate(glm::vec3& rotation){ Rotate(rotation.x,rotation.y,rotation.z); }
 void Object::Scale(float x, float y, float z){ m_Scale.x += x * Resources->dt; m_Scale.y += y * Resources->dt; m_Scale.z += z * Resources->dt; m_Calculate_Radius(); }
 void Object::Scale(glm::vec3& scale){ Scale(scale.x,scale.y,scale.z); }
@@ -63,15 +68,9 @@ void Object::Set_Position(float x, float y, float z){ m_Position.x = x; m_Positi
 void Object::Set_Position(glm::vec3& position){ Set_Position(position.x,position.y,position.z); }
 void Object::Set_Scale(float x, float y, float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_Calculate_Radius(); }
 void Object::Set_Scale(glm::vec3& scale){ Set_Scale(scale.x,scale.y,scale.z); }
-void Object::Pitch(float amount){
-	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0)));
-}
-void Object::Yaw(float amount){
-	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(0,1,0)));
-}
-void Object::Roll(float amount){
-	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(amount,glm::vec3(0,0,1)));
-}
+void Object::Pitch(float amount){ m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0))); }
+void Object::Yaw(float amount){ m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(0,1,0))); }
+void Object::Roll(float amount){ m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(amount,glm::vec3(0,0,1))); }
 void Object::Update(float dt){
 	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr){

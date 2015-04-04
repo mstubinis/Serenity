@@ -112,16 +112,13 @@ void Engine::EngineClass::Update(float dt,sf::Event e){
 	}
 
 	game->Update(dt);
-
 	for(auto object:Resources->Objects)
 		object->Update(dt);
 	for(auto light:Resources->Lights)
 		light->Update(dt);
+	Mouse_Difference *= (0.975f * (1-dt));
 
 	bullet->Update(dt);
-	renderer->Update(dt);
-
-	Mouse_Difference *= (0.975f * (1-dt));
 }
 void Engine::EngineClass::Render(){
 	renderer->Render(m_DrawDebug);

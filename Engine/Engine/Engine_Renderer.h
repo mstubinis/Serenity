@@ -20,7 +20,6 @@ class Renderer{
 		Renderer();
 		~Renderer();
 
-		void Update(float);
 		void Render(bool debug = false);
 
 		void Geometry_Pass(bool debug);

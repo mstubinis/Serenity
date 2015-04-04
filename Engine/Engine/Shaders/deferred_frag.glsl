@@ -39,9 +39,9 @@ vec3 CalcBumpedNormal(){
 
 void main(){
 	if(DiffuseMapEnabled == 1)
-		DiffuseOut = texture(DiffuseMap, UV) * vec4(Object_Color.xyz,1);
+		DiffuseOut = texture(DiffuseMap, UV) * vec4(Object_Color,1);
 	else
-		DiffuseOut = vec4(0);
+		DiffuseOut = vec4(Object_Color,1);
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1)

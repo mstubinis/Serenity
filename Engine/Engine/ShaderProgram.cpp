@@ -14,6 +14,3 @@ ShaderP::ShaderP(std::string vs, std::string ps){
 ShaderP::~ShaderP(){
 	glDeleteShader(m_Shader);
 }
-std::string ShaderP::Vertex_Shader()const { return m_VertexShader; }
-std::string ShaderP::Pixel_Shader()const { return m_PixelShader; }
-GLuint ShaderP::Get_Shader_Program()const { return m_Shader; }
