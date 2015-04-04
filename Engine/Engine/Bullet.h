@@ -4,7 +4,6 @@
 #include <Bullet\btBulletCollisionCommon.h>
 #include <Bullet\btBulletDynamicsCommon.h>
 
-#include "Engine_Renderer.h"
 #include "Engine_Resources.h"
 
 #include <Bullet\LinearMath\btIDebugDraw.h>
@@ -28,7 +27,7 @@ class Bullet{
 		void Add_Rigid_Body(btRigidBody*);
 
 		void Update(float dt);
-		void Render(RENDER_TYPE);
+		void Render();
 };
 extern Bullet* bullet;
 #endif

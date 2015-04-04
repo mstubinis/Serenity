@@ -2,9 +2,9 @@
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
 
-Planet::Planet(std::string mat, glm::vec3 pos, glm::vec3 scl, glm::vec3 rot, std::string name, bool add):Object("Planet",mat,pos,scl,rot,name,add)
-{
+Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos, glm::vec3 scl, std::string name, bool add):Object("Planet",mat,pos,scl,name,add){
 	m_AtmosphereHeight = 0.025f;
+	m_Type = type;
 }
 Planet::~Planet()
 {
@@ -13,7 +13,7 @@ void Planet::Update(float dt)
 {
 	Object::Update(dt);
 }
-void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type){
+void Planet::Render(Mesh* mesh, Material* mat,Planet* star,bool debug){
 	if(mesh == nullptr)
 		return;
 
@@ -43,7 +43,7 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type){
 	glm::vec3 camPos = Resources->Current_Camera()->Position() - Position();
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
-	glm::vec3 lightDir = Resources->Lights.at(0)->Position() - Position();
+	glm::vec3 lightDir = star->Position() - Position();
 	lightDir = glm::normalize(lightDir);
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
@@ -149,6 +149,6 @@ void Planet::Render(Mesh* mesh, Material* mat,RENDER_TYPE type){
 	glCullFace(GL_BACK);
 	glDisable(GL_BLEND);
 }
-void Planet::Render(RENDER_TYPE type){
-	this->Render(m_Mesh,m_Material,type);
+void Planet::Render(Planet* star,bool debug){
+	this->Render(m_Mesh,m_Material,star,debug);
 }

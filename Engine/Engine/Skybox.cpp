@@ -3,7 +3,7 @@
 #include "ShaderProgram.h"
 #include <SOIL\SOIL.h>
 
-Skybox::Skybox(std::string name): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Skybox",true){
+Skybox::Skybox(std::string name): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Skybox",true){
 	m_Position = glm::vec3(0,0,0);
 	m_Scale = glm::vec3(999,999,999);
 	m_WorldMatrix = m_Model = glm::mat4(1);
@@ -36,7 +36,7 @@ void Skybox::Update(float dt){
 
 	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(m_Model);
 }
-void Skybox::Render(RENDER_TYPE rType){
+void Skybox::Render(bool debug){
 	glDepthMask (GL_FALSE);
 	glUseProgram( m_ShaderProgram );
 

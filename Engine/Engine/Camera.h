@@ -35,8 +35,8 @@ class Camera: public Object{
 		void Set_Ortho_Projection(float,float,float,float);
 
 		void Update(float);
-		void Render(Mesh*,Material*);
-		void Render();
+		void Render(Mesh*,Material*,bool=false);
+		void Render(bool=false);
 
 		void LookAt(glm::vec3&);  
 		void LookAt(glm::vec3&,glm::vec3&); 
@@ -52,7 +52,7 @@ class Camera: public Object{
 		glm::mat4 Projection() const;
 		glm::mat4 View() const;
 
-		float Get_Angle_Between(Object*) const;
+		float Get_Angle_Between(Object*);
 
 };
 #endif

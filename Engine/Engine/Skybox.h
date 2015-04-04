@@ -20,6 +20,6 @@ class Skybox: public Object{
 		~Skybox();
 
 		void Update(float);
-		void Render(RENDER_TYPE rType = RENDER_TYPE_FORWARD);
+		void Render(bool=false);
 };
 #endif

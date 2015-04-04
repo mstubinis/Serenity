@@ -4,7 +4,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 
-Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Camera"){//create a perspective camera
+Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_ClipStart = clipStartVal;
@@ -17,7 +17,7 @@ Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float c
 	m_Friction = 0.001f;
 	Set_View();
 }
-Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),glm::vec3(0,0,0),"Camera"){//create an orthographic camera
+Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_ClipStart = clipStartVal;
@@ -41,43 +41,50 @@ void Camera::Set_Aspect_Ratio(float ratio){
 	if(m_Type == CAMERA_TYPE_PERSPECTIVE)
 		Set_Perspective_Projection();
 }
-void Camera::LookAt(glm::vec3& target){ m_View = glm::lookAt(m_Position,target,m_Up); }
+void Camera::LookAt(glm::vec3& target){ m_View = glm::lookAt(m_Position,target,Up()); }
 void Camera::LookAt(glm::vec3& target,glm::vec3& up){ m_View = glm::lookAt(m_Position,target,up); }
 void Camera::LookAt(glm::vec3& eye,glm::vec3& target,glm::vec3& up){ m_View = glm::lookAt(eye,target,up); }
 void Camera::LookAt(Object* target, bool targetUp){
-	if(!targetUp) m_View = glm::lookAt(m_Position,target->Position(),m_Up);
+	if(!targetUp) m_View = glm::lookAt(m_Position,target->Position(),Up());
 	else m_View = glm::lookAt(m_Position,target->Position(),target->Up());
 }
 void Camera::Set_View(){
 	glm::vec3 p = Position();
-	m_View = glm::lookAt(p,p + m_Forward,m_Up); 
+	m_View = glm::lookAt(p,p + Forward(),Up()); 
 }
 glm::mat4 Camera::Calculate_Projection(glm::mat4& modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ModelView(glm::mat4& modelMatrix){ return m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::Update(float dt){
+	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr){
-		glm::mat4 newModel = m_Parent->Model();
+		newModel = m_Parent->Model();
+		m_Orientation = m_Parent->Orientation();
+
 		newModel = glm::translate(newModel, m_Position);
+		newModel *= glm::mat4_cast(m_Orientation);
 		m_Model = newModel;
-		LookAt(Position(),m_Parent->Position(), m_Parent->Up());
+
+		glm::vec3 pos = Position();
+		LookAt(pos,m_Parent->Position(), m_Parent->Up());
 	}
 	else{
-		glm::mat4 newModel = glm::mat4(1);
-		newModel = glm::mat4(1);
 		newModel = glm::translate(newModel, m_Position);
+		newModel *= glm::mat4_cast(m_Orientation);
 		m_Model = newModel;
-		Set_View();
+
+	glm::vec3 pos = Position();
+	LookAt(pos,pos + Forward(), Up());
 	}
 }
-void Camera::Render(Mesh* mesh, Material* material){}
-void Camera::Render(){ Render(nullptr,nullptr); }
+void Camera::Render(Mesh* mesh, Material* material,bool debug){}
+void Camera::Render(bool debug){ Render(nullptr,nullptr,debug); }
 glm::mat4 Camera::Projection() const { return m_Projection; }
 glm::mat4 Camera::View() const { return m_View; }
 CAMERA_TYPE Camera::Get_Type() const { return m_Type; }
 CAMERA_STATE Camera::Get_State() const { return m_State; }
-float Camera::Get_Angle_Between(Object* other) const{
-	glm::vec3 a = glm::normalize(m_Forward);
+float Camera::Get_Angle_Between(Object* other){
+	glm::vec3 a = Forward();
 	glm::vec3 b = glm::normalize(other->Position() - m_Position); //object to camera
 	float dot_product = glm::dot(a,b);
 	float length_of_a = glm::length(a);

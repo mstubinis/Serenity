@@ -45,7 +45,7 @@ void Engine::EngineClass::INIT_Game(){
 	Resources = new ResourceManager();
 	Resources->INIT_Game_Resources();
 
-	renderer = new Renderer(RENDER_TYPE_DEFERRED);
+	renderer = new Renderer();
 	bullet = new Bullet();
 
 	game = new Game();

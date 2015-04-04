@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <glm\glm.hpp>
+#include <glm\gtc\quaternion.hpp>
+#include <glm\gtx\quaternion.hpp>
 #include <glm\gtx\transform.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
@@ -15,7 +17,8 @@ class Object{
 	protected:
 		std::string m_Name;
 		glm::mat4 m_WorldMatrix, m_Model;
-		glm::vec3 m_Position, m_Rotation, m_Scale, m_Forward, m_Right, m_Up, m_Color, m_Radius;
+		glm::quat m_Orientation;
+		glm::vec3 m_Position, m_Scale, m_Color, m_Radius;
 
 		Object* m_Parent;
 		std::vector<Object*> m_Children;
@@ -31,7 +34,6 @@ class Object{
 				std::string = "",
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
-			    glm::vec3 = glm::vec3(0,0,0),   //Rotation
 			    std::string = "Meshless Object",//Object
 				bool addToResources = true      //Add this to the resource generic object pool (Don't do for lights)
 			  );
@@ -49,8 +51,8 @@ class Object{
 		void Add_Child(Object*);
 
 		virtual void Update(float);
-		virtual void Render(Mesh*, Material*,RENDER_TYPE);
-		virtual void Render(RENDER_TYPE = RENDER_TYPE_FORWARD);
+		virtual void Render(Mesh*, Material*,bool=false);
+		virtual void Render(bool=false);
 
 		#pragma region Getters
 		virtual glm::vec3 Position() const; 
@@ -65,6 +67,7 @@ class Object{
 		const std::string Name() const;
 		const Object* Parent() const;
 		std::vector<Object*> Children() const;
+		glm::quat Orientation(){ return m_Orientation; }
 		#pragma endregion
 
 		#pragma region Setters

@@ -5,17 +5,11 @@
 
 #include <glm\gtc\constants.hpp>
 
-Renderer::Renderer(RENDER_TYPE type){
-
+Renderer::Renderer(){
 	Resources->Load_Texture_Into_GLuint(RandomMapSSAO,"Textures\\SSAONormal.png");
 
 	glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
-
-	Set_Render_Type(type);
-	m_EnableLighting = true;
-	m_EnableNormalMapping = true;
-	m_EnableLightmapping = true;
 
 	m_gBuffer = new GBuffer(Window->getSize().x,Window->getSize().y);
 }
@@ -32,10 +26,10 @@ void Renderer::Geometry_Pass(bool debug){
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 	for(auto object:Resources->Objects){
-		object->Render(m_Type);
+		object->Render(debug);
 	}	
 	if(debug){
-		bullet->Render(RENDER_TYPE_DEFERRED);
+		bullet->Render();
 		GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
 		glUseProgram(shader);
 		for(auto light:Resources->Lights){
@@ -55,48 +49,27 @@ void Renderer::Lighting_Pass(){
 
 	this->Pass_Lighting();
 }
-void Renderer::Set_Render_Type(RENDER_TYPE type){ m_Type = type; }
 void Renderer::Render(bool debug){
-
-	switch(m_Type){
-		case RENDER_TYPE_FORWARD:
-			glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glClearColor(0,0,0,1);
-
-			for(auto object:Resources->Objects){
-				object->Render();
-			}
-			if(debug)
-				bullet->Render(RENDER_TYPE_FORWARD);
-
-			break;
-		case RENDER_TYPE_DEFERRED:
-			m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_BLOOM);
-			this->Geometry_Pass(debug);
-			m_gBuffer->Stop();
+	m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_BLOOM);
+	this->Geometry_Pass(debug);
+	m_gBuffer->Stop();
 
 
-			m_gBuffer->Start(BUFFER_TYPE_LIGHTING);
-			this->Lighting_Pass();
-			m_gBuffer->Stop();
+	m_gBuffer->Start(BUFFER_TYPE_LIGHTING);
+	this->Lighting_Pass();
+	m_gBuffer->Stop();
 
-			m_gBuffer->Start(BUFFER_TYPE_SSAO);
-			this->Pass_SSAO();
-			m_gBuffer->Stop();
-			m_gBuffer->Start(BUFFER_TYPE_FREE1);
-			this->Pass_Blur_Horizontal(m_gBuffer->Texture(BUFFER_TYPE_SSAO));
-			m_gBuffer->Stop();
-			m_gBuffer->Start(BUFFER_TYPE_SSAO);
-			this->Pass_Blur_Vertical(m_gBuffer->Texture(BUFFER_TYPE_FREE1));
-			m_gBuffer->Stop();
+	m_gBuffer->Start(BUFFER_TYPE_SSAO);
+	this->Pass_SSAO();
+	m_gBuffer->Stop();
+	m_gBuffer->Start(BUFFER_TYPE_FREE1);
+	this->Pass_Blur_Horizontal(m_gBuffer->Texture(BUFFER_TYPE_SSAO));
+	m_gBuffer->Stop();
+	m_gBuffer->Start(BUFFER_TYPE_SSAO);
+	this->Pass_Blur_Vertical(m_gBuffer->Texture(BUFFER_TYPE_FREE1));
+	m_gBuffer->Stop();
 
-			this->Pass_Final();
-
-			break;
-		default:
-			break;
-	}
+	this->Pass_Final();
 }
 void Renderer::Pass_Lighting(){
 	GLuint shader = Resources->Get_Shader_Program("Deferred_Light")->Get_Shader_Program();

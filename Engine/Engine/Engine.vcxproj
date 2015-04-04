@@ -116,6 +116,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="TextureBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +139,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClInclude Include="Planet.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="TextureBuffer.h" />
   </ItemGroup>
   <ItemGroup>
