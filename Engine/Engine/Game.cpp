@@ -41,14 +41,15 @@ void Game::Update(float dt){
 	if(Keyboard::IsKeyDown("d") == true)
 		player->Apply_Force(1,0,0);
 	if(Keyboard::IsKeyDown("q") == true)
-		player->Rotate(0,0,1);
+		player->Apply_Rotation_Force(0,0,1);
 	if(Keyboard::IsKeyDown("e") == true)
-		player->Rotate(0,0,-1);
+		player->Apply_Rotation_Force(0,0,-1);
 
 	if(Keyboard::IsKeyDown("f1") == true)
 		Resources->Objects.at(4)->Scale(5,5,5);
 	if(Keyboard::IsKeyDown("f2") == true)
 		Resources->Objects.at(4)->Scale(-5,-5,-5);
 
-	player->Rotate(Mouse_Difference.y*0.005f,Mouse_Difference.x*0.005f,0);
+
+	player->Apply_Rotation_Force(Mouse_Difference.y*0.005f,Mouse_Difference.x*0.005f,0);
 }

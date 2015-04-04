@@ -29,9 +29,7 @@ void Object::m_Calculate_Radius(){
 	m_Radius = m_Mesh->Radius() * m_Scale;
 }
 glm::vec3 Object::Forward(){
-	glm::vec3 r = Right();
-	glm::vec3 u = Up();
-	return glm::normalize(glm::cross(r,u));
+	return glm::normalize(glm::cross(Right(),Up()));
 }
 glm::vec3 Object::Right(){
 	float x = m_Orientation.x;
@@ -76,8 +74,10 @@ void Object::Roll(float amount){
 }
 void Object::Update(float dt){
 	glm::mat4 newModel = glm::mat4(1);
-	if(m_Parent != nullptr)
+	if(m_Parent != nullptr){
 		newModel = m_Parent->m_Model;
+		m_Orientation = m_Parent->Orientation();
+	}
 
 	newModel = glm::translate(newModel, m_Position);
 	newModel *= glm::mat4_cast(m_Orientation);

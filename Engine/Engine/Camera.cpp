@@ -14,8 +14,7 @@ Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float c
 
 	Set_Perspective_Projection();
 	m_State = CAMERA_STATE_FREEFORM;
-	m_Friction = 0.001f;
-	Set_View();
+	LookAt(Position(),Position() + Forward(), Up());
 }
 Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create an orthographic camera
 	m_Angle = 45.0f;
@@ -27,8 +26,7 @@ Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, flo
 
 	Set_Ortho_Projection(leftVal,rightVal,bottomVal,topVal);
 	m_State = CAMERA_STATE_FREEFORM;
-	m_Friction = 0.001f;
-	Set_View();
+	LookAt(Position(),Position() + Forward(), Up());
 }
 Camera::~Camera(){ 
 }
@@ -48,34 +46,13 @@ void Camera::LookAt(Object* target, bool targetUp){
 	if(!targetUp) m_View = glm::lookAt(m_Position,target->Position(),Up());
 	else m_View = glm::lookAt(m_Position,target->Position(),target->Up());
 }
-void Camera::Set_View(){
-	glm::vec3 p = Position();
-	m_View = glm::lookAt(p,p + Forward(),Up()); 
-}
 glm::mat4 Camera::Calculate_Projection(glm::mat4& modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ModelView(glm::mat4& modelMatrix){ return m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::Update(float dt){
-	glm::mat4 newModel = glm::mat4(1);
-	if(m_Parent != nullptr){
-		newModel = m_Parent->Model();
-		m_Orientation = m_Parent->Orientation();
-
-		newModel = glm::translate(newModel, m_Position);
-		newModel *= glm::mat4_cast(m_Orientation);
-		m_Model = newModel;
-
-		glm::vec3 pos = Position();
-		LookAt(pos,m_Parent->Position(), m_Parent->Up());
-	}
-	else{
-		newModel = glm::translate(newModel, m_Position);
-		newModel *= glm::mat4_cast(m_Orientation);
-		m_Model = newModel;
-
+	Object::Update(dt);
 	glm::vec3 pos = Position();
-	LookAt(pos,pos + Forward(), Up());
-	}
+	LookAt(pos,pos - Forward(), Up());
 }
 void Camera::Render(Mesh* mesh, Material* material,bool debug){}
 void Camera::Render(bool debug){ Render(nullptr,nullptr,debug); }
@@ -96,4 +73,3 @@ float Camera::Get_Angle_Between(Object* other){
 		return 0;
 	return angle;
 }
-glm::vec3 Camera::Position() const { return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
