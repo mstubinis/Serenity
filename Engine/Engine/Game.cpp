@@ -11,7 +11,7 @@ Game::~Game()
 }
 void Game::Init_Logic(){
 
-	new Skybox("Skybox1");
+	new Skybox("Basic");
 	player = new ObjectDynamic("Voyager","Voyager",glm::vec3(0,0,0));
 	new ObjectDynamic("Voyager","Voyager",glm::vec3(2,0,0));
 	//new Planet(Resources->Get_Material("Earth"),glm::vec3(-2,0,0));

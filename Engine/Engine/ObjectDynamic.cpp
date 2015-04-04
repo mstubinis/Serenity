@@ -41,9 +41,9 @@ void ObjectDynamic::Update(float dt){
 
 void ObjectDynamic::Set_Position(float x, float y, float z){
 	m_RigidBody->activate();
-	btTransform transform = m_RigidBody->getCenterOfMassTransform();
+	btTransform transform = m_RigidBody->getWorldTransform();
 	transform.setOrigin(btVector3(x,y,z));
-	m_RigidBody->setCenterOfMassTransform(transform);
+	m_RigidBody->setWorldTransform(transform);
 }
 void ObjectDynamic::Set_Position(glm::vec3& p){ ObjectDynamic::Set_Position(p.x,p.y,p.z); }
 void ObjectDynamic::Translate(float x,float y,float z){
@@ -67,9 +67,11 @@ void ObjectDynamic::Rotate(float x, float y, float z){
 	btQuaternion q = btQuaternion(m_Orientation.x,m_Orientation.y,m_Orientation.z,m_Orientation.w);
 	m_RigidBody->getWorldTransform().setRotation(q);
 }
-void ObjectDynamic::Rotate(glm::vec3& r){ ObjectDynamic::Rotate(r.x,r.y,r.z); }
+void ObjectDynamic::Rotate(glm::vec3& r){ 
+	ObjectDynamic::Rotate(r.x,r.y,r.z); 
+}
 glm::vec3 ObjectDynamic::Position(){
-	btVector3 p = m_RigidBody->getCenterOfMassTransform().getOrigin();
+	btVector3 p = m_RigidBody->getWorldTransform().getOrigin();
 	return glm::vec3(p.x(),p.y(),p.z());
 }
 void ObjectDynamic::Apply_Force(float x,float y,float z,bool local){ 
@@ -123,11 +125,12 @@ void ObjectDynamic::Set_Linear_Velocity(float x, float y, float z, bool local){
 		m_RigidBody->setLinearVelocity(btVector3(res.x,res.y,res.z)); 
 	}
 }
-void ObjectDynamic::Set_Linear_Velocity(glm::vec3& velocity, bool local){ ObjectDynamic::Set_Linear_Velocity(velocity.x,velocity.y,velocity.z,local); }
+void ObjectDynamic::Set_Linear_Velocity(glm::vec3& velocity, bool local){ 
+	ObjectDynamic::Set_Linear_Velocity(velocity.x,velocity.y,velocity.z,local); 
+}
 void ObjectDynamic::Set_Angular_Velocity(float x, float y, float z){ 
 	m_RigidBody->setAngularVelocity(btVector3(x,y,z)); 
 }
 void ObjectDynamic::Set_Angular_Velocity(glm::vec3& velocity){ 
 	m_RigidBody->setAngularVelocity(btVector3(velocity.x,velocity.y,velocity.z)); 
 }
-

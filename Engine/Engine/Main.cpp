@@ -8,7 +8,7 @@ sf::Window* Window;
 sf::Mouse* Mouse;
 
 int main(){
-	Engine::EngineClass* program = new Engine::EngineClass("Engine",900,600);
+	Engine::EngineClass* program = new Engine::EngineClass("Engine",1024,768);
 
 	program->Run();
 

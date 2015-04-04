@@ -229,14 +229,17 @@ void Mesh::LoadFromOBJ(std::string filename){
 		v1.position = pointData.at(static_cast<unsigned int>(face.at(0).x-1));
 		v2.position = pointData.at(static_cast<unsigned int>(face.at(1).x-1));
 		v3.position = pointData.at(static_cast<unsigned int>(face.at(2).x-1));
-
-		v1.uv = uvData.at(static_cast<unsigned int>(face.at(0).y-1));
-		v2.uv = uvData.at(static_cast<unsigned int>(face.at(1).y-1));
-		v3.uv = uvData.at(static_cast<unsigned int>(face.at(2).y-1));
-
-		v1.normal = normalData.at(static_cast<unsigned int>(face.at(0).z-1));
-		v2.normal = normalData.at(static_cast<unsigned int>(face.at(1).z-1));
-		v3.normal = normalData.at(static_cast<unsigned int>(face.at(2).z-1));
+		
+		if(uvData.size() > 0){
+			v1.uv = uvData.at(static_cast<unsigned int>(face.at(0).y-1));
+			v2.uv = uvData.at(static_cast<unsigned int>(face.at(1).y-1));
+			v3.uv = uvData.at(static_cast<unsigned int>(face.at(2).y-1));
+		}
+		if(normalData.size() > 0){
+			v1.normal = normalData.at(static_cast<unsigned int>(face.at(0).z-1));
+			v2.normal = normalData.at(static_cast<unsigned int>(face.at(1).z-1));
+			v3.normal = normalData.at(static_cast<unsigned int>(face.at(2).z-1));
+		}
 
 		v1.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 		v2.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
@@ -244,8 +247,10 @@ void Mesh::LoadFromOBJ(std::string filename){
 
 		if(face.size() == 4){//quad
 			v4.position = pointData.at(static_cast<unsigned int>(face.at(3).x-1));
-			v4.uv = uvData.at(static_cast<unsigned int>(face.at(3).y-1));
-			v4.normal = normalData.at(static_cast<unsigned int>(face.at(3).z-1));
+			if(uvData.size() > 0)
+				v4.uv = uvData.at(static_cast<unsigned int>(face.at(3).y-1));
+			if(normalData.size() > 0)
+				v4.normal = normalData.at(static_cast<unsigned int>(face.at(3).z-1));
 			v4.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 			GenerateQuad(v1,v2,v3,v4);
 		}

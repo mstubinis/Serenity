@@ -96,7 +96,7 @@ void Object::Render(Mesh* mesh, Material* material,bool debug){
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform3f(glGetUniformLocation(shaderProgram, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
-
+	glUniform1i(glGetUniformLocation(shaderProgram, "Shadeless"),static_cast<int>(material->Shadeless()));
 	for(auto component:material->Components())
 		material->Bind_Texture(component.second,shaderProgram);
 

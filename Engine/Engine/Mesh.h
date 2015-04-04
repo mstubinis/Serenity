@@ -20,6 +20,10 @@ struct Vertex{
 	glm::vec3 normal;
 	glm::vec3 binormal;
 	glm::vec3 tangent;
+	Vertex(){
+		uv = glm::vec2(0,0);
+		normal = binormal = tangent = glm::vec3(0,0,0);
+	}
 };
 
 class Mesh{

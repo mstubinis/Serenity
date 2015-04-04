@@ -23,22 +23,17 @@ void ResourceManager::INIT_Game_Resources(){
 
 	Add_Shader_Program("Deferred_Light","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_frag.glsl");
 
-	Add_Mesh("Default","Models\\scar.obj");
-	Add_Mesh("Skybox","Models\\Skybox.ply");
-	Add_Mesh("LightSphere","Models\\LightSphere.ply");
-	Add_Mesh("DEBUGLight","Models\\DEBUGLight.ply");
-	Add_Mesh("Ground","Models\\Ground.ply");
-	Add_Mesh("Planet","Models\\planet.ply");
+	Add_Mesh("Skybox","Models\\skybox.obj");
+	Add_Mesh("DEBUGLight","Models\\debugLight.obj");
+	Add_Mesh("Planet","Models\\planet.obj");
 	Add_Mesh("Voyager","Models\\voyager.obj");
 
 	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
-	Add_Material("Rock","Textures\\rock.png","Textures\\rockNormal.png","");
-	Add_Material("Stone","Textures\\stone.png","Textures\\stoneNormal.png","");
 	Add_Material("Earth","Textures\\earth.png","","");
 	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");
 
-	m_Cameras["Default"] = new Camera(45.0f,float(window_x/window_y),0.01f,1000.0f);
-	m_Cameras["Debug"] = new Camera(45.0f,float(window_x/window_y),0.01f,1000.0f);
+	m_Cameras["Default"] = new Camera(60,float(window_x/window_y),0.01f,1000.0f);
+	m_Cameras["Debug"] = new Camera(60,float(window_x/window_y),0.01f,1000.0f);
 
 	Set_Active_Camera("Default");
 }

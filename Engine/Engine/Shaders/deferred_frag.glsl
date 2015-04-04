@@ -4,6 +4,8 @@ uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
 uniform sampler2D GlowMap;
 
+uniform int Shadeless;
+
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
 uniform int GlowMapEnabled;
@@ -41,13 +43,19 @@ void main(){
 	else
 		DiffuseOut = vec4(0);
 
-	if(NormalMapEnabled == 1)
-		NormalOut = vec4(CalcBumpedNormal().xyz,0);
-	else
-		NormalOut = vec4(normalize(Normals).xyz,0);
+	if(Shadeless == 0){
+		if(NormalMapEnabled == 1)
+			NormalOut = vec4(CalcBumpedNormal().xyz,0);
+		else
+			NormalOut = vec4(normalize(Normals).xyz,0);
 
-	if(GlowMapEnabled == 1)
-		GlowOut.r = texture(GlowMap, UV).r;
-	else
-		GlowOut.r = 0;
+		if(GlowMapEnabled == 1)
+			GlowOut.r = texture(GlowMap, UV).r;
+		else
+			GlowOut = vec4(0);
+	}
+	else{
+		NormalOut = vec4(1);
+		GlowOut = vec4(1);
+	}
 }

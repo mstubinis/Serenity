@@ -7,6 +7,9 @@
 class Material{
 	private:
 		std::unordered_map<MaterialComponents::MATERIAL_COMPONENT_TYPE,MaterialComponents::MaterialComponent*> m_Components;
+
+		bool m_Shadeless;
+
 	public:
 		Material(std::string diffuse,std::string normal="",std::string glow="");
 		~Material();
@@ -16,5 +19,8 @@ class Material{
 		void Add_Component(MaterialComponents::MATERIAL_COMPONENT_TYPE, std::string file);
 
 		void Bind_Texture(MaterialComponents::MaterialComponent*,GLuint shader);
+
+		bool Shadeless();
+		void Set_Shadeless(bool);
 };
 #endif

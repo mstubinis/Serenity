@@ -11,6 +11,7 @@ Material::Material(std::string diffuse, std::string normal, std::string glow){
 	m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = new MaterialComponent(MATERIAL_COMPONENT_TEXTURE_DIFFUSE,diffuse);
 	m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = new MaterialComponent(MATERIAL_COMPONENT_TEXTURE_NORMAL,normal);
 	m_Components[MATERIAL_COMPONENT_TEXTURE_GLOW] = new MaterialComponent(MATERIAL_COMPONENT_TEXTURE_GLOW,glow);
+	m_Shadeless = false;
 }
 Material::~Material(){
 	for(auto component:m_Components)
@@ -38,3 +39,5 @@ void Material::Bind_Texture(MaterialComponents::MaterialComponent* component,GLu
 	glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), component->Type());
 	glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
 }
+bool Material::Shadeless(){ return m_Shadeless; }
+void Material::Set_Shadeless(bool b){ m_Shadeless = b; }
