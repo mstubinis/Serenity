@@ -156,6 +156,9 @@ void Mesh::LoadFromOBJ(std::string filename){
 	if(boost::filesystem::exists(colFile)){
 		m_Collision = Mesh::LoadColFromOBJ(colFile);
 	}
+	else{
+		m_Collision = Mesh::LoadColFromOBJ(filename);
+	}
 
 	std::vector<glm::vec3> pointData;
 	std::vector<glm::vec2> uvData;

@@ -13,7 +13,6 @@ Camera::Camera(float angleVal, float aspectRatioVal, float clipStartVal, float c
 	m_Type = CAMERA_TYPE_PERSPECTIVE;
 
 	Set_Perspective_Projection();
-	m_State = CAMERA_STATE_FREEFORM;
 	LookAt(Position(),Position() + Forward(), Up());
 }
 Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float clipStartVal, float clipEndVal): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create an orthographic camera
@@ -25,7 +24,6 @@ Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, flo
 	m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
 	Set_Ortho_Projection(leftVal,rightVal,bottomVal,topVal);
-	m_State = CAMERA_STATE_FREEFORM;
 	LookAt(Position(),Position() + Forward(), Up());
 }
 Camera::~Camera(){ 
@@ -59,7 +57,6 @@ void Camera::Render(bool debug){ Render(nullptr,nullptr,debug); }
 glm::mat4 Camera::Projection() const { return m_Projection; }
 glm::mat4 Camera::View() const { return m_View; }
 CAMERA_TYPE Camera::Get_Type() const { return m_Type; }
-CAMERA_STATE Camera::Get_State() const { return m_State; }
 float Camera::Get_Angle_Between(Object* other){
 	glm::vec3 a = Forward();
 	glm::vec3 b = glm::normalize(other->Position() - m_Position); //object to camera

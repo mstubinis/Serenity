@@ -36,6 +36,7 @@ class ResourceManager{
 		void Add_Mesh(std::string name,std::string file);
 		void Add_Material(std::string name,std::string diffuse, std::string normal, std::string glow);
 		void Add_Shader_Program(std::string name,std::string vs, std::string ps);
+		void Add_Camera(std::string,Camera*);
 
 		float dt;
 		std::vector<Object*> Objects;

@@ -91,8 +91,6 @@ void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
 		case sf::Event::TextEntered:
 			this->EVENT_TEXT_ENTERED(e.text);
 			break;
-        default:
-            break;
     }
 	#pragma endregion
 }
@@ -102,6 +100,8 @@ void Engine::EngineClass::_RESET_EVENTS(){
 
 	for(auto iterator:Engine::Events::Keyboard::KeyProcessing::m_KeyStatus){ iterator.second = false; }
 	for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
+
+	Engine::Events::Mouse::MouseProcessing::_SetMouseWheelDelta(0);
 }
 void Engine::EngineClass::Update(float dt,sf::Event e){
 	m_Timer += dt;
@@ -152,9 +152,7 @@ void Engine::EngineClass::EVENT_KEY_RELEASED(sf::Event::KeyEvent key){
 	Engine::Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = false;
 }
 void Engine::EngineClass::EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
-	Mouse_Position_Previous = Mouse_Position;
-	Mouse_Position.x = static_cast<float>(mouseWheel.x);
-	Mouse_Position.y = static_cast<float>(mouseWheel.y);
+	Engine::Events::Mouse::MouseProcessing::_SetMouseWheelDelta(mouseWheel.delta);
 }
 void Engine::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;

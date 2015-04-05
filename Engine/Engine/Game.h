@@ -4,10 +4,12 @@
 #include "Object.h"
 #include "ObjectDynamic.h"
 #include "Planet.h"
+#include "GameCamera.h"
 
 class Game{
 	private:
 		ObjectDynamic* player;
+		GameCamera* playerCamera;
 	public:
 		Game();
 		~Game();

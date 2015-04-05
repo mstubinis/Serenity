@@ -254,6 +254,7 @@ unordered_map<string,sf::Keyboard::Key> Keyboard::KeyProcessing::m_KeyMap = _get
 unordered_map<string,Mouse::MouseButton> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
 unordered_map<sf::Keyboard::Key,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
 unordered_map<Mouse::MouseButton,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
+int Mouse::MouseProcessing::m_Delta = 0;
 
 //init prev / current variables
 sf::Keyboard::Key Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;

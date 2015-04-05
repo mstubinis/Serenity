@@ -27,15 +27,16 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("DEBUGLight","Models\\debugLight.obj");
 	Add_Mesh("Planet","Models\\planet.obj");
 	Add_Mesh("Voyager","Models\\voyager.obj");
+	Add_Mesh("Defiant","Models\\defiant.obj");
 
 	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
 	Add_Material("Earth","Textures\\earth.png","","");
 	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");
+	Add_Material("Defiant","Textures\\defiant.png","","Textures\\defiantGlow.png");
 
-	m_Cameras["Default"] = new Camera(60,float(window_x/window_y),0.01f,1000.0f);
 	m_Cameras["Debug"] = new Camera(60,float(window_x/window_y),0.01f,1000.0f);
 
-	Set_Active_Camera("Default");
+	Set_Active_Camera("Debug");
 }
 ResourceManager::~ResourceManager(){
 	for(auto mesh:m_Meshes){
@@ -132,7 +133,11 @@ void ResourceManager::Add_Material(std::string name, std::string diffuse, std::s
 		return;
 	m_Materials[name] = new Material(diffuse,normal,glow);
 }
-
+void ResourceManager::Add_Camera(std::string name, Camera* camera){
+	if (m_Cameras.size() > 0 && m_Cameras.count(name))
+		return;
+	m_Cameras[name] = camera;
+}
 void ResourceManager::Add_Shader_Program(std::string name, std::string vs, std::string ps){
 	if (m_ShaderPrograms.size() > 0 && m_ShaderPrograms.count(name))
 		return;
@@ -151,7 +156,7 @@ Material* ResourceManager::Get_Material(std::string name){
 		return nullptr;
 	return m_Materials[name]; 
 }
-Camera* ResourceManager::Default_Camera(){ return m_Cameras["Default"]; }
+Camera* ResourceManager::Default_Camera(){ return m_Cameras["Debug"]; }
 Camera* ResourceManager::Get_Camera(std::string name){ return m_Cameras[name]; }
 Camera* ResourceManager::Current_Camera(){ return m_Current_Camera; }
 ShaderP* ResourceManager::Default_Shader_Program(){ return m_ShaderPrograms["Default"]; }

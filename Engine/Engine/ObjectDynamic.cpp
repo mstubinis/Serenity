@@ -29,7 +29,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass,m_MotionState,m_Collision_Shape,inertia);
 
 	m_RigidBody = new btRigidBody(rigidBodyCI);
-	m_RigidBody->setFriction(0);
+	m_RigidBody->setFriction(0.1f);
 	m_RigidBody->setDamping(0.3f,0.5f);//this makes the objects slowly slow down in space, like air friction
 	bullet->Add_Rigid_Body(m_RigidBody);
 }
@@ -40,7 +40,7 @@ ObjectDynamic::~ObjectDynamic(){
 }
 glm::vec3 ObjectDynamic::Forward(){ return glm::normalize(glm::cross(Right(),Up())); }
 glm::vec3 ObjectDynamic::Right(){
-	btQuaternion q = m_RigidBody->getWorldTransform().getRotation();
+	btQuaternion q = m_RigidBody->getCenterOfMassTransform().getRotation();
 	float x = q.x();
 	float y = q.y();
 	float z = q.z();
@@ -50,7 +50,7 @@ glm::vec3 ObjectDynamic::Right(){
                                      2 * (x * z - w * y)));
 }
 glm::vec3 ObjectDynamic::Up(){
-	btQuaternion q = m_RigidBody->getWorldTransform().getRotation();
+	btQuaternion q = m_RigidBody->getCenterOfMassTransform().getRotation();
 	float x = q.x();
 	float y = q.y();
 	float z = q.z();
@@ -62,7 +62,7 @@ glm::vec3 ObjectDynamic::Up(){
 void ObjectDynamic::Update(float dt){
 	m_RigidBody->activate();
 	m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(m_Model));
-	btQuaternion q = m_RigidBody->getWorldTransform().getRotation();
+	btQuaternion q = m_RigidBody->getCenterOfMassTransform().getRotation();
 	m_Orientation = glm::quat(q.w(),q.x(),q.y(),q.z());
 	glm::mat4 parentModel = glm::mat4(1);
 	if(m_Parent != nullptr)

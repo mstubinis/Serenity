@@ -4,12 +4,10 @@
 #include "Object.h"
 
 enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
-enum CAMERA_STATE { CAMERA_STATE_FREEFORM,CAMERA_STATE_ORBIT,CAMERA_STATE_FOLLOW };
 
 class Camera: public Object{
-	private:
+	protected:
 		CAMERA_TYPE m_Type;
-		CAMERA_STATE m_State;
 
 		float m_Angle;
 		float m_AspectRatio;
@@ -22,7 +20,6 @@ class Camera: public Object{
 		~Camera();
 
 		CAMERA_TYPE Get_Type() const;
-		CAMERA_STATE Get_State() const;
 
 		void Set_Perspective_Projection();
 		void Set_Ortho_Projection(float,float,float,float);

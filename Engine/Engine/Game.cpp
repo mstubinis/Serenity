@@ -12,13 +12,13 @@ Game::~Game()
 void Game::Init_Logic(){
 
 	new Skybox("Basic");
-	player = new ObjectDynamic("Voyager","Voyager",glm::vec3(0,0,0));
+	player = new ObjectDynamic("Defiant","Defiant",glm::vec3(0,0,0));
+	playerCamera = new GameCamera(60,float(Window->getSize().x/Window->getSize().y),0.01f,1000.0f);
+	Resources->Set_Active_Camera(playerCamera);
 	new ObjectDynamic("Voyager","Voyager",glm::vec3(2,0,0));
 	//new Planet(Resources->Get_Material("Earth"),glm::vec3(-2,0,0));
 
-	Resources->Current_Camera()->Set_Position(0,glm::length(player->Radius())*0.2f,glm::length(player->Radius())*1.5f);
-	Resources->Current_Camera()->LookAt(player,true);
-	player->Add_Child(Resources->Current_Camera());
+	playerCamera->Follow(player);
 
 	SunLight* sun = new SunLight(glm::vec3(0,0,-8));
 }
@@ -45,11 +45,12 @@ void Game::Update(float dt){
 	if(Keyboard::IsKeyDown("e") == true)
 		player->Apply_Torque(0,0,-1);
 
-	if(Keyboard::IsKeyDown("f1") == true)
-		Resources->Objects.at(4)->Scale(5,5,5);
-	if(Keyboard::IsKeyDown("f2") == true)
-		Resources->Objects.at(4)->Scale(-5,-5,-5);
+	if(Keyboard::IsKeyDownOnce("f1") == true)
+		playerCamera->Follow(player);
+	if(Keyboard::IsKeyDownOnce("f2") == true)
+		playerCamera->Orbit(player);
 
-
-	player->Apply_Torque(-Mouse_Difference.y*0.005f,-Mouse_Difference.x*0.005f,0);
+	if(playerCamera->State() != CAMERA_STATE_ORBIT){
+		player->Apply_Torque(-Mouse_Difference.y*0.005f,-Mouse_Difference.x*0.005f,0);
+	}
 }
