@@ -15,11 +15,9 @@ class Camera: public Object{
 		float m_ClipStart, m_ClipEnd;
 		glm::mat4 m_View, m_Projection;
 	public:
-		Camera(float angle, float aspectRatio, float clipStart, float clipEnd);				      // Perspective camera Constructor
-		Camera(float left, float right, float bottom, float top, float clipStart, float clipEnd); // Orthographic camera Constructor
+		Camera(float angle, float ratio, float _near, float _far);				           // Perspective camera Constructor
+		Camera(float left, float right, float bottom, float top, float _near, float _far); // Orthographic camera Constructor
 		~Camera();
-
-		CAMERA_TYPE Get_Type() const;
 
 		void Set_Perspective_Projection();
 		void Set_Ortho_Projection(float,float,float,float);
@@ -28,9 +26,9 @@ class Camera: public Object{
 		void Render(Mesh*,Material*,bool=false);
 		void Render(bool=false);
 
-		void LookAt(glm::vec3&);  
-		void LookAt(glm::vec3&,glm::vec3&); 
-		void LookAt(glm::vec3&,glm::vec3&,glm::vec3&); 
+		void LookAt(const glm::vec3&);  
+		void LookAt(const glm::vec3&,const glm::vec3&); 
+		void LookAt(const glm::vec3&,const glm::vec3&,const glm::vec3&); 
 		void LookAt(Object*,bool targetUp = false);
 
 		void Set_Aspect_Ratio(float);
@@ -38,10 +36,8 @@ class Camera: public Object{
 		glm::mat4 Calculate_ViewProjInverted();
 		glm::mat4 Calculate_Projection(glm::mat4&);
 		glm::mat4 Calculate_ModelView(glm::mat4&);
-		glm::mat4 Projection() const;
-		glm::mat4 View() const;
-
-		float Get_Angle_Between(Object*);
-
+		const glm::mat4 Projection() const{ return m_Projection; }
+		const glm::mat4 View() const{ return m_View; }
+		const CAMERA_TYPE Type() const{ return m_Type; }
 };
 #endif

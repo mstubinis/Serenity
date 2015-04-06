@@ -14,11 +14,17 @@
 #include <glm\gtc\type_ptr.hpp>
                                                                                  
 class Object{
+	private:
+		glm::vec3 _Forward(); 
+		glm::vec3 _Right(); 
+		glm::vec3 _Up();
 	protected:
+		bool m_Changed;
+
 		std::string m_Name;
 		glm::mat4 m_WorldMatrix, m_Model;
 		glm::quat m_Orientation;
-		glm::vec3 m_Position, m_Scale, m_Color, m_Radius;
+		glm::vec3 m_Position, m_Scale, m_Color, m_Radius, m_Forward, m_Right, m_Up;
 
 		Object* m_Parent;
 		std::vector<Object*> m_Children;
@@ -55,19 +61,19 @@ class Object{
 		virtual void Render(bool=false);
 
 		#pragma region Getters
-		virtual glm::vec3 Position() const; 
-		virtual glm::vec3 Scale();
-		virtual glm::vec3 Forward(); 
-		virtual glm::vec3 Right(); 
-		virtual glm::vec3 Up();
-		const glm::vec3& Radius() const;
-		const glm::vec3& Color() const;
-		const glm::mat4& Model() const;
-		const glm::mat4& World() const;
-		const std::string Name() const;
-		const Object* Parent() const;
-		std::vector<Object*> Children() const;
-		glm::quat Orientation(){ return m_Orientation; }
+		const glm::quat& Orientation(){ return m_Orientation; }
+		const glm::vec3  Position() const{ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+		const glm::vec3& Scale() const{ return m_Scale; }
+		const glm::vec3& Forward() const{ return m_Forward; }
+		const glm::vec3& Right() const{ return m_Right; }
+		const glm::vec3& Up() const{ return m_Up; }
+		const glm::vec3& Radius() const{ return m_Radius; }
+		const glm::vec3& Color() const{ return m_Color; }
+		const glm::mat4& Model() const{ return m_Model; }
+		const glm::mat4& World() const{ return m_WorldMatrix; }
+		const std::string Name() const{ return m_Name; }
+		const Object* Parent() const{ return m_Parent; }
+		const std::vector<Object*> Children() const{ return m_Children; }
 		#pragma endregion
 
 		#pragma region Setters

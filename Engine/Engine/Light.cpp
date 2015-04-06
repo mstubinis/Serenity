@@ -44,8 +44,7 @@ SunLight::SunLight(glm::vec3 pos,std::string name,LIGHT_TYPE type):Object("DEBUG
 
 	Resources->Lights.push_back(this);
 }
-SunLight::~SunLight(){
-}
+SunLight::~SunLight(){}
 void SunLight::Update(float dt){
 	Object::Update(dt);
 }

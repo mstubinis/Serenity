@@ -27,7 +27,7 @@ void GameCamera::Update(float dt){
 		case CAMERA_STATE_ORBIT:
 			m_OrbitRadius += Engine::Events::Mouse::GetMouseWheelDelta() * dt;
 
-			Rotate(Mouse_Difference.y*0.005f,Mouse_Difference.x*0.005f,0);
+			Rotate(-Mouse_Difference.y*0.005f,-Mouse_Difference.x*0.005f,0);
 
 			m_Position = (m_Target->Forward()*glm::length(m_Target->Radius())*1.5f) + (m_Target->Forward()*glm::length(m_Target->Radius() * (1+m_OrbitRadius)));
 

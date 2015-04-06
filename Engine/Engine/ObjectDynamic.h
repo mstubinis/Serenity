@@ -5,6 +5,10 @@
 #include "Bullet.h"
 
 class ObjectDynamic: public Object{
+	private:
+		glm::vec3 _Forward(); 
+		glm::vec3 _Right(); 
+		glm::vec3 _Up();
 	protected:
 		btCollisionShape* m_Collision_Shape;
 		btRigidBody* m_RigidBody;
@@ -20,10 +24,6 @@ class ObjectDynamic: public Object{
 		~ObjectDynamic();
 
 		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3&);
-
-		glm::vec3 Forward(); 
-		glm::vec3 Right(); 
-		glm::vec3 Up();
 
 		void Apply_Force(float,float,float,bool local=true); void Apply_Force(glm::vec3&,glm::vec3& = glm::vec3(0,0,0),bool local=true);
 		void Apply_Impulse(float,float,float); void Apply_Impulse(glm::vec3&,glm::vec3& = glm::vec3(0,0,0));

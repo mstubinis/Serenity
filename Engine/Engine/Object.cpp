@@ -3,6 +3,10 @@
 #include "ShaderProgram.h"
 
 Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool addToResources){
+	m_Changed = true;
+	m_Forward = glm::vec3(0,0,-1);
+	m_Right = glm::vec3(1,0,0);
+	m_Up = glm::vec3(0,1,0);
 	Set_Mesh(Resources->Get_Mesh(mesh));
 	Set_Material(Resources->Get_Material(mat));
 	m_Parent = nullptr;
@@ -28,8 +32,8 @@ void Object::m_Calculate_Radius(){
 	}
 	m_Radius = m_Mesh->Radius() * m_Scale;
 }
-glm::vec3 Object::Forward(){ return glm::normalize(glm::cross(Right(),Up())); }
-glm::vec3 Object::Right(){
+glm::vec3 Object::_Forward(){ return glm::normalize(glm::cross(Right(),Up())); }
+glm::vec3 Object::_Right(){
 	float x = m_Orientation.x;
 	float y = m_Orientation.y;
 	float z = m_Orientation.z;
@@ -38,7 +42,7 @@ glm::vec3 Object::Right(){
                                      2 * (x * y + w * z),
                                      2 * (x * z - w * y)));
 }
-glm::vec3 Object::Up(){
+glm::vec3 Object::_Up(){
 	float x = m_Orientation.x;
 	float y = m_Orientation.y;
 	float z = m_Orientation.z;
@@ -51,6 +55,7 @@ void Object::Translate(float x, float y, float z){
 	m_Position += Forward() * (z * Resources->dt);
 	m_Position += Right() * (x * Resources->dt);
 	m_Position += Up() * (y * Resources->dt);
+	m_Changed = true;
 }
 void Object::Translate(glm::vec3& translation){ Translate(translation.x,translation.y,translation.z); }
 void Object::Rotate(float x, float y, float z){ 
@@ -60,29 +65,61 @@ void Object::Rotate(float x, float y, float z){
 	Pitch(x); 
 	Yaw(y); 
 	Roll(z); 
+	m_Changed = true;
 }
 void Object::Rotate(glm::vec3& rotation){ Rotate(rotation.x,rotation.y,rotation.z); }
-void Object::Scale(float x, float y, float z){ m_Scale.x += x * Resources->dt; m_Scale.y += y * Resources->dt; m_Scale.z += z * Resources->dt; m_Calculate_Radius(); }
+void Object::Scale(float x, float y, float z){ 
+	m_Scale.x += x * Resources->dt; 
+	m_Scale.y += y * Resources->dt; 
+	m_Scale.z += z * Resources->dt; 
+	m_Calculate_Radius(); 
+	m_Changed = true;
+}
 void Object::Scale(glm::vec3& scale){ Scale(scale.x,scale.y,scale.z); }
-void Object::Set_Position(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; }
+void Object::Set_Position(float x, float y, float z){ 
+	m_Position.x = x; 
+	m_Position.y = y; 
+	m_Position.z = z; 
+	m_Changed = true;
+}
 void Object::Set_Position(glm::vec3& position){ Set_Position(position.x,position.y,position.z); }
-void Object::Set_Scale(float x, float y, float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_Calculate_Radius(); }
+void Object::Set_Scale(float x, float y, float z){ 
+	m_Scale.x = x; 
+	m_Scale.y = y; 
+	m_Scale.z = z; 
+	m_Calculate_Radius(); 
+	m_Changed = true;
+}
 void Object::Set_Scale(glm::vec3& scale){ Set_Scale(scale.x,scale.y,scale.z); }
-void Object::Pitch(float amount){ m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0))); }
-void Object::Yaw(float amount){ m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(0,1,0))); }
-void Object::Roll(float amount){ m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(amount,glm::vec3(0,0,1))); }
+void Object::Pitch(float amount){ 
+	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0)));
+	m_Changed = true;
+}
+void Object::Yaw(float amount){ 
+	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(0,1,0)));
+	m_Changed = true;
+}
+void Object::Roll(float amount){ 
+	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(amount,glm::vec3(0,0,1)));
+	m_Changed = true;
+}
 void Object::Update(float dt){
 	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr){
 		newModel = m_Parent->m_Model;
 		m_Orientation = m_Parent->Orientation();
 	}
+	if(m_Changed){
+		m_Forward = _Forward();
+		m_Right = _Right();
+		m_Up = _Up();
 
-	newModel = glm::translate(newModel, m_Position);
-	newModel *= glm::mat4_cast(m_Orientation);
-	newModel = glm::scale(newModel,m_Scale);
-	m_Model = newModel;
-
+		newModel = glm::translate(newModel, m_Position);
+		newModel *= glm::mat4_cast(m_Orientation);
+		newModel = glm::scale(newModel,m_Scale);
+		m_Model = newModel;
+		m_Changed = false;
+	}
 	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(m_Model);
 }
 void Object::Render(Mesh* mesh, Material* material,bool debug){
@@ -108,21 +145,11 @@ void Object::Render(bool debug){ Object::Render(m_Mesh,m_Material,debug); }
 void Object::Add_Child(Object* child){
 	child->m_Parent = this;
 	this->m_Children.push_back(child);
+	child->m_Changed = true;
+	m_Changed = true;
 }
 void Object::Set_Color(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
 void Object::Set_Color(glm::vec3& color){ Object::Set_Color(color.x,color.y,color.z); }
-#pragma region Getters
-glm::vec3 Object::Position() const { return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
-glm::vec3 Object::Scale() { return m_Scale; }
-const glm::vec3& Object::Radius() const { return m_Radius; }
-const glm::vec3& Object::Color() const { return m_Color; }
-const glm::mat4& Object::Model() const { return m_Model; }
-const glm::mat4& Object::World() const { return m_WorldMatrix; }
-const std::string Object::Name() const { return m_Name; }
-const Object* Object::Parent() const { return m_Parent; }
-std::vector<Object*> Object::Children() const { return m_Children; }
-#pragma endregion
-#pragma region Setters
+
 void Object::Set_Mesh(Mesh* mesh){ m_Mesh = mesh; if(m_Mesh == nullptr){m_Radius = glm::vec3(0,0,0); return; } m_Radius = mesh->Radius();  m_Calculate_Radius();  }
 void Object::Set_Material(Material* material){ m_Material = material; }
-#pragma endregion
