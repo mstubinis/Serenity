@@ -26,9 +26,9 @@ uniform float fKr4PI;			// Kr * 4 * PI
 uniform float fKm4PI;			// Km * 4 * PI 
 uniform float fScale;			// 1 / (fOuterRadius - fInnerRadius) 
 uniform float fScaleDepth;		// The scale depth (i.e. the altitude at which the atmosphere's average density is found) 
-uniform float fScaleOverScaleDepth;	// fScale / fScaleDepth 	
-const int iSamples = 2; 
-const float fInvSamples = 0.25; 
+uniform float fScaleOverScaleDepth;	// fScale / fScaleDepth
+uniform float fSamples;
+uniform int nSamples;	
 
 out vec3 c0;
 out vec3 c1;
@@ -53,7 +53,7 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 }
 void main(void)	{
 	if(hasAtmosphere == 1){
-		vec3 v3Pos = position;
+		vec3 v3Pos = position * vec3(fInnerRadius);
 		vec3 v3Ray = v3Pos - v3CameraPos;
 		float fFar = length(v3Ray);	
 		v3Ray /= fFar;	
@@ -63,21 +63,21 @@ void main(void)	{
 		vec3 v3Start = v3CameraPos + v3Ray * fNear;	
 		fFar -= fNear;	
 		float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);	
-		float fCameraAngle = dot(-v3Ray, v3Pos);	
-		float fLightAngle = dot(v3LightDir, v3Pos);	
-		float fCameraScale = scale(fCameraAngle);	
-		float fLightScale = scale(fLightAngle);	
-		float fCameraOffset = fDepth*fCameraScale;	
-		float fTemp = (fLightScale + fCameraScale);	
+		float fCameraAngle = dot(-v3Ray, v3Pos) / length(v3Pos);
+		float fLightAngle = dot(v3LightDir, v3Pos) / length(v3Pos);
+		float fCameraScale = scale(fCameraAngle);
+		float fLightScale = scale(fLightAngle);
+		float fCameraOffset = fDepth*fCameraScale;
+		float fTemp = (fLightScale + fCameraScale);
 	
-		float fSampleLength = fFar * fInvSamples;	
+		float fSampleLength = fFar / fSamples;
 		float fScaledLength = fSampleLength * fScale;	
 		vec3 v3SampleRay = v3Ray * fSampleLength;	
 		vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;	
 	
 		vec3 v3FrontColor = vec3(0);	
-		vec3 v3Attenuate;
-		for(int i = 0; i < iSamples; i++)	{	
+		vec3 v3Attenuate = vec3(0);
+		for(int i = 0; i < nSamples; i++)	{	
 			float fHeight = length(v3SamplePoint);	
 			float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));	
 			float fScatter = fDepth*fTemp - fCameraOffset;	
