@@ -27,7 +27,7 @@ uniform float fKm4PI;			// Km * 4 * PI
 uniform float fScale;			// 1 / (fOuterRadius - fInnerRadius) 
 uniform float fScaleDepth;		// The scale depth (i.e. the altitude at which the atmosphere's average density is found) 
 uniform float fScaleOverScaleDepth;	// fScale / fScaleDepth 	
-const int iSamples = 4; 
+const int iSamples = 2; 
 const float fInvSamples = 0.25; 
 
 out vec3 c0;
@@ -53,7 +53,7 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 }
 void main(void)	{
 	if(hasAtmosphere == 1){
-		vec3 v3Pos = normalize(position);
+		vec3 v3Pos = position;
 		vec3 v3Ray = v3Pos - v3CameraPos;
 		float fFar = length(v3Ray);	
 		v3Ray /= fFar;	

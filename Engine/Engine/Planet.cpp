@@ -13,15 +13,20 @@ void Planet::Update(float dt)
 {
 	Object::Update(dt);
 }
-void Planet::Render(Mesh* mesh, Material* mat,Planet* star,bool debug){
+void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	if(mesh == nullptr)
 		return;
 
 	GLuint shaderProgram = Resources->Get_Shader_Program("AS_GroundFromSpace")->Get_Shader_Program();
 
+	float innerRadius = 1.0f;
+	float outerRadius = innerRadius + (innerRadius * m_AtmosphereHeight);
+
 	glUseProgram(shaderProgram);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+
+
 	glUniform3f(glGetUniformLocation(shaderProgram, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 
 	for(auto component:mat->Components())
@@ -43,18 +48,13 @@ void Planet::Render(Mesh* mesh, Material* mat,Planet* star,bool debug){
 	glm::vec3 camPos = Resources->Current_Camera()->Position() - Position();
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
-	glm::vec3 lightDir = star->Position() - Position();
+	glm::vec3 lightDir = Resources->Lights.at(0)->Position() - Position();
 	lightDir = glm::normalize(lightDir);
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
-	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),
-		                                  1.0f / glm::pow(0.57f, 4.0f),
-										  1.0f / glm::pow(0.475f, 4.0f));
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),1.0f / glm::pow(0.57f, 4.0f),1.0f / glm::pow(0.475f, 4.0f));
 
 	glUniform3f(glGetUniformLocation(shaderProgram,"v3InvWavelength"), v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z);
-
-	float innerRadius = 1.0f;
-	float outerRadius = innerRadius + (m_AtmosphereHeight);
 
 	float camHeight = glm::length(camPos);
 	float camHeight2 = camHeight*camHeight;
@@ -97,16 +97,14 @@ void Planet::Render(Mesh* mesh, Material* mat,Planet* star,bool debug){
    	glBlendEquation(GL_FUNC_ADD);
    	glBlendFunc(GL_ONE, GL_ONE);
 
-	glm::mat4 f;
+
 	glm::mat4 obj = glm::mat4(1);
+	obj = glm::translate(obj,Position());
+	obj *= glm::mat4_cast(m_Orientation);
+	float rad = outerRadius*m_Scale.x;
+	obj = glm::scale(obj,glm::vec3(rad,rad,rad));
 
-	obj = glm::translate(obj, Position());
-	float radius = m_Radius.x + (m_AtmosphereHeight * m_Scale.x);
-	obj = glm::scale(obj,glm::vec3(radius,radius,radius));
-
-	f = Resources->Current_Camera()->Calculate_Projection(obj);
-
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(f));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_Projection(obj)));
 
 
 	glUniform1i(glGetUniformLocation(shader,"nSamples"), 2);
@@ -140,7 +138,7 @@ void Planet::Render(Mesh* mesh, Material* mat,Planet* star,bool debug){
 	float g = -0.98f;
 	glUniform1f(glGetUniformLocation(shader,"g"),g);
 	glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
-	glUniform1f(glGetUniformLocation(shader,"fExposure"),6.0f);
+	glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
 
 	Resources->Get_Mesh("Planet")->Render();
 
@@ -149,6 +147,6 @@ void Planet::Render(Mesh* mesh, Material* mat,Planet* star,bool debug){
 	glCullFace(GL_BACK);
 	glDisable(GL_BLEND);
 }
-void Planet::Render(Planet* star,bool debug){
-	this->Render(m_Mesh,m_Material,star,debug);
+void Planet::Render(bool debug){
+	this->Render(m_Mesh,m_Material,debug);
 }

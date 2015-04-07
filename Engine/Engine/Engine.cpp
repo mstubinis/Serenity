@@ -20,19 +20,24 @@ Engine::EngineClass::~EngineClass(){
 }
 void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsigned int height){
 	srand(static_cast<unsigned int>(time(NULL)));
+
 	sf::ContextSettings settings;
 	settings.depthBits = 24;
 	settings.stencilBits = 8;
 	settings.antialiasingLevel = 4;
 	settings.majorVersion = 3;
 	settings.minorVersion = 0;
-    Window = new sf::Window(sf::VideoMode(width, height), name, sf::Style::Default, settings);
+
+	sf::VideoMode videoMode;
+	videoMode.width = width;
+	videoMode.height = height;
+
+    Window = new sf::Window(videoMode, name, sf::Style::Default, settings);
+
     Window->setVerticalSyncEnabled(true);
 	Window->setMouseCursorVisible(false);
 	
-	m_MouseMoved = true;
-
-	glClearColor(0,0,0,1); // black background
+	glClearColor(0,0,0,1);
 }
 void Engine::EngineClass::INIT_Game(){
 	Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
@@ -83,7 +88,7 @@ void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
 			this->EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);
 			break;
 		case sf::Event::MouseMoved:
-			this->EVENT_MOUSE_MOVED(e.mouseMove,m_MouseMoved);
+			this->EVENT_MOUSE_MOVED(e.mouseMove);
 			break;
 		case sf::Event::Resized:
 			this->EVENT_RESIZE(e.size.width,e.size.height);
@@ -102,15 +107,14 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
 
 	Engine::Events::Mouse::MouseProcessing::_SetMouseWheelDelta(0);
+
+	if(Mouse_Position.x < 50 || Mouse_Position.y < 50 || Mouse_Position.x > static_cast<int>(Window->getSize().x - 50) || Mouse_Position.y > static_cast<int>(Window->getSize().y - 50)){
+		Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
+		Mouse_Position = Mouse_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
+		Mouse_Difference = glm::vec2(0,0);
+	}
 }
 void Engine::EngineClass::Update(float dt,sf::Event e){
-	m_Timer += dt;
-
-	if(m_MouseMoved == false && m_Timer > 0.165f){
-		m_MouseMoved = true;
-		m_Timer = 0;
-	}
-
 	game->Update(dt);
 	for(auto object:Resources->Objects)
 		object->Update(dt);
@@ -189,23 +193,13 @@ void Engine::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEven
 		return;
 	}
 }
-void Engine::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse,bool doit){
+void Engine::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
 	Mouse_Position_Previous = Mouse_Position;
 	Mouse_Position.x = static_cast<float>(mouse.x);
 	Mouse_Position.y = static_cast<float>(mouse.y);
-	if (doit == false){
-		return;
-	}
 
-	if(m_MouseMoved == true){
-		Mouse_Difference.x += (Mouse_Position.x - Mouse_Position_Previous.x);
-		Mouse_Difference.y += (Mouse_Position.y - Mouse_Position_Previous.y);
-	}
-	if(mouse.x < 50 || mouse.y < 50 || mouse.x > static_cast<int>(Window->getSize().x - 50) || mouse.y > static_cast<int>(Window->getSize().y - 50)){
-		m_MouseMoved = false;
-		m_Timer = 0;
-		Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
-	}
+	Mouse_Difference.x += (Mouse_Position.x - Mouse_Position_Previous.x);
+	Mouse_Difference.y += (Mouse_Position.y - Mouse_Position_Previous.y);
 }
 void Engine::EngineClass::EVENT_MOUSE_ENTERED()
 {

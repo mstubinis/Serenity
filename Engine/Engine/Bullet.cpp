@@ -27,7 +27,7 @@ Bullet::~Bullet(){
 void Bullet::Set_Gravity(float x,float y,float z){ m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
 void Bullet::Set_Gravity(vec3 gravity){ Set_Gravity(gravity.x,gravity.y,gravity.z); }
 void Bullet::Add_Rigid_Body(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
-void Bullet::Update(float dt){ m_dynamicsWorld->stepSimulation(dt); }
+void Bullet::Update(float dt){ m_dynamicsWorld->stepSimulation(glm::max(1/60.0f,dt)); }
 void Bullet::Render(){
 	glm::mat4 model = glm::mat4();
 	GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();

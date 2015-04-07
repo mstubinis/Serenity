@@ -34,7 +34,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");
 	Add_Material("Defiant","Textures\\defiant.png","","Textures\\defiantGlow.png");
 
-	m_Cameras["Debug"] = new Camera(60,float(window_x/window_y),0.01f,1000.0f);
+	m_Cameras["Debug"] = new Camera(45,window_x/(float)window_y,0.1f,100000.0f);
 
 	Set_Active_Camera("Debug");
 }

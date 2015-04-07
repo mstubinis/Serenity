@@ -20,7 +20,7 @@ class Planet: public Object{
 		~Planet();
 
 		virtual void Update(float);
-		virtual void Render(Mesh*, Material*,Planet*,bool=false);
-		virtual void Render(Planet* star,bool=false);
+		virtual void Render(Mesh*, Material*,bool=false);
+		virtual void Render(bool=false);
 };
 #endif

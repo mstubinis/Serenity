@@ -32,6 +32,7 @@ out vec3 c0;
 out vec3 c1;
 out vec3 v3Direction;
 out vec3 v3LightPosition;
+out float Depth;
 
 float scale(float fCos){
 	float x = 1.0 - fCos;
@@ -44,7 +45,7 @@ float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadiu
 	return 0.5 * (-B - sqrt(fDet));
 }
 void main(){
-	vec3 v3Pos = position;
+	vec3 v3Pos = position * vec3(fOuterRadius);
 	vec3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
@@ -55,8 +56,9 @@ void main(){
     fFar -= fNear;
 
     float fStartAngle = dot(v3Ray, v3Start) / fOuterRadius;
-    float fStartDepth = exp(-(1.0 / fScaleDepth));
+    float fStartDepth = exp(-1.0 / fScaleDepth);
     float fStartOffset = fStartDepth * scale(fStartAngle);
+	Depth = clamp(fStartOffset,0.0,1.0);
 
     float fSampleLength = fFar / fSamples;
     float fScaledLength = fSampleLength * fScale;

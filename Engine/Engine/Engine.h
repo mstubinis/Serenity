@@ -22,7 +22,7 @@ namespace Engine{
 			void EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent);
 			void EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent);
 			void EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent);
-			void EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent,bool=true);
+			void EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent);
 			void EVENT_MOUSE_ENTERED();
 			void EVENT_MOUSE_LEFT();
 			void EVENT_JOYSTICK_BUTTON_PRESSED();
@@ -35,9 +35,7 @@ namespace Engine{
 			void _EVENT_HANDLERS(sf::Event);
 			void _RESET_EVENTS();
 
-			bool m_MouseMoved;
 			bool m_DrawDebug;
-			float m_Timer;
 
 			Game* game;
 			GLuint m_vao;

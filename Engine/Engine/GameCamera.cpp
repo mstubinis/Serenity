@@ -22,6 +22,11 @@ void GameCamera::Update(float dt){
 		case CAMERA_STATE_FOLLOW:
 			m_Position = m_Target->Position() + (m_Target->Forward()*glm::length(m_Target->Radius())*3.0f);
 			m_Position += m_Target->Up() * glm::length(m_Target->Radius())*0.6f;
+
+			m_Model = glm::mat4(1);
+			m_Model = glm::translate(m_Model,m_Position);
+			m_Model *= glm::mat4_cast(m_Orientation);
+
 			LookAt(m_Target,true);
 			break;
 		case CAMERA_STATE_ORBIT:

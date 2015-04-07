@@ -35,7 +35,7 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
 
 	vec3 N = normalize(_norm);
     vec3 L = normalize(gPosition);
-    vec3 H = normalize(L + _worldPos);
+    vec3 H = normalize(gPosition + _worldPos);
 
     float df = max(0.0, dot(N, L));
     float sf = max(0.0, dot(N, H));

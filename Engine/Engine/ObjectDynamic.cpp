@@ -21,7 +21,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 
 	m_MotionState = new btDefaultMotionState(tr);
 
-	float mass = 0.5f;
+	float mass = 0.5f * m_Radius.x;
 
 	btVector3 inertia;
 	m_Collision_Shape->calculateLocalInertia(mass,inertia);

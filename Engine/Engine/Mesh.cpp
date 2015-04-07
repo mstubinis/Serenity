@@ -269,7 +269,7 @@ btConvexHullShape* Mesh::LoadColFromOBJ(std::string filename){
 	for(std::string line; std::getline(str, line, '\n');){
 		std::string x; std::string y; std::string z;
 		unsigned int whilespaceCount = 0;
-		if(line[0] == 'v'){ 
+		if(line[0] == 'v' && line[1] == ' '){ 
 			for(auto c:line){
 				if(c == ' ')                      whilespaceCount++;
 				else{
@@ -278,15 +278,15 @@ btConvexHullShape* Mesh::LoadColFromOBJ(std::string filename){
 					else if(whilespaceCount == 3) z += c;
 				}
 			}
-			if(line[1] == ' '){//vertex point
-				float x1 = static_cast<float>(::atof(x.c_str()));
-				float y1 = static_cast<float>(::atof(y.c_str()));
-				float z1 = static_cast<float>(::atof(z.c_str()));
+			float x1 = static_cast<float>(::atof(x.c_str()));
+			float y1 = static_cast<float>(::atof(y.c_str()));
+			float z1 = static_cast<float>(::atof(z.c_str()));
 
-				btVector3 pos = btVector3(x1,y1,z1);
-				collision->addPoint(pos);
-			}
+			btVector3 pos = btVector3(x1,y1,z1);
+			collision->addPoint(pos);
 		}
+		else if(line[0] == 'v' && line[1] != ' ')
+			return collision;
 	}
 	return collision;
 }
