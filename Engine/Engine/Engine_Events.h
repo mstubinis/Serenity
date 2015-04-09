@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <boost/algorithm/string.hpp> 
 
+#include <glm/glm.hpp>
+
 namespace Engine{
 	namespace Events{
 		namespace Mouse{
@@ -26,6 +28,11 @@ namespace Engine{
 					static MouseButton m_previousButton;
 					static std::unordered_map<MouseButton,bool> m_MouseStatus;
 
+					static glm::vec2 m_Position, m_Position_Previous,m_Difference;
+
+					static glm::vec2 _GetMousePosition(){ return m_Position; }
+					static glm::vec2 _GetMousePositionPrevious(){ return m_Position_Previous; }
+					static glm::vec2 _GetMouseDifference(){ return m_Difference; }
 					static bool MouseProcessing::_IsMouseButtonDown(std::string str){
 						boost::algorithm::to_lower(str);
 						MouseButton key = MouseProcessing::m_MouseMap[str];
@@ -43,6 +50,9 @@ namespace Engine{
 					static int MouseProcessing::_GetMouseWheelDelta(){ return m_Delta; }
 					static void MouseProcessing::_SetMouseWheelDelta(int d){ m_Delta = d; }
 			};
+			static glm::vec2 GetMouseDifference(){ return MouseProcessing::_GetMouseDifference(); }
+			static glm::vec2 GetMousePositionPrevious(){ return MouseProcessing::_GetMousePositionPrevious(); }
+			static glm::vec2 GetMousePosition(){ return MouseProcessing::_GetMousePosition(); }
 			static bool IsMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
 			static bool IsMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
 			static int GetMouseWheelDelta(){ return MouseProcessing::_GetMouseWheelDelta(); }

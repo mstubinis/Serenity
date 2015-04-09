@@ -269,7 +269,7 @@ btConvexHullShape* Mesh::LoadColFromOBJ(std::string filename){
 	for(std::string line; std::getline(str, line, '\n');){
 		std::string x; std::string y; std::string z;
 		unsigned int whilespaceCount = 0;
-		if(line[0] == 'v' && line[1] == ' '){ 
+		if(line[0] == 'v' && line[1] == ' '){
 			for(auto c:line){
 				if(c == ' ')                      whilespaceCount++;
 				else{

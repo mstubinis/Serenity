@@ -255,6 +255,9 @@ unordered_map<string,Mouse::MouseButton> Mouse::MouseProcessing::m_MouseMap = _g
 unordered_map<sf::Keyboard::Key,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
 unordered_map<Mouse::MouseButton,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
 int Mouse::MouseProcessing::m_Delta = 0;
+glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0,0);
+glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0,0);
+glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
 
 //init prev / current variables
 sf::Keyboard::Key Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;

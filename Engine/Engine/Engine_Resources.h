@@ -16,7 +16,6 @@
 class ShaderP;
 class ResourceManager{
 	private:
-
 		Camera* m_Current_Camera;
 
 		std::unordered_map<std::string,Camera*> m_Cameras;
@@ -47,11 +46,8 @@ class ResourceManager{
 		ShaderP* Default_Shader_Program(); ShaderP* Get_Shader_Program(std::string);
 
 		void INIT_Game_Resources();
-
-		void Update(float);
 };
 extern sf::Window* Window;
 extern sf::Mouse* Mouse;
-extern glm::vec2 Mouse_Position, Mouse_Position_Previous,Mouse_Difference;
 extern ResourceManager* Resources;
 #endif

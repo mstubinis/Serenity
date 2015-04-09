@@ -76,7 +76,7 @@ void PlayerShip::Update(float dt){
 		Apply_Torque(0,0,-1);
 
 	if(m_Camera->State() != CAMERA_STATE_ORBIT){
-		Apply_Torque(-Mouse_Difference.y*0.0001f,-Mouse_Difference.x*0.0001f,0);
+		Apply_Torque(-Mouse::GetMouseDifference().y*0.002f,-Mouse::GetMouseDifference().x*0.002f,0);
 	}
 
 	if(Keyboard::IsKeyDownOnce("f1"))

@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "Engine_Events.h"
 
+using namespace Engine::Events;
+
 GameCamera::GameCamera(float angle, float ratio, float _near, float _far):Camera(angle,ratio,_near,_far){
 	m_State = CAMERA_STATE_FREEFORM;
 	m_Target = nullptr;
@@ -32,7 +34,7 @@ void GameCamera::Update(float dt){
 		case CAMERA_STATE_ORBIT:
 			m_OrbitRadius += Engine::Events::Mouse::GetMouseWheelDelta() * dt;
 
-			Rotate(-Mouse_Difference.y*0.005f,-Mouse_Difference.x*0.005f,0);
+			Rotate(-Mouse::GetMouseDifference().y*0.005f,-Mouse::GetMouseDifference().x*0.005f,0);
 
 			m_Position = (glm::vec3(0,0,1)*glm::length(m_Target->Radius())*1.5f) + (glm::vec3(0,0,1)*glm::length(m_Target->Radius() * (1+m_OrbitRadius)));
 

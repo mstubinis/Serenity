@@ -32,7 +32,9 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
 	videoMode.width = width;
 	videoMode.height = height;
 
-    Window = new sf::Window(videoMode, name, sf::Style::Default, settings);
+	int style = sf::Style::Fullscreen;
+
+    Window = new sf::Window(videoMode, name, style, settings);
 
     Window->setVerticalSyncEnabled(true);
 	Window->setMouseCursorVisible(false);
@@ -41,8 +43,8 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
 }
 void Engine::EngineClass::INIT_Game(){
 	Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
-	Mouse_Position = Mouse_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
-	Mouse_Difference = glm::vec2(0,0);
+	Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
+	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
 
 	glewExperimental = GL_TRUE; 
 	glewInit();
@@ -87,17 +89,18 @@ void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
     }
 }
 void Engine::EngineClass::_RESET_EVENTS(){
-	Engine::Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-	Engine::Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
+	Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
+	Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
 
 	for(auto iterator:Engine::Events::Keyboard::KeyProcessing::m_KeyStatus){ iterator.second = false; }
 	for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
 
-	Engine::Events::Mouse::MouseProcessing::_SetMouseWheelDelta(0);
+	Events::Mouse::MouseProcessing::_SetMouseWheelDelta(0);
 
-	if(Mouse_Position.x < 50 || Mouse_Position.y < 50 || Mouse_Position.x > static_cast<int>(Window->getSize().x - 50) || Mouse_Position.y > static_cast<int>(Window->getSize().y - 50)){
+	glm::vec2 mousePos = Engine::Events::Mouse::GetMousePosition();
+	if(mousePos.x < 50 || mousePos.y < 50 || mousePos.x > static_cast<int>(Window->getSize().x - 50) || mousePos.y > static_cast<int>(Window->getSize().y - 50)){
 		Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
-		Mouse_Position = Mouse_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
+		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
 	}
 }
 void Engine::EngineClass::_Update(float dt,sf::Event e){
@@ -106,7 +109,7 @@ void Engine::EngineClass::_Update(float dt,sf::Event e){
 		object->Update(dt);
 	for(auto light:Resources->Lights)
 		light->Update(dt);
-	Mouse_Difference *= (0.975f * (1-dt));
+	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 
 	bullet->Update(dt);
 }
@@ -132,17 +135,17 @@ void Engine::EngineClass::EVENT_TEXT_ENTERED(sf::Event::TextEvent text)
 {
 }
 void Engine::EngineClass::EVENT_KEY_PRESSED(sf::Event::KeyEvent key){
-	Engine::Events::Keyboard::KeyProcessing::m_previousKey = Engine::Events::Keyboard::KeyProcessing::m_currentKey;
-	Engine::Events::Keyboard::KeyProcessing::m_currentKey = key.code;
-	Engine::Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = true;
+	Events::Keyboard::KeyProcessing::m_previousKey = Events::Keyboard::KeyProcessing::m_currentKey;
+	Events::Keyboard::KeyProcessing::m_currentKey = key.code;
+	Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = true;
 }
 void Engine::EngineClass::EVENT_KEY_RELEASED(sf::Event::KeyEvent key){
-	Engine::Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-	Engine::Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-	Engine::Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = false;
+	Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
+	Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
+	Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = false;
 }
 void Engine::EngineClass::EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
-	Engine::Events::Mouse::MouseProcessing::_SetMouseWheelDelta(mouseWheel.delta);
+	Events::Mouse::MouseProcessing::_SetMouseWheelDelta(mouseWheel.delta);
 }
 void Engine::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
@@ -180,12 +183,12 @@ void Engine::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEven
 	}
 }
 void Engine::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
-	Mouse_Position_Previous = Mouse_Position;
-	Mouse_Position.x = static_cast<float>(mouse.x);
-	Mouse_Position.y = static_cast<float>(mouse.y);
+	Events::Mouse::MouseProcessing::m_Position_Previous = Events::Mouse::MouseProcessing::m_Position;
+	Events::Mouse::MouseProcessing::m_Position.x = static_cast<float>(mouse.x);
+	Events::Mouse::MouseProcessing::m_Position.y = static_cast<float>(mouse.y);
 
-	Mouse_Difference.x += (Mouse_Position.x - Mouse_Position_Previous.x);
-	Mouse_Difference.y += (Mouse_Position.y - Mouse_Position_Previous.y);
+	Events::Mouse::MouseProcessing::m_Difference.x += (Events::Mouse::MouseProcessing::m_Position.x - Events::Mouse::MouseProcessing::m_Position_Previous.x);
+	Events::Mouse::MouseProcessing::m_Difference.y += (Events::Mouse::MouseProcessing::m_Position.y - Events::Mouse::MouseProcessing::m_Position_Previous.y);
 }
 void Engine::EngineClass::EVENT_MOUSE_ENTERED()
 {

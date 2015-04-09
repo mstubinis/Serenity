@@ -6,9 +6,6 @@ ResourceManager::ResourceManager(){
 	dt = 0;
 }
 void ResourceManager::INIT_Game_Resources(){
-	float window_x = static_cast<float>(Window->getSize().x);
-	float window_y = static_cast<float>(Window->getSize().y);
-
 	Add_Shader_Program("Default","Shaders\\vert.glsl","Shaders\\frag.glsl");
 
 	Add_Shader_Program("Deferred","Shaders\\vert.glsl","Shaders\\deferred_frag.glsl");
@@ -36,7 +33,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");
 	Add_Material("Defiant","Textures\\defiant.png","","Textures\\defiantGlow.png");
 
-	m_Cameras["Debug"] = new Camera(45,window_x/(float)window_y,0.1f,100000.0f);
+	m_Cameras["Debug"] = new Camera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,100000.0f);
 
 	Set_Active_Camera("Debug");
 }
@@ -59,9 +56,6 @@ ResourceManager::~ResourceManager(){
 	for(auto shaderP:m_ShaderPrograms){
 		delete shaderP.second;
 	}
-}
-void ResourceManager::Update(float dt)
-{
 }
 void ResourceManager::Set_Active_Camera(Camera* camera){ m_Current_Camera = camera; }
 void ResourceManager::Set_Active_Camera(std::string name){ m_Current_Camera = m_Cameras[name]; }

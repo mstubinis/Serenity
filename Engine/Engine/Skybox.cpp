@@ -5,7 +5,7 @@
 
 Skybox::Skybox(std::string name): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Skybox",true){
 	m_Position = glm::vec3(0,0,0);
-	m_Scale = glm::vec3(999,999,999);
+	m_Scale = glm::vec3(99999,99999,99999);
 	m_WorldMatrix = m_Model = glm::mat4(1);
 
 	m_ShaderProgram = Resources->Get_Shader_Program("Deferred_Skybox")->Get_Shader_Program();
@@ -20,9 +20,6 @@ Skybox::Skybox(std::string name): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(
 	std::string names[6] = {front,back,left,right,top,bottom};
 	Resources->Load_Cubemap_Texture_Into_GLuint(m_Texture,names);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture);
-
-	if (m_Texture == 0)
-		printf("SOIL loading error: '%s'\n", SOIL_last_result());
 }
 Skybox::~Skybox(){
 	glDeleteTextures(1,&m_Texture);

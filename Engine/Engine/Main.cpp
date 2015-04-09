@@ -3,7 +3,6 @@
 Renderer* renderer;
 Bullet* bullet;
 ResourceManager* Resources;
-glm::vec2 Mouse_Position, Mouse_Position_Previous,Mouse_Difference;
 sf::Window* Window;
 sf::Mouse* Mouse;
 
