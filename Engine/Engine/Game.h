@@ -1,15 +1,13 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "Object.h"
-#include "ObjectDynamic.h"
-#include "Planet.h"
-#include "GameCamera.h"
+#include <unordered_map>
+#include "SolarSystem.h"
 
 class Game{
 	private:
-		ObjectDynamic* player;
-		GameCamera* playerCamera;
+		std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
+		SolarSystem* m_CurrentSolarSystem;
 	public:
 		Game();
 		~Game();

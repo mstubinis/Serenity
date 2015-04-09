@@ -144,6 +144,9 @@
     <ClCompile Include="GameCamera.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Ship.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -212,6 +215,9 @@
     <ClInclude Include="GameCamera.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Ship.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\frag.glsl">
@@ -264,6 +270,12 @@
     </None>
     <None Include="Shaders\deferred_lighting_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
+    </None>
+    <None Include="Shaders\AS_skyFromAtmosphere_frag.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
+    </None>
+    <None Include="Shaders\AS_skyFromAtmosphere_vert.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -45,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\boost155\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SFML_STATIC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -73,7 +73,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\boost155\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SFML_STATIC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -116,6 +116,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClCompile Include="Engine_Resources.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="TextureBuffer.cpp" />
@@ -140,6 +141,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClInclude Include="Engine_Resources.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Ship.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="TextureBuffer.h" />
@@ -147,6 +149,8 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
   <ItemGroup>
     <None Include="Shaders\AS_groundFromSpace_frag.glsl" />
     <None Include="Shaders\AS_groundFromSpace_vert.glsl" />
+    <None Include="Shaders\AS_skyFromAtmosphere_frag.glsl" />
+    <None Include="Shaders\AS_skyFromAtmosphere_vert.glsl" />
     <None Include="Shaders\AS_skyFromSpace_frag.glsl" />
     <None Include="Shaders\AS_skyFromSpace_vert.glsl" />
     <None Include="Shaders\deferred_blur_frag.glsl" />

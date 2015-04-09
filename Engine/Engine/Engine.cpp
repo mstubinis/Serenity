@@ -36,7 +36,7 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
 
     Window->setVerticalSyncEnabled(true);
 	Window->setMouseCursorVisible(false);
-	
+
 	glClearColor(0,0,0,1);
 }
 void Engine::EngineClass::INIT_Game(){
@@ -61,43 +61,30 @@ void Engine::EngineClass::INIT_Game(){
 	glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
 }
 void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
-	#pragma region Event Handlers
 	switch (e.type){
         case sf::Event::Closed:
-			this->EVENT_CLOSE();
-            break;
+			EVENT_CLOSE();break;
         case sf::Event::KeyReleased:
-			this->EVENT_KEY_RELEASED(e.key);
-            break;
+			EVENT_KEY_RELEASED(e.key);break;
         case sf::Event::KeyPressed:
-			this->EVENT_KEY_PRESSED(e.key);
-            break;
+			EVENT_KEY_PRESSED(e.key);break;
 		case sf::Event::MouseButtonPressed:
-			this->EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);
-			break;
+			EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
 		case sf::Event::MouseButtonReleased:
-			this->EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);
-			break;
+			EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
 		case sf::Event::MouseEntered:
-			this->EVENT_MOUSE_ENTERED();
-			break;
+			EVENT_MOUSE_ENTERED();break;
 		case sf::Event::MouseLeft:
-			this->EVENT_MOUSE_LEFT();
-			break;
+			EVENT_MOUSE_LEFT();break;
 		case sf::Event::MouseWheelMoved:
-			this->EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);
-			break;
+			EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
 		case sf::Event::MouseMoved:
-			this->EVENT_MOUSE_MOVED(e.mouseMove);
-			break;
+			EVENT_MOUSE_MOVED(e.mouseMove);break;
 		case sf::Event::Resized:
-			this->EVENT_RESIZE(e.size.width,e.size.height);
-			break;
+			EVENT_RESIZE(e.size.width,e.size.height);break;
 		case sf::Event::TextEntered:
-			this->EVENT_TEXT_ENTERED(e.text);
-			break;
+			EVENT_TEXT_ENTERED(e.text);break;
     }
-	#pragma endregion
 }
 void Engine::EngineClass::_RESET_EVENTS(){
 	Engine::Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
@@ -111,10 +98,9 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	if(Mouse_Position.x < 50 || Mouse_Position.y < 50 || Mouse_Position.x > static_cast<int>(Window->getSize().x - 50) || Mouse_Position.y > static_cast<int>(Window->getSize().y - 50)){
 		Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
 		Mouse_Position = Mouse_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
-		Mouse_Difference = glm::vec2(0,0);
 	}
 }
-void Engine::EngineClass::Update(float dt,sf::Event e){
+void Engine::EngineClass::_Update(float dt,sf::Event e){
 	game->Update(dt);
 	for(auto object:Resources->Objects)
 		object->Update(dt);
@@ -124,7 +110,7 @@ void Engine::EngineClass::Update(float dt,sf::Event e){
 
 	bullet->Update(dt);
 }
-void Engine::EngineClass::Render(){
+void Engine::EngineClass::_Render(){
 	renderer->Render(m_DrawDebug);
 
 	Window->display();
@@ -228,13 +214,12 @@ void Engine::EngineClass::Run(){
 	while(true){
 		bool poll = Window->pollEvent(event);
 		Resources->dt = clock.restart().asSeconds();
-		this->_EVENT_HANDLERS(event);
 
-		this->Update(Resources->dt,event);
+		_EVENT_HANDLERS(event);
+		_Update(Resources->dt,event);
+		_RESET_EVENTS();
 
-		this->_RESET_EVENTS();
-
-		Render();
+		_Render();
 	}
 }
 #pragma endregion

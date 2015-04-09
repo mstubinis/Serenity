@@ -7,8 +7,6 @@ using namespace Engine::Events;
 Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision): ObjectDynamic(mesh,mat,pos,scl,name,collision){
 	m_WarpFactor = 0;
 	m_IsWarping = false;
-
-	Game::CurrentSystem()->Objects().push_back(this);
 }
 Ship::~Ship()
 {
@@ -42,8 +40,9 @@ void PlayerShip::Update(float dt){
 			}
 		}
 		for(auto obj:Resources->Lights){
-			if(obj->Parent() == nullptr)
+			if(obj->Parent() == nullptr){
 				obj->Translate(s,false);
+			}
 		}
 	}
 
@@ -77,7 +76,7 @@ void PlayerShip::Update(float dt){
 		Apply_Torque(0,0,-1);
 
 	if(m_Camera->State() != CAMERA_STATE_ORBIT){
-		Apply_Torque(-Mouse_Difference.y*0.002f,-Mouse_Difference.x*0.002f,0);
+		Apply_Torque(-Mouse_Difference.y*0.0001f,-Mouse_Difference.x*0.0001f,0);
 	}
 
 	if(Keyboard::IsKeyDownOnce("f1"))

@@ -1,9 +1,7 @@
 #ifndef SHIP_H
 #define SHIP_H
 
-#include "Game.h"
 #include "ObjectDynamic.h"
-
 class GameCamera;
 class Ship: public ObjectDynamic{
 	protected:

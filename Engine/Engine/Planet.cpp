@@ -1,16 +1,15 @@
+#include "Light.h"
 #include "Planet.h"
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
 
-Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos, glm::vec3 scl, std::string name, bool add):Object("Planet",mat,pos,scl,name,add){
+Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name, bool add):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,add){
 	m_AtmosphereHeight = 0.025f;
 	m_Type = type;
 }
-Planet::~Planet()
-{
+Planet::~Planet(){
 }
-void Planet::Update(float dt)
-{
+void Planet::Update(float dt){
 	Object::Update(dt);
 }
 void Planet::Render(Mesh* mesh, Material* mat,bool debug){
@@ -88,10 +87,12 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 
 	mesh->Render();
 
-	//sky from space
 	if(m_AtmosphereHeight <= 0.0f)
 		return;
-	shader = Resources->Get_Shader_Program("AS_SkyFromSpace")->Get_Shader_Program();
+
+	if(camHeight > outerRadius) shader = Resources->Get_Shader_Program("AS_SkyFromSpace")->Get_Shader_Program();
+	else                        shader = Resources->Get_Shader_Program("AS_SkyFromAtmosphere")->Get_Shader_Program();
+
 	glUseProgram(shader);
 
 	glCullFace(GL_FRONT);
@@ -99,7 +100,6 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	glEnable(GL_BLEND);
    	glBlendEquation(GL_FUNC_ADD);
    	glBlendFunc(GL_ONE, GL_ONE);
-
 
 	glm::mat4 obj = glm::mat4(1);
 	obj = glm::translate(obj,Position());
@@ -147,6 +147,21 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	glCullFace(GL_BACK);
 	glDisable(GL_BLEND);
 }
-void Planet::Render(bool debug){
-	this->Render(m_Mesh,m_Material,debug);
+void Planet::Render(bool debug){ Render(m_Mesh,m_Material,debug); }
+
+
+Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name, bool add): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,add){
+	m_Light = new SunLight();
+	m_Light->Set_Color(lightColor);
+	Set_Color(starColor);
+	m_Material->Set_Shadeless(true);
+
+	Add_Child(m_Light);
 }
+Star::~Star(){
+	delete m_Light;
+}
+void Star::Render(Mesh* mesh, Material* mat,bool debug){
+	Object::Render(mesh,mat,debug);
+}
+void Star::Render(bool debug){ Star::Render(m_Mesh,m_Material,debug); }

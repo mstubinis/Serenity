@@ -45,7 +45,9 @@ class Object{
 			  );
 		~Object();
 
-		virtual void Translate(float,float,float); virtual void Translate(glm::vec3&);
+		void Flag_As_Changed();
+
+		virtual void Translate(float,float,float,bool local=true); virtual void Translate(glm::vec3&,bool local=true);
 		virtual void Rotate(float,float,float); virtual void Rotate(glm::vec3&);
 		virtual void Scale(float,float,float); virtual void Scale(glm::vec3&);
 		virtual void Pitch(float); void Yaw(float); virtual void Roll(float);

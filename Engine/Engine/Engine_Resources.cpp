@@ -19,6 +19,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Shader_Program("Deferred_Skybox","Shaders\\vert_skybox.glsl","Shaders\\deferred_frag_skybox.glsl");
 
 	Add_Shader_Program("AS_SkyFromSpace","Shaders\\AS_skyFromSpace_vert.glsl","Shaders\\AS_skyFromSpace_frag.glsl");
+	Add_Shader_Program("AS_SkyFromAtmosphere","Shaders\\AS_skyFromAtmosphere_vert.glsl","Shaders\\AS_skyFromAtmosphere_frag.glsl");
 	Add_Shader_Program("AS_GroundFromSpace","Shaders\\AS_groundFromSpace_vert.glsl","Shaders\\AS_groundFromSpace_frag.glsl");
 
 	Add_Shader_Program("Deferred_Light","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_frag.glsl");
@@ -29,6 +30,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("Voyager","Models\\voyager.obj");
 	Add_Mesh("Defiant","Models\\defiant.obj");
 
+	Add_Material("Star","Textures\\sun.png","","");
 	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
 	Add_Material("Earth","Textures\\earth.png","","");
 	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");

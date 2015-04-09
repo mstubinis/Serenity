@@ -3,6 +3,8 @@
 
 #include "Engine_Resources.h"
 #include "Planet.h"
+#include "GameCamera.h"
+#include "Ship.h"
 
 class SolarSystem{
 	private:
@@ -10,6 +12,10 @@ class SolarSystem{
 		std::unordered_map<std::string,Planet*> m_Moons;
 		std::unordered_map<std::string,Planet*> m_Stars;
 
+		ObjectDynamic* player;
+		GameCamera* playerCamera;
+
+		void LoadTestSystem();
 		void LoadRandomly();
 		void LoadFromFile(std::string);
 	public:

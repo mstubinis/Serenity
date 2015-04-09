@@ -40,8 +40,8 @@ namespace Engine{
 			Game* game;
 			GLuint m_vao;
 
-			void Update(float,sf::Event);
-			void Render();
+			void _Update(float,sf::Event);
+			void _Render();
 
 		public:
 			EngineClass(std::string name, unsigned int width, unsigned int height);

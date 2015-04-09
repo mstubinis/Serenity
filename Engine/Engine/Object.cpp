@@ -51,13 +51,19 @@ glm::vec3 Object::_Up(){
                                      1 - 2 * (x * x + z * z),
                                      2 * (y * z + w * x)));
 }
-void Object::Translate(float x, float y, float z){
-	m_Position += Forward() * (z * Resources->dt);
-	m_Position += Right() * (x * Resources->dt);
-	m_Position += Up() * (y * Resources->dt);
-	m_Changed = true;
+void Object::Translate(float x, float y, float z,bool local){
+	x *= Resources->dt; y*= Resources->dt; z*=Resources->dt;
+	if(local){
+		m_Position += Forward() * z;
+		m_Position += Right() * x;
+		m_Position += Up() * y;
+	}
+	else{
+		m_Position += glm::vec3(x,y,z);
+	}
+	Flag_As_Changed();
 }
-void Object::Translate(glm::vec3& translation){ Translate(translation.x,translation.y,translation.z); }
+void Object::Translate(glm::vec3& translation,bool local){ Translate(translation.x,translation.y,translation.z); }
 void Object::Rotate(float x, float y, float z){ 
 	float threshold = 0.025f;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
@@ -73,14 +79,14 @@ void Object::Scale(float x, float y, float z){
 	m_Scale.y += y * Resources->dt; 
 	m_Scale.z += z * Resources->dt; 
 	m_Calculate_Radius(); 
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Object::Scale(glm::vec3& scale){ Scale(scale.x,scale.y,scale.z); }
 void Object::Set_Position(float x, float y, float z){ 
 	m_Position.x = x; 
 	m_Position.y = y; 
 	m_Position.z = z; 
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Object::Set_Position(glm::vec3& position){ Set_Position(position.x,position.y,position.z); }
 void Object::Set_Scale(float x, float y, float z){ 
@@ -88,20 +94,20 @@ void Object::Set_Scale(float x, float y, float z){
 	m_Scale.y = y; 
 	m_Scale.z = z; 
 	m_Calculate_Radius(); 
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Object::Set_Scale(glm::vec3& scale){ Set_Scale(scale.x,scale.y,scale.z); }
 void Object::Pitch(float amount){ 
 	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0)));
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Object::Yaw(float amount){ 
 	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(0,1,0)));
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Object::Roll(float amount){ 
 	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(amount,glm::vec3(0,0,1)));
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Object::Update(float dt){
 	glm::mat4 newModel = glm::mat4(1);
@@ -145,11 +151,16 @@ void Object::Render(bool debug){ Object::Render(m_Mesh,m_Material,debug); }
 void Object::Add_Child(Object* child){
 	child->m_Parent = this;
 	this->m_Children.push_back(child);
-	child->m_Changed = true;
-	m_Changed = true;
+	child->Flag_As_Changed();
+	Flag_As_Changed();
 }
 void Object::Set_Color(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
 void Object::Set_Color(glm::vec3& color){ Object::Set_Color(color.x,color.y,color.z); }
 
 void Object::Set_Mesh(Mesh* mesh){ m_Mesh = mesh; if(m_Mesh == nullptr){m_Radius = glm::vec3(0,0,0); return; } m_Radius = mesh->Radius();  m_Calculate_Radius();  }
 void Object::Set_Material(Material* material){ m_Material = material; }
+void Object::Flag_As_Changed(){
+	m_Changed = true;
+	for(auto child:m_Children)
+		child->m_Changed = true;
+}
