@@ -1,10 +1,11 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <string>
+#include <GL\glew.h>
+#include <SFML\OpenGL.hpp>
+#include <SFML\Window.hpp>
 class Game;
-#include "Engine_Resources.h"
-#include "Bullet.h"
-
 namespace Engine{
 	class EngineClass{
 		private:

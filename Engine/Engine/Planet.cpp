@@ -1,7 +1,10 @@
+#include "Engine_Resources.h"
 #include "Light.h"
 #include "Planet.h"
-#include "Engine_Resources.h"
 #include "ShaderProgram.h"
+#include "Mesh.h"
+#include "Material.h"
+#include "Camera.h"
 
 Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name, bool add):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,add){
 	m_AtmosphereHeight = 0.025f;

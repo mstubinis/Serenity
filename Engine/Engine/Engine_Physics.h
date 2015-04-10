@@ -1,15 +1,17 @@
-#ifndef BULLET_H
-#define BULLET_H
+#ifndef ENGINE_PHYSICS_H
+#define ENGINE_PHYSICS_H
 
-#include <Bullet\btBulletCollisionCommon.h>
-#include <Bullet\btBulletDynamicsCommon.h>
+#include <glm\glm.hpp>
 
-#include "Engine_Resources.h"
+class btBroadphaseInterface;
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+class btRigidBody;
+class GLDebugDrawer;
 
-#include <Bullet\LinearMath\btIDebugDraw.h>
-#include "GLDebugDrawer.h"
-
-class Bullet{
+class PhysicsEngine{
 	private:
 		btBroadphaseInterface* m_broadphase;					  // Build the broadphase
 		btDefaultCollisionConfiguration* m_collisionConfiguration;// collision configuration
@@ -20,8 +22,8 @@ class Bullet{
 		GLDebugDrawer* m_debugDrawer;
 
 	public:
-		Bullet();
-		~Bullet();
+		PhysicsEngine();
+		~PhysicsEngine();
 
 		void Set_Gravity(float,float,float); void Set_Gravity(glm::vec3);
 		void Add_Rigid_Body(btRigidBody*);
@@ -29,5 +31,5 @@ class Bullet{
 		void Update(float dt);
 		void Render();
 };
-extern Bullet* bullet;
+extern PhysicsEngine* physicsEngine;
 #endif

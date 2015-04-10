@@ -2,8 +2,6 @@
 #define OBJECT_H
 
 #include "Engine_Renderer.h"
-#include "Mesh.h"
-#include "Material.h"
 #include <string>
 #include <vector>
 #include <glm\glm.hpp>
@@ -12,7 +10,9 @@
 #include <glm\gtx\transform.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
-                                                                                 
+
+class Mesh;
+class Material;                                                                          
 class Object{
 	private:
 		glm::vec3 _Forward(); 

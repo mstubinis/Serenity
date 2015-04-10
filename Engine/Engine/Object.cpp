@@ -1,6 +1,9 @@
 #include "Object.h"
+#include "Camera.h"
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
+#include "Mesh.h"
+#include "Material.h"
 
 Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool addToResources){
 	m_Changed = true;

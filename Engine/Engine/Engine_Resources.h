@@ -1,19 +1,19 @@
 #ifndef ENGINE_RESOURCES_H
 #define ENGINE_RESOURCES_H
 
-#include "Object.h"
-#include "Light.h"
-#include "ObjectDynamic.h"
-#include "Skybox.h"
-#include "Mesh.h"
-#include "Material.h"
-#include "Camera.h"
 #include <unordered_map>
-#include <SFML\Graphics.hpp>
+#include <GL\glew.h>
+#include <SFML\OpenGL.hpp>
 #include <SFML\Window.hpp>
 #include <Bullet\btBulletDynamicsCommon.h>
 
+class Camera;
+class Mesh;
+class Material;
 class ShaderP;
+class Object;
+class SunLight;
+
 class ResourceManager{
 	private:
 		Camera* m_Current_Camera;

@@ -1,6 +1,8 @@
 #include "Skybox.h"
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
+#include "Camera.h"
+#include "Mesh.h"
 #include <SOIL\SOIL.h>
 
 Skybox::Skybox(std::string name): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Skybox",true){

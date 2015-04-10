@@ -2,6 +2,18 @@
 #include "ShaderProgram.h"
 #include <SOIL\SOIL.h>
 
+#include "Object.h"
+#include "Light.h"
+#include "ObjectDynamic.h"
+#include "Skybox.h"
+#include "Mesh.h"
+#include "Material.h"
+#include "Camera.h"
+
+#include <glm\gtx\transform.hpp>
+#include <glm\gtc\matrix_transform.hpp>
+#include <glm\gtc\type_ptr.hpp>
+
 ResourceManager::ResourceManager(){
 	dt = 0;
 }

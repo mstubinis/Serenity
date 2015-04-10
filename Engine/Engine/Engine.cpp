@@ -1,6 +1,12 @@
 #include "Engine.h"
+#include "Engine_Resources.h"
+#include "Engine_Renderer.h"
+#include "Engine_Physics.h"
 #include "Game.h"
 #include "Engine_Events.h"
+
+#include "ObjectDynamic.h"
+#include "Light.h"
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
 	m_DrawDebug = false;
@@ -13,7 +19,7 @@ Engine::EngineClass::~EngineClass(){
 	glDeleteVertexArrays( 1, &m_vao );
 	delete game;
 	delete renderer;
-	delete bullet;
+	delete physicsEngine;
 	delete Resources;
 	delete Mouse;
 	delete Window;
@@ -53,7 +59,7 @@ void Engine::EngineClass::INIT_Game(){
 	Resources->INIT_Game_Resources();
 
 	renderer = new Renderer();
-	bullet = new Bullet();
+	physicsEngine = new PhysicsEngine();
 
 	game = new Game();
 	game->Init_Resources();
@@ -111,7 +117,7 @@ void Engine::EngineClass::_Update(float dt,sf::Event e){
 		light->Update(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 
-	bullet->Update(dt);
+	physicsEngine->Update(dt);
 }
 void Engine::EngineClass::_Render(){
 	renderer->Render(m_DrawDebug);

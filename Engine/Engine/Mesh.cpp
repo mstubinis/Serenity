@@ -285,7 +285,7 @@ btConvexHullShape* Mesh::LoadColFromOBJ(std::string filename){
 			btVector3 pos = btVector3(x1,y1,z1);
 			collision->addPoint(pos);
 		}
-		else if(line[0] == 'v' && line[1] != ' ')
+		else if(line[0] == 'v' && line[1] != ' ') //we are done loading in the points, break out of the method
 			return collision;
 	}
 	return collision;

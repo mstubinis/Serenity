@@ -2,6 +2,10 @@
 #include "Engine_Resources.h"
 #include "Engine_Events.h"
 #include "ShaderProgram.h"
+#include "GBuffer.h"
+#include "Camera.h"
+#include "Light.h"
+#include "Engine_Physics.h"
 
 #include <glm\gtc\constants.hpp>
 
@@ -26,7 +30,7 @@ void Renderer::Geometry_Pass(bool debug){
 		object->Render(debug);
 	}	
 	if(debug){
-		bullet->Render();
+		physicsEngine->Render();
 		GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
 		glUseProgram(shader);
 		for(auto light:Resources->Lights){

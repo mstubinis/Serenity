@@ -1,7 +1,11 @@
 #include "Engine.h"
 
+class Renderer;
+class PhysicsEngine;
+class ResourceManager;
+
 Renderer* renderer;
-Bullet* bullet;
+PhysicsEngine* physicsEngine;
 ResourceManager* Resources;
 sf::Window* Window;
 sf::Mouse* Mouse;

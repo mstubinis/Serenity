@@ -1,3 +1,5 @@
+#include "Engine_Resources.h"
+#include "Light.h"
 #include "Ship.h"
 #include "Engine_Events.h"
 #include "GameCamera.h"

@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "SolarSystem.h"
 #include "Engine.h"
 #include "Engine_Events.h"
 

@@ -1,5 +1,10 @@
 #include "ObjectDynamic.h"
+#include "Engine_Physics.h"
+#include <Bullet\btBulletCollisionCommon.h>
+#include <Bullet\btBulletDynamicsCommon.h>
 #include "Engine_Resources.h"
+#include "Mesh.h"
+#include "Camera.h"
 
 ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,btCollisionShape* collisionShape): Object(mesh,mat,pos,scl,name,true){
 	m_Collision_Shape = collisionShape;
@@ -32,7 +37,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 	m_RigidBody->setSleepingThresholds(0.15f,0.15f);
 	m_RigidBody->setFriction(0.3f);
 	m_RigidBody->setDamping(0.3f,0.5f);//this makes the objects slowly slow down in space, like air friction
-	bullet->Add_Rigid_Body(m_RigidBody);
+	physicsEngine->Add_Rigid_Body(m_RigidBody);
 }
 ObjectDynamic::~ObjectDynamic(){
 	delete m_Collision_Shape;

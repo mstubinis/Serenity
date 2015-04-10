@@ -1,10 +1,10 @@
 #ifndef SOLARSYSTEM_H
 #define SOLARSYSTEM_H
 
-#include "Engine_Resources.h"
-#include "Planet.h"
-#include "GameCamera.h"
-#include "Ship.h"
+class Object;
+class ObjectDynamic;
+class GameCamera;
+class Planet;
 
 class SolarSystem{
 	private:

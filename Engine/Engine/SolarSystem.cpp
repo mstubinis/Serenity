@@ -1,10 +1,14 @@
 #include "Engine_Events.h"
 #include "SolarSystem.h"
+#include "Engine_Resources.h"
+#include "Planet.h"
+#include "GameCamera.h"
+#include "Ship.h"
+#include "Skybox.h"
 
 using namespace Engine::Events;
 
-SolarSystem::SolarSystem(std::string file)
-{
+SolarSystem::SolarSystem(std::string file){
 	if(file == ""){
 		//SolarSystem::LoadRandomly();
 		SolarSystem::LoadTestSystem();

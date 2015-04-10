@@ -1,8 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <string>
 #include <unordered_map>
-#include "SolarSystem.h"
+
+class SolarSystem;
 
 class Game{
 	private:

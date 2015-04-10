@@ -2,7 +2,11 @@
 #define OBJECTDYNAMIC_H
 
 #include "Object.h"
-#include "Bullet.h"
+
+class btCollisionShape;
+class btRigidBody;
+struct btDefaultMotionState;
+class btVector3;
 
 class ObjectDynamic: public Object{
 	private:

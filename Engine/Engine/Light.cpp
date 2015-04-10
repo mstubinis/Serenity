@@ -1,6 +1,8 @@
 #include "Light.h"
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
+#include "Camera.h"
+#include "Mesh.h"
 
 void Init_Quad(){
 	//Projection setup
