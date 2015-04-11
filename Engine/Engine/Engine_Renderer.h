@@ -2,7 +2,7 @@
 #define ENGINE_RENDER_H
 
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
 
 class Object;
 class GBuffer;

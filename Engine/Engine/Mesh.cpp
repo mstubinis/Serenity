@@ -320,11 +320,6 @@ void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_Tangents.push_back(v1.tangent);
 	m_Tangents.push_back(v2.tangent);
 	m_Tangents.push_back(v3.tangent);
-
-
-	btVector3 bv1 = btVector3(v1.position.x,v1.position.y,v1.position.z);
-    btVector3 bv2 = btVector3(v2.position.x,v2.position.y,v2.position.z);
-    btVector3 bv3 = btVector3(v3.position.x,v3.position.y,v3.position.z);
 }
 void Mesh::GenerateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
 	GenerateTriangle(v1,v2,v3);

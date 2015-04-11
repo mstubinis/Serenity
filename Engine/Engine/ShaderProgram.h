@@ -3,9 +3,12 @@
 
 #include <vector>
 #include <string>
-#include <fstream>
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
+
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #pragma region Shader_Compilers
 static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){
@@ -13,25 +16,17 @@ static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
  
-    // Read the Vertex Shader code from the file
-    std::string VertexShaderCode;
-    std::ifstream VertexShaderStream(vShaderFile, std::ios::in);
-    if(VertexShaderStream.is_open()){
-        std::string Line = "";
-        while(getline(VertexShaderStream, Line))
-            VertexShaderCode += "\n" + Line;
-        VertexShaderStream.close();
-    }
- 
-    // Read the Fragment Shader code from the file
-    std::string FragmentShaderCode;
-    std::ifstream FragmentShaderStream(fShaderFile, std::ios::in);
-    if(FragmentShaderStream.is_open()){
-        std::string Line = "";
-        while(getline(FragmentShaderStream, Line))
-            FragmentShaderCode += "\n" + Line;
-        FragmentShaderStream.close();
-    }
+	std::string VertexShaderCode = "";
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vShaderFile);
+	for(std::string line; std::getline(str, line, '\n');){
+		VertexShaderCode += "\n" + line;
+	}
+	std::string FragmentShaderCode = "";
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(fShaderFile);
+	for(std::string line; std::getline(str1, line, '\n');){
+		FragmentShaderCode += "\n" + line;
+	}
+
  
     GLint Result = GL_FALSE;
     int InfoLogLength;

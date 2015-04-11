@@ -1,11 +1,11 @@
-#version 130
+#version 120
 
-in vec3 position;
-in vec2 uv;
-in vec3 normal;
-in vec3 binormal;
-in vec3 tangent;
-in vec4 color;
+attribute vec3 position;
+attribute vec2 uv;
+attribute vec3 normal;
+attribute vec3 binormal;
+attribute vec3 tangent;
+attribute vec4 color;
 
 uniform mat4 MVP;
 uniform mat4 World;

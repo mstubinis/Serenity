@@ -3,7 +3,7 @@
 
 #include <string>
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
 #include <SFML/Window.hpp>
 class Game;
 namespace Engine{

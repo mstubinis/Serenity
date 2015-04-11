@@ -40,7 +40,7 @@ void GBuffer::Start(unsigned int type){
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	GLenum buffers[] = { m_Buffers[type]->Attatchment() };
+	unsigned int buffers[] = { m_Buffers[type]->Attatchment() };
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 
 	// Clear the render targets
@@ -57,7 +57,7 @@ void GBuffer::Start(unsigned int type,unsigned int type1){
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	GLenum buffers[] = { m_Buffers[type]->Attatchment(),m_Buffers[type1]->Attatchment() };
+	unsigned int buffers[] = { m_Buffers[type]->Attatchment(),m_Buffers[type1]->Attatchment() };
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 
 	// Clear the render targets
@@ -74,7 +74,7 @@ void GBuffer::Start(unsigned int type,unsigned int type1,unsigned int type2){
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	GLenum buffers[] = { m_Buffers[type]->Attatchment(),m_Buffers[type1]->Attatchment(),m_Buffers[type2]->Attatchment() };
+	unsigned int buffers[] = { m_Buffers[type]->Attatchment(),m_Buffers[type1]->Attatchment(),m_Buffers[type2]->Attatchment() };
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 
 	// Clear the render targets

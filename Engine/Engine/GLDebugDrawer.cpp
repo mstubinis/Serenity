@@ -1,7 +1,8 @@
 
 #include "GLDebugDrawer.h"
 #include "GLDebugFont.h"
-#include <SFML\OpenGL.hpp>
+#include <GL/glew.h>
+#include <GL/GL.h>
 
 GLDebugDrawer::GLDebugDrawer():m_debugMode(0){}
 GLDebugDrawer::~GLDebugDrawer(){}

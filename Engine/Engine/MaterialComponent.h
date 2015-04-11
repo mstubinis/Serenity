@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
 
 class Material;
 

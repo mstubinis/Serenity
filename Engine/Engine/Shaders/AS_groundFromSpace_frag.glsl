@@ -23,7 +23,6 @@ varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
 
-
 vec3 CalcBumpedNormal(){
     vec3 Norm = normalize(Normals);
     vec3 Tang = normalize(Tangents);

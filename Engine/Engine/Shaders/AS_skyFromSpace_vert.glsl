@@ -1,6 +1,6 @@
-#version 130
+#version 120
 
-in vec3 position;
+attribute vec3 position;
 
 uniform mat4 MVP;
 

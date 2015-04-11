@@ -23,7 +23,7 @@ Renderer::~Renderer(){
 void Renderer::Geometry_Pass(bool debug){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0,0,0,1);
+	glClearColor(0,1,0,1);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 	for(auto object:Resources->Objects){
@@ -42,19 +42,17 @@ void Renderer::Geometry_Pass(bool debug){
     glDisable(GL_DEPTH_TEST);
 }
 void Renderer::Lighting_Pass(){
-
 	glEnable(GL_BLEND);
    	glBlendEquation(GL_FUNC_ADD);
    	glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT);
-
 	this->Pass_Lighting();
 }
 void Renderer::Render(bool debug){
+
 	m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_BLOOM);
 	this->Geometry_Pass(debug);
 	m_gBuffer->Stop();
-
 
 	m_gBuffer->Start(BUFFER_TYPE_LIGHTING);
 	this->Lighting_Pass();
@@ -71,6 +69,7 @@ void Renderer::Render(bool debug){
 	m_gBuffer->Stop();
 
 	this->Pass_Final();
+
 }
 void Renderer::Pass_Lighting(){
 	GLuint shader = Resources->Get_Shader_Program("Deferred_Light")->Get_Shader_Program();

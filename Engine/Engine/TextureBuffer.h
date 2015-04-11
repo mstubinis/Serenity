@@ -2,7 +2,7 @@
 #define TEXTURE_BUFFER_H
 
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
 
 class TextureBuffer{
 	private:

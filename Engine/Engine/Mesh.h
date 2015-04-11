@@ -5,7 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include <GL/GL.h>
 
 class btCollisionShape;
 class btTriangleMesh;

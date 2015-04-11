@@ -3,7 +3,6 @@
 uniform samplerCube cubemap;
 
 varying vec3 TexCoord0;
-varying vec3 WP;
 
 void main(){
     gl_FragData[0] = texture(cubemap, TexCoord0);

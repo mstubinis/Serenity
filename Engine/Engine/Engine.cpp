@@ -45,7 +45,7 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
     Window->setVerticalSyncEnabled(true);
 	Window->setMouseCursorVisible(false);
 
-	glClearColor(0,0,0,1);
+	glClearColor(1,1,0,1);
 }
 void Engine::EngineClass::INIT_Game(){
 	Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
@@ -221,7 +221,7 @@ void Engine::EngineClass::Run(){
 	sf::Clock clock;
 	sf::Event event;
 	while(true){
-		bool poll = Window->pollEvent(event);
+		Window->pollEvent(event);
 		Resources->dt = clock.restart().asSeconds();
 
 		_EVENT_HANDLERS(event);
