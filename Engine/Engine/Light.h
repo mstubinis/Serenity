@@ -6,10 +6,10 @@ enum LIGHT_TYPE {LIGHT_TYPE_SUN,LIGHT_TYPE_POINT,LIGHT_TYPE_DIRECTIONAL, LIGHT_T
 
 class SunLight: public Object{
 	protected:
-		LIGHT_TYPE m_Type;
+		unsigned int m_Type;
 		float m_AmbientIntensity, m_DiffuseIntensity;
 	public:
-		SunLight(glm::vec3 = glm::vec3(0,0,0),std::string = "Sun Light",LIGHT_TYPE=LIGHT_TYPE_SUN);
+		SunLight(glm::vec3 = glm::vec3(0,0,0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN);
 		~SunLight();
 
 		void Update(float);

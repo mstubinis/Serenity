@@ -1,4 +1,4 @@
-#version 330
+#version 130
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
@@ -10,8 +10,6 @@ uniform float gRadius;
 uniform float gIntensity;
 uniform float gBias;
 uniform float gScale;
-
-layout(location=0)out float SSAOOut;
 
 const int sample_count = 4;
 const vec2 poisson[] =  vec2[](
@@ -59,5 +57,5 @@ void main() {
         occlusion += occlude(samplePosition, coord2, origin, normal);
     }
 	occlusion /= (sample_count*4);
-    SSAOOut = clamp(1-occlusion,0.01,0.99);//this clamp removes artifacts from gaussian blur. will need to fix later
+    gl_FragColor.r = clamp(1-occlusion,0.01,0.99);//this clamp removes artifacts from gaussian blur. will need to fix later
 }

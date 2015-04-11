@@ -1,10 +1,10 @@
-#version 330
+#version 110
 
-in vec4 Color;
-in vec2 UV;
-in vec3 Normal;
-in vec3 Binormal;
-in vec3 Tangent;
+varying vec4 Color;
+varying vec2 UV;
+varying vec3 Normal;
+varying vec3 Binormal;
+varying vec3 Tangent;
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;

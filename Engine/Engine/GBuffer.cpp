@@ -18,7 +18,7 @@ GBuffer::GBuffer(int width, int height){
 
 	for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
 		TextureBuffer* tbo = new TextureBuffer(GBUFFER_TYPES[i],GBUFFER_PIXEL_TYPES[i],GBUFFER_FLOAT_TYPES[i],GBUFFER_ATTACHMENT_TYPES[i],m_width,m_height);
-		m_Buffers[(BUFFER_TYPES)i] = tbo;
+		m_Buffers[i] = tbo;
 	}
 	if( glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		throw new std::exception("Can't initialize an FBO render texture. FBO initialization failed.");
@@ -32,7 +32,7 @@ GBuffer::~GBuffer(){
 	glDeleteFramebuffers(1, &m_fbo);
 	glDeleteRenderbuffers(1, &m_depth);
 }
-void GBuffer::Start(BUFFER_TYPES type){
+void GBuffer::Start(unsigned int type){
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -50,7 +50,7 @@ void GBuffer::Start(BUFFER_TYPES type){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::Start(BUFFER_TYPES type,BUFFER_TYPES type1){
+void GBuffer::Start(unsigned int type,unsigned int type1){
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -67,7 +67,7 @@ void GBuffer::Start(BUFFER_TYPES type,BUFFER_TYPES type1){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::Start(BUFFER_TYPES type,BUFFER_TYPES type1,BUFFER_TYPES type2){
+void GBuffer::Start(unsigned int type,unsigned int type1,unsigned int type2){
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -89,5 +89,5 @@ void GBuffer::Stop(){
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPopAttrib();
 }
-std::unordered_map<BUFFER_TYPES,TextureBuffer*> GBuffer::Buffers(){ return m_Buffers; }
-GLuint GBuffer::Texture(BUFFER_TYPES type){ return m_Buffers[type]->Texture(); }
+std::unordered_map<unsigned int,TextureBuffer*> GBuffer::Buffers(){ return m_Buffers; }
+GLuint GBuffer::Texture(unsigned int type){ return m_Buffers[type]->Texture(); }

@@ -1,4 +1,4 @@
-#version 330
+#version 130
 
 uniform int gLightType;
 
@@ -22,8 +22,6 @@ uniform mat4 VPInverse;
 
 uniform float gMatSpecularIntensity;
 uniform float gSpecularPower;
-
-layout (location = 0) out vec4 LightOut;
 
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
@@ -82,11 +80,11 @@ void main(){
 	normal = normalize(normal);
 
 	if(gLightType == 0)
-		LightOut = CalcSunLight(position,normal);
+		gl_FragColor = CalcSunLight(position,normal);
 	else if(gLightType == 1)
-		LightOut = CalcPointLight(position,normal);
+		gl_FragColor = CalcPointLight(position,normal);
 	else if(gLightType == 2)
-		LightOut = CalcDirectionalLight(position,normal);
+		gl_FragColor = CalcDirectionalLight(position,normal);
 	else if(gLightType == 3)
-		LightOut = CalcSpotLight(position,normal);
+		gl_FragColor = CalcSpotLight(position,normal);
 }

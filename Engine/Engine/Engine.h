@@ -2,9 +2,9 @@
 #define ENGINE_H
 
 #include <string>
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
-#include <SFML\Window.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
+#include <SFML/Window.hpp>
 class Game;
 namespace Engine{
 	class EngineClass{

@@ -7,10 +7,10 @@
 #include "Light.h"
 #include "Engine_Physics.h"
 
-#include <glm\gtc\constants.hpp>
+#include <glm/gtc/constants.hpp>
 
 Renderer::Renderer(){
-	Resources->Load_Texture_Into_GLuint(RandomMapSSAO,"Textures\\SSAONormal.png");
+	Resources->Load_Texture_Into_GLuint(RandomMapSSAO,"Textures/SSAONormal.png");
 
 	glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);

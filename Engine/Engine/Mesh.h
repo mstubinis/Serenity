@@ -1,10 +1,11 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include <string>
 #include <vector>
-#include <glm\glm.hpp>
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
+#include <glm/glm.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 class btCollisionShape;
 class btTriangleMesh;
@@ -56,18 +57,18 @@ class Mesh{
 		Mesh(std::string = "");
 		~Mesh();
 
-		GLuint* VAO();
-		GLuint* Buffers();
+		//GLuint* VAO();
+		const GLuint* Buffers() const { return m_buffers; }
 		btConvexHullShape* Collision() const { return m_Collision; }
 
-		glm::vec3 Radius();
+		const glm::vec3 Radius() const { return m_radius; }
 
-		std::vector<glm::vec3>& Points();
-		std::vector<glm::vec4>& Colors();
-		std::vector<glm::vec2>& UVS();
-		std::vector<glm::vec3>& Normals();
-		std::vector<glm::vec3>& Binormals();
-		std::vector<glm::vec3>& Tangents();
+		const std::vector<glm::vec3>& Points() const { return m_Points; }
+		const std::vector<glm::vec4>& Colors() const { return m_Colors; }
+		const std::vector<glm::vec2>& UVS() const { return m_UVs; }
+		const std::vector<glm::vec3>& Normals() const { return m_Normals; }
+		const std::vector<glm::vec3>& Binormals() const { return m_Binormals; }
+		const std::vector<glm::vec3>& Tangents() const { return m_Tangents; }
 
 		void Render();
 };

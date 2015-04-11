@@ -1,8 +1,8 @@
 #ifndef TEXTURE_BUFFER_H
 #define TEXTURE_BUFFER_H
 
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 class TextureBuffer{
 	private:

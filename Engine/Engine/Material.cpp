@@ -5,8 +5,7 @@ using namespace MaterialComponents;
 
 Material::Material(std::string diffuse, std::string normal, std::string glow){
 	for(unsigned int i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
-		MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i; 
-		m_Components[type] = nullptr;
+		m_Components[i] = nullptr;
 	}
 	m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = new MaterialComponent(MATERIAL_COMPONENT_TEXTURE_DIFFUSE,diffuse);
 	m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = new MaterialComponent(MATERIAL_COMPONENT_TEXTURE_NORMAL,normal);
@@ -17,13 +16,13 @@ Material::~Material(){
 	for(auto component:m_Components)
 		delete component.second;
 }
-void Material::Add_Component(MATERIAL_COMPONENT_TYPE type, std::string file){
+void Material::Add_Component(unsigned int type, std::string file){
 	if(m_Components[type] != nullptr)
 		return;
 	m_Components[type] = new MaterialComponent(type,file);
 }
-MaterialComponent* Material::Get_Component(MATERIAL_COMPONENT_TYPE type){ return m_Components[type]; }
-std::unordered_map<MATERIAL_COMPONENT_TYPE,MaterialComponent*>& Material::Components(){ return m_Components; }
+MaterialComponent* Material::Get_Component(unsigned int type){ return m_Components[type]; }
+std::unordered_map<unsigned int,MaterialComponent*>& Material::Components(){ return m_Components; }
 void Material::Bind_Texture(MaterialComponents::MaterialComponent* component,GLuint shader){
 	if(component == nullptr)
 		return;

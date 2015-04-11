@@ -1,7 +1,7 @@
 #include "ObjectDynamic.h"
 #include "Engine_Physics.h"
-#include <Bullet\btBulletCollisionCommon.h>
-#include <Bullet\btBulletDynamicsCommon.h>
+#include <Bullet/btBulletCollisionCommon.h>
+#include <Bullet/btBulletDynamicsCommon.h>
 #include "Engine_Resources.h"
 #include "Mesh.h"
 #include "Camera.h"

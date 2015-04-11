@@ -1,4 +1,4 @@
-#version 330
+#version 110
 
 uniform sampler2D gColorMap;
 uniform sampler2D gLightMap;

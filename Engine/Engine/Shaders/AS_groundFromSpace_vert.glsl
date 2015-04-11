@@ -1,11 +1,11 @@
-#version 330
+#version 130
 
-layout (location=0) in vec3 position;
-layout (location=1) in vec2 uv;
-layout (location=2) in vec3 normal;
-layout (location=3) in vec3 binormal;
-layout (location=4) in vec3 tangent;
-layout (location=5) in vec4 color;
+in vec3 position;
+in vec2 uv;
+in vec3 normal;
+in vec3 binormal;
+in vec3 tangent;
+in vec4 color;
 
 uniform int hasAtmosphere;
 
@@ -30,15 +30,15 @@ uniform float fScaleOverScaleDepth;	// fScale / fScaleDepth
 uniform float fSamples;
 uniform int nSamples;	
 
-out vec3 c0;
-out vec3 c1;
+varying vec3 c0;
+varying vec3 c1;
 
-out vec4 Color;
-out vec2 UV;
+varying vec4 Color;
+varying vec2 UV;
 
-out vec3 Normals;
-out vec3 Binormals;
-out vec3 Tangents;
+varying vec3 Normals;
+varying vec3 Binormals;
+varying vec3 Tangents;
 
 
 float scale(float fCos)	{	

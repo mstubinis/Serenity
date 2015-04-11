@@ -1,8 +1,8 @@
 #ifndef ENGINE_RENDER_H
 #define ENGINE_RENDER_H
 
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 class Object;
 class GBuffer;

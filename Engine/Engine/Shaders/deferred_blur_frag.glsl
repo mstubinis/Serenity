@@ -1,18 +1,15 @@
-#version 330
+#version 110
 
 uniform sampler2D texture;
 uniform vec2 gScreenSize;
-
-
-layout(location=0)out vec4 BlurOut;
 
 varying vec2 offset[14];
 
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 void main(void){
-   vec4 sum = vec4(0);
-   vec2 uv = CalcTexCoord();
-   vec4 color = texture2D(texture, uv );
+    vec4 sum = vec4(0);
+    vec2 uv = CalcTexCoord();
+    vec4 color = texture2D(texture, uv );
 
 	sum += texture2D(texture, uv+offset[ 0])*0.0044;
 	sum += texture2D(texture, uv+offset[ 1])*0.009;
@@ -30,5 +27,5 @@ void main(void){
 	sum += texture2D(texture, uv+offset[12])*0.009;
 	sum += texture2D(texture, uv+offset[13])*0.0044;
 
-   BlurOut = sum;
+    gl_FragColor = sum;
 }

@@ -1,10 +1,10 @@
-#version 330
+#version 130
 
-layout (location = 0) in vec3 Position;
+in vec3 Position;
 uniform mat4 MVP;
 
-out vec3 TexCoord0;
-out vec3 WP;
+varying vec3 TexCoord0;
+varying vec3 WP;
 
 void main(){
     vec4 WVP_Pos = MVP * vec4(Position, 1);

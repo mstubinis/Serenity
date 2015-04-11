@@ -1,7 +1,6 @@
-#version 330
+#version 110
 
-in vec3 TexCoord0;
-
+varying vec3 TexCoord0;
 uniform samplerCube cubemap;
 
 void main(){

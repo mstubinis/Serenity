@@ -38,7 +38,7 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
 	videoMode.width = width;
 	videoMode.height = height;
 
-	int style = sf::Style::Fullscreen;
+	int style = sf::Style::Default;
 
     Window = new sf::Window(videoMode, name, style, settings);
 

@@ -2,7 +2,7 @@
 #define ENGINE_EVENTS_H
 
 #include <string>
-#include <SFML\Window.hpp>
+#include <SFML/Window.hpp>
 
 #include <unordered_map>
 #include <boost/algorithm/string.hpp> 
@@ -26,7 +26,7 @@ namespace Engine{
 					static int m_Delta;
 					static MouseButton m_currentButton;
 					static MouseButton m_previousButton;
-					static std::unordered_map<MouseButton,bool> m_MouseStatus;
+					static std::unordered_map<unsigned int,bool> m_MouseStatus;
 
 					static glm::vec2 m_Position, m_Position_Previous,m_Difference;
 
@@ -64,7 +64,7 @@ namespace Engine{
 				public:
 					static sf::Keyboard::Key m_currentKey;
 					static sf::Keyboard::Key m_previousKey;
-					static std::unordered_map<sf::Keyboard::Key,bool> m_KeyStatus;
+					static std::unordered_map<unsigned int,bool> m_KeyStatus;
 
 					static bool KeyProcessing::_IsKeyDown(std::string str){
 						boost::algorithm::to_lower(str);

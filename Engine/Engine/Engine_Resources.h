@@ -2,10 +2,10 @@
 #define ENGINE_RESOURCES_H
 
 #include <unordered_map>
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
-#include <SFML\Window.hpp>
-#include <Bullet\btBulletDynamicsCommon.h>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
+#include <SFML/Window.hpp>
+#include <Bullet/btBulletDynamicsCommon.h>
 
 class Camera;
 class Mesh;

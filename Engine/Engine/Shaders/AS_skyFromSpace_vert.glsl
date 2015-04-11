@@ -1,6 +1,6 @@
-#version 330
+#version 130
 
-layout (location=0) in vec3 position;
+in vec3 position;
 
 uniform mat4 MVP;
 
@@ -28,11 +28,11 @@ uniform float fScaleDepth;
 uniform float fScale;               // 1 / (fOuterRadius - fInnerRadius)
 uniform float fScaleOverScaleDepth; // fScale / fScaleDepth
 
-out vec3 c0;
-out vec3 c1;
-out vec3 v3Direction;
-out vec3 v3LightPosition;
-out float Depth;
+varying vec3 c0;
+varying vec3 c1;
+varying vec3 v3Direction;
+varying vec3 v3LightPosition;
+varying float Depth;
 
 float scale(float fCos){
 	float x = 1.0 - fCos;

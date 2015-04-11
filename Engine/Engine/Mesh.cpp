@@ -437,11 +437,3 @@ void Mesh::CalculateTangentBinormal(Vertex& v1, Vertex& v2, Vertex& v3){
 	v1.binormal = binormal; v2.binormal = binormal; v3.binormal = binormal;
 	v1.tangent = tangent;   v2.tangent = tangent;   v3.tangent = tangent;
 }
-std::vector<glm::vec3>& Mesh::Points(){ return m_Points; }
-std::vector<glm::vec4>& Mesh::Colors(){ return m_Colors; }
-std::vector<glm::vec2>& Mesh::UVS(){ return m_UVs; }
-std::vector<glm::vec3>& Mesh::Normals(){ return m_Normals; }
-std::vector<glm::vec3>& Mesh::Binormals(){ return m_Binormals; }
-std::vector<glm::vec3>& Mesh::Tangents(){ return m_Tangents; }
-glm::vec3 Mesh::Radius(){ return m_radius; }
-GLuint* Mesh::Buffers(){ return m_buffers; }

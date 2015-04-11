@@ -1,16 +1,12 @@
-#version 330
+#version 130
 
 uniform samplerCube cubemap;
 
-in vec3 TexCoord0;
-in vec3 WP;
-
-layout (location = 0) out vec4 DiffuseOut; 
-layout (location = 1) out vec4 NormalOut; 
-layout (location = 2) out vec4 GlowOut;
+varying vec3 TexCoord0;
+varying vec3 WP;
 
 void main(){
-    DiffuseOut = texture(cubemap, TexCoord0);
-    NormalOut = vec4(1);
-	GlowOut = vec4(1);
+    gl_FragData[0] = texture(cubemap, TexCoord0);
+    gl_FragData[1] = vec4(1);
+	gl_FragData[2] = vec4(1);
 }

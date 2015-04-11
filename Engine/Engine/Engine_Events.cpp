@@ -1,14 +1,13 @@
 #include "Engine_Events.h"
 
-using namespace std;
 using namespace Engine::Events;
 
 //return actual objects
-unordered_map<sf::Keyboard::Key,bool> _getkeys(){ return unordered_map<sf::Keyboard::Key, bool>(); }
-unordered_map<Mouse::MouseButton,bool> _getmouse(){ return unordered_map<Mouse::MouseButton, bool>(); }
+std::unordered_map<unsigned int,bool> _getkeys(){ return std::unordered_map<unsigned int, bool>(); }
+std::unordered_map<unsigned int,bool> _getmouse(){ return std::unordered_map<unsigned int, bool>(); }
 //return string dictionaries of keys / mouse buttons
-unordered_map<string,sf::Keyboard::Key> _getkeymap(){
-	unordered_map<string,sf::Keyboard::Key> k;
+std::unordered_map<std::string,sf::Keyboard::Key> _getkeymap(){
+	std::unordered_map<std::string,sf::Keyboard::Key> k;
 	k["a"] = sf::Keyboard::A;
 	k["add"] = sf::Keyboard::Add;
 	k["b"] = sf::Keyboard::B;
@@ -226,7 +225,7 @@ unordered_map<string,sf::Keyboard::Key> _getkeymap(){
 	k["z"] = sf::Keyboard::Z;
 	return k;
 }
-unordered_map<string,Mouse::MouseButton> _getmousemap(){
+std::unordered_map<std::string,Mouse::MouseButton> _getmousemap(){
 	std::unordered_map<std::string,Mouse::MouseButton> m;
 
 	m["l"] = Mouse::MouseButton::MOUSE_BUTTON_LEFT;
@@ -250,10 +249,10 @@ unordered_map<string,Mouse::MouseButton> _getmousemap(){
 }
 
 //init static values with actual objects
-unordered_map<string,sf::Keyboard::Key> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
-unordered_map<string,Mouse::MouseButton> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
-unordered_map<sf::Keyboard::Key,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
-unordered_map<Mouse::MouseButton,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
+std::unordered_map<std::string,sf::Keyboard::Key> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
+std::unordered_map<std::string,Mouse::MouseButton> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
+std::unordered_map<unsigned int,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
+std::unordered_map<unsigned int,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
 int Mouse::MouseProcessing::m_Delta = 0;
 glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0,0);
 glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0,0);

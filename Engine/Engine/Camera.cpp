@@ -1,8 +1,8 @@
 #include "Camera.h"
 #include "Engine_Resources.h"
-#include <glm\gtx\transform.hpp>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtc\type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create a perspective camera
 	m_Angle = angleVal;

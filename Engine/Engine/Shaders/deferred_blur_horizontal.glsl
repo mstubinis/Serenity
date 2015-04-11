@@ -1,3 +1,4 @@
+#version 110
 
 varying vec2 offset[14];
 

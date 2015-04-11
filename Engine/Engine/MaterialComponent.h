@@ -2,8 +2,8 @@
 #define MATERIALCOMPONENT_H
 
 #include <unordered_map>
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 class Material;
 
@@ -23,14 +23,14 @@ namespace MaterialComponents{
 		private:
 			GLuint m_Texture;
 			GLuint m_TextureType;
-			MATERIAL_COMPONENT_TYPE m_Type;
+			unsigned int m_Type;
 		public:
-			MaterialComponent(MATERIAL_COMPONENT_TYPE,std::string file);
+			MaterialComponent(unsigned int,std::string file);
 			~MaterialComponent();
 
-			GLuint Texture() const;
-			GLuint TextureType() const;
-			MATERIAL_COMPONENT_TYPE Type() const;
+			const GLuint Texture() const{ return m_Texture; }
+			const GLuint TextureType() const{ return m_TextureType; }
+			const unsigned int Type() const{ return m_Type; }
 
 	};
 };

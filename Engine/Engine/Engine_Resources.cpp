@@ -1,6 +1,6 @@
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
-#include <SOIL\SOIL.h>
+#include <SOIL/SOIL.h>
 
 #include "Object.h"
 #include "Light.h"
@@ -10,40 +10,40 @@
 #include "Material.h"
 #include "Camera.h"
 
-#include <glm\gtx\transform.hpp>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtc\type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 ResourceManager::ResourceManager(){
 	dt = 0;
 }
 void ResourceManager::INIT_Game_Resources(){
-	Add_Shader_Program("Default","Shaders\\vert.glsl","Shaders\\frag.glsl");
+	Add_Shader_Program("Default","Shaders/vert.glsl","Shaders/frag.glsl");
 
-	Add_Shader_Program("Deferred","Shaders\\vert.glsl","Shaders\\deferred_frag.glsl");
-	Add_Shader_Program("Deferred_Blur_Horizontal","Shaders\\deferred_blur_horizontal.glsl","Shaders\\deferred_blur_frag.glsl");
-	Add_Shader_Program("Deferred_Blur_Vertical","Shaders\\deferred_blur_vertical.glsl","Shaders\\deferred_blur_frag.glsl");
-	Add_Shader_Program("Deferred_SSAO","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_ssao_frag.glsl");
-	Add_Shader_Program("Deferred_Final","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_final_frag.glsl");
-	Add_Shader_Program("Deferred_Skybox","Shaders\\vert_skybox.glsl","Shaders\\deferred_frag_skybox.glsl");
+	Add_Shader_Program("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
+	Add_Shader_Program("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
+	Add_Shader_Program("Deferred_Blur_Vertical","Shaders/deferred_blur_vertical.glsl","Shaders/deferred_blur_frag.glsl");
+	Add_Shader_Program("Deferred_SSAO","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_ssao_frag.glsl");
+	Add_Shader_Program("Deferred_Final","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_final_frag.glsl");
+	Add_Shader_Program("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
 
-	Add_Shader_Program("AS_SkyFromSpace","Shaders\\AS_skyFromSpace_vert.glsl","Shaders\\AS_skyFromSpace_frag.glsl");
-	Add_Shader_Program("AS_SkyFromAtmosphere","Shaders\\AS_skyFromAtmosphere_vert.glsl","Shaders\\AS_skyFromAtmosphere_frag.glsl");
-	Add_Shader_Program("AS_GroundFromSpace","Shaders\\AS_groundFromSpace_vert.glsl","Shaders\\AS_groundFromSpace_frag.glsl");
+	Add_Shader_Program("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
+	Add_Shader_Program("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
+	Add_Shader_Program("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
 
-	Add_Shader_Program("Deferred_Light","Shaders\\deferred_lighting_vert.glsl","Shaders\\deferred_lighting_frag.glsl");
+	Add_Shader_Program("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
-	Add_Mesh("Skybox","Models\\skybox.obj");
-	Add_Mesh("DEBUGLight","Models\\debugLight.obj");
-	Add_Mesh("Planet","Models\\planet.obj");
-	Add_Mesh("Voyager","Models\\voyager.obj");
-	Add_Mesh("Defiant","Models\\defiant.obj");
+	Add_Mesh("Skybox","Models/skybox.obj");
+	Add_Mesh("DEBUGLight","Models/debugLight.obj");
+	Add_Mesh("Planet","Models/planet.obj");
+	Add_Mesh("Voyager","Models/voyager.obj");
+	Add_Mesh("Defiant","Models/defiant.obj");
 
-	Add_Material("Star","Textures\\sun.png","","");
-	Add_Material("Default","Textures\\Scar.png","Textures\\ScarNormal.png","Textures\\ScarGlow.png");
-	Add_Material("Earth","Textures\\earth.png","","");
-	Add_Material("Voyager","Textures\\voyager.png","","Textures\\voyagerGlow.png");
-	Add_Material("Defiant","Textures\\defiant.png","","Textures\\defiantGlow.png");
+	Add_Material("Star","Textures/sun.png","","");
+	Add_Material("Default","Textures/Scar.png","Textures/ScarNormal.png","Textures/ScarGlow.png");
+	Add_Material("Earth","Textures/earth.png","","");
+	Add_Material("Voyager","Textures/voyager.png","","Textures/voyagerGlow.png");
+	Add_Material("Defiant","Textures/defiant.png","","Textures/defiantGlow.png");
 
 	m_Cameras["Debug"] = new Camera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,100000.0f);
 

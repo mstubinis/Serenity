@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <GL\glew.h>
-#include <SFML\OpenGL.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 #pragma region Shader_Compilers
 static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){

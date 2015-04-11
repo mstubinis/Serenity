@@ -1,4 +1,4 @@
-#version 330
+#version 130
 
 uniform float fExposure;
 
@@ -14,18 +14,15 @@ uniform int HasAtmosphere;
 
 uniform vec3 Object_Color;
 
-in vec3 c0;
-in vec3 c1;
+varying vec3 c0;
+varying vec3 c1;
 
-in vec4 Color;
-in vec2 UV;
-in vec3 Normals; 
-in vec3 Binormals;
-in vec3 Tangents;
+varying vec4 Color;
+varying vec2 UV;
+varying vec3 Normals; 
+varying vec3 Binormals;
+varying vec3 Tangents;
 
-layout(location=0)out vec4 DiffuseOut; 
-layout(location=1)out vec4 NormalOut; 
-layout(location=2)out vec4 GlowOut; 
 
 vec3 CalcBumpedNormal(){
     vec3 Norm = normalize(Normals);
@@ -45,29 +42,29 @@ void main(){
 	if(HasAtmosphere == 1){
 		if(DiffuseMapEnabled == 1){
 			vec4 diffuse = texture(DiffuseMap, UV) * vec4(Object_Color.xyz,1);
-			DiffuseOut.rgb = 1.0 - exp( -fExposure * ((c0+diffuse.xyz) * c1) );
-			DiffuseOut.a = 1.0;
+			gl_FragData[0].rgb = 1.0 - exp( -fExposure * ((c0+diffuse.xyz) * c1) );
+			gl_FragData[0].a = 1.0;
 		}
 		else{
-			DiffuseOut = vec4(0);
+			gl_FragData[0] = vec4(0);
 		}
-		NormalOut = vec4(1);
-		GlowOut = vec4(1);
+		gl_FragData[1] = vec4(1);
+		gl_FragData[2] = vec4(1);
 	}
 	else{
 		if(DiffuseMapEnabled == 1)
-			DiffuseOut = texture(DiffuseMap, UV) * vec4(Object_Color.xyz,1);
+			gl_FragData[0] = texture(DiffuseMap, UV) * vec4(Object_Color.xyz,1);
 		else
-			DiffuseOut = vec4(0);
+			gl_FragData[0] = vec4(0);
 
 		if(NormalMapEnabled == 1)
-			NormalOut = vec4(CalcBumpedNormal().xyz,0);
+			gl_FragData[1] = vec4(CalcBumpedNormal().xyz,0);
 		else
-			NormalOut = vec4(normalize(Normals).xyz,0);
+			gl_FragData[1] = vec4(normalize(Normals).xyz,0);
 
 		if(GlowMapEnabled == 1)
-			GlowOut.r = texture(GlowMap, UV).r;
+			gl_FragData[2].r = texture(GlowMap, UV).r;
 		else
-			GlowOut.r = 0;
+			gl_FragData[2].r = 0;
 	}
 }

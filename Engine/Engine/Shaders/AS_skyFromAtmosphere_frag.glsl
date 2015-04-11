@@ -1,19 +1,16 @@
-#version 330
+#version 110
 
 uniform float g;
 uniform float g2;
 uniform float fExposure;
 
-in vec3 c0;
-in vec3 c1;
-in vec3 v3Direction;
-in vec3 v3LightPosition;
-in float Depth;
-in float outerRadius;
-in float cameraHeight;
-
-layout(location=0)out vec4 DiffuseOut; 
-layout(location=1)out vec4 NormalOut; 
+varying vec3 c0;
+varying vec3 c1;
+varying vec3 v3Direction;
+varying vec3 v3LightPosition;
+varying float Depth;
+varying float outerRadius;
+varying float cameraHeight;
 
 void main(){
 	float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
@@ -28,6 +25,5 @@ void main(){
 	vec4 HDR = 1.0 - exp(f4Color * -fExposure);
 	float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
-	DiffuseOut = vec4(HDR.xyz,nightmult+(outerRadius - cameraHeight));
-	NormalOut = vec4(0,0,0,1);
+	gl_FragColor = vec4(HDR.xyz,nightmult+(outerRadius - cameraHeight));
 }

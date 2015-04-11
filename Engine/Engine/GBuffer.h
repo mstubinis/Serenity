@@ -45,7 +45,7 @@ class GBuffer{
 		GLuint m_fbo;
 		GLuint m_depth;
 
-		std::unordered_map<BUFFER_TYPES,TextureBuffer*> m_Buffers;
+		std::unordered_map<unsigned int,TextureBuffer*> m_Buffers;
 
 		unsigned int m_width;
 		unsigned int m_height;
@@ -54,12 +54,12 @@ class GBuffer{
 		GBuffer(int width, int height);
 		~GBuffer();
 
-		void Start(BUFFER_TYPES);
-		void Start(BUFFER_TYPES,BUFFER_TYPES);
-		void Start(BUFFER_TYPES,BUFFER_TYPES,BUFFER_TYPES);
+		void Start(unsigned int);
+		void Start(unsigned int,unsigned int);
+		void Start(unsigned int,unsigned int,unsigned int);
 		void Stop();
 
-		std::unordered_map<BUFFER_TYPES,TextureBuffer*> Buffers();
-		GLuint Texture(BUFFER_TYPES);
+		std::unordered_map<unsigned int,TextureBuffer*> Buffers();
+		GLuint Texture(unsigned int);
 };
 #endif

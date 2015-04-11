@@ -1,7 +1,7 @@
 #ifndef ENGINE_PHYSICS_H
 #define ENGINE_PHYSICS_H
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;

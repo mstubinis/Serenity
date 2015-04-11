@@ -1,13 +1,13 @@
 #include "Engine_Physics.h"
 
-#include <Bullet\btBulletCollisionCommon.h>
-#include <Bullet\btBulletDynamicsCommon.h>
-#include <Bullet\LinearMath\btIDebugDraw.h>
+#include <Bullet/btBulletCollisionCommon.h>
+#include <Bullet/btBulletDynamicsCommon.h>
+#include <Bullet/LinearMath/btIDebugDraw.h>
 #include "GLDebugDrawer.h"
 
-#include <glm\gtx\transform.hpp>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtc\type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
