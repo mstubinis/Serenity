@@ -19,18 +19,9 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 vec3 CalcBumpedNormal(){
-    vec3 Norm = normalize(Normals);
-    vec3 Tang = normalize(Tangents);
-	vec3 Binorm = normalize(Binormals);
-    Tang = normalize(Tang - dot(Tang, Norm) * Norm);
-
-    vec3 BumpMapNormal = texture(NormalMap, UV).xyz;
-    BumpMapNormal = BumpMapNormal * 2.0 - 1.0;
-    mat3 TBN = mat3(Tang, Binorm, Norm);
-
-    vec3 NewNormal = TBN * BumpMapNormal;
-    NewNormal = normalize(NewNormal);
-    return NewNormal;
+    vec3 normalMapTexture = (texture(NormalMap, UV).xyz) * 2.0 - 1.0;
+    mat3 TBN = mat3(-Tangents, Binormals, Normals);
+    return normalize(TBN * normalMapTexture);
 }
 
 void main(){
@@ -41,9 +32,9 @@ void main(){
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1)
-			gl_FragData[1] = vec4(CalcBumpedNormal().xyz,0);
+			gl_FragData[1] = vec4(CalcBumpedNormal(),0);
 		else
-			gl_FragData[1] = vec4(normalize(Normals).xyz,0);
+			gl_FragData[1] = vec4(normalize(Normals),0);
 
 		if(GlowMapEnabled == 1)
 			gl_FragData[2].r = texture(GlowMap, UV).r;

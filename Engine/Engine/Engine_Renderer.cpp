@@ -197,31 +197,25 @@ void Renderer::Pass_Final(){
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
 
-	GLuint m_textureID[4];
-	m_textureID[0] = glGetUniformLocation(shader,"gColorMap");
-	m_textureID[1] = glGetUniformLocation(shader,"gLightMap");
-	m_textureID[2] = glGetUniformLocation(shader,"gSSAOMap");
-	m_textureID[3] = glGetUniformLocation(shader,"gGlowMap");
-
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DIFFUSE));
-	glUniform1i( m_textureID[0], 0 );
+	glUniform1i( glGetUniformLocation(shader,"gColorMap"), 0 );
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_LIGHTING));
-	glUniform1i( m_textureID[1], 1 );
+	glUniform1i( glGetUniformLocation(shader,"gLightMap"), 1 );
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_SSAO));
-	glUniform1i( m_textureID[2], 2 );
+	glUniform1i( glGetUniformLocation(shader,"gSSAOMap"), 2 );
 
 	glActiveTexture(GL_TEXTURE3);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_BLOOM));
-	glUniform1i( m_textureID[3], 3 );
+	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 3 );
 
 
 	Init_Quad();

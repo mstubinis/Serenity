@@ -9,7 +9,7 @@ const int GBUFFER_TYPES[] =		       {GL_RGBA8,		      //diffuse
 								        GL_RGBA16F,           //bloom + lightmap (1 channel)
 									    GL_R8,                //ssao
 										GL_RGBA16F,           //free1
-										GL_DEPTH_COMPONENT24};//depth
+										GL_DEPTH_COMPONENT32F};//depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			  //diffuse
 							            GL_RGB,			      //normals

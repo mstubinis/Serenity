@@ -3,7 +3,6 @@
 attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
-attribute vec3 binormal;
 attribute vec3 tangent;
 attribute vec4 color;
 
@@ -95,6 +94,6 @@ void main(void)	{
 	UV = uv;
 
 	Normals = (World * vec4(normal,0.0)).xyz;
-	Binormals = (World * vec4(binormal,0.0)).xyz;
 	Tangents = (World * vec4(tangent,0.0)).xyz;
+	Binormals = cross(Normals,Tangents);
 }

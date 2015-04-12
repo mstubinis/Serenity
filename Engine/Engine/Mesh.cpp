@@ -52,13 +52,6 @@ Mesh::Mesh(int x, int y,int width, int height){
 	m_Normals.push_back(glm::vec3(1,1,1));
 	m_Normals.push_back(glm::vec3(1,1,1));
 
-	m_Binormals.push_back(glm::vec3(1,1,1));
-	m_Binormals.push_back(glm::vec3(1,1,1));
-	m_Binormals.push_back(glm::vec3(1,1,1));
-	m_Binormals.push_back(glm::vec3(1,1,1));
-	m_Binormals.push_back(glm::vec3(1,1,1));
-	m_Binormals.push_back(glm::vec3(1,1,1));
-
 	m_Tangents.push_back(glm::vec3(1,1,1));
 	m_Tangents.push_back(glm::vec3(1,1,1));
 	m_Tangents.push_back(glm::vec3(1,1,1));
@@ -311,11 +304,7 @@ void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_UVs.push_back(v3.uv);
 	m_Normals.push_back(v3.normal);
 
-	CalculateTangentBinormal(v1,v2,v3);
-
-	m_Binormals.push_back(v1.binormal);
-	m_Binormals.push_back(v2.binormal);
-	m_Binormals.push_back(v3.binormal);
+	CalculateTangent(v1,v2,v3);
 
 	m_Tangents.push_back(v1.tangent);
 	m_Tangents.push_back(v2.tangent);
@@ -340,12 +329,9 @@ void Mesh::Init(){
 	glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-	glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
 	glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
 	glBufferData(GL_ARRAY_BUFFER, m_Colors.size() * sizeof(glm::vec4), &m_Colors[0], GL_STATIC_DRAW);
 
 	#pragma region Calculate Mesh Radius (x, y, and z)
@@ -378,8 +364,8 @@ void Mesh::Render(){
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)
 		glDisableVertexAttribArray(i);
 }
-void Mesh::CalculateTangentBinormal(Vertex& v1, Vertex& v2, Vertex& v3){
-	glm::vec3 tangent, binormal;
+void Mesh::CalculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
+	glm::vec3 tangent;
 	float vector1[3], vector2[3];
 	float tuVector[2], tvVector[2];
 	float den;
@@ -409,10 +395,6 @@ void Mesh::CalculateTangentBinormal(Vertex& v1, Vertex& v2, Vertex& v3){
 	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
 	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
 
-	binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
-	binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
-	binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
-
 	// Calculate the length of this normal.
 	length = sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
 			
@@ -421,14 +403,5 @@ void Mesh::CalculateTangentBinormal(Vertex& v1, Vertex& v2, Vertex& v3){
 	tangent.y = tangent.y / length;
 	tangent.z = tangent.z / length;
 
-	// Calculate the length of this normal.
-	length = sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
-			
-	// Normalize the normal and then store it
-	binormal.x = binormal.x / length;
-	binormal.y = binormal.y / length;
-	binormal.z = binormal.z / length;
-
-	v1.binormal = binormal; v2.binormal = binormal; v3.binormal = binormal;
 	v1.tangent = tangent;   v2.tangent = tangent;   v3.tangent = tangent;
 }

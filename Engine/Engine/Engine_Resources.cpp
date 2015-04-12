@@ -43,7 +43,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Material("Default","Textures/Scar.png","Textures/ScarNormal.png","Textures/ScarGlow.png");
 	Add_Material("Earth","Textures/earth.png","","");
 	Add_Material("Voyager","Textures/voyager.png","","Textures/voyagerGlow.png");
-	Add_Material("Defiant","Textures/defiant.png","","Textures/defiantGlow.png");
+	Add_Material("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
 
 	m_Cameras["Debug"] = new Camera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,100000.0f);
 
