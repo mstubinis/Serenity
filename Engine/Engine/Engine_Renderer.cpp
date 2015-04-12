@@ -50,7 +50,7 @@ void Renderer::Lighting_Pass(){
 }
 void Renderer::Render(bool debug){
 
-	m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_BLOOM);
+	m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL);
 	this->Geometry_Pass(debug);
 	m_gBuffer->Stop();
 
@@ -212,15 +212,10 @@ void Renderer::Pass_Final(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_SSAO));
 	glUniform1i( glGetUniformLocation(shader,"gSSAOMap"), 2 );
 
-	glActiveTexture(GL_TEXTURE3);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_BLOOM));
-	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 3 );
-
 
 	Init_Quad();
 
-	for(unsigned int i = 0; i < 4; i++){
+	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);

@@ -75,15 +75,16 @@ vec3 decodeLocation(vec2 texCoord){
 void main(){
 	vec2 texCoord = CalcTexCoord();
 	vec3 position = decodeLocation(texCoord);
-    vec3 normal = (texture2D( gNormalMap, texCoord).xyz * 2.0 - 1.0);
+	vec4 normalTexture = texture2D( gNormalMap, texCoord);
+    vec3 normal = normalTexture.rgb * 2.0 - 1.0;
 	normal = normalize(normal);
 
 	if(gLightType == 0)
-		gl_FragColor = CalcSunLight(position,normal);
+		gl_FragColor = max(vec4(normalTexture.a),CalcSunLight(position,normal));
 	else if(gLightType == 1)
-		gl_FragColor = CalcPointLight(position,normal);
+		gl_FragColor = max(vec4(normalTexture.a),CalcPointLight(position,normal));
 	else if(gLightType == 2)
-		gl_FragColor = CalcDirectionalLight(position,normal);
+		gl_FragColor = max(vec4(normalTexture.a),CalcDirectionalLight(position,normal));
 	else if(gLightType == 3)
-		gl_FragColor = CalcSpotLight(position,normal);
+		gl_FragColor = max(vec4(normalTexture.a),CalcSpotLight(position,normal));
 }

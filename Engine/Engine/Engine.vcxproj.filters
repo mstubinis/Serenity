@@ -220,13 +220,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\frag.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
     <None Include="Shaders\vert.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
-    <None Include="Shaders\frag_skybox.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering</Filter>
     </None>
     <None Include="Shaders\vert_skybox.glsl">

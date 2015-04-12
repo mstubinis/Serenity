@@ -18,8 +18,6 @@ ResourceManager::ResourceManager(){
 	dt = 0;
 }
 void ResourceManager::INIT_Game_Resources(){
-	Add_Shader_Program("Default","Shaders/vert.glsl","Shaders/frag.glsl");
-
 	Add_Shader_Program("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
 	Add_Shader_Program("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
 	Add_Shader_Program("Deferred_Blur_Vertical","Shaders/deferred_blur_vertical.glsl","Shaders/deferred_blur_frag.glsl");

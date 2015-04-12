@@ -23,7 +23,6 @@ vec3 CalcBumpedNormal(){
     mat3 TBN = mat3(-Tangents, Binormals, Normals);
     return normalize(TBN * normalMapTexture);
 }
-
 void main(){
 	if(DiffuseMapEnabled == 1)
 		gl_FragData[0] = texture(DiffuseMap, UV) * vec4(Object_Color,1);
@@ -32,17 +31,16 @@ void main(){
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1)
-			gl_FragData[1] = vec4(CalcBumpedNormal(),0);
+			gl_FragData[1].rgb = CalcBumpedNormal();
 		else
-			gl_FragData[1] = vec4(normalize(Normals),0);
+			gl_FragData[1].rgb = normalize(Normals);
 
 		if(GlowMapEnabled == 1)
-			gl_FragData[2].r = texture(GlowMap, UV).r;
+			gl_FragData[1].a = texture(GlowMap, UV).r;
 		else
-			gl_FragData[2] = vec4(0);
+			gl_FragData[1].a = 0;
 	}
 	else{
 		gl_FragData[1] = vec4(1);
-		gl_FragData[2] = vec4(1);
 	}
 }

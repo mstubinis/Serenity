@@ -48,7 +48,6 @@ void main(){
 			gl_FragData[0] = vec4(0);
 		}
 		gl_FragData[1] = vec4(1);
-		gl_FragData[2] = vec4(1);
 	}
 	else{
 		if(DiffuseMapEnabled == 1)
@@ -57,13 +56,13 @@ void main(){
 			gl_FragData[0] = vec4(0);
 
 		if(NormalMapEnabled == 1)
-			gl_FragData[1] = vec4(CalcBumpedNormal().xyz,0);
+			gl_FragData[1].rgb = CalcBumpedNormal();
 		else
-			gl_FragData[1] = vec4(normalize(Normals).xyz,0);
+			gl_FragData[1].rgb = normalize(Normals);
 
 		if(GlowMapEnabled == 1)
-			gl_FragData[2].r = texture(GlowMap, UV).r;
+			gl_FragData[1].a = texture(GlowMap, UV).r;
 		else
-			gl_FragData[2].r = 0;
+			gl_FragData[1].a = 0;
 	}
 }
