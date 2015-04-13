@@ -40,7 +40,7 @@ class Object{
 				std::string = "",
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
-			    std::string = "Meshless Object",//Object
+			    std::string = "Object",         //Object
 				bool addToResources = true      //Add this to the resource generic object pool (Don't do for lights)
 			  );
 		~Object();

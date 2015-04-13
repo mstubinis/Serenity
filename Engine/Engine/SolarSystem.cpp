@@ -28,6 +28,7 @@ void SolarSystem::LoadTestSystem(){
 	new Ship("Voyager","Voyager","USS Voyager",glm::vec3(4,0,0));
 
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0));
+	ObjectDynamic* starbase = new ObjectDynamic("Starbase","Star",glm::vec3(-100,0,0));
 	
 	
 	Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-83710,0,0));

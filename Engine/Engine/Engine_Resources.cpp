@@ -36,6 +36,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("Planet","Models/planet.obj");
 	Add_Mesh("Voyager","Models/voyager.obj");
 	Add_Mesh("Defiant","Models/defiant.obj");
+	Add_Mesh("Starbase","Models/starbase.obj");
 
 	Add_Material("Star","Textures/sun.png","","");
 	Add_Material("Default","Textures/Scar.png","Textures/ScarNormal.png","Textures/ScarGlow.png");
