@@ -41,7 +41,7 @@ namespace Engine{
 			Game* game;
 			GLuint m_vao;
 
-			void _Update(float,sf::Event);
+			void _Update(float);
 			void _Render();
 
 		public:

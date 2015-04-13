@@ -2,11 +2,13 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_Physics.h"
-#include "Game.h"
 #include "Engine_Events.h"
+#include "Game.h"
 
 #include "ObjectDynamic.h"
 #include "Light.h"
+
+#include <iostream>
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
 	m_DrawDebug = false;
@@ -92,6 +94,8 @@ void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
 			EVENT_RESIZE(e.size.width,e.size.height);break;
 		case sf::Event::TextEntered:
 			EVENT_TEXT_ENTERED(e.text);break;
+		default:
+			break;
     }
 }
 void Engine::EngineClass::_RESET_EVENTS(){
@@ -101,7 +105,7 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	for(auto iterator:Engine::Events::Keyboard::KeyProcessing::m_KeyStatus){ iterator.second = false; }
 	for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
 
-	Events::Mouse::MouseProcessing::_SetMouseWheelDelta(0);
+	Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1-Resources->dt);
 
 	glm::vec2 mousePos = Engine::Events::Mouse::GetMousePosition();
 	if(mousePos.x < 50 || mousePos.y < 50 || mousePos.x > static_cast<int>(Window->getSize().x - 50) || mousePos.y > static_cast<int>(Window->getSize().y - 50)){
@@ -109,7 +113,7 @@ void Engine::EngineClass::_RESET_EVENTS(){
 		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
 	}
 }
-void Engine::EngineClass::_Update(float dt,sf::Event e){
+void Engine::EngineClass::_Update(float dt){
 	game->Update(dt);
 	for(auto object:Resources->Objects)
 		object->Update(dt);
@@ -151,7 +155,7 @@ void Engine::EngineClass::EVENT_KEY_RELEASED(sf::Event::KeyEvent key){
 	Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = false;
 }
 void Engine::EngineClass::EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
-	Events::Mouse::MouseProcessing::_SetMouseWheelDelta(mouseWheel.delta);
+	Events::Mouse::MouseProcessing::m_Delta += (mouseWheel.delta * 10);
 }
 void Engine::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
@@ -219,13 +223,13 @@ void Engine::EngineClass::EVENT_JOYSTICK_DISCONNECTED()
 }
 void Engine::EngineClass::Run(){
 	sf::Clock clock;
-	sf::Event event;
 	while(true){
-		Window->pollEvent(event);
 		Resources->dt = clock.restart().asSeconds();
-
-		_EVENT_HANDLERS(event);
-		_Update(Resources->dt,event);
+		sf::Event event;
+		while(Window->pollEvent(event)){
+			_EVENT_HANDLERS(event);
+		}
+		_Update(Resources->dt);
 		_RESET_EVENTS();
 
 		_Render();

@@ -253,7 +253,7 @@ std::unordered_map<std::string,sf::Keyboard::Key> Keyboard::KeyProcessing::m_Key
 std::unordered_map<std::string,Mouse::MouseButton> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
 std::unordered_map<unsigned int,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
 std::unordered_map<unsigned int,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
-int Mouse::MouseProcessing::m_Delta = 0;
+float Mouse::MouseProcessing::m_Delta = 0;
 glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0,0);
 glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0,0);
 glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);

@@ -51,6 +51,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\boost155\stage\lib;$(SolutionDir)dependencies\lib\Bullet-Debug;$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies);glew32s.lib;glew32mxs.lib;SOIL.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletFileLoader_Debug.lib;BulletMultiThreaded_Debug.lib;BulletSoftBody_Debug.lib;BulletSoftBodySolvers_DX11_Debug.lib;BulletWorldImporter_Debug.lib;BulletXMLWorldImporter_Debug.lib;OpenGLSupport_Debug.lib;LinearMath_Debug.lib;sfml-audio-s-d.lib;sfml-graphics-s-d.lib;sfml-main-d.lib;sfml-network-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>MSVCRTD;LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>mkdir “$(TargetDir)Shaders\”
@@ -80,6 +81,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\boost155\stage\lib;$(SolutionDir)dependencies\lib\SFML;$(SolutionDir)dependencies\lib\Bullet;$(SolutionDir)dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glew32mxs.lib;sfml-audio-s.lib;sfml-graphics-s.lib;sfml-main.lib;sfml-network-s.lib;sfml-system-s.lib;sfml-window-s.lib;%(AdditionalDependencies);SOIL.lib;BulletCollision.lib;BulletDynamics.lib;BulletFileLoader.lib;BulletMultiThreaded.lib;BulletSoftBody.lib;BulletSoftBodySolvers_DX11.lib;BulletWorldImporter.lib;BulletXMLWorldImporter.lib;OpenGLSupport.lib;LinearMath.lib</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>MSVCRTD;LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>mkdir “$(TargetDir)Shaders\”

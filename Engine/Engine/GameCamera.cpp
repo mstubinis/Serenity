@@ -33,6 +33,8 @@ void GameCamera::Update(float dt){
 			break;
 		case CAMERA_STATE_ORBIT:
 			m_OrbitRadius += Engine::Events::Mouse::GetMouseWheelDelta() * dt;
+			if( m_OrbitRadius < 0) m_OrbitRadius = 0;
+			else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
 
 			Rotate(-Mouse::GetMouseDifference().y*0.005f,-Mouse::GetMouseDifference().x*0.005f,0);
 

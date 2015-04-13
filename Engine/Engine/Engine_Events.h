@@ -23,16 +23,13 @@ namespace Engine{
 				private:
 					static std::unordered_map<std::string,MouseButton> m_MouseMap;
 				public:
-					static int m_Delta;
+					static float m_Delta;
 					static MouseButton m_currentButton;
 					static MouseButton m_previousButton;
 					static std::unordered_map<unsigned int,bool> m_MouseStatus;
 
 					static glm::vec2 m_Position, m_Position_Previous,m_Difference;
 
-					static glm::vec2 _GetMousePosition(){ return m_Position; }
-					static glm::vec2 _GetMousePositionPrevious(){ return m_Position_Previous; }
-					static glm::vec2 _GetMouseDifference(){ return m_Difference; }
 					static bool MouseProcessing::_IsMouseButtonDown(std::string str){
 						boost::algorithm::to_lower(str);
 						MouseButton key = MouseProcessing::m_MouseMap[str];
@@ -47,15 +44,13 @@ namespace Engine{
 							return true;
 						return false;
 					}
-					static int MouseProcessing::_GetMouseWheelDelta(){ return m_Delta; }
-					static void MouseProcessing::_SetMouseWheelDelta(int d){ m_Delta = d; }
 			};
-			static glm::vec2 GetMouseDifference(){ return MouseProcessing::_GetMouseDifference(); }
-			static glm::vec2 GetMousePositionPrevious(){ return MouseProcessing::_GetMousePositionPrevious(); }
-			static glm::vec2 GetMousePosition(){ return MouseProcessing::_GetMousePosition(); }
+			static glm::vec2 GetMouseDifference(){ return MouseProcessing::m_Difference; }
+			static glm::vec2 GetMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
+			static glm::vec2 GetMousePosition(){ return MouseProcessing::m_Position; }
 			static bool IsMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
 			static bool IsMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
-			static int GetMouseWheelDelta(){ return MouseProcessing::_GetMouseWheelDelta(); }
+			static float GetMouseWheelDelta(){ return MouseProcessing::m_Delta; }
 		};
 		namespace Keyboard{
 			class KeyProcessing{
