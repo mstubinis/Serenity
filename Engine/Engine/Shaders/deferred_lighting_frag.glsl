@@ -1,4 +1,4 @@
-#version 130
+#version 120
 
 uniform int gLightType;
 
@@ -29,7 +29,7 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
     float DiffuseFactor = dot(_norm, -_lightDir);
 
-    vec4 DiffuseColor  = vec4(0);
+    vec4 DiffuseColor = vec4(0.0);
 
     vec3 L = normalize(gPosition);
     vec3 H = normalize(gPosition + _worldPos);
@@ -41,7 +41,7 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     if (DiffuseFactor > 0.0) {
         DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * DiffuseFactor;
     }
-    return AmbientColor + DiffuseColor * df + vec4(gColor,1) * sf;
+    return AmbientColor + DiffuseColor * df + vec4(gColor,1.0) * sf;
 }
 vec4 CalcPointLight(vec3 _worldPos, vec3 _norm){
     vec3 LightDirection = _worldPos - gPosition;
@@ -67,7 +67,7 @@ vec4 CalcSpotLight(vec3 _worldPos, vec3 _norm){
 vec3 decodeLocation(vec2 texCoord){
 	vec4 clipSpaceLocation;
     clipSpaceLocation.xy = texCoord * 2.0 - 1.0;
-    clipSpaceLocation.z = texture(gPositionMap, texCoord).r * 2.0 - 1.0;
+    clipSpaceLocation.z = texture2D(gPositionMap, texCoord).r * 2.0 - 1.0;
     clipSpaceLocation.w = 1.0;
     vec4 homogenousLocation = VPInverse * clipSpaceLocation;
     return homogenousLocation.xyz / homogenousLocation.w;

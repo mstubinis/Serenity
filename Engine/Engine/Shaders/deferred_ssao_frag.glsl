@@ -1,4 +1,4 @@
-#version 130
+#version 120
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
@@ -12,18 +12,17 @@ uniform float gBias;
 uniform float gScale;
 
 const int sample_count = 4;
-const vec2 poisson[] =  vec2[](
-                                vec2(  0.34495938,   0.29387760 ),
+const vec2 poisson[] =  vec2[]( vec2(  0.34495938,   0.29387760 ),
                                 vec2(  0.53742981,  -0.47373420 ),
                                 vec2( -0.26496911,  -0.41893023 ),
-                                vec2( -0.81409955,   0.91437590 )
-                              );
+                                vec2( -0.81409955,   0.91437590 ));
+
 vec2 CalcTexCoord(){ return gl_FragCoord.xy / gScreenSize; }
 
 vec3 calculatePosition(vec2 texCoord){
 	vec4 clipSpaceLocation;
-    clipSpaceLocation.xy = texCoord * 2 - 1;
-    clipSpaceLocation.z = texture(gPositionMap, texCoord).r * 2 - 1;
+    clipSpaceLocation.xy = texCoord * 2.0 - 1.0;
+    clipSpaceLocation.z = texture2D(gPositionMap, texCoord).r * 2.0 - 1.0;
     clipSpaceLocation.w = 1.0;
     vec4 homogenousLocation = VPInverse * clipSpaceLocation;
     return homogenousLocation.xyz / homogenousLocation.w;
@@ -36,7 +35,7 @@ float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal) {
 }
 vec2 getRandom(vec2 uv){
 	vec2 res;
-	res = texture(gRandomMap, gScreenSize * uv / 64).xy * 2 - 1;
+	res = texture(gRandomMap, gScreenSize * uv / 64).xy * 2.0 - 1.0;
 	return normalize(res);
 }
 void main() {
@@ -56,6 +55,6 @@ void main() {
         occlusion += occlude(samplePosition, coord1 * 0.75, origin, normal);
         occlusion += occlude(samplePosition, coord2, origin, normal);
     }
-	occlusion /= (sample_count*4);
+	occlusion /= (sample_count*4.0);
     gl_FragColor.r = clamp(1-occlusion,0.01,0.99);//this clamp removes artifacts from gaussian blur. will need to fix later
 }

@@ -54,9 +54,11 @@
       <IgnoreSpecificDefaultLibraries>MSVCRTD;LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir “$(TargetDir)Shaders\”
+      <Command>mkdir “$(TargetDir)Fonts\”
+mkdir “$(TargetDir)Shaders\”
 mkdir “$(TargetDir)Models\”
 mkdir “$(TargetDir)Textures\”
+xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>
@@ -84,9 +86,11 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
       <IgnoreSpecificDefaultLibraries>MSVCRTD;LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir “$(TargetDir)Shaders\”
+      <Command>mkdir “$(TargetDir)Fonts\”
+mkdir “$(TargetDir)Shaders\”
 mkdir “$(TargetDir)Models\”
 mkdir “$(TargetDir)Textures\”
+xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>

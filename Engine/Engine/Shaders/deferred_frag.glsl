@@ -1,4 +1,4 @@
-#version 130
+#version 120
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
@@ -19,15 +19,15 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 vec3 CalcBumpedNormal(){
-    vec3 normalMapTexture = (texture(NormalMap, UV).xyz) * 2.0 - 1.0;
+    vec3 normalMapTexture = (texture2D(NormalMap, UV).xyz) * 2.0 - 1.0;
     mat3 TBN = mat3(-Tangents, Binormals, Normals);
     return normalize(TBN * normalMapTexture);
 }
 void main(){
 	if(DiffuseMapEnabled == 1)
-		gl_FragData[0] = texture(DiffuseMap, UV) * vec4(Object_Color,1);
+		gl_FragData[0] = texture2D(DiffuseMap, UV) * vec4(Object_Color,1.0);
 	else
-		gl_FragData[0] = vec4(Object_Color,1);
+		gl_FragData[0] = vec4(Object_Color,1.0);
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1)
@@ -36,11 +36,11 @@ void main(){
 			gl_FragData[1].rgb = normalize(Normals);
 
 		if(GlowMapEnabled == 1)
-			gl_FragData[1].a = texture(GlowMap, UV).r;
+			gl_FragData[1].a = texture2D(GlowMap, UV).r;
 		else
-			gl_FragData[1].a = 0;
+			gl_FragData[1].a = 0.0;
 	}
 	else{
-		gl_FragData[1] = vec4(1);
+		gl_FragData[1] = vec4(1.0);
 	}
 }
