@@ -24,5 +24,3 @@ TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attat
 TextureBuffer::~TextureBuffer(){
 	glDeleteTextures(1, &m_Texture);
 }
-GLuint TextureBuffer::Texture()const { return m_Texture; }
-int TextureBuffer::Attatchment()const { return m_BufferAttatchment; }

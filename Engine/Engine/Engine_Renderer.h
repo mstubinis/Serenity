@@ -6,10 +6,13 @@
 
 class Object;
 class GBuffer;
+class Font;
 class Renderer{
 	private:
+
 		GLuint RandomMapSSAO;
 		GBuffer* m_gBuffer;
+		Font* m_Font;
 
 		void Init_Quad();
 

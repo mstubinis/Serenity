@@ -31,7 +31,6 @@ namespace MaterialComponents{
 			const GLuint Texture() const{ return m_Texture; }
 			const GLuint TextureType() const{ return m_TextureType; }
 			const unsigned int Type() const{ return m_Type; }
-
 	};
 };
 #endif

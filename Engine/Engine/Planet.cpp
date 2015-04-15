@@ -28,7 +28,6 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
-
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 
 	for(auto component:mat->Components())
@@ -93,8 +92,13 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	if(m_AtmosphereHeight <= 0.0f)
 		return;
 
-	if(camHeight > outerRadius) shader = Resources->Get_Shader_Program("AS_SkyFromSpace")->Get_Shader_Program();
-	else                        shader = Resources->Get_Shader_Program("AS_SkyFromAtmosphere")->Get_Shader_Program();
+	if(camHeight > outerRadius){ 
+		shader = Resources->Get_Shader_Program("AS_SkyFromSpace")->Get_Shader_Program();
+	}
+	else{
+		shader = Resources->Get_Shader_Program("AS_SkyFromAtmosphere")->Get_Shader_Program();
+	}
+
 
 	glUseProgram(shader);
 

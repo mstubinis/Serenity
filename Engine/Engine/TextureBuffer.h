@@ -20,8 +20,8 @@ class TextureBuffer{
 		TextureBuffer(int,int,int,int,unsigned int,unsigned int);
 		~TextureBuffer();
 
-		GLuint Texture() const;
-		int Attatchment() const;
+		GLuint Texture() const { return m_Texture; }
+		int Attatchment() const { return m_BufferAttatchment; }
 };
 
 #endif

@@ -4,7 +4,7 @@
 #include <string>
 #include <GL/glew.h>
 #include <GL/GL.h>
-#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 class Game;
 namespace Engine{
 	class EngineClass{
@@ -40,6 +40,7 @@ namespace Engine{
 
 			Game* game;
 			GLuint m_vao;
+			sf::Clock clock;
 
 			void _Update(float);
 			void _Render();

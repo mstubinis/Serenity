@@ -17,12 +17,12 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 void main(){
-	gl_Position = MVP * vec4(position, 1);
+	gl_Position = MVP * vec4(position, 1.0);
 
 	Color = color;
 	UV = uv;
 
-	Normals = (World * vec4(normal,0)).xyz;
-	Tangents = (World * vec4(tangent,0)).xyz;
+	Normals = (World * vec4(normal,0.0)).xyz;
+	Tangents = (World * vec4(tangent,0.0)).xyz;
 	Binormals = cross(Normals,Tangents);
 }

@@ -37,7 +37,9 @@ PhysicsEngine::~PhysicsEngine(){
 void PhysicsEngine::Set_Gravity(float x,float y,float z){ m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
 void PhysicsEngine::Set_Gravity(glm::vec3 gravity){ Set_Gravity(gravity.x,gravity.y,gravity.z); }
 void PhysicsEngine::Add_Rigid_Body(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
-void PhysicsEngine::Update(float dt){ m_dynamicsWorld->stepSimulation(glm::max(1/60.0f,dt)); }
+void PhysicsEngine::Update(float dt){
+	m_dynamicsWorld->stepSimulation(glm::max(dt,1/60.0f)); 
+}
 void PhysicsEngine::Render(){
 	glm::mat4 model = glm::mat4();
 	GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();

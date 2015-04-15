@@ -135,20 +135,17 @@ void Object::Render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
 		return;
 
-	GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
+	GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
 
-	glUseProgram(shaderProgram);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
-	glUniform3f(glGetUniformLocation(shaderProgram, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
-	glUniform1i(glGetUniformLocation(shaderProgram, "Shadeless"),static_cast<int>(material->Shadeless()));
+	glUseProgram(shader);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
+	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->Shadeless()));
 	for(auto component:material->Components())
-		material->Bind_Texture(component.second,shaderProgram);
+		material->Bind_Texture(component.second,shader);
 
 	mesh->Render();
-
-	if(debug){
-	}
 }
 void Object::Render(bool debug){ Object::Render(m_Mesh,m_Material,debug); }
 void Object::Add_Child(Object* child){

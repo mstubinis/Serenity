@@ -5,9 +5,12 @@
 #include "GBuffer.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Font.h"
 #include "Engine_Physics.h"
 
 #include <glm/gtc/constants.hpp>
+#include <boost/lexical_cast.hpp>
+#include <iostream>
 
 Renderer::Renderer(){
 	Resources->Load_Texture_Into_GLuint(RandomMapSSAO,"Textures/SSAONormal.png");
@@ -16,16 +19,20 @@ Renderer::Renderer(){
 	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
 
 	m_gBuffer = new GBuffer(Window->getSize().x,Window->getSize().y);
+
+	m_Font = new Font("Fonts/consolas.fnt");
 }
 Renderer::~Renderer(){
 	delete m_gBuffer;
+	delete m_Font;
 }
 void Renderer::Geometry_Pass(bool debug){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0,1,0,1);
     glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
+	glDisable(GL_BLEND);
+	
 	for(auto object:Resources->Objects){
 		object->Render(debug);
 	}	
@@ -44,7 +51,7 @@ void Renderer::Geometry_Pass(bool debug){
 void Renderer::Lighting_Pass(){
 	glEnable(GL_BLEND);
    	glBlendEquation(GL_FUNC_ADD);
-   	glBlendFunc(GL_ONE, GL_ONE);
+   	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClear(GL_COLOR_BUFFER_BIT);
 	this->Pass_Lighting();
 }
@@ -70,6 +77,8 @@ void Renderer::Render(bool debug){
 
 	this->Pass_Final();
 
+	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources->dt) +
+		               "\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources->dt)),glm::vec2(25,25),glm::vec3(1,1,1),0);
 }
 void Renderer::Pass_Lighting(){
 	GLuint shader = Resources->Get_Shader_Program("Deferred_Light")->Get_Shader_Program();
@@ -117,25 +126,20 @@ void Renderer::Pass_SSAO(){
 	glUniform1f(glGetUniformLocation(shader,"gRadius"), 0.7f);
 	glUniform1f(glGetUniformLocation(shader,"gScale"), 1.2f);
 
-	GLuint m_textureID[3];
-	m_textureID[0] = glGetUniformLocation(shader,"gNormalMap");
-	m_textureID[1] = glGetUniformLocation(shader,"gPositionMap");
-	m_textureID[2] = glGetUniformLocation(shader,"gRandomMap");
-
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_NORMAL));
-	glUniform1i( m_textureID[0], 0 );
+	glUniform1i(glGetUniformLocation(shader,"gNormalMap"), 0 );
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
-	glUniform1i( m_textureID[1], 1 );
+	glUniform1i(glGetUniformLocation(shader,"gPositionMap"), 1 );
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,RandomMapSSAO);
-	glUniform1i( m_textureID[2], 2 );
+	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
 	Init_Quad();
 

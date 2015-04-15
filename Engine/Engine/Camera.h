@@ -22,7 +22,7 @@ class Camera: public Object{
 		void Set_Perspective_Projection();
 		void Set_Ortho_Projection(float,float,float,float);
 
-		void Update(float);
+		virtual void Update(float);
 		void Render(Mesh*,Material*,bool=false);
 		void Render(bool=false);
 

@@ -39,6 +39,7 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
 	sf::VideoMode videoMode;
 	videoMode.width = width;
 	videoMode.height = height;
+	videoMode.bitsPerPixel = 32;
 
 	int style = sf::Style::Default;
 
@@ -125,8 +126,6 @@ void Engine::EngineClass::_Update(float dt){
 }
 void Engine::EngineClass::_Render(){
 	renderer->Render(m_DrawDebug);
-
-	Window->display();
 }
 #pragma region Event Handler Methods
 void Engine::EngineClass::EVENT_RESIZE(unsigned int width, unsigned int height)
@@ -222,7 +221,6 @@ void Engine::EngineClass::EVENT_JOYSTICK_DISCONNECTED()
 {
 }
 void Engine::EngineClass::Run(){
-	sf::Clock clock;
 	while(true){
 		Resources->dt = clock.restart().asSeconds();
 		sf::Event event;
@@ -233,6 +231,7 @@ void Engine::EngineClass::Run(){
 		_RESET_EVENTS();
 
 		_Render();
+		Window->display();
 	}
 }
 #pragma endregion

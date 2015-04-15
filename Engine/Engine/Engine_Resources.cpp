@@ -35,17 +35,16 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("Skybox","Models/skybox.obj");
 	Add_Mesh("DEBUGLight","Models/debugLight.obj");
 	Add_Mesh("Planet","Models/planet.obj");
-	Add_Mesh("Voyager","Models/voyager.obj");
 	Add_Mesh("Defiant","Models/defiant.obj");
 	Add_Mesh("Starbase","Models/starbase.obj");
 
 	Add_Material("Star","Textures/sun.png","","");
 	Add_Material("Default","Textures/sun.png","","");
 	Add_Material("Earth","Textures/earth.png","","");
-	Add_Material("Voyager","Textures/voyager.png","","Textures/voyagerGlow.png");
 	Add_Material("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
 
 	m_Cameras["Debug"] = new Camera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,100000.0f);
+	m_Cameras["HUD"] = new Camera(0,(float)Window->getSize().x,0,(float)Window->getSize().y,0.05f,2.0f);
 
 	Set_Active_Camera("Debug");
 }

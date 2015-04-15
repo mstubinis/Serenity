@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 #include <Bullet/btBulletDynamicsCommon.h>
 
 class Camera;
