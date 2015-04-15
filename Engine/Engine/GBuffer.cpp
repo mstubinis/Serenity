@@ -1,6 +1,5 @@
 #include "GBuffer.h"
 #include "Engine_Resources.h"
-#include <exception>
 
 //Create the FBO render texture initializing all the stuff that we need
 GBuffer::GBuffer(int width, int height){	
@@ -20,8 +19,6 @@ GBuffer::GBuffer(int width, int height){
 		TextureBuffer* tbo = new TextureBuffer(GBUFFER_TYPES[i],GBUFFER_PIXEL_TYPES[i],GBUFFER_FLOAT_TYPES[i],GBUFFER_ATTACHMENT_TYPES[i],m_width,m_height);
 		m_Buffers[i] = tbo;
 	}
-	if( glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		throw new std::exception("Can't initialize an FBO render texture. FBO initialization failed.");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

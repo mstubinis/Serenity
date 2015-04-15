@@ -1,6 +1,5 @@
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
-#include <SOIL/SOIL.h>
 
 #include "Object.h"
 #include "Light.h"
@@ -13,6 +12,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <SFML/Graphics.hpp>
 
 ResourceManager::ResourceManager(){
 	dt = 0;
@@ -39,7 +40,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Mesh("Starbase","Models/starbase.obj");
 
 	Add_Material("Star","Textures/sun.png","","");
-	Add_Material("Default","Textures/Scar.png","Textures/ScarNormal.png","Textures/ScarGlow.png");
+	Add_Material("Default","Textures/sun.png","","");
 	Add_Material("Earth","Textures/earth.png","","");
 	Add_Material("Voyager","Textures/voyager.png","","Textures/voyagerGlow.png");
 	Add_Material("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
@@ -72,49 +73,33 @@ void ResourceManager::Set_Active_Camera(Camera* camera){ m_Current_Camera = came
 void ResourceManager::Set_Active_Camera(std::string name){ m_Current_Camera = m_Cameras[name]; }
 void ResourceManager::Load_Texture_Into_GLuint(GLuint& address, std::string filename){
 	glGenTextures(1, &address);
-	unsigned char* image;
-	int width, height;
+	sf::Image image;
 
-	if(filename != ""){
-		glBindTexture(GL_TEXTURE_2D, address);
-		image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,GL_UNSIGNED_BYTE, image);
-		SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, address);
+	image.loadFromFile(filename.c_str());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else if(filename == "")
-		address = 0;
-
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
 }
 void ResourceManager::Load_Cubemap_Texture_Into_GLuint(GLuint& address, std::string filenames[]){
 	glGenTextures(1, &address);
 	for(unsigned int i = 0; i < 6; i++){
-		unsigned char* image;
-		int width, height;
-		if(filenames[i] != ""){
-			glBindTexture(GL_TEXTURE_CUBE_MAP, address);
-			image = SOIL_load_image(filenames[i].c_str(), &width, &height, 0, SOIL_LOAD_RGB);
-			GLenum skyboxSide;
-			if(i==0)
-				skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-			else if(i == 1)
-				skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-			else if(i == 2)
-				skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-			else if(i == 3)
-				skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-			else if(i == 4)
-				skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-			else
-				skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-			glTexImage2D(skyboxSide, 0, GL_RGB,width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,image);
-			SOIL_free_image_data(image);
-		}
+		sf::Image image;
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, address);
+		image.loadFromFile(filenames[i].c_str());
+		GLenum skyboxSide;
+		if(i==0)           skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+		else if(i == 1)    skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+		else if(i == 2)    skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+		else if(i == 3)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+		else if(i == 4)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+		else               skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+		glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
 	}
 	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
