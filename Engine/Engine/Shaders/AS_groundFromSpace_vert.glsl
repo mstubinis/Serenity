@@ -11,6 +11,9 @@ uniform int hasAtmosphere;
 uniform mat4 MVP;
 uniform mat4 World;
 
+uniform float near;
+uniform float far;
+
 uniform vec3 v3CameraPos;
 uniform vec3 v3LightDir;		// The direction vector to the light source 
 uniform vec3 v3InvWavelength;	// 1 / pow(wavelength, 4) for the red, green, and blue channels 
@@ -89,6 +92,8 @@ void main(void)	{
 		c1 = v3Attenuate;
 	}
 	gl_Position = MVP * vec4(position, 1.0);
+    gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near) - 1.0; 
+    gl_Position.z *= gl_Position.w;
 
 	Color = color;
 	UV = uv;

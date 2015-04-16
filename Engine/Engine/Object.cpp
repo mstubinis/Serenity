@@ -153,6 +153,9 @@ void Object::Render(Mesh* mesh, Material* material,bool debug){
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->Shadeless()));
+
+	glUniform1f(glGetUniformLocation(shader, "near"),Resources->Current_Camera()->Near());
+	glUniform1f(glGetUniformLocation(shader, "far"),Resources->Current_Camera()->Far());
 	for(auto component:material->Components())
 		material->Bind_Texture(component.second,shader);
 

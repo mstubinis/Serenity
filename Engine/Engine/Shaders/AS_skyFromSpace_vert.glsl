@@ -3,6 +3,8 @@
 attribute vec3 position;
 
 uniform mat4 MVP;
+uniform float near;
+uniform float far;
 
 uniform int nSamples;
 uniform float fSamples;
@@ -77,8 +79,10 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-    // Finally, scale the Mie and Rayleigh colors
 	gl_Position = MVP * vec4(position, 1.0);
+    gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near) - 1.0; 
+    gl_Position.z *= gl_Position.w;
+
 	v3LightPosition = v3LightDir;
 	v3Direction = v3CameraPos - v3Pos;
 	c0 = v3FrontColor * (v3InvWavelength * fKrESun);

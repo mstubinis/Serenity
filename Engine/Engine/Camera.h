@@ -16,7 +16,7 @@ class Camera: public Object{
 		float m_Angle;
 		float m_AspectRatio;
 
-		float m_ClipStart, m_ClipEnd;
+		float m_Near, m_Far;
 		glm::mat4 m_View, m_Projection;
 	public:
 		Camera(float angle, float ratio, float _near, float _far);				           // Perspective camera Constructor
@@ -36,6 +36,9 @@ class Camera: public Object{
 		void LookAt(Object*,bool targetUp = false);
 
 		void Set_Aspect_Ratio(float);
+
+		const float Near() const { return m_Near; }
+		const float Far() const { return m_Far; }
 
 		glm::mat4 Calculate_ViewProjInverted();
 		glm::mat4 Calculate_Projection(glm::mat4&);

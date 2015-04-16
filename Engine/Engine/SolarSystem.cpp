@@ -21,7 +21,7 @@ SolarSystem::~SolarSystem()
 {
 }
 void SolarSystem::LoadTestSystem(){
-	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.5f,50000000.0f);
+	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.5f,2200000000.0f);
 	Resources->Set_Active_Camera(playerCamera);
 
 	new Skybox("Basic");

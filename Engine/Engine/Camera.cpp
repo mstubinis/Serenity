@@ -8,8 +8,8 @@
 Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
-	m_ClipStart = _near;
-	m_ClipEnd = _far;
+	m_Near = _near;
+	m_Far = _far;
 
 	m_Type = CAMERA_TYPE_PERSPECTIVE;
 
@@ -19,8 +19,8 @@ Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far): O
 Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Camera"){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
-	m_ClipStart = _near;
-	m_ClipEnd = _far;
+	m_Near = _near;
+	m_Far = _far;
 
 	m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
@@ -62,11 +62,11 @@ Camera::~Camera()
 { 
 }
 void Camera::Set_Perspective_Projection(){ 
-	m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_ClipStart,m_ClipEnd); 
+	m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far); 
 	m_Changed = true;
 }
 void Camera::Set_Ortho_Projection(float left, float right, float bottom, float top){
-	m_Projection = glm::ortho(left,right,bottom,top,m_ClipStart,m_ClipEnd);
+	m_Projection = glm::ortho(left,right,bottom,top,m_Near,m_Far);
 	m_Changed = true;
 }
 void Camera::Set_Aspect_Ratio(float ratio){ 
