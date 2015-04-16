@@ -46,7 +46,7 @@ void SolarSystem::LoadRandomly()
 	//Then load moons. Generally the number of moons depends on the type of planet. Gas giants have more moons than rocky planets.
 }
 void SolarSystem::Update(float dt){
-	if(Keyboard::IsKeyDown("esc")) 
+	if(Keyboard::IsKeyDown("esc"))
 		exit(EXIT_SUCCESS);
 }
 void SolarSystem::Render()

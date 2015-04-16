@@ -11,12 +11,12 @@ uniform float gLinear;
 uniform float gExp;
 
 uniform vec3 gDirection;
-uniform vec3 gPosition;
+uniform vec3 gLightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
 
-uniform vec3 gEyeWorldPos;
+uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
 uniform mat4 VPInverse;
 
@@ -29,10 +29,11 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
     float DiffuseFactor = dot(_norm, -_lightDir);
 
+
     vec4 DiffuseColor = vec4(0.0);
 
-    vec3 L = normalize(gPosition);
-    vec3 H = normalize(gPosition + _worldPos);
+    vec3 L = normalize(gLightPosition - gCameraPosition);
+    vec3 H = normalize(L - gCameraPosition);
 
     float df = max(0.0, dot(_norm, L));
     float sf = max(0.0, dot(_norm, H));
@@ -41,10 +42,10 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     if (DiffuseFactor > 0.0) {
         DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * DiffuseFactor;
     }
-    return AmbientColor + DiffuseColor * df + vec4(gColor,1.0) * sf;
+    return AmbientColor + DiffuseColor * (df + vec4(gColor,1.0) * sf);
 }
 vec4 CalcPointLight(vec3 _worldPos, vec3 _norm){
-    vec3 LightDirection = _worldPos - gPosition;
+    vec3 LightDirection = _worldPos - gLightPosition;
     float Distance = length(LightDirection);
     LightDirection = normalize(LightDirection);
 
@@ -55,7 +56,7 @@ vec4 CalcPointLight(vec3 _worldPos, vec3 _norm){
     return c / a;
 }
 vec4 CalcSunLight(vec3 _worldPos, vec3 _norm){
-    vec3 LightDirection = normalize(_worldPos - gPosition);
+    vec3 LightDirection = normalize(_worldPos - gLightPosition);
     return CalcLightInternal(LightDirection, _worldPos, _norm);
 }
 vec4 CalcDirectionalLight(vec3 _worldPos, vec3 _norm){ 
