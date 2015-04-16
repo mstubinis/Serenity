@@ -9,9 +9,6 @@ attribute vec4 color;
 uniform mat4 MVP;
 uniform mat4 World;
 
-uniform float near;
-uniform float far;
-
 varying vec4 Color;
 varying vec2 UV;
 
@@ -21,9 +18,7 @@ varying vec3 Tangents;
 
 void main(){
 	gl_Position = MVP * vec4(position, 1.0);
-
-    gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near) - 1.0; 
-    gl_Position.z *= gl_Position.w;
+	gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
 	Color = color;
 	UV = uv;

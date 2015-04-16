@@ -1,6 +1,8 @@
 #version 120
 
 uniform float fExposure;
+uniform float far;
+uniform float C;
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
@@ -56,4 +58,6 @@ void main(){
 		else
 			gl_FragData[1].a = 0.0;
 	}
+    const float offset = 1.0;
+    gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));
 }

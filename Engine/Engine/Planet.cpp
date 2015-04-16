@@ -32,8 +32,8 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
-	glUniform1f(glGetUniformLocation(shader, "near"),Resources->Current_Camera()->Near());
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources->Current_Camera()->Far());
+	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 
@@ -120,8 +120,8 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	obj *= glm::mat4_cast(m_Orientation);
 	obj = glm::scale(obj,glm::vec3(outerRadius,outerRadius,outerRadius));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_Projection(obj)));
-	glUniform1f(glGetUniformLocation(shader, "near"),Resources->Current_Camera()->Near());
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources->Current_Camera()->Far());
+	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
 	glUniform1i(glGetUniformLocation(shader,"nSamples"), 2);
 	glUniform1f(glGetUniformLocation(shader,"fSamples"), 2.0f);

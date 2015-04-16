@@ -119,7 +119,6 @@ void Object::Update(float dt){
 	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr){
 		newModel = m_Parent->m_Model;
-		m_Orientation = m_Parent->Orientation();
 	}
 	if(m_Changed){
 		m_Forward = _Forward();
@@ -154,8 +153,8 @@ void Object::Render(Mesh* mesh, Material* material,bool debug){
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->Shadeless()));
 
-	glUniform1f(glGetUniformLocation(shader, "near"),Resources->Current_Camera()->Near());
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources->Current_Camera()->Far());
+	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	for(auto component:material->Components())
 		material->Bind_Texture(component.second,shader);
 
@@ -178,7 +177,7 @@ void Object::Set_Mesh(Mesh* mesh){
 		return; 
 	} 
 	m_BoundingBoxRadius = mesh->Radius();  
-	m_Calculate_Radius();  
+	m_Calculate_Radius();
 }
 void Object::Set_Material(Material* material){ m_Material = material; }
 void Object::Flag_As_Changed(){

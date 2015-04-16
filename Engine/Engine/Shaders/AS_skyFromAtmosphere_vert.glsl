@@ -4,9 +4,6 @@ attribute vec3 position;
 
 uniform mat4 MVP;
 
-uniform float near;
-uniform float far;
-
 uniform int nSamples;
 uniform float fSamples;
 uniform vec3 v3CameraPos;           // The camera's current position
@@ -78,8 +75,7 @@ void main(){
         v3SamplePoint += v3SampleRay;
     }
 	gl_Position = MVP * vec4(position, 1.0);
-    gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near) - 1.0; 
-    gl_Position.z *= gl_Position.w;
+	gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
 	v3LightPosition = v3LightDir;
 	v3Direction = v3CameraPos - v3Pos;

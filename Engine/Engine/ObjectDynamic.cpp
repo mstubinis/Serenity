@@ -83,23 +83,25 @@ glm::vec3 ObjectDynamic::_Up(){
                                      2 * (y * z + w * x)));
 }
 void ObjectDynamic::Update(float dt){
+	if(m_RigidBody->isActive())
+		Flag_As_Changed();
 	if(m_Changed){ 
 		m_RigidBody->activate();
 		m_Changed = false;
 	}
-
 	glm::mat4 parentModel = glm::mat4(1);
-	if(m_Parent != nullptr)
+	if(m_Parent != nullptr){
 		parentModel = m_Parent->Model();
-
+		m_Orientation = m_Parent->Orientation();
+	}
 	if(m_RigidBody->isActive()){
+		m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(m_Model));
+		btQuaternion t = m_RigidBody->getWorldTransform().getRotation();
+		m_Orientation = glm::quat(t.w(),t.x(),t.y(),t.z());
+
 		m_Forward = ObjectDynamic::_Forward();
 		m_Right = ObjectDynamic::_Right();
 		m_Up = ObjectDynamic::_Up();
-
-		m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(m_Model));
-		btQuaternion q = m_RigidBody->getCenterOfMassTransform().getRotation();
-		m_Orientation = glm::quat(q.w(),q.x(),q.y(),q.z());
 	}
 	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(parentModel * m_Model);
 }

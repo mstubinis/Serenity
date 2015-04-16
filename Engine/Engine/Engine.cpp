@@ -109,7 +109,8 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1-Resources->dt);
 
 	glm::vec2 mousePos = Engine::Events::Mouse::GetMousePosition();
-	if(mousePos.x < 50 || mousePos.y < 50 || mousePos.x > static_cast<int>(Window->getSize().x - 50) || mousePos.y > static_cast<int>(Window->getSize().y - 50)){
+	float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Window->getSize().x/2,Window->getSize().y/2)));
+	if(mouseDistFromCenter > 50){
 		Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
 		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
 	}

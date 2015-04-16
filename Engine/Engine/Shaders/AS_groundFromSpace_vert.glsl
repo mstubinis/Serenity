@@ -11,9 +11,6 @@ uniform int hasAtmosphere;
 uniform mat4 MVP;
 uniform mat4 World;
 
-uniform float near;
-uniform float far;
-
 uniform vec3 v3CameraPos;
 uniform vec3 v3LightDir;		// The direction vector to the light source 
 uniform vec3 v3InvWavelength;	// 1 / pow(wavelength, 4) for the red, green, and blue channels 
@@ -41,7 +38,6 @@ varying vec2 UV;
 varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
-
 
 float scale(float fCos)	{	
 	float x = 1.0 - fCos;	
@@ -86,14 +82,12 @@ void main(void)	{
 			v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI));	
 			v3FrontColor += v3Attenuate * (fDepth * fScaledLength);	
 			v3SamplePoint += v3SampleRay;	
-		}	
-	
+		}
 		c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);	
 		c1 = v3Attenuate;
 	}
 	gl_Position = MVP * vec4(position, 1.0);
-    gl_Position.z = 2.0*log(gl_Position.w/near)/log(far/near) - 1.0; 
-    gl_Position.z *= gl_Position.w;
+	gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
 	Color = color;
 	UV = uv;

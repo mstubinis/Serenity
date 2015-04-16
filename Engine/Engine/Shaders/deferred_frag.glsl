@@ -5,6 +5,8 @@ uniform sampler2D NormalMap;
 uniform sampler2D GlowMap;
 
 uniform int Shadeless;
+uniform float far;
+uniform float C;
 
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
@@ -43,4 +45,6 @@ void main(){
 	else{
 		gl_FragData[1] = vec4(1.0);
 	}
+    const float offset = 1.0;
+    gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));
 }

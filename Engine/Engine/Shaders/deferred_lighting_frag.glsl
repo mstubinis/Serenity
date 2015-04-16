@@ -29,7 +29,6 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
     float DiffuseFactor = dot(_norm, -_lightDir);
 
-
     vec4 DiffuseColor = vec4(0.0);
 
     vec3 L = normalize(gLightPosition - gCameraPosition);

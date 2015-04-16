@@ -21,11 +21,12 @@ SolarSystem::~SolarSystem()
 {
 }
 void SolarSystem::LoadTestSystem(){
-	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.5f,2200000000.0f);
+	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,1000000000.0f);
 	Resources->Set_Active_Camera(playerCamera);
 
 	new Skybox("Basic");
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0));
+	Ship* other = new Ship("Defiant","Defiant","USS Valiant",glm::vec3(2,0,0));
 	
 	for(int i = 0; i < 1; i++){
 		Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-83710,0,-(i * 130000)),63710);
@@ -37,8 +38,7 @@ void SolarSystem::LoadTestSystem(){
 void SolarSystem::LoadFromFile(std::string)
 {
 }
-void SolarSystem::LoadRandomly()
-{
+void SolarSystem::LoadRandomly(){
 	//solar systems are normally mono - trinary. Load 1 - 3 stars
 
 	//Then load planets. Generally the more stars, the more planets
