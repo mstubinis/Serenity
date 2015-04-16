@@ -7,6 +7,8 @@
 
 Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool addToResources){
 	m_Changed = true;
+	m_Radius = 0;
+	m_BoundingBoxRadius = glm::vec3(0,0,0);
 	m_Forward = glm::vec3(0,0,-1);
 	m_Right = glm::vec3(1,0,0);
 	m_Up = glm::vec3(0,1,0);
@@ -30,10 +32,11 @@ Object::~Object()
 }
 void Object::m_Calculate_Radius(){
 	if(m_Mesh == nullptr){
-		m_Radius = glm::vec3(0,0,0);
+		m_BoundingBoxRadius = glm::vec3(0,0,0);
 		return;
 	}
-	m_Radius = m_Mesh->Radius() * m_Scale;
+	m_BoundingBoxRadius = m_Mesh->Radius() * m_Scale;
+	m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
 }
 glm::vec3 Object::_Forward(){ return glm::normalize(glm::cross(Right(),Up())); }
 glm::vec3 Object::_Right(){
@@ -131,8 +134,16 @@ void Object::Update(float dt){
 	}
 	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(m_Model);
 }
+float Object::Distance(Object* other){
+	glm::vec3 vecTo = other->Position() - Position();
+	return abs(glm::length(vecTo));
+}
 void Object::Render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
+		return;
+	if(!Resources->Current_Camera()->SphereIntersectTest(this))
+		return;
+	if(Resources->Current_Camera()->Distance(this) > 250 * Radius())
 		return;
 
 	GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
@@ -157,7 +168,15 @@ void Object::Add_Child(Object* child){
 void Object::Set_Color(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
 void Object::Set_Color(glm::vec3& color){ Object::Set_Color(color.x,color.y,color.z); }
 
-void Object::Set_Mesh(Mesh* mesh){ m_Mesh = mesh; if(m_Mesh == nullptr){m_Radius = glm::vec3(0,0,0); return; } m_Radius = mesh->Radius();  m_Calculate_Radius();  }
+void Object::Set_Mesh(Mesh* mesh){ 
+	m_Mesh = mesh; 
+	if(m_Mesh == nullptr){
+		m_BoundingBoxRadius = glm::vec3(0,0,0); 
+		return; 
+	} 
+	m_BoundingBoxRadius = mesh->Radius();  
+	m_Calculate_Radius();  
+}
 void Object::Set_Material(Material* material){ m_Material = material; }
 void Object::Flag_As_Changed(){
 	m_Changed = true;

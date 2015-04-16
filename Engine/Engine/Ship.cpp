@@ -34,7 +34,7 @@ void PlayerShip::Update(float dt){
 	if(m_IsWarping && m_WarpFactor > 0){
 		float speed = (m_WarpFactor * 1.0f/Mass())*2;
 
-		glm::vec3 s = Forward() * (speed*speed*speed*speed*speed*speed*speed*speed*speed*speed*speed);
+		glm::vec3 s = Forward() * glm::pow(speed,15.0f);
 
 		for(auto obj:Resources->Objects){
 			if(obj != this && obj->Parent() == nullptr){

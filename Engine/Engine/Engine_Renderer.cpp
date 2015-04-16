@@ -77,8 +77,7 @@ void Renderer::Render(bool debug){
 
 	this->Pass_Final();
 
-	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources->dt) +
-		               "\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources->dt)),glm::vec2(25,25),glm::vec3(1,1,1),0);
+	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources->dt) +"\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources->dt)),glm::vec2(25,25),glm::vec3(1,1,1),0);
 }
 void Renderer::Pass_Lighting(){
 	GLuint shader = Resources->Get_Shader_Program("Deferred_Light")->Get_Shader_Program();

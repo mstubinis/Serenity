@@ -20,6 +20,9 @@ class Planet: public Object{
 			  );
 		~Planet();
 
+		const glm::vec3& RadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
+		const float Radius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
+
 		virtual void Update(float);
 		virtual void Render(Mesh*, Material*,bool=false);
 		virtual void Render(bool=false);

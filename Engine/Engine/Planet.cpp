@@ -18,10 +18,14 @@ void Planet::Update(float dt){
 void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	if(mesh == nullptr)
 		return;
+	if(!Resources->Current_Camera()->SphereIntersectTest(this))
+		return;
+	if(Resources->Current_Camera()->Distance(this) > 250 * Radius())
+		return;
 
 	GLuint shader = Resources->Get_Shader_Program("AS_GroundFromSpace")->Get_Shader_Program();
 
-	float innerRadius = m_Radius.x;
+	float innerRadius = m_Radius;
 	float outerRadius = innerRadius + (innerRadius * m_AtmosphereHeight);
 
 	glUseProgram(shader);

@@ -24,7 +24,9 @@ class Object{
 		std::string m_Name;
 		glm::mat4 m_WorldMatrix, m_Model;
 		glm::quat m_Orientation;
-		glm::vec3 m_Position, m_Scale, m_Color, m_Radius, m_Forward, m_Right, m_Up;
+		glm::vec3 m_Position, m_Scale, m_Color, m_Forward, m_Right, m_Up;
+		float m_Radius;
+		glm::vec3 m_BoundingBoxRadius;
 
 		Object* m_Parent;
 		std::vector<Object*> m_Children;
@@ -46,6 +48,8 @@ class Object{
 		~Object();
 
 		void Flag_As_Changed();
+
+		float Distance(Object*);
 
 		virtual void Translate(float,float,float,bool local=true); virtual void Translate(glm::vec3&,bool local=true);
 		virtual void Rotate(float,float,float); virtual void Rotate(glm::vec3&);
@@ -69,7 +73,8 @@ class Object{
 		const glm::vec3& Forward() const{ return m_Forward; }
 		const glm::vec3& Right() const{ return m_Right; }
 		const glm::vec3& Up() const{ return m_Up; }
-		const glm::vec3& Radius() const{ return m_Radius; }
+		virtual const glm::vec3& RadiusBox() const{ return m_BoundingBoxRadius; }
+		virtual const float Radius() const { return m_Radius; }
 		const glm::vec3& Color() const{ return m_Color; }
 		const glm::mat4& Model() const{ return m_Model; }
 		const glm::mat4& World() const{ return m_WorldMatrix; }

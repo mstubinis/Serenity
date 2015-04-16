@@ -5,7 +5,11 @@
 
 enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
 
+
 class Camera: public Object{
+	private:
+		void _ConstructFrustrum();
+		glm::vec4 m_Planes[6];
 	protected:
 		CAMERA_TYPE m_Type;
 
@@ -39,5 +43,7 @@ class Camera: public Object{
 		const glm::mat4 Projection() const{ return m_Projection; }
 		const glm::mat4 View() const{ return m_View; }
 		const CAMERA_TYPE Type() const{ return m_Type; }
+
+		bool SphereIntersectTest(Object*);
 };
 #endif

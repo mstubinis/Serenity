@@ -12,7 +12,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 	if(m_Collision_Shape == nullptr){
 		if(m_Mesh != nullptr){
 			if(m_Mesh->Collision() == nullptr)
-				m_Collision_Shape = new btBoxShape(btVector3(m_Radius.x,m_Radius.y,m_Radius.z));
+				m_Collision_Shape = new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z));
 			else
 				m_Collision_Shape = m_Mesh->Collision();
 		}
@@ -27,7 +27,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 
 	m_MotionState = new btDefaultMotionState(tr);
 
-	m_Mass = 0.5f * m_Radius.x;
+	m_Mass = 0.5f * m_Radius;
 
 	m_Collision_Shape->calculateLocalInertia(m_Mass,*m_Inertia);
 
@@ -174,7 +174,7 @@ void ObjectDynamic::Set_Angular_Velocity(float x, float y, float z){
 }
 void ObjectDynamic::Set_Angular_Velocity(glm::vec3& velocity){ ObjectDynamic::Set_Angular_Velocity(velocity.x,velocity.y,velocity.z); }
 void ObjectDynamic::Set_Mass(float mass){
-	m_Mass = 0.5f * m_Radius.x;
+	m_Mass = 0.5f * m_Radius;
 	m_Collision_Shape->calculateLocalInertia(m_Mass,*m_Inertia);
 	if(m_RigidBody != nullptr)
 		m_RigidBody->setMassProps(m_Mass,*m_Inertia);
