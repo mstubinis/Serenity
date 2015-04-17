@@ -142,7 +142,7 @@ void Object::Render(Mesh* mesh, Material* material,bool debug){
 		return;
 	if(!Resources->Current_Camera()->SphereIntersectTest(this))
 		return;
-	if(Resources->Current_Camera()->Distance(this) > 250 * Radius())
+	if(Resources->Current_Camera()->Distance(this) > 450 * Radius())
 		return;
 
 	GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();

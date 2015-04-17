@@ -20,7 +20,7 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 		return;
 	if(!Resources->Current_Camera()->SphereIntersectTest(this))
 		return;
-	if(Resources->Current_Camera()->Distance(this) > 250 * Radius())
+	if(Resources->Current_Camera()->Distance(this) > 450 * Radius())
 		return;
 
 	GLuint shader = Resources->Get_Shader_Program("AS_GroundFromSpace")->Get_Shader_Program();

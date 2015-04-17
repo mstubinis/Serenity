@@ -21,7 +21,7 @@ SolarSystem::~SolarSystem()
 {
 }
 void SolarSystem::LoadTestSystem(){
-	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,1000000000.0f);
+	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,9000000000.0f);
 	Resources->Set_Active_Camera(playerCamera);
 
 	new Skybox("Basic");
@@ -33,7 +33,7 @@ void SolarSystem::LoadTestSystem(){
 	}
 	playerCamera->Follow(player);
 
-	Star* sun = new Star(glm::vec3(1,0.6f,0),glm::vec3(1,1,1),glm::vec3(0,0,-169580000),6958000,"Sun");
+	Star* sun = new Star(glm::vec3(1,0.6f,0),glm::vec3(1,1,1),glm::vec3(0,0,-279580000),6958000,"Sun");
 }
 void SolarSystem::LoadFromFile(std::string)
 {
