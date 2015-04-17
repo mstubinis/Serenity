@@ -120,6 +120,7 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	obj *= glm::mat4_cast(m_Orientation);
 	obj = glm::scale(obj,glm::vec3(outerRadius,outerRadius,outerRadius));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_Projection(obj)));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(obj));
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources->Current_Camera()->Far());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 

@@ -6,6 +6,7 @@ uniform float fExposure;
 uniform float far;
 uniform float C;
 
+varying vec3 WorldPosition;
 varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
@@ -27,7 +28,9 @@ void main(){
 	vec4 HDR = 1.0 - exp(f4Color * -fExposure);
 	float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
-	gl_FragColor = vec4(HDR.xyz,nightmult+(outerRadius - cameraHeight));
+	gl_FragData[0] = vec4(HDR.xyz,nightmult+(outerRadius - cameraHeight));
+	gl_FragData[1] = vec4(1);
+	gl_FragData[2] = vec4(WorldPosition,1.0);
 
     const float offset = 1.0;
     gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));

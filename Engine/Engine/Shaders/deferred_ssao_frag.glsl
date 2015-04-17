@@ -19,14 +19,6 @@ const vec2 poisson[] =  vec2[]( vec2(  0.34495938,   0.29387760 ),
 
 vec2 CalcTexCoord(){ return gl_FragCoord.xy / gScreenSize; }
 
-vec3 calculatePosition(vec2 texCoord){
-	vec4 clipSpaceLocation;
-    clipSpaceLocation.xy = texCoord * 2.0 - 1.0;
-    clipSpaceLocation.z = texture2D(gPositionMap, texCoord).r * 2.0 - 1.0;
-    clipSpaceLocation.w = 1.0;
-    vec4 homogenousLocation = VPInverse * clipSpaceLocation;
-    return homogenousLocation.xyz / homogenousLocation.w;
-}
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal) {
     vec3 diff = calculatePosition(uv+offsetUV)-origin;
     vec3 vec = normalize(diff);
@@ -40,7 +32,7 @@ vec2 getRandom(vec2 uv){
 }
 void main() {
 	vec2 samplePosition = CalcTexCoord();
-    vec3 origin = calculatePosition(samplePosition);
+    vec3 origin = vec3 position = texture2D(gPositionMap,samplePosition).xyz;
     vec3 normal = texture2D(gNormalMap, samplePosition).xyz;
     vec2 random = getRandom(samplePosition);
 

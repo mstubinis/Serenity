@@ -38,8 +38,8 @@ void Skybox::Render(bool debug){
 	glDepthMask (GL_FALSE);
 	glUseProgram( m_ShaderProgram );
 
-	GLuint MatrixID = glGetUniformLocation( m_ShaderProgram, "MVP" );
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
+	glUniformMatrix4fv(glGetUniformLocation( m_ShaderProgram, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
+	glUniformMatrix4fv(glGetUniformLocation( m_ShaderProgram, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
 	glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture);

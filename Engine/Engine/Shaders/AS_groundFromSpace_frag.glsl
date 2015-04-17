@@ -19,6 +19,7 @@ uniform vec3 Object_Color;
 varying vec3 c0;
 varying vec3 c1;
 
+varying vec3 WorldPosition;
 varying vec4 Color;
 varying vec2 UV;
 varying vec3 Normals; 
@@ -58,6 +59,7 @@ void main(){
 		else
 			gl_FragData[1].a = 0.0;
 	}
+	gl_FragData[2] = vec4(WorldPosition,1.0);
     const float offset = 1.0;
     gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));
 }

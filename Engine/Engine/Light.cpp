@@ -40,8 +40,8 @@ void Init_Quad(){
 SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type):Object("DEBUGLight","",pos,glm::vec3(1,1,1),name,false){
 	m_Type = type;
 
-    m_AmbientIntensity = 0.2f;
-    m_DiffuseIntensity = 0.8f;
+    m_AmbientIntensity = 0.05f;
+    m_DiffuseIntensity = 1.0f;
 	m_Parent = nullptr;
 
 	Resources->Lights.push_back(this);
@@ -53,9 +53,6 @@ void SunLight::Update(float dt){
 void SunLight::Render(GLuint shader){ 
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
-	glm::mat4 tiMV = glm::transpose(glm::inverse(m_Model * Resources->Current_Camera()->View()));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(tiMV));
-
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
     glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
     glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
@@ -66,8 +63,8 @@ void SunLight::Render(GLuint shader){
 	glm::vec3 campos = Resources->Current_Camera()->Position();
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
-    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 1.0f);
+    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 150.0f);
 
 	Init_Quad();
 }
@@ -88,16 +85,13 @@ DirectionalLight::~DirectionalLight()
 void DirectionalLight::Render(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
-	glm::mat4 tiMV = glm::transpose(glm::inverse(m_Model * Resources->Current_Camera()->View()));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(tiMV));
-
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
 	glUniform3f(glGetUniformLocation(shader,"gDirection"), m_Direction.x, m_Direction.y,m_Direction.z);
     glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
     glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
 
-    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 1.0f);
+    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 150.0f);
 
 	Init_Quad();
 }
@@ -111,9 +105,6 @@ PointLight::~PointLight(){
 }
 void PointLight::Render(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
-
-	glm::mat4 tiMV = glm::transpose(glm::inverse(m_Model * Resources->Current_Camera()->View()));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(tiMV));
 
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
     glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
@@ -129,8 +120,8 @@ void PointLight::Render(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gLinear"), m_Linear);
     glUniform1f(glGetUniformLocation(shader,"gExp"), m_Exp);
 
-    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 0.6f);
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 1.0f);
+    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 150.0f);
 
 	Init_Quad();
 }

@@ -29,19 +29,21 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
     float DiffuseFactor = dot(_norm, -_lightDir);
 
-    vec4 DiffuseColor = vec4(0.0);
-
-    vec3 L = normalize(gLightPosition - gCameraPosition);
-    vec3 H = normalize(L - gCameraPosition);
-
-    float df = max(0.0, dot(_norm, L));
-    float sf = max(0.0, dot(_norm, H));
-    sf = pow(sf, gMatSpecularIntensity);
+    vec4 DiffuseColor  = vec4(0.0);
+    vec4 SpecularColor = vec4(0.0);
 
     if (DiffuseFactor > 0.0) {
         DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * DiffuseFactor;
+
+        vec3 VertexToEye = normalize(gCameraPosition - _worldPos);
+        vec3 LightReflect = normalize(reflect(_lightDir, _norm));
+        float SpecularFactor = dot(VertexToEye, LightReflect);
+        SpecularFactor = pow(SpecularFactor, gSpecularPower);
+        if (SpecularFactor > 0.0) {
+            SpecularColor = vec4(gColor, 1.0) * gMatSpecularIntensity * SpecularFactor;
+        }
     }
-    return AmbientColor + DiffuseColor * (df + vec4(gColor,1.0) * sf);
+    return (AmbientColor + DiffuseColor + SpecularColor);
 }
 vec4 CalcPointLight(vec3 _worldPos, vec3 _norm){
     vec3 LightDirection = _worldPos - gLightPosition;
@@ -64,20 +66,11 @@ vec4 CalcDirectionalLight(vec3 _worldPos, vec3 _norm){
 vec4 CalcSpotLight(vec3 _worldPos, vec3 _norm){
 	return vec4(0);
 }
-vec3 decodeLocation(vec2 texCoord){
-	vec4 clipSpaceLocation;
-    clipSpaceLocation.xy = texCoord * 2.0 - 1.0;
-    clipSpaceLocation.z = texture2D(gPositionMap, texCoord).r * 2.0 - 1.0;
-    clipSpaceLocation.w = 1.0;
-    vec4 homogenousLocation = VPInverse * clipSpaceLocation;
-    return homogenousLocation.xyz / homogenousLocation.w;
-}
 void main(){
 	vec2 texCoord = CalcTexCoord();
-	vec3 position = decodeLocation(texCoord);
+	vec3 position = texture2D(gPositionMap,texCoord).xyz;
 	vec4 normalTexture = texture2D( gNormalMap, texCoord);
-    vec3 normal = normalTexture.rgb * 2.0 - 1.0;
-	normal = normalize(normal);
+    vec3 normal = normalize(normalTexture.rgb);
 
 	if(gLightType == 0)
 		gl_FragColor = max(vec4(normalTexture.a),CalcSunLight(position,normal));

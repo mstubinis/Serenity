@@ -51,13 +51,13 @@ void Renderer::Geometry_Pass(bool debug){
 void Renderer::Lighting_Pass(){
 	glEnable(GL_BLEND);
    	glBlendEquation(GL_FUNC_ADD);
-   	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   	glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT);
 	this->Pass_Lighting();
 }
 void Renderer::Render(bool debug){
 
-	m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL);
+	m_gBuffer->Start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_POSITION);
 	this->Geometry_Pass(debug);
 	m_gBuffer->Stop();
 
@@ -77,6 +77,8 @@ void Renderer::Render(bool debug){
 
 	this->Pass_Final();
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//render hud stuff
 	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources->dt) +"\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources->dt)),glm::vec2(25,25),glm::vec3(1,1,1),0);
 }
 void Renderer::Pass_Lighting(){
@@ -85,7 +87,6 @@ void Renderer::Pass_Lighting(){
 	glUseProgram(shader);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
-	glUniform3f(glGetUniformLocation(shader,"gEyeWorldPos"), camPos.x, camPos.y, camPos.z);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_ViewProjInverted()));
 
 	glActiveTexture(GL_TEXTURE0);
@@ -95,7 +96,7 @@ void Renderer::Pass_Lighting(){
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_POSITION));
 	glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
 
 	for (auto light:Resources->Lights) {
@@ -132,7 +133,7 @@ void Renderer::Pass_SSAO(){
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_DEPTH));
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_POSITION));
 	glUniform1i(glGetUniformLocation(shader,"gPositionMap"), 1 );
 
 	glActiveTexture(GL_TEXTURE2);
@@ -214,7 +215,6 @@ void Renderer::Pass_Final(){
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_SSAO));
 	glUniform1i( glGetUniformLocation(shader,"gSSAOMap"), 2 );
-
 
 	Init_Quad();
 
