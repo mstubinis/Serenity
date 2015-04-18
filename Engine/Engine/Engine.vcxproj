@@ -170,11 +170,13 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <None Include="Shaders\deferred_blur_vertical.glsl" />
     <None Include="Shaders\deferred_final_frag.glsl" />
     <None Include="Shaders\deferred_frag.glsl" />
+    <None Include="Shaders\deferred_frag_HUD.glsl" />
     <None Include="Shaders\deferred_frag_skybox.glsl" />
     <None Include="Shaders\deferred_lighting_frag.glsl" />
     <None Include="Shaders\deferred_lighting_vert.glsl" />
     <None Include="Shaders\deferred_ssao_frag.glsl" />
     <None Include="Shaders\vert.glsl" />
+    <None Include="Shaders\vert_HUD.glsl" />
     <None Include="Shaders\vert_skybox.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

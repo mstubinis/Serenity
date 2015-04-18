@@ -61,11 +61,12 @@ Font::~Font(){
 	delete m_FontData;
 }
 void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
-	GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
+	GLuint shader = Resources->Get_Shader_Program("Deferred_HUD")->Get_Shader_Program();
+	glUseProgram(shader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_FontData->Get_Glyph_Texture());
-	glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"), 0);
-	glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"), 1);
+	glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
+	glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
 
 	glUseProgram(shader );
@@ -83,7 +84,7 @@ void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float an
 			FontGlyph* glyph = m_FontData->Get_Glyph_Data(c);
 
 			glyph->m_Model = glm::mat4(1);
-			glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.1f - depth));
+			glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.5 - depth));
 			glyph->m_Model = glm::rotate(glyph->m_Model, angle,glm::vec3(0,0,1));
 			glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(scl.x,scl.y,1));
 			glyph->m_World = Resources->Get_Camera("HUD")->Projection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
@@ -95,4 +96,5 @@ void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float an
 			x += glyph->xadvance;
 		}
 	}
+	glUseProgram(0);
 }

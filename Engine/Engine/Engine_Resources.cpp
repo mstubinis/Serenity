@@ -20,6 +20,7 @@ ResourceManager::ResourceManager(){
 }
 void ResourceManager::INIT_Game_Resources(){
 	Add_Shader_Program("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
+	Add_Shader_Program("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
 	Add_Shader_Program("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
 	Add_Shader_Program("Deferred_Blur_Vertical","Shaders/deferred_blur_vertical.glsl","Shaders/deferred_blur_frag.glsl");
 	Add_Shader_Program("Deferred_SSAO","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_ssao_frag.glsl");
@@ -44,7 +45,7 @@ void ResourceManager::INIT_Game_Resources(){
 	Add_Material("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
 
 	m_Cameras["Debug"] = new Camera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,100000.0f);
-	m_Cameras["HUD"] = new Camera(0,(float)Window->getSize().x,0,(float)Window->getSize().y,0.05f,2.0f);
+	m_Cameras["HUD"] = new Camera(0,(float)Window->getSize().x,0,(float)Window->getSize().y,0.005f,100000.0f);
 
 	Set_Active_Camera("Debug");
 }

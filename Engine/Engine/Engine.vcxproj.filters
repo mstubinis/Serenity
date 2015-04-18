@@ -283,5 +283,11 @@
     <None Include="Shaders\AS_skyFromAtmosphere_vert.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
     </None>
+    <None Include="Shaders\deferred_frag_HUD.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
+    </None>
+    <None Include="Shaders\vert_HUD.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
   </ItemGroup>
 </Project>
