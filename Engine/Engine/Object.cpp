@@ -5,6 +5,8 @@
 #include "Mesh.h"
 #include "Material.h"
 
+using namespace Engine;
+
 Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool addToResources){
 	m_Changed = true;
 	m_Radius = 0;
@@ -12,8 +14,8 @@ Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,s
 	m_Forward = glm::vec3(0,0,-1);
 	m_Right = glm::vec3(1,0,0);
 	m_Up = glm::vec3(0,1,0);
-	Set_Mesh(Resources->Get_Mesh(mesh));
-	Set_Material(Resources->Get_Material(mat));
+	Set_Mesh(Resources::getMesh(mesh));
+	Set_Material(Resources::getMaterial(mat));
 	m_Parent = nullptr;
 
 	m_Name = name;
@@ -25,7 +27,7 @@ Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,s
 	Object::Set_Scale(scl);
 
 	if(addToResources == true)
-		Resources->Objects.push_back(this);
+		Resources::Detail::ResourceManagement::m_Objects.push_back(this);
 }
 Object::~Object()
 {
@@ -58,7 +60,8 @@ glm::vec3 Object::_Up(){
                                      2 * (y * z + w * x)));
 }
 void Object::Translate(float x, float y, float z,bool local){
-	x *= Resources->dt; y*= Resources->dt; z*=Resources->dt;
+	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
+	x *= dt; y*= dt; z *= dt;
 	if(local){
 		m_Position += Forward() * z;
 		m_Position += Right() * x;
@@ -80,10 +83,11 @@ void Object::Rotate(float x, float y, float z){
 	m_Changed = true;
 }
 void Object::Rotate(glm::vec3& rotation){ Rotate(rotation.x,rotation.y,rotation.z); }
-void Object::Scale(float x, float y, float z){ 
-	m_Scale.x += x * Resources->dt; 
-	m_Scale.y += y * Resources->dt; 
-	m_Scale.z += z * Resources->dt; 
+void Object::Scale(float x, float y, float z){
+	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
+	m_Scale.x += x * dt; 
+	m_Scale.y += y * dt; 
+	m_Scale.z += z * dt; 
 	m_Calculate_Radius(); 
 	Flag_As_Changed();
 }
@@ -131,7 +135,7 @@ void Object::Update(float dt){
 		m_Model = newModel;
 		m_Changed = false;
 	}
-	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(m_Model);
+	m_WorldMatrix = Resources::getActiveCamera()->Calculate_Projection(m_Model);
 }
 float Object::Distance(Object* other){
 	glm::vec3 vecTo = other->Position() - Position();
@@ -140,12 +144,12 @@ float Object::Distance(Object* other){
 void Object::Render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
 		return;
-	if(!Resources->Current_Camera()->SphereIntersectTest(this))
+	if(!Resources::getActiveCamera()->SphereIntersectTest(this))
 		return;
-	if(Resources->Current_Camera()->Distance(this) > 450 * Radius())
+	if(Resources::getActiveCamera()->Distance(this) > 450 * Radius())
 		return;
 
-	GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred")->Get_Shader_Program();
 
 	glUseProgram(shader);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
@@ -153,7 +157,7 @@ void Object::Render(Mesh* mesh, Material* material,bool debug){
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->Shadeless()));
 
-	glUniform1f(glGetUniformLocation(shader, "far"),Resources->Current_Camera()->Far());
+	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->Far());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	for(auto component:material->Components())
 		material->Bind_Texture(component.second,shader);

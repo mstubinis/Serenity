@@ -1,5 +1,6 @@
 #include "Mesh.h"
-#include "Engine_Resources.h"
+
+#include <bullet/btBulletDynamicsCommon.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>

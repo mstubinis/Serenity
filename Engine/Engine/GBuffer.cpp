@@ -1,5 +1,4 @@
 #include "GBuffer.h"
-#include "Engine_Resources.h"
 
 //Create the FBO render texture initializing all the stuff that we need
 GBuffer::GBuffer(int width, int height){	

@@ -9,28 +9,30 @@ class Game;
 namespace Engine{
 	class EngineClass{
 		private:
-			void INIT_Window(std::string name, unsigned int width, unsigned int height);
-			void INIT_Game();
+			void _INIT_Window(std::string name, unsigned int width, unsigned int height);
+			void _INIT_Game();
 
 			#pragma region Event Handlers
-			void EVENT_RESIZE(unsigned int width, unsigned int height);
-			void EVENT_CLOSE();
-			void EVENT_LOST_FOCUS();
-			void EVENT_GAINED_FOCUS();
-			void EVENT_TEXT_ENTERED(sf::Event::TextEvent);
-			void EVENT_KEY_PRESSED(sf::Event::KeyEvent);
-			void EVENT_KEY_RELEASED(sf::Event::KeyEvent);
-			void EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent);
-			void EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent);
-			void EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent);
-			void EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent);
-			void EVENT_MOUSE_ENTERED();
-			void EVENT_MOUSE_LEFT();
-			void EVENT_JOYSTICK_BUTTON_PRESSED();
-			void EVENT_JOYSTICK_BUTTON_RELEASED();
-			void EVENT_JOYSTICK_MOVED();
-			void EVENT_JOYSTICK_CONNECTED();
-			void EVENT_JOYSTICK_DISCONNECTED();
+			void _EVENT_RESIZE(unsigned int width, unsigned int height);
+			void _EVENT_CLOSE();
+			void _EVENT_LOST_FOCUS();
+			void _EVENT_GAINED_FOCUS();
+			void _EVENT_TEXT_ENTERED(sf::Event::TextEvent);
+			void _EVENT_KEY_PRESSED(sf::Event::KeyEvent);
+			void _EVENT_KEY_RELEASED(sf::Event::KeyEvent);
+			void _EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent);
+			void _EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent);
+			void _EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent);
+			void _EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent);
+			void _EVENT_MOUSE_ENTERED();
+			void _EVENT_MOUSE_LEFT();
+			/*
+			void _EVENT_JOYSTICK_BUTTON_PRESSED();
+			void _EVENT_JOYSTICK_BUTTON_RELEASED();
+			void _EVENT_JOYSTICK_MOVED();
+			void _EVENT_JOYSTICK_CONNECTED();
+			void _EVENT_JOYSTICK_DISCONNECTED();
+			*/
 			#pragma endregion
 
 			void _EVENT_HANDLERS(sf::Event);

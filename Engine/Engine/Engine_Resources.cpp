@@ -15,63 +15,78 @@
 
 #include <SFML/Graphics.hpp>
 
-ResourceManager::ResourceManager(){
-	dt = 0;
-}
-void ResourceManager::INIT_Game_Resources(){
-	Add_Shader_Program("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
-	Add_Shader_Program("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
-	Add_Shader_Program("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
-	Add_Shader_Program("Deferred_Blur_Vertical","Shaders/deferred_blur_vertical.glsl","Shaders/deferred_blur_frag.glsl");
-	Add_Shader_Program("Deferred_SSAO","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_ssao_frag.glsl");
-	Add_Shader_Program("Deferred_Final","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_final_frag.glsl");
-	Add_Shader_Program("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
+using namespace Engine::Resources;
 
-	Add_Shader_Program("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
-	Add_Shader_Program("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
-	Add_Shader_Program("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
 
-	Add_Shader_Program("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
+float Detail::ResourceManagement::m_DeltaTime = 0;
+Camera* Detail::ResourceManagement::m_ActiveCamera = nullptr;
+sf::Window* Detail::ResourceManagement::m_Window = nullptr;
+sf::Mouse* Detail::ResourceManagement::m_Mouse = nullptr;
 
-	Add_Mesh("Skybox","Models/skybox.obj");
-	Add_Mesh("DEBUGLight","Models/debugLight.obj");
-	Add_Mesh("Planet","Models/planet.obj");
-	Add_Mesh("Defiant","Models/defiant.obj");
-	Add_Mesh("Starbase","Models/starbase.obj");
+std::vector<Object*> _getObjectsDefaults(){ std::vector<Object*> k; return k; }
+std::vector<Object*> Detail::ResourceManagement::m_Objects = _getObjectsDefaults();
 
-	Add_Material("Star","Textures/sun.png","","");
-	Add_Material("Default","Textures/sun.png","","");
-	Add_Material("Earth","Textures/earth.png","","");
-	Add_Material("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
+std::vector<SunLight*> _getLightsDefaults(){ std::vector<SunLight*> k; return k; }
+std::vector<SunLight*> Detail::ResourceManagement::m_Lights = _getLightsDefaults();
 
-	m_Cameras["Debug"] = new Camera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,100000.0f);
-	m_Cameras["HUD"] = new Camera(0,(float)Window->getSize().x,0,(float)Window->getSize().y,0.005f,100000.0f);
+std::unordered_map<std::string,Camera*> _getCameraDefaults(){ std::unordered_map<std::string,Camera*> k; return k; }
+std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras = _getCameraDefaults();
 
-	Set_Active_Camera("Debug");
-}
-ResourceManager::~ResourceManager(){
-	for(auto mesh:m_Meshes){
+std::unordered_map<std::string,Mesh*> _getMeshDefaults(){ std::unordered_map<std::string,Mesh*> k; return k; }
+std::unordered_map<std::string,Mesh*> Detail::ResourceManagement::m_Meshes = _getMeshDefaults();
+
+std::unordered_map<std::string,Material*> _getMaterialDefaults(){ std::unordered_map<std::string,Material*> k; return k; }
+std::unordered_map<std::string,Material*> Detail::ResourceManagement::m_Materials = _getMaterialDefaults();
+
+std::unordered_map<std::string,ShaderP*> _getShaderDefaults(){ std::unordered_map<std::string,ShaderP*> k; return k; }
+std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders = _getShaderDefaults();
+
+void Engine::Resources::Detail::ResourceManagement::destruct(){
+	for(auto mesh:Detail::ResourceManagement::m_Meshes){
 		delete mesh.second;
 	}
-	for(auto mat:m_Materials){
+	for(auto mat:Detail::ResourceManagement::m_Materials){
 		delete mat.second;
 	}
-	for(auto cam:m_Cameras){
+	for(auto cam:Detail::ResourceManagement::m_Cameras){
 		delete cam.second;
 	}
-	for(auto obj:Objects){
-		delete obj;
-	}
-	for(auto light:Lights){
-		delete light;
-	}
-	for(auto shaderP:m_ShaderPrograms){
+	for(auto shaderP:Detail::ResourceManagement::m_Shaders){
 		delete shaderP.second;
 	}
+	for(auto light:Detail::ResourceManagement::m_Lights){
+		delete light;
+	}
+	for(auto obj:Detail::ResourceManagement::m_Objects){
+		delete obj;
+	}
+	delete Detail::ResourceManagement::m_Mouse;
+	delete Detail::ResourceManagement::m_Window;
 }
-void ResourceManager::Set_Active_Camera(Camera* camera){ m_Current_Camera = camera; }
-void ResourceManager::Set_Active_Camera(std::string name){ m_Current_Camera = m_Cameras[name]; }
-void ResourceManager::Load_Texture_Into_GLuint(GLuint& address, std::string filename){
+
+void Engine::Resources::addMesh(std::string name,std::string file){
+	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
+		return;
+	Detail::ResourceManagement::m_Meshes[name] = new Mesh(file);
+}
+void Engine::Resources::addMesh(std::string file){
+	std::string name = file.substr(0, file.size()-4);
+	Engine::Resources::addMesh(name,file);
+}
+
+void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
+	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
+		return;
+	Detail::ResourceManagement::m_Materials[name] = new Material(diffuse,normal,glow);
+}
+
+void Engine::Resources::addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile){
+	if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
+		return;
+	Detail::ResourceManagement::m_Shaders[name] = new ShaderP(vertexShaderFile,fragmentShaderFile);
+}
+
+void Engine::Resources::loadTextureIntoGLuint(GLuint& address, std::string filename){
 	glGenTextures(1, &address);
 	sf::Image image;
 
@@ -85,7 +100,7 @@ void ResourceManager::Load_Texture_Into_GLuint(GLuint& address, std::string file
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
-void ResourceManager::Load_Cubemap_Texture_Into_GLuint(GLuint& address, std::string filenames[]){
+void Engine::Resources::loadCubemapTextureIntoGLuint(GLuint& address, std::string filenames[]){
 	glGenTextures(1, &address);
 	for(unsigned int i = 0; i < 6; i++){
 		sf::Image image;
@@ -109,48 +124,34 @@ void ResourceManager::Load_Cubemap_Texture_Into_GLuint(GLuint& address, std::str
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 
-void ResourceManager::Add_Mesh(std::string file){
-	std::string name = file.substr(0, file.size()-4);
-	if (m_Meshes.size() > 0 && m_Meshes.count(name))
-		return;
-	m_Meshes[name] = new Mesh(file);
+void Engine::Resources::initResources(){
+	addShader("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
+	addShader("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
+	addShader("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
+	addShader("Deferred_Blur_Vertical","Shaders/deferred_blur_vertical.glsl","Shaders/deferred_blur_frag.glsl");
+	addShader("Deferred_SSAO","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_ssao_frag.glsl");
+	addShader("Deferred_Final","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_final_frag.glsl");
+	addShader("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
+
+	addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
+	addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
+	addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
+
+	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
+
+	addMesh("Skybox","Models/skybox.obj");
+	addMesh("DEBUGLight","Models/debugLight.obj");
+	addMesh("Planet","Models/planet.obj");
+	addMesh("Defiant","Models/defiant.obj");
+	addMesh("Starbase","Models/starbase.obj");
+
+	addMaterial("Star","Textures/sun.png","","");
+	addMaterial("Default","Textures/sun.png","","");
+	addMaterial("Earth","Textures/earth.png","","");
+	addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
+
+	Engine::Resources::Detail::ResourceManagement::m_Cameras["Debug"] = new Camera(45,getWindow()->getSize().x/(float)getWindow()->getSize().y,0.1f,100000.0f);
+	Engine::Resources::Detail::ResourceManagement::m_Cameras["HUD"] = new Camera(0,(float)getWindow()->getSize().x,0,(float)getWindow()->getSize().y,0.005f,100000.0f);
+
+	setActiveCamera("Debug");
 }
-void ResourceManager::Add_Mesh(std::string name, std::string file){
-	if (m_Meshes.size() > 0 && m_Meshes.count(name))
-		return;
-	m_Meshes[name] = new Mesh(file);
-}
-void ResourceManager::Add_Material(std::string name, std::string diffuse, std::string normal, std::string glow){
-	if (m_Materials.size() > 0 && m_Materials.count(name))
-		return;
-	m_Materials[name] = new Material(diffuse,normal,glow);
-}
-void ResourceManager::Add_Camera(std::string name, Camera* camera){
-	if (m_Cameras.size() > 0 && m_Cameras.count(name))
-		return;
-	m_Cameras[name] = camera;
-}
-void ResourceManager::Add_Shader_Program(std::string name, std::string vs, std::string ps){
-	if (m_ShaderPrograms.size() > 0 && m_ShaderPrograms.count(name))
-		return;
-	m_ShaderPrograms[name] = new ShaderP(vs,ps);
-}
-#pragma region Getters
-Mesh* ResourceManager::Default_Mesh(){ return m_Meshes["Default"]; }
-Mesh* ResourceManager::Get_Mesh(std::string name){ 
-	if(name == "")
-		return nullptr;
-	return m_Meshes[name]; 
-}
-Material* ResourceManager::Default_Material(){ return m_Materials["Default"]; }
-Material* ResourceManager::Get_Material(std::string name){ 
-	if(name == "")
-		return nullptr;
-	return m_Materials[name]; 
-}
-Camera* ResourceManager::Default_Camera(){ return m_Cameras["Debug"]; }
-Camera* ResourceManager::Get_Camera(std::string name){ return m_Cameras[name]; }
-Camera* ResourceManager::Current_Camera(){ return m_Current_Camera; }
-ShaderP* ResourceManager::Default_Shader_Program(){ return m_ShaderPrograms["Default"]; }
-ShaderP* ResourceManager::Get_Shader_Program(std::string name){ return m_ShaderPrograms[name]; }
-#pragma endregion

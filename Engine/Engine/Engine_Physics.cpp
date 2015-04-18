@@ -1,8 +1,8 @@
 #include "Engine_Physics.h"
 
-#include <Bullet/btBulletCollisionCommon.h>
-#include <Bullet/btBulletDynamicsCommon.h>
-#include <Bullet/LinearMath/btIDebugDraw.h>
+#include <bullet/btBulletCollisionCommon.h>
+#include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/LinearMath/btIDebugDraw.h>
 #include "GLDebugDrawer.h"
 
 #include <glm/gtx/transform.hpp>
@@ -12,6 +12,8 @@
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
 #include "Camera.h"
+
+using namespace Engine;
 
 PhysicsEngine::PhysicsEngine(){
 	m_broadphase = new btDbvtBroadphase();
@@ -38,12 +40,14 @@ void PhysicsEngine::Set_Gravity(float x,float y,float z){ m_dynamicsWorld->setGr
 void PhysicsEngine::Set_Gravity(glm::vec3 gravity){ Set_Gravity(gravity.x,gravity.y,gravity.z); }
 void PhysicsEngine::Add_Rigid_Body(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
 void PhysicsEngine::Update(float dt){
-	m_dynamicsWorld->stepSimulation(glm::max(dt,1/60.0f)); 
+	m_dynamicsWorld->stepSimulation(1/60.0f);
 }
 void PhysicsEngine::Render(){
 	glm::mat4 model = glm::mat4();
-	GLuint shaderProgram = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
-	glm::mat4 world = Resources->Current_Camera()->Calculate_Projection(model);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP"), 1, GL_FALSE, glm::value_ptr(world));
-	m_dynamicsWorld->debugDrawWorld(); 
+	GLuint shader = Resources::getShader("Deferred")->Get_Shader_Program();
+	glUseProgram(shader);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));
+	m_dynamicsWorld->debugDrawWorld();
+	glUseProgram(0);
 }

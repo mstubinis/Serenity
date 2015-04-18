@@ -10,15 +10,16 @@
 
 #include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
-#include <iostream>
+
+using namespace Engine;
 
 Renderer::Renderer(){
-	Resources->Load_Texture_Into_GLuint(RandomMapSSAO,"Textures/SSAONormal.png");
+	Resources::loadTextureIntoGLuint(RandomMapSSAO,"Textures/SSAONormal.png");
 
 	glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
 
-	m_gBuffer = new GBuffer(Window->getSize().x,Window->getSize().y);
+	m_gBuffer = new GBuffer(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	m_Font = new Font("Fonts/consolas.fnt");
 }
@@ -33,14 +34,14 @@ void Renderer::Geometry_Pass(bool debug){
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	
-	for(auto object:Resources->Objects){
+	for(auto object:Resources::getObjects()){
 		object->Render(debug);
 	}	
 	if(debug){
 		physicsEngine->Render();
-		GLuint shader = Resources->Get_Shader_Program("Deferred")->Get_Shader_Program();
+		GLuint shader = Resources::getShader("Deferred")->Get_Shader_Program();
 		glUseProgram(shader);
-		for(auto light:Resources->Lights){
+		for(auto light:Resources::getLights()){
 			light->RenderDebug(shader);
 		}
 		glUseProgram(0);
@@ -79,15 +80,15 @@ void Renderer::Render(bool debug){
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//render hud stuff
-	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources->dt) +"\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources->dt)),glm::vec2(25,25),glm::vec3(1,1,1),0);
+	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +"\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),glm::vec2(25,25),glm::vec3(1,1,1),0);
 }
 void Renderer::Pass_Lighting(){
-	GLuint shader = Resources->Get_Shader_Program("Deferred_Light")->Get_Shader_Program();
-	glm::vec3 camPos = Resources->Current_Camera()->Position();
+	GLuint shader = Resources::getShader("Deferred_Light")->Get_Shader_Program();
+	glm::vec3 camPos = Resources::getActiveCamera()->Position();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_ViewProjInverted()));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->Calculate_ViewProjInverted()));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -99,7 +100,7 @@ void Renderer::Pass_Lighting(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_POSITION));
 	glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
 
-	for (auto light:Resources->Lights) {
+	for (auto light:Resources::getLights()) {
 		light->Render(shader);
    	}
 
@@ -115,12 +116,12 @@ void Renderer::Pass_Lighting(){
 void Renderer::Pass_SSAO(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	GLuint shader = Resources->Get_Shader_Program("Deferred_SSAO")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred_SSAO")->Get_Shader_Program();
 	glUseProgram(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources->Current_Camera()->Calculate_ViewProjInverted()));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->Calculate_ViewProjInverted()));
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
 	glUniform1f(glGetUniformLocation(shader,"gIntensity"), 2.9f);
 	glUniform1f(glGetUniformLocation(shader,"gBias"), 0.01f);
 	glUniform1f(glGetUniformLocation(shader,"gRadius"), 0.7f);
@@ -153,11 +154,10 @@ void Renderer::Pass_SSAO(){
 void Renderer::Pass_Blur_Horizontal(GLuint texture){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	GLuint shader = Resources->Get_Shader_Program("Deferred_Blur_Horizontal")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred_Blur_Horizontal")->Get_Shader_Program();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
-
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -175,10 +175,10 @@ void Renderer::Pass_Blur_Horizontal(GLuint texture){
 void Renderer::Pass_Blur_Vertical(GLuint texture){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	GLuint shader = Resources->Get_Shader_Program("Deferred_Blur_Vertical")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred_Blur_Vertical")->Get_Shader_Program();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -196,10 +196,10 @@ void Renderer::Pass_Blur_Vertical(GLuint texture){
 void Renderer::Pass_Final(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	GLuint shader = Resources->Get_Shader_Program("Deferred_Final")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred_Final")->Get_Shader_Program();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Window->getSize().x),static_cast<float>(Window->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -230,7 +230,7 @@ void Renderer::Init_Quad(){
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,Window->getSize().x,0,Window->getSize().y,0.1f,2);	
+	glOrtho(0,Resources::getWindow()->getSize().x,0,Resources::getWindow()->getSize().y,0.1f,2);	
 	
 	//Model setup
 	glMatrixMode(GL_MODELVIEW);
@@ -245,11 +245,11 @@ void Renderer::Init_Quad(){
 	glTexCoord2f( 0, 0 );
 	glVertex3f(    0.0f, 0.0f, 0.0f);
 	glTexCoord2f( 1, 0 );
-	glVertex3f(   (float) Window->getSize().x, 0.0f, 0.0f);
+	glVertex3f(   (float) Resources::getWindow()->getSize().x, 0.0f, 0.0f);
 	glTexCoord2f( 1, 1 );
-	glVertex3f(   (float) Window->getSize().x, (float) Window->getSize().y, 0.0f);
+	glVertex3f(   (float) Resources::getWindow()->getSize().x, (float) Resources::getWindow()->getSize().y, 0.0f);
 	glTexCoord2f( 0, 1 );
-	glVertex3f(    0.0f,  (float) Window->getSize().y, 0.0f);
+	glVertex3f(    0.0f,  (float) Resources::getWindow()->getSize().y, 0.0f);
 	glEnd();
 
 	//Reset the matrices	

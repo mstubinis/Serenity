@@ -1,10 +1,12 @@
 #include "ObjectDynamic.h"
 #include "Engine_Physics.h"
-#include <Bullet/btBulletCollisionCommon.h>
-#include <Bullet/btBulletDynamicsCommon.h>
+#include <bullet/btBulletCollisionCommon.h>
+#include <bullet/btBulletDynamicsCommon.h>
 #include "Engine_Resources.h"
 #include "Mesh.h"
 #include "Camera.h"
+
+using namespace Engine;
 
 ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,btCollisionShape* collisionShape): Object(mesh,mat,pos,scl,name,true){
 	m_Collision_Shape = collisionShape;
@@ -46,8 +48,9 @@ ObjectDynamic::~ObjectDynamic(){
 	delete m_Inertia;
 }
 void ObjectDynamic::Translate(float x, float y, float z,bool local){
+	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
 	m_RigidBody->activate();
-	x *= Resources->dt; y*= Resources->dt; z*=Resources->dt;
+	x *= dt; y*= dt; z *= dt;
 	btVector3 pos = m_RigidBody->getWorldTransform().getOrigin();
 	glm::vec3 p = glm::vec3(pos.x(),pos.y(),pos.z());
 	if(local){
@@ -98,7 +101,7 @@ void ObjectDynamic::Update(float dt){
 		m_Right = ObjectDynamic::_Right();
 		m_Up = ObjectDynamic::_Up();
 	}
-	m_WorldMatrix = Resources->Current_Camera()->Calculate_Projection(parentModel * newModel);
+	m_WorldMatrix = Resources::getActiveCamera()->Calculate_Projection(parentModel * newModel);
 	m_Model = parentModel * newModel;
 }
 void ObjectDynamic::Set_Position(float x, float y, float z){

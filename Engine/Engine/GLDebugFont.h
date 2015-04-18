@@ -1,7 +1,7 @@
 #ifndef BT_DEBUG_FONT_H
 #define BT_DEBUG_FONT_H
 
-#include <Bullet/LinearMath/btVector3.h>
+#include <bullet/LinearMath/btVector3.h>
 
 void GLDebugDrawStringInternal(int x,int y,const char* string,const btVector3& rgb, bool enableBlend, int spacing);
 void GLDebugDrawStringInternal(int x,int y,const char* string,const btVector3& rgb);

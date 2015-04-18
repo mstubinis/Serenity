@@ -1,7 +1,7 @@
 #ifndef GL_DEBUG_DRAWER_H
 #define GL_DEBUG_DRAWER_H
 
-#include <Bullet/LinearMath/btIDebugDraw.h>
+#include <bullet/LinearMath/btIDebugDraw.h>
 
 class GLDebugDrawer : public btIDebugDraw{
 	int m_debugMode;

@@ -7,11 +7,13 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 
+using namespace Engine;
+
 FontData::FontData(std::string filename){
 	LoadTextFile(filename);
 	std::string texture_filename = filename.substr(0,filename.size()-4);
 	texture_filename += "_0.png";
-	Resources->Load_Texture_Into_GLuint(Font_Texture,texture_filename);
+	Resources::loadTextureIntoGLuint(Font_Texture,texture_filename);
 }
 FontData::~FontData(){
 	for(auto glyph:Font_Glyphs){
@@ -61,7 +63,7 @@ Font::~Font(){
 	delete m_FontData;
 }
 void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
-	GLuint shader = Resources->Get_Shader_Program("Deferred_HUD")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred_HUD")->Get_Shader_Program();
 	glUseProgram(shader);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_FontData->Get_Glyph_Texture());
@@ -74,7 +76,7 @@ void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float an
 
 	float y_offset = 0;
 	float x = pos.x;
-	pos.y = Window->getSize().y - pos.y;
+	pos.y = Resources::getWindow()->getSize().y - pos.y;
 	for(auto c:text){
 		if(c == '\n'){
 			y_offset += m_FontData->Get_Glyph_Data('X')->height+4;
@@ -87,7 +89,7 @@ void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float an
 			glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.5 - depth));
 			glyph->m_Model = glm::rotate(glyph->m_Model, angle,glm::vec3(0,0,1));
 			glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(scl.x,scl.y,1));
-			glyph->m_World = Resources->Get_Camera("HUD")->Projection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+			glyph->m_World = Resources::getCamera("HUD")->Projection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
 			glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(glyph->m_World));
 			glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));

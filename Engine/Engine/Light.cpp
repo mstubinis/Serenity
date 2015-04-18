@@ -4,12 +4,14 @@
 #include "Camera.h"
 #include "Mesh.h"
 
+using namespace Engine;
+
 void Init_Quad(){
 	//Projection setup
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,Window->getSize().x,0,Window->getSize().y,0.1f,2);	
+	glOrtho(0,Resources::getWindow()->getSize().x,0,Resources::getWindow()->getSize().y,0.1f,2);	
 	
 	//Model setup
 	glMatrixMode(GL_MODELVIEW);
@@ -24,11 +26,11 @@ void Init_Quad(){
 	glTexCoord2f( 0, 0 );
 	glVertex3f(    0.0f, 0.0f, 0.0f);
 	glTexCoord2f( 1, 0 );
-	glVertex3f(   (float) Window->getSize().x, 0.0f, 0.0f);
+	glVertex3f(   (float) Resources::getWindow()->getSize().x, 0.0f, 0.0f);
 	glTexCoord2f( 1, 1 );
-	glVertex3f(   (float) Window->getSize().x, (float) Window->getSize().y, 0.0f);
+	glVertex3f(   (float) Resources::getWindow()->getSize().x, (float) Resources::getWindow()->getSize().y, 0.0f);
 	glTexCoord2f( 0, 1 );
-	glVertex3f(    0.0f,  (float) Window->getSize().y, 0.0f);
+	glVertex3f(    0.0f,  (float) Resources::getWindow()->getSize().y, 0.0f);
 	glEnd();
 
 	//Reset the matrices	
@@ -44,7 +46,7 @@ SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type):Object("DEB
     m_DiffuseIntensity = 1.0f;
 	m_Parent = nullptr;
 
-	Resources->Lights.push_back(this);
+	Resources::Detail::ResourceManagement::m_Lights.push_back(this);
 }
 SunLight::~SunLight(){}
 void SunLight::Update(float dt){
@@ -60,7 +62,7 @@ void SunLight::Render(GLuint shader){
 	glm::vec3 pos = Position();
 	glUniform3f(glGetUniformLocation(shader,"gLightPosition"), pos.x, pos.y, pos.z);
 
-	glm::vec3 campos = Resources->Current_Camera()->Position();
+	glm::vec3 campos = Resources::getActiveCamera()->Position();
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
     glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
@@ -69,7 +71,7 @@ void SunLight::Render(GLuint shader){
 	Init_Quad();
 }
 void SunLight::RenderDebug(GLuint shader){
-	glm::mat4 MVP = Resources->Current_Camera()->Calculate_Projection(m_Model);
+	glm::mat4 MVP = Resources::getActiveCamera()->Calculate_Projection(m_Model);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(MVP));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
@@ -113,7 +115,7 @@ void PointLight::Render(GLuint shader){
 	glm::vec3 pos = Position();
 	glUniform3f(glGetUniformLocation(shader,"gLightPosition"), pos.x, pos.y, pos.z);
 
-	glm::vec3 campos = Resources->Current_Camera()->Position();
+	glm::vec3 campos = Resources::getActiveCamera()->Position();
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
 	glUniform1f(glGetUniformLocation(shader,"gConstant"), m_Constant);

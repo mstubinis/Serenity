@@ -8,25 +8,19 @@
 #include "ObjectDynamic.h"
 #include "Light.h"
 
-#include <iostream>
-
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
 	m_DrawDebug = false;
-	INIT_Window(name,width,height);
-	INIT_Game();
-
-	Window->setKeyRepeatEnabled(false);
+	_INIT_Window(name,width,height);
+	_INIT_Game();
 }
 Engine::EngineClass::~EngineClass(){
 	glDeleteVertexArrays( 1, &m_vao );
 	delete game;
 	delete renderer;
 	delete physicsEngine;
-	delete Resources;
-	delete Mouse;
-	delete Window;
+	Engine::Resources::Detail::ResourceManagement::destruct();
 }
-void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsigned int height){
+void Engine::EngineClass::_INIT_Window(std::string name, unsigned int width, unsigned int height){
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	sf::ContextSettings settings;
@@ -43,23 +37,24 @@ void Engine::EngineClass::INIT_Window(std::string name, unsigned int width, unsi
 
 	int style = sf::Style::Default;
 
-    Window = new sf::Window(videoMode, name, style, settings);
+	Resources::Detail::ResourceManagement::m_Window = new sf::Window(videoMode, name, style, settings);
 
-    Window->setVerticalSyncEnabled(true);
-	Window->setMouseCursorVisible(false);
+    //Resources::getWindow()->setVerticalSyncEnabled(true);
+	Resources::getWindow()->setMouseCursorVisible(false);
+	Resources::getWindow()->setKeyRepeatEnabled(false);
+	Resources::getWindow()->setFramerateLimit(60);
 
 	glClearColor(1,1,0,1);
 }
-void Engine::EngineClass::INIT_Game(){
-	Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
-	Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
+void Engine::EngineClass::_INIT_Game(){
+	Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
+	Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
 	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
 
 	glewExperimental = GL_TRUE; 
 	glewInit();
 
-	Resources = new ResourceManager();
-	Resources->INIT_Game_Resources();
+	Resources::initResources();
 
 	renderer = new Renderer();
 	physicsEngine = new PhysicsEngine();
@@ -74,29 +69,27 @@ void Engine::EngineClass::INIT_Game(){
 void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
 	switch (e.type){
         case sf::Event::Closed:
-			EVENT_CLOSE();break;
+			_EVENT_CLOSE();break;
         case sf::Event::KeyReleased:
-			EVENT_KEY_RELEASED(e.key);break;
+			_EVENT_KEY_RELEASED(e.key);break;
         case sf::Event::KeyPressed:
-			EVENT_KEY_PRESSED(e.key);break;
+			_EVENT_KEY_PRESSED(e.key);break;
 		case sf::Event::MouseButtonPressed:
-			EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
+			_EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
 		case sf::Event::MouseButtonReleased:
-			EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
+			_EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
 		case sf::Event::MouseEntered:
-			EVENT_MOUSE_ENTERED();break;
+			_EVENT_MOUSE_ENTERED();break;
 		case sf::Event::MouseLeft:
-			EVENT_MOUSE_LEFT();break;
+			_EVENT_MOUSE_LEFT();break;
 		case sf::Event::MouseWheelMoved:
-			EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
+			_EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
 		case sf::Event::MouseMoved:
-			EVENT_MOUSE_MOVED(e.mouseMove);break;
+			_EVENT_MOUSE_MOVED(e.mouseMove);break;
 		case sf::Event::Resized:
-			EVENT_RESIZE(e.size.width,e.size.height);break;
+			_EVENT_RESIZE(e.size.width,e.size.height);break;
 		case sf::Event::TextEntered:
-			EVENT_TEXT_ENTERED(e.text);break;
-		default:
-			break;
+			_EVENT_TEXT_ENTERED(e.text);break;
     }
 }
 void Engine::EngineClass::_RESET_EVENTS(){
@@ -106,20 +99,20 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	for(auto iterator:Engine::Events::Keyboard::KeyProcessing::m_KeyStatus){ iterator.second = false; }
 	for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
 
-	Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1-Resources->dt);
+	Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1-Resources::dt());
 
 	glm::vec2 mousePos = Engine::Events::Mouse::GetMousePosition();
-	float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Window->getSize().x/2,Window->getSize().y/2)));
+	float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2)));
 	if(mouseDistFromCenter > 50){
-		Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
-		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Window->getSize().x/2,Window->getSize().y/2);
+		Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
+		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
 	}
 }
 void Engine::EngineClass::_Update(float dt){
 	game->Update(dt);
-	for(auto object:Resources->Objects)
+	for(auto object:Resources::getObjects())
 		object->Update(dt);
-	for(auto light:Resources->Lights)
+	for(auto light:Resources::getLights())
 		light->Update(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 
@@ -129,35 +122,35 @@ void Engine::EngineClass::_Render(){
 	renderer->Render(m_DrawDebug);
 }
 #pragma region Event Handler Methods
-void Engine::EngineClass::EVENT_RESIZE(unsigned int width, unsigned int height)
+void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)
 {
 }
-void Engine::EngineClass::EVENT_CLOSE(){
+void Engine::EngineClass::_EVENT_CLOSE(){
 
 }
-void Engine::EngineClass::EVENT_LOST_FOCUS()
+void Engine::EngineClass::_EVENT_LOST_FOCUS()
 {
 }
-void Engine::EngineClass::EVENT_GAINED_FOCUS()
+void Engine::EngineClass::_EVENT_GAINED_FOCUS()
 {
 }
-void Engine::EngineClass::EVENT_TEXT_ENTERED(sf::Event::TextEvent text)
+void Engine::EngineClass::_EVENT_TEXT_ENTERED(sf::Event::TextEvent text)
 {
 }
-void Engine::EngineClass::EVENT_KEY_PRESSED(sf::Event::KeyEvent key){
+void Engine::EngineClass::_EVENT_KEY_PRESSED(sf::Event::KeyEvent key){
 	Events::Keyboard::KeyProcessing::m_previousKey = Events::Keyboard::KeyProcessing::m_currentKey;
 	Events::Keyboard::KeyProcessing::m_currentKey = key.code;
 	Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = true;
 }
-void Engine::EngineClass::EVENT_KEY_RELEASED(sf::Event::KeyEvent key){
+void Engine::EngineClass::_EVENT_KEY_RELEASED(sf::Event::KeyEvent key){
 	Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
 	Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
 	Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = false;
 }
-void Engine::EngineClass::EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
+void Engine::EngineClass::_EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
 	Events::Mouse::MouseProcessing::m_Delta += (mouseWheel.delta * 10);
 }
-void Engine::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
+void Engine::EngineClass::_EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
 	if(mouseButton.button == sf::Mouse::Button::Left){
 		Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_LEFT;
@@ -175,7 +168,7 @@ void Engine::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent
 		return;
 	}
 }
-void Engine::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent mouseButton){
+void Engine::EngineClass::_EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent mouseButton){
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_NONE;
 	Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_NONE;
 
@@ -192,7 +185,7 @@ void Engine::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEven
 		return;
 	}
 }
-void Engine::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
+void Engine::EngineClass::_EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
 	Events::Mouse::MouseProcessing::m_Position_Previous = Events::Mouse::MouseProcessing::m_Position;
 	Events::Mouse::MouseProcessing::m_Position.x = static_cast<float>(mouse.x);
 	Events::Mouse::MouseProcessing::m_Position.y = static_cast<float>(mouse.y);
@@ -200,39 +193,41 @@ void Engine::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
 	Events::Mouse::MouseProcessing::m_Difference.x += (Events::Mouse::MouseProcessing::m_Position.x - Events::Mouse::MouseProcessing::m_Position_Previous.x);
 	Events::Mouse::MouseProcessing::m_Difference.y += (Events::Mouse::MouseProcessing::m_Position.y - Events::Mouse::MouseProcessing::m_Position_Previous.y);
 }
-void Engine::EngineClass::EVENT_MOUSE_ENTERED()
+void Engine::EngineClass::_EVENT_MOUSE_ENTERED()
 {
 }
-void Engine::EngineClass::EVENT_MOUSE_LEFT(){
-	Mouse->setPosition(sf::Vector2i(Window->getSize().x/2,Window->getSize().y/2),*Window);
+void Engine::EngineClass::_EVENT_MOUSE_LEFT(){
+	Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
 }
-void Engine::EngineClass::EVENT_JOYSTICK_BUTTON_PRESSED()
+/*
+void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_PRESSED()
 {
 }
-void Engine::EngineClass::EVENT_JOYSTICK_BUTTON_RELEASED()
+void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_RELEASED()
 {
 }
-void Engine::EngineClass::EVENT_JOYSTICK_MOVED()
+void Engine::EngineClass::_EVENT_JOYSTICK_MOVED()
 {
 }
-void Engine::EngineClass::EVENT_JOYSTICK_CONNECTED()
+void Engine::EngineClass::_EVENT_JOYSTICK_CONNECTED()
 {
 }
-void Engine::EngineClass::EVENT_JOYSTICK_DISCONNECTED()
+void Engine::EngineClass::_EVENT_JOYSTICK_DISCONNECTED()
 {
 }
+*/
 void Engine::EngineClass::Run(){
-	while(true){
-		Resources->dt = clock.restart().asSeconds();
-		sf::Event event;
-		while(Window->pollEvent(event)){
-			_EVENT_HANDLERS(event);
+	while(Resources::getWindow()->isOpen()){
+		sf::Event e;
+		Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
+		while(Resources::getWindow()->pollEvent(e)){
+			_EVENT_HANDLERS(e);
 		}
-		_Update(Resources->dt);
+		_Update(Resources::dt());
 		_RESET_EVENTS();
 
 		_Render();
-		Window->display();
+		Resources::getWindow()->display();
 	}
 }
 #pragma endregion

@@ -13,7 +13,7 @@ struct SkyboxTextures{
 };
 class Skybox: public Object{
 	private:
-		GLuint m_ShaderProgram;
+		GLuint m_Shader;
 		GLuint m_Texture;
 	public:
 		Skybox(std::string name);

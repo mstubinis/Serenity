@@ -6,6 +6,7 @@
 #include "Ship.h"
 #include "Skybox.h"
 
+using namespace Engine;
 using namespace Engine::Events;
 
 SolarSystem::SolarSystem(std::string file){
@@ -21,8 +22,8 @@ SolarSystem::~SolarSystem()
 {
 }
 void SolarSystem::LoadTestSystem(){
-	playerCamera = new GameCamera(45,Window->getSize().x/(float)Window->getSize().y,0.1f,9000000000.0f);
-	Resources->Set_Active_Camera(playerCamera);
+	playerCamera = new GameCamera(45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f);
+	Resources::setActiveCamera(playerCamera);
 
 	new Skybox("Basic");
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0));

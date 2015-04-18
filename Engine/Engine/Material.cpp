@@ -1,5 +1,4 @@
 #include "Material.h"
-#include "Engine_Resources.h"
 
 using namespace MaterialComponents;
 
