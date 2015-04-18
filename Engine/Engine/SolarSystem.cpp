@@ -27,7 +27,6 @@ void SolarSystem::LoadTestSystem(){
 	new Skybox("Basic");
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0));
 	Ship* other = new Ship("Defiant","Defiant","USS Valiant",glm::vec3(2,0,0));
-	
 	for(int i = 0; i < 1; i++){
 		Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-83710,0,-(i * 130000)),63710);
 	}

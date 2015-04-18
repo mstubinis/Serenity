@@ -53,8 +53,9 @@ bool Camera::SphereIntersectTest(Object* sphere){
 	float rad = sphere->Radius();
 	for (unsigned int i = 0; i < 6; i++){
 		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - sphere->Radius();
-		if (dist > 0) 
+		if (dist > 0){
 			return false;
+		}
 	}
 	return true;
 }
@@ -63,11 +64,11 @@ Camera::~Camera()
 }
 void Camera::Set_Perspective_Projection(){ 
 	m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far); 
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Camera::Set_Ortho_Projection(float left, float right, float bottom, float top){
 	m_Projection = glm::ortho(left,right,bottom,top,m_Near,m_Far);
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Camera::Set_Aspect_Ratio(float ratio){ 
 	m_AspectRatio = ratio;
@@ -75,20 +76,20 @@ void Camera::Set_Aspect_Ratio(float ratio){
 }
 void Camera::LookAt(const glm::vec3& target){ 
 	m_View = glm::lookAt(m_Position,target,Up());
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Camera::LookAt(const glm::vec3& target,const glm::vec3& up){ 
 	m_View = glm::lookAt(m_Position,target,up); 
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Camera::LookAt(const glm::vec3& eye,const glm::vec3& target,const glm::vec3& up){ 
 	m_View = glm::lookAt(eye,target,up); 
-	m_Changed = true;
+	Flag_As_Changed();
 }
 void Camera::LookAt(Object* target, bool targetUp){
 	if(!targetUp) m_View = glm::lookAt(m_Position,target->Position(),Up());
 	else m_View = glm::lookAt(m_Position,target->Position(),target->Up());
-	m_Changed = true;
+	Flag_As_Changed();
 }
 glm::mat4 Camera::Calculate_Projection(glm::mat4& modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::Calculate_ModelView(glm::mat4& modelMatrix){ return m_View * modelMatrix; }

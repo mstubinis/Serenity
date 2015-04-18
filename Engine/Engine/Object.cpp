@@ -94,7 +94,7 @@ void Object::Set_Position(float x, float y, float z){
 	m_Position.z = z; 
 	Flag_As_Changed();
 }
-void Object::Set_Position(glm::vec3& position){ Set_Position(position.x,position.y,position.z); }
+void Object::Set_Position(glm::vec3 position){ Set_Position(position.x,position.y,position.z); }
 void Object::Set_Scale(float x, float y, float z){ 
 	m_Scale.x = x; 
 	m_Scale.y = y; 

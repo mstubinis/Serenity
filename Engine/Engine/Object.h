@@ -56,7 +56,7 @@ class Object{
 		virtual void Scale(float,float,float); virtual void Scale(glm::vec3&);
 		virtual void Pitch(float); void Yaw(float); virtual void Roll(float);
 
-		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3&);
+		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3);
 		virtual void Set_Scale(float,float,float); virtual void Set_Scale(glm::vec3&);
 		virtual void Set_Color(float,float,float); virtual void Set_Color(glm::vec3&);
 

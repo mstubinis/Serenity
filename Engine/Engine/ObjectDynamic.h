@@ -36,7 +36,6 @@ class ObjectDynamic: public Object{
 		void Apply_Impulse(float,float,float); void Apply_Impulse(glm::vec3&,glm::vec3& = glm::vec3(0,0,0));
 		void Apply_Torque(float,float,float); void Apply_Torque(glm::vec3&);
 		void Apply_Torque_Impulse(float,float,float); void Apply_Torque_Impulse(glm::vec3&);
-		//void Apply_Rotation_Force(float,float,float,bool local=true); void Apply_Rotation_Force(glm::vec3&,bool local=true);
 
 		void Set_Linear_Velocity(float,float,float,bool local=true); void Set_Linear_Velocity(glm::vec3&,bool local=true);
 		void Set_Angular_Velocity(float,float,float); void Set_Angular_Velocity(glm::vec3&);
@@ -45,7 +44,7 @@ class ObjectDynamic: public Object{
 
 		void Update(float);
 
-		glm::vec3 Position();
+		const glm::vec3 Position() const;
 		const float Mass() const { return m_Mass; }
 };
 #endif
