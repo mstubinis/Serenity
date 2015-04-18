@@ -8,8 +8,8 @@
 
 using namespace Engine;
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,btCollisionShape* collisionShape): Object(mesh,mat,pos,scl,name,true){
-	m_Collision_Shape = collisionShape;
+ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,btCollisionShape* col,Scene* scene): Object(mesh,mat,pos,scl,name,true,scene){
+	m_Collision_Shape = col;
 	m_Inertia = new btVector3(0,0,0);
 	if(m_Collision_Shape == nullptr){
 		if(m_Mesh != nullptr){

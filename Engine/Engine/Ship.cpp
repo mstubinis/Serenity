@@ -3,11 +3,12 @@
 #include "Ship.h"
 #include "Engine_Events.h"
 #include "GameCamera.h"
+#include "Scene.h"
 
 using namespace Engine;
 using namespace Engine::Events;
 
-Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision): ObjectDynamic(mesh,mat,pos,scl,name,collision){
+Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
 	m_WarpFactor = 0;
 	m_IsWarping = false;
 }
@@ -24,7 +25,7 @@ void Ship::TranslateWarp(float amount){
 	}
 }
 
-PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision): Ship(mesh,mat,name,pos,scl,collision){
+PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
 	m_Camera = static_cast<GameCamera*>(Resources::getActiveCamera());
 	m_Camera->Follow(this);
 }
@@ -37,14 +38,14 @@ void PlayerShip::Update(float dt){
 
 		glm::vec3 s = Forward() * glm::pow(speed,15.0f);
 
-		for(auto obj:Resources::getObjects()){
-			if(obj != this && obj->Parent() == nullptr){
-				obj->Translate(s,false);
+		for(auto obj:Resources::getCurrentScene()->Objects()){
+			if(obj.second != this && obj.second->Parent() == nullptr){
+				obj.second->Translate(s,false);
 			}
 		}
-		for(auto obj:Resources::getLights()){
-			if(obj->Parent() == nullptr){
-				obj->Translate(s,false);
+		for(auto obj:Resources::getCurrentScene()->Lights()){
+			if(obj.second->Parent() == nullptr){
+				obj.second->Translate(s,false);
 			}
 		}
 	}

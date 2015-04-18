@@ -4,6 +4,7 @@
 #include "Engine_Physics.h"
 #include "Engine_Events.h"
 #include "Game.h"
+#include "Scene.h"
 
 #include "ObjectDynamic.h"
 #include "Light.h"
@@ -110,10 +111,10 @@ void Engine::EngineClass::_RESET_EVENTS(){
 }
 void Engine::EngineClass::_Update(float dt){
 	game->Update(dt);
-	for(auto object:Resources::getObjects())
-		object->Update(dt);
-	for(auto light:Resources::getLights())
-		light->Update(dt);
+	for(auto object:Resources::getCurrentScene()->Objects())
+		object.second->Update(dt);
+	for(auto light:Resources::getCurrentScene()->Lights())
+		light.second->Update(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 
 	physicsEngine->Update(dt);

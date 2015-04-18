@@ -13,8 +13,9 @@ class Station: public ObjectDynamic{
 			    std::string = "",
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 				glm::vec3 = glm::vec3(1,1,1),   //Scale
-				std::string = "Station", //Object
-				btCollisionShape* = nullptr     //Bullet Collision Shape
+				std::string = "Station",        //Object name
+				btCollisionShape* = nullptr,    //Bullet Collision Shape
+				Scene* = nullptr
 			   );
 		~Station();
 

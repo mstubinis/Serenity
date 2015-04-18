@@ -4,12 +4,12 @@
 
 using namespace Engine::Events;
 
-GameCamera::GameCamera(float angle, float ratio, float _near, float _far):Camera(angle,ratio,_near,_far){
+GameCamera::GameCamera(float angle, float ratio, float _near, float _far,Scene* scene):Camera(angle,ratio,_near,_far,scene){
 	m_State = CAMERA_STATE_FREEFORM;
 	m_Target = nullptr;
 	m_OrbitRadius = 0;
 }
-GameCamera::GameCamera(float left, float right, float bottom, float top, float _near, float _far):Camera(left,right,bottom,top,_near,_far){
+GameCamera::GameCamera(float left, float right, float bottom, float top, float _near, float _far, Scene* scene):Camera(left,right,bottom,top,_near,_far,scene){
 	m_State = CAMERA_STATE_FREEFORM;
 	m_Target = nullptr;
 	m_OrbitRadius = 0;

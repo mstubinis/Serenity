@@ -12,7 +12,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 class Mesh;
-class Material;                                                                          
+class Material;
+class Scene;
 class Object{
 	private:
 		glm::vec3 _Forward(); 
@@ -43,7 +44,8 @@ class Object{
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
 			    std::string = "Object",         //Object
-				bool addToResources = true      //Add this to the resource generic object pool (Don't do for lights)
+				bool isNotLight = true,
+				Scene* = nullptr                //The scene to add the object to (default nullptr = the current scene)
 			  );
 		~Object();
 

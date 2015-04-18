@@ -11,8 +11,8 @@ class GameCamera: public Camera{
 		Object* m_Target;
 		float m_OrbitRadius;
 	public:
-		GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd);				      // Perspective camera Constructor
-		GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd); // Orthographic camera Constructor
+		GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);				      // Perspective camera Constructor
+		GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
 		~GameCamera();
 
 		void Follow(Object*); void Orbit(Object*);

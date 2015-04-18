@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,17 +18,14 @@
 
 using namespace Engine::Resources;
 
-
 float Detail::ResourceManagement::m_DeltaTime = 0;
-Camera* Detail::ResourceManagement::m_ActiveCamera = nullptr;
 sf::Window* Detail::ResourceManagement::m_Window = nullptr;
 sf::Mouse* Detail::ResourceManagement::m_Mouse = nullptr;
+Scene* Detail::ResourceManagement::m_CurrentScene = nullptr;
+Camera* Detail::ResourceManagement::m_ActiveCamera = nullptr;
 
-std::vector<Object*> _getObjectsDefaults(){ std::vector<Object*> k; return k; }
-std::vector<Object*> Detail::ResourceManagement::m_Objects = _getObjectsDefaults();
-
-std::vector<SunLight*> _getLightsDefaults(){ std::vector<SunLight*> k; return k; }
-std::vector<SunLight*> Detail::ResourceManagement::m_Lights = _getLightsDefaults();
+std::unordered_map<std::string,Scene*> _getScenesDefaults(){ std::unordered_map<std::string,Scene*> k; return k; }
+std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes = _getScenesDefaults();
 
 std::unordered_map<std::string,Camera*> _getCameraDefaults(){ std::unordered_map<std::string,Camera*> k; return k; }
 std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras = _getCameraDefaults();
@@ -54,12 +52,10 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 	for(auto shaderP:Detail::ResourceManagement::m_Shaders){
 		delete shaderP.second;
 	}
-	for(auto light:Detail::ResourceManagement::m_Lights){
-		delete light;
+	for(auto scene:Detail::ResourceManagement::m_Scenes){
+		delete scene.second;
 	}
-	for(auto obj:Detail::ResourceManagement::m_Objects){
-		delete obj;
-	}
+	delete Detail::ResourceManagement::m_CurrentScene;
 	delete Detail::ResourceManagement::m_Mouse;
 	delete Detail::ResourceManagement::m_Window;
 }
@@ -85,7 +81,6 @@ void Engine::Resources::addShader(std::string name, std::string vertexShaderFile
 		return;
 	Detail::ResourceManagement::m_Shaders[name] = new ShaderP(vertexShaderFile,fragmentShaderFile);
 }
-
 void Engine::Resources::loadTextureIntoGLuint(GLuint& address, std::string filename){
 	glGenTextures(1, &address);
 	sf::Image image;
@@ -102,10 +97,10 @@ void Engine::Resources::loadTextureIntoGLuint(GLuint& address, std::string filen
 }
 void Engine::Resources::loadCubemapTextureIntoGLuint(GLuint& address, std::string filenames[]){
 	glGenTextures(1, &address);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, address);
 	for(unsigned int i = 0; i < 6; i++){
 		sf::Image image;
-
-		glBindTexture(GL_TEXTURE_CUBE_MAP, address);
+		
 		image.loadFromFile(filenames[i].c_str());
 		GLenum skyboxSide;
 		if(i==0)           skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
@@ -125,6 +120,8 @@ void Engine::Resources::loadCubemapTextureIntoGLuint(GLuint& address, std::strin
 }
 
 void Engine::Resources::initResources(){
+	new Scene("Default");
+
 	addShader("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
 	addShader("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
 	addShader("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
@@ -149,9 +146,4 @@ void Engine::Resources::initResources(){
 	addMaterial("Default","Textures/sun.png","","");
 	addMaterial("Earth","Textures/earth.png","","");
 	addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
-
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["Debug"] = new Camera(45,getWindow()->getSize().x/(float)getWindow()->getSize().y,0.1f,100000.0f);
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["HUD"] = new Camera(0,(float)getWindow()->getSize().x,0,(float)getWindow()->getSize().y,0.005f,100000.0f);
-
-	setActiveCamera("Debug");
 }

@@ -5,10 +5,11 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
+#include "Scene.h"
 
 using namespace Engine;
 
-Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name, bool add):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,add){
+Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,Scene* scene):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,true,scene){
 	m_AtmosphereHeight = 0.025f;
 	m_Type = type;
 }
@@ -61,7 +62,7 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 	glm::vec3 camPos = Resources::getActiveCamera()->Position() - Position();
 	glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
-	glm::vec3 lightDir = Resources::getLights().at(0)->Position() - Position();
+	glm::vec3 lightDir = Resources::getCurrentScene()->Lights().begin()->second->Position() - Position();
 	lightDir = glm::normalize(lightDir);
 	glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
@@ -169,8 +170,8 @@ void Planet::Render(Mesh* mesh, Material* mat,bool debug){
 void Planet::Render(bool debug){ Render(m_Mesh,m_Material,debug); }
 
 
-Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name, bool add): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,add){
-	m_Light = new SunLight();
+Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,scene){
+	m_Light = new SunLight(glm::vec3(0,0,0),"Sun Light",LIGHT_TYPE_SUN,scene);
 	m_Light->Set_Color(lightColor);
 	Set_Color(starColor);
 	m_Material->Set_Shadeless(true);

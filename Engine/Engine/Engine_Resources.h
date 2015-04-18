@@ -14,14 +14,15 @@ class Material;
 class ShaderP;
 class Object;
 class SunLight;
+class Scene;
 
 namespace Engine{
 	namespace Resources{
 		namespace Detail{
 			class ResourceManagement{
 				public:
-					static std::vector<Object*> m_Objects;
-					static std::vector<SunLight*> m_Lights;
+					static std::unordered_map<std::string,Scene*> m_Scenes;
+					static Scene* m_CurrentScene;
 
 					static float m_DeltaTime;
 
@@ -38,8 +39,8 @@ namespace Engine{
 					static void destruct();
 			};
 		};
-		static std::vector<Object*> getObjects(){ return Detail::ResourceManagement::m_Objects; }
-		static std::vector<SunLight*> getLights(){ return Detail::ResourceManagement::m_Lights; }
+		static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
+		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene = s; }
 
 		static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
 		static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }

@@ -16,7 +16,7 @@ class Planet: public Object{
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    float = 1,                      //Scale
 			    std::string = "Planet",         //Name
-				bool addToResources = true      //Add this to the resource generic object pool (Don't do for lights)
+				Scene* = nullptr
 			  );
 		~Planet();
 
@@ -38,7 +38,7 @@ class Star: public Planet{
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    float = 1,					    //Scale
 			    std::string = "Star",           //Name
-				bool addToResources = true      //Add this to the resource generic object pool (Don't do for lights)
+				Scene* = nullptr
 			);
 		~Star();
 

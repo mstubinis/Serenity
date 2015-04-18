@@ -1,12 +1,14 @@
 #ifndef SOLARSYSTEM_H
 #define SOLARSYSTEM_H
 
+#include "Scene.h"
+
 class Object;
 class ObjectDynamic;
 class GameCamera;
 class Planet;
 
-class SolarSystem{
+class SolarSystem: public Scene{
 	private:
 		std::unordered_map<std::string,Planet*> m_Planets;
 		std::unordered_map<std::string,Planet*> m_Moons;
@@ -19,7 +21,7 @@ class SolarSystem{
 		void LoadRandomly();
 		void LoadFromFile(std::string);
 	public:
-		SolarSystem(std::string = "");
+		SolarSystem(std::string name, std::string file);
 		~SolarSystem();
 
 		void Update(float);

@@ -14,7 +14,8 @@ class Ship: public ObjectDynamic{
 			std::string = "Ship",           //Name
 			glm::vec3 = glm::vec3(0,0,0),   //Position
 			glm::vec3 = glm::vec3(1,1,1),   //Scale
-			btCollisionShape* = nullptr     //Bullet Collision Shape
+			btCollisionShape* = nullptr,    //Bullet Collision Shape
+			Scene* = nullptr
 		    );
 		~Ship();
 
@@ -33,7 +34,8 @@ class PlayerShip: public Ship{
 			std::string = "Player Ship",    //Name
 			glm::vec3 = glm::vec3(0,0,0),   //Position
 			glm::vec3 = glm::vec3(1,1,1),   //Scale
-			btCollisionShape* = nullptr     //Bullet Collision Shape
+			btCollisionShape* = nullptr,    //Bullet Collision Shape
+			Scene* = nullptr
 		    );
 		~PlayerShip();
 

@@ -25,7 +25,8 @@ class ObjectDynamic: public Object{
 					   glm::vec3 = glm::vec3(0,0,0),   //Position
 					   glm::vec3 = glm::vec3(1,1,1),   //Scale
 					   std::string = "Dynamic Object", //Object
-					   btCollisionShape* = nullptr     //Bullet Collision Shape
+					   btCollisionShape* = nullptr,    //Bullet Collision Shape
+					   Scene* = nullptr
 					 );
 		~ObjectDynamic();
 

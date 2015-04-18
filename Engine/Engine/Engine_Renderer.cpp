@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "Font.h"
 #include "Engine_Physics.h"
+#include "Scene.h"
 
 #include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
@@ -34,15 +35,15 @@ void Renderer::Geometry_Pass(bool debug){
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	
-	for(auto object:Resources::getObjects()){
-		object->Render(debug);
+	for(auto object:Resources::getCurrentScene()->Objects()){
+		object.second->Render(debug);
 	}	
 	if(debug){
 		physicsEngine->Render();
 		GLuint shader = Resources::getShader("Deferred")->Get_Shader_Program();
 		glUseProgram(shader);
-		for(auto light:Resources::getLights()){
-			light->RenderDebug(shader);
+		for(auto light:Resources::getCurrentScene()->Lights()){
+			light.second->RenderDebug(shader);
 		}
 		glUseProgram(0);
 	}
@@ -100,8 +101,8 @@ void Renderer::Pass_Lighting(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->Texture(BUFFER_TYPE_POSITION));
 	glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
 
-	for (auto light:Resources::getLights()) {
-		light->Render(shader);
+	for (auto light:Resources::getCurrentScene()->Lights()) {
+		light.second->Render(shader);
    	}
 
 	// Reset OpenGL state

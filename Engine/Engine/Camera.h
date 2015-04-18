@@ -5,7 +5,7 @@
 
 enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
 
-
+class Scene;
 class Camera: public Object{
 	private:
 		void _ConstructFrustrum();
@@ -19,8 +19,8 @@ class Camera: public Object{
 		float m_Near, m_Far;
 		glm::mat4 m_View, m_Projection;
 	public:
-		Camera(float angle, float ratio, float _near, float _far);				           // Perspective camera Constructor
-		Camera(float left, float right, float bottom, float top, float _near, float _far); // Orthographic camera Constructor
+		Camera(float angle, float ratio, float _near, float _far,Scene* = nullptr);				           // Perspective camera Constructor
+		Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* = nullptr); // Orthographic camera Constructor
 		~Camera();
 
 		void Set_Perspective_Projection();

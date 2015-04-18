@@ -4,10 +4,13 @@
 #include "ShaderProgram.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "Scene.h"
+
+#include <boost/lexical_cast.hpp>
 
 using namespace Engine;
 
-Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool addToResources){
+Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Scene* scene){
 	m_Changed = true;
 	m_Radius = 0;
 	m_BoundingBoxRadius = glm::vec3(0,0,0);
@@ -26,8 +29,18 @@ Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,s
 	Object::Set_Position(pos);
 	Object::Set_Scale(scl);
 
-	if(addToResources == true)
-		Resources::Detail::ResourceManagement::m_Objects.push_back(this);
+	unsigned int count = 0;
+	if(scene == nullptr){
+		scene = Resources::getCurrentScene();
+	}
+	if (scene->Objects().size() > 0){
+		while(scene->Objects().count(m_Name)){
+			m_Name = name + " " + boost::lexical_cast<std::string>(count);
+			count++;
+		}
+	}
+	if(isNotLight)
+		scene->Objects()[m_Name] = this;
 }
 Object::~Object()
 {

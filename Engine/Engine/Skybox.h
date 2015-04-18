@@ -3,6 +3,8 @@
 
 #include "Object.h"
 
+class Scene;
+
 struct SkyboxTextures{
 	std::string front;
 	std::string back;
@@ -16,7 +18,7 @@ class Skybox: public Object{
 		GLuint m_Shader;
 		GLuint m_Texture;
 	public:
-		Skybox(std::string name);
+		Skybox(std::string name,Scene* = nullptr);
 		~Skybox();
 
 		void Update(float);

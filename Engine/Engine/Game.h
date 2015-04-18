@@ -9,7 +9,6 @@ class SolarSystem;
 class Game{
 	private:
 		std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
-		SolarSystem* m_CurrentSolarSystem;
 	public:
 		Game();
 		~Game();

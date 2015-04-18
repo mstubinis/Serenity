@@ -3,6 +3,9 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "Scene.h"
+
+#include <boost/lexical_cast.hpp>
 
 using namespace Engine;
 
@@ -39,16 +42,27 @@ void Init_Quad(){
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
-SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type):Object("DEBUGLight","",pos,glm::vec3(1,1,1),name,false){
+SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type,Scene* scene):Object("DEBUGLight","",pos,glm::vec3(1,1,1),name,false,scene){
 	m_Type = type;
 
     m_AmbientIntensity = 0.05f;
     m_DiffuseIntensity = 1.0f;
 	m_Parent = nullptr;
 
-	Resources::Detail::ResourceManagement::m_Lights.push_back(this);
+	unsigned int count = 0;
+	if(scene == nullptr){
+		scene = Resources::getCurrentScene();
+	}
+	if (scene->Lights().size() > 0){
+		while(scene->Lights().count(m_Name)){
+			m_Name = name + " " + boost::lexical_cast<std::string>(count);
+			count++;
+		}
+	}
+	scene->Lights()[m_Name] = this;
 }
-SunLight::~SunLight(){}
+SunLight::~SunLight(){
+}
 void SunLight::Update(float dt){
 	Object::Update(dt);
 }
@@ -78,11 +92,10 @@ void SunLight::RenderDebug(GLuint shader){
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),1,1,1);
 	m_Mesh->Render();
 }
-DirectionalLight::DirectionalLight(glm::vec3 dir): SunLight(glm::vec3(0,0,0),"Directional Light",LIGHT_TYPE_DIRECTIONAL){
+DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0,0,0),"Directional Light",LIGHT_TYPE_DIRECTIONAL,scene){
 	m_Direction = dir;
 }
-DirectionalLight::~DirectionalLight()
-{
+DirectionalLight::~DirectionalLight(){
 }
 void DirectionalLight::Render(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
@@ -98,7 +111,7 @@ void DirectionalLight::Render(GLuint shader){
 	Init_Quad();
 }
 
-PointLight::PointLight(glm::vec3 pos): SunLight(pos,"Point Light",LIGHT_TYPE_POINT){
+PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Point Light",LIGHT_TYPE_POINT,scene){
 	m_Constant = 0.3f;
 	m_Linear = 0.2f;
 	m_Exp = 0.3f;
@@ -127,12 +140,11 @@ void PointLight::Render(GLuint shader){
 
 	Init_Quad();
 }
-SpotLight::SpotLight(glm::vec3 pos): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
+SpotLight::SpotLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);
     m_Cutoff = 0;
 }
-SpotLight::~SpotLight()
-{
+SpotLight::~SpotLight(){
 }
 void SpotLight::Render(GLuint shader)
 {
