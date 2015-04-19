@@ -81,7 +81,9 @@ void Renderer::render(bool debug){
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//render hud stuff
-	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +"\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),glm::vec2(25,25),glm::vec3(1,1,1),0);
+	glm::vec3 pos = Resources::getCurrentScene()->getLights().begin()->second->getScreenCoordinates();
+	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
+		               "\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),glm::vec2(pos.x,pos.y),glm::vec3(1,1,1),0);
 }
 void Renderer::_passLighting(){
 	GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();

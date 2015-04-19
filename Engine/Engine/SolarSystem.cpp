@@ -91,7 +91,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					}
 
 				}
-				float randDegree = rand() * 360;
+				float randDegree = rand() * 360.0f;
 				float xPos = sin(randDegree) * static_cast<float>(POSITION);
 				float zPos = cos(randDegree) * static_cast<float>(POSITION);
 

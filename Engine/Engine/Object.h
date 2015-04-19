@@ -52,6 +52,7 @@ class Object{
 		void flagAsChanged();
 
 		float getDistance(Object*);
+		glm::vec3 getScreenCoordinates();
 
 		virtual void translate(float,float,float,bool local=true); 
 		virtual void translate(glm::vec3&,bool local=true);

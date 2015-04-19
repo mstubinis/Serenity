@@ -212,3 +212,45 @@ void Object::setName(std::string name){
 	    else++it;
 	}
 }
+glm::vec3 Object::getScreenCoordinates(){
+	glm::vec2 windowSize = glm::vec2(static_cast<int>(Resources::getWindow()->getSize().x),static_cast<int>(Resources::getWindow()->getSize().y));
+	glm::vec3 objPos = getPosition();
+	glm::mat4 MV = Resources::getActiveCamera()->getView() * m_Model;
+	glm::vec4 viewport = glm::vec4(0.0f,0.0f,static_cast<float>(windowSize.x),static_cast<float>(windowSize.y));
+	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
+
+	//check if point is behind
+	glm::vec3 viewVector = glm::vec3(MV[2][0],MV[2][1],MV[2][2]);
+	float dot = glm::dot(viewVector,objPos);
+
+	float resY = static_cast<float>(windowSize.y-screen.y);
+
+
+	if(screen.x < 0)
+		screen.x = 0;
+	else if(screen.x > windowSize.x)
+		screen.x = windowSize.x;
+	if(resY < 0)
+		resY = 0;
+	else if(resY > windowSize.y)
+		resY = windowSize.y;
+
+	if(dot < 0.0f){
+		return glm::vec3(screen.x,resY,screen.z);
+	}
+	else{
+		float fX = windowSize.x - screen.x;
+		float fY = windowSize.y - resY;
+
+		if(fX < windowSize.x/2)
+			fX = 0;
+		else if(fX > windowSize.x/2)
+			fX = windowSize.x;
+		if(fY < windowSize.y/2)
+			fY = 0;
+		else if(fY > windowSize.y/2)
+			fY = windowSize.y;
+
+		return glm::vec3(fX,fY,screen.z);
+	}
+}
