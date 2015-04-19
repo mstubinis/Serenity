@@ -173,8 +173,7 @@ void Object::render(Mesh* mesh, Material* material,bool debug){
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	for(auto component:material->getComponents())
-		material->bindTexture(component.second,shader);
-
+		material->bindTexture(component.first,shader);
 	mesh->render();
 }
 void Object::render(bool debug){ Object::render(m_Mesh,m_Material,debug); }
@@ -215,12 +214,12 @@ void Object::setName(std::string name){
 glm::vec3 Object::getScreenCoordinates(){
 	glm::vec2 windowSize = glm::vec2(static_cast<int>(Resources::getWindow()->getSize().x),static_cast<int>(Resources::getWindow()->getSize().y));
 	glm::vec3 objPos = getPosition();
-	glm::mat4 MV = Resources::getActiveCamera()->getView() * m_Model;
+	glm::mat4 V = Resources::getActiveCamera()->getView();
 	glm::vec4 viewport = glm::vec4(0.0f,0.0f,static_cast<float>(windowSize.x),static_cast<float>(windowSize.y));
-	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
+	glm::vec3 screen = glm::project(objPos,V * m_Model,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
-	glm::vec3 viewVector = glm::vec3(MV[2][0],MV[2][1],MV[2][2]);
+	glm::vec3 viewVector = glm::vec3(V[2][0],V[2][1],V[2][2]);
 	float dot = glm::dot(viewVector,objPos);
 
 	float resY = static_cast<float>(windowSize.y-screen.y);

@@ -9,6 +9,7 @@
 #include "Material.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "Texture.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -23,6 +24,9 @@ sf::Window* Detail::ResourceManagement::m_Window = nullptr;
 sf::Mouse* Detail::ResourceManagement::m_Mouse = nullptr;
 Scene* Detail::ResourceManagement::m_CurrentScene = nullptr;
 Camera* Detail::ResourceManagement::m_ActiveCamera = nullptr;
+
+std::unordered_map<std::string,Texture*> _getTexturesDefaults(){ std::unordered_map<std::string,Texture*> k; return k; }
+std::unordered_map<std::string,Texture*> Detail::ResourceManagement::m_Textures = _getTexturesDefaults();
 
 std::unordered_map<std::string,Scene*> _getScenesDefaults(){ std::unordered_map<std::string,Scene*> k; return k; }
 std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes = _getScenesDefaults();
@@ -42,6 +46,9 @@ std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders =
 void Engine::Resources::Detail::ResourceManagement::destruct(){
 	for(auto mesh:Detail::ResourceManagement::m_Meshes){
 		delete mesh.second;
+	}
+	for(auto texture:Detail::ResourceManagement::m_Textures){
+		delete texture.second;
 	}
 	for(auto mat:Detail::ResourceManagement::m_Materials){
 		delete mat.second;

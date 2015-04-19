@@ -3,6 +3,7 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 using namespace Engine;
 
@@ -21,11 +22,11 @@ Skybox::Skybox(std::string name,Scene* scene): Object("Skybox","",glm::vec3(0,0,
 	std::string top = "Textures\\Skyboxes\\" + name + "\\Top.png";
 	std::string bottom = "Textures\\Skyboxes\\" + name + "\\Bottom.png";
 	std::string names[6] = {front,back,left,right,top,bottom};
-	Resources::loadCubemapTextureIntoGLuint(m_Texture,names);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture);
+
+	m_Texture = new Texture(names,GL_TEXTURE_CUBE_MAP);
 }
 Skybox::~Skybox(){
-	glDeleteTextures(1,&m_Texture);
+	delete m_Texture;
 }
 void Skybox::update(float dt){
 	m_Position = Resources::getActiveCamera()->getPosition();
@@ -44,7 +45,7 @@ void Skybox::render(bool debug){
 	glUniformMatrix4fv(glGetUniformLocation( m_Shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
 	glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->getTextureAddress());
 	glUniform1i(glGetUniformLocation(m_Shader, "cubemap"), 0);
 
 	glBindBuffer( GL_ARRAY_BUFFER, m_Mesh->getBuffers()[0] );

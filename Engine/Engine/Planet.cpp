@@ -41,7 +41,7 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
 
 	for(auto component:mat->getComponents())
-		mat->bindTexture(component.second,shader);
+		mat->bindTexture(component.first,shader);
 
 	if(m_AtmosphereHeight > 0){
 		glUniform1i(glGetUniformLocation(shader,"hasAtmosphere"),1);

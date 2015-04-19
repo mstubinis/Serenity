@@ -93,9 +93,6 @@
     <ClCompile Include="Material.cpp">
       <Filter>Source Files\Engine\Materials</Filter>
     </ClCompile>
-    <ClCompile Include="MaterialComponent.cpp">
-      <Filter>Source Files\Engine\Materials</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Source Files\Engine\Materials</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Engine\Materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -177,9 +177,6 @@
       <Filter>Header Files\Engine\DeferredRendering</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Header Files\Engine\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialComponent.h">
       <Filter>Header Files\Engine\Materials</Filter>
     </ClInclude>
     <ClInclude Include="ShaderProgram.h">
@@ -235,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\Engine\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

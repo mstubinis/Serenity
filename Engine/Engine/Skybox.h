@@ -4,6 +4,7 @@
 #include "Object.h"
 
 class Scene;
+class Texture;
 
 struct SkyboxTextures{
 	std::string front;
@@ -16,7 +17,7 @@ struct SkyboxTextures{
 class Skybox: public Object{
 	private:
 		GLuint m_Shader;
-		GLuint m_Texture;
+		Texture* m_Texture;
 	public:
 		Skybox(std::string name,Scene* = nullptr);
 		~Skybox();

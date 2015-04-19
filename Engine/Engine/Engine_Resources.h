@@ -15,6 +15,7 @@ class ShaderP;
 class Object;
 class SunLight;
 class Scene;
+class Texture;
 
 namespace Engine{
 	namespace Resources{
@@ -33,6 +34,7 @@ namespace Engine{
 
 					static std::unordered_map<std::string,Camera*> m_Cameras;
 					static std::unordered_map<std::string,Mesh*> m_Meshes;
+					static std::unordered_map<std::string,Texture*> m_Textures;
 					static std::unordered_map<std::string,Material*> m_Materials;
 					static std::unordered_map<std::string,ShaderP*> m_Shaders;
 

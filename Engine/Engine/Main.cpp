@@ -7,7 +7,7 @@ Renderer* renderer;
 PhysicsEngine* physicsEngine;
 
 int main(){
-	Engine::EngineClass* program = new Engine::EngineClass("Engine",1024,600);
+	Engine::EngineClass* program = new Engine::EngineClass("Engine",1024,768);
 
 	program->run();
 
