@@ -28,7 +28,7 @@ GBuffer::~GBuffer(){
 	glDeleteFramebuffers(1, &m_fbo);
 	glDeleteRenderbuffers(1, &m_depth);
 }
-void GBuffer::Start(unsigned int type){
+void GBuffer::start(unsigned int type){
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -36,7 +36,7 @@ void GBuffer::Start(unsigned int type){
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	unsigned int buffers[] = { m_Buffers[type]->Attatchment() };
+	unsigned int buffers[] = { m_Buffers[type]->getAttatchment() };
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 
 	// Clear the render targets
@@ -46,14 +46,14 @@ void GBuffer::Start(unsigned int type){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::Start(unsigned int type,unsigned int type1){
+void GBuffer::start(unsigned int type,unsigned int type1){
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	unsigned int buffers[] = { m_Buffers[type]->Attatchment(),m_Buffers[type1]->Attatchment() };
+	unsigned int buffers[] = { m_Buffers[type]->getAttatchment(),m_Buffers[type1]->getAttatchment() };
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 
 	// Clear the render targets
@@ -63,14 +63,14 @@ void GBuffer::Start(unsigned int type,unsigned int type1){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::Start(unsigned int type,unsigned int type1,unsigned int type2){
+void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2){
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	unsigned int buffers[] = { m_Buffers[type]->Attatchment(),m_Buffers[type1]->Attatchment(),m_Buffers[type2]->Attatchment() };
+	unsigned int buffers[] = { m_Buffers[type]->getAttatchment(),m_Buffers[type1]->getAttatchment(),m_Buffers[type2]->getAttatchment() };
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 
 	// Clear the render targets
@@ -80,10 +80,10 @@ void GBuffer::Start(unsigned int type,unsigned int type1,unsigned int type2){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::Stop(){	
+void GBuffer::stop(){	
 	// Stop acquiring and unbind the FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPopAttrib();
 }
-std::unordered_map<unsigned int,TextureBuffer*> GBuffer::Buffers(){ return m_Buffers; }
-GLuint GBuffer::Texture(unsigned int type){ return m_Buffers[type]->Texture(); }
+std::unordered_map<unsigned int,TextureBuffer*> GBuffer::getBuffers(){ return m_Buffers; }
+GLuint GBuffer::getTexture(unsigned int type){ return m_Buffers[type]->getTexture(); }

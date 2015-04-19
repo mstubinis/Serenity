@@ -15,27 +15,25 @@ Material::~Material(){
 	for(auto component:m_Components)
 		delete component.second;
 }
-void Material::Add_Component(unsigned int type, std::string file){
+void Material::addComponent(unsigned int type, std::string file){
 	if(m_Components[type] != nullptr)
 		return;
 	m_Components[type] = new MaterialComponent(type,file);
 }
-MaterialComponent* Material::Get_Component(unsigned int type){ return m_Components[type]; }
-std::unordered_map<unsigned int,MaterialComponent*>& Material::Components(){ return m_Components; }
-void Material::Bind_Texture(MaterialComponents::MaterialComponent* component,GLuint shader){
+MaterialComponent* Material::getComponent(unsigned int type){ return m_Components[type]; }
+std::unordered_map<unsigned int,MaterialComponent*>& Material::getComponents(){ return m_Components; }
+void Material::bindTexture(MaterialComponents::MaterialComponent* component,GLuint shader){
 	if(component == nullptr)
 		return;
 
-	std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[component->Type()];
-	if(component->Texture() == 0){//Texture / Material type not present; disable this material
+	std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[component->getType()];
+	if(component->getTexture() == 0){//Texture / Material type not present; disable this material
 		glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
 		return;
 	}
-	glEnable(component->TextureType()); //may not need this line, consider cpu cost
-	glActiveTexture(GL_TEXTURE0 + component->Type());
-	glBindTexture(component->TextureType(), component->Texture());
-	glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), component->Type());
+	glEnable(component->getTextureType()); //may not need this line, consider cpu cost
+	glActiveTexture(GL_TEXTURE0 + component->getType());
+	glBindTexture(component->getTextureType(), component->getTexture());
+	glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), component->getType());
 	glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
 }
-bool Material::Shadeless(){ return m_Shadeless; }
-void Material::Set_Shadeless(bool b){ m_Shadeless = b; }

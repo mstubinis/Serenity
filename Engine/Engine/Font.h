@@ -24,15 +24,15 @@ struct FontGlyph {
 };
 class FontData{
 	private:
-		GLuint Font_Texture;
-		std::unordered_map<unsigned char,FontGlyph*> Font_Glyphs;
-		void LoadTextFile(std::string filename);
+		GLuint m_FontTexture;
+		std::unordered_map<unsigned char,FontGlyph*> m_FontGlyphs;
+		void _loadTextFile(std::string filename);
 	public:
 		FontData(std::string filename);
 		~FontData();
 
-		GLuint Get_Glyph_Texture();
-		FontGlyph* Get_Glyph_Data(unsigned char);
+		GLuint getGlyphTexture();
+		FontGlyph* getGlyphData(unsigned char);
 };
 class Font{
 	private:

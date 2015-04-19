@@ -15,11 +15,12 @@ class GameCamera: public Camera{
 		GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
 		~GameCamera();
 
-		void Follow(Object*); void Orbit(Object*);
+		void follow(Object*); 
+		void orbit(Object*);
 
-		void Update(float);
-		void Render();
+		void update(float);
+		void render();
 
-		const CAMERA_STATE State() const { return m_State; }
+		const CAMERA_STATE getState() const { return m_State; }
 };
 #endif

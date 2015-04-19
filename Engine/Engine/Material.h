@@ -12,13 +12,13 @@ class Material{
 		Material(std::string diffuse,std::string normal="",std::string glow="");
 		~Material();
 
-		std::unordered_map<unsigned int,MaterialComponents::MaterialComponent*>& Components();
-		MaterialComponents::MaterialComponent* Get_Component(unsigned int);
-		void Add_Component(unsigned int, std::string file);
+		std::unordered_map<unsigned int,MaterialComponents::MaterialComponent*>& getComponents();
+		MaterialComponents::MaterialComponent* getComponent(unsigned int);
+		void addComponent(unsigned int, std::string file);
 
-		void Bind_Texture(MaterialComponents::MaterialComponent*,GLuint shader);
+		void bindTexture(MaterialComponents::MaterialComponent*,GLuint shader);
 
-		bool Shadeless();
-		void Set_Shadeless(bool);
+		const bool getShadeless() const { return m_Shadeless; }
+		void setShadeless(bool b){ m_Shadeless = b; }
 };
 #endif

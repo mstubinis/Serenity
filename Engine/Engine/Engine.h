@@ -9,8 +9,8 @@ class Game;
 namespace Engine{
 	class EngineClass{
 		private:
-			void _INIT_Window(std::string name, unsigned int width, unsigned int height);
-			void _INIT_Game();
+			void _initWindow(std::string name, unsigned int width, unsigned int height);
+			void _initGame();
 
 			#pragma region Event Handlers
 			void _EVENT_RESIZE(unsigned int width, unsigned int height);
@@ -44,14 +44,14 @@ namespace Engine{
 			GLuint m_vao;
 			sf::Clock clock;
 
-			void _Update(float);
-			void _Render();
+			void _update(float);
+			void _render();
 
 		public:
 			EngineClass(std::string name, unsigned int width, unsigned int height);
 			~EngineClass();
 
-			void Run();
+			void run();
 	};
 };
 #endif

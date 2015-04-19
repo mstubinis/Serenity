@@ -13,9 +13,9 @@ class Game{
 		Game();
 		~Game();
 
-		void Init_Resources();
-		void Init_Logic();
+		void initResources();
+		void initLogic();
 
-		void Update(float);
+		void update(float);
 };
 #endif

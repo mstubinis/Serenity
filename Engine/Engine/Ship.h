@@ -19,9 +19,9 @@ class Ship: public ObjectDynamic{
 		    );
 		~Ship();
 
-		void TranslateWarp(float);
+		void translateWarp(float);
 
-		virtual void Update(float);
+		virtual void update(float);
 };
 
 class PlayerShip: public Ship{
@@ -39,7 +39,7 @@ class PlayerShip: public Ship{
 		    );
 		~PlayerShip();
 
-		void Update(float);
+		void update(float);
 };
 
 #endif

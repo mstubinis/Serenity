@@ -17,14 +17,14 @@ class SolarSystem: public Scene{
 		ObjectDynamic* player;
 		GameCamera* playerCamera;
 
-		void LoadTestSystem();
-		void LoadRandomly();
-		void LoadFromFile(std::string);
+		void _loadTestSystem();
+		void _loadRandomly();
+		void _loadFromFile(std::string);
 	public:
 		SolarSystem(std::string name, std::string file);
 		~SolarSystem();
 
-		void Update(float);
-		void Render();
+		void update(float);
+		void render();
 };
 #endif

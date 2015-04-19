@@ -36,15 +36,15 @@ PhysicsEngine::~PhysicsEngine(){
 	delete m_collisionConfiguration;
 	delete m_broadphase;
 }
-void PhysicsEngine::Set_Gravity(float x,float y,float z){ m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
-void PhysicsEngine::Set_Gravity(glm::vec3 gravity){ Set_Gravity(gravity.x,gravity.y,gravity.z); }
-void PhysicsEngine::Add_Rigid_Body(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
-void PhysicsEngine::Update(float dt){
+void PhysicsEngine::setGravity(float x,float y,float z){ m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
+void PhysicsEngine::setGravity(glm::vec3 gravity){ setGravity(gravity.x,gravity.y,gravity.z); }
+void PhysicsEngine::addRigidBody(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
+void PhysicsEngine::update(float dt){
 	m_dynamicsWorld->stepSimulation(1/60.0f);
 }
-void PhysicsEngine::Render(){
+void PhysicsEngine::render(){
 	glm::mat4 model = glm::mat4();
-	GLuint shader = Resources::getShader("Deferred")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 	glUseProgram(shader);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));

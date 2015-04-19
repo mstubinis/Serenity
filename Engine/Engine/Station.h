@@ -19,7 +19,7 @@ class Station: public ObjectDynamic{
 			   );
 		~Station();
 
-		void Update(float);
-		void Render();
+		void update(float);
+		void render();
 };
 #endif

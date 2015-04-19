@@ -14,22 +14,22 @@ class Renderer{
 		GBuffer* m_gBuffer;
 		Font* m_Font;
 
-		void Init_Quad();
+		void _initQuad();
 
-		void Pass_Lighting();
-		void Pass_SSAO();
-		void Pass_Blur_Horizontal(GLuint texture);
-		void Pass_Blur_Vertical(GLuint texture);
-		void Pass_Final();
+		void _geometryPass(bool debug);
+		void _lightingPass();
+
+		void _passLighting();
+		void _passSSAO();
+		void _passBlurHorizontal(GLuint texture);
+		void _passBlurVertical(GLuint texture);
+		void _passFinal();
 
 	public:
 		Renderer();
 		~Renderer();
 
-		void Render(bool debug = false);
-
-		void Geometry_Pass(bool debug);
-		void Lighting_Pass();
+		void render(bool debug = false);
 };
 extern Renderer* renderer;
 #endif

@@ -38,35 +38,36 @@ class Mesh{
 		std::vector<glm::vec3> m_Normals;
 		std::vector<glm::vec3> m_Tangents;
 
-		void GenerateQuad(Vertex&,Vertex&,Vertex&,Vertex&);
-		void GenerateTriangle(Vertex&,Vertex&,Vertex&);
+		void _generateQuad(Vertex&,Vertex&,Vertex&,Vertex&);
+		void _generateTriangle(Vertex&,Vertex&,Vertex&);
 
-		void CalculateTangent(Vertex&, Vertex&, Vertex&);
+		void _calculateTangent(Vertex&, Vertex&, Vertex&);
 
-		void LoadFromFile(std::string);
-		void LoadFromPLY(std::string);
-		void LoadFromOBJ(std::string);
+		void _loadFromFile(std::string);
+		void _loadFromPLY(std::string);
+		void _loadFromOBJ(std::string);
 
-		btConvexHullShape* LoadColFromOBJ(std::string);
+		btConvexHullShape* _loadColFromOBJ(std::string);
+		btConvexHullShape* _loadColFromPLY(std::string);
 
-		void Init();
+		void _init();
 	public:
 		Mesh(int x, int y, int width, int height);
 		Mesh(std::string = "");
 		~Mesh();
 
 		//GLuint* VAO();
-		const GLuint* Buffers() const { return m_buffers; }
-		btConvexHullShape* Collision() const { return m_Collision; }
+		const GLuint* getBuffers() const { return m_buffers; }
+		btConvexHullShape* getCollision() const { return m_Collision; }
 
-		const glm::vec3 Radius() const { return m_radius; }
+		const glm::vec3 getRadius() const { return m_radius; }
 
-		const std::vector<glm::vec3>& Points() const { return m_Points; }
-		const std::vector<glm::vec4>& Colors() const { return m_Colors; }
-		const std::vector<glm::vec2>& UVS() const { return m_UVs; }
-		const std::vector<glm::vec3>& Normals() const { return m_Normals; }
-		const std::vector<glm::vec3>& Tangents() const { return m_Tangents; }
+		const std::vector<glm::vec3>& getPoints() const { return m_Points; }
+		const std::vector<glm::vec4>& getColors() const { return m_Colors; }
+		const std::vector<glm::vec2>& getUVS() const { return m_UVs; }
+		const std::vector<glm::vec3>& getNormals() const { return m_Normals; }
+		const std::vector<glm::vec3>& getTangents() const { return m_Tangents; }
 
-		void Render();
+		void render();
 };
 #endif

@@ -10,20 +10,20 @@
 using namespace Engine;
 
 FontData::FontData(std::string filename){
-	LoadTextFile(filename);
+	_loadTextFile(filename);
 	std::string texture_filename = filename.substr(0,filename.size()-4);
 	texture_filename += "_0.png";
-	Resources::loadTextureIntoGLuint(Font_Texture,texture_filename);
+	Resources::loadTextureIntoGLuint(m_FontTexture,texture_filename);
 }
 FontData::~FontData(){
-	for(auto glyph:Font_Glyphs){
+	for(auto glyph:m_FontGlyphs){
 		delete glyph.second->char_mesh;
 		delete glyph.second;
 	}
 }
-FontGlyph* FontData::Get_Glyph_Data(unsigned char c){ return Font_Glyphs[c]; }
-GLuint FontData::Get_Glyph_Texture(){ return Font_Texture; }
-void FontData::LoadTextFile(std::string filename){
+FontGlyph* FontData::getGlyphData(unsigned char c){ return m_FontGlyphs[c]; }
+GLuint FontData::getGlyphTexture(){ return m_FontTexture; }
+void FontData::_loadTextFile(std::string filename){
 	std::unordered_map<unsigned char,FontGlyph*> _Font_Chars;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 	for(std::string line; std::getline(str, line, '\n');){
@@ -53,7 +53,7 @@ void FontData::LoadTextFile(std::string filename){
 			_Font_Chars[font->id] = font;
 		}
 	}
-	Font_Glyphs = _Font_Chars;
+	m_FontGlyphs = _Font_Chars;
 }
 
 Font::Font(std::string filename){
@@ -63,10 +63,10 @@ Font::~Font(){
 	delete m_FontData;
 }
 void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
-	GLuint shader = Resources::getShader("Deferred_HUD")->Get_Shader_Program();
+	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_FontData->Get_Glyph_Texture());
+	glBindTexture(GL_TEXTURE_2D, m_FontData->getGlyphTexture());
 	glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
 	glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
@@ -79,22 +79,22 @@ void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float an
 	pos.y = Resources::getWindow()->getSize().y - pos.y;
 	for(auto c:text){
 		if(c == '\n'){
-			y_offset += m_FontData->Get_Glyph_Data('X')->height+4;
+			y_offset += m_FontData->getGlyphData('X')->height+4;
 			x = pos.x;
 		}
 		else{
-			FontGlyph* glyph = m_FontData->Get_Glyph_Data(c);
+			FontGlyph* glyph = m_FontData->getGlyphData(c);
 
 			glyph->m_Model = glm::mat4(1);
 			glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.5 - depth));
 			glyph->m_Model = glm::rotate(glyph->m_Model, angle,glm::vec3(0,0,1));
 			glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(scl.x,scl.y,1));
-			glyph->m_World = Resources::getCamera("HUD")->Projection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+			glyph->m_World = Resources::getCamera("HUD")->getProjection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
 			glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(glyph->m_World));
 			glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));
 
-			glyph->char_mesh->Render();
+			glyph->char_mesh->render();
 			x += glyph->xadvance;
 		}
 	}

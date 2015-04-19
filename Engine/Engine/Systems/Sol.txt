@@ -1,0 +1,224 @@
+#NOTE radius is in KM. Position is in KM (distance from sun, use sin/cos to place them). Orbit speed is in days
+Sol
+
+S name=Sun radius=695800 r=1 g=1 b=0 r1=0.8 g1=0.8 b1=1 position=0
+
+P name=Mercuery radius=2440 r=1 g=1 b=1 position=57910000 type=Rock texture=Mercury.png
+
+P name=Venus radius=6052 r=1 g=1 b=1 position=108200000 type=Rock texture=Venus.png
+
+P name=Earth radius=6371 r=1 g=1 b=1 position=149600000 type=Rock texture=Earth.png
+M name=Moon radius=1737 r=1 g=1 b=1 parent=Earth position=384400 type=Rock texture=Moon.png
+
+P name=Mars radius=3390 r=1 g=1 b=1 position=227900000 type=Rock texture=Mars.png
+M name=Phobos radius=11.2667 r=1 g=1 b=1 parent=Mars position=9390 type=Asteroid
+M name=Deimos radius=6.2 r=1 g=1 b=1 parent=Mars position=23470 type=Asteroid
+
+P name=Jupiter radius=69911 r=1 g=1 b=1 position=778500000 type=Gas texture=Jupiter.png
+M name=Callisto parent=Jupiter
+M name=Io parent=Jupiter
+M name=Europa parent=Jupiter
+M name=Ganymede parent=Jupiter
+M name=Metis parent=Jupiter
+M name=Adrastea parent=Jupiter
+M name=Amalthea parent=Jupiter
+M name=Thebe parent=Jupiter
+M name=Themisto parent=Jupiter
+M name=Leda parent=Jupiter
+M name=Himalia parent=Jupiter
+M name=Lysithea parent=Jupiter
+M name=Elara parent=Jupiter
+M name=Dia parent=Jupiter
+M name=Carpo parent=Jupiter
+M name=S/2003-J-12 parent=Jupiter
+M name=Euporie parent=Jupiter
+M name=S/2003-J-3 parent=Jupiter
+M name=S/2003-J-18 parent=Jupiter
+M name=S/2011-J-1 parent=Jupiter
+M name=S/2010-J-2 parent=Jupiter
+M name=Thelxinoe parent=Jupiter
+M name=Euanthe parent=Jupiter
+M name=Helike parent=Jupiter
+M name=Orthosie parent=Jupiter
+M name=Iocaste parent=Jupiter
+M name=S/2003-J-16 parent=Jupiter
+M name=Praxidike parent=Jupiter
+M name=Harpalyke parent=Jupiter
+M name=Mneme parent=Jupiter
+M name=Hermippe parent=Jupiter
+M name=Thyone parent=Jupiter
+M name=Ananke parent=Jupiter
+M name=Herse parent=Jupiter
+M name=Aitne parent=Jupiter
+M name=Kale parent=Jupiter
+M name=Taygete parent=Jupiter
+M name=S/2003-J-19 parent=Jupiter
+M name=Chaldene parent=Jupiter
+M name=S/2003-J-15 parent=Jupiter
+M name=S/2003-J-10 parent=Jupiter
+M name=S/2003-J-23 parent=Jupiter
+M name=Erinome parent=Jupiter
+M name=Aoede parent=Jupiter
+M name=Kallichore parent=Jupiter
+M name=Kalyke parent=Jupiter
+M name=Carme parent=Jupiter
+M name=Callirrhoe parent=Jupiter
+M name=Eurydome parent=Jupiter
+M name=S/2011-J-2 parent=Jupiter
+M name=Pasithee parent=Jupiter
+M name=S/2010-J-1 parent=Jupiter
+M name=Kore parent=Jupiter
+M name=Cyllene parent=Jupiter
+M name=Eukelade parent=Jupiter
+M name=S/2003-J-4 parent=Jupiter
+M name=Pasiphae parent=Jupiter
+M name=Hegemone parent=Jupiter
+M name=Arche parent=Jupiter
+M name=Isonoe parent=Jupiter
+M name=S/2003-J-9 parent=Jupiter
+M name=S/2003-J-5 parent=Jupiter
+M name=Sinope parent=Jupiter
+M name=Sponde parent=Jupiter
+M name=Autonoe parent=Jupiter
+M name=Megaclite parent=Jupiter
+M name=S/2003-J-2 parent=Jupiter
+
+P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=Gas texture=Saturn.png
+M name=S/2009-S-1 parent=Saturn
+M name=Pan parent=Saturn
+M name=Daphnis parent=Saturn
+M name=Atlas parent=Saturn
+M name=Prometheus parent=Saturn
+M name=Pandora parent=Saturn
+M name=Epimetheus parent=Saturn
+M name=Janus parent=Saturn
+M name=Aegaeon parent=Saturn
+M name=Mimas parent=Saturn
+M name=Methone parent=Saturn
+M name=Anthe parent=Saturn
+M name=Pallene parent=Saturn
+M name=Enceladus parent=Saturn
+M name=Tethys parent=Saturn
+M name=Telesto parent=Saturn
+M name=Calypso parent=Saturn
+M name=Dione parent=Saturn
+M name=Helene parent=Saturn
+M name=Polydeuces parent=Saturn
+M name=Rhea parent=Saturn
+M name=Titan parent=Saturn
+M name=Hyperion parent=Saturn
+M name=Iapetus parent=Saturn
+M name=Kiviuq parent=Saturn
+M name=Ijiraq parent=Saturn
+M name=Phoebe parent=Saturn
+M name=Paaliaq parent=Saturn
+M name=Skathi parent=Saturn
+M name=Albiorix parent=Saturn
+M name=S/2007-S-2 parent=Saturn
+M name=Bebhionn parent=Saturn
+M name=Erriapus parent=Saturn
+M name=Skoll parent=Saturn
+M name=Siarnaq parent=Saturn
+M name=Tarqeq parent=Saturn
+M name=S/2004-S-13 parent=Saturn
+M name=Greip parent=Saturn
+M name=Hyrrokkin parent=Saturn
+M name=Jarnsaxa parent=Saturn
+M name=Tarvos parent=Saturn
+M name=Mundilfari parent=Saturn
+M name=S/2006-S-1 parent=Saturn
+M name=S/2004-S-17 parent=Saturn
+M name=Bergelmir parent=Saturn
+M name=Narvi parent=Saturn
+M name=Suttungr parent=Saturn
+M name=Hati parent=Saturn
+M name=S/2004-S-12 parent=Saturn
+M name=Farbauti parent=Saturn
+M name=Thrymr parent=Saturn
+M name=Aegir parent=Saturn
+M name=S/2007-S-3 parent=Saturn
+M name=Bestla parent=Saturn
+M name=S/2004-S-7 parent=Saturn
+M name=S/2006-S-3 parent=Saturn
+M name=Fenrir parent=Saturn
+M name=Surtur parent=Saturn
+M name=Kari parent=Saturn
+M name=Ymir parent=Saturn
+M name=Loge parent=Saturn
+M name=Fornjot parent=Saturn
+
+
+P name=Uranus radius=25,362 r=1 g=1 b=1 position=2877000000 type=Gas texture=Uranus.png
+M name=Cordelia parent=Uranus
+M name=Ophelia parent=Uranus
+M name=Bianca parent=Uranus
+M name=Cressida parent=Uranus
+M name=Desdemona parent=Uranus
+M name=Juliet parent=Uranus
+M name=Portia parent=uranus
+M name=Rosalind parent=Uranus
+M name=Cupid parent=Uranus
+M name=Belinda parent=Uranus
+M name=Perdita parent=Uranus
+M name=Puck parent=Uranus
+M name=Mab parent=Uranus
+M name=Miranda parent=Uranus
+M name=Ariel parent=Uranus
+M name=Umbriel parent=Uranus
+M name=Titania parent=Uranus
+M name=Oberon parent=Uranus
+M name=Francisco parent=Uranus
+M name=Caliban parent=Uranus
+M name=Stephano parent=Uranus
+M name=Trinculo parent=Uranus
+M name=Sycorax parent=Uranus
+M name=Margaret parent=Uranus
+M name=Prospero parent=Uranus
+M name=Setebos parent=Uranus
+M name=Ferdinand parent=Uranus
+
+P name=Neptune radius=24622 r=1 g=1 b=1 position=4503000000 type=Gas texture=Neptune.png
+M name=Naiad parent=Neptune
+M name=Thalassa parent=Neptune
+M name=Despina parent=Neptune
+M name=Galatea parent=Neptune
+M name=Larissa parent=Neptune
+M name=S/2004-N-1 parent=Neptune
+M name=Proteus parent=Neptune
+M name=Triton parent=Neptune
+M name=Nereid parent=Neptune
+M name=Halimede parent=Neptune
+M name=Sao parent=Neptune
+M name=Laomedeia parent=Neptune
+M name=Psamathe parent=Neptune
+M name=Neso parent=Neptune
+
+#NOTE pluto orbits a point outside itself. Perhaps add this in a future version
+P name=Pluto radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock texture=Pluto.png
+M name=Charon parent=Pluto
+M name=Styx parent=Pluto
+M name=Nix parent=Pluto
+M name=Kerberos parent=Pluto
+M name=Hydra parent=Pluto
+
+P name=Eris radius=1450 r=1 g=1 b=1 position=14640000000 type=Rock
+M name=Dysnomia parent=Eris
+
+P name=Haumea radius=690 r=1 g=1 b=1 position=7722450000 type=Asteroid
+M name=Hi'iaka parent=Haumea
+M name=Namaka parent=Haumea
+
+P name=Makemake radius=750 r=1 g=1 b=1 position=6850000000 type=Rock
+
+#NOTE - the planet below needs to be considred a special case due to its orbit
+P name=Sedna radius=518 r=1 g=1 b=1 position=112500000000 type=Rock
+
+P name=(225088)-2007-OR10 radius=640 r=1 g=1 b=1 position=12000000000
+
+P name=50000-Quaoar radius=555 r=1 g=1 b=1 position=6525000000
+M name=Weywot parent=50000-Quaoar
+
+P name=90482-Orcus radius=425 r=1 g=1 b=1 position=6300000000
+M name=Vanth parent=90482-Orcus
+
+P name=20000-Varuna radius=330 r=1 g=1 b=1 position=6450000000

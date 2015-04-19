@@ -21,7 +21,7 @@ class Skybox: public Object{
 		Skybox(std::string name,Scene* = nullptr);
 		~Skybox();
 
-		void Update(float);
-		void Render(bool=false);
+		void update(float);
+		void render(bool=false);
 };
 #endif

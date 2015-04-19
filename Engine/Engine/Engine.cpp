@@ -11,17 +11,17 @@
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
 	m_DrawDebug = false;
-	_INIT_Window(name,width,height);
-	_INIT_Game();
+	_initWindow(name,width,height);
+	_initGame();
 }
 Engine::EngineClass::~EngineClass(){
-	glDeleteVertexArrays( 1, &m_vao );
+	//glDeleteVertexArrays( 1, &m_vao );
 	delete game;
 	delete renderer;
 	delete physicsEngine;
 	Engine::Resources::Detail::ResourceManagement::destruct();
 }
-void Engine::EngineClass::_INIT_Window(std::string name, unsigned int width, unsigned int height){
+void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsigned int height){
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	sf::ContextSettings settings;
@@ -47,7 +47,7 @@ void Engine::EngineClass::_INIT_Window(std::string name, unsigned int width, uns
 
 	glClearColor(1,1,0,1);
 }
-void Engine::EngineClass::_INIT_Game(){
+void Engine::EngineClass::_initGame(){
 	Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
 	Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
 	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
@@ -61,11 +61,11 @@ void Engine::EngineClass::_INIT_Game(){
 	physicsEngine = new PhysicsEngine();
 
 	game = new Game();
-	game->Init_Resources();
-	game->Init_Logic();
+	game->initResources();
+	game->initLogic();
 
-	glGenVertexArrays( 1, &m_vao );
-	glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
+	//glGenVertexArrays( 1, &m_vao );
+	//glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
 }
 void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
 	switch (e.type){
@@ -102,25 +102,25 @@ void Engine::EngineClass::_RESET_EVENTS(){
 
 	Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1-Resources::dt());
 
-	glm::vec2 mousePos = Engine::Events::Mouse::GetMousePosition();
+	glm::vec2 mousePos = Engine::Events::Mouse::getMousePosition();
 	float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2)));
 	if(mouseDistFromCenter > 50){
 		Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
 		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
 	}
 }
-void Engine::EngineClass::_Update(float dt){
-	game->Update(dt);
-	for(auto object:Resources::getCurrentScene()->Objects())
-		object.second->Update(dt);
-	for(auto light:Resources::getCurrentScene()->Lights())
-		light.second->Update(dt);
+void Engine::EngineClass::_update(float dt){
+	game->update(dt);
+	for(auto object:Resources::getCurrentScene()->getObjects())
+		object.second->update(dt);
+	for(auto light:Resources::getCurrentScene()->getLights())
+		light.second->update(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 
-	physicsEngine->Update(dt);
+	physicsEngine->update(dt);
 }
-void Engine::EngineClass::_Render(){
-	renderer->Render(m_DrawDebug);
+void Engine::EngineClass::_render(){
+	renderer->render(m_DrawDebug);
 }
 #pragma region Event Handler Methods
 void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)
@@ -217,17 +217,17 @@ void Engine::EngineClass::_EVENT_JOYSTICK_DISCONNECTED()
 {
 }
 */
-void Engine::EngineClass::Run(){
+void Engine::EngineClass::run(){
 	while(Resources::getWindow()->isOpen()){
 		sf::Event e;
 		Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
 		while(Resources::getWindow()->pollEvent(e)){
 			_EVENT_HANDLERS(e);
 		}
-		_Update(Resources::dt());
+		_update(Resources::dt());
 		_RESET_EVENTS();
 
-		_Render();
+		_render();
 		Resources::getWindow()->display();
 	}
 }

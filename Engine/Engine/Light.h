@@ -12,9 +12,10 @@ class SunLight: public Object{
 		SunLight(glm::vec3 = glm::vec3(0,0,0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
 		~SunLight();
 
-		void Update(float);
-		virtual void Render(GLuint);
-		void RenderDebug(GLuint);
+		void update(float);
+		virtual void render(GLuint);
+		void renderDebug(GLuint);
+		void setName(std::string);
 };
 class DirectionalLight: public SunLight{
 	private:
@@ -23,7 +24,7 @@ class DirectionalLight: public SunLight{
 		DirectionalLight(glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
 		~DirectionalLight();
 
-		void Render(GLuint);
+		void render(GLuint);
 };
 class PointLight: public SunLight{
 	protected:
@@ -33,7 +34,7 @@ class PointLight: public SunLight{
 		PointLight(glm::vec3 = glm::vec3(0,0,0), Scene* = nullptr);
 		~PointLight();
 
-		void Render(GLuint);
+		void render(GLuint);
 };
 class SpotLight: public SunLight{
 	private:
@@ -44,6 +45,6 @@ class SpotLight: public SunLight{
 		SpotLight(glm::vec3, Scene* = nullptr);
 		~SpotLight();
 
-		void Render(GLuint);
+		void render(GLuint);
 };
 #endif

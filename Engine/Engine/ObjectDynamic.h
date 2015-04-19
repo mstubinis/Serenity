@@ -10,9 +10,9 @@ class btVector3;
 
 class ObjectDynamic: public Object{
 	private:
-		glm::vec3 _Forward(); 
-		glm::vec3 _Right(); 
-		glm::vec3 _Up();
+		glm::vec3 _calculateForward(); 
+		glm::vec3 _calculateRight(); 
+		glm::vec3 _calculateUp();
 		float m_Mass;
 	protected:
 		btCollisionShape* m_Collision_Shape;
@@ -30,22 +30,30 @@ class ObjectDynamic: public Object{
 					 );
 		~ObjectDynamic();
 
-		virtual void Set_Position(float,float,float); virtual void Set_Position(glm::vec3&);
+		virtual void setPosition(float,float,float); 
+		virtual void setPosition(glm::vec3&);
 
-		void Translate(float,float,float,bool local = true); void Translate(glm::vec3&,bool local = true);
-		void Apply_Force(float,float,float,bool local=true); void Apply_Force(glm::vec3&,glm::vec3& = glm::vec3(0,0,0),bool local=true);
-		void Apply_Impulse(float,float,float); void Apply_Impulse(glm::vec3&,glm::vec3& = glm::vec3(0,0,0));
-		void Apply_Torque(float,float,float); void Apply_Torque(glm::vec3&);
-		void Apply_Torque_Impulse(float,float,float); void Apply_Torque_Impulse(glm::vec3&);
+		void translate(float,float,float,bool local = true); 
+		void translate(glm::vec3&,bool local = true);
+		void applyForce(float,float,float,bool local=true); 
+		void applyForce(glm::vec3&,glm::vec3& = glm::vec3(0,0,0),bool local=true);
+		void applyImpulse(float,float,float); 
+		void applyImpulse(glm::vec3&,glm::vec3& = glm::vec3(0,0,0));
+		void applyTorque(float,float,float); 
+		void applyTorque(glm::vec3&);
+		void applyTorqueImpulse(float,float,float); 
+		void applyTorqueImpulse(glm::vec3&);
 
-		void Set_Linear_Velocity(float,float,float,bool local=true); void Set_Linear_Velocity(glm::vec3&,bool local=true);
-		void Set_Angular_Velocity(float,float,float); void Set_Angular_Velocity(glm::vec3&);
+		void setLinearVelocity(float,float,float,bool local=true); 
+		void setLinearVelocity(glm::vec3&,bool local=true);
+		void setAngularVelocity(float,float,float); 
+		void setAngularVelocity(glm::vec3&);
 
-		void Set_Mass(float);
+		void setMass(float);
 
-		void Update(float);
+		void update(float);
 
-		const glm::vec3 Position() const;
-		const float Mass() const { return m_Mass; }
+		const glm::vec3 getPosition() const;
+		const float getMass() const { return m_Mass; }
 };
 #endif

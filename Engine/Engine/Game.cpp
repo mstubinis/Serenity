@@ -12,13 +12,13 @@ Game::~Game(){
 	for(auto solarSystem:m_SolarSystems)
 		delete solarSystem.second;
 }
-void Game::Init_Logic(){
+void Game::initLogic(){
 	m_SolarSystems["Sol"] = new SolarSystem("Sol","");
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 }
-void Game::Init_Resources()
+void Game::initResources()
 {
 }
-void Game::Update(float dt){
-	Resources::getCurrentScene()->Update(dt);
+void Game::update(float dt){
+	Resources::getCurrentScene()->update(dt);
 }

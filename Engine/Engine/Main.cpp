@@ -9,7 +9,7 @@ PhysicsEngine* physicsEngine;
 int main(){
 	Engine::EngineClass* program = new Engine::EngineClass("Engine",1024,768);
 
-	program->Run();
+	program->run();
 
 	delete program;
     return 0;

@@ -28,9 +28,9 @@ namespace MaterialComponents{
 			MaterialComponent(unsigned int,std::string file);
 			~MaterialComponent();
 
-			const GLuint Texture() const{ return m_Texture; }
-			const GLuint TextureType() const{ return m_TextureType; }
-			const unsigned int Type() const{ return m_Type; }
+			const GLuint getTexture() const{ return m_Texture; }
+			const GLuint getTextureType() const{ return m_TextureType; }
+			const unsigned int getType() const{ return m_Type; }
 	};
 };
 #endif

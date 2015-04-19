@@ -142,8 +142,8 @@ void Engine::Resources::initResources(){
 	addMesh("Defiant","Models/defiant.obj");
 	addMesh("Starbase","Models/starbase.obj");
 
-	addMaterial("Star","Textures/sun.png","","");
-	addMaterial("Default","Textures/sun.png","","");
-	addMaterial("Earth","Textures/earth.png","","");
+	addMaterial("Star","Textures/Planets/Sun.png","","");
+	addMaterial("Default","Textures/Planets/Sun.png","","");
+	addMaterial("Earth","Textures/Planets/Earth.png","","");
 	addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
 }

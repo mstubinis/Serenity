@@ -8,7 +8,7 @@ enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
 class Scene;
 class Camera: public Object{
 	private:
-		void _ConstructFrustrum();
+		void _constructFrustrum();
 		glm::vec4 m_Planes[6];
 	protected:
 		CAMERA_TYPE m_Type;
@@ -23,30 +23,30 @@ class Camera: public Object{
 		Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* = nullptr); // Orthographic camera Constructor
 		~Camera();
 
-		void Set_Perspective_Projection();
-		void Set_Ortho_Projection(float,float,float,float);
+		void setPerspectiveProjection();
+		void setOrthoProjection(float,float,float,float);
 
-		virtual void Update(float);
-		void Render(Mesh*,Material*,bool=false);
-		void Render(bool=false);
+		virtual void update(float);
+		void render(Mesh*,Material*,bool=false);
+		void render(bool=false);
 
-		void LookAt(const glm::vec3&);  
-		void LookAt(const glm::vec3&,const glm::vec3&); 
-		void LookAt(const glm::vec3&,const glm::vec3&,const glm::vec3&); 
-		void LookAt(Object*,bool targetUp = false);
+		void lookAt(const glm::vec3&);  
+		void lookAt(const glm::vec3&,const glm::vec3&); 
+		void lookAt(const glm::vec3&,const glm::vec3&,const glm::vec3&); 
+		void lookAt(Object*,bool targetUp = false);
 
-		void Set_Aspect_Ratio(float);
+		void setAspectRatio(float);
 
-		const float Near() const { return m_Near; }
-		const float Far() const { return m_Far; }
+		const float getNear() const { return m_Near; }
+		const float getFar() const { return m_Far; }
 
-		glm::mat4 Calculate_ViewProjInverted();
-		glm::mat4 Calculate_Projection(glm::mat4&);
-		glm::mat4 Calculate_ModelView(glm::mat4&);
-		const glm::mat4 Projection() const{ return m_Projection; }
-		const glm::mat4 View() const{ return m_View; }
-		const CAMERA_TYPE Type() const{ return m_Type; }
+		glm::mat4 calculateViewProjInverted();
+		glm::mat4 calculateProjection(glm::mat4&);
+		glm::mat4 calculateModelView(glm::mat4&);
+		const glm::mat4 getProjection() const{ return m_Projection; }
+		const glm::mat4 getView() const{ return m_View; }
+		const CAMERA_TYPE getType() const{ return m_Type; }
 
-		bool SphereIntersectTest(Object*);
+		bool sphereIntersectTest(Object*);
 };
 #endif

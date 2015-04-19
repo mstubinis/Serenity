@@ -3,7 +3,7 @@
 
 #include "Object.h"
 
-enum PlanetType { PLANET_TYPE_ROCKY, PLANET_TYPE_GAS_GIANT, PLANET_TYPE_MOON, PLANET_TYPE_STAR };
+enum PlanetType { PLANET_TYPE_ROCKY, PLANET_TYPE_GAS_GIANT, PLANET_TYPE_MOON, PLANET_TYPE_STAR, PLANET_TYPE_ASTEROID };
 class SunLight;
 class Planet: public Object{
 	protected:
@@ -20,12 +20,12 @@ class Planet: public Object{
 			  );
 		~Planet();
 
-		const glm::vec3& RadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
-		const float Radius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
+		const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
+		const float getRadius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
 
-		virtual void Update(float);
-		virtual void Render(Mesh*, Material*,bool=false);
-		virtual void Render(bool=false);
+		virtual void update(float);
+		virtual void render(Mesh*, Material*,bool=false);
+		virtual void render(bool=false);
 };
 
 class Star: public Planet{
@@ -42,7 +42,7 @@ class Star: public Planet{
 			);
 		~Star();
 
-		void Render(Mesh*, Material*,bool=false);
-		void Render(bool=false);
+		void render(Mesh*, Material*,bool=false);
+		void render(bool=false);
 };
 #endif

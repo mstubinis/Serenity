@@ -60,28 +60,99 @@ Mesh::Mesh(int x, int y,int width, int height){
 	m_Tangents.push_back(glm::vec3(1,1,1));
 	m_Tangents.push_back(glm::vec3(1,1,1));
 
-	Init();
+	_init();
 }
 Mesh::Mesh(std::string filename){
-	LoadFromFile(filename);
-	Init();
+	_loadFromFile(filename);
+	_init();
 }
-void Mesh::LoadFromFile(std::string filename){
+void Mesh::_loadFromFile(std::string filename){
 	m_Collision = nullptr;
 	assert(filename.length() >= 4);
 	std::string extention;
 	for(unsigned int i = filename.length() - 4; i < filename.length(); i++)
 		extention += tolower(filename.at(i));
 	if(extention == ".obj")
-		LoadFromOBJ(filename);
+		_loadFromOBJ(filename);
 	if(extention == ".ply")
-		LoadFromPLY(filename);
+		_loadFromPLY(filename);
 }
-void Mesh::LoadFromPLY(std::string filename){
+void Mesh::_loadFromPLY(std::string filename){
+	std::string colFile = filename.substr(0,filename.size()-4);
+	colFile += "Col.ply";
+	if(boost::filesystem::exists(colFile)){
+		m_Collision = Mesh::_loadColFromPLY(colFile);
+	}
+	else{
+		m_Collision = Mesh::_loadColFromPLY(filename);
+	}
+
 	bool StartReadingGeometryData = false;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 	std::vector<Vertex> vertices;
-	m_Collision = new btConvexHullShape();
+	for(std::string line; std::getline(str, line, '\n');){
+		if(StartReadingGeometryData == true){
+			int SlashCount = 0;
+			int whitespaceCount = 0;
+			int SpaceCount = 0;
+
+			std::string x; std::string y; std::string z; std::string w;
+			std::string u; std::string v;
+			std::string n1; std::string n2;std::string n3;
+
+			Vertex vert;
+			#pragma region Vertex
+			if(line[1] != ' '){
+				for(unsigned int i = 0; i < line.length(); i++){
+					if(line.at(i) == ' ')    SpaceCount++;
+					if(SpaceCount == 0)      x += line.at(i);
+					else if(SpaceCount == 1) y += line.at(i);
+					else if(SpaceCount == 2) z += line.at(i);
+					else if(SpaceCount == 3) n1 += line.at(i);
+					else if(SpaceCount == 4) n2 += line.at(i);
+					else if(SpaceCount == 5) n3 += line.at(i);
+					else if(SpaceCount == 6) u += line.at(i);
+					else if(SpaceCount == 7) v += line.at(i);
+				}
+				vert.position = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+				vert.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
+				vert.uv = glm::vec2(static_cast<float>(::atof(u.c_str())),1-static_cast<float>(::atof(v.c_str())));
+				vert.normal = glm::vec3( static_cast<float>(::atof(n1.c_str())),static_cast<float>(::atof(n2.c_str())),static_cast<float>(::atof(n3.c_str())));
+				vertices.push_back(vert);
+			}
+			#pragma endregion
+			#pragma region Indices
+			if((line[0] == '3' || line[0] == '4') && line[1] == ' '){
+				for(unsigned int i = 0; i < line.length(); i++){
+					if(line.at(i) == ' '){ 
+						SpaceCount++;
+						whitespaceCount++;
+					}
+					if(SpaceCount == 1) x += line.at(i);
+					else if(SpaceCount == 2) y += line.at(i);
+					else if(SpaceCount == 3) z += line.at(i);
+					else if(SpaceCount == 4) w += line.at(i);
+				}
+				int index1 = static_cast<int>(::atof(x.c_str()));
+				int index2 = static_cast<int>(::atof(y.c_str()));
+				int index3 = static_cast<int>(::atof(z.c_str()));
+				int index4 = static_cast<int>(::atof(w.c_str()));
+				if(whitespaceCount == 4)
+					_generateQuad(vertices[index1],vertices[index2],vertices[index3],vertices[index4]);
+				else
+					_generateTriangle(vertices[index1],vertices[index2],vertices[index3]);
+			}
+			#pragma endregion
+		}
+		if(line == "end_header")
+			StartReadingGeometryData = true;
+	}
+}
+btConvexHullShape* Mesh::_loadColFromPLY(std::string filename){
+	bool StartReadingGeometryData = false;
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+	std::vector<Vertex> vertices;
+	btConvexHullShape* collision = new btConvexHullShape();
 	for(std::string line; std::getline(str, line, '\n');){
 		if(StartReadingGeometryData == true){
 			int SlashCount = 0;
@@ -113,45 +184,23 @@ void Mesh::LoadFromPLY(std::string filename){
 				vertices.push_back(vert);
 
 				btVector3 pos = btVector3(vert.position.x,vert.position.y,vert.position.z);
-				m_Collision->addPoint(pos);
-			}
-			#pragma endregion
-			#pragma region Indices
-			if((line[0] == '3' || line[0] == '4') && line[1] == ' '){
-				for(unsigned int i = 0; i < line.length(); i++){
-					if(line.at(i) == ' '){ 
-						SpaceCount++;
-						whitespaceCount++;
-					}
-					if(SpaceCount == 1) x += line.at(i);
-					else if(SpaceCount == 2) y += line.at(i);
-					else if(SpaceCount == 3) z += line.at(i);
-					else if(SpaceCount == 4) w += line.at(i);
-				}
-				int index1 = static_cast<int>(::atof(x.c_str()));
-				int index2 = static_cast<int>(::atof(y.c_str()));
-				int index3 = static_cast<int>(::atof(z.c_str()));
-				int index4 = static_cast<int>(::atof(w.c_str()));
-				if(whitespaceCount == 4)
-					GenerateQuad(vertices[index1],vertices[index2],vertices[index3],vertices[index4]);
-				else
-					GenerateTriangle(vertices[index1],vertices[index2],vertices[index3]);
+				collision->addPoint(pos);
 			}
 			#pragma endregion
 		}
 		if(line == "end_header")
 			StartReadingGeometryData = true;
 	}
-	
+	return collision;
 }
-void Mesh::LoadFromOBJ(std::string filename){
+void Mesh::_loadFromOBJ(std::string filename){
 	std::string colFile = filename.substr(0,filename.size()-4);
 	colFile += "Col.obj";
 	if(boost::filesystem::exists(colFile)){
-		m_Collision = Mesh::LoadColFromOBJ(colFile);
+		m_Collision = Mesh::_loadColFromOBJ(colFile);
 	}
 	else{
-		m_Collision = Mesh::LoadColFromOBJ(filename);
+		m_Collision = Mesh::_loadColFromOBJ(filename);
 	}
 
 	std::vector<glm::vec3> pointData;
@@ -249,14 +298,14 @@ void Mesh::LoadFromOBJ(std::string filename){
 			if(normalData.size() > 0)
 				v4.normal = normalData.at(static_cast<unsigned int>(face.at(3).z-1));
 			v4.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-			GenerateQuad(v1,v2,v3,v4);
+			_generateQuad(v1,v2,v3,v4);
 		}
 		else{//triangle
-			GenerateTriangle(v1,v2,v3);
+			_generateTriangle(v1,v2,v3);
 		}
 	}
 }
-btConvexHullShape* Mesh::LoadColFromOBJ(std::string filename){
+btConvexHullShape* Mesh::_loadColFromOBJ(std::string filename){
 	btConvexHullShape* collision = new btConvexHullShape();
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
@@ -289,7 +338,7 @@ Mesh::~Mesh(){
 		glDeleteBuffers(1, &m_buffers[i]);
 	delete m_Collision;
 }
-void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
+void Mesh::_generateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_Colors.push_back(v1.color);
 	m_Points.push_back(v1.position);
 	m_UVs.push_back(v1.uv);
@@ -305,17 +354,17 @@ void Mesh::GenerateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_UVs.push_back(v3.uv);
 	m_Normals.push_back(v3.normal);
 
-	CalculateTangent(v1,v2,v3);
+	_calculateTangent(v1,v2,v3);
 
 	m_Tangents.push_back(v1.tangent);
 	m_Tangents.push_back(v2.tangent);
 	m_Tangents.push_back(v3.tangent);
 }
-void Mesh::GenerateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
-	GenerateTriangle(v1,v2,v3);
-	GenerateTriangle(v1,v3,v4);
+void Mesh::_generateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
+	_generateTriangle(v1,v2,v3);
+	_generateTriangle(v1,v3,v4);
 }
-void Mesh::Init(){
+void Mesh::_init(){
 
 	//Bind the data to the buffers
 	glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
@@ -354,23 +403,22 @@ void Mesh::Init(){
 	m_radius = glm::vec3(maxX,maxY,maxZ);
 	#pragma endregion
 }
-void Mesh::Render(){
-	//for each unique vertex data type (position, color, uv, normal, binormal, tangent)...
+void Mesh::render(){
+	//for each unique vertex data type (position, color, uv, normal, tangent)...
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++){
 		glBindBuffer( GL_ARRAY_BUFFER, m_buffers[i] );
-		glEnableVertexAttribArray( i );
-		glVertexAttribPointer( i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0, 0 );
+		glEnableVertexAttribArray(i);
+		glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0, 0);
 	}
 	glDrawArrays(GL_TRIANGLES, 0, m_Points.size());
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)
 		glDisableVertexAttribArray(i);
 }
-void Mesh::CalculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
+void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
 	glm::vec3 tangent;
 	float vector1[3], vector2[3];
 	float tuVector[2], tvVector[2];
 	float den;
-	float length;
 
 	// Calculate the two vectors for this face.
 	vector1[0] = v2.position.x - v1.position.x;
@@ -396,13 +444,6 @@ void Mesh::CalculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
 	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
 	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
 
-	// Calculate the length of this normal.
-	length = sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
-			
-	// Normalize the normal and then store it
-	tangent.x = tangent.x / length;
-	tangent.y = tangent.y / length;
-	tangent.z = tangent.z / length;
-
+	tangent = glm::normalize(tangent);
 	v1.tangent = tangent;   v2.tangent = tangent;   v3.tangent = tangent;
 }

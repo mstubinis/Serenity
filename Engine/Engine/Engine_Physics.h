@@ -25,11 +25,12 @@ class PhysicsEngine{
 		PhysicsEngine();
 		~PhysicsEngine();
 
-		void Set_Gravity(float,float,float); void Set_Gravity(glm::vec3);
-		void Add_Rigid_Body(btRigidBody*);
+		void setGravity(float,float,float); 
+		void setGravity(glm::vec3);
+		void addRigidBody(btRigidBody*);
 
-		void Update(float dt);
-		void Render();
+		void update(float dt);
+		void render();
 };
 extern PhysicsEngine* physicsEngine;
 #endif

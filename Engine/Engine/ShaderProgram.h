@@ -78,15 +78,14 @@ class ShaderP{
 
 		std::string m_VertexShader;
 		std::string m_PixelShader;
-
 	public:
 		ShaderP(std::string vs,std::string ps);
 		~ShaderP();
 
-		const GLuint Get_Shader_Program() const{ return m_Shader; }
+		const GLuint getShaderProgram() const{ return m_Shader; }
 
-		const std::string Vertex_Shader() const{ return m_VertexShader; }
-		const std::string Pixel_Shader() const{ return m_PixelShader; }
+		const std::string getVertexShader() const{ return m_VertexShader; }
+		const std::string getPixelShader() const{ return m_PixelShader; }
 };
 
 #endif

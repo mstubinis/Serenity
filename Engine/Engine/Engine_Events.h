@@ -45,12 +45,12 @@ namespace Engine{
 						return false;
 					}
 			};
-			static glm::vec2 GetMouseDifference(){ return MouseProcessing::m_Difference; }
-			static glm::vec2 GetMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
-			static glm::vec2 GetMousePosition(){ return MouseProcessing::m_Position; }
-			static bool IsMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
-			static bool IsMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
-			static float GetMouseWheelDelta(){ return MouseProcessing::m_Delta; }
+			static glm::vec2 getMouseDifference(){ return MouseProcessing::m_Difference; }
+			static glm::vec2 getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
+			static glm::vec2 getMousePosition(){ return MouseProcessing::m_Position; }
+			static bool isMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
+			static bool isMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
+			static float getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
 		};
 		namespace Keyboard{
 			class KeyProcessing{
@@ -83,9 +83,9 @@ namespace Engine{
 						return false;
 					}
 			};
-			static bool IsKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }
-			static bool IsKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }
-			static bool IsKeyUp(std::string str){ return KeyProcessing::_IsKeyUp(str); }
+			static bool isKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }
+			static bool isKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }
+			static bool isKeyUp(std::string str){ return KeyProcessing::_IsKeyUp(str); }
 		};
 	};
 };
