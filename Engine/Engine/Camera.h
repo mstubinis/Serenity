@@ -30,9 +30,9 @@ class Camera: public Object{
 		void render(Mesh*,Material*,bool=false);
 		void render(bool=false);
 
-		void lookAt(const glm::vec3&);  
-		void lookAt(const glm::vec3&,const glm::vec3&); 
-		void lookAt(const glm::vec3&,const glm::vec3&,const glm::vec3&); 
+		void lookAt(glm::vec3);  
+		void lookAt(glm::vec3,glm::vec3); 
+		void lookAt(glm::vec3,glm::vec3,glm::vec3); 
 		void lookAt(Object*,bool targetUp = false);
 
 		void setAspectRatio(float);
@@ -41,10 +41,10 @@ class Camera: public Object{
 		const float getFar() const { return m_Far; }
 
 		glm::mat4 calculateViewProjInverted();
-		glm::mat4 calculateProjection(glm::mat4&);
-		glm::mat4 calculateModelView(glm::mat4&);
-		const glm::mat4 getProjection() const{ return m_Projection; }
-		const glm::mat4 getView() const{ return m_View; }
+		glm::mat4 calculateProjection(glm::mat4);
+		glm::mat4 calculateModelView(glm::mat4);
+		glm::mat4 getProjection(){ return m_Projection; }
+		glm::mat4 getView(){ return m_View; }
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
 		bool sphereIntersectTest(Object*);

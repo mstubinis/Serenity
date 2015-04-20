@@ -31,29 +31,27 @@ class ObjectDynamic: public Object{
 		~ObjectDynamic();
 
 		virtual void setPosition(float,float,float); 
-		virtual void setPosition(glm::vec3&);
+		virtual void setPosition(glm::vec3);
 
-		void translate(float,float,float,bool local = true); 
-		void translate(glm::vec3&,bool local = true);
+		void translate(float,float,float,bool local=true); 
+		void translate(glm::vec3,bool local=true);
 		void applyForce(float,float,float,bool local=true); 
-		void applyForce(glm::vec3&,glm::vec3& = glm::vec3(0,0,0),bool local=true);
+		void applyForce(glm::vec3,glm::vec3 = glm::vec3(0,0,0),bool local=true);
 		void applyImpulse(float,float,float); 
-		void applyImpulse(glm::vec3&,glm::vec3& = glm::vec3(0,0,0));
+		void applyImpulse(glm::vec3,glm::vec3 = glm::vec3(0,0,0));
 		void applyTorque(float,float,float); 
-		void applyTorque(glm::vec3&);
+		void applyTorque(glm::vec3);
 		void applyTorqueImpulse(float,float,float); 
-		void applyTorqueImpulse(glm::vec3&);
+		void applyTorqueImpulse(glm::vec3);
 
 		void setLinearVelocity(float,float,float,bool local=true); 
-		void setLinearVelocity(glm::vec3&,bool local=true);
+		void setLinearVelocity(glm::vec3,bool local=true);
 		void setAngularVelocity(float,float,float); 
-		void setAngularVelocity(glm::vec3&);
+		void setAngularVelocity(glm::vec3);
 
 		void setMass(float);
 
 		void update(float);
-
-		const glm::vec3 getPosition() const;
 		const float getMass() const { return m_Mass; }
 };
 #endif

@@ -55,11 +55,11 @@ class Object{
 		glm::vec3 getScreenCoordinates();
 
 		virtual void translate(float,float,float,bool local=true); 
-		virtual void translate(glm::vec3&,bool local=true);
+		virtual void translate(glm::vec3,bool local=true);
 		virtual void rotate(float,float,float); 
-		virtual void rotate(glm::vec3&);
+		virtual void rotate(glm::vec3);
 		virtual void scale(float,float,float); 
-		virtual void scale(glm::vec3&);
+		virtual void scale(glm::vec3);
 		virtual void pitch(float); 
 		virtual void yaw(float); 
 		virtual void roll(float);
@@ -67,9 +67,9 @@ class Object{
 		virtual void setPosition(float,float,float); 
 		virtual void setPosition(glm::vec3);
 		virtual void setScale(float,float,float); 
-		virtual void setScale(glm::vec3&);
+		virtual void setScale(glm::vec3);
 		virtual void setColor(float,float,float); 
-		virtual void setColor(glm::vec3&);
+		virtual void setColor(glm::vec3);
 
 		void addChild(Object*);
 

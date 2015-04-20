@@ -49,9 +49,10 @@ ObjectDynamic::~ObjectDynamic(){
 }
 void ObjectDynamic::translate(float x, float y, float z,bool local){
 	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
-	m_RigidBody->activate();
 	x *= dt; y*= dt; z *= dt;
-	btVector3 pos = m_RigidBody->getWorldTransform().getOrigin();
+	m_RigidBody->activate();
+	btTransform transform = m_RigidBody->getWorldTransform();
+	btVector3 pos = transform.getOrigin();
 	glm::vec3 p = glm::vec3(pos.x(),pos.y(),pos.z());
 	if(local){
 		p += getForward() * z;
@@ -61,12 +62,13 @@ void ObjectDynamic::translate(float x, float y, float z,bool local){
 	else{
 		p += glm::vec3(x,y,z);
 	}
-	m_RigidBody->getWorldTransform().setOrigin(btVector3(p.x,p.y,p.z));
+	transform.setOrigin(btVector3(p.x,p.y,p.z));
+	m_RigidBody->setWorldTransform(transform);
 }
-void ObjectDynamic::translate(glm::vec3& translation,bool local){ translate(translation.x,translation.y,translation.z); }
+void ObjectDynamic::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 glm::vec3 ObjectDynamic::_calculateForward(){ return glm::normalize(glm::cross(getRight(),getUp())); }
 glm::vec3 ObjectDynamic::_calculateRight(){
-	btQuaternion q = m_RigidBody->getCenterOfMassTransform().getRotation();
+	btQuaternion q = m_RigidBody->getWorldTransform().getRotation();
 	float x = q.x();
 	float y = q.y();
 	float z = q.z();
@@ -76,7 +78,7 @@ glm::vec3 ObjectDynamic::_calculateRight(){
                                      2 * (x * z - w * y)));
 }
 glm::vec3 ObjectDynamic::_calculateUp(){
-	btQuaternion q = m_RigidBody->getCenterOfMassTransform().getRotation();
+	btQuaternion q = m_RigidBody->getWorldTransform().getRotation();
 	float x = q.x();
 	float y = q.y();
 	float z = q.z();
@@ -110,7 +112,7 @@ void ObjectDynamic::setPosition(float x, float y, float z){
 	transform.setOrigin(btVector3(x,y,z));
 	m_RigidBody->setWorldTransform(transform);
 }
-void ObjectDynamic::setPosition(glm::vec3& p){ ObjectDynamic::setPosition(p.x,p.y,p.z); }
+void ObjectDynamic::setPosition(glm::vec3 p){ ObjectDynamic::setPosition(p.x,p.y,p.z); }
 void ObjectDynamic::applyForce(float x,float y,float z,bool local){ 
 	m_RigidBody->activate();
 	if(!local){
@@ -123,7 +125,7 @@ void ObjectDynamic::applyForce(float x,float y,float z,bool local){
 		m_RigidBody->applyCentralForce(btVector3(res.x,res.y,res.z)); 
 	}
 }
-void ObjectDynamic::applyForce(glm::vec3& force,glm::vec3& relPos,bool local){ 
+void ObjectDynamic::applyForce(glm::vec3 force,glm::vec3 relPos,bool local){ 
 	m_RigidBody->activate();
 	if(!local){
 		m_RigidBody->applyForce(btVector3(force.x,force.y,force.z),btVector3(relPos.x,relPos.y,relPos.z)); 
@@ -139,7 +141,7 @@ void ObjectDynamic::applyImpulse(float x,float y,float z){
 	m_RigidBody->activate();
 	m_RigidBody->applyCentralImpulse(btVector3(x,y,z));
 }
-void ObjectDynamic::applyImpulse(glm::vec3& impulse,glm::vec3& relPos){ 
+void ObjectDynamic::applyImpulse(glm::vec3 impulse,glm::vec3 relPos){ 
 	m_RigidBody->activate();
 	m_RigidBody->applyImpulse(btVector3(impulse.x,impulse.y,impulse.z),btVector3(relPos.x,relPos.y,relPos.z));
 }
@@ -148,13 +150,13 @@ void ObjectDynamic::applyTorque(float x,float y,float z){
 	btVector3 t = m_RigidBody->getInvInertiaTensorWorld().inverse()*(m_RigidBody->getWorldTransform().getBasis()*btVector3(x,y,z));
 	m_RigidBody->applyTorque(t);
 }
-void ObjectDynamic::applyTorque(glm::vec3& torque){ ObjectDynamic::applyTorque(torque.x,torque.y,torque.z); }
+void ObjectDynamic::applyTorque(glm::vec3 torque){ ObjectDynamic::applyTorque(torque.x,torque.y,torque.z); }
 void ObjectDynamic::applyTorqueImpulse(float x,float y,float z){
 	m_RigidBody->activate();
 	btVector3 t = m_RigidBody->getInvInertiaTensorWorld().inverse()*(m_RigidBody->getWorldTransform().getBasis()*btVector3(x,y,z));
 	m_RigidBody->applyTorqueImpulse(t);
 }
-void ObjectDynamic::applyTorqueImpulse(glm::vec3& torque){ ObjectDynamic::applyTorqueImpulse(torque.x,torque.y,torque.z); }
+void ObjectDynamic::applyTorqueImpulse(glm::vec3 torque){ ObjectDynamic::applyTorqueImpulse(torque.x,torque.y,torque.z); }
 void ObjectDynamic::setLinearVelocity(float x, float y, float z, bool local){
 	m_RigidBody->activate();
 	if(!local){
@@ -167,12 +169,12 @@ void ObjectDynamic::setLinearVelocity(float x, float y, float z, bool local){
 		m_RigidBody->setLinearVelocity(btVector3(res.x,res.y,res.z)); 
 	}
 }
-void ObjectDynamic::setLinearVelocity(glm::vec3& velocity, bool local){ ObjectDynamic::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
+void ObjectDynamic::setLinearVelocity(glm::vec3 velocity, bool local){ ObjectDynamic::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ObjectDynamic::setAngularVelocity(float x, float y, float z){ 
 	m_RigidBody->activate();
 	m_RigidBody->setAngularVelocity(btVector3(x,y,z)); 
 }
-void ObjectDynamic::setAngularVelocity(glm::vec3& velocity){ ObjectDynamic::setAngularVelocity(velocity.x,velocity.y,velocity.z); }
+void ObjectDynamic::setAngularVelocity(glm::vec3 velocity){ ObjectDynamic::setAngularVelocity(velocity.x,velocity.y,velocity.z); }
 void ObjectDynamic::setMass(float mass){
 	m_RigidBody->activate();
 	m_Mass = 0.5f * m_Radius;

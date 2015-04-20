@@ -29,7 +29,7 @@ void GameCamera::update(float dt){
 			m_Model = glm::translate(m_Model,m_Position);
 			m_Model *= glm::mat4_cast(m_Orientation);
 
-			lookAt(m_Position,m_Target->getPosition()-(m_Target->getForward()*500.0f),m_Target->getUp());
+			lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*500.0f),m_Target->getUp());
 			break;
 		case CAMERA_STATE_ORBIT:
 			m_OrbitRadius += Engine::Events::Mouse::getMouseWheelDelta() * dt;

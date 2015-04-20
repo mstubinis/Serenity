@@ -85,7 +85,7 @@ void Object::translate(float x, float y, float z,bool local){
 	}
 	flagAsChanged();
 }
-void Object::translate(glm::vec3& translation,bool local){ translate(translation.x,translation.y,translation.z); }
+void Object::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 void Object::rotate(float x, float y, float z){ 
 	float threshold = 0.025f;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
@@ -95,7 +95,7 @@ void Object::rotate(float x, float y, float z){
 	roll(z); 
 	m_Changed = true;
 }
-void Object::rotate(glm::vec3& rotation){ rotate(rotation.x,rotation.y,rotation.z); }
+void Object::rotate(glm::vec3 rotation){ rotate(rotation.x,rotation.y,rotation.z); }
 void Object::scale(float x, float y, float z){
 	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
 	m_Scale.x += x * dt; 
@@ -104,7 +104,7 @@ void Object::scale(float x, float y, float z){
 	calculateRadius(); 
 	flagAsChanged();
 }
-void Object::scale(glm::vec3& scl){ scale(scl.x,scl.y,scl.z); }
+void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
 void Object::setPosition(float x, float y, float z){ 
 	m_Position.x = x; 
 	m_Position.y = y; 
@@ -119,7 +119,7 @@ void Object::setScale(float x, float y, float z){
 	calculateRadius(); 
 	flagAsChanged();
 }
-void Object::setScale(glm::vec3& scale){ setScale(scale.x,scale.y,scale.z); }
+void Object::setScale(glm::vec3 scale){ setScale(scale.x,scale.y,scale.z); }
 void Object::pitch(float amount){ 
 	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0)));
 	flagAsChanged();
@@ -184,7 +184,7 @@ void Object::addChild(Object* child){
 	flagAsChanged();
 }
 void Object::setColor(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
-void Object::setColor(glm::vec3& color){ Object::setColor(color.x,color.y,color.z); }
+void Object::setColor(glm::vec3 color){ Object::setColor(color.x,color.y,color.z); }
 
 void Object::setMesh(Mesh* mesh){ 
 	m_Mesh = mesh; 
@@ -214,28 +214,30 @@ void Object::setName(std::string name){
 glm::vec3 Object::getScreenCoordinates(){
 	glm::vec2 windowSize = glm::vec2(static_cast<int>(Resources::getWindow()->getSize().x),static_cast<int>(Resources::getWindow()->getSize().y));
 	glm::vec3 objPos = getPosition();
-	glm::mat4 V = Resources::getActiveCamera()->getView();
-	glm::vec4 viewport = glm::vec4(0.0f,0.0f,static_cast<float>(windowSize.x),static_cast<float>(windowSize.y));
-	glm::vec3 screen = glm::project(objPos,V * m_Model,Resources::getActiveCamera()->getProjection(),viewport);
+	glm::mat4 MV = Resources::getActiveCamera()->getView();
+	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
+	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
-	glm::vec3 viewVector = glm::vec3(V[2][0],V[2][1],V[2][2]);
-	float dot = glm::dot(viewVector,objPos);
+	glm::vec3 viewVector = glm::vec3(MV[0][2],MV[1][2],MV[2][2]);
 
+	//this needs work
+	float dot = glm::dot(viewVector,objPos-Resources::getActiveCamera()->getPosition());
+
+	float resX = static_cast<float>(screen.x);
 	float resY = static_cast<float>(windowSize.y-screen.y);
 
-
 	if(screen.x < 0)
-		screen.x = 0;
+		resX = 0;
 	else if(screen.x > windowSize.x)
-		screen.x = windowSize.x;
+		resX = windowSize.x;
 	if(resY < 0)
 		resY = 0;
 	else if(resY > windowSize.y)
 		resY = windowSize.y;
 
 	if(dot < 0.0f){
-		return glm::vec3(screen.x,resY,0);
+		return glm::vec3(resX,resY,0);
 	}
 	else{
 		float fX = windowSize.x - screen.x;

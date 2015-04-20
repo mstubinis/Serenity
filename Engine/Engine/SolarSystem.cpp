@@ -31,18 +31,18 @@ SolarSystem::~SolarSystem()
 void SolarSystem::_loadTestSystem(){
 	playerCamera = new GameCamera(45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
 	Resources::setActiveCamera(playerCamera);
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["Debug"] = new Camera(45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,100000.0f,this);
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["HUD"] = new Camera(0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.005f,100000.0f,this);
+	Engine::Resources::Detail::ResourceManagement::m_Cameras["Debug"] = new Camera(45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
+	Engine::Resources::Detail::ResourceManagement::m_Cameras["HUD"] = new Camera(0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.05f,10.0f,this);
 
 	new Skybox("Basic",this);
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
-	Ship* other = new Ship("Defiant","Defiant","USS Valiant",glm::vec3(2,0,0),glm::vec3(1,1,1),nullptr,this);
+	Ship* other = new Ship("Defiant","Defiant","USS Valiant",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
 	for(int i = 0; i < 1; i++){
 		Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-83710,0,-(i * 130000)),63710,"Earth",this);
 	}
 	playerCamera->follow(player);
 
-	Star* sun = new Star(glm::vec3(1,0.6f,0),glm::vec3(228.0f/255.0f,228.0f/255.0f,1),glm::vec3(0,0,-279580000),6958000,"Sun",this);
+	Star* sun = new Star(glm::vec3(1,0.6f,0),glm::vec3(228.0f/255.0f,228.0f/255.0f,1),glm::vec3(-16958000,16958000,-279580000),6958000,"Sun",this);
 }
 void SolarSystem::_loadFromFile(std::string filename){
 	unsigned int count = 0;

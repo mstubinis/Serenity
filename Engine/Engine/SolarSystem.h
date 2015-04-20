@@ -4,7 +4,7 @@
 #include "Scene.h"
 
 class Object;
-class ObjectDynamic;
+class PlayerShip;
 class GameCamera;
 class Planet;
 
@@ -14,7 +14,7 @@ class SolarSystem: public Scene{
 		std::unordered_map<std::string,Planet*> m_Moons;
 		std::unordered_map<std::string,Planet*> m_Stars;
 
-		ObjectDynamic* player;
+		PlayerShip* player;
 		GameCamera* playerCamera;
 
 		void _loadTestSystem();
@@ -26,5 +26,7 @@ class SolarSystem: public Scene{
 
 		void update(float);
 		void render();
+
+		PlayerShip* getPlayer(){ return player; }
 };
 #endif
