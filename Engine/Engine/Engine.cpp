@@ -17,8 +17,8 @@ Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned 
 Engine::EngineClass::~EngineClass(){
 	//glDeleteVertexArrays( 1, &m_vao );
 	delete game;
-	delete renderer;
 	delete physicsEngine;
+	Engine::Renderer::Detail::RenderManagement::destruct();
 	Engine::Resources::Detail::ResourceManagement::destruct();
 }
 void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsigned int height){
@@ -36,7 +36,7 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	videoMode.height = height;
 	videoMode.bitsPerPixel = 32;
 
-	int style = sf::Style::Default;
+	int style = sf::Style::Fullscreen;
 	if(style == sf::Style::Fullscreen){
 		videoMode = sf::VideoMode::getDesktopMode();
 		width = videoMode.width;
@@ -45,6 +45,11 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	}
 
 	Resources::Detail::ResourceManagement::m_Window = new sf::Window(videoMode, name, style, settings);
+
+	glEnable(GL_CULL_FACE); 
+	glCullFace(GL_BACK);
+	glDepthMask(GL_TRUE); 
+	glEnable(GL_DEPTH_TEST);
 
     //Resources::getWindow()->setVerticalSyncEnabled(true);
 	Resources::getWindow()->setMouseCursorVisible(false);
@@ -62,8 +67,8 @@ void Engine::EngineClass::_initGame(){
 	glewInit();
 
 	Resources::initResources();
+	Renderer::Detail::RenderManagement::init();
 
-	renderer = new Renderer();
 	physicsEngine = new PhysicsEngine();
 
 	game = new Game();
@@ -127,7 +132,7 @@ void Engine::EngineClass::_update(float dt){
 }
 void Engine::EngineClass::_render(){
 	game->render();
-	renderer->render(m_DrawDebug);
+	Engine::Renderer::Detail::RenderManagement::render(m_DrawDebug);
 }
 #pragma region Event Handler Methods
 void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)

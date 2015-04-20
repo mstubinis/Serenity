@@ -30,11 +30,11 @@ void Game::initResources(){
 	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png","","");
 }
 void Game::initLogic(){
-	m_SolarSystems["Sol"] = new SolarSystem("Sol","");
+	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());
-	m_SolarSystems["Sol"]->getPlayer()->setTarget(Resources::getCurrentScene()->getObjects()["USS Valiant"]);
+	m_SolarSystems["Sol"]->getPlayer()->setTarget(Resources::getCurrentScene()->getObjects()["Moon"]);
 }
 void Game::update(float dt){
 	Resources::getCurrentScene()->update(dt);

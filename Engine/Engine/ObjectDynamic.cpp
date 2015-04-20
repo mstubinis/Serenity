@@ -40,6 +40,10 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 	m_RigidBody->setFriction(0.3f);
 	m_RigidBody->setDamping(0.3f,0.5f);//this makes the objects slowly slow down in space, like air friction
 	physicsEngine->addRigidBody(m_RigidBody);
+
+	if(m_Parent == nullptr){
+		ObjectDynamic::update(1);
+	}
 }
 ObjectDynamic::~ObjectDynamic(){
 	delete m_Collision_Shape;

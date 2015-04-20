@@ -20,7 +20,8 @@
 
 using namespace Engine::Resources;
 
-float Detail::ResourceManagement::m_DeltaTime = 0;
+//if dt is not set to 1, initialization of objects will be incorrect
+float Detail::ResourceManagement::m_DeltaTime = 1;
 sf::Window* Detail::ResourceManagement::m_Window = nullptr;
 sf::Mouse* Detail::ResourceManagement::m_Mouse = nullptr;
 Scene* Detail::ResourceManagement::m_CurrentScene = nullptr;
@@ -96,8 +97,6 @@ void Engine::Resources::addShader(std::string name, std::string vertexShaderFile
 	Detail::ResourceManagement::m_Shaders[name] = new ShaderP(vertexShaderFile,fragmentShaderFile);
 }
 void Engine::Resources::initResources(){
-	new Scene("Default");
-
 	addShader("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
 	addShader("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
 	addShader("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");

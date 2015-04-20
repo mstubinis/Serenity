@@ -1,5 +1,6 @@
 #include "Texture.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "Camera.h"
 #include "ShaderProgram.h"
 #include "Mesh.h"
@@ -81,5 +82,5 @@ void Texture::_loadFromFiles(std::string file[],GLuint type){
 	}
 }
 void Texture::render(glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
-	renderer->getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
+	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
 }

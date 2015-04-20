@@ -1,9 +1,6 @@
 #include "Engine.h"
 
-class Renderer;
 class PhysicsEngine;
-
-Renderer* renderer;
 PhysicsEngine* physicsEngine;
 
 int main(){

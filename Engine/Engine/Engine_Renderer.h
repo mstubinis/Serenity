@@ -6,27 +6,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-struct FontRenderInfo{
-	std::string font;
-	std::string text;
-	glm::vec2 pos;
-	glm::vec3 col;
-	glm::vec2 scl;
-	float rot;
-	float depth;
-	FontRenderInfo(){
-		text = font = ""; pos = scl = glm::vec2(0,0); col = glm::vec3(1,1,1); rot = depth = 0;
-	}
-	FontRenderInfo(std::string _font, std::string _text, glm::vec2 _pos, glm::vec3 _col, glm::vec2 _scl, float _rot, float _depth){
-		font = _font;
-		text = _text;
-		pos = _pos;
-		col = _col;
-		scl = _scl;
-		rot = _rot;
-		depth = _depth;
-	}
-};
 struct TextureRenderInfo{
 	std::string texture;
 	glm::vec2 pos;
@@ -46,42 +25,54 @@ struct TextureRenderInfo{
 		depth = _depth;
 	}
 };
-
-class Object;
-class GBuffer;
-class Font;
-class Texture;
-class Renderer{
-	private:
-		std::vector<FontRenderInfo> m_FontsToBeRendered;
-		std::vector<TextureRenderInfo> m_TexturesToBeRendered;
-
-		Texture* RandomMapSSAO;
-		GBuffer* m_gBuffer;
-		Font* m_Font;
-
-		void _initQuad();
-
-		void _renderText();
-		void _renderTextures();
-
-		void _geometryPass(bool debug);
-		void _lightingPass();
-
-		void _passLighting();
-		void _passSSAO();
-		void _passBlurHorizontal(GLuint texture);
-		void _passBlurVertical(GLuint texture);
-		void _passFinal();
-
-	public:
-		Renderer();
-		~Renderer();
-
-		void render(bool debug = false);
-
-		std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
-		std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
+struct FontRenderInfo: public TextureRenderInfo{
+	std::string text;
+	FontRenderInfo():TextureRenderInfo(){
+		text = "";
+	}
+	FontRenderInfo(std::string _font, std::string _text, glm::vec2 _pos, glm::vec3 _col, glm::vec2 _scl, float _rot, float _depth):TextureRenderInfo(_font,_pos,_col,_scl,_rot,_depth){
+		text = _text;
+	}
 };
-extern Renderer* renderer;
+
+class GBuffer;
+class Texture;
+
+namespace Engine{
+	namespace Renderer{
+		namespace Detail{
+			class RenderManagement{
+				private:
+					static Texture* RandomMapSSAO;
+					static GBuffer* m_gBuffer;
+
+					static std::vector<FontRenderInfo> m_FontsToBeRendered;
+					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
+
+					static void _initQuad();
+
+					static void _renderText();
+					static void _renderTextures();
+
+					static void _geometryPass(bool debug);
+					static void _lightingPass();
+
+					static void _passLighting();
+					static void _passSSAO();
+					static void _passBlurHorizontal(GLuint texture);
+					static void _passBlurVertical(GLuint texture);
+					static void _passFinal();
+				public:
+					static void render(bool debug=false);
+
+					static void init();
+					static void destruct();
+
+					static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
+					static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
+
+			};
+		};
+	};
+};
 #endif

@@ -41,6 +41,18 @@ Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,s
 	}
 	if(isNotLight)
 		scene->getObjects()[m_Name] = this;
+
+	if(m_Parent == nullptr){
+		glm::mat4 newModel = glm::mat4(1);
+		newModel = glm::translate(newModel, m_Position);
+		newModel *= glm::mat4_cast(m_Orientation);
+		newModel = glm::scale(newModel,m_Scale);
+		m_Model = newModel;
+
+		m_Forward = _calculateForward();
+		m_Right = _calculateRight();
+		m_Up = _calculateUp();
+	}
 }
 Object::~Object()
 {

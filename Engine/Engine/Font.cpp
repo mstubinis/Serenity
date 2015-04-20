@@ -1,5 +1,6 @@
 #include "Font.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
@@ -66,5 +67,5 @@ Font::~Font(){
 	delete m_FontData;
 }
 void Font::renderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
-	renderer->getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
+	Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
 }

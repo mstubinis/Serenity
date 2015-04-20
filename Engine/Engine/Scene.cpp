@@ -8,6 +8,7 @@ using namespace Engine;
 Scene::Scene(std::string name){
 	if(Resources::getCurrentScene() == nullptr)
 		Resources::Detail::ResourceManagement::m_CurrentScene = this;
+
 	Resources::Detail::ResourceManagement::m_Scenes[name] = this;
 	m_Name = name;
 }

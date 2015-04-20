@@ -57,10 +57,12 @@
     </Link>
     <PostBuildEvent>
       <Command>mkdir “$(TargetDir)Fonts\”
+mkdir “$(TargetDir)Systems\”
 mkdir “$(TargetDir)Shaders\”
 mkdir “$(TargetDir)Models\”
 mkdir “$(TargetDir)Textures\”
 xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Systems" "$(TargetDir)Systems" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>
@@ -91,10 +93,12 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     </Link>
     <PostBuildEvent>
       <Command>mkdir “$(TargetDir)Fonts\”
+mkdir “$(TargetDir)Systems\”
 mkdir “$(TargetDir)Shaders\”
 mkdir “$(TargetDir)Models\”
 mkdir “$(TargetDir)Textures\”
 xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Systems" "$(TargetDir)Systems" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>

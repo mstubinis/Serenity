@@ -16,30 +16,35 @@
 
 using namespace Engine;
 
-Renderer::Renderer(){
-	RandomMapSSAO = new Texture("Textures/SSAONormal.png");
 
-	glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
-	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
+Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
+GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 
-	m_gBuffer = new GBuffer(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+std::vector<FontRenderInfo> _getRenderFontsDefault(){ std::vector<FontRenderInfo> k; return k; }
+std::vector<FontRenderInfo> Engine::Renderer::Detail::RenderManagement::m_FontsToBeRendered = _getRenderFontsDefault();
+std::vector<TextureRenderInfo> _getRenderTexturesDefault(){ std::vector<TextureRenderInfo> k; return k; }
+std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_TexturesToBeRendered = _getRenderTexturesDefault();
+
+void Engine::Renderer::Detail::RenderManagement::init(){
+	Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = new Texture("Textures/SSAONormal.png");
+	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 }
-Renderer::~Renderer(){
-	delete m_gBuffer;
-	delete RandomMapSSAO;
+void Engine::Renderer::Detail::RenderManagement::destruct(){
+	delete Engine::Renderer::Detail::RenderManagement::m_gBuffer;
+	delete Engine::Renderer::Detail::RenderManagement::RandomMapSSAO;
 }
-void Renderer::_renderTextures(){
+
+void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	for(auto item:m_TexturesToBeRendered){
 		Texture* texture = Resources::Detail::ResourceManagement::m_Textures[item.texture];
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
-		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
-		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
-		glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
+		glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
 
-		glUseProgram(shader);
 		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
 
 		glm::mat4 model = glm::mat4(1);
@@ -57,18 +62,17 @@ void Renderer::_renderTextures(){
 	glUseProgram(0);
 	m_TexturesToBeRendered.clear();
 }
-void Renderer::_renderText(){
+void Engine::Renderer::Detail::RenderManagement::_renderText(){
 	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	for(auto item:m_FontsToBeRendered){
-		Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.font];
+		Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture];
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->getTextureAddress());
-		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
-		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
-		glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
+		glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
 
-		glUseProgram(shader );
 		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
 
 		float y_offset = 0;
@@ -99,7 +103,7 @@ void Renderer::_renderText(){
 	glUseProgram(0);
 	m_FontsToBeRendered.clear();
 }
-void Renderer::_geometryPass(bool debug){
+void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0,1,0,1);
@@ -121,41 +125,41 @@ void Renderer::_geometryPass(bool debug){
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
 }
-void Renderer::_lightingPass(){
+void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glEnable(GL_BLEND);
    	glBlendEquation(GL_FUNC_ADD);
    	glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT);
-	this->_passLighting();
+	Engine::Renderer::Detail::RenderManagement::_passLighting();
 }
-void Renderer::render(bool debug){
+void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 
 	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_POSITION);
-	this->_geometryPass(debug);
+	Engine::Renderer::Detail::RenderManagement::_geometryPass(debug);
 	m_gBuffer->stop();
 
 	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
-	this->_lightingPass();
+	Engine::Renderer::Detail::RenderManagement::_lightingPass();
 	m_gBuffer->stop();
 
 	m_gBuffer->start(BUFFER_TYPE_SSAO);
-	this->_passSSAO();
+	Engine::Renderer::Detail::RenderManagement::_passSSAO();
 	m_gBuffer->stop();
 	m_gBuffer->start(BUFFER_TYPE_FREE1);
-	this->_passBlurHorizontal(m_gBuffer->getTexture(BUFFER_TYPE_SSAO));
+	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(m_gBuffer->getTexture(BUFFER_TYPE_SSAO));
 	m_gBuffer->stop();
 	m_gBuffer->start(BUFFER_TYPE_SSAO);
-	this->_passBlurVertical(m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
+	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
 	m_gBuffer->stop();
 
-	this->_passFinal();
+	Engine::Renderer::Detail::RenderManagement::_passFinal();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	this->_renderTextures();
-	this->_renderText();
+	Engine::Renderer::Detail::RenderManagement::_renderTextures();
+	Engine::Renderer::Detail::RenderManagement::_renderText();
 }
-void Renderer::_passLighting(){
+void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();
 	glm::vec3 camPos = Resources::getActiveCamera()->getPosition();
 	glUseProgram(shader);
@@ -186,7 +190,7 @@ void Renderer::_passLighting(){
 	glUseProgram(0);
 }
 
-void Renderer::_passSSAO(){
+void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
@@ -215,7 +219,7 @@ void Renderer::_passSSAO(){
 	glBindTexture(GL_TEXTURE_2D,RandomMapSSAO->getTextureAddress());
 	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
-	_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad();
 
 	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -224,7 +228,7 @@ void Renderer::_passSSAO(){
 	}
 	glUseProgram(0);
 }
-void Renderer::_passBlurHorizontal(GLuint texture){
+void Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(GLuint texture){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_Blur_Horizontal")->getShaderProgram();
@@ -237,7 +241,7 @@ void Renderer::_passBlurHorizontal(GLuint texture){
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad();
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -245,7 +249,7 @@ void Renderer::_passBlurHorizontal(GLuint texture){
 
 	glUseProgram(0);
 }
-void Renderer::_passBlurVertical(GLuint texture){
+void Engine::Renderer::Detail::RenderManagement::_passBlurVertical(GLuint texture){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_Blur_Vertical")->getShaderProgram();
@@ -258,7 +262,7 @@ void Renderer::_passBlurVertical(GLuint texture){
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad();
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -266,7 +270,7 @@ void Renderer::_passBlurVertical(GLuint texture){
 
 	glUseProgram(0);
 }
-void Renderer::_passFinal(){
+void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_Final")->getShaderProgram();
@@ -289,7 +293,7 @@ void Renderer::_passFinal(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_SSAO));
 	glUniform1i( glGetUniformLocation(shader,"gSSAOMap"), 2 );
 
-	_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad();
 
 	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -298,7 +302,7 @@ void Renderer::_passFinal(){
 	}
 	glUseProgram(0);
 }
-void Renderer::_initQuad(){
+void Engine::Renderer::Detail::RenderManagement::_initQuad(){
 	//Projection setup
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
