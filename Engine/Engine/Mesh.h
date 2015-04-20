@@ -52,6 +52,7 @@ class Mesh{
 
 		void _init();
 	public:
+		Mesh(int width, int height);
 		Mesh(int x, int y, int width, int height);
 		Mesh(std::string = "");
 		~Mesh();

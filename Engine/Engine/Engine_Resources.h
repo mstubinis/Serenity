@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 
+class Font;
 class Camera;
 class Mesh;
 class Material;
@@ -32,6 +33,7 @@ namespace Engine{
 
 					static Camera* m_ActiveCamera;
 
+					static std::unordered_map<std::string,Font*> m_Fonts;
 					static std::unordered_map<std::string,Camera*> m_Cameras;
 					static std::unordered_map<std::string,Mesh*> m_Meshes;
 					static std::unordered_map<std::string,Texture*> m_Textures;
@@ -55,6 +57,8 @@ namespace Engine{
 		static void setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = c; }
 		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
+		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name]; }
+		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name]; }
 		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name]; }
 		static Material* getMaterial(std::string name){ return Detail::ResourceManagement::m_Materials[name]; }
 		static ShaderP* getShader(std::string name){ return Detail::ResourceManagement::m_Shaders[name]; }
@@ -65,11 +69,7 @@ namespace Engine{
 		void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
 		void addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile);
 
-		void loadTextureIntoGLuint(GLuint& address, std::string filename);
-		void loadCubemapTextureIntoGLuint(GLuint& address, std::string filenames[]);
 		void initResources();
 	};
 };
-
-
 #endif

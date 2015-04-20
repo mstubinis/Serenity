@@ -1,5 +1,10 @@
 #include "Texture.h"
 #include "Engine_Resources.h"
+#include "Camera.h"
+#include "ShaderProgram.h"
+#include "Mesh.h"
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
 using namespace Engine;
 
@@ -11,11 +16,12 @@ Texture::Texture(std::string file,GLuint type,std::string name){
 	if(file != "")
 		_loadFromFile(file,type);
 
-	std::string realName = name;
+	m_Name = name;
 	if(name == ""){
-		realName = name.substr(0,name.size()-4);
+		m_Name = file.substr(0,file.size()-4);
 	}
-	Resources::Detail::ResourceManagement::m_Textures[realName] = this;
+	if(file != "")
+		Resources::Detail::ResourceManagement::m_Textures[m_Name] = this;
 }
 Texture::Texture(std::string files[],GLuint type,std::string name){
 	m_TextureAddress = 0;
@@ -23,12 +29,9 @@ Texture::Texture(std::string files[],GLuint type,std::string name){
 	m_Height = 0;
 	m_Type = type;
 	_loadFromFiles(files,type);
+	m_Name = name;
 
-	std::string realName = name;
-	if(name == ""){
-		realName = name.substr(0,name.size()-4);
-	}
-	Resources::Detail::ResourceManagement::m_Textures[realName] = this;
+	Resources::Detail::ResourceManagement::m_Textures[m_Name] = this;
 }
 Texture::~Texture(){
 	glDeleteTextures(1,&m_TextureAddress);
@@ -76,4 +79,7 @@ void Texture::_loadFromFiles(std::string file[],GLuint type){
 		glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	}
+}
+void Texture::render(glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
+	renderer->getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
 }

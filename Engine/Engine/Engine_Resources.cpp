@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "Texture.h"
+#include "Font.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,6 +25,9 @@ sf::Window* Detail::ResourceManagement::m_Window = nullptr;
 sf::Mouse* Detail::ResourceManagement::m_Mouse = nullptr;
 Scene* Detail::ResourceManagement::m_CurrentScene = nullptr;
 Camera* Detail::ResourceManagement::m_ActiveCamera = nullptr;
+
+std::unordered_map<std::string,Font*> _getFontsDefaults(){ std::unordered_map<std::string,Font*> k; return k; }
+std::unordered_map<std::string,Font*> Detail::ResourceManagement::m_Fonts = _getFontsDefaults();
 
 std::unordered_map<std::string,Texture*> _getTexturesDefaults(){ std::unordered_map<std::string,Texture*> k; return k; }
 std::unordered_map<std::string,Texture*> Detail::ResourceManagement::m_Textures = _getTexturesDefaults();
@@ -49,6 +53,9 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 	}
 	for(auto texture:Detail::ResourceManagement::m_Textures){
 		delete texture.second;
+	}
+	for(auto font:Detail::ResourceManagement::m_Fonts){
+		delete font.second;
 	}
 	for(auto mat:Detail::ResourceManagement::m_Materials){
 		delete mat.second;
@@ -88,44 +95,6 @@ void Engine::Resources::addShader(std::string name, std::string vertexShaderFile
 		return;
 	Detail::ResourceManagement::m_Shaders[name] = new ShaderP(vertexShaderFile,fragmentShaderFile);
 }
-void Engine::Resources::loadTextureIntoGLuint(GLuint& address, std::string filename){
-	glGenTextures(1, &address);
-	sf::Image image;
-
-	glBindTexture(GL_TEXTURE_2D, address);
-	image.loadFromFile(filename.c_str());
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-}
-void Engine::Resources::loadCubemapTextureIntoGLuint(GLuint& address, std::string filenames[]){
-	glGenTextures(1, &address);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, address);
-	for(unsigned int i = 0; i < 6; i++){
-		sf::Image image;
-		
-		image.loadFromFile(filenames[i].c_str());
-		GLenum skyboxSide;
-		if(i==0)           skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-		else if(i == 1)    skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-		else if(i == 2)    skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-		else if(i == 3)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-		else if(i == 4)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-		else               skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-		glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
-	}
-	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-}
-
 void Engine::Resources::initResources(){
 	new Scene("Default");
 
@@ -143,14 +112,5 @@ void Engine::Resources::initResources(){
 
 	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
-	addMesh("Skybox","Models/skybox.obj");
-	addMesh("DEBUGLight","Models/debugLight.obj");
-	addMesh("Planet","Models/planet.obj");
-	addMesh("Defiant","Models/defiant.obj");
-	addMesh("Starbase","Models/starbase.obj");
-
-	addMaterial("Star","Textures/Planets/Sun.png","","");
-	addMaterial("Default","Textures/Planets/Sun.png","","");
-	addMaterial("Earth","Textures/Planets/Earth.png","","");
-	addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
+	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = new Mesh(1,1);
 }

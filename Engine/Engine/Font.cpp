@@ -3,6 +3,7 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "Texture.h"
 #include <sstream>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -13,7 +14,7 @@ FontData::FontData(std::string filename){
 	_loadTextFile(filename);
 	std::string texture_filename = filename.substr(0,filename.size()-4);
 	texture_filename += "_0.png";
-	Resources::loadTextureIntoGLuint(m_FontTexture,texture_filename);
+	m_FontTexture = new Texture(texture_filename);
 }
 FontData::~FontData(){
 	for(auto glyph:m_FontGlyphs){
@@ -22,7 +23,6 @@ FontData::~FontData(){
 	}
 }
 FontGlyph* FontData::getGlyphData(unsigned char c){ return m_FontGlyphs[c]; }
-GLuint FontData::getGlyphTexture(){ return m_FontTexture; }
 void FontData::_loadTextFile(std::string filename){
 	std::unordered_map<unsigned char,FontGlyph*> _Font_Chars;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
@@ -58,45 +58,13 @@ void FontData::_loadTextFile(std::string filename){
 
 Font::Font(std::string filename){
 	m_FontData = new FontData(filename);
+
+	m_Name = filename.substr(0,filename.size()-4);
+	Resources::Detail::ResourceManagement::m_Fonts[m_Name] = this;
 }
 Font::~Font(){
 	delete m_FontData;
 }
-void Font::RenderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
-	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
-	glUseProgram(shader);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_FontData->getGlyphTexture());
-	glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
-	glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
-	glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
-
-	glUseProgram(shader );
-	glUniform3f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z);
-
-	float y_offset = 0;
-	float x = pos.x;
-	pos.y = Resources::getWindow()->getSize().y - pos.y;
-	for(auto c:text){
-		if(c == '\n'){
-			y_offset += m_FontData->getGlyphData('X')->height+4;
-			x = pos.x;
-		}
-		else{
-			FontGlyph* glyph = m_FontData->getGlyphData(c);
-
-			glyph->m_Model = glm::mat4(1);
-			glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.5 - depth));
-			glyph->m_Model = glm::rotate(glyph->m_Model, angle,glm::vec3(0,0,1));
-			glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(scl.x,scl.y,1));
-			glyph->m_World = Resources::getCamera("HUD")->getProjection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
-
-			glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(glyph->m_World));
-			glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));
-
-			glyph->char_mesh->render();
-			x += glyph->xadvance;
-		}
-	}
-	glUseProgram(0);
+void Font::renderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
+	renderer->getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
 }

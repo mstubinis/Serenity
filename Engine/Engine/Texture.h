@@ -5,9 +5,11 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <SFML/Graphics.hpp>
+#include <glm/glm.hpp>
 
 class Texture{
 	private:
+		std::string m_Name;
 		GLuint m_TextureAddress;
 		void _loadFromFile(std::string file,GLuint);
 		void _loadFromFiles(std::string file[],GLuint);
@@ -23,5 +25,9 @@ class Texture{
 		const GLuint getTextureType() const { return m_Type; }
 		const unsigned int getWidth() const { return m_Width; }
 		const unsigned int getHeight() const { return m_Height; }
+		const std::string getName() const { return m_Name; }
+
+		void render(glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth);
+
 };
 #endif

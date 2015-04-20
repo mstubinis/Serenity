@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 class Mesh;
+class Texture;
 
 struct FontGlyph {
 	 unsigned int id;
@@ -24,29 +25,33 @@ struct FontGlyph {
 };
 class FontData{
 	private:
-		GLuint m_FontTexture;
+		Texture* m_FontTexture;
 		std::unordered_map<unsigned char,FontGlyph*> m_FontGlyphs;
 		void _loadTextFile(std::string filename);
 	public:
 		FontData(std::string filename);
 		~FontData();
 
-		GLuint getGlyphTexture();
+		Texture* getGlyphTexture() { return m_FontTexture; }
 		FontGlyph* getGlyphData(unsigned char);
 };
 class Font{
 	private:
 		FontData* m_FontData;
+		std::string m_Name;
 	public:
 		Font(std::string);
 		~Font();
 
-		void RenderText(std::string text, 
+		void renderText(std::string text, 
 			            glm::vec2& pos, 
 						glm::vec3 color, 
 						float angle = 0, 
 						glm::vec2 scl = glm::vec2(1,1), 
 						float depth = 0
 					    );
+
+		FontData* getFontData() { return m_FontData; }
+		const std::string getName() const { return m_Name; }
 };
 #endif

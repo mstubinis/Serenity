@@ -8,6 +8,8 @@
 #include "Font.h"
 #include "Engine_Physics.h"
 #include "Scene.h"
+#include "Texture.h"
+#include "Mesh.h"
 
 #include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
@@ -15,18 +17,89 @@
 using namespace Engine;
 
 Renderer::Renderer(){
-	Resources::loadTextureIntoGLuint(RandomMapSSAO,"Textures/SSAONormal.png");
+	RandomMapSSAO = new Texture("Textures/SSAONormal.png");
 
 	glEnable(GL_CULL_FACE); glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE); glEnable(GL_DEPTH_TEST);
 
 	m_gBuffer = new GBuffer(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
-
-	m_Font = new Font("Fonts/consolas.fnt");
 }
 Renderer::~Renderer(){
 	delete m_gBuffer;
-	delete m_Font;
+	delete RandomMapSSAO;
+}
+void Renderer::_renderTextures(){
+	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
+	glUseProgram(shader);
+	for(auto item:m_TexturesToBeRendered){
+		Texture* texture = Resources::Detail::ResourceManagement::m_Textures[item.texture];
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
+		glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
+
+		glUseProgram(shader);
+		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
+
+		glm::mat4 model = glm::mat4(1);
+		float displaySizeX = texture->getWidth() * item.scl.x;
+		float displaySizeY = texture->getHeight() * item.scl.y;
+		model = glm::translate(model, glm::vec3(item.pos.x-displaySizeX/2,Resources::getWindow()->getSize().y-item.pos.y-displaySizeY/2,-0.5 - item.depth));
+		model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
+		model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
+		model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
+		glm::mat4 world = Resources::getCamera("HUD")->getProjection() * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+
+		glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(world));
+		glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));
+
+		Resources::getMesh("Plane")->render();
+	}
+	glUseProgram(0);
+	m_TexturesToBeRendered.clear();
+}
+void Renderer::_renderText(){
+	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
+	glUseProgram(shader);
+	for(auto item:m_FontsToBeRendered){
+		Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.font];
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->getTextureAddress());
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"), 0);
+		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"), 1);
+		glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
+
+		glUseProgram(shader );
+		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
+
+		float y_offset = 0;
+		float x = item.pos.x;
+		item.pos.y = Resources::getWindow()->getSize().y - item.pos.y;
+		for(auto c:item.text){
+			if(c == '\n'){
+				y_offset += (font->getFontData()->getGlyphData('X')->height+4) * item.scl.y;
+				x = item.pos.x;
+			}
+			else{
+				FontGlyph* glyph = font->getFontData()->getGlyphData(c);
+
+				glyph->m_Model = glm::mat4(1);
+				glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,item.pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.5 - item.depth));
+				glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
+				glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
+				glyph->m_World = Resources::getCamera("HUD")->getProjection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+
+				glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(glyph->m_World));
+				glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));
+
+				glyph->char_mesh->render();
+				x += (glyph->xadvance) * item.scl.x;
+			}
+		}
+	}
+	glUseProgram(0);
+	m_FontsToBeRendered.clear();
 }
 void Renderer::_geometryPass(bool debug){
     glDepthMask(GL_TRUE);
@@ -80,10 +153,9 @@ void Renderer::render(bool debug){
 	this->_passFinal();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//render hud stuff
-	glm::vec3 pos = Resources::getCurrentScene()->getLights().begin()->second->getScreenCoordinates();
-	m_Font->RenderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
-		               "\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),glm::vec2(pos.x,pos.y),glm::vec3(1,1,1),0);
+
+	this->_renderTextures();
+	this->_renderText();
 }
 void Renderer::_passLighting(){
 	GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();
@@ -142,7 +214,7 @@ void Renderer::_passSSAO(){
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,RandomMapSSAO);
+	glBindTexture(GL_TEXTURE_2D,RandomMapSSAO->getTextureAddress());
 	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
 	_initQuad();

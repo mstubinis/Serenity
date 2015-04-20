@@ -235,7 +235,7 @@ glm::vec3 Object::getScreenCoordinates(){
 		resY = windowSize.y;
 
 	if(dot < 0.0f){
-		return glm::vec3(screen.x,resY,screen.z);
+		return glm::vec3(screen.x,resY,0);
 	}
 	else{
 		float fX = windowSize.x - screen.x;
@@ -250,6 +250,6 @@ glm::vec3 Object::getScreenCoordinates(){
 		else if(fY > windowSize.y/2)
 			fY = windowSize.y;
 
-		return glm::vec3(fX,fY,screen.z);
+		return glm::vec3(fX,fY,1);
 	}
 }

@@ -113,6 +113,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="GLDebugDrawer.cpp" />
     <ClCompile Include="GLDebugFont.cpp" />
+    <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -142,6 +143,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GLDebugDrawer.h" />
     <ClInclude Include="GLDebugFont.h" />
+    <ClInclude Include="HUD.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />

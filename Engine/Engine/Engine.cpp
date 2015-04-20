@@ -36,7 +36,7 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	videoMode.height = height;
 	videoMode.bitsPerPixel = 32;
 
-	int style = sf::Style::Fullscreen;
+	int style = sf::Style::Default;
 	if(style == sf::Style::Fullscreen){
 		videoMode = sf::VideoMode::getDesktopMode();
 		width = videoMode.width;
@@ -126,6 +126,7 @@ void Engine::EngineClass::_update(float dt){
 	physicsEngine->update(dt);
 }
 void Engine::EngineClass::_render(){
+	game->render();
 	renderer->render(m_DrawDebug);
 }
 #pragma region Event Handler Methods

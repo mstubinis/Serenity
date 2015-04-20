@@ -62,6 +62,61 @@ Mesh::Mesh(int x, int y,int width, int height){
 
 	_init();
 }
+Mesh::Mesh(int width, int height){
+	m_Collision = nullptr;
+
+	m_Points.push_back(glm::vec3(0,0,0));
+	m_Points.push_back(glm::vec3(width,height,0));
+	m_Points.push_back(glm::vec3(0,height,0));
+
+	m_Points.push_back(glm::vec3(width,0,0));
+	m_Points.push_back(glm::vec3(width,height,0));
+	m_Points.push_back(glm::vec3(0,0,0));
+
+	m_Colors.push_back(glm::vec4(1,1,1,1));
+	m_Colors.push_back(glm::vec4(1,1,1,1));
+	m_Colors.push_back(glm::vec4(1,1,1,1));
+	m_Colors.push_back(glm::vec4(1,1,1,1));
+	m_Colors.push_back(glm::vec4(1,1,1,1));
+	m_Colors.push_back(glm::vec4(1,1,1,1));
+
+	float uv_topLeft_x = float(0);
+	float uv_topLeft_y = float(0);
+	
+	float uv_bottomLeft_x = float(0);
+	float uv_bottomLeft_y = float(0) + float(height);
+
+	float uv_bottomRight_x = float(0) + float(width);
+	float uv_bottomRight_y = float(0) + float(height);
+
+	float uv_topRight_x = float(0) + float(width);
+	float uv_topRight_y = float(0);
+
+	m_UVs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+	m_UVs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+	m_UVs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
+
+	m_UVs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
+	m_UVs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+	m_UVs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+
+
+	m_Normals.push_back(glm::vec3(1,1,1));
+	m_Normals.push_back(glm::vec3(1,1,1));
+	m_Normals.push_back(glm::vec3(1,1,1));
+	m_Normals.push_back(glm::vec3(1,1,1));
+	m_Normals.push_back(glm::vec3(1,1,1));
+	m_Normals.push_back(glm::vec3(1,1,1));
+
+	m_Tangents.push_back(glm::vec3(1,1,1));
+	m_Tangents.push_back(glm::vec3(1,1,1));
+	m_Tangents.push_back(glm::vec3(1,1,1));
+	m_Tangents.push_back(glm::vec3(1,1,1));
+	m_Tangents.push_back(glm::vec3(1,1,1));
+	m_Tangents.push_back(glm::vec3(1,1,1));
+
+	_init();
+}
 Mesh::Mesh(std::string filename){
 	_loadFromFile(filename);
 	_init();
