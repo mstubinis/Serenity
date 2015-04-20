@@ -43,9 +43,7 @@ void Renderer::_renderTextures(){
 		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
 
 		glm::mat4 model = glm::mat4(1);
-		float displaySizeX = texture->getWidth() * item.scl.x;
-		float displaySizeY = texture->getHeight() * item.scl.y;
-		model = glm::translate(model, glm::vec3(item.pos.x-displaySizeX/2,Resources::getWindow()->getSize().y-item.pos.y-displaySizeY/2,-0.5 - item.depth));
+		model = glm::translate(model, glm::vec3(item.pos.x,Resources::getWindow()->getSize().y-item.pos.y,-0.5 - item.depth));
 		model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
 		model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
 		model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));

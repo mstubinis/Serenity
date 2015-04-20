@@ -62,16 +62,16 @@ Mesh::Mesh(int x, int y,int width, int height){
 
 	_init();
 }
-Mesh::Mesh(int width, int height){
+Mesh::Mesh(float width, float height){
 	m_Collision = nullptr;
 
-	m_Points.push_back(glm::vec3(0,0,0));
-	m_Points.push_back(glm::vec3(width,height,0));
-	m_Points.push_back(glm::vec3(0,height,0));
+	m_Points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
+	m_Points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
+	m_Points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
 
-	m_Points.push_back(glm::vec3(width,0,0));
-	m_Points.push_back(glm::vec3(width,height,0));
-	m_Points.push_back(glm::vec3(0,0,0));
+	m_Points.push_back(glm::vec3(width/2.0f,-height/2.0f,0));
+	m_Points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
+	m_Points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
 
 	m_Colors.push_back(glm::vec4(1,1,1,1));
 	m_Colors.push_back(glm::vec4(1,1,1,1));

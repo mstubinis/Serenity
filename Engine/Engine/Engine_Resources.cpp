@@ -112,5 +112,5 @@ void Engine::Resources::initResources(){
 
 	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
-	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = new Mesh(1,1);
+	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = new Mesh(1.0f,1.0f);
 }

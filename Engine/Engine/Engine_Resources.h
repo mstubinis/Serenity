@@ -71,5 +71,14 @@ namespace Engine{
 
 		void initResources();
 	};
+	static std::string convertNumberToStringCommas(unsigned long long n){
+		std::string numWithCommas = std::to_string(n);
+		int insertPosition = numWithCommas.length() - 3;
+		while (insertPosition > 0) {
+			numWithCommas.insert(insertPosition, ",");
+			insertPosition-=3;
+		}
+		return numWithCommas;
+	}
 };
 #endif

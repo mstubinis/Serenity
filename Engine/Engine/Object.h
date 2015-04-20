@@ -23,9 +23,11 @@ class Object{
 		bool m_Changed;
 
 		std::string m_Name;
-		glm::mat4 m_WorldMatrix, m_Model;
+		glm::mat4 m_WorldMatrix;
+		glm::mat4 m_Model;
 		glm::quat m_Orientation;
-		glm::vec3 m_Position, m_Scale, m_Color, m_Forward, m_Right, m_Up;
+		glm::vec3 m_Scale, m_Color, m_Forward, m_Right, m_Up;
+		glm::vec3 m_Position;
 		float m_Radius;
 		glm::vec3 m_BoundingBoxRadius;
 
@@ -52,6 +54,7 @@ class Object{
 		void flagAsChanged();
 
 		float getDistance(Object*);
+		unsigned long long getDistanceLL(Object*);
 		glm::vec3 getScreenCoordinates();
 
 		virtual void translate(float,float,float,bool local=true); 
@@ -79,7 +82,7 @@ class Object{
 
 		#pragma region Getters
 		const glm::quat& getOrientation(){ return m_Orientation; }
-		const glm::vec3  getPosition() const{ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+		const glm::vec3 getPosition() const{ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 		const glm::vec3& getScale() const{ return m_Scale; }
 		const glm::vec3& getForward() const{ return m_Forward; }
 		const glm::vec3& getRight() const{ return m_Right; }

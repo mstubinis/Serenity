@@ -152,7 +152,13 @@ void Object::update(float dt){
 }
 float Object::getDistance(Object* other){
 	glm::vec3 vecTo = other->getPosition() - getPosition();
-	return abs(glm::length(vecTo));
+	return (abs(glm::length(vecTo)));
+}
+unsigned long long Object::getDistanceLL(Object* other){
+	unsigned long long res;
+	glm::vec3 vecTo = other->getPosition() - getPosition();
+	res = static_cast<unsigned long long>(abs(glm::length(vecTo)));
+	return res;
 }
 void Object::render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
@@ -216,42 +222,58 @@ glm::vec3 Object::getScreenCoordinates(){
 	glm::vec3 objPos = getPosition();
 	glm::mat4 MV = Resources::getActiveCamera()->getView();
 	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
-	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
+	glm::vec3 screen = glm::project(glm::vec3(objPos),MV,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
 	glm::vec3 viewVector = glm::vec3(MV[0][2],MV[1][2],MV[2][2]);
 
 	//this needs work
-	float dot = glm::dot(viewVector,objPos-Resources::getActiveCamera()->getPosition());
+	float dot = glm::dot(viewVector,glm::vec3(objPos-Resources::getActiveCamera()->getPosition()));
 
 	float resX = static_cast<float>(screen.x);
 	float resY = static_cast<float>(windowSize.y-screen.y);
 
-	if(screen.x < 0)
+	int inBounds = 1;
+
+	if(screen.x < 0){
 		resX = 0;
-	else if(screen.x > windowSize.x)
+		inBounds = 0;
+	}
+	else if(screen.x > windowSize.x){
 		resX = windowSize.x;
-	if(resY < 0)
+		inBounds = 0;
+	}
+	if(resY < 0){
 		resY = 0;
-	else if(resY > windowSize.y)
+		inBounds = 0;
+	}
+	else if(resY > windowSize.y){
 		resY = windowSize.y;
+		inBounds = 0;
+	}
+
 
 	if(dot < 0.0f){
-		return glm::vec3(resX,resY,0);
+		return glm::vec3(resX,resY,inBounds);
 	}
 	else{
+		inBounds = 0;
 		float fX = windowSize.x - screen.x;
 		float fY = windowSize.y - resY;
 
-		if(fX < windowSize.x/2)
+		if(fX < windowSize.x/2){
 			fX = 0;
-		else if(fX > windowSize.x/2)
+		}
+		else if(fX > windowSize.x/2){
 			fX = windowSize.x;
-		if(fY < windowSize.y/2)
+		}
+		if(fY < windowSize.y/2){
 			fY = 0;
-		else if(fY > windowSize.y/2)
+		}
+		else if(fY > windowSize.y/2){
 			fY = windowSize.y;
+		}
 
-		return glm::vec3(fX,fY,1);
+		return glm::vec3(fX,fY,inBounds);
 	}
 }
