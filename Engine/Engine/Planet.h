@@ -16,6 +16,7 @@ class Planet: public Object{
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    float = 1,                      //Scale
 			    std::string = "Planet",         //Name
+				float = 0,                      //Atmosphere size
 				Scene* = nullptr
 			  );
 		~Planet();

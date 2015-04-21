@@ -34,12 +34,11 @@ void Game::initLogic(){
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());
-	m_SolarSystems["Sol"]->getPlayer()->setTarget(Resources::getCurrentScene()->getObjects()["Moon"]);
 }
 void Game::update(float dt){
 	Resources::getCurrentScene()->update(dt);
 	m_HUD->update(dt);
 }
 void Game::render(){
-	m_HUD->render();
+	m_HUD->render(Engine::Renderer::isDebug());
 }

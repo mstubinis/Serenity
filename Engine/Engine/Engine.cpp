@@ -10,7 +10,7 @@
 #include "Light.h"
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
-	m_DrawDebug = false;
+	Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
 	_initWindow(name,width,height);
 	_initGame();
 }
@@ -132,7 +132,7 @@ void Engine::EngineClass::_update(float dt){
 }
 void Engine::EngineClass::_render(){
 	game->render();
-	Engine::Renderer::Detail::RenderManagement::render(m_DrawDebug);
+	Engine::Renderer::Detail::RenderManagement::render(Engine::Renderer::isDebug());
 }
 #pragma region Event Handler Methods
 void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)

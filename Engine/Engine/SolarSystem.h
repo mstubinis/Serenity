@@ -3,6 +3,7 @@
 
 #include "Scene.h"
 
+class Star;
 class Object;
 class PlayerShip;
 class GameCamera;
@@ -10,9 +11,9 @@ class Planet;
 
 class SolarSystem: public Scene{
 	private:
-		std::unordered_map<std::string,Planet*> m_Planets;
-		std::unordered_map<std::string,Planet*> m_Moons;
-		std::unordered_map<std::string,Planet*> m_Stars;
+		std::vector<Planet*> m_Planets;
+		std::vector<Planet*> m_Moons;
+		std::vector<Star*> m_Stars;
 
 		PlayerShip* player;
 		GameCamera* playerCamera;
@@ -28,5 +29,8 @@ class SolarSystem: public Scene{
 		void render();
 
 		PlayerShip* getPlayer(){ return player; }
+		std::vector<Planet*>& getPlanets() { return m_Planets; }
+		std::vector<Planet*>& getMoons() { return m_Moons; }
+		std::vector<Star*>& getStars() { return m_Stars; }
 };
 #endif

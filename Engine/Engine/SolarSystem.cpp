@@ -32,17 +32,17 @@ SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 	}
 }
 SolarSystem::~SolarSystem(){
-	for(auto star:m_Stars)    delete star.second;
-	for(auto planet:m_Planets)delete planet.second;
-	for(auto moon:m_Moons)    delete moon.second;
+	for(auto star:m_Stars)    delete star;
+	for(auto planet:m_Planets)delete planet;
+	for(auto moon:m_Moons)    delete moon;
 }
 void SolarSystem::_loadTestSystem(){
 	new Skybox("Basic",this);
 
 	Star* sun = new Star(glm::vec3(1,0.6f,0),glm::vec3(228.0f/255.0f,228.0f/255.0f,1),glm::vec3(0,0,0),6958000,"Sun",this);
-	m_Stars["Sun"] = sun;
-	Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-80000,0,1499000000),63710,"Earth",this);
-	m_Planets["Earth"] = p;
+	m_Stars.push_back(sun);
+	Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-80000,0,1499000000),63710,"Earth",0.025f,this);
+	m_Planets.push_back(p);
 
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,1499000000),glm::vec3(1,1,1),nullptr,this);
 	Ship* other = new Ship("Defiant","Defiant","USS Valiant",glm::vec3(3,0,1499000000),glm::vec3(1,1,1),nullptr,this);
@@ -77,7 +77,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 				new Skybox(line,this);
 			}
 			if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*') && line[1] == ' '){//we got something to work with
-				Planet* planetoid;
+				Planet* planetoid = nullptr;
 
 				std::string token;
 				std::istringstream stream(line);
@@ -85,6 +85,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 				std::string NAME;
 				std::string PARENT = "";
 				float R,G,B,   R1,G1,B1;
+				float ATMOSPHERE_HEIGHT;
 				std::string LIGHTCOLOR;
 				std::string TYPE;
 				std::string TEXTURE = "Textures/Planets/";
@@ -98,17 +99,18 @@ void SolarSystem::_loadFromFile(std::string filename){
 					std::string key = token.substr(0, pos);
 					std::string value = token.substr(pos + 1, std::string::npos);
 
-					if(key == "name")            NAME = value;
-					else if(key == "radius")     RADIUS = stoull(value)*10;
-					else if(key == "r")			 R = stof(value);
-					else if(key == "g")			 G = stof(value);
-					else if(key == "b")			 B = stof(value);
-					else if(key == "r1")         R1 = stof(value);
-					else if(key == "g1")         G1 = stof(value);
-					else if(key == "b1")         B1 = stof(value);
-					else if(key == "position")   POSITION = stoull(value)*10; 
-					else if(key == "parent")     PARENT = value;
-					else if(key == "type")       TYPE = value;
+					if(key == "name")                  NAME = value;
+					else if(key == "radius")           RADIUS = stoull(value)*10;
+					else if(key == "r")			       R = stof(value);
+					else if(key == "g")			       G = stof(value);
+					else if(key == "b")			       B = stof(value);
+					else if(key == "r1")               R1 = stof(value);
+					else if(key == "g1")               G1 = stof(value);
+					else if(key == "b1")               B1 = stof(value);
+					else if(key == "position")         POSITION = stoull(value)*10; 
+					else if(key == "parent")           PARENT = value;
+					else if(key == "type")             TYPE = value;
+					else if(key == "atmosphereHeight") ATMOSPHERE_HEIGHT = stof(value);
 					else if(key == "texture"){    
 						TEXTURE += value;
 						MATERIAL_NAME = value.substr(0,value.size()-4);
@@ -123,30 +125,30 @@ void SolarSystem::_loadFromFile(std::string filename){
 					Resources::addMaterial(MATERIAL_NAME,TEXTURE,"","");
 
 				if(line[0] == 'S'){//Sun
-					planetoid = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,this);
-					m_Stars[NAME] = planetoid;
+					Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,this);
+					m_Stars.push_back(star);
 				}
 				else if(line[0] == 'P'){//Planet
 					PlanetType PLANET_TYPE;
 					if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
 					else if(TYPE == "Gas") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,this);
+					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
 						planetoid->translate(getObjects()[PARENT]->getPosition(),false);
 					}
-					m_Planets[NAME] = planetoid;
+					m_Planets.push_back(planetoid);
 				}
 				else if(line[0] == 'M'){//Moon
 					PlanetType PLANET_TYPE;
 					if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
 					else if(TYPE == "Gas") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,this);
+					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
 						planetoid->translate(getObjects()[PARENT]->getPosition(),false);
 					}
-					m_Moons[NAME] = planetoid;
+					m_Moons.push_back(planetoid);
 				}
 				else if(line[0] == '*'){//Player ship
 					if(PARENT != ""){

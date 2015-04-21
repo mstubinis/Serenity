@@ -9,8 +9,8 @@
 
 using namespace Engine;
 
-Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,Scene* scene):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,true,scene){
-	m_AtmosphereHeight = 0.025f;
+Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,float atmosphere,Scene* scene):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,true,scene){
+	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
 }
 Planet::~Planet(){
@@ -170,7 +170,7 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 void Planet::render(bool debug){ render(m_Mesh,m_Material,debug); }
 
 
-Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,scene){
+Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
 	m_Light = new SunLight(glm::vec3(0,0,0),"Sun Light",LIGHT_TYPE_SUN,scene);
 	m_Light->setColor(lightColor);
 	setColor(starColor);

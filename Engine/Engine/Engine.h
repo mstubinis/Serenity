@@ -38,8 +38,6 @@ namespace Engine{
 			void _EVENT_HANDLERS(sf::Event);
 			void _RESET_EVENTS();
 
-			bool m_DrawDebug;
-
 			Game* game;
 			GLuint m_vao;
 			sf::Clock clock;

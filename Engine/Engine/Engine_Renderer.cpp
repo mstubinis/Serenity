@@ -16,7 +16,7 @@
 
 using namespace Engine;
 
-
+bool Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
 Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 
@@ -80,7 +80,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 		item.pos.y = Resources::getWindow()->getSize().y - item.pos.y;
 		for(auto c:item.text){
 			if(c == '\n'){
-				y_offset += (font->getFontData()->getGlyphData('X')->height+4) * item.scl.y;
+				y_offset += (font->getFontData()->getGlyphData('X')->height+6) * item.scl.y;
 				x = item.pos.x;
 			}
 			else{
