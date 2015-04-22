@@ -19,9 +19,7 @@ void Planet::update(float dt){
 	Object::update(dt);
 }
 void Planet::render(Mesh* mesh, Material* mat,bool debug){
-	if(mesh == nullptr)
-		return;
-	if(!Resources::getActiveCamera()->sphereIntersectTest(this))
+	if(mesh == nullptr || !Resources::getActiveCamera()->sphereIntersectTest(this))
 		return;
 	if(Resources::getActiveCamera()->getDistance(this) > 450 * getRadius())
 		return;
@@ -38,7 +36,7 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
-	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
+	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
 	for(auto component:mat->getComponents())
 		mat->bindTexture(component.first,shader);
@@ -61,6 +59,9 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 
 	glm::vec3 camPos = Resources::getActiveCamera()->getPosition() - getPosition();
 	glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
+
+	glm::vec4 ambient = Resources::getCurrentScene()->getAmbientLightColor();
+	glUniform4f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z,ambient.w);
 
 	glm::vec3 lightDir = Resources::getCurrentScene()->getLights().begin()->second->getPosition() - getPosition();
 	lightDir = glm::normalize(lightDir);
@@ -98,6 +99,7 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 
 
 	mesh->render();
+	glUseProgram(0);
 
 	if(m_AtmosphereHeight <= 0.0f)
 		return;
@@ -118,12 +120,12 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
    	glBlendEquation(GL_FUNC_ADD);
    	glBlendFunc(GL_ONE, GL_ONE);
 
-	glm::mat4 obj = glm::mat4(1);
-	obj = glm::translate(obj,getPosition());
-	obj *= glm::mat4_cast(m_Orientation);
-	obj = glm::scale(obj,glm::vec3(outerRadius,outerRadius,outerRadius));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->calculateProjection(obj)));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(obj));
+	glm::mat4 obj = m_Model;
+	obj = glm::scale(obj,glm::vec3(1 + m_AtmosphereHeight));
+	glm::mat4 world = Resources::getActiveCamera()->calculateProjection(obj);
+
+	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP1" ), 1, GL_FALSE, glm::value_ptr(world));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World1" ), 1, GL_FALSE, glm::value_ptr(obj));
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
@@ -160,8 +162,7 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 	glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
 	glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
 
-	Resources::getMesh("Planet")->render();
-
+	mesh->render();
 	glUseProgram(0);
 
 	glCullFace(GL_BACK);
@@ -169,11 +170,10 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 }
 void Planet::render(bool debug){ render(m_Mesh,m_Material,debug); }
 
-
 Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
-	m_Light = new SunLight(glm::vec3(0,0,0),"Sun Light",LIGHT_TYPE_SUN,scene);
-	m_Light->setColor(lightColor);
-	setColor(starColor);
+	m_Light = new SunLight(glm::vec3(0,0,0),name + " Light",LIGHT_TYPE_SUN,scene);
+	m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
+	setColor(starColor.x,starColor.y,starColor.z,1);
 	m_Material->setShadeless(true);
 
 	addChild(m_Light);

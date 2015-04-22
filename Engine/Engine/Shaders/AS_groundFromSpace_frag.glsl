@@ -14,7 +14,8 @@ uniform int GlowMapEnabled;
 
 uniform int HasAtmosphere;
 
-uniform vec3 Object_Color;
+uniform vec4 Object_Color;
+uniform vec4 gAmbientColor;
 
 varying vec3 c0;
 varying vec3 c1;
@@ -34,8 +35,8 @@ vec3 CalcBumpedNormal(){
 void main(){
 	if(HasAtmosphere == 1){
 		if(DiffuseMapEnabled == 1){
-			vec4 diffuse = texture2D(DiffuseMap, UV) * vec4(Object_Color.xyz,1.0);
-			gl_FragData[0].rgb = 1.0 - exp( -fExposure * ((c0+diffuse.xyz) * c1) );
+			vec4 diffuse = texture2D(DiffuseMap, UV) * Object_Color;
+			gl_FragData[0].rgb = max(gAmbientColor.xyz*diffuse.xyz,(1.0 - exp( -fExposure * ((c0+diffuse.xyz) * c1) )));
 			gl_FragData[0].a = 1.0;
 		}
 		else{
@@ -45,7 +46,7 @@ void main(){
 	}
 	else{
 		if(DiffuseMapEnabled == 1)
-			gl_FragData[0] = texture2D(DiffuseMap, UV) * vec4(Object_Color.xyz,1.0);
+			gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
 		else
 			gl_FragData[0] = vec4(0.0);
 

@@ -33,24 +33,35 @@ void Engine::Renderer::Detail::RenderManagement::destruct(){
 	delete Engine::Renderer::Detail::RenderManagement::m_gBuffer;
 	delete Engine::Renderer::Detail::RenderManagement::RandomMapSSAO;
 }
-
+void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
+	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
+}
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	for(auto item:m_TexturesToBeRendered){
-		Texture* texture = Resources::Detail::ResourceManagement::m_Textures[item.texture];
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
-		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
-		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
+		Texture* texture = nullptr;
+		if(item.texture != ""){
+			texture = Resources::Detail::ResourceManagement::m_Textures[item.texture];
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
+			glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
+			glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
+		}
+		else{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
+			glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),0);
+		}
 		glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
-
-		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
+		glUniform4f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z,item.col.w);
 
 		glm::mat4 model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(item.pos.x,Resources::getWindow()->getSize().y-item.pos.y,-0.5 - item.depth));
 		model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
-		model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
+		if(item.texture != "")
+			model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
 		model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 		glm::mat4 world = Resources::getCamera("HUD")->getProjection() * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
@@ -73,7 +84,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 		glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
 		glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
 
-		glUniform3f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z);
+		glUniform4f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z,item.col.w);
 
 		float y_offset = 0;
 		float x = item.pos.x;
@@ -277,6 +288,8 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	glUseProgram(shader);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glm::vec4 ambient = Resources::getCurrentScene()->getAmbientLightColor();
+	glUniform4f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z,ambient.w);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);

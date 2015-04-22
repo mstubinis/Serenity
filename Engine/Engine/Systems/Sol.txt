@@ -6,7 +6,7 @@ S name=Sun radius=695800 r=1 g=1 b=0 r1=0.8 g1=0.8 b1=1 position=0
 
 P name=Mercuery radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.png
 
-P name=Venus radius=6052 r=1 g=1 b=1 position=108200000 type=Rock atmosphereHeight=0.025 texture=Venus.png
+P name=Venus radius=6031 r=1 g=1 b=1 position=108200000 type=Rock atmosphereHeight=0.025 texture=Venus.png
 
 P name=Earth radius=6371 r=1 g=1 b=1 position=149600000 type=Rock atmosphereHeight=0.025 texture=Earth.png
 M name=Moon radius=1737 r=1 g=1 b=1 parent=Earth position=384400 type=Rock atmosphereHeight=0 texture=Moon.png

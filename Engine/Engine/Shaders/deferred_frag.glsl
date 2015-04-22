@@ -12,7 +12,7 @@ uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
 uniform int GlowMapEnabled;
 
-uniform vec3 Object_Color;
+uniform vec4 Object_Color;
 
 varying vec3 WorldPosition;
 varying vec4 Color;
@@ -28,9 +28,9 @@ vec3 CalcBumpedNormal(){
 }
 void main(){
 	if(DiffuseMapEnabled == 1)
-		gl_FragData[0] = texture2D(DiffuseMap, UV) * vec4(Object_Color,1.0);
+		gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
 	else
-		gl_FragData[0] = vec4(Object_Color,1.0);
+		gl_FragData[0] = Object_Color;
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1)

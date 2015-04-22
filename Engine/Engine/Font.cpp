@@ -66,6 +66,6 @@ Font::Font(std::string filename){
 Font::~Font(){
 	delete m_FontData;
 }
-void Font::renderText(std::string text, glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
+void Font::renderText(std::string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
 	Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
 }

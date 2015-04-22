@@ -9,14 +9,14 @@
 struct TextureRenderInfo{
 	std::string texture;
 	glm::vec2 pos;
-	glm::vec3 col;
+	glm::vec4 col;
 	glm::vec2 scl;
 	float rot;
 	float depth;
 	TextureRenderInfo(){
-		texture = ""; pos = scl = glm::vec2(0,0); col = glm::vec3(1,1,1); rot = depth = 0;
+		texture = ""; pos = scl = glm::vec2(0,0); col = glm::vec4(1,1,1,1); rot = depth = 0;
 	}
-	TextureRenderInfo(std::string _texture, glm::vec2 _pos, glm::vec3 _col, glm::vec2 _scl, float _rot, float _depth){
+	TextureRenderInfo(std::string _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
 		texture = _texture;
 		pos = _pos;
 		col = _col;
@@ -30,7 +30,7 @@ struct FontRenderInfo: public TextureRenderInfo{
 	FontRenderInfo():TextureRenderInfo(){
 		text = "";
 	}
-	FontRenderInfo(std::string _font, std::string _text, glm::vec2 _pos, glm::vec3 _col, glm::vec2 _scl, float _rot, float _depth):TextureRenderInfo(_font,_pos,_col,_scl,_rot,_depth){
+	FontRenderInfo(std::string _font, std::string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth):TextureRenderInfo(_font,_pos,_col,_scl,_rot,_depth){
 		text = _text;
 	}
 };
@@ -76,6 +76,8 @@ namespace Engine{
 		};
 		static bool isDebug(){ return Detail::RenderManagement::m_DrawDebug; }
 		static void drawDebug(bool b){ Detail::RenderManagement::m_DrawDebug = b; }
+
+		void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
 	};
 };
 #endif

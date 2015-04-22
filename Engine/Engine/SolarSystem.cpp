@@ -182,6 +182,22 @@ void SolarSystem::_loadRandomly(){
 	//Then load planets. Generally the more stars, the more planets
 
 	//Then load moons. Generally the number of moons depends on the type of planet. Gas giants have more moons than rocky planets.
+
+
+
+	glm::vec3 offset = -player->getPosition();
+	Scene* s =  Resources::getCurrentScene();
+	for(auto obj:Resources::getCurrentScene()->getObjects()){
+		if(obj.second != player && obj.second->getParent() == nullptr){
+			obj.second->translate(offset,false);
+		}
+	}
+	for(auto obj:Resources::getCurrentScene()->getLights()){
+		if(obj.second->getParent() == nullptr){
+			obj.second->translate(offset,false);
+		}
+	}
+	player->setPosition(0,0,0);
 }
 void SolarSystem::update(float dt){
 	if(Keyboard::isKeyDown("esc"))

@@ -9,6 +9,9 @@
 #include "ObjectDynamic.h"
 #include "Light.h"
 
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
+
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
 	Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
 	_initWindow(name,width,height);
@@ -36,7 +39,7 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	videoMode.height = height;
 	videoMode.bitsPerPixel = 32;
 
-	int style = sf::Style::Fullscreen;
+	int style = sf::Style::Default;
 	if(style == sf::Style::Fullscreen){
 		videoMode = sf::VideoMode::getDesktopMode();
 		width = videoMode.width;
@@ -113,11 +116,13 @@ void Engine::EngineClass::_RESET_EVENTS(){
 
 	Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1-Resources::dt());
 
-	glm::vec2 mousePos = Engine::Events::Mouse::getMousePosition();
-	float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2)));
-	if(mouseDistFromCenter > 50){
-		Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
-		Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
+	if(Resources::getWindow()->hasFocus()){
+		glm::vec2 mousePos = Engine::Events::Mouse::getMousePosition();
+		float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2)));
+		if(mouseDistFromCenter > 50){
+			Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
+			Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
+		}
 	}
 }
 void Engine::EngineClass::_update(float dt){
@@ -143,9 +148,11 @@ void Engine::EngineClass::_EVENT_CLOSE(){
 }
 void Engine::EngineClass::_EVENT_LOST_FOCUS()
 {
+	Resources::getWindow()->setMouseCursorVisible(true);
 }
 void Engine::EngineClass::_EVENT_GAINED_FOCUS()
 {
+	Resources::getWindow()->setMouseCursorVisible(false);
 }
 void Engine::EngineClass::_EVENT_TEXT_ENTERED(sf::Event::TextEvent text)
 {
@@ -164,6 +171,7 @@ void Engine::EngineClass::_EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mo
 	Events::Mouse::MouseProcessing::m_Delta += (mouseWheel.delta * 10);
 }
 void Engine::EngineClass::_EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
+	Resources::getWindow()->setMouseCursorVisible(false);
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
 	if(mouseButton.button == sf::Mouse::Button::Left){
 		Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_LEFT;
@@ -199,18 +207,20 @@ void Engine::EngineClass::_EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEve
 	}
 }
 void Engine::EngineClass::_EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
-	Events::Mouse::MouseProcessing::m_Position_Previous = Events::Mouse::MouseProcessing::m_Position;
-	Events::Mouse::MouseProcessing::m_Position.x = static_cast<float>(mouse.x);
-	Events::Mouse::MouseProcessing::m_Position.y = static_cast<float>(mouse.y);
+	if(Resources::getWindow()->hasFocus()){
+		Events::Mouse::MouseProcessing::m_Position_Previous = Events::Mouse::MouseProcessing::m_Position;
+		Events::Mouse::MouseProcessing::m_Position.x = static_cast<float>(mouse.x);
+		Events::Mouse::MouseProcessing::m_Position.y = static_cast<float>(mouse.y);
 
-	Events::Mouse::MouseProcessing::m_Difference.x += (Events::Mouse::MouseProcessing::m_Position.x - Events::Mouse::MouseProcessing::m_Position_Previous.x);
-	Events::Mouse::MouseProcessing::m_Difference.y += (Events::Mouse::MouseProcessing::m_Position.y - Events::Mouse::MouseProcessing::m_Position_Previous.y);
+		Events::Mouse::MouseProcessing::m_Difference.x += (Events::Mouse::MouseProcessing::m_Position.x - Events::Mouse::MouseProcessing::m_Position_Previous.x);
+		Events::Mouse::MouseProcessing::m_Difference.y += (Events::Mouse::MouseProcessing::m_Position.y - Events::Mouse::MouseProcessing::m_Position_Previous.y);
+	}
 }
 void Engine::EngineClass::_EVENT_MOUSE_ENTERED()
 {
 }
 void Engine::EngineClass::_EVENT_MOUSE_LEFT(){
-	Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
+	Resources::getWindow()->setMouseCursorVisible(true);
 }
 /*
 void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_PRESSED()

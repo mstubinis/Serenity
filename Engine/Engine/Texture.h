@@ -27,7 +27,7 @@ class Texture{
 		const unsigned int getHeight() const { return m_Height; }
 		const std::string getName() const { return m_Name; }
 
-		void render(glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth);
+		void render(glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
 
 };
 #endif

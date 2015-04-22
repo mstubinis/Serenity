@@ -5,6 +5,7 @@ uniform sampler2D gLightMap;
 uniform sampler2D gSSAOMap;
 
 uniform vec2 gScreenSize;
+uniform vec4 gAmbientColor;
 
 vec2 CalcTexCoord(){ return gl_FragCoord.xy / gScreenSize; }
 void main(){
@@ -16,7 +17,7 @@ void main(){
 	if(lighting.r < 0.00001 && lighting.g < 0.00001 && lighting.b < 0.00001)
 		gl_FragColor = image;
 	else{
-		vec4 light = max(vec4(0.05),max(lighting,lighting*ssao));
+		vec4 light = max(gAmbientColor,max(lighting,lighting*ssao));
 		vec4 Final = image*light;
 		gl_FragColor = Final;
 	}

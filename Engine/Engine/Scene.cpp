@@ -5,12 +5,13 @@
 
 using namespace Engine;
 
-Scene::Scene(std::string name){
+Scene::Scene(std::string name,glm::vec4 ambientLightColor){
 	if(Resources::getCurrentScene() == nullptr)
 		Resources::Detail::ResourceManagement::m_CurrentScene = this;
 
 	Resources::Detail::ResourceManagement::m_Scenes[name] = this;
 	m_Name = name;
+	m_AmbientLighting = ambientLightColor;
 }
 Scene::~Scene(){
 	for(auto obj:m_Objects)
@@ -33,3 +34,5 @@ void Scene::setName(std::string name){
 void Scene::update(float dt)
 {
 }
+void Scene::setAmbientLightColor(glm::vec4 c){ m_AmbientLighting = c; }
+void Scene::setAmbientLightColor(float r,float g,float b,float a){ setAmbientLightColor(glm::vec4(r,g,b,a)); }

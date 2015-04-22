@@ -26,7 +26,8 @@ class Object{
 		glm::mat4 m_WorldMatrix;
 		glm::mat4 m_Model;
 		glm::quat m_Orientation;
-		glm::vec3 m_Scale, m_Color, m_Forward, m_Right, m_Up;
+		glm::vec3 m_Scale, m_Forward, m_Right, m_Up;
+		glm::vec4 m_Color;
 		glm::vec3 m_Position;
 		float m_Radius;
 		glm::vec3 m_BoundingBoxRadius;
@@ -71,8 +72,8 @@ class Object{
 		virtual void setPosition(glm::vec3);
 		virtual void setScale(float,float,float); 
 		virtual void setScale(glm::vec3);
-		virtual void setColor(float,float,float); 
-		virtual void setColor(glm::vec3);
+		virtual void setColor(float,float,float,float); 
+		virtual void setColor(glm::vec4);
 
 		void addChild(Object*);
 
@@ -89,7 +90,7 @@ class Object{
 		const glm::vec3& getUp() const{ return m_Up; }
 		virtual const glm::vec3& getRadiusBox() const{ return m_BoundingBoxRadius; }
 		virtual const float getRadius() const { return m_Radius; }
-		const glm::vec3& getColor() const{ return m_Color; }
+		const glm::vec4& getColor() const{ return m_Color; }
 		const glm::mat4& getModel() const{ return m_Model; }
 		const glm::mat4& getWorld() const{ return m_WorldMatrix; }
 		const std::string getName() const{ return m_Name; }

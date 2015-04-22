@@ -85,10 +85,13 @@ void HUD::update(float dt){
 }
 void HUD::render(bool debug){
 	//render hud stuff
+	glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	// render warp drive
+	Renderer::renderRectangle(glm::vec2(winSize.x/2,winSize.y/2),glm::vec4(m_Color.x,m_Color.y,m_Color.z,0.3f),100,100,0,0);
 	if(debug){
 		m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
 						   "\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),
-						   glm::vec2(10,10),m_Color,0,glm::vec2(0.8f,0.8f));
+						   glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f));
 	}
 
 	if(m_Player->getTarget() != nullptr){
@@ -97,7 +100,7 @@ void HUD::render(bool debug){
 
 		#pragma region renderCrossHairAndOtherInfo
 		if(pos.z == 1){
-			Resources::getTexture("Textures/HUD/Crosshair")->render(glm::vec2(pos.x,pos.y),m_Color,0,glm::vec2(scl,scl),0);
+			Resources::getTexture("Textures/HUD/Crosshair")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0);
 			unsigned long long distanceInKm = (m_Player->getTarget()->getDistanceLL(m_Player) / 10);
 			std::string stringRepresentation = "";
 			if(distanceInKm > 0){
@@ -107,7 +110,7 @@ void HUD::render(bool debug){
 				float distanceInm = (m_Player->getTarget()->getDistance(m_Player))*100.0f;
 				stringRepresentation = boost::lexical_cast<std::string>(static_cast<unsigned int>(distanceInm)) + " m";
 			}
-			m_Font->renderText(m_Player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),m_Color,0,glm::vec2(0.7f,0.7f),0);
+			m_Font->renderText(m_Player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0);
 		}
 		else{
 			glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
@@ -135,7 +138,7 @@ void HUD::render(bool debug){
 				else
 					angle = 135;
 			}
-			Resources::getTexture("Textures/HUD/CrosshairArrow")->render(glm::vec2(pos.x,pos.y),m_Color,angle,glm::vec2(scl,scl),0);
+			Resources::getTexture("Textures/HUD/CrosshairArrow")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0);
 		}
 		#pragma endregion
 

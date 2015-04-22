@@ -81,6 +81,6 @@ void Texture::_loadFromFiles(std::string file[],GLuint type){
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	}
 }
-void Texture::render(glm::vec2& pos, glm::vec3 color,float angle, glm::vec2 scl, float depth){
+void Texture::render(glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
 	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
 }

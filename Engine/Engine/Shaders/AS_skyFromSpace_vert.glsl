@@ -2,8 +2,8 @@
 
 attribute vec3 position;
 
-uniform mat4 MVP;
-uniform mat4 World;
+uniform mat4 MVP1;
+uniform mat4 World1;
 
 uniform int nSamples;
 uniform float fSamples;
@@ -80,13 +80,13 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = MVP * vec4(position, 1.0);
+	gl_Position = MVP1 * vec4(position, 1.0);
+	gl_TexCoord[6] = MVP1 * vec4(position, 1.0);
 
 	v3LightPosition = v3LightDir;
 	v3Direction = v3CameraPos - v3Pos;
 	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
 
-	WorldPosition = (World * vec4(position,1.0)).xyz;
+	WorldPosition = (World1 * vec4(position,1.0)).xyz;
 }

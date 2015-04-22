@@ -24,7 +24,7 @@ Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,s
 	m_Name = name;
 	m_Model = m_WorldMatrix = glm::mat4(1);
 	m_Orientation = glm::quat();
-	m_Color = glm::vec3(1,1,1);
+	m_Color = glm::vec4(1,1,1,1);
 
 	Object::setPosition(pos);
 	Object::setScale(scl);
@@ -167,10 +167,8 @@ float Object::getDistance(Object* other){
 	return (abs(glm::length(vecTo)));
 }
 unsigned long long Object::getDistanceLL(Object* other){
-	unsigned long long res;
 	glm::vec3 vecTo = other->getPosition() - getPosition();
-	res = static_cast<unsigned long long>(abs(glm::length(vecTo)));
-	return res;
+	return static_cast<unsigned long long>(abs(glm::length(vecTo)));
 }
 void Object::render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
@@ -185,7 +183,7 @@ void Object::render(Mesh* mesh, Material* material,bool debug){
 	glUseProgram(shader);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
-	glUniform3f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z);
+	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
 
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
@@ -201,8 +199,8 @@ void Object::addChild(Object* child){
 	child->flagAsChanged();
 	flagAsChanged();
 }
-void Object::setColor(float x, float y, float z){ m_Color.x = x; m_Color.y = y; m_Color.z = z; }
-void Object::setColor(glm::vec3 color){ Object::setColor(color.x,color.y,color.z); }
+void Object::setColor(float x, float y, float z,float a){ m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; }
+void Object::setColor(glm::vec4 color){ Object::setColor(color.x,color.y,color.z,color.w); }
 
 void Object::setMesh(Mesh* mesh){ 
 	m_Mesh = mesh; 
@@ -230,16 +228,14 @@ void Object::setName(std::string name){
 	}
 }
 glm::vec3 Object::getScreenCoordinates(){
-	glm::vec2 windowSize = glm::vec2(static_cast<int>(Resources::getWindow()->getSize().x),static_cast<int>(Resources::getWindow()->getSize().y));
+	glm::vec2 windowSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 	glm::vec3 objPos = getPosition();
 	glm::mat4 MV = Resources::getActiveCamera()->getView();
 	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
-	glm::vec3 screen = glm::project(glm::vec3(objPos),MV,Resources::getActiveCamera()->getProjection(),viewport);
+	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
 	glm::vec3 viewVector = glm::vec3(MV[0][2],MV[1][2],MV[2][2]);
-
-	//this needs work
 	float dot = glm::dot(viewVector,glm::vec3(objPos-Resources::getActiveCamera()->getPosition()));
 
 	float resX = static_cast<float>(screen.x);
@@ -247,23 +243,10 @@ glm::vec3 Object::getScreenCoordinates(){
 
 	int inBounds = 1;
 
-	if(screen.x < 0){
-		resX = 0;
-		inBounds = 0;
-	}
-	else if(screen.x > windowSize.x){
-		resX = windowSize.x;
-		inBounds = 0;
-	}
-	if(resY < 0){
-		resY = 0;
-		inBounds = 0;
-	}
-	else if(resY > windowSize.y){
-		resY = windowSize.y;
-		inBounds = 0;
-	}
-
+	if(screen.x < 0){ resX = 0; inBounds = 0; }
+	else if(screen.x > windowSize.x){ resX = windowSize.x; inBounds = 0; }
+	if(resY < 0){ resY = 0; inBounds = 0; }
+	else if(resY > windowSize.y){ resY = windowSize.y; inBounds = 0; }
 
 	if(dot < 0.0f){
 		return glm::vec3(resX,resY,inBounds);
@@ -273,18 +256,10 @@ glm::vec3 Object::getScreenCoordinates(){
 		float fX = windowSize.x - screen.x;
 		float fY = windowSize.y - resY;
 
-		if(fX < windowSize.x/2){
-			fX = 0;
-		}
-		else if(fX > windowSize.x/2){
-			fX = windowSize.x;
-		}
-		if(fY < windowSize.y/2){
-			fY = 0;
-		}
-		else if(fY > windowSize.y/2){
-			fY = windowSize.y;
-		}
+		if(fX < windowSize.x/2){ fX = 0; }
+		else if(fX > windowSize.x/2){ fX = windowSize.x; }
+		if(fY < windowSize.y/2){ fY = 0; }
+		else if(fY > windowSize.y/2){ fY = windowSize.y; }
 
 		return glm::vec3(fX,fY,inBounds);
 	}
