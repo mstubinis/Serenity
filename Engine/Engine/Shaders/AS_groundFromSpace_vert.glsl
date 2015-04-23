@@ -93,8 +93,9 @@ void main(void)	{
 	Color = color;
 	UV = uv;
 
-	Normals = (World * vec4(normal,0.0)).xyz;
-	Tangents = (World * vec4(tangent,0.0)).xyz;
+	//normalizing these solved a problem, but might cause more. Be careful here
+	Normals = normalize((World * vec4(normal,0.0)).xyz);
+	Tangents = normalize((World * vec4(tangent,0.0)).xyz);
 	Binormals = cross(Normals,Tangents);
 
 	WorldPosition = (World * vec4(position,1.0)).xyz;

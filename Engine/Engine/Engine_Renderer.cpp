@@ -125,7 +125,6 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 		object.second->render(debug);
 	}	
 	if(debug){
-		physicsEngine->render();
 		GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 		glUseProgram(shader);
 		for(auto light:Resources::getCurrentScene()->getLights()){
@@ -164,6 +163,8 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	m_gBuffer->stop();
 
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
+
+	if(debug) physicsEngine->render();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

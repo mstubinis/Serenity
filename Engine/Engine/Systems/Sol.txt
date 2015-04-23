@@ -15,7 +15,7 @@ P name=Mars radius=3390 r=1 g=1 b=1 position=227900000 type=Rock atmosphereHeigh
 #M name=Phobos radius=11.2667 r=1 g=1 b=1 parent=Mars position=9390 atmosphereHeight=0 type=Asteroid
 #M name=Deimos radius=6.2 r=1 g=1 b=1 parent=Mars position=23470 atmosphereHeight=0 type=Asteroid
 
-P name=Jupiter radius=69911 r=1 g=1 b=1 position=778500000 type=Gas atmosphereHeight=0 texture=Jupiter.png
+P name=Jupiter radius=69911 r=1 g=1 b=1 position=778500000 type=GasGiant atmosphereHeight=0 texture=Jupiter.png
 M name=Callisto parent=Jupiter radius=2410 r=1 g=1 b=1 position=1882700 atmosphereHeight=0 type=Rock texture=Callisto.png
 M name=Io parent=Jupiter radius=1822 r=1 g=1 b=1 position=421700 atmosphereHeight=0 type=Rock texture=Io.png
 M name=Europa parent=Jupiter radius=1560 r=1 g=1 b=1 position=670900 atmosphereHeight=0 type=Rock texture=Europa.png
@@ -84,7 +84,7 @@ M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphe
 #M name=Megaclite parent=Jupiter
 #M name=S/2003-J-2 parent=Jupiter
 
-P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=Gas atmosphereHeight=0 texture=Saturn.png
+P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.png
 #M name=S/2009-S-1 parent=Saturn
 #M name=Pan parent=Saturn
 #M name=Daphnis parent=Saturn
@@ -149,7 +149,7 @@ P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=Gas atmosphereHe
 #M name=Fornjot parent=Saturn
 
 
-P name=Uranus radius=25,362 r=1 g=1 b=1 position=2877000000 type=Gas atmosphereHeight=0 texture=Uranus.png
+P name=Uranus radius=25,362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.png
 #M name=Cordelia parent=Uranus
 #M name=Ophelia parent=Uranus
 #M name=Bianca parent=Uranus
@@ -178,7 +178,7 @@ P name=Uranus radius=25,362 r=1 g=1 b=1 position=2877000000 type=Gas atmosphereH
 #M name=Setebos parent=Uranus
 #M name=Ferdinand parent=Uranus
 
-P name=Neptune radius=24622 r=1 g=1 b=1 position=4503000000 type=Gas atmosphereHeight=0 texture=Neptune.png
+P name=Neptune radius=24622 r=1 g=1 b=1 position=4503000000 type=IceGiant atmosphereHeight=0 texture=Neptune.png
 #M name=Naiad parent=Neptune
 #M name=Thalassa parent=Neptune
 #M name=Despina parent=Neptune

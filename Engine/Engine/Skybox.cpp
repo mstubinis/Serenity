@@ -9,7 +9,7 @@ using namespace Engine;
 
 Skybox::Skybox(std::string name,Scene* scene): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Skybox " + name,true,scene){
 	m_Position = glm::vec3(0,0,0);
-	m_Scale = glm::vec3(99999,99999,99999);
+	m_Scale = glm::vec3(999,999,999);
 	m_WorldMatrix = m_Model = glm::mat4(1);
 
 	m_Shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();

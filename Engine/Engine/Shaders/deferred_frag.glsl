@@ -34,7 +34,7 @@ void main(){
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1)
-			gl_FragData[1].rgb = CalcBumpedNormal();
+			gl_FragData[1].rgb = normalize(CalcBumpedNormal());
 		else
 			gl_FragData[1].rgb = normalize(Normals);
 

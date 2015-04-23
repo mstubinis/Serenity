@@ -13,8 +13,7 @@ Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, gl
 	m_IsWarping = false;
 	m_Target = nullptr;
 }
-Ship::~Ship()
-{
+Ship::~Ship(){
 }
 void Ship::update(float dt){
 	ObjectDynamic::update(dt);
@@ -32,8 +31,7 @@ PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::
 	m_Camera = static_cast<GameCamera*>(Resources::getActiveCamera());
 	m_Camera->follow(this);
 }
-PlayerShip::~PlayerShip()
-{
+PlayerShip::~PlayerShip(){
 }
 void PlayerShip::update(float dt){
 	if(m_IsWarping && m_WarpFactor > 0){
@@ -52,7 +50,6 @@ void PlayerShip::update(float dt){
 			}
 		}
 	}
-
 	if(Keyboard::isKeyDown("w"))
 		if(!m_IsWarping)
 			applyForce(0,0,-1);

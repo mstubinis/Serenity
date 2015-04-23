@@ -14,6 +14,11 @@ class HUD{
 		Font* m_Font;
 		PlayerShip* m_Player;
 		void _renderCrosshair(Object*);
+
+
+		glm::vec2 m_WarpIndicatorSize;
+
+
 	public:
 		HUD(PlayerShip*);
 		~HUD();

@@ -82,6 +82,7 @@ class Object{
 		virtual void render(bool=false);
 
 		#pragma region Getters
+		const bool hasChanged() const { return m_Changed; }
 		const glm::quat& getOrientation(){ return m_Orientation; }
 		const glm::vec3 getPosition() const{ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 		const glm::vec3& getScale() const{ return m_Scale; }

@@ -80,4 +80,5 @@ void main(){
 		gl_FragColor = max(vec4(normalTexture.a),CalcDirectionalLight(position,normal));
 	else if(gLightType == 3)
 		gl_FragColor = max(vec4(normalTexture.a),CalcSpotLight(position,normal));
+
 }

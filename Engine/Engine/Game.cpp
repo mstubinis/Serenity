@@ -30,7 +30,8 @@ void Game::initResources(){
 	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png","","");
 }
 void Game::initLogic(){
-	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
+	//m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
+	m_SolarSystems["Sol"] = new SolarSystem("Sol","");
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());

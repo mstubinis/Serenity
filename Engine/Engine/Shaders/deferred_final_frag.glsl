@@ -14,7 +14,7 @@ void main(){
 	vec4 lighting = texture2D(gLightMap, texCoords);
 	float ssao = texture2D(gSSAOMap, texCoords);
 
-	if(lighting.r < 0.00001 && lighting.g < 0.00001 && lighting.b < 0.00001)
+	if(lighting.r > 0.9999 && lighting.g > 0.9999 && lighting.b > 0.9999)
 		gl_FragColor = image;
 	else{
 		vec4 light = max(gAmbientColor,max(lighting,lighting*ssao));

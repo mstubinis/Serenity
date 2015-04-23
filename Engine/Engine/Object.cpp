@@ -145,11 +145,11 @@ void Object::roll(float amount){
 	flagAsChanged();
 }
 void Object::update(float dt){
-	glm::mat4 newModel = glm::mat4(1);
-	if(m_Parent != nullptr){
-		newModel = m_Parent->m_Model;
-	}
 	if(m_Changed){
+		glm::mat4 newModel = glm::mat4(1);
+		if(m_Parent != nullptr){
+			newModel = m_Parent->m_Model;
+		}
 		m_Forward = _calculateForward();
 		m_Right = _calculateRight();
 		m_Up = _calculateUp();
@@ -160,7 +160,8 @@ void Object::update(float dt){
 		m_Model = newModel;
 		m_Changed = false;
 	}
-	m_WorldMatrix = Resources::getActiveCamera()->calculateProjection(m_Model);
+	if(Resources::getActiveCamera()->hasChanged())
+		m_WorldMatrix = Resources::getActiveCamera()->calculateProjection(m_Model);
 }
 float Object::getDistance(Object* other){
 	glm::vec3 vecTo = other->getPosition() - getPosition();
