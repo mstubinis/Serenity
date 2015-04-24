@@ -18,6 +18,7 @@ class Camera: public Object{
 
 		float m_Near, m_Far;
 		glm::mat4 m_View, m_Projection;
+		glm::mat4 m_ViewProjection;
 	public:
 		Camera(float angle, float ratio, float _near, float _far,Scene* = nullptr);				           // Perspective camera Constructor
 		Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* = nullptr); // Orthographic camera Constructor
@@ -45,6 +46,7 @@ class Camera: public Object{
 		glm::mat4 calculateModelView(glm::mat4);
 		glm::mat4 getProjection(){ return m_Projection; }
 		glm::mat4 getView(){ return m_View; }
+		glm::mat4 getViewProjection(){ return m_Projection * m_View; }
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
 		bool sphereIntersectTest(Object*);

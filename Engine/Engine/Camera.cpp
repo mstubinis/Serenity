@@ -9,6 +9,7 @@ Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Sce
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
 	m_Far = _far;
+	m_ViewProjection = glm::mat4(1);
 
 	m_Type = CAMERA_TYPE_PERSPECTIVE;
 
@@ -20,6 +21,7 @@ Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, flo
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
 	m_Far = _far;
+	m_ViewProjection = glm::mat4(1);
 
 	m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
@@ -27,12 +29,10 @@ Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, flo
 	lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
 void Camera::_constructFrustrum(){
-	glm::mat4 matrix = m_Projection * m_View;
-
-	glm::vec4 rowX = glm::row(matrix, 0);
-	glm::vec4 rowY = glm::row(matrix, 1);
-	glm::vec4 rowZ = glm::row(matrix, 2);
-	glm::vec4 rowW = glm::row(matrix, 3);
+	glm::vec4 rowX = glm::row(m_ViewProjection, 0);
+	glm::vec4 rowY = glm::row(m_ViewProjection, 1);
+	glm::vec4 rowZ = glm::row(m_ViewProjection, 2);
+	glm::vec4 rowW = glm::row(m_ViewProjection, 3);
 
 	m_Planes[0] = glm::normalize(rowW + rowX);
 	m_Planes[1] = glm::normalize(rowW - rowX);
@@ -95,6 +95,7 @@ glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * mod
 glm::mat4 Camera::calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::update(float dt){
 	if(m_Changed){
+		m_ViewProjection = m_Projection * m_View;
 		_constructFrustrum();
 	}
 	Object::update(dt);

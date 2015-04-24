@@ -22,7 +22,7 @@ Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,s
 	m_Parent = nullptr;
 
 	m_Name = name;
-	m_Model = m_WorldMatrix = glm::mat4(1);
+	m_Model = glm::mat4(1);
 	m_Orientation = glm::quat();
 	m_Color = glm::vec4(1,1,1,1);
 
@@ -160,8 +160,6 @@ void Object::update(float dt){
 		m_Model = newModel;
 		m_Changed = false;
 	}
-	if(Resources::getActiveCamera()->hasChanged())
-		m_WorldMatrix = Resources::getActiveCamera()->calculateProjection(m_Model);
 }
 float Object::getDistance(Object* other){
 	glm::vec3 vecTo = other->getPosition() - getPosition();
@@ -174,20 +172,21 @@ unsigned long long Object::getDistanceLL(Object* other){
 void Object::render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
 		return;
-	if(!Resources::getActiveCamera()->sphereIntersectTest(this))
+	Camera* activeCamera = Resources::getActiveCamera();
+	if(!activeCamera->sphereIntersectTest(this))
 		return;
-	if(Resources::getActiveCamera()->getDistance(this) > 450 * getRadius())
+	if(activeCamera->getDistance(this) > 450 * getRadius())
 		return;
 
 	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 
 	glUseProgram(shader);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
 
-	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
+	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	for(auto component:material->getComponents())
 		material->bindTexture(component.first,shader);
@@ -215,6 +214,7 @@ void Object::setMesh(Mesh* mesh){
 void Object::setMaterial(Material* material){ m_Material = material; }
 void Object::flagAsChanged(){
 	m_Changed = true;
+	if(m_Children.size() == 0) return;
 	for(auto child:m_Children)
 		child->m_Changed = true;
 }

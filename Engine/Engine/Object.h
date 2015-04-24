@@ -23,7 +23,6 @@ class Object{
 		bool m_Changed;
 
 		std::string m_Name;
-		glm::mat4 m_WorldMatrix;
 		glm::mat4 m_Model;
 		glm::quat m_Orientation;
 		glm::vec3 m_Scale, m_Forward, m_Right, m_Up;
@@ -93,7 +92,6 @@ class Object{
 		virtual const float getRadius() const { return m_Radius; }
 		const glm::vec4& getColor() const{ return m_Color; }
 		const glm::mat4& getModel() const{ return m_Model; }
-		const glm::mat4& getWorld() const{ return m_WorldMatrix; }
 		const std::string getName() const{ return m_Name; }
 		const Object* getParent() const{ return m_Parent; }
 		const std::vector<Object*> getChildren() const{ return m_Children; }

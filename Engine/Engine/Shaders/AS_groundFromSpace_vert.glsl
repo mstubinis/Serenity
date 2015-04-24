@@ -4,11 +4,10 @@ attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
 attribute vec3 tangent;
-attribute vec4 color;
 
 uniform int hasAtmosphere;
 
-uniform mat4 MVP;
+uniform mat4 VP;
 uniform mat4 World;
 
 uniform vec3 v3CameraPos;
@@ -32,7 +31,6 @@ uniform int nSamples;
 varying vec3 c0;
 varying vec3 c1;
 
-varying vec4 Color;
 varying vec2 UV;
 
 varying vec3 WorldPosition;
@@ -51,6 +49,7 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 	return 0.5 * (-B - sqrt(fDet));
 }
 void main(void)	{
+	mat4 MVP = VP * World;
 	if(hasAtmosphere == 1){
 		vec3 v3Pos = position * vec3(fInnerRadius);
 		vec3 v3Ray = v3Pos - v3CameraPos;
@@ -90,7 +89,6 @@ void main(void)	{
 	gl_Position = MVP * vec4(position, 1.0);
 	gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
-	Color = color;
 	UV = uv;
 
 	//normalizing these solved a problem, but might cause more. Be careful here

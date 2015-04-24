@@ -46,7 +46,7 @@ void PhysicsEngine::render(){
 	glm::mat4 model = glm::mat4(1.0);
 	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 	glUseProgram(shader);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));
 	m_dynamicsWorld->debugDrawWorld();
 	glUseProgram(0);

@@ -6,7 +6,6 @@ uniform int DiffuseMapEnabled;
 uniform vec4 Object_Color;
 
 varying vec3 WorldPosition;
-varying vec4 Color;
 varying vec2 UV;
 
 void main(){

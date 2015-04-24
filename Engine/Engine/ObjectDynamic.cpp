@@ -107,7 +107,6 @@ void ObjectDynamic::update(float dt){
 		m_Right = ObjectDynamic::_calculateRight();
 		m_Up = ObjectDynamic::_calculateUp();
 	}
-	m_WorldMatrix = Resources::getActiveCamera()->calculateProjection(parentModel * newModel);
 	m_Model = parentModel * newModel;
 }
 void ObjectDynamic::setPosition(float x, float y, float z){

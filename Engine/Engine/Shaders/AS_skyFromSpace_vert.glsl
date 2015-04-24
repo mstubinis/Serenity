@@ -2,8 +2,8 @@
 
 attribute vec3 position;
 
-uniform mat4 MVP1;
-uniform mat4 World1;
+uniform mat4 VP;
+uniform mat4 World;
 
 uniform int nSamples;
 uniform float fSamples;
@@ -36,7 +36,6 @@ varying vec3 v3Direction;
 varying vec3 v3LightPosition;
 varying float Depth;
 
-
 float scale(float fCos){
 	float x = 1.0 - fCos;
 	return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
@@ -48,6 +47,7 @@ float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadiu
 	return 0.5 * (-B - sqrt(fDet));
 }
 void main(){
+	mat4 MVP = VP * World;
 	vec3 v3Pos = position * vec3(fOuterRadius);
 	vec3 v3Ray = v3Pos - v3CameraPos;
 	float fFar = length(v3Ray);
@@ -80,13 +80,13 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-	gl_Position = MVP1 * vec4(position, 1.0);
-	gl_TexCoord[6] = MVP1 * vec4(position, 1.0);
+	gl_Position = MVP * vec4(position, 1.0);
+	gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
 	v3LightPosition = v3LightDir;
 	v3Direction = v3CameraPos - v3Pos;
 	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
 
-	WorldPosition = (World1 * vec4(position,1.0)).xyz;
+	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

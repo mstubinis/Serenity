@@ -95,9 +95,7 @@ void SunLight::render(GLuint shader){
 	_initQuad();
 }
 void SunLight::renderDebug(GLuint shader){
-	glm::mat4 MVP = Resources::getActiveCamera()->calculateProjection(m_Model);
-
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(MVP));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform3f(glGetUniformLocation(shader, "Object_Color"),1,1,1);
 	m_Mesh->render();

@@ -15,7 +15,6 @@ uniform int GlowMapEnabled;
 uniform vec4 Object_Color;
 
 varying vec3 WorldPosition;
-varying vec4 Color;
 varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;

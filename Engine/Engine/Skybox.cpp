@@ -10,7 +10,7 @@ using namespace Engine;
 Skybox::Skybox(std::string name,Scene* scene): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Skybox " + name,true,scene){
 	m_Position = glm::vec3(0,0,0);
 	m_Scale = glm::vec3(999,999,999);
-	m_WorldMatrix = m_Model = glm::mat4(1);
+	m_Model = glm::mat4(1);
 
 	m_Shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();
 
@@ -34,14 +34,12 @@ void Skybox::update(float dt){
 	m_Model = glm::mat4(1);
 	m_Model = glm::translate(m_Model, m_Position);
 	m_Model = glm::scale(m_Model,m_Scale);
-
-	m_WorldMatrix = Resources::getActiveCamera()->calculateProjection(m_Model);
 }
 void Skybox::render(bool debug){
 	glDepthMask (GL_FALSE);
 	glUseProgram( m_Shader );
 
-	glUniformMatrix4fv(glGetUniformLocation( m_Shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
+	glUniformMatrix4fv(glGetUniformLocation( m_Shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 	glUniformMatrix4fv(glGetUniformLocation( m_Shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
 	glActiveTexture(GL_TEXTURE0);

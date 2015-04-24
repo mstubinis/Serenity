@@ -19,13 +19,6 @@ Mesh::Mesh(int x, int y,int width, int height){
 	m_Points.push_back(glm::vec3(width,height,0));
 	m_Points.push_back(glm::vec3(0,0,0));
 
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-
 	float uv_topLeft_x = float(x/256.0f);
 	float uv_topLeft_y = float(y/256.0f);
 	
@@ -72,13 +65,6 @@ Mesh::Mesh(float width, float height){
 	m_Points.push_back(glm::vec3(width/2.0f,-height/2.0f,0));
 	m_Points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
 	m_Points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
-
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
-	m_Colors.push_back(glm::vec4(1,1,1,1));
 
 	float uv_topLeft_x = float(0);
 	float uv_topLeft_y = float(0);
@@ -170,7 +156,6 @@ void Mesh::_loadFromPLY(std::string filename){
 					else if(SpaceCount == 7) v += line.at(i);
 				}
 				vert.position = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
-				vert.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 				vert.uv = glm::vec2(static_cast<float>(::atof(u.c_str())),1-static_cast<float>(::atof(v.c_str())));
 				vert.normal = glm::vec3( static_cast<float>(::atof(n1.c_str())),static_cast<float>(::atof(n2.c_str())),static_cast<float>(::atof(n3.c_str())));
 				vertices.push_back(vert);
@@ -214,10 +199,7 @@ btConvexHullShape* Mesh::_loadColFromPLY(std::string filename){
 			int whitespaceCount = 0;
 			int SpaceCount = 0;
 
-			std::string x; std::string y; std::string z; std::string w;
-			std::string u; std::string v;
-			std::string n1; std::string n2;std::string n3;
-
+			std::string x; std::string y; std::string z;
 			Vertex vert;
 			#pragma region Vertex
 			if(line[1] != ' '){
@@ -226,16 +208,8 @@ btConvexHullShape* Mesh::_loadColFromPLY(std::string filename){
 					if(SpaceCount == 0)      x += line.at(i);
 					else if(SpaceCount == 1) y += line.at(i);
 					else if(SpaceCount == 2) z += line.at(i);
-					else if(SpaceCount == 3) n1 += line.at(i);
-					else if(SpaceCount == 4) n2 += line.at(i);
-					else if(SpaceCount == 5) n3 += line.at(i);
-					else if(SpaceCount == 6) u += line.at(i);
-					else if(SpaceCount == 7) v += line.at(i);
 				}
 				vert.position = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
-				vert.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-				vert.uv = glm::vec2(static_cast<float>(::atof(u.c_str())),1-static_cast<float>(::atof(v.c_str())));
-				vert.normal = glm::vec3( static_cast<float>(::atof(n1.c_str())),static_cast<float>(::atof(n2.c_str())),static_cast<float>(::atof(n3.c_str())));
 				vertices.push_back(vert);
 
 				btVector3 pos = btVector3(vert.position.x,vert.position.y,vert.position.z);
@@ -341,18 +315,12 @@ void Mesh::_loadFromOBJ(std::string filename){
 			v2.normal = normalData.at(static_cast<unsigned int>(face.at(1).z-1));
 			v3.normal = normalData.at(static_cast<unsigned int>(face.at(2).z-1));
 		}
-
-		v1.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-		v2.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-		v3.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
-
 		if(face.size() == 4){//quad
 			v4.position = pointData.at(static_cast<unsigned int>(face.at(3).x-1));
 			if(uvData.size() > 0)
 				v4.uv = uvData.at(static_cast<unsigned int>(face.at(3).y-1));
 			if(normalData.size() > 0)
 				v4.normal = normalData.at(static_cast<unsigned int>(face.at(3).z-1));
-			v4.color = glm::vec4(rand() % 100 * 0.01f,rand() % 100 * 0.01f,rand() % 100 * 0.01f,1);
 			_generateQuad(v1,v2,v3,v4);
 		}
 		else{//triangle
@@ -394,17 +362,14 @@ Mesh::~Mesh(){
 	delete m_Collision;
 }
 void Mesh::_generateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
-	m_Colors.push_back(v1.color);
 	m_Points.push_back(v1.position);
 	m_UVs.push_back(v1.uv);
 	m_Normals.push_back(v1.normal);
 
-	m_Colors.push_back(v2.color);
 	m_Points.push_back(v2.position);
 	m_UVs.push_back(v2.uv);
 	m_Normals.push_back(v2.normal);
 
-	m_Colors.push_back(v3.color);
 	m_Points.push_back(v3.position);
 	m_UVs.push_back(v3.uv);
 	m_Normals.push_back(v3.normal);
@@ -435,9 +400,6 @@ void Mesh::_init(){
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
 	glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-	glBufferData(GL_ARRAY_BUFFER, m_Colors.size() * sizeof(glm::vec4), &m_Colors[0], GL_STATIC_DRAW);
 
 	#pragma region Calculate Mesh Radius (x, y, and z)
 	float maxX = 0;

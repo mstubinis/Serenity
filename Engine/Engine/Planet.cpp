@@ -24,13 +24,14 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 	if(Resources::getActiveCamera()->getDistance(this) > 450 * getRadius())
 		return;
 
+	Camera* activeCamera = Resources::getActiveCamera();
 	GLuint shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
 
 	float innerRadius = m_Radius;
 	float outerRadius = innerRadius + (innerRadius * m_AtmosphereHeight);
 
 	glUseProgram(shader);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(m_WorldMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
@@ -122,10 +123,9 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 
 	glm::mat4 obj = m_Model;
 	obj = glm::scale(obj,glm::vec3(1 + m_AtmosphereHeight));
-	glm::mat4 world = Resources::getActiveCamera()->calculateProjection(obj);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP1" ), 1, GL_FALSE, glm::value_ptr(world));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World1" ), 1, GL_FALSE, glm::value_ptr(obj));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(obj));
 	glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 

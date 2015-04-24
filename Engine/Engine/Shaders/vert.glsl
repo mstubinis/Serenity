@@ -4,12 +4,10 @@ attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
 attribute vec3 tangent;
-attribute vec4 color;
 
-uniform mat4 MVP;
+uniform mat4 VP;
 uniform mat4 World;
 
-varying vec4 Color;
 varying vec2 UV;
 
 varying vec3 WorldPosition;
@@ -18,10 +16,10 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 void main(){
+	mat4 MVP = VP * World;
 	gl_Position = MVP * vec4(position, 1.0);
 	gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
-	Color = color;
 	UV = uv;
 
 	//normalizing these solved a problem, but might cause more. Be careful here
