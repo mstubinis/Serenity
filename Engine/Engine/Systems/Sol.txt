@@ -85,6 +85,36 @@ M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphe
 #M name=S/2003-J-2 parent=Jupiter
 
 P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.png
+R parent=Saturn position=535 radius=279 r=78 g=68 b=56 break=269
+R parent=Saturn position=852 radius=130 r=154 g=138 b=115 break=120
+R parent=Saturn position=172 radius=120 r=96 g=87 b=82 break=110
+R parent=Saturn position=826 radius=116 r=146 g=129 b=109 break=2
+R parent=Saturn position=315 radius=84 r=208 g=182 b=149 break=75
+R parent=Saturn position=933 radius=26 r=208 g=182 b=149 break=2
+R parent=Saturn position=866 radius=7 r=208 g=182 b=149 break=1
+R parent=Saturn position=280 radius=13 r=99 g=86 b=70 break=10
+R parent=Saturn position=344 radius=5 r=99 g=86 b=70 break=4
+R parent=Saturn position=16 radius=10 r=30 g=30 b=29 break=6
+R parent=Saturn position=33 radius=7 r=83 g=77 b=73 break=2
+R parent=Saturn position=48 radius=8 r=83 g=77 b=73 break=3
+R parent=Saturn position=109 radius=6 r=74 g=66 b=63 break=3
+R parent=Saturn position=95 radius=5 r=74 g=66 b=63 break=1
+R parent=Saturn position=147 radius=8 r=74 g=66 b=63 break=4
+R parent=Saturn position=165 radius=4 r=120 g=110 b=101 break=3
+R parent=Saturn position=535 radius=3 r=102 g=93 b=76 break=1
+R parent=Saturn position=510 radius=3 r=102 g=93 b=76 break=1
+R parent=Saturn position=500 radius=4 r=102 g=93 b=76 break=0
+R parent=Saturn position=478 radius=2 r=102 g=93 b=76 break=0
+R parent=Saturn position=558 radius=4 r=90 g=81 b=64 break=0
+R parent=Saturn position=578 radius=2 r=102 g=93 b=76 break=0
+R parent=Saturn position=630 radius=2 r=102 g=93 b=76 break=0
+R parent=Saturn position=646 radius=4 r=65 g=57 b=46 break=0 
+R parent=Saturn position=1010 radius=4 r=102 g=102 b=102 break=0
+R parent=Saturn position=1015 radius=6 r=102 g=102 b=102 break=0
+R parent=Saturn position=909 radius=4 r=-1 g=-1 b=-1 break=0
+R parent=Saturn position=667 radius=4 r=-1 g=-1 b=-1 break=2
+R parent=Saturn position=205 radius=3 r=-1 g=-1 b=-1 break=2
+
 #M name=S/2009-S-1 parent=Saturn
 #M name=Pan parent=Saturn
 #M name=Daphnis parent=Saturn
