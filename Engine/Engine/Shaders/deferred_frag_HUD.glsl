@@ -16,5 +16,6 @@ void main(){
 		gl_FragData[0] = Object_Color;
 	}
 	gl_FragData[1] = vec4(1.0);
-	gl_FragData[2] = vec4(WorldPosition,1.0);
+	gl_FragData[2].r = 1.0;
+	gl_FragData[3] = vec4(WorldPosition,1.0);
 }

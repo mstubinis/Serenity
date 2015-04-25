@@ -149,14 +149,14 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 }
 void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 
-	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_POSITION);
+	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
 	Engine::Renderer::Detail::RenderManagement::_geometryPass(debug);
 	m_gBuffer->stop();
 
 	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
 	Engine::Renderer::Detail::RenderManagement::_lightingPass();
 	m_gBuffer->stop();
-	/*
+
 	m_gBuffer->start(BUFFER_TYPE_SSAO);
 	Engine::Renderer::Detail::RenderManagement::_passSSAO();
 	m_gBuffer->stop();
@@ -166,7 +166,7 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	m_gBuffer->start(BUFFER_TYPE_SSAO);
 	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
 	m_gBuffer->stop();
-	*/
+	
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
 
 	if(debug) physicsEngine->render();
@@ -194,12 +194,17 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
 	glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
 
+	glActiveTexture(GL_TEXTURE2);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GLOW));
+	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 2 );
+
 	for (auto light:Resources::getCurrentScene()->getLights()) {
 		light.second->render(shader);
    	}
 
 	// Reset OpenGL state
-	for(unsigned int i = 0; i < 2; i++){
+	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);

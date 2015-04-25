@@ -15,6 +15,7 @@ uniform vec3 gLightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
+uniform sampler2D gGlowMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
@@ -69,16 +70,16 @@ vec4 CalcSpotLight(vec3 _worldPos, vec3 _norm){
 void main(){
 	vec2 texCoord = CalcTexCoord();
 	vec3 position = texture2D(gPositionMap,texCoord).xyz;
-	vec4 normalTexture = texture2D( gNormalMap, texCoord);
-    vec3 normal = normalize(normalTexture.rgb);
+    vec3 normal = normalize(texture2D( gNormalMap, texCoord).rgb);
+	float glow = texture2D(gGlowMap,texCoord).r;
 
 	if(gLightType == 0)
-		gl_FragColor = max(vec4(normalTexture.a),CalcSunLight(position,normal));
+		gl_FragColor = max(vec4(glow),CalcSunLight(position,normal));
 	else if(gLightType == 1)
-		gl_FragColor = max(vec4(normalTexture.a),CalcPointLight(position,normal));
+		gl_FragColor = max(vec4(glow),CalcPointLight(position,normal));
 	else if(gLightType == 2)
-		gl_FragColor = max(vec4(normalTexture.a),CalcDirectionalLight(position,normal));
+		gl_FragColor = max(vec4(glow),CalcDirectionalLight(position,normal));
 	else if(gLightType == 3)
-		gl_FragColor = max(vec4(normalTexture.a),CalcSpotLight(position,normal));
+		gl_FragColor = max(vec4(glow),CalcSpotLight(position,normal));
 
 }

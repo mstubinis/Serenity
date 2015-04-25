@@ -224,4 +224,4 @@ P name=Pluto radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHei
 
 #P name=20000-Varuna radius=330 r=1 g=1 b=1 position=6450000000 atmosphereHeight=0 
 
-* name=Player parent=Saturn position=140000
+* name=Player parent=Earth position=8000

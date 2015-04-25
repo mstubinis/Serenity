@@ -80,6 +80,23 @@ void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
+void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,unsigned int type3){
+	// Bind our FBO and set the viewport to the proper size
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0,0,m_width, m_height);
+
+	// Specify what to render an start acquiring
+	unsigned int buffers[] = { m_Buffers[type]->getAttatchment(),m_Buffers[type1]->getAttatchment(),m_Buffers[type2]->getAttatchment(),m_Buffers[type3]->getAttatchment() };
+	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
+
+	// Clear the render targets
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glClearColor( 0, 0, 0, 1 );
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+}
 void GBuffer::stop(){	
 	// Stop acquiring and unbind the FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

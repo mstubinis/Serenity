@@ -34,19 +34,22 @@ void main(){
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1){
 			gl_FragData[1].rgb = normalize(CalcBumpedNormal());
+			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 		else{
-			gl_FragData[1].rgb = normalize(Normals)*texture2D(DiffuseMap, UV).a;
+			gl_FragData[1].rgb = normalize(Normals);
+			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 
 		if(GlowMapEnabled == 1)
-			gl_FragData[1].a = texture2D(GlowMap, UV).r;
+			gl_FragData[2].r = texture2D(GlowMap, UV).r;
 		else
-			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
+			gl_FragData[2].r = 0.0;
 	}
 	else{
-		gl_FragData[1] = vec4(1.0);
+		gl_FragData[1].rgb = vec3(1.0);
+		gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 	}
-	gl_FragData[2] = vec4(WorldPosition,1.0);
+	gl_FragData[3] = vec4(WorldPosition,1.0);
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }
