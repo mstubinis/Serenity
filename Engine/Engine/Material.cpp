@@ -1,7 +1,22 @@
 #include "Material.h"
 #include "Texture.h"
 
+Material::Material(Texture* diffuse,Texture* normal,Texture* glow){
+	for(unsigned int i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
+		m_Components[i] = nullptr;
+	}
 
+	if(diffuse == nullptr)m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = new Texture("");
+	else                  m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = diffuse;
+
+	if(normal == nullptr) m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = new Texture("");
+	else                  m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = normal;
+
+	if(glow == nullptr)   m_Components[MATERIAL_COMPONENT_TEXTURE_GLOW] = new Texture("");
+	else                  m_Components[MATERIAL_COMPONENT_TEXTURE_GLOW] = glow;
+
+	m_Shadeless = false;
+}
 Material::Material(std::string diffuse, std::string normal, std::string glow){
 	for(unsigned int i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
 		m_Components[i] = nullptr;

@@ -23,6 +23,7 @@ class Material{
 		std::unordered_map<unsigned int,Texture*> m_Components;
 		bool m_Shadeless;
 	public:
+		Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr);
 		Material(std::string diffuse,std::string normal="",std::string glow="");
 		~Material();
 

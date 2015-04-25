@@ -30,7 +30,8 @@ class Mesh{
 		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent
 		btConvexHullShape* m_Collision;
 
-		glm::vec3 m_radius;
+		glm::vec3 m_radiusBox;
+		float m_radius;
 		std::vector<glm::vec3> m_Points;
 		std::vector<glm::vec2> m_UVs;
 		std::vector<glm::vec3> m_Normals;
@@ -59,7 +60,8 @@ class Mesh{
 		const GLuint* getBuffers() const { return m_buffers; }
 		btConvexHullShape* getCollision() const { return m_Collision; }
 
-		const glm::vec3& getRadius() const { return m_radius; }
+		const glm::vec3& getRadiusBox() const { return m_radiusBox; }
+		const float getRadius() const { return m_radius; }
 
 		const std::vector<glm::vec3>& getPoints() const { return m_Points; }
 		const std::vector<glm::vec2>& getUVS() const { return m_UVs; }

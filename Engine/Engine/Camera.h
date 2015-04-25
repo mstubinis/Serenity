@@ -50,5 +50,6 @@ class Camera: public Object{
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
 		bool sphereIntersectTest(Object*);
+		bool sphereIntersectTest(glm::vec3 pos, float radius);
 };
 #endif

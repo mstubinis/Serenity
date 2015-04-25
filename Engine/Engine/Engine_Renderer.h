@@ -4,7 +4,14 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <unordered_map>
+
+class GBuffer;
+class Texture;
+class Mesh;
+class Material;
 
 struct TextureRenderInfo{
 	std::string texture;
@@ -35,14 +42,11 @@ struct FontRenderInfo: public TextureRenderInfo{
 	}
 };
 
-class GBuffer;
-class Texture;
-
 namespace Engine{
 	namespace Renderer{
 		namespace Detail{
 			class RenderManagement{
-				private:	
+				private:
 					static Texture* RandomMapSSAO;
 					static GBuffer* m_gBuffer;
 
@@ -71,7 +75,6 @@ namespace Engine{
 
 					static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
 					static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
-
 			};
 		};
 		static bool isDebug(){ return Detail::RenderManagement::m_DrawDebug; }

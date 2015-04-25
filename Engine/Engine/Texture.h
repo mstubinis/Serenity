@@ -11,12 +11,14 @@ class Texture{
 	private:
 		std::string m_Name;
 		GLuint m_TextureAddress;
+		void _loadFromPixels(const unsigned char*,unsigned int, unsigned int,GLuint);
 		void _loadFromFile(std::string file,GLuint);
 		void _loadFromFiles(std::string file[],GLuint);
 		GLuint m_Type;
 		unsigned int m_Width, m_Height;
 	public:
 
+		Texture(const unsigned char*,unsigned int, unsigned int,GLuint = GL_TEXTURE_2D,std::string name = "");
 		Texture(std::string file,GLuint = GL_TEXTURE_2D,std::string name = "");
 		Texture(std::string file[],GLuint = GL_TEXTURE_CUBE_MAP,std::string name = "");
 		~Texture();

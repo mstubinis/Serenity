@@ -90,7 +90,11 @@ void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::
 		return;
 	Detail::ResourceManagement::m_Materials[name] = new Material(diffuse,normal,glow);
 }
-
+void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture* normal, Texture* glow){
+	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
+		return;
+	Detail::ResourceManagement::m_Materials[name] = new Material(diffuse,normal,glow);
+}
 void Engine::Resources::addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile){
 	if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
 		return;

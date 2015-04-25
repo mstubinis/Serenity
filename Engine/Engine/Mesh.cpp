@@ -417,7 +417,8 @@ void Mesh::_init(){
 		if(z > maxZ)
 			maxZ = z;
 	}
-	m_radius = glm::vec3(maxX,maxY,maxZ);
+	m_radiusBox = glm::vec3(maxX,maxY,maxZ);
+	m_radius = glm::max(maxX, glm::max(maxY,maxZ));
 	#pragma endregion
 }
 void Mesh::render(){
@@ -457,10 +458,14 @@ void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
 	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
 
 	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+
 	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
 	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
 	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
 
-	tangent = glm::normalize(tangent);
-	v1.tangent = tangent;   v2.tangent = tangent;   v3.tangent = tangent;
+	glm::vec3 t1 = glm::normalize(tangent - v1.normal * glm::dot(v1.normal, tangent));
+	glm::vec3 t2 = glm::normalize(tangent - v2.normal * glm::dot(v2.normal, tangent));
+	glm::vec3 t3 = glm::normalize(tangent - v3.normal * glm::dot(v3.normal, tangent));
+
+	v1.tangent = t1;   v2.tangent = t2;   v3.tangent = t3;
 }

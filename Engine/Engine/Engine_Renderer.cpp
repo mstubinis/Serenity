@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "Texture.h"
 #include "Mesh.h"
+#include "Material.h"
 
 #include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
@@ -120,13 +121,15 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 	glClearColor(0,1,0,1);
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	
+
 	for(auto object:Resources::getCurrentScene()->getObjects()){
 		object.second->render(debug);
 	}	
 	if(debug){
 		GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 		glUseProgram(shader);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
+		glUniform3f(glGetUniformLocation(shader, "Object_Color"),1,1,1);
 		for(auto light:Resources::getCurrentScene()->getLights()){
 			light.second->renderDebug(shader);
 		}
@@ -136,11 +139,13 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
     glDisable(GL_DEPTH_TEST);
 }
 void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
+
 	glEnable(GL_BLEND);
-   	glBlendEquation(GL_FUNC_ADD);
-   	glBlendFunc(GL_ONE, GL_ONE);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT);
 	Engine::Renderer::Detail::RenderManagement::_passLighting();
+
 }
 void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 
@@ -151,7 +156,7 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
 	Engine::Renderer::Detail::RenderManagement::_lightingPass();
 	m_gBuffer->stop();
-
+	/*
 	m_gBuffer->start(BUFFER_TYPE_SSAO);
 	Engine::Renderer::Detail::RenderManagement::_passSSAO();
 	m_gBuffer->stop();
@@ -161,7 +166,7 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	m_gBuffer->start(BUFFER_TYPE_SSAO);
 	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
 	m_gBuffer->stop();
-
+	*/
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
 
 	if(debug) physicsEngine->render();
@@ -307,9 +312,14 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_SSAO));
 	glUniform1i( glGetUniformLocation(shader,"gSSAOMap"), 2 );
 
+	glActiveTexture(GL_TEXTURE3);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
+	glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 3 );
+
 	Engine::Renderer::Detail::RenderManagement::_initQuad();
 
-	for(unsigned int i = 0; i < 3; i++){
+	for(unsigned int i = 0; i < 4; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);

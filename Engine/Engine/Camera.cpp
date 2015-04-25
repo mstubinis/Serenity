@@ -49,9 +49,17 @@ void Camera::_constructFrustrum(){
 }
 bool Camera::sphereIntersectTest(Object* sphere){
 	glm::vec3 pos = sphere->getPosition();
-	float rad = sphere->getRadius();
 	for (unsigned int i = 0; i < 6; i++){
 		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - sphere->getRadius();
+		if (dist > 0){
+			return false;
+		}
+	}
+	return true;
+}
+bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
+	for (unsigned int i = 0; i < 6; i++){
+		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
 		if (dist > 0){
 			return false;
 		}

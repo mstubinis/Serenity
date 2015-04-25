@@ -67,6 +67,7 @@ namespace Engine{
 		void addMesh(std::string name,std::string file);
 		void addMesh(std::string file);
 		void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
+		void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr);
 		void addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile);
 
 		void initResources();

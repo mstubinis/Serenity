@@ -9,6 +9,15 @@
 
 using namespace Engine;
 
+Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,GLuint type,std::string name){
+	m_TextureAddress = 0;
+	m_Width = 0;
+	m_Height = 0;
+	m_Type = type;
+	_loadFromPixels(pixels,w,h,type);
+	m_Name = name;
+	Resources::Detail::ResourceManagement::m_Textures[m_Name] = this;
+}
 Texture::Texture(std::string file,GLuint type,std::string name){
 	m_TextureAddress = 0;
 	m_Width = 0;
@@ -36,6 +45,25 @@ Texture::Texture(std::string files[],GLuint type,std::string name){
 }
 Texture::~Texture(){
 	glDeleteTextures(1,&m_TextureAddress);
+	m_TextureAddress = 0;
+	m_Width = 0;
+	m_Height = 0;
+}
+void Texture::_loadFromPixels(const unsigned char* pixels, unsigned int w, unsigned int h,GLuint type){
+	if(type == GL_TEXTURE_2D){
+		glGenTextures(1, &m_TextureAddress);
+
+		glBindTexture(GL_TEXTURE_2D, m_TextureAddress);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,GL_UNSIGNED_BYTE, pixels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		m_Width = w;
+		m_Height = h;
+	}
 }
 void Texture::_loadFromFile(std::string file,GLuint type){
 	if(type == GL_TEXTURE_2D){
@@ -45,7 +73,6 @@ void Texture::_loadFromFile(std::string file,GLuint type){
 		glBindTexture(GL_TEXTURE_2D, m_TextureAddress);
 		image.loadFromFile(file.c_str());
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

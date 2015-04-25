@@ -105,7 +105,7 @@ void Object::rotate(float x, float y, float z){
 	pitch(x); 
 	yaw(y); 
 	roll(z); 
-	m_Changed = true;
+	flagAsChanged();
 }
 void Object::rotate(glm::vec3 rotation){ rotate(rotation.x,rotation.y,rotation.z); }
 void Object::scale(float x, float y, float z){
@@ -181,13 +181,14 @@ void Object::render(Mesh* mesh, Material* material,bool debug){
 	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 
 	glUseProgram(shader);
+
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
+	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
+	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
 
-	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
-	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	for(auto component:material->getComponents())
 		material->bindTexture(component.first,shader);
 	mesh->render();
@@ -208,7 +209,7 @@ void Object::setMesh(Mesh* mesh){
 		m_BoundingBoxRadius = glm::vec3(0,0,0); 
 		return; 
 	} 
-	m_BoundingBoxRadius = mesh->getRadius();  
+	m_BoundingBoxRadius = mesh->getRadiusBox();  
 	calculateRadius();
 }
 void Object::setMaterial(Material* material){ m_Material = material; }

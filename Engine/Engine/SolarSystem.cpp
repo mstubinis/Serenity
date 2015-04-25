@@ -161,6 +161,41 @@ void SolarSystem::_loadFromFile(std::string filename){
 						planetoid->translate(getObjects()[PARENT]->getPosition(),false);
 					}
 					m_Planets.push_back(planetoid);
+
+					if(NAME == "Saturn"){
+						//saturn's rings
+						std::vector<RingInfo> rings;
+						rings.push_back(RingInfo(535,279,glm::vec3(78,68,56),269));
+						rings.push_back(RingInfo(852,130,glm::vec3(154,138,115),120));
+						rings.push_back(RingInfo(172,120,glm::vec3(96,87,82),110));
+						rings.push_back(RingInfo(826,116,glm::vec3(146,129,109),2));
+						rings.push_back(RingInfo(315,84,glm::vec3(208,182,149),75));
+						rings.push_back(RingInfo(933,26,glm::vec3(208,182,149),2));
+						rings.push_back(RingInfo(866,7,glm::vec3(208,182,149),1));
+						rings.push_back(RingInfo(280,13,glm::vec3(99,86,70),10));
+						rings.push_back(RingInfo(344,5,glm::vec3(99,86,70),4));
+						rings.push_back(RingInfo(16,10,glm::vec3(30,30,29),6));
+						rings.push_back(RingInfo(33,7,glm::vec3(83,77,73),2));
+						rings.push_back(RingInfo(48,8,glm::vec3(83,77,73),3));
+						rings.push_back(RingInfo(109,6,glm::vec3(74,66,63),3));
+						rings.push_back(RingInfo(95,5,glm::vec3(74,66,63),1));
+						rings.push_back(RingInfo(147,8,glm::vec3(74,66,63),4));
+						rings.push_back(RingInfo(165,4,glm::vec3(120,110,101),3));
+						rings.push_back(RingInfo(535,3,glm::vec3(102,93,76),1));
+						rings.push_back(RingInfo(510,3,glm::vec3(102,93,76),1));
+						rings.push_back(RingInfo(500,4,glm::vec3(102,93,76),0));
+						rings.push_back(RingInfo(478,2,glm::vec3(102,93,76),0));
+						rings.push_back(RingInfo(558,4,glm::vec3(90,81,64),0));
+						rings.push_back(RingInfo(578,2,glm::vec3(102,93,76),0));
+						rings.push_back(RingInfo(630,2,glm::vec3(102,93,76),0));
+						rings.push_back(RingInfo(646,4,glm::vec3(65,57,46),0));
+						rings.push_back(RingInfo(1010,4,glm::vec3(102,102,102),0));
+						rings.push_back(RingInfo(1015,6,glm::vec3(102,102,102),0));
+						rings.push_back(RingInfo(909,4,glm::vec3(-1,-1,-1),0));
+						rings.push_back(RingInfo(667,4,glm::vec3(-1,-1,-1),2));
+						rings.push_back(RingInfo(205,3,glm::vec3(-1,-1,-1),2));
+						Ring* r = new Ring(rings,planetoid);
+					}
 				}
 				else if(line[0] == 'M'){//Moon
 					PlanetType PLANET_TYPE;
@@ -224,18 +259,30 @@ void SolarSystem::_loadRandomly(){
 	new Skybox(skybox);
 	#pragma endregion
 
-	//solar systems are normally mono - seven. Load 1 - 7 stars (2 being most common, 7 most rare)
 	#pragma region ConstructStars
 	unsigned int percent = static_cast<unsigned int>(rand() % 1000);
-	unsigned int numberOfStars = 7;
+
+	unsigned int numberOfStars = 1;
+	if(percent < 50) 
+		numberOfStars = 7;
+	else if(percent >= 50 && percent < 135)
+		numberOfStars = 6;
+	else if(percent >= 135 && percent < 250)
+		numberOfStars = 5;
+	else if(percent >= 250 && percent < 450)
+		numberOfStars = 4;
+	else if(percent >= 450 && percent < 750)
+		numberOfStars = 3;
+	else if(percent >= 750 && percent < 850)
+		numberOfStars = 2;
 
 
 
 	for(unsigned int i = 0; i < numberOfStars; i++){
 		Star* star = nullptr;
 		//star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
-		float radius = static_cast<float>(200000.0f + (rand() % 1252440000));
-		float position = static_cast<float>(radius * 2.0f + (rand() % 41252440000));
+		float radius = static_cast<float>(97412.0f + (rand() % 1252440000))*10.0f;
+		float position = static_cast<float>(radius * 2.0f + (rand() % 841252440000));
 
 		float R = static_cast<float>((rand()%100)/100.0f);
 		float G = static_cast<float>((rand()%100)/100.0f);
@@ -366,7 +413,7 @@ void SolarSystem::_loadRandomly(){
 			posX = sin(randomDegree) * positionAwayFromSun;
 			posZ = cos(randomDegree) * positionAwayFromSun;
 
-			float RADIUS = static_cast<float>(500 + rand() % 85000);
+			float RADIUS = static_cast<float>(500 + rand() % 85000)*10.0f;
 			PlanetType PLANET_TYPE = PLANET_TYPE_ROCKY;
 			if(RADIUS <= 15000){
 				float chance = rand() % 1000 / 1000.0f;

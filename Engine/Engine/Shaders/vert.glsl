@@ -23,9 +23,16 @@ void main(){
 	UV = uv;
 
 	//normalizing these solved a problem, but might cause more. Be careful here
+
+
 	Normals = normalize((World * vec4(normal,0.0)).xyz);
 	Tangents = normalize((World * vec4(tangent,0.0)).xyz);
 	Binormals = cross(Normals,Tangents);
+
+	//Handedness
+	if (dot(cross(Normals, Tangents), Binormals) < 0.0){
+		 Tangents *= -1.0;
+	}
 
 	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

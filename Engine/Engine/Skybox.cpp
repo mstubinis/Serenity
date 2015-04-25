@@ -7,7 +7,7 @@
 
 using namespace Engine;
 
-Skybox::Skybox(std::string name,Scene* scene): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"Skybox " + name,true,scene){
+Skybox::Skybox(std::string name,Scene* scene): Object("Skybox","",glm::vec3(0,0,0),glm::vec3(1,1,1),"***Skybox " + name,true,scene){
 	m_Position = glm::vec3(0,0,0);
 	m_Scale = glm::vec3(999,999,999);
 	m_Model = glm::mat4(1);
@@ -36,7 +36,7 @@ void Skybox::update(float dt){
 	m_Model = glm::scale(m_Model,m_Scale);
 }
 void Skybox::render(bool debug){
-	glDepthMask (GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 	glUseProgram( m_Shader );
 
 	glUniformMatrix4fv(glGetUniformLocation( m_Shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
@@ -52,5 +52,6 @@ void Skybox::render(bool debug){
 
 	glDrawArrays(GL_TRIANGLES, 0, m_Mesh->getPoints().size());
 	glDisableVertexAttribArray(0);
-	glDepthMask(GL_TRUE);
+	glUseProgram(0);
+	glEnable(GL_DEPTH_TEST);
 }

@@ -5,6 +5,7 @@
 #include "Engine_Resources.h"
 #include "HUD.h"
 #include "Ship.h"
+#include "Planet.h"
 
 using namespace Engine;
 using namespace Engine::Events;
@@ -21,6 +22,7 @@ void Game::initResources(){
 	Resources::addMesh("Planet","Models/planet.obj");
 	Resources::addMesh("Defiant","Models/defiant.obj");
 	Resources::addMesh("Starbase","Models/starbase.obj");
+	Resources::addMesh("Ring","Models/ring.obj");
 
 	Resources::addMaterial("Star","Textures/Planets/Sun.png","","");
 	Resources::addMaterial("Default","Textures/Planets/Sun.png","","");
@@ -30,8 +32,8 @@ void Game::initResources(){
 	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png","","");
 }
 void Game::initLogic(){
-	//m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
-	m_SolarSystems["Sol"] = new SolarSystem("Sol","");
+	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
+	//m_SolarSystems["Sol"] = new SolarSystem("Sol","");
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());

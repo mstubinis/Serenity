@@ -55,11 +55,6 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 
 	Resources::Detail::ResourceManagement::m_Window = new sf::Window(videoMode, name, style, settings);
 
-	glEnable(GL_CULL_FACE); 
-	glCullFace(GL_BACK);
-	glDepthMask(GL_TRUE); 
-	glEnable(GL_DEPTH_TEST);
-
     //Resources::getWindow()->setVerticalSyncEnabled(true);
 	Resources::getWindow()->setMouseCursorVisible(false);
 	Resources::getWindow()->setKeyRepeatEnabled(false);

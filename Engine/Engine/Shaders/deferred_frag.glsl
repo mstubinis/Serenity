@@ -32,20 +32,21 @@ void main(){
 		gl_FragData[0] = Object_Color;
 
 	if(Shadeless == 0){
-		if(NormalMapEnabled == 1)
+		if(NormalMapEnabled == 1){
 			gl_FragData[1].rgb = normalize(CalcBumpedNormal());
-		else
-			gl_FragData[1].rgb = normalize(Normals);
+		}
+		else{
+			gl_FragData[1].rgb = normalize(Normals)*texture2D(DiffuseMap, UV).a;
+		}
 
 		if(GlowMapEnabled == 1)
 			gl_FragData[1].a = texture2D(GlowMap, UV).r;
 		else
-			gl_FragData[1].a = 0.0;
+			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 	}
 	else{
 		gl_FragData[1] = vec4(1.0);
 	}
 	gl_FragData[2] = vec4(WorldPosition,1.0);
-    const float offset = 1.0;
-    gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));
+    gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }
