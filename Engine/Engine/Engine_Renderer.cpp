@@ -17,6 +17,7 @@
 
 using namespace Engine;
 
+bool Engine::Renderer::Detail::RenderManagement::m_DidLightingPassOnce = false;
 bool Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
 Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
@@ -143,6 +144,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 }
 void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 
+	m_DidLightingPassOnce = false;
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
@@ -203,7 +205,9 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 2 );
 
 	for (auto light:Resources::getCurrentScene()->getLights()) {
+		glUniform1i(glGetUniformLocation(shader,"didOnce"),static_cast<unsigned int>(m_DidLightingPassOnce));
 		light.second->render(shader);
+		m_DidLightingPassOnce = true;
    	}
 
 	// Reset OpenGL state

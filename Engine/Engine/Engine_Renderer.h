@@ -49,6 +49,7 @@ namespace Engine{
 				private:
 					static Texture* RandomMapSSAO;
 					static GBuffer* m_gBuffer;
+					static bool m_DidLightingPassOnce;
 
 					static std::vector<FontRenderInfo> m_FontsToBeRendered;
 					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;

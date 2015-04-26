@@ -19,6 +19,8 @@ class Object{
 		glm::vec3 _calculateForward(); 
 		glm::vec3 _calculateRight(); 
 		glm::vec3 _calculateUp();
+
+		bool m_JustSpawned;
 	protected:
 		bool m_Changed;
 

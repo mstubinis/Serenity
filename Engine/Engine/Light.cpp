@@ -95,7 +95,10 @@ void SunLight::render(GLuint shader){
 	_initQuad();
 }
 void SunLight::renderDebug(GLuint shader){
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+	if(m_Parent == nullptr)
+		glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+	else
+		glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Parent->getModel()));
 	m_Mesh->render();
 }
 DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0,0,0),"Directional Light",LIGHT_TYPE_DIRECTIONAL,scene){

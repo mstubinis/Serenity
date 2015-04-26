@@ -6,6 +6,8 @@ uniform vec3 gColor;
 uniform float gAmbientIntensity;
 uniform float gDiffuseIntensity;
 
+uniform int didOnce;
+
 uniform float gConstant;
 uniform float gLinear;
 uniform float gExp;
@@ -73,13 +75,19 @@ void main(){
     vec3 normal = normalize(texture2D( gNormalMap, texCoord).rgb);
 	float glow = texture2D(gGlowMap,texCoord).r;
 
-	if(gLightType == 0)
-		gl_FragColor = max(vec4(glow),CalcSunLight(position,normal));
-	else if(gLightType == 1)
-		gl_FragColor = max(vec4(glow),CalcPointLight(position,normal));
-	else if(gLightType == 2)
-		gl_FragColor = max(vec4(glow),CalcDirectionalLight(position,normal));
-	else if(gLightType == 3)
-		gl_FragColor = max(vec4(glow),CalcSpotLight(position,normal));
+	vec4 lightCalculation = vec4(0);
 
+	if(gLightType == 0)
+		lightCalculation = CalcSunLight(position,normal);
+	else if(gLightType == 1)
+		lightCalculation = CalcPointLight(position,normal);
+	else if(gLightType == 2)
+		lightCalculation = CalcDirectionalLight(position,normal);
+	else if(gLightType == 3)
+		lightCalculation = CalcSpotLight(position,normal);
+
+	if(didOnce == 0)
+		gl_FragColor = max(vec4(glow),lightCalculation);
+	else
+		gl_FragColor = lightCalculation;
 }

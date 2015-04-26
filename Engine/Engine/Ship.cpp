@@ -45,13 +45,13 @@ void PlayerShip::update(float dt){
 		glm::vec3 s = getForward() * glm::pow(speed,20.0f);
 
 		for(auto obj:Resources::getCurrentScene()->getObjects()){
-			if(obj.second != this && obj.second->getParent() == nullptr){
-				obj.second->translate(s,false);
+			if((obj.second->getName().find("Skybox") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
+				obj.second->setPosition(obj.second->getPosition() + s);
 			}
 		}
 		for(auto obj:Resources::getCurrentScene()->getLights()){
 			if(obj.second->getParent() == nullptr){
-				obj.second->translate(s,false);
+				obj.second->setPosition(obj.second->getPosition() + s);
 			}
 		}
 	}
@@ -93,7 +93,7 @@ void PlayerShip::update(float dt){
 		m_Camera->follow(this);
 	}
 	else if(Keyboard::isKeyDownOnce("f2")){
-		if(m_Target == nullptr || m_Camera->getTarget() != this){
+		if(m_Camera->getState() == CAMERA_STATE_FOLLOW || m_Target == nullptr || m_Camera->getTarget() != this){
 			Resources::getCurrentScene()->centerSceneToObject(this);
 			m_Camera->orbit(this);
 		}

@@ -11,6 +11,7 @@
 using namespace Engine;
 
 Object::Object(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Scene* scene){
+	m_JustSpawned = true;
 	m_Changed = true;
 	m_Radius = 0;
 	m_BoundingBoxRadius = glm::vec3(0,0,0);
@@ -120,12 +121,15 @@ void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
 void Object::setPosition(float x, float y, float z){ 
 	m_Position.x = x; 
 	m_Position.y = y; 
-	m_Position.z = z; 
-	glm::mat4 newModel = glm::mat4(1);
-	newModel = glm::translate(newModel, m_Position);
-	newModel *= glm::mat4_cast(m_Orientation);
-	newModel = glm::scale(newModel,m_Scale);
-	m_Model = newModel;
+	m_Position.z = z;
+	if(m_JustSpawned){
+		glm::mat4 newModel = glm::mat4(1);
+		newModel = glm::translate(newModel, m_Position);
+		newModel *= glm::mat4_cast(m_Orientation);
+		newModel = glm::scale(newModel,m_Scale);
+		m_Model = newModel;
+	}
+	flagAsChanged();
 }
 void Object::setPosition(glm::vec3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
@@ -164,15 +168,13 @@ void Object::update(float dt){
 		m_Model = newModel;
 		m_Changed = false;
 	}
+	if(m_JustSpawned == true)
+		m_JustSpawned = false;
+	for(auto child:m_Children)
+		child->update(dt);
 }
-float Object::getDistance(Object* other){
-	glm::vec3 vecTo = other->getPosition() - getPosition();
-	return (abs(glm::length(vecTo)));
-}
-unsigned long long Object::getDistanceLL(Object* other){
-	glm::vec3 vecTo = other->getPosition() - getPosition();
-	return static_cast<unsigned long long>(abs(glm::length(vecTo)));
-}
+float Object::getDistance(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
+unsigned long long Object::getDistanceLL(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::render(Mesh* mesh, Material* material,bool debug){
 	if(mesh == nullptr)
 		return;
@@ -218,10 +220,15 @@ void Object::setMesh(Mesh* mesh){
 }
 void Object::setMaterial(Material* material){ m_Material = material; }
 void Object::flagAsChanged(){
-	m_Changed = true;
-	if(m_Children.size() == 0) return;
-	for(auto child:m_Children)
-		child->m_Changed = true;
+	if(m_Parent != nullptr){
+		m_Parent->flagAsChanged();
+	}
+	else{
+		m_Changed = true;
+		if(m_Children.size() == 0) return;
+		for(auto child:m_Children)
+			child->m_Changed = true;
+	}
 }
 void Object::setName(std::string name){
 	std::string oldName = m_Name;

@@ -197,7 +197,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 							std::vector<RingInfo> rings;
 							planetRings[PARENT] = rings;
 						}
-						planetRings[PARENT].push_back(RingInfo(POSITION/10,RADIUS/10,glm::vec3(R,G,B),BREAK));
+						planetRings[PARENT].push_back(RingInfo(static_cast<unsigned int>(POSITION/10),static_cast<unsigned int>(RADIUS/10),glm::vec3(R,G,B),BREAK));
 					}
 				}
 			}
@@ -251,7 +251,6 @@ void SolarSystem::_loadRandomly(){
 		numberOfStars = 3;
 	else if(percent >= 750 && percent < 850)
 		numberOfStars = 2;
-
 
 
 	for(unsigned int i = 0; i < numberOfStars; i++){
@@ -418,31 +417,27 @@ void SolarSystem::_loadRandomly(){
 			std::string MATERIAL_NAME,FOLDER,normalFile,glowFile = "";
 			std::string base_name;
 			std::string base_path = planets_path;
+			std::string key = "";
 			if(PLANET_TYPE == PLANET_TYPE_ROCKY){
-				FOLDER = planets_folders["Rocky"];
-				base_path += "/Rocky/";
-				std::vector<std::string> textures = planet_textures["Rocky"];
-				std::string texture = textures.at(rand() % textures.size());
-				base_name = texture.substr(base_path.size(),texture.size()-1);
-				FOLDER += "/" + base_name;
-				MATERIAL_NAME = FOLDER;
-				FOLDER += "/";
+				key = "Rocky";
 			}
 			else if(PLANET_TYPE == PLANET_TYPE_ICE){
-				FOLDER = planets_folders["Ice"];
-				base_path += "/Ice/";
-				std::vector<std::string> textures = planet_textures["Ice"];
-				std::string texture = textures.at(rand() % textures.size());
-				base_name = texture.substr(base_path.size(),texture.size()-1);
-				FOLDER += "/" + base_name;
-				MATERIAL_NAME = FOLDER;
-				FOLDER += "/";
+				key = "Ice";
 			}
 			else if(PLANET_TYPE == PLANET_TYPE_GAS_GIANT){
+				key = "GasGiant";
 			}
 			else if(PLANET_TYPE == PLANET_TYPE_ICE_GIANT){
+				key = "IceGiant";
 			}
-
+			FOLDER = planets_folders[key];
+			base_path += "/" + key + "/";
+			std::vector<std::string> textures = planet_textures[key];
+			std::string texture = textures.at(rand() % textures.size());
+			base_name = texture.substr(base_path.size(),texture.size()-1);
+			FOLDER += "/" + base_name;
+			MATERIAL_NAME = FOLDER;
+			FOLDER += "/";
 
 			std::string diffuseFile = FOLDER + base_name + ".png";
 			std::string normFile = FOLDER + base_name + "Norm.png";
@@ -464,7 +459,7 @@ void SolarSystem::_loadRandomly(){
 			}
 		}
 	}
-	//Then load moons. Generally the number of moons depends on the type of planet. Gas giants have more moons than rocky planets, etc..
+	//Then load moons. Generally the number of moons depends on the type of planet. Giants have more moons than normal planets, etc..
 
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
 

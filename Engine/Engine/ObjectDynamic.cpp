@@ -105,6 +105,8 @@ void ObjectDynamic::update(float dt){
 		m_Up = ObjectDynamic::_calculateUp();
 	}
 	m_Model = parentModel * newModel;
+	for(auto child:m_Children)
+		child->update(dt);
 }
 void ObjectDynamic::setPosition(float x, float y, float z){
 	m_RigidBody->activate();

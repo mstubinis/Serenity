@@ -20,21 +20,20 @@ void Scene::centerSceneToObject(Object* center){
 		if(obj.second != center && obj.second->getParent() == nullptr){
 			obj.second->setPosition(obj.second->getPosition() + offset);
 		}
+		obj.second->flagAsChanged();
 	}
 	for(auto obj:s->getLights()){
-		if(obj.second->getParent() == nullptr){
+		if(obj.second != center && obj.second->getParent() == nullptr){
 			obj.second->setPosition(obj.second->getPosition() + offset);
 		}
+		obj.second->flagAsChanged();
 	}
 	center->setPosition(0,0,0);
 }
 Scene::~Scene(){
-	for(auto obj:m_Objects)
-		delete obj.second;
-	for(auto light:m_Lights)
-		delete light.second;
-	for(auto cam:m_Cameras)
-		delete cam.second;
+	for(auto obj:m_Objects)  delete obj.second;
+	for(auto light:m_Lights) delete light.second;
+	for(auto cam:m_Cameras)  delete cam.second;
 }
 void Scene::setName(std::string name){
 	std::string oldName = m_Name;
