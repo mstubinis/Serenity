@@ -330,7 +330,6 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 	Texture* diffuse = new Texture(ringImage.getPixelsPtr(),ringImage.getSize().x,ringImage.getSize().y,GL_TEXTURE_2D,parent->getName() + "RingsDiffuse");
 	Resources::addMaterial(parent->getName() + "Rings",diffuse,nullptr,nullptr);
 	this->material = Resources::getMaterial(parent->getName() + "Rings");
-	ringImage.saveToFile("test.png");
 }
 void Ring::update(float dt){
 }
