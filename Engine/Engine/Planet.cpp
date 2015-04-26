@@ -336,11 +336,9 @@ void Ring::update(float dt){
 void Ring::render(){
 	Camera* activeCamera = Resources::getActiveCamera();
 	glm::mat4 model = m_Parent->getModel();
-	model = glm::rotate(model,45.0f,glm::vec3(1,0,0));
 	Mesh* mesh = Resources::getMesh("Ring");
 	float radius = mesh->getRadius() * m_Parent->getScale().x;
 
-    glDisable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -363,6 +361,5 @@ void Ring::render(){
 		material->bindTexture(component.first,shader);
 	mesh->render();
 	glUseProgram(0);
-	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 }

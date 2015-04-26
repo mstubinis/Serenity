@@ -21,6 +21,6 @@ void main(){
 	else{
 		vec4 light = max(gAmbientColor,max(lighting,lighting*ssao));
 		vec4 Final = image*light;
-		gl_FragColor = Final;
+		gl_FragColor = normals;
 	}
 }

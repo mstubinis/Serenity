@@ -29,6 +29,9 @@ std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_Tex
 void Engine::Renderer::Detail::RenderManagement::init(){
 	Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = new Texture("Textures/SSAONormal.png");
 	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
 	delete Engine::Renderer::Detail::RenderManagement::m_gBuffer;

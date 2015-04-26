@@ -4,6 +4,8 @@
 #include "Engine_Events.h"
 #include "GameCamera.h"
 #include "Scene.h"
+#include "SolarSystem.h"
+#include "Planet.h"
 
 using namespace Engine;
 using namespace Engine::Events;
@@ -32,6 +34,9 @@ PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::
 	m_Camera->follow(this);
 }
 PlayerShip::~PlayerShip(){
+}
+void PlayerShip::setTarget(Object* target){
+	Ship::setTarget(target);
 }
 void PlayerShip::update(float dt){
 	if(m_IsWarping && m_WarpFactor > 0){
@@ -83,10 +88,20 @@ void PlayerShip::update(float dt){
 		applyTorque(-Mouse::getMouseDifference().y*0.002f,-Mouse::getMouseDifference().x*0.002f,0);
 	}
 
-	if(Keyboard::isKeyDownOnce("f1"))
+	if(Keyboard::isKeyDownOnce("f1")){
+		Resources::getCurrentScene()->centerSceneToObject(this);
 		m_Camera->follow(this);
-	else if(Keyboard::isKeyDownOnce("f2"))
-		m_Camera->orbit(this);
+	}
+	else if(Keyboard::isKeyDownOnce("f2")){
+		if(m_Target == nullptr || m_Camera->getTarget() != this){
+			Resources::getCurrentScene()->centerSceneToObject(this);
+			m_Camera->orbit(this);
+		}
+		else if(m_Target != nullptr){
+			Resources::getCurrentScene()->centerSceneToObject(m_Target);
+			m_Camera->orbit(m_Target);
+		}
+	}
 	else if(Keyboard::isKeyDownOnce("l")){
 		m_IsWarping = !m_IsWarping;
 		m_WarpFactor = 0;

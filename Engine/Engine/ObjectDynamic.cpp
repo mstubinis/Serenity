@@ -52,8 +52,6 @@ ObjectDynamic::~ObjectDynamic(){
 	delete m_Inertia;
 }
 void ObjectDynamic::translate(float x, float y, float z,bool local){
-	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
-	x *= dt; y*= dt; z *= dt;
 	m_RigidBody->activate();
 	btTransform transform = m_RigidBody->getWorldTransform();
 	btVector3 pos = transform.getOrigin();
@@ -66,8 +64,7 @@ void ObjectDynamic::translate(float x, float y, float z,bool local){
 	else{
 		p += glm::vec3(x,y,z);
 	}
-	transform.setOrigin(btVector3(p.x,p.y,p.z));
-	m_RigidBody->setWorldTransform(transform);
+	this->setPosition(this->getPosition() + p);
 }
 void ObjectDynamic::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 glm::vec3 ObjectDynamic::_calculateForward(){ return glm::normalize(glm::cross(getRight(),getUp())); }

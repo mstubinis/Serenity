@@ -150,7 +150,10 @@ void SolarSystem::_loadFromFile(std::string filename){
 				}
 
 				if(line[0] == 'S'){//Sun
-					Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,this);
+					Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(0,0,0),static_cast<float>(RADIUS),NAME,this);
+					if(PARENT != ""){
+						star->setPosition(getObjects()[PARENT]->getPosition()+glm::vec3(xPos,0,zPos));
+					}
 					m_Stars.push_back(star);
 				}
 				else if(line[0] == 'P'){//Planet
@@ -162,7 +165,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
 					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
-						planetoid->translate(getObjects()[PARENT]->getPosition(),false);
+						planetoid->setPosition(getObjects()[PARENT]->getPosition()+glm::vec3(xPos,0,zPos));
 					}
 					m_Planets.push_back(planetoid);
 				}
@@ -175,7 +178,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
 					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
-						planetoid->translate(getObjects()[PARENT]->getPosition(),false);
+						planetoid->setPosition(getObjects()[PARENT]->getPosition() + glm::vec3(xPos,0,zPos));
 					}
 					m_Moons.push_back(planetoid);
 				}
@@ -207,19 +210,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 		new Ring(rings.second,static_cast<Planet*>(m_Objects[rings.first]));
 	}
 
-	glm::vec3 offset = -player->getPosition();
-	Scene* s =  Resources::getCurrentScene();
-	for(auto obj:Resources::getCurrentScene()->getObjects()){
-		if(obj.second != player && obj.second->getParent() == nullptr){
-			obj.second->translate(offset,false);
-		}
-	}
-	for(auto obj:Resources::getCurrentScene()->getLights()){
-		if(obj.second->getParent() == nullptr){
-			obj.second->translate(offset,false);
-		}
-	}
-	player->setPosition(0,0,0);
+	centerSceneToObject(player);
 }
 void SolarSystem::_loadRandomly(){
 	#pragma region Skybox
@@ -477,17 +468,7 @@ void SolarSystem::_loadRandomly(){
 
 	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
 
-	#pragma region ChangeCoordSpace
-	glm::vec3 offset = -player->getPosition();
-	Scene* s =  Resources::getCurrentScene();
-	for(auto obj:s->getObjects()){
-		if(obj.second != player && obj.second->getParent() == nullptr){ obj.second->translate(offset,false); }
-	}
-	for(auto obj:s->getLights()){
-		if(obj.second->getParent() == nullptr){ obj.second->translate(offset,false); }
-	}
-	player->setPosition(0,0,0);
-	#pragma endregion
+	centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){
 	if(Keyboard::isKeyDown("esc"))

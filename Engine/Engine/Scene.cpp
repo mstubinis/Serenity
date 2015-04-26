@@ -13,6 +13,21 @@ Scene::Scene(std::string name,glm::vec4 ambientLightColor){
 	m_Name = name;
 	m_AmbientLighting = ambientLightColor;
 }
+void Scene::centerSceneToObject(Object* center){
+	glm::vec3 offset = -(center->getPosition());
+	Scene* s =  Resources::getCurrentScene();
+	for(auto obj:s->getObjects()){
+		if(obj.second != center && obj.second->getParent() == nullptr){
+			obj.second->setPosition(obj.second->getPosition() + offset);
+		}
+	}
+	for(auto obj:s->getLights()){
+		if(obj.second->getParent() == nullptr){
+			obj.second->setPosition(obj.second->getPosition() + offset);
+		}
+	}
+	center->setPosition(0,0,0);
+}
 Scene::~Scene(){
 	for(auto obj:m_Objects)
 		delete obj.second;

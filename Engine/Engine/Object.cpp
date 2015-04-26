@@ -85,16 +85,16 @@ glm::vec3 Object::_calculateUp(){
                                      2 * (y * z + w * x)));
 }
 void Object::translate(float x, float y, float z,bool local){
-	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
-	x *= dt; y*= dt; z *= dt;
+	glm::vec3 offset = glm::vec3(0,0,0);
 	if(local){
-		m_Position += getForward() * z;
-		m_Position += getRight() * x;
-		m_Position += getUp() * y;
+		offset += getForward() * z;
+		offset += getRight() * x;
+		offset += getUp() * y;
 	}
 	else{
-		m_Position += glm::vec3(x,y,z);
+		offset += glm::vec3(x,y,z);
 	}
+	this->setPosition(this->getPosition() + offset);
 	flagAsChanged();
 }
 void Object::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
@@ -121,7 +121,11 @@ void Object::setPosition(float x, float y, float z){
 	m_Position.x = x; 
 	m_Position.y = y; 
 	m_Position.z = z; 
-	flagAsChanged();
+	glm::mat4 newModel = glm::mat4(1);
+	newModel = glm::translate(newModel, m_Position);
+	newModel *= glm::mat4_cast(m_Orientation);
+	newModel = glm::scale(newModel,m_Scale);
+	m_Model = newModel;
 }
 void Object::setPosition(glm::vec3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 

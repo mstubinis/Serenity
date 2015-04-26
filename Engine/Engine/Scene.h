@@ -34,5 +34,7 @@ class Scene{
 		glm::vec4 getAmbientLightColor(){ return m_AmbientLighting; }
 		void setAmbientLightColor(glm::vec4);
 		void setAmbientLightColor(float,float,float,float);
+
+		void centerSceneToObject(Object*);
 };
 #endif

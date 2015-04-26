@@ -43,6 +43,7 @@ class PlayerShip: public Ship{
 		~PlayerShip();
 
 		void update(float);
+		void setTarget(Object*);
 };
 
 #endif

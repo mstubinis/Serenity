@@ -21,6 +21,8 @@ class GameCamera: public Camera{
 		void update(float);
 		void render();
 
+		void setTarget(Object* target) { m_Target = target; }
+		const Object* getTarget() const { return m_Target; }
 		const CAMERA_STATE getState() const { return m_State; }
 };
 #endif
