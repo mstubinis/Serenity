@@ -3,6 +3,8 @@
 
 #include "Object.h"
 
+class ObjectDisplay;
+
 enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
 
 class Scene;
@@ -28,8 +30,6 @@ class Camera: public Object{
 		void setOrthoProjection(float,float,float,float);
 
 		virtual void update(float);
-		void render(Mesh*,Material*,bool=false);
-		void render(bool=false);
 
 		void lookAt(glm::vec3);  
 		void lookAt(glm::vec3,glm::vec3); 
@@ -49,7 +49,7 @@ class Camera: public Object{
 		glm::mat4 getViewProjection(){ return m_Projection * m_View; }
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
-		bool sphereIntersectTest(Object*);
+		bool sphereIntersectTest(ObjectDisplay*);
 		bool sphereIntersectTest(glm::vec3 pos, float radius);
 };
 #endif

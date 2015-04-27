@@ -1,14 +1,14 @@
 #ifndef OBJECTDYNAMIC_H
 #define OBJECTDYNAMIC_H
 
-#include "Object.h"
+#include "ObjectDisplay.h"
 
 class btCollisionShape;
 class btRigidBody;
 struct btDefaultMotionState;
 class btVector3;
 
-class ObjectDynamic: public Object{
+class ObjectDynamic: public ObjectDisplay{
 	private:
 		glm::vec3 _calculateForward(); 
 		glm::vec3 _calculateRight(); 

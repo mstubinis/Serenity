@@ -42,7 +42,7 @@ void _initQuad(){
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
-SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type,Scene* scene):Object("DEBUGLight","",pos,glm::vec3(1,1,1),name,false,scene){
+SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,false,scene){
 	m_Type = type;
 
     m_AmbientIntensity = 0.05f;

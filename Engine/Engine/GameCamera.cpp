@@ -1,6 +1,7 @@
 #include "GameCamera.h"
 #include "Engine.h"
 #include "Engine_Events.h"
+#include "ObjectDisplay.h"
 
 using namespace Engine::Events;
 
@@ -52,11 +53,11 @@ void GameCamera::update(float dt){
 	}
 }
 void GameCamera::render(){}
-void GameCamera::follow(Object* target){
+void GameCamera::follow(ObjectDisplay* target){
 	m_Target = target;
 	m_State = CAMERA_STATE_FOLLOW;
 }
-void GameCamera::orbit(Object* target){
+void GameCamera::orbit(ObjectDisplay* target){
 	m_Target = target;
 	m_State = CAMERA_STATE_ORBIT;
 }

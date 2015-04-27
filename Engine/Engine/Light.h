@@ -1,10 +1,10 @@
 #ifndef LIGHT_H
 #define LIGHT_H
-#include "Object.h"
+#include "ObjectDisplay.h"
 
 enum LIGHT_TYPE {LIGHT_TYPE_SUN,LIGHT_TYPE_POINT,LIGHT_TYPE_DIRECTIONAL, LIGHT_TYPE_SPOT};
 class Scene;
-class SunLight: public Object{
+class SunLight: public ObjectDisplay{
 	protected:
 		unsigned int m_Type;
 		float m_AmbientIntensity, m_DiffuseIntensity;

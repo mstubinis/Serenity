@@ -1,7 +1,7 @@
 #ifndef PLANET_H
 #define PLANET_H
 
-#include "Object.h"
+#include "ObjectDisplay.h"
 
 class SunLight;
 class Ring;
@@ -13,8 +13,6 @@ enum PlanetType { PLANET_TYPE_ROCKY,
 				  PLANET_TYPE_STAR, 
 				  PLANET_TYPE_ASTEROID };
 
-
-
 struct RingInfo{
 	unsigned int position;
 	unsigned int size;
@@ -23,7 +21,7 @@ struct RingInfo{
 	RingInfo(unsigned int p, unsigned int s, glm::vec3 col,unsigned int ab = 1){ position = p; size = s; color = col; alphaBreakpoint = ab; }
 };
 
-class Planet: public Object{
+class Planet: public ObjectDisplay{
 	protected:
 		std::vector<Ring*> m_Rings;
 		PlanetType m_Type;

@@ -10,7 +10,7 @@
 
 using namespace Engine;
 
-Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,float atmosphere,Scene* scene):Object("Planet",mat,pos,glm::vec3(scl,scl,scl),name,true,scene){
+Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,true,scene){
 	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
 }
@@ -200,7 +200,7 @@ Star::~Star(){
 	delete m_Light;
 }
 void Star::render(Mesh* mesh, Material* mat,bool debug){
-	Object::render(mesh,mat,debug);
+	ObjectDisplay::render(mesh,mat,debug);
 }
 void Star::render(bool debug){ Star::render(m_Mesh,m_Material,debug); }
 
@@ -236,91 +236,62 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 			}
 
 			if(count > 0){
-				sf::Color backgroundColor = ringImage.getPixel(ringInfo.position + i,0);
-				glm::vec4 bC = glm::vec4(backgroundColor.r/255.0f,backgroundColor.g/255.0f,backgroundColor.b/255.0f,backgroundColor.a/255.0f);
-				sf::Color finalColor = sf::Color(255,255,255,255);
+				sf::Color backgroundColorFront = ringImage.getPixel(ringInfo.position + i,0);
+				sf::Color backgroundColorBack = ringImage.getPixel(ringInfo.position - i,0);
+				glm::vec4 bCFront = glm::vec4(backgroundColorFront.r/255.0f,backgroundColorFront.g/255.0f,backgroundColorFront.b/255.0f,backgroundColorFront.a/255.0f);
+				glm::vec4 bCBack = glm::vec4(backgroundColorBack.r/255.0f,backgroundColorBack.g/255.0f,backgroundColorBack.b/255.0f,backgroundColorBack.a/255.0f);
+				sf::Color finalColorFront = sf::Color(255,255,255,255);
+				sf::Color finalColorBack = sf::Color(255,255,255,255);
 
-				float fA = pC.a + bC.a * (1-pC.a);
-				finalColor.a = fA * 255;
+				float fAFront = pC.a + bCFront.a * (1-pC.a);
+				float fABack = pC.a + bCBack.a * (1-pC.a);
+				finalColorFront.a = fAFront * 255;
+				finalColorBack.a = fABack * 255;
 
-				finalColor.r = ((pC.r*pC.a + bC.r*bC.a * (1-pC.a)) / fA)* 255;
-				finalColor.g = ((pC.g*pC.a + bC.g*bC.a * (1-pC.a)) / fA)* 255;
-				finalColor.b = ((pC.b*pC.a + bC.b*bC.a * (1-pC.a)) / fA)* 255;
+				finalColorFront.r = static_cast<unsigned int>(((pC.r*pC.a + bCFront.r*bCFront.a * (1-pC.a)) / fAFront)* 255);
+				finalColorFront.g = static_cast<unsigned int>(((pC.g*pC.a + bCFront.g*bCFront.a * (1-pC.a)) / fAFront)* 255);
+				finalColorFront.b = static_cast<unsigned int>(((pC.b*pC.a + bCFront.b*bCFront.a * (1-pC.a)) / fAFront)* 255);
+
+				finalColorBack.r = static_cast<unsigned int>(((pC.r*pC.a + bCBack.r*bCBack.a * (1-pC.a)) / fABack)* 255);
+				finalColorBack.g = static_cast<unsigned int>(((pC.g*pC.a + bCBack.g*bCBack.a * (1-pC.a)) / fABack)* 255);
+				finalColorBack.b = static_cast<unsigned int>(((pC.b*pC.a + bCBack.b*bCBack.a * (1-pC.a)) / fABack)* 255);
 
 				if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
-					finalColor = sf::Color(backgroundColor.r,backgroundColor.g,backgroundColor.b,0);
+					finalColorFront = sf::Color(backgroundColorFront.r,backgroundColorFront.g,backgroundColorFront.b,0);
+					finalColorBack = sf::Color(backgroundColorBack.r,backgroundColorBack.g,backgroundColorBack.b,0);
 
 					float numerator = ringInfo.size - i;
 					pC.a = static_cast<float>(numerator/(ringInfo.size));
-					finalColor.a = 255 - (pC.a *255);
+					finalColorFront.a = 255 - (pC.a *255);
+					finalColorBack.a = 255 - (pC.a *255);
 				}
 
-				finalColor.r += rand() % 6 - 3;
-				finalColor.g += rand() % 6 - 3;
-				finalColor.b += rand() % 6 - 3;
+				int ra = rand() % 10 - 5;
+				int ra1 = rand() % 10 - 5;
+
+				finalColorFront.r += ra;
+				finalColorFront.g += ra;
+				finalColorFront.b += ra;
+
+				finalColorBack.r += ra1;
+				finalColorBack.g += ra1;
+				finalColorBack.b += ra1;
 
 				for(unsigned int s = 0; s < ringImage.getSize().y; s++){
-					ringImage.setPixel(ringInfo.position + i,s,finalColor);
+					ringImage.setPixel(ringInfo.position + i,s,finalColorFront);
+					ringImage.setPixel(ringInfo.position - i,s,finalColorBack);
 				}
 			}
 			else{
 				sf::Color finalColor = paintCol;
-				finalColor.r += rand() % 6 - 3;
-				finalColor.g += rand() % 6 - 3;
-				finalColor.b += rand() % 6 - 3;
+				int ra = rand() % 10 - 5;
+
+				finalColor.r += ra;
+				finalColor.g += ra;
+				finalColor.b += ra;
 
 				for(unsigned int s = 0; s < ringImage.getSize().y; s++){
 					ringImage.setPixel(ringInfo.position + i,s,paintCol);
-				}
-			}
-		}
-		newI = 0;
-		for(unsigned int i = 0; i < ringInfo.size; i++){
-			if(i > ringInfo.alphaBreakpoint){
-				float numerator = alphaChangeRange - newI;
-				pC.a = static_cast<float>(numerator/(alphaChangeRange));
-				paintCol.a = pC.a * 255;
-				newI++;
-			}
-			else{
-				pC.a = 1;
-				paintCol.a = 255;
-			}
-
-			if(count > 0){
-				sf::Color backgroundColor = ringImage.getPixel(ringInfo.position - i,0);
-				glm::vec4 bC = glm::vec4(backgroundColor.r/255.0f,backgroundColor.g/255.0f,backgroundColor.b/255.0f,backgroundColor.a/255.0f);
-				sf::Color finalColor = sf::Color(255,255,255,255);
-
-				float fA = pC.a + bC.a * (1-pC.a);
-				finalColor.a = fA * 255;
-
-				finalColor.r = ((pC.r*pC.a + bC.r*bC.a * (1-pC.a)) / fA)* 255;
-				finalColor.g = ((pC.g*pC.a + bC.g*bC.a * (1-pC.a)) / fA)* 255;
-				finalColor.b = ((pC.b*pC.a + bC.b*bC.a * (1-pC.a)) / fA)* 255;
-
-				if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
-					finalColor = sf::Color(backgroundColor.r,backgroundColor.g,backgroundColor.b,0);
-
-					float numerator = ringInfo.size - i;
-					pC.a = static_cast<float>(numerator/(ringInfo.size));
-					finalColor.a = 255 - (pC.a *255);
-				}
-				finalColor.r += rand() % 6 - 3;
-				finalColor.g += rand() % 6 - 3;
-				finalColor.b += rand() % 6 - 3;
-
-				for(unsigned int s = 0; s < ringImage.getSize().y; s++){
-					ringImage.setPixel(ringInfo.position - i,s,finalColor);
-				}
-			}
-			else{
-				sf::Color finalColor = paintCol;
-				finalColor.r += rand() % 6 - 3;
-				finalColor.g += rand() % 6 - 3;
-				finalColor.b += rand() % 6 - 3;
-
-				for(unsigned int s = 0; s < ringImage.getSize().y; s++){
 					ringImage.setPixel(ringInfo.position - i,s,paintCol);
 				}
 			}

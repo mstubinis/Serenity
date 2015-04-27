@@ -1,10 +1,11 @@
 #include "Camera.h"
+#include "ObjectDisplay.h"
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZCamera",true,scene){//create a perspective camera
+Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZCamera",true,scene){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
@@ -16,7 +17,7 @@ Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Sce
 	setPerspectiveProjection();
 	lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
-Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object("","",glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZCamera",true,scene){//create an orthographic camera
+Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZCamera",true,scene){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
@@ -47,7 +48,7 @@ void Camera::_constructFrustrum(){
 		m_Planes[i] = -m_Planes[i] / length;
 	}
 }
-bool Camera::sphereIntersectTest(Object* sphere){
+bool Camera::sphereIntersectTest(ObjectDisplay* sphere){
 	glm::vec3 pos = sphere->getPosition();
 	for (unsigned int i = 0; i < 6; i++){
 		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - sphere->getRadius();
@@ -110,5 +111,3 @@ void Camera::update(float dt){
 	glm::vec3 pos = getPosition();
 	lookAt(pos,pos - getForward(), getUp());
 }
-void Camera::render(Mesh* mesh, Material* material,bool debug){}
-void Camera::render(bool debug){ render(nullptr,nullptr,debug); }
