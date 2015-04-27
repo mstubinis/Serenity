@@ -8,8 +8,11 @@
 class SunLight;
 class Object;
 class Camera;
+class Skybox;
 
 class Scene{
+	private:
+		Skybox* m_Skybox;
 	protected:
 		std::map<std::string,Camera*> m_Cameras;
 		std::map<std::string,Object*> m_Objects;
@@ -18,7 +21,6 @@ class Scene{
 		std::string m_Name;
 
 		glm::vec4 m_AmbientLighting;
-
 	public:
 		Scene(std::string name,glm::vec4 = glm::vec4(0.05f,0.05f,0.05f,0.05f));
 		~Scene();
@@ -35,6 +37,8 @@ class Scene{
 		void setAmbientLightColor(glm::vec4);
 		void setAmbientLightColor(float,float,float,float);
 
+		Skybox* getSkybox() const { return m_Skybox; }
+		void setSkybox(Skybox* s){ m_Skybox = s; }
 		void centerSceneToObject(Object*);
 };
 #endif

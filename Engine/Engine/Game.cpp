@@ -39,7 +39,6 @@ void Game::initLogic(){
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());
 }
 void Game::update(float dt){
-	Resources::getCurrentScene()->update(dt);
 	m_HUD->update(dt);
 }
 void Game::render(){

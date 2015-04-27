@@ -2,6 +2,7 @@
 #include "Light.h"
 #include "Engine_Resources.h"
 #include "Camera.h"
+#include "Skybox.h"
 
 using namespace Engine;
 
@@ -45,8 +46,14 @@ void Scene::setName(std::string name){
 	    else++it;
 	}
 }
-void Scene::update(float dt)
-{
+void Scene::update(float dt){
+	for(auto object:m_Objects)
+		if(object.second->getParent() == nullptr)
+			object.second->update(dt);
+	for(auto light:m_Lights)
+		if(light.second->getParent() == nullptr)
+			light.second->update(dt);
+	m_Skybox->update();
 }
 void Scene::setAmbientLightColor(glm::vec4 c){ m_AmbientLighting = c; }
 void Scene::setAmbientLightColor(float r,float g,float b,float a){ setAmbientLightColor(glm::vec4(r,g,b,a)); }

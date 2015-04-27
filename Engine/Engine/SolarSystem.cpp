@@ -232,7 +232,7 @@ void SolarSystem::_loadRandomly(){
 	}
 	unsigned int random_skybox_index = static_cast<unsigned int>((rand() % folders.size()));
 	std::string skybox = folders.at(random_skybox_index);
-	new Skybox(skybox);
+	new Skybox(skybox,this);
 	#pragma endregion
 
 	#pragma region ConstructStars
@@ -468,6 +468,7 @@ void SolarSystem::_loadRandomly(){
 void SolarSystem::update(float dt){
 	if(Keyboard::isKeyDown("esc"))
 		exit(EXIT_SUCCESS);
+	Scene::update(dt);
 }
 void SolarSystem::render()
 {

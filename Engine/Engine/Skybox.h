@@ -1,10 +1,12 @@
 #ifndef SKYBOX_H
 #define SKYBOX_H
 
-#include "Object.h"
+#include <string>
+#include <glm/glm.hpp>
 
 class Scene;
 class Texture;
+class Mesh;
 
 struct SkyboxTextures{
 	std::string front;
@@ -14,15 +16,16 @@ struct SkyboxTextures{
 	std::string top;
 	std::string bottom;
 };
-class Skybox: public Object{
+class Skybox{
 	private:
-		GLuint m_Shader;
 		Texture* m_Texture;
+		glm::mat4 m_Model;
+		Mesh* m_Mesh;
 	public:
 		Skybox(std::string name,Scene* = nullptr);
 		~Skybox();
 
-		void update(float);
-		void render(bool=false);
+		void update();
+		void render();
 };
 #endif

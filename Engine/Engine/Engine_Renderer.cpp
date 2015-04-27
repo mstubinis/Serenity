@@ -11,6 +11,7 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "Skybox.h"
 
 #include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
@@ -126,7 +127,11 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	for(auto object:Resources::getCurrentScene()->getObjects()){
+	Scene* s = Resources::getCurrentScene();
+	if(s->getSkybox() != nullptr)
+		s->getSkybox()->render();
+
+	for(auto object:s->getObjects()){
 		object.second->render(debug);
 	}	
 	if(debug){
@@ -134,7 +139,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 		glUseProgram(shader);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 		glUniform3f(glGetUniformLocation(shader, "Object_Color"),1,1,1);
-		for(auto light:Resources::getCurrentScene()->getLights()){
+		for(auto light:s->getLights()){
 			light.second->renderDebug(shader);
 		}
 		glUseProgram(0);
