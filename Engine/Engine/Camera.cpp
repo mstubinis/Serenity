@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZCamera",true,scene){//create a perspective camera
+Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"***Camera",true,scene){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
@@ -17,7 +17,7 @@ Camera::Camera(float angleVal, float aspectRatioVal, float _near, float _far,Sce
 	setPerspectiveProjection();
 	lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
-Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZCamera",true,scene){//create an orthographic camera
+Camera::Camera(float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"***Camera",true,scene){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
