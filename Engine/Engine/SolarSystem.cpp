@@ -456,6 +456,37 @@ void SolarSystem::_loadRandomly(){
 				B += (rand() % 1000 / 1000) * 0.3f;
 				planet->setColor(R,G,B,1);
 				m_Planets.push_back(planet);
+
+				//rings
+				std::vector<RingInfo> rings;
+				unsigned int numRings = rand() % 20;
+				unsigned int chance = rand() % 100;
+				if(chance <= 20){
+					for(unsigned int i = 0; i < numRings; i++){
+						
+						unsigned int randSize = ((rand() % 200 + 3));
+
+						unsigned int randPos = (randSize + 1 ) + (rand() % (1024 - ((randSize + 1)*2)));
+
+						unsigned int RR = rand() % 255;
+						unsigned int RG = rand() % 255;
+						unsigned int RB = rand() % 255;
+
+						unsigned int randBreak = (rand() % randSize);
+						unsigned int chance1 = rand() % 100;
+						unsigned int chance2 = rand() % 100;
+
+						if(chance1 > 25){
+							rings.push_back(RingInfo(randPos,randSize,glm::vec3(RR,RG,RB),randBreak));
+						}
+						else if(randSize < 50){
+							if(chance2 < 20)
+								rings.push_back(RingInfo(randPos,randSize,glm::vec3(-1,-1,-1),randBreak));
+						}
+					}
+					if(rings.size() > 0)
+						new Ring(rings,planet);
+				}
 			}
 		}
 	}

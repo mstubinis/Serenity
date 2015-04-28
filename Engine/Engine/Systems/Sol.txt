@@ -179,7 +179,7 @@ R parent=Saturn position=205 radius=3 r=-1 g=-1 b=-1 break=2
 #M name=Fornjot parent=Saturn
 
 
-P name=Uranus radius=25,362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.png
+P name=Uranus radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.png
 #M name=Cordelia parent=Uranus
 #M name=Ophelia parent=Uranus
 #M name=Bianca parent=Uranus
