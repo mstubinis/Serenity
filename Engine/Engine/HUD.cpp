@@ -149,5 +149,9 @@ void HUD::render(bool debug){
 						   "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->getObjects().size()),
 						   glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f));
 	}
+	else{
+		m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),
+						   glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f));
+	}
 	#pragma endregion
 }
