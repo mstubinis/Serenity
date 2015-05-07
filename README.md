@@ -5,8 +5,8 @@ Note
 ----
 * This project is currently in the early stages of development and is therefore not release worthy just yet.
 
-Installing & Building
----------------------
+Installing & Building - Visual Studio
+-------------------------------------
 
 1. Clone this repository
 
