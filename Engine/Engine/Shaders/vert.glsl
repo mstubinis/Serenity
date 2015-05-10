@@ -23,8 +23,6 @@ void main(){
 	UV = uv;
 
 	//normalizing these solved a problem, but might cause more. Be careful here
-
-
 	Normals = normalize((World * vec4(normal,0.0)).xyz);
 	Tangents = normalize((World * vec4(tangent,0.0)).xyz);
 	Binormals = cross(Normals,Tangents);

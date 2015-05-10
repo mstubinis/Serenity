@@ -47,7 +47,6 @@ namespace Engine{
 		namespace Detail{
 			class RenderManagement{
 				private:
-					static Texture* RandomMapSSAO;
 					static GBuffer* m_gBuffer;
 					static bool m_DidLightingPassOnce;
 
@@ -68,6 +67,7 @@ namespace Engine{
 					static void _passBlurVertical(GLuint texture);
 					static void _passFinal();
 				public:
+					static Texture* RandomMapSSAO;
 					static bool m_DrawDebug;
 					static void render(bool debug=false);
 

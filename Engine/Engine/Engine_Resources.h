@@ -45,6 +45,7 @@ namespace Engine{
 		};
 		static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
 		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene = s; }
+		static void setCurrentScene(std::string s){ Detail::ResourceManagement::m_CurrentScene = Detail::ResourceManagement::m_Scenes[s]; }
 
 		static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
 		static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
@@ -72,7 +73,8 @@ namespace Engine{
 
 		void initResources();
 	};
-	static std::string convertNumberToStringCommas(unsigned long long n){
+	template<typename T>
+	static std::string convertNumberToStringCommas(T n){
 		std::string numWithCommas = std::to_string(n);
 		int insertPosition = numWithCommas.length() - 3;
 		while (insertPosition > 0) {

@@ -21,15 +21,18 @@ void Game::initResources(){
 	Resources::addMesh("DEBUGLight","Models/debugLight.obj");
 	Resources::addMesh("Planet","Models/planet.obj");
 	Resources::addMesh("Defiant","Models/defiant.obj");
+	Resources::addMesh("Akira","Models/akira.obj");
 	Resources::addMesh("Starbase","Models/starbase.obj");
 	Resources::addMesh("Ring","Models/ring.obj");
 
-	Resources::addMaterial("Star","Textures/Planets/Sun.png","","");
-	Resources::addMaterial("Default","Textures/Planets/Sun.png","","");
-	Resources::addMaterial("Earth","Textures/Planets/Earth.png","","");
+	Resources::addMaterial("Star","Textures/Planets/Sun.png");
+	Resources::addMaterial("Default","Textures/Planets/Sun.png");
+	Resources::addMaterial("Earth","Textures/Planets/Earth.png");
 	Resources::addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
-	Resources::addMaterial("Crosshair","Textures/HUD/Crosshair.png","","");
-	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png","","");
+	Resources::addMaterial("Akira","Textures/akira.png","Textures/akiraNormal.png","Textures/akiraGlow.png");
+	Resources::addMaterial("Crosshair","Textures/HUD/Crosshair.png");
+	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png");
+
 }
 void Game::initLogic(){
 	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");

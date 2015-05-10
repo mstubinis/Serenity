@@ -12,12 +12,12 @@ Skybox::Skybox(std::string name,Scene* scene){
 	m_Model = glm::mat4(1);
 
 	glActiveTexture(GL_TEXTURE0);
-	std::string front = "Textures\\Skyboxes\\" + name + "\\Front.png";
-	std::string back = "Textures\\Skyboxes\\" + name + "\\Back.png";
-	std::string left = "Textures\\Skyboxes\\" + name + "\\Left.png";
-	std::string right = "Textures\\Skyboxes\\" + name + "\\Right.png";
-	std::string top = "Textures\\Skyboxes\\" + name + "\\Top.png";
-	std::string bottom = "Textures\\Skyboxes\\" + name + "\\Bottom.png";
+	std::string front = "Textures/Skyboxes/" + name + "/Front.png";
+	std::string back = "Textures/Skyboxes/" + name + "/Back.png";
+	std::string left = "Textures/Skyboxes/" + name + "/Left.png";
+	std::string right = "Textures/Skyboxes/" + name + "/Right.png";
+	std::string top = "Textures/Skyboxes/" + name + "/Top.png";
+	std::string bottom = "Textures/Skyboxes/" + name + "/Bottom.png";
 	std::string names[6] = {front,back,left,right,top,bottom};
 
 	m_Texture = new Texture(names,GL_TEXTURE_CUBE_MAP);

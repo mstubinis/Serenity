@@ -78,7 +78,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 			else if(count == 2){//this line has the system's skybox
 				new Skybox(line,this);
 			}
-			if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R') && line[1] == ' '){//we got something to work with
+			if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$') && line[1] == ' '){//we got something to work with
 				Planet* planetoid = nullptr;
 
 				std::string token;
@@ -187,11 +187,17 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += getObjects()[PARENT]->getPosition().x;
 						zPos += getObjects()[PARENT]->getPosition().z;
 					}
-					player = new PlayerShip("Defiant","Defiant",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+					player = new PlayerShip("Akira","Akira",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
 
 				}
+				else if(line[0] == '$'){//Other ship
+					if(PARENT != ""){
+						xPos += getObjects()[PARENT]->getPosition().x;
+						zPos += getObjects()[PARENT]->getPosition().z;
+					}
+					new Ship("Defiant","Defiant",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+				}
 				else if(line[0] == 'R'){//Rings
-					
 					if(PARENT != ""){
 						if(!planetRings.count(PARENT)){
 							std::vector<RingInfo> rings;
@@ -450,10 +456,9 @@ void SolarSystem::_loadRandomly(){
 
 				planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(posX,0,posZ),RADIUS,"Planet " + boost::lexical_cast<std::string>(i + 1),ATMOSPHERE_HEIGHT,this);
 
-				float R = 0.3f,G = 0.3f,B = 0.3f;
-				R += (rand() % 1000 / 1000) * 0.5f;
-				G += (rand() % 1000 / 1000) * 0.2f;
-				B += (rand() % 1000 / 1000) * 0.3f;
+				float R = (rand() % 1000)/1000.0f;
+				float G = (rand() % 1000)/1000.0f;
+				float B = (rand() % 1000)/1000.0f;
 				planet->setColor(R,G,B,1);
 				m_Planets.push_back(planet);
 
@@ -492,7 +497,7 @@ void SolarSystem::_loadRandomly(){
 	}
 	//Then load moons. Generally the number of moons depends on the type of planet. Giants have more moons than normal planets, etc..
 
-	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
+	player = new PlayerShip("Akira","Akira","USS Thunderchild",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
 
 	centerSceneToObject(player);
 }

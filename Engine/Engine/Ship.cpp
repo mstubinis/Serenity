@@ -21,7 +21,7 @@ void Ship::update(float dt){
 	ObjectDynamic::update(dt);
 }
 void Ship::translateWarp(float amount){
-	float amountToAdd = amount * (1.0f / getMass());
+	float amountToAdd = amount * (1.0f / 0.5f);
 	if((amount > 0 && m_WarpFactor + amount < 1) || (amount < 0 && m_WarpFactor > 0)){
 		m_WarpFactor += amountToAdd * Resources::dt();
 	}
@@ -40,9 +40,9 @@ void PlayerShip::setTarget(ObjectDisplay* target){
 }
 void PlayerShip::update(float dt){
 	if(m_IsWarping && m_WarpFactor > 0){
-		float speed = (m_WarpFactor * 1.0f/getMass())*2;
+		float speed = (m_WarpFactor * 1.0f/0.46f)*2;
 
-		glm::vec3 s = getForward() * glm::pow(speed,20.0f);
+		glm::vec3 s = (getForward() * glm::pow(speed,20.0f))/getMass();
 
 		for(auto obj:Resources::getCurrentScene()->getObjects()){
 			if((obj.second->getName().find("Skybox") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
@@ -57,27 +57,27 @@ void PlayerShip::update(float dt){
 	}
 	if(Keyboard::isKeyDown("w"))
 		if(!m_IsWarping)
-			applyForce(0,0,-1);
+			applyForce(0,0,-1*(getMass()*3));
 		else{
 			translateWarp(0.1f);
 		}
 	if(Keyboard::isKeyDown("s"))
 		if(!m_IsWarping)
-			applyForce(0,0,1);
+			applyForce(0,0,1*(getMass()*3));
 		else{
 			translateWarp(-0.1f);
 		}
 	if(Keyboard::isKeyDown("a"))
 		if(!m_IsWarping)
-			applyForce(-1,0,0);
+			applyForce(-1*(getMass()*3),0,0);
 	if(Keyboard::isKeyDown("d"))
 		if(!m_IsWarping)
-			applyForce(1,0,0);
+			applyForce(1*(getMass()*3),0,0);
 
 	if(Keyboard::isKeyDown("f"))
-		applyForce(0,-1,0);
+		applyForce(0,-1*(getMass()*3),0);
 	if(Keyboard::isKeyDown("r"))
-		applyForce(0,1,0);
+		applyForce(0,1*(getMass()*3),0);
 
 	if(Keyboard::isKeyDown("q"))
 		applyTorque(0,0,1);
@@ -102,6 +102,19 @@ void PlayerShip::update(float dt){
 			m_Camera->orbit(m_Target);
 		}
 	}
+	else if(Keyboard::isKeyDownOnce("f3")){
+		if(m_Camera->getState() == CAMERA_STATE_FOLLOWTARGET || m_Target == nullptr || m_Camera->getTarget() != this){
+			Resources::getCurrentScene()->centerSceneToObject(this);
+			m_Camera->follow(this);
+		}
+		else if(m_Target != nullptr){
+			Resources::getCurrentScene()->centerSceneToObject(this);
+			m_Camera->followTarget(m_Target,this);
+		}
+	}
+
+
+
 	else if(Keyboard::isKeyDownOnce("l")){
 		m_IsWarping = !m_IsWarping;
 		m_WarpFactor = 0;

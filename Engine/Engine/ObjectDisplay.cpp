@@ -51,7 +51,9 @@ void ObjectDisplay::calculateRadius(){
 	m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
 }
 void ObjectDisplay::render(bool debug){ render(m_Mesh,m_Material,debug); }
-void ObjectDisplay::setColor(float x, float y, float z,float a){ m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; }
+void ObjectDisplay::setColor(float x, float y, float z,float a){ 
+	m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; 
+}
 void ObjectDisplay::setColor(glm::vec4 color){ setColor(color.x,color.y,color.z,color.w); }
 void ObjectDisplay::setMesh(Mesh* mesh){ 
 	m_Mesh = mesh; 
