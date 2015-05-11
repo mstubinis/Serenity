@@ -30,7 +30,7 @@ Skybox::Skybox(std::string name,Scene* scene){
 Skybox::~Skybox(){
 	delete m_Texture;
 }
-void Skybox::update(){
+void Skybox::_updateMatrix(){
 	m_Model = glm::mat4(1);
 	m_Model = glm::translate(m_Model, Resources::getActiveCamera()->getPosition());
 	m_Model = glm::scale(m_Model,glm::vec3(999999999,999999999,999999999));

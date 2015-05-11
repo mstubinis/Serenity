@@ -129,6 +129,7 @@ void Engine::EngineClass::_RESET_EVENTS(){
 void Engine::EngineClass::_update(float dt){
 	game->update(dt);
 	Resources::getCurrentScene()->update(dt);
+	Resources::getCurrentScene()->_updateMatrix(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 
 	physicsEngine->update(dt);

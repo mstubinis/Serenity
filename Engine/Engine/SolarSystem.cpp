@@ -187,7 +187,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += getObjects()[PARENT]->getPosition().x;
 						zPos += getObjects()[PARENT]->getPosition().z;
 					}
-					player = new PlayerShip("Akira","Akira",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+					player = new PlayerShip("Defiant","Defiant",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
 
 				}
 				else if(line[0] == '$'){//Other ship

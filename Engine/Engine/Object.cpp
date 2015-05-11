@@ -135,6 +135,9 @@ void Object::roll(float amount){
 	flagAsChanged();
 }
 void Object::update(float dt){
+
+}
+void Object::_updateMatrix(float dt){
 	if(m_Changed){
 		glm::mat4 newModel = glm::mat4(1);
 		if(m_Parent != nullptr){

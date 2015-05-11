@@ -89,6 +89,8 @@ glm::vec3 ObjectDynamic::_calculateUp(){
                                      2 * (y * z + w * x)));
 }
 void ObjectDynamic::update(float dt){
+}
+void ObjectDynamic::_updateMatrix(float dt){
 	glm::mat4 parentModel = glm::mat4(1);
 	glm::mat4 newModel = glm::mat4(1);
 	m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(newModel));

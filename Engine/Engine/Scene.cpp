@@ -30,6 +30,7 @@ void Scene::centerSceneToObject(Object* center){
 		obj.second->flagAsChanged();
 	}
 	center->setPosition(0,0,0);
+	center->flagAsChanged();
 }
 Scene::~Scene(){
 	for(auto obj:m_Objects)  delete obj.second;
@@ -48,12 +49,18 @@ void Scene::setName(std::string name){
 }
 void Scene::update(float dt){
 	for(auto object:m_Objects)
-		if(object.second->getParent() == nullptr)
-			object.second->update(dt);
+		object.second->update(dt);
 	for(auto light:m_Lights)
-		if(light.second->getParent() == nullptr)
-			light.second->update(dt);
-	m_Skybox->update();
+		light.second->update(dt);
+}
+void Scene::_updateMatrix(float dt){
+	for(auto object:m_Objects){
+		object.second->_updateMatrix(dt);
+	}
+	for(auto light:m_Lights){
+		light.second->_updateMatrix(dt);
+	}
+	m_Skybox->_updateMatrix();
 }
 void Scene::setAmbientLightColor(glm::vec4 c){ m_AmbientLighting = c; }
 void Scene::setAmbientLightColor(float r,float g,float b,float a){ setAmbientLightColor(glm::vec4(r,g,b,a)); }

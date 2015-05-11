@@ -25,7 +25,7 @@ class Skybox{
 		Skybox(std::string name,Scene* = nullptr);
 		~Skybox();
 
-		void update();
+		void _updateMatrix();
 		void render();
 };
 #endif

@@ -66,6 +66,7 @@ class Object{
 		void addChild(Object*);
 
 		virtual void update(float);
+		virtual void _updateMatrix(float);
 		virtual void render(Mesh*,Material*,bool=false);
 		virtual void render(bool=false);
 

@@ -70,3 +70,6 @@ void ObjectDisplay::scale(float x, float y,float z){
 	calculateRadius(); 
 }
 void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z); }
+void ObjectDisplay::_updateMatrix(float dt){
+	Object::_updateMatrix(dt);
+}
