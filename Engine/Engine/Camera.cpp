@@ -110,4 +110,5 @@ void Camera::_updateMatrix(float dt){
 		m_ViewProjection = m_Projection * m_View;
 		_constructFrustrum();
 	}
+	Object::_updateMatrix(dt);
 }

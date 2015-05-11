@@ -24,7 +24,6 @@ GameCamera::~GameCamera()
 }
 void GameCamera::update(float dt){
 	Camera::update(dt);
-
 	switch(m_State){
 		case CAMERA_STATE_FOLLOW:
 			m_Position = m_Target->getPosition() + (m_Target->getForward()*glm::length(m_Target->getRadius())*2.0f);
@@ -33,6 +32,8 @@ void GameCamera::update(float dt){
 			m_Model = glm::mat4(1);
 			m_Model = glm::translate(m_Model,m_Position);
 			m_Model *= glm::mat4_cast(m_Orientation);
+
+			m_Position = getPosition();
 
 			lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*500.0f),m_Target->getUp());
 			break;
@@ -43,6 +44,8 @@ void GameCamera::update(float dt){
 			m_Model = glm::mat4(1);
 			m_Model = glm::translate(m_Model,m_Position);
 			m_Model *= glm::mat4_cast(m_Orientation);
+
+			m_Position = getPosition();
 
 			lookAt(getPosition(),m_Target->getPosition(),m_Player->getUp());
 			break;
@@ -59,6 +62,8 @@ void GameCamera::update(float dt){
 			m_Model = glm::translate(m_Model,m_Target->getPosition());
 			m_Model *= glm::mat4_cast(m_Orientation);
 			m_Model = glm::translate(m_Model,m_Position);
+
+			m_Position = getPosition();
 
 			lookAt(getPosition(),m_Target->getPosition(),getUp());
 			break;

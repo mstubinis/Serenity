@@ -143,14 +143,16 @@ void Object::_updateMatrix(float dt){
 		if(m_Parent != nullptr){
 			newModel = m_Parent->m_Model;
 		}
-		m_Forward = _calculateForward();
-		m_Right = _calculateRight();
-		m_Up = _calculateUp();
 
 		newModel = glm::translate(newModel, m_Position);
 		newModel *= glm::mat4_cast(m_Orientation);
 		newModel = glm::scale(newModel,m_Scale);
 		m_Model = newModel;
+
+		m_Forward = _calculateForward();
+		m_Right = _calculateRight();
+		m_Up = _calculateUp();
+
 		m_Changed = false;
 	}
 	if(m_JustSpawned == true)

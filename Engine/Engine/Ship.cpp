@@ -89,8 +89,10 @@ void PlayerShip::update(float dt){
 	}
 
 	if(Keyboard::isKeyDownOnce("f1")){
-		Resources::getCurrentScene()->centerSceneToObject(this);
-		m_Camera->follow(this);
+		if(m_Camera->getState() != CAMERA_STATE_FOLLOW || (m_Camera->getState() == CAMERA_STATE_FOLLOW && m_Camera->getTarget() != this)){
+			Resources::getCurrentScene()->centerSceneToObject(this);
+			m_Camera->follow(this);
+		}
 	}
 	else if(Keyboard::isKeyDownOnce("f2")){
 		if(m_Camera->getState() == CAMERA_STATE_FOLLOW || m_Target == nullptr || m_Camera->getTarget() != this){
@@ -103,7 +105,7 @@ void PlayerShip::update(float dt){
 		}
 	}
 	else if(Keyboard::isKeyDownOnce("f3")){
-		if(m_Camera->getState() == CAMERA_STATE_FOLLOWTARGET || m_Target == nullptr || m_Camera->getTarget() != this){
+		if(m_Camera->getState() == CAMERA_STATE_FOLLOWTARGET || (m_Target == nullptr && m_Camera->getState() != CAMERA_STATE_FOLLOW) || m_Camera->getTarget() != this){
 			Resources::getCurrentScene()->centerSceneToObject(this);
 			m_Camera->follow(this);
 		}
