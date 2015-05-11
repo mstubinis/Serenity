@@ -19,11 +19,7 @@ class Object{
 		glm::vec3 _calculateForward(); 
 		glm::vec3 _calculateRight(); 
 		glm::vec3 _calculateUp();
-
-		bool m_JustSpawned;
 	protected:
-		bool m_Changed;
-
 		std::string m_Name;
 		glm::mat4 m_Model;
 		glm::quat m_Orientation;
@@ -42,8 +38,6 @@ class Object{
 			  );
 		~Object();
 
-		void flagAsChanged();
-
 		float getDistance(Object*);
 		unsigned long long getDistanceLL(Object*);
 		glm::vec3 getScreenCoordinates();
@@ -54,9 +48,6 @@ class Object{
 		virtual void rotate(glm::vec3);
 		virtual void scale(float,float,float); 
 		virtual void scale(glm::vec3);
-		virtual void pitch(float); 
-		virtual void yaw(float); 
-		virtual void roll(float);
 
 		virtual void setPosition(float,float,float); 
 		virtual void setPosition(glm::vec3);
@@ -66,11 +57,10 @@ class Object{
 		void addChild(Object*);
 
 		virtual void update(float);
-		virtual void _updateMatrix(float);
+		virtual void _updateMatrix();
 		virtual void render(Mesh*,Material*,bool=false);
 		virtual void render(bool=false);
 
-		const bool hasChanged() const { return m_Changed; }
 		const glm::quat& getOrientation(){ return m_Orientation; }
 		const glm::vec3 getPosition() const{ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 		const glm::vec3& getScale() const{ return m_Scale; }

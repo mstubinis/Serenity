@@ -8,11 +8,8 @@
 using namespace Engine;
 
 Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Scene* scene){
-	m_JustSpawned = true;
-	m_Changed = true;
-	m_Forward = glm::vec3(0,0,-1);
-	m_Right = glm::vec3(1,0,0);
-	m_Up = glm::vec3(0,1,0);
+	m_Forward = glm::vec3(0,0,-1);m_Right = glm::vec3(1,0,0);m_Up = glm::vec3(0,1,0);
+
 	m_Parent = nullptr;
 
 	m_Name = name;
@@ -34,18 +31,6 @@ Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Sce
 	}
 	if(isNotLight)
 		scene->getObjects()[m_Name] = this;
-
-	if(m_Parent == nullptr){
-		glm::mat4 newModel = glm::mat4(1);
-		newModel = glm::translate(newModel, m_Position);
-		newModel *= glm::mat4_cast(m_Orientation);
-		newModel = glm::scale(newModel,m_Scale);
-		m_Model = newModel;
-
-		m_Forward = _calculateForward();
-		m_Right = _calculateRight();
-		m_Up = _calculateUp();
-	}
 }
 Object::~Object()
 {
@@ -80,17 +65,22 @@ void Object::translate(float x, float y, float z,bool local){
 		offset += glm::vec3(x,y,z);
 	}
 	this->setPosition(this->getPosition() + offset);
-	flagAsChanged();
+	_updateMatrix();
 }
 void Object::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 void Object::rotate(float x, float y, float z){ 
 	float threshold = 0.025f;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
 		return;
-	pitch(x); 
-	yaw(y); 
-	roll(z); 
-	flagAsChanged();
+
+	if(abs(x) >= threshold)m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-x, glm::vec3(1,0,0)));//pitch
+	if(abs(y) >= threshold)m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-y, glm::vec3(0,1,0)));//yaw
+	if(abs(z) >= threshold)m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(z,glm::vec3(0,0,1)));  //roll
+
+	_updateMatrix();
+	m_Forward = _calculateForward();
+	m_Right = _calculateRight();
+	m_Up = _calculateUp();
 }
 void Object::rotate(glm::vec3 rotation){ rotate(rotation.x,rotation.y,rotation.z); }
 void Object::scale(float x, float y, float z){
@@ -98,86 +88,47 @@ void Object::scale(float x, float y, float z){
 	m_Scale.x += x * dt; 
 	m_Scale.y += y * dt; 
 	m_Scale.z += z * dt; 
-	flagAsChanged();
+	_updateMatrix();
 }
 void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
 void Object::setPosition(float x, float y, float z){ 
 	m_Position.x = x; 
 	m_Position.y = y; 
 	m_Position.z = z;
-	if(m_JustSpawned){
-		glm::mat4 newModel = glm::mat4(1);
-		newModel = glm::translate(newModel, m_Position);
-		newModel *= glm::mat4_cast(m_Orientation);
-		newModel = glm::scale(newModel,m_Scale);
-		m_Model = newModel;
-	}
-	flagAsChanged();
+
+	_updateMatrix();
 }
 void Object::setPosition(glm::vec3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
 	m_Scale.x = x; 
 	m_Scale.y = y; 
 	m_Scale.z = z; 
-	flagAsChanged();
+	_updateMatrix();
 }
 void Object::setScale(glm::vec3 scale){ setScale(scale.x,scale.y,scale.z); }
-void Object::pitch(float amount){ 
-	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(1,0,0)));
-	flagAsChanged();
-}
-void Object::yaw(float amount){ 
-	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-amount, glm::vec3(0,1,0)));
-	flagAsChanged();
-}
-void Object::roll(float amount){ 
-	m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(amount,glm::vec3(0,0,1)));
-	flagAsChanged();
-}
 void Object::update(float dt){
 
 }
-void Object::_updateMatrix(float dt){
-	if(m_Changed){
-		glm::mat4 newModel = glm::mat4(1);
-		if(m_Parent != nullptr){
-			newModel = m_Parent->m_Model;
-		}
+void Object::_updateMatrix(){
 
-		newModel = glm::translate(newModel, m_Position);
-		newModel *= glm::mat4_cast(m_Orientation);
-		newModel = glm::scale(newModel,m_Scale);
-		m_Model = newModel;
-
-		m_Forward = _calculateForward();
-		m_Right = _calculateRight();
-		m_Up = _calculateUp();
-
-		m_Changed = false;
+	glm::mat4 newModel = glm::mat4(1);
+	if(m_Parent != nullptr){
+		newModel = m_Parent->m_Model;
 	}
-	if(m_JustSpawned == true)
-		m_JustSpawned = false;
+
+	newModel = glm::translate(newModel, m_Position);
+	newModel *= glm::mat4_cast(m_Orientation);
+	newModel = glm::scale(newModel,m_Scale);
+	m_Model = newModel;
+
 	for(auto child:m_Children)
-		child->update(dt);
+		child->_updateMatrix();
 }
 float Object::getDistance(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::addChild(Object* child){
 	child->m_Parent = this;
 	m_Children.push_back(child);
-	child->flagAsChanged();
-	flagAsChanged();
-}
-void Object::flagAsChanged(){
-	if(m_Parent != nullptr){
-		m_Parent->flagAsChanged();
-	}
-	else{
-		m_Changed = true;
-		if(m_Children.size() == 0) return;
-		for(auto child:m_Children)
-			child->m_Changed = true;
-	}
 }
 void Object::setName(std::string name){
 	std::string oldName = m_Name;

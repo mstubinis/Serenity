@@ -52,7 +52,7 @@ class ObjectDynamic: public ObjectDisplay{
 		void setMass(float);
 
 		void update(float);
-		void _updateMatrix(float);
+		void _updateMatrix();
 		const float getMass() const { return m_Mass; }
 };
 #endif

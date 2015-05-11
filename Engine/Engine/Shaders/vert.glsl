@@ -27,11 +27,5 @@ void main(){
 	Tangents = normalize((World * vec4(tangent,0.0)).xyz);
 	Binormals = cross(Normals,Tangents);
 
-	//Handedness. this deals with the normal mapping and mirrored uvs.
-	//more info here: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/
-	if (dot(cross(Normals, Tangents), Binormals) > 0.0){
-		 Tangents *= -1.0;
-	}
-
 	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

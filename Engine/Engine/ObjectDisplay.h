@@ -25,7 +25,7 @@ class ObjectDisplay: public Object{
 					 );
 		~ObjectDisplay();
 
-		virtual void _updateMatrix(float);
+		virtual void _updateMatrix();
 		virtual void render(Mesh*, Material*,bool=false);
 		virtual void render(bool=false);
 

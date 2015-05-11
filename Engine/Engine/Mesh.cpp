@@ -433,39 +433,30 @@ void Mesh::render(){
 		glDisableVertexAttribArray(i);
 }
 void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
-	glm::vec3 tangent;
-	float vector1[3], vector2[3];
-	float tuVector[2], tvVector[2];
-	float den;
-
-	// Calculate the two vectors for this face.
-	vector1[0] = v2.position.x - v1.position.x;
-	vector1[1] = v2.position.y - v1.position.y;
-	vector1[2] = v2.position.z - v1.position.z;
-
-	vector2[0] = v3.position.x - v1.position.x;
-	vector2[1] = v3.position.y - v1.position.y;
-	vector2[2] = v3.position.z - v1.position.z;
-
-	// Calculate the tu and tv texture space vectors.
-	tuVector[0] = v2.uv.x - v1.uv.x;
-	tvVector[0] = v2.uv.y - v1.uv.y;
-
-	tuVector[1] = v3.uv.x - v1.uv.x;
-	tvVector[1] = v3.uv.y - v1.uv.y;
-
-	// Calculate the denominator of the tangent/binormal equation.
-	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
-
-	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
-
-	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
-	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
-	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+    // Edges of the triangle : postion delta
+	glm::vec3 deltaPos1 = v2.position-v1.position;
+	glm::vec3 deltaPos2 = v3.position-v1.position;
+ 
+    // UV delta
+	glm::vec2 deltaUV1 = v2.uv-v1.uv;
+	glm::vec2 deltaUV2 = v3.uv-v1.uv;
+	float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+	glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*r;
+	glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*r;
 
 	glm::vec3 t1 = glm::normalize(tangent - v1.normal * glm::dot(v1.normal, tangent));
 	glm::vec3 t2 = glm::normalize(tangent - v2.normal * glm::dot(v2.normal, tangent));
 	glm::vec3 t3 = glm::normalize(tangent - v3.normal * glm::dot(v3.normal, tangent));
+
+	if (glm::dot(glm::cross(v1.normal, t1), bitangent) < 0.0f){
+		t1 = t1 * -1.0f;
+	}
+	if (glm::dot(glm::cross(v2.normal, t2), bitangent) < 0.0f){
+		t2 = t2 * -1.0f;
+	}
+	if (glm::dot(glm::cross(v3.normal, t3), bitangent) < 0.0f){
+		t3 = t3 * -1.0f;
+	}
 
 	v1.tangent = t1;   v2.tangent = t2;   v3.tangent = t3;
 }

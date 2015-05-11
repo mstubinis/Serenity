@@ -89,8 +89,6 @@ glm::vec3 ObjectDynamic::_calculateUp(){
                                      2 * (y * z + w * x)));
 }
 void ObjectDynamic::update(float dt){
-}
-void ObjectDynamic::_updateMatrix(float dt){
 	glm::mat4 parentModel = glm::mat4(1);
 	glm::mat4 newModel = glm::mat4(1);
 	m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(newModel));
@@ -98,7 +96,6 @@ void ObjectDynamic::_updateMatrix(float dt){
 		parentModel = m_Parent->getModel();
 	}
 	if(m_RigidBody->isActive()){
-		flagAsChanged();
 		btQuaternion t = m_RigidBody->getWorldTransform().getRotation();
 		m_Orientation = glm::quat(t.w(),t.x(),t.y(),t.z());
 
@@ -108,7 +105,10 @@ void ObjectDynamic::_updateMatrix(float dt){
 	}
 	m_Model = parentModel * newModel;
 	for(auto child:m_Children)
-		child->update(dt);
+		child->_updateMatrix();
+}
+void ObjectDynamic::_updateMatrix(){
+
 }
 void ObjectDynamic::setPosition(float x, float y, float z){
 	m_RigidBody->activate();

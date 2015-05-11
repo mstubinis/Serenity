@@ -33,7 +33,6 @@ class Scene{
 		virtual void setName(std::string);
 
 		virtual void update(float);
-		void _updateMatrix(float);
 		glm::vec4 getAmbientLightColor(){ return m_AmbientLighting; }
 		void setAmbientLightColor(glm::vec4);
 		void setAmbientLightColor(float,float,float,float);

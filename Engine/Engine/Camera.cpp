@@ -72,11 +72,9 @@ Camera::~Camera()
 }
 void Camera::setPerspectiveProjection(){ 
 	m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far); 
-	flagAsChanged();
 }
 void Camera::setOrthoProjection(float left, float right, float bottom, float top){
 	m_Projection = glm::ortho(left,right,bottom,top,m_Near,m_Far);
-	flagAsChanged();
 }
 void Camera::setAspectRatio(float ratio){ 
 	m_AspectRatio = ratio;
@@ -84,20 +82,16 @@ void Camera::setAspectRatio(float ratio){
 }
 void Camera::lookAt(glm::vec3 target){ 
 	m_View = glm::lookAt(m_Position,target,getUp());
-	flagAsChanged();
 }
 void Camera::lookAt(glm::vec3 target,glm::vec3 up){ 
 	m_View = glm::lookAt(m_Position,target,up); 
-	flagAsChanged();
 }
 void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){ 
 	m_View = glm::lookAt(eye,target,up); 
-	flagAsChanged();
 }
 void Camera::lookAt(Object* target, bool targetUp){
 	if(!targetUp) m_View = glm::lookAt(m_Position,target->getPosition(),getUp());
 	else m_View = glm::lookAt(m_Position,target->getPosition(),target->getUp());
-	flagAsChanged();
 }
 glm::mat4 Camera::calculateProjection(glm::mat4 modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * modelMatrix; }
@@ -105,10 +99,9 @@ glm::mat4 Camera::calculateViewProjInverted(){ return glm::inverse(m_Projection 
 void Camera::update(float dt){
 
 }
-void Camera::_updateMatrix(float dt){
-	if(m_Changed){
-		m_ViewProjection = m_Projection * m_View;
-		_constructFrustrum();
-	}
-	Object::_updateMatrix(dt);
+void Camera::_updateMatrix(){
+	m_ViewProjection = m_Projection * m_View;
+	_constructFrustrum();
+
+	Object::_updateMatrix();
 }

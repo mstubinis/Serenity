@@ -21,16 +21,13 @@ void Scene::centerSceneToObject(Object* center){
 		if(obj.second != center && obj.second->getParent() == nullptr){
 			obj.second->setPosition(obj.second->getPosition() + offset);
 		}
-		obj.second->flagAsChanged();
 	}
 	for(auto obj:s->getLights()){
 		if(obj.second != center && obj.second->getParent() == nullptr){
 			obj.second->setPosition(obj.second->getPosition() + offset);
 		}
-		obj.second->flagAsChanged();
 	}
 	center->setPosition(0,0,0);
-	center->flagAsChanged();
 }
 Scene::~Scene(){
 	for(auto obj:m_Objects)  delete obj.second;
@@ -52,14 +49,6 @@ void Scene::update(float dt){
 		object.second->update(dt);
 	for(auto light:m_Lights)
 		light.second->update(dt);
-}
-void Scene::_updateMatrix(float dt){
-	for(auto object:m_Objects){
-		object.second->_updateMatrix(dt);
-	}
-	for(auto light:m_Lights){
-		light.second->_updateMatrix(dt);
-	}
 	m_Skybox->_updateMatrix();
 }
 void Scene::setAmbientLightColor(glm::vec4 c){ m_AmbientLighting = c; }
