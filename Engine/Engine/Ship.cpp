@@ -45,7 +45,7 @@ void PlayerShip::update(float dt){
 		glm::vec3 s = (getForward() * glm::pow(speed,20.0f))/getMass();
 
 		for(auto obj:Resources::getCurrentScene()->getObjects()){
-			if((obj.second->getName().find("Skybox") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
+			if((obj.second->getName().find("Skybox") == std::string::npos) && (obj.second->getName().find("Camera") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
 				obj.second->setPosition(obj.second->getPosition() + s);
 			}
 		}

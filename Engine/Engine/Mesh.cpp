@@ -385,7 +385,6 @@ void Mesh::_generateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
 	_generateTriangle(v1,v3,v4);
 }
 void Mesh::_init(){
-
 	//Bind the data to the buffers
 	glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
 

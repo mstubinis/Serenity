@@ -97,11 +97,11 @@ glm::mat4 Camera::calculateProjection(glm::mat4 modelMatrix){ return m_Projectio
 glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * modelMatrix; }
 glm::mat4 Camera::calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::update(float dt){
-
-}
-void Camera::_updateMatrix(){
 	m_ViewProjection = m_Projection * m_View;
 	_constructFrustrum();
 
 	Object::_updateMatrix();
+}
+void Camera::_updateMatrix(){
+
 }

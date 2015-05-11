@@ -48,6 +48,7 @@ class Camera: public Object{
 		glm::mat4 getProjection(){ return m_Projection; }
 		glm::mat4 getView(){ return m_View; }
 		glm::mat4 getViewProjection(){ return m_Projection * m_View; }
+		glm::vec3 getViewVector(){ return glm::vec3(m_View[0][2],m_View[1][2],m_View[2][2]); }
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
 		bool sphereIntersectTest(ObjectDisplay*);

@@ -148,8 +148,7 @@ glm::vec3 Object::getScreenCoordinates(){
 	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
-	glm::vec3 viewVector = glm::vec3(MV[0][2],MV[1][2],MV[2][2]);
-	float dot = glm::dot(viewVector,glm::vec3(objPos-Resources::getActiveCamera()->getPosition()));
+	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),glm::vec3(objPos-Resources::getActiveCamera()->getPosition()));
 
 	float resX = static_cast<float>(screen.x);
 	float resY = static_cast<float>(windowSize.y-screen.y);
