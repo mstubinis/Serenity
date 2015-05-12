@@ -115,8 +115,6 @@ void PlayerShip::update(float dt){
 		}
 	}
 
-
-
 	else if(Keyboard::isKeyDownOnce("l")){
 		m_IsWarping = !m_IsWarping;
 		m_WarpFactor = 0;

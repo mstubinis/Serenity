@@ -230,8 +230,6 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->calculateViewProjInverted()));
-
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
 	glUniform1f(glGetUniformLocation(shader,"gIntensity"), 2.9f);
 	glUniform1f(glGetUniformLocation(shader,"gBias"), 0.01f);

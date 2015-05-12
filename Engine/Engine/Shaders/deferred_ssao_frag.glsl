@@ -4,7 +4,6 @@ uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
 uniform sampler2D gRandomMap;
 
-uniform mat4 VPInverse;
 uniform vec2 gScreenSize;
 uniform float gRadius;
 uniform float gIntensity;
@@ -17,22 +16,25 @@ const vec2 poisson[] =  vec2[]( vec2(  0.34495938,   0.29387760 ),
                                 vec2( -0.26496911,  -0.41893023 ),
                                 vec2( -0.81409955,   0.91437590 ));
 
-vec2 CalcTexCoord(){ return gl_FragCoord.xy / gScreenSize; }
-
-float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal) {
+vec3 calculatePosition(vec2 uv){
+    return texture2D(gPositionMap, uv).xyz;
+}
+vec2 CalcTexCoord(){ 
+	return gl_FragCoord.xy / gScreenSize; 
+}
+float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
     vec3 diff = calculatePosition(uv+offsetUV)-origin;
     vec3 vec = normalize(diff);
     float dist = length(diff)/gScale;
     return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;
 }
 vec2 getRandom(vec2 uv){
-	vec2 res;
-	res = texture(gRandomMap, gScreenSize * uv / 64).xy * 2.0 - 1.0;
+	vec2 res = texture2D(gRandomMap, gScreenSize * uv / 64).xy * 2.0 - 1.0;
 	return normalize(res);
 }
-void main() {
+void main(){
 	vec2 samplePosition = CalcTexCoord();
-    vec3 origin = vec3 position = texture2D(gPositionMap,samplePosition).xyz;
+    vec3 origin = calculatePosition(samplePosition);
     vec3 normal = texture2D(gNormalMap, samplePosition).xyz;
     vec2 random = getRandom(samplePosition);
 

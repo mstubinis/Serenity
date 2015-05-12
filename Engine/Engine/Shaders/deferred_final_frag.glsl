@@ -14,12 +14,12 @@ void main(){
 	vec4 image = texture2D(gColorMap, texCoords);
 	vec4 lighting = texture2D(gLightMap, texCoords);
 	vec4 normals = texture2D(gNormalMap,texCoords);
-	float ssao = texture2D(gSSAOMap, texCoords);
+	float ssao = texture2D(gSSAOMap, texCoords).r;
 
 	if(normals.r > 0.9999 && normals.g > 0.9999 && normals.b > 0.9999)
 		gl_FragColor = image;
 	else{
-		vec4 light = max(gAmbientColor,max(lighting,lighting*ssao));
+		vec4 light = max(gAmbientColor,lighting * ssao);
 		vec4 Final = image*light;
 		gl_FragColor = Final;
 	}
