@@ -6,8 +6,6 @@ uniform vec3 gColor;
 uniform float gAmbientIntensity;
 uniform float gDiffuseIntensity;
 
-uniform int didOnce;
-
 uniform float gConstant;
 uniform float gLinear;
 uniform float gExp;
@@ -17,7 +15,6 @@ uniform vec3 gLightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
-uniform sampler2D gGlowMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
@@ -73,7 +70,6 @@ void main(){
 	vec2 texCoord = CalcTexCoord();
 	vec3 position = texture2D(gPositionMap,texCoord).xyz;
     vec3 normal = normalize(texture2D( gNormalMap, texCoord).rgb);
-	float glow = texture2D(gGlowMap,texCoord).r;
 
 	vec4 lightCalculation = vec4(0);
 
@@ -86,8 +82,5 @@ void main(){
 	else if(gLightType == 3)
 		lightCalculation = CalcSpotLight(position,normal);
 
-	if(didOnce == 0)
-		gl_FragColor = max(vec4(glow),lightCalculation);
-	else
-		gl_FragColor = lightCalculation;
+	gl_FragColor = lightCalculation;
 }

@@ -5,19 +5,21 @@
 
 const int GBUFFER_TYPES[] =		       {GL_RGBA16F,		       // (diffuse.rgba)
 								        GL_RGBA16F,		       // (normals.rgba)
-										GL_R8,				   // Glow
-										GL_RGB16F,			   // World Position
+										GL_R8,			       // Glow
+										GL_RGB32F,			   // World Position
 								        GL_RGB16F,		       // (lighting.rgb)
 									    GL_R8,                 // (ssao)
+										GL_RGBA16F,            // edge
 										GL_RGBA16F,            // free buffer
 										GL_DEPTH_COMPONENT32F};// depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)
 							            GL_RGBA,			   // (normals.rgba)
-										GL_RED,				   // Glow
+										GL_RED,			       // Glow
 										GL_RGB,				   // World Position
 								        GL_RGB,			       // (lighting.rgb)
 								        GL_RED,                // (ssao)
+								        GL_RGBA,			   // edge
 								        GL_RGBA,			   // free buffer
 								        GL_DEPTH_COMPONENT};   // depth
 
@@ -25,6 +27,7 @@ const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,
 						                GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
+								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
@@ -37,9 +40,10 @@ const int GBUFFER_ATTACHMENT_TYPES[] = {GL_COLOR_ATTACHMENT0,
 										GL_COLOR_ATTACHMENT4,
 										GL_COLOR_ATTACHMENT5,
 										GL_COLOR_ATTACHMENT6,
+										GL_COLOR_ATTACHMENT7,
 										GL_DEPTH_ATTACHMENT};
 
-enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION,BUFFER_TYPE_LIGHTING,BUFFER_TYPE_SSAO,
+enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION,BUFFER_TYPE_LIGHTING,BUFFER_TYPE_SSAO,BUFFER_TYPE_EDGE,
 				   BUFFER_TYPE_FREE1,
 				   BUFFER_TYPE_DEPTH,
 				   BUFFER_TYPE_NUMBER};

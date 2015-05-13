@@ -41,8 +41,9 @@ void main(){
 			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 
-		if(GlowMapEnabled == 1)
+		if(GlowMapEnabled == 1){
 			gl_FragData[2].r = texture2D(GlowMap, UV).r;
+		}
 		else
 			gl_FragData[2].r = 0.0;
 	}

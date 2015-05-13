@@ -50,5 +50,6 @@ void main(){
         occlusion += occlude(samplePosition, coord2, origin, normal);
     }
 	occlusion /= (sample_count*4.0);
-    gl_FragColor.r = clamp(1-occlusion,0.01,0.99);//this clamp removes artifacts from gaussian blur. will need to fix later
+    //gl_FragColor.r = clamp(1-occlusion,0.01,0.99);//this clamp removes artifacts from gaussian blur. will need to fix later
+	gl_FragColor.r = 1-occlusion;
 }

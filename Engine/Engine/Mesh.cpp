@@ -53,6 +53,13 @@ Mesh::Mesh(int x, int y,int width, int height){
 	m_Tangents.push_back(glm::vec3(1,1,1));
 	m_Tangents.push_back(glm::vec3(1,1,1));
 
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+
 	_init();
 }
 Mesh::Mesh(float width, float height){
@@ -100,6 +107,13 @@ Mesh::Mesh(float width, float height){
 	m_Tangents.push_back(glm::vec3(1,1,1));
 	m_Tangents.push_back(glm::vec3(1,1,1));
 	m_Tangents.push_back(glm::vec3(1,1,1));
+
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
+	m_Binormals.push_back(glm::vec3(1,1,1));
 
 	_init();
 }
@@ -379,6 +393,10 @@ void Mesh::_generateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_Tangents.push_back(v1.tangent);
 	m_Tangents.push_back(v2.tangent);
 	m_Tangents.push_back(v3.tangent);
+
+	m_Binormals.push_back(v1.binormal);
+	m_Binormals.push_back(v2.binormal);
+	m_Binormals.push_back(v3.binormal);
 }
 void Mesh::_generateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
 	_generateTriangle(v1,v2,v3);
@@ -399,6 +417,9 @@ void Mesh::_init(){
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
 	glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
+	glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
 
 	#pragma region Calculate Mesh Radius (x, y, and z)
 	float maxX = 0;
@@ -447,15 +468,17 @@ void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
 	glm::vec3 t2 = glm::normalize(tangent - v2.normal * glm::dot(v2.normal, tangent));
 	glm::vec3 t3 = glm::normalize(tangent - v3.normal * glm::dot(v3.normal, tangent));
 
-	if (glm::dot(glm::cross(v1.normal, t1), bitangent) < 0.0f){
-		t1 = t1 * -1.0f;
-	}
-	if (glm::dot(glm::cross(v2.normal, t2), bitangent) < 0.0f){
-		t2 = t2 * -1.0f;
-	}
-	if (glm::dot(glm::cross(v3.normal, t3), bitangent) < 0.0f){
-		t3 = t3 * -1.0f;
-	}
+	glm::vec3 b1 = glm::normalize(bitangent - v1.normal * glm::dot(v1.normal, bitangent));
+	glm::vec3 b2 = glm::normalize(bitangent - v2.normal * glm::dot(v2.normal, bitangent));
+	glm::vec3 b3 = glm::normalize(bitangent - v3.normal * glm::dot(v3.normal, bitangent));
+
+
+	if (glm::dot(glm::cross(t1, b1), v1.normal) < 0.0f){t1.x *= -1.0f;}
+
+	if (glm::dot(glm::cross(t2, b2), v2.normal) < 0.0f){t2.x *= -1.0f;}
+
+	if (glm::dot(glm::cross(t3, b3), v3.normal) < 0.0f){t3.x *= -1.0f;}
 
 	v1.tangent = t1;   v2.tangent = t2;   v3.tangent = t3;
+	v1.binormal = -b1; v2.binormal = -b2; v3.binormal = -b3;
 }

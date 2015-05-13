@@ -4,6 +4,7 @@ attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
 attribute vec3 tangent;
+attribute vec3 binormal;
 
 uniform mat4 MVP;
 uniform mat4 World;

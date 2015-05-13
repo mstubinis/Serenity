@@ -73,6 +73,9 @@
     <Filter Include="Header Files\Game">
       <UniqueIdentifier>{3f40b499-c23f-4f0d-8e66-2af89ecc0fd4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\EdgeDetect">
+      <UniqueIdentifier>{ce37d8bc-972f-4b3a-b991-56b2b710c471}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -306,6 +309,9 @@
     </None>
     <None Include="Shaders\vert_HUD.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
+    <None Include="Shaders\deferred_edge_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\EdgeDetect</Filter>
     </None>
   </ItemGroup>
 </Project>

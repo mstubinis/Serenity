@@ -178,6 +178,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <None Include="Shaders\deferred_blur_frag.glsl" />
     <None Include="Shaders\deferred_blur_horizontal.glsl" />
     <None Include="Shaders\deferred_blur_vertical.glsl" />
+    <None Include="Shaders\deferred_edge_frag.glsl" />
     <None Include="Shaders\deferred_final_frag.glsl" />
     <None Include="Shaders\deferred_frag.glsl" />
     <None Include="Shaders\deferred_frag_HUD.glsl" />

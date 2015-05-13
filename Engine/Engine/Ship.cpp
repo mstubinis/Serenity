@@ -80,12 +80,12 @@ void PlayerShip::update(float dt){
 		applyForce(0,1*(getMass()*3),0);
 
 	if(Keyboard::isKeyDown("q"))
-		applyTorque(0,0,1);
+		applyTorque(0,0,1*1/(getMass()));
 	if(Keyboard::isKeyDown("e"))
-		applyTorque(0,0,-1);
+		applyTorque(0,0,-1*1/(getMass()));
 
 	if(m_Camera->getState() != CAMERA_STATE_ORBIT){
-		applyTorque(-Mouse::getMouseDifference().y*0.002f,-Mouse::getMouseDifference().x*0.002f,0);
+		applyTorque(-Mouse::getMouseDifference().y*0.002f*(1/(getMass()*3)),-Mouse::getMouseDifference().x*0.002f*(1/(getMass()*3)),0);
 	}
 
 	if(Keyboard::isKeyDownOnce("f1")){

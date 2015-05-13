@@ -4,6 +4,7 @@ attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
 attribute vec3 tangent;
+attribute vec3 binormal;
 
 uniform int hasAtmosphere;
 
@@ -94,7 +95,7 @@ void main(void)	{
 	//normalizing these solved a problem, but might cause more. Be careful here
 	Normals = normalize((World * vec4(normal,0.0)).xyz);
 	Tangents = normalize((World * vec4(tangent,0.0)).xyz);
-	Binormals = cross(Normals,Tangents);
+	Binormals = normalize((World * vec4(binormal,0.0)).xyz);
 
 	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

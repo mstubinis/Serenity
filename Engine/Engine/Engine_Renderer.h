@@ -48,7 +48,6 @@ namespace Engine{
 			class RenderManagement{
 				private:
 					static GBuffer* m_gBuffer;
-					static bool m_DidLightingPassOnce;
 
 					static std::vector<FontRenderInfo> m_FontsToBeRendered;
 					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
@@ -63,8 +62,9 @@ namespace Engine{
 
 					static void _passLighting();
 					static void _passSSAO();
-					static void _passBlurHorizontal(GLuint texture);
-					static void _passBlurVertical(GLuint texture);
+					static void _passEdge(GLuint texture,GLuint texture1,float radius = 1.0f);
+					static void _passBlurHorizontal(GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f);
+					static void _passBlurVertical(GLuint texture, float radius = 1.0f,float strengthModifier = 1.0f);
 					static void _passFinal();
 				public:
 					static Texture* RandomMapSSAO;

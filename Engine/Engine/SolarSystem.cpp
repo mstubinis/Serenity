@@ -320,8 +320,7 @@ void SolarSystem::_loadRandomly(){
 			glm::vec3 starPos = star->getPosition();
 			glm::vec3 offset = starPos - centerOfMassPosition;
 			glm::vec3 normOffset = glm::normalize(offset);
-			star->translate(normOffset*biggestRadius*2.0f);
-			star->update(1);
+			star->setPosition(star->getPosition() + (normOffset*biggestRadius*2.0f));
 		}
 		allStarsGood = true;
 		for(auto star:m_Stars){

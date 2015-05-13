@@ -10,7 +10,7 @@ varying vec3 WorldPosition;
 void main(){
 	mat4 MVP = VP * World;
     gl_Position = MVP * vec4(Position, 1.0);
-	gl_Position.z = gl_Position.w - 0.01;
+	gl_Position.z = gl_Position.w;
     TexCoord0 = Position;
 	WorldPosition = (World * vec4(Position,1.0)).xyz;
 }

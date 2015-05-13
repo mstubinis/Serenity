@@ -28,7 +28,8 @@ void main(){
 
 	gl_FragData[0] = vec4(HDR.xyz,nightmult);
 	gl_FragData[1] = vec4(1.0);
-	gl_FragData[2] = vec4(WorldPosition,1.0);
+	gl_FragData[2].r = 0.0;
+	gl_FragData[3] = vec4(WorldPosition,1.0);
 
     const float offset = 1.0;
     gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));

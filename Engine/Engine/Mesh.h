@@ -11,23 +11,24 @@ class btCollisionShape;
 class btTriangleMesh;
 class btConvexHullShape;
 
-const unsigned int NUM_VERTEX_DATA = 4;
-const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3};
+const unsigned int NUM_VERTEX_DATA = 5;
+const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
 struct Vertex{
 	glm::vec3 position;
 	glm::vec2 uv;
 	glm::vec3 normal;
 	glm::vec3 tangent;
+	glm::vec3 binormal;
 	Vertex(){
 		uv = glm::vec2(0,0);
-		normal = tangent = glm::vec3(0,0,0);
+		normal = tangent = binormal = glm::vec3(0,0,0);
 	}
 };
 
 class Mesh{
 	private:
-		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent
+		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
 		btConvexHullShape* m_Collision;
 
 		glm::vec3 m_radiusBox;
@@ -36,6 +37,7 @@ class Mesh{
 		std::vector<glm::vec2> m_UVs;
 		std::vector<glm::vec3> m_Normals;
 		std::vector<glm::vec3> m_Tangents;
+		std::vector<glm::vec3> m_Binormals;
 
 		void _generateQuad(Vertex&,Vertex&,Vertex&,Vertex&);
 		void _generateTriangle(Vertex&,Vertex&,Vertex&);
@@ -67,6 +69,7 @@ class Mesh{
 		const std::vector<glm::vec2>& getUVS() const { return m_UVs; }
 		const std::vector<glm::vec3>& getNormals() const { return m_Normals; }
 		const std::vector<glm::vec3>& getTangents() const { return m_Tangents; }
+		const std::vector<glm::vec3>& getBinormals() const { return m_Binormals; }
 
 		void render();
 };
