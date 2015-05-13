@@ -1,15 +1,20 @@
-#version 110
+#version 120
 
 uniform sampler2D texture;
 uniform float strengthModifier;
 uniform vec2 gScreenSize;
+
+uniform float R;
+uniform float G;
+uniform float B;
+uniform float A;
 
 varying vec2 offset[14];
 varying float Radius;
 
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 void main(void){
-    vec4 sum = vec4(0);
+    vec4 sum = vec4(0.0);
     vec2 uv = CalcTexCoord();
     vec4 color = texture2D(texture, uv );
 
@@ -31,5 +36,12 @@ void main(void){
 	sum += texture2D(texture, uv+offset[12])*0.009 * strength;
 	sum += texture2D(texture, uv+offset[13])*0.0044 * strength;
 
-    gl_FragColor = sum;
+	if(R == 1.0)
+		gl_FragColor.r = sum.r;
+	if(G == 1.0)
+		gl_FragColor.g = sum.g;
+	if(B == 1.0)
+		gl_FragColor.b = sum.b;
+	if(A == 1.0)
+		gl_FragColor.a = sum.a;
 }

@@ -63,8 +63,8 @@ namespace Engine{
 					static void _passLighting();
 					static void _passSSAO();
 					static void _passEdge(GLuint texture,GLuint texture1,float radius = 1.0f);
-					static void _passBlurHorizontal(GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f);
-					static void _passBlurVertical(GLuint texture, float radius = 1.0f,float strengthModifier = 1.0f);
+					static void _passBlurHorizontal(GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
+					static void _passBlurVertical(GLuint texture, float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
 					static void _passFinal();
 				public:
 					static Texture* RandomMapSSAO;

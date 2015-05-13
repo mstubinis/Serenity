@@ -9,7 +9,7 @@ const int GBUFFER_TYPES[] =		       {GL_RGBA16F,		       // (diffuse.rgba)
 										GL_RGB32F,			   // World Position
 								        GL_RGB16F,		       // (lighting.rgb)
 									    GL_R8,                 // (ssao)
-										GL_RGBA16F,            // edge
+										GL_RGBA16F,            // edge / bloom
 										GL_RGBA16F,            // free buffer
 										GL_DEPTH_COMPONENT32F};// depth
 
@@ -19,7 +19,7 @@ const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)
 										GL_RGB,				   // World Position
 								        GL_RGB,			       // (lighting.rgb)
 								        GL_RED,                // (ssao)
-								        GL_RGBA,			   // edge
+								        GL_RGBA,			   // edge / bloom
 								        GL_RGBA,			   // free buffer
 								        GL_DEPTH_COMPONENT};   // depth
 

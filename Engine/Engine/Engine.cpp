@@ -58,7 +58,7 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
     //Resources::getWindow()->setVerticalSyncEnabled(true);
 	Resources::getWindow()->setMouseCursorVisible(false);
 	Resources::getWindow()->setKeyRepeatEnabled(false);
-	Resources::getWindow()->setFramerateLimit(60);
+	//Resources::getWindow()->setFramerateLimit(60);
 
 	glClearColor(1,1,0,1);
 }
