@@ -9,8 +9,8 @@ uniform float gRadius;
 uniform float gIntensity;
 uniform float gBias;
 uniform float gScale;
+uniform int gSampleCount;
 
-const int sample_count = 4;
 const vec2 poisson[] =  vec2[]( vec2(  0.34495938,   0.29387760 ),
                                 vec2(  0.53742981,  -0.47373420 ),
                                 vec2( -0.26496911,  -0.41893023 ),
@@ -41,7 +41,7 @@ void main(){
     float radius = gRadius/origin.z;
     float occlusion = 0.0;
 
-    for (int i = 0; i < sample_count; i++) {
+    for (int i = 0; i < gSampleCount; i++) {
         vec2 coord1 = reflect(poisson[i], random)*radius;
         vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
         occlusion += occlude(samplePosition, coord1 * 0.25, origin, normal);
@@ -49,7 +49,7 @@ void main(){
         occlusion += occlude(samplePosition, coord1 * 0.75, origin, normal);
         occlusion += occlude(samplePosition, coord2, origin, normal);
     }
-	occlusion /= (sample_count*4.0);
+	occlusion /= (gSampleCount*4.0);
     //gl_FragColor.g = clamp(1-occlusion,0.01,0.99);//this clamp removes artifacts from gaussian blur. will need to fix later
 	gl_FragColor.g = 1-occlusion;
 }

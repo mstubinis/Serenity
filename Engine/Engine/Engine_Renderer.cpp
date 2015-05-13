@@ -165,10 +165,12 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	Engine::Renderer::Detail::RenderManagement::_lightingPass();
 	m_gBuffer->stop();
 
+	//only write to the G channel of the glow buffer for SSAO pass
 	m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
 	Engine::Renderer::Detail::RenderManagement::_passSSAO();
 	m_gBuffer->stop();
 
+	//only blurr the G channel of the glow buffer for the Gaussian blur pass
 	m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
 	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
 	m_gBuffer->stop();
@@ -239,6 +241,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	glUniform1f(glGetUniformLocation(shader,"gBias"), 0.01f);
 	glUniform1f(glGetUniformLocation(shader,"gRadius"), 0.7f);
 	glUniform1f(glGetUniformLocation(shader,"gScale"), 1.2f);
+	glUniform1i(glGetUniformLocation(shader,"gSampleCount"), 1);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -303,14 +306,14 @@ void Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(GLuint text
 	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 	glUniform1f(glGetUniformLocation(shader,"strengthModifier"), strengthModifier);
 
-	if(channels.find("R") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"R"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"R"), 0.0f);
-	if(channels.find("G") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"G"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"G"), 0.0f);
-	if(channels.find("B") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"B"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"B"), 0.0f);
-	if(channels.find("A") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"A"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"A"), 0.0f);
+	if(channels.find("R") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"R"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"R"), 0);
+	if(channels.find("G") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"G"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"G"), 0);
+	if(channels.find("B") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"B"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"B"), 0);
+	if(channels.find("A") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"A"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"A"), 0);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -333,14 +336,14 @@ void Engine::Renderer::Detail::RenderManagement::_passBlurVertical(GLuint textur
 	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 	glUniform1f(glGetUniformLocation(shader,"strengthModifier"), strengthModifier);
 
-	if(channels.find("R") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"R"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"R"), 0.0f);
-	if(channels.find("G") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"G"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"G"), 0.0f);
-	if(channels.find("B") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"B"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"B"), 0.0f);
-	if(channels.find("A") != std::string::npos) glUniform1f(glGetUniformLocation(shader,"A"), 1.0f);
-	else                                        glUniform1f(glGetUniformLocation(shader,"A"), 0.0f);
+	if(channels.find("R") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"R"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"R"), 0);
+	if(channels.find("G") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"G"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"G"), 0);
+	if(channels.find("B") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"B"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"B"), 0);
+	if(channels.find("A") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"A"), 1);
+	else                                        glUniform1i(glGetUniformLocation(shader,"A"), 0);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);

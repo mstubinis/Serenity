@@ -1,4 +1,4 @@
-#version 110
+#version 120
 
 varying vec2 offset[14];
 varying float Radius;

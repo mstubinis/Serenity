@@ -45,7 +45,7 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	videoMode.height = height;
 	videoMode.bitsPerPixel = 32;
 
-	int style = sf::Style::Default;
+	int style = sf::Style::Fullscreen;
 	if(style == sf::Style::Fullscreen){
 		videoMode = sf::VideoMode::getDesktopMode();
 		width = videoMode.width;
