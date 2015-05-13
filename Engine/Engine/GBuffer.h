@@ -5,20 +5,18 @@
 
 const int GBUFFER_TYPES[] =		       {GL_RGBA16F,		       // (diffuse.rgba)
 								        GL_RGBA16F,		       // (normals.rgba)
-										GL_R8,			       // Glow
+										GL_RG8,			       // Glow & SSAO
 										GL_RGB32F,			   // World Position
 								        GL_RGB16F,		       // (lighting.rgb)
-									    GL_R8,                 // (ssao)
 										GL_RGBA16F,            // edge / bloom
 										GL_RGBA16F,            // free buffer
 										GL_DEPTH_COMPONENT32F};// depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)
 							            GL_RGBA,			   // (normals.rgba)
-										GL_RED,			       // Glow
+										GL_RG,			       // Glow & SSAO
 										GL_RGB,				   // World Position
 								        GL_RGB,			       // (lighting.rgb)
-								        GL_RED,                // (ssao)
 								        GL_RGBA,			   // edge / bloom
 								        GL_RGBA,			   // free buffer
 								        GL_DEPTH_COMPONENT};   // depth
@@ -27,7 +25,6 @@ const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,
 						                GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
-								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
@@ -40,13 +37,13 @@ const int GBUFFER_ATTACHMENT_TYPES[] = {GL_COLOR_ATTACHMENT0,
 										GL_COLOR_ATTACHMENT4,
 										GL_COLOR_ATTACHMENT5,
 										GL_COLOR_ATTACHMENT6,
-										GL_COLOR_ATTACHMENT7,
 										GL_DEPTH_ATTACHMENT};
 
-enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION,BUFFER_TYPE_LIGHTING,BUFFER_TYPE_SSAO,BUFFER_TYPE_EDGE,
+enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION,BUFFER_TYPE_LIGHTING,BUFFER_TYPE_EDGE,
 				   BUFFER_TYPE_FREE1,
 				   BUFFER_TYPE_DEPTH,
 				   BUFFER_TYPE_NUMBER};
+
 
 class GBuffer{
 	private:
@@ -62,11 +59,11 @@ class GBuffer{
 		GBuffer(int width, int height);
 		~GBuffer();
 
-		void start(unsigned int);
-		void start(unsigned int,unsigned int);
-		void start(unsigned int,unsigned int,unsigned int);
-		void start(unsigned int,unsigned int,unsigned int,unsigned int);
-		void stop();
+		void start(unsigned int,std::string = "RGBA");
+		void start(unsigned int,unsigned int,std::string = "RGBA");
+		void start(unsigned int,unsigned int,unsigned int,std::string = "RGBA");
+		void start(unsigned int,unsigned int,unsigned int,unsigned int,std::string = "RGBA");
+		void stop(std::string = "RGBA");
 
 		std::unordered_map<unsigned int,TextureBuffer*> getBuffers();
 		GLuint getTexture(unsigned int);

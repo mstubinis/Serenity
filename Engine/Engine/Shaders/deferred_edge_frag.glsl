@@ -23,7 +23,8 @@ float avg_intensity(vec4 pix) {
 }
 
 vec4 get_pixel(vec2 coords,float dx,float dy) {
-	return texture2D(texture,coords + vec2(dx, dy));
+	float glowValue = texture2D(texture,coords + vec2(dx, dy)).r;
+	return vec4(glowValue);
 }
 
 // returns pixel color

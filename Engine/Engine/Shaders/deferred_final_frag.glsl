@@ -2,7 +2,6 @@
 
 uniform sampler2D gColorMap;
 uniform sampler2D gLightMap;
-uniform sampler2D gSSAOMap;
 uniform sampler2D gNormalMap;
 uniform sampler2D gGlowMap;
 uniform sampler2D gBloomMap;
@@ -16,7 +15,7 @@ void main(){
 	vec4 image = texture2D(gColorMap, texCoords);
 	vec4 lighting = texture2D(gLightMap, texCoords);
 	vec4 normals = texture2D(gNormalMap,texCoords);
-	float ssao = texture2D(gSSAOMap, texCoords).r;
+	float ssao = texture2D(gGlowMap, texCoords).g;
 	float glow = texture2D(gGlowMap, texCoords).r;
 	vec4 bloom = texture2D(gBloomMap,texCoords);
 

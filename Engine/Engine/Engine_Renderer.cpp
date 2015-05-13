@@ -165,17 +165,16 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	Engine::Renderer::Detail::RenderManagement::_lightingPass();
 	m_gBuffer->stop();
 
-	m_gBuffer->start(BUFFER_TYPE_SSAO);
+	m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
 	Engine::Renderer::Detail::RenderManagement::_passSSAO();
 	m_gBuffer->stop();
 
-	m_gBuffer->start(BUFFER_TYPE_FREE1);
-	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_SSAO,1.0f,1.0f,"RGBA");
+	m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
+	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
 	m_gBuffer->stop();
-	m_gBuffer->start(BUFFER_TYPE_SSAO);
-	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,1.0f,1.0f,"RGBA");
+	m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
+	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,1.0f,1.0f,"G");
 	m_gBuffer->stop();
-
 
 
 	m_gBuffer->start(BUFFER_TYPE_EDGE);
@@ -189,8 +188,6 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,0.42f,3.5f);
 	m_gBuffer->stop();
 
-
-	
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
 
 	if(debug) physicsEngine->render();
@@ -232,7 +229,8 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 }
 
 void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
+
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
 	glUseProgram(shader);
 
@@ -379,27 +377,22 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_SSAO));
-	glUniform1i( glGetUniformLocation(shader,"gSSAOMap"), 2 );
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
+	glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 2 );
 
 	glActiveTexture(GL_TEXTURE3);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-	glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 3 );
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GLOW));
+	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 3 );
 
 	glActiveTexture(GL_TEXTURE4);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GLOW));
-	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 4 );
-
-	glActiveTexture(GL_TEXTURE5);
-	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_EDGE));
-	glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 5 );
+	glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 4 );
 
 	Engine::Renderer::Detail::RenderManagement::_initQuad();
 
-	for(unsigned int i = 0; i < 6; i++){
+	for(unsigned int i = 0; i < 5; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);

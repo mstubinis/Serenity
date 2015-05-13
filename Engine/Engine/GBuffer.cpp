@@ -28,7 +28,19 @@ GBuffer::~GBuffer(){
 	glDeleteFramebuffers(1, &m_fbo);
 	glDeleteRenderbuffers(1, &m_depth);
 }
-void GBuffer::start(unsigned int type){
+void GBuffer::start(unsigned int type,std::string channels){
+
+	unsigned int r,g,b,a;
+	if(channels.find("R") != std::string::npos) r=1;
+	else                                        r=0;
+	if(channels.find("G") != std::string::npos) g=1;
+	else                                        g=0;
+	if(channels.find("B") != std::string::npos) b=1;
+	else                                        b=0;
+	if(channels.find("A") != std::string::npos) a=1;
+	else                                        a=0;
+	glColorMask(r,g,b,a);
+
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -46,7 +58,18 @@ void GBuffer::start(unsigned int type){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::start(unsigned int type,unsigned int type1){
+void GBuffer::start(unsigned int type,unsigned int type1,std::string channels){
+	unsigned int r,g,b,a;
+	if(channels.find("R") != std::string::npos) r=1;
+	else                                        r=0;
+	if(channels.find("G") != std::string::npos) g=1;
+	else                                        g=0;
+	if(channels.find("B") != std::string::npos) b=1;
+	else                                        b=0;
+	if(channels.find("A") != std::string::npos) a=1;
+	else                                        a=0;
+	glColorMask(r,g,b,a);
+
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -63,7 +86,18 @@ void GBuffer::start(unsigned int type,unsigned int type1){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2){
+void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,std::string channels){
+	unsigned int r,g,b,a;
+	if(channels.find("R") != std::string::npos) r=1;
+	else                                        r=0;
+	if(channels.find("G") != std::string::npos) g=1;
+	else                                        g=0;
+	if(channels.find("B") != std::string::npos) b=1;
+	else                                        b=0;
+	if(channels.find("A") != std::string::npos) a=1;
+	else                                        a=0;
+	glColorMask(r,g,b,a);
+
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -80,7 +114,18 @@ void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2){
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,unsigned int type3){
+void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,unsigned int type3,std::string channels){
+	unsigned int r,g,b,a;
+	if(channels.find("R") != std::string::npos) r=1;
+	else                                        r=0;
+	if(channels.find("G") != std::string::npos) g=1;
+	else                                        g=0;
+	if(channels.find("B") != std::string::npos) b=1;
+	else                                        b=0;
+	if(channels.find("A") != std::string::npos) a=1;
+	else                                        a=0;
+	glColorMask(r,g,b,a);
+
 	// Bind our FBO and set the viewport to the proper size
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glPushAttrib(GL_VIEWPORT_BIT);
@@ -97,10 +142,21 @@ void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,unsi
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 }
-void GBuffer::stop(){	
+void GBuffer::stop(std::string channels){	
 	// Stop acquiring and unbind the FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPopAttrib();
+
+	unsigned int r,g,b,a;
+	if(channels.find("R") != std::string::npos) r=1;
+	else                                        r=0;
+	if(channels.find("G") != std::string::npos) g=1;
+	else                                        g=0;
+	if(channels.find("B") != std::string::npos) b=1;
+	else                                        b=0;
+	if(channels.find("A") != std::string::npos) a=1;
+	else                                        a=0;
+	glColorMask(r,g,b,a);
 }
 std::unordered_map<unsigned int,TextureBuffer*> GBuffer::getBuffers(){ return m_Buffers; }
 GLuint GBuffer::getTexture(unsigned int type){ return m_Buffers[type]->getTexture(); }
