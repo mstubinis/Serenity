@@ -175,6 +175,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <None Include="Shaders\AS_skyFromAtmosphere_vert.glsl" />
     <None Include="Shaders\AS_skyFromSpace_frag.glsl" />
     <None Include="Shaders\AS_skyFromSpace_vert.glsl" />
+    <None Include="Shaders\deferred_bloom_frag.glsl" />
     <None Include="Shaders\deferred_blur_frag.glsl" />
     <None Include="Shaders\deferred_blur_horizontal.glsl" />
     <None Include="Shaders\deferred_blur_vertical.glsl" />

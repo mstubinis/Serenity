@@ -167,10 +167,10 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 
 	//only write to the G channel of the glow buffer for SSAO pass
 	m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-	Engine::Renderer::Detail::RenderManagement::_passSSAO();
+	Engine::Renderer::Detail::RenderManagement::_passSSAO(1,2.9f,0.01f,0.7f,1.2f);
 	m_gBuffer->stop();
 
-	//only blurr the G channel of the glow buffer for the Gaussian blur pass
+	//only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
 	m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
 	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
 	m_gBuffer->stop();
@@ -178,20 +178,21 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,1.0f,1.0f,"G");
 	m_gBuffer->stop();
 
-
-	m_gBuffer->start(BUFFER_TYPE_EDGE);
-	Engine::Renderer::Detail::RenderManagement::_passEdge(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
+	glDisable(GL_BLEND);
+	m_gBuffer->start(BUFFER_TYPE_BLOOM);
+	Engine::Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
 	m_gBuffer->stop();
 
 	m_gBuffer->start(BUFFER_TYPE_FREE1);
-	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_EDGE,0.42f,3.5f);
+	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_BLOOM,0.42f,3.8f);
 	m_gBuffer->stop();
-	m_gBuffer->start(BUFFER_TYPE_EDGE);
-	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,0.42f,3.5f);
+	m_gBuffer->start(BUFFER_TYPE_BLOOM);
+	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,0.42f,3.8f);
 	m_gBuffer->stop();
-
+	
+	
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
-
+	glEnable(GL_BLEND);
 	if(debug) physicsEngine->render();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -229,19 +230,18 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	}
 	glUseProgram(0);
 }
-
-void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
+void Engine::Renderer::Detail::RenderManagement::_passSSAO(unsigned int sampleCount, float intensity, float bias, float radius, float scale){
 	//glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
 	glUseProgram(shader);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
-	glUniform1f(glGetUniformLocation(shader,"gIntensity"), 2.9f);
-	glUniform1f(glGetUniformLocation(shader,"gBias"), 0.01f);
-	glUniform1f(glGetUniformLocation(shader,"gRadius"), 0.7f);
-	glUniform1f(glGetUniformLocation(shader,"gScale"), 1.2f);
-	glUniform1i(glGetUniformLocation(shader,"gSampleCount"), 1);
+	glUniform1f(glGetUniformLocation(shader,"gIntensity"), intensity);
+	glUniform1f(glGetUniformLocation(shader,"gBias"), bias);
+	glUniform1f(glGetUniformLocation(shader,"gRadius"),radius);
+	glUniform1f(glGetUniformLocation(shader,"gScale"), scale);
+	glUniform1i(glGetUniformLocation(shader,"gSampleCount"), sampleCount);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -258,7 +258,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	glBindTexture(GL_TEXTURE_2D,RandomMapSSAO->getTextureAddress());
 	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -267,7 +267,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	}
 	glUseProgram(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture,GLuint texture1, float radius){
+void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_Edge")->getShaderProgram();
@@ -281,19 +281,42 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture,GLuint
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
+
+	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+
+
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
+	glUseProgram(0);
+}
+void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLuint texture1){
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	GLuint shader = Resources::getShader("Deferred_Bloom")->getShaderProgram();
+	glUseProgram(shader);
+
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
+	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
+
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture1));
 	glUniform1i(glGetUniformLocation(shader,"texture1"), 1 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	for(unsigned int i = 0; i < 2; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, i);
 	}
-
 	glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(GLuint texture, float radius,float strengthModifier,std::string channels){
@@ -320,7 +343,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(GLuint text
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -350,7 +373,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBlurVertical(GLuint textur
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -390,10 +413,10 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
 	glActiveTexture(GL_TEXTURE4);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_EDGE));
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
 	glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 4 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad();
+	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	for(unsigned int i = 0; i < 5; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -402,12 +425,12 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	}
 	glUseProgram(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_initQuad(){
+void Engine::Renderer::Detail::RenderManagement::_initQuad(unsigned int width, unsigned int height){
 	//Projection setup
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,Resources::getWindow()->getSize().x,0,Resources::getWindow()->getSize().y,0.1f,2);	
+	glOrtho(0,width,0,height,0.1f,2);	
 	
 	//Model setup
 	glMatrixMode(GL_MODELVIEW);
@@ -416,17 +439,17 @@ void Engine::Renderer::Detail::RenderManagement::_initQuad(){
 	// Render the quad
 	glLoadIdentity();
 	glColor3f(1,1,1);
-	glTranslatef(0,0,-1.0);
+	glTranslatef(0,0,-1);
 	
 	glBegin(GL_QUADS);
-	glTexCoord2f( 0, 0 );
-	glVertex3f(    0.0f, 0.0f, 0.0f);
-	glTexCoord2f( 1, 0 );
-	glVertex3f(   (float) Resources::getWindow()->getSize().x, 0.0f, 0.0f);
-	glTexCoord2f( 1, 1 );
-	glVertex3f(   (float) Resources::getWindow()->getSize().x, (float) Resources::getWindow()->getSize().y, 0.0f);
-	glTexCoord2f( 0, 1 );
-	glVertex3f(    0.0f,  (float) Resources::getWindow()->getSize().y, 0.0f);
+	glTexCoord2f(0,0);
+	glVertex3f(0,0,0);
+	glTexCoord2f(1,0);
+	glVertex3f((float)width,0,0);
+	glTexCoord2f(1,1);
+	glVertex3f((float)width,(float)height,0);
+	glTexCoord2f(0,1);
+	glVertex3f(0,(float)height,0);
 	glEnd();
 
 	//Reset the matrices	

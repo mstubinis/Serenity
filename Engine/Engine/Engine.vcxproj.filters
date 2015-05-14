@@ -73,7 +73,10 @@
     <Filter Include="Header Files\Game">
       <UniqueIdentifier>{3f40b499-c23f-4f0d-8e66-2af89ecc0fd4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\EdgeDetect">
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\Bloom">
+      <UniqueIdentifier>{1525d723-c801-414d-9e52-3e0c1ef180e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\EdgeDetect">
       <UniqueIdentifier>{ce37d8bc-972f-4b3a-b991-56b2b710c471}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -311,7 +314,10 @@
       <Filter>Resource Files\Shaders\ForwardRendering</Filter>
     </None>
     <None Include="Shaders\deferred_edge_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\EdgeDetect</Filter>
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\EdgeDetect</Filter>
+    </None>
+    <None Include="Shaders\deferred_bloom_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\Bloom</Filter>
     </None>
   </ItemGroup>
 </Project>

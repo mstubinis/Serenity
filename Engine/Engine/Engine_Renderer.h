@@ -52,7 +52,7 @@ namespace Engine{
 					static std::vector<FontRenderInfo> m_FontsToBeRendered;
 					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
 
-					static void _initQuad();
+					static void _initQuad(unsigned int width, unsigned int height);
 
 					static void _renderText();
 					static void _renderTextures();
@@ -61,8 +61,9 @@ namespace Engine{
 					static void _lightingPass();
 
 					static void _passLighting();
-					static void _passSSAO();
-					static void _passEdge(GLuint texture,GLuint texture1,float radius = 1.0f);
+					static void _passSSAO(unsigned int sampleCount, float intensity, float bias, float radius, float scale);
+					static void _passEdge(GLuint texture,float radius = 1.0f);
+					static void _passBloom(GLuint texture,GLuint texture1);
 					static void _passBlurHorizontal(GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
 					static void _passBlurVertical(GLuint texture, float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
 					static void _passFinal();
