@@ -29,7 +29,7 @@ struct Vertex{
 class Mesh{
 	private:
 		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
-		btConvexHullShape* m_Collision;
+		btCollisionShape* m_Collision;
 
 		glm::vec3 m_radiusBox;
 		float m_radius;
@@ -48,8 +48,8 @@ class Mesh{
 		void _loadFromPLY(std::string);
 		void _loadFromOBJ(std::string);
 
-		btConvexHullShape* _loadColFromOBJ(std::string);
-		btConvexHullShape* _loadColFromPLY(std::string);
+		btCollisionShape* _loadColFromOBJ(std::string);
+		btCollisionShape* _loadColFromPLY(std::string);
 
 		void _init();
 	public:
@@ -60,7 +60,7 @@ class Mesh{
 
 		//GLuint* VAO();
 		const GLuint* getBuffers() const { return m_buffers; }
-		btConvexHullShape* getCollision() const { return m_Collision; }
+		btCollisionShape* getCollision() const { return m_Collision; }
 
 		const glm::vec3& getRadiusBox() const { return m_radiusBox; }
 		const float getRadius() const { return m_radius; }

@@ -202,11 +202,11 @@ void Mesh::_loadFromPLY(std::string filename){
 			StartReadingGeometryData = true;
 	}
 }
-btConvexHullShape* Mesh::_loadColFromPLY(std::string filename){
+btCollisionShape* Mesh::_loadColFromPLY(std::string filename){
 	bool StartReadingGeometryData = false;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 	std::vector<Vertex> vertices;
-	btConvexHullShape* collision = new btConvexHullShape();
+	btCollisionShape* collision = new btConvexHullShape();
 	for(std::string line; std::getline(str, line, '\n');){
 		if(StartReadingGeometryData == true){
 			int SlashCount = 0;
@@ -227,7 +227,7 @@ btConvexHullShape* Mesh::_loadColFromPLY(std::string filename){
 				vertices.push_back(vert);
 
 				btVector3 pos = btVector3(vert.position.x,vert.position.y,vert.position.z);
-				collision->addPoint(pos);
+				((btConvexHullShape*)collision)->addPoint(pos);
 			}
 			#pragma endregion
 		}
@@ -342,8 +342,8 @@ void Mesh::_loadFromOBJ(std::string filename){
 		}
 	}
 }
-btConvexHullShape* Mesh::_loadColFromOBJ(std::string filename){
-	btConvexHullShape* collision = new btConvexHullShape();
+btCollisionShape* Mesh::_loadColFromOBJ(std::string filename){
+	btCollisionShape* collision = new btConvexHullShape();
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
 	for(std::string line; std::getline(str, line, '\n');){
@@ -363,7 +363,7 @@ btConvexHullShape* Mesh::_loadColFromOBJ(std::string filename){
 			float z1 = static_cast<float>(::atof(z.c_str()));
 
 			btVector3 pos = btVector3(x1,y1,z1);
-			collision->addPoint(pos);
+			((btConvexHullShape*)collision)->addPoint(pos);
 		}
 		else if(line[0] == 'v' && line[1] != ' ') //we are done loading in the points, break out of the method
 			return collision;
