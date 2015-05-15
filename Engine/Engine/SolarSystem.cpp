@@ -26,7 +26,6 @@ SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 
 	if(file == ""){
 		SolarSystem::_loadRandomly();
-		//SolarSystem::_loadTestSystem();
 	}
 	else{
 		SolarSystem::_loadFromFile(file);
@@ -36,31 +35,6 @@ SolarSystem::~SolarSystem(){
 	for(auto star:m_Stars)    delete star;
 	for(auto planet:m_Planets)delete planet;
 	for(auto moon:m_Moons)    delete moon;
-}
-void SolarSystem::_loadTestSystem(){
-	new Skybox("Basic",this);
-
-	Star* sun = new Star(glm::vec3(1,0.6f,0),glm::vec3(228.0f/255.0f,228.0f/255.0f,1),glm::vec3(0,0,0),6958000,"Sun",this);
-	m_Stars.push_back(sun);
-	Planet* p = new Planet("Earth",PLANET_TYPE_ROCKY,glm::vec3(-80000,0,1499000000),63710,"Earth",0.025f,this);
-	m_Planets.push_back(p);
-
-	player = new PlayerShip("Defiant","Defiant","USS Defiant",glm::vec3(0,0,1499000000),glm::vec3(1,1,1),nullptr,this);
-	Ship* other = new Ship("Defiant","Defiant","USS Valiant",glm::vec3(3,0,1499000000),glm::vec3(1,1,1),nullptr,this);
-
-	glm::vec3 offset = -player->getPosition();
-	Scene* s =  Resources::getCurrentScene();
-	for(auto obj:s->getObjects()){
-		if(obj.second != player && obj.second->getParent() == nullptr){
-			obj.second->translate(offset,false);
-		}
-	}
-	for(auto obj:s->getLights()){
-		if(obj.second->getParent() == nullptr){
-			obj.second->translate(offset,false);
-		}
-	}
-	player->setPosition(0,0,0);
 }
 void SolarSystem::_loadFromFile(std::string filename){
 	unsigned int count = 0;
@@ -187,7 +161,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += getObjects()[PARENT]->getPosition().x;
 						zPos += getObjects()[PARENT]->getPosition().z;
 					}
-					player = new PlayerShip("Akira","Akira",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+					player = new PlayerShip("Defiant","Defiant",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
 
 				}
 				else if(line[0] == '$'){//Other ship
@@ -195,7 +169,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += getObjects()[PARENT]->getPosition().x;
 						zPos += getObjects()[PARENT]->getPosition().z;
 					}
-					new Ship("Defiant","Defiant",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+					new Ship("Akira","Akira",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
 				}
 				else if(line[0] == 'R'){//Rings
 					if(PARENT != ""){

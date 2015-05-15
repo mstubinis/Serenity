@@ -39,8 +39,8 @@ PhysicsEngine::~PhysicsEngine(){
 void PhysicsEngine::setGravity(float x,float y,float z){ m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
 void PhysicsEngine::setGravity(glm::vec3 gravity){ setGravity(gravity.x,gravity.y,gravity.z); }
 void PhysicsEngine::addRigidBody(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
-void PhysicsEngine::update(float dt){
-	m_dynamicsWorld->stepSimulation(1/60.0f);
+void PhysicsEngine::update(float dt,unsigned int maxSteps,float other){
+	m_dynamicsWorld->stepSimulation(dt,maxSteps,other);
 }
 void PhysicsEngine::render(){
 	glm::mat4 model = glm::mat4(1.0);

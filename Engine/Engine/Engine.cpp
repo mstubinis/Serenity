@@ -130,8 +130,6 @@ void Engine::EngineClass::_update(float dt){
 	game->update(dt);
 	Resources::getCurrentScene()->update(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
-
-	physicsEngine->update(dt);
 }
 void Engine::EngineClass::_render(){
 	game->render();
@@ -249,6 +247,8 @@ void Engine::EngineClass::run(){
 
 		_render();
 		Resources::getWindow()->display();
+
+		physicsEngine->update(1/60.0f);
 	}
 }
 #pragma endregion

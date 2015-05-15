@@ -18,7 +18,6 @@ class SolarSystem: public Scene{
 		PlayerShip* player;
 		GameCamera* playerCamera;
 
-		void _loadTestSystem();
 		void _loadRandomly();
 		void _loadFromFile(std::string);
 	public:

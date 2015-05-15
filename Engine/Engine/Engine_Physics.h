@@ -29,7 +29,7 @@ class PhysicsEngine{
 		void setGravity(glm::vec3);
 		void addRigidBody(btRigidBody*);
 
-		void update(float dt);
+		void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
 		void render();
 };
 extern PhysicsEngine* physicsEngine;
