@@ -26,12 +26,14 @@ void GameCamera::update(float dt){
 	Camera::update(dt);
 	switch(m_State){
 		case CAMERA_STATE_FOLLOW:
-			setPosition(m_Target->getPosition() + (m_Target->getForward()*glm::length(m_Target->getRadius())*2.0f)+ m_Target->getUp() * glm::length(m_Target->getRadius())*0.3f);
+			m_Model = glm::mat4(1);
+			m_Model = glm::translate(m_Model,m_Target->getPosition()+(m_Target->getForward()*glm::length(m_Target->getRadius())*2.0f)+ m_Target->getUp() * glm::length(m_Target->getRadius())*0.3f);
 
 			lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*500.0f),m_Target->getUp());
 			break;
 		case CAMERA_STATE_FOLLOWTARGET:
-			setPosition(m_Player->getPosition() - glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*2.7f)+ m_Player->getUp() * glm::length(m_Player->getRadius())*0.3f);
+			m_Model = glm::mat4(1);
+			m_Model = glm::translate(m_Model,m_Player->getPosition() - glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*2.7f)+ m_Player->getUp() * glm::length(m_Player->getRadius())*0.3f);
 
 			lookAt(getPosition(),m_Target->getPosition(),m_Player->getUp());
 			break;

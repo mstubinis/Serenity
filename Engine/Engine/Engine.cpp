@@ -248,7 +248,7 @@ void Engine::EngineClass::run(){
 		_render();
 		Resources::getWindow()->display();
 
-		physicsEngine->update(1/60.0f);
+		physicsEngine->update(Resources::dt(),10);
 	}
 }
 #pragma endregion

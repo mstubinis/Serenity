@@ -88,12 +88,14 @@ glm::vec3 ObjectDynamic::_calculateUp(){
 void ObjectDynamic::update(float dt){
 	glm::mat4 parentModel = glm::mat4(1);
 	glm::mat4 newModel = glm::mat4(1);
-	m_RigidBody->getWorldTransform().getOpenGLMatrix(glm::value_ptr(newModel));
+	btTransform tr;
+	m_RigidBody->getMotionState()->getWorldTransform(tr);
+	tr.getOpenGLMatrix(glm::value_ptr(newModel));
 	if(m_Parent != nullptr){
 		parentModel = m_Parent->getModel();
 	}
 	if(m_RigidBody->isActive()){
-		btQuaternion t = m_RigidBody->getWorldTransform().getRotation();
+		btQuaternion t = tr.getRotation();
 		m_Orientation = glm::quat(t.w(),t.x(),t.y(),t.z());
 
 		m_Forward = ObjectDynamic::_calculateForward();
@@ -109,15 +111,14 @@ void ObjectDynamic::_updateMatrix(){
 }
 void ObjectDynamic::setPosition(float x, float y, float z){
 	m_RigidBody->activate();
-	btTransform transform = m_RigidBody->getWorldTransform();
-	transform.setOrigin(btVector3(x,y,z));
-	m_RigidBody->setWorldTransform(transform);
+	btTransform t;
+	m_RigidBody->getMotionState()->getWorldTransform(t);
+	t.setOrigin(btVector3(x,y,z));
+	m_RigidBody->setWorldTransform(t);
 }
 void ObjectDynamic::setPosition(glm::vec3 p){ ObjectDynamic::setPosition(p.x,p.y,p.z); }
 void ObjectDynamic::applyForce(float x,float y,float z,bool local){ 
 	m_RigidBody->activate();
-	btTransform t;
-	m_RigidBody->getMotionState()->getWorldTransform(t);
 	if(local){
 		glm::vec3 res = getRight() * x;
 		res += getUp() * y;
