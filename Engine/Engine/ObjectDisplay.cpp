@@ -24,7 +24,7 @@ void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug)
 	Camera* activeCamera = Resources::getActiveCamera();
 	if(!activeCamera->sphereIntersectTest(this))
 		return;
-	if(activeCamera->getDistance(this) > 450 * getRadius())
+	if(activeCamera->getDistance(this) > 850 * getRadius())
 		return;
 
 	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();

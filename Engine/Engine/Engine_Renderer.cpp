@@ -193,7 +193,7 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
 	glEnable(GL_BLEND);
-	if(debug) physicsEngine->render();
+	if(debug) Physics::Detail::PhysicsManagement::render();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

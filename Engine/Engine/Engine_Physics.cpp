@@ -15,7 +15,14 @@
 
 using namespace Engine;
 
-PhysicsEngine::PhysicsEngine(){
+btBroadphaseInterface* Engine::Physics::Detail::PhysicsManagement::m_broadphase = nullptr;
+btDefaultCollisionConfiguration* Engine::Physics::Detail::PhysicsManagement::m_collisionConfiguration = nullptr;
+btCollisionDispatcher* Engine::Physics::Detail::PhysicsManagement::m_dispatcher = nullptr;
+btSequentialImpulseConstraintSolver* Engine::Physics::Detail::PhysicsManagement::m_solver = nullptr;
+btDiscreteDynamicsWorld* Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
+GLDebugDrawer* Engine::Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
+
+void Engine::Physics::Detail::PhysicsManagement::init(){
 	m_broadphase = new btDbvtBroadphase();
 	m_collisionConfiguration = new btDefaultCollisionConfiguration();
 	m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
@@ -28,7 +35,7 @@ PhysicsEngine::PhysicsEngine(){
 
 	m_dynamicsWorld->setGravity(btVector3(0,0,0));
 }
-PhysicsEngine::~PhysicsEngine(){
+void Engine::Physics::Detail::PhysicsManagement::destruct(){
 	delete m_debugDrawer;
 	delete m_dynamicsWorld;
 	delete m_solver;
@@ -36,13 +43,24 @@ PhysicsEngine::~PhysicsEngine(){
 	delete m_collisionConfiguration;
 	delete m_broadphase;
 }
-void PhysicsEngine::setGravity(float x,float y,float z){ m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
-void PhysicsEngine::setGravity(glm::vec3 gravity){ setGravity(gravity.x,gravity.y,gravity.z); }
-void PhysicsEngine::addRigidBody(btRigidBody* rigidBody){ m_dynamicsWorld->addRigidBody(rigidBody); }
-void PhysicsEngine::update(float dt,unsigned int maxSteps,float other){
+void Engine::Physics::Detail::PhysicsManagement::_setGravity(float x, float y, float z){ 
+	Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->setGravity(btVector3(x,y,z)); 
+}
+void Engine::Physics::Detail::PhysicsManagement::_addRigidBody(btRigidBody* rigidBody){ 
+	Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(rigidBody); 
+}
+
+void Engine::Physics::setGravity(float x,float y,float z){ 
+	Engine::Physics::Detail::PhysicsManagement::_setGravity(x,y,z);
+}
+void Engine::Physics::setGravity(glm::vec3 gravity){ setGravity(gravity.x,gravity.y,gravity.z); }
+void Engine::Physics::addRigidBody(btRigidBody* rigidBody){ 
+	Engine::Physics::Detail::PhysicsManagement::_addRigidBody(rigidBody);
+}
+void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int maxSteps,float other){
 	m_dynamicsWorld->stepSimulation(dt,maxSteps,other);
 }
-void PhysicsEngine::render(){
+void Engine::Physics::Detail::PhysicsManagement::render(){
 	glm::mat4 model = glm::mat4(1.0);
 	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 	glUseProgram(shader);

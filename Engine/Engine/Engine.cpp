@@ -26,7 +26,7 @@ Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned 
 Engine::EngineClass::~EngineClass(){
 	//glDeleteVertexArrays( 1, &m_vao );
 	delete game;
-	delete physicsEngine;
+	Engine::Physics::Detail::PhysicsManagement::destruct();
 	Engine::Renderer::Detail::RenderManagement::destruct();
 	Engine::Resources::Detail::ResourceManagement::destruct();
 }
@@ -72,8 +72,7 @@ void Engine::EngineClass::_initGame(){
 
 	Resources::initResources();
 	Renderer::Detail::RenderManagement::init();
-
-	physicsEngine = new PhysicsEngine();
+	Physics::Detail::PhysicsManagement::init();
 
 	game = new Game();
 	game->initResources();
@@ -247,8 +246,7 @@ void Engine::EngineClass::run(){
 
 		_render();
 		Resources::getWindow()->display();
-
-		physicsEngine->update(Resources::dt(),10);
+		Physics::Detail::PhysicsManagement::update(Resources::dt(),10);
 	}
 }
 #pragma endregion

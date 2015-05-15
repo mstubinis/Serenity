@@ -11,26 +11,31 @@ class btDiscreteDynamicsWorld;
 class btRigidBody;
 class GLDebugDrawer;
 
-class PhysicsEngine{
-	private:
-		btBroadphaseInterface* m_broadphase;					  // Build the broadphase
-		btDefaultCollisionConfiguration* m_collisionConfiguration;// collision configuration
-		btCollisionDispatcher* m_dispatcher;					  // dispatcher
-		btSequentialImpulseConstraintSolver* m_solver;		      // The actual physics solver
-		btDiscreteDynamicsWorld* m_dynamicsWorld;				  // The world.
+namespace Engine{
+	namespace Physics{
+		namespace Detail{
+			class PhysicsManagement{
+				private:
+					static btBroadphaseInterface* m_broadphase;
+					static btDefaultCollisionConfiguration* m_collisionConfiguration;
+					static btCollisionDispatcher* m_dispatcher;
+					static btSequentialImpulseConstraintSolver* m_solver;
+					static btDiscreteDynamicsWorld* m_dynamicsWorld;
 
-		GLDebugDrawer* m_debugDrawer;
+					static GLDebugDrawer* m_debugDrawer;
+				public:
+					static void _addRigidBody(btRigidBody*);
+					static void _setGravity(float,float,float);
 
-	public:
-		PhysicsEngine();
-		~PhysicsEngine();
-
+					static void init();
+					static void destruct();
+					static void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
+					static void render();
+			};
+		};
 		void setGravity(float,float,float); 
 		void setGravity(glm::vec3);
 		void addRigidBody(btRigidBody*);
-
-		void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
-		void render();
+	};
 };
-extern PhysicsEngine* physicsEngine;
 #endif
