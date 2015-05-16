@@ -29,9 +29,6 @@ subject to the following restrictions:
 
 
 
-
-
-
 SIMD_FORCE_INLINE void bt_calc_quantization_parameters(
 	btVector3 & outMinBound,
 	btVector3 & outMaxBound,

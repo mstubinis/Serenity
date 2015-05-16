@@ -3,7 +3,7 @@
 
 #include "ObjectDisplay.h"
 
-class btCollisionShape;
+namespace Engine{namespace Physics{struct Collision;};};
 class btRigidBody;
 struct btDefaultMotionState;
 class btVector3;
@@ -15,17 +15,16 @@ class ObjectDynamic: public ObjectDisplay{
 		glm::vec3 _calculateUp();
 		float m_Mass;
 	protected:
-		btCollisionShape* m_Collision_Shape;
+		Engine::Physics::Collision* m_Collision_Shape;
 		btRigidBody* m_RigidBody;
 		btDefaultMotionState* m_MotionState;
-		btVector3* m_Inertia;
 	public:
 		ObjectDynamic( std::string = "",
 					   std::string = "",
-					   glm::vec3 = glm::vec3(0,0,0),   //Position
-					   glm::vec3 = glm::vec3(1,1,1),   //Scale
-					   std::string = "Dynamic Object", //Object
-					   btCollisionShape* = nullptr,    //Bullet Collision Shape
+					   glm::vec3 = glm::vec3(0,0,0),         //Position
+					   glm::vec3 = glm::vec3(1,1,1),         //Scale
+					   std::string = "Dynamic Object",       //Object
+					   Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 					   Scene* = nullptr
 					 );
 		~ObjectDynamic();

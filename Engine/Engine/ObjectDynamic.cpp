@@ -8,15 +8,17 @@
 
 using namespace Engine;
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,btCollisionShape* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,true,scene){
+ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,Engine::Physics::Collision* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,true,scene){
 	m_Collision_Shape = col;
-	m_Inertia = new btVector3(0,0,0);
+	m_Mass = 0.5f * m_Radius;
 	if(m_Collision_Shape == nullptr){
+		m_Collision_Shape = new Engine::Physics::Collision(nullptr,COLLISION_TYPE_NONE);
 		if(m_Mesh != nullptr){
-			if(m_Mesh->getCollision() == nullptr)
-				m_Collision_Shape = new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z));
+			if(m_Mesh->getCollision() == nullptr){
+				m_Collision_Shape->setCollision(new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z)),COLLISION_TYPE_BOXSHAPE,m_Mass);
+			}
 			else
-				m_Collision_Shape = m_Mesh->getCollision();
+				m_Collision_Shape->setCollision(m_Mesh->getCollision()->getCollision(),m_Mesh->getCollision()->getCollisionType(),m_Mass);
 		}
 	}
 
@@ -29,11 +31,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 
 	m_MotionState = new btDefaultMotionState(tr);
 
-	m_Mass = 0.5f * m_Radius;
-
-	m_Collision_Shape->calculateLocalInertia(m_Mass,*m_Inertia);
-
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision_Shape,*m_Inertia);
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision_Shape->getCollision(),*(m_Collision_Shape->getInertia()));
 
 	m_RigidBody = new btRigidBody(rigidBodyCI);
 	m_RigidBody->setSleepingThresholds(0.15f,0.15f);
@@ -49,7 +47,6 @@ ObjectDynamic::~ObjectDynamic(){
 	delete m_Collision_Shape;
 	delete m_RigidBody;
 	delete m_MotionState;
-	delete m_Inertia;
 }
 void ObjectDynamic::translate(float x, float y, float z,bool local){
 	m_RigidBody->activate();
@@ -176,7 +173,9 @@ void ObjectDynamic::setAngularVelocity(glm::vec3 velocity){ ObjectDynamic::setAn
 void ObjectDynamic::setMass(float mass){
 	m_RigidBody->activate();
 	m_Mass = 0.5f * m_Radius;
-	m_Collision_Shape->calculateLocalInertia(m_Mass,*m_Inertia);
+
+	m_Collision_Shape->recalculate(m_Mass);
+
 	if(m_RigidBody != nullptr)
-		m_RigidBody->setMassProps(m_Mass,*m_Inertia);
+		m_RigidBody->setMassProps(m_Mass,*(m_Collision_Shape->getInertia()));
 }

@@ -71,6 +71,6 @@ void GLDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& 
 }
 void GLDebugDrawer::reportErrorWarning(const char* warningString){}
 void GLDebugDrawer::draw3dText(const btVector3& location,const char* textString){
-	glRasterPos3f(location.x(),  location.y(),  location.z());
+	glRasterPos3f(location.x(),location.y(),location.z());
 }
 void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }

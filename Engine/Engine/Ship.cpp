@@ -10,7 +10,7 @@
 using namespace Engine;
 using namespace Engine::Events;
 
-Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
 	m_WarpFactor = 0;
 	m_IsWarping = false;
 	m_Target = nullptr;
@@ -29,7 +29,7 @@ void Ship::translateWarp(float amount){
 void Ship::setTarget(ObjectDisplay* target){
 	m_Target = target;
 }
-PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, btCollisionShape* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
+PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
 	m_Camera = static_cast<GameCamera*>(Resources::getActiveCamera());
 	m_Camera->follow(this);
 }

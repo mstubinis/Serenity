@@ -10,12 +10,12 @@ class Ship: public ObjectDynamic{
 		ObjectDisplay* m_Target;
 	public:
 		Ship(
-			std::string,                    //Mesh
-			std::string,                    //Material
-			std::string = "Ship",           //Name
-			glm::vec3 = glm::vec3(0,0,0),   //Position
-			glm::vec3 = glm::vec3(1,1,1),   //Scale
-			btCollisionShape* = nullptr,    //Bullet Collision Shape
+			std::string,                          //Mesh
+			std::string,                          //Material
+			std::string = "Ship",                 //Name
+			glm::vec3 = glm::vec3(0,0,0),         //Position
+			glm::vec3 = glm::vec3(1,1,1),         //Scale
+			Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 			Scene* = nullptr
 		    );
 		~Ship();
@@ -32,12 +32,12 @@ class PlayerShip: public Ship{
 		GameCamera* m_Camera;
 	public:
 		PlayerShip(
-			std::string,                    //Mesh
-			std::string,                    //Material
-			std::string = "Player Ship",    //Name
-			glm::vec3 = glm::vec3(0,0,0),   //Position
-			glm::vec3 = glm::vec3(1,1,1),   //Scale
-			btCollisionShape* = nullptr,    //Bullet Collision Shape
+			std::string,                          //Mesh
+			std::string,                          //Material
+			std::string = "Player Ship",          //Name
+			glm::vec3 = glm::vec3(0,0,0),         //Position
+			glm::vec3 = glm::vec3(1,1,1),         //Scale
+			Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 			Scene* = nullptr
 		    );
 		~PlayerShip();
