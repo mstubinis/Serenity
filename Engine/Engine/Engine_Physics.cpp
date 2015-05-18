@@ -71,15 +71,17 @@ void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int ma
 }
 void Engine::Physics::Detail::PhysicsManagement::render(){
 	glUseProgram(0);
+
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
 
-
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
+
 	m_dynamicsWorld->debugDrawWorld();
+
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);

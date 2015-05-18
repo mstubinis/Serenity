@@ -3,6 +3,7 @@
 uniform float fExposure;
 uniform float far;
 uniform float C;
+uniform float BaseGlow;
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
@@ -61,9 +62,9 @@ void main(){
 		}
 
 		if(GlowMapEnabled == 1)
-			gl_FragData[2].r = texture2D(GlowMap, UV).r;
+			gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
 		else
-			gl_FragData[2].r = 0.0;
+			gl_FragData[2].r = BaseGlow;
 	}
 	gl_FragData[3] = vec4(WorldPosition,1.0);
     const float offset = 1.0;

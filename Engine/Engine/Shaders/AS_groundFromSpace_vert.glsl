@@ -88,7 +88,7 @@ void main(void)	{
 		c1 = v3Attenuate;
 	}
 	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = MVP * vec4(position, 1.0);
+	gl_TexCoord[6] = gl_Position;
 
 	UV = uv;
 

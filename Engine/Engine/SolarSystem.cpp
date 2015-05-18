@@ -204,7 +204,7 @@ void SolarSystem::_loadRandomly(){
 				std::string path_name = boost::lexical_cast<std::string>(itr->path());
 				std::replace(path_name.begin(),path_name.end(),'\\','/');
 				boost::erase_all(path_name,"\"");
-				path_name = path_name.substr(18,path_name.size());
+				path_name = path_name.substr(path.size(),path_name.size());
 				folders.push_back(path_name);
 
 			}

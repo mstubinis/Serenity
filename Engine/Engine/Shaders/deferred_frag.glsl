@@ -7,6 +7,7 @@ uniform sampler2D GlowMap;
 uniform int Shadeless;
 uniform float far;
 uniform float C;
+uniform float BaseGlow;
 
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
@@ -42,14 +43,15 @@ void main(){
 		}
 
 		if(GlowMapEnabled == 1){
-			gl_FragData[2].r = texture2D(GlowMap, UV).r;
+			gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
 		}
 		else
-			gl_FragData[2].r = 0.0;
+			gl_FragData[2].r = BaseGlow;
 	}
 	else{
 		gl_FragData[1].rgb = vec3(1.0);
 		gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
+		gl_FragData[2].r = BaseGlow;
 	}
 	gl_FragData[3] = vec4(WorldPosition,1.0);
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));

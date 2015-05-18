@@ -22,6 +22,7 @@ class Material{
 	private:
 		std::unordered_map<unsigned int,Texture*> m_Components;
 		bool m_Shadeless;
+		float m_BaseGlow;
 	public:
 		Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr);
 		Material(std::string diffuse,std::string normal="",std::string glow="");
@@ -34,6 +35,8 @@ class Material{
 		void bindTexture(unsigned int,GLuint shader);
 
 		const bool getShadeless() const { return m_Shadeless; }
+		const float getBaseGlow() const { return m_BaseGlow; }
 		void setShadeless(bool b){ m_Shadeless = b; }
+		void setBaseGlow(float f){ m_BaseGlow = f; }
 };
 #endif

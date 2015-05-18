@@ -36,7 +36,9 @@ void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug)
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
+
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
+	glUniform1f(glGetUniformLocation(shader, "BaseGlow"),material->getBaseGlow());
 
 	for(auto component:material->getComponents())
 		material->bindTexture(component.first,shader);

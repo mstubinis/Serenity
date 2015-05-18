@@ -19,7 +19,7 @@ varying vec3 Tangents;
 void main(){
 	mat4 MVP = VP * World;
 	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = MVP * vec4(position, 1.0);
+	gl_TexCoord[6] = gl_Position;
 
 	UV = uv;
 

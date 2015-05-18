@@ -33,10 +33,9 @@ Skybox::~Skybox(){
 void Skybox::_updateMatrix(){
 	m_Model = glm::mat4(1);
 	m_Model = glm::translate(m_Model, Resources::getActiveCamera()->getPosition());
-	m_Model = glm::scale(m_Model,glm::vec3(999999999,999999999,999999999));
+	m_Model = glm::scale(m_Model,glm::vec3(999999999999,999999999999,999999999999));
 }
 void Skybox::render(){
-	glDisable(GL_DEPTH_TEST);
 	GLuint shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();
 	glUseProgram(shader);
 
@@ -54,5 +53,4 @@ void Skybox::render(){
 	glDrawArrays(GL_TRIANGLES, 0, m_Mesh->getPoints().size());
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
-	glEnable(GL_DEPTH_TEST);
 }
