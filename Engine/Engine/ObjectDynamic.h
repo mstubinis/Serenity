@@ -32,6 +32,9 @@ class ObjectDynamic: public ObjectDisplay{
 		virtual void setPosition(float,float,float); 
 		virtual void setPosition(glm::vec3);
 
+		void scale(float,float,float);
+		void scale(glm::vec3);
+
 		void translate(float,float,float,bool local=true); 
 		void translate(glm::vec3,bool local=true);
 		void applyForce(float,float,float,bool local=true); 

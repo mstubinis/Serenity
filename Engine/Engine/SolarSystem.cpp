@@ -19,11 +19,10 @@ using namespace Engine;
 using namespace Engine::Events;
 
 SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
-	playerCamera = new GameCamera(45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
+	playerCamera = new GameCamera("Default",45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
 	Resources::setActiveCamera(playerCamera);
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["Default"] = playerCamera;
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["Debug"] = new Camera(45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
-	Engine::Resources::Detail::ResourceManagement::m_Cameras["HUD"] = new Camera(0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.05f,10.0f,this);
+	new Camera("Debug",45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
+	new Camera("HUD",0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.05f,10.0f,this);
 
 	if(file == ""){
 		SolarSystem::_loadRandomly();

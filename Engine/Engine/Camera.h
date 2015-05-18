@@ -22,8 +22,8 @@ class Camera: public Object{
 		glm::mat4 m_View, m_Projection;
 		glm::mat4 m_ViewProjection;
 	public:
-		Camera(float angle, float ratio, float near, float far,Scene* = nullptr);				           // Perspective camera Constructor
-		Camera(float left, float right, float bottom, float top, float near, float far,Scene* = nullptr); // Orthographic camera Constructor
+		Camera(std::string name, float angle, float ratio, float near, float far,Scene* = nullptr);				           // Perspective camera Constructor
+		Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* = nullptr); // Orthographic camera Constructor
 		~Camera();
 
 		void resize(unsigned int w, unsigned int h);

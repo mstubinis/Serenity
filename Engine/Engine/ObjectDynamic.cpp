@@ -106,6 +106,11 @@ void ObjectDynamic::update(float dt){
 void ObjectDynamic::_updateMatrix(){
 
 }
+void ObjectDynamic::scale(float x,float y,float z){
+	ObjectDisplay::scale(x,y,z);
+	this->m_Collision_Shape->getCollision()->setLocalScaling(btVector3(m_Scale.x,m_Scale.y,m_Scale.z));
+}
+void ObjectDynamic::scale(glm::vec3 scl){ ObjectDynamic::scale(scl.x,scl.y,scl.z); }
 void ObjectDynamic::setPosition(float x, float y, float z){
 	m_RigidBody->activate();
 	btTransform t;
