@@ -47,8 +47,6 @@ namespace Engine{
 		namespace Detail{
 			class RenderManagement{
 				private:
-					static GBuffer* m_gBuffer;
-
 					static std::vector<FontRenderInfo> m_FontsToBeRendered;
 					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
 
@@ -68,6 +66,7 @@ namespace Engine{
 					static void _passBlurVertical(GLuint texture, float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
 					static void _passFinal();
 				public:
+					static GBuffer* m_gBuffer;
 					static Texture* RandomMapSSAO;
 					static bool m_DrawDebug;
 					static void render(bool debug=false);

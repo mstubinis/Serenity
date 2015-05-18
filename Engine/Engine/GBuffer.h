@@ -59,6 +59,9 @@ class GBuffer{
 		GBuffer(int width, int height);
 		~GBuffer();
 
+		void resizeBaseBuffer(unsigned int w, unsigned int h);
+		void resizeBuffer(unsigned int, unsigned int w, unsigned int h);
+
 		void start(unsigned int,std::string = "RGBA");
 		void start(unsigned int,unsigned int,std::string = "RGBA");
 		void start(unsigned int,unsigned int,unsigned int,std::string = "RGBA");

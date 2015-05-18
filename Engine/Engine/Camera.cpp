@@ -67,6 +67,16 @@ bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
 	}
 	return true;
 }
+void Camera::resize(unsigned int width, unsigned int height){
+	if(m_Type == CAMERA_TYPE_PERSPECTIVE){
+		float w = static_cast<float>(width);
+		float h = static_cast<float>(height);
+		setAspectRatio(w/h);
+	}
+	else{
+		setOrthoProjection(0,(float)width,0,(float)height);
+	}
+}
 Camera::~Camera()
 { 
 }

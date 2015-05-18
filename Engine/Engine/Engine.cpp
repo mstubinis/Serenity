@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Camera.h"
+#include "GBuffer.h"
 #include "Engine_Physics.h"
 #include "Engine_Events.h"
 #include "Game.h"
@@ -45,7 +47,7 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	videoMode.height = height;
 	videoMode.bitsPerPixel = 32;
 
-	int style = sf::Style::Fullscreen;
+	int style = sf::Style::Default;
 	if(style == sf::Style::Fullscreen){
 		videoMode = sf::VideoMode::getDesktopMode();
 		width = videoMode.width;
@@ -135,8 +137,16 @@ void Engine::EngineClass::_render(){
 	Engine::Renderer::Detail::RenderManagement::render(Engine::Renderer::isDebug());
 }
 #pragma region Event Handler Methods
-void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)
-{
+void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height){
+	glViewport(0,0,width,height);
+
+	Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(width,height);
+	for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
+		Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,width,height);
+	}
+	for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){
+		camera.second->resize(width,height);
+	}
 }
 void Engine::EngineClass::_EVENT_CLOSE(){
 

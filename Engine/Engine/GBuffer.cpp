@@ -28,6 +28,21 @@ GBuffer::~GBuffer(){
 	glDeleteFramebuffers(1, &m_fbo);
 	glDeleteRenderbuffers(1, &m_depth);
 }
+void GBuffer::resizeBaseBuffer(unsigned int width, unsigned int height){
+	m_width  = width;
+	m_height = height;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+	// Bind the depth buffer
+	glBindRenderbuffer(GL_RENDERBUFFER, m_depth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void GBuffer::resizeBuffer(unsigned int buffer, unsigned int width, unsigned int height){
+	m_Buffers[buffer]->resize(width,height);
+}
 void GBuffer::start(unsigned int type,std::string channels){
 
 	unsigned int r,g,b,a;
