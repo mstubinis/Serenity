@@ -17,8 +17,7 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, g
 ObjectDisplay::~ObjectDisplay()
 {
 }
-void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug)
-{
+void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug){
 	if(mesh == nullptr)
 		return;
 	Camera* activeCamera = Resources::getActiveCamera();

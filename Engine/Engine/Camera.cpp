@@ -130,6 +130,11 @@ bool Camera::rayIntersectSphere(ObjectDisplay* object){
 	glm::vec3 C = object->getPosition();
 	float r = object->getRadius();
 
+	//check if point is behind
+	float dot = glm::dot(rayVector,C-getPosition());
+	if(dot >= 0)
+		return false;
+
 	//a = (xB-xA)²+(yB-yA)²+(zB-zA)²
 	//b = 2*((xB-xA)(xA-xC)+(yB-yA)(yA-yC)+(zB-zA)(zA-zC))
 	//c = (xA-xC)²+(yA-yC)²+(zA-zC)²-r²
