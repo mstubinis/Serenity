@@ -27,5 +27,7 @@ class GameCamera: public Camera{
 		void setTarget(ObjectDisplay* target) { m_Target = target; }
 		const ObjectDisplay* getTarget() const { return m_Target; }
 		const CAMERA_STATE getState() const { return m_State; }
+
+		ObjectDisplay* getObjectInCenterRay(ObjectDisplay* exclusion);
 };
 #endif

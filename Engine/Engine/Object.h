@@ -14,6 +14,7 @@
 class Mesh;
 class Material;
 class Scene;
+class Camera;
 class Object{
 	private:
 		glm::vec3 _calculateForward(); 
@@ -73,5 +74,7 @@ class Object{
 		const std::vector<Object*> getChildren() const{ return m_Children; }
 
 		virtual void setName(std::string);
+
+		virtual bool rayIntersectSphere(Camera*);
 };
 #endif

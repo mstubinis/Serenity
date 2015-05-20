@@ -122,3 +122,26 @@ void Camera::update(float dt){
 void Camera::_updateMatrix(){
 
 }
+bool Camera::rayIntersectSphere(ObjectDisplay* object){
+	glm::vec3 A = this->getPosition();
+	glm::vec3 rayVector = this->getViewVector();
+	glm::vec3 B = A + rayVector;
+
+	glm::vec3 C = object->getPosition();
+	float r = object->getRadius();
+
+	//a = (xB-xA)²+(yB-yA)²+(zB-zA)²
+	//b = 2*((xB-xA)(xA-xC)+(yB-yA)(yA-yC)+(zB-zA)(zA-zC))
+	//c = (xA-xC)²+(yA-yC)²+(zA-zC)²-r²
+
+	float a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
+	float b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
+	float c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
+
+	//Delta=b²-4*a*c
+	float Delta = (b*b) - (4*a*c);
+
+	if(Delta < 0)
+		return false;
+	return true;
+}

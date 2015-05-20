@@ -20,8 +20,9 @@ void main(){
 	float glow = texture2D(gGlowMap, texCoords).r;
 	vec4 bloom = texture2D(gBloomMap,texCoords);
 
-	if(normals.r > 0.9999 && normals.g > 0.9999 && normals.b > 0.9999)
+	if(normals.r > 0.9999 && normals.g > 0.9999 && normals.b > 0.9999){
 		gl_FragColor = bloom+image;
+	}
 	else{
 		vec4 light = max(gAmbientColor,max(vec4(glow),(lighting*ssao)));
 		vec4 imageLight = image * light;

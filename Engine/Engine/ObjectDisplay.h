@@ -3,7 +3,6 @@
 
 #include "Object.h"
 
-
 class ObjectDisplay: public Object{
 	protected:
 		Mesh* m_Mesh;
@@ -42,5 +41,7 @@ class ObjectDisplay: public Object{
 
 		void setMesh(Mesh*);
 		void setMaterial(Material*);
+
+		bool rayIntersectSphere(Camera*);
 };
 #endif

@@ -71,6 +71,33 @@ void GameCamera::update(float dt){
 		}
 	}
 }
+ObjectDisplay* GameCamera::getObjectInCenterRay(ObjectDisplay* exclusion)
+{
+	ObjectDisplay* ret = nullptr;
+	std::vector<ObjectDisplay*> objs;
+	for(auto object:Engine::Resources::getCurrentScene()->getObjects()){
+		if(object.second->rayIntersectSphere(this)){
+			if((ObjectDisplay*)object.second != exclusion)
+				objs.push_back((ObjectDisplay*)object.second);
+		}
+	}
+	if(objs.size() == 0)
+		return nullptr;
+	else if(objs.size() == 1)
+		return objs.at(0);
+	else{
+		float distance = -1;
+		for(auto object:objs){
+			float d = glm::distance(object->getPosition(),this->getPosition());
+			if(distance == -1 || d < distance){
+				distance = d;
+				ret = object;
+			}
+		}
+	}
+
+	return ret;
+}
 void GameCamera::render(){}
 void GameCamera::follow(ObjectDisplay* target){
 	m_Target = target;

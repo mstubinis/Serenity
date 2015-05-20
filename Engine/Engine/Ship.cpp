@@ -119,6 +119,8 @@ void PlayerShip::update(float dt){
 		m_IsWarping = !m_IsWarping;
 		m_WarpFactor = 0;
 	}
-
+	else if(Keyboard::isKeyDownOnce("t")){
+		this->setTarget(m_Camera->getObjectInCenterRay(this));
+	}
 	Ship::update(dt);
 }

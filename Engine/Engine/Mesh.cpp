@@ -268,6 +268,7 @@ void Mesh::_generateTriangle(Vertex& v1, Vertex& v2, Vertex& v3){
 	m_Binormals.push_back(v3.binormal);
 }
 void Mesh::_generateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
+	//well this was easy
 	_generateTriangle(v1,v2,v3);
 	_generateTriangle(v1,v3,v4);
 }

@@ -75,3 +75,6 @@ void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z
 void ObjectDisplay::_updateMatrix(){
 	Object::_updateMatrix();
 }
+bool ObjectDisplay::rayIntersectSphere(Camera* cam){
+	return cam->rayIntersectSphere(this);
+}

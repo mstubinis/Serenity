@@ -178,3 +178,7 @@ glm::vec3 Object::getScreenCoordinates(){
 }
 void Object::render(Mesh* m, Material* mat, bool debug){}
 void Object::render(bool debug){}
+bool Object::rayIntersectSphere(Camera* cam)
+{
+	return false;
+}
