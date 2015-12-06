@@ -56,14 +56,7 @@ void Camera::_constructFrustrum(){
 	}
 }
 bool Camera::sphereIntersectTest(ObjectDisplay* sphere){
-	glm::vec3 pos = sphere->getPosition();
-	for (unsigned int i = 0; i < 6; i++){
-		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - sphere->getRadius();
-		if (dist > 0){
-			return false;
-		}
-	}
-	return true;
+	return sphereIntersectTest(sphere->getPosition(),sphere->getRadius());
 }
 bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
 	for (unsigned int i = 0; i < 6; i++){
@@ -98,17 +91,17 @@ void Camera::setAspectRatio(float ratio){
 	setPerspectiveProjection();
 }
 void Camera::lookAt(glm::vec3 target){ 
-	m_View = glm::lookAt(m_Position,target,getUp());
+	m_View = glm::lookAt(getPosition(),target,getUp());
 }
 void Camera::lookAt(glm::vec3 target,glm::vec3 up){ 
-	m_View = glm::lookAt(m_Position,target,up); 
+	m_View = glm::lookAt(getPosition(),target,up); 
 }
 void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){ 
 	m_View = glm::lookAt(eye,target,up); 
 }
 void Camera::lookAt(Object* target, bool targetUp){
-	if(!targetUp) m_View = glm::lookAt(m_Position,target->getPosition(),getUp());
-	else m_View = glm::lookAt(m_Position,target->getPosition(),target->getUp());
+	if(!targetUp) m_View = glm::lookAt(getPosition(),target->getPosition(),getUp());
+	else m_View = glm::lookAt(getPosition(),target->getPosition(),target->getUp());
 }
 glm::mat4 Camera::calculateProjection(glm::mat4 modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * modelMatrix; }
@@ -123,30 +116,5 @@ void Camera::_updateMatrix(){
 
 }
 bool Camera::rayIntersectSphere(ObjectDisplay* object){
-	glm::vec3 A = this->getPosition();
-	glm::vec3 rayVector = this->getViewVector();
-	glm::vec3 B = A + rayVector;
-
-	glm::vec3 C = object->getPosition();
-	float r = object->getRadius();
-
-	//check if point is behind
-	float dot = glm::dot(rayVector,C-getPosition());
-	if(dot >= 0)
-		return false;
-
-	//a = (xB-xA)²+(yB-yA)²+(zB-zA)²
-	//b = 2*((xB-xA)(xA-xC)+(yB-yA)(yA-yC)+(zB-zA)(zA-zC))
-	//c = (xA-xC)²+(yA-yC)²+(zA-zC)²-r²
-
-	float a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
-	float b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
-	float c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
-
-	//Delta=b²-4*a*c
-	float Delta = (b*b) - (4*a*c);
-
-	if(Delta < 0)
-		return false;
-	return true;
+	return object->rayIntersectSphere(getPosition(),getViewVector());
 }

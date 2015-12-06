@@ -25,7 +25,7 @@ class Object{
 		glm::mat4 m_Model;
 		glm::quat m_Orientation;
 		glm::vec3 m_Scale, m_Forward, m_Right, m_Up;
-		glm::vec3 m_Position;
+		//glm::vec3 m_Position;
 
 		Object* m_Parent;
 		std::vector<Object*> m_Children;
@@ -63,18 +63,22 @@ class Object{
 		virtual void render(bool=false);
 
 		const glm::quat& getOrientation(){ return m_Orientation; }
-		const glm::vec3 getPosition() const{ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+		const glm::vec3 getPosition(){ 
+			//m_Position = glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]);
+			return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); 
+		}
 		const glm::vec3& getScale() const{ return m_Scale; }
 		const glm::vec3& getForward() const{ return m_Forward; }
 		const glm::vec3& getRight() const{ return m_Right; }
 		const glm::vec3& getUp() const{ return m_Up; }
 		const glm::mat4& getModel() const{ return m_Model; }
-		const std::string getName() const{ return m_Name; }
+		const std::string& getName() const{ return m_Name; }
 		const Object* getParent() const{ return m_Parent; }
 		const std::vector<Object*> getChildren() const{ return m_Children; }
 
 		virtual void setName(std::string);
 
 		virtual bool rayIntersectSphere(Camera*);
+		virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);
 };
 #endif

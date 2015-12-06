@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "SolarSystem.h"
 #include "Planet.h"
+#include "Particles.h"
 
 using namespace Engine;
 using namespace Engine::Events;
@@ -32,6 +33,9 @@ void Ship::setTarget(ObjectDisplay* target){
 PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
 	m_Camera = static_cast<GameCamera*>(Resources::getActiveCamera());
 	m_Camera->follow(this);
+
+	ParticleEmitter* p = new ParticleEmitter(Resources::getParticleInfo("Smoke"),pos,glm::vec3(1,1,1),"Particle Emitter");
+	p->addParticle();
 }
 PlayerShip::~PlayerShip(){
 }

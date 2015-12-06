@@ -168,6 +168,9 @@
     <ClCompile Include="ObjectDisplay.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Particles.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -252,6 +255,9 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="ObjectDisplay.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
   </ItemGroup>

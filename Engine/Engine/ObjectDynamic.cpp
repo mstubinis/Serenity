@@ -24,7 +24,8 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 
 	btTransform tr;
 	glm::mat4 m = glm::mat4(1);
-	m = glm::translate(m,glm::vec3(m_Position));
+	//m = glm::translate(m,glm::vec3(m_Position));
+	m = glm::translate(m,pos);
 	m *= glm::mat4_cast(m_Orientation);
 	m = glm::scale(m,m_Scale);
 	tr.setFromOpenGLMatrix(glm::value_ptr(m));

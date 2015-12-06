@@ -127,6 +127,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClCompile Include="ObjectDynamic.cpp" />
     <ClCompile Include="Engine_Renderer.cpp" />
     <ClCompile Include="Engine_Resources.cpp" />
+    <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
@@ -157,6 +158,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClInclude Include="ObjectDynamic.h" />
     <ClInclude Include="Engine_Renderer.h" />
     <ClInclude Include="Engine_Resources.h" />
+    <ClInclude Include="Particles.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />

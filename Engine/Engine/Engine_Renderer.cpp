@@ -12,6 +12,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Skybox.h"
+#include "Particles.h"
 
 #include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
@@ -63,7 +64,9 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 		glUniform4f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z,item.col.w);
 
 		glm::mat4 model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(item.pos.x,Resources::getWindow()->getSize().y-item.pos.y,-0.5 - item.depth));
+		model = glm::translate(model, glm::vec3(item.pos.x,
+												Resources::getWindow()->getSize().y-item.pos.y,
+												-0.5 - item.depth));
 		model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
 		if(item.texture != "")
 			model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
@@ -127,12 +130,27 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 	glDisable(GL_BLEND);
 
 	Scene* s = Resources::getCurrentScene();
-	if(s->getSkybox() != nullptr)
-		s->getSkybox()->render();
+	s->renderSkybox();
 
 	for(auto object:s->getObjects()){
 		object.second->render(debug);
-	}	
+	}
+
+	//render particles
+	//glDepthMask(GL_FALSE);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
+	//glUseProgram(shader);
+	//for(auto emitter:s->getParticleEmitters()){
+		//for(auto particle:emitter.second->getParticles()){
+			//particle.render(shader);
+		//}
+	//}
+	//glUseProgram(0);
+	//glDisable(GL_BLEND);
+	//glDepthMask(GL_TRUE);
+
 	if(debug){
 		GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 		glUseProgram(shader);
@@ -192,9 +210,10 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	
 	
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
-	glEnable(GL_BLEND);
-	if(debug) Physics::Detail::PhysicsManagement::render();
 
+	glEnable(GL_BLEND);
+	if(debug)
+		Physics::Detail::PhysicsManagement::render();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Engine::Renderer::Detail::RenderManagement::_renderTextures();

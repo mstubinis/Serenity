@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <SFML/Graphics.hpp>
+#include <glm/glm.hpp>
 class Game;
 namespace Engine{
 	class EngineClass{

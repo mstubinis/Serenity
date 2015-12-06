@@ -193,7 +193,7 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, s
 	m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 	setColor(starColor.x,starColor.y,starColor.z,1);
 	m_Material->setShadeless(true);
-	m_Material->setBaseGlow(0.65f);
+	m_Material->setBaseGlow(0.22f);
 
 	addChild(m_Light);
 }

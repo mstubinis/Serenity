@@ -9,6 +9,7 @@ using namespace Engine;
 
 ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name, bool notLight,Scene* scene):Object(pos,scl,name,notLight,scene){
 	m_Radius = 0;
+	m_Visible = true;
 	m_BoundingBoxRadius = glm::vec3(0,0,0);
 	setMesh(Resources::getMesh(mesh));
 	setMaterial(Resources::getMaterial(mat));
@@ -18,7 +19,7 @@ ObjectDisplay::~ObjectDisplay()
 {
 }
 void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug){
-	if(mesh == nullptr)
+	if(mesh == nullptr || m_Visible == false)
 		return;
 	Camera* activeCamera = Resources::getActiveCamera();
 	if(!activeCamera->sphereIntersectTest(this))
@@ -56,6 +57,7 @@ void ObjectDisplay::setColor(float x, float y, float z,float a){
 	m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; 
 }
 void ObjectDisplay::setColor(glm::vec4 color){ setColor(color.x,color.y,color.z,color.w); }
+void ObjectDisplay::setVisible(bool vis){ m_Visible = vis; }
 void ObjectDisplay::setMesh(Mesh* mesh){ 
 	m_Mesh = mesh; 
 	if(m_Mesh == nullptr){
@@ -76,4 +78,25 @@ void ObjectDisplay::_updateMatrix(){
 }
 bool ObjectDisplay::rayIntersectSphere(Camera* cam){
 	return cam->rayIntersectSphere(this);
+}
+bool ObjectDisplay::rayIntersectSphere(glm::vec3 A, glm::vec3 rayVector){
+	glm::vec3 B = A + rayVector;
+
+	glm::vec3 C = getPosition();
+	float r = getRadius();
+
+	//check if point is behind
+	float dot = glm::dot(rayVector,C-A);
+	if(dot >= 0)
+		return false;
+
+	float a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
+	float b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
+	float c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
+
+	float Delta = (b*b) - (4*a*c);
+
+	if(Delta < 0)
+		return false;
+	return true;
 }

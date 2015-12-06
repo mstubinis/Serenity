@@ -32,7 +32,10 @@ void Game::initResources(){
 	Resources::addMaterial("Akira","Textures/akira.png","Textures/akiraNormal.png","Textures/akiraGlow.png");
 	Resources::addMaterial("Crosshair","Textures/HUD/Crosshair.png");
 	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png");
+	Resources::addMaterial("SunFlare","Textures/Skyboxes/StarFlare.png");
+	Resources::addMaterial("Smoke","Textures/Effects/Smoke.png");
 
+	Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
 	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");

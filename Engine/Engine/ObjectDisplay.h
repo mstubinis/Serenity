@@ -5,6 +5,7 @@
 
 class ObjectDisplay: public Object{
 	protected:
+		bool m_Visible;
 		Mesh* m_Mesh;
 		Material* m_Material;
 		glm::vec4 m_Color;
@@ -41,7 +42,9 @@ class ObjectDisplay: public Object{
 
 		void setMesh(Mesh*);
 		void setMaterial(Material*);
+		void setVisible(bool b);
 
 		bool rayIntersectSphere(Camera*);
+		bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);
 };
 #endif

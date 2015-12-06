@@ -9,6 +9,7 @@ class SunLight;
 class Object;
 class Camera;
 class Skybox;
+class ParticleEmitter;
 
 class Scene{
 	private:
@@ -16,6 +17,7 @@ class Scene{
 	protected:
 		std::map<std::string,Camera*> m_Cameras;
 		std::map<std::string,Object*> m_Objects;
+		std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
 		std::map<std::string,SunLight*> m_Lights;
 
 		std::string m_Name;
@@ -26,6 +28,8 @@ class Scene{
 		~Scene();
 
 		std::map<std::string,Object*>& getObjects(){ return m_Objects; }
+		std::map<std::string,Camera*>& getCameras(){ return m_Cameras; }
+		std::map<std::string,ParticleEmitter*>& getParticleEmitters(){ return m_ParticleEmitters; }
 		std::map<std::string,SunLight*>& getLights(){ return m_Lights; }
 
 		const std::string getName() const { return m_Name; }
@@ -40,5 +44,6 @@ class Scene{
 		Skybox* getSkybox() const { return m_Skybox; }
 		void setSkybox(Skybox* s){ m_Skybox = s; }
 		void centerSceneToObject(Object*);
+		void renderSkybox();
 };
 #endif

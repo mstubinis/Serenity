@@ -3,6 +3,8 @@
 #include "Engine_Resources.h"
 #include "Camera.h"
 #include "Skybox.h"
+#include "Particles.h"
+
 
 using namespace Engine;
 
@@ -19,20 +21,29 @@ void Scene::centerSceneToObject(Object* center){
 	Scene* s =  Resources::getCurrentScene();
 	for(auto obj:s->getObjects()){
 		if(obj.second != center && obj.second->getParent() == nullptr){
-			obj.second->setPosition(obj.second->getPosition() + offset);
+			glm::vec3 objPos = obj.second->getPosition();
+			obj.second->setPosition(objPos + offset);
+		}
+	}
+	for(auto emitter:m_ParticleEmitters){
+		for(auto particle:emitter.second->getParticles()){
+			glm::vec3 objPos = particle.getPosition();
+			particle.setPosition(objPos + offset);
 		}
 	}
 	for(auto obj:s->getLights()){
 		if(obj.second != center && obj.second->getParent() == nullptr){
-			obj.second->setPosition(obj.second->getPosition() + offset);
+			glm::vec3 objPos = obj.second->getPosition();
+			obj.second->setPosition(objPos + offset);
 		}
 	}
 	center->setPosition(0,0,0);
 }
 Scene::~Scene(){
-	for(auto obj:m_Objects)  delete obj.second;
-	for(auto light:m_Lights) delete light.second;
-	for(auto cam:m_Cameras)  delete cam.second;
+	for(auto obj:m_Objects)              delete obj.second;
+	for(auto light:m_Lights)             delete light.second;
+	for(auto emitter:m_ParticleEmitters) delete emitter.second;
+	for(auto cam:m_Cameras)              delete cam.second;
 }
 void Scene::setName(std::string name){
 	std::string oldName = m_Name;
@@ -47,9 +58,15 @@ void Scene::setName(std::string name){
 void Scene::update(float dt){
 	for(auto object:m_Objects)
 		object.second->update(dt);
+	for(auto emitter:m_ParticleEmitters){
+		for(auto particle:emitter.second->getParticles()){
+			particle.update(dt);
+		}
+	}
 	for(auto light:m_Lights)
 		light.second->update(dt);
 	m_Skybox->_updateMatrix();
 }
 void Scene::setAmbientLightColor(glm::vec4 c){ m_AmbientLighting = c; }
 void Scene::setAmbientLightColor(float r,float g,float b,float a){ setAmbientLightColor(glm::vec4(r,g,b,a)); }
+void Scene::renderSkybox(){ if(m_Skybox != nullptr) m_Skybox->render(); }

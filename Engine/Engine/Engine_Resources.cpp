@@ -11,6 +11,7 @@
 #include "Scene.h"
 #include "Texture.h"
 #include "Font.h"
+#include "Particles.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -45,31 +46,21 @@ std::unordered_map<std::string,Mesh*> Detail::ResourceManagement::m_Meshes = _ge
 std::unordered_map<std::string,Material*> _getMaterialDefaults(){ std::unordered_map<std::string,Material*> k; return k; }
 std::unordered_map<std::string,Material*> Detail::ResourceManagement::m_Materials = _getMaterialDefaults();
 
+std::unordered_map<std::string,ParticleInfo*> _getParticleInfoDefaults(){ std::unordered_map<std::string,ParticleInfo*> k; return k; }
+std::unordered_map<std::string,ParticleInfo*> Detail::ResourceManagement::m_ParticleInfos = _getParticleInfoDefaults();
+
 std::unordered_map<std::string,ShaderP*> _getShaderDefaults(){ std::unordered_map<std::string,ShaderP*> k; return k; }
 std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders = _getShaderDefaults();
 
 void Engine::Resources::Detail::ResourceManagement::destruct(){
-	for(auto mesh:Detail::ResourceManagement::m_Meshes){
-		delete mesh.second;
-	}
-	for(auto texture:Detail::ResourceManagement::m_Textures){
-		delete texture.second;
-	}
-	for(auto font:Detail::ResourceManagement::m_Fonts){
-		delete font.second;
-	}
-	for(auto mat:Detail::ResourceManagement::m_Materials){
-		delete mat.second;
-	}
-	for(auto cam:Detail::ResourceManagement::m_Cameras){
-		delete cam.second;
-	}
-	for(auto shaderP:Detail::ResourceManagement::m_Shaders){
-		delete shaderP.second;
-	}
-	for(auto scene:Detail::ResourceManagement::m_Scenes){
-		delete scene.second;
-	}
+	for(auto mesh:Detail::ResourceManagement::m_Meshes)         delete mesh.second;
+	for(auto texture:Detail::ResourceManagement::m_Textures)    delete texture.second;
+	for(auto font:Detail::ResourceManagement::m_Fonts)          delete font.second;
+	for(auto mat:Detail::ResourceManagement::m_Materials)       delete mat.second;
+	for(auto pinfo:Detail::ResourceManagement::m_ParticleInfos) delete pinfo.second;
+	for(auto cam:Detail::ResourceManagement::m_Cameras)         delete cam.second;
+	for(auto shaderP:Detail::ResourceManagement::m_Shaders)     delete shaderP.second;
+	for(auto scene:Detail::ResourceManagement::m_Scenes)        delete scene.second;
 	delete Detail::ResourceManagement::m_CurrentScene;
 	delete Detail::ResourceManagement::m_Mouse;
 	delete Detail::ResourceManagement::m_Window;
@@ -95,6 +86,18 @@ void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture*
 		return;
 	Detail::ResourceManagement::m_Materials[name] = new Material(diffuse,normal,glow);
 }
+
+void Engine::Resources::addParticleInfo(std::string name, std::string material){
+	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
+		return;
+	Detail::ResourceManagement::m_ParticleInfos[name] = new ParticleInfo(material);
+}
+void Engine::Resources::addParticleInfo(std::string name, Material* material){
+	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
+		return;
+	Detail::ResourceManagement::m_ParticleInfos[name] = new ParticleInfo(material);
+}
+
 void Engine::Resources::addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile){
 	if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
 		return;
@@ -110,6 +113,7 @@ void Engine::Resources::initResources(){
 	addShader("Deferred_Bloom","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_bloom_frag.glsl");
 	addShader("Deferred_Final","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_final_frag.glsl");
 	addShader("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
+	addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
 
 	addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
 	addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");

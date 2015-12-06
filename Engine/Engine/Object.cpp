@@ -92,10 +92,9 @@ void Object::scale(float x, float y, float z){
 }
 void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
 void Object::setPosition(float x, float y, float z){ 
-	m_Position.x = x; 
-	m_Position.y = y; 
-	m_Position.z = z;
-
+	m_Model[3][0] = x;
+	m_Model[3][1] = y;
+	m_Model[3][2] = z;
 	_updateMatrix();
 }
 void Object::setPosition(glm::vec3 position){ setPosition(position.x,position.y,position.z); }
@@ -114,9 +113,12 @@ void Object::_updateMatrix(){
 	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr){
 		newModel = m_Parent->m_Model;
+		//newModel = glm::translate(newModel, glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]));
+	}
+	else{
+		newModel = glm::translate(newModel, glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]));
 	}
 
-	newModel = glm::translate(newModel, m_Position);
 	newModel *= glm::mat4_cast(m_Orientation);
 	newModel = glm::scale(newModel,m_Scale);
 	m_Model = newModel;
@@ -178,7 +180,9 @@ glm::vec3 Object::getScreenCoordinates(){
 }
 void Object::render(Mesh* m, Material* mat, bool debug){}
 void Object::render(bool debug){}
-bool Object::rayIntersectSphere(Camera* cam)
-{
+bool Object::rayIntersectSphere(Camera* cam){
+	return false;
+}
+bool Object::rayIntersectSphere(glm::vec3 origin, glm::vec3 vector){
 	return false;
 }

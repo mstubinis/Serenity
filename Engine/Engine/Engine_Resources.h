@@ -18,6 +18,8 @@ class SunLight;
 class Scene;
 class Texture;
 
+struct ParticleInfo;
+
 namespace Engine{
 	namespace Resources{
 		namespace Detail{
@@ -39,6 +41,7 @@ namespace Engine{
 					static std::unordered_map<std::string,Texture*> m_Textures;
 					static std::unordered_map<std::string,Material*> m_Materials;
 					static std::unordered_map<std::string,ShaderP*> m_Shaders;
+					static std::unordered_map<std::string,ParticleInfo*> m_ParticleInfos;
 
 					static void destruct();
 			};
@@ -62,6 +65,7 @@ namespace Engine{
 		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name]; }
 		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name]; }
 		static Material* getMaterial(std::string name){ return Detail::ResourceManagement::m_Materials[name]; }
+		static ParticleInfo* getParticleInfo(std::string name){ return Detail::ResourceManagement::m_ParticleInfos[name]; }
 		static ShaderP* getShader(std::string name){ return Detail::ResourceManagement::m_Shaders[name]; }
 
 
@@ -70,6 +74,9 @@ namespace Engine{
 		void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
 		void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr);
 		void addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile);
+
+		void addParticleInfo(std::string name, std::string material);
+		void addParticleInfo(std::string name, Material* diffuse);
 
 		void initResources();
 	};

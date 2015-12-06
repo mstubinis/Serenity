@@ -6,6 +6,7 @@
 #include "Ship.h"
 #include "Skybox.h"
 #include "Light.h"
+#include "Particles.h"
 
 #include <algorithm>
 #include <sstream>
@@ -22,7 +23,7 @@ SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 	playerCamera = new GameCamera("Default",45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
 	Resources::setActiveCamera(playerCamera);
 	new Camera("Debug",45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
-	new Camera("HUD",0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.05f,10.0f,this);
+	new Camera("HUD",0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.05f,9000000000.0f,this);
 
 	if(file == ""){
 		SolarSystem::_loadRandomly();
@@ -40,17 +41,19 @@ void SolarSystem::_loadFromFile(std::string filename){
 	unsigned int count = 0;
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 	std::unordered_map<std::string,std::vector<RingInfo>> planetRings;
+
+	std::string skybox;
 	for(std::string line; std::getline(str, line, '\n');){
-
-		//remove \r from the line
-		line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() );
-
+		line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() ); //remove \r from the line
 		if(line[0] != '#'){//ignore commented lines
 			if(count == 1){//this line has the system's name
 				this->setName(line);
 			}
 			else if(count == 2){//this line has the system's skybox
-				new Skybox(line,this);
+				skybox = line;
+			}
+			else if(count == 3){//this line has the system's skybox's number of flares
+				new Skybox(skybox,boost::lexical_cast<unsigned int>(line),this);
 			}
 			if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$') && line[1] == ' '){//we got something to work with
 				Planet* planetoid = nullptr;
@@ -189,7 +192,6 @@ void SolarSystem::_loadFromFile(std::string filename){
 	for(auto rings:planetRings){
 		new Ring(rings.second,static_cast<Planet*>(m_Objects[rings.first]));
 	}
-
 	centerSceneToObject(player);
 }
 void SolarSystem::_loadRandomly(){
@@ -206,13 +208,13 @@ void SolarSystem::_loadRandomly(){
 				boost::erase_all(path_name,"\"");
 				path_name = path_name.substr(path.size(),path_name.size());
 				folders.push_back(path_name);
-
 			}
 		}
 	}
 	unsigned int random_skybox_index = static_cast<unsigned int>((rand() % folders.size()));
 	std::string skybox = folders.at(random_skybox_index);
-	new Skybox(skybox,this);
+	unsigned int numFlares = rand() % 200;
+	new Skybox(skybox,numFlares,this);
 	#pragma endregion
 
 	#pragma region ConstructStars
@@ -471,7 +473,6 @@ void SolarSystem::_loadRandomly(){
 	//Then load moons. Generally the number of moons depends on the type of planet. Giants have more moons than normal planets, etc..
 
 	player = new PlayerShip("Akira","Akira","USS Thunderchild",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
-
 	centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){
