@@ -7,6 +7,7 @@
 #include "Scene.h"
 #include "Engine.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 
 ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,true,scene){
@@ -33,11 +34,22 @@ void ParticleEmitter::addParticle(){
 	float rotationalVelocity = 0.05f;
 	m_Particles.push_back(new Particle(this,this->getPosition(),m_info->startColor,glm::vec2(1,1),rot,velocity,rotationalVelocity,glm::vec2(0,0)));
 }
-void ParticleEmitter::update(float dt)
-{
+void ParticleEmitter::deleteParticles(){
+	std::vector<Particle*> copies = m_Particles;
+	for(auto p:m_Particles){
+		if(p->ToBeErased()){
+			copies.erase(std::remove(copies.begin(), copies.end(), p), copies.end());
+			delete p;
+			p = nullptr;
+		}
+	}
+	m_Particles = copies;
+}
+void ParticleEmitter::update(float dt){
 	Object::update(dt);
 	for(auto particle:m_Particles)
 		particle->update(dt);
+	deleteParticles();
 }
 void ParticleEmitter::render(){
 	return;
@@ -52,6 +64,7 @@ Particle::Particle(ParticleEmitter* _emitter,glm::vec3 pos,glm::vec4 col,glm::ve
 	velocity = vel;
 	zRotVelocity = rVel;
 	scaleVelocity = sVel;
+	toBeErased = false;
 
 	model = glm::mat4(1);
 	model = glm::translate(model,position);
@@ -80,6 +93,9 @@ void Particle::update(float dt){
 	model = glm::translate(model,position);
 	model = glm::rotate(model, zRot,glm::vec3(0,0,1));
 	model = glm::scale(model, glm::vec3(scale.x,scale.y,1));
+
+	if(lifetime >= lifetimeMax)
+		toBeErased = true;
 }
 void Particle::render(GLuint shader){
 

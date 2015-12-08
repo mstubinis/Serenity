@@ -43,6 +43,7 @@ class ParticleEmitter: public Object{
 		const ParticleInfo* getParticleInfo() const { return m_info; }
 
 		void addParticle();
+		void deleteParticles();
 		void update(float);
 		void render();
 };
@@ -60,6 +61,10 @@ class Particle{
 
 		glm::vec4 color;
 
+		float lifetime;
+		float lifetimeMax;
+		bool toBeErased;
+
 		float zRot;
 		float zRotVelocity;
 	public:
@@ -69,6 +74,8 @@ class Particle{
 
 		void setPosition(float,float,float); 
 		void setPosition(glm::vec3);
+
+		const bool ToBeErased() const { return toBeErased; }
 
 		const glm::vec3& getPosition(){ 
 			position = glm::vec3(model[3][0],model[3][1],model[3][2]);
