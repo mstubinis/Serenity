@@ -9,8 +9,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,true,scene)
-{
+ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,true,scene){
 	m_info = info;
 	unsigned int count = 0;
 	if(scene == nullptr){
@@ -25,25 +24,24 @@ ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 sc
 	scene->getParticleEmitters()[m_Name] = this;
 }
 ParticleEmitter::~ParticleEmitter(){
+	for(auto particle:m_Particles) delete particle;
 }
 void ParticleEmitter::addParticle(){
 	float rot = rand() % 360;
 
 	glm::vec3 velocity = glm::vec3(0,0.05f,0);
 	float rotationalVelocity = 0.05f;
-	m_Particles.push_back(Particle(this,this->getPosition(),m_info->startColor,glm::vec2(1,1),rot,velocity,rotationalVelocity,glm::vec2(0,0)));
+	m_Particles.push_back(new Particle(this,this->getPosition(),m_info->startColor,glm::vec2(1,1),rot,velocity,rotationalVelocity,glm::vec2(0,0)));
 }
 void ParticleEmitter::update(float dt)
 {
 	Object::update(dt);
 	for(auto particle:m_Particles)
-		particle.update(dt);
+		particle->update(dt);
 }
 void ParticleEmitter::render(){
 	return;
 }
-
-
 
 Particle::Particle(ParticleEmitter* _emitter,glm::vec3 pos,glm::vec4 col,glm::vec2 scl ,float rot,glm::vec3 vel,float rVel, glm::vec2 sVel){
 	emitter = _emitter;
@@ -74,9 +72,9 @@ void Particle::setPosition(float x,float y,float z){
 }
 void Particle::setPosition(glm::vec3 pos){ setPosition(pos.x,pos.y,pos.z); }
 void Particle::update(float dt){
-	position += velocity;
-	zRot += zRotVelocity;
-	scale += scaleVelocity;
+	position += velocity*dt;
+	zRot += zRotVelocity*dt;
+	scale += scaleVelocity*dt;
 
 	model = glm::mat4(1);
 	model = glm::translate(model,position);

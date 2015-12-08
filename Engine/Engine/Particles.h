@@ -34,12 +34,12 @@ class Particle;
 class ParticleEmitter: public Object{
 	private:
 		ParticleInfo* m_info;
-		std::vector<Particle> m_Particles;
+		std::vector<Particle*> m_Particles;
 	public:
 		ParticleEmitter(ParticleInfo*, glm::vec3 = glm::vec3(0,0,0), glm::vec3 = glm::vec3(1,1,1) ,std::string = "Particle Emitter", Scene* = nullptr);
 		~ParticleEmitter();
 
-		std::vector<Particle> getParticles(){ return m_Particles; }
+		std::vector<Particle*> getParticles(){ return m_Particles; }
 		const ParticleInfo* getParticleInfo() const { return m_info; }
 
 		void addParticle();

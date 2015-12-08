@@ -1,4 +1,4 @@
-#version 110
+#version 120
 
 uniform sampler2D gColorMap;
 uniform sampler2D gLightMap;
@@ -25,7 +25,12 @@ void main(){
 	}
 	else{
 		vec4 light = max(gAmbientColor,max(vec4(glow),(lighting*ssao)));
-		vec4 imageLight = image * light;
+
+		//make the specular part of the lighting "stand out"
+		float specLight = pow(lighting.r,5);
+
+		vec4 imageLight = (image * light)+(specLight*0.6);
+
 		gl_FragColor = imageLight + max((bloom*(1.0-light)), glow*image);
 	}
 }

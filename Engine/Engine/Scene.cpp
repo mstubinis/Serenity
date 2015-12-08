@@ -26,9 +26,11 @@ void Scene::centerSceneToObject(Object* center){
 		}
 	}
 	for(auto emitter:m_ParticleEmitters){
+		glm::vec3 objPos = emitter.second->getPosition();
+		emitter.second->setPosition(objPos + offset);
 		for(auto particle:emitter.second->getParticles()){
-			glm::vec3 objPos = particle.getPosition();
-			particle.setPosition(objPos + offset);
+			objPos = particle->getPosition();
+			particle->setPosition(objPos + offset);
 		}
 	}
 	for(auto obj:s->getLights()){
@@ -60,7 +62,7 @@ void Scene::update(float dt){
 		object.second->update(dt);
 	for(auto emitter:m_ParticleEmitters){
 		for(auto particle:emitter.second->getParticles()){
-			particle.update(dt);
+			particle->update(dt);
 		}
 	}
 	for(auto light:m_Lights)
