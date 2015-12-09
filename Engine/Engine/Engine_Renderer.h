@@ -62,13 +62,16 @@ namespace Engine{
 					static void _passSSAO(unsigned int sampleCount, float intensity, float bias, float radius, float scale);
 					static void _passEdge(GLuint texture,float radius = 1.0f);
 					static void _passBloom(GLuint texture,GLuint texture1);
-					static void _passBlurHorizontal(GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
-					static void _passBlurVertical(GLuint texture, float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
+					static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
 					static void _passFinal();
 				public:
 					static GBuffer* m_gBuffer;
 					static Texture* RandomMapSSAO;
 					static bool m_DrawDebug;
+
+					static bool m_Enabled_Bloom;
+					static bool m_Enabled_SSAO;
+
 					static void render(bool debug=false);
 
 					static void init();
@@ -77,6 +80,39 @@ namespace Engine{
 					static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
 					static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
 			};
+			static void renderFullscreenQuad(unsigned int width, unsigned int height){
+				//Projection setup
+				glMatrixMode(GL_PROJECTION);
+				glPushMatrix();
+				glLoadIdentity();
+				glOrtho(0,width,0,height,0.1f,2);	
+	
+				//Model setup
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
+
+				// Render the quad
+				glLoadIdentity();
+				glColor3f(1,1,1);
+				glTranslatef(0,0,-1);
+	
+				glBegin(GL_QUADS);
+				glTexCoord2f(0,0);
+				glVertex3f(0,0,0);
+				glTexCoord2f(1,0);
+				glVertex3f((float)width,0,0);
+				glTexCoord2f(1,1);
+				glVertex3f((float)width,(float)height,0);
+				glTexCoord2f(0,1);
+				glVertex3f(0,(float)height,0);
+				glEnd();
+
+				//Reset the matrices	
+				glMatrixMode(GL_PROJECTION);
+				glPopMatrix();
+				glMatrixMode(GL_MODELVIEW);
+				glPopMatrix();
+			}
 		};
 		static bool isDebug(){ return Detail::RenderManagement::m_DrawDebug; }
 		static void drawDebug(bool b){ Detail::RenderManagement::m_DrawDebug = b; }

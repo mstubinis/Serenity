@@ -25,9 +25,9 @@ void Game::initResources(){
 	Resources::addMesh("Starbase","Models/starbase.obj");
 	Resources::addMesh("Ring","Models/ring.obj");
 
-	Resources::addMaterial("Star","Textures/Planets/Sun.png");
-	Resources::addMaterial("Default","Textures/Planets/Sun.png");
-	Resources::addMaterial("Earth","Textures/Planets/Earth.png");
+	Resources::addMaterial("Star","Textures/Planets/Sun.jpg");
+	Resources::addMaterial("Default","Textures/Planets/Sun.jpg");
+	Resources::addMaterial("Earth","Textures/Planets/Earth.jpg");
 	Resources::addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
 	Resources::addMaterial("Akira","Textures/akira.png","Textures/akiraNormal.png","Textures/akiraGlow.png");
 	Resources::addMaterial("Crosshair","Textures/HUD/Crosshair.png");

@@ -1,9 +1,7 @@
 #include "Texture.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
-#include "Camera.h"
 #include "ShaderProgram.h"
-#include "Mesh.h"
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
 
@@ -66,13 +64,23 @@ void Texture::_loadFromPixels(const unsigned char* pixels, unsigned int w, unsig
 	}
 }
 void Texture::_loadFromFile(std::string file,GLuint type){
+	std::string extention;
+	for(unsigned int i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
 	if(type == GL_TEXTURE_2D){
 		glGenTextures(1, &m_TextureAddress);
 		sf::Image image;
 
 		glBindTexture(GL_TEXTURE_2D, m_TextureAddress);
 		image.loadFromFile(file.c_str());
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+
+
+		if(extention == ".png")
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+		else if(extention == ".jpg")
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+		else
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -84,10 +92,14 @@ void Texture::_loadFromFile(std::string file,GLuint type){
 	}
 }
 void Texture::_loadFromFiles(std::string file[],GLuint type){
+
 	if(type == GL_TEXTURE_CUBE_MAP){
 		glGenTextures(1, &m_TextureAddress);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureAddress);
 		for(unsigned int i = 0; i < 6; i++){
+			std::string extention;
+			for(unsigned int s = file[i].length() - 4; s < file[i].length(); s++)extention += tolower(file[i].at(s));
+
 			sf::Image image;
 		
 			image.loadFromFile(file[i].c_str());
@@ -98,7 +110,13 @@ void Texture::_loadFromFiles(std::string file[],GLuint type){
 			else if(i == 3)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 			else if(i == 4)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
 			else               skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-			glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
+
+			if(extention == ".png")
+				glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
+			else if(extention == ".jpg")
+				glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
+			else
+				glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
 		}
 		glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -22,6 +22,7 @@ Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned 
 	Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
 	#endif
 
+	srand(static_cast<unsigned int>(time(NULL)));
 	_initWindow(name,width,height);
 	_initGame();
 }
@@ -33,8 +34,6 @@ Engine::EngineClass::~EngineClass(){
 	Engine::Resources::Detail::ResourceManagement::destruct();
 }
 void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsigned int height){
-	srand(static_cast<unsigned int>(time(NULL)));
-
 	sf::ContextSettings settings;
 	settings.depthBits = 24;
 	settings.stencilBits = 8;
@@ -48,13 +47,12 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	videoMode.bitsPerPixel = 32;
 
 	int style = sf::Style::Default;
-	if(style == sf::Style::Fullscreen){
+	if(width == 0 || height == 0){
+		style = sf::Style::Fullscreen;
 		videoMode = sf::VideoMode::getDesktopMode();
 		width = videoMode.width;
 		height = videoMode.height;
-		videoMode.bitsPerPixel = 32;
 	}
-
 	Resources::Detail::ResourceManagement::m_Window = new sf::Window(videoMode, name, style, settings);
 
     //Resources::getWindow()->setVerticalSyncEnabled(true);
@@ -65,9 +63,9 @@ void Engine::EngineClass::_initWindow(std::string name, unsigned int width, unsi
 	glClearColor(1,1,0,1);
 }
 void Engine::EngineClass::_initGame(){
-	Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
-	Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
-	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
+	Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2),*Resources::getWindow());
+	Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
 
 	glewExperimental = GL_TRUE; 
 	glewInit();
@@ -120,10 +118,10 @@ void Engine::EngineClass::_RESET_EVENTS(){
 
 	if(Resources::getWindow()->hasFocus()){
 		glm::vec2 mousePos = Engine::Events::Mouse::getMousePosition();
-		float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2)));
+		float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2)));
 		if(mouseDistFromCenter > 50){
-			Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2),*Resources::getWindow());
-			Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindow()->getSize().x/2,Resources::getWindow()->getSize().y/2);
+			Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2),*Resources::getWindow());
+			Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
 		}
 	}
 }

@@ -69,8 +69,8 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 			glm::vec3 camPos = activeCamera->getPosition() - getPosition();
 			glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
-			glm::vec4 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-			glUniform4f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z,ambient.w);
+			glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
+			glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
 			glm::vec3 lightDir = Resources::getCurrentScene()->getLights().begin()->second->getPosition() - getPosition();
 			lightDir = glm::normalize(lightDir);

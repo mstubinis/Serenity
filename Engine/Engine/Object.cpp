@@ -143,7 +143,7 @@ void Object::setName(std::string name){
 	}
 }
 glm::vec3 Object::getScreenCoordinates(){
-	glm::vec2 windowSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
 	glm::vec3 objPos = getPosition();
 	glm::mat4 MV = Resources::getActiveCamera()->getView();
 	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);

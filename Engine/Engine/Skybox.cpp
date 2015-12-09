@@ -12,12 +12,12 @@ Skybox::Skybox(std::string name,unsigned int numSunFlares,Scene* scene){
 	m_Model = glm::mat4(1);
 
 	glActiveTexture(GL_TEXTURE0);
-	std::string front = "Textures/Skyboxes/" + name + "/Front.png";
-	std::string back = "Textures/Skyboxes/" + name + "/Back.png";
-	std::string left = "Textures/Skyboxes/" + name + "/Left.png";
-	std::string right = "Textures/Skyboxes/" + name + "/Right.png";
-	std::string top = "Textures/Skyboxes/" + name + "/Top.png";
-	std::string bottom = "Textures/Skyboxes/" + name + "/Bottom.png";
+	std::string front = "Textures/Skyboxes/" + name + "/Front.jpg";
+	std::string back = "Textures/Skyboxes/" + name + "/Back.jpg";
+	std::string left = "Textures/Skyboxes/" + name + "/Left.jpg";
+	std::string right = "Textures/Skyboxes/" + name + "/Right.jpg";
+	std::string top = "Textures/Skyboxes/" + name + "/Top.jpg";
+	std::string bottom = "Textures/Skyboxes/" + name + "/Bottom.jpg";
 	std::string names[6] = {front,back,left,right,top,bottom};
 
 	m_Texture = new Texture(names,GL_TEXTURE_CUBE_MAP);
@@ -58,7 +58,7 @@ void Skybox::_updateMatrix(){
 }
 
 glm::vec2 Skybox::getScreenCoordinates(glm::vec3 objPos){
-	glm::vec2 windowSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
 	glm::mat4 MV = Resources::getActiveCamera()->getView();
 	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
 	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
@@ -123,7 +123,7 @@ void Skybox::render(){
 
 			glm::mat4 model = glm::mat4(1);
 			model = glm::translate(model, glm::vec3(pos.x,
-													Resources::getWindow()->getSize().y-pos.y,
+													Resources::getWindowSize().y-pos.y,
 													-0.5 - 1));
 			model = glm::rotate(model,0.0f,glm::vec3(0,0,1));
 			model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));

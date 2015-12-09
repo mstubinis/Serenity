@@ -20,10 +20,10 @@ using namespace Engine;
 using namespace Engine::Events;
 
 SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
-	playerCamera = new GameCamera("Default",45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
+	playerCamera = new GameCamera("Default",45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
 	Resources::setActiveCamera(playerCamera);
-	new Camera("Debug",45,Resources::getWindow()->getSize().x/(float)Resources::getWindow()->getSize().y,0.1f,9000000000.0f,this);
-	new Camera("HUD",0,(float)Resources::getWindow()->getSize().x,0,(float)Resources::getWindow()->getSize().y,0.05f,9000000000.0f,this);
+	new Camera("Debug",45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
+	new Camera("HUD",0,(float)Resources::getWindowSize().x,0,(float)Resources::getWindowSize().y,0.05f,9000000000.0f,this);
 
 	if(file == ""){
 		SolarSystem::_loadRandomly();
@@ -100,8 +100,8 @@ void SolarSystem::_loadFromFile(std::string filename){
 
 				}
 				float randDegree = rand() * 360.0f;
-				float xPos = sin(randDegree) * static_cast<float>(POSITION);
-				float zPos = cos(randDegree) * static_cast<float>(POSITION);
+				double xPos = sin(randDegree) * static_cast<double>(POSITION);
+				double zPos = cos(randDegree) * static_cast<double>(POSITION);
 
 				if(MATERIAL_NAME != ""){
 					std::string normalFile = "";
@@ -161,18 +161,26 @@ void SolarSystem::_loadFromFile(std::string filename){
 				}
 				else if(line[0] == '*'){//Player ship
 					if(PARENT != ""){
-						xPos += getObjects()[PARENT]->getPosition().x;
-						zPos += getObjects()[PARENT]->getPosition().z;
+						double parentX = getObjects()[PARENT]->getPosition().x;
+						double parentZ = getObjects()[PARENT]->getPosition().z;
+						xPos += parentX;
+						zPos += parentZ;
 					}
-					player = new PlayerShip("Defiant","Defiant",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+					float realX = static_cast<float>(xPos);
+					float realY = static_cast<float>(zPos);
+					player = new PlayerShip("Defiant","Defiant",NAME,glm::vec3(realX,0,realY),glm::vec3(1),nullptr,this);
 
 				}
 				else if(line[0] == '$'){//Other ship
 					if(PARENT != ""){
-						xPos += getObjects()[PARENT]->getPosition().x;
-						zPos += getObjects()[PARENT]->getPosition().z;
+						double parentX = getObjects()[PARENT]->getPosition().x;
+						double parentZ = getObjects()[PARENT]->getPosition().z;
+						xPos += parentX;
+						zPos += parentZ;
 					}
-					new Ship("Akira","Akira",NAME,glm::vec3(xPos,0,zPos),glm::vec3(1,1,1),nullptr,this);
+					float realX = static_cast<float>(xPos);
+					float realY = static_cast<float>(zPos);
+					new Ship("Akira","Akira",NAME,glm::vec3(realX,0,realY),glm::vec3(1),nullptr,this);
 				}
 				else if(line[0] == 'R'){//Rings
 					if(PARENT != ""){
@@ -420,9 +428,9 @@ void SolarSystem::_loadRandomly(){
 			MATERIAL_NAME = FOLDER;
 			FOLDER += "/";
 
-			std::string diffuseFile = FOLDER + base_name + ".png";
-			std::string normFile = FOLDER + base_name + "Norm.png";
-			std::string gloFile = FOLDER + base_name + "Glow.png";
+			std::string diffuseFile = FOLDER + base_name + ".jpg";
+			std::string normFile = FOLDER + base_name + "Norm.jpg";
+			std::string gloFile = FOLDER + base_name + "Glow.jpg";
 			if(boost::filesystem::exists(normFile)){ normalFile = normFile; }
 			if(boost::filesystem::exists(gloFile)){ glowFile = gloFile; }
 
@@ -461,7 +469,7 @@ void SolarSystem::_loadRandomly(){
 						}
 						else if(randSize < 50){
 							if(chance2 < 20)
-								rings.push_back(RingInfo(randPos,randSize,glm::vec3(-1,-1,-1),randBreak));
+								rings.push_back(RingInfo(randPos,randSize,glm::vec3(-1),randBreak));
 						}
 					}
 					if(rings.size() > 0)
@@ -472,7 +480,7 @@ void SolarSystem::_loadRandomly(){
 	}
 	//Then load moons. Generally the number of moons depends on the type of planet. Giants have more moons than normal planets, etc..
 
-	player = new PlayerShip("Akira","Akira","USS Thunderchild",glm::vec3(0,0,0),glm::vec3(1,1,1),nullptr,this);
+	player = new PlayerShip("Akira","Akira","USS Thunderchild",glm::vec3(0),glm::vec3(1),nullptr,this);
 	centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){

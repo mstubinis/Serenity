@@ -54,6 +54,7 @@ namespace Engine{
 		static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
 
 		static sf::Window* getWindow(){ return Detail::ResourceManagement::m_Window; }
+		static sf::Vector2u getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
 		static sf::Mouse* getMouse(){ return Detail::ResourceManagement::m_Mouse; }
 
 		static Camera* getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera; }

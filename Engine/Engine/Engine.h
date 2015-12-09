@@ -47,7 +47,7 @@ namespace Engine{
 			void _render();
 
 		public:
-			EngineClass(std::string name, unsigned int width, unsigned int height);
+			EngineClass(std::string name, unsigned int width=0, unsigned int height=0);
 			~EngineClass();
 
 			void run();

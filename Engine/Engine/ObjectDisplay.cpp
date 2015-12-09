@@ -10,10 +10,10 @@ using namespace Engine;
 ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name, bool notLight,Scene* scene):Object(pos,scl,name,notLight,scene){
 	m_Radius = 0;
 	m_Visible = true;
-	m_BoundingBoxRadius = glm::vec3(0,0,0);
+	m_BoundingBoxRadius = glm::vec3(0);
 	setMesh(Resources::getMesh(mesh));
 	setMaterial(Resources::getMaterial(mat));
-	m_Color = glm::vec4(1,1,1,1);
+	m_Color = glm::vec4(1);
 }
 ObjectDisplay::~ObjectDisplay()
 {
@@ -24,7 +24,7 @@ void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug){
 	Camera* activeCamera = Resources::getActiveCamera();
 	if(!activeCamera->sphereIntersectTest(this))
 		return;
-	if(activeCamera->getDistance(this) > 850 * getRadius())
+	if(activeCamera->getDistance(this) > 1100 * getRadius())
 		return;
 
 	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
@@ -46,7 +46,7 @@ void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug){
 }
 void ObjectDisplay::calculateRadius(){
 	if(m_Mesh == nullptr){
-		m_BoundingBoxRadius = glm::vec3(0,0,0);
+		m_BoundingBoxRadius = glm::vec3(0);
 		return;
 	}
 	m_BoundingBoxRadius = m_Mesh->getRadius() * m_Scale;
@@ -61,7 +61,7 @@ void ObjectDisplay::setVisible(bool vis){ m_Visible = vis; }
 void ObjectDisplay::setMesh(Mesh* mesh){ 
 	m_Mesh = mesh; 
 	if(m_Mesh == nullptr){
-		m_BoundingBoxRadius = glm::vec3(0,0,0); 
+		m_BoundingBoxRadius = glm::vec3(0); 
 		return; 
 	} 
 	m_BoundingBoxRadius = mesh->getRadiusBox();  

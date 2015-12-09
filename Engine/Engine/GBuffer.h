@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 const int GBUFFER_TYPES[] =		       {GL_RGBA8,		       // (diffuse.rgba)
+									    GL_RGBA8,			   // (diffuse forward rendering.rgba)
 								        GL_RGBA16F,		       // (normals.rgba)
 										GL_RG8,			       // Glow & SSAO
 										GL_RGB32F,			   // World Position
@@ -13,6 +14,7 @@ const int GBUFFER_TYPES[] =		       {GL_RGBA8,		       // (diffuse.rgba)
 										GL_DEPTH_COMPONENT16}; // depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)
+										GL_RGBA,			   // (diffuse forward rendering.rgba)
 							            GL_RGBA,			   // (normals.rgba)
 										GL_RG,			       // Glow & SSAO
 										GL_RGB,				   // World Position
@@ -22,6 +24,7 @@ const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)
 								        GL_DEPTH_COMPONENT};   // depth
 
 const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,
+						                GL_UNSIGNED_BYTE,
 						                GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
@@ -37,9 +40,16 @@ const int GBUFFER_ATTACHMENT_TYPES[] = {GL_COLOR_ATTACHMENT0,
 										GL_COLOR_ATTACHMENT4,
 										GL_COLOR_ATTACHMENT5,
 										GL_COLOR_ATTACHMENT6,
+										GL_COLOR_ATTACHMENT7,
 										GL_DEPTH_ATTACHMENT};
 
-enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION,BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM,
+enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,
+				   BUFFER_TYPE_DIFFUSE_FORWARD,
+	               BUFFER_TYPE_NORMAL,
+				   BUFFER_TYPE_GLOW,
+				   BUFFER_TYPE_POSITION,
+				   BUFFER_TYPE_LIGHTING,
+				   BUFFER_TYPE_BLOOM,
 				   BUFFER_TYPE_FREE1,
 				   BUFFER_TYPE_DEPTH,
 				   BUFFER_TYPE_NUMBER};

@@ -5,22 +5,22 @@ Basic
 
 S name=Sun radius=695800 r=1 g=1 b=0 r1=0.8 g1=0.8 b1=1 position=0
 
-P name=Mercuery radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.png
+P name=Mercuery radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.jpg
 
-P name=Venus radius=6031 r=1 g=1 b=1 position=108200000 type=Rock atmosphereHeight=0.025 texture=Venus.png
+P name=Venus radius=6031 r=1 g=1 b=1 position=108200000 type=Rock atmosphereHeight=0.025 texture=Venus.jpg
 
-P name=Earth radius=6371 r=1 g=1 b=1 position=149600000 type=Rock atmosphereHeight=0.025 texture=Earth.png
-M name=Moon radius=1737 r=1 g=1 b=1 parent=Earth position=384400 type=Rock atmosphereHeight=0 texture=Moon.png
+P name=Earth radius=6371 r=1 g=1 b=1 position=149600000 type=Rock atmosphereHeight=0.025 texture=Earth.jpg
+M name=Moon radius=1737 r=1 g=1 b=1 parent=Earth position=384400 type=Rock atmosphereHeight=0 texture=Moon.jpg
 
-P name=Mars radius=3390 r=1 g=1 b=1 position=227900000 type=Rock atmosphereHeight=0 texture=Mars.png
+P name=Mars radius=3390 r=1 g=1 b=1 position=227900000 type=Rock atmosphereHeight=0 texture=Mars.jpg
 #M name=Phobos radius=11.2667 r=1 g=1 b=1 parent=Mars position=9390 atmosphereHeight=0 type=Asteroid
 #M name=Deimos radius=6.2 r=1 g=1 b=1 parent=Mars position=23470 atmosphereHeight=0 type=Asteroid
 
-P name=Jupiter radius=69911 r=1 g=1 b=1 position=778500000 type=GasGiant atmosphereHeight=0 texture=Jupiter.png
-M name=Callisto parent=Jupiter radius=2410 r=1 g=1 b=1 position=1882700 atmosphereHeight=0 type=Rock texture=Callisto.png
-M name=Io parent=Jupiter radius=1822 r=1 g=1 b=1 position=421700 atmosphereHeight=0 type=Rock texture=Io.png
-M name=Europa parent=Jupiter radius=1560 r=1 g=1 b=1 position=670900 atmosphereHeight=0 type=Rock texture=Europa.png
-M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphereHeight=0 type=Rock texture=Ganymede.png
+P name=Jupiter radius=69911 r=1 g=1 b=1 position=778500000 type=GasGiant atmosphereHeight=0 texture=Jupiter.jpg
+M name=Callisto parent=Jupiter radius=2410 r=1 g=1 b=1 position=1882700 atmosphereHeight=0 type=Rock texture=Callisto.jpg
+M name=Io parent=Jupiter radius=1822 r=1 g=1 b=1 position=421700 atmosphereHeight=0 type=Rock texture=Io.jpg
+M name=Europa parent=Jupiter radius=1560 r=1 g=1 b=1 position=670900 atmosphereHeight=0 type=Rock texture=Europa.jpg
+M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphereHeight=0 type=Rock texture=Ganymede.jpg
 #M name=Metis parent=Jupiter
 #M name=Adrastea parent=Jupiter
 #M name=Amalthea parent=Jupiter
@@ -85,7 +85,7 @@ M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphe
 #M name=Megaclite parent=Jupiter
 #M name=S/2003-J-2 parent=Jupiter
 
-P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.png
+P name=Saturn radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.jpg
 R parent=Saturn position=535 radius=279 r=78 g=68 b=56 break=269
 R parent=Saturn position=852 radius=130 r=154 g=138 b=115 break=120
 R parent=Saturn position=172 radius=120 r=96 g=87 b=82 break=110
@@ -180,7 +180,7 @@ R parent=Saturn position=205 radius=3 r=-1 g=-1 b=-1 break=2
 #M name=Fornjot parent=Saturn
 
 
-P name=Uranus radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.png
+P name=Uranus radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.jpg
 #M name=Cordelia parent=Uranus
 #M name=Ophelia parent=Uranus
 #M name=Bianca parent=Uranus
@@ -209,7 +209,7 @@ P name=Uranus radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosph
 #M name=Setebos parent=Uranus
 #M name=Ferdinand parent=Uranus
 
-P name=Neptune radius=24622 r=1 g=1 b=1 position=4503000000 type=IceGiant atmosphereHeight=0 texture=Neptune.png
+P name=Neptune radius=24622 r=1 g=1 b=1 position=4503000000 type=IceGiant atmosphereHeight=0 texture=Neptune.jpg
 #M name=Naiad parent=Neptune
 #M name=Thalassa parent=Neptune
 #M name=Despina parent=Neptune
@@ -226,7 +226,7 @@ P name=Neptune radius=24622 r=1 g=1 b=1 position=4503000000 type=IceGiant atmosp
 #M name=Neso parent=Neptune
 
 #NOTE pluto orbits a point outside itself. Perhaps add this in a future version
-P name=Pluto radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHeight=0 texture=Pluto.png
+P name=Pluto radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHeight=0 texture=Pluto.jpg
 #M name=Charon parent=Pluto
 #M name=Styx parent=Pluto
 #M name=Nix parent=Pluto
@@ -256,4 +256,4 @@ P name=Pluto radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHei
 #P name=20000-Varuna radius=330 r=1 g=1 b=1 position=6450000000 atmosphereHeight=0 
 
 * name=Player parent=Earth position=8000
-$ name=Valiant parent=Player position=5
+$ name=Valiant parent=Player position=2

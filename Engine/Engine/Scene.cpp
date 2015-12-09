@@ -8,7 +8,7 @@
 
 using namespace Engine;
 
-Scene::Scene(std::string name,glm::vec4 ambientLightColor){
+Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 	if(Resources::getCurrentScene() == nullptr)
 		Resources::Detail::ResourceManagement::m_CurrentScene = this;
 
@@ -69,6 +69,6 @@ void Scene::update(float dt){
 		light.second->update(dt);
 	m_Skybox->_updateMatrix();
 }
-void Scene::setAmbientLightColor(glm::vec4 c){ m_AmbientLighting = c; }
-void Scene::setAmbientLightColor(float r,float g,float b,float a){ setAmbientLightColor(glm::vec4(r,g,b,a)); }
+void Scene::setAmbientLightColor(glm::vec3 c){ m_AmbientLighting = c; }
+void Scene::setAmbientLightColor(float r,float g,float b){ setAmbientLightColor(glm::vec3(r,g,b)); }
 void Scene::renderSkybox(){ if(m_Skybox != nullptr) m_Skybox->render(); }

@@ -9,39 +9,6 @@
 
 using namespace Engine;
 
-void _initQuad(){
-	//Projection setup
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0,Resources::getWindow()->getSize().x,0,Resources::getWindow()->getSize().y,0.1f,2);	
-	
-	//Model setup
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	// Render the quad
-	glLoadIdentity();
-	glColor3f(1,1,1);
-	glTranslatef(0,0,-1.0);
-	
-	glBegin(GL_QUADS);
-	glTexCoord2f( 0, 0 );
-	glVertex3f(    0.0f, 0.0f, 0.0f);
-	glTexCoord2f( 1, 0 );
-	glVertex3f(   (float) Resources::getWindow()->getSize().x, 0.0f, 0.0f);
-	glTexCoord2f( 1, 1 );
-	glVertex3f(   (float) Resources::getWindow()->getSize().x, (float) Resources::getWindow()->getSize().y, 0.0f);
-	glTexCoord2f( 0, 1 );
-	glVertex3f(    0.0f,  (float) Resources::getWindow()->getSize().y, 0.0f);
-	glEnd();
-
-	//Reset the matrices	
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-}
 SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,false,scene){
 	m_Type = type;
 
@@ -92,7 +59,7 @@ void SunLight::render(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	_initQuad();
+	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 void SunLight::renderDebug(GLuint shader){
 	if(m_Parent == nullptr)
@@ -117,7 +84,7 @@ void DirectionalLight::render(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	_initQuad();
+	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
 PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Point Light",LIGHT_TYPE_POINT,scene){
@@ -147,7 +114,7 @@ void PointLight::render(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	_initQuad();
+	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 SpotLight::SpotLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);

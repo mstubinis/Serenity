@@ -20,6 +20,8 @@
 using namespace Engine;
 
 bool Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
+bool Engine::Renderer::Detail::RenderManagement::m_Enabled_Bloom = true;
+bool Engine::Renderer::Detail::RenderManagement::m_Enabled_SSAO = true;
 Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 
@@ -30,7 +32,7 @@ std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_Tex
 
 void Engine::Renderer::Detail::RenderManagement::init(){
 	Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = new Texture("Textures/SSAONormal.png");
-	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -65,7 +67,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 
 		glm::mat4 model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(item.pos.x,
-												Resources::getWindow()->getSize().y-item.pos.y,
+												Resources::getWindowSize().y-item.pos.y,
 												-0.5 - item.depth));
 		model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
 		if(item.texture != "")
@@ -96,7 +98,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 
 		float y_offset = 0;
 		float x = item.pos.x;
-		item.pos.y = Resources::getWindow()->getSize().y - item.pos.y;
+		item.pos.y = Resources::getWindowSize().y - item.pos.y;
 		for(auto c:item.text){
 			if(c == '\n'){
 				y_offset += (font->getFontData()->getGlyphData('X')->height+6) * item.scl.y;
@@ -183,32 +185,33 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	Engine::Renderer::Detail::RenderManagement::_lightingPass();
 	m_gBuffer->stop();
 
-	//only write to the G channel of the glow buffer for SSAO pass
-	m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-	Engine::Renderer::Detail::RenderManagement::_passSSAO(1,2.9f,0.01f,0.7f,1.2f);
-	m_gBuffer->stop();
+	if(Engine::Renderer::Detail::RenderManagement::m_Enabled_SSAO){
+		//only write to the G channel of the glow buffer for SSAO pass
+		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
+		Engine::Renderer::Detail::RenderManagement::_passSSAO(1.0f,2.9f,0.01f,0.7f,1.2f);
+		m_gBuffer->stop();
 
-	//only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
-	m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
-	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
-	m_gBuffer->stop();
-	m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,1.0f,1.0f,"G");
-	m_gBuffer->stop();
+		//only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
+		m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
+		m_gBuffer->stop();
+		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,1.0f,1.0f,"G");
+		m_gBuffer->stop();
+	}
+	if(Engine::Renderer::Detail::RenderManagement::m_Enabled_Bloom){
+		glDisable(GL_BLEND);
+		m_gBuffer->start(BUFFER_TYPE_BLOOM);
+		Engine::Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
+		m_gBuffer->stop();
 
-	glDisable(GL_BLEND);
-	m_gBuffer->start(BUFFER_TYPE_BLOOM);
-	Engine::Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
-	m_gBuffer->stop();
-
-	m_gBuffer->start(BUFFER_TYPE_FREE1);
-	Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(BUFFER_TYPE_BLOOM,0.42f,3.8f);
-	m_gBuffer->stop();
-	m_gBuffer->start(BUFFER_TYPE_BLOOM);
-	Engine::Renderer::Detail::RenderManagement::_passBlurVertical(BUFFER_TYPE_FREE1,0.42f,3.8f);
-	m_gBuffer->stop();
-	
-	
+		m_gBuffer->start(BUFFER_TYPE_FREE1);
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.42f,3.8f);
+		m_gBuffer->stop();
+		m_gBuffer->start(BUFFER_TYPE_BLOOM);
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.42f,3.8f);
+		m_gBuffer->stop();
+	}
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
 
 	glEnable(GL_BLEND);
@@ -224,7 +227,7 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	glm::vec3 camPos = Resources::getActiveCamera()->getPosition();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->calculateViewProjInverted()));
 
 	glActiveTexture(GL_TEXTURE0);
@@ -255,7 +258,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(unsigned int sampleCo
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniform1f(glGetUniformLocation(shader,"gIntensity"), intensity);
 	glUniform1f(glGetUniformLocation(shader,"gBias"), bias);
 	glUniform1f(glGetUniformLocation(shader,"gRadius"),radius);
@@ -277,7 +280,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(unsigned int sampleCo
 	glBindTexture(GL_TEXTURE_2D,RandomMapSSAO->getTextureAddress());
 	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -292,7 +295,7 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 	GLuint shader = Resources::getShader("Deferred_Edge")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -300,14 +303,11 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-
-	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
-
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
 
 	glUseProgram(0);
 }
@@ -317,7 +317,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLui
 	GLuint shader = Resources::getShader("Deferred_Bloom")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -329,7 +329,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLui
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture1));
 	glUniform1i(glGetUniformLocation(shader,"texture1"), 1 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	for(unsigned int i = 0; i < 2; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -338,13 +338,11 @@ void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLui
 	}
 	glUseProgram(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(GLuint texture, float radius,float strengthModifier,std::string channels){
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	GLuint shader = Resources::getShader("Deferred_Blur_Horizontal")->getShaderProgram();
+void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float strengthModifier,std::string channels){
+	GLuint shader = Resources::getShader("Deferred_Blur_" + type)->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 	glUniform1f(glGetUniformLocation(shader,"strengthModifier"), strengthModifier);
 
@@ -362,37 +360,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBlurHorizontal(GLuint text
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
-
-	glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glUseProgram(0);
-}
-void Engine::Renderer::Detail::RenderManagement::_passBlurVertical(GLuint texture, float radius,float strengthModifier,std::string channels){
-	GLuint shader = Resources::getShader("Deferred_Blur_Vertical")->getShaderProgram();
-	glUseProgram(shader);
-
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
-	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
-	glUniform1f(glGetUniformLocation(shader,"strengthModifier"), strengthModifier);
-
-	if(channels.find("R") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"R"), 1);
-	else                                        glUniform1i(glGetUniformLocation(shader,"R"), 0);
-	if(channels.find("G") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"G"), 1);
-	else                                        glUniform1i(glGetUniformLocation(shader,"G"), 0);
-	if(channels.find("B") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"B"), 1);
-	else                                        glUniform1i(glGetUniformLocation(shader,"B"), 0);
-	if(channels.find("A") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"A"), 1);
-	else                                        glUniform1i(glGetUniformLocation(shader,"A"), 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
-	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
-
-	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -406,9 +374,12 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	GLuint shader = Resources::getShader("Deferred_Final")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindow()->getSize().x),static_cast<float>(Resources::getWindow()->getSize().y));
-	glm::vec4 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-	glUniform4f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z,ambient.w);
+	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+	glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
+	glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
+
+	glUniform1i( glGetUniformLocation(shader,"HasSSAO"), static_cast<int>(RenderManagement::m_Enabled_SSAO));
+	glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RenderManagement::m_Enabled_Bloom));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -435,7 +406,7 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
 	glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 4 );
 
-	Engine::Renderer::Detail::RenderManagement::_initQuad(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	for(unsigned int i = 0; i < 5; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -443,37 +414,4 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	glUseProgram(0);
-}
-void Engine::Renderer::Detail::RenderManagement::_initQuad(unsigned int width, unsigned int height){
-	//Projection setup
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0,width,0,height,0.1f,2);	
-	
-	//Model setup
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	// Render the quad
-	glLoadIdentity();
-	glColor3f(1,1,1);
-	glTranslatef(0,0,-1);
-	
-	glBegin(GL_QUADS);
-	glTexCoord2f(0,0);
-	glVertex3f(0,0,0);
-	glTexCoord2f(1,0);
-	glVertex3f((float)width,0,0);
-	glTexCoord2f(1,1);
-	glVertex3f((float)width,(float)height,0);
-	glTexCoord2f(0,1);
-	glVertex3f(0,(float)height,0);
-	glEnd();
-
-	//Reset the matrices	
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
 }

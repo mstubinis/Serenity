@@ -22,9 +22,9 @@ class Scene{
 
 		std::string m_Name;
 
-		glm::vec4 m_AmbientLighting;
+		glm::vec3 m_AmbientLighting;
 	public:
-		Scene(std::string name,glm::vec4 = glm::vec4(0.05f,0.05f,0.05f,0.05f));
+		Scene(std::string name,glm::vec3 = glm::vec3(0.01f,0.01f,0.01f));
 		~Scene();
 
 		std::map<std::string,Object*>& getObjects(){ return m_Objects; }
@@ -37,9 +37,9 @@ class Scene{
 		virtual void setName(std::string);
 
 		virtual void update(float);
-		glm::vec4 getAmbientLightColor(){ return m_AmbientLighting; }
-		void setAmbientLightColor(glm::vec4);
-		void setAmbientLightColor(float,float,float,float);
+		glm::vec3 getAmbientLightColor(){ return m_AmbientLighting; }
+		void setAmbientLightColor(glm::vec3);
+		void setAmbientLightColor(float,float,float);
 
 		Skybox* getSkybox() const { return m_Skybox; }
 		void setSkybox(Skybox* s){ m_Skybox = s; }
