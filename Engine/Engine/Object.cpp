@@ -8,6 +8,7 @@
 using namespace Engine;
 
 Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Scene* scene){
+	m_Radius = 0;
 	m_Forward = glm::vec3(0,0,-1);m_Right = glm::vec3(1,0,0);m_Up = glm::vec3(0,1,0);
 
 	m_Parent = nullptr;

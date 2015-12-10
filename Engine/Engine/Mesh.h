@@ -67,6 +67,6 @@ class Mesh{
 		const std::vector<glm::vec3>& getTangents() const { return m_Tangents; }
 		const std::vector<glm::vec3>& getBinormals() const { return m_Binormals; }
 
-		void render();
+		void render(GLuint mode = GL_TRIANGLES);
 };
 #endif

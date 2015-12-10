@@ -32,6 +32,11 @@ class Scene{
 		std::map<std::string,ParticleEmitter*>& getParticleEmitters(){ return m_ParticleEmitters; }
 		std::map<std::string,SunLight*>& getLights(){ return m_Lights; }
 
+		 Object* getObject(std::string name)  { return m_Objects[name]; }
+		 Camera* getCamera(std::string name)  { return m_Cameras[name]; }
+		 ParticleEmitter* getParticleEmitter(std::string name)  { return m_ParticleEmitters[name]; }
+		 SunLight* getLight(std::string name)  { return m_Lights[name]; }
+
 		const std::string getName() const { return m_Name; }
 
 		virtual void setName(std::string);

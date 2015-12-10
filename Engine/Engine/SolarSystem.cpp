@@ -2,6 +2,7 @@
 #include "SolarSystem.h"
 #include "Engine_Resources.h"
 #include "Planet.h"
+#include "Lagrange.h"
 #include "GameCamera.h"
 #include "Ship.h"
 #include "Skybox.h"
@@ -33,9 +34,9 @@ SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 	}
 }
 SolarSystem::~SolarSystem(){
-	for(auto star:m_Stars)    delete star;
-	for(auto planet:m_Planets)delete planet;
-	for(auto moon:m_Moons)    delete moon;
+	for(auto star:m_Stars)    delete star.second;
+	for(auto planet:m_Planets)delete planet.second;
+	for(auto moon:m_Moons)    delete moon.second;
 }
 void SolarSystem::_loadFromFile(std::string filename){
 	unsigned int count = 0;
@@ -55,13 +56,14 @@ void SolarSystem::_loadFromFile(std::string filename){
 			else if(count == 3){//this line has the system's skybox's number of flares
 				new Skybox(skybox,boost::lexical_cast<unsigned int>(line),this);
 			}
-			if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$') && line[1] == ' '){//we got something to work with
+			if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L') && line[1] == ' '){//we got something to work with
 				Planet* planetoid = nullptr;
 
 				std::string token;
 				std::istringstream stream(line);
 
 				std::string NAME;
+				std::string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
 				std::string PARENT = "";
 				float R,G,B,   R1,G1,B1;
 				float ATMOSPHERE_HEIGHT;
@@ -69,9 +71,9 @@ void SolarSystem::_loadFromFile(std::string filename){
 				std::string TYPE;
 				std::string TEXTURE = "Textures/Planets/";
 				std::string MATERIAL_NAME = "";
-				unsigned long long RADIUS;
-				unsigned long long POSITION;
-				unsigned int BREAK;
+				unsigned long long RADIUS = 0;
+				unsigned long long POSITION = 0;
+				unsigned int BREAK = 0;
 
 
 				while(std::getline(stream, token, ' ')) {
@@ -80,7 +82,12 @@ void SolarSystem::_loadFromFile(std::string filename){
 					std::string key = token.substr(0, pos);
 					std::string value = token.substr(pos + 1, std::string::npos);
 
-					if(key == "name")                  NAME = value;
+					if(key == "name"){                  
+						NAME = value;
+						std::replace(NAME.begin(),NAME.end(),'_',' ');
+					}
+					else if(key == "lp1")              LAGRANGE_PLANET_1 = value;
+					else if(key == "lp2")              LAGRANGE_PLANET_2 = value;
 					else if(key == "radius")           RADIUS = stoull(value)*10;
 					else if(key == "r")			       R = stof(value);
 					else if(key == "g")			       G = stof(value);
@@ -131,7 +138,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					if(PARENT != ""){
 						star->setPosition(getObjects()[PARENT]->getPosition()+glm::vec3(xPos,0,zPos));
 					}
-					m_Stars.push_back(star);
+					m_Stars[NAME] = star;
 				}
 				else if(line[0] == 'P'){//Planet
 					PlanetType PLANET_TYPE;
@@ -144,7 +151,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					if(PARENT != ""){
 						planetoid->setPosition(getObjects()[PARENT]->getPosition()+glm::vec3(xPos,0,zPos));
 					}
-					m_Planets.push_back(planetoid);
+					m_Planets[NAME] = planetoid;
 				}
 				else if(line[0] == 'M'){//Moon
 					PlanetType PLANET_TYPE;
@@ -157,7 +164,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					if(PARENT != ""){
 						planetoid->setPosition(getObjects()[PARENT]->getPosition() + glm::vec3(xPos,0,zPos));
 					}
-					m_Moons.push_back(planetoid);
+					m_Moons[NAME] = planetoid;
 				}
 				else if(line[0] == '*'){//Player ship
 					if(PARENT != ""){
@@ -190,6 +197,9 @@ void SolarSystem::_loadFromFile(std::string filename){
 						}
 						planetRings[PARENT].push_back(RingInfo(static_cast<unsigned int>(POSITION/10),static_cast<unsigned int>(RADIUS/10),glm::vec3(R,G,B),BREAK));
 					}
+				}
+				else if(line[0] == 'L'){//Lagrange Point
+					new Lagrange(static_cast<Planet*>(m_Objects[LAGRANGE_PLANET_1]),static_cast<Planet*>(m_Objects[LAGRANGE_PLANET_2]),NAME,this);
 				}
 			}
 		}
@@ -262,7 +272,7 @@ void SolarSystem::_loadRandomly(){
 		posZ = glm::cos(randomDegree) * position;
 
 		star = new Star(starColor,lightColor,glm::vec3(posX,0,posZ),radius,"Star " + boost::lexical_cast<std::string>(1 + i),this);
-		m_Stars.push_back(star);
+		m_Stars["Star " + boost::lexical_cast<std::string>(1 + i)] = star;
 	}
 	#pragma endregion
 
@@ -278,17 +288,17 @@ void SolarSystem::_loadRandomly(){
 	for(auto star:m_Stars){
 		for(auto otherStar:m_Stars){
 			if(star != otherStar){
-				float biggerRadius = glm::max(star->getRadius(),otherStar->getRadius());
-				unsigned long long dist = star->getDistanceLL(otherStar);
+				float biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
+				unsigned long long dist = star.second->getDistanceLL(otherStar.second);
 				if(dist < biggerRadius * 10.0f){
 					allStarsGood = false;
 				}
 			}
 		}
-		biggestRadius = glm::max(star->getRadius(),biggestRadius);
-		starPositions.push_back(star->getPosition());
-		starMasses.push_back(star->getRadius());
-		totalMasses += star->getRadius();
+		biggestRadius = glm::max(star.second->getRadius(),biggestRadius);
+		starPositions.push_back(star.second->getPosition());
+		starMasses.push_back(star.second->getRadius());
+		totalMasses += star.second->getRadius();
 	}
 
 	float numerator1 = 0,numerator2 = 0;
@@ -301,17 +311,17 @@ void SolarSystem::_loadRandomly(){
 
 	while(!allStarsGood){
 		for(auto star:m_Stars){
-			glm::vec3 starPos = star->getPosition();
+			glm::vec3 starPos = star.second->getPosition();
 			glm::vec3 offset = starPos - centerOfMassPosition;
 			glm::vec3 normOffset = glm::normalize(offset);
-			star->setPosition(star->getPosition() + (normOffset*biggestRadius*2.0f));
+			star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*2.0f));
 		}
 		allStarsGood = true;
 		for(auto star:m_Stars){
 			for(auto otherStar:m_Stars){
 				if(star != otherStar){
-					float biggerRadius = glm::max(star->getRadius(),otherStar->getRadius());
-					unsigned long long dist = star->getDistanceLL(otherStar);
+					float biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
+					unsigned long long dist = star.second->getDistanceLL(otherStar.second);
 					if(dist < biggerRadius * 10.0f){
 						allStarsGood = false;
 					}
@@ -365,11 +375,11 @@ void SolarSystem::_loadRandomly(){
 		for(unsigned int i = 0; i < numberOfPlanets; i++){
 			Planet* planet = nullptr;
 
-			float maxPositionAwayFromSun = glm::abs(glm::length(star->getPosition() - centerOfMassPosition));
+			float maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
 			maxPositionAwayFromSun -= (maxPositionAwayFromSun / 4.0f);
 			if(m_Stars.size() == 1)
-				maxPositionAwayFromSun = glm::abs(glm::length(star->getRadius()*2000.0f));
-			float minPositionAwayFromSun = star->getRadius() * 4.0f;
+				maxPositionAwayFromSun = glm::abs(glm::length(star.second->getRadius()*2000.0f));
+			float minPositionAwayFromSun = star.second->getRadius() * 4.0f;
 			float positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
 
 			float posX,posZ;
@@ -396,7 +406,7 @@ void SolarSystem::_loadRandomly(){
 
 			//dist of earth from sun 149,600,000. radius of sun 695,800
 			//planets with atmosphere must be roughly 215 sun radius's away (Earth like) to min 155 away (Venus) and max 327 (Mars)
-			if(positionAwayFromSun > 155 * star->getRadius() && positionAwayFromSun < 327 * star->getRadius()){
+			if(positionAwayFromSun > 155 * star.second->getRadius() && positionAwayFromSun < 327 * star.second->getRadius()){
 				float chance = rand() % 1000 / 1000.0f;
 				if(chance > 0.5f)
 					ATMOSPHERE_HEIGHT = 0.025f;
@@ -443,7 +453,7 @@ void SolarSystem::_loadRandomly(){
 				float G = (rand() % 1000)/1000.0f;
 				float B = (rand() % 1000)/1000.0f;
 				planet->setColor(R,G,B,1);
-				m_Planets.push_back(planet);
+				m_Planets["Planet " + boost::lexical_cast<std::string>(i + 1)] = planet;
 
 				//rings
 				std::vector<RingInfo> rings;

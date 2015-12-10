@@ -7,7 +7,7 @@ class Ship: public ObjectDynamic{
 	protected:
 		bool m_IsWarping;
 		float m_WarpFactor;
-		ObjectDisplay* m_Target;
+		Object* m_Target;
 	public:
 		Ship(
 			std::string,                          //Mesh
@@ -22,8 +22,8 @@ class Ship: public ObjectDynamic{
 
 		void translateWarp(float);
 
-		ObjectDisplay* getTarget() { return m_Target; }
-		virtual void setTarget(ObjectDisplay*);
+		Object* getTarget() { return m_Target; }
+		virtual void setTarget(Object*);
 		virtual void update(float);
 };
 
@@ -43,7 +43,7 @@ class PlayerShip: public Ship{
 		~PlayerShip();
 
 		void update(float);
-		void setTarget(ObjectDisplay*);
+		void setTarget(Object*);
 };
 
 #endif

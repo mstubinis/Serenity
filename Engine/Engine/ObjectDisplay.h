@@ -10,7 +10,6 @@ class ObjectDisplay: public Object{
 		Material* m_Material;
 		glm::vec4 m_Color;
 
-		float m_Radius;
 		glm::vec3 m_BoundingBoxRadius;
 
 		virtual void calculateRadius();
@@ -36,7 +35,6 @@ class ObjectDisplay: public Object{
 		virtual void scale(glm::vec3);
 
 		virtual const glm::vec3& getRadiusBox() const{ return m_BoundingBoxRadius; }
-		virtual const float getRadius() const { return m_Radius; }
 
 		const glm::vec4& getColor() const{ return m_Color; }
 

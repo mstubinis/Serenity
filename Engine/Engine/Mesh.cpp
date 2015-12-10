@@ -311,14 +311,14 @@ void Mesh::_init(){
 	m_radius = glm::max(maxX, glm::max(maxY,maxZ));
 	#pragma endregion
 }
-void Mesh::render(){
+void Mesh::render(GLuint mode){
 	//for each unique vertex data type (position, color, uv, normal, tangent)...
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++){
 		glBindBuffer( GL_ARRAY_BUFFER, m_buffers[i] );
 		glEnableVertexAttribArray(i);
 		glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0, 0);
 	}
-	glDrawArrays(GL_TRIANGLES, 0, m_Points.size());
+	glDrawArrays(mode, 0, m_Points.size());
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)
 		glDisableVertexAttribArray(i);
 }

@@ -28,6 +28,7 @@ class Object{
 		//glm::vec3 m_Position;
 
 		Object* m_Parent;
+		float m_Radius;
 		std::vector<Object*> m_Children;
 	public:
 		Object(
@@ -61,6 +62,8 @@ class Object{
 		virtual void _updateMatrix();
 		virtual void render(Mesh*,Material*,bool=false);
 		virtual void render(bool=false);
+
+		virtual const float getRadius() const { return m_Radius; }
 
 		const glm::quat& getOrientation(){ return m_Orientation; }
 		const glm::vec3 getPosition(){ 

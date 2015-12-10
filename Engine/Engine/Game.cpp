@@ -6,6 +6,7 @@
 #include "HUD.h"
 #include "Ship.h"
 #include "Planet.h"
+#include "Lagrange.h"
 
 using namespace Engine;
 using namespace Engine::Events;
@@ -24,6 +25,7 @@ void Game::initResources(){
 	Resources::addMesh("Akira","Models/akira.obj");
 	Resources::addMesh("Starbase","Models/starbase.obj");
 	Resources::addMesh("Ring","Models/ring.obj");
+	Lagrange::_genBuffers();
 
 	Resources::addMaterial("Star","Textures/Planets/Sun.jpg");
 	Resources::addMaterial("Default","Textures/Planets/Sun.jpg");

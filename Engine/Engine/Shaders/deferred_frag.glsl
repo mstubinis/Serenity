@@ -50,7 +50,10 @@ void main(){
 	}
 	else{
 		gl_FragData[1].rgb = vec3(1.0);
-		gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
+		if(DiffuseMapEnabled == 1)
+			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
+		else
+			gl_FragData[1].a = Object_Color.a;
 		gl_FragData[2].r = BaseGlow;
 	}
 	gl_FragData[3] = vec4(WorldPosition,1.0);

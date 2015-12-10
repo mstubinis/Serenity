@@ -257,3 +257,5 @@ P name=Pluto radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHei
 
 * name=Player parent=Earth position=8000
 $ name=Valiant parent=Player position=2
+
+L name=Earth_Lagrange_Point lp1=Earth lp2=Moon

@@ -27,7 +27,7 @@ void Ship::translateWarp(float amount){
 		m_WarpFactor += amountToAdd * Resources::dt();
 	}
 }
-void Ship::setTarget(ObjectDisplay* target){
+void Ship::setTarget(Object* target){
 	m_Target = target;
 }
 PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
@@ -39,7 +39,7 @@ PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::
 }
 PlayerShip::~PlayerShip(){
 }
-void PlayerShip::setTarget(ObjectDisplay* target){
+void PlayerShip::setTarget(Object* target){
 	Ship::setTarget(target);
 }
 void PlayerShip::update(float dt){

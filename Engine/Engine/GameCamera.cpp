@@ -99,17 +99,17 @@ ObjectDisplay* GameCamera::getObjectInCenterRay(ObjectDisplay* exclusion)
 	return ret;
 }
 void GameCamera::render(){}
-void GameCamera::follow(ObjectDisplay* target){
+void GameCamera::follow(Object* target){
 	m_Target = target;
 	m_Player = target;
 	m_State = CAMERA_STATE_FOLLOW;
 }
-void GameCamera::followTarget(ObjectDisplay* target,ObjectDisplay* player){
+void GameCamera::followTarget(Object* target,Object* player){
 	m_Target = target;
 	m_Player = player;
 	m_State = CAMERA_STATE_FOLLOWTARGET;
 }
-void GameCamera::orbit(ObjectDisplay* target){
+void GameCamera::orbit(Object* target){
 	m_Target = target;
 	m_Player = target;
 	m_State = CAMERA_STATE_ORBIT;

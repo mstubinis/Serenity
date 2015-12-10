@@ -30,28 +30,37 @@ HUD::~HUD(){
 void HUD::update(float dt){
 	if(Keyboard::isKeyDownOnce(",")){
 		SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
+		/*
 		unsigned int totalAmount = scene->getStars().size() +
 								   scene->getPlanets().size() + 
 								   scene->getMoons().size();
-
 		if(m_Player->getTarget() == nullptr)
 			m_Player->setTarget(scene->getStars().at(0));
 		else{
 			m_TargetIterator++;
+
+			ObjectDisplay* target;
+
 			if(scene->getStars().size() > m_TargetIterator){
-				m_Player->setTarget(scene->getStars().at(m_TargetIterator));
+				target = scene->getStars().at(m_TargetIterator);
+				m_Player->setTarget(target);
 			}
 			else if(scene->getStars().size()+scene->getPlanets().size() > m_TargetIterator){
-				m_Player->setTarget(scene->getPlanets().at(m_TargetIterator - scene->getStars().size()));
+				target = scene->getPlanets().at(m_TargetIterator - scene->getStars().size());
+				m_Player->setTarget(target);
 			}
 			else if(scene->getStars().size()+scene->getPlanets().size()+scene->getMoons().size() > m_TargetIterator){
-				m_Player->setTarget(scene->getMoons().at(m_TargetIterator - scene->getStars().size() - scene->getPlanets().size()));
+				target = scene->getMoons().at(m_TargetIterator - scene->getStars().size() - scene->getPlanets().size());
+				m_Player->setTarget(target);
 			}
 			else{
 				m_Player->setTarget(scene->getStars().at(0));
 				m_TargetIterator = 0;
 			}
 		}
+		*/
+		Object* target = scene->getObject("Earth Lagrange Point");
+		m_Player->setTarget(target);
 
 	}
 	else if(Keyboard::isKeyDownOnce(".")){
