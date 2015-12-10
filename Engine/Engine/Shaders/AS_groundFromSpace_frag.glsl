@@ -39,6 +39,9 @@ void main(){
 			vec4 diffuse = texture2D(DiffuseMap, UV) * Object_Color;
 			gl_FragData[0].rgb = max(gAmbientColor*diffuse.xyz,(1.0 - exp( -fExposure * ((c0+diffuse.xyz) * c1) )));
 			gl_FragData[0].a = 1.0;
+			if(GlowMapEnabled == 1){
+				gl_FragData[0].rgb = max(gl_FragData[0].rgb, (vec3(1.0)-gl_FragData[0].rgb)*texture2D(GlowMap, UV).rgb );
+			}
 		}
 		else{
 			gl_FragData[0] = vec4(0.0);

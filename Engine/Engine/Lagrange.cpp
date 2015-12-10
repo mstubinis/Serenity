@@ -182,7 +182,6 @@ void Lagrange::_calculateLagrangePosition(){
     rot[2][2] = unitVector.z;
 	this->m_Orientation = glm::quat_cast(rot);
 
-
 	unitVector *= distanceOfL1FromP1;
 	position = glm::vec3(p1->getPosition() + unitVector);
 	setPosition(position);
