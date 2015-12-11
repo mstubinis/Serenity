@@ -15,13 +15,6 @@
 #include <SFML/System.hpp>
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
-
-	#ifdef ENGINE_DEBUG
-	Engine::Renderer::Detail::RenderManagement::m_DrawDebug = true;
-	#else
-	Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
-	#endif
-
 	srand(static_cast<unsigned int>(time(NULL)));
 	_initWindow(name,width,height);
 	_initGame();

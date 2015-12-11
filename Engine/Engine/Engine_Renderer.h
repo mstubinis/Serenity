@@ -57,6 +57,30 @@ struct FontRenderInfo: public TextureRenderInfo{
 
 namespace Engine{
 	namespace Renderer{
+		struct RendererInfo{
+			static bool ssao;
+			static unsigned int ssao_samples;
+			static float ssao_bias;
+			static float ssao_scale;
+			static float ssao_radius;
+			static float ssao_intensity;
+
+			static bool bloom;
+			static bool lighting;
+			static bool debug;
+		};
+		namespace Settings{
+			static void setSSAOIntensity(float i){ Renderer::RendererInfo::ssao_intensity = i; }
+			static void setSSAORadius(float r){ Renderer::RendererInfo::ssao_radius = r; }
+			static void setSSAOScale(float s){ Renderer::RendererInfo::ssao_scale = s; }
+			static void setSSAOBias(float b){ Renderer::RendererInfo::ssao_bias = b; }
+			static void setSSAOSamples(unsigned int s){ Renderer::RendererInfo::ssao_samples = s; }
+
+			static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
+			static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }
+			static void enableSSAO(bool enabled = true){ Renderer::RendererInfo::ssao = enabled;  }
+			static void enableDebugDrawing(bool enabled = true){ Renderer::RendererInfo::debug = enabled;  }
+		};
 		namespace Detail{
 			class RenderManagement{
 				private:
@@ -73,8 +97,7 @@ namespace Engine{
 					static void _geometryPass();
 					static void _lightingPass();
 
-					static void _passLighting();
-					static void _passSSAO(unsigned int sampleCount, float intensity, float bias, float radius, float scale);
+					static void _passSSAO();
 					static void _passEdge(GLuint texture,float radius = 1.0f);
 					static void _passBloom(GLuint texture,GLuint texture1);
 					static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
@@ -82,10 +105,6 @@ namespace Engine{
 				public:
 					static GBuffer* m_gBuffer;
 					static Texture* RandomMapSSAO;
-					static bool m_DrawDebug;
-
-					static bool m_Enabled_Bloom;
-					static bool m_Enabled_SSAO;
 
 					static void render();
 
@@ -131,9 +150,6 @@ namespace Engine{
 				glPopMatrix();
 			}
 		};
-		static bool isDebug(){ return Detail::RenderManagement::m_DrawDebug; }
-		static void drawDebug(bool b){ Detail::RenderManagement::m_DrawDebug = b; }
-
 		void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
 	};
 };

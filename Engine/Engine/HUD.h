@@ -24,7 +24,7 @@ class HUD{
 		~HUD();
 
 		void update(float);
-		void render(bool debug=false);
+		void render(bool=false);
 
 		const glm::vec3 getColor() const { return m_Color; }
 		void setColor(glm::vec3 c){ m_Color = c; }

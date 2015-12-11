@@ -6,6 +6,7 @@ uniform sampler2D gNormalMap;
 uniform sampler2D gGlowMap;
 uniform sampler2D gBloomMap;
 
+uniform int HasLighting;
 uniform int HasSSAO;
 uniform int HasBloom;
 
@@ -20,32 +21,30 @@ void main(){
 	vec4 lighting = texture2D(gLightMap, texCoords);
 	vec4 normals = texture2D(gNormalMap,texCoords);
 	float glow = texture2D(gGlowMap, texCoords).r;
-	vec4 bloom = texture2D(gBloomMap,texCoords);
 
 	if(normals.r > 0.9999 && normals.g > 0.9999 && normals.b > 0.9999){
-
 		if(HasBloom == 1){
+			vec4 bloom = texture2D(gBloomMap,texCoords);
 			image += bloom;
 		}
-
 		gl_FragColor = image;
 	}
 	else{
-
 		if(HasSSAO == 1){
 			float ssao = texture2D(gGlowMap, texCoords).g;
 			lighting *= ssao;
 		}
+		vec4 imageLight = image;
 		vec4 step2 = max(vec4(glow),lighting);
 		vec4 light = max(vec4(gAmbientColor,1),step2);
-
-		//make the specular part of the lighting "stand out"
-		float specLight = pow(lighting.r,8);
-
-		vec4 imageLight = (image * light)+(specLight*0.5);
-
+		if(HasLighting == 1){
+			imageLight *= light;
+			float specLight = pow(lighting.r,8);
+			imageLight += specLight*0.5;
+		}
 		vec4 illumination = glow*image;
 		if(HasBloom == 1){
+			vec4 bloom = texture2D(gBloomMap,texCoords);
 			illumination = max((bloom*(1.0-light)), illumination);
 		}
 		gl_FragColor = imageLight+illumination;

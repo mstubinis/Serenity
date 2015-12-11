@@ -50,5 +50,5 @@ void Game::update(float dt){
 	m_HUD->update(dt);
 }
 void Game::render(){
-	m_HUD->render(Engine::Renderer::isDebug());
+	m_HUD->render(Engine::Renderer::RendererInfo::debug);
 }

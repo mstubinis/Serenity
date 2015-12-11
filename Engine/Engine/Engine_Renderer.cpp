@@ -19,9 +19,17 @@
 
 using namespace Engine;
 
-bool Engine::Renderer::Detail::RenderManagement::m_DrawDebug = false;
-bool Engine::Renderer::Detail::RenderManagement::m_Enabled_Bloom = true;
-bool Engine::Renderer::Detail::RenderManagement::m_Enabled_SSAO = true;
+bool Renderer::RendererInfo::ssao = true;
+unsigned int Renderer::RendererInfo::ssao_samples = 4;
+float Renderer::RendererInfo::ssao_scale = 1.2f;
+float Renderer::RendererInfo::ssao_intensity = 2.9f;
+float Renderer::RendererInfo::ssao_bias = 0.01f;
+float Renderer::RendererInfo::ssao_radius = 0.7f;
+
+bool Renderer::RendererInfo::bloom = true;
+bool Renderer::RendererInfo::lighting = true;
+bool Renderer::RendererInfo::debug = false;
+
 Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 
@@ -37,6 +45,12 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 	Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = new Texture("Textures/SSAONormal.png");
 	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
+	#ifdef ENGINE_DEBUG
+	Renderer::RendererInfo::debug = true;
+	#else
+	Renderer::RendererInfo::debug = false;
+	#endif
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 }
@@ -49,13 +63,13 @@ void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float wid
 }
 void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
 	for(auto item:m_ObjectsToBeRendered){
-		item.object->draw(item.mesh,item.material,item.shader,m_DrawDebug);
+		item.object->draw(item.mesh,item.material,item.shader,RendererInfo::debug);
 	}
 	m_ObjectsToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
 	for(auto item:m_ForegroundObjectsToBeRendered){
-		item.object->draw(item.mesh,item.material,item.shader,m_DrawDebug);
+		item.object->draw(item.mesh,item.material,item.shader,RendererInfo::debug);
 	}
 	m_ForegroundObjectsToBeRendered.clear();
 }
@@ -154,7 +168,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
 	Scene* s = Resources::getCurrentScene();
 	s->renderSkybox();
 	for(auto object:s->getObjects()){
-		object.second->render(0,m_DrawDebug);
+		object.second->render(0,RendererInfo::debug);
 	}
 	_renderObjects();
 
@@ -192,65 +206,11 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
     glDisable(GL_DEPTH_TEST);
 }
 void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
-
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
     glClear(GL_COLOR_BUFFER_BIT);
-	Engine::Renderer::Detail::RenderManagement::_passLighting();
 
-}
-void Engine::Renderer::Detail::RenderManagement::render(){
-
-	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
-	Engine::Renderer::Detail::RenderManagement::_geometryPass();
-	m_gBuffer->stop();
-
-	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
-	Engine::Renderer::Detail::RenderManagement::_lightingPass();
-	m_gBuffer->stop();
-
-	if(Engine::Renderer::Detail::RenderManagement::m_Enabled_SSAO){
-		//only write to the G channel of the glow buffer for SSAO pass
-		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-		Engine::Renderer::Detail::RenderManagement::_passSSAO(1.0f,2.9f,0.01f,0.7f,1.2f);
-		m_gBuffer->stop();
-
-		//only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
-		m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
-		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
-		m_gBuffer->stop();
-		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,1.0f,1.0f,"G");
-		m_gBuffer->stop();
-	}
-	if(Engine::Renderer::Detail::RenderManagement::m_Enabled_Bloom){
-		glDisable(GL_BLEND);
-		m_gBuffer->start(BUFFER_TYPE_BLOOM);
-		Engine::Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
-		m_gBuffer->stop();
-
-		m_gBuffer->start(BUFFER_TYPE_FREE1);
-		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.42f,3.8f);
-		m_gBuffer->stop();
-		m_gBuffer->start(BUFFER_TYPE_BLOOM);
-		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.42f,3.8f);
-		m_gBuffer->stop();
-	}
-	Engine::Renderer::Detail::RenderManagement::_passFinal();
-
-	glEnable(GL_BLEND);
-	if(m_DrawDebug)
-		Physics::Detail::PhysicsManagement::render();
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glDisable(GL_DEPTH_TEST);
-	_renderForegroundObjects();
-	Engine::Renderer::Detail::RenderManagement::_renderTextures();
-	Engine::Renderer::Detail::RenderManagement::_renderText();
-	glEnable(GL_DEPTH_TEST);
-}
-void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();
 	glm::vec3 camPos = Resources::getActiveCamera()->getPosition();
 	glUseProgram(shader);
@@ -280,18 +240,67 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	}
 	glUseProgram(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passSSAO(unsigned int sampleCount, float intensity, float bias, float radius, float scale){
-	//glClear(GL_COLOR_BUFFER_BIT);
+void Engine::Renderer::Detail::RenderManagement::render(){
 
+	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
+	Engine::Renderer::Detail::RenderManagement::_geometryPass();
+	m_gBuffer->stop();
+
+	if(RendererInfo::lighting){
+		m_gBuffer->start(BUFFER_TYPE_LIGHTING);
+		Engine::Renderer::Detail::RenderManagement::_lightingPass();
+		m_gBuffer->stop();
+	}
+	if(RendererInfo::ssao){
+		//only write to the G channel of the glow buffer for SSAO pass
+		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
+		Engine::Renderer::Detail::RenderManagement::_passSSAO();
+		m_gBuffer->stop();
+
+		//only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
+		m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_GLOW,1.0f,1.0f,"G");
+		m_gBuffer->stop();
+		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,1.0f,1.0f,"G");
+		m_gBuffer->stop();
+	}
+	if(RendererInfo::bloom){
+		glDisable(GL_BLEND);
+		m_gBuffer->start(BUFFER_TYPE_BLOOM);
+		Engine::Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
+		m_gBuffer->stop();
+
+		m_gBuffer->start(BUFFER_TYPE_FREE1);
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.42f,3.8f);
+		m_gBuffer->stop();
+		m_gBuffer->start(BUFFER_TYPE_BLOOM);
+		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.42f,3.8f);
+		m_gBuffer->stop();
+	}
+	Engine::Renderer::Detail::RenderManagement::_passFinal();
+
+	glEnable(GL_BLEND);
+	if(RendererInfo::debug)
+		Physics::Detail::PhysicsManagement::render();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDisable(GL_DEPTH_TEST);
+	_renderForegroundObjects();
+	Engine::Renderer::Detail::RenderManagement::_renderTextures();
+	Engine::Renderer::Detail::RenderManagement::_renderText();
+	glEnable(GL_DEPTH_TEST);
+}
+void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
 	glUseProgram(shader);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
-	glUniform1f(glGetUniformLocation(shader,"gIntensity"), intensity);
-	glUniform1f(glGetUniformLocation(shader,"gBias"), bias);
-	glUniform1f(glGetUniformLocation(shader,"gRadius"),radius);
-	glUniform1f(glGetUniformLocation(shader,"gScale"), scale);
-	glUniform1i(glGetUniformLocation(shader,"gSampleCount"), sampleCount);
+	glUniform1f(glGetUniformLocation(shader,"gIntensity"), RendererInfo::ssao_intensity);
+	glUniform1f(glGetUniformLocation(shader,"gBias"), RendererInfo::ssao_bias);
+	glUniform1f(glGetUniformLocation(shader,"gRadius"),RendererInfo::ssao_radius);
+	glUniform1f(glGetUniformLocation(shader,"gScale"), RendererInfo::ssao_scale);
+	glUniform1i(glGetUniformLocation(shader,"gSampleCount"), RendererInfo::ssao_samples);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -406,8 +415,9 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
 	glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
-	glUniform1i( glGetUniformLocation(shader,"HasSSAO"), static_cast<int>(RenderManagement::m_Enabled_SSAO));
-	glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RenderManagement::m_Enabled_Bloom));
+	glUniform1i( glGetUniformLocation(shader,"HasLighting"), static_cast<int>(RendererInfo::lighting));
+	glUniform1i( glGetUniformLocation(shader,"HasSSAO"), static_cast<int>(RendererInfo::ssao));
+	glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::bloom));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
