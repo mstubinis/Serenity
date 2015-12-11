@@ -18,21 +18,21 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, g
 ObjectDisplay::~ObjectDisplay()
 {
 }
-void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug){
-	if(mesh == nullptr || m_Visible == false)
-		return;
-	Camera* activeCamera = Resources::getActiveCamera();
-	if(!activeCamera->sphereIntersectTest(this))
-		return;
-	if(activeCamera->getDistance(this) > 1100 * getRadius())
-		return;
-
-	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
-
+void ObjectDisplay::render(Mesh* mesh,Material* material,GLuint shader,bool debug){
+	//add to render queue
+	if(shader == 0){
+		shader = Resources::getShader("Deferred")->getShaderProgram();
+	}
+	Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,mesh,material,shader));
+}
+void ObjectDisplay::draw(Mesh* mesh, Material* material, GLuint shader, bool debug){
+	Camera* camera = Resources::getActiveCamera();
+	if((mesh == nullptr || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
+		return;	
 	glUseProgram(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
+	glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
@@ -43,6 +43,7 @@ void ObjectDisplay::render(Mesh* mesh,Material* material,bool debug){
 	for(auto component:material->getComponents())
 		material->bindTexture(component.first,shader);
 	mesh->render();
+	glUseProgram(0);
 }
 void ObjectDisplay::calculateRadius(){
 	if(m_Mesh == nullptr){
@@ -52,7 +53,7 @@ void ObjectDisplay::calculateRadius(){
 	m_BoundingBoxRadius = m_Mesh->getRadius() * m_Scale;
 	m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
 }
-void ObjectDisplay::render(bool debug){ render(m_Mesh,m_Material,debug); }
+void ObjectDisplay::render(GLuint shader,bool debug){ render(m_Mesh,m_Material,shader,debug); }
 void ObjectDisplay::setColor(float x, float y, float z,float a){ 
 	m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; 
 }
@@ -73,9 +74,6 @@ void ObjectDisplay::scale(float x, float y,float z){
 	calculateRadius(); 
 }
 void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z); }
-void ObjectDisplay::_updateMatrix(){
-	Object::_updateMatrix();
-}
 bool ObjectDisplay::rayIntersectSphere(Camera* cam){
 	return cam->rayIntersectSphere(this);
 }

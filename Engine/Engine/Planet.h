@@ -18,7 +18,12 @@ struct RingInfo{
 	unsigned int size;
 	unsigned int alphaBreakpoint;
 	glm::vec3 color;
-	RingInfo(unsigned int p, unsigned int s, glm::vec3 col,unsigned int ab = 1){ position = p; size = s; color = col; alphaBreakpoint = ab; }
+	RingInfo(unsigned int p, unsigned int s, glm::vec3 col,unsigned int ab = 1){ 
+		position = p; 
+		size = s; 
+		color = col; 
+		alphaBreakpoint = ab; 
+	}
 };
 
 class Planet: public ObjectDisplay{
@@ -30,7 +35,7 @@ class Planet: public ObjectDisplay{
 		Planet(
 				std::string = "",               //Material
 				PlanetType = PLANET_TYPE_ROCKY, //Type
-			    glm::vec3 = glm::vec3(0,0,0),   //Position
+			    glm::vec3 = glm::vec3(0),       //Position
 			    float = 1,                      //Radius
 			    std::string = "Planet",         //Name
 				float = 0,                      //Atmosphere size
@@ -43,9 +48,9 @@ class Planet: public ObjectDisplay{
 
 		void addRing(Ring*);
 
-		virtual void update(float);
-		virtual void render(Mesh*, Material*,bool=false);
-		virtual void render(bool=false);
+		void update(float);
+		virtual void render(Mesh*, Material*,GLuint,bool=false);
+		void draw(Mesh*, Material*,GLuint,bool=false);
 };
 
 class Star: public Planet{
@@ -61,9 +66,7 @@ class Star: public Planet{
 				Scene* = nullptr
 			);
 		~Star();
-
-		void render(Mesh*, Material*,bool=false);
-		void render(bool=false);
+		void render(Mesh*, Material*,GLuint,bool=false);
 };
 
 class Ring{
@@ -76,7 +79,6 @@ class Ring{
 		~Ring();
 
 		void update(float);
-		void render();
+		void draw(GLuint shader);
 };
-
 #endif

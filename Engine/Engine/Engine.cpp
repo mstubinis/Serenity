@@ -132,7 +132,7 @@ void Engine::EngineClass::_update(float dt){
 }
 void Engine::EngineClass::_render(){
 	game->render();
-	Engine::Renderer::Detail::RenderManagement::render(Engine::Renderer::isDebug());
+	Engine::Renderer::Detail::RenderManagement::render();
 }
 #pragma region Event Handler Methods
 void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height){

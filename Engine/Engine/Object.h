@@ -60,16 +60,14 @@ class Object{
 
 		virtual void update(float);
 		virtual void _updateMatrix();
-		virtual void render(Mesh*,Material*,bool=false);
-		virtual void render(bool=false);
+		virtual void render(Mesh*,Material*,GLuint shader=0,bool=false);
+		virtual void render(GLuint shader=0,bool=false);
+		virtual void draw(Mesh*,Material*,GLuint shader,bool=false);
 
 		virtual const float getRadius() const { return m_Radius; }
 
 		const glm::quat& getOrientation(){ return m_Orientation; }
-		const glm::vec3 getPosition(){ 
-			//m_Position = glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]);
-			return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); 
-		}
+		const glm::vec3 getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 		const glm::vec3& getScale() const{ return m_Scale; }
 		const glm::vec3& getForward() const{ return m_Forward; }
 		const glm::vec3& getRight() const{ return m_Right; }

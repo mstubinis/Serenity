@@ -32,8 +32,8 @@ class Lagrange: public Object{
 		}
 
 		void update(float);
-		void render(Mesh*, Material*,bool=false);
-		void render(bool=false);
+		void render(GLuint=0, bool=false);
+		void draw(Mesh*, Material*,GLuint=0,bool=false);
 };
 
 #endif

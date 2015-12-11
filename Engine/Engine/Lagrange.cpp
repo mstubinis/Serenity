@@ -189,21 +189,21 @@ void Lagrange::_calculateLagrangePosition(){
 void Lagrange::update(float dt){
 	Object::update(dt);
 }
-void Lagrange::render(Mesh* mesh, Material* mat,bool debug){
-	if(m_Visible == false)
-		return;
-	Camera* activeCamera = Resources::getActiveCamera();
-	if(!activeCamera->sphereIntersectTest(this->getPosition(),m_Radius))
-		return;
-	if(activeCamera->getDistance(this) > 1100 * m_Radius)
-		return;
-
-	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
-
+void Lagrange::render(GLuint shader, bool debug){
+	//add to render queue
+	if(shader == 0){
+		shader = Resources::getShader("Deferred")->getShaderProgram();
+	}
+	Engine::Renderer::Detail::RenderManagement::getForegroundObjectRenderQueue().push_back(GeometryRenderInfo(this,nullptr,nullptr,shader));
+}
+void Lagrange::draw(Mesh* mesh, Material* mat,GLuint shader, bool debug){
+	Camera* camera = Resources::getActiveCamera();
+	if((m_Visible == false) || (!camera->sphereIntersectTest(this->getPosition(),this->getRadius())) || (camera->getDistance(this) > 1100 * getRadius()))
+		return;	
 	glUseProgram(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
+	glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
@@ -248,7 +248,4 @@ void Lagrange::render(Mesh* mesh, Material* mat,bool debug){
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 	glUseProgram(0);
-}
-void Lagrange::render(bool debug){
-	Lagrange::render(nullptr,nullptr,debug);
 }

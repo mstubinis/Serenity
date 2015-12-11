@@ -23,7 +23,11 @@ void Planet::update(float dt){
 	for(auto ring:m_Rings)
 		ring->update(dt);
 }
-void Planet::render(Mesh* mesh, Material* mat,bool debug){
+void Planet::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){
+	shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
+	ObjectDisplay::render(mesh,mat,shader,debug);
+}
+void Planet::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){
 	bool renderPlanet = true;
 	if(mesh == nullptr || !Resources::getActiveCamera()->sphereIntersectTest(this))
 		renderPlanet = false;
@@ -33,8 +37,6 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 
 	if(renderPlanet){
 		#pragma region Ground
-			GLuint shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
-
 			float innerRadius = m_Radius;
 			float outerRadius = innerRadius + (innerRadius * m_AtmosphereHeight);
 
@@ -181,12 +183,17 @@ void Planet::render(Mesh* mesh, Material* mat,bool debug){
 
 		#pragma endregion
 	}
-
+	shader = Resources::getShader("Deferred")->getShaderProgram();
+	glUseProgram(shader);
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for(auto ring:m_Rings)
-		ring->render();
+		ring->draw(shader);
+	glDisable(GL_BLEND);
+	glUseProgram(0);
 
 }
-void Planet::render(bool debug){ render(m_Mesh,m_Material,debug); }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
 	m_Light = new SunLight(glm::vec3(0,0,0),name + " Light",LIGHT_TYPE_SUN,scene);
@@ -200,12 +207,9 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, s
 Star::~Star(){
 	delete m_Light;
 }
-void Star::render(Mesh* mesh, Material* mat,bool debug){
-	ObjectDisplay::render(mesh,mat,debug);
+void Star::render(Mesh* mesh,Material* material,GLuint shader,bool debug){
+	ObjectDisplay::render(mesh,material,shader,debug);
 }
-void Star::render(bool debug){ Star::render(m_Mesh,m_Material,debug); }
-
-
 Ring::Ring(std::vector<RingInfo> rings,Planet* parent){
 	m_Parent = parent;
 	_makeRingImage(rings,parent);
@@ -305,19 +309,11 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 }
 void Ring::update(float dt){
 }
-void Ring::render(){
+void Ring::draw(GLuint shader){
 	Camera* activeCamera = Resources::getActiveCamera();
 	glm::mat4 model = m_Parent->getModel();
 	Mesh* mesh = Resources::getMesh("Ring");
 	float radius = mesh->getRadius() * m_Parent->getScale().x;
-
-	glEnable(GL_BLEND);
-	glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
-
-	glUseProgram(shader);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
 	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
@@ -332,6 +328,4 @@ void Ring::render(){
 	for(auto component:material->getComponents())
 		material->bindTexture(component.first,shader);
 	mesh->render();
-	glUseProgram(0);
-	glDisable(GL_BLEND);
 }

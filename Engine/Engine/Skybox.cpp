@@ -43,6 +43,9 @@ Skybox::Skybox(std::string name,unsigned int numSunFlares,Scene* scene){
 			m_SunFlares.push_back(flare);
 		}
 	}
+	m_Model = glm::mat4(1);
+	m_Model = glm::translate(m_Model, Resources::getActiveCamera()->getPosition());
+	m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
 
 	if(scene == nullptr) scene = Resources::getCurrentScene();
 	if(scene->getSkybox() == nullptr)
@@ -52,9 +55,10 @@ Skybox::~Skybox(){
 	delete m_Texture;
 }
 void Skybox::_updateMatrix(){
-	m_Model = glm::mat4(1);
-	m_Model = glm::translate(m_Model, Resources::getActiveCamera()->getPosition());
-	m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
+	glm::vec3 p = Resources::getActiveCamera()->getPosition();
+	m_Model[3][0] = p.x;
+	m_Model[3][1] = p.y;
+	m_Model[3][2] = p.z;
 }
 
 glm::vec2 Skybox::getScreenCoordinates(glm::vec3 objPos){

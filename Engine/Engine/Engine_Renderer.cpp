@@ -25,6 +25,9 @@ bool Engine::Renderer::Detail::RenderManagement::m_Enabled_SSAO = true;
 Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 
+std::vector<GeometryRenderInfo> _getRenderObjectsDefault(){ std::vector<GeometryRenderInfo> k; return k; }
+std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ObjectsToBeRendered = _getRenderObjectsDefault();
+std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered = _getRenderObjectsDefault();
 std::vector<FontRenderInfo> _getRenderFontsDefault(){ std::vector<FontRenderInfo> k; return k; }
 std::vector<FontRenderInfo> Engine::Renderer::Detail::RenderManagement::m_FontsToBeRendered = _getRenderFontsDefault();
 std::vector<TextureRenderInfo> _getRenderTexturesDefault(){ std::vector<TextureRenderInfo> k; return k; }
@@ -44,7 +47,22 @@ void Engine::Renderer::Detail::RenderManagement::destruct(){
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
 	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
 }
+void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
+	for(auto item:m_ObjectsToBeRendered){
+		item.object->draw(item.mesh,item.material,item.shader,m_DrawDebug);
+	}
+	m_ObjectsToBeRendered.clear();
+}
+void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
+	for(auto item:m_ForegroundObjectsToBeRendered){
+		item.object->draw(item.mesh,item.material,item.shader,m_DrawDebug);
+	}
+	m_ForegroundObjectsToBeRendered.clear();
+}
+
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	for(auto item:m_TexturesToBeRendered){
@@ -84,6 +102,8 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 	m_TexturesToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_renderText(){
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	for(auto item:m_FontsToBeRendered){
@@ -124,7 +144,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 	glUseProgram(0);
 	m_FontsToBeRendered.clear();
 }
-void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
+void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0,1,0,1);
@@ -133,27 +153,31 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 
 	Scene* s = Resources::getCurrentScene();
 	s->renderSkybox();
-
 	for(auto object:s->getObjects()){
-		object.second->render(debug);
+		object.second->render(0,m_DrawDebug);
 	}
+	_renderObjects();
+
 
 	//render particles
-	//glDepthMask(GL_FALSE);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
-	//glUseProgram(shader);
-	//for(auto emitter:s->getParticleEmitters()){
-		//for(auto particle:emitter.second->getParticles()){
-			//particle.render(shader);
-		//}
-	//}
-	//glUseProgram(0);
-	//glDisable(GL_BLEND);
-	//glDepthMask(GL_TRUE);
+	/*
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
+	glUseProgram(shader);
+	for(auto emitter:s->getParticleEmitters()){
+		for(auto particle:emitter.second->getParticles()){
+			particle.render(shader);
+		}
+	}
+	glUseProgram(0);
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);
+	*/
 
-	if(debug){
+	/*
+	if(m_DrawDebug){
 		GLuint shader = Resources::getShader("Deferred")->getShaderProgram();
 		glUseProgram(shader);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
@@ -163,6 +187,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(bool debug){
 		}
 		glUseProgram(0);
 	}
+	*/
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
 }
@@ -175,10 +200,10 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	Engine::Renderer::Detail::RenderManagement::_passLighting();
 
 }
-void Engine::Renderer::Detail::RenderManagement::render(bool debug){
+void Engine::Renderer::Detail::RenderManagement::render(){
 
 	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
-	Engine::Renderer::Detail::RenderManagement::_geometryPass(debug);
+	Engine::Renderer::Detail::RenderManagement::_geometryPass();
 	m_gBuffer->stop();
 
 	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
@@ -215,12 +240,15 @@ void Engine::Renderer::Detail::RenderManagement::render(bool debug){
 	Engine::Renderer::Detail::RenderManagement::_passFinal();
 
 	glEnable(GL_BLEND);
-	if(debug)
+	if(m_DrawDebug)
 		Physics::Detail::PhysicsManagement::render();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glDisable(GL_DEPTH_TEST);
+	_renderForegroundObjects();
 	Engine::Renderer::Detail::RenderManagement::_renderTextures();
 	Engine::Renderer::Detail::RenderManagement::_renderText();
+	glEnable(GL_DEPTH_TEST);
 }
 void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();

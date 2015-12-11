@@ -12,7 +12,20 @@ class GBuffer;
 class Texture;
 class Mesh;
 class Material;
+class Object;
 
+struct GeometryRenderInfo{
+	Object* object;
+	Mesh* mesh;
+	Material* material;
+	GLuint shader;
+	GeometryRenderInfo(Object* _object,Mesh* _mesh, Material* _material, GLuint _shader){
+		object = _object;
+		mesh = _mesh;
+		material = _material;
+		shader = _shader;
+	}
+};
 struct TextureRenderInfo{
 	std::string texture;
 	glm::vec2 pos;
@@ -49,13 +62,15 @@ namespace Engine{
 				private:
 					static std::vector<FontRenderInfo> m_FontsToBeRendered;
 					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
+					static std::vector<GeometryRenderInfo> m_ObjectsToBeRendered;
+					static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
 
-					static void _initQuad(unsigned int width, unsigned int height);
-
+					static void _renderObjects();
+					static void _renderForegroundObjects();
 					static void _renderText();
 					static void _renderTextures();
 
-					static void _geometryPass(bool debug);
+					static void _geometryPass();
 					static void _lightingPass();
 
 					static void _passLighting();
@@ -72,11 +87,13 @@ namespace Engine{
 					static bool m_Enabled_Bloom;
 					static bool m_Enabled_SSAO;
 
-					static void render(bool debug=false);
+					static void render();
 
 					static void init();
 					static void destruct();
 
+					static std::vector<GeometryRenderInfo>& getForegroundObjectRenderQueue(){ return m_ForegroundObjectsToBeRendered; }
+					static std::vector<GeometryRenderInfo>& getObjectRenderQueue(){ return m_ObjectsToBeRendered; }
 					static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
 					static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
 			};

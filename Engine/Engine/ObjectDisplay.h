@@ -24,9 +24,9 @@ class ObjectDisplay: public Object{
 					 );
 		~ObjectDisplay();
 
-		virtual void _updateMatrix();
-		virtual void render(Mesh*, Material*,bool=false);
-		virtual void render(bool=false);
+		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
+		virtual void render(GLuint=0,bool=false);
+		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
 
 		virtual void setColor(float,float,float,float); 
 		virtual void setColor(glm::vec4);
