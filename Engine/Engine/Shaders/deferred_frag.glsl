@@ -8,6 +8,7 @@ uniform int Shadeless;
 uniform float far;
 uniform float C;
 uniform float BaseGlow;
+uniform float Specularity;
 
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
@@ -56,6 +57,7 @@ void main(){
 			gl_FragData[1].a = Object_Color.a;
 		gl_FragData[2].r = BaseGlow;
 	}
+	gl_FragData[2].b = Specularity;
 	gl_FragData[3] = vec4(WorldPosition,1.0);
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

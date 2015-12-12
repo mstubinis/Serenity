@@ -39,6 +39,7 @@ void ObjectDisplay::draw(Mesh* mesh, Material* material, GLuint shader, bool deb
 
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
 	glUniform1f(glGetUniformLocation(shader, "BaseGlow"),material->getBaseGlow());
+	glUniform1f(glGetUniformLocation(shader, "Specularity"),material->getSpecularity());
 
 	for(auto component:material->getComponents())
 		material->bindTexture(component.first,shader);

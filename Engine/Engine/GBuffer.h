@@ -6,7 +6,7 @@
 const int GBUFFER_TYPES[] =		       {GL_RGBA8,		       // (diffuse.rgba)
 									    GL_RGBA8,			   // (diffuse forward rendering.rgba)
 								        GL_RGBA16F,		       // (normals.rgba)
-										GL_RG8,			       // Glow & SSAO
+										GL_RGB8,			   // Glow & SSAO & Specular
 										GL_RGB32F,			   // World Position
 								        GL_RGB8,		       // (lighting.rgb)
 										GL_RGBA8,              // bloom
@@ -16,7 +16,7 @@ const int GBUFFER_TYPES[] =		       {GL_RGBA8,		       // (diffuse.rgba)
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)
 										GL_RGBA,			   // (diffuse forward rendering.rgba)
 							            GL_RGBA,			   // (normals.rgba)
-										GL_RG,			       // Glow & SSAO
+										GL_RGB,			       // Glow & SSAO & Specular
 										GL_RGB,				   // World Position
 								        GL_RGB,			       // (lighting.rgb)
 								        GL_RGBA,			   // bloom

@@ -74,32 +74,6 @@ void Engine::EngineClass::_initGame(){
 	//glGenVertexArrays( 1, &m_vao );
 	//glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
 }
-void Engine::EngineClass::_EVENT_HANDLERS(sf::Event e){
-	switch (e.type){
-        case sf::Event::Closed:
-			_EVENT_CLOSE();break;
-        case sf::Event::KeyReleased:
-			_EVENT_KEY_RELEASED(e.key);break;
-        case sf::Event::KeyPressed:
-			_EVENT_KEY_PRESSED(e.key);break;
-		case sf::Event::MouseButtonPressed:
-			_EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
-		case sf::Event::MouseButtonReleased:
-			_EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
-		case sf::Event::MouseEntered:
-			_EVENT_MOUSE_ENTERED();break;
-		case sf::Event::MouseLeft:
-			_EVENT_MOUSE_LEFT();break;
-		case sf::Event::MouseWheelMoved:
-			_EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
-		case sf::Event::MouseMoved:
-			_EVENT_MOUSE_MOVED(e.mouseMove);break;
-		case sf::Event::Resized:
-			_EVENT_RESIZE(e.size.width,e.size.height);break;
-		case sf::Event::TextEntered:
-			_EVENT_TEXT_ENTERED(e.text);break;
-    }
-}
 void Engine::EngineClass::_RESET_EVENTS(){
 	Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
 	Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
@@ -142,16 +116,13 @@ void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)
 void Engine::EngineClass::_EVENT_CLOSE(){
 
 }
-void Engine::EngineClass::_EVENT_LOST_FOCUS()
-{
+void Engine::EngineClass::_EVENT_LOST_FOCUS(){
 	Resources::getWindow()->setMouseCursorVisible(true);
 }
-void Engine::EngineClass::_EVENT_GAINED_FOCUS()
-{
+void Engine::EngineClass::_EVENT_GAINED_FOCUS(){
 	Resources::getWindow()->setMouseCursorVisible(false);
 }
-void Engine::EngineClass::_EVENT_TEXT_ENTERED(sf::Event::TextEvent text)
-{
+void Engine::EngineClass::_EVENT_TEXT_ENTERED(sf::Event::TextEvent text){
 }
 void Engine::EngineClass::_EVENT_KEY_PRESSED(sf::Event::KeyEvent key){
 	Events::Keyboard::KeyProcessing::m_previousKey = Events::Keyboard::KeyProcessing::m_currentKey;
@@ -169,38 +140,15 @@ void Engine::EngineClass::_EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mo
 void Engine::EngineClass::_EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
 	Resources::getWindow()->setMouseCursorVisible(false);
 	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
-	if(mouseButton.button == sf::Mouse::Button::Left){
-		Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_LEFT;
-		Engine::Events::Mouse::MouseProcessing::m_MouseStatus[Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_LEFT] = true;
-		return;
-	}
-	if(mouseButton.button == sf::Mouse::Button::Middle){
-		Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_MIDDLE;
-		Engine::Events::Mouse::MouseProcessing::m_MouseStatus[Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_MIDDLE] = true;
-		return;
-	}
-	if(mouseButton.button == sf::Mouse::Button::Right){
-		Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_RIGHT;
-		Engine::Events::Mouse::MouseProcessing::m_MouseStatus[Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_RIGHT] = true;
-		return;
-	}
+
+	Engine::Events::Mouse::MouseProcessing::m_currentButton = mouseButton.button;
+	Engine::Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = true;
 }
 void Engine::EngineClass::_EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent mouseButton){
-	Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_NONE;
-	Engine::Events::Mouse::MouseProcessing::m_currentButton = Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_NONE;
+	Engine::Events::Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
+	Engine::Events::Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
 
-	if(mouseButton.button == sf::Mouse::Button::Left){
-		Engine::Events::Mouse::MouseProcessing::m_MouseStatus[Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_LEFT] = false;
-		return;
-	}
-	if(mouseButton.button == sf::Mouse::Button::Middle){
-		Engine::Events::Mouse::MouseProcessing::m_MouseStatus[Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_MIDDLE] = false;
-		return;
-	}
-	if(mouseButton.button == sf::Mouse::Button::Right){
-		Engine::Events::Mouse::MouseProcessing::m_MouseStatus[Engine::Events::Mouse::MouseButton::MOUSE_BUTTON_RIGHT] = false;
-		return;
-	}
+	Engine::Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = false;
 }
 void Engine::EngineClass::_EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
 	if(Resources::getWindow()->hasFocus()){
@@ -212,27 +160,21 @@ void Engine::EngineClass::_EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
 		Events::Mouse::MouseProcessing::m_Difference.y += (Events::Mouse::MouseProcessing::m_Position.y - Events::Mouse::MouseProcessing::m_Position_Previous.y);
 	}
 }
-void Engine::EngineClass::_EVENT_MOUSE_ENTERED()
-{
+void Engine::EngineClass::_EVENT_MOUSE_ENTERED(){
 }
 void Engine::EngineClass::_EVENT_MOUSE_LEFT(){
 	Resources::getWindow()->setMouseCursorVisible(true);
 }
 /*
-void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_PRESSED()
-{
+void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_PRESSED(){
 }
-void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_RELEASED()
-{
+void Engine::EngineClass::_EVENT_JOYSTICK_BUTTON_RELEASED(){
 }
-void Engine::EngineClass::_EVENT_JOYSTICK_MOVED()
-{
+void Engine::EngineClass::_EVENT_JOYSTICK_MOVED(){
 }
-void Engine::EngineClass::_EVENT_JOYSTICK_CONNECTED()
-{
+void Engine::EngineClass::_EVENT_JOYSTICK_CONNECTED(){
 }
-void Engine::EngineClass::_EVENT_JOYSTICK_DISCONNECTED()
-{
+void Engine::EngineClass::_EVENT_JOYSTICK_DISCONNECTED(){
 }
 */
 void Engine::EngineClass::run(){
@@ -240,7 +182,32 @@ void Engine::EngineClass::run(){
 		sf::Event e;
 		Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
 		while(Resources::getWindow()->pollEvent(e)){
-			_EVENT_HANDLERS(e);
+			#pragma region Event Handlers
+			switch (e.type){
+				case sf::Event::Closed:
+					_EVENT_CLOSE();break;
+				case sf::Event::KeyReleased:
+					_EVENT_KEY_RELEASED(e.key);break;
+				case sf::Event::KeyPressed:
+					_EVENT_KEY_PRESSED(e.key);break;
+				case sf::Event::MouseButtonPressed:
+					_EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
+				case sf::Event::MouseButtonReleased:
+					_EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
+				case sf::Event::MouseEntered:
+					_EVENT_MOUSE_ENTERED();break;
+				case sf::Event::MouseLeft:
+					_EVENT_MOUSE_LEFT();break;
+				case sf::Event::MouseWheelMoved:
+					_EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
+				case sf::Event::MouseMoved:
+					_EVENT_MOUSE_MOVED(e.mouseMove);break;
+				case sf::Event::Resized:
+					_EVENT_RESIZE(e.size.width,e.size.height);break;
+				case sf::Event::TextEntered:
+					_EVENT_TEXT_ENTERED(e.text);break;
+			}
+			#pragma endregion
 		}
 		_update(Resources::dt());
 		_RESET_EVENTS();

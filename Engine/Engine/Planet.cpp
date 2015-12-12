@@ -23,16 +23,16 @@ void Planet::update(float dt){
 	for(auto ring:m_Rings)
 		ring->update(dt);
 }
-void Planet::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){
+void Planet::render(Mesh* mesh, Material* material,GLuint shader,bool debug){
 	shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
-	ObjectDisplay::render(mesh,mat,shader,debug);
+	ObjectDisplay::render(mesh,material,shader,debug);
 }
-void Planet::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){
+void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 	bool renderPlanet = true;
 	if(mesh == nullptr || !Resources::getActiveCamera()->sphereIntersectTest(this))
 		renderPlanet = false;
 	Camera* activeCamera = Resources::getActiveCamera();
-	if(activeCamera->getDistance(this) > 450 * getRadius())
+	if(activeCamera->getDistance(this) > 700 * getRadius())
 		renderPlanet = false;
 
 	if(renderPlanet){
@@ -47,10 +47,13 @@ void Planet::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){
 			glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 			glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
+			glUniform1f(glGetUniformLocation(shader, "BaseGlow"),material->getBaseGlow());
+			glUniform1f(glGetUniformLocation(shader, "Specularity"),0.08f);
+
 			glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
-			for(auto component:mat->getComponents())
-				mat->bindTexture(component.first,shader);
+			for(auto component:material->getComponents())
+				material->bindTexture(component.first,shader);
 
 			if(m_AtmosphereHeight > 0){
 				glUniform1i(glGetUniformLocation(shader,"hasAtmosphere"),1);
@@ -196,7 +199,7 @@ void Planet::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
-	m_Light = new SunLight(glm::vec3(0,0,0),name + " Light",LIGHT_TYPE_SUN,scene);
+	m_Light = new SunLight(glm::vec3(0),name + " Light",LIGHT_TYPE_SUN,scene);
 	m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 	setColor(starColor.x,starColor.y,starColor.z,1);
 	m_Material->setShadeless(true);
@@ -209,6 +212,9 @@ Star::~Star(){
 }
 void Star::render(Mesh* mesh,Material* material,GLuint shader,bool debug){
 	ObjectDisplay::render(mesh,material,shader,debug);
+}
+void Star::draw(Mesh* mesh,Material* material,GLuint shader,bool debug){
+	ObjectDisplay::draw(mesh,material,shader,debug);
 }
 Ring::Ring(std::vector<RingInfo> rings,Planet* parent){
 	m_Parent = parent;

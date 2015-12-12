@@ -36,7 +36,6 @@ namespace Engine{
 			*/
 			#pragma endregion
 
-			void _EVENT_HANDLERS(sf::Event);
 			void _RESET_EVENTS();
 
 			Game* game;
@@ -47,7 +46,7 @@ namespace Engine{
 			void _render();
 
 		public:
-			EngineClass(std::string name, unsigned int width=0, unsigned int height=0);
+			EngineClass(std::string app_name, unsigned int width=0, unsigned int height=0);
 			~EngineClass();
 
 			void run();

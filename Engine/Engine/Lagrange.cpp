@@ -210,6 +210,7 @@ void Lagrange::draw(Mesh* mesh, Material* mat,GLuint shader, bool debug){
 	glUniform1i(glGetUniformLocation(shader, "DiffuseMapEnabled"),0);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
 	glUniform1f(glGetUniformLocation(shader, "BaseGlow"),1.0f);
+	glUniform1f(glGetUniformLocation(shader, "Specularity"),0.0f);
 
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_BLEND);

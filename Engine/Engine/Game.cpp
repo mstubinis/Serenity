@@ -45,6 +45,8 @@ void Game::initLogic(){
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());
+
+	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
 }
 void Game::update(float dt){
 	m_HUD->update(dt);

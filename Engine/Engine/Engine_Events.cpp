@@ -6,8 +6,8 @@ using namespace Engine::Events;
 std::unordered_map<unsigned int,bool> _getkeys(){ return std::unordered_map<unsigned int, bool>(); }
 std::unordered_map<unsigned int,bool> _getmouse(){ return std::unordered_map<unsigned int, bool>(); }
 //return string dictionaries of keys / mouse buttons
-std::unordered_map<std::string,sf::Keyboard::Key> _getkeymap(){
-	std::unordered_map<std::string,sf::Keyboard::Key> k;
+std::unordered_map<std::string,unsigned int> _getkeymap(){
+	std::unordered_map<std::string,unsigned int> k;
 	k["a"] = sf::Keyboard::A;
 	k["add"] = sf::Keyboard::Add;
 	k["b"] = sf::Keyboard::B;
@@ -225,32 +225,32 @@ std::unordered_map<std::string,sf::Keyboard::Key> _getkeymap(){
 	k["z"] = sf::Keyboard::Z;
 	return k;
 }
-std::unordered_map<std::string,Mouse::MouseButton> _getmousemap(){
-	std::unordered_map<std::string,Mouse::MouseButton> m;
+std::unordered_map<std::string,unsigned int> _getmousemap(){
+	std::unordered_map<std::string,unsigned int> m;
 
-	m["l"] = Mouse::MouseButton::MOUSE_BUTTON_LEFT;
-	m["left"] = Mouse::MouseButton::MOUSE_BUTTON_LEFT;
-	m["left button"] = Mouse::MouseButton::MOUSE_BUTTON_LEFT;
-	m["leftbutton"] = Mouse::MouseButton::MOUSE_BUTTON_LEFT;
+	m["l"] = sf::Mouse::Button::Left;
+	m["left"] = sf::Mouse::Button::Left;
+	m["left button"] = sf::Mouse::Button::Left;
+	m["leftbutton"] = sf::Mouse::Button::Left;
 
-	m["r"] = Mouse::MouseButton::MOUSE_BUTTON_RIGHT;
-	m["right"] = Mouse::MouseButton::MOUSE_BUTTON_RIGHT;
-	m["right button"] = Mouse::MouseButton::MOUSE_BUTTON_RIGHT;
-	m["rightbutton"] = Mouse::MouseButton::MOUSE_BUTTON_RIGHT;
+	m["r"] = sf::Mouse::Button::Right;
+	m["right"] = sf::Mouse::Button::Right;
+	m["right button"] = sf::Mouse::Button::Right;
+	m["rightbutton"] = sf::Mouse::Button::Right;
 
-	m["m"] = Mouse::MouseButton::MOUSE_BUTTON_MIDDLE;
-	m["middle"] = Mouse::MouseButton::MOUSE_BUTTON_MIDDLE;
-	m["middle button"] = Mouse::MouseButton::MOUSE_BUTTON_MIDDLE;
-	m["middlebutton"] = Mouse::MouseButton::MOUSE_BUTTON_MIDDLE;
+	m["m"] = sf::Mouse::Button::Middle;
+	m["middle"] = sf::Mouse::Button::Middle;
+	m["middle button"] = sf::Mouse::Button::Middle;
+	m["middlebutton"] = sf::Mouse::Button::Middle;
 
-	m["none"] = Mouse::MouseButton::MOUSE_BUTTON_NONE;
+	m["none"] = static_cast<unsigned int>(5);
 
 	return m;
 }
 
 //init static values with actual objects
-std::unordered_map<std::string,sf::Keyboard::Key> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
-std::unordered_map<std::string,Mouse::MouseButton> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
+std::unordered_map<std::string,unsigned int> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
+std::unordered_map<std::string,unsigned int> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
 std::unordered_map<unsigned int,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
 std::unordered_map<unsigned int,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
 float Mouse::MouseProcessing::m_Delta = 0;
@@ -259,7 +259,7 @@ glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0,0);
 glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
 
 //init prev / current variables
-sf::Keyboard::Key Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-sf::Keyboard::Key Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-Mouse::MouseButton Mouse::MouseProcessing::m_currentButton = Mouse::MOUSE_BUTTON_NONE;
-Mouse::MouseButton Mouse::MouseProcessing::m_previousButton = Mouse::MOUSE_BUTTON_NONE;
+unsigned int Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
+unsigned int Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
+unsigned int Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
+unsigned int Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key

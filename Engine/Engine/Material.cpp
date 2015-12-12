@@ -27,6 +27,7 @@ Material::Material(std::string diffuse, std::string normal, std::string glow){
 	m_Components[MATERIAL_COMPONENT_TEXTURE_GLOW] = new Texture(glow);
 	m_Shadeless = false;
 	m_BaseGlow = 0.0f;
+	m_Specularity = 1.0f;
 }
 Material::~Material(){
 	for(auto component:m_Components)

@@ -56,7 +56,6 @@ void SunLight::render(GLuint shader){
 	glm::vec3 campos = Resources::getActiveCamera()->getPosition();
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
-    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
 	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -81,7 +80,6 @@ void DirectionalLight::render(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
     glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
 
-    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
 	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -111,7 +109,6 @@ void PointLight::render(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gLinear"), m_Linear);
     glUniform1f(glGetUniformLocation(shader,"gExp"), m_Exp);
 
-    glUniform1f(glGetUniformLocation(shader,"gMatSpecularIntensity"), 1.0f);
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
 	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);

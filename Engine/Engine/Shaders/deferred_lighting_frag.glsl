@@ -15,12 +15,12 @@ uniform vec3 gLightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
+uniform sampler2D gGlowMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
 uniform mat4 VPInverse;
 
-uniform float gMatSpecularIntensity;
 uniform float gSpecularPower;
 
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
@@ -41,7 +41,8 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
         float SpecularFactor = dot(VertexToEye, LightReflect);
         SpecularFactor = pow(SpecularFactor, gSpecularPower);
         if (SpecularFactor > 0.0) {
-            SpecularColor = vec4(gColor, 1.0) * gMatSpecularIntensity * SpecularFactor;
+			float materialSpecularity = texture2D(gGlowMap,CalcTexCoord()).b;
+            SpecularColor = vec4(gColor, 1.0) * materialSpecularity * SpecularFactor;
         }
     }
     return (AmbientColor + DiffuseColor + SpecularColor);

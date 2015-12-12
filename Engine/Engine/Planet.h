@@ -50,7 +50,7 @@ class Planet: public ObjectDisplay{
 
 		void update(float);
 		virtual void render(Mesh*, Material*,GLuint,bool=false);
-		void draw(Mesh*, Material*,GLuint,bool=false);
+		virtual void draw(Mesh*, Material*,GLuint,bool=false);
 };
 
 class Star: public Planet{
@@ -67,6 +67,7 @@ class Star: public Planet{
 			);
 		~Star();
 		void render(Mesh*, Material*,GLuint,bool=false);
+		void draw(Mesh*, Material*,GLuint,bool=false);
 };
 
 class Ring{
