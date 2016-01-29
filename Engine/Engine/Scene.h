@@ -24,7 +24,7 @@ class Scene{
 
 		glm::vec3 m_AmbientLighting;
 	public:
-		Scene(std::string name,glm::vec3 = glm::vec3(0.01f,0.01f,0.01f));
+		Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
 		~Scene();
 
 		std::map<std::string,Object*>& getObjects(){ return m_Objects; }

@@ -4,12 +4,16 @@
 #include "Object.h"
 
 class Planet;
+enum LAGRANGE_TYPE { LAGRANGE_TYPE_L1,LAGRANGE_TYPE_L2,LAGRANGE_TYPE_L3,LAGRANGE_TYPE_L4,LAGRANGE_TYPE_L5 };
 class Lagrange: public Object{
 	private:
 		Planet* m_Planet1;
 		Planet* m_Planet2;
 		bool m_Visible;
-		void _calculateLagrangePosition();
+		void _calculateLagrangePosition(LAGRANGE_TYPE);
+		void _init(Planet*,Planet*,LAGRANGE_TYPE);
+
+		LAGRANGE_TYPE m_Type;
 
 		static float radius;
 		static GLuint m_Buffer;
@@ -18,6 +22,13 @@ class Lagrange: public Object{
 	public:
 		Lagrange(Planet*,
 				 Planet*,
+				 LAGRANGE_TYPE = LAGRANGE_TYPE_L1,
+				 std::string = "Lagrange Point",   //Object name
+				 Scene* = nullptr
+			   );
+		Lagrange(Planet*,
+				 Planet*,
+				 std::string = "L1",
 				 std::string = "Lagrange Point",   //Object name
 				 Scene* = nullptr
 			   );
@@ -30,6 +41,8 @@ class Lagrange: public Object{
 			glBindBuffer(GL_ARRAY_BUFFER, Lagrange::m_Buffer );
 			glBufferData(GL_ARRAY_BUFFER, Lagrange::m_Vertices.size() * sizeof(glm::vec3),&Lagrange::m_Vertices[0], GL_STATIC_DRAW );
 		}
+
+		const LAGRANGE_TYPE getType() const{ return m_Type; }
 
 		void update(float);
 		void render(GLuint=0, bool=false);

@@ -25,6 +25,7 @@ void Game::initResources(){
 	Resources::addMesh("Akira","Models/akira.obj");
 	Resources::addMesh("Starbase","Models/starbase.obj");
 	Resources::addMesh("Ring","Models/ring.obj");
+	Resources::addMesh("Dreadnought","Models/Dreadnought.obj");
 	Lagrange::_genBuffers();
 
 	Resources::addMaterial("Star","Textures/Planets/Sun.jpg");
@@ -36,6 +37,7 @@ void Game::initResources(){
 	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png");
 	Resources::addMaterial("SunFlare","Textures/Skyboxes/StarFlare.png");
 	Resources::addMaterial("Smoke","Textures/Effects/Smoke.png");
+	Resources::addMaterial("Dreadnought","Textures/dreadnought.png","Textures/dreadnoughtNormal.png","Textures/dreadnoughtGlow.png");
 
 	Resources::addParticleInfo("Smoke","Smoke");
 }

@@ -63,6 +63,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 				std::istringstream stream(line);
 
 				std::string NAME;
+				std::string LAGRANGE__TYPE;
 				std::string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
 				std::string PARENT = "";
 				float R,G,B,   R1,G1,B1;
@@ -88,6 +89,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					}
 					else if(key == "lp1")              LAGRANGE_PLANET_1 = value;
 					else if(key == "lp2")              LAGRANGE_PLANET_2 = value;
+					else if(key == "lType")            LAGRANGE__TYPE = value;
 					else if(key == "radius")           RADIUS = stoull(value)*10;
 					else if(key == "r")			       R = stof(value);
 					else if(key == "g")			       G = stof(value);
@@ -175,7 +177,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					}
 					float realX = static_cast<float>(xPos);
 					float realY = static_cast<float>(zPos);
-					player = new PlayerShip("Defiant","Defiant",NAME,glm::vec3(realX,0,realY),glm::vec3(1),nullptr,this);
+					player = new PlayerShip("Dreadnought","Dreadnought",NAME,glm::vec3(realX,0,realY),glm::vec3(1),nullptr,this);
 
 				}
 				else if(line[0] == '$'){//Other ship
@@ -199,7 +201,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					}
 				}
 				else if(line[0] == 'L'){//Lagrange Point
-					new Lagrange(static_cast<Planet*>(m_Objects[LAGRANGE_PLANET_1]),static_cast<Planet*>(m_Objects[LAGRANGE_PLANET_2]),NAME,this);
+					new Lagrange(static_cast<Planet*>(m_Objects[LAGRANGE_PLANET_1]),static_cast<Planet*>(m_Objects[LAGRANGE_PLANET_2]),LAGRANGE_TYPE_L1,NAME,this);
 				}
 			}
 		}

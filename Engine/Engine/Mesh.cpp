@@ -340,9 +340,9 @@ void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
 	glm::vec3 b2 = glm::normalize(bitangent - v2.normal * glm::dot(v2.normal, bitangent));
 	glm::vec3 b3 = glm::normalize(bitangent - v3.normal * glm::dot(v3.normal, bitangent));
 
-	if (glm::dot(glm::cross(t1, b1), v1.normal) < 0.0f){t1.x *= -1.0f;}
-	if (glm::dot(glm::cross(t2, b2), v2.normal) < 0.0f){t2.x *= -1.0f;}
-	if (glm::dot(glm::cross(t3, b3), v3.normal) < 0.0f){t3.x *= -1.0f;}
+	if (glm::dot(glm::cross(t1, b1), v1.normal) < 0.0f){t1 *= -1.0f;}
+	if (glm::dot(glm::cross(t2, b2), v2.normal) < 0.0f){t2 *= -1.0f;}
+	if (glm::dot(glm::cross(t3, b3), v3.normal) < 0.0f){t3 *= -1.0f;}
 
 	v1.tangent = t1;   v2.tangent = t2;   v3.tangent = t3;
 	v1.binormal = -b1; v2.binormal = -b2; v3.binormal = -b3;

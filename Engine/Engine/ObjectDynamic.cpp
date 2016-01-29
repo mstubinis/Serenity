@@ -27,7 +27,12 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 	m = glm::translate(m,pos);
 	m *= glm::mat4_cast(m_Orientation);
 	m = glm::scale(m,m_Scale);
-	tr.setFromOpenGLMatrix(glm::value_ptr(m));
+
+	#ifdef BT_USE_DOUBLE_PRECISION
+		tr.setFromOpenGLMatrix(glm::value_ptr(glm::dmat4(m)));
+	#else
+		tr.setFromOpenGLMatrix(glm::value_ptr(m));
+	#endif
 
 	m_MotionState = new btDefaultMotionState(tr);
 
@@ -50,8 +55,8 @@ ObjectDynamic::~ObjectDynamic(){
 }
 void ObjectDynamic::translate(float x, float y, float z,bool local){
 	m_RigidBody->activate();
-	btTransform transform = m_RigidBody->getWorldTransform();
-	btVector3 pos = transform.getOrigin();
+	btTransform t = m_RigidBody->getWorldTransform();
+	btVector3 pos = t.getOrigin();
 	glm::vec3 p = glm::vec3(pos.x(),pos.y(),pos.z());
 	if(local){
 		p += getForward() * z;
@@ -61,7 +66,7 @@ void ObjectDynamic::translate(float x, float y, float z,bool local){
 	else{
 		p += glm::vec3(x,y,z);
 	}
-	this->setPosition(this->getPosition() + p);
+	setPosition(getPosition() + p);
 }
 void ObjectDynamic::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 glm::vec3 ObjectDynamic::_calculateForward(){ 
@@ -84,10 +89,17 @@ glm::vec3 ObjectDynamic::_calculateUp(){
 }
 void ObjectDynamic::update(float dt){
 	glm::mat4 parentModel = glm::mat4(1);
-	glm::mat4 newModel = glm::mat4(1);
+
+	#ifdef BT_USE_DOUBLE_PRECISION
+		glm::dmat4 newModel = glm::dmat4(1);
+	#else
+		glm::mat4 newModel = glm::mat4(1);
+	#endif
+
 	btTransform tr;
 	m_RigidBody->getMotionState()->getWorldTransform(tr);
 	tr.getOpenGLMatrix(glm::value_ptr(newModel));
+
 	if(m_Parent != nullptr){
 		parentModel = m_Parent->getModel();
 	}
@@ -99,7 +111,14 @@ void ObjectDynamic::update(float dt){
 		m_Right = ObjectDynamic::_calculateRight();
 		m_Up = ObjectDynamic::_calculateUp();
 	}
-	m_Model = parentModel * newModel;
+
+
+	#ifdef BT_USE_DOUBLE_PRECISION
+		m_Model = parentModel * glm::mat4(newModel);
+	#else
+		m_Model = parentModel * newModel;
+	#endif
+
 	for(auto child:m_Children)
 		child->_updateMatrix();
 }
@@ -112,11 +131,21 @@ void ObjectDynamic::scale(float x,float y,float z){
 }
 void ObjectDynamic::scale(glm::vec3 scl){ ObjectDynamic::scale(scl.x,scl.y,scl.z); }
 void ObjectDynamic::setPosition(float x, float y, float z){
+	/*
 	m_RigidBody->activate();
 	btTransform t;
 	m_RigidBody->getMotionState()->getWorldTransform(t);
 	t.setOrigin(btVector3(x,y,z));
 	m_RigidBody->setWorldTransform(t);
+	*/
+
+    btTransform initialTransform;
+
+    initialTransform.setOrigin(btVector3(x,y,z));
+	initialTransform.setRotation(m_RigidBody->getOrientation());
+
+    m_RigidBody->setWorldTransform(initialTransform);
+    m_MotionState->setWorldTransform(initialTransform);
 }
 void ObjectDynamic::setPosition(glm::vec3 p){ ObjectDynamic::setPosition(p.x,p.y,p.z); }
 void ObjectDynamic::applyForce(float x,float y,float z,bool local){ 

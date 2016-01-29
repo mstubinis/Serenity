@@ -40,7 +40,7 @@ void main(){
 		if(HasLighting == 1){
 			imageLight *= light;
 			float specLight = pow(lighting.r,8);
-			imageLight += specLight*0.5;
+			imageLight += specLight*(specLight*0.4);
 		}
 		vec4 illumination = glow*image;
 		if(HasBloom == 1){

@@ -59,7 +59,7 @@ void HUD::update(float dt){
 			}
 		}
 		*/
-		Object* target = scene->getObject("Earth Lagrange Point");
+		Object* target = scene->getObject("Earth Lagrange Point L1");
 		m_Player->setTarget(target);
 
 	}
