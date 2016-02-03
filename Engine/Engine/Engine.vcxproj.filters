@@ -224,9 +224,6 @@
     <ClInclude Include="Engine_Resources.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="SolarSystem.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>

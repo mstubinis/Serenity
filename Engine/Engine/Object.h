@@ -38,7 +38,7 @@ class Object{
 				bool isNotLight = true,
 				Scene* = nullptr                //The scene to add the object to (default nullptr = the current scene)
 			  );
-		~Object();
+		virtual ~Object();
 
 		float getDistance(Object*);
 		unsigned long long getDistanceLL(Object*);

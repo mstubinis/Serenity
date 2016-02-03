@@ -18,7 +18,7 @@ class Ship: public ObjectDynamic{
 			Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 			Scene* = nullptr
 		    );
-		~Ship();
+		virtual ~Ship();
 
 		void translateWarp(float);
 
@@ -40,7 +40,7 @@ class PlayerShip: public Ship{
 			Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 			Scene* = nullptr
 		    );
-		~PlayerShip();
+		virtual ~PlayerShip();
 
 		void update(float);
 		void setTarget(Object*);

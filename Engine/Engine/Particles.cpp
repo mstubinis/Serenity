@@ -25,10 +25,10 @@ ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 sc
 	scene->getParticleEmitters()[m_Name] = this;
 }
 ParticleEmitter::~ParticleEmitter(){
-	for(auto particle:m_Particles) delete particle;
+	for(auto particle:m_Particles) SAFE_DELETE(particle);
 }
 void ParticleEmitter::addParticle(){
-	float rot = rand() % 360;
+	float rot = static_cast<float>(rand() % 360);
 
 	glm::vec3 velocity = glm::vec3(0,0.05f,0);
 	float rotationalVelocity = 0.05f;
@@ -39,8 +39,7 @@ void ParticleEmitter::deleteParticles(){
 	for(auto p:m_Particles){
 		if(p->ToBeErased()){
 			copies.erase(std::remove(copies.begin(), copies.end(), p), copies.end());
-			delete p;
-			p = nullptr;
+			SAFE_DELETE(p);
 		}
 	}
 	m_Particles = copies;

@@ -5,8 +5,10 @@
 #include <string>
 #include <glm/glm.hpp>
 
-class SunLight;
+#include <boost/shared_ptr.hpp>
+
 class Object;
+class SunLight;
 class Camera;
 class Skybox;
 class ParticleEmitter;
@@ -15,7 +17,6 @@ class Scene{
 	private:
 		Skybox* m_Skybox;
 	protected:
-		std::map<std::string,Camera*> m_Cameras;
 		std::map<std::string,Object*> m_Objects;
 		std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
 		std::map<std::string,SunLight*> m_Lights;
@@ -25,15 +26,13 @@ class Scene{
 		glm::vec3 m_AmbientLighting;
 	public:
 		Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
-		~Scene();
+		virtual ~Scene();
 
 		std::map<std::string,Object*>& getObjects(){ return m_Objects; }
-		std::map<std::string,Camera*>& getCameras(){ return m_Cameras; }
 		std::map<std::string,ParticleEmitter*>& getParticleEmitters(){ return m_ParticleEmitters; }
 		std::map<std::string,SunLight*>& getLights(){ return m_Lights; }
 
 		 Object* getObject(std::string name)  { return m_Objects[name]; }
-		 Camera* getCamera(std::string name)  { return m_Cameras[name]; }
 		 ParticleEmitter* getParticleEmitter(std::string name)  { return m_ParticleEmitters[name]; }
 		 SunLight* getLight(std::string name)  { return m_Lights[name]; }
 

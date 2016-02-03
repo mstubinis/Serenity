@@ -12,15 +12,24 @@ enum MATERIAL_COMPONENT_TYPE{
 	MATERIAL_COMPONENT_TEXTURE_GLOW,
 	MATERIAL_COMPONENT_TYPE_NUMBER
 };
+enum MATERIAL_LIGHTING_MODE{
+	MATERIAL_LIGHTING_MODE_BLINNPHONG,
+	MATERIAL_LIGHTING_MODE_BLINN,
+	MATERIAL_LIGHTING_MODE_PHONG,
+	MATERIAL_LIGHTING_MODE_TANGENT,
+	MATERIAL_LIGHTING_MODE_NUMBER
+};
+
 static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_NUMBER] = {
 	"DiffuseMap",
 	"NormalMap",
 	"GlowMap"
 };
 class Texture;
-class Material{
+class Material final{
 	private:
 		std::unordered_map<unsigned int,Texture*> m_Components;
+		unsigned int m_LightingMode;
 		bool m_Shadeless;
 		float m_BaseGlow;
 		float m_Specularity;
@@ -38,8 +47,10 @@ class Material{
 		const bool getShadeless() const { return m_Shadeless; }
 		const float getBaseGlow() const { return m_BaseGlow; }
 		const float getSpecularity() const { return m_Specularity; }
+		const unsigned int getLightingMode() const { return m_LightingMode; }
 		void setShadeless(bool b){ m_Shadeless = b; }
 		void setBaseGlow(float f){ m_BaseGlow = f; }
 		void setSpecularity(float s){ m_Specularity = s; }
+		void setLightingMode(unsigned int m){ m_LightingMode = m; }
 };
 #endif

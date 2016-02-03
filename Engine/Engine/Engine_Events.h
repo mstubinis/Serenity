@@ -12,7 +12,7 @@
 namespace Engine{
 	namespace Events{
 		namespace Mouse{
-			class MouseProcessing{
+			class MouseProcessing final{
 				private:
 					static std::unordered_map<std::string,unsigned int> m_MouseMap;
 				public:
@@ -46,7 +46,7 @@ namespace Engine{
 			static float getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
 		};
 		namespace Keyboard{
-			class KeyProcessing{
+			class KeyProcessing final{
 				private:
 					static std::unordered_map<std::string,unsigned int> m_KeyMap;
 				public:
@@ -80,6 +80,14 @@ namespace Engine{
 			static bool isKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }
 			static bool isKeyUp(std::string str){ return KeyProcessing::_IsKeyUp(str); }
 		};
+		static bool isKeyDown(std::string str){ return Keyboard::KeyProcessing::_IsKeyDown(str); }
+		static bool isKeyDownOnce(std::string str){ return Keyboard::KeyProcessing::_IsKeyDownOnce(str); }
+		static bool isKeyUp(std::string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
+
+		static glm::vec2 getMousePosition(){ return Mouse::MouseProcessing::m_Position; }
+		static bool isMouseButtonDown(std::string str){ return Mouse::MouseProcessing::_IsMouseButtonDown(str); }
+		static bool isMouseButtonDownOnce(std::string str){ return Mouse::MouseProcessing::_IsMouseButtonDownOnce(str); }
+		static float getMouseWheelDelta(){ return Mouse::MouseProcessing::m_Delta; }
 	};
 };
 #endif

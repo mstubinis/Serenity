@@ -27,7 +27,7 @@ class ObjectDynamic: public ObjectDisplay{
 					   Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 					   Scene* = nullptr
 					 );
-		~ObjectDynamic();
+		virtual ~ObjectDynamic();
 
 		virtual void setPosition(float,float,float); 
 		virtual void setPosition(glm::vec3);

@@ -34,7 +34,7 @@ class Skybox{
 
 	public:
 		Skybox(std::string name,unsigned int numSunFlares = 0,Scene* = nullptr);
-		~Skybox();
+		virtual ~Skybox();
 
 		void _updateMatrix();
 		void render();

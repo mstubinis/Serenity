@@ -32,7 +32,7 @@ class Lagrange: public Object{
 				 std::string = "Lagrange Point",   //Object name
 				 Scene* = nullptr
 			   );
-		~Lagrange();
+		virtual ~Lagrange();
 
 
 		static void _genBuffers(){

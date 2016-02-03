@@ -30,8 +30,10 @@ Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Sce
 			count++;
 		}
 	}
-	if(isNotLight)
+	if(isNotLight){
 		scene->getObjects()[m_Name] = this;
+		Engine::Resources::Detail::ResourceManagement::m_Objects[m_Name] = this;
+	}
 }
 Object::~Object()
 {

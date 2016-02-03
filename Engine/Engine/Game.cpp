@@ -1,18 +1,17 @@
-#include "Game.h"
 #include "SolarSystem.h"
 #include "Engine.h"
-#include "Engine_Events.h"
-#include "Engine_Resources.h"
 #include "HUD.h"
 #include "Ship.h"
 #include "Planet.h"
 #include "Lagrange.h"
 
-using namespace Engine;
+using namespace Engine; 
 using namespace Engine::Events;
 
-Game::Game(){}
-Game::~Game(){
+HUD* m_HUD;
+std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
+
+void Game::cleanup(){
 	for(auto solarSystem:m_SolarSystems)
 		delete solarSystem.second;
 	delete m_HUD;
@@ -51,6 +50,9 @@ void Game::initLogic(){
 	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
 }
 void Game::update(float dt){
+	if(Keyboard::isKeyDown("esc"))
+		Engine::stop();
+
 	m_HUD->update(dt);
 }
 void Game::render(){

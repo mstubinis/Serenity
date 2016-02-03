@@ -2,28 +2,35 @@
 #define ENGINE_RESOURCES_H
 
 #include <unordered_map>
+
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 
-class Font;
+#include "Texture.h"
+#include "Font.h"
+#include "Scene.h"
+
 class Camera;
 class Mesh;
 class Material;
 class ShaderP;
 class Object;
 class SunLight;
-class Scene;
-class Texture;
 
 struct ParticleInfo;
 
+#define SAFE_DELETE(x){\
+	delete x;          \
+	x = NULL;          \
+}                      \
+                              
 namespace Engine{
 	namespace Resources{
 		namespace Detail{
-			class ResourceManagement{
+			class ResourceManagement final{
 				public:
 					static std::unordered_map<std::string,Scene*> m_Scenes;
 					static Scene* m_CurrentScene;
@@ -35,8 +42,9 @@ namespace Engine{
 
 					static Camera* m_ActiveCamera;
 
-					static std::unordered_map<std::string,Font*> m_Fonts;
+					static std::unordered_map<std::string,Object*> m_Objects;
 					static std::unordered_map<std::string,Camera*> m_Cameras;
+					static std::unordered_map<std::string,Font*> m_Fonts;
 					static std::unordered_map<std::string,Mesh*> m_Meshes;
 					static std::unordered_map<std::string,Texture*> m_Textures;
 					static std::unordered_map<std::string,Material*> m_Materials;
@@ -47,7 +55,7 @@ namespace Engine{
 			};
 		};
 		static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
-		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene = s; }
+		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene; }
 		static void setCurrentScene(std::string s){ Detail::ResourceManagement::m_CurrentScene = Detail::ResourceManagement::m_Scenes[s]; }
 
 		static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
@@ -58,10 +66,11 @@ namespace Engine{
 		static sf::Mouse* getMouse(){ return Detail::ResourceManagement::m_Mouse; }
 
 		static Camera* getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera; }
-		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
 		static void setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = c; }
 		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
+		static Object* getObject(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
+		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
 		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name]; }
 		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name]; }
 		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name]; }
@@ -81,8 +90,9 @@ namespace Engine{
 
 		void initResources();
 	};
+	//TODO: Move this somewhere else
 	template<typename T>
-	static std::string convertNumberToStringCommas(T n){
+	static std::string convertNumToNumWithCommas(T n){
 		std::string numWithCommas = std::to_string(n);
 		int insertPosition = numWithCommas.length() - 3;
 		while (insertPosition > 0) {

@@ -5,13 +5,16 @@
 #include "Skybox.h"
 #include "Particles.h"
 
-
 using namespace Engine;
 
 Scene::Scene(std::string name,glm::vec3 ambientLightColor){
-	if(Resources::getCurrentScene() == nullptr)
+	if(Resources::getCurrentScene() == nullptr){
 		Resources::Detail::ResourceManagement::m_CurrentScene = this;
-
+	}
+	if(Resources::getActiveCamera() == nullptr){
+		new Camera("Default",45.0f,1.0f,0.1f,100.0f,this);
+		Resources::Detail::ResourceManagement::m_ActiveCamera = Resources::getCamera("Default");
+	}
 	Resources::Detail::ResourceManagement::m_Scenes[name] = this;
 	m_Name = name;
 	m_AmbientLighting = ambientLightColor;
@@ -42,10 +45,6 @@ void Scene::centerSceneToObject(Object* center){
 	center->setPosition(0,0,0);
 }
 Scene::~Scene(){
-	for(auto obj:m_Objects)              delete obj.second;
-	for(auto light:m_Lights)             delete light.second;
-	for(auto emitter:m_ParticleEmitters) delete emitter.second;
-	for(auto cam:m_Cameras)              delete cam.second;
 }
 void Scene::setName(std::string name){
 	std::string oldName = m_Name;
@@ -67,7 +66,8 @@ void Scene::update(float dt){
 	}
 	for(auto light:m_Lights)
 		light.second->update(dt);
-	m_Skybox->_updateMatrix();
+	if(m_Skybox != nullptr)
+		m_Skybox->_updateMatrix();
 }
 void Scene::setAmbientLightColor(glm::vec3 c){ m_AmbientLighting = c; }
 void Scene::setAmbientLightColor(float r,float g,float b){ setAmbientLightColor(glm::vec3(r,g,b)); }

@@ -17,7 +17,7 @@ class Station: public ObjectDynamic{
 				Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 				Scene* = nullptr
 			   );
-		~Station();
+		virtual ~Station();
 
 		void update(float);
 		void render();

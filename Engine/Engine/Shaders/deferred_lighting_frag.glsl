@@ -27,7 +27,7 @@ vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
 vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
-    float DiffuseFactor = dot(_norm, -_lightDir);
+    float DiffuseFactor = dot(_norm, -_lightDir)*1.2; //just to add a little bit more light
 
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);

@@ -1,11 +1,6 @@
 #include "Engine.h"
-#include "Engine_Resources.h"
-#include "Engine_Renderer.h"
 #include "Camera.h"
 #include "GBuffer.h"
-#include "Engine_Physics.h"
-#include "Engine_Events.h"
-#include "Game.h"
 #include "Scene.h"
 
 #include "ObjectDynamic.h"
@@ -21,7 +16,7 @@ Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned 
 }
 Engine::EngineClass::~EngineClass(){
 	//glDeleteVertexArrays( 1, &m_vao );
-	delete game;
+	Game::cleanup();
 	Engine::Physics::Detail::PhysicsManagement::destruct();
 	Engine::Renderer::Detail::RenderManagement::destruct();
 	Engine::Resources::Detail::ResourceManagement::destruct();
@@ -67,9 +62,14 @@ void Engine::EngineClass::_initGame(){
 	Renderer::Detail::RenderManagement::init();
 	Physics::Detail::PhysicsManagement::init();
 
-	game = new Game();
-	game->initResources();
-	game->initLogic();
+
+	//the scene is the root of all games. create the default scene
+	//Scene* scene;
+	//if(Resources::getCurrentScene() == nullptr)
+		//scene = new Scene("Default");
+
+	Game::initResources();
+	Game::initLogic();
 
 	//glGenVertexArrays( 1, &m_vao );
 	//glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
@@ -93,12 +93,12 @@ void Engine::EngineClass::_RESET_EVENTS(){
 	}
 }
 void Engine::EngineClass::_update(float dt){
-	game->update(dt);
+	Game::update(dt);
 	Resources::getCurrentScene()->update(dt);
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-dt));
 }
 void Engine::EngineClass::_render(){
-	game->render();
+	Game::render();
 	Engine::Renderer::Detail::RenderManagement::render();
 }
 #pragma region Event Handler Methods
@@ -106,6 +106,7 @@ void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)
 	glViewport(0,0,width,height);
 
 	Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(width,height);
+	Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
 	for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
 		Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,width,height);
 	}
@@ -114,7 +115,7 @@ void Engine::EngineClass::_EVENT_RESIZE(unsigned int width, unsigned int height)
 	}
 }
 void Engine::EngineClass::_EVENT_CLOSE(){
-
+	Resources::getWindow()->close();
 }
 void Engine::EngineClass::_EVENT_LOST_FOCUS(){
 	Resources::getWindow()->setMouseCursorVisible(true);
@@ -177,35 +178,39 @@ void Engine::EngineClass::_EVENT_JOYSTICK_CONNECTED(){
 void Engine::EngineClass::_EVENT_JOYSTICK_DISCONNECTED(){
 }
 */
+
 void Engine::EngineClass::run(){
 	while(Resources::getWindow()->isOpen()){
-		sf::Event e;
+
+		sf::Event event;
 		Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-		while(Resources::getWindow()->pollEvent(e)){
+		while(Resources::getWindow()->pollEvent(event)){
 			#pragma region Event Handlers
-			switch (e.type){
+			switch (event.type){
 				case sf::Event::Closed:
 					_EVENT_CLOSE();break;
 				case sf::Event::KeyReleased:
-					_EVENT_KEY_RELEASED(e.key);break;
+					_EVENT_KEY_RELEASED(event.key);break;
 				case sf::Event::KeyPressed:
-					_EVENT_KEY_PRESSED(e.key);break;
+					_EVENT_KEY_PRESSED(event.key);break;
 				case sf::Event::MouseButtonPressed:
-					_EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
+					_EVENT_MOUSE_BUTTON_PRESSED(event.mouseButton);break;
 				case sf::Event::MouseButtonReleased:
-					_EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
+					_EVENT_MOUSE_BUTTON_RELEASED(event.mouseButton);break;
 				case sf::Event::MouseEntered:
 					_EVENT_MOUSE_ENTERED();break;
 				case sf::Event::MouseLeft:
 					_EVENT_MOUSE_LEFT();break;
 				case sf::Event::MouseWheelMoved:
-					_EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
+					_EVENT_MOUSE_WHEEL_MOVED(event.mouseWheel);break;
 				case sf::Event::MouseMoved:
-					_EVENT_MOUSE_MOVED(e.mouseMove);break;
+					_EVENT_MOUSE_MOVED(event.mouseMove);break;
 				case sf::Event::Resized:
-					_EVENT_RESIZE(e.size.width,e.size.height);break;
+					_EVENT_RESIZE(event.size.width,event.size.height);break;
 				case sf::Event::TextEntered:
-					_EVENT_TEXT_ENTERED(e.text);break;
+					_EVENT_TEXT_ENTERED(event.text);break;
+				default:
+					break;
 			}
 			#pragma endregion
 		}

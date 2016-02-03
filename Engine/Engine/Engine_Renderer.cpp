@@ -1,6 +1,5 @@
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
-#include "Engine_Events.h"
 #include "ShaderProgram.h"
 #include "GBuffer.h"
 #include "Camera.h"
@@ -32,6 +31,7 @@ bool Renderer::RendererInfo::debug = false;
 
 Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
+glm::mat4 Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::mat4(1);
 
 std::vector<GeometryRenderInfo> _getRenderObjectsDefault(){ std::vector<GeometryRenderInfo> k; return k; }
 std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ObjectsToBeRendered = _getRenderObjectsDefault();
@@ -44,6 +44,7 @@ std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_Tex
 void Engine::Renderer::Detail::RenderManagement::init(){
 	Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = new Texture("Textures/SSAONormal.png");
 	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
 
 	#ifdef ENGINE_DEBUG
 	Renderer::RendererInfo::debug = true;
@@ -55,8 +56,7 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 	glCullFace(GL_BACK);
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
-	delete Engine::Renderer::Detail::RenderManagement::m_gBuffer;
-	delete Engine::Renderer::Detail::RenderManagement::RandomMapSSAO;
+	SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
 }
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
 	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
@@ -95,17 +95,18 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 			glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),0);
 		}
 		glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
-		glUniform4f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z,item.col.w);
+		glUniform4f(glGetUniformLocation(shader,"Object_Color"),item.col.r,item.col.g,item.col.b,item.col.a);
 
 		glm::mat4 model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(item.pos.x,
 												Resources::getWindowSize().y-item.pos.y,
-												-0.5 - item.depth));
+												-0.001f - item.depth));
 		model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
 		if(item.texture != "")
 			model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
 		model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
-		glm::mat4 world = Resources::getCamera("HUD")->getProjection() * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+
+		glm::mat4 world = m_2DProjectionMatrix * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
 		glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(world));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));
@@ -142,10 +143,10 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 				FontGlyph* glyph = font->getFontData()->getGlyphData(c);
 
 				glyph->m_Model = glm::mat4(1);
-				glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,item.pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.5 - item.depth));
+				glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,item.pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.001f - item.depth));
 				glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
 				glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
-				glyph->m_World = Resources::getCamera("HUD")->getProjection() * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+				glyph->m_World = m_2DProjectionMatrix * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
 				glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(glyph->m_World));
 				glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));
@@ -161,7 +162,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0,1,0,1);
+	glClearColor(1,1,0,1);
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
@@ -290,11 +291,19 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 		Physics::Detail::PhysicsManagement::render();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glDisable(GL_DEPTH_TEST);
 	_renderForegroundObjects();
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.1f);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
 	Engine::Renderer::Detail::RenderManagement::_renderTextures();
 	Engine::Renderer::Detail::RenderManagement::_renderText();
-	glEnable(GL_DEPTH_TEST);
+
+	glDisable(GL_ALPHA_TEST);
 }
 void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();

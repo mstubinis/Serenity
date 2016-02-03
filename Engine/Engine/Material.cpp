@@ -1,5 +1,6 @@
 #include "Material.h"
 #include "Texture.h"
+#include "Engine_Resources.h"
 
 Material::Material(Texture* diffuse,Texture* normal,Texture* glow){
 	for(unsigned int i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
@@ -17,6 +18,8 @@ Material::Material(Texture* diffuse,Texture* normal,Texture* glow){
 
 	m_Shadeless = false;
 	m_BaseGlow = 0.0f;
+	m_Specularity = 1.0f;
+	m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
 }
 Material::Material(std::string diffuse, std::string normal, std::string glow){
 	for(unsigned int i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
@@ -28,10 +31,10 @@ Material::Material(std::string diffuse, std::string normal, std::string glow){
 	m_Shadeless = false;
 	m_BaseGlow = 0.0f;
 	m_Specularity = 1.0f;
+	m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
 }
 Material::~Material(){
-	for(auto component:m_Components)
-		delete component.second;
+
 }
 void Material::addComponent(unsigned int type, std::string file){
 	if(m_Components[type] != nullptr)

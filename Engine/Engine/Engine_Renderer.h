@@ -82,7 +82,7 @@ namespace Engine{
 			static void enableDebugDrawing(bool enabled = true){ Renderer::RendererInfo::debug = enabled;  }
 		};
 		namespace Detail{
-			class RenderManagement{
+			class RenderManagement final{
 				private:
 					static std::vector<FontRenderInfo> m_FontsToBeRendered;
 					static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
@@ -105,6 +105,7 @@ namespace Engine{
 				public:
 					static GBuffer* m_gBuffer;
 					static Texture* RandomMapSSAO;
+					static glm::mat4 m_2DProjectionMatrix;
 
 					static void render();
 

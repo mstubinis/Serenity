@@ -26,7 +26,7 @@ struct Vertex{
 	}
 };
 
-class Mesh{
+class Mesh final{
 	private:
 		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
 		Engine::Physics::Collision* m_Collision;

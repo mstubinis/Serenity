@@ -41,7 +41,7 @@ class Planet: public ObjectDisplay{
 				float = 0,                      //Atmosphere size
 				Scene* = nullptr
 			  );
-		~Planet();
+		virtual ~Planet();
 
 		const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
 		const float getRadius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
@@ -65,12 +65,12 @@ class Star: public Planet{
 			    std::string = "Star",           //Name
 				Scene* = nullptr
 			);
-		~Star();
+		virtual ~Star();
 		void render(Mesh*, Material*,GLuint,bool=false);
 		void draw(Mesh*, Material*,GLuint,bool=false);
 };
 
-class Ring{
+class Ring final{
 	private:
 		Material* material;
 		Planet* m_Parent;

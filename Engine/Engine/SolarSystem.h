@@ -2,6 +2,7 @@
 #define SOLARSYSTEM_H
 
 #include "Scene.h"
+#include <unordered_map>
 
 class Star;
 class Object;
@@ -9,7 +10,7 @@ class PlayerShip;
 class GameCamera;
 class Planet;
 
-class SolarSystem: public Scene{
+class SolarSystem final: public Scene{
 	private:
 		std::unordered_map<std::string,Planet*> m_Planets;
 		std::unordered_map<std::string,Planet*> m_Moons;

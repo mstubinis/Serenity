@@ -72,7 +72,7 @@ static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){
 }
 #pragma endregion
 
-class ShaderP{
+class ShaderP final{
 	private:
 		GLuint m_Shader;
 

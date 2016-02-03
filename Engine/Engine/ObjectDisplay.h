@@ -22,7 +22,7 @@ class ObjectDisplay: public Object{
 					  bool isNotLight = true,
 				      Scene* = nullptr
 					 );
-		~ObjectDisplay();
+		virtual ~ObjectDisplay();
 
 		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
 		virtual void render(GLuint=0,bool=false);

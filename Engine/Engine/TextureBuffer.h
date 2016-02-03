@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-class TextureBuffer{
+class TextureBuffer final{
 	private:
 		int m_BufferInternalFormat;
 		int m_BufferFormat;

@@ -9,8 +9,6 @@
 #include "Material.h"
 #include "Camera.h"
 #include "Scene.h"
-#include "Texture.h"
-#include "Font.h"
 #include "Particles.h"
 
 #include <glm/gtx/transform.hpp>
@@ -21,12 +19,18 @@
 
 using namespace Engine::Resources;
 
-//if dt is not set to 1, initialization of objects will be incorrect
+//if m_DeltaTime is not set to 1, initialization of objects will be incorrect
 float Detail::ResourceManagement::m_DeltaTime = 1;
-sf::Window* Detail::ResourceManagement::m_Window = nullptr;
-sf::Mouse* Detail::ResourceManagement::m_Mouse = nullptr;
-Scene* Detail::ResourceManagement::m_CurrentScene = nullptr;
-Camera* Detail::ResourceManagement::m_ActiveCamera = nullptr;
+sf::Window* Detail::ResourceManagement::m_Window = NULL;
+sf::Mouse* Detail::ResourceManagement::m_Mouse = NULL;
+Scene* Detail::ResourceManagement::m_CurrentScene = NULL;
+Camera* Detail::ResourceManagement::m_ActiveCamera = NULL;
+
+std::unordered_map<std::string,Object*> _getObjectsDefaults(){ std::unordered_map<std::string,Object*> k; return k; }
+std::unordered_map<std::string,Object*> Detail::ResourceManagement::m_Objects = _getObjectsDefaults();
+
+std::unordered_map<std::string,Camera*> _getCamerasDefaults(){ std::unordered_map<std::string,Camera*> k; return k; }
+std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras = _getCamerasDefaults();
 
 std::unordered_map<std::string,Font*> _getFontsDefaults(){ std::unordered_map<std::string,Font*> k; return k; }
 std::unordered_map<std::string,Font*> Detail::ResourceManagement::m_Fonts = _getFontsDefaults();
@@ -36,9 +40,6 @@ std::unordered_map<std::string,Texture*> Detail::ResourceManagement::m_Textures 
 
 std::unordered_map<std::string,Scene*> _getScenesDefaults(){ std::unordered_map<std::string,Scene*> k; return k; }
 std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes = _getScenesDefaults();
-
-std::unordered_map<std::string,Camera*> _getCameraDefaults(){ std::unordered_map<std::string,Camera*> k; return k; }
-std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras = _getCameraDefaults();
 
 std::unordered_map<std::string,Mesh*> _getMeshDefaults(){ std::unordered_map<std::string,Mesh*> k; return k; }
 std::unordered_map<std::string,Mesh*> Detail::ResourceManagement::m_Meshes = _getMeshDefaults();
@@ -53,17 +54,16 @@ std::unordered_map<std::string,ShaderP*> _getShaderDefaults(){ std::unordered_ma
 std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders = _getShaderDefaults();
 
 void Engine::Resources::Detail::ResourceManagement::destruct(){
-	for(auto mesh:Detail::ResourceManagement::m_Meshes)         delete mesh.second;
-	for(auto texture:Detail::ResourceManagement::m_Textures)    delete texture.second;
-	for(auto font:Detail::ResourceManagement::m_Fonts)          delete font.second;
-	for(auto mat:Detail::ResourceManagement::m_Materials)       delete mat.second;
-	for(auto pinfo:Detail::ResourceManagement::m_ParticleInfos) delete pinfo.second;
-	for(auto cam:Detail::ResourceManagement::m_Cameras)         delete cam.second;
-	for(auto shaderP:Detail::ResourceManagement::m_Shaders)     delete shaderP.second;
-	for(auto scene:Detail::ResourceManagement::m_Scenes)        delete scene.second;
-	delete Detail::ResourceManagement::m_CurrentScene;
-	delete Detail::ResourceManagement::m_Mouse;
-	delete Detail::ResourceManagement::m_Window;
+	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )              SAFE_DELETE(it->second); 
+	for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )          SAFE_DELETE(it->second); 
+	for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                SAFE_DELETE(it->second);
+	for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )        SAFE_DELETE(it->second);
+	for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it )SAFE_DELETE(it->second);
+	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )            SAFE_DELETE(it->second);
+	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )            SAFE_DELETE(it->second); 
+	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )              SAFE_DELETE(it->second);
+	SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
+	SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
 
 void Engine::Resources::addMesh(std::string name,std::string file){
@@ -114,12 +114,11 @@ void Engine::Resources::initResources(){
 	addShader("Deferred_Final","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_final_frag.glsl");
 	addShader("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
 	addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
+	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
 	addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
 	addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
 	addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
-
-	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
 	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = new Mesh(1.0f,1.0f);
 }

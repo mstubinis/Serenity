@@ -20,7 +20,7 @@ Skybox::Skybox(std::string name,unsigned int numSunFlares,Scene* scene){
 	std::string bottom = "Textures/Skyboxes/" + name + "/Bottom.jpg";
 	std::string names[6] = {front,back,left,right,top,bottom};
 
-	m_Texture = new Texture(names,GL_TEXTURE_CUBE_MAP);
+	m_Texture = new Texture(names,"Cubemap ",GL_TEXTURE_CUBE_MAP);
 	m_Mesh = Resources::getMesh("Skybox");
 
 	if(numSunFlares > 0){
@@ -52,7 +52,7 @@ Skybox::Skybox(std::string name,unsigned int numSunFlares,Scene* scene){
 		scene->setSkybox(this);
 }
 Skybox::~Skybox(){
-	delete m_Texture;
+	SAFE_DELETE(m_Texture);
 }
 void Skybox::_updateMatrix(){
 	glm::vec3 p = Resources::getActiveCamera()->getPosition();

@@ -6,9 +6,23 @@
 #include <GL/GL.h>
 #include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
-class Game;
+
+#include "Engine_Resources.h"
+#include "Engine_Renderer.h"
+#include "Engine_Events.h"
+#include "Engine_Physics.h"
+
 namespace Engine{
-	class EngineClass{
+
+	static sf::Window* getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
+	static sf::Vector2u getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
+	static sf::Mouse* getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
+	static void setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture->getWidth(),texture->getHeight(),texture->getPixelsPtr()); }
+	static void showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
+	static void hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
+	static void stop(){ Resources::getWindow()->close(); }
+
+	class EngineClass final{
 		private:
 			void _initWindow(std::string name, unsigned int width, unsigned int height);
 			void _initGame();
@@ -38,7 +52,6 @@ namespace Engine{
 
 			void _RESET_EVENTS();
 
-			Game* game;
 			GLuint m_vao;
 			sf::Clock clock;
 
@@ -51,5 +64,13 @@ namespace Engine{
 
 			void run();
 	};
+};
+
+namespace Game{
+	void initResources();
+	void initLogic();
+	void update(float);
+	void render();
+	void cleanup();
 };
 #endif

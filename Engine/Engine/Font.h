@@ -23,7 +23,7 @@ struct FontGlyph {
 	 glm::mat4 m_Model;
 	 glm::mat4 m_World;
 };
-class FontData{
+class FontData final{
 	private:
 		Texture* m_FontTexture;
 		std::unordered_map<unsigned char,FontGlyph*> m_FontGlyphs;
@@ -35,7 +35,7 @@ class FontData{
 		Texture* getGlyphTexture() { return m_FontTexture; }
 		FontGlyph* getGlyphData(unsigned char);
 };
-class Font{
+class Font final{
 	private:
 		FontData* m_FontData;
 		std::string m_Name;

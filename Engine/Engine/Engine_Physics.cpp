@@ -45,12 +45,12 @@ void Engine::Physics::Detail::PhysicsManagement::init(){
 	btGImpactCollisionAlgorithm::registerAlgorithm(m_dispatcher);
 }
 void Engine::Physics::Detail::PhysicsManagement::destruct(){
-	delete m_debugDrawer;
-	delete m_dynamicsWorld;
-	delete m_solver;
-	delete m_dispatcher;
-	delete m_collisionConfiguration;
-	delete m_broadphase;
+	SAFE_DELETE(m_debugDrawer);
+	SAFE_DELETE(m_dynamicsWorld);
+	SAFE_DELETE(m_solver);
+	SAFE_DELETE(m_dispatcher);
+	SAFE_DELETE(m_collisionConfiguration);
+	SAFE_DELETE(m_broadphase);
 }
 void Engine::Physics::Detail::PhysicsManagement::_setGravity(float x, float y, float z){ 
 	Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->setGravity(btVector3(x,y,z)); 

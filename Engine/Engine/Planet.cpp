@@ -309,7 +309,7 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 		}
 		count++;
 	}
-	Texture* diffuse = new Texture(ringImage.getPixelsPtr(),ringImage.getSize().x,ringImage.getSize().y,GL_TEXTURE_2D,parent->getName() + "RingsDiffuse");
+	Texture* diffuse = new Texture(ringImage.getPixelsPtr(),ringImage.getSize().x,ringImage.getSize().y,parent->getName() + "RingsDiffuse",GL_TEXTURE_2D);
 	Resources::addMaterial(parent->getName() + "Rings",diffuse,nullptr,nullptr);
 	this->material = Resources::getMaterial(parent->getName() + "Rings");
 }

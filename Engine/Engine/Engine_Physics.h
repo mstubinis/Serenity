@@ -26,9 +26,21 @@ namespace Engine{
 				btCollisionShape* m_Collision;
 				btVector3* m_Inertia;
 				
-				Collision(){ m_Inertia = nullptr; setCollision(nullptr,COLLISION_TYPE_NONE,0); }
-				Collision(btCollisionShape* shape,unsigned int type){ m_Inertia = nullptr; setCollision(shape,type,0); }
-				~Collision(){ delete m_Inertia; delete m_Collision; m_CollisionType = COLLISION_TYPE_NONE; }
+				Collision(){ 
+					m_Inertia = nullptr;
+					m_Collision = nullptr;
+					setCollision(nullptr,COLLISION_TYPE_NONE,0); 
+				}
+				Collision(btCollisionShape* shape,unsigned int type){ 
+					m_Inertia = nullptr;
+					m_Collision = nullptr;
+					setCollision(shape,type,0); 
+				}
+				~Collision(){ 
+					delete m_Inertia; 
+					delete m_Collision; 
+					m_CollisionType = COLLISION_TYPE_NONE; 
+				}
 				void recalculate(float mass){
 					if(m_Collision != nullptr){
 						if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
@@ -64,7 +76,7 @@ namespace Engine{
 				const unsigned int getCollisionType() const { return m_CollisionType; }
 		};
 		namespace Detail{
-			class PhysicsManagement{
+			class PhysicsManagement final{
 				private:
 					static btBroadphaseInterface* m_broadphase;
 					static btDefaultCollisionConfiguration* m_collisionConfiguration;

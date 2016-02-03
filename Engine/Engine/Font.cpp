@@ -19,8 +19,8 @@ FontData::FontData(std::string filename){
 }
 FontData::~FontData(){
 	for(auto glyph:m_FontGlyphs){
-		delete glyph.second->char_mesh;
-		delete glyph.second;
+		SAFE_DELETE(glyph.second->char_mesh);
+		SAFE_DELETE(glyph.second);
 	}
 }
 FontGlyph* FontData::getGlyphData(unsigned char c){ return m_FontGlyphs[c]; }
@@ -64,7 +64,7 @@ Font::Font(std::string filename){
 	Resources::Detail::ResourceManagement::m_Fonts[m_Name] = this;
 }
 Font::~Font(){
-	delete m_FontData;
+	SAFE_DELETE(m_FontData);
 }
 void Font::renderText(std::string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
 	Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));

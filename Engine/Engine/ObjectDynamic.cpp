@@ -15,7 +15,8 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 		m_Collision_Shape = new Engine::Physics::Collision(nullptr,COLLISION_TYPE_NONE);
 		if(m_Mesh != nullptr){
 			if(m_Mesh->getCollision() == nullptr){
-				m_Collision_Shape->setCollision(new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z)),COLLISION_TYPE_BOXSHAPE,m_Mass);
+				//causes memory leaks
+				//m_Collision_Shape->setCollision(new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z)),COLLISION_TYPE_BOXSHAPE,m_Mass);
 			}
 			else
 				m_Collision_Shape->setCollision(m_Mesh->getCollision()->getCollision(),m_Mesh->getCollision()->getCollisionType(),m_Mass);
@@ -49,9 +50,8 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, g
 	}
 }
 ObjectDynamic::~ObjectDynamic(){
-	delete m_Collision_Shape;
-	delete m_RigidBody;
-	delete m_MotionState;
+	SAFE_DELETE(m_RigidBody);
+	SAFE_DELETE(m_MotionState);
 }
 void ObjectDynamic::translate(float x, float y, float z,bool local){
 	m_RigidBody->activate();

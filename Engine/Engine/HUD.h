@@ -7,7 +7,7 @@ class Font;
 class Object;
 class PlayerShip;
 
-class HUD{
+class HUD final{
 	private:
 		unsigned int m_TargetIterator;
 		glm::vec3 m_Color;

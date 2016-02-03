@@ -34,9 +34,7 @@ SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 	}
 }
 SolarSystem::~SolarSystem(){
-	for(auto star:m_Stars)    delete star.second;
-	for(auto planet:m_Planets)delete planet.second;
-	for(auto moon:m_Moons)    delete moon.second;
+
 }
 void SolarSystem::_loadFromFile(std::string filename){
 	unsigned int count = 0;
@@ -130,8 +128,6 @@ void SolarSystem::_loadFromFile(std::string filename){
 					if(boost::filesystem::exists(gloFile)){
 						glowFile = gloFile;
 					}
-
-
 					Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile);
 				}
 
@@ -496,8 +492,6 @@ void SolarSystem::_loadRandomly(){
 	centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){
-	if(Keyboard::isKeyDown("esc"))
-		exit(EXIT_SUCCESS);
 	Scene::update(dt);
 }
 void SolarSystem::render()
