@@ -20,7 +20,7 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 	m_AmbientLighting = ambientLightColor;
 }
 void Scene::centerSceneToObject(Object* center){
-	glm::vec3 offset = -(center->getPosition());
+	glm::dvec3 offset = -(center->getPosition());
 	Scene* s =  Resources::getCurrentScene();
 	for(auto object:s->getObjects()){
 		Object* obj = object.second;
@@ -29,7 +29,7 @@ void Scene::centerSceneToObject(Object* center){
 		}
 	}
 	for(auto emitter:m_ParticleEmitters){
-		glm::vec3 objPos = emitter.second->getPosition();
+		glm::dvec3 objPos = emitter.second->getPosition();
 		emitter.second->setPosition(objPos + offset);
 		for(auto particle:emitter.second->getParticles()){
 			objPos = particle->getPosition();

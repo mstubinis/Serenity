@@ -13,8 +13,8 @@ class Ship: public ObjectDynamic{
 			std::string,                          //Mesh
 			std::string,                          //Material
 			std::string = "Ship",                 //Name
-			glm::vec3 = glm::vec3(0,0,0),         //Position
-			glm::vec3 = glm::vec3(1,1,1),         //Scale
+			glm::dvec3 = glm::dvec3(0),           //Position
+			glm::vec3 = glm::vec3(1),             //Scale
 			Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 			Scene* = nullptr
 		    );
@@ -35,8 +35,8 @@ class PlayerShip: public Ship{
 			std::string,                          //Mesh
 			std::string,                          //Material
 			std::string = "Player Ship",          //Name
-			glm::vec3 = glm::vec3(0,0,0),         //Position
-			glm::vec3 = glm::vec3(1,1,1),         //Scale
+			glm::dvec3 = glm::dvec3(0),           //Position
+			glm::vec3 = glm::vec3(1),             //Scale
 			Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
 			Scene* = nullptr
 		    );

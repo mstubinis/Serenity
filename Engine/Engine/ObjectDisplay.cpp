@@ -7,7 +7,7 @@
 
 using namespace Engine;
 
-ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,Scene* scene):Object(pos,scl,name,scene){
+ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::dvec3 pos, glm::vec3 scl, std::string name,Scene* scene):Object(pos,scl,name,scene){
 	m_Radius = 0;
 	m_Visible = true;
 	m_BoundingBoxRadius = glm::vec3(0);
@@ -34,7 +34,7 @@ void ObjectDisplay::draw(Mesh* mesh, Material* material, GLuint shader, bool deb
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
 	glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(m_Model)));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
@@ -78,14 +78,15 @@ void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z
 bool ObjectDisplay::rayIntersectSphere(Camera* cam){
 	return cam->rayIntersectSphere(this);
 }
-bool ObjectDisplay::rayIntersectSphere(glm::vec3 A, glm::vec3 rayVector){
-	glm::vec3 B = A + rayVector;
+bool ObjectDisplay::rayIntersectSphere(glm::dvec3 A, glm::vec3 rayVector){
+	glm::vec3 a1 = glm::vec3(A);
+	glm::vec3 B = a1 + rayVector;
 
-	glm::vec3 C = getPosition();
+	glm::vec3 C = glm::vec3(getPosition());
 	float r = getRadius();
 
 	//check if point is behind
-	float dot = glm::dot(rayVector,C-A);
+	float dot = glm::dot(rayVector,C-a1);
 	if(dot >= 0)
 		return false;
 

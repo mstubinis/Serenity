@@ -22,18 +22,17 @@ class Object{
 		glm::vec3 _calculateUp();
 	protected:
 		std::string m_Name;
-		glm::vec3 m_Position;
-		glm::mat4 m_Model;
+		glm::dvec3 m_Position;
+		glm::dmat4 m_Model;
 		glm::quat m_Orientation;
 		glm::vec3 m_Scale, m_Forward, m_Right, m_Up;
-		//glm::vec3 m_Position;
 
 		Object* m_Parent;
 		float m_Radius;
 		std::vector<Object*> m_Children;
 	public:
 		Object(
-			    glm::vec3 = glm::vec3(0,0,0),   //Position
+			    glm::dvec3 = glm::dvec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
 			    std::string = "Object",         //Object
 				Scene* = nullptr                //The scene to add the object to (default nullptr = the current scene)
@@ -42,17 +41,18 @@ class Object{
 
 		float getDistance(Object*);
 		unsigned long long getDistanceLL(Object*);
+
 		glm::vec3 getScreenCoordinates();
 
-		virtual void translate(float,float,float,bool local=true); 
-		virtual void translate(glm::vec3,bool local=true);
+		virtual void translate(double,double,double,bool local=true); 
+		virtual void translate(glm::dvec3,bool local=true);
 		virtual void rotate(float,float,float); 
 		virtual void rotate(glm::vec3);
 		virtual void scale(float,float,float); 
 		virtual void scale(glm::vec3);
 
-		virtual void setPosition(float,float,float); 
-		virtual void setPosition(glm::vec3);
+		virtual void setPosition(double,double,double); 
+		virtual void setPosition(glm::dvec3);
 		virtual void setScale(float,float,float); 
 		virtual void setScale(glm::vec3);
 
@@ -66,12 +66,12 @@ class Object{
 		virtual const float getRadius() const { return m_Radius; }
 
 		const glm::quat& getOrientation(){ return m_Orientation; }
-		const glm::vec3 getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+		const glm::dvec3 getPosition(){ return glm::dvec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 		const glm::vec3& getScale() const{ return m_Scale; }
 		const glm::vec3& getForward() const{ return m_Forward; }
 		const glm::vec3& getRight() const{ return m_Right; }
 		const glm::vec3& getUp() const{ return m_Up; }
-		const glm::mat4& getModel() const{ return m_Model; }
+		const glm::dmat4& getModel() const{ return m_Model; }
 		const std::string& getName() const{ return m_Name; }
 		Object* getParent() const{ return m_Parent; }
 		const std::vector<Object*> getChildren() const{ return m_Children; }
@@ -79,6 +79,6 @@ class Object{
 		virtual void setName(std::string);
 
 		virtual bool rayIntersectSphere(Camera*);
-		virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);
+		virtual bool rayIntersectSphere(glm::dvec3 origin, glm::vec3 vector);
 };
 #endif

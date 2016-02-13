@@ -44,7 +44,7 @@ Skybox::Skybox(std::string name,unsigned int numSunFlares,Scene* scene){
 		}
 	}
 	m_Model = glm::mat4(1);
-	m_Model = glm::translate(m_Model, Resources::getActiveCamera()->getPosition());
+	m_Model = glm::translate(m_Model, glm::vec3(Resources::getActiveCamera()->getPosition()));
 	m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
 
 	if(scene == nullptr) scene = Resources::getCurrentScene();
@@ -55,7 +55,7 @@ Skybox::~Skybox(){
 	SAFE_DELETE(m_Texture);
 }
 void Skybox::_updateMatrix(){
-	glm::vec3 p = Resources::getActiveCamera()->getPosition();
+	glm::dvec3 p = Resources::getActiveCamera()->getPosition();
 	m_Model[3][0] = p.x;
 	m_Model[3][1] = p.y;
 	m_Model[3][2] = p.z;
@@ -68,7 +68,7 @@ glm::vec2 Skybox::getScreenCoordinates(glm::vec3 objPos){
 	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
-	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),glm::vec3(objPos-Resources::getActiveCamera()->getPosition()));
+	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),glm::vec3(objPos-glm::vec3(Resources::getActiveCamera()->getPosition())));
 
 	if(dot < 0.0f){
 		return glm::vec2(screen.x,windowSize.y-screen.y);
@@ -113,7 +113,7 @@ void Skybox::render(){
 		shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 		glUseProgram(shader);
 		for(auto flare:m_SunFlares){
-			glm::vec2 pos = getScreenCoordinates(Resources::getActiveCamera()->getPosition() - flare.position);
+			glm::vec2 pos = getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position);
 			glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
 			glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
 

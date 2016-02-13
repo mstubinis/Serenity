@@ -11,7 +11,7 @@
 using namespace Engine;
 using namespace Engine::Events;
 
-Ship::Ship(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Ship::Ship(std::string mesh, std::string mat, std::string name,glm::dvec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
 	m_WarpFactor = 0;
 	m_IsWarping = false;
 	m_Target = nullptr;
@@ -30,7 +30,7 @@ void Ship::translateWarp(float amount){
 void Ship::setTarget(Object* target){
 	m_Target = target;
 }
-PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::vec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
+PlayerShip::PlayerShip(std::string mesh, std::string mat, std::string name,glm::dvec3 pos, glm::vec3 scl, Engine::Physics::Collision* collision,Scene* scene): Ship(mesh,mat,name,pos,scl,collision,scene){
 	m_Camera = static_cast<GameCamera*>(Resources::getActiveCamera());
 	m_Camera->follow(this);
 
@@ -44,9 +44,9 @@ void PlayerShip::setTarget(Object* target){
 }
 void PlayerShip::update(float dt){
 	if(m_IsWarping && m_WarpFactor > 0){
-		float speed = (m_WarpFactor * 1.0f/0.46f)*2;
+		double speed = (m_WarpFactor * 1.0/0.46)*2.0;
 
-		glm::vec3 s = (getForward() * glm::pow(speed,20.0f))/getMass();
+		glm::dvec3 s = (glm::dvec3(getForward()) * glm::pow(speed,20.0))/static_cast<double>(getMass());
 
 		for(auto obj:Resources::getCurrentScene()->getObjects()){
 			if((obj.second->getName().find("Skybox") == std::string::npos) && (obj.second->getName().find("Camera") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){

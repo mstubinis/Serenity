@@ -144,9 +144,9 @@ void SolarSystem::_loadFromFile(std::string filename){
 				}
 
 				if(line[0] == 'S'){//Sun
-					Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(0,0,0),static_cast<float>(RADIUS),NAME,this);
+					Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::dvec3(0),static_cast<float>(RADIUS),NAME,this);
 					if(PARENT != ""){
-						star->setPosition(getObjects()[PARENT]->getPosition()+glm::vec3(xPos,0,zPos));
+						star->setPosition(getObjects()[PARENT]->getPosition()+glm::dvec3(xPos,0,zPos));
 					}
 					m_Stars[NAME] = star;
 				}
@@ -157,7 +157,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
 					else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
+					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::dvec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
 						Object* parent = getObjects()[PARENT];
 						planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -178,7 +178,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
 					else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
+					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::dvec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
 						Object* parent = getObjects()[PARENT];
 						planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -192,9 +192,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += parentX;
 						zPos += parentZ;
 					}
-					float realX = static_cast<float>(xPos);
-					float realZ = static_cast<float>(zPos);
-					player = new PlayerShip("Dreadnought","Dreadnought",NAME,glm::vec3(realX,0,realZ),glm::vec3(1),nullptr,this);
+					player = new PlayerShip("Dreadnought","Dreadnought",NAME,glm::dvec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
 
 				}
 				else if(line[0] == '$'){//Other ship
@@ -204,9 +202,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += parentX;
 						zPos += parentZ;
 					}
-					float realX = static_cast<float>(xPos);
-					float realZ = static_cast<float>(zPos);
-					new Ship("Akira","Akira",NAME,glm::vec3(realX,0,realZ),glm::vec3(1),nullptr,this);
+					new Ship("Akira","Akira",NAME,glm::dvec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
 				}
 				else if(line[0] == 'R'){//Rings
 					if(PARENT != ""){
@@ -290,7 +286,7 @@ void SolarSystem::_loadRandomly(){
 		posX = glm::sin(randomDegree) * position;
 		posZ = glm::cos(randomDegree) * position;
 
-		star = new Star(starColor,lightColor,glm::vec3(posX,0,posZ),radius,"Star " + boost::lexical_cast<std::string>(1 + i),this);
+		star = new Star(starColor,lightColor,glm::dvec3(posX,0,posZ),radius,"Star " + boost::lexical_cast<std::string>(1 + i),this);
 		m_Stars["Star " + boost::lexical_cast<std::string>(1 + i)] = star;
 	}
 	#pragma endregion
@@ -298,23 +294,23 @@ void SolarSystem::_loadRandomly(){
 	#pragma region CheckStarPositions
 	//check if any stars are too close to each other, and move them accordingly
 	bool allStarsGood = true;
-	glm::vec3 centerOfMassPosition;
+	glm::dvec3 centerOfMassPosition;
 
 	std::vector<float> starMasses;
-	std::vector<glm::vec3> starPositions;
-	float totalMasses = 0.0f;
-	float biggestRadius = 0.0f;
+	std::vector<glm::dvec3> starPositions;
+	double totalMasses = 0.0;
+	double biggestRadius = 0.0;
 	for(auto star:m_Stars){
 		for(auto otherStar:m_Stars){
 			if(star != otherStar){
-				float biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
+				double biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
 				unsigned long long dist = star.second->getDistanceLL(otherStar.second);
 				if(dist < biggerRadius * 10.0f){
 					allStarsGood = false;
 				}
 			}
 		}
-		biggestRadius = glm::max(star.second->getRadius(),biggestRadius);
+		biggestRadius = glm::max(static_cast<double>(star.second->getRadius()),biggestRadius);
 		starPositions.push_back(star.second->getPosition());
 		starMasses.push_back(star.second->getRadius());
 		totalMasses += star.second->getRadius();
@@ -330,10 +326,10 @@ void SolarSystem::_loadRandomly(){
 
 	while(!allStarsGood){
 		for(auto star:m_Stars){
-			glm::vec3 starPos = star.second->getPosition();
-			glm::vec3 offset = starPos - centerOfMassPosition;
-			glm::vec3 normOffset = glm::normalize(offset);
-			star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*2.0f));
+			glm::dvec3 starPos = star.second->getPosition();
+			glm::dvec3 offset = starPos - centerOfMassPosition;
+			glm::dvec3 normOffset = glm::normalize(offset);
+			star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*2.0));
 		}
 		allStarsGood = true;
 		for(auto star:m_Stars){
@@ -394,19 +390,19 @@ void SolarSystem::_loadRandomly(){
 		for(unsigned int i = 0; i < numberOfPlanets; i++){
 			Planet* planet = nullptr;
 
-			float maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
+			double maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
 			maxPositionAwayFromSun -= (maxPositionAwayFromSun / 4.0f);
 			if(m_Stars.size() == 1)
 				maxPositionAwayFromSun = glm::abs(glm::length(star.second->getRadius()*2000.0f));
-			float minPositionAwayFromSun = star.second->getRadius() * 4.0f;
-			float positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
+			double minPositionAwayFromSun = star.second->getRadius() * 4.0f;
+			double positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
 
-			float posX,posZ;
-			float randomDegree = rand() % 36000 / 100.0f;
+			double posX,posZ;
+			double randomDegree = rand() % 36000 / 100.0f;
 			posX = sin(randomDegree) * positionAwayFromSun;
 			posZ = cos(randomDegree) * positionAwayFromSun;
 
-			float RADIUS = static_cast<float>(500 + rand() % 85000)*10.0f;
+			double RADIUS = (500.0 + rand() % 85000)*10.0;
 			PlanetType PLANET_TYPE = PLANET_TYPE_ROCKY;
 			if(RADIUS <= 15000){
 				float chance = rand() % 1000 / 1000.0f;
@@ -425,7 +421,7 @@ void SolarSystem::_loadRandomly(){
 
 			//dist of earth from sun 149,600,000. radius of sun 695,800
 			//planets with atmosphere must be roughly 215 sun radius's away (Earth like) to min 155 away (Venus) and max 327 (Mars)
-			if(positionAwayFromSun > 155 * star.second->getRadius() && positionAwayFromSun < 327 * star.second->getRadius()){
+			if(positionAwayFromSun > 155.0 * star.second->getRadius() && positionAwayFromSun < 327.0 * star.second->getRadius()){
 				float chance = rand() % 1000 / 1000.0f;
 				if(chance > 0.5f)
 					ATMOSPHERE_HEIGHT = 0.025f;
@@ -466,7 +462,7 @@ void SolarSystem::_loadRandomly(){
 			if(boost::filesystem::exists(diffuseFile)){
 				Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
 
-				planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(posX,0,posZ),RADIUS,"Planet " + boost::lexical_cast<std::string>(i + 1),ATMOSPHERE_HEIGHT,this);
+				planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::dvec3(posX,0,posZ),RADIUS,"Planet " + boost::lexical_cast<std::string>(i + 1),ATMOSPHERE_HEIGHT,this);
 
 				float R = (rand() % 1000)/1000.0f;
 				float G = (rand() % 1000)/1000.0f;
@@ -509,7 +505,7 @@ void SolarSystem::_loadRandomly(){
 	}
 	//Then load moons. Generally the number of moons depends on the type of planet. Giants have more moons than normal planets, etc..
 
-	player = new PlayerShip("Akira","Akira","USS Thunderchild",glm::vec3(0),glm::vec3(1),nullptr,this);
+	player = new PlayerShip("Akira","Akira","USS Thunderchild",glm::dvec3(0),glm::vec3(1),nullptr,this);
 	centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){

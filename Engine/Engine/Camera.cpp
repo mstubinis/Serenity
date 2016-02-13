@@ -8,7 +8,7 @@
 
 using namespace Engine;
 
-Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create a perspective camera
+Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::dvec3(0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
@@ -18,11 +18,11 @@ Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _ne
 	m_Type = CAMERA_TYPE_PERSPECTIVE;
 
 	setPerspectiveProjection();
-	lookAt(getPosition(),getPosition() + getForward(), getUp());
+	lookAt(getPosition(),getPosition() + glm::dvec3(getForward()), glm::dvec3(getUp()));
 
 	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
 }
-Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create an orthographic camera
+Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::dvec3(0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
@@ -32,7 +32,7 @@ Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal,
 	m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
 	setOrthoProjection(leftVal,rightVal,bottomVal,topVal);
-	lookAt(getPosition(),getPosition() + getForward(), getUp());
+	lookAt(getPosition(),getPosition() + glm::dvec3(getForward()), glm::dvec3(getUp()));
 
 	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
 }
@@ -58,7 +58,7 @@ void Camera::_constructFrustrum(){
 bool Camera::sphereIntersectTest(ObjectDisplay* sphere){
 	return sphereIntersectTest(sphere->getPosition(),sphere->getRadius());
 }
-bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
+bool Camera::sphereIntersectTest(glm::dvec3 pos, float radius){
 	for (unsigned int i = 0; i < 6; i++){
 		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
 		if (dist > 0){
@@ -90,18 +90,18 @@ void Camera::setAspectRatio(float ratio){
 	m_AspectRatio = ratio;
 	setPerspectiveProjection();
 }
-void Camera::lookAt(glm::vec3 target){ 
-	m_View = glm::lookAt(getPosition(),target,getUp());
+void Camera::lookAt(glm::dvec3 target){ 
+	m_View = glm::lookAt(getPosition(),target,glm::dvec3(getUp()));
 }
-void Camera::lookAt(glm::vec3 target,glm::vec3 up){ 
+void Camera::lookAt(glm::dvec3 target,glm::dvec3 up){ 
 	m_View = glm::lookAt(getPosition(),target,up); 
 }
-void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){ 
+void Camera::lookAt(glm::dvec3 eye,glm::dvec3 target,glm::dvec3 up){ 
 	m_View = glm::lookAt(eye,target,up); 
 }
 void Camera::lookAt(Object* target, bool targetUp){
-	if(!targetUp) m_View = glm::lookAt(getPosition(),target->getPosition(),getUp());
-	else m_View = glm::lookAt(getPosition(),target->getPosition(),target->getUp());
+	if(!targetUp) m_View = glm::lookAt(getPosition(),target->getPosition(),glm::dvec3(getUp()));
+	else m_View = glm::lookAt(getPosition(),target->getPosition(),glm::dvec3(target->getUp()));
 }
 glm::mat4 Camera::calculateProjection(glm::mat4 modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * modelMatrix; }

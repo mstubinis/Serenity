@@ -213,7 +213,7 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
     glClear(GL_COLOR_BUFFER_BIT);
 
 	GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();
-	glm::vec3 camPos = Resources::getActiveCamera()->getPosition();
+	glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	glUseProgram(shader);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));

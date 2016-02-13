@@ -16,7 +16,7 @@ class ObjectDisplay: public Object{
 	public:
 		ObjectDisplay(std::string = "",
 				      std::string = "",
-					  glm::vec3 = glm::vec3(0,0,0),
+					  glm::dvec3 = glm::dvec3(0,0,0),
 					  glm::vec3 = glm::vec3(1,1,1),
 					  std::string = "Visible Object",
 				      Scene* = nullptr
@@ -42,6 +42,6 @@ class ObjectDisplay: public Object{
 		void setVisible(bool b);
 
 		bool rayIntersectSphere(Camera*);
-		bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);
+		bool rayIntersectSphere(glm::dvec3 origin, glm::vec3 vector);
 };
 #endif

@@ -132,10 +132,10 @@ float _genRadius(std::vector<glm::vec3>& temp){
 std::vector<glm::vec3> Lagrange::m_Vertices = _genBuffer();
 float Lagrange::radius = _genRadius(Lagrange::m_Vertices);
 
-Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type, std::string _name,Scene* _scene): Object(glm::vec3(0),glm::vec3(1),_name,_scene){
+Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type, std::string _name,Scene* _scene): Object(glm::dvec3(0),glm::vec3(1),_name,_scene){
 	_init(_planet1,_planet2,_type);
 }
-Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, std::string _type, std::string _name,Scene* _scene): Object(glm::vec3(0),glm::vec3(1),_name,_scene){
+Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, std::string _type, std::string _name,Scene* _scene): Object(glm::dvec3(0),glm::vec3(1),_name,_scene){
 	LAGRANGE_TYPE type;
 	std::transform(_type.begin(), _type.end(), _type.begin(),std::tolower);
 	if(_type == "l1")      type = LAGRANGE_TYPE_L1;
@@ -160,7 +160,7 @@ Lagrange::~Lagrange(){
 
 }
 void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
-	glm::vec3 position = glm::vec3(0);
+	glm::dvec3 position = glm::dvec3(0);
 
 	//first off we want the bigger body to be p1, the other is p2.
 	Planet* p1 = m_Planet1; Planet* p2 = m_Planet2;
@@ -176,13 +176,13 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 	float step1 = actualDistance / (sizeRatio + 1);
 	float distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
 
-	glm::vec3 unitVector = glm::normalize(p2->getPosition() - p1->getPosition());
+	glm::dvec3 unitVector = glm::normalize(p2->getPosition() - p1->getPosition());
 
 
-	glm::vec3 xaxis = glm::cross(glm::vec3(0,1,0), unitVector);
+	glm::dvec3 xaxis = glm::cross(glm::dvec3(0,1,0), unitVector);
     glm::normalize(xaxis);
 
-    glm::vec3 yaxis = glm::cross(unitVector, xaxis);
+    glm::dvec3 yaxis = glm::cross(unitVector, xaxis);
 	glm::normalize(yaxis);
 
 	glm::mat3x3 rot;
@@ -220,7 +220,7 @@ void Lagrange::draw(Mesh* mesh, Material* mat,GLuint shader, bool debug){
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
 	glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(m_Model)));
 
 	glUniform1i(glGetUniformLocation(shader, "DiffuseMapEnabled"),0);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);

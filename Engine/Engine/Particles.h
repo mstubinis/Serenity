@@ -36,7 +36,7 @@ class ParticleEmitter: public Object{
 		ParticleInfo* m_info;
 		std::vector<Particle*> m_Particles;
 	public:
-		ParticleEmitter(ParticleInfo*, glm::vec3 = glm::vec3(0,0,0), glm::vec3 = glm::vec3(1,1,1) ,std::string = "Particle Emitter", Scene* = nullptr);
+		ParticleEmitter(ParticleInfo*, glm::dvec3 = glm::dvec3(0), glm::vec3 = glm::vec3(1) ,std::string = "Particle Emitter", Scene* = nullptr);
 		virtual ~ParticleEmitter();
 
 		std::vector<Particle*> getParticles(){ return m_Particles; }
@@ -68,12 +68,12 @@ class Particle{
 		float zRot;
 		float zRotVelocity;
 	public:
-		Particle(ParticleEmitter*,glm::vec3 pos,glm::vec4 col,glm::vec2 scl = glm::vec2(1,1) ,float rot = 0,glm::vec3 vel = glm::vec3(0,0,0),float rVel = 0, glm::vec2 sVel = glm::vec2(0,0));
+		Particle(ParticleEmitter*,glm::dvec3 pos,glm::vec4 col,glm::vec2 scl = glm::vec2(1,1) ,float rot = 0,glm::vec3 vel = glm::vec3(0,0,0),float rVel = 0, glm::vec2 sVel = glm::vec2(0,0));
 		~Particle();
 		void update(float);
 
-		void setPosition(float,float,float); 
-		void setPosition(glm::vec3);
+		void setPosition(double,double,double); 
+		void setPosition(glm::dvec3);
 
 		const bool ToBeErased() const { return toBeErased; }
 

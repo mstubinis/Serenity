@@ -10,7 +10,7 @@
 
 using namespace Engine;
 
-Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
+Planet::Planet(std::string mat, PlanetType type, glm::dvec3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
 	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
 	m_OrbitInfo = nullptr;
@@ -42,7 +42,7 @@ void Planet::update(float dt){
 		double newX = parentPos.x - glm::cos(m_OrbitInfo->angle)*a;
 		double newZ = parentPos.z - glm::sin(m_OrbitInfo->angle)*b;
 
-		setPosition(glm::vec3(newX,0,newZ));
+		setPosition(newX,0,newZ);
 	}
 	for(auto ring:m_Rings)  ring->update(dt);
 
@@ -66,7 +66,7 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			float outerRadius = innerRadius + (innerRadius * m_AtmosphereHeight);
 
 			glm::mat4 mod = glm::mat4(1);
-			mod = glm::translate(mod,m_Position);
+			mod = glm::translate(mod,glm::vec3(m_Position));
 			mod *= glm::mat4_cast(m_Orientation);
 			mod = glm::scale(mod,m_Scale);
 
@@ -105,13 +105,13 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			glUniform1i(glGetUniformLocation(shader,"nSamples"), 2);
 			glUniform1f(glGetUniformLocation(shader,"fSamples"), 2.0f);
 
-			glm::vec3 camPos = activeCamera->getPosition() - getPosition();
+			glm::vec3 camPos = glm::vec3(activeCamera->getPosition() - getPosition());
 			glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), camPos.x,camPos.y,camPos.z);
 
 			glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
 			glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
-			glm::vec3 lightDir = Resources::getCurrentScene()->getLights().begin()->second->getPosition() - getPosition();
+			glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->getLights().begin()->second->getPosition() - getPosition());
 			lightDir = glm::normalize(lightDir);
 			glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
@@ -171,7 +171,7 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			mod = glm::mat4(1);
-			mod = glm::translate(mod,m_Position);
+			mod = glm::translate(mod,glm::vec3(m_Position));
 			mod = glm::scale(mod,m_Scale);
 			mod = glm::scale(mod,glm::vec3(1 + m_AtmosphereHeight));
 
@@ -234,8 +234,8 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
-Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
-	m_Light = new SunLight(glm::vec3(0),name + " Light",LIGHT_TYPE_SUN,scene);
+Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::dvec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
+	m_Light = new SunLight(glm::dvec3(0),name + " Light",LIGHT_TYPE_SUN,scene);
 	m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 	setColor(starColor.x,starColor.y,starColor.z,1);
 	m_Material->setShadeless(true);
@@ -352,14 +352,14 @@ void Ring::update(float dt){
 }
 void Ring::draw(GLuint shader){
 	Camera* activeCamera = Resources::getActiveCamera();
-	glm::mat4 model = m_Parent->getModel();
+	glm::dmat4 model = m_Parent->getModel();
 	Mesh* mesh = Resources::getMesh("Ring");
 	float radius = mesh->getRadius() * m_Parent->getScale().x;
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
 	glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
 	glm::vec4 color = m_Parent->getColor();
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
 	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));

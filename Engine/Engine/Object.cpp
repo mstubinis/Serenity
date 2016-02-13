@@ -7,7 +7,7 @@
 
 using namespace Engine;
 
-Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,Scene* scene){
+Object::Object(glm::dvec3 pos, glm::vec3 scl,std::string name,Scene* scene){
 	m_Radius = 0;
 	m_Forward = glm::vec3(0,0,-1);
 	m_Right = glm::vec3(1,0,0);
@@ -16,7 +16,7 @@ Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,Scene* scene){
 	m_Parent = nullptr;
 
 	m_Name = name;
-	m_Model = glm::mat4(1);
+	m_Model = glm::dmat4(1);
 	m_Orientation = glm::quat();
 
 	Object::setPosition(pos);
@@ -57,19 +57,19 @@ glm::vec3 Object::_calculateUp(){
                                      1 - 2 * (x * x + z * z),
                                      2 * (y * z + w * x)));
 }
-void Object::translate(float x, float y, float z,bool local){
-	glm::vec3 offset = glm::vec3(0);
+void Object::translate(double x, double y, double z,bool local){
+	glm::dvec3 offset = glm::dvec3(0);
 	if(local){
-		offset += getForward() * z;
-		offset += getRight() * x;
-		offset += getUp() * y;
+		offset += glm::dvec3(getForward()) * z;
+		offset += glm::dvec3(getRight()) * x;
+		offset += glm::dvec3(getUp()) * y;
 	}
 	else{
-		offset += glm::vec3(x,y,z);
+		offset += glm::dvec3(x,y,z);
 	}
 	this->setPosition(this->getPosition() + offset);
 }
-void Object::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
+void Object::translate(glm::dvec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 void Object::rotate(float x, float y, float z){ 
 	float threshold = 0;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
@@ -91,7 +91,7 @@ void Object::scale(float x, float y, float z){
 	m_Scale.z += z * dt; 
 }
 void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
-void Object::setPosition(float x, float y, float z){ 
+void Object::setPosition(double x, double y, double z){ 
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
@@ -100,13 +100,13 @@ void Object::setPosition(float x, float y, float z){
 		m_Model = m_Parent->m_Model;
 	}
 	else{
-		m_Model = glm::mat4(1);
+		m_Model = glm::dmat4(1);
 	}
 	m_Model = glm::translate(m_Model, m_Position);
-	m_Model *= glm::mat4_cast(m_Orientation);
-	m_Model = glm::scale(m_Model,m_Scale);
+	m_Model *= glm::dmat4(glm::mat4_cast(m_Orientation));
+	m_Model = glm::scale(m_Model,glm::dvec3(m_Scale));
 }
-void Object::setPosition(glm::vec3 position){ setPosition(position.x,position.y,position.z); }
+void Object::setPosition(glm::dvec3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
 	m_Scale.x = x; 
 	m_Scale.y = y; 
@@ -116,18 +116,17 @@ void Object::setScale(glm::vec3 scale){ setScale(scale.x,scale.y,scale.z); }
 void Object::update(float dt){
 	if(m_Parent != nullptr){
 		m_Model = m_Parent->m_Model;
-		//m_Model = glm::scale(m_Model,1.0f/m_Parent->getScale());
 	}
 	else{
-		m_Model = glm::mat4(1);
+		m_Model = glm::dmat4(1);
 	}
 	m_Model = glm::translate(m_Model, m_Position);
-	m_Model *= glm::mat4_cast(m_Orientation);
-	m_Model = glm::scale(m_Model,m_Scale);
+	m_Model *= glm::dmat4(glm::mat4_cast(m_Orientation));
+	m_Model = glm::scale(m_Model,glm::dvec3(m_Scale));
 }
 
-float Object::getDistance(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
-unsigned long long Object::getDistanceLL(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
+float Object::getDistance(Object* other){ glm::dvec3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
+unsigned long long Object::getDistanceLL(Object* other){ glm::dvec3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::addChild(Object* child){
 	child->m_Parent = this;
 	m_Children.push_back(child);
@@ -144,13 +143,13 @@ void Object::setName(std::string name){
 }
 glm::vec3 Object::getScreenCoordinates(){
 	glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
-	glm::vec3 objPos = getPosition();
+	glm::vec3 objPos = glm::vec3(getPosition());
 	glm::mat4 MV = Resources::getActiveCamera()->getView();
 	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
 	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
 
 	//check if point is behind
-	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),glm::vec3(objPos-Resources::getActiveCamera()->getPosition()));
+	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos-glm::vec3(Resources::getActiveCamera()->getPosition()));
 
 	float resX = static_cast<float>(screen.x);
 	float resY = static_cast<float>(windowSize.y-screen.y);
@@ -184,6 +183,6 @@ void Object::render(GLuint shader,bool debug){}
 bool Object::rayIntersectSphere(Camera* cam){
 	return false;
 }
-bool Object::rayIntersectSphere(glm::vec3 origin, glm::vec3 vector){
+bool Object::rayIntersectSphere(glm::dvec3 origin, glm::vec3 vector){
 	return false;
 }
