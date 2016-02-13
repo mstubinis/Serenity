@@ -9,7 +9,7 @@
 
 using namespace Engine;
 
-SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,false,scene){
+SunLight::SunLight(glm::vec3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,scene){
 	m_Type = type;
 
     m_AmbientIntensity = 0.05f;
@@ -43,7 +43,9 @@ void SunLight::setName(std::string name){
 void SunLight::update(float dt){
 	Object::update(dt);
 }
-void SunLight::render(GLuint shader){ 
+void SunLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void SunLight::draw(Mesh* mesh, Material* mat, GLuint shader, bool debug){ }
+void SunLight::lighten(GLuint shader){ 
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
@@ -58,21 +60,17 @@ void SunLight::render(GLuint shader){
 
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
-}
-void SunLight::renderDebug(GLuint shader){
-	if(m_Parent == nullptr)
-		glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
-	else
-		glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Parent->getModel()));
-	m_Mesh->render();
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
 DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0,0,0),"Directional Light",LIGHT_TYPE_DIRECTIONAL,scene){
 	m_Direction = dir;
 }
 DirectionalLight::~DirectionalLight(){
 }
-void DirectionalLight::render(GLuint shader){
+
+void DirectionalLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void DirectionalLight::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void DirectionalLight::lighten(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
@@ -82,7 +80,7 @@ void DirectionalLight::render(GLuint shader){
 
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
 
 PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Point Light",LIGHT_TYPE_POINT,scene){
@@ -92,7 +90,9 @@ PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Point Light",L
 }
 PointLight::~PointLight(){
 }
-void PointLight::render(GLuint shader){
+void PointLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void PointLight::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void PointLight::lighten(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
@@ -111,7 +111,7 @@ void PointLight::render(GLuint shader){
 
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
 SpotLight::SpotLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);
@@ -119,6 +119,7 @@ SpotLight::SpotLight(glm::vec3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGH
 }
 SpotLight::~SpotLight(){
 }
-void SpotLight::render(GLuint shader)
-{
+void SpotLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void SpotLight::draw(Mesh* mesh, Material* mat, GLuint shader, bool debug){ }
+void SpotLight::lighten(GLuint shader){
 }

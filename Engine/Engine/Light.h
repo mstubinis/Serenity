@@ -10,11 +10,15 @@ class SunLight: public ObjectDisplay{
 		float m_AmbientIntensity, m_DiffuseIntensity;
 	public:
 		SunLight(glm::vec3 = glm::vec3(0,0,0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
-		~SunLight();
+		virtual ~SunLight();
 
 		void update(float);
-		virtual void render(GLuint);
-		void renderDebug(GLuint);
+
+		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
+		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+
+		virtual void lighten(GLuint);
+
 		void setName(std::string);
 };
 class DirectionalLight: public SunLight{
@@ -22,9 +26,12 @@ class DirectionalLight: public SunLight{
         glm::vec3 m_Direction;
 	public:
 		DirectionalLight(glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
-		~DirectionalLight();
+		virtual ~DirectionalLight();
 
-		void render(GLuint);
+		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
+		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+
+		virtual void lighten(GLuint);
 };
 class PointLight: public SunLight{
 	protected:
@@ -32,9 +39,12 @@ class PointLight: public SunLight{
 
 	public:
 		PointLight(glm::vec3 = glm::vec3(0,0,0), Scene* = nullptr);
-		~PointLight();
+		virtual ~PointLight();
 
-		void render(GLuint);
+		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
+		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+
+		virtual void lighten(GLuint);
 };
 class SpotLight: public SunLight{
 	private:
@@ -43,8 +53,11 @@ class SpotLight: public SunLight{
 
 	public:
 		SpotLight(glm::vec3, Scene* = nullptr);
-		~SpotLight();
+		virtual ~SpotLight();
 
-		void render(GLuint);
+		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
+		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+
+		virtual void lighten(GLuint);
 };
 #endif

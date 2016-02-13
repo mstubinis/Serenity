@@ -10,7 +10,7 @@
 #include <SFML/System.hpp>
 
 Engine::EngineClass::EngineClass(std::string name, unsigned int width, unsigned int height){
-	srand(static_cast<unsigned int>(time(NULL)));
+	srand((unsigned)time(0));
 	_initWindow(name,width,height);
 	_initGame();
 }

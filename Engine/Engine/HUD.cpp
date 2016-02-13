@@ -27,7 +27,7 @@ void HUD::update(float dt){
 	if(Keyboard::isKeyDownOnce(",")){
 		SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
 
-		Object* target = scene->getObject("Earth Lagrange Point L1");
+		Object* target = scene->getObject("Earth");
 		m_Player->setTarget(target);
 
 	}

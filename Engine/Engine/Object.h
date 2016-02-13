@@ -22,6 +22,7 @@ class Object{
 		glm::vec3 _calculateUp();
 	protected:
 		std::string m_Name;
+		glm::vec3 m_Position;
 		glm::mat4 m_Model;
 		glm::quat m_Orientation;
 		glm::vec3 m_Scale, m_Forward, m_Right, m_Up;
@@ -35,7 +36,6 @@ class Object{
 			    glm::vec3 = glm::vec3(0,0,0),   //Position
 			    glm::vec3 = glm::vec3(1,1,1),   //Scale
 			    std::string = "Object",         //Object
-				bool isNotLight = true,
 				Scene* = nullptr                //The scene to add the object to (default nullptr = the current scene)
 			  );
 		virtual ~Object();
@@ -59,7 +59,6 @@ class Object{
 		void addChild(Object*);
 
 		virtual void update(float);
-		virtual void _updateMatrix();
 		virtual void render(Mesh*,Material*,GLuint shader=0,bool=false);
 		virtual void render(GLuint shader=0,bool=false);
 		virtual void draw(Mesh*,Material*,GLuint shader,bool=false);
@@ -74,7 +73,7 @@ class Object{
 		const glm::vec3& getUp() const{ return m_Up; }
 		const glm::mat4& getModel() const{ return m_Model; }
 		const std::string& getName() const{ return m_Name; }
-		const Object* getParent() const{ return m_Parent; }
+		Object* getParent() const{ return m_Parent; }
 		const std::vector<Object*> getChildren() const{ return m_Children; }
 
 		virtual void setName(std::string);

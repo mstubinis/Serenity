@@ -1,4 +1,4 @@
-#include "Engine_Resources.h"
+﻿#include "Engine_Resources.h"
 #include "Light.h"
 #include "Planet.h"
 #include "ShaderProgram.h"
@@ -10,18 +10,43 @@
 
 using namespace Engine;
 
-Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,true,scene){
+Planet::Planet(std::string mat, PlanetType type, glm::vec3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
 	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
+	m_OrbitInfo = nullptr;
+	m_RotationInfo = nullptr;	
 }
 Planet::~Planet(){
-	for(auto ring:m_Rings)
-		delete ring;
+	for(auto ring:m_Rings)    SAFE_DELETE(ring);
+	SAFE_DELETE(m_OrbitInfo);
+	SAFE_DELETE(m_RotationInfo);
 }
 void Planet::update(float dt){
+	if(m_RotationInfo != nullptr){
+		float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
+		double secondsToRotate = m_RotationInfo->days * 86400.0;
+		double finalSpeed = 1.0 / (secondsToRotate * static_cast<double>(speed));
+		rotate(0,static_cast<float>(finalSpeed),0);
+	}
+	if(m_OrbitInfo != nullptr){
+		//earth's orbital speed is 30km/sec
+
+		glm::dvec3 parentPos = glm::dvec3(m_OrbitInfo->parent->getPosition());
+
+		//6.283188 is the radian limit (360 degrees to raidians)
+		m_OrbitInfo->angle += ((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188;
+
+		double a = m_OrbitInfo->majorRadius;
+		double b = m_OrbitInfo->minorRadius;
+
+		double newX = parentPos.x - glm::cos(m_OrbitInfo->angle)*a;
+		double newZ = parentPos.z - glm::sin(m_OrbitInfo->angle)*b;
+
+		setPosition(glm::vec3(newX,0,newZ));
+	}
+	for(auto ring:m_Rings)  ring->update(dt);
+
 	Object::update(dt);
-	for(auto ring:m_Rings)
-		ring->update(dt);
 }
 void Planet::render(Mesh* mesh, Material* material,GLuint shader,bool debug){
 	shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
@@ -40,9 +65,18 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			float innerRadius = m_Radius;
 			float outerRadius = innerRadius + (innerRadius * m_AtmosphereHeight);
 
+			glm::mat4 mod = glm::mat4(1);
+			mod = glm::translate(mod,m_Position);
+			mod *= glm::mat4_cast(m_Orientation);
+			mod = glm::scale(mod,m_Scale);
+
+			glm::mat4 rot = glm::mat4(1);
+			rot *= glm::mat4_cast(m_Orientation);
+
 			glUseProgram(shader);
 			glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-			glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+			glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(mod));
+			glUniformMatrix4fv(glGetUniformLocation(shader, "Rot" ), 1, GL_FALSE, glm::value_ptr(rot));
 
 			glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 			glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
@@ -136,11 +170,13 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
    			glBlendFunc(GL_ONE, GL_ONE);
 			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			glm::mat4 obj = m_Model;
-			obj = glm::scale(obj,glm::vec3(1 + m_AtmosphereHeight));
+			mod = glm::mat4(1);
+			mod = glm::translate(mod,m_Position);
+			mod = glm::scale(mod,m_Scale);
+			mod = glm::scale(mod,glm::vec3(1 + m_AtmosphereHeight));
 
 			glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-			glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(obj));
+			glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(mod));
 			glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 			glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
@@ -208,7 +244,6 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, s
 	addChild(m_Light);
 }
 Star::~Star(){
-	delete m_Light;
 }
 void Star::render(Mesh* mesh,Material* material,GLuint shader,bool debug){
 	ObjectDisplay::render(mesh,material,shader,debug);

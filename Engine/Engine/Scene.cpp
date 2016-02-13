@@ -22,10 +22,10 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 void Scene::centerSceneToObject(Object* center){
 	glm::vec3 offset = -(center->getPosition());
 	Scene* s =  Resources::getCurrentScene();
-	for(auto obj:s->getObjects()){
-		if(obj.second != center && obj.second->getParent() == nullptr){
-			glm::vec3 objPos = obj.second->getPosition();
-			obj.second->setPosition(objPos + offset);
+	for(auto object:s->getObjects()){
+		Object* obj = object.second;
+		if(obj != center && obj->getParent() == nullptr){
+			obj->setPosition(obj->getPosition() + offset);
 		}
 	}
 	for(auto emitter:m_ParticleEmitters){
@@ -36,13 +36,14 @@ void Scene::centerSceneToObject(Object* center){
 			particle->setPosition(objPos + offset);
 		}
 	}
-	for(auto obj:s->getLights()){
-		if(obj.second != center && obj.second->getParent() == nullptr){
-			glm::vec3 objPos = obj.second->getPosition();
-			obj.second->setPosition(objPos + offset);
+	for(auto object:s->getLights()){
+		Object* obj = object.second;
+		if(obj != center && obj->getParent() == nullptr){
+			obj->setPosition(obj->getPosition() + offset);
 		}
 	}
-	center->setPosition(0,0,0);
+	if(center->getParent() == nullptr)
+		center->setPosition(0,0,0);
 }
 Scene::~Scene(){
 }
@@ -59,13 +60,13 @@ void Scene::setName(std::string name){
 void Scene::update(float dt){
 	for(auto object:m_Objects)
 		object.second->update(dt);
+
 	for(auto emitter:m_ParticleEmitters){
 		for(auto particle:emitter.second->getParticles()){
 			particle->update(dt);
 		}
 	}
-	for(auto light:m_Lights)
-		light.second->update(dt);
+
 	if(m_Skybox != nullptr)
 		m_Skybox->_updateMatrix();
 }

@@ -7,9 +7,11 @@
 
 using namespace Engine;
 
-Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Scene* scene){
+Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,Scene* scene){
 	m_Radius = 0;
-	m_Forward = glm::vec3(0,0,-1);m_Right = glm::vec3(1,0,0);m_Up = glm::vec3(0,1,0);
+	m_Forward = glm::vec3(0,0,-1);
+	m_Right = glm::vec3(1,0,0);
+	m_Up = glm::vec3(0,1,0);
 
 	m_Parent = nullptr;
 
@@ -30,10 +32,8 @@ Object::Object(glm::vec3 pos, glm::vec3 scl,std::string name,bool isNotLight,Sce
 			count++;
 		}
 	}
-	if(isNotLight){
-		scene->getObjects()[m_Name] = this;
-		Engine::Resources::Detail::ResourceManagement::m_Objects[m_Name] = this;
-	}
+	scene->getObjects()[m_Name] = this;
+	Engine::Resources::Detail::ResourceManagement::m_Objects[m_Name] = this;
 }
 Object::~Object()
 {
@@ -58,7 +58,7 @@ glm::vec3 Object::_calculateUp(){
                                      2 * (y * z + w * x)));
 }
 void Object::translate(float x, float y, float z,bool local){
-	glm::vec3 offset = glm::vec3(0,0,0);
+	glm::vec3 offset = glm::vec3(0);
 	if(local){
 		offset += getForward() * z;
 		offset += getRight() * x;
@@ -68,19 +68,17 @@ void Object::translate(float x, float y, float z,bool local){
 		offset += glm::vec3(x,y,z);
 	}
 	this->setPosition(this->getPosition() + offset);
-	_updateMatrix();
 }
 void Object::translate(glm::vec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 void Object::rotate(float x, float y, float z){ 
-	float threshold = 0.025f;
+	float threshold = 0;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
 		return;
 
-	if(abs(x) >= threshold)m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-x, glm::vec3(1,0,0)));//pitch
-	if(abs(y) >= threshold)m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(-y, glm::vec3(0,1,0)));//yaw
-	if(abs(z) >= threshold)m_Orientation = m_Orientation * glm::normalize(glm::angleAxis(z,glm::vec3(0,0,1)));  //roll
+	if(abs(x) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1,0,0)));   //pitch
+	if(abs(y) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));   //yaw
+	if(abs(z) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
 
-	_updateMatrix();
 	m_Forward = _calculateForward();
 	m_Right = _calculateRight();
 	m_Up = _calculateUp();
@@ -91,44 +89,43 @@ void Object::scale(float x, float y, float z){
 	m_Scale.x += x * dt; 
 	m_Scale.y += y * dt; 
 	m_Scale.z += z * dt; 
-	_updateMatrix();
 }
 void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
 void Object::setPosition(float x, float y, float z){ 
-	m_Model[3][0] = x;
-	m_Model[3][1] = y;
-	m_Model[3][2] = z;
-	_updateMatrix();
+	m_Position.x = x;
+	m_Position.y = y;
+	m_Position.z = z;
+
+	if(m_Parent != nullptr){
+		m_Model = m_Parent->m_Model;
+	}
+	else{
+		m_Model = glm::mat4(1);
+	}
+	m_Model = glm::translate(m_Model, m_Position);
+	m_Model *= glm::mat4_cast(m_Orientation);
+	m_Model = glm::scale(m_Model,m_Scale);
 }
 void Object::setPosition(glm::vec3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
 	m_Scale.x = x; 
 	m_Scale.y = y; 
 	m_Scale.z = z; 
-	_updateMatrix();
 }
 void Object::setScale(glm::vec3 scale){ setScale(scale.x,scale.y,scale.z); }
 void Object::update(float dt){
-
-}
-void Object::_updateMatrix(){
-
-	glm::mat4 newModel = glm::mat4(1);
 	if(m_Parent != nullptr){
-		newModel = m_Parent->m_Model;
-		//newModel = glm::translate(newModel, glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]));
+		m_Model = m_Parent->m_Model;
+		//m_Model = glm::scale(m_Model,1.0f/m_Parent->getScale());
 	}
 	else{
-		newModel = glm::translate(newModel, glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]));
+		m_Model = glm::mat4(1);
 	}
-
-	newModel *= glm::mat4_cast(m_Orientation);
-	newModel = glm::scale(newModel,m_Scale);
-	m_Model = newModel;
-
-	for(auto child:m_Children)
-		child->_updateMatrix();
+	m_Model = glm::translate(m_Model, m_Position);
+	m_Model *= glm::mat4_cast(m_Orientation);
+	m_Model = glm::scale(m_Model,m_Scale);
 }
+
 float Object::getDistance(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::vec3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::addChild(Object* child){

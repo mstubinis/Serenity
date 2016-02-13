@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 
-ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,true,scene){
+ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::vec3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,scene){
 	m_info = info;
 	unsigned int count = 0;
 	if(scene == nullptr){

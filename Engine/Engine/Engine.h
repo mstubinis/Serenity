@@ -17,7 +17,10 @@ namespace Engine{
 	static sf::Window* getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
 	static sf::Vector2u getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
 	static sf::Mouse* getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
-	static void setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture->getWidth(),texture->getHeight(),texture->getPixelsPtr()); }
+	static void setWindowIcon(Texture* texture){
+		texture->generatePixelPointer();
+		Resources::getWindow()->setIcon(texture->getWidth(),texture->getHeight(),texture->getPixelsPtr()); 
+	}
 	static void showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
 	static void hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
 	static void stop(){ Resources::getWindow()->close(); }

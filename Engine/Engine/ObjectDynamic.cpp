@@ -8,7 +8,7 @@
 
 using namespace Engine;
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,Engine::Physics::Collision* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,true,scene){
+ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,Engine::Physics::Collision* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,scene){
 	m_Collision_Shape = col;
 	m_Mass = 0.5f * m_Radius;
 	if(m_Collision_Shape == nullptr){
@@ -118,12 +118,6 @@ void ObjectDynamic::update(float dt){
 	#else
 		m_Model = parentModel * newModel;
 	#endif
-
-	for(auto child:m_Children)
-		child->_updateMatrix();
-}
-void ObjectDynamic::_updateMatrix(){
-
 }
 void ObjectDynamic::scale(float x,float y,float z){
 	ObjectDisplay::scale(x,y,z);
@@ -131,14 +125,6 @@ void ObjectDynamic::scale(float x,float y,float z){
 }
 void ObjectDynamic::scale(glm::vec3 scl){ ObjectDynamic::scale(scl.x,scl.y,scl.z); }
 void ObjectDynamic::setPosition(float x, float y, float z){
-	/*
-	m_RigidBody->activate();
-	btTransform t;
-	m_RigidBody->getMotionState()->getWorldTransform(t);
-	t.setOrigin(btVector3(x,y,z));
-	m_RigidBody->setWorldTransform(t);
-	*/
-
     btTransform initialTransform;
 
     initialTransform.setOrigin(btVector3(x,y,z));

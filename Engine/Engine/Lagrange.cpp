@@ -132,10 +132,10 @@ float _genRadius(std::vector<glm::vec3>& temp){
 std::vector<glm::vec3> Lagrange::m_Vertices = _genBuffer();
 float Lagrange::radius = _genRadius(Lagrange::m_Vertices);
 
-Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type, std::string _name,Scene* _scene): Object(glm::vec3(0),glm::vec3(1),_name,true,_scene){
+Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type, std::string _name,Scene* _scene): Object(glm::vec3(0),glm::vec3(1),_name,_scene){
 	_init(_planet1,_planet2,_type);
 }
-Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, std::string _type, std::string _name,Scene* _scene): Object(glm::vec3(0),glm::vec3(1),_name,true,_scene){
+Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, std::string _type, std::string _name,Scene* _scene): Object(glm::vec3(0),glm::vec3(1),_name,_scene){
 	LAGRANGE_TYPE type;
 	std::transform(_type.begin(), _type.end(), _type.begin(),std::tolower);
 	if(_type == "l1")      type = LAGRANGE_TYPE_L1;

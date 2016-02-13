@@ -51,10 +51,9 @@ class ObjectDynamic: public ObjectDisplay{
 		void setAngularVelocity(float,float,float); 
 		void setAngularVelocity(glm::vec3);
 
+		const float getMass() const { return m_Mass; }
 		void setMass(float);
 
 		void update(float);
-		void _updateMatrix();
-		const float getMass() const { return m_Mass; }
 };
 #endif

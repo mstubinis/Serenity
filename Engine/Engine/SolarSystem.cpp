@@ -23,8 +23,6 @@ using namespace Engine::Events;
 SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 	playerCamera = new GameCamera("Default",45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
 	Resources::setActiveCamera(playerCamera);
-	new Camera("Debug",45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
-	new Camera("HUD",0,(float)Resources::getWindowSize().x,0,(float)Resources::getWindowSize().y,0.05f,9000000000.0f,this);
 
 	if(file == ""){
 		SolarSystem::_loadRandomly();
@@ -70,10 +68,17 @@ void SolarSystem::_loadFromFile(std::string filename){
 				std::string TYPE;
 				std::string TEXTURE = "Textures/Planets/";
 				std::string MATERIAL_NAME = "";
+
+				float ORBIT_PERIOD = -1;
+				unsigned long long ORBIT_MAJOR_AXIS = -1;
+				float ORBIT_ECCENTRICITY = -1;
+
+				float ROTATIONAL_TILT = -1;
+				float ROTATIONAL_PERIOD = -1;
+
 				unsigned long long RADIUS = 0;
 				unsigned long long POSITION = 0;
 				unsigned int BREAK = 0;
-
 
 				while(std::getline(stream, token, ' ')) {
 					size_t pos = token.find("=");
@@ -100,15 +105,22 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(key == "type")             TYPE = value;
 					else if(key == "atmosphereHeight") ATMOSPHERE_HEIGHT = stof(value);
 					else if(key == "break")            BREAK = stoi(value);
+					else if(key == "eccentricity")     ORBIT_ECCENTRICITY = stof(value);
+					else if(key == "period")           ORBIT_PERIOD = stof(value);
+					else if(key == "majorAxis")        ORBIT_MAJOR_AXIS = stoll(value)*10;
+					else if(key == "days")             ROTATIONAL_PERIOD = stof(value);
+					else if(key == "tilt")             ROTATIONAL_TILT = stof(value);
 					else if(key == "texture"){    
 						TEXTURE += value;
 						MATERIAL_NAME = value.substr(0,value.size()-4);
 					}
 
 				}
-				float randDegree = rand() * 360.0f;
-				double xPos = sin(randDegree) * static_cast<double>(POSITION);
-				double zPos = cos(randDegree) * static_cast<double>(POSITION);
+				double randAngle = rand() % 3600;
+				randAngle /= 10;
+				randAngle *= 3.14159 / 180.0;
+				double xPos = glm::cos(randAngle) * static_cast<double>(POSITION);
+				double zPos = glm::sin(randAngle) * static_cast<double>(POSITION);
 
 				if(MATERIAL_NAME != ""){
 					std::string normalFile = "";
@@ -147,7 +159,15 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
 					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
-						planetoid->setPosition(getObjects()[PARENT]->getPosition()+glm::vec3(xPos,0,zPos));
+						Object* parent = getObjects()[PARENT];
+						planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
+
+						if(ORBIT_PERIOD != -1.0f){
+							planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,parent));
+						}
+						if(ROTATIONAL_TILT != -1.0f){
+							planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
+						}
 					}
 					m_Planets[NAME] = planetoid;
 				}
@@ -160,7 +180,8 @@ void SolarSystem::_loadFromFile(std::string filename){
 					else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
 					planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
 					if(PARENT != ""){
-						planetoid->setPosition(getObjects()[PARENT]->getPosition() + glm::vec3(xPos,0,zPos));
+						Object* parent = getObjects()[PARENT];
+						planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 					}
 					m_Moons[NAME] = planetoid;
 				}
@@ -172,8 +193,8 @@ void SolarSystem::_loadFromFile(std::string filename){
 						zPos += parentZ;
 					}
 					float realX = static_cast<float>(xPos);
-					float realY = static_cast<float>(zPos);
-					player = new PlayerShip("Dreadnought","Dreadnought",NAME,glm::vec3(realX,0,realY),glm::vec3(1),nullptr,this);
+					float realZ = static_cast<float>(zPos);
+					player = new PlayerShip("Dreadnought","Dreadnought",NAME,glm::vec3(realX,0,realZ),glm::vec3(1),nullptr,this);
 
 				}
 				else if(line[0] == '$'){//Other ship
@@ -184,8 +205,8 @@ void SolarSystem::_loadFromFile(std::string filename){
 						zPos += parentZ;
 					}
 					float realX = static_cast<float>(xPos);
-					float realY = static_cast<float>(zPos);
-					new Ship("Akira","Akira",NAME,glm::vec3(realX,0,realY),glm::vec3(1),nullptr,this);
+					float realZ = static_cast<float>(zPos);
+					new Ship("Akira","Akira",NAME,glm::vec3(realX,0,realZ),glm::vec3(1),nullptr,this);
 				}
 				else if(line[0] == 'R'){//Rings
 					if(PARENT != ""){

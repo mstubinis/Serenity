@@ -19,7 +19,6 @@ class ObjectDisplay: public Object{
 					  glm::vec3 = glm::vec3(0,0,0),
 					  glm::vec3 = glm::vec3(1,1,1),
 					  std::string = "Visible Object",
-					  bool isNotLight = true,
 				      Scene* = nullptr
 					 );
 		virtual ~ObjectDisplay();

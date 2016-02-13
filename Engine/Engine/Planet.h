@@ -5,6 +5,7 @@
 
 class SunLight;
 class Ring;
+
 enum PlanetType { PLANET_TYPE_ROCKY, 
 	              PLANET_TYPE_ICE,
 				  PLANET_TYPE_GAS_GIANT, 
@@ -12,6 +13,31 @@ enum PlanetType { PLANET_TYPE_ROCKY,
 				  PLANET_TYPE_MOON, 
 				  PLANET_TYPE_STAR, 
 				  PLANET_TYPE_ASTEROID };
+
+struct RotationInfo{
+	float tilt;
+	float days;
+	RotationInfo(float _tilt, float _days){
+		tilt = _tilt;
+		days = _days;
+	}
+};
+
+struct OrbitInfo{
+	float eccentricity;
+	float days;
+	float minorRadius; float majorRadius;
+	double angle;
+	Object* parent;
+	OrbitInfo(float _eccentricity, float _days, float _majorRadius,double _angle,Object* _parent){
+		angle = _angle;
+		eccentricity = _eccentricity;
+		days = _days;
+		majorRadius = _majorRadius;
+		minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
+		parent = _parent;
+	}
+};
 
 struct RingInfo{
 	unsigned int position;
@@ -22,7 +48,7 @@ struct RingInfo{
 		position = p; 
 		size = s; 
 		color = col; 
-		alphaBreakpoint = ab; 
+		alphaBreakpoint = ab;
 	}
 };
 
@@ -30,6 +56,8 @@ class Planet: public ObjectDisplay{
 	protected:
 		std::vector<Ring*> m_Rings;
 		PlanetType m_Type;
+		OrbitInfo* m_OrbitInfo;
+		RotationInfo* m_RotationInfo;
 		float m_AtmosphereHeight;
 	public:
 		Planet(
@@ -47,6 +75,15 @@ class Planet: public ObjectDisplay{
 		const float getRadius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
 
 		void addRing(Ring*);
+
+		void setOrbit(OrbitInfo* o){ 
+			m_OrbitInfo = o; 
+			update(0);
+		}
+		void setRotation(RotationInfo* r){ 
+			m_RotationInfo = r;
+			rotate(0,0,m_RotationInfo->tilt);
+		}
 
 		void update(float);
 		virtual void render(Mesh*, Material*,GLuint,bool=false);

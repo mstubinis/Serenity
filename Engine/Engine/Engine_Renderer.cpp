@@ -19,7 +19,7 @@
 using namespace Engine;
 
 bool Renderer::RendererInfo::ssao = true;
-unsigned int Renderer::RendererInfo::ssao_samples = 4;
+unsigned int Renderer::RendererInfo::ssao_samples = 2;
 float Renderer::RendererInfo::ssao_scale = 1.2f;
 float Renderer::RendererInfo::ssao_intensity = 2.9f;
 float Renderer::RendererInfo::ssao_bias = 0.01f;
@@ -235,7 +235,7 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 2 );
 
 	for (auto light:Resources::getCurrentScene()->getLights()) {
-		light.second->render(shader);
+		light.second->lighten(shader);
    	}
 
 	// Reset OpenGL state

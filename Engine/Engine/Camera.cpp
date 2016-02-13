@@ -8,7 +8,7 @@
 
 using namespace Engine;
 
-Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZ" + name,true,scene){//create a perspective camera
+Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
@@ -22,7 +22,7 @@ Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _ne
 
 	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
 }
-Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZ" + name,true,scene){//create an orthographic camera
+Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::vec3(0,0,0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
@@ -110,10 +110,7 @@ void Camera::update(float dt){
 	m_ViewProjection = m_Projection * m_View;
 	_constructFrustrum();
 
-	Object::_updateMatrix();
-}
-void Camera::_updateMatrix(){
-
+	Object::update(dt);
 }
 bool Camera::rayIntersectSphere(ObjectDisplay* object){
 	return object->rayIntersectSphere(getPosition(),getViewVector());

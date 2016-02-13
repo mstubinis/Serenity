@@ -7,7 +7,7 @@
 
 using namespace Engine;
 
-ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name, bool notLight,Scene* scene):Object(pos,scl,name,notLight,scene){
+ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string name,Scene* scene):Object(pos,scl,name,scene){
 	m_Radius = 0;
 	m_Visible = true;
 	m_BoundingBoxRadius = glm::vec3(0);

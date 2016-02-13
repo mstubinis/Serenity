@@ -17,6 +17,10 @@ void Game::cleanup(){
 	delete m_HUD;
 }
 void Game::initResources(){
+	Resources::addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
+	Resources::addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
+	Resources::addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
+
 	Resources::addMesh("Skybox","Models/skybox.obj");
 	Resources::addMesh("DEBUGLight","Models/debugLight.obj");
 	Resources::addMesh("Planet","Models/planet.obj");

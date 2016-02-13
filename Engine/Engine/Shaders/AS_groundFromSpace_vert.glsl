@@ -8,6 +8,7 @@ attribute vec3 binormal;
 
 uniform int hasAtmosphere;
 
+uniform mat4 Rot;
 uniform mat4 VP;
 uniform mat4 World;
 
@@ -52,7 +53,8 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 void main(void)	{
 	mat4 MVP = VP * World;
 	if(hasAtmosphere == 1){
-		vec3 v3Pos = position * vec3(fInnerRadius);
+		vec4 test = (Rot * vec4(position,1.0));
+		vec3 v3Pos = vec3(test) * vec3(fInnerRadius);
 		vec3 v3Ray = v3Pos - v3CameraPos;
 		float fFar = length(v3Ray);	
 		v3Ray /= fFar;	

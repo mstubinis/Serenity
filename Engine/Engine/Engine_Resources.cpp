@@ -116,9 +116,5 @@ void Engine::Resources::initResources(){
 	addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
 	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
-	addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
-	addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
-	addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
-
 	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = new Mesh(1.0f,1.0f);
 }

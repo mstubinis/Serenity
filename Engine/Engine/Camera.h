@@ -31,7 +31,6 @@ class Camera: public Object{
 		void setOrthoProjection(float,float,float,float);
 
 		virtual void update(float);
-		virtual void _updateMatrix();
 
 		void lookAt(glm::vec3);  
 		void lookAt(glm::vec3,glm::vec3); 

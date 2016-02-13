@@ -1,18 +1,11 @@
 #ifndef ENGINE_RENDER_H
 #define ENGINE_RENDER_H
 
-#include <GL/glew.h>
-#include <GL/GL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <vector>
-#include <unordered_map>
+#include "Engine_Resources.h"
 
 class GBuffer;
-class Texture;
-class Mesh;
-class Material;
-class Object;
 
 struct GeometryRenderInfo{
 	Object* object;
@@ -117,12 +110,12 @@ namespace Engine{
 					static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
 					static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
 			};
-			static void renderFullscreenQuad(unsigned int width, unsigned int height){
+			static void renderFullscreenQuad(unsigned int width, unsigned int height,float scale = 1.0f){
 				//Projection setup
 				glMatrixMode(GL_PROJECTION);
 				glPushMatrix();
 				glLoadIdentity();
-				glOrtho(0,width,0,height,0.1f,2);	
+				glOrtho(0,Engine::Resources::getWindowSize().x,0,Engine::Resources::getWindowSize().y,0.1f,2);	
 	
 				//Model setup
 				glMatrixMode(GL_MODELVIEW);
@@ -133,22 +126,21 @@ namespace Engine{
 				glColor3f(1,1,1);
 				glTranslatef(0,0,-1);
 	
+				//glScalef(scale,scale,1.0f);
 				glBegin(GL_QUADS);
 				glTexCoord2f(0,0);
 				glVertex3f(0,0,0);
-				glTexCoord2f(1,0);
-				glVertex3f((float)width,0,0);
-				glTexCoord2f(1,1);
-				glVertex3f((float)width,(float)height,0);
-				glTexCoord2f(0,1);
-				glVertex3f(0,(float)height,0);
+				glTexCoord2f(0,0);
+				glVertex3f((float)width*scale,0,0);
+				glTexCoord2f(0,0);
+				glVertex3f((float)width*scale,(float)height*scale,0);
+				glTexCoord2f(0,0);
+				glVertex3f(0,(float)height*scale,0);
 				glEnd();
 
 				//Reset the matrices	
-				glMatrixMode(GL_PROJECTION);
-				glPopMatrix();
-				glMatrixMode(GL_MODELVIEW);
-				glPopMatrix();
+				glMatrixMode(GL_PROJECTION); glPopMatrix();
+				glMatrixMode(GL_MODELVIEW);  glPopMatrix();
 			}
 		};
 		void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
