@@ -19,13 +19,14 @@ class Material;
 class ShaderP;
 class Object;
 class SunLight;
+class SoundEffect;
 
 struct ParticleInfo;
 
-#define SAFE_DELETE(x){\
-	delete x;          \
-	x = NULL;          \
-}                      \
+template<typename T> void SAFE_DELETE(T*& p){
+    delete p;
+    p = nullptr;
+}
                               
 namespace Engine{
 	namespace Resources{
@@ -38,10 +39,12 @@ namespace Engine{
 					static float m_DeltaTime;
 
 					static sf::Window* m_Window;
+					static std::string m_WindowName;
 					static sf::Mouse* m_Mouse;
 
 					static Camera* m_ActiveCamera;
 
+					static std::unordered_map<std::string,SoundEffect*> m_Sounds;
 					static std::unordered_map<std::string,Object*> m_Objects;
 					static std::unordered_map<std::string,Camera*> m_Cameras;
 					static std::unordered_map<std::string,Font*> m_Fonts;
@@ -69,6 +72,7 @@ namespace Engine{
 		static void setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = c; }
 		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
+		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name]; }
 		static Object* getObject(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
 		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
 		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name]; }
@@ -81,12 +85,20 @@ namespace Engine{
 
 		void addMesh(std::string name,std::string file);
 		void addMesh(std::string file);
+		void removeMesh(std::string name);
+
 		void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
 		void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr);
+		void removeMaterial(std::string name);
+
 		void addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile);
 
 		void addParticleInfo(std::string name, std::string material);
 		void addParticleInfo(std::string name, Material* diffuse);
+		void removeParticleInfo(std::string name);
+
+		void addSound(std::string name, std::string file);
+		void removeSound(std::string name);
 
 		void initResources();
 	};

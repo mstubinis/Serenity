@@ -9,12 +9,12 @@ class Scene;
 class Texture;
 class Mesh;
 
-struct SkyboxSunFlare{
+struct SkyboxSunFlare final{
 	glm::vec3 position;
 	glm::vec3 color;
 	float scale;
 };
-struct SkyboxTextures{
+struct SkyboxTextures final{
 	std::string front;
 	std::string back;
 	std::string left;
@@ -22,7 +22,7 @@ struct SkyboxTextures{
 	std::string top;
 	std::string bottom;
 };
-class Skybox{
+class Skybox final{
 	private:
 		Texture* m_Texture;
 		glm::mat4 m_Model;
@@ -36,7 +36,7 @@ class Skybox{
 		Skybox(std::string name,unsigned int numSunFlares = 0,Scene* = nullptr);
 		virtual ~Skybox();
 
-		void _updateMatrix();
+		void update();
 		void render();
 };
 #endif

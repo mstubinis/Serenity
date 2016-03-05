@@ -9,10 +9,9 @@ int main(){
 	ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
     #endif
 
-	Engine::EngineClass* program = new Engine::EngineClass("Engine",1024,768);
-
-	program->run();
-	delete program;
+	Engine::Detail::EngineClass::init("Engine",1024,768);
+	Engine::Detail::EngineClass::run();
+	Engine::Detail::EngineClass::destruct();
 
     return 0;
 }

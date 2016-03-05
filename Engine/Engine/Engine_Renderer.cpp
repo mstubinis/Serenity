@@ -42,6 +42,8 @@ std::vector<TextureRenderInfo> _getRenderTexturesDefault(){ std::vector<TextureR
 std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_TexturesToBeRendered = _getRenderTexturesDefault();
 
 void Engine::Renderer::Detail::RenderManagement::init(){
+	initOpenGL();
+
 	Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = new Texture("Textures/SSAONormal.png");
 	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
 	Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
@@ -51,7 +53,10 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 	#else
 	Renderer::RendererInfo::debug = false;
 	#endif
-
+}
+void Engine::Renderer::Detail::RenderManagement::initOpenGL(){
+	glewExperimental = GL_TRUE; 
+	glewInit();
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 }
@@ -162,7 +167,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1,1,0,1);
+	glClearColor(0,0,0,1);
     glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
@@ -247,7 +252,6 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
-
 	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
 	Engine::Renderer::Detail::RenderManagement::_geometryPass();
 	m_gBuffer->stop();
@@ -466,4 +470,18 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	glUseProgram(0);
+}
+void Engine::Renderer::Detail::RenderManagement::hardClear(){
+	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0,0,0,1);
+	m_gBuffer->stop();
+
+	m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_FREE1,BUFFER_TYPE_BLOOM);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0,0,0,1);
+	m_gBuffer->stop();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0,0,0,1);
 }

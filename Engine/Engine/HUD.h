@@ -5,14 +5,14 @@
 
 class Font;
 class Object;
-class PlayerShip;
+class Ship;
 
 class HUD final{
 	private:
 		unsigned int m_TargetIterator;
 		glm::vec3 m_Color;
 		Font* m_Font;
-		PlayerShip* m_Player;
+		Ship* m_Player;
 		void _renderCrosshair(Object*);
 
 
@@ -20,7 +20,7 @@ class HUD final{
 
 
 	public:
-		HUD(PlayerShip*);
+		HUD(Ship*);
 		~HUD();
 
 		void update(float);

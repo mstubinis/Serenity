@@ -20,6 +20,7 @@ class TextureBuffer final{
 		TextureBuffer(int,int,int,int,unsigned int,unsigned int);
 		~TextureBuffer();
 
+		void clear(GLuint& fbo);
 		void resize(unsigned int, unsigned int);
 		GLuint getTexture() const { return m_Texture; }
 		int getAttatchment() const { return m_BufferAttatchment; }

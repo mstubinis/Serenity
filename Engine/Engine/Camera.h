@@ -20,7 +20,6 @@ class Camera: public Object{
 
 		float m_Near, m_Far;
 		glm::mat4 m_View, m_Projection;
-		glm::mat4 m_ViewProjection;
 	public:
 		Camera(std::string name, float angle, float ratio, float near, float far,Scene* = nullptr);				           // Perspective camera Constructor
 		Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* = nullptr); // Orthographic camera Constructor
@@ -32,9 +31,9 @@ class Camera: public Object{
 
 		virtual void update(float);
 
-		void lookAt(glm::dvec3);  
-		void lookAt(glm::dvec3,glm::dvec3); 
-		void lookAt(glm::dvec3,glm::dvec3,glm::dvec3); 
+		void lookAt(glm::v3);  
+		void lookAt(glm::v3,glm::v3); 
+		void lookAt(glm::v3,glm::v3,glm::v3); 
 		void lookAt(Object*,bool targetUp = false);
 
 		void setAspectRatio(float);
@@ -54,7 +53,7 @@ class Camera: public Object{
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
 		bool sphereIntersectTest(ObjectDisplay*);
-		bool sphereIntersectTest(glm::dvec3 pos, float radius);
+		bool sphereIntersectTest(glm::v3 pos, float radius);
 
 		//ray tests
 		bool rayIntersectSphere(ObjectDisplay*);

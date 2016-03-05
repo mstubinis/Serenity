@@ -21,7 +21,7 @@ class ObjectDynamic: public ObjectDisplay{
 	public:
 		ObjectDynamic( std::string = "",
 					   std::string = "",
-					   glm::dvec3 = glm::dvec3(0,0,0),         //Position
+					   glm::v3 = glm::v3(0,0,0),         //Position
 					   glm::vec3 = glm::vec3(1,1,1),         //Scale
 					   std::string = "Dynamic Object",       //Object
 					   Engine::Physics::Collision* = nullptr,//Bullet Collision Shape
@@ -29,14 +29,14 @@ class ObjectDynamic: public ObjectDisplay{
 					 );
 		virtual ~ObjectDynamic();
 
-		virtual void setPosition(double,double,double); 
-		virtual void setPosition(glm::dvec3);
+		virtual void setPosition(glm::nType,glm::nType,glm::nType); 
+		virtual void setPosition(glm::v3);
 
 		void scale(float,float,float);
 		void scale(glm::vec3);
 
-		void translate(double,double,double,bool local=true); 
-		void translate(glm::dvec3,bool local=true);
+		void translate(glm::nType,glm::nType,glm::nType,bool local=true); 
+		void translate(glm::v3,bool local=true);
 		void applyForce(float,float,float,bool local=true); 
 		void applyForce(glm::vec3,glm::vec3 = glm::vec3(0),bool local=true);
 		void applyImpulse(float,float,float); 

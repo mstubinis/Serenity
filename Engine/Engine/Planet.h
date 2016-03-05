@@ -14,7 +14,7 @@ enum PlanetType { PLANET_TYPE_ROCKY,
 				  PLANET_TYPE_STAR, 
 				  PLANET_TYPE_ASTEROID };
 
-struct RotationInfo{
+struct RotationInfo final{
 	float tilt;
 	float days;
 	RotationInfo(float _tilt, float _days){
@@ -23,13 +23,13 @@ struct RotationInfo{
 	}
 };
 
-struct OrbitInfo{
+struct OrbitInfo final{
 	float eccentricity;
 	float days;
 	float minorRadius; float majorRadius;
-	double angle;
+	glm::nType angle;
 	Object* parent;
-	OrbitInfo(float _eccentricity, float _days, float _majorRadius,double _angle,Object* _parent){
+	OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,Object* _parent){
 		angle = _angle;
 		eccentricity = _eccentricity;
 		days = _days;
@@ -39,7 +39,7 @@ struct OrbitInfo{
 	}
 };
 
-struct RingInfo{
+struct RingInfo final{
 	unsigned int position;
 	unsigned int size;
 	unsigned int alphaBreakpoint;
@@ -63,13 +63,15 @@ class Planet: public ObjectDisplay{
 		Planet(
 				std::string = "",               //Material
 				PlanetType = PLANET_TYPE_ROCKY, //Type
-			    glm::dvec3 = glm::dvec3(0),     //Position
+			    glm::v3 = glm::v3(0),           //Position
 			    float = 1,                      //Radius
 			    std::string = "Planet",         //Name
 				float = 0,                      //Atmosphere size
 				Scene* = nullptr
 			  );
 		virtual ~Planet();
+
+		glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*5,this->getRadius()*7); }
 
 		const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
 		const float getRadius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
@@ -97,7 +99,7 @@ class Star: public Planet{
 		Star(
 				glm::vec3 = glm::vec3(1,1,0),   //Star Color
 				glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
-			    glm::dvec3 = glm::dvec3(0),     //Position
+			    glm::v3 = glm::v3(0),           //Position
 			    float = 1,					    //Scale
 			    std::string = "Star",           //Name
 				Scene* = nullptr

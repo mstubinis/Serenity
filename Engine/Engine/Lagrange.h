@@ -44,6 +44,8 @@ class Lagrange: public Object{
 
 		const LAGRANGE_TYPE getType() const{ return m_Type; }
 
+		glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }
+
 		void update(float);
 		void render(GLuint=0, bool=false);
 		void draw(Mesh*, Material*,GLuint=0,bool=false);

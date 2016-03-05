@@ -7,7 +7,7 @@
 
 class GBuffer;
 
-struct GeometryRenderInfo{
+struct GeometryRenderInfo final{
 	Object* object;
 	Mesh* mesh;
 	Material* material;
@@ -38,7 +38,7 @@ struct TextureRenderInfo{
 		depth = _depth;
 	}
 };
-struct FontRenderInfo: public TextureRenderInfo{
+struct FontRenderInfo final: public TextureRenderInfo{
 	std::string text;
 	FontRenderInfo():TextureRenderInfo(){
 		text = "";
@@ -50,7 +50,7 @@ struct FontRenderInfo: public TextureRenderInfo{
 
 namespace Engine{
 	namespace Renderer{
-		struct RendererInfo{
+		struct RendererInfo final{
 			static bool ssao;
 			static unsigned int ssao_samples;
 			static float ssao_bias;
@@ -101,8 +101,10 @@ namespace Engine{
 					static glm::mat4 m_2DProjectionMatrix;
 
 					static void render();
+					static void hardClear();
 
 					static void init();
+					static void initOpenGL();
 					static void destruct();
 
 					static std::vector<GeometryRenderInfo>& getForegroundObjectRenderQueue(){ return m_ForegroundObjectsToBeRendered; }

@@ -1,4 +1,5 @@
 #include "Engine_Resources.h"
+#include "Engine_Sounds.h"
 #include "ShaderProgram.h"
 
 #include "Object.h"
@@ -22,6 +23,7 @@ using namespace Engine::Resources;
 //if m_DeltaTime is not set to 1, initialization of objects will be incorrect
 float Detail::ResourceManagement::m_DeltaTime = 1;
 sf::Window* Detail::ResourceManagement::m_Window = NULL;
+std::string Detail::ResourceManagement::m_WindowName = "";
 sf::Mouse* Detail::ResourceManagement::m_Mouse = NULL;
 Scene* Detail::ResourceManagement::m_CurrentScene = NULL;
 Camera* Detail::ResourceManagement::m_ActiveCamera = NULL;
@@ -53,15 +55,19 @@ std::unordered_map<std::string,ParticleInfo*> Detail::ResourceManagement::m_Part
 std::unordered_map<std::string,ShaderP*> _getShaderDefaults(){ std::unordered_map<std::string,ShaderP*> k; return k; }
 std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders = _getShaderDefaults();
 
+std::unordered_map<std::string,SoundEffect*> _getSoundsDefaults(){ std::unordered_map<std::string,SoundEffect*> k; return k; }
+std::unordered_map<std::string,SoundEffect*> Detail::ResourceManagement::m_Sounds = _getSoundsDefaults();
+
 void Engine::Resources::Detail::ResourceManagement::destruct(){
-	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )              SAFE_DELETE(it->second); 
-	for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )          SAFE_DELETE(it->second); 
-	for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                SAFE_DELETE(it->second);
-	for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )        SAFE_DELETE(it->second);
-	for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it )SAFE_DELETE(it->second);
-	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )            SAFE_DELETE(it->second);
-	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )            SAFE_DELETE(it->second); 
-	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )              SAFE_DELETE(it->second);
+	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               SAFE_DELETE(it->second); 
+	for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )           SAFE_DELETE(it->second); 
+	for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                 SAFE_DELETE(it->second);
+	for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )         SAFE_DELETE(it->second);
+	for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it ) SAFE_DELETE(it->second);
+	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             SAFE_DELETE(it->second);
+	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             SAFE_DELETE(it->second);
+	for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               SAFE_DELETE(it->second);
+	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               SAFE_DELETE(it->second);
 	SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
 	SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
@@ -103,6 +109,39 @@ void Engine::Resources::addShader(std::string name, std::string vertexShaderFile
 		return;
 	Detail::ResourceManagement::m_Shaders[name] = new ShaderP(vertexShaderFile,fragmentShaderFile);
 }
+
+void Engine::Resources::addSound(std::string name, std::string file){
+	if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name))
+		return;
+	Detail::ResourceManagement::m_Sounds[name] = new SoundEffect(file);
+}
+
+void Engine::Resources::removeMesh(std::string name){
+	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name)){
+		SAFE_DELETE(Detail::ResourceManagement::m_Meshes[name]);
+		Detail::ResourceManagement::m_Meshes.erase(name);
+	}
+}
+void Engine::Resources::removeMaterial(std::string name){
+	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name)){
+		SAFE_DELETE(Detail::ResourceManagement::m_Materials[name]);
+		Detail::ResourceManagement::m_Materials.erase(name);
+	}
+}
+void Engine::Resources::removeParticleInfo(std::string name){
+	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name)){
+		SAFE_DELETE(Detail::ResourceManagement::m_ParticleInfos[name]);
+		Detail::ResourceManagement::m_ParticleInfos.erase(name);
+	}
+}
+void Engine::Resources::removeSound(std::string name){
+	if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name)){
+		SAFE_DELETE(Detail::ResourceManagement::m_Sounds[name]);
+		Detail::ResourceManagement::m_Sounds.erase(name);
+	}
+}
+
+
 void Engine::Resources::initResources(){
 	addShader("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
 	addShader("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");

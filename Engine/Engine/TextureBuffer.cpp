@@ -1,4 +1,5 @@
 #include "TextureBuffer.h"
+#include <vector>
 
 TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attatchment, unsigned int width, unsigned int height){
 	m_BufferInternalFormat = internalformat;
@@ -6,8 +7,7 @@ TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attat
 	m_BufferType = type;
 	m_BufferAttatchment = attatchment;
 
-	m_width = width;
-	m_height = height;
+	m_width = width; m_height = height;
 
 	glGenTextures(1, &m_Texture);
 	glBindTexture(GL_TEXTURE_2D, m_Texture);
@@ -20,13 +20,34 @@ TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attat
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, GL_TEXTURE_2D, m_Texture, 0);
+
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 TextureBuffer::~TextureBuffer(){
 	glDeleteTextures(1, &m_Texture);
 }
+void TextureBuffer::clear(GLuint& fbo){
+	glColorMask(1,1,1,1);
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+
+	// Bind our FBO and set the viewport to the proper size
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0,0,m_width, m_height);
+
+	// Specify what to render an start acquiring
+	unsigned int buffers[] = { getAttatchment()};
+
+	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
+
+	// Clear the render targets
+	glClear( GL_COLOR_BUFFER_BIT);
+	glClearColor( 0, 0, 0, 1 );
+}
 void TextureBuffer::resize(unsigned int width, unsigned int height){
-	m_width = width;
-	m_height = height;
+	m_width = width; m_height = height;
 
 	glBindTexture(GL_TEXTURE_2D, m_Texture);
 

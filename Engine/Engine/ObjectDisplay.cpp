@@ -7,7 +7,7 @@
 
 using namespace Engine;
 
-ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::dvec3 pos, glm::vec3 scl, std::string name,Scene* scene):Object(pos,scl,name,scene){
+ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Scene* scene):Object(pos,scl,name,scene){
 	m_Radius = 0;
 	m_Visible = true;
 	m_BoundingBoxRadius = glm::vec3(0);
@@ -78,7 +78,7 @@ void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z
 bool ObjectDisplay::rayIntersectSphere(Camera* cam){
 	return cam->rayIntersectSphere(this);
 }
-bool ObjectDisplay::rayIntersectSphere(glm::dvec3 A, glm::vec3 rayVector){
+bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 	glm::vec3 a1 = glm::vec3(A);
 	glm::vec3 B = a1 + rayVector;
 

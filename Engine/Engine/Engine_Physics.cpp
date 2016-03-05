@@ -224,7 +224,7 @@ Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadColl
 			break;
 		}
 		case COLLISION_TYPE_BOXSHAPE:{
-			glm::vec3 max = glm::vec3(0,0,0);
+			glm::vec3 max = glm::vec3(0);
 			if(extention == ".obj"){
 				#pragma region OBJ
 				std::vector<glm::vec3> pointData;
@@ -254,12 +254,9 @@ Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadColl
 					float y = abs(point.y);
 					float z = abs(point.z);
 
-					if(x > max.x)
-						max.x = x;
-					if(y > max.y)
-						max.y = y;
-					if(z > max.z)
-						max.z = z;
+					if(x > max.x) max.x = x;
+					if(y > max.y) max.y = y;
+					if(z > max.z) max.z = z;
 				}
 				#pragma endregion
 			}
@@ -268,6 +265,5 @@ Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadColl
 			break;
 		}
 	}
-
 	return collision;
 }

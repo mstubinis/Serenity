@@ -14,7 +14,7 @@
 using namespace Engine;
 using namespace Engine::Events;
 
-HUD::HUD(PlayerShip* player){
+HUD::HUD(Ship* player){
 	m_Font = new Font("Fonts/consolas.fnt");
 	m_Player = player;
 	m_Color = glm::vec3(55.0f/255.0f,107.0f/255.0f,126.0f/255.0f);
@@ -23,16 +23,30 @@ HUD::HUD(PlayerShip* player){
 }
 HUD::~HUD(){
 }
+
+unsigned int count = 0;
 void HUD::update(float dt){
 	if(Keyboard::isKeyDownOnce(",")){
 		SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-
-		Object* target = scene->getObject("Earth");
-		m_Player->setTarget(target);
-
+		
+		std::vector<Planet*> objs;
+		for(auto p:scene->getPlanets()){
+			objs.push_back(p.second);
+		}
+		m_Player->setTarget(objs[count]);
+		count++;
+		if (count > scene->getPlanets().size()-1){ count = 0; }
 	}
 	else if(Keyboard::isKeyDownOnce(".")){
-
+		SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
+		
+		std::vector<Planet*> objs;
+		for(auto p:scene->getPlanets()){
+			objs.push_back(p.second);
+		}
+		m_Player->setTarget(objs[count]);
+		count--;
+		if (count <= 0){ count = scene->getPlanets().size()-1; }
 	}
 }
 void HUD::render(bool debug){

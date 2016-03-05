@@ -14,7 +14,7 @@ class btConvexHullShape;
 const unsigned int NUM_VERTEX_DATA = 5;
 const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
-struct Vertex{
+struct Vertex final{
 	glm::vec3 position;
 	glm::vec2 uv;
 	glm::vec3 normal;

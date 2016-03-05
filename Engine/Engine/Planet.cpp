@@ -10,7 +10,7 @@
 
 using namespace Engine;
 
-Planet::Planet(std::string mat, PlanetType type, glm::dvec3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
+Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,float scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
 	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
 	m_OrbitInfo = nullptr;
@@ -24,25 +24,30 @@ Planet::~Planet(){
 void Planet::update(float dt){
 	if(m_RotationInfo != nullptr){
 		float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
-		double secondsToRotate = m_RotationInfo->days * 86400.0;
-		double finalSpeed = 1.0 / (secondsToRotate * static_cast<double>(speed));
+		glm::nType secondsToRotate = m_RotationInfo->days * 86400.0;
+		glm::nType finalSpeed = 1.0 / (secondsToRotate * static_cast<glm::nType>(speed));
 		rotate(0,static_cast<float>(finalSpeed),0);
 	}
 	if(m_OrbitInfo != nullptr){
 		//earth's orbital speed is 30km/sec
 
-		glm::dvec3 parentPos = glm::dvec3(m_OrbitInfo->parent->getPosition());
+		glm::v3 currentPos = getPosition();
+		glm::v3 offset = glm::v3(0);
+
+		glm::v3 parentPos = glm::v3(m_OrbitInfo->parent->getPosition());
 
 		//6.283188 is the radian limit (360 degrees to raidians)
 		m_OrbitInfo->angle += ((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188;
 
-		double a = m_OrbitInfo->majorRadius;
-		double b = m_OrbitInfo->minorRadius;
+		glm::nType a = m_OrbitInfo->majorRadius;
+		glm::nType b = m_OrbitInfo->minorRadius;
 
-		double newX = parentPos.x - glm::cos(m_OrbitInfo->angle)*a;
-		double newZ = parentPos.z - glm::sin(m_OrbitInfo->angle)*b;
+		glm::nType newX = parentPos.x - glm::cos(m_OrbitInfo->angle)*a;
+		glm::nType newZ = parentPos.z - glm::sin(m_OrbitInfo->angle)*b;
 
-		setPosition(newX,0,newZ);
+		offset = glm::vec3(newX - currentPos.x,0,newZ - currentPos.z);
+
+		setPosition(currentPos + offset);
 	}
 	for(auto ring:m_Rings)  ring->update(dt);
 
@@ -234,8 +239,8 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
-Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::dvec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
-	m_Light = new SunLight(glm::dvec3(0),name + " Light",LIGHT_TYPE_SUN,scene);
+Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
+	m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
 	m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 	setColor(starColor.x,starColor.y,starColor.z,1);
 	m_Material->setShadeless(true);
@@ -352,7 +357,7 @@ void Ring::update(float dt){
 }
 void Ring::draw(GLuint shader){
 	Camera* activeCamera = Resources::getActiveCamera();
-	glm::dmat4 model = m_Parent->getModel();
+	glm::m4 model = m_Parent->getModel();
 	Mesh* mesh = Resources::getMesh("Ring");
 	float radius = mesh->getRadius() * m_Parent->getScale().x;
 

@@ -1,15 +1,15 @@
-#include "SolarSystem.h"
 #include "Engine.h"
+#include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
 #include "Planet.h"
 #include "Lagrange.h"
 
-using namespace Engine; 
-using namespace Engine::Events;
+using namespace Engine;
 
 HUD* m_HUD;
 std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
+
 
 void Game::cleanup(){
 	for(auto solarSystem:m_SolarSystems)
@@ -34,28 +34,32 @@ void Game::initResources(){
 	Resources::addMaterial("Star","Textures/Planets/Sun.jpg");
 	Resources::addMaterial("Default","Textures/Planets/Sun.jpg");
 	Resources::addMaterial("Earth","Textures/Planets/Earth.jpg","","Textures/Planets/EarthNight.jpg");
-	Resources::addMaterial("Defiant","Textures/defiant.png","Textures/defiantNormal.png","Textures/defiantGlow.png");
-	Resources::addMaterial("Akira","Textures/akira.png","Textures/akiraNormal.png","Textures/akiraGlow.png");
+	Resources::addMaterial("Defiant","Textures/defiant.png","Textures/defiant_Normal.png","Textures/defiant_Glow.png");
+	Resources::addMaterial("Akira","Textures/akira.png","Textures/akira_Normal.png","Textures/akira_Glow.png");
 	Resources::addMaterial("Crosshair","Textures/HUD/Crosshair.png");
 	Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png");
 	Resources::addMaterial("SunFlare","Textures/Skyboxes/StarFlare.png");
 	Resources::addMaterial("Smoke","Textures/Effects/Smoke.png");
-	Resources::addMaterial("Dreadnought","Textures/dreadnought.png","Textures/dreadnoughtNormal.png","Textures/dreadnoughtGlow.png");
+	Resources::addMaterial("Dreadnought","Textures/dreadnought.png","Textures/dreadnought_Normal.png","Textures/dreadnought_Glow.png");
 
 	Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
+	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
+
 	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
 	//m_SolarSystems["Sol"] = new SolarSystem("Sol","");
 	Resources::setCurrentScene(m_SolarSystems["Sol"]);
 
 	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());
-
-	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
 }
 void Game::update(float dt){
-	if(Keyboard::isKeyDown("esc"))
+	if(Events::Keyboard::isKeyDown("esc"))
 		Engine::stop();
+	if(Events::Keyboard::isKeyDownOnce("f6"))
+		Engine::setFullScreen(true);
+	if(Events::Keyboard::isKeyDownOnce("f7"))
+		Engine::setFullScreen(false);
 
 	m_HUD->update(dt);
 }

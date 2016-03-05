@@ -10,7 +10,7 @@
 class Mesh;
 class Texture;
 
-struct FontGlyph {
+struct FontGlyph final{
 	 unsigned int id;
 	 unsigned int x;
 	 unsigned int y;

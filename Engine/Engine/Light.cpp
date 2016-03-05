@@ -9,7 +9,7 @@
 
 using namespace Engine;
 
-SunLight::SunLight(glm::dvec3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,scene){
+SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,scene){
 	m_Type = type;
 
     m_AmbientIntensity = 0.05f;
@@ -62,7 +62,7 @@ void SunLight::lighten(GLuint shader){
 
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
-DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::dvec3(0),"Directional Light",LIGHT_TYPE_DIRECTIONAL,scene){
+DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),"Directional Light",LIGHT_TYPE_DIRECTIONAL,scene){
 	m_Direction = dir;
 }
 DirectionalLight::~DirectionalLight(){
@@ -83,7 +83,7 @@ void DirectionalLight::lighten(GLuint shader){
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
 
-PointLight::PointLight(glm::dvec3 pos,Scene* scene): SunLight(pos,"Point Light",LIGHT_TYPE_POINT,scene){
+PointLight::PointLight(glm::v3 pos,Scene* scene): SunLight(pos,"Point Light",LIGHT_TYPE_POINT,scene){
 	m_Constant = 0.3f;
 	m_Linear = 0.2f;
 	m_Exp = 0.3f;
@@ -113,7 +113,7 @@ void PointLight::lighten(GLuint shader){
 
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
-SpotLight::SpotLight(glm::dvec3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
+SpotLight::SpotLight(glm::v3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);
     m_Cutoff = 0;
 }

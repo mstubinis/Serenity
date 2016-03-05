@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 
-ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::dvec3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,scene){
+ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::v3 pos, glm::vec3 scl,std::string name, Scene* scene):Object(pos,scl,name,scene){
 	m_info = info;
 	unsigned int count = 0;
 	if(scene == nullptr){
@@ -54,7 +54,7 @@ void ParticleEmitter::render(){
 	return;
 }
 
-Particle::Particle(ParticleEmitter* _emitter,glm::dvec3 pos,glm::vec4 col,glm::vec2 scl ,float rot,glm::vec3 vel,float rVel, glm::vec2 sVel){
+Particle::Particle(ParticleEmitter* _emitter,glm::v3 pos,glm::vec4 col,glm::vec2 scl ,float rot,glm::vec3 vel,float rVel, glm::vec2 sVel){
 	emitter = _emitter;
 	position = pos;
 	color = col;
@@ -73,7 +73,7 @@ Particle::Particle(ParticleEmitter* _emitter,glm::dvec3 pos,glm::vec4 col,glm::v
 Particle::~Particle(){
 	//delete light; 
 }
-void Particle::setPosition(double x,double y,double z){
+void Particle::setPosition(glm::nType x,glm::nType y,glm::nType z){
 	position.x = x;
 	position.y = y;
 	position.z = z;
@@ -82,7 +82,7 @@ void Particle::setPosition(double x,double y,double z){
 	model[3][1] = position.y;
 	model[3][2] = position.z;
 }
-void Particle::setPosition(glm::dvec3 pos){ setPosition(pos.x,pos.y,pos.z); }
+void Particle::setPosition(glm::v3 pos){ setPosition(pos.x,pos.y,pos.z); }
 void Particle::update(float dt){
 	position += velocity*dt;
 	zRot += zRotVelocity*dt;

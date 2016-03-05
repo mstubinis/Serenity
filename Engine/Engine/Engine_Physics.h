@@ -20,7 +20,7 @@ enum COLLISION_TYPE { COLLISION_TYPE_CONVEXHULL, COLLISION_TYPE_TRIANGLESHAPE,CO
 
 namespace Engine{
 	namespace Physics{
-		struct Collision{
+		struct Collision final{
 			public:
 				unsigned int m_CollisionType;
 				btCollisionShape* m_Collision;

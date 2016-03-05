@@ -25,7 +25,7 @@ varying vec3 Tangents;
 vec3 CalcBumpedNormal(){
     vec3 normalMapTexture = (texture2D(NormalMap, UV).xyz) * 2.0 - 1.0;
     mat3 TBN = mat3(-Tangents, Binormals, Normals);
-    return normalize(TBN * normalMapTexture);
+    return (TBN * normalMapTexture);
 }
 void main(){
 	if(DiffuseMapEnabled == 1)
@@ -35,7 +35,7 @@ void main(){
 
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1){
-			gl_FragData[1].rgb = normalize(CalcBumpedNormal());
+			gl_FragData[1].rgb = CalcBumpedNormal();
 			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 		else{

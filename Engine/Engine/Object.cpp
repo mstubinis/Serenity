@@ -7,20 +7,21 @@
 
 using namespace Engine;
 
-Object::Object(glm::dvec3 pos, glm::vec3 scl,std::string name,Scene* scene){
+Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
 	m_Radius = 0;
-	m_Forward = glm::vec3(0,0,-1);
-	m_Right = glm::vec3(1,0,0);
-	m_Up = glm::vec3(0,1,0);
+	m_Forward = glm::v3(0,0,-1);
+	m_Right = glm::v3(1,0,0);
+	m_Up = glm::v3(0,1,0);
 
 	m_Parent = nullptr;
 
 	m_Name = name;
-	m_Model = glm::dmat4(1);
+	m_Model = glm::m4(1);
 	m_Orientation = glm::quat();
 
 	Object::setPosition(pos);
 	Object::setScale(scl);
+	_prevPosition = pos;
 
 	unsigned int count = 0;
 	if(scene == nullptr){
@@ -38,38 +39,38 @@ Object::Object(glm::dvec3 pos, glm::vec3 scl,std::string name,Scene* scene){
 Object::~Object()
 {
 }
-glm::vec3 Object::_calculateForward(){ return glm::normalize(glm::cross(getRight(),getUp())); }
-glm::vec3 Object::_calculateRight(){
+glm::v3 Object::_calculateForward(){ return glm::normalize(glm::cross(getRight(),getUp())); }
+glm::v3 Object::_calculateRight(){
 	float x = m_Orientation.x;
 	float y = m_Orientation.y;
 	float z = m_Orientation.z;
 	float w = m_Orientation.w;
-	return glm::normalize(glm::vec3( 1 - 2 * (y * y + z * z),
-                                     2 * (x * y + w * z),
-                                     2 * (x * z - w * y)));
+	return glm::normalize(glm::v3( 1 - 2 * (y * y + z * z),
+                                   2 * (x * y + w * z),
+                                   2 * (x * z - w * y)));
 }
-glm::vec3 Object::_calculateUp(){
+glm::v3 Object::_calculateUp(){
 	float x = m_Orientation.x;
 	float y = m_Orientation.y;
 	float z = m_Orientation.z;
 	float w = m_Orientation.w;
-	return glm::normalize(glm::vec3( 2 * (x * y - w * z), 
-                                     1 - 2 * (x * x + z * z),
-                                     2 * (y * z + w * x)));
+	return glm::normalize(glm::v3( 2 * (x * y - w * z), 
+                                   1 - 2 * (x * x + z * z),
+                                   2 * (y * z + w * x)));
 }
-void Object::translate(double x, double y, double z,bool local){
-	glm::dvec3 offset = glm::dvec3(0);
+void Object::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
+	glm::v3 offset = glm::v3(0);
 	if(local){
-		offset += glm::dvec3(getForward()) * z;
-		offset += glm::dvec3(getRight()) * x;
-		offset += glm::dvec3(getUp()) * y;
+		offset += getForward() * z;
+		offset += getRight() * x;
+		offset += getUp() * y;
 	}
 	else{
-		offset += glm::dvec3(x,y,z);
+		offset += glm::v3(x,y,z);
 	}
-	this->setPosition(this->getPosition() + offset);
+	setPosition(getPosition() + offset);
 }
-void Object::translate(glm::dvec3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
+void Object::translate(glm::v3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
 void Object::rotate(float x, float y, float z){ 
 	float threshold = 0;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
@@ -91,22 +92,12 @@ void Object::scale(float x, float y, float z){
 	m_Scale.z += z * dt; 
 }
 void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
-void Object::setPosition(double x, double y, double z){ 
+void Object::setPosition(glm::nType x, glm::nType y, glm::nType z){ 
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
-
-	if(m_Parent != nullptr){
-		m_Model = m_Parent->m_Model;
-	}
-	else{
-		m_Model = glm::dmat4(1);
-	}
-	m_Model = glm::translate(m_Model, m_Position);
-	m_Model *= glm::dmat4(glm::mat4_cast(m_Orientation));
-	m_Model = glm::scale(m_Model,glm::dvec3(m_Scale));
 }
-void Object::setPosition(glm::dvec3 position){ setPosition(position.x,position.y,position.z); }
+void Object::setPosition(glm::v3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
 	m_Scale.x = x; 
 	m_Scale.y = y; 
@@ -118,15 +109,14 @@ void Object::update(float dt){
 		m_Model = m_Parent->m_Model;
 	}
 	else{
-		m_Model = glm::dmat4(1);
+		m_Model = glm::m4(1);
 	}
 	m_Model = glm::translate(m_Model, m_Position);
-	m_Model *= glm::dmat4(glm::mat4_cast(m_Orientation));
-	m_Model = glm::scale(m_Model,glm::dvec3(m_Scale));
+	m_Model *= glm::m4(glm::mat4_cast(m_Orientation));
+	m_Model = glm::scale(m_Model,glm::v3(m_Scale));
 }
-
-float Object::getDistance(Object* other){ glm::dvec3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
-unsigned long long Object::getDistanceLL(Object* other){ glm::dvec3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
+float Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
+unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::addChild(Object* child){
 	child->m_Parent = this;
 	m_Children.push_back(child);
@@ -183,6 +173,6 @@ void Object::render(GLuint shader,bool debug){}
 bool Object::rayIntersectSphere(Camera* cam){
 	return false;
 }
-bool Object::rayIntersectSphere(glm::dvec3 origin, glm::vec3 vector){
+bool Object::rayIntersectSphere(glm::v3 origin, glm::vec3 vector){
 	return false;
 }

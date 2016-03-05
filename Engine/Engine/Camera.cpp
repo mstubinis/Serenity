@@ -8,39 +8,38 @@
 
 using namespace Engine;
 
-Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::dvec3(0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create a perspective camera
+Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::v3(0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
 	m_Far = _far;
-	m_ViewProjection = glm::mat4(1);
 
 	m_Type = CAMERA_TYPE_PERSPECTIVE;
 
 	setPerspectiveProjection();
-	lookAt(getPosition(),getPosition() + glm::dvec3(getForward()), glm::dvec3(getUp()));
+	lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
 
 	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
 }
-Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::dvec3(0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create an orthographic camera
+Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::v3(0),glm::vec3(1,1,1),"ZZZ" + name,scene){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
 	m_Far = _far;
-	m_ViewProjection = glm::mat4(1);
 
 	m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
 	setOrthoProjection(leftVal,rightVal,bottomVal,topVal);
-	lookAt(getPosition(),getPosition() + glm::dvec3(getForward()), glm::dvec3(getUp()));
+	lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
 
 	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
 }
 void Camera::_constructFrustrum(){
-	glm::vec4 rowX = glm::row(m_ViewProjection, 0);
-	glm::vec4 rowY = glm::row(m_ViewProjection, 1);
-	glm::vec4 rowZ = glm::row(m_ViewProjection, 2);
-	glm::vec4 rowW = glm::row(m_ViewProjection, 3);
+	glm::mat4 vp = m_Projection * m_View;
+	glm::vec4 rowX = glm::row(vp, 0);
+	glm::vec4 rowY = glm::row(vp, 1);
+	glm::vec4 rowZ = glm::row(vp, 2);
+	glm::vec4 rowW = glm::row(vp, 3);
 
 	m_Planes[0] = glm::normalize(rowW + rowX);
 	m_Planes[1] = glm::normalize(rowW - rowX);
@@ -51,16 +50,15 @@ void Camera::_constructFrustrum(){
 
 	for(unsigned int i = 0; i < 6; i++){
 		glm::vec3 normal(m_Planes[i].x, m_Planes[i].y, m_Planes[i].z);
-		float length = glm::length(normal);
-		m_Planes[i] = -m_Planes[i] / length;
+		m_Planes[i] = -m_Planes[i] / glm::length(normal);
 	}
 }
 bool Camera::sphereIntersectTest(ObjectDisplay* sphere){
 	return sphereIntersectTest(sphere->getPosition(),sphere->getRadius());
 }
-bool Camera::sphereIntersectTest(glm::dvec3 pos, float radius){
+bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
 	for (unsigned int i = 0; i < 6; i++){
-		float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
+		glm::nType dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
 		if (dist > 0){
 			return false;
 		}
@@ -90,26 +88,24 @@ void Camera::setAspectRatio(float ratio){
 	m_AspectRatio = ratio;
 	setPerspectiveProjection();
 }
-void Camera::lookAt(glm::dvec3 target){ 
-	m_View = glm::lookAt(getPosition(),target,glm::dvec3(getUp()));
+void Camera::lookAt(glm::v3 target){ 
+	m_View = glm::lookAt(getPosition(),target,glm::v3(getUp()));
 }
-void Camera::lookAt(glm::dvec3 target,glm::dvec3 up){ 
+void Camera::lookAt(glm::v3 target,glm::v3 up){ 
 	m_View = glm::lookAt(getPosition(),target,up); 
 }
-void Camera::lookAt(glm::dvec3 eye,glm::dvec3 target,glm::dvec3 up){ 
+void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){ 
 	m_View = glm::lookAt(eye,target,up); 
 }
 void Camera::lookAt(Object* target, bool targetUp){
-	if(!targetUp) m_View = glm::lookAt(getPosition(),target->getPosition(),glm::dvec3(getUp()));
-	else m_View = glm::lookAt(getPosition(),target->getPosition(),glm::dvec3(target->getUp()));
+	if(!targetUp) m_View = glm::lookAt(getPosition(),target->getPosition(),glm::v3(getUp()));
+	else m_View = glm::lookAt(getPosition(),target->getPosition(),glm::v3(target->getUp()));
 }
 glm::mat4 Camera::calculateProjection(glm::mat4 modelMatrix){ return m_Projection * m_View * modelMatrix; }
 glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * modelMatrix; }
 glm::mat4 Camera::calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::update(float dt){
-	m_ViewProjection = m_Projection * m_View;
 	_constructFrustrum();
-
 	Object::update(dt);
 }
 bool Camera::rayIntersectSphere(ObjectDisplay* object){

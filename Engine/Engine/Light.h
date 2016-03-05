@@ -9,7 +9,7 @@ class SunLight: public ObjectDisplay{
 		unsigned int m_Type;
 		float m_AmbientIntensity, m_DiffuseIntensity;
 	public:
-		SunLight(glm::dvec3 = glm::dvec3(0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
+		SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
 		virtual ~SunLight();
 
 		void update(float);
@@ -38,7 +38,7 @@ class PointLight: public SunLight{
         float m_Constant, m_Linear, m_Exp;
 
 	public:
-		PointLight(glm::dvec3 = glm::dvec3(0), Scene* = nullptr);
+		PointLight(glm::v3 = glm::v3(0), Scene* = nullptr);
 		virtual ~PointLight();
 
 		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
@@ -52,7 +52,7 @@ class SpotLight: public SunLight{
 		float m_Cutoff;
 
 	public:
-		SpotLight(glm::dvec3, Scene* = nullptr);
+		SpotLight(glm::v3, Scene* = nullptr);
 		virtual ~SpotLight();
 
 		virtual void render(Mesh*, Material*,GLuint=0,bool=false);

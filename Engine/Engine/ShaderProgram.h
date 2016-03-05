@@ -10,7 +10,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 
-#pragma region Shader_Compilers
+
 static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){
 	// Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -70,7 +70,6 @@ static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){
  
     return ProgramID;
 }
-#pragma endregion
 
 class ShaderP final{
 	private:

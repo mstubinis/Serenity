@@ -54,8 +54,8 @@ Skybox::Skybox(std::string name,unsigned int numSunFlares,Scene* scene){
 Skybox::~Skybox(){
 	SAFE_DELETE(m_Texture);
 }
-void Skybox::_updateMatrix(){
-	glm::dvec3 p = Resources::getActiveCamera()->getPosition();
+void Skybox::update(){
+	glm::v3 p = Resources::getActiveCamera()->getPosition();
 	m_Model[3][0] = p.x;
 	m_Model[3][1] = p.y;
 	m_Model[3][2] = p.z;
