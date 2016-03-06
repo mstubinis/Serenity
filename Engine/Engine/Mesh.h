@@ -7,7 +7,7 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-namespace Engine{namespace Physics{struct Collision;};};
+class Collision;
 class btTriangleMesh;
 class btConvexHullShape;
 
@@ -29,7 +29,7 @@ struct Vertex final{
 class Mesh final{
 	private:
 		GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
-		Engine::Physics::Collision* m_Collision;
+		Collision* m_Collision;
 
 		glm::vec3 m_radiusBox;
 		float m_radius;
@@ -56,7 +56,7 @@ class Mesh final{
 
 		//GLuint* VAO();
 		const GLuint* getBuffers() const { return m_buffers; }
-		Engine::Physics::Collision* getCollision() const { return m_Collision; }
+		Collision* getCollision() const { return m_Collision; }
 
 		const glm::vec3& getRadiusBox() const { return m_radiusBox; }
 		const float getRadius() const { return m_radius; }

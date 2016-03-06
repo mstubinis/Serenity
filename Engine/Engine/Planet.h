@@ -6,13 +6,15 @@
 class SunLight;
 class Ring;
 
-enum PlanetType { PLANET_TYPE_ROCKY, 
-	              PLANET_TYPE_ICE,
-				  PLANET_TYPE_GAS_GIANT, 
-				  PLANET_TYPE_ICE_GIANT,
-				  PLANET_TYPE_MOON, 
-				  PLANET_TYPE_STAR, 
-				  PLANET_TYPE_ASTEROID };
+enum PlanetType { 
+	PLANET_TYPE_ROCKY, 
+	PLANET_TYPE_ICE,
+	PLANET_TYPE_GAS_GIANT, 
+	PLANET_TYPE_ICE_GIANT,
+	PLANET_TYPE_MOON, 
+	PLANET_TYPE_STAR, 
+	PLANET_TYPE_ASTEROID 
+};
 
 struct RotationInfo final{
 	float tilt;
@@ -88,8 +90,8 @@ class Planet: public ObjectDisplay{
 		}
 
 		void update(float);
-		virtual void render(Mesh*, Material*,GLuint,bool=false);
-		virtual void draw(Mesh*, Material*,GLuint,bool=false);
+		virtual void render(GLuint,bool=false);
+		virtual void draw(GLuint,bool=false);
 };
 
 class Star: public Planet{
@@ -105,8 +107,8 @@ class Star: public Planet{
 				Scene* = nullptr
 			);
 		virtual ~Star();
-		void render(Mesh*, Material*,GLuint,bool=false);
-		void draw(Mesh*, Material*,GLuint,bool=false);
+		void render(GLuint,bool=false);
+		void draw(GLuint,bool=false);
 };
 
 class Ring final{

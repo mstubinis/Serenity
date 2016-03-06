@@ -53,13 +53,13 @@ void Planet::update(float dt){
 
 	Object::update(dt);
 }
-void Planet::render(Mesh* mesh, Material* material,GLuint shader,bool debug){
+void Planet::render(GLuint shader,bool debug){
 	shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
-	ObjectDisplay::render(mesh,material,shader,debug);
+	ObjectDisplay::render(shader,debug);
 }
-void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
+void Planet::draw(GLuint shader,bool debug){
 	bool renderPlanet = true;
-	if(mesh == nullptr || !Resources::getActiveCamera()->sphereIntersectTest(this))
+	if(m_Mesh == nullptr || !Resources::getActiveCamera()->sphereIntersectTest(this))
 		renderPlanet = false;
 	Camera* activeCamera = Resources::getActiveCamera();
 	if(activeCamera->getDistance(this) > 700 * getRadius())
@@ -86,13 +86,13 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 			glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
-			glUniform1f(glGetUniformLocation(shader, "BaseGlow"),material->getBaseGlow());
+			glUniform1f(glGetUniformLocation(shader, "BaseGlow"),m_Material->getBaseGlow());
 			glUniform1f(glGetUniformLocation(shader, "Specularity"),0.08f);
 
 			glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
-			for(auto component:material->getComponents())
-				material->bindTexture(component.first,shader);
+			for(auto component:m_Material->getComponents())
+				m_Material->bindTexture(component.first,shader);
 
 			if(m_AtmosphereHeight > 0){
 				glUniform1i(glGetUniformLocation(shader,"hasAtmosphere"),1);
@@ -151,7 +151,7 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			glUniform1f(glGetUniformLocation(shader,"fExposure"), 2.0f);
 
 
-			mesh->render();
+			m_Mesh->render();
 			glUseProgram(0);
 			#pragma endregion
 
@@ -218,7 +218,7 @@ void Planet::draw(Mesh* mesh, Material* material,GLuint shader,bool debug){
 			glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
 			glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
 
-			mesh->render();
+			m_Mesh->render();
 			glUseProgram(0);
 
 			glCullFace(GL_BACK);
@@ -250,11 +250,11 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,float scl, std
 }
 Star::~Star(){
 }
-void Star::render(Mesh* mesh,Material* material,GLuint shader,bool debug){
-	ObjectDisplay::render(mesh,material,shader,debug);
+void Star::render(GLuint shader,bool debug){
+	ObjectDisplay::render(shader,debug);
 }
-void Star::draw(Mesh* mesh,Material* material,GLuint shader,bool debug){
-	ObjectDisplay::draw(mesh,material,shader,debug);
+void Star::draw(GLuint shader,bool debug){
+	ObjectDisplay::draw(shader,debug);
 }
 Ring::Ring(std::vector<RingInfo> rings,Planet* parent){
 	m_Parent = parent;
@@ -272,7 +272,7 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 	for(auto ringInfo: rings){
 		sf::Color paintCol = sf::Color(ringInfo.color.r,ringInfo.color.g,ringInfo.color.b,255);
 		glm::vec4 pC = glm::vec4(paintCol.r/255.0f,paintCol.g/255.0f,paintCol.b/255.0f,paintCol.a/255.0f);
-		float alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
+		unsigned int alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
 		unsigned int newI = 0;
 		for(unsigned int i = 0; i < ringInfo.size; i++){
 			if(i > ringInfo.alphaBreakpoint){

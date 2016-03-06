@@ -16,16 +16,15 @@ class ObjectDisplay: public Object{
 	public:
 		ObjectDisplay(std::string = "",
 				      std::string = "",
-					  glm::v3 = glm::v3(0,0,0),
-					  glm::vec3 = glm::vec3(1,1,1),
+					  glm::v3 = glm::v3(0),
+					  glm::vec3 = glm::vec3(1),
 					  std::string = "Visible Object",
 				      Scene* = nullptr
 					 );
 		virtual ~ObjectDisplay();
 
-		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
 		virtual void render(GLuint=0,bool=false);
-		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+		virtual void draw(GLuint shader,bool=false);
 
 		virtual void setColor(float,float,float,float); 
 		virtual void setColor(glm::vec4);

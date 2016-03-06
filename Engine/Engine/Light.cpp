@@ -43,8 +43,8 @@ void SunLight::setName(std::string name){
 void SunLight::update(float dt){
 	Object::update(dt);
 }
-void SunLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
-void SunLight::draw(Mesh* mesh, Material* mat, GLuint shader, bool debug){ }
+void SunLight::render(GLuint shader,bool debug){ }
+void SunLight::draw(GLuint shader, bool debug){ }
 void SunLight::lighten(GLuint shader){ 
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
@@ -68,8 +68,8 @@ DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::v3
 DirectionalLight::~DirectionalLight(){
 }
 
-void DirectionalLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
-void DirectionalLight::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void DirectionalLight::render(GLuint shader,bool debug){ }
+void DirectionalLight::draw(GLuint shader,bool debug){ }
 void DirectionalLight::lighten(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
@@ -90,8 +90,8 @@ PointLight::PointLight(glm::v3 pos,Scene* scene): SunLight(pos,"Point Light",LIG
 }
 PointLight::~PointLight(){
 }
-void PointLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
-void PointLight::draw(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
+void PointLight::render(GLuint shader,bool debug){ }
+void PointLight::draw(GLuint shader,bool debug){ }
 void PointLight::lighten(GLuint shader){
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
@@ -119,7 +119,7 @@ SpotLight::SpotLight(glm::v3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_
 }
 SpotLight::~SpotLight(){
 }
-void SpotLight::render(Mesh* mesh, Material* mat,GLuint shader,bool debug){ }
-void SpotLight::draw(Mesh* mesh, Material* mat, GLuint shader, bool debug){ }
+void SpotLight::render(GLuint shader,bool debug){ }
+void SpotLight::draw(GLuint shader, bool debug){ }
 void SpotLight::lighten(GLuint shader){
 }

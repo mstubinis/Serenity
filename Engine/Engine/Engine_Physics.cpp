@@ -29,6 +29,9 @@ btSequentialImpulseConstraintSolver* Engine::Physics::Detail::PhysicsManagement:
 btDiscreteDynamicsWorld* Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
 GLDebugDrawer* Engine::Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
+std::vector<Collision*> _getCollisions(){ std::vector<Collision*> c; return c; }
+std::vector<Collision*> Engine::Physics::Detail::PhysicsManagement::m_Collisions = _getCollisions();
+
 void Engine::Physics::Detail::PhysicsManagement::init(){
 	m_broadphase = new btDbvtBroadphase();
 	m_collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -51,6 +54,8 @@ void Engine::Physics::Detail::PhysicsManagement::destruct(){
 	SAFE_DELETE(m_dispatcher);
 	SAFE_DELETE(m_collisionConfiguration);
 	SAFE_DELETE(m_broadphase);
+	for(auto collision:m_Collisions)
+		SAFE_DELETE(collision);
 }
 void Engine::Physics::Detail::PhysicsManagement::_setGravity(float x, float y, float z){ 
 	Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->setGravity(btVector3(x,y,z)); 
@@ -87,9 +92,64 @@ void Engine::Physics::Detail::PhysicsManagement::render(){
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
-Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadCollision(std::string filename, COLLISION_TYPE collisionType){
+
+Collision::Collision(){ 
+	m_Inertia = nullptr;
+	m_CollisionShape = nullptr;
+	setCollision(nullptr,COLLISION_TYPE_NONE,0);
+	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+}
+Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type){ 
+	m_Inertia = nullptr;
+	m_CollisionShape = nullptr;
+	setCollision(shape,type,0);
+	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+}
+Collision::Collision(std::string filename,COLLISION_TYPE type){ 
+	m_Inertia = nullptr;
+	m_CollisionShape = nullptr;
+	load(filename,type);
+	setCollision(m_CollisionShape,type,0);
+	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+}
+Collision::~Collision(){ 
+	SAFE_DELETE(m_Inertia);
+	SAFE_DELETE(m_CollisionShape); 
+	m_CollisionType = COLLISION_TYPE_NONE;
+}
+void Collision::recalculate(float mass){
+	if(m_CollisionShape != nullptr){
+		if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
+			m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
+		}
+		else{
+			((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
+		}
+	}
+}
+void Collision::setCollision(btCollisionShape* shape,unsigned int type, float mass){
+	if(m_Inertia == nullptr){
+		m_Inertia = new btVector3(0,0,0);
+	}
+	else{
+		m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
+	}
+	m_CollisionShape = shape;
+	m_CollisionType = type;
+	if(shape != nullptr){
+		if(mass != 0){
+			if(type != COLLISION_TYPE_TRIANGLESHAPE){
+				m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
+			}
+			else{
+				((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
+			}
+		}
+	}
+}
+void Collision::load(std::string filename, COLLISION_TYPE collisionType){
 	btCollisionShape* shape = nullptr;
-	Engine::Physics::Collision* collision = nullptr;
+	Collision* collision = nullptr;
 	std::string extention;
 	for(unsigned int i = filename.length() - 4; i < filename.length(); i++) extention += tolower(filename.at(i));
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
@@ -118,12 +178,14 @@ Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadColl
 						((btConvexHullShape*)shape)->addPoint(pos);
 					}
 					else if(line[0] == 'v' && line[1] != ' '){
-						collision = new Collision(shape,COLLISION_TYPE_CONVEXHULL);
-						return collision;
+						this->m_CollisionShape = shape;
+						this->m_CollisionType = COLLISION_TYPE_CONVEXHULL;
+						return;
 					}
 				}
-				collision = new Collision(shape,COLLISION_TYPE_CONVEXHULL);
-				return collision;
+				this->m_CollisionShape = shape;
+				this->m_CollisionType = COLLISION_TYPE_CONVEXHULL;
+				return;
 				#pragma endregion
 			}
 			break;
@@ -220,7 +282,9 @@ Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadColl
 			((btGImpactMeshShape*)shape)->setMargin(0.001f);
 			((btGImpactMeshShape*)shape)->updateBound();
 			
-			collision = new Collision(shape,COLLISION_TYPE_TRIANGLESHAPE);
+			this->m_CollisionShape = shape;
+			this->m_CollisionType = COLLISION_TYPE_TRIANGLESHAPE;
+			return;
 			break;
 		}
 		case COLLISION_TYPE_BOXSHAPE:{
@@ -261,9 +325,10 @@ Engine::Physics::Collision* Engine::Physics::Detail::PhysicsManagement::loadColl
 				#pragma endregion
 			}
 			shape = new btBoxShape(btVector3(max.x,max.y,max.z));
-			collision = new Collision(shape,COLLISION_TYPE_BOXSHAPE);
+			this->m_CollisionShape = shape;
+			this->m_CollisionType = COLLISION_TYPE_BOXSHAPE;
+			return;
 			break;
 		}
 	}
-	return collision;
 }

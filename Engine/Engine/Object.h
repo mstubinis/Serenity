@@ -88,9 +88,8 @@ class Object{
 		void addChild(Object*);
 
 		virtual void update(float);
-		virtual void render(Mesh*,Material*,GLuint shader=0,bool=false);
-		virtual void render(GLuint shader=0,bool=false);
-		virtual void draw(Mesh*,Material*,GLuint shader,bool=false);
+		virtual void render(GLuint=0,bool=false);
+		virtual void draw(GLuint shader,bool=false);
 
 		virtual const float getRadius() const { return m_Radius; }
 

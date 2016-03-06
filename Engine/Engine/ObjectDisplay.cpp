@@ -18,16 +18,16 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
 ObjectDisplay::~ObjectDisplay()
 {
 }
-void ObjectDisplay::render(Mesh* mesh,Material* material,GLuint shader,bool debug){
+void ObjectDisplay::render(GLuint shader,bool debug){
 	//add to render queue
 	if(shader == 0){
 		shader = Resources::getShader("Deferred")->getShaderProgram();
 	}
-	Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,mesh,material,shader));
+	Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
-void ObjectDisplay::draw(Mesh* mesh, Material* material, GLuint shader, bool debug){
+void ObjectDisplay::draw(GLuint shader, bool debug){
 	Camera* camera = Resources::getActiveCamera();
-	if((mesh == nullptr || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
+	if((m_Mesh == nullptr || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
 		return;	
 	glUseProgram(shader);
 
@@ -37,13 +37,13 @@ void ObjectDisplay::draw(Mesh* mesh, Material* material, GLuint shader, bool deb
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(m_Model)));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
-	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
-	glUniform1f(glGetUniformLocation(shader, "BaseGlow"),material->getBaseGlow());
-	glUniform1f(glGetUniformLocation(shader, "Specularity"),material->getSpecularity());
+	glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(m_Material->getShadeless()));
+	glUniform1f(glGetUniformLocation(shader, "BaseGlow"),m_Material->getBaseGlow());
+	glUniform1f(glGetUniformLocation(shader, "Specularity"),m_Material->getSpecularity());
 
-	for(auto component:material->getComponents())
-		material->bindTexture(component.first,shader);
-	mesh->render();
+	for(auto component:m_Material->getComponents())
+		m_Material->bindTexture(component.first,shader);
+	m_Mesh->render();
 	glUseProgram(0);
 }
 void ObjectDisplay::calculateRadius(){
@@ -54,7 +54,6 @@ void ObjectDisplay::calculateRadius(){
 	m_BoundingBoxRadius = m_Mesh->getRadius() * m_Scale;
 	m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
 }
-void ObjectDisplay::render(GLuint shader,bool debug){ render(m_Mesh,m_Material,shader,debug); }
 void ObjectDisplay::setColor(float x, float y, float z,float a){ 
 	m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; 
 }

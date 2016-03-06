@@ -167,9 +167,8 @@ glm::vec3 Object::getScreenCoordinates(){
 		return glm::vec3(fX,fY,inBounds);
 	}
 }
-void Object::render(Mesh* m, Material* mat,GLuint shader, bool debug){}
-void Object::draw(Mesh* m, Material* mat,GLuint shader, bool debug){}
-void Object::render(GLuint shader,bool debug){}
+void Object::render(GLuint shader, bool debug){}
+void Object::draw(GLuint shader, bool debug){}
 bool Object::rayIntersectSphere(Camera* cam){
 	return false;
 }

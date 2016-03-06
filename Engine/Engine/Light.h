@@ -14,8 +14,8 @@ class SunLight: public ObjectDisplay{
 
 		void update(float);
 
-		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
-		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+		virtual void render(GLuint=0,bool=false);
+		virtual void draw(GLuint shader,bool=false);
 
 		virtual void lighten(GLuint);
 
@@ -28,8 +28,8 @@ class DirectionalLight: public SunLight{
 		DirectionalLight(glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
 		virtual ~DirectionalLight();
 
-		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
-		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+		virtual void render(GLuint=0,bool=false);
+		virtual void draw(GLuint shader,bool=false);
 
 		virtual void lighten(GLuint);
 };
@@ -41,8 +41,8 @@ class PointLight: public SunLight{
 		PointLight(glm::v3 = glm::v3(0), Scene* = nullptr);
 		virtual ~PointLight();
 
-		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
-		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+		virtual void render(GLuint=0,bool=false);
+		virtual void draw(GLuint shader,bool=false);
 
 		virtual void lighten(GLuint);
 };
@@ -55,8 +55,8 @@ class SpotLight: public SunLight{
 		SpotLight(glm::v3, Scene* = nullptr);
 		virtual ~SpotLight();
 
-		virtual void render(Mesh*, Material*,GLuint=0,bool=false);
-		virtual void draw(Mesh*, Material*,GLuint shader,bool=false);
+		virtual void render(GLuint=0,bool=false);
+		virtual void draw(GLuint shader,bool=false);
 
 		virtual void lighten(GLuint);
 };

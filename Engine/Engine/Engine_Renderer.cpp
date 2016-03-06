@@ -68,13 +68,13 @@ void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float wid
 }
 void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
 	for(auto item:m_ObjectsToBeRendered){
-		item.object->draw(item.mesh,item.material,item.shader,RendererInfo::debug);
+		item.object->draw(item.shader,RendererInfo::debug);
 	}
 	m_ObjectsToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
 	for(auto item:m_ForegroundObjectsToBeRendered){
-		item.object->draw(item.mesh,item.material,item.shader,RendererInfo::debug);
+		item.object->draw(item.shader,RendererInfo::debug);
 	}
 	m_ForegroundObjectsToBeRendered.clear();
 }

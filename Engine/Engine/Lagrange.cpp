@@ -210,9 +210,9 @@ void Lagrange::render(GLuint shader, bool debug){
 	if(shader == 0){
 		shader = Resources::getShader("Deferred")->getShaderProgram();
 	}
-	Engine::Renderer::Detail::RenderManagement::getForegroundObjectRenderQueue().push_back(GeometryRenderInfo(this,nullptr,nullptr,shader));
+	Engine::Renderer::Detail::RenderManagement::getForegroundObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
-void Lagrange::draw(Mesh* mesh, Material* mat,GLuint shader, bool debug){
+void Lagrange::draw(GLuint shader, bool debug){
 	Camera* camera = Resources::getActiveCamera();
 	if((m_Visible == false) || (!camera->sphereIntersectTest(this->getPosition(),this->getRadius())) || (camera->getDistance(this) > 1100 * getRadius()))
 		return;	

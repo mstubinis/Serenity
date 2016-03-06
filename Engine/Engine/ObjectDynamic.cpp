@@ -8,11 +8,11 @@
 
 using namespace Engine;
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Engine::Physics::Collision* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,scene){
+ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,scene){
 	m_Collision_Shape = col;
 	m_Mass = 0.5f * m_Radius;
 	if(m_Collision_Shape == nullptr){
-		m_Collision_Shape = new Engine::Physics::Collision(nullptr,COLLISION_TYPE_NONE);
+		m_Collision_Shape = new Collision(new btEmptyShape(),COLLISION_TYPE_NONE);
 		if(m_Mesh != nullptr){
 			if(m_Mesh->getCollision() == nullptr){
 				//causes memory leaks

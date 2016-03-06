@@ -16,65 +16,35 @@ class GLDebugDrawer;
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
 
-enum COLLISION_TYPE { COLLISION_TYPE_CONVEXHULL, COLLISION_TYPE_TRIANGLESHAPE,COLLISION_TYPE_BOXSHAPE,COLLISION_TYPE_NONE };
+enum COLLISION_TYPE { 
+	COLLISION_TYPE_CONVEXHULL, 
+	COLLISION_TYPE_TRIANGLESHAPE,
+	COLLISION_TYPE_COMPOUND,
+	COLLISION_TYPE_BOXSHAPE,
+	COLLISION_TYPE_NONE
+};
+class Collision final{
+	private:
+		unsigned int m_CollisionType;
+		btCollisionShape* m_CollisionShape;
+		btVector3* m_Inertia;
+	public:
+		Collision();
+		Collision(btCollisionShape* shape,COLLISION_TYPE);
+		Collision(std::string filename,COLLISION_TYPE);
+		~Collision();
+
+		void load(std::string filename, COLLISION_TYPE);
+
+		void recalculate(float mass);
+		void setCollision(btCollisionShape* shape,unsigned int type, float mass);
+		btCollisionShape* getCollision() const { return m_CollisionShape; }
+		btVector3* getInertia() const { return m_Inertia; }
+		const unsigned int getCollisionType() const { return m_CollisionType; }
+};
 
 namespace Engine{
 	namespace Physics{
-		struct Collision final{
-			public:
-				unsigned int m_CollisionType;
-				btCollisionShape* m_Collision;
-				btVector3* m_Inertia;
-				
-				Collision(){ 
-					m_Inertia = nullptr;
-					m_Collision = nullptr;
-					setCollision(nullptr,COLLISION_TYPE_NONE,0); 
-				}
-				Collision(btCollisionShape* shape,unsigned int type){ 
-					m_Inertia = nullptr;
-					m_Collision = nullptr;
-					setCollision(shape,type,0); 
-				}
-				~Collision(){ 
-					delete m_Inertia; 
-					delete m_Collision; 
-					m_CollisionType = COLLISION_TYPE_NONE; 
-				}
-				void recalculate(float mass){
-					if(m_Collision != nullptr){
-						if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
-							m_Collision->calculateLocalInertia(mass,*m_Inertia);
-						}
-						else{
-							((btGImpactMeshShape*)m_Collision)->calculateLocalInertia(mass,*m_Inertia);
-						}
-					}
-				}
-				void setCollision(btCollisionShape* shape,unsigned int type, float mass){
-					if(m_Inertia == nullptr){
-						m_Inertia = new btVector3(0,0,0);
-					}
-					else{
-						m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
-					}
-					m_Collision = shape;
-					m_CollisionType = type;
-					if(shape != nullptr){
-						if(mass != 0){
-							if(type != COLLISION_TYPE_TRIANGLESHAPE){
-								m_Collision->calculateLocalInertia(mass,*m_Inertia);
-							}
-							else{
-								((btGImpactMeshShape*)m_Collision)->calculateLocalInertia(mass,*m_Inertia);
-							}
-						}
-					}
-				}
-				btCollisionShape* getCollision() const { return m_Collision; }
-				btVector3* getInertia() const { return m_Inertia; }
-				const unsigned int getCollisionType() const { return m_CollisionType; }
-		};
 		namespace Detail{
 			class PhysicsManagement final{
 				private:
@@ -94,7 +64,7 @@ namespace Engine{
 					static void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
 					static void render();
 
-					static Collision* loadCollision(std::string filename, COLLISION_TYPE);
+					static std::vector<Collision*> m_Collisions;
 			};
 		};
 		void setGravity(float,float,float); 
