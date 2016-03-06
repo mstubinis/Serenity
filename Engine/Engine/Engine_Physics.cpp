@@ -29,8 +29,8 @@ btSequentialImpulseConstraintSolver* Engine::Physics::Detail::PhysicsManagement:
 btDiscreteDynamicsWorld* Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
 GLDebugDrawer* Engine::Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
-std::vector<Collision*> _getCollisions(){ std::vector<Collision*> c; return c; }
-std::vector<Collision*> Engine::Physics::Detail::PhysicsManagement::m_Collisions = _getCollisions();
+std::vector<MeshCollision*> _getCollisions(){ std::vector<MeshCollision*> c; return c; }
+std::vector<MeshCollision*> Engine::Physics::Detail::PhysicsManagement::m_MeshCollisions = _getCollisions();
 
 void Engine::Physics::Detail::PhysicsManagement::init(){
 	m_broadphase = new btDbvtBroadphase();
@@ -54,7 +54,7 @@ void Engine::Physics::Detail::PhysicsManagement::destruct(){
 	SAFE_DELETE(m_dispatcher);
 	SAFE_DELETE(m_collisionConfiguration);
 	SAFE_DELETE(m_broadphase);
-	for(auto collision:m_Collisions)
+	for(auto collision:m_MeshCollisions)
 		SAFE_DELETE(collision);
 }
 void Engine::Physics::Detail::PhysicsManagement::_setGravity(float x, float y, float z){ 
@@ -93,63 +93,22 @@ void Engine::Physics::Detail::PhysicsManagement::render(){
 	glPopMatrix();
 }
 
-Collision::Collision(){ 
-	m_Inertia = nullptr;
-	m_CollisionShape = nullptr;
-	setCollision(nullptr,COLLISION_TYPE_NONE,0);
-	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+MeshCollision::MeshCollision(btCollisionShape* shape,COLLISION_TYPE type){ 
+	m_CollisionShape = shape;
+	m_CollisionType = type;
+	Engine::Physics::Detail::PhysicsManagement::m_MeshCollisions.push_back(this);
 }
-Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type){ 
-	m_Inertia = nullptr;
-	m_CollisionShape = nullptr;
-	setCollision(shape,type,0);
-	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
-}
-Collision::Collision(std::string filename,COLLISION_TYPE type){ 
-	m_Inertia = nullptr;
+MeshCollision::MeshCollision(std::string filename,COLLISION_TYPE type){ 
 	m_CollisionShape = nullptr;
 	load(filename,type);
-	setCollision(m_CollisionShape,type,0);
-	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+	Engine::Physics::Detail::PhysicsManagement::m_MeshCollisions.push_back(this);
 }
-Collision::~Collision(){ 
-	SAFE_DELETE(m_Inertia);
+MeshCollision::~MeshCollision(){ 
 	SAFE_DELETE(m_CollisionShape); 
 	m_CollisionType = COLLISION_TYPE_NONE;
 }
-void Collision::recalculate(float mass){
-	if(m_CollisionShape != nullptr){
-		if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
-			m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
-		}
-		else{
-			((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
-		}
-	}
-}
-void Collision::setCollision(btCollisionShape* shape,unsigned int type, float mass){
-	if(m_Inertia == nullptr){
-		m_Inertia = new btVector3(0,0,0);
-	}
-	else{
-		m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
-	}
-	m_CollisionShape = shape;
-	m_CollisionType = type;
-	if(shape != nullptr){
-		if(mass != 0){
-			if(type != COLLISION_TYPE_TRIANGLESHAPE){
-				m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
-			}
-			else{
-				((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
-			}
-		}
-	}
-}
-void Collision::load(std::string filename, COLLISION_TYPE collisionType){
+void MeshCollision::load(std::string filename, COLLISION_TYPE collisionType){
 	btCollisionShape* shape = nullptr;
-	Collision* collision = nullptr;
 	std::string extention;
 	for(unsigned int i = filename.length() - 4; i < filename.length(); i++) extention += tolower(filename.at(i));
 	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
@@ -329,6 +288,29 @@ void Collision::load(std::string filename, COLLISION_TYPE collisionType){
 			this->m_CollisionType = COLLISION_TYPE_BOXSHAPE;
 			return;
 			break;
+		}
+	}
+}
+Collision::Collision(MeshCollision* _meshCollision,float mass){ 
+	if(m_Inertia == nullptr){
+		m_Inertia = new btVector3(0,0,0);
+	}
+	else{
+		m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
+	}
+	m_MeshCollision = _meshCollision;
+	recalculate(mass);
+}
+Collision::~Collision(){ 
+	SAFE_DELETE(m_Inertia);
+}
+void Collision::recalculate(float mass){
+	if(m_MeshCollision->getCollisionShape() != nullptr){
+		if(m_MeshCollision->getCollisionType() != COLLISION_TYPE_TRIANGLESHAPE){
+			m_MeshCollision->getCollisionShape()->calculateLocalInertia(mass,*m_Inertia);
+		}
+		else{
+			((btGImpactMeshShape*)m_MeshCollision->getCollisionShape())->calculateLocalInertia(mass,*m_Inertia);
 		}
 	}
 }

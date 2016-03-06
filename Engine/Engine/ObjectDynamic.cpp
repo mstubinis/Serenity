@@ -9,17 +9,34 @@
 using namespace Engine;
 
 ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): ObjectDisplay(mesh,mat,pos,scl,name,scene){
-	m_Collision_Shape = col;
+	m_Collision = col;
 	m_Mass = 0.5f * m_Radius;
-	if(m_Collision_Shape == nullptr){
-		m_Collision_Shape = new Collision(new btEmptyShape(),COLLISION_TYPE_NONE);
-		if(m_Mesh != nullptr){
-			if(m_Mesh->getCollision() == nullptr){
-				//causes memory leaks
-				//m_Collision_Shape->setCollision(new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z)),COLLISION_TYPE_BOXSHAPE,m_Mass);
+	if(m_Collision == nullptr){
+		if(m_DisplayItems.size() > 0){
+			if(m_DisplayItems.size() == 1){
+				if(m_DisplayItems[0]->mesh->getCollision() == nullptr){
+					//causes memory leaks
+					//m_Collision_Shape = new Collision(nullptr,COLLISION_TYPE_NONE);
+					//m_Collision_Shape->setCollision(new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z)),COLLISION_TYPE_BOXSHAPE,m_Mass);
+				}
+				else
+					m_Collision = new Collision(m_DisplayItems[0]->mesh->getCollision(),m_Mass);
 			}
-			else
-				m_Collision_Shape->setCollision(m_Mesh->getCollision()->getCollision(),m_Mesh->getCollision()->getCollisionType(),m_Mass);
+			else{
+				btCompoundShape* shape = new btCompoundShape();
+				for(auto item:m_DisplayItems){
+					btTransform t;
+					glm::mat4 m = glm::mat4(1);
+					m = glm::translate(m,item->position);
+					m *= glm::mat4_cast(item->orientation);
+					m = glm::scale(m,item->scale);
+					t.setFromOpenGLMatrix(glm::value_ptr(m));
+
+					shape->addChildShape(t,item->mesh->getCollision()->getCollisionShape());
+				}
+				MeshCollision* compoundMesh = new MeshCollision(shape,COLLISION_TYPE_COMPOUND);
+				m_Collision = new Collision(compoundMesh,m_Mass);
+			}
 		}
 	}
 
@@ -33,7 +50,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
 
 	m_MotionState = new btDefaultMotionState(tr);
 
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision_Shape->getCollision(),*(m_Collision_Shape->getInertia()));
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getMeshCollision()->getCollisionShape(),*(m_Collision->getInertia()));
 
 	m_RigidBody = new btRigidBody(rigidBodyCI);
 	m_RigidBody->setSleepingThresholds(0.015f,0.015f);
@@ -49,6 +66,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
 ObjectDynamic::~ObjectDynamic(){
 	SAFE_DELETE(m_RigidBody);
 	SAFE_DELETE(m_MotionState);
+	SAFE_DELETE(m_Collision);
 }
 void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
 	m_RigidBody->activate();
@@ -107,7 +125,7 @@ void ObjectDynamic::update(float dt){
 }
 void ObjectDynamic::scale(float x,float y,float z){
 	ObjectDisplay::scale(x,y,z);
-	this->m_Collision_Shape->getCollision()->setLocalScaling(btVector3(m_Scale.x,m_Scale.y,m_Scale.z));
+	m_Collision->getMeshCollision()->getCollisionShape()->setLocalScaling(btVector3(m_Scale.x,m_Scale.y,m_Scale.z));
 }
 void ObjectDynamic::scale(glm::vec3 scl){ ObjectDynamic::scale(scl.x,scl.y,scl.z); }
 void ObjectDynamic::setPosition(glm::nType x, glm::nType y, glm::nType z){
@@ -178,10 +196,10 @@ void ObjectDynamic::setAngularVelocity(float x, float y, float z){
 void ObjectDynamic::setAngularVelocity(glm::vec3 velocity){ ObjectDynamic::setAngularVelocity(velocity.x,velocity.y,velocity.z); }
 void ObjectDynamic::setMass(float mass){
 	m_RigidBody->activate();
-	m_Mass = 0.5f * m_Radius;
+	m_Mass = mass;
 
-	m_Collision_Shape->recalculate(m_Mass);
+	m_Collision->recalculate(m_Mass);
 
 	if(m_RigidBody != nullptr)
-		m_RigidBody->setMassProps(m_Mass,*(m_Collision_Shape->getInertia()));
+		m_RigidBody->setMassProps(m_Mass,*(m_Collision->getInertia()));
 }

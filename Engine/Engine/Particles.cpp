@@ -74,9 +74,9 @@ Particle::~Particle(){
 	//delete light; 
 }
 void Particle::setPosition(glm::nType x,glm::nType y,glm::nType z){
-	position.x = x;
-	position.y = y;
-	position.z = z;
+	position.x = static_cast<float>(x);
+	position.y = static_cast<float>(y);
+	position.z = static_cast<float>(z);
 
 	model[3][0] = position.x;
 	model[3][1] = position.y;
@@ -97,6 +97,5 @@ void Particle::update(float dt){
 		toBeErased = true;
 }
 void Particle::render(GLuint shader){
-
 
 }

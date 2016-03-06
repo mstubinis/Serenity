@@ -59,7 +59,7 @@ void Planet::render(GLuint shader,bool debug){
 }
 void Planet::draw(GLuint shader,bool debug){
 	bool renderPlanet = true;
-	if(m_Mesh == nullptr || !Resources::getActiveCamera()->sphereIntersectTest(this))
+	if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
 		renderPlanet = false;
 	Camera* activeCamera = Resources::getActiveCamera();
 	if(activeCamera->getDistance(this) > 700 * getRadius())
@@ -86,13 +86,8 @@ void Planet::draw(GLuint shader,bool debug){
 			glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
 			glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
-			glUniform1f(glGetUniformLocation(shader, "BaseGlow"),m_Material->getBaseGlow());
-			glUniform1f(glGetUniformLocation(shader, "Specularity"),0.08f);
 
 			glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
-
-			for(auto component:m_Material->getComponents())
-				m_Material->bindTexture(component.first,shader);
 
 			if(m_AtmosphereHeight > 0){
 				glUniform1i(glGetUniformLocation(shader,"hasAtmosphere"),1);
@@ -150,8 +145,13 @@ void Planet::draw(GLuint shader,bool debug){
 
 			glUniform1f(glGetUniformLocation(shader,"fExposure"), 2.0f);
 
-
-			m_Mesh->render();
+			glUniform1f(glGetUniformLocation(shader, "Specularity"),0.08f);
+			for(auto item:m_DisplayItems){
+				glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
+				for(auto component:item->material->getComponents())
+					item->material->bindTexture(component.first,shader);
+				item->mesh->render();
+			}
 			glUseProgram(0);
 			#pragma endregion
 
@@ -218,7 +218,9 @@ void Planet::draw(GLuint shader,bool debug){
 			glUniform1f(glGetUniformLocation(shader,"g2"), g*g);
 			glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
 
-			m_Mesh->render();
+			for(auto item:m_DisplayItems){
+				item->mesh->render();
+			}
 			glUseProgram(0);
 
 			glCullFace(GL_BACK);
@@ -243,8 +245,11 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,float scl, std
 	m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
 	m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 	setColor(starColor.x,starColor.y,starColor.z,1);
-	m_Material->setShadeless(true);
-	m_Material->setBaseGlow(0.22f);
+
+	for(auto item:m_DisplayItems){
+		item->material->setShadeless(true);
+		item->material->setBaseGlow(0.22f);
+	}
 
 	addChild(m_Light);
 }
@@ -276,9 +281,9 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 		unsigned int newI = 0;
 		for(unsigned int i = 0; i < ringInfo.size; i++){
 			if(i > ringInfo.alphaBreakpoint){
-				float numerator = alphaChangeRange - newI;
+				unsigned int numerator = alphaChangeRange - newI;
 				pC.a = static_cast<float>(numerator/(alphaChangeRange));
-				paintCol.a = pC.a * 255;
+				paintCol.a = static_cast<unsigned int>(pC.a * 255);
 				newI++;
 			}
 			else{
@@ -291,13 +296,13 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 				sf::Color backgroundColorBack = ringImage.getPixel(ringInfo.position - i,0);
 				glm::vec4 bCFront = glm::vec4(backgroundColorFront.r/255.0f,backgroundColorFront.g/255.0f,backgroundColorFront.b/255.0f,backgroundColorFront.a/255.0f);
 				glm::vec4 bCBack = glm::vec4(backgroundColorBack.r/255.0f,backgroundColorBack.g/255.0f,backgroundColorBack.b/255.0f,backgroundColorBack.a/255.0f);
-				sf::Color finalColorFront = sf::Color(255,255,255,255);
-				sf::Color finalColorBack = sf::Color(255,255,255,255);
+				sf::Color finalColorFront = sf::Color::White;
+				sf::Color finalColorBack = sf::Color::White;
 
 				float fAFront = pC.a + bCFront.a * (1-pC.a);
 				float fABack = pC.a + bCBack.a * (1-pC.a);
-				finalColorFront.a = fAFront * 255;
-				finalColorBack.a = fABack * 255;
+				finalColorFront.a = static_cast<unsigned int>(fAFront * 255);
+				finalColorBack.a = static_cast<unsigned int>(fABack * 255);
 
 				finalColorFront.r = static_cast<unsigned int>(((pC.r*pC.a + bCFront.r*bCFront.a * (1-pC.a)) / fAFront)* 255);
 				finalColorFront.g = static_cast<unsigned int>(((pC.g*pC.a + bCFront.g*bCFront.a * (1-pC.a)) / fAFront)* 255);
@@ -311,10 +316,10 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 					finalColorFront = sf::Color(backgroundColorFront.r,backgroundColorFront.g,backgroundColorFront.b,0);
 					finalColorBack = sf::Color(backgroundColorBack.r,backgroundColorBack.g,backgroundColorBack.b,0);
 
-					float numerator = ringInfo.size - i;
+					unsigned int numerator = ringInfo.size - i;
 					pC.a = static_cast<float>(numerator/(ringInfo.size));
-					finalColorFront.a = 255 - (pC.a *255);
-					finalColorBack.a = 255 - (pC.a *255);
+					finalColorFront.a = 255 - static_cast<unsigned int>(pC.a *255);
+					finalColorBack.a = 255 - static_cast<unsigned int>(pC.a *255);
 				}
 
 				int ra = rand() % 10 - 5;

@@ -138,10 +138,10 @@ void Mesh::_loadFromOBJ(std::string filename){
 	std::string colFile = filename.substr(0,filename.size()-4);
 	colFile += "Col.obj";
 	if(boost::filesystem::exists(colFile)){
-		m_Collision = new Collision(colFile,COLLISION_TYPE_CONVEXHULL);
+		m_Collision = new MeshCollision(colFile,COLLISION_TYPE_CONVEXHULL);
 	}
 	else{
-		m_Collision = new Collision(filename,COLLISION_TYPE_CONVEXHULL);
+		m_Collision = new MeshCollision(filename,COLLISION_TYPE_CONVEXHULL);
 	}
 
 	std::vector<glm::vec3> pointData;

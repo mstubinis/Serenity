@@ -15,7 +15,7 @@ class ObjectDynamic: public ObjectDisplay{
 		glm::vec3 _calculateUp();
 		float m_Mass;
 	protected:
-		Collision* m_Collision_Shape;
+		Collision* m_Collision;
 		btRigidBody* m_RigidBody;
 		btDefaultMotionState* m_MotionState;
 	public:

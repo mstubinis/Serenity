@@ -55,7 +55,7 @@ Skybox::~Skybox(){
 	SAFE_DELETE(m_Texture);
 }
 void Skybox::update(){
-	glm::v3 p = Resources::getActiveCamera()->getPosition();
+	glm::vec3 p = glm::vec3(Resources::getActiveCamera()->getPosition());
 	m_Model[3][0] = p.x;
 	m_Model[3][1] = p.y;
 	m_Model[3][2] = p.z;

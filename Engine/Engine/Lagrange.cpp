@@ -170,11 +170,11 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 
 	float sizeRatio = p1->getRadius() / p2->getRadius();
 	float planetaryDistanceToSubtractFromDistance = p1->getRadius() + p2->getRadius();
-	float distanceFromP2AndP1 = glm::distance(p1->getPosition(),p2->getPosition());
-	float actualDistance = distanceFromP2AndP1 - planetaryDistanceToSubtractFromDistance;
+	glm::nType distanceFromP2AndP1 = glm::distance(p1->getPosition(),p2->getPosition());
+	glm::nType actualDistance = distanceFromP2AndP1 - static_cast<glm::nType>(planetaryDistanceToSubtractFromDistance);
 
-	float step1 = actualDistance / (sizeRatio + 1);
-	float distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
+	glm::nType step1 = actualDistance / (sizeRatio + 1);
+	glm::nType distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
 
 	glm::v3 unitVector = glm::normalize(p2->getPosition() - p1->getPosition());
 
@@ -186,15 +186,15 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 	glm::normalize(yaxis);
 
 	glm::mat3x3 rot;
-    rot[0][0] = xaxis.x;
-    rot[1][0] = yaxis.x;
-    rot[2][0] = unitVector.x;
-    rot[0][1] = xaxis.y;
-    rot[1][1] = yaxis.y;
-    rot[2][1] = unitVector.y;
-    rot[0][2] = xaxis.z;
-    rot[1][2] = yaxis.z;
-    rot[2][2] = unitVector.z;
+    rot[0][0] = static_cast<float>(xaxis.x);
+    rot[1][0] = static_cast<float>(yaxis.x);
+    rot[2][0] = static_cast<float>(unitVector.x);
+    rot[0][1] = static_cast<float>(xaxis.y);
+    rot[1][1] = static_cast<float>(yaxis.y);
+    rot[2][1] = static_cast<float>(unitVector.y);
+    rot[0][2] = static_cast<float>(xaxis.z);
+    rot[1][2] = static_cast<float>(yaxis.z);
+    rot[2][2] = static_cast<float>(unitVector.z);
 	this->m_Orientation = glm::quat_cast(rot);
 
 	unitVector *= distanceOfL1FromP1;

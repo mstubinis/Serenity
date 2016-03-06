@@ -220,7 +220,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 							std::vector<RingInfo> rings;
 							planetRings[PARENT] = rings;
 						}
-						planetRings[PARENT].push_back(RingInfo(static_cast<unsigned int>(POSITION/10),static_cast<unsigned int>(RADIUS/10),glm::vec3(R,G,B),BREAK));
+						planetRings[PARENT].push_back(RingInfo(static_cast<unsigned int>(POSITION/10),static_cast<unsigned int>(RADIUS/10),glm::uvec3(R,G,B),BREAK));
 					}
 				}
 				else if(line[0] == 'L'){//Lagrange Point
@@ -503,11 +503,11 @@ void SolarSystem::_loadRandomly(){
 						unsigned int chance2 = rand() % 100;
 
 						if(chance1 > 25){
-							rings.push_back(RingInfo(randPos,randSize,glm::vec3(RR,RG,RB),randBreak));
+							rings.push_back(RingInfo(randPos,randSize,glm::uvec3(RR,RG,RB),randBreak));
 						}
 						else if(randSize < 50){
 							if(chance2 < 20)
-								rings.push_back(RingInfo(randPos,randSize,glm::vec3(-1),randBreak));
+								rings.push_back(RingInfo(randPos,randSize,glm::uvec3(-1),randBreak));
 						}
 					}
 					if(rings.size() > 0)

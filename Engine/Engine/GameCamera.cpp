@@ -85,7 +85,7 @@ ObjectDisplay* GameCamera::getObjectInCenterRay(ObjectDisplay* exclusion){
 	else if(objs.size() == 1)
 		return objs.at(0);
 	else{
-		float distance = -1;
+		glm::nType distance = -1;
 		for(auto object:objs){
 			glm::nType d = glm::distance(object->getPosition(),this->getPosition());
 			if(distance == -1 || d < distance){

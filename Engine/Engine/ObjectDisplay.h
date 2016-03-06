@@ -3,15 +3,25 @@
 
 #include "Object.h"
 
+struct DisplayItem{
+	Mesh* mesh;
+	Material* material;
+	glm::vec3 position;
+	glm::quat orientation;
+	glm::vec3 scale;
+	DisplayItem(Mesh* _m, Material* _mat, glm::vec3 _p = glm::vec3(0), glm::quat _o = glm::quat(), glm::vec3 _s = glm::vec3(1)){
+		mesh = _m; material = _mat; position = _p; orientation = _o; scale = _s;
+	}
+	~DisplayItem(){
+	}
+};
+
 class ObjectDisplay: public Object{
 	protected:
 		bool m_Visible;
-		Mesh* m_Mesh;
-		Material* m_Material;
+		std::vector<DisplayItem*> m_DisplayItems;
 		glm::vec4 m_Color;
-
 		glm::vec3 m_BoundingBoxRadius;
-
 		virtual void calculateRadius();
 	public:
 		ObjectDisplay(std::string = "",
@@ -36,8 +46,6 @@ class ObjectDisplay: public Object{
 
 		const glm::vec4& getColor() const{ return m_Color; }
 
-		void setMesh(Mesh*);
-		void setMaterial(Material*);
 		void setVisible(bool b);
 
 		bool rayIntersectSphere(Camera*);

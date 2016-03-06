@@ -23,24 +23,31 @@ enum COLLISION_TYPE {
 	COLLISION_TYPE_BOXSHAPE,
 	COLLISION_TYPE_NONE
 };
-class Collision final{
+class MeshCollision final{
 	private:
 		unsigned int m_CollisionType;
 		btCollisionShape* m_CollisionShape;
-		btVector3* m_Inertia;
 	public:
-		Collision();
-		Collision(btCollisionShape* shape,COLLISION_TYPE);
-		Collision(std::string filename,COLLISION_TYPE);
-		~Collision();
+		MeshCollision(btCollisionShape* shape = nullptr,COLLISION_TYPE = COLLISION_TYPE_NONE);
+		MeshCollision(std::string filename,COLLISION_TYPE);
+		~MeshCollision();
 
 		void load(std::string filename, COLLISION_TYPE);
 
-		void recalculate(float mass);
-		void setCollision(btCollisionShape* shape,unsigned int type, float mass);
-		btCollisionShape* getCollision() const { return m_CollisionShape; }
-		btVector3* getInertia() const { return m_Inertia; }
+		btCollisionShape* getCollisionShape() const { return m_CollisionShape; }
 		const unsigned int getCollisionType() const { return m_CollisionType; }
+};
+class Collision final{
+	private:
+		MeshCollision* m_MeshCollision;
+		btVector3* m_Inertia;
+	public:
+		Collision(MeshCollision*,float mass);
+		~Collision();
+
+		void recalculate(float mass);
+		btVector3* getInertia() const { return m_Inertia; }
+		MeshCollision* getMeshCollision() const { return m_MeshCollision; }
 };
 
 namespace Engine{
@@ -64,7 +71,7 @@ namespace Engine{
 					static void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
 					static void render();
 
-					static std::vector<Collision*> m_Collisions;
+					static std::vector<MeshCollision*> m_MeshCollisions;
 			};
 		};
 		void setGravity(float,float,float); 

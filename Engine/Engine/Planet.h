@@ -45,8 +45,8 @@ struct RingInfo final{
 	unsigned int position;
 	unsigned int size;
 	unsigned int alphaBreakpoint;
-	glm::vec3 color;
-	RingInfo(unsigned int p, unsigned int s, glm::vec3 col,unsigned int ab = 1){ 
+	glm::uvec3 color;
+	RingInfo(unsigned int p, unsigned int s, glm::uvec3 col,unsigned int ab = 1){ 
 		position = p; 
 		size = s; 
 		color = col; 
