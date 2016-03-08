@@ -34,13 +34,19 @@ void ObjectDisplay::draw(GLuint shader, bool debug){
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
 	glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(m_Model)));
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
 	for(auto item:m_DisplayItems){
+		glm::mat4 m = glm::mat4(m_Model);
+		m = glm::translate(m,item->position);
+		m *= glm::mat4_cast(item->orientation);
+		m = glm::scale(m,item->scale);
+
 		glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(item->material->getShadeless()));
 		glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
 		glUniform1f(glGetUniformLocation(shader, "Specularity"),item->material->getSpecularity());
+
+		glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m));
 
 		for(auto component:item->material->getComponents())
 			item->material->bindTexture(component.first,shader);

@@ -35,6 +35,9 @@ class ObjectDynamic: public ObjectDisplay{
 		void scale(float,float,float);
 		void scale(glm::vec3);
 
+		void rotate(float,float,float,bool overTime = true); 
+		void rotate(glm::vec3, bool overTime = true);
+
 		void translate(glm::nType,glm::nType,glm::nType,bool local=true); 
 		void translate(glm::v3,bool local=true);
 		void applyForce(float,float,float,bool local=true); 
@@ -53,6 +56,8 @@ class ObjectDynamic: public ObjectDisplay{
 
 		const float getMass() const { return m_Mass; }
 		void setMass(float);
+
+		void alignTo(glm::v3,float speed=0, bool overTime=false);
 
 		void update(float);
 };

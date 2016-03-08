@@ -164,7 +164,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
 						if(ORBIT_PERIOD != -1.0f){
-							planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,parent));
+							//planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,parent));
 						}
 						if(ROTATIONAL_TILT != -1.0f){
 							planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
@@ -185,7 +185,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 						planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
 						if(ORBIT_PERIOD != -1.0f){
-							planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,parent));
+							//planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,parent));
 						}
 						if(ROTATIONAL_TILT != -1.0f){
 							planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));

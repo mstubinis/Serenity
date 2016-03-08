@@ -3,11 +3,39 @@
 
 #include "ObjectDynamic.h"
 
+struct StationPartConnectorsInfo{
+	std::vector<glm::vec3> connectorLocations;
+	std::vector<glm::vec3> connectorDirections;
+	StationPartConnectorsInfo(std::vector<glm::vec3> _connectors,std::vector<glm::vec3> _directions){
+		connectorLocations = _connectors;
+		connectorDirections = _directions;
+	}
+	~StationPartConnectorsInfo(){
+		connectorLocations.clear();
+		connectorDirections.clear();
+	}
+};
+struct StationPart{
+	StationPart* parent;
+	DisplayItem* displayItem;
+	StationPartConnectorsInfo* connectorsInfo;
+	std::vector<unsigned int> usedPartsIndices;
+	StationPart(DisplayItem* _displayItem, StationPartConnectorsInfo* _s){
+		displayItem = _displayItem;
+		connectorsInfo = _s;
+	}
+	~StationPart(){
+		delete displayItem;
+		delete connectorsInfo;
+		usedPartsIndices.clear();
+	}
+};
+
+static std::map<std::string,StationPartConnectorsInfo*> stationPartsInfo;
+
 class Station: public ObjectDynamic{
-	private:
-
 	protected:
-
+		std::vector<StationPart*> m_StationParts; // the first element is always the root element
 	public:
 		Station(std::string = "",
 			    std::string = "",
@@ -19,8 +47,11 @@ class Station: public ObjectDynamic{
 			   );
 		virtual ~Station();
 
-		glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }
+		glm::vec2 getGravityInfo(){ return glm::vec2(getRadius()*100,getRadius()*150); }
 
-		void update(float);
+		virtual void update(float);
+
+		virtual void addStationPart(StationPart*,unsigned int, StationPart* = nullptr,unsigned int = -1);
+		virtual StationPart* getRootStationPart(){ return m_StationParts[0]; }
 };
 #endif

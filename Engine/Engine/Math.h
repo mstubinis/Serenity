@@ -10,12 +10,8 @@
 #include <glm/glm.hpp>
 
 namespace Game{
-
 	namespace Pathfinding{
-
 		static std::list<glm::v3> getPathFrom(Object* start, Object* finish);
-
 	};
-
 };
 #endif

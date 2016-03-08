@@ -1,7 +1,6 @@
-#include "Object.h"
+#include "Engine.h"
+#include "Math.h"
 #include "Camera.h"
-#include "Engine_Resources.h"
-#include "Scene.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -19,9 +18,9 @@ Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
 	m_Model = glm::m4(1);
 	m_Orientation = glm::quat();
 
-	Object::setPosition(pos);
 	Object::setScale(scl);
 	_prevPosition = pos;
+	Object::setPosition(pos);
 
 	unsigned int count = 0;
 	if(scene == nullptr){
@@ -71,7 +70,10 @@ void Object::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
 	setPosition(getPosition() + offset);
 }
 void Object::translate(glm::v3 translation,bool local){ translate(translation.x,translation.y,translation.z,local); }
-void Object::rotate(float x, float y, float z){ 
+void Object::rotate(float x, float y, float z, bool overTime){
+	if(overTime){
+		x *= Resources::dt(); y *= Resources::dt(); z *= Resources::dt();
+	}
 	float threshold = 0;
 	if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
 		return;
@@ -84,7 +86,7 @@ void Object::rotate(float x, float y, float z){
 	m_Right = _calculateRight();
 	m_Up = _calculateUp();
 }
-void Object::rotate(glm::vec3 rotation){ rotate(rotation.x,rotation.y,rotation.z); }
+void Object::rotate(glm::vec3 rotation,bool overTime){ rotate(rotation.x,rotation.y,rotation.z,overTime); }
 void Object::scale(float x, float y, float z){
 	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
 	m_Scale.x += x * dt; 
@@ -96,6 +98,7 @@ void Object::setPosition(glm::nType x, glm::nType y, glm::nType z){
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
+	Object::update(0);
 }
 void Object::setPosition(glm::v3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
@@ -115,7 +118,7 @@ void Object::update(float dt){
 	m_Model *= glm::m4(glm::mat4_cast(m_Orientation));
 	m_Model = glm::scale(m_Model,glm::v3(m_Scale));
 }
-float Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (abs(glm::length(vecTo))); }
+float Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::addChild(Object* child){
 	child->m_Parent = this;
@@ -174,4 +177,7 @@ bool Object::rayIntersectSphere(Camera* cam){
 }
 bool Object::rayIntersectSphere(glm::v3 origin, glm::vec3 vector){
 	return false;
+}
+void Object::alignTo(glm::v3 direction, float time, bool overTime){
+	Engine::alignTo(m_Orientation,glm::vec3(direction),time,overTime);
 }

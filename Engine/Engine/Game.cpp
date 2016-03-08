@@ -4,6 +4,7 @@
 #include "Ship.h"
 #include "Planet.h"
 #include "Lagrange.h"
+#include "Station.h"
 
 using namespace Engine;
 
@@ -12,6 +13,8 @@ std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
 
 
 void Game::cleanup(){
+	for(auto part:stationPartsInfo)
+		delete part.second;
 	for(auto solarSystem:m_SolarSystems)
 		delete solarSystem.second;
 	delete m_HUD;

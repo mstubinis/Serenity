@@ -73,10 +73,12 @@ class Object{
 
 		glm::vec3 getScreenCoordinates();
 
+		virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
+
 		virtual void translate(glm::nType,glm::nType,glm::nType,bool local=true); 
 		virtual void translate(glm::v3,bool local=true);
-		virtual void rotate(float,float,float); 
-		virtual void rotate(glm::vec3);
+		virtual void rotate(float,float,float,bool overTime = true); 
+		virtual void rotate(glm::vec3, bool overTime = true);
 		virtual void scale(float,float,float); 
 		virtual void scale(glm::vec3);
 

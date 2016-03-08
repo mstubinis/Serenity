@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Engine_Resources.h"
+#include "Engine.h"
 #include <algorithm>
 #include <cctype>
 
@@ -177,32 +178,14 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 	glm::nType distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
 
 	glm::v3 unitVector = glm::normalize(p2->getPosition() - p1->getPosition());
-
-
-	glm::v3 xaxis = glm::cross(glm::v3(0,1,0), unitVector);
-    glm::normalize(xaxis);
-
-    glm::v3 yaxis = glm::cross(unitVector, xaxis);
-	glm::normalize(yaxis);
-
-	glm::mat3x3 rot;
-    rot[0][0] = static_cast<float>(xaxis.x);
-    rot[1][0] = static_cast<float>(yaxis.x);
-    rot[2][0] = static_cast<float>(unitVector.x);
-    rot[0][1] = static_cast<float>(xaxis.y);
-    rot[1][1] = static_cast<float>(yaxis.y);
-    rot[2][1] = static_cast<float>(unitVector.y);
-    rot[0][2] = static_cast<float>(xaxis.z);
-    rot[1][2] = static_cast<float>(yaxis.z);
-    rot[2][2] = static_cast<float>(unitVector.z);
-	this->m_Orientation = glm::quat_cast(rot);
+	this->alignTo(unitVector);
 
 	unitVector *= distanceOfL1FromP1;
 	position = p1->getPosition() + unitVector;
 	setPosition(position);
 }
 void Lagrange::update(float dt){
-	_calculateLagrangePosition(m_Type);
+	//_calculateLagrangePosition(m_Type);
 	Object::update(dt);
 }
 void Lagrange::render(GLuint shader, bool debug){

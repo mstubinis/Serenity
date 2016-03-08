@@ -203,3 +203,16 @@ void ObjectDynamic::setMass(float mass){
 	if(m_RigidBody != nullptr)
 		m_RigidBody->setMassProps(m_Mass,*(m_Collision->getInertia()));
 }
+void ObjectDynamic::alignTo(glm::v3 direction, float time,bool overTime){
+	Object::alignTo(direction, time, overTime);
+	btQuaternion quat = btQuaternion(m_Orientation.x,m_Orientation.y,m_Orientation.z,m_Orientation.w);
+	m_RigidBody->getWorldTransform().setRotation(quat);
+}
+void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
+	Object::rotate(x,y,z,overTime);
+	btQuaternion quat = btQuaternion(m_Orientation.x,m_Orientation.y,m_Orientation.z,m_Orientation.w);
+	m_RigidBody->getWorldTransform().setRotation(quat);
+}
+void ObjectDynamic::rotate(glm::vec3 rotation, bool overTime){
+	ObjectDynamic::rotate(rotation.x,rotation.y,rotation.z,overTime);
+}

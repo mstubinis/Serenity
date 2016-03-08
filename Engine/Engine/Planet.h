@@ -86,7 +86,7 @@ class Planet: public ObjectDisplay{
 		}
 		void setRotation(RotationInfo* r){ 
 			m_RotationInfo = r;
-			rotate(0,0,m_RotationInfo->tilt);
+			rotate(0,0,-m_RotationInfo->tilt,false);
 		}
 
 		void update(float);
