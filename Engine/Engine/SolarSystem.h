@@ -35,6 +35,7 @@ class SolarSystem final: public Scene{
 		void render();
 
 		Ship* getPlayer(){ return player; }
+		GameCamera* getPlayerCamera(){ return playerCamera; }
 		std::map<std::string,Station*>& getStations() { return m_Stations; }
 		std::map<std::string,Lagrange*>& getLagrangePoints() { return m_LagrangePoints; }
 

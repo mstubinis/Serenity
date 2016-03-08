@@ -5,6 +5,7 @@
 #include "Planet.h"
 #include "Lagrange.h"
 #include "Station.h"
+#include "GameCamera.h"
 
 using namespace Engine;
 

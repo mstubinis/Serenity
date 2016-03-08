@@ -65,36 +65,35 @@ namespace Engine{
 		return glm::acos(glm::dot(a,b));
 	}
 	static void alignTo(glm::quat& o, glm::vec3 direction,float speed=0, bool overTime=false){
-
+		glm::quat original(o);
 		glm::vec3 r = glm::normalize(glm::vec3(1-2*(o.y*o.y+o.z*o.z),2*(o.x*o.y+o.w*o.z),2*(o.x*o.z-o.w*o.y)));
 		glm::vec3 u = glm::normalize(glm::vec3(2*(o.x*o.y-o.w*o.z),1-2*(o.x*o.x+o.z*o.z),2*(o.y*o.z+o.w*o.x)));
 
 		glm::vec3 forward = glm::normalize(glm::cross(r,u));
-		direction = glm::normalize(direction);
-		if(speed == 0){
-			glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0,1,0), direction));
-			glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
+		direction = -glm::normalize(direction);
 
-			glm::mat3 rot;
-			rot[0][0] = static_cast<float>(xaxis.x);
-			rot[1][0] = static_cast<float>(yaxis.x);
-			rot[2][0] = static_cast<float>(direction.x);
-			rot[0][1] = static_cast<float>(xaxis.y);
-			rot[1][1] = static_cast<float>(yaxis.y);
-			rot[2][1] = static_cast<float>(direction.y);
-			rot[0][2] = static_cast<float>(xaxis.z);
-			rot[1][2] = static_cast<float>(yaxis.z);
-			rot[2][2] = static_cast<float>(direction.z);
-			o = glm::quat_cast(rot);
-		}
-		else{
-			glm::vec3 cross = glm::normalize(glm::cross(direction,forward));
+		glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0,1,0), direction));
+		glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
+
+		glm::mat3 rot;
+		rot[0][0] = static_cast<float>(xaxis.x);
+		rot[1][0] = static_cast<float>(yaxis.x);
+		rot[2][0] = static_cast<float>(direction.x);
+		rot[0][1] = static_cast<float>(xaxis.y);
+		rot[1][1] = static_cast<float>(yaxis.y);
+		rot[2][1] = static_cast<float>(direction.y);
+		rot[0][2] = static_cast<float>(xaxis.z);
+		rot[1][2] = static_cast<float>(yaxis.z);
+		rot[2][2] = static_cast<float>(direction.z);
+		o = glm::quat_cast(rot);
+		if(speed != 0){
+			speed *= Resources::dt();
 			if(overTime){
-				float angle = getAngleBetweenTwoVectors(direction,forward) * (speed*Resources::dt());
-				o = o * (glm::angleAxis(angle, -glm::vec3(cross)));
+				float angle = getAngleBetweenTwoVectors(direction,forward) * speed;
+				o = glm::lerp(original,o,speed*10);
 			}
 			else{
-				o = o * (glm::angleAxis(speed, -glm::vec3(cross)));
+				o = glm::lerp(original,o,speed);
 			}
 		}
 	}
