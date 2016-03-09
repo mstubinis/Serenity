@@ -48,6 +48,15 @@ namespace Engine{
 		static glm::v3 getUp(glm::quat& q){
 			return glm::normalize(glm::v3(2*(q.x*q.y-q.w*q.z),1-2*(q.x*q.x+q.z*q.z),2*(q.y*q.z+q.w*q.x)));
 		}
+		static glm::v3 getColumnVector(const btRigidBody* b, unsigned int column){
+			btTransform t;
+			b->getMotionState()->getWorldTransform(t);
+			btVector3 v = t.getBasis().getColumn(column);
+			return glm::v3(v.x(),v.y(),v.z());
+		}
+		static glm::v3 getForward(const btRigidBody* b){ return getColumnVector(b,2); }
+		static glm::v3 getRight(const btRigidBody* b){ return getColumnVector(b,0); }
+		static glm::v3 getUp(const btRigidBody* b){ return getColumnVector(b,1); }
 
 		static float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true){
 			if(degrees == true)

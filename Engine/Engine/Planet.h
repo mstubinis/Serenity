@@ -66,7 +66,7 @@ class Planet: public ObjectDisplay{
 				std::string = "",               //Material
 				PlanetType = PLANET_TYPE_ROCKY, //Type
 			    glm::v3 = glm::v3(0),           //Position
-			    float = 1,                      //Radius
+			    glm::nType = 1,                 //Radius
 			    std::string = "Planet",         //Name
 				float = 0,                      //Atmosphere size
 				Scene* = nullptr
@@ -102,7 +102,7 @@ class Star: public Planet{
 				glm::vec3 = glm::vec3(1,1,0),   //Star Color
 				glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
 			    glm::v3 = glm::v3(0),           //Position
-			    float = 1,					    //Scale
+			    glm::nType = 1,					//Scale
 			    std::string = "Star",           //Name
 				Scene* = nullptr
 			);

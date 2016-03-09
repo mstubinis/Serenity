@@ -10,7 +10,6 @@ class Material;
 class Scene;
 class Camera;
 
-
 class Object{
 	private:
 		glm::v3 _calculateForward(); 
@@ -30,14 +29,14 @@ class Object{
 		std::vector<Object*> m_Children;
 	public:
 		Object(
-			    glm::v3 = glm::v3(0,0,0), //Position
-			    glm::vec3 = glm::vec3(1,1,1),   //Scale
-			    std::string = "Object",         //Object
-				Scene* = nullptr                //The scene to add the object to (default nullptr = the current scene)
+			    glm::v3 = glm::v3(0),     //Position
+			    glm::vec3 = glm::vec3(1), //Scale
+			    std::string = "Object",   //Object
+				Scene* = nullptr          //The scene to add the object to (default nullptr = the current scene)
 			  );
 		virtual ~Object();
 
-		float getDistance(Object*);
+		glm::nType getDistance(Object*);
 		unsigned long long getDistanceLL(Object*);
 
 		glm::vec3 getScreenCoordinates();

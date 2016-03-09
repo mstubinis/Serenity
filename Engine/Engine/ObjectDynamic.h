@@ -9,12 +9,8 @@ struct btDefaultMotionState;
 class btVector3;
 
 class ObjectDynamic: public ObjectDisplay{
-	private:
-		glm::v3 _calculateForward(); 
-		glm::v3 _calculateRight(); 
-		glm::v3 _calculateUp();
-		float m_Mass;
 	protected:
+		float m_Mass;
 		Collision* m_Collision;
 		btRigidBody* m_RigidBody;
 		btDefaultMotionState* m_MotionState;
@@ -77,6 +73,7 @@ class ObjectDynamic: public ObjectDisplay{
 		void setAngularVelocityY(float,bool local=true);
 		void setAngularVelocityZ(float,bool local=true);
 
+		const glm::v3 getPosition();
 		const float getMass() const { return m_Mass; }
 		btRigidBody* getRigidBody() const { return m_RigidBody; }
 		void setMass(float);

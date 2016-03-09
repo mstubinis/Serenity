@@ -60,7 +60,7 @@ void HUD::render(bool debug){
 	#pragma region renderCrossHairAndOtherInfo
 	if(m_Player->getTarget() != nullptr){
 		glm::vec3 pos = m_Player->getTarget()->getScreenCoordinates();
-		float scl = glm::max(0.5f,m_Player->getTarget()->getRadius()*35/m_Player->getTarget()->getDistance(Resources::getActiveCamera()));
+		glm::nType scl = glm::max(static_cast<glm::nType>(0.5f),static_cast<glm::nType>(m_Player->getTarget()->getRadius()*35/m_Player->getTarget()->getDistance(Resources::getActiveCamera())));
 
 		if(pos.z == 1){
 			Resources::getTexture("Textures/HUD/Crosshair")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
@@ -70,7 +70,7 @@ void HUD::render(bool debug){
 				stringRepresentation = Engine::convertNumToNumWithCommas(static_cast<unsigned long long>(distanceInKm)) + " Km";
 			}
 			else{
-				float distanceInm = (m_Player->getTarget()->getDistance(m_Player))*100.0f;
+				glm::nType distanceInm = (m_Player->getTarget()->getDistance(m_Player))*100.0f;
 				stringRepresentation = boost::lexical_cast<std::string>(static_cast<unsigned int>(distanceInm)) + " m";
 			}
 			m_Font->renderText(m_Player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);

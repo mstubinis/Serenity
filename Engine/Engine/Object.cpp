@@ -39,15 +39,6 @@ Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
 Object::~Object()
 {
 }
-glm::v3 Object::_calculateForward(){ 
-	return Engine::Math::getForward(m_Orientation);
-}
-glm::v3 Object::_calculateRight(){
-	return Engine::Math::getRight(m_Orientation);
-}
-glm::v3 Object::_calculateUp(){
-	return Engine::Math::getUp(m_Orientation);
-}
 void Object::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
 	glm::v3 offset = glm::v3(0);
 	if(local){
@@ -73,9 +64,9 @@ void Object::rotate(float x, float y, float z, bool overTime){
 	if(abs(y) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));   //yaw
 	if(abs(z) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
 
-	m_Forward = _calculateForward();
-	m_Right = _calculateRight();
-	m_Up = _calculateUp();
+	m_Forward = Engine::Math::getForward(m_Orientation);
+	m_Right = Engine::Math::getRight(m_Orientation);
+	m_Up = Engine::Math::getUp(m_Orientation);
 }
 void Object::rotate(glm::vec3 rotation,bool overTime){ rotate(rotation.x,rotation.y,rotation.z,overTime); }
 void Object::scale(float x, float y, float z){
@@ -89,7 +80,14 @@ void Object::setPosition(glm::nType x, glm::nType y, glm::nType z){
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
-	Object::update(0);
+
+	glm::v3 parentPos(0);
+	if(m_Parent != nullptr){
+		glm::v3 parentPos = m_Parent->getPosition();
+	}
+	m_Model[3][0] = parentPos.x + x;
+	m_Model[3][1] = parentPos.y + y;
+	m_Model[3][2] = parentPos.z + z;
 }
 void Object::setPosition(glm::v3 position){ setPosition(position.x,position.y,position.z); }
 void Object::setScale(float x, float y, float z){ 
@@ -109,7 +107,7 @@ void Object::update(float dt){
 	m_Model *= glm::m4(glm::mat4_cast(m_Orientation));
 	m_Model = glm::scale(m_Model,glm::v3(m_Scale));
 }
-float Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
+glm::nType Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 void Object::addChild(Object* child){
 	child->m_Parent = this;
