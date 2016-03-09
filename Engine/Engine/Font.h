@@ -1,5 +1,5 @@
-#ifndef FONT_H
-#define FONT_H
+#ifndef ENGINE_FONT_H
+#define ENGINE_FONT_H
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <GLM/gtc/matrix_transform.hpp>

@@ -1,5 +1,5 @@
-#ifndef OBJECTDISPLAY_H
-#define OBJECTDISPLAY_H
+#ifndef ENGINE_OBJECTDISPLAY_H
+#define ENGINE_OBJECTDISPLAY_H
 
 #include "Object.h"
 
@@ -15,7 +15,6 @@ struct DisplayItem{
 	~DisplayItem(){
 	}
 };
-
 class ObjectDisplay: public Object{
 	protected:
 		bool m_Visible;

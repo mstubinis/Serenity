@@ -1,5 +1,5 @@
 #include "GBuffer.h"
-#include "Engine_Resources.h"
+#include "TextureBuffer.h"
 
 //Create the FBO render texture initializing all the stuff that we need
 GBuffer::GBuffer(int width, int height){	
@@ -40,7 +40,7 @@ GBuffer::~GBuffer(){
 	glDeleteFramebuffers(1, &m_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	for(auto buffer:m_Buffers){
-		SAFE_DELETE(buffer.second);
+		delete(buffer.second);
 	}
 	m_Buffers.clear();
 }

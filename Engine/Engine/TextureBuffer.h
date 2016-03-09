@@ -1,5 +1,5 @@
-#ifndef TEXTURE_BUFFER_H
-#define TEXTURE_BUFFER_H
+#ifndef ENGINE_TEXTURE_BUFFER_H
+#define ENGINE_TEXTURE_BUFFER_H
 
 #include <GL/glew.h>
 #include <GL/GL.h>

@@ -1,5 +1,5 @@
-#ifndef OBJECTDYNAMIC_H
-#define OBJECTDYNAMIC_H
+#ifndef ENGINE_OBJECTDYNAMIC_H
+#define ENGINE_OBJECTDYNAMIC_H
 
 #include "ObjectDisplay.h"
 

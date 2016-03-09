@@ -9,8 +9,10 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
-#include "Scene.h"
 #include "Particles.h"
+#include "Texture.h"
+#include "Font.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>

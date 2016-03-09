@@ -1,9 +1,11 @@
 #include "Engine_Physics.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/btBulletCollisionCommon.h>
 #include <bullet/LinearMath/btIDebugDraw.h>
 #include <bullet/BulletCollision/Gimpact/btCompoundFromGimpact.h>
 #include <bullet/BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
+#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -16,7 +18,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Engine_Resources.h"
-#include "ShaderProgram.h"
 #include "Camera.h"
 #include "GLDebugDrawer.h"
 

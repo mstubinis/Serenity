@@ -1,5 +1,5 @@
-#ifndef ENGINE_RENDER_H
-#define ENGINE_RENDER_H
+#ifndef ENGINE_ENGINE_RENDERER_H
+#define ENGINE_ENGINE_RENDERER_H
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

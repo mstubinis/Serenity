@@ -1,4 +1,5 @@
 #include "Light.h"
+#include "Engine_Renderer.h"
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
 #include "Camera.h"

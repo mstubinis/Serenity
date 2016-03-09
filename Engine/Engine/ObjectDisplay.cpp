@@ -1,5 +1,6 @@
 #include "ObjectDisplay.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "Camera.h"
 #include "Material.h"
 #include "Mesh.h"

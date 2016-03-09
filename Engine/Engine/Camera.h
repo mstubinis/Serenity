@@ -1,13 +1,12 @@
-#ifndef _CAMERA_H
-#define _CAMERA_H
+#ifndef ENGINE_CAMERA_H
+#define ENGINE_CAMERA_H
 
 #include "Object.h"
 
+class Scene;
 class ObjectDisplay;
-
 enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
 
-class Scene;
 class Camera: public Object{
 	private:
 		void _constructFrustrum();
@@ -21,8 +20,8 @@ class Camera: public Object{
 		float m_Near, m_Far;
 		glm::mat4 m_View, m_Projection;
 	public:
-		Camera(std::string name, float angle, float ratio, float near, float far,Scene* = nullptr);				           // Perspective camera Constructor
-		Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* = nullptr); // Orthographic camera Constructor
+		Camera(std::string,float,float,float,float,Scene* = nullptr);			  // Perspective camera Constructor
+		Camera(std::string,float,float,float,float,float,float,Scene* = nullptr); // Orthographic camera Constructor
 		~Camera();
 
 		void resize(unsigned int w, unsigned int h);

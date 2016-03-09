@@ -1,5 +1,5 @@
-#ifndef ENGINE_RESOURCES_H
-#define ENGINE_RESOURCES_H
+#ifndef ENGINE_ENGINE_RESOURCES_H
+#define ENGINE_ENGINE_RESOURCES_H
 
 #include <unordered_map>
 
@@ -9,10 +9,9 @@
 #include <SFML/Graphics.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 
-#include "Texture.h"
-#include "Font.h"
-#include "Scene.h"
-
+class Font;
+class Texture;
+class Scene;
 class Camera;
 class Mesh;
 class Material;

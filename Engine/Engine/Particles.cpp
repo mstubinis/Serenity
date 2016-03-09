@@ -6,6 +6,7 @@
 #include "Light.h"
 #include "Scene.h"
 #include "Engine.h"
+#include "Engine_Resources.h"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>

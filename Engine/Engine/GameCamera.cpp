@@ -1,5 +1,4 @@
 #include "GameCamera.h"
-#include "Engine.h"
 #include "Engine_Events.h"
 #include "Engine_Resources.h"
 #include "ObjectDisplay.h"

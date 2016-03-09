@@ -1,5 +1,5 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef ENGINE_MATERIAL_H
+#define ENGINE_MATERIAL_H
 
 #include <string>
 #include <unordered_map>

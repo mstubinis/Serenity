@@ -1,5 +1,5 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef ENGINE_TEXTURE_H
+#define ENGINE_TEXTURE_H
 
 #include <string>
 #include <vector>

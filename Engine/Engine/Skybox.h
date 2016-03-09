@@ -1,5 +1,5 @@
-#ifndef SKYBOX_H
-#define SKYBOX_H
+#ifndef ENGINE_SKYBOX_H
+#define ENGINE_SKYBOX_H
 
 #include <string>
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef ENGINE_ENGINE_H
+#define ENGINE_ENGINE_H
 
 #include <string>
 #include <GL/glew.h>
@@ -12,6 +12,8 @@
 #include "Engine_Events.h"
 #include "Engine_Physics.h"
 #include "Engine_Sounds.h"
+
+#include "Texture.h"
 
 #include "GBuffer.h"
 

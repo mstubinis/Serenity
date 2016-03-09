@@ -1,5 +1,5 @@
-#ifndef ENGINE_EVENTS_H
-#define ENGINE_EVENTS_H
+#ifndef ENGINE_ENGINE_EVENTS_H
+#define ENGINE_ENGINE_EVENTS_H
 
 #include <string>
 #include <SFML/Window.hpp>

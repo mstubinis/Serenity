@@ -1,11 +1,13 @@
-#ifndef PARTICLES_H
-#define PARTICLES_H
+#ifndef ENGINE_PARTICLES_H
+#define ENGINE_PARTICLES_H
 
 #include "Object.h"
-#include "Light.h"
-#include "Engine_Resources.h"
+#include <GL/glew.h>
+#include <GL/GL.h>
 
 
+class SunLight;
+class Material;
 struct ParticleInfo{
 	Material* material;
 

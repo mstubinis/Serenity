@@ -1,5 +1,5 @@
-#ifndef ENGINE_PHYSICS_H
-#define ENGINE_PHYSICS_H
+#ifndef ENGINE_ENGINE_PHYSICS_H
+#define ENGINE_ENGINE_PHYSICS_H
 
 #include <glm/glm.hpp>
 #include <string>
@@ -12,9 +12,8 @@ class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
 class btRigidBody;
 class GLDebugDrawer;
-
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/BulletCollision/Gimpact/btGImpactShape.h>
+class btCollisionShape;
+class btVector3;
 
 enum COLLISION_TYPE { 
 	COLLISION_TYPE_CONVEXHULL, 

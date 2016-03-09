@@ -1,5 +1,5 @@
-#ifndef SHADERPROGRAM_H
-#define SHADERPROGRAM_H
+#ifndef ENGINE_SHADERPROGRAM_H
+#define ENGINE_SHADERPROGRAM_H
 
 #include <vector>
 #include <string>

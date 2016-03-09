@@ -1,5 +1,5 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef ENGINE_OBJECT_H
+#define ENGINE_OBJECT_H
 
 #include "Engine_Math.h"
 #include <string>
@@ -11,10 +11,6 @@ class Scene;
 class Camera;
 
 class Object{
-	private:
-		glm::v3 _calculateForward(); 
-		glm::v3 _calculateRight(); 
-		glm::v3 _calculateUp();
 	protected:
 		std::string m_Name;
 		glm::v3 m_Position;
@@ -58,8 +54,8 @@ class Object{
 		void addChild(Object*);
 
 		virtual void update(float);
-		virtual void render(GLuint=0,bool=false);
-		virtual void draw(GLuint shader,bool=false);
+		virtual void render(GLuint=0,bool=false){}
+		virtual void draw(GLuint shader,bool=false){}
 
 		virtual const float getRadius() const { return m_Radius; }
 
@@ -77,7 +73,7 @@ class Object{
 
 		virtual void setName(std::string);
 
-		virtual bool rayIntersectSphere(Camera*);
-		virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
+		virtual bool rayIntersectSphere(Camera*){return false;}
+		virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}
 };
 #endif

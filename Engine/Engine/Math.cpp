@@ -1,6 +1,7 @@
 #include "Math.h"
 #include "Engine_Resources.h"
 #include "Camera.h"
+#include "Scene.h"
 
 using namespace Engine;
 

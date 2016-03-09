@@ -1,7 +1,9 @@
-#ifndef GBUFFER_H
-#define GBUFFER_H
-#include "TextureBuffer.h"
+#ifndef ENGINE_GBUFFER_H
+#define ENGINE_GBUFFER_H
+
 #include <unordered_map>
+#include <GL/glew.h>
+#include <GL/GL.h>
 
 const int GBUFFER_TYPES[] =		       {GL_RGBA,		       // (diffuse.rgba)
 									    GL_RGBA,			   // (diffuse forward rendering.rgba)
@@ -55,6 +57,7 @@ enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,
 				   BUFFER_TYPE_NUMBER};
 
 
+class TextureBuffer;
 class GBuffer final{
 	private:
 		GLuint m_fbo;

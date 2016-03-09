@@ -1,7 +1,7 @@
-#ifndef ENGINE_MATH_H
-#define ENGINE_MATH_H
+#ifndef ENGINE_ENGINE_MATH_H
+#define ENGINE_ENGINE_MATH_H
 
-#include "Engine_Renderer.h"
+#include "Engine_Resources.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>

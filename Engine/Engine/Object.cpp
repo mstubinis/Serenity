@@ -2,6 +2,7 @@
 #include "Math.h"
 #include "Engine_Math.h"
 #include "Camera.h"
+#include "Scene.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -71,9 +72,9 @@ void Object::rotate(float x, float y, float z, bool overTime){
 void Object::rotate(glm::vec3 rotation,bool overTime){ rotate(rotation.x,rotation.y,rotation.z,overTime); }
 void Object::scale(float x, float y, float z){
 	float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
-	m_Scale.x += x * dt; 
-	m_Scale.y += y * dt; 
-	m_Scale.z += z * dt; 
+	m_Scale.x += x * dt;
+	m_Scale.y += y * dt;
+	m_Scale.z += z * dt;
 }
 void Object::scale(glm::vec3 scl){ scale(scl.x,scl.y,scl.z); }
 void Object::setPosition(glm::nType x, glm::nType y, glm::nType z){ 
@@ -158,14 +159,6 @@ glm::vec3 Object::getScreenCoordinates(){
 
 		return glm::vec3(fX,fY,inBounds);
 	}
-}
-void Object::render(GLuint shader, bool debug){}
-void Object::draw(GLuint shader, bool debug){}
-bool Object::rayIntersectSphere(Camera* cam){
-	return false;
-}
-bool Object::rayIntersectSphere(glm::v3 origin, glm::vec3 vector){
-	return false; 
 }
 void Object::alignTo(glm::v3 direction, float time, bool overTime){
 	Engine::Math::alignTo(m_Orientation,glm::vec3(direction),time,overTime);
