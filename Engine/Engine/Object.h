@@ -1,46 +1,15 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "Engine_Renderer.h"
+#include "Engine_Math.h"
 #include <string>
 #include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 class Mesh;
 class Material;
 class Scene;
 class Camera;
 
-namespace glm{
-
-	#ifdef ENGINE_PRECISION_NORMAL
-	typedef float nType;
-	typedef glm::detail::tvec3<float> v3;
-	typedef glm::detail::tmat4x4<float> m4;
-	#endif
-	#ifdef ENGINE_PRECISION_HIGH
-	typedef double nType;
-	typedef glm::detail::tvec3<nType> v3;
-	typedef glm::detail::tmat4x4<nType> m4;
-	#endif
-	#ifdef ENGINE_PRECISION_VERY_HIGH
-	typedef long double nType;
-	typedef glm::detail::tvec3<long double> v3;
-	typedef glm::detail::tmat4x4<long double> m4;
-	#endif
-
-	typedef glm::detail::tvec3<float> v3_f;
-	typedef glm::detail::tmat4x4<float> m4_f;
-	typedef glm::detail::tvec3<nType> v3_d;
-	typedef glm::detail::tmat4x4<nType> m4_d;
-	typedef glm::detail::tvec3<long double> v3_ld;
-	typedef glm::detail::tmat4x4<long double> m4_ld;
-};
 
 class Object{
 	private:

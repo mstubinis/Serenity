@@ -27,10 +27,7 @@ class ShipSystem{
 		ShipSystem(unsigned int type,Ship*);
 		virtual ~ShipSystem();
 
-		const bool isOnline() const {
-			if(m_Health > 0 && m_Power > 0) return true;
-			return false;
-		}
+		const bool isOnline() const { if(m_Health > 0 && m_Power > 0) return true; return false; }
 
 		virtual void update(float);
 };

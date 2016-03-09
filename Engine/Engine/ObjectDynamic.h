@@ -10,9 +10,9 @@ class btVector3;
 
 class ObjectDynamic: public ObjectDisplay{
 	private:
-		glm::vec3 _calculateForward(); 
-		glm::vec3 _calculateRight(); 
-		glm::vec3 _calculateUp();
+		glm::v3 _calculateForward(); 
+		glm::v3 _calculateRight(); 
+		glm::v3 _calculateUp();
 		float m_Mass;
 	protected:
 		Collision* m_Collision;
@@ -40,22 +40,50 @@ class ObjectDynamic: public ObjectDisplay{
 
 		void translate(glm::nType,glm::nType,glm::nType,bool local=true); 
 		void translate(glm::v3,bool local=true);
-		void applyForce(float,float,float,bool local=true); 
+
+		void applyForce(float,float,float,bool local=true);
 		void applyForce(glm::vec3,glm::vec3 = glm::vec3(0),bool local=true);
-		void applyImpulse(float,float,float); 
-		void applyImpulse(glm::vec3,glm::vec3 = glm::vec3(0));
-		void applyTorque(float,float,float); 
-		void applyTorque(glm::vec3);
-		void applyTorqueImpulse(float,float,float); 
-		void applyTorqueImpulse(glm::vec3);
+		void applyForceX(float,bool local=true);
+		void applyForceY(float,bool local=true);
+		void applyForceZ(float,bool local=true);
+
+		void applyImpulse(float,float,float,bool local=true); 
+		void applyImpulse(glm::vec3,glm::vec3 = glm::vec3(0),bool local=true);
+		void applyImpulseX(float,bool local=true);
+		void applyImpulseY(float,bool local=true);
+		void applyImpulseZ(float,bool local=true);
+
+		void applyTorque(float,float,float,bool local=true); 
+		void applyTorque(glm::vec3,bool local=true);
+		void applyTorqueX(float,bool local=true);
+		void applyTorqueY(float,bool local=true);
+		void applyTorqueZ(float,bool local=true);
+
+		void applyTorqueImpulse(float,float,float,bool local=true); 
+		void applyTorqueImpulse(glm::vec3,bool local=true);
+		void applyTorqueImpulseX(float,bool local=true);
+		void applyTorqueImpulseY(float,bool local=true);
+		void applyTorqueImpulseZ(float,bool local=true);
 
 		void setLinearVelocity(float,float,float,bool local=true); 
 		void setLinearVelocity(glm::vec3,bool local=true);
-		void setAngularVelocity(float,float,float); 
-		void setAngularVelocity(glm::vec3);
+		void setLinearVelocityX(float,bool local=true);
+		void setLinearVelocityY(float,bool local=true);
+		void setLinearVelocityZ(float,bool local=true);
+
+		void setAngularVelocity(float,float,float,bool local=true); 
+		void setAngularVelocity(glm::vec3,bool local=true);
+		void setAngularVelocityX(float,bool local=true);
+		void setAngularVelocityY(float,bool local=true);
+		void setAngularVelocityZ(float,bool local=true);
 
 		const float getMass() const { return m_Mass; }
+		btRigidBody* getRigidBody() const { return m_RigidBody; }
 		void setMass(float);
+
+		void clearLinearForces();
+		void clearAngularForces();
+		void clearAllForces();
 
 		void alignTo(glm::v3,float speed=0, bool overTime=false);
 

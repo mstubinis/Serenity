@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Math.h"
+#include "Engine_Math.h"
 #include "Camera.h"
 
 #include <boost/lexical_cast.hpp>
@@ -38,24 +39,14 @@ Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
 Object::~Object()
 {
 }
-glm::v3 Object::_calculateForward(){ return glm::normalize(glm::cross(getRight(),getUp())); }
+glm::v3 Object::_calculateForward(){ 
+	return Engine::Math::getForward(m_Orientation);
+}
 glm::v3 Object::_calculateRight(){
-	float x = m_Orientation.x;
-	float y = m_Orientation.y;
-	float z = m_Orientation.z;
-	float w = m_Orientation.w;
-	return glm::normalize(glm::v3( 1 - 2 * (y * y + z * z),
-                                   2 * (x * y + w * z),
-                                   2 * (x * z - w * y)));
+	return Engine::Math::getRight(m_Orientation);
 }
 glm::v3 Object::_calculateUp(){
-	float x = m_Orientation.x;
-	float y = m_Orientation.y;
-	float z = m_Orientation.z;
-	float w = m_Orientation.w;
-	return glm::normalize(glm::v3( 2 * (x * y - w * z), 
-                                   1 - 2 * (x * x + z * z),
-                                   2 * (y * z + w * x)));
+	return Engine::Math::getUp(m_Orientation);
 }
 void Object::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
 	glm::v3 offset = glm::v3(0);
@@ -176,8 +167,8 @@ bool Object::rayIntersectSphere(Camera* cam){
 	return false;
 }
 bool Object::rayIntersectSphere(glm::v3 origin, glm::vec3 vector){
-	return false;
+	return false; 
 }
 void Object::alignTo(glm::v3 direction, float time, bool overTime){
-	Engine::alignTo(m_Orientation,glm::vec3(direction),time,overTime);
+	Engine::Math::alignTo(m_Orientation,glm::vec3(direction),time,overTime);
 }

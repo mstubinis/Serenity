@@ -18,8 +18,8 @@ void Station::addStationPart(StationPart* _part, unsigned int _part_port, Statio
 		_part->displayItem->position += _part->connectorsInfo->connectorLocations.at(_part_port);
 
 		//"align-to" the part to the parent properly
-		Engine::alignTo(_part->displayItem->orientation,_part->connectorsInfo->connectorDirections.at(_parent_port));
-		Engine::alignTo(_part->displayItem->orientation,_part->connectorsInfo->connectorDirections.at(_part_port));
+		Engine::Math::alignTo(_part->displayItem->orientation,_part->connectorsInfo->connectorDirections.at(_parent_port));
+		Engine::Math::alignTo(_part->displayItem->orientation,_part->connectorsInfo->connectorDirections.at(_part_port));
 
 		_part->usedPartsIndices.push_back(_part_port);
 		_parent->usedPartsIndices.push_back(_parent_port);

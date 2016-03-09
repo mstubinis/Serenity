@@ -12,7 +12,6 @@ using namespace Engine;
 HUD* m_HUD;
 std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
 
-
 void Game::cleanup(){
 	for(auto part:stationPartsInfo)
 		delete part.second;
@@ -64,6 +63,9 @@ void Game::update(float dt){
 		Engine::setFullScreen(true);
 	if(Events::Keyboard::isKeyDownOnce("f7"))
 		Engine::setFullScreen(false);
+	if(Events::Keyboard::isKeyDown("f8"))
+		m_SolarSystems["Sol"]->getPlayer()->alignTo(m_SolarSystems["Sol"]->getPlayer()->getTarget()->getPosition()-m_SolarSystems["Sol"]->getPlayer()->getPosition(),2,true);
+
 
 	m_HUD->update(dt);
 }

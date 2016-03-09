@@ -64,7 +64,7 @@ void HUD::render(bool debug){
 
 		if(pos.z == 1){
 			Resources::getTexture("Textures/HUD/Crosshair")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
-			unsigned long long distanceInKm = (m_Player->getTarget()->getDistanceLL(m_Player) / 10.0f);
+			unsigned long long distanceInKm = (m_Player->getTarget()->getDistanceLL(m_Player) / 10);
 			std::string stringRepresentation = "";
 			if(distanceInKm > 0){
 				stringRepresentation = Engine::convertNumToNumWithCommas(static_cast<unsigned long long>(distanceInKm)) + " Km";
