@@ -33,7 +33,7 @@ struct ParticleInfo{
 
 class Particle;
 
-class ParticleEmitter: public Object{
+class ParticleEmitter: public ObjectBasic{
 	private:
 		ParticleInfo* m_info;
 		std::vector<Particle*> m_Particles;

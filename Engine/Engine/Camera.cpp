@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "ObjectDisplay.h"
+#include "ObjectDynamic.h"
 #include "Engine_Resources.h"
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,7 +9,7 @@
 
 using namespace Engine;
 
-Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene): Object(glm::v3(0),glm::vec3(1),"ZZZ" + name,scene){//create a perspective camera
+Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),"ZZZ" + name,scene){//create a perspective camera
 	m_Angle = angleVal;
 	m_AspectRatio = aspectRatioVal;
 	m_Near = _near;
@@ -21,7 +22,7 @@ Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _ne
 
 	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
 }
-Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene): Object(glm::v3(0),glm::vec3(1),"ZZZ" + name,scene){//create an orthographic camera
+Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),"ZZZ" + name,scene){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = _near;
@@ -52,18 +53,6 @@ void Camera::_constructFrustrum(){
 		glm::vec3 normal(m_Planes[i].x, m_Planes[i].y, m_Planes[i].z);
 		m_Planes[i] = -m_Planes[i] / glm::length(normal);
 	}
-}
-bool Camera::sphereIntersectTest(ObjectDisplay* sphere){
-	return sphereIntersectTest(sphere->getPosition(),sphere->getRadius());
-}
-bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
-	for (unsigned int i = 0; i < 6; i++){
-		glm::nType dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
-		if (dist > 0){
-			return false;
-		}
-	}
-	return true;
 }
 void Camera::resize(unsigned int width, unsigned int height){
 	if(m_Type == CAMERA_TYPE_PERSPECTIVE){
@@ -108,6 +97,20 @@ void Camera::update(float dt){
 	_constructFrustrum();
 	Object::update(dt);
 }
-bool Camera::rayIntersectSphere(ObjectDisplay* object){
+bool Camera::sphereIntersectTest(Object* sphere){
+	return sphereIntersectTest(sphere->getPosition(),sphere->getRadius());
+}
+bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
+	if(radius <= 0)
+		return false;
+	for (unsigned int i = 0; i < 6; i++){
+		glm::nType dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
+		if (dist > 0){
+			return false;
+		}
+	}
+	return true;
+}
+bool Camera::rayIntersectSphere(Object* object){
 	return object->rayIntersectSphere(getPosition(),getViewVector());
 }

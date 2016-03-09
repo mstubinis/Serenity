@@ -42,7 +42,7 @@ void SunLight::setName(std::string name){
 	}
 }
 void SunLight::update(float dt){
-	Object::update(dt);
+	ObjectBasic::update(dt);
 }
 void SunLight::render(GLuint shader,bool debug){ }
 void SunLight::draw(GLuint shader, bool debug){ }

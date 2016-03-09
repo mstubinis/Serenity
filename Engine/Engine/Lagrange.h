@@ -5,7 +5,7 @@
 
 class Planet;
 enum LAGRANGE_TYPE { LAGRANGE_TYPE_L1,LAGRANGE_TYPE_L2,LAGRANGE_TYPE_L3,LAGRANGE_TYPE_L4,LAGRANGE_TYPE_L5 };
-class Lagrange: public Object{
+class Lagrange: public ObjectBasic{
 	private:
 		Planet* m_Planet1;
 		Planet* m_Planet2;

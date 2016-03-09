@@ -15,7 +15,7 @@ struct DisplayItem{
 	~DisplayItem(){
 	}
 };
-class ObjectDisplay: public Object{
+class ObjectDisplay: public ObjectBasic{
 	protected:
 		bool m_Visible;
 		std::vector<DisplayItem*> m_DisplayItems;
@@ -47,7 +47,7 @@ class ObjectDisplay: public Object{
 
 		void setVisible(bool b);
 
-		bool rayIntersectSphere(Camera*);
-		bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
+		virtual bool rayIntersectSphere(Camera*);
+		virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 };
 #endif

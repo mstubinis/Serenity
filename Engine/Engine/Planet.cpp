@@ -51,7 +51,7 @@ void Planet::update(float dt){
 	}
 	for(auto ring:m_Rings)  ring->update(dt);
 
-	Object::update(dt);
+	ObjectDisplay::update(dt);
 }
 void Planet::render(GLuint shader,bool debug){
 	shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();

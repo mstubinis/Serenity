@@ -5,9 +5,10 @@
 
 class Scene;
 class ObjectDisplay;
+class ObjectDynamic;
 enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
 
-class Camera: public Object{
+class Camera: public ObjectBasic{
 	private:
 		void _constructFrustrum();
 		glm::vec4 m_Planes[6];
@@ -51,10 +52,10 @@ class Camera: public Object{
 		glm::vec3 getViewVector(){ return glm::vec3(m_View[0][2],m_View[1][2],m_View[2][2]); }
 		const CAMERA_TYPE getType() const{ return m_Type; }
 
-		bool sphereIntersectTest(ObjectDisplay*);
+		bool sphereIntersectTest(Object*);
 		bool sphereIntersectTest(glm::v3 pos, float radius);
 
 		//ray tests
-		bool rayIntersectSphere(ObjectDisplay*);
+		bool rayIntersectSphere(Object*);
 };
 #endif

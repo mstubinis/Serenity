@@ -28,6 +28,6 @@ class GameCamera: public Camera{
 		const Object* getTarget() const { return m_Target; }
 		const CAMERA_STATE getState() const { return m_State; }
 
-		ObjectDisplay* getObjectInCenterRay(ObjectDisplay* exclusion);
+		Object* getObjectInCenterRay(Object* exclusion);
 };
 #endif
