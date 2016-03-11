@@ -18,6 +18,7 @@ class ObjectDynamic: public Object{
 		glm::vec3 m_BoundingBoxRadius;
 		virtual void calculateRadius();
 		glm::m4 m_Model;
+		glm::v3 _prevPosition;
 
 		float m_Mass;
 		Collision* m_Collision;
@@ -36,6 +37,8 @@ class ObjectDynamic: public Object{
 
 		virtual void setPosition(glm::nType,glm::nType,glm::nType); 
 		virtual void setPosition(glm::v3);
+		virtual void setScale(float,float,float); 
+		virtual void setScale(glm::vec3);
 
 		virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
 
@@ -84,12 +87,17 @@ class ObjectDynamic: public Object{
 		virtual void setAngularVelocityY(float,bool local=true);
 		virtual void setAngularVelocityZ(float,bool local=true);
 
-		const glm::v3& getForward() const{ return m_Forward; }
-		const glm::v3& getRight() const{ return m_Right; }
-		const glm::v3& getUp() const{ return m_Up; }
-		const glm::v3 getPosition();
-		const float getMass() const { return m_Mass; }
-		btRigidBody* getRigidBody() const { return m_RigidBody; }
+		virtual glm::v3 getForward(){ return m_Forward; }
+		virtual glm::v3 getRight(){ return m_Right; }
+		virtual glm::v3 getUp(){ return m_Up; }
+		virtual glm::v3 getPosition();
+		virtual float getMass(){ return m_Mass; }
+		virtual btRigidBody* getRigidBody(){ return m_RigidBody; }
+		virtual glm::quat getOrientation();
+		virtual glm::vec3 getScale();
+		virtual glm::m4 getModel();
+		virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }
+
 		virtual void setMass(float);
 
 		virtual void clearLinearForces();

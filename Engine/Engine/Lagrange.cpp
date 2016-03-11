@@ -186,7 +186,7 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 }
 void Lagrange::update(float dt){
 	_calculateLagrangePosition(m_Type);
-	Object::update(dt);
+	ObjectBasic::update(dt);
 }
 void Lagrange::render(GLuint shader, bool debug){
 	//add to render queue

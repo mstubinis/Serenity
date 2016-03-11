@@ -10,7 +10,22 @@ class Material;
 class Scene;
 class Camera;
 
-class Object{
+class ObjectInterface{
+	public:
+		virtual ~ObjectInterface(){}
+		virtual glm::quat getOrientation() = 0;
+		virtual glm::v3 getPosition() = 0;
+		virtual glm::vec3 getScale() = 0;
+		virtual glm::v3 getForward() = 0;
+		virtual glm::v3 getRight() = 0;
+		virtual glm::v3 getUp() = 0;
+		virtual glm::m4 getModel() = 0;
+		virtual glm::v3 getMotionVector() = 0;
+
+		virtual void update(float) = 0;
+};
+
+class Object: virtual public ObjectInterface{
 	protected:
 		std::string m_Name;
 		Object* m_Parent;
@@ -50,19 +65,11 @@ class Object{
 		virtual void render(GLuint=0,bool=false){}
 		virtual void draw(GLuint shader,bool=false){}
 
-		virtual const float getRadius() const { return m_Radius; }
+		virtual float& getRadius(){ return m_Radius; }
+		virtual std::string& getName(){ return m_Name; }
 
-		virtual const glm::quat& getOrientation(){ return glm::quat(); }
-		virtual const glm::v3 getPosition(){ return glm::v3(0); }
-		virtual const glm::vec3& getScale() const{ return glm::vec3(1); }
-		virtual const glm::v3& getForward() const{ return glm::v3(0,0,-1); }
-		virtual const glm::v3& getRight() const{ return glm::v3(1,0,0); }
-		virtual const glm::v3& getUp() const{ return glm::v3(0,1,0); }
-		virtual const glm::m4& getModel() const{ return glm::m4(1); }
-		virtual const std::string& getName() const{ return m_Name; }
-		virtual const glm::v3 getMotionVector() { return glm::v3(0); }
-		virtual Object* getParent() const{ return m_Parent; }
-		virtual const std::vector<Object*> getChildren() const{ return m_Children; }
+		virtual Object* getParent(){ return m_Parent; }
+		virtual std::vector<Object*>& getChildren(){ return m_Children; }
 
 		virtual void setName(std::string);
 
@@ -101,14 +108,14 @@ class ObjectBasic: public Object{
 
 		virtual void update(float);
 
-		virtual const glm::v3& getForward() const{ return m_Forward; }
-		virtual const glm::v3& getRight() const{ return m_Right; }
-		virtual const glm::v3& getUp() const{ return m_Up; }
-		virtual const glm::v3 getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
-		virtual const glm::vec3& getScale() const{ return m_Scale; }
-		virtual const glm::m4& getModel() const{ return m_Model; }
-		virtual const glm::quat& getOrientation(){ return m_Orientation; }
-		virtual const glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
+		virtual glm::v3 getForward(){ return m_Forward; }
+		virtual glm::v3 getRight(){ return m_Right; }
+		virtual glm::v3 getUp(){ return m_Up; }
+		virtual glm::v3 getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+		virtual glm::vec3 getScale(){ return m_Scale; }
+		virtual glm::m4 getModel(){ return m_Model; }
+		virtual glm::quat getOrientation(){ return m_Orientation; }
+		virtual glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
 
 		virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
 };

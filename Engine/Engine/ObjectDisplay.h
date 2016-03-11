@@ -41,9 +41,9 @@ class ObjectDisplay: public ObjectBasic{
 		virtual void scale(float,float,float);
 		virtual void scale(glm::vec3);
 
-		virtual const glm::vec3& getRadiusBox() const{ return m_BoundingBoxRadius; }
+		virtual glm::vec3& getRadiusBox(){ return m_BoundingBoxRadius; }
 
-		const glm::vec4& getColor() const{ return m_Color; }
+		glm::vec4& getColor(){ return m_Color; }
 
 		void setVisible(bool b);
 

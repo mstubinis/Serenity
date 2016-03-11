@@ -2,6 +2,16 @@
 #define STATION_H
 
 #include "ObjectDynamic.h"
+#include "ObjectDisplay.h"
+
+enum STATION_PRESET{
+	STATION_PRESET_SHIPYARD_SMALL,
+	STATION_PRESET_SHIPYARD_MEDIUM,
+	STATION_PRESET_SHIPYARD_LARGE,
+	STATION_PRESET_COMMAND_SMALL,
+	STATION_PRESET_COMMAND_MEDIUM,
+	STATION_PRESET_COMMAND_LARGE
+};
 
 struct StationPartConnectorsInfo{
 	std::vector<glm::vec3> connectorLocations;
