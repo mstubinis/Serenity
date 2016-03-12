@@ -61,15 +61,24 @@ std::unordered_map<std::string,SoundEffect*> _getSoundsDefaults(){ std::unordere
 std::unordered_map<std::string,SoundEffect*> Detail::ResourceManagement::m_Sounds = _getSoundsDefaults();
 
 void Engine::Resources::Detail::ResourceManagement::destruct(){
-	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               SAFE_DELETE(it->second); 
-	for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )           SAFE_DELETE(it->second); 
-	for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                 SAFE_DELETE(it->second);
-	for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )         SAFE_DELETE(it->second);
-	for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it ) SAFE_DELETE(it->second);
-	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             SAFE_DELETE(it->second);
-	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             SAFE_DELETE(it->second);
-	for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               SAFE_DELETE(it->second);
-	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               SAFE_DELETE(it->second);
+	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               
+		SAFE_DELETE(it->second); 
+	for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )           
+		SAFE_DELETE(it->second); 
+	for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                 
+		SAFE_DELETE(it->second);
+	for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )         
+		SAFE_DELETE(it->second);
+	for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it ) 
+		SAFE_DELETE(it->second);
+	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             
+		SAFE_DELETE(it->second);
+	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             
+		SAFE_DELETE(it->second);
+	for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               
+		SAFE_DELETE(it->second);
+	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               
+		SAFE_DELETE(it->second);
 	SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
 	SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }

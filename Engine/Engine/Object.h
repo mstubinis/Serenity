@@ -12,7 +12,22 @@ class Camera;
 
 class ObjectInterface{
 	public:
-		virtual ~ObjectInterface(){}
+		//virtual ~ObjectInterface(){}
+
+		virtual void update(float) = 0;
+
+		virtual void setPosition(glm::nType,glm::nType,glm::nType) = 0;
+		virtual void setPosition(glm::v3) = 0;
+		virtual void setScale(float,float,float) = 0;
+		virtual void setScale(glm::vec3) = 0;
+
+		virtual void translate(glm::nType,glm::nType,glm::nType,bool local=true) = 0;
+		virtual void translate(glm::v3,bool local=true) = 0;
+		virtual void rotate(float,float,float,bool overTime = true) = 0;
+		virtual void rotate(glm::vec3, bool overTime = true) = 0;
+		virtual void scale(float,float,float) = 0;
+		virtual void scale(glm::vec3) = 0;
+
 		virtual glm::quat getOrientation() = 0;
 		virtual glm::v3 getPosition() = 0;
 		virtual glm::vec3 getScale() = 0;
@@ -21,11 +36,9 @@ class ObjectInterface{
 		virtual glm::v3 getUp() = 0;
 		virtual glm::m4 getModel() = 0;
 		virtual glm::v3 getMotionVector() = 0;
-
-		virtual void update(float) = 0;
 };
 
-class Object: virtual public ObjectInterface{
+class Object: public ObjectInterface{
 	protected:
 		std::string m_Name;
 		Object* m_Parent;
@@ -37,7 +50,7 @@ class Object: virtual public ObjectInterface{
 			    glm::vec3 = glm::vec3(1), //Scale
 			    std::string = "Object",   //Object
 				Scene* = nullptr          //The scene to add the object to (default nullptr = the current scene)
-			  );
+	    );
 		virtual ~Object();
 
 		virtual glm::nType getDistance(Object*);
@@ -46,18 +59,6 @@ class Object: virtual public ObjectInterface{
 		virtual glm::vec3 getScreenCoordinates();
 
 		virtual void alignTo(glm::v3,float speed=0,bool overTime=false){}
-
-		virtual void translate(glm::nType,glm::nType,glm::nType,bool local=true){}
-		virtual void translate(glm::v3,bool local=true){}
-		virtual void rotate(float,float,float,bool overTime = true){}
-		virtual void rotate(glm::vec3, bool overTime = true){}
-		virtual void scale(float,float,float){}
-		virtual void scale(glm::vec3){}
-
-		virtual void setPosition(glm::nType,glm::nType,glm::nType){}
-		virtual void setPosition(glm::v3){}
-		virtual void setScale(float,float,float){}
-		virtual void setScale(glm::vec3){}
 
 		virtual void addChild(Object*);
 
@@ -91,7 +92,7 @@ class ObjectBasic: public Object{
 			    glm::vec3 = glm::vec3(1),     //Scale
 			    std::string = "Object Basic", //Object name
 				Scene* = nullptr              //The scene to add the object to (default nullptr = the current scene)
-			  );
+	    );
 		virtual ~ObjectBasic();
 
 		virtual void setPosition(glm::nType,glm::nType,glm::nType);
@@ -119,5 +120,4 @@ class ObjectBasic: public Object{
 
 		virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
 };
-
 #endif

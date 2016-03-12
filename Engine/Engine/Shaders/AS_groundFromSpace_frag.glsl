@@ -38,10 +38,11 @@ void main(){
 	if(HasAtmosphere == 1){
 		if(DiffuseMapEnabled == 1){
 			vec4 diffuse = texture2D(DiffuseMap, UV) * Object_Color;
-			gl_FragData[0].rgb = max(gAmbientColor*diffuse.xyz,(1.0 - exp( -fExposure * ((c0+diffuse.xyz) * c1) )));
+			gl_FragData[0].rgb = max(gAmbientColor*diffuse.rgb,(1 - exp( -fExposure * ((c0+diffuse.rgb) * c1) )));
 			gl_FragData[0].a = 1.0;
 			if(GlowMapEnabled == 1){
-				gl_FragData[0].rgb = max(gl_FragData[0].rgb, (vec3(1.0)-gl_FragData[0].rgb)*texture2D(GlowMap, UV).rgb );
+				vec3 lightIntensity = max(gAmbientColor*vec3(1),(1 - exp( -fExposure * ((c0+vec3(1)) * c1) )));
+				gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1-lightIntensity)*texture2D(GlowMap, UV).rgb);
 			}
 		}
 		else{

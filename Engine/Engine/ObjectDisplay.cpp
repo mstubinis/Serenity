@@ -86,7 +86,7 @@ void ObjectDisplay::setColor(glm::vec4 color){ setColor(color.x,color.y,color.z,
 void ObjectDisplay::setVisible(bool vis){ m_Visible = vis; }
 
 void ObjectDisplay::scale(float x, float y,float z){
-	Object::scale(x,y,z);
+	ObjectBasic::scale(x,y,z);
 	calculateRadius(); 
 }
 void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z); }
