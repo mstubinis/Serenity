@@ -38,6 +38,7 @@ varying vec3 WorldPosition;
 varying float Depth;
 varying float cameraHeight;
 varying float outerRadius;
+varying float planetRadius;
 
 float scale(float fCos){
 	float x = 1.0 - fCos;
@@ -88,6 +89,7 @@ void main(){
 
 	cameraHeight = fCameraHeight;
 	outerRadius = fOuterRadius;
+	planetRadius = fInnerRadius;
 
 	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

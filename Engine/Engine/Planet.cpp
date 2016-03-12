@@ -163,17 +163,19 @@ void Planet::draw(GLuint shader,bool debug){
 		if(renderAtmosphere){
 			if(camHeight > outerRadius){ 
 				shader = Resources::getShader("AS_SkyFromSpace")->getShaderProgram(); 
+   				glBlendFunc(GL_ONE, GL_ONE);
+				//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 			else{ 
 				shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram(); 
+   				//glBlendFunc(GL_ONE, GL_ONE);
+			    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 			}
 			glUseProgram(shader);
 
 			glCullFace(GL_FRONT);
 
 			glEnable(GL_BLEND);
-   			glBlendFunc(GL_ONE, GL_ONE);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			mod = glm::mat4(1);
 			mod = glm::translate(mod,glm::vec3(m_Position));
@@ -236,6 +238,7 @@ void Planet::draw(GLuint shader,bool debug){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for(auto ring:m_Rings)
 		ring->draw(shader);
+
 	glDisable(GL_BLEND);
 	glUseProgram(0);
 
