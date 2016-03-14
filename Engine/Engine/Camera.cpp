@@ -95,7 +95,7 @@ glm::mat4 Camera::calculateModelView(glm::mat4 modelMatrix){ return m_View * mod
 glm::mat4 Camera::calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 void Camera::update(float dt){
 	_constructFrustrum();
-	Object::update(dt);
+	ObjectBasic::update(dt);
 }
 bool Camera::sphereIntersectTest(Object* sphere){
 	return sphereIntersectTest(sphere->getPosition(),sphere->getRadius());

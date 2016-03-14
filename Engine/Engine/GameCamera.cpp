@@ -55,7 +55,7 @@ void GameCamera::update(float dt){
 
 			rotate(-Mouse::getMouseDifference().y*0.6f,-Mouse::getMouseDifference().x*0.6f,0);
 
-			glm::v3 pos = (glm::v3(0,0,1)*static_cast<glm::nType>(glm::length(m_Target->getRadius()))*static_cast<glm::nType>(1.5)) + (glm::v3(0,0,1)*static_cast<glm::nType>(glm::length(m_Target->getRadius()) * (1.0+m_OrbitRadius)));
+			glm::v3 pos = (glm::v3(0,0,1)*static_cast<glm::nType>(glm::length(m_Target->getRadius()))*static_cast<glm::nType>(0.37)) + (glm::v3(0,0,1)*static_cast<glm::nType>(glm::length(m_Target->getRadius()) * (1.0+m_OrbitRadius)));
 
 			m_Model = glm::m4(1);
 			m_Model = glm::translate(m_Model,m_Target->getPosition());

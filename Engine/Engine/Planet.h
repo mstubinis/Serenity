@@ -25,20 +25,24 @@ struct RotationInfo final{
 	}
 };
 
-struct OrbitInfo final{
-	float eccentricity;
-	float days;
-	float minorRadius; float majorRadius;
-	glm::nType angle;
-	Object* parent;
-	OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,Object* _parent){
-		angle = _angle;
-		eccentricity = _eccentricity;
-		days = _days;
-		majorRadius = _majorRadius;
-		minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
-		parent = _parent;
-	}
+class OrbitInfo final{
+	public:
+		float eccentricity;
+		float days;
+		float minorRadius; float majorRadius;
+		glm::nType angle;
+		Object* parent;
+		OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,Object* _parent){
+			angle = _angle;
+			eccentricity = _eccentricity;
+			days = _days;
+			majorRadius = _majorRadius;
+			minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
+			parent = _parent;
+		}
+		~OrbitInfo(){}
+		void setOrbitalPosition(glm::nType angle,Object* thisPlanet);
+		glm::v3 getOrbitalPosition(glm::nType angle,Object* thisPlanet);
 };
 
 struct RingInfo final{
@@ -75,6 +79,7 @@ class Planet: public ObjectDisplay{
 
 		glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*5,this->getRadius()*7); }
 
+		OrbitInfo* getOrbitInfo() const { return m_OrbitInfo; }
 		const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
 		const float getRadius() const { return m_Radius + (m_Radius * m_AtmosphereHeight); }
 

@@ -10,6 +10,28 @@
 
 using namespace Engine;
 
+glm::v3 OrbitInfo::getOrbitalPosition(glm::nType angle,Object* thisPlanet){
+	glm::v3 currentPos = thisPlanet->getPosition();
+	glm::v3 offset = glm::v3(0);
+
+	glm::v3 parentPos = glm::v3(parent->getPosition());
+
+	glm::nType newX = parentPos.x - glm::cos(angle)*majorRadius;
+	glm::nType newZ = parentPos.z - glm::sin(angle)*minorRadius;
+
+	offset = glm::vec3(newX - currentPos.x,
+		               0,
+					   newZ - currentPos.z);
+
+	return (currentPos + offset);
+}
+void OrbitInfo::setOrbitalPosition(glm::nType a,Object* thisPlanet){
+	angle += a;
+	glm::v3 nextPos = getOrbitalPosition(angle,thisPlanet);
+	thisPlanet->setPosition(nextPos);
+}
+
+
 Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::nType scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
 	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
@@ -29,25 +51,7 @@ void Planet::update(float dt){
 		rotate(0,static_cast<float>(finalSpeed),0);
 	}
 	if(m_OrbitInfo != nullptr){
-		//earth's orbital speed is 30km/sec
-
-		glm::v3 currentPos = getPosition();
-		glm::v3 offset = glm::v3(0);
-
-		glm::v3 parentPos = glm::v3(m_OrbitInfo->parent->getPosition());
-
-		//6.283188 is the radian limit (360 degrees to raidians)
-		m_OrbitInfo->angle += ((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188;
-
-		glm::nType a = m_OrbitInfo->majorRadius;
-		glm::nType b = m_OrbitInfo->minorRadius;
-
-		glm::nType newX = parentPos.x - glm::cos(m_OrbitInfo->angle)*a;
-		glm::nType newZ = parentPos.z - glm::sin(m_OrbitInfo->angle)*b;
-
-		offset = glm::vec3(newX - currentPos.x,0,newZ - currentPos.z);
-
-		setPosition(currentPos + offset);
+		m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
 	}
 	for(auto ring:m_Rings)  ring->update(dt);
 

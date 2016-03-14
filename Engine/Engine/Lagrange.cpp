@@ -133,10 +133,10 @@ float _genRadius(std::vector<glm::vec3>& temp){
 std::vector<glm::vec3> Lagrange::m_Vertices = _genBuffer();
 float Lagrange::radius = _genRadius(Lagrange::m_Vertices);
 
-Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type, std::string _name,Scene* _scene):ObjectBasic(glm::v3(0),glm::vec3(1),_name,_scene){
-	_init(_planet1,_planet2,_type);
+Lagrange::Lagrange(Planet* _p1, Planet* _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
+	_init(_p1,_p2,_type);
 }
-Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, std::string _type, std::string _name,Scene* _scene):ObjectBasic(glm::v3(0),glm::vec3(1),_name,_scene){
+Lagrange::Lagrange(Planet* _p1, Planet* _p2, std::string _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
 	LAGRANGE_TYPE type;
 	std::transform(_type.begin(), _type.end(), _type.begin(),std::tolower);
 	if(_type == "l1")      type = LAGRANGE_TYPE_L1;
@@ -144,7 +144,7 @@ Lagrange::Lagrange(Planet* _planet1, Planet* _planet2, std::string _type, std::s
 	else if(_type == "l3") type = LAGRANGE_TYPE_L3;
 	else if(_type == "l4") type = LAGRANGE_TYPE_L4;
 	else                   type = LAGRANGE_TYPE_L5;
-	_init(_planet1,_planet2,type);
+	_init(_p1,_p2,type);
 }
 void Lagrange::_init(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type){
 	m_Planet1 = _planet1;
@@ -163,25 +163,59 @@ Lagrange::~Lagrange(){
 void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 	glm::v3 position = glm::v3(0);
 
-	//first off we want the bigger body to be p1, the other is p2.
+	// p1 has the bigger radius
 	Planet* p1 = m_Planet1; Planet* p2 = m_Planet2;
 	if(p2->getRadius() >= p1->getRadius()){
 		p1 = m_Planet2; p2 = m_Planet1;
 	}
 
-	float sizeRatio = p1->getRadius() / p2->getRadius();
-	float planetaryDistanceToSubtractFromDistance = p1->getRadius() + p2->getRadius();
-	glm::nType distanceFromP2AndP1 = glm::distance(p1->getPosition(),p2->getPosition());
-	glm::nType actualDistance = distanceFromP2AndP1 - static_cast<glm::nType>(planetaryDistanceToSubtractFromDistance);
+	//p1 is the orbital parent
+	if(m_Planet2->getOrbitInfo() != nullptr && m_Planet2->getOrbitInfo()->parent == m_Planet1){
+		p1 = m_Planet1; p2 = m_Planet2;
+	}
+	else if(m_Planet1->getOrbitInfo() != nullptr && m_Planet1->getOrbitInfo()->parent == m_Planet2){
+		p1 = m_Planet2; p2 = m_Planet1;
+	}
 
-	glm::nType step1 = actualDistance / (sizeRatio + 1);
-	glm::nType distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
+	glm::v3 p1Position = p1->getPosition();
+	glm::v3 p2Position = p2->getPosition();
 
-	glm::v3 unitVector = glm::normalize(p2->getPosition() - p1->getPosition());
-	this->alignTo(unitVector);
+	if(type == LAGRANGE_TYPE_L1){
+		float sizeRatio = p1->getRadius() / p2->getRadius();
+		float planetaryDistanceToSubtractFromDistance = p1->getRadius() + p2->getRadius();
+		glm::nType distanceFromP2AndP1 = glm::distance(p1Position,p2Position);
+		glm::nType actualDistance = distanceFromP2AndP1 - static_cast<glm::nType>(planetaryDistanceToSubtractFromDistance);
 
-	unitVector *= distanceOfL1FromP1;
-	position = p1->getPosition() + unitVector;
+		glm::nType step1 = actualDistance / (sizeRatio + 1);
+		glm::nType distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
+
+		glm::v3 unitVector = glm::normalize(p2Position - p1Position);
+		this->alignTo(unitVector);
+
+		unitVector *= distanceOfL1FromP1;
+		position = p1Position + unitVector;
+
+	}
+	else if(type == LAGRANGE_TYPE_L4 || type == LAGRANGE_TYPE_L5){
+		glm::nType d = ((glm::distance(p2Position,p1Position)) * glm::sqrt(3.0f)) / 2.0f;
+		glm::v3 midway = glm::v3(Engine::Math::midpoint(p2Position,p1Position));
+
+		glm::v3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + static_cast<glm::nType>(0.5f),p2);
+
+		glm::v3 D = glm::normalize(p2Position - p1Position);
+		this->alignTo(D);
+
+		glm::nType dotProduct = glm::dot((P-p1Position),D);
+		glm::v3 X = p1Position + (dotProduct * D);
+		glm::v3 cross = glm::normalize(X - P);
+
+		if(type == LAGRANGE_TYPE_L4){
+			position = midway + (cross * d);
+		}
+		else if(type == LAGRANGE_TYPE_L5){
+			position = midway - (cross * d);
+		}
+	}
 	setPosition(position);
 }
 void Lagrange::update(float dt){
