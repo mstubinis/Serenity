@@ -22,43 +22,24 @@
 
 using namespace Engine::Resources;
 
-//if m_DeltaTime is not set to 1, initialization of objects will be incorrect
 float Detail::ResourceManagement::m_DeltaTime = 1;
-sf::Window* Detail::ResourceManagement::m_Window = NULL;
-std::string Detail::ResourceManagement::m_WindowName = "";
-sf::Mouse* Detail::ResourceManagement::m_Mouse = NULL;
-Scene* Detail::ResourceManagement::m_CurrentScene = NULL;
-Camera* Detail::ResourceManagement::m_ActiveCamera = NULL;
 
-std::unordered_map<std::string,Object*> _getObjectsDefaults(){ std::unordered_map<std::string,Object*> k; return k; }
-std::unordered_map<std::string,Object*> Detail::ResourceManagement::m_Objects = _getObjectsDefaults();
+sf::Window* Detail::ResourceManagement::m_Window;
+std::string Detail::ResourceManagement::m_WindowName;
+sf::Mouse* Detail::ResourceManagement::m_Mouse;
+Scene* Detail::ResourceManagement::m_CurrentScene;
+Camera* Detail::ResourceManagement::m_ActiveCamera;
 
-std::unordered_map<std::string,Camera*> _getCamerasDefaults(){ std::unordered_map<std::string,Camera*> k; return k; }
-std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras = _getCamerasDefaults();
-
-std::unordered_map<std::string,Font*> _getFontsDefaults(){ std::unordered_map<std::string,Font*> k; return k; }
-std::unordered_map<std::string,Font*> Detail::ResourceManagement::m_Fonts = _getFontsDefaults();
-
-std::unordered_map<std::string,Texture*> _getTexturesDefaults(){ std::unordered_map<std::string,Texture*> k; return k; }
-std::unordered_map<std::string,Texture*> Detail::ResourceManagement::m_Textures = _getTexturesDefaults();
-
-std::unordered_map<std::string,Scene*> _getScenesDefaults(){ std::unordered_map<std::string,Scene*> k; return k; }
-std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes = _getScenesDefaults();
-
-std::unordered_map<std::string,Mesh*> _getMeshDefaults(){ std::unordered_map<std::string,Mesh*> k; return k; }
-std::unordered_map<std::string,Mesh*> Detail::ResourceManagement::m_Meshes = _getMeshDefaults();
-
-std::unordered_map<std::string,Material*> _getMaterialDefaults(){ std::unordered_map<std::string,Material*> k; return k; }
-std::unordered_map<std::string,Material*> Detail::ResourceManagement::m_Materials = _getMaterialDefaults();
-
-std::unordered_map<std::string,ParticleInfo*> _getParticleInfoDefaults(){ std::unordered_map<std::string,ParticleInfo*> k; return k; }
-std::unordered_map<std::string,ParticleInfo*> Detail::ResourceManagement::m_ParticleInfos = _getParticleInfoDefaults();
-
-std::unordered_map<std::string,ShaderP*> _getShaderDefaults(){ std::unordered_map<std::string,ShaderP*> k; return k; }
-std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders = _getShaderDefaults();
-
-std::unordered_map<std::string,SoundEffect*> _getSoundsDefaults(){ std::unordered_map<std::string,SoundEffect*> k; return k; }
-std::unordered_map<std::string,SoundEffect*> Detail::ResourceManagement::m_Sounds = _getSoundsDefaults();
+std::unordered_map<std::string,Object*> Detail::ResourceManagement::m_Objects;
+std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras;
+std::unordered_map<std::string,Font*> Detail::ResourceManagement::m_Fonts;
+std::unordered_map<std::string,Texture*> Detail::ResourceManagement::m_Textures;
+std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes;
+std::unordered_map<std::string,Mesh*> Detail::ResourceManagement::m_Meshes;
+std::unordered_map<std::string,Material*> Detail::ResourceManagement::m_Materials;
+std::unordered_map<std::string,ParticleInfo*> Detail::ResourceManagement::m_ParticleInfos;
+std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders;
+std::unordered_map<std::string,SoundEffect*> Detail::ResourceManagement::m_Sounds;
 
 void Engine::Resources::Detail::ResourceManagement::destruct(){
 	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               
