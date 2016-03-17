@@ -8,6 +8,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
+#include <boost/shared_ptr.hpp>
 
 class Font;
 class Texture;
@@ -43,15 +44,15 @@ namespace Engine{
 
 					static Camera* m_ActiveCamera;
 
-					static std::unordered_map<std::string,SoundEffect*> m_Sounds;
+					static std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> m_Sounds;
 					static std::unordered_map<std::string,Object*> m_Objects;
 					static std::unordered_map<std::string,Camera*> m_Cameras;
-					static std::unordered_map<std::string,Font*> m_Fonts;
-					static std::unordered_map<std::string,Mesh*> m_Meshes;
-					static std::unordered_map<std::string,Texture*> m_Textures;
-					static std::unordered_map<std::string,Material*> m_Materials;
-					static std::unordered_map<std::string,ShaderP*> m_Shaders;
-					static std::unordered_map<std::string,ParticleInfo*> m_ParticleInfos;
+					static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
+					static std::unordered_map<std::string,boost::shared_ptr<Mesh>> m_Meshes;
+					static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
+					static std::unordered_map<std::string,boost::shared_ptr<Material>> m_Materials;
+					static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_Shaders;
+					static std::unordered_map<std::string,boost::shared_ptr<ParticleInfo>> m_ParticleInfos;
 
 					static void destruct();
 			};
@@ -71,16 +72,15 @@ namespace Engine{
 		static void setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = c; }
 		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
-		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name]; }
+		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name].get(); }
 		static Object* getObject(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
 		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
-		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name]; }
-		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name]; }
-		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name]; }
-		static Material* getMaterial(std::string name){ return Detail::ResourceManagement::m_Materials[name]; }
-		static ParticleInfo* getParticleInfo(std::string name){ return Detail::ResourceManagement::m_ParticleInfos[name]; }
-		static ShaderP* getShader(std::string name){ return Detail::ResourceManagement::m_Shaders[name]; }
-
+		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name].get(); }
+		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name].get(); }
+		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name].get(); }
+		static Material* getMaterial(std::string name){ return Detail::ResourceManagement::m_Materials[name].get(); }
+		static ParticleInfo* getParticleInfo(std::string name){ return Detail::ResourceManagement::m_ParticleInfos[name].get(); }
+		static ShaderP* getShader(std::string name){ return Detail::ResourceManagement::m_Shaders[name].get(); }
 
 		void addMesh(std::string name,std::string file);
 		void addMesh(std::string file);

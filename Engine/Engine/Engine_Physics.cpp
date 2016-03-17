@@ -30,8 +30,7 @@ btSequentialImpulseConstraintSolver* Engine::Physics::Detail::PhysicsManagement:
 btDiscreteDynamicsWorld* Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
 GLDebugDrawer* Engine::Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
-std::vector<MeshCollision*> _getCollisions(){ std::vector<MeshCollision*> c; return c; }
-std::vector<MeshCollision*> Engine::Physics::Detail::PhysicsManagement::m_MeshCollisions = _getCollisions();
+std::vector<MeshCollision*> Engine::Physics::Detail::PhysicsManagement::m_MeshCollisions;
 
 void Engine::Physics::Detail::PhysicsManagement::init(){
 	m_broadphase = new btDbvtBroadphase();

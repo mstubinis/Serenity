@@ -39,6 +39,8 @@ class ObjectInterface{
 };
 
 class Object: public ObjectInterface{
+	private:
+		bool m_IsToBeDestroyed;
 	protected:
 		std::string m_Name;
 		Object* m_Parent;
@@ -52,6 +54,9 @@ class Object: public ObjectInterface{
 				Scene* = nullptr          //The scene to add the object to (default nullptr = the current scene)
 	    );
 		virtual ~Object();
+
+		void destroy(){ m_IsToBeDestroyed = true; }
+		bool isDestroyed(){ return m_IsToBeDestroyed; }
 
 		virtual glm::nType getDistance(Object*);
 		virtual unsigned long long getDistanceLL(Object*);

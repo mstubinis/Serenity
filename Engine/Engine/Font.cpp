@@ -61,7 +61,8 @@ Font::Font(std::string filename){
 	m_FontData = new FontData(filename);
 
 	m_Name = filename.substr(0,filename.size()-4);
-	Resources::Detail::ResourceManagement::m_Fonts[m_Name] = this;
+
+	Resources::Detail::ResourceManagement::m_Fonts[m_Name] = boost::shared_ptr<Font>(this);
 }
 Font::~Font(){
 	SAFE_DELETE(m_FontData);

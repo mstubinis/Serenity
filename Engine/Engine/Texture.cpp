@@ -17,7 +17,8 @@ Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,std:
 	m_Type = type;
 	_loadFromPixels(pixels,w,h,type);
 	m_Name = name;
-	Resources::Detail::ResourceManagement::m_Textures[m_Name] = this;
+
+	Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);
 }
 Texture::Texture(std::string file,std::string name,GLuint type){
 	m_Directory = file;
@@ -32,8 +33,9 @@ Texture::Texture(std::string file,std::string name,GLuint type){
 	if(name == ""){
 		m_Name = file.substr(0,file.size()-4);
 	}
-	if(file != "")
-		Resources::Detail::ResourceManagement::m_Textures[m_Name] = this;
+	if(file != ""){
+		Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);
+	}
 }
 Texture::Texture(std::string files[],std::string name,GLuint type){
 	m_Directory = "";
@@ -54,7 +56,7 @@ Texture::Texture(std::string files[],std::string name,GLuint type){
 		}
 		m_Name = "Cubemap " + boost::lexical_cast<std::string>(total);
 	}
-	Resources::Detail::ResourceManagement::m_Textures[m_Name] = this;
+	Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);
 }
 Texture::~Texture(){
 	m_PixelsPointer.clear();

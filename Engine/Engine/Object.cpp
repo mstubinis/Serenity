@@ -11,6 +11,7 @@ using namespace Engine;
 Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
 	m_Radius = 0;
 	m_Parent = nullptr;
+	m_IsToBeDestroyed = false;
 	m_Name = name;
 	unsigned int count = 0;
 	if(scene == nullptr){

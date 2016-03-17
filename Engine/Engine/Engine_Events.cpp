@@ -2,9 +2,6 @@
 
 using namespace Engine::Events;
 
-//return actual objects
-std::unordered_map<unsigned int,bool> _getkeys(){ return std::unordered_map<unsigned int, bool>(); }
-std::unordered_map<unsigned int,bool> _getmouse(){ return std::unordered_map<unsigned int, bool>(); }
 //return string dictionaries of keys / mouse buttons
 std::unordered_map<std::string,unsigned int> _getkeymap(){
 	std::unordered_map<std::string,unsigned int> k;
@@ -251,12 +248,12 @@ std::unordered_map<std::string,unsigned int> _getmousemap(){
 //init static values with actual objects
 std::unordered_map<std::string,unsigned int> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
 std::unordered_map<std::string,unsigned int> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
-std::unordered_map<unsigned int,bool> Keyboard::KeyProcessing::m_KeyStatus = _getkeys();
-std::unordered_map<unsigned int,bool> Mouse::MouseProcessing::m_MouseStatus = _getmouse();
+std::unordered_map<unsigned int,bool> Keyboard::KeyProcessing::m_KeyStatus;
+std::unordered_map<unsigned int,bool> Mouse::MouseProcessing::m_MouseStatus;
 float Mouse::MouseProcessing::m_Delta = 0;
-glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0,0);
-glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0,0);
-glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0,0);
+glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0);
+glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0);
+glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0);
 
 //init prev / current variables
 unsigned int Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;

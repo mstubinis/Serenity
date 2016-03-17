@@ -33,13 +33,10 @@ Texture* Engine::Renderer::Detail::RenderManagement::RandomMapSSAO = nullptr;
 GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 glm::mat4 Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::mat4(1);
 
-std::vector<GeometryRenderInfo> _getRenderObjectsDefault(){ std::vector<GeometryRenderInfo> k; return k; }
-std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ObjectsToBeRendered = _getRenderObjectsDefault();
-std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered = _getRenderObjectsDefault();
-std::vector<FontRenderInfo> _getRenderFontsDefault(){ std::vector<FontRenderInfo> k; return k; }
-std::vector<FontRenderInfo> Engine::Renderer::Detail::RenderManagement::m_FontsToBeRendered = _getRenderFontsDefault();
-std::vector<TextureRenderInfo> _getRenderTexturesDefault(){ std::vector<TextureRenderInfo> k; return k; }
-std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_TexturesToBeRendered = _getRenderTexturesDefault();
+std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ObjectsToBeRendered;
+std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
+std::vector<FontRenderInfo> Engine::Renderer::Detail::RenderManagement::m_FontsToBeRendered;
+std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_TexturesToBeRendered;
 
 void Engine::Renderer::Detail::RenderManagement::init(){
 	initOpenGL();
@@ -87,7 +84,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 	for(auto item:m_TexturesToBeRendered){
 		Texture* texture = nullptr;
 		if(item.texture != ""){
-			texture = Resources::Detail::ResourceManagement::m_Textures[item.texture];
+			texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
 			glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
@@ -127,7 +124,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 	GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 	glUseProgram(shader);
 	for(auto item:m_FontsToBeRendered){
-		Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture];
+		Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->getTextureAddress());
 		glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);

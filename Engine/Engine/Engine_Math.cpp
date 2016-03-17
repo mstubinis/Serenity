@@ -9,9 +9,9 @@ glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){
 	return glm::vec3(_x,_y,_z);
 }
 glm::vec3 Math::midpoint(glm::v3 a, glm::v3 b){
-	float _x = (a.x + b.x)/2;
-	float _y = (a.y + b.y)/2;
-	float _z = (a.z + b.z)/2;
+	float _x = static_cast<float>((a.x + b.x)/2);
+	float _y = static_cast<float>((a.y + b.y)/2);
+	float _z = static_cast<float>((a.z + b.z)/2);
 	return glm::vec3(_x,_y,_z);
 }
 

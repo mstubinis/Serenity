@@ -32,32 +32,32 @@ Camera* Detail::ResourceManagement::m_ActiveCamera;
 
 std::unordered_map<std::string,Object*> Detail::ResourceManagement::m_Objects;
 std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras;
-std::unordered_map<std::string,Font*> Detail::ResourceManagement::m_Fonts;
-std::unordered_map<std::string,Texture*> Detail::ResourceManagement::m_Textures;
+std::unordered_map<std::string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
+std::unordered_map<std::string,boost::shared_ptr<Texture>> Detail::ResourceManagement::m_Textures;
 std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes;
-std::unordered_map<std::string,Mesh*> Detail::ResourceManagement::m_Meshes;
-std::unordered_map<std::string,Material*> Detail::ResourceManagement::m_Materials;
-std::unordered_map<std::string,ParticleInfo*> Detail::ResourceManagement::m_ParticleInfos;
-std::unordered_map<std::string,ShaderP*> Detail::ResourceManagement::m_Shaders;
-std::unordered_map<std::string,SoundEffect*> Detail::ResourceManagement::m_Sounds;
+std::unordered_map<std::string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
+std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
+std::unordered_map<std::string,boost::shared_ptr<ParticleInfo>> Detail::ResourceManagement::m_ParticleInfos;
+std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_Shaders;
+std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> Detail::ResourceManagement::m_Sounds;
 
 void Engine::Resources::Detail::ResourceManagement::destruct(){
 	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               
-		SAFE_DELETE(it->second); 
+		it->second.reset();
 	for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )           
-		SAFE_DELETE(it->second); 
+		it->second.reset();
 	for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                 
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )         
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it ) 
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             
 		SAFE_DELETE(it->second);
 	for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               
 		SAFE_DELETE(it->second);
 	SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
@@ -67,7 +67,7 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 void Engine::Resources::addMesh(std::string name,std::string file){
 	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
 		return;
-	Detail::ResourceManagement::m_Meshes[name] = new Mesh(file);
+	Detail::ResourceManagement::m_Meshes[name] = boost::shared_ptr<Mesh>(new Mesh(file));
 }
 void Engine::Resources::addMesh(std::string file){
 	std::string name = file.substr(0, file.size()-4);
@@ -77,58 +77,58 @@ void Engine::Resources::addMesh(std::string file){
 void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
 	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
 		return;
-	Detail::ResourceManagement::m_Materials[name] = new Material(diffuse,normal,glow);
+	Detail::ResourceManagement::m_Materials[name] = boost::shared_ptr<Material>(new Material(diffuse,normal,glow));
 }
 void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture* normal, Texture* glow){
 	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
 		return;
-	Detail::ResourceManagement::m_Materials[name] = new Material(diffuse,normal,glow);
+	Detail::ResourceManagement::m_Materials[name] = boost::shared_ptr<Material>(new Material(diffuse,normal,glow));
 }
 
 void Engine::Resources::addParticleInfo(std::string name, std::string material){
 	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
 		return;
-	Detail::ResourceManagement::m_ParticleInfos[name] = new ParticleInfo(material);
+	Detail::ResourceManagement::m_ParticleInfos[name] = boost::shared_ptr<ParticleInfo>(new ParticleInfo(material));
 }
 void Engine::Resources::addParticleInfo(std::string name, Material* material){
 	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
 		return;
-	Detail::ResourceManagement::m_ParticleInfos[name] = new ParticleInfo(material);
+	Detail::ResourceManagement::m_ParticleInfos[name] = boost::shared_ptr<ParticleInfo>(new ParticleInfo(material));
 }
 
 void Engine::Resources::addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile){
 	if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
 		return;
-	Detail::ResourceManagement::m_Shaders[name] = new ShaderP(vertexShaderFile,fragmentShaderFile);
+	Detail::ResourceManagement::m_Shaders[name] = boost::shared_ptr<ShaderP>(new ShaderP(vertexShaderFile,fragmentShaderFile));
 }
 
 void Engine::Resources::addSound(std::string name, std::string file){
 	if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name))
 		return;
-	Detail::ResourceManagement::m_Sounds[name] = new SoundEffect(file);
+	Detail::ResourceManagement::m_Sounds[name] = boost::shared_ptr<SoundEffect>(new SoundEffect(file));
 }
 
 void Engine::Resources::removeMesh(std::string name){
 	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name)){
-		SAFE_DELETE(Detail::ResourceManagement::m_Meshes[name]);
+		Detail::ResourceManagement::m_Meshes[name].reset();
 		Detail::ResourceManagement::m_Meshes.erase(name);
 	}
 }
 void Engine::Resources::removeMaterial(std::string name){
 	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name)){
-		SAFE_DELETE(Detail::ResourceManagement::m_Materials[name]);
+		Detail::ResourceManagement::m_Materials[name].reset();
 		Detail::ResourceManagement::m_Materials.erase(name);
 	}
 }
 void Engine::Resources::removeParticleInfo(std::string name){
 	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name)){
-		SAFE_DELETE(Detail::ResourceManagement::m_ParticleInfos[name]);
+		Detail::ResourceManagement::m_ParticleInfos[name].reset();
 		Detail::ResourceManagement::m_ParticleInfos.erase(name);
 	}
 }
 void Engine::Resources::removeSound(std::string name){
 	if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name)){
-		SAFE_DELETE(Detail::ResourceManagement::m_Sounds[name]);
+		Detail::ResourceManagement::m_Sounds[name].reset();
 		Detail::ResourceManagement::m_Sounds.erase(name);
 	}
 }
@@ -147,5 +147,5 @@ void Engine::Resources::initResources(){
 	addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
 	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
-	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = new Mesh(1.0f,1.0f);
+	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::shared_ptr<Mesh>(new Mesh(1.0f,1.0f));
 }

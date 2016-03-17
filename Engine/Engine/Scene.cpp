@@ -58,9 +58,19 @@ void Scene::setName(std::string name){
 	}
 }
 void Scene::update(float dt){
-	for(auto object:m_Objects){
-		object.second->update(dt);
+	for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
+		if (it->second->isDestroyed()){
+			delete it->second;
+			m_Objects.erase(it++);
+	    }
+	    else{
+			it->second->update(dt);
+			++it;
+	    }
 	}
+
+
+
 	for(auto emitter:m_ParticleEmitters){
 		for(auto particle:emitter.second->getParticles()){
 			particle->update(dt);
