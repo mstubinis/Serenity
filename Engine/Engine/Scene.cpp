@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Skybox.h"
 #include "Particles.h"
+#include <boost/shared_ptr.hpp>
 
 using namespace Engine;
 
@@ -15,7 +16,7 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 		new Camera("Default",45.0f,1.0f,0.1f,100.0f,this);
 		Resources::Detail::ResourceManagement::m_ActiveCamera = Resources::getCamera("Default");
 	}
-	Resources::Detail::ResourceManagement::m_Scenes[name] = this;
+	Resources::Detail::ResourceManagement::m_Scenes[name] = boost::shared_ptr<Scene>(this);
 	m_Name = name;
 	m_AmbientLighting = ambientLightColor;
 }
@@ -48,13 +49,14 @@ void Scene::centerSceneToObject(Object* center){
 Scene::~Scene(){
 }
 void Scene::setName(std::string name){
-	std::string oldName = m_Name;
-	m_Name = name;
-	Resources::Detail::ResourceManagement::m_Scenes[name] = this;
+	if(name == m_Name) return;
 
-	for(auto it = begin(Resources::Detail::ResourceManagement::m_Scenes); it != end(Resources::Detail::ResourceManagement::m_Scenes);){
-		if (it->first == oldName)it = Resources::Detail::ResourceManagement::m_Scenes.erase(it);
-	    else++it;
+	std::string oldName = m_Name; m_Name = name;
+	Resources::Detail::ResourceManagement::m_Scenes[name] = boost::shared_ptr<Scene>(this);
+
+	if(Resources::Detail::ResourceManagement::m_Scenes.count(oldName)){
+		Resources::Detail::ResourceManagement::m_Scenes[oldName].reset();
+		Resources::Detail::ResourceManagement::m_Scenes.erase(oldName);
 	}
 }
 void Scene::update(float dt){
@@ -68,7 +70,6 @@ void Scene::update(float dt){
 			++it;
 	    }
 	}
-
 
 
 	for(auto emitter:m_ParticleEmitters){

@@ -154,6 +154,6 @@ void Texture::generatePixelPointer(){
 		}
 	}
 }
-void Texture::render(glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
+void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
 	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
 }

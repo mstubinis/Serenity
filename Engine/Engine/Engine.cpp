@@ -117,7 +117,7 @@ void Engine::Detail::EngineClass::EVENT_RESIZE(unsigned int width, unsigned int 
 		Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,width,height);
 	}
 	for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){
-		camera.second->resize(width,height);
+		camera.second.lock().get()->resize(width,height);
 	}
 }
 void Engine::Detail::EngineClass::EVENT_CLOSE(){

@@ -9,6 +9,7 @@
 #include <SFML/Graphics.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 class Font;
 class Texture;
@@ -33,7 +34,7 @@ namespace Engine{
 		namespace Detail{
 			class ResourceManagement final{
 				public:
-					static std::unordered_map<std::string,Scene*> m_Scenes;
+					static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
 					static Scene* m_CurrentScene;
 
 					static float m_DeltaTime;
@@ -45,8 +46,8 @@ namespace Engine{
 					static Camera* m_ActiveCamera;
 
 					static std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> m_Sounds;
-					static std::unordered_map<std::string,Object*> m_Objects;
-					static std::unordered_map<std::string,Camera*> m_Cameras;
+					static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
+					static std::unordered_map<std::string,boost::weak_ptr<Camera>> m_Cameras;
 					static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
 					static std::unordered_map<std::string,boost::shared_ptr<Mesh>> m_Meshes;
 					static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
@@ -58,8 +59,8 @@ namespace Engine{
 			};
 		};
 		static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
-		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene; }
-		static void setCurrentScene(std::string s){ Detail::ResourceManagement::m_CurrentScene = Detail::ResourceManagement::m_Scenes[s]; }
+		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene = s; }
+		static void setCurrentScene(std::string s){ Detail::ResourceManagement::m_CurrentScene = Detail::ResourceManagement::m_Scenes[s].get(); }
 
 		static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
 		static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
@@ -70,11 +71,12 @@ namespace Engine{
 
 		static Camera* getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera; }
 		static void setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = c; }
-		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
+		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name].lock().get(); }
 
+		static Scene* getScene(std::string name){ return Detail::ResourceManagement::m_Scenes[name].get(); }
 		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name].get(); }
-		static Object* getObject(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
-		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
+		static Object* getObject(std::string name){ return Detail::ResourceManagement::m_Objects[name].get(); }
+		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name].lock().get(); }
 		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name].get(); }
 		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name].get(); }
 		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name].get(); }

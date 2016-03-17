@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Engine;
+using namespace boost;
 
 Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _near, float _far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),"ZZZ" + name,scene){//create a perspective camera
 	m_Angle = angleVal;
@@ -20,7 +21,7 @@ Camera::Camera(std::string name, float angleVal, float aspectRatioVal, float _ne
 	setPerspectiveProjection();
 	lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
 
-	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
+	Resources::Detail::ResourceManagement::m_Cameras[name] = weak_ptr<Camera>(dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[m_Name]));
 }
 Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal, float topVal, float _near, float _far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),"ZZZ" + name,scene){//create an orthographic camera
 	m_Angle = 45.0f;
@@ -33,7 +34,7 @@ Camera::Camera(std::string name, float leftVal, float rightVal, float bottomVal,
 	setOrthoProjection(leftVal,rightVal,bottomVal,topVal);
 	lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
 
-	Engine::Resources::Detail::ResourceManagement::m_Cameras[name] = this;
+	Resources::Detail::ResourceManagement::m_Cameras[name] = weak_ptr<Camera>(dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[m_Name]));
 }
 void Camera::_constructFrustrum(){
 	glm::mat4 vp = m_Projection * m_View;

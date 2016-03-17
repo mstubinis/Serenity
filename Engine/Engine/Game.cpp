@@ -10,13 +10,10 @@
 using namespace Engine;
 
 HUD* m_HUD;
-std::unordered_map<std::string, SolarSystem*> m_SolarSystems;
 
 void Game::cleanup(){
 	for(auto part:stationPartsInfo)
 		delete part.second;
-	for(auto solarSystem:m_SolarSystems)
-		delete solarSystem.second;
 	delete m_HUD;
 }
 void Game::initResources(){
@@ -50,13 +47,16 @@ void Game::initResources(){
 void Game::initLogic(){
 	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
 
-	m_SolarSystems["Sol"] = new SolarSystem("Sol","Systems/Sol.txt");
-	//m_SolarSystems["Sol"] = new SolarSystem("Sol","");
-	Resources::setCurrentScene(m_SolarSystems["Sol"]);
+	new SolarSystem("Sol","Systems/Sol.txt");
+	//new SolarSystem("Sol","");
+	Resources::setCurrentScene("Sol");
 
-	m_HUD = new HUD(m_SolarSystems["Sol"]->getPlayer());
+	m_HUD = new HUD(static_cast<SolarSystem*>(Resources::getScene("Sol"))->getPlayer());
 }
 void Game::update(float dt){
+
+	SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
+
 	if(Events::Keyboard::isKeyDown("esc"))
 		Engine::stop();
 	if(Events::Keyboard::isKeyDownOnce("f6"))
@@ -64,7 +64,7 @@ void Game::update(float dt){
 	if(Events::Keyboard::isKeyDownOnce("f7"))
 		Engine::setFullScreen(false);
 	if(Events::Keyboard::isKeyDown("f8"))
-		m_SolarSystems["Sol"]->getPlayer()->alignTo(m_SolarSystems["Sol"]->getPlayer()->getTarget()->getPosition()-m_SolarSystems["Sol"]->getPlayer()->getPosition(),2,true);
+		s->getPlayer()->alignTo(s->getPlayer()->getTarget()->getPosition()-s->getPlayer()->getPosition(),2,true);
 
 
 	m_HUD->update(dt);

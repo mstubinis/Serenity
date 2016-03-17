@@ -17,6 +17,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include <SFML/Graphics.hpp>
 
@@ -30,11 +31,11 @@ sf::Mouse* Detail::ResourceManagement::m_Mouse;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 Camera* Detail::ResourceManagement::m_ActiveCamera;
 
-std::unordered_map<std::string,Object*> Detail::ResourceManagement::m_Objects;
-std::unordered_map<std::string,Camera*> Detail::ResourceManagement::m_Cameras;
+std::unordered_map<std::string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
+std::unordered_map<std::string,boost::weak_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
 std::unordered_map<std::string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
 std::unordered_map<std::string,boost::shared_ptr<Texture>> Detail::ResourceManagement::m_Textures;
-std::unordered_map<std::string,Scene*> Detail::ResourceManagement::m_Scenes;
+std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
 std::unordered_map<std::string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
 std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
 std::unordered_map<std::string,boost::shared_ptr<ParticleInfo>> Detail::ResourceManagement::m_ParticleInfos;
@@ -55,11 +56,11 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             
 		it->second.reset();
 	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               
 		it->second.reset();
 	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               
-		SAFE_DELETE(it->second);
+		it->second.reset();
 	SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
 	SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
@@ -67,45 +68,44 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 void Engine::Resources::addMesh(std::string name,std::string file){
 	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
 		return;
-	Detail::ResourceManagement::m_Meshes[name] = boost::shared_ptr<Mesh>(new Mesh(file));
+	Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file);
 }
 void Engine::Resources::addMesh(std::string file){
-	std::string name = file.substr(0, file.size()-4);
-	Engine::Resources::addMesh(name,file);
+	std::string name = file.substr(0, file.size()-4); Engine::Resources::addMesh(name,file);
 }
 
 void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
 	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
 		return;
-	Detail::ResourceManagement::m_Materials[name] = boost::shared_ptr<Material>(new Material(diffuse,normal,glow));
+	Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow);
 }
 void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture* normal, Texture* glow){
 	if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
 		return;
-	Detail::ResourceManagement::m_Materials[name] = boost::shared_ptr<Material>(new Material(diffuse,normal,glow));
+	Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow);
 }
 
 void Engine::Resources::addParticleInfo(std::string name, std::string material){
 	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
 		return;
-	Detail::ResourceManagement::m_ParticleInfos[name] = boost::shared_ptr<ParticleInfo>(new ParticleInfo(material));
+	Detail::ResourceManagement::m_ParticleInfos[name] = boost::make_shared<ParticleInfo>(material);
 }
 void Engine::Resources::addParticleInfo(std::string name, Material* material){
 	if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
 		return;
-	Detail::ResourceManagement::m_ParticleInfos[name] = boost::shared_ptr<ParticleInfo>(new ParticleInfo(material));
+	Detail::ResourceManagement::m_ParticleInfos[name] = boost::make_shared<ParticleInfo>(material);
 }
 
 void Engine::Resources::addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile){
 	if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
 		return;
-	Detail::ResourceManagement::m_Shaders[name] = boost::shared_ptr<ShaderP>(new ShaderP(vertexShaderFile,fragmentShaderFile));
+	Detail::ResourceManagement::m_Shaders[name] = boost::make_shared<ShaderP>(vertexShaderFile,fragmentShaderFile);
 }
 
 void Engine::Resources::addSound(std::string name, std::string file){
 	if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name))
 		return;
-	Detail::ResourceManagement::m_Sounds[name] = boost::shared_ptr<SoundEffect>(new SoundEffect(file));
+	Detail::ResourceManagement::m_Sounds[name] = boost::make_shared<SoundEffect>(file);
 }
 
 void Engine::Resources::removeMesh(std::string name){
@@ -147,5 +147,5 @@ void Engine::Resources::initResources(){
 	addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
 	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
-	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::shared_ptr<Mesh>(new Mesh(1.0f,1.0f));
+	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }

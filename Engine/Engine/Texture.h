@@ -35,7 +35,7 @@ class Texture final{
 
 		void generatePixelPointer();
 
-		void render(glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
+		void render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
 
 };
 #endif

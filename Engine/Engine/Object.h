@@ -4,16 +4,21 @@
 #include "Engine_Math.h"
 #include <string>
 #include <vector>
+#include <boost/weak_ptr.hpp>
 
 class Mesh;
 class Material;
 class Scene;
 class Camera;
 
+template <typename T> bool exists(boost::weak_ptr<T> t){
+	if(t.use_count() == 0 || !t.lock())
+		return false;
+	return true;
+}
+
 class ObjectInterface{
 	public:
-		//virtual ~ObjectInterface(){}
-
 		virtual void update(float) = 0;
 
 		virtual void setPosition(glm::nType,glm::nType,glm::nType) = 0;

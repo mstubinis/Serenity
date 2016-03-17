@@ -5,6 +5,7 @@
 #include "Scene.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace Engine;
 
@@ -24,7 +25,7 @@ Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
 		}
 	}
 	scene->getObjects()[m_Name] = this;
-	Engine::Resources::Detail::ResourceManagement::m_Objects[m_Name] = this;
+	Resources::Detail::ResourceManagement::m_Objects[m_Name] = boost::shared_ptr<Object>(this);
 }
 Object::~Object()
 {
@@ -72,13 +73,19 @@ void Object::addChild(Object* child){
 	m_Children.push_back(child);
 }
 void Object::setName(std::string name){
-	std::string oldName = m_Name;
-	m_Name = name;
-	Resources::Detail::ResourceManagement::m_CurrentScene->getObjects()[name] = this;
+	if(name == m_Name) return;
 
-	for(auto it = begin(Resources::Detail::ResourceManagement::m_CurrentScene->getObjects()); it != end(Resources::Detail::ResourceManagement::m_CurrentScene->getObjects());){
-		if (it->first == oldName)it = Resources::Detail::ResourceManagement::m_CurrentScene->getObjects().erase(it);
-	    else++it;
+	std::string oldName = m_Name; m_Name = name;
+
+	Resources::Detail::ResourceManagement::m_CurrentScene->getObjects()[name] = this;
+	if(Resources::Detail::ResourceManagement::m_CurrentScene->getObjects().count(oldName)){
+		Resources::Detail::ResourceManagement::m_CurrentScene->getObjects().erase(oldName);
+	}
+
+	Resources::Detail::ResourceManagement::m_Objects[name] = boost::shared_ptr<Object>(this);
+	if(Resources::Detail::ResourceManagement::m_Objects.count(oldName)){
+		Resources::Detail::ResourceManagement::m_Objects[oldName].reset();
+		Resources::Detail::ResourceManagement::m_Objects.erase(oldName);
 	}
 }
 
