@@ -11,18 +11,16 @@
 using namespace Engine;
 
 glm::v3 OrbitInfo::getOrbitalPosition(glm::nType angle,Object* thisPlanet){
-	glm::v3 currentPos = thisPlanet->getPosition();
 	glm::v3 offset = glm::v3(0);
+	glm::v3 currentPos = thisPlanet->getPosition();
+	if(exists(parent)){
+		glm::v3 parentPos = glm::v3(parent.lock().get()->getPosition());
 
-	glm::v3 parentPos = glm::v3(parent->getPosition());
+		glm::nType newX = parentPos.x - glm::cos(angle)*majorRadius;
+		glm::nType newZ = parentPos.z - glm::sin(angle)*minorRadius;
 
-	glm::nType newX = parentPos.x - glm::cos(angle)*majorRadius;
-	glm::nType newZ = parentPos.z - glm::sin(angle)*minorRadius;
-
-	offset = glm::vec3(newX - currentPos.x,
-		               0,
-					   newZ - currentPos.z);
-
+		offset = glm::vec3(newX - currentPos.x,0,newZ - currentPos.z);
+	}
 	return (currentPos + offset);
 }
 void OrbitInfo::setOrbitalPosition(glm::nType a,Object* thisPlanet){

@@ -75,7 +75,8 @@ namespace Engine{
 
 		static Scene* getScene(std::string name){ return Detail::ResourceManagement::m_Scenes[name].get(); }
 		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name].get(); }
-		static Object* getObject(std::string name){ return Detail::ResourceManagement::m_Objects[name].get(); }
+		static boost::shared_ptr<Object> getObjectPtr(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
+		static Object* getObject(std::string name){ return getObjectPtr(name).get(); }
 		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name].lock().get(); }
 		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name].get(); }
 		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name].get(); }

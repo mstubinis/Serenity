@@ -12,9 +12,7 @@ class Scene;
 class Camera;
 
 template <typename T> bool exists(boost::weak_ptr<T> t){
-	if(t.use_count() == 0 || !t.lock())
-		return false;
-	return true;
+	return !(t.expired());
 }
 
 class ObjectInterface{

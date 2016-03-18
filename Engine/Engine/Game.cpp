@@ -59,13 +59,6 @@ void Game::update(float dt){
 
 	if(Events::Keyboard::isKeyDown("esc"))
 		Engine::stop();
-	if(Events::Keyboard::isKeyDownOnce("f6"))
-		Engine::setFullScreen(true);
-	if(Events::Keyboard::isKeyDownOnce("f7"))
-		Engine::setFullScreen(false);
-	if(Events::Keyboard::isKeyDown("f8"))
-		s->getPlayer()->alignTo(s->getPlayer()->getTarget()->getPosition()-s->getPlayer()->getPosition(),2,true);
-
 
 	m_HUD->update(dt);
 }

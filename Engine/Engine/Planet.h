@@ -2,6 +2,7 @@
 #define PLANET_H
 
 #include "ObjectDisplay.h"
+#include "Engine_Resources.h"
 
 class SunLight;
 class Ring;
@@ -31,14 +32,14 @@ class OrbitInfo final{
 		float days;
 		float minorRadius; float majorRadius;
 		glm::nType angle;
-		Object* parent;
-		OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,Object* _parent){
+		boost::weak_ptr<Object> parent;
+		OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,std::string _parent){
 			angle = _angle;
 			eccentricity = _eccentricity;
 			days = _days;
 			majorRadius = _majorRadius;
 			minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
-			parent = _parent;
+			parent = Engine::Resources::getObjectPtr(_parent);
 		}
 		~OrbitInfo(){}
 		void setOrbitalPosition(glm::nType angle,Object* thisPlanet);

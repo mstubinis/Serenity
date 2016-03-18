@@ -62,7 +62,9 @@ void Scene::setName(std::string name){
 void Scene::update(float dt){
 	for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
 		if (it->second->isDestroyed()){
-			delete it->second;
+			std::string name = it->second->getName();
+			Resources::getObjectPtr(name).reset();
+			Resources::Detail::ResourceManagement::m_Objects.erase(name);
 			m_Objects.erase(it++);
 	    }
 	    else{

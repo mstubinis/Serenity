@@ -133,10 +133,10 @@ float _genRadius(std::vector<glm::vec3>& temp){
 std::vector<glm::vec3> Lagrange::m_Vertices = _genBuffer();
 float Lagrange::radius = _genRadius(Lagrange::m_Vertices);
 
-Lagrange::Lagrange(Planet* _p1, Planet* _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
+Lagrange::Lagrange(std::string _p1, std::string _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
 	_init(_p1,_p2,_type);
 }
-Lagrange::Lagrange(Planet* _p1, Planet* _p2, std::string _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
+Lagrange::Lagrange(std::string _p1, std::string _p2, std::string _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
 	LAGRANGE_TYPE type;
 	std::transform(_type.begin(), _type.end(), _type.begin(),std::tolower);
 	if(_type == "l1")      type = LAGRANGE_TYPE_L1;
@@ -146,9 +146,11 @@ Lagrange::Lagrange(Planet* _p1, Planet* _p2, std::string _type, std::string name
 	else                   type = LAGRANGE_TYPE_L5;
 	_init(_p1,_p2,type);
 }
-void Lagrange::_init(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type){
-	m_Planet1 = _planet1;
-	m_Planet2 = _planet2;
+void Lagrange::_init(std::string _planet1, std::string _planet2, LAGRANGE_TYPE _type){
+
+	m_Planet1 = boost::dynamic_pointer_cast<Planet>(Resources::getObjectPtr(_planet1));
+	m_Planet2 = boost::dynamic_pointer_cast<Planet>(Resources::getObjectPtr(_planet2));
+
 	m_Visible = true;
 	m_Type = _type;
 
@@ -156,26 +158,39 @@ void Lagrange::_init(Planet* _planet1, Planet* _planet2, LAGRANGE_TYPE _type){
 	m_Scale = glm::vec3(2,2,2);
 
 	m_Radius = Lagrange::radius * glm::max(glm::abs(m_Scale.x),glm::max(glm::abs(m_Scale.y),glm::abs(m_Scale.z)));
+
+	// p1 has the bigger radius
+	boost::weak_ptr<Object> p1 = m_Planet1;
+	boost::weak_ptr<Object> p2 = m_Planet2;
+
+	boost::weak_ptr<Object> chk1 = boost::dynamic_pointer_cast<Object>(m_Planet1.lock());
+	boost::weak_ptr<Object> chk2 = boost::dynamic_pointer_cast<Object>(m_Planet2.lock());
+
+	if(p2.lock().get()->getRadius() >= p1.lock().get()->getRadius()){
+		p1 = m_Planet2;
+		p2 = m_Planet1;
+	}
+	if(m_Planet2.lock().get()->getOrbitInfo() != nullptr && m_Planet2.lock().get()->getOrbitInfo()->parent.lock() == chk1.lock()){
+		p1 = m_Planet1;
+		p2 = m_Planet2;
+	}
+	else if(m_Planet1.lock().get()->getOrbitInfo() != nullptr && m_Planet1.lock().get()->getOrbitInfo()->parent.lock() == chk2.lock()){
+		p1 = m_Planet2;
+		p2 = m_Planet1;
+	}
+	m_Planet1 = boost::dynamic_pointer_cast<Planet>(p1.lock());
+	m_Planet2 = boost::dynamic_pointer_cast<Planet>(p2.lock());
 }
 Lagrange::~Lagrange(){
 
 }
 void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
+	if(!exists(m_Planet1) || !exists(m_Planet2))
+		return;
 	glm::v3 position = glm::v3(0);
 
-	// p1 has the bigger radius
-	Planet* p1 = m_Planet1; Planet* p2 = m_Planet2;
-	if(p2->getRadius() >= p1->getRadius()){
-		p1 = m_Planet2; p2 = m_Planet1;
-	}
-
-	//p1 is the orbital parent
-	if(m_Planet2->getOrbitInfo() != nullptr && m_Planet2->getOrbitInfo()->parent == m_Planet1){
-		p1 = m_Planet1; p2 = m_Planet2;
-	}
-	else if(m_Planet1->getOrbitInfo() != nullptr && m_Planet1->getOrbitInfo()->parent == m_Planet2){
-		p1 = m_Planet2; p2 = m_Planet1;
-	}
+	Planet* p1 = m_Planet1.lock().get();
+	Planet* p2 = m_Planet2.lock().get();
 
 	glm::v3 p1Position = p1->getPosition();
 	glm::v3 p2Position = p2->getPosition();

@@ -7,11 +7,11 @@ class Planet;
 enum LAGRANGE_TYPE { LAGRANGE_TYPE_L1,LAGRANGE_TYPE_L2,LAGRANGE_TYPE_L3,LAGRANGE_TYPE_L4,LAGRANGE_TYPE_L5 };
 class Lagrange: public ObjectBasic{
 	private:
-		Planet* m_Planet1;
-		Planet* m_Planet2;
+		boost::weak_ptr<Planet> m_Planet1;
+		boost::weak_ptr<Planet> m_Planet2;
 		bool m_Visible;
 		void _calculateLagrangePosition(LAGRANGE_TYPE);
-		void _init(Planet*,Planet*,LAGRANGE_TYPE);
+		void _init(std::string planet1,std::string planet2, LAGRANGE_TYPE type);
 
 		LAGRANGE_TYPE m_Type;
 
@@ -20,14 +20,14 @@ class Lagrange: public ObjectBasic{
 		static std::vector<glm::vec3> m_Vertices;
 
 	public:
-		Lagrange(Planet*,
-				 Planet*,
+		Lagrange(std::string,
+				 std::string,
 				 LAGRANGE_TYPE = LAGRANGE_TYPE_L1,
 				 std::string = "Lagrange Point",   //Object name
 				 Scene* = nullptr
 			   );
-		Lagrange(Planet*,
-				 Planet*,
+		Lagrange(std::string,
+				 std::string,
 				 std::string = "L1",
 				 std::string = "Lagrange Point",   //Object name
 				 Scene* = nullptr
