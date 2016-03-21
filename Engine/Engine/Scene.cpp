@@ -19,6 +19,7 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 	Resources::Detail::ResourceManagement::m_Scenes[name] = boost::shared_ptr<Scene>(this);
 	m_Name = name;
 	m_AmbientLighting = ambientLightColor;
+	m_BackgroundColor = glm::vec3(0,0,0);
 }
 void Scene::centerSceneToObject(Object* center){
 	glm::v3 offset = -(center->getPosition());
@@ -48,6 +49,7 @@ void Scene::centerSceneToObject(Object* center){
 }
 Scene::~Scene(){
 }
+void Scene::setBackgroundColor(float r, float g, float b){ m_BackgroundColor.x = r; m_BackgroundColor.y = g; m_BackgroundColor.z = b; }
 void Scene::setName(std::string name){
 	if(name == m_Name) return;
 

@@ -24,6 +24,7 @@ class Scene{
 		std::string m_Name;
 
 		glm::vec3 m_AmbientLighting;
+		glm::vec3 m_BackgroundColor;
 	public:
 		Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
 		virtual ~Scene();
@@ -42,8 +43,10 @@ class Scene{
 
 		virtual void update(float);
 		glm::vec3 getAmbientLightColor(){ return m_AmbientLighting; }
+		glm::vec3 getBackgroundColor(){ return m_BackgroundColor; }
 		void setAmbientLightColor(glm::vec3);
 		void setAmbientLightColor(float,float,float);
+		void setBackgroundColor(float,float,float);
 
 		Skybox* getSkybox() const { return m_Skybox; }
 		void setSkybox(Skybox* s){ m_Skybox = s; }

@@ -51,8 +51,6 @@ class Object: public ObjectInterface{
 		std::vector<Object*> m_Children;
 	public:
 		Object(
-			    glm::v3 = glm::v3(0),     //Position
-			    glm::vec3 = glm::vec3(1), //Scale
 			    std::string = "Object",   //Object
 				Scene* = nullptr          //The scene to add the object to (default nullptr = the current scene)
 	    );
@@ -124,6 +122,7 @@ class ObjectBasic: public Object{
 		virtual glm::vec3 getScale(){ return m_Scale; }
 		virtual glm::m4 getModel(){ return m_Model; }
 		virtual glm::quat getOrientation(){ return m_Orientation; }
+		virtual void setOrientation(glm::quat q){ m_Orientation = q; }
 		virtual glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
 
 		virtual void alignTo(glm::v3,float speed=0,bool overTime=false);

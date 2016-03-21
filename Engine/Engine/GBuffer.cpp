@@ -10,16 +10,15 @@ GBuffer::GBuffer(int width, int height){
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0, 0, 0, 0);
+	glClearColor(0,0,0,0);
 
 	// Bind the depth buffer
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
 
-	
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glClearColor(0, 0, 0, 0);
+	glClearColor(0,0,0,0);
 
 	for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
 		TextureBuffer* tbo = new TextureBuffer(GBUFFER_TYPES[i],
@@ -32,7 +31,6 @@ GBuffer::GBuffer(int width, int height){
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
 GBuffer::~GBuffer(){
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	clearBuffers();
@@ -67,7 +65,7 @@ void GBuffer::clearBuffers(){
 	glPopAttrib();
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0,0,0,1);
+	glClearColor(0,0,0,0);
 }
 void GBuffer::resizeBuffer(unsigned int buffer, unsigned int width, unsigned int height){ m_Buffers[buffer]->resize(width,height); }
 void GBuffer::start(std::vector<unsigned int>& types,std::string channels){
@@ -91,7 +89,7 @@ void GBuffer::start(std::vector<unsigned int>& types,std::string channels){
 
 	// Clear the render targets
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0,0,0,1);
+	glClearColor(0,0,0,0);
 }
 void GBuffer::start(unsigned int type,std::string channels){
 	std::vector<unsigned int> types;

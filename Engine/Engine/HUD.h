@@ -15,10 +15,7 @@ class HUD final{
 		Ship* m_Player;
 		void _renderCrosshair(Object*);
 
-
 		glm::vec2 m_WarpIndicatorSize;
-
-
 	public:
 		HUD(Ship*);
 		~HUD();

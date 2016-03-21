@@ -2,7 +2,12 @@
 #define ENGINE_LIGHT_H
 #include "ObjectDisplay.h"
 
-enum LIGHT_TYPE {LIGHT_TYPE_SUN,LIGHT_TYPE_POINT,LIGHT_TYPE_DIRECTIONAL, LIGHT_TYPE_SPOT};
+enum LIGHT_TYPE {
+	LIGHT_TYPE_SUN,
+	LIGHT_TYPE_POINT,
+	LIGHT_TYPE_DIRECTIONAL,
+	LIGHT_TYPE_SPOT
+};
 class Scene;
 class SunLight: public ObjectDisplay{
 	protected:
@@ -25,7 +30,7 @@ class DirectionalLight: public SunLight{
 	private:
         glm::vec3 m_Direction;
 	public:
-		DirectionalLight(glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
+		DirectionalLight(std::string = "Directional Light",glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
 		virtual ~DirectionalLight();
 
 		virtual void render(GLuint=0,bool=false);
@@ -34,12 +39,23 @@ class DirectionalLight: public SunLight{
 		virtual void lighten(GLuint);
 };
 class PointLight: public SunLight{
-	protected:
+	private:
         float m_Constant, m_Linear, m_Exp;
-
+		float m_PointLightRadius;
+	protected:
+		float calculatePointLightRadius();
 	public:
-		PointLight(glm::v3 = glm::v3(0), Scene* = nullptr);
+		PointLight(std::string = "Point Light",glm::v3 = glm::v3(0), Scene* = nullptr);
 		virtual ~PointLight();
+
+		virtual void setConstant(float c);
+		virtual void setLinear(float l);
+		virtual void setExponent(float e);
+
+		float& getConstant(){ return m_Constant; }
+		float& getLinear(){ return m_Linear; }
+		float& getExponent(){ return m_Exp; }
+		glm::vec3 getAttributes(){ return glm::vec3(m_Constant,m_Linear,m_Exp); }
 
 		virtual void render(GLuint=0,bool=false);
 		virtual void draw(GLuint shader,bool=false);
@@ -52,7 +68,7 @@ class SpotLight: public SunLight{
 		float m_Cutoff;
 
 	public:
-		SpotLight(glm::v3, Scene* = nullptr);
+		SpotLight(std::string = "Spot Light",glm::v3 = glm::v3(0), Scene* = nullptr);
 		virtual ~SpotLight();
 
 		virtual void render(GLuint=0,bool=false);

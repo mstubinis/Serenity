@@ -61,9 +61,10 @@ void SunLight::lighten(GLuint shader){
 
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
+	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
-DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),"Directional Light",LIGHT_TYPE_DIRECTIONAL,scene){
+DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LIGHT_TYPE_DIRECTIONAL,scene){
 	m_Direction = dir;
 }
 DirectionalLight::~DirectionalLight(){
@@ -81,27 +82,53 @@ void DirectionalLight::lighten(GLuint shader){
 
 	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
+	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
 
-PointLight::PointLight(glm::v3 pos,Scene* scene): SunLight(pos,"Point Light",LIGHT_TYPE_POINT,scene){
+PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_POINT,scene){
 	m_Constant = 0.3f;
 	m_Linear = 0.2f;
 	m_Exp = 0.3f;
+	m_PointLightRadius = calculatePointLightRadius();
 }
 PointLight::~PointLight(){
+}
+float PointLight::calculatePointLightRadius(){
+	float MaxChannel = glm::max(glm::max(m_Color.x, m_Color.y), m_Color.z);
+	float ret = (-m_Linear + glm::sqrt(m_Linear * m_Linear -
+		4 * m_Exp * (m_Exp - 256 * MaxChannel * m_DiffuseIntensity))) / (2 * m_Exp);
+   	return ret;
+
+}
+void PointLight::setConstant(float c){ 
+	m_Constant = c;
+	m_PointLightRadius = calculatePointLightRadius();
+}
+void PointLight::setLinear(float l){ 
+	m_Linear = l;
+	m_PointLightRadius = calculatePointLightRadius();
+}
+void PointLight::setExponent(float e){ 
+	m_Exp = e;
+	m_PointLightRadius = calculatePointLightRadius();
 }
 void PointLight::render(GLuint shader,bool debug){ }
 void PointLight::draw(GLuint shader,bool debug){ }
 void PointLight::lighten(GLuint shader){
+	Camera* camera = Resources::getActiveCamera();
+	glm::v3 pos = getPosition();
+	if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
+		return;	
+
 	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
 
 	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
     glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
     glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
+	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
 
-	glm::vec3 pos = glm::vec3(getPosition());
-	glUniform3f(glGetUniformLocation(shader,"gLightPosition"), pos.x, pos.y, pos.z);
+	glUniform3f(glGetUniformLocation(shader,"gLightPosition"), float(pos.x), float(pos.y), float(pos.z));
 
 	glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
@@ -110,11 +137,22 @@ void PointLight::lighten(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"gLinear"), m_Linear);
     glUniform1f(glGetUniformLocation(shader,"gExp"), m_Exp);
 
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), 50.0f);
+	this->m_Orientation = Resources::getActiveCamera()->getOrientation();
 
-	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
+	glm::mat4 m(1);
+	m = glm::translate(m,glm::vec3(pos));
+	m *= glm::mat4_cast(m_Orientation);
+	m = glm::scale(m,glm::vec3(m_PointLightRadius));
+
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m));
+
+	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 1);
+
+	Resources::getMesh("PointLightBounds")->render();
+	//Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
-SpotLight::SpotLight(glm::v3 pos,Scene* scene): SunLight(pos,"Spot Light",LIGHT_TYPE_SPOT){
+SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);
     m_Cutoff = 0;
 }

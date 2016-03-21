@@ -6,6 +6,7 @@
 #include "Lagrange.h"
 #include "Station.h"
 #include "GameCamera.h"
+#include "CapsuleSpace.h"
 
 using namespace Engine;
 
@@ -47,11 +48,14 @@ void Game::initResources(){
 void Game::initLogic(){
 	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
 
-	new SolarSystem("Sol","Systems/Sol.txt");
+	//new SolarSystem("Sol","Systems/Sol.txt");
 	//new SolarSystem("Sol","");
-	Resources::setCurrentScene("Sol");
+	new CapsuleSpace();
+	//Resources::setCurrentScene("Sol");
+	Resources::setCurrentScene("CapsuleSpace");
 
-	m_HUD = new HUD(static_cast<SolarSystem*>(Resources::getScene("Sol"))->getPlayer());
+	//m_HUD = new HUD(static_cast<SolarSystem*>(Resources::getScene("Sol"))->getPlayer());
+	m_HUD = new HUD(static_cast<SolarSystem*>(Resources::getScene("CapsuleSpace"))->getPlayer());
 }
 void Game::update(float dt){
 

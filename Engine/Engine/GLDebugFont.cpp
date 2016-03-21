@@ -30,16 +30,8 @@
 #include <stdio.h>
 #include <string.h> //for memset
 
-void GLDebugResetFont(int screenWidth,int screenHeight){	
-
-}
+void GLDebugResetFont(int screenWidth,int screenHeight){}
 #define USE_ARRAYS 1
-void GLDebugDrawStringInternal(int x,int y,const char* string, const btVector3& rgb){ 
-	GLDebugDrawStringInternal(x,y,string,rgb,true,10); 
-}
-void GLDebugDrawStringInternal(int x,int y,const char* string, const btVector3& rgb, bool enableBlend, int spacing){
-
-}
-void GLDebugDrawString(int x,int y,const char* string){
-
-}
+void GLDebugDrawStringInternal(int x,int y,const char* string, const btVector3& rgb){GLDebugDrawStringInternal(x,y,string,rgb,true,10);}
+void GLDebugDrawStringInternal(int x,int y,const char* string, const btVector3& rgb, bool enableBlend, int spacing){}
+void GLDebugDrawString(int x,int y,const char* string){}

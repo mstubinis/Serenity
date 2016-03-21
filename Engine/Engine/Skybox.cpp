@@ -105,9 +105,9 @@ void Skybox::render(){
 	glUseProgram(0);
 
 	if(m_SunFlares.size() > 0){
-		glEnable(GL_BLEND);
+		glEnablei(GL_BLEND,0);
 		glDisable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
 		Texture* texture = Resources::getTexture("Textures/Skyboxes/StarFlare");
 		shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
@@ -140,7 +140,6 @@ void Skybox::render(){
 			Resources::getMesh("Plane")->render();
 		}
 		glUseProgram(0);
-		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 	}
 }

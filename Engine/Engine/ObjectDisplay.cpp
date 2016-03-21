@@ -11,6 +11,7 @@ using namespace Engine;
 ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Scene* scene):ObjectBasic(pos,scl,name,scene){
 	m_Radius = 0;
 	m_Visible = true;
+	m_Shadeless = false;
 	m_BoundingBoxRadius = glm::vec3(0);
 	m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
 	m_Color = glm::vec4(1);
@@ -37,13 +38,18 @@ void ObjectDisplay::draw(GLuint shader, bool debug){
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 
+	if(m_Shadeless)
+		glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
+
 	for(auto item:m_DisplayItems){
 		glm::mat4 m = glm::mat4(m_Model);
 		m = glm::translate(m,item->position);
 		m *= glm::mat4_cast(item->orientation);
 		m = glm::scale(m,item->scale);
 
-		glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(item->material->getShadeless()));
+		if(!m_Shadeless)
+			glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(item->material->getShadeless()));
+
 		glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
 		glUniform1f(glGetUniformLocation(shader, "Specularity"),item->material->getSpecularity());
 
@@ -82,16 +88,22 @@ void ObjectDisplay::calculateRadius(){
 void ObjectDisplay::setColor(float x, float y, float z,float a){ 
 	m_Color.x = x; m_Color.y = y; m_Color.z = z; m_Color.w = a; 
 }
-void ObjectDisplay::setColor(glm::vec4 color){ setColor(color.x,color.y,color.z,color.w); }
-void ObjectDisplay::setVisible(bool vis){ m_Visible = vis; }
+void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }
+void ObjectDisplay::setVisible(bool v){ m_Visible = v; }
+
+void ObjectDisplay::setScale(float x,float y,float z){
+	ObjectBasic::setScale(x,y,z);
+	calculateRadius();
+}
+void ObjectDisplay::setScale(glm::vec3 s){ ObjectDisplay::setScale(s.x,s.y,s.z); }
 
 void ObjectDisplay::scale(float x, float y,float z){
 	ObjectBasic::scale(x,y,z);
 	calculateRadius(); 
 }
-void ObjectDisplay::scale(glm::vec3 scl){ ObjectDisplay::scale(scl.x,scl.y,scl.z); }
-bool ObjectDisplay::rayIntersectSphere(Camera* cam){
-	return cam->rayIntersectSphere(this);
+void ObjectDisplay::scale(glm::vec3 s){ ObjectDisplay::scale(s.x,s.y,s.z); }
+bool ObjectDisplay::rayIntersectSphere(Camera* c){
+	return c->rayIntersectSphere(this);
 }
 bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 	glm::vec3 a1 = glm::vec3(A);

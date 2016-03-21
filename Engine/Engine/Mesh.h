@@ -14,6 +14,14 @@ class btConvexHullShape;
 const unsigned int NUM_VERTEX_DATA = 5;
 const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
+struct ObjectLoadingData final{
+	std::vector<glm::vec3> Points;
+	std::vector<glm::vec2> UVs;
+	std::vector<glm::vec3> Normals;
+	std::vector<std::vector<glm::vec3>> Faces;
+	ObjectLoadingData(){}
+};
+
 struct Vertex final{
 	glm::vec3 position;
 	glm::vec2 uv;

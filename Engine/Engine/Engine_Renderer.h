@@ -137,8 +137,10 @@ namespace Engine{
 				glEnd();
 
 				//Reset the matrices	
-				glMatrixMode(GL_PROJECTION); glPopMatrix();
-				glMatrixMode(GL_MODELVIEW);  glPopMatrix();
+				glMatrixMode(GL_PROJECTION);
+				glPopMatrix();
+				glMatrixMode(GL_MODELVIEW);
+				glPopMatrix();
 			}
 		};
 		void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);

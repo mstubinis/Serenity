@@ -3,16 +3,10 @@
 using namespace Engine;
 
 glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){
-	float _x = (a.x + b.x)/2.0f;
-	float _y = (a.y + b.y)/2.0f;
-	float _z = (a.z + b.z)/2.0f;
-	return glm::vec3(_x,_y,_z);
+	return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f);
 }
 glm::vec3 Math::midpoint(glm::v3 a, glm::v3 b){
-	float _x = static_cast<float>((a.x + b.x)/2);
-	float _y = static_cast<float>((a.y + b.y)/2);
-	float _z = static_cast<float>((a.z + b.z)/2);
-	return glm::vec3(_x,_y,_z);
+	return glm::vec3(static_cast<float>((a.x+b.x)/2),static_cast<float>((a.y+b.y)/2),static_cast<float>((a.z+b.z)/2));
 }
 
 glm::v3 Math::getForward(glm::quat& q){

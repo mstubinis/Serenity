@@ -17,6 +17,7 @@ struct DisplayItem{
 };
 class ObjectDisplay: public ObjectBasic{
 	protected:
+		bool m_Shadeless;
 		bool m_Visible;
 		std::vector<DisplayItem*> m_DisplayItems;
 		glm::vec4 m_Color;
@@ -34,6 +35,9 @@ class ObjectDisplay: public ObjectBasic{
 
 		virtual void render(GLuint=0,bool=false);
 		virtual void draw(GLuint shader,bool=false);
+
+		virtual void setScale(float,float,float); 
+		virtual void setScale(glm::vec3);
 
 		virtual void setColor(float,float,float,float); 
 		virtual void setColor(glm::vec4);

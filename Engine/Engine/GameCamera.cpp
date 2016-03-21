@@ -25,7 +25,7 @@ void GameCamera::update(float dt){
 	Camera::update(dt);
 	switch(m_State){
 		case CAMERA_STATE_FOLLOW:{
-			m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * dt)*0.4f;
+			m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * 0.02f);
 			if( m_OrbitRadius < 0) m_OrbitRadius = 0;
 			else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
@@ -36,7 +36,7 @@ void GameCamera::update(float dt){
 			break;
 		}
 		case CAMERA_STATE_FOLLOWTARGET:{
-			m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * dt)*0.4f;
+			m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * 0.02f);
 			if( m_OrbitRadius < 0) m_OrbitRadius = 0;
 			else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
@@ -49,7 +49,7 @@ void GameCamera::update(float dt){
 			break;
 		}
 		case CAMERA_STATE_ORBIT:{
-			m_OrbitRadius += Engine::Events::Mouse::getMouseWheelDelta() * dt;
+			m_OrbitRadius += Engine::Events::Mouse::getMouseWheelDelta() * 0.01f;
 			if( m_OrbitRadius < 0) m_OrbitRadius = 0;
 			else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
 

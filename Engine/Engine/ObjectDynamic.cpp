@@ -12,7 +12,7 @@
 
 using namespace Engine;
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): Object(pos,scl,name,scene){
+ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): Object(name,scene){
 	m_Forward = glm::v3(0,0,-1);
 	m_Right = glm::v3(1,0,0);
 	m_Up = glm::v3(0,1,0);
@@ -129,6 +129,9 @@ void ObjectDynamic::draw(GLuint shader, bool debug){
 		return;	
 	glUseProgram(shader);
 
+	glEnablei(GL_BLEND,0);
+	glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
+
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
 	glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
 	glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
@@ -177,6 +180,18 @@ void ObjectDynamic::setPosition(glm::nType x, glm::nType y, glm::nType z){
 
     m_RigidBody->setWorldTransform(initialTransform);
     m_MotionState->setWorldTransform(initialTransform);
+}
+void ObjectDynamic::setOrientation(glm::quat q){
+	btTransform initialTransform;
+    btQuaternion quat(q.x,q.y,q.z,q.w);
+
+	initialTransform.setOrigin(m_RigidBody->getWorldTransform().getOrigin());
+	initialTransform.setRotation(quat);
+
+    m_RigidBody->setWorldTransform(initialTransform);
+    m_MotionState->setWorldTransform(initialTransform);
+
+	clearAngularForces();
 }
 void ObjectDynamic::setPosition(glm::v3 p){ ObjectDynamic::setPosition(p.x,p.y,p.z); }
 void ObjectDynamic::applyForce(float x,float y,float z,bool local){ 

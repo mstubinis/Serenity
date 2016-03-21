@@ -5,14 +5,14 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-const int GBUFFER_TYPES[] =		       {GL_RGBA,		       // (diffuse.rgba)
-									    GL_RGBA,			   // (diffuse forward rendering.rgba)
+const int GBUFFER_TYPES[] =		       {GL_RGBA16F,		       // (diffuse.rgba)
+									    GL_RGBA16F,			   // (diffuse forward rendering.rgba)
 								        GL_RGB16F,		       // (normals.rgb)
-										GL_RGB8,			   // Glow & SSAO & Specular
+										GL_RGB,			       // Glow & SSAO & Specular
 										GL_RGB32F,			   // World Position
-								        GL_RGB8,		       // (lighting.rgb)
-										GL_RGBA8,              // bloom
-										GL_RGBA8,              // free buffer
+								        GL_RGB,		           // (lighting.rgb)
+										GL_RGBA,               // bloom
+										GL_RGBA16F,            // free buffer
 										GL_DEPTH_COMPONENT16}; // depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGBA,			   // (diffuse.rgba)

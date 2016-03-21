@@ -261,11 +261,8 @@ void Lagrange::draw(GLuint shader, bool debug){
 	glUniform1f(glGetUniformLocation(shader, "Specularity"),0.0f);
 
 	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
    	glBlendFunc(GL_ONE, GL_ONE);
 	glPolygonMode(GL_FRONT_AND_BACK , GL_LINE);
-
-    //glDisable(GL_DEPTH_TEST);
 
 	//first end
 	glUniform4f(glGetUniformLocation(shader, "Object_Color"),1,0,0,1);
@@ -291,10 +288,8 @@ void Lagrange::draw(GLuint shader, bool debug){
 	glDrawArrays(GL_LINE_STRIP, 136, 17);
 	glDisableVertexAttribArray(0);
 
-    //glEnable(GL_DEPTH_TEST);
-
 	glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
 	glEnable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(0);
 }

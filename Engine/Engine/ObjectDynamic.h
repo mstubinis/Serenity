@@ -94,6 +94,7 @@ class ObjectDynamic: public Object{
 		virtual float getMass(){ return m_Mass; }
 		virtual btRigidBody* getRigidBody(){ return m_RigidBody; }
 		virtual glm::quat getOrientation();
+		virtual void setOrientation(glm::quat);
 		virtual glm::vec3 getScale();
 		virtual glm::m4 getModel();
 		virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }

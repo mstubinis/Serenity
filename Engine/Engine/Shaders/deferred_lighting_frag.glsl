@@ -10,6 +10,7 @@ uniform float gConstant;
 uniform float gLinear;
 uniform float gExp;
 
+
 uniform vec3 gDirection;
 uniform vec3 gLightPosition;
 

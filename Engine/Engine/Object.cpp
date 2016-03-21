@@ -9,7 +9,7 @@
 
 using namespace Engine;
 
-Object::Object(glm::v3 pos, glm::vec3 scl,std::string name,Scene* scene){
+Object::Object(std::string name,Scene* scene){
 	m_Radius = 0;
 	m_Parent = nullptr;
 	m_IsToBeDestroyed = false;
@@ -89,7 +89,7 @@ void Object::setName(std::string name){
 	}
 }
 
-ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene):Object(pos,scl,name,scene){
+ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene):Object(name,scene){
 	m_Forward = glm::v3(0,0,-1);
 	m_Right = glm::v3(1,0,0);
 	m_Up = glm::v3(0,1,0);

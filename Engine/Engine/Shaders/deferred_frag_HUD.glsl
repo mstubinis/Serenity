@@ -8,15 +8,14 @@ uniform vec4 Object_Color;
 varying vec3 WorldPosition;
 varying vec2 UV;
 
+uniform float far;
+uniform float C;
+
 void main(){
 	if(DiffuseMapEnabled == 1.0){
-		gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
+		gl_FragColor = texture2D(DiffuseMap, UV) * Object_Color;
 	}
 	else{
-		gl_FragData[0] = Object_Color;
+		gl_FragColor = Object_Color;
 	}
-	gl_FragData[1] = vec4(1.0);
-	gl_FragData[2].r = 1.0;
-	gl_FragData[2].b = 0.0;
-	gl_FragData[3] = vec4(WorldPosition,1.0);
 }

@@ -25,24 +25,22 @@ varying vec3 Tangents;
 vec3 CalcBumpedNormal(){
     vec3 normalMapTexture = (texture2D(NormalMap, UV).xyz) * 2.0 - 1.0;
     mat3 TBN = mat3(-Tangents, Binormals, Normals);
-    return (TBN * normalMapTexture);
+    return normalize(TBN * normalMapTexture);
 }
 void main(){
-	if(DiffuseMapEnabled == 1)
+	if(DiffuseMapEnabled == 1){
 		gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
-	else
+	}
+	else{
 		gl_FragData[0] = Object_Color;
-
+	}
 	if(Shadeless == 0){
 		if(NormalMapEnabled == 1){
 			gl_FragData[1].rgb = CalcBumpedNormal();
-			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 		else{
 			gl_FragData[1].rgb = normalize(Normals);
-			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
-
 		if(GlowMapEnabled == 1){
 			gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
 		}
@@ -51,12 +49,9 @@ void main(){
 	}
 	else{
 		gl_FragData[1].rgb = vec3(1.0);
-		if(DiffuseMapEnabled == 1)
-			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
-		else
-			gl_FragData[1].a = Object_Color.a;
 		gl_FragData[2].r = BaseGlow;
 	}
+	gl_FragData[1].a = Object_Color.a;
 	gl_FragData[2].b = Specularity;
 	gl_FragData[3] = vec4(WorldPosition,1.0);
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));

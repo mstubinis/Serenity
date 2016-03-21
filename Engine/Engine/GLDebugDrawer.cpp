@@ -15,7 +15,7 @@ void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btV
 	glEnd();
 }
 void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color){ 
-	drawLine(from,to,color,color); 
+	drawLine(from,to,color,color);
 }
 void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVector3& color){
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));

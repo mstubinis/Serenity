@@ -110,6 +110,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CapsuleSpace.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_Math.cpp" />
     <ClCompile Include="Engine_Physics.cpp" />
@@ -146,6 +147,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
     <ClCompile Include="Font.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CapsuleSpace.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Engine_Math.h" />
     <ClInclude Include="Engine_Physics.h" />

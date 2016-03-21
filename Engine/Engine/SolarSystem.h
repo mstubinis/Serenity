@@ -13,7 +13,7 @@ class Planet;
 class Station;
 class Lagrange;
 
-class SolarSystem final: public Scene{
+class SolarSystem: public Scene{
 	private:
 		std::map<std::string,Station*> m_Stations;
 		std::map<std::string,Lagrange*> m_LagrangePoints;
@@ -29,13 +29,14 @@ class SolarSystem final: public Scene{
 		void _loadFromFile(std::string);
 	public:
 		SolarSystem(std::string name, std::string file);
-		~SolarSystem();
+		virtual ~SolarSystem();
 
-		void update(float);
-		void render();
+		virtual void update(float);
 
 		Ship* getPlayer(){ return player; }
+		void setPlayer(Ship* p){ player = p; }
 		GameCamera* getPlayerCamera(){ return playerCamera; }
+		void setPlayerCamera(GameCamera* c){ playerCamera = c; }
 		std::map<std::string,Station*>& getStations() { return m_Stations; }
 		std::map<std::string,Lagrange*>& getLagrangePoints() { return m_LagrangePoints; }
 

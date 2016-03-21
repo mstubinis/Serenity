@@ -136,11 +136,6 @@ void MeshCollision::load(std::string filename, COLLISION_TYPE collisionType){
 						btVector3 pos = btVector3(x1,y1,z1);
 						((btConvexHullShape*)shape)->addPoint(pos);
 					}
-					else if(line[0] == 'v' && line[1] != ' '){
-						this->m_CollisionShape = shape;
-						this->m_CollisionType = COLLISION_TYPE_CONVEXHULL;
-						return;
-					}
 				}
 				this->m_CollisionShape = shape;
 				this->m_CollisionType = COLLISION_TYPE_CONVEXHULL;

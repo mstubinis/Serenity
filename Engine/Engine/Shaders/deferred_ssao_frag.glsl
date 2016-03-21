@@ -11,10 +11,10 @@ uniform float gBias;
 uniform float gScale;
 uniform int gSampleCount;
 
-const vec2 poisson[] =  vec2[]( vec2(  0.34495938,   0.29387760 ),
-                                vec2(  0.53742981,  -0.47373420 ),
-                                vec2( -0.26496911,  -0.41893023 ),
-                                vec2( -0.81409955,   0.91437590 ));
+const vec2 poisson[] =  vec2[]( vec2( 0.344, 0.293),
+                                vec2( 0.537,-0.473),
+                                vec2(-0.264,-0.418),
+                                vec2(-0.814, 0.914));
 
 vec3 calculatePosition(vec2 uv){
     return texture2D(gPositionMap, uv).xyz;

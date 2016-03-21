@@ -33,8 +33,7 @@ void HUD::update(float dt){
 		for(auto p:scene->getPlanets()){
 			objs.push_back(p.second);
 		}
-		m_Player->setTarget(scene->getObject("Earth Lagrange Point L4"));
-		//m_Player->setTarget(objs[count]);
+		m_Player->setTarget(objs[count]);
 		count++;
 		if (count > scene->getPlanets().size()-1){ count = 0; }
 	}
@@ -45,8 +44,7 @@ void HUD::update(float dt){
 		for(auto p:scene->getPlanets()){
 			objs.push_back(p.second);
 		}
-		m_Player->setTarget(scene->getObject("Earth Lagrange Point L5"));
-		//m_Player->setTarget(objs[count]);
+		m_Player->setTarget(objs[count]);
 		count--;
 		if (count <= 0){ count = scene->getPlanets().size()-1; }
 	}

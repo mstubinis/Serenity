@@ -25,11 +25,13 @@ SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
 	playerCamera = new GameCamera("Default",45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
 	Resources::setActiveCamera(playerCamera);
 
-	if(file == ""){
-		SolarSystem::_loadRandomly();
-	}
-	else{
-		SolarSystem::_loadFromFile(file);
+	if(file != "NULL"){
+		if(file == ""){
+			SolarSystem::_loadRandomly();
+		}
+		else{
+			SolarSystem::_loadFromFile(file);
+		}
 	}
 }
 SolarSystem::~SolarSystem(){
@@ -525,7 +527,4 @@ void SolarSystem::_loadRandomly(){
 }
 void SolarSystem::update(float dt){
 	Scene::update(dt);
-}
-void SolarSystem::render()
-{
 }
