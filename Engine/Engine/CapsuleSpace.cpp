@@ -107,7 +107,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	m_TunnelB->setPosition(0,0,0);
 	m_Ribbon->setPosition(0,300,0);
 
-	float step = -200.0f;
+	float step = -60.0f;
 	for(unsigned int i = 0; i < 30; i++){
 
 		float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
@@ -121,8 +121,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	}
 
 	//this to just test. should set player / camera dynamically
-	setPlayer(new Ship("Defiant","Defiant",true,"Dreadnought",glm::v3(0),glm::vec3(1),nullptr,this));
-	setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
+	setPlayer(new Ship("Dreadnought","Dreadnought",true,"Dreadnought",glm::v3(0),glm::vec3(1),nullptr,this));
+	setPlayerCamera(static_cast<GameCamera*>(getActiveCamera()));
 	getPlayerCamera()->follow(getPlayer());
 
 }

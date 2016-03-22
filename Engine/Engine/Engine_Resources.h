@@ -11,9 +11,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
+class Scene;
 class Font;
 class Texture;
-class Scene;
 class Camera;
 class Mesh;
 class Material;
@@ -43,8 +43,6 @@ namespace Engine{
 					static std::string m_WindowName;
 					static sf::Mouse* m_Mouse;
 
-					static Camera* m_ActiveCamera;
-
 					static std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> m_Sounds;
 					static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
 					static std::unordered_map<std::string,boost::weak_ptr<Camera>> m_Cameras;
@@ -69,9 +67,9 @@ namespace Engine{
 		static sf::Vector2u getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
 		static sf::Mouse* getMouse(){ return Detail::ResourceManagement::m_Mouse; }
 
-		static Camera* getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera; }
-		static void setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = c; }
-		static void setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name].lock().get(); }
+		Camera* getActiveCamera();
+		void setActiveCamera(Camera* c);
+		void setActiveCamera(std::string name);
 
 		static Scene* getScene(std::string name){ return Detail::ResourceManagement::m_Scenes[name].get(); }
 		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name].get(); }

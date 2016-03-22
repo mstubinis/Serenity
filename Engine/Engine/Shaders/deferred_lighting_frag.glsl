@@ -28,18 +28,18 @@ vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
 vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
-    float DiffuseFactor = dot(_norm, -_lightDir);
+    float Lambertian = dot(_norm, -_lightDir);
 
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);
 
-    if (DiffuseFactor > 0.0) {
+    if (Lambertian > 0.0) {
 
-        DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * DiffuseFactor;
+        DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * Lambertian;
 
-        vec3 VertexToEye = normalize(gCameraPosition - _worldPos);
-        vec3 LightReflect = normalize(reflect(_lightDir, _norm));
-        float SpecularFactor = dot(VertexToEye, LightReflect);
+        vec3 LightSourceToEye = normalize(gCameraPosition - _worldPos);
+        vec3 ReflectionVector = normalize(reflect(_lightDir, _norm));
+        float SpecularFactor = dot(LightSourceToEye, ReflectionVector);
         SpecularFactor = pow(SpecularFactor, gSpecularPower);
         if (SpecularFactor > 0.0) {
 			float materialSpecularity = texture2D(gGlowMap,CalcTexCoord()).b;
@@ -48,23 +48,16 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
     }
     return (AmbientColor + DiffuseColor + SpecularColor);
 }
-vec4 CalcPointLight(vec3 _worldPos, vec3 _norm){
-    vec3 LightDirection = _worldPos - gLightPosition;
-    float Distance = length(LightDirection);
-    LightDirection = normalize(LightDirection);
+vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal){
+    vec3 LightDir = PxlWorldPos - gLightPosition;
+    float Distance = length(LightDir);
+    LightDir = normalize(LightDir);
 
-    vec4 c = CalcLightInternal(LightDirection, _worldPos, _norm);
+    vec4 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal);
 
     float a =  gConstant + (gLinear * Distance) + (gExp * Distance * Distance);
     a = max(1.0, a);
     return c / a;
-}
-vec4 CalcSunLight(vec3 _worldPos, vec3 _norm){
-    vec3 LightDirection = normalize(_worldPos - gLightPosition);
-    return CalcLightInternal(LightDirection, _worldPos, _norm);
-}
-vec4 CalcDirectionalLight(vec3 _worldPos, vec3 _norm){ 
-	return CalcLightInternal(gDirection,_worldPos,_norm); 
 }
 vec4 CalcSpotLight(vec3 _worldPos, vec3 _norm){
 	return vec4(0);
@@ -77,11 +70,11 @@ void main(){
 	vec4 lightCalculation = vec4(0);
 
 	if(gLightType == 0)
-		lightCalculation = CalcSunLight(position,normal);
+		lightCalculation = CalcLightInternal(normalize(position - gLightPosition),position,normal);
 	else if(gLightType == 1)
 		lightCalculation = CalcPointLight(position,normal);
 	else if(gLightType == 2)
-		lightCalculation = CalcDirectionalLight(position,normal);
+		lightCalculation = CalcLightInternal(gDirection,position,normal);
 	else if(gLightType == 3)
 		lightCalculation = CalcSpotLight(position,normal);
 

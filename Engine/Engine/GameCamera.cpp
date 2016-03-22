@@ -6,13 +6,13 @@
 
 using namespace Engine::Events;
 
-GameCamera::GameCamera(std::string name, float angle, float ratio, float _near, float _far,Scene* scene):Camera(name,angle,ratio,_near,_far,scene){
+GameCamera::GameCamera(std::string name, float a, float r, float n, float f,Scene* scene):Camera(name,a,r,n,f,scene){
 	m_State = CAMERA_STATE_FREEFORM;
 	m_Target = nullptr;
 	m_Player = nullptr;
 	m_OrbitRadius = 0;
 }
-GameCamera::GameCamera(std::string name, float left, float right, float bottom, float top, float _near, float _far, Scene* scene):Camera(name,left,right,bottom,top,_near,_far,scene){
+GameCamera::GameCamera(std::string name, float l, float r, float b, float t, float n, float f, Scene* scene):Camera(name,l,r,b,t,n,f,scene){
 	m_State = CAMERA_STATE_FREEFORM;
 	m_Target = nullptr;
 	m_Player = nullptr;

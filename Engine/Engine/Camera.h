@@ -43,9 +43,9 @@ class Camera: public ObjectBasic{
 		const float getNear() const { return m_Near; }
 		const float getFar() const { return m_Far; }
 
-		glm::mat4 calculateViewProjInverted();
-		glm::mat4 calculateProjection(glm::mat4);
-		glm::mat4 calculateModelView(glm::mat4);
+		glm::mat4 calculateProjection(glm::mat4 model){ return m_Projection * m_View * model; }
+		glm::mat4 calculateModelView(glm::mat4 model){ return m_View * model; }
+		glm::mat4 calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
 		glm::mat4 getProjection(){ return m_Projection; }
 		glm::mat4 getView(){ return m_View; }
 		glm::mat4 getViewProjection(){ return m_Projection * m_View; }

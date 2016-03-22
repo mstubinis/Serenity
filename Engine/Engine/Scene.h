@@ -6,16 +6,18 @@
 #include <glm/glm.hpp>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 class Object;
-class SunLight;
 class Camera;
+class SunLight;
 class Skybox;
 class ParticleEmitter;
 
 class Scene{
 	private:
 		Skybox* m_Skybox;
+		boost::weak_ptr<Camera> m_ActiveCamera;
 	protected:
 		std::map<std::string,Object*> m_Objects;
 		std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
@@ -33,9 +35,9 @@ class Scene{
 		std::map<std::string,ParticleEmitter*>& getParticleEmitters(){ return m_ParticleEmitters; }
 		std::map<std::string,SunLight*>& getLights(){ return m_Lights; }
 
-		 Object* getObject(std::string name)  { return m_Objects[name]; }
-		 ParticleEmitter* getParticleEmitter(std::string name)  { return m_ParticleEmitters[name]; }
-		 SunLight* getLight(std::string name)  { return m_Lights[name]; }
+		Object* getObject(std::string name){ return m_Objects[name]; }
+		ParticleEmitter* getParticleEmitter(std::string name){ return m_ParticleEmitters[name]; }
+		SunLight* getLight(std::string name){ return m_Lights[name]; }
 
 		const std::string getName() const { return m_Name; }
 
@@ -47,6 +49,10 @@ class Scene{
 		void setAmbientLightColor(glm::vec3);
 		void setAmbientLightColor(float,float,float);
 		void setBackgroundColor(float,float,float);
+
+		Camera* getActiveCamera(){ return m_ActiveCamera.lock().get(); }
+		void setActiveCamera(Camera* c);
+		void setActiveCamera(std::string name);
 
 		Skybox* getSkybox() const { return m_Skybox; }
 		void setSkybox(Skybox* s){ m_Skybox = s; }

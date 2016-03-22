@@ -7,19 +7,20 @@
 #include <boost/shared_ptr.hpp>
 
 using namespace Engine;
+using namespace boost;
 
 Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 	if(Resources::getCurrentScene() == nullptr){
 		Resources::Detail::ResourceManagement::m_CurrentScene = this;
 	}
-	if(Resources::getActiveCamera() == nullptr){
-		new Camera("Default",45.0f,1.0f,0.1f,100.0f,this);
-		Resources::Detail::ResourceManagement::m_ActiveCamera = Resources::getCamera("Default");
-	}
-	Resources::Detail::ResourceManagement::m_Scenes[name] = boost::shared_ptr<Scene>(this);
 	m_Name = name;
 	m_AmbientLighting = ambientLightColor;
 	m_BackgroundColor = glm::vec3(0,0,0);
+
+	new Camera("Default_" + m_Name,45.0f,1.0f,0.1f,100.0f,this);
+	setActiveCamera("ZZZDefault_" + m_Name);
+
+	Resources::Detail::ResourceManagement::m_Scenes[m_Name] = shared_ptr<Scene>(this);
 }
 void Scene::centerSceneToObject(Object* center){
 	glm::v3 offset = -(center->getPosition());
@@ -61,6 +62,8 @@ void Scene::setName(std::string name){
 		Resources::Detail::ResourceManagement::m_Scenes.erase(oldName);
 	}
 }
+void Scene::setActiveCamera(Camera* c){ m_ActiveCamera = dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[c->getName()]); }
+void Scene::setActiveCamera(std::string name){ m_ActiveCamera = dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[name]); }
 void Scene::update(float dt){
 	for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
 		if (it->second->isDestroyed()){
@@ -74,7 +77,6 @@ void Scene::update(float dt){
 			++it;
 	    }
 	}
-
 
 	for(auto emitter:m_ParticleEmitters){
 		for(auto particle:emitter.second->getParticles()){

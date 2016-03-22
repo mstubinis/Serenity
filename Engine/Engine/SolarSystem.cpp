@@ -22,8 +22,8 @@ using namespace Engine;
 using namespace Engine::Events;
 
 SolarSystem::SolarSystem(std::string name, std::string file):Scene(name){
-	playerCamera = new GameCamera("Default",45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
-	Resources::setActiveCamera(playerCamera);
+	playerCamera = new GameCamera("PlayerCamera_" + m_Name,45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
+	setActiveCamera(playerCamera);
 
 	if(file != "NULL"){
 		if(file == ""){
@@ -202,9 +202,9 @@ void SolarSystem::_loadFromFile(std::string filename){
 						xPos += parentX;
 						zPos += parentZ;
 					}
-					player = new Ship("Dreadnought","Dreadnought",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
-					playerCamera = static_cast<GameCamera*>(Resources::getActiveCamera());
-					playerCamera->follow(player);
+					setPlayer(new Ship("Dreadnought","Dreadnought",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+					setPlayerCamera(static_cast<GameCamera*>(getActiveCamera()));
+					getPlayerCamera()->follow(getPlayer());
 
 				}
 				else if(line[0] == '$'){//Other ship

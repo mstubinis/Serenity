@@ -48,14 +48,13 @@ void Game::initResources(){
 void Game::initLogic(){
 	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
 
-	//new SolarSystem("Sol","Systems/Sol.txt");
-	//new SolarSystem("Sol","");
+	new SolarSystem("Sol","Systems/Sol.txt");
 	new CapsuleSpace();
-	//Resources::setCurrentScene("Sol");
-	Resources::setCurrentScene("CapsuleSpace");
+	//new SolarSystem("Sol","");
+	Resources::setCurrentScene("Sol");
+	////Resources::setCurrentScene("CapsuleSpace");
 
-	//m_HUD = new HUD(static_cast<SolarSystem*>(Resources::getScene("Sol"))->getPlayer());
-	m_HUD = new HUD(static_cast<SolarSystem*>(Resources::getScene("CapsuleSpace"))->getPlayer());
+	m_HUD = new HUD();
 }
 void Game::update(float dt){
 
@@ -63,6 +62,10 @@ void Game::update(float dt){
 
 	if(Events::Keyboard::isKeyDown("esc"))
 		Engine::stop();
+	if(Events::Keyboard::isKeyDownOnce("f6"))
+		Resources::setCurrentScene("CapsuleSpace");
+	if(Events::Keyboard::isKeyDownOnce("f7"))
+		Resources::setCurrentScene("Sol");
 
 	m_HUD->update(dt);
 }

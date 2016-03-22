@@ -14,9 +14,8 @@
 using namespace Engine;
 using namespace Engine::Events;
 
-HUD::HUD(Ship* player){
+HUD::HUD(){
 	m_Font = new Font("Fonts/consolas.fnt");
-	m_Player = player;
 	m_Color = glm::vec3(55.0f/255.0f,107.0f/255.0f,126.0f/255.0f);
 	m_TargetIterator = 0;
 	m_WarpIndicatorSize = glm::vec2(30,115);
@@ -33,7 +32,7 @@ void HUD::update(float dt){
 		for(auto p:scene->getPlanets()){
 			objs.push_back(p.second);
 		}
-		m_Player->setTarget(objs[count]);
+		scene->getPlayer()->setTarget(objs[count]);
 		count++;
 		if (count > scene->getPlanets().size()-1){ count = 0; }
 	}
@@ -44,35 +43,37 @@ void HUD::update(float dt){
 		for(auto p:scene->getPlanets()){
 			objs.push_back(p.second);
 		}
-		m_Player->setTarget(objs[count]);
+		scene->getPlayer()->setTarget(objs[count]);
 		count--;
 		if (count <= 0){ count = scene->getPlanets().size()-1; }
 	}
 }
 void HUD::render(bool debug){
 	//render hud stuff
+	SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
+	Ship* player = scene->getPlayer();
 	glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 
 	// render warp drive
 	//Engine::Renderer::renderRectangle(glm::vec2(winSize.x/2 - 100,winSize.y - m_WarpIndicatorSize.y/2),glm::vec4(m_Color.x,m_Color.y,m_Color.z,0.3f),m_WarpIndicatorSize.x,m_WarpIndicatorSize.y,0,0);
 
 	#pragma region renderCrossHairAndOtherInfo
-	if(m_Player->getTarget() != nullptr){
-		glm::vec3 pos = m_Player->getTarget()->getScreenCoordinates();
-		glm::nType scl = glm::max(static_cast<glm::nType>(0.5f),static_cast<glm::nType>(m_Player->getTarget()->getRadius()*35/m_Player->getTarget()->getDistance(Resources::getActiveCamera())));
+	if(player->getTarget() != nullptr){
+		glm::vec3 pos = player->getTarget()->getScreenCoordinates();
+		glm::nType scl = glm::max(static_cast<glm::nType>(0.5f),static_cast<glm::nType>(player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getActiveCamera())));
 
 		if(pos.z == 1){
 			Resources::getTexture("Textures/HUD/Crosshair")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
-			unsigned long long distanceInKm = (m_Player->getTarget()->getDistanceLL(m_Player) / 10);
+			unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
 			std::string stringRepresentation = "";
 			if(distanceInKm > 0){
 				stringRepresentation = Engine::convertNumToNumWithCommas(static_cast<unsigned long long>(distanceInKm)) + " Km";
 			}
 			else{
-				glm::nType distanceInm = (m_Player->getTarget()->getDistance(m_Player))*100.0f;
+				glm::nType distanceInm = (player->getTarget()->getDistance(player))*100.0f;
 				stringRepresentation = boost::lexical_cast<std::string>(static_cast<unsigned int>(distanceInm)) + " m";
 			}
-			m_Font->renderText(m_Player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
+			m_Font->renderText(player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
 		}
 		else{
 			glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);

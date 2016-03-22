@@ -29,7 +29,6 @@ sf::Window* Detail::ResourceManagement::m_Window;
 std::string Detail::ResourceManagement::m_WindowName;
 sf::Mouse* Detail::ResourceManagement::m_Mouse;
 Scene* Detail::ResourceManagement::m_CurrentScene;
-Camera* Detail::ResourceManagement::m_ActiveCamera;
 
 std::unordered_map<std::string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
 std::unordered_map<std::string,boost::weak_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
@@ -64,6 +63,11 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 	SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
 	SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
+
+Camera* Engine::Resources::getActiveCamera(){ return Detail::ResourceManagement::m_CurrentScene->getActiveCamera(); }
+void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_CurrentScene->setActiveCamera(c); }
+void Engine::Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_CurrentScene->setActiveCamera(name); }
+
 
 void Engine::Resources::addMesh(std::string name,std::string file){
 	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))

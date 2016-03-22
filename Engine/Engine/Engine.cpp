@@ -96,10 +96,10 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
 	}
 }
 void Engine::Detail::EngineClass::update(){
+	Engine::Physics::Detail::PhysicsManagement::update(Resources::dt(),10);
 	Game::update(Resources::dt());
 	Resources::getCurrentScene()->update(Resources::dt());
 	Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-Resources::dt()));
-	Engine::Physics::Detail::PhysicsManagement::update(Resources::dt(),10);
 	RESET_EVENTS();
 }
 void Engine::Detail::EngineClass::render(){

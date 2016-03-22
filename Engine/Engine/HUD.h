@@ -12,12 +12,11 @@ class HUD final{
 		unsigned int m_TargetIterator;
 		glm::vec3 m_Color;
 		Font* m_Font;
-		Ship* m_Player;
 		void _renderCrosshair(Object*);
 
 		glm::vec2 m_WarpIndicatorSize;
 	public:
-		HUD(Ship*);
+		HUD();
 		~HUD();
 
 		void update(float);
