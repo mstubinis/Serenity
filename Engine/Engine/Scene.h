@@ -17,7 +17,6 @@ class ParticleEmitter;
 class Scene{
 	private:
 		Skybox* m_Skybox;
-		boost::weak_ptr<Camera> m_ActiveCamera;
 	protected:
 		std::map<std::string,Object*> m_Objects;
 		std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
@@ -49,10 +48,6 @@ class Scene{
 		void setAmbientLightColor(glm::vec3);
 		void setAmbientLightColor(float,float,float);
 		void setBackgroundColor(float,float,float);
-
-		Camera* getActiveCamera(){ return m_ActiveCamera.lock().get(); }
-		void setActiveCamera(Camera* c);
-		void setActiveCamera(std::string name);
 
 		Skybox* getSkybox() const { return m_Skybox; }
 		void setSkybox(Skybox* s){ m_Skybox = s; }

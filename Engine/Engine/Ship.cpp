@@ -218,7 +218,7 @@ Ship::Ship(std::string mesh, std::string mat, bool player, std::string name,glm:
 	m_PlayerCamera = nullptr;
 
 	if(player){
-		m_PlayerCamera = static_cast<GameCamera*>(scene->getActiveCamera());
+		m_PlayerCamera = static_cast<GameCamera*>(Resources::getActiveCamera());
 	}
 
 	for(unsigned int i = 0; i < SHIP_SYSTEM_NUMBER; i++){

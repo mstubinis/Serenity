@@ -11,15 +11,34 @@
 
 using namespace Engine;
 
-CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
-	m_Light = new PointLight(name + " Light",pos,scene);
+CapsuleEnd::CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){
+	this->setColor(color.x,color.y,color.z,1);
+}
+CapsuleEnd::~CapsuleEnd(){
+}
 
-	m_Light->setConstant(0.000003f);
-	m_Light->setLinear(0.000003f);
-	m_Light->setExponent(0.000003f);
+void CapsuleEnd::update(float dt){
+	ObjectBasic::update(dt);
+}
+void CapsuleEnd::draw(GLuint shader,bool debug){
+	glDisable(GL_DEPTH_TEST);
+	ObjectDisplay::draw(shader,debug);
+	glEnable(GL_DEPTH_TEST);
+}
 
+
+CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
+	m_Light = nullptr;
+	if(makeLight){
+		m_Light = new PointLight(name + " Light",pos,scene);
+
+		m_Light->setConstant(0.000005f);
+		m_Light->setLinear(0.000005f);
+		m_Light->setExponent(0.000005f);
+
+		m_Light->setColor(1,75.0f/255.0f,0,1);
+	}
 	setColor(1,235.0f/255.0f,206.0f/255.0f,1);
-	m_Light->setColor(1,75.0f/255.0f,0,1);
 	this->m_Shadeless = true;
 }
 CapsuleStar::~CapsuleStar(){
@@ -34,8 +53,8 @@ void CapsuleStar::update(float dt){
 		float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
 		setPosition(x*100,y*100,-70*100);
 	}
-
-	m_Light->setPosition(pos);
+	if(m_Light != nullptr)
+		m_Light->setPosition(pos);
 
 	this->m_Orientation = Resources::getActiveCamera()->getOrientation();
 
@@ -71,7 +90,7 @@ void CapsuleRibbon::draw(GLuint shader,bool debug){
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	setSkybox(nullptr);
-	setAmbientLightColor(82.0f/255.0f,29.0f/255.0f,0);
+	setAmbientLightColor(40.0f/255.0f,22.0f/255.0f,0);
 	setBackgroundColor(1,0,0);
 
 	if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleTunnel")){
@@ -91,44 +110,54 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_C")){
 		Resources::addMaterial("Capsule_C","Textures/Effects/capsule_c.png");
 		Resources::getMaterial("Capsule_C")->setShadeless(true);
-		Resources::getMaterial("Capsule_C")->setBaseGlow(0.2f);
+		Resources::getMaterial("Capsule_C")->setBaseGlow(0.12f);
+	}
+	if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_D")){
+		Resources::addMaterial("Capsule_D","Textures/Effects/capsule_d.png");
+		Resources::getMaterial("Capsule_D")->setShadeless(true);
 	}
 
-	m_TunnelA = new CapsuleTunnel(5000,"Capsule_Tunnel_A","Capsule_A",this);
-	m_TunnelB = new CapsuleTunnel(5000,"Capsule_Tunnel_B","Capsule_B",this);
-	m_Ribbon = new CapsuleRibbon(5000,"Capsule_Tunnel_C_Ribbon","Capsule_C",this);
+	m_TunnelA = new CapsuleTunnel(5000,"AAAAAA_Capsule_Tunnel_A","Capsule_A",this);
+	m_TunnelB = new CapsuleTunnel(5000,"AAAAAA_Capsule_Tunnel_B","Capsule_B",this);
+	m_Ribbon = new CapsuleRibbon(5000,"AAAAAA_Capsule_Tunnel_C_Ribbon","Capsule_C",this);
+
+	m_FrontEnd = new CapsuleEnd(370,glm::v3(0,0,-5000),glm::vec3(1),"AAAAAA_Capsule_Tunnel_B_Front",this);
+	m_BackEnd = new CapsuleEnd(230,glm::v3(0,0,5000),glm::vec3(0),"AAAAAA_Capsule_Tunnel_B_Back",this);
+
+	m_BackEnd->rotate(0,180,0,false);
 
 	glm::vec3 oldScale = m_TunnelB->getScale();
-	m_TunnelB->setScale(oldScale.x-(0.62f * m_TunnelB->getTunnelRadius()),
-		                oldScale.y-(0.62f * m_TunnelB->getTunnelRadius()),
-						oldScale.z);
+	m_TunnelB->setScale(oldScale.x-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.y-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.z);
 
 	m_TunnelA->setPosition(0,0,0);
 	m_TunnelB->setPosition(0,0,0);
 	m_Ribbon->setPosition(0,300,0);
 
-	float step = -60.0f;
-	for(unsigned int i = 0; i < 30; i++){
-
+	float step = -10.0f;
+	for(unsigned int i = 0; i < 60; i++){
 		float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
 		float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
 
 		glm::v3 pos = glm::v3(x,y,step)*glm::v3(100);
 
-		m_CapsuleStars.push_back(new CapsuleStar(100,pos,"ZZZZZZ_CapsuleStar" + boost::lexical_cast<std::string>(i),this));
-
-		step -= 8.0f;
+		bool spawnLight = true;
+		if(i % 2 == 0){
+			spawnLight = false;
+		}
+		m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star" + boost::lexical_cast<std::string>(i),this,spawnLight));
+		step -= 4.0f;
 	}
 
 	//this to just test. should set player / camera dynamically
 	setPlayer(new Ship("Dreadnought","Dreadnought",true,"Dreadnought",glm::v3(0),glm::vec3(1),nullptr,this));
-	setPlayerCamera(static_cast<GameCamera*>(getActiveCamera()));
+	setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
 	getPlayerCamera()->follow(getPlayer());
 
 }
 CapsuleSpace::~CapsuleSpace(){
 }
 void CapsuleSpace::update(float dt){
+	m_Timer += dt*2;
 	SolarSystem::update(dt);
 
 	float aRadius = m_TunnelA->getTunnelRadius();
@@ -143,6 +172,8 @@ void CapsuleSpace::update(float dt){
 
 	m_TunnelA->rotate(0,0,tunnelARotRand);
 	m_TunnelB->rotate(0,0,-tunnelBRotRand);
+	m_BackEnd->rotate(0,0,150);
+	m_FrontEnd->rotate(0,0,-150);
 
 	if(m_TunnelA->getPosition().z >= 12.112 * aRadius || m_TunnelA->getPosition().z <= -12.112 * aRadius){
 		m_TunnelA->setPosition(0,0,0);
@@ -155,4 +186,15 @@ void CapsuleSpace::update(float dt){
 	}
 	getPlayer()->setPosition(0,0,0);
 	getPlayer()->setOrientation(glm::quat());
+
+	float x = glm::sin(m_Timer)*0.035f;
+	float y = glm::cos(m_Timer)*0.035f;
+
+	float rot = glm::sin(m_Timer)*15;
+
+	for(auto item:getPlayer()->getDisplayItems()){
+		item->position = glm::vec3(x,y,0);
+
+		item->orientation = (glm::angleAxis(rot,  glm::vec3(0,0,1)));   //roll
+	}
 }

@@ -10,31 +10,35 @@
 using namespace Engine;
 using namespace boost;
 
-Camera::Camera(std::string name, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),"ZZZ"+name,scene){//create a perspective camera
+Camera::Camera(std::string name, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene,false){//create a perspective camera
 	m_Angle = angle;
 	m_AspectRatio = aspectRatio;
 	m_Near = near;
 	m_Far = far;
+
+	m_Scene = scene;
 
 	m_Type = CAMERA_TYPE_PERSPECTIVE;
 
 	setPerspectiveProjection();
 	lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
 
-	Resources::Detail::ResourceManagement::m_Cameras[name] = weak_ptr<Camera>(dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[m_Name]));
+	Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
 }
-Camera::Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),"ZZZ"+name,scene){//create an orthographic camera
+Camera::Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene,false){//create an orthographic camera
 	m_Angle = 45.0f;
 	m_AspectRatio = 1.0f;
 	m_Near = near;
 	m_Far = far;
+
+	m_Scene = scene;
 
 	m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
 	setOrthoProjection(left,right,bottom,top);
 	lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
 
-	Resources::Detail::ResourceManagement::m_Cameras[name] = weak_ptr<Camera>(dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[m_Name]));
+	Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
 }
 void Camera::_constructFrustrum(){
 	glm::mat4 vp = m_Projection * m_View;
@@ -76,18 +80,15 @@ void Camera::setAspectRatio(float ratio){
 	m_AspectRatio = ratio;
 	setPerspectiveProjection();
 }
-void Camera::lookAt(glm::v3 target){ 
-	m_View = glm::lookAt(getPosition(),target,glm::v3(getUp()));
-}
-void Camera::lookAt(glm::v3 target,glm::v3 up){ 
-	m_View = glm::lookAt(getPosition(),target,up); 
-}
+void Camera::lookAt(glm::v3 target){ Camera::lookAt(getPosition(),target,glm::v3(getUp())); }
+void Camera::lookAt(glm::v3 target,glm::v3 up){ Camera::lookAt(getPosition(),target,up); }
 void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){ 
-	m_View = glm::lookAt(eye,target,up); 
+	m_View = glm::lookAt(eye,target,up);
+	m_Orientation = glm::toQuat(glm::inverse(m_View));
 }
 void Camera::lookAt(Object* target, bool targetUp){
-	if(!targetUp) m_View = glm::lookAt(getPosition(),target->getPosition(),glm::v3(getUp()));
-	else m_View = glm::lookAt(getPosition(),target->getPosition(),glm::v3(target->getUp()));
+	glm::v3 u; if(!targetUp) u = glm::v3(getUp()); else u = target->getUp();
+	Camera::lookAt((getPosition(),target->getPosition(),u));
 }
 void Camera::update(float dt){
 	_constructFrustrum();

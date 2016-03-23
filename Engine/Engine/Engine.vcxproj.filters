@@ -15,9 +15,6 @@
     <Filter Include="Header Files\Engine">
       <UniqueIdentifier>{1fa40977-5af4-4b4b-adf5-1fd56320d21e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\DeferredRendering">
-      <UniqueIdentifier>{38085e6a-1222-44e1-92ff-ee7d2416c392}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Shaders\DeferredRendering">
       <UniqueIdentifier>{2b413ee7-08eb-47dc-a422-3a6b052d31f8}</UniqueIdentifier>
     </Filter>
@@ -27,21 +24,12 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\LightingShaders">
       <UniqueIdentifier>{4970b14b-ba45-4831-81da-db3cec9cd0d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Materials">
-      <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\Engine">
       <UniqueIdentifier>{7168ad54-1c5f-4245-b720-04bc4cb816bf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\DeferredRendering">
-      <UniqueIdentifier>{02a33361-c515-464f-9369-19b4c3fe28b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Materials">
-      <UniqueIdentifier>{445d46fd-3b43-47ff-abec-53ef9754382a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine\Objects">
       <UniqueIdentifier>{e30d7ba1-932e-40bc-b395-39b473e2b9f8}</UniqueIdentifier>
@@ -79,6 +67,12 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\EdgeDetect">
       <UniqueIdentifier>{ce37d8bc-972f-4b3a-b991-56b2b710c471}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Rendering">
+      <UniqueIdentifier>{445d46fd-3b43-47ff-abec-53ef9754382a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Rendering">
+      <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -93,14 +87,11 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="GBuffer.cpp">
-      <Filter>Source Files\Engine\DeferredRendering</Filter>
-    </ClCompile>
     <ClCompile Include="Material.cpp">
-      <Filter>Source Files\Engine\Materials</Filter>
+      <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="ShaderProgram.cpp">
-      <Filter>Source Files\Engine\Materials</Filter>
+      <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
@@ -113,9 +104,6 @@
     </ClCompile>
     <ClCompile Include="GLDebugFont.cpp">
       <Filter>Source Files\Engine\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureBuffer.cpp">
-      <Filter>Source Files\Engine\DeferredRendering</Filter>
     </ClCompile>
     <ClCompile Include="Engine_Events.cpp">
       <Filter>Source Files\Engine</Filter>
@@ -157,7 +145,7 @@
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\Engine\Materials</Filter>
+      <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="HUD.cpp">
       <Filter>Source Files\Game</Filter>
@@ -186,6 +174,9 @@
     <ClCompile Include="CapsuleSpace.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
+    <ClCompile Include="GBuffer.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -203,14 +194,11 @@
     <ClInclude Include="Light.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="GBuffer.h">
-      <Filter>Header Files\Engine\DeferredRendering</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Header Files\Engine\Materials</Filter>
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="ShaderProgram.h">
-      <Filter>Header Files\Engine\Materials</Filter>
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Header Files\Engine\Objects</Filter>
@@ -220,9 +208,6 @@
     </ClInclude>
     <ClInclude Include="GLDebugFont.h">
       <Filter>Header Files\Engine\Other</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureBuffer.h">
-      <Filter>Header Files\Engine\DeferredRendering</Filter>
     </ClInclude>
     <ClInclude Include="Engine_Events.h">
       <Filter>Header Files\Engine</Filter>
@@ -258,7 +243,7 @@
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
-      <Filter>Header Files\Engine\Materials</Filter>
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="HUD.h">
       <Filter>Header Files\Game</Filter>
@@ -286,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="CapsuleSpace.h">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

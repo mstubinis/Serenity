@@ -48,6 +48,7 @@ class ObjectDisplay: public ObjectBasic{
 		virtual glm::vec3& getRadiusBox(){ return m_BoundingBoxRadius; }
 
 		glm::vec4& getColor(){ return m_Color; }
+		std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
 		void setVisible(bool b);
 

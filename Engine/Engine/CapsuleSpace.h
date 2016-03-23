@@ -6,10 +6,19 @@
 
 class PointLight;
 
+class CapsuleEnd final: public ObjectDisplay{
+	public:
+		CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* = nullptr);
+		~CapsuleEnd();
+
+		void update(float);
+		void draw(GLuint shader,bool=false);
+};
+
 class CapsuleStar final: public ObjectDisplay{
 		PointLight* m_Light;
 	public:
-		CapsuleStar(float size,glm::v3 pos, std::string name, Scene* = nullptr);
+		CapsuleStar(float size,glm::v3 pos, std::string name, Scene* = nullptr,bool=true);
 		~CapsuleStar();
 
 		void update(float);
@@ -39,9 +48,12 @@ class CapsuleRibbon final: public ObjectDisplay{
 
 class CapsuleSpace final: public SolarSystem{
 	private:
+		float m_Timer;
 		CapsuleTunnel* m_TunnelA;
 		CapsuleTunnel* m_TunnelB;
 		CapsuleRibbon* m_Ribbon;
+		CapsuleEnd* m_FrontEnd;
+		CapsuleEnd* m_BackEnd;
 
 		std::vector<CapsuleStar*> m_CapsuleStars;
 	public:

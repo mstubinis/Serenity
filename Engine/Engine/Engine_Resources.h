@@ -39,13 +39,15 @@ namespace Engine{
 
 					static float m_DeltaTime;
 
+					static boost::weak_ptr<Camera> m_ActiveCamera;
+
 					static sf::Window* m_Window;
 					static std::string m_WindowName;
 					static sf::Mouse* m_Mouse;
 
 					static std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> m_Sounds;
 					static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
-					static std::unordered_map<std::string,boost::weak_ptr<Camera>> m_Cameras;
+					static std::unordered_map<std::string,boost::shared_ptr<Camera>> m_Cameras;
 					static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
 					static std::unordered_map<std::string,boost::shared_ptr<Mesh>> m_Meshes;
 					static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
@@ -68,14 +70,16 @@ namespace Engine{
 		static sf::Mouse* getMouse(){ return Detail::ResourceManagement::m_Mouse; }
 
 		Camera* getActiveCamera();
+		boost::weak_ptr<Camera>& getActiveCameraPtr();
 		void setActiveCamera(Camera* c);
 		void setActiveCamera(std::string name);
 
 		static Scene* getScene(std::string name){ return Detail::ResourceManagement::m_Scenes[name].get(); }
 		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name].get(); }
-		static boost::shared_ptr<Object> getObjectPtr(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
+		static boost::shared_ptr<Object>& getObjectPtr(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
+		static boost::shared_ptr<Camera>& getCameraPtr(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
 		static Object* getObject(std::string name){ return getObjectPtr(name).get(); }
-		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name].lock().get(); }
+		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name].get(); }
 		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name].get(); }
 		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name].get(); }
 		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name].get(); }

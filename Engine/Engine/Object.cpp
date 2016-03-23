@@ -9,23 +9,26 @@
 
 using namespace Engine;
 
-Object::Object(std::string name,Scene* scene){
+Object::Object(std::string name,Scene* scene, bool isNotCamera){
 	m_Radius = 0;
 	m_Parent = nullptr;
 	m_IsToBeDestroyed = false;
 	m_Name = name;
 	unsigned int count = 0;
-	if(scene == nullptr){
-		scene = Resources::getCurrentScene();
-	}
-	if (scene->getObjects().size() > 0){
-		while(scene->getObjects().count(m_Name)){
-			m_Name = name + " " + boost::lexical_cast<std::string>(count);
-			count++;
+
+	if(isNotCamera){
+		if(scene == nullptr){
+			scene = Resources::getCurrentScene();
 		}
+		if (scene->getObjects().size() > 0){
+			while(scene->getObjects().count(m_Name)){
+				m_Name = name + " " + boost::lexical_cast<std::string>(count);
+				count++;
+			}
+		}
+		scene->getObjects()[m_Name] = this;
+		Resources::Detail::ResourceManagement::m_Objects[m_Name] = boost::shared_ptr<Object>(this);
 	}
-	scene->getObjects()[m_Name] = this;
-	Resources::Detail::ResourceManagement::m_Objects[m_Name] = boost::shared_ptr<Object>(this);
 }
 Object::~Object()
 {
@@ -89,7 +92,7 @@ void Object::setName(std::string name){
 	}
 }
 
-ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene):Object(name,scene){
+ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene,bool isNotCameras):Object(name,scene,isNotCameras){
 	m_Forward = glm::v3(0,0,-1);
 	m_Right = glm::v3(1,0,0);
 	m_Up = glm::v3(0,1,0);

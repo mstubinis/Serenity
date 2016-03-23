@@ -35,6 +35,8 @@ class ObjectDynamic: public Object{
 					 );
 		virtual ~ObjectDynamic();
 
+		std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
+
 		virtual void setPosition(glm::nType,glm::nType,glm::nType); 
 		virtual void setPosition(glm::v3);
 		virtual void setScale(float,float,float); 

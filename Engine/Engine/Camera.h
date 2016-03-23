@@ -12,6 +12,7 @@ class Camera: public ObjectBasic{
 	private:
 		void _constructFrustrum();
 		glm::vec4 m_Planes[6];
+		Scene* m_Scene;
 	protected:
 		CAMERA_TYPE m_Type;
 
@@ -42,6 +43,10 @@ class Camera: public ObjectBasic{
 		const float getAspectRatio() const { return m_AspectRatio; }
 		const float getNear() const { return m_Near; }
 		const float getFar() const { return m_Far; }
+
+		Scene* getScene(){ return m_Scene; }
+
+		glm::quat getOrientation(){ return m_Orientation; }
 
 		glm::mat4 calculateProjection(glm::mat4 model){ return m_Projection * m_View * model; }
 		glm::mat4 calculateModelView(glm::mat4 model){ return m_View * model; }

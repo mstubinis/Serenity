@@ -52,7 +52,8 @@ class Object: public ObjectInterface{
 	public:
 		Object(
 			    std::string = "Object",   //Object
-				Scene* = nullptr          //The scene to add the object to (default nullptr = the current scene)
+				Scene* = nullptr,         //The scene to add the object to (default nullptr = the current scene)
+				bool = true               //This is not a camera
 	    );
 		virtual ~Object();
 
@@ -97,7 +98,8 @@ class ObjectBasic: public Object{
 			    glm::v3 = glm::v3(0),         //Position
 			    glm::vec3 = glm::vec3(1),     //Scale
 			    std::string = "Object Basic", //Object name
-				Scene* = nullptr              //The scene to add the object to (default nullptr = the current scene)
+				Scene* = nullptr,             //The scene to add the object to (default nullptr = the current scene)
+				bool = true                   //This is not a camera
 	    );
 		virtual ~ObjectBasic();
 

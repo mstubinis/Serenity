@@ -17,8 +17,10 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 	m_AmbientLighting = ambientLightColor;
 	m_BackgroundColor = glm::vec3(0,0,0);
 
-	new Camera("Default_" + m_Name,45.0f,1.0f,0.1f,100.0f,this);
-	setActiveCamera("ZZZDefault_" + m_Name);
+	if(!exists(Resources::getActiveCameraPtr())){
+		new Camera("Default_" + m_Name,45.0f,1.0f,0.1f,100.0f,this);
+		Resources::setActiveCamera("Default_" + m_Name);
+	}
 
 	Resources::Detail::ResourceManagement::m_Scenes[m_Name] = shared_ptr<Scene>(this);
 }
@@ -62,8 +64,6 @@ void Scene::setName(std::string name){
 		Resources::Detail::ResourceManagement::m_Scenes.erase(oldName);
 	}
 }
-void Scene::setActiveCamera(Camera* c){ m_ActiveCamera = dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[c->getName()]); }
-void Scene::setActiveCamera(std::string name){ m_ActiveCamera = dynamic_pointer_cast<Camera>(Resources::Detail::ResourceManagement::m_Objects[name]); }
 void Scene::update(float dt){
 	for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
 		if (it->second->isDestroyed()){
@@ -74,6 +74,19 @@ void Scene::update(float dt){
 	    }
 	    else{
 			it->second->update(dt);
+			++it;
+	    }
+	}
+	for (auto it = Resources::Detail::ResourceManagement::m_Cameras.cbegin(); it != Resources::Detail::ResourceManagement::m_Cameras.cend();){
+		if (it->second->isDestroyed()){
+			std::string name = it->second->getName();
+			Resources::getCameraPtr(name).reset();
+			Resources::Detail::ResourceManagement::m_Cameras.erase(it++);
+	    }
+	    else{
+			if(it->second->getScene() == this){
+				it->second->update(dt);
+			}
 			++it;
 	    }
 	}

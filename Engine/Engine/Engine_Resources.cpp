@@ -29,9 +29,10 @@ sf::Window* Detail::ResourceManagement::m_Window;
 std::string Detail::ResourceManagement::m_WindowName;
 sf::Mouse* Detail::ResourceManagement::m_Mouse;
 Scene* Detail::ResourceManagement::m_CurrentScene;
+boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 
 std::unordered_map<std::string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
-std::unordered_map<std::string,boost::weak_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
+std::unordered_map<std::string,boost::shared_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
 std::unordered_map<std::string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
 std::unordered_map<std::string,boost::shared_ptr<Texture>> Detail::ResourceManagement::m_Textures;
 std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
@@ -56,6 +57,8 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 		it->second.reset();
 	for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             
 		it->second.reset();
+	for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )             
+		it->second.reset();
 	for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               
 		it->second.reset();
 	for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               
@@ -64,10 +67,10 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
 	SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
 
-Camera* Engine::Resources::getActiveCamera(){ return Detail::ResourceManagement::m_CurrentScene->getActiveCamera(); }
-void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_CurrentScene->setActiveCamera(c); }
-void Engine::Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_CurrentScene->setActiveCamera(name); }
-
+Camera* Engine::Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
+boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
+void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
+void Engine::Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
 void Engine::Resources::addMesh(std::string name,std::string file){
 	if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))

@@ -52,6 +52,7 @@ void Game::initLogic(){
 	new CapsuleSpace();
 	//new SolarSystem("Sol","");
 	Resources::setCurrentScene("Sol");
+	Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 	////Resources::setCurrentScene("CapsuleSpace");
 
 	m_HUD = new HUD();
@@ -62,10 +63,14 @@ void Game::update(float dt){
 
 	if(Events::Keyboard::isKeyDown("esc"))
 		Engine::stop();
-	if(Events::Keyboard::isKeyDownOnce("f6"))
+	if(Events::Keyboard::isKeyDownOnce("f6")){
 		Resources::setCurrentScene("CapsuleSpace");
-	if(Events::Keyboard::isKeyDownOnce("f7"))
+		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+	}
+	if(Events::Keyboard::isKeyDownOnce("f7")){
 		Resources::setCurrentScene("Sol");
+		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+	}
 
 	m_HUD->update(dt);
 }
