@@ -20,7 +20,7 @@ TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attat
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, GL_TEXTURE_2D, m_Texture, 0);
 
-	glClearColor(0, 0, 0, 0);
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 TextureBuffer::~TextureBuffer(){

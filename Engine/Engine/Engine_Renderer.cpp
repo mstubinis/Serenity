@@ -162,13 +162,13 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
 	Scene* s = Resources::getCurrentScene();
 	glm::vec3 clear = s->getBackgroundColor();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(clear.x,clear.y,clear.z,0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(clear.x,clear.y,clear.z,1);
 	glDisable(GL_BLEND); //disable blending on all mrts
 
 	s->renderSkybox();
 	glDepthMask(GL_TRUE);
-    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
 	glBlendEquationi(GL_FUNC_ADD,0);
 	glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
@@ -177,8 +177,8 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
 	}
 	_renderObjects();
 
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 }
 void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glEnable(GL_BLEND);
@@ -454,14 +454,14 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 void Engine::Renderer::Detail::RenderManagement::hardClear(){
 	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0,0,0,0);
+	glClearColor(0,0,0,1);
 	m_gBuffer->stop();
 
 	m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_FREE1,BUFFER_TYPE_BLOOM);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0,0,0,0);
+	glClearColor(0,0,0,1);
 	m_gBuffer->stop();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0,0,0,0);
+	glClearColor(0,0,0,1);
 }
