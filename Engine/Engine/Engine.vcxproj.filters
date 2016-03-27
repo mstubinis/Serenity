@@ -46,12 +46,6 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO">
       <UniqueIdentifier>{01d8a664-bbee-4225-8f52-3537791a4b3f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Other">
-      <UniqueIdentifier>{80125bc3-e093-450f-a304-952592e3fe4e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Engine\Other">
-      <UniqueIdentifier>{0ac16972-c034-4fa5-b1f8-7a195a864256}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Shaders\ForwardRendering\AtmopshericScattering">
       <UniqueIdentifier>{9482e4ed-522e-4fe0-b336-5a2cc2814377}</UniqueIdentifier>
     </Filter>
@@ -98,12 +92,6 @@
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="GLDebugDrawer.cpp">
-      <Filter>Source Files\Engine\Other</Filter>
-    </ClCompile>
-    <ClCompile Include="GLDebugFont.cpp">
-      <Filter>Source Files\Engine\Other</Filter>
     </ClCompile>
     <ClCompile Include="Engine_Events.cpp">
       <Filter>Source Files\Engine</Filter>
@@ -202,12 +190,6 @@
     </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="GLDebugDrawer.h">
-      <Filter>Header Files\Engine\Other</Filter>
-    </ClInclude>
-    <ClInclude Include="GLDebugFont.h">
-      <Filter>Header Files\Engine\Other</Filter>
     </ClInclude>
     <ClInclude Include="Engine_Events.h">
       <Filter>Header Files\Engine</Filter>

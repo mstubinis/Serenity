@@ -26,9 +26,9 @@ uniform float gSpecularPower;
 
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
-vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
+vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal){
     vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
-    float Lambertian = dot(_norm, -_lightDir);
+    float Lambertian = dot(PxlNormal, -LightDir);
 
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);
@@ -37,11 +37,11 @@ vec4 CalcLightInternal(vec3 _lightDir,vec3 _worldPos,vec3 _norm){
 
         DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * Lambertian;
 
-        vec3 LightSourceToEye = normalize(gCameraPosition - _worldPos);
-        vec3 ReflectionVector = normalize(reflect(_lightDir, _norm));
+        vec3 LightSourceToEye = normalize(gCameraPosition - PxlWorldPos);
+        vec3 ReflectionVector = normalize(reflect(LightDir, PxlNormal));
         float SpecularFactor = dot(LightSourceToEye, ReflectionVector);
         SpecularFactor = pow(SpecularFactor, gSpecularPower);
-        if (SpecularFactor > 0.0) {
+        if (SpecularFactor > 0.0 && gSpecularPower > 0.001f) {
 			float materialSpecularity = texture2D(gGlowMap,CalcTexCoord()).b;
             SpecularColor = vec4(gColor, 1.0) * materialSpecularity * SpecularFactor;
         }
@@ -59,7 +59,7 @@ vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal){
     a = max(1.0, a);
     return c / a;
 }
-vec4 CalcSpotLight(vec3 _worldPos, vec3 _norm){
+vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal){
 	return vec4(0);
 }
 void main(){

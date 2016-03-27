@@ -53,6 +53,9 @@ namespace Engine{
 
 		float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true);
 		void alignTo(glm::quat& o, glm::vec3 direction,float speed=0, bool overTime=false);
+
+		void setColor(glm::vec3&,float,float,float);
+		void setColor(glm::vec4&,float,float,float,float);
 	};
 };
 #endif

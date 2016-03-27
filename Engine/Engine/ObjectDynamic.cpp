@@ -73,13 +73,17 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
 	m_RigidBody->setSleepingThresholds(0.015f,0.015f);
 	m_RigidBody->setFriction(0.3f);
 	m_RigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
-	Physics::addRigidBody(m_RigidBody);
+
+	if(Resources::getCurrentScene() == scene)
+		Physics::addRigidBody(m_RigidBody);
 
 	if(m_Parent == nullptr){
 		ObjectDynamic::update(0);
 	}
 }
 ObjectDynamic::~ObjectDynamic(){
+	Physics::removeRigidBody(m_RigidBody);
+
 	SAFE_DELETE(m_RigidBody);
 	SAFE_DELETE(m_MotionState);
 	SAFE_DELETE(m_Collision);
@@ -355,6 +359,18 @@ void ObjectDynamic::clearAllForces(){
 	ObjectDynamic::setLinearVelocity(0,0,0);
 	ObjectDynamic::setAngularVelocity(0,0,0);
 }
+
+void ObjectDynamic::activateCollisionObject(){
+}
+void ObjectDynamic::activateRigidBody(){
+	m_RigidBody->activate();
+}
+void ObjectDynamic::deactivateCollisionObject(){
+}
+void ObjectDynamic::deactivateRigidBody(){
+	m_RigidBody->setActivationState(WANTS_DEACTIVATION);
+}
+
 bool ObjectDynamic::rayIntersectSphere(Camera* cam){ return cam->rayIntersectSphere(this); }
 void ObjectDynamic::calculateRadius(){
 	if(m_DisplayItems.size() == 0){

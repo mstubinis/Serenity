@@ -20,9 +20,9 @@ void Engine::Detail::EngineClass::init(std::string name, unsigned int width, uns
 void Engine::Detail::EngineClass::destruct(){
 	//glDeleteVertexArrays( 1, &m_vao );
 	Game::cleanup();
+	Engine::Resources::Detail::ResourceManagement::destruct();
 	Engine::Physics::Detail::PhysicsManagement::destruct();
 	Engine::Renderer::Detail::RenderManagement::destruct();
-	Engine::Resources::Detail::ResourceManagement::destruct();
 	Engine::Sound::Detail::SoundManagement::destruct();
 }
 void Engine::Detail::EngineClass::initWindow(std::string name, unsigned int width, unsigned int height){

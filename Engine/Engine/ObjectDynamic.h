@@ -9,6 +9,14 @@ struct btDefaultMotionState;
 class btVector3;
 struct DisplayItem;
 
+/*
+#define BIT(x) (1<<(x))
+enum COLLISION_GROUPS {
+    COLLISION_GROUP_NOTHING = 0,
+    COLLISION_GROUP_EVERYTHING = BIT(0),
+};
+*/
+
 class ObjectDynamic: public Object{
 	protected:
 		glm::v3 m_Forward, m_Right, m_Up;
@@ -106,6 +114,11 @@ class ObjectDynamic: public Object{
 		virtual void clearLinearForces();
 		virtual void clearAngularForces();
 		virtual void clearAllForces();
+
+		void activateCollisionObject();
+		void activateRigidBody();
+		void deactivateCollisionObject();
+		void deactivateRigidBody();
 
 		virtual void update(float);
 		virtual void render(GLuint=0,bool=false);

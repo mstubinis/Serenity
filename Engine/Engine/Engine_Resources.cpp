@@ -1,5 +1,6 @@
 #include "Engine_Resources.h"
 #include "Engine_Sounds.h"
+#include "Engine_Physics.h"
 #include "ShaderProgram.h"
 
 #include "Object.h"
@@ -157,4 +158,29 @@ void Engine::Resources::initResources(){
 	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
 
 	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
+}
+
+void Engine::Resources::setCurrentScene(Scene* s){ 
+
+	Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
+	for(auto obj:previousScene->getObjects()){
+		ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
+		if(dynamicObj != NULL){
+			Engine::Physics::removeRigidBody(dynamicObj);
+			//dynamicObj->deactivateCollisionObject();
+		}
+	}
+
+	Detail::ResourceManagement::m_CurrentScene = s;
+
+	for(auto obj:s->getObjects()){
+		ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
+		if(dynamicObj != NULL){
+			Engine::Physics::addRigidBody(dynamicObj);
+			//dynamicObj->activateCollisionObject();
+		}
+	}
+}
+void Engine::Resources::setCurrentScene(std::string s){ 
+	Engine::Resources::setCurrentScene(Detail::ResourceManagement::m_Scenes[s].get());
 }

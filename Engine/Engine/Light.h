@@ -12,7 +12,7 @@ class Scene;
 class SunLight: public ObjectDisplay{
 	protected:
 		unsigned int m_Type;
-		float m_AmbientIntensity, m_DiffuseIntensity;
+		float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularPower;
 	public:
 		SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
 		virtual ~SunLight();
@@ -23,6 +23,8 @@ class SunLight: public ObjectDisplay{
 		virtual void draw(GLuint shader,bool=false);
 
 		virtual void lighten(GLuint);
+		float getSpecularPower(){ return m_SpecularPower; }
+		void setSpecularPower(float s){ m_SpecularPower = s; }
 
 		void setName(std::string);
 };

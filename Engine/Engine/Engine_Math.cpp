@@ -64,3 +64,16 @@ void Math::alignTo(glm::quat& o, glm::vec3 direction,float speed, bool overTime)
 		}
 	}
 }
+void Math::setColor(glm::vec3& color,float r, float g, float b){
+	if(r > 1) r = r / 255.0f;
+	if(g > 1) g = g / 255.0f;
+	if(b > 1) b = b / 255.0f;
+	color.x = r; color.y = g; color.z = b;
+}
+void Math::setColor(glm::vec4& color,float r, float g, float b,float a){
+	if(r > 1) r = r / 255.0f;
+	if(g > 1) g = g / 255.0f;
+	if(b > 1) b = b / 255.0f;
+	if(a > 1) a = a / 255.0f;
+	color.x = r; color.y = g; color.z = b; color.w = a; 
+}

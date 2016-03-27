@@ -52,7 +52,6 @@ void Scene::centerSceneToObject(Object* center){
 }
 Scene::~Scene(){
 }
-void Scene::setBackgroundColor(float r, float g, float b){ m_BackgroundColor.x = r; m_BackgroundColor.y = g; m_BackgroundColor.z = b; }
 void Scene::setName(std::string name){
 	if(name == m_Name) return;
 
@@ -98,6 +97,7 @@ void Scene::update(float dt){
 	}
 	if(m_Skybox != nullptr) m_Skybox->update();
 }
-void Scene::setAmbientLightColor(glm::vec3 c){ m_AmbientLighting = c; }
-void Scene::setAmbientLightColor(float r,float g,float b){ setAmbientLightColor(glm::vec3(r,g,b)); }
+void Scene::setAmbientLightColor(glm::vec3 c){ setAmbientLightColor(c.r,c.g,c.b); }
+void Scene::setAmbientLightColor(float r,float g,float b){ Engine::Math::setColor(m_AmbientLighting,r,g,b); }
+void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
 void Scene::renderSkybox(){ if(m_Skybox != nullptr) m_Skybox->render(); }

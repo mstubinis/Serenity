@@ -59,8 +59,8 @@ namespace Engine{
 			};
 		};
 		static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
-		static void setCurrentScene(Scene* s){ Detail::ResourceManagement::m_CurrentScene = s; }
-		static void setCurrentScene(std::string s){ Detail::ResourceManagement::m_CurrentScene = Detail::ResourceManagement::m_Scenes[s].get(); }
+		void setCurrentScene(Scene* s);
+		void setCurrentScene(std::string s);
 
 		static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
 		static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }

@@ -30,15 +30,15 @@ void CapsuleEnd::draw(GLuint shader,bool debug){
 CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
 	m_Light = nullptr;
 	if(makeLight){
-		m_Light = new PointLight(name + " Light",pos,scene);
+		m_Light = new PointLight(name + " Light",pos/static_cast<glm::nType>(100),scene);
 
-		m_Light->setConstant(0.000005f);
-		m_Light->setLinear(0.000005f);
-		m_Light->setExponent(0.000005f);
+		m_Light->setConstant(0.1f);
+		m_Light->setLinear(0.1f);
+		m_Light->setExponent(0.1f);
 
-		m_Light->setColor(1,75.0f/255.0f,0,1);
+		m_Light->setColor(255,124,27,255);
 	}
-	setColor(1,235.0f/255.0f,206.0f/255.0f,1);
+	setColor(255,235,206,255);
 	this->m_Shadeless = true;
 }
 CapsuleStar::~CapsuleStar(){
@@ -46,7 +46,7 @@ CapsuleStar::~CapsuleStar(){
 void CapsuleStar::update(float dt){
 	glm::v3 pos = getPosition();
 
-	translate(0,0,(-55 * 100 ) * dt);
+	translate(0,0,(-120 * 100 ) * dt);
 
 	if(pos.z >= 70 * 100){
 		float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
@@ -54,7 +54,7 @@ void CapsuleStar::update(float dt){
 		setPosition(x*100,y*100,-70*100);
 	}
 	if(m_Light != nullptr)
-		m_Light->setPosition(pos);
+		m_Light->setPosition(pos/static_cast<glm::nType>(100));
 
 	this->m_Orientation = Resources::getActiveCamera()->getOrientation();
 
@@ -90,8 +90,12 @@ void CapsuleRibbon::draw(GLuint shader,bool debug){
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	setSkybox(nullptr);
-	setAmbientLightColor(40.0f/255.0f,22.0f/255.0f,0);
-	setBackgroundColor(1,0,0);
+	setAmbientLightColor(40.0f,22.0f,0);
+	setBackgroundColor(255.0f,0,0);
+
+	PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
+	l->setColor(255,225,225,255);
+	l->setSpecularPower(0.0f);
 
 	if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleTunnel")){
 		Resources::addMesh("CapsuleTunnel","Models/capsuleTunnel.obj");
@@ -190,10 +194,10 @@ void CapsuleSpace::update(float dt){
 	float x = glm::sin(m_Timer)*0.035f;
 	float y = glm::cos(m_Timer)*0.035f;
 
-	float rot = glm::sin(m_Timer)*15;
+	float rot = glm::sin(m_Timer)*13;
 
 	for(auto item:getPlayer()->getDisplayItems()){
-		item->position = glm::vec3(x,y,0);
+		item->position = glm::vec3(x*1.2f,-y,0);
 
 		item->orientation = (glm::angleAxis(rot,  glm::vec3(0,0,1)));   //roll
 	}
