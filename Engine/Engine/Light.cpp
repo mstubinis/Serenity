@@ -10,12 +10,12 @@
 
 using namespace Engine;
 
-SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("DEBUGLight","",pos,glm::vec3(1,1,1),name,scene){
+SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),name,scene){
 	m_Type = type;
 
     m_AmbientIntensity = 0.05f;
     m_DiffuseIntensity = 1.0f;
-	m_SpecularPower = 50.0f;
+	m_SpecularPower = 50;
 	m_Parent = nullptr;
 
 	unsigned int count = 0;
@@ -48,25 +48,25 @@ void SunLight::update(float dt){
 void SunLight::render(GLuint shader,bool debug){ }
 void SunLight::draw(GLuint shader, bool debug){ }
 void SunLight::lighten(GLuint shader){ 
-	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
+	glUniform1i(glGetUniformLocation(shader,"LightType"), static_cast<int>(m_Type));
 
-	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
-    glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
-    glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
+	glUniform3f(glGetUniformLocation(shader,"LightColor"), m_Color.x, m_Color.y, m_Color.z);
+    glUniform1f(glGetUniformLocation(shader,"LightAmbientIntensity"), m_AmbientIntensity);
+    glUniform1f(glGetUniformLocation(shader,"LightDiffuseIntensity"), m_DiffuseIntensity);
 
 	glm::vec3 pos = glm::vec3(getPosition());
-	glUniform3f(glGetUniformLocation(shader,"gLightPosition"), pos.x, pos.y, pos.z);
+	glUniform3f(glGetUniformLocation(shader,"LightPosition"), pos.x, pos.y, pos.z);
 
 	glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), m_SpecularPower);
+	glUniform1f(glGetUniformLocation(shader,"LightSpecularPower"), m_SpecularPower);
 
 	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LIGHT_TYPE_DIRECTIONAL,scene){
-	m_Direction = dir;
+	m_Direction = glm::normalize(dir);
 }
 DirectionalLight::~DirectionalLight(){
 }
@@ -74,14 +74,14 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::render(GLuint shader,bool debug){ }
 void DirectionalLight::draw(GLuint shader,bool debug){ }
 void DirectionalLight::lighten(GLuint shader){
-	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
+	glUniform1i(glGetUniformLocation(shader,"LightType"), static_cast<int>(m_Type));
 
-	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
-	glUniform3f(glGetUniformLocation(shader,"gDirection"), m_Direction.x, m_Direction.y,m_Direction.z);
-    glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
-    glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
+	glUniform3f(glGetUniformLocation(shader,"LightColor"), m_Color.x, m_Color.y, m_Color.z);
+	glUniform3f(glGetUniformLocation(shader,"LightDirection"), m_Direction.x, m_Direction.y,m_Direction.z);
+    glUniform1f(glGetUniformLocation(shader,"LightAmbientIntensity"), m_AmbientIntensity);
+    glUniform1f(glGetUniformLocation(shader,"LightDiffuseIntensity"), m_DiffuseIntensity);
 
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), m_SpecularPower);
+	glUniform1f(glGetUniformLocation(shader,"LightSpecularPower"), m_SpecularPower);
 
 	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
 	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
@@ -121,21 +121,21 @@ void PointLight::lighten(GLuint shader){
 	if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
 		return;	
 
-	glUniform1i(glGetUniformLocation(shader,"gLightType"), static_cast<int>(m_Type));
+	glUniform1i(glGetUniformLocation(shader,"LightType"), static_cast<int>(m_Type));
 
-	glUniform3f(glGetUniformLocation(shader,"gColor"), m_Color.x, m_Color.y, m_Color.z);
-    glUniform1f(glGetUniformLocation(shader,"gAmbientIntensity"), m_AmbientIntensity);
-    glUniform1f(glGetUniformLocation(shader,"gDiffuseIntensity"), m_DiffuseIntensity);
-	glUniform1f(glGetUniformLocation(shader,"gSpecularPower"), m_SpecularPower);
+	glUniform3f(glGetUniformLocation(shader,"LightColor"), m_Color.x, m_Color.y, m_Color.z);
+    glUniform1f(glGetUniformLocation(shader,"LightAmbientIntensity"), m_AmbientIntensity);
+    glUniform1f(glGetUniformLocation(shader,"LightDiffuseIntensity"), m_DiffuseIntensity);
+	glUniform1f(glGetUniformLocation(shader,"LightSpecularPower"), m_SpecularPower);
 
-	glUniform3f(glGetUniformLocation(shader,"gLightPosition"), float(pos.x), float(pos.y), float(pos.z));
+	glUniform3f(glGetUniformLocation(shader,"LightPosition"), float(pos.x), float(pos.y), float(pos.z));
 
 	glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
-	glUniform1f(glGetUniformLocation(shader,"gConstant"), m_Constant);
-    glUniform1f(glGetUniformLocation(shader,"gLinear"), m_Linear);
-    glUniform1f(glGetUniformLocation(shader,"gExp"), m_Exp);
+	glUniform1f(glGetUniformLocation(shader,"LightConstant"), m_Constant);
+    glUniform1f(glGetUniformLocation(shader,"LightLinear"), m_Linear);
+    glUniform1f(glGetUniformLocation(shader,"LightExp"), m_Exp);
 
 	this->m_Orientation = Resources::getActiveCamera()->getOrientation();
 

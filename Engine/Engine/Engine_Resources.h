@@ -74,18 +74,61 @@ namespace Engine{
 		void setActiveCamera(Camera* c);
 		void setActiveCamera(std::string name);
 
-		static Scene* getScene(std::string name){ return Detail::ResourceManagement::m_Scenes[name].get(); }
-		static SoundEffect* getSound(std::string name){ return Detail::ResourceManagement::m_Sounds[name].get(); }
-		static boost::shared_ptr<Object>& getObjectPtr(std::string name){ return Detail::ResourceManagement::m_Objects[name]; }
-		static boost::shared_ptr<Camera>& getCameraPtr(std::string name){ return Detail::ResourceManagement::m_Cameras[name]; }
-		static Object* getObject(std::string name){ return getObjectPtr(name).get(); }
-		static Camera* getCamera(std::string name){ return Detail::ResourceManagement::m_Cameras[name].get(); }
-		static Font* getFont(std::string name){ return Detail::ResourceManagement::m_Fonts[name].get(); }
-		static Texture* getTexture(std::string name){ return Detail::ResourceManagement::m_Textures[name].get(); }
-		static Mesh* getMesh(std::string name){ return Detail::ResourceManagement::m_Meshes[name].get(); }
-		static Material* getMaterial(std::string name){ return Detail::ResourceManagement::m_Materials[name].get(); }
-		static ParticleInfo* getParticleInfo(std::string name){ return Detail::ResourceManagement::m_ParticleInfos[name].get(); }
-		static ShaderP* getShader(std::string name){ return Detail::ResourceManagement::m_Shaders[name].get(); }
+		static Scene* getScene(std::string n){ 
+			if(!Detail::ResourceManagement::m_Scenes.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_Scenes[n].get(); 
+		}
+		static SoundEffect* getSound(std::string n){ 
+			if(!Detail::ResourceManagement::m_Sounds.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_Sounds[n].get(); 
+		}
+		static boost::shared_ptr<Object>& getObjectPtr(std::string n){ 
+			return Detail::ResourceManagement::m_Objects[n]; 
+		}
+		static boost::shared_ptr<Camera>& getCameraPtr(std::string n){ 
+			return Detail::ResourceManagement::m_Cameras[n]; 
+		}
+		static Object* getObject(std::string n){
+			if(!Detail::ResourceManagement::m_Objects.count(n))
+				return nullptr;
+			return getObjectPtr(n).get(); 
+		}
+		static Camera* getCamera(std::string n){
+			if(!Detail::ResourceManagement::m_Cameras.count(n))
+				return nullptr;
+			return getCameraPtr(n).get(); 
+		}
+		static Font* getFont(std::string n){
+			if(!Detail::ResourceManagement::m_Fonts.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_Fonts[n].get(); 
+		}
+		static Texture* getTexture(std::string n){
+			if(!Detail::ResourceManagement::m_Textures.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_Textures[n].get(); 
+		}
+		static Mesh* getMesh(std::string n){
+			if(!Detail::ResourceManagement::m_Meshes.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_Meshes[n].get(); 
+		}
+		static Material* getMaterial(std::string n){ 
+			if(!Detail::ResourceManagement::m_Materials.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_Materials[n].get(); 
+		}
+		static ParticleInfo* getParticleInfo(std::string n){ 
+			if(!Detail::ResourceManagement::m_ParticleInfos.count(n))
+				return nullptr;
+			return Detail::ResourceManagement::m_ParticleInfos[n].get(); 
+		}
+		static ShaderP* getShader(std::string n){ 
+			if(!Detail::ResourceManagement::m_Shaders.count(n)) return nullptr;
+			return Detail::ResourceManagement::m_Shaders[n].get(); 
+		}
 
 		void addMesh(std::string name,std::string file);
 		void addMesh(std::string file);

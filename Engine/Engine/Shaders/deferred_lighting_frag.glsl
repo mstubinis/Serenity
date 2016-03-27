@@ -1,18 +1,18 @@
 #version 120
 
-uniform int gLightType;
+uniform int LightType;
 
-uniform vec3 gColor;
-uniform float gAmbientIntensity;
-uniform float gDiffuseIntensity;
+uniform vec3 LightColor;
+uniform float LightAmbientIntensity;
+uniform float LightDiffuseIntensity;
+uniform float LightSpecularPower;
 
-uniform float gConstant;
-uniform float gLinear;
-uniform float gExp;
+uniform float LightConstant;
+uniform float LightLinear;
+uniform float LightExp;
 
-
-uniform vec3 gDirection;
-uniform vec3 gLightPosition;
+uniform vec3 LightDirection;
+uniform vec3 LightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
@@ -22,40 +22,44 @@ uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
 uniform mat4 VPInverse;
 
-uniform float gSpecularPower;
-
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal){
-    vec4 AmbientColor = vec4(gColor, 1.0) * gAmbientIntensity;
-    float Lambertian = dot(PxlNormal, -LightDir);
+    vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
+    float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
 
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);
 
     if (Lambertian > 0.0) {
+        DiffuseColor = vec4(LightColor, 1.0) * LightDiffuseIntensity * Lambertian;
+        vec3 ViewVector = normalize(-PxlWorldPos + gCameraPosition);
 
-        DiffuseColor = vec4(gColor, 1.0) * gDiffuseIntensity * Lambertian;
+		// this is blinn phong
+		vec3 halfDir = normalize(LightDir + ViewVector);
+		float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
+		SpecularAngle = pow(SpecularAngle, LightSpecularPower);
 
-        vec3 LightSourceToEye = normalize(gCameraPosition - PxlWorldPos);
-        vec3 ReflectionVector = normalize(reflect(LightDir, PxlNormal));
-        float SpecularFactor = dot(LightSourceToEye, ReflectionVector);
-        SpecularFactor = pow(SpecularFactor, gSpecularPower);
-        if (SpecularFactor > 0.0 && gSpecularPower > 0.001f) {
+		//this is regular phong
+		//vec3 reflectDir = reflect(-LightDir, PxlNormal);
+		//float SpecularAngle = max(dot(reflectDir, ViewVector), 0.0);
+		//SpecularAngle = pow(SpecularAngle, LightSpecularPower/4.0);
+
+        if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
 			float materialSpecularity = texture2D(gGlowMap,CalcTexCoord()).b;
-            SpecularColor = vec4(gColor, 1.0) * materialSpecularity * SpecularFactor;
+            SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }
     return (AmbientColor + DiffuseColor + SpecularColor);
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal){
-    vec3 LightDir = PxlWorldPos - gLightPosition;
+    vec3 LightDir = PxlWorldPos + LightPosition;
     float Distance = length(LightDir);
     LightDir = normalize(LightDir);
 
     vec4 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal);
 
-    float a =  gConstant + (gLinear * Distance) + (gExp * Distance * Distance);
+    float a =  LightConstant + (LightLinear * Distance) + (LightExp * Distance * Distance);
     a = max(1.0, a);
     return c / a;
 }
@@ -64,19 +68,19 @@ vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal){
 }
 void main(){
 	vec2 texCoord = CalcTexCoord();
-	vec3 position = texture2D(gPositionMap,texCoord).xyz;
-    vec3 normal = normalize(texture2D( gNormalMap, texCoord).rgb);
+	vec3 PxlPosition = texture2D(gPositionMap,texCoord).xyz;
+    vec3 PxlNormal = normalize(texture2D(gNormalMap, texCoord).rgb);
 
 	vec4 lightCalculation = vec4(0);
 
-	if(gLightType == 0)
-		lightCalculation = CalcLightInternal(normalize(position - gLightPosition),position,normal);
-	else if(gLightType == 1)
-		lightCalculation = CalcPointLight(position,normal);
-	else if(gLightType == 2)
-		lightCalculation = CalcLightInternal(gDirection,position,normal);
-	else if(gLightType == 3)
-		lightCalculation = CalcSpotLight(position,normal);
+	if(LightType == 0)
+		lightCalculation = CalcLightInternal(normalize(PxlPosition + LightPosition),PxlPosition,PxlNormal);
+	else if(LightType == 1)
+		lightCalculation = CalcPointLight(PxlPosition,PxlNormal);
+	else if(LightType == 2)
+		lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal);
+	else if(LightType == 3)
+		lightCalculation = CalcSpotLight(PxlPosition,PxlNormal);
 
 	gl_FragColor = lightCalculation;
 }

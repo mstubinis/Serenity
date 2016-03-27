@@ -13,7 +13,8 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
 	m_Visible = true;
 	m_Shadeless = false;
 	m_BoundingBoxRadius = glm::vec3(0);
-	m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
+	if(mesh != "" && mat != "")
+		m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
 	m_Color = glm::vec4(1);
 	calculateRadius();
 }

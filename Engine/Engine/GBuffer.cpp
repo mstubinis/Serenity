@@ -37,7 +37,7 @@ void TextureBuffer::clear(GLuint& fbo){
 	glViewport(0,0,m_width, m_height);
 
 	// Specify what to render an start acquiring
-	unsigned int buffers[] = { getAttatchment()};
+	unsigned int buffers[] = { getAttatchment() };
 
 	glDrawBuffers(sizeof(buffers)/sizeof(*buffers), buffers);
 

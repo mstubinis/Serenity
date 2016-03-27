@@ -31,7 +31,7 @@ Texture::Texture(std::string file,std::string name,GLuint type){
 
 	m_Name = name;
 	if(name == ""){
-		m_Name = file.substr(0,file.size()-4);
+		m_Name = file;
 	}
 	if(file != ""){
 		Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);

@@ -30,7 +30,7 @@ void OrbitInfo::setOrbitalPosition(glm::nType a,Object* thisPlanet){
 }
 
 
-Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::nType scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl,scl,scl),name,scene){
+Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::nType scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl),name,scene){
 	m_AtmosphereHeight = atmosphere;
 	m_Type = type;
 	m_OrbitInfo = nullptr;
@@ -253,7 +253,7 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::nType scl
 
 	for(auto item:m_DisplayItems){
 		item->material->setShadeless(true);
-		item->material->setBaseGlow(0.22f);
+		item->material->setBaseGlow(0.21f);
 	}
 
 	addChild(m_Light);

@@ -212,7 +212,6 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	for (auto light:Resources::getCurrentScene()->getLights()) {
 		light.second->lighten(shader);
    	}
-
 	// Reset OpenGL state
 	for(unsigned int i = 0; i < 3; i++){
 		glActiveTexture(GL_TEXTURE0 + i);

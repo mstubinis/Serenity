@@ -63,7 +63,7 @@ void HUD::render(bool debug){
 		glm::nType scl = glm::max(static_cast<glm::nType>(0.5f),static_cast<glm::nType>(player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getActiveCamera())));
 
 		if(pos.z == 1){
-			Resources::getTexture("Textures/HUD/Crosshair")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
+			Resources::getTexture("Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
 			unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
 			std::string stringRepresentation = "";
 			if(distanceInKm > 0){
@@ -101,7 +101,7 @@ void HUD::render(bool debug){
 				else
 					angle = 135;
 			}
-			Resources::getTexture("Textures/HUD/CrosshairArrow")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0.1f);
+			Resources::getTexture("Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0.1f);
 		}
 
 	}

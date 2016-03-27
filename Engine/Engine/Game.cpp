@@ -23,7 +23,6 @@ void Game::initResources(){
 	Resources::addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
 
 	Resources::addMesh("Skybox","Models/skybox.obj");
-	Resources::addMesh("DEBUGLight","Models/debugLight.obj");
 	Resources::addMesh("Planet","Models/planet.obj");
 	Resources::addMesh("Defiant","Models/defiant.obj");
 	Resources::addMesh("Akira","Models/akira.obj");
@@ -33,7 +32,6 @@ void Game::initResources(){
 	Lagrange::_genBuffers();
 
 	Resources::addMaterial("Star","Textures/Planets/Sun.jpg");
-	Resources::addMaterial("Default","Textures/Planets/Sun.jpg");
 	Resources::addMaterial("Earth","Textures/Planets/Earth.jpg","","Textures/Planets/EarthNight.jpg");
 	Resources::addMaterial("Defiant","Textures/defiant.png","Textures/defiant_Normal.png","Textures/defiant_Glow.png");
 	Resources::addMaterial("Akira","Textures/akira.png","Textures/akira_Normal.png","Textures/akira_Glow.png");

@@ -28,6 +28,7 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_N
 class Texture;
 class Material final{
 	private:
+		void _init(Texture*,Texture*,Texture*);
 		std::unordered_map<unsigned int,Texture*> m_Components;
 		unsigned int m_LightingMode;
 		bool m_Shadeless;
