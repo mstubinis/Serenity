@@ -37,6 +37,7 @@ CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,b
 		m_Light->setExponent(0.1f);
 
 		m_Light->setColor(255,124,27,255);
+		m_Light->setSpecularPower(2.0f);
 	}
 	setColor(255,235,206,255);
 	this->m_Shadeless = true;
@@ -48,10 +49,10 @@ void CapsuleStar::update(float dt){
 
 	translate(0,0,(-120 * 100 ) * dt);
 
-	if(pos.z >= 70 * 100){
+	if(pos.z >= 200 * 100){
 		float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
 		float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
-		setPosition(x*100,y*100,-70*100);
+		setPosition(x*100,y*100,-200*100);
 	}
 	if(m_Light != nullptr)
 		m_Light->setPosition(pos/static_cast<glm::nType>(100));
@@ -94,7 +95,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	setBackgroundColor(255.0f,0,0);
 
 	PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
-	l->setColor(255,225,225,255);
+	l->setColor(255,235,235,255);
 	l->setSpecularPower(0.0f);
 
 	if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleTunnel")){
@@ -138,18 +139,18 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	m_Ribbon->setPosition(0,300,0);
 
 	float step = -10.0f;
-	for(unsigned int i = 0; i < 60; i++){
+	for(unsigned int i = 0; i < 120; i++){
 		float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
 		float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
 
 		glm::v3 pos = glm::v3(x,y,step)*glm::v3(100);
 
-		bool spawnLight = true;
-		if(i % 2 == 0){
-			spawnLight = false;
+		bool spawnLight = false;
+		if(i % 5 == 0){
+			spawnLight = true;
 		}
 		m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star" + boost::lexical_cast<std::string>(i),this,spawnLight));
-		step -= 4.0f;
+		step -= 6.0f;
 	}
 
 	//this to just test. should set player / camera dynamically

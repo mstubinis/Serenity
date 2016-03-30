@@ -33,13 +33,19 @@ SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):
 SunLight::~SunLight(){
 }
 void SunLight::setName(std::string name){
-	std::string oldName = m_Name;
-	m_Name = name;
-	Resources::Detail::ResourceManagement::m_CurrentScene->getLights()[name] = this;
+	if(name == m_Name) return;
 
-	for(auto it = begin(Resources::Detail::ResourceManagement::m_CurrentScene->getLights()); it != end(Resources::Detail::ResourceManagement::m_CurrentScene->getLights());){
-		if (it->first == oldName)it = Resources::Detail::ResourceManagement::m_CurrentScene->getLights().erase(it);
-	    else++it;
+	std::string oldName = m_Name; m_Name = name;
+
+	Resources::Detail::ResourceManagement::m_CurrentScene->getLights()[name] = this;
+	if(Resources::Detail::ResourceManagement::m_CurrentScene->getLights().count(oldName)){
+		Resources::Detail::ResourceManagement::m_CurrentScene->getLights().erase(oldName);
+	}
+
+	Resources::Detail::ResourceManagement::m_Objects[name] = boost::shared_ptr<Object>(this);
+	if(Resources::Detail::ResourceManagement::m_Objects.count(oldName)){
+		Resources::Detail::ResourceManagement::m_Objects[oldName].reset();
+		Resources::Detail::ResourceManagement::m_Objects.erase(oldName);
 	}
 }
 void SunLight::update(float dt){

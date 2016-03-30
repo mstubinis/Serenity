@@ -98,12 +98,14 @@ mkdir “$(TargetDir)Systems\”
 mkdir “$(TargetDir)Shaders\”
 mkdir “$(TargetDir)Models\”
 mkdir “$(TargetDir)Textures\”
+mkdir “$(TargetDir)Sounds\”
 xcopy "$(SolutionDir)\dependencies\bin" "$(TargetDir)" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Systems" "$(TargetDir)Systems" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
 xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>
+xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying Binary...</Message>

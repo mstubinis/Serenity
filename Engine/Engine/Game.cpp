@@ -18,6 +18,8 @@ void Game::cleanup(){
 	delete m_HUD;
 }
 void Game::initResources(){
+	Resources::addSoundAsMusic("Test","Sounds/Music/test.ogg");
+
 	Resources::addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
 	Resources::addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
 	Resources::addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
@@ -52,6 +54,9 @@ void Game::initLogic(){
 	Resources::setCurrentScene("Sol");
 	Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 	////Resources::setCurrentScene("CapsuleSpace");
+
+	Sound::setCurrentMusicAndPlay("Test");
+	Sound::loop("Test");
 
 	m_HUD = new HUD();
 }

@@ -20,7 +20,9 @@ class Material;
 class ShaderP;
 class Object;
 class SunLight;
+class SoundEffectBasic;
 class SoundEffect;
+class SoundMusic;
 
 struct ParticleInfo;
 
@@ -45,7 +47,7 @@ namespace Engine{
 					static std::string m_WindowName;
 					static sf::Mouse* m_Mouse;
 
-					static std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> m_Sounds;
+					static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
 					static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
 					static std::unordered_map<std::string,boost::shared_ptr<Camera>> m_Cameras;
 					static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
@@ -79,11 +81,14 @@ namespace Engine{
 				return nullptr;
 			return Detail::ResourceManagement::m_Scenes[n].get(); 
 		}
-		static SoundEffect* getSound(std::string n){ 
+		static SoundEffectBasic* getSound(std::string n){ 
 			if(!Detail::ResourceManagement::m_Sounds.count(n))
 				return nullptr;
 			return Detail::ResourceManagement::m_Sounds[n].get(); 
 		}
+		SoundMusic* getSoundAsMusic(std::string n);
+		SoundEffect* getSoundAsEffect(std::string n);
+
 		static boost::shared_ptr<Object>& getObjectPtr(std::string n){ 
 			return Detail::ResourceManagement::m_Objects[n]; 
 		}
@@ -138,13 +143,16 @@ namespace Engine{
 		void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr);
 		void removeMaterial(std::string name);
 
-		void addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile);
+		void addShader(std::string name, std::string vertexShader, std::string fragmentShader, bool fromFile = true);
 
 		void addParticleInfo(std::string name, std::string material);
 		void addParticleInfo(std::string name, Material* diffuse);
 		void removeParticleInfo(std::string name);
 
-		void addSound(std::string name, std::string file);
+		void addSound(std::string name, std::string file,bool asEffect = true);
+		void addSoundAsEffect(std::string name, std::string file);
+		void addSoundAsMusic(std::string name, std::string file);
+
 		void removeSound(std::string name);
 
 		void initResources();

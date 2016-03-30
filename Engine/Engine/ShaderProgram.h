@@ -11,22 +11,28 @@
 #include <boost/iostreams/stream.hpp>
 
 
-static GLuint CompileShader(const char* vShaderFile, const char* fShaderFile){
+static GLuint CompileShader(const char* vShader, const char* fShader, bool fromFile = true){
 	// Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
  
 	std::string VertexShaderCode = "";
-	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vShaderFile);
-	for(std::string line; std::getline(str, line, '\n');){
-		VertexShaderCode += "\n" + line;
-	}
 	std::string FragmentShaderCode = "";
-	boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(fShaderFile);
-	for(std::string line; std::getline(str1, line, '\n');){
-		FragmentShaderCode += "\n" + line;
-	}
 
+	if(fromFile){
+		boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vShader);
+		for(std::string line; std::getline(str, line, '\n');){
+			VertexShaderCode += "\n" + line;
+		}
+		boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(fShader);
+		for(std::string line; std::getline(str1, line, '\n');){
+			FragmentShaderCode += "\n" + line;
+		}
+	}
+	else{
+		VertexShaderCode = vShader;
+		FragmentShaderCode = fShader;
+	}
  
     GLint Result = GL_FALSE;
     int InfoLogLength;
@@ -78,7 +84,7 @@ class ShaderP final{
 		std::string m_VertexShader;
 		std::string m_PixelShader;
 	public:
-		ShaderP(std::string vs,std::string ps);
+		ShaderP(std::string vs,std::string ps, bool fromFile = true);
 		~ShaderP();
 
 		const GLuint getShaderProgram() const{ return m_Shader; }

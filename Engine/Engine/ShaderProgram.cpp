@@ -1,15 +1,9 @@
 #include "ShaderProgram.h"
 
-ShaderP::ShaderP(std::string vs, std::string ps){
+ShaderP::ShaderP(std::string vs, std::string ps, bool fromFile){
 	m_VertexShader = vs;
-	if(vs == ""){
-		m_VertexShader = "Shaders/vert.glsl";
-	}
 	m_PixelShader = ps;
-	if(ps == ""){
-		m_PixelShader = "Shaders/frag.glsl";
-	}
-	m_Shader = CompileShader(m_VertexShader.c_str(),m_PixelShader.c_str());
+	m_Shader = CompileShader(m_VertexShader.c_str(),m_PixelShader.c_str(), fromFile);
 }
 ShaderP::~ShaderP(){
 	glDeleteShader(m_Shader);

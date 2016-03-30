@@ -209,11 +209,16 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GLOW));
 	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 2 );
 
+	glActiveTexture(GL_TEXTURE3);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
+	glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 3 );
+
 	for (auto light:Resources::getCurrentScene()->getLights()) {
 		light.second->lighten(shader);
    	}
 	// Reset OpenGL state
-	for(unsigned int i = 0; i < 3; i++){
+	for(unsigned int i = 0; i < 4; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);

@@ -17,6 +17,7 @@ uniform vec3 LightPosition;
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
 uniform sampler2D gGlowMap;
+uniform sampler2D gDiffuseMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
@@ -24,9 +25,11 @@ uniform mat4 VPInverse;
 
 vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
-vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal){
+vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
     float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
+
+	vec4 diffuseMapColor = vec4(texture2D(gDiffuseMap,uv).rgb, 1.0);
 
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);
@@ -50,37 +53,40 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal){
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }
-    return (AmbientColor + DiffuseColor + SpecularColor);
+	if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
+		return diffuseMapColor;
+	}
+    return (((AmbientColor + DiffuseColor) * diffuseMapColor) + SpecularColor);
 }
-vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal){
+vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = PxlWorldPos + LightPosition;
     float Distance = length(LightDir);
     LightDir = normalize(LightDir);
 
-    vec4 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal);
+    vec4 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
     float a =  LightConstant + (LightLinear * Distance) + (LightExp * Distance * Distance);
     a = max(1.0, a);
     return c / a;
 }
-vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal){
+vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 	return vec4(0);
 }
 void main(){
 	vec2 texCoord = CalcTexCoord();
 	vec3 PxlPosition = texture2D(gPositionMap,texCoord).xyz;
-    vec3 PxlNormal = normalize(texture2D(gNormalMap, texCoord).rgb);
+    vec3 PxlNormal = (texture2D(gNormalMap, texCoord).rgb);
 
 	vec4 lightCalculation = vec4(0);
 
 	if(LightType == 0)
-		lightCalculation = CalcLightInternal(normalize(PxlPosition + LightPosition),PxlPosition,PxlNormal);
+		lightCalculation = CalcLightInternal(normalize(PxlPosition + LightPosition),PxlPosition,PxlNormal,texCoord);
 	else if(LightType == 1)
-		lightCalculation = CalcPointLight(PxlPosition,PxlNormal);
+		lightCalculation = CalcPointLight(PxlPosition,PxlNormal,texCoord);
 	else if(LightType == 2)
-		lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal);
+		lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,texCoord);
 	else if(LightType == 3)
-		lightCalculation = CalcSpotLight(PxlPosition,PxlNormal);
+		lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,texCoord);
 
 	gl_FragColor = lightCalculation;
 }

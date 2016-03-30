@@ -1,8 +1,8 @@
 #include "Engine_Resources.h"
-#include "Engine_Sounds.h"
 #include "Engine_Physics.h"
-#include "ShaderProgram.h"
+#include "Engine_Sounds.h"
 
+#include "ShaderProgram.h"
 #include "Object.h"
 #include "Light.h"
 #include "ObjectDynamic.h"
@@ -41,7 +41,7 @@ std::unordered_map<std::string,boost::shared_ptr<Mesh>> Detail::ResourceManageme
 std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
 std::unordered_map<std::string,boost::shared_ptr<ParticleInfo>> Detail::ResourceManagement::m_ParticleInfos;
 std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_Shaders;
-std::unordered_map<std::string,boost::shared_ptr<SoundEffect>> Detail::ResourceManagement::m_Sounds;
+std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 
 void Engine::Resources::Detail::ResourceManagement::destruct(){
 	for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               
@@ -104,16 +104,30 @@ void Engine::Resources::addParticleInfo(std::string name, Material* material){
 	Detail::ResourceManagement::m_ParticleInfos[name] = boost::make_shared<ParticleInfo>(material);
 }
 
-void Engine::Resources::addShader(std::string name, std::string vertexShaderFile, std::string fragmentShaderFile){
+void Engine::Resources::addShader(std::string name, std::string vShader, std::string fShader, bool fromFile){
 	if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
 		return;
-	Detail::ResourceManagement::m_Shaders[name] = boost::make_shared<ShaderP>(vertexShaderFile,fragmentShaderFile);
+	Detail::ResourceManagement::m_Shaders[name] = boost::make_shared<ShaderP>(vShader,fShader,fromFile);
 }
 
-void Engine::Resources::addSound(std::string name, std::string file){
+void Engine::Resources::addSound(std::string name, std::string file, bool asEffect){
 	if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name))
 		return;
-	Detail::ResourceManagement::m_Sounds[name] = boost::make_shared<SoundEffect>(file);
+	if(asEffect) Detail::ResourceManagement::m_Sounds[name] = boost::make_shared<SoundEffect>(file);
+	else         Detail::ResourceManagement::m_Sounds[name] = boost::make_shared<SoundMusic>(file);
+}
+void Engine::Resources::addSoundAsEffect(std::string name, std::string file){ addSound(name,file,true); }
+void Engine::Resources::addSoundAsMusic(std::string name, std::string file){ addSound(name,file,false); }
+
+SoundMusic* Engine::Resources::getSoundAsMusic(std::string n){ 
+	if(!Detail::ResourceManagement::m_Sounds.count(n))
+		return nullptr;
+	return static_cast<SoundMusic*>(Detail::ResourceManagement::m_Sounds[n].get()); 
+}
+SoundEffect* Engine::Resources::getSoundAsEffect(std::string n){ 
+	if(!Detail::ResourceManagement::m_Sounds.count(n))
+		return nullptr;
+	return static_cast<SoundEffect*>(Detail::ResourceManagement::m_Sounds[n].get()); 
 }
 
 void Engine::Resources::removeMesh(std::string name){
@@ -167,7 +181,6 @@ void Engine::Resources::setCurrentScene(Scene* s){
 		ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
 		if(dynamicObj != NULL){
 			Engine::Physics::removeRigidBody(dynamicObj);
-			//dynamicObj->deactivateCollisionObject();
 		}
 	}
 
@@ -177,7 +190,6 @@ void Engine::Resources::setCurrentScene(Scene* s){
 		ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
 		if(dynamicObj != NULL){
 			Engine::Physics::addRigidBody(dynamicObj);
-			//dynamicObj->activateCollisionObject();
 		}
 	}
 }
