@@ -11,9 +11,7 @@ class Material;
 class Scene;
 class Camera;
 
-template <typename T> bool exists(boost::weak_ptr<T> t){
-	return !(t.expired());
-}
+template <typename T> bool exists(boost::weak_ptr<T> t){ return !(t.expired()); }
 
 class ObjectInterface{
 	public:

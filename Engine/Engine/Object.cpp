@@ -1,6 +1,5 @@
 #include "Engine.h"
 #include "Math.h"
-#include "Engine_Math.h"
 #include "Camera.h"
 #include "Scene.h"
 
@@ -36,40 +35,7 @@ Object::~Object()
 glm::nType Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return static_cast<unsigned long long>(abs(glm::length(vecTo))); }
 glm::vec3 Object::getScreenCoordinates(){
-	glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
-	glm::vec3 objPos = glm::vec3(getPosition());
-	glm::mat4 MV = Resources::getActiveCamera()->getView();
-	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
-	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
-
-	//check if point is behind
-	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos-glm::vec3(Resources::getActiveCamera()->getPosition()));
-
-	float resX = static_cast<float>(screen.x);
-	float resY = static_cast<float>(windowSize.y-screen.y);
-
-	int inBounds = 1;
-
-	if(screen.x < 0){ resX = 0; inBounds = 0; }
-	else if(screen.x > windowSize.x){ resX = windowSize.x; inBounds = 0; }
-	if(resY < 0){ resY = 0; inBounds = 0; }
-	else if(resY > windowSize.y){ resY = windowSize.y; inBounds = 0; }
-
-	if(dot < 0.0f){
-		return glm::vec3(resX,resY,inBounds);
-	}
-	else{
-		inBounds = 0;
-		float fX = windowSize.x - screen.x;
-		float fY = windowSize.y - resY;
-
-		if(fX < windowSize.x/2){ fX = 0; }
-		else if(fX > windowSize.x/2){ fX = windowSize.x; }
-		if(fY < windowSize.y/2){ fY = 0; }
-		else if(fY > windowSize.y/2){ fY = windowSize.y; }
-
-		return glm::vec3(fX,fY,inBounds);
-	}
+	return Math::getScreenCoordinates(glm::vec3(getPosition()));
 }
 void Object::addChild(Object* child){
 	child->m_Parent = this;

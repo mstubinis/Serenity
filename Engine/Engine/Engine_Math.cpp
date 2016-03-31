@@ -1,10 +1,43 @@
 #include "Engine_Math.h"
+#include "Engine_Resources.h"
+#include "Camera.h"
 
 using namespace Engine;
 
-glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){
-	return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f);
+glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos){
+	glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	glm::mat4 MV = Resources::getActiveCamera()->getView();
+	glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
+	glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
+
+	//check if point is behind
+	float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos-glm::vec3(Resources::getActiveCamera()->getPosition()));
+
+	float resX = static_cast<float>(screen.x);
+	float resY = static_cast<float>(windowSize.y-screen.y);
+
+	unsigned int inBounds = 1;
+
+	if(screen.x < 0){ resX = 0; inBounds = 0; }
+	else if(screen.x > windowSize.x){ resX = windowSize.x; inBounds = 0; }
+	if(resY < 0){ resY = 0; inBounds = 0; }
+	else if(resY > windowSize.y){ resY = windowSize.y; inBounds = 0; }
+
+	if(dot < 0.0f){
+		return glm::vec3(resX,resY,inBounds);
+	}
+	inBounds = 0;
+	float fX = windowSize.x - screen.x;
+	float fY = windowSize.y - resY;
+
+	if(fX < windowSize.x/2){ fX = 0; }
+	else if(fX > windowSize.x/2){ fX = windowSize.x; }
+	if(fY < windowSize.y/2){ fY = 0; }
+	else if(fY > windowSize.y/2){ fY = windowSize.y; }
+
+	return glm::vec3(fX,fY,inBounds);
 }
+glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
 glm::vec3 Math::midpoint(glm::v3 a, glm::v3 b){
 	return glm::vec3(static_cast<float>((a.x+b.x)/2),static_cast<float>((a.y+b.y)/2),static_cast<float>((a.z+b.z)/2));
 }

@@ -34,14 +34,6 @@ class Lagrange: public ObjectBasic{
 			   );
 		virtual ~Lagrange();
 
-
-		static void _genBuffers(){
-			glGenBuffers(1, &Lagrange::m_Buffer);
-
-			glBindBuffer(GL_ARRAY_BUFFER, Lagrange::m_Buffer );
-			glBufferData(GL_ARRAY_BUFFER, Lagrange::m_Vertices.size() * sizeof(glm::vec3),&Lagrange::m_Vertices[0], GL_STATIC_DRAW );
-		}
-
 		const LAGRANGE_TYPE getType() const{ return m_Type; }
 
 		glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }

@@ -42,7 +42,7 @@ class SoundEffectBasic{
 };
 class SoundEffect: public SoundEffectBasic{
 	public:
-		SoundEffect(std::string file);
+		SoundEffect(std::string file, bool loop = false, glm::vec3 sourceOrigin = glm::vec3(0));
 		virtual ~SoundEffect();
 
 		virtual void play();
@@ -59,7 +59,7 @@ class SoundEffect: public SoundEffectBasic{
 };
 class SoundMusic: public SoundEffectBasic{
 	public:
-		SoundMusic(std::string file);
+		SoundMusic(std::string file, bool loop = true);
 		virtual ~SoundMusic();
 
 		virtual void play();
@@ -94,6 +94,17 @@ namespace Engine{
 					static bool isPaused(sf::SoundSource::Status);
 			};
 		};
+		static void stop(std::string music){
+			Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->stop();
+		}
+		static void play(std::string music, bool loop = true){
+			Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->play();
+			Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+		}
+		static void playAt(std::string music, float seconds,bool loop = true){
+			Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->playAt(seconds);
+			Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+		}
 		static void loop(std::string music, bool loop = true){
 			Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
 		}
@@ -108,7 +119,6 @@ namespace Engine{
 			}
 			dynamic_cast<SoundMusic*>(Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get())->play();
 		}
-
 		static void setMasterMusicVolume(float volume){
 			for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
 				SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());

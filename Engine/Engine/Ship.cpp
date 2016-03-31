@@ -308,3 +308,6 @@ void Ship::translateWarp(float amount){
 void Ship::setTarget(Object* target){
 	m_Target = target;
 }
+void Ship::setTarget(std::string target){
+	Ship::setTarget(Resources::getObject(target));
+}

@@ -11,127 +11,8 @@
 using namespace Engine;
 
 GLuint Lagrange::m_Buffer;
-
-std::vector<glm::vec3> _genBuffer(){
-	std::vector<glm::vec3> temp;
-	    //68 verts
-		temp.push_back(glm::vec3(0,-10.608f,-13.657f));
-		temp.push_back(glm::vec3(0,-6.262f,-8.53f));
-		temp.push_back(glm::vec3(4.06f,-9.8f,-13.657f));
-		temp.push_back(glm::vec3(2.4f,-5.785f,-8.53f));
-		temp.push_back(glm::vec3(7.5f,-7.5f,-13.657f));
-		temp.push_back(glm::vec3(4.428f,-4.428f,-8.53f));
-		temp.push_back(glm::vec3(9.8f,-4.059f,-13.657f));
-		temp.push_back(glm::vec3(5.785f,-2.396f,-8.53f));
-		temp.push_back(glm::vec3(10.608f,0,-13.657f));
-		temp.push_back(glm::vec3(6.262f,0,-8.53f));
-		temp.push_back(glm::vec3(9.8f,4.059f,-13.657f));
-		temp.push_back(glm::vec3(5.785,2.396f,-8.53f));
-		temp.push_back(glm::vec3(7.5f,7.5f,-13.657f));
-		temp.push_back(glm::vec3(4.428f,4.428f,-8.53f));
-		temp.push_back(glm::vec3(4.06f,9.8f,-13.657f));
-		temp.push_back(glm::vec3(2.396f,5.785f,-8.53f));
-		temp.push_back(glm::vec3(0,10.608f,-13.657f));
-		temp.push_back(glm::vec3(0,6.262f,-8.53f));
-		temp.push_back(glm::vec3(-4.06f,9.8f,-13.657f));
-		temp.push_back(glm::vec3(-2.396f,5.785f,-8.53f));
-		temp.push_back(glm::vec3(-7.5f,7.5f,-13.657f));
-		temp.push_back(glm::vec3(-4.428f,4.428f,-8.53f));
-		temp.push_back(glm::vec3(-9.8f,4.059f,-13.657f));
-		temp.push_back(glm::vec3(-5.78f,2.396f,-8.53f));
-		temp.push_back(glm::vec3(-10.6f,0,-13.657f));
-		temp.push_back(glm::vec3(-6.262f,0,-8.53f));
-		temp.push_back(glm::vec3(-9.8f,-4.059f,-13.657f));
-		temp.push_back(glm::vec3(-5.785f,-2.396f,-8.53f));
-		temp.push_back(glm::vec3(-7.5f,-7.5f,-13.657f));
-		temp.push_back(glm::vec3(-4.428f,-4.428f,-8.53f));
-		temp.push_back(glm::vec3(-4.06f,-9.8f,-13.657f));
-		temp.push_back(glm::vec3(-2.396f,-5.785f,-8.53f));
-		temp.push_back(glm::vec3(0,-10.608f,-13.657f));
-		temp.push_back(glm::vec3(0,-6.262f,-8.53f));
-
-		temp.push_back(glm::vec3(0,-6.262f,-8.53f));
-		temp.push_back(glm::vec3(0,-3.964f,-3.46f));
-		temp.push_back(glm::vec3(2.4f,-5.785f,-8.53f));
-		temp.push_back(glm::vec3(1.517f,-3.662f,-3.46f));
-		temp.push_back(glm::vec3(4.428f,-4.428f,-8.53f));
-		temp.push_back(glm::vec3(2.803f,-2.803f,-3.46f));
-		temp.push_back(glm::vec3(5.785f,-2.396f,-8.53f));
-		temp.push_back(glm::vec3(3.662f,-1.517f,-3.46f));
-		temp.push_back(glm::vec3(6.262f,0,-8.53f));
-		temp.push_back(glm::vec3(3.964f,0,-3.46f));
-		temp.push_back(glm::vec3(5.785,2.396f,-8.53f));
-		temp.push_back(glm::vec3(3.662f,1.517f,-3.46f));
-		temp.push_back(glm::vec3(4.428f,4.428f,-8.53f));
-		temp.push_back(glm::vec3(2.803f,2.803f,-3.46f));
-		temp.push_back(glm::vec3(2.396f,5.785f,-8.53f));
-		temp.push_back(glm::vec3(1.517f,3.662f,-3.46f));
-		temp.push_back(glm::vec3(0,6.262f,-8.53f));
-		temp.push_back(glm::vec3(0,3.964f,-3.46f));
-		temp.push_back(glm::vec3(-2.396f,5.785f,-8.53f));
-		temp.push_back(glm::vec3(-1.517f,3.662f,-3.46f));
-		temp.push_back(glm::vec3(-4.428f,4.428f,-8.53f));
-		temp.push_back(glm::vec3(-2.803f,2.803f,-3.46f));
-		temp.push_back(glm::vec3(-5.78f,2.396f,-8.53f));
-		temp.push_back(glm::vec3(-3.662f,1.517f,-3.46f));
-		temp.push_back(glm::vec3(-6.262f,0,-8.53f));
-		temp.push_back(glm::vec3(-3.964f,0,-3.46f));
-		temp.push_back(glm::vec3(-5.785f,-2.396f,-8.53f));
-		temp.push_back(glm::vec3(-3.662f,-1.517f,-3.46f));
-		temp.push_back(glm::vec3(-4.428f,-4.428f,-8.53f));
-		temp.push_back(glm::vec3(-2.803f,-2.803f,-3.46f));
-		temp.push_back(glm::vec3(-2.396f,-5.785f,-8.53f));
-		temp.push_back(glm::vec3(-1.517f,-3.662f,-3.46f));
-		temp.push_back(glm::vec3(0,-6.262f,-8.53f));
-		temp.push_back(glm::vec3(0,-3.964f,-3.46f));
-
-	std::vector<glm::vec3> temp2;
-
-	for(auto point:temp)
-		temp2.push_back(glm::vec3(point.x,point.y,-point.z));
-
-	temp.insert(temp.end(),temp2.begin(),temp2.end());
-
-	//middle ring (17 vertices)
-	temp.push_back(glm::vec3(0,-2.668f,0));
-	temp.push_back(glm::vec3(1.021f,-2.465f,0));
-	temp.push_back(glm::vec3(1.887f,-1.887f,0));
-	temp.push_back(glm::vec3(2.465f,-1.021f,0));
-	temp.push_back(glm::vec3(2.668f,0,0));
-	temp.push_back(glm::vec3(2.465f,1.021f,0));
-	temp.push_back(glm::vec3(1.887f,1.887f,0));
-	temp.push_back(glm::vec3(1.021f,2.465f,0));
-	temp.push_back(glm::vec3(0,2.668f,0));
-	temp.push_back(glm::vec3(-1.021f,2.465f,0));
-	temp.push_back(glm::vec3(-1.887f,1.887f,0));
-	temp.push_back(glm::vec3(-2.465f,1.021f,0));
-	temp.push_back(glm::vec3(-2.668f,0,0));
-	temp.push_back(glm::vec3(-2.465f,-1.021f,0));
-	temp.push_back(glm::vec3(-1.887,-1.887f,0));
-	temp.push_back(glm::vec3(-1.021f,-2.465f,0));
-	temp.push_back(glm::vec3(0,-2.668f,0));
-
-
-	return temp;
-}
-float _genRadius(std::vector<glm::vec3>& temp){
-	float maxX = 0;
-	float maxY = 0;
-	float maxZ = 0;
-	for(auto point:temp){
-		float x = abs(point.x);
-		float y = abs(point.y);
-		float z = abs(point.z);
-
-		if(x > maxX) maxX = x;
-		if(y > maxY) maxY = y;
-		if(z > maxZ) maxZ = z;
-	}
-	return glm::max(maxX, glm::max(maxY,maxZ));
-}
-
-std::vector<glm::vec3> Lagrange::m_Vertices = _genBuffer();
-float Lagrange::radius = _genRadius(Lagrange::m_Vertices);
+std::vector<glm::vec3> Lagrange::m_Vertices;
+float Lagrange::radius;
 
 Lagrange::Lagrange(std::string _p1, std::string _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
 	_init(_p1,_p2,_type);
@@ -147,6 +28,125 @@ Lagrange::Lagrange(std::string _p1, std::string _p2, std::string _type, std::str
 	_init(_p1,_p2,type);
 }
 void Lagrange::_init(std::string _planet1, std::string _planet2, LAGRANGE_TYPE _type){
+	#pragma region MeshData
+	if(Lagrange::m_Vertices.size() == 0){
+		//68 verts
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-10.608f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-6.262f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(4.06f,-9.8f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.4f,-5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(7.5f,-7.5f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(4.428f,-4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(9.8f,-4.059f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(5.785f,-2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(10.608f,0,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(6.262f,0,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(9.8f,4.059f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(5.785,2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(7.5f,7.5f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(4.428f,4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(4.06f,9.8f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.396f,5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,10.608f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,6.262f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-4.06f,9.8f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.396f,5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-7.5f,7.5f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-4.428f,4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-9.8f,4.059f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-5.78f,2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-10.6f,0,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-6.262f,0,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-9.8f,-4.059f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-5.785f,-2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-7.5f,-7.5f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-4.428f,-4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-4.06f,-9.8f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.396f,-5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-10.608f,-13.657f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-6.262f,-8.53f));
+
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-6.262f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-3.964f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.4f,-5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(1.517f,-3.662f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(4.428f,-4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.803f,-2.803f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(5.785f,-2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(3.662f,-1.517f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(6.262f,0,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(3.964f,0,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(5.785,2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(3.662f,1.517f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(4.428f,4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.803f,2.803f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.396f,5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(1.517f,3.662f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,6.262f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,3.964f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.396f,5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-1.517f,3.662f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-4.428f,4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.803f,2.803f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-5.78f,2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-3.662f,1.517f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-6.262f,0,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-3.964f,0,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-5.785f,-2.396f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-3.662f,-1.517f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-4.428f,-4.428f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.803f,-2.803f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.396f,-5.785f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(-1.517f,-3.662f,-3.46f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-6.262f,-8.53f));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-3.964f,-3.46f));
+
+		std::vector<glm::vec3> temp2;
+
+		for(auto point:Lagrange::m_Vertices)
+			temp2.push_back(glm::vec3(point.x,point.y,-point.z));
+
+		Lagrange::m_Vertices.insert(Lagrange::m_Vertices.end(),temp2.begin(),temp2.end());
+
+		//middle ring (17 vertices)
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-2.668f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(1.021f,-2.465f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(1.887f,-1.887f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.465f,-1.021f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.668f,0,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(2.465f,1.021f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(1.887f,1.887f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(1.021f,2.465f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,2.668f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-1.021f,2.465f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-1.887f,1.887f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.465f,1.021f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.668f,0,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-2.465f,-1.021f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-1.887,-1.887f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(-1.021f,-2.465f,0));
+		Lagrange::m_Vertices.push_back(glm::vec3(0,-2.668f,0));
+
+		float maxX = 0;
+		float maxY = 0;
+		float maxZ = 0;
+		for(auto point:Lagrange::m_Vertices){
+			float x = abs(point.x);
+			float y = abs(point.y);
+			float z = abs(point.z);
+
+			if(x > maxX) maxX = x;
+			if(y > maxY) maxY = y;
+			if(z > maxZ) maxZ = z;
+		}
+		Lagrange::radius = glm::max(maxX, glm::max(maxY,maxZ));
+
+		glGenBuffers(1, &Lagrange::m_Buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, Lagrange::m_Buffer );
+		glBufferData(GL_ARRAY_BUFFER, Lagrange::m_Vertices.size() * sizeof(glm::vec3),&Lagrange::m_Vertices[0], GL_STATIC_DRAW );
+	}
+
+	#pragma endregion
 
 	m_Planet1 = boost::dynamic_pointer_cast<Planet>(Resources::getObjectPtr(_planet1));
 	m_Planet2 = boost::dynamic_pointer_cast<Planet>(Resources::getObjectPtr(_planet2));

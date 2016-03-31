@@ -128,6 +128,7 @@ class Ship: public ObjectDynamic{
 
 		Object* getTarget() { return m_Target; }
 		virtual void setTarget(Object*);
+		virtual void setTarget(std::string);
 		virtual void update(float);
 };
 #endif

@@ -39,9 +39,11 @@ void SoundEffectBasic::setMinDistance(float d){ s->setMinDistance(d); }
 
 
 
-SoundEffect::SoundEffect(std::string file):SoundEffectBasic(file){
+SoundEffect::SoundEffect(std::string file, bool loop, glm::vec3 sourceOrigin):SoundEffectBasic(file){
 	Sound::Detail::SoundManagement::m_Buffer->loadFromFile(file);
 	s = new sf::Sound(*Sound::Detail::SoundManagement::m_Buffer);
+	static_cast<sf::Sound*>(s)->setLoop(loop);
+	static_cast<sf::Sound*>(s)->setPosition(sf::Vector3f(sourceOrigin.x,sourceOrigin.y,sourceOrigin.z));
 }
 SoundEffect::~SoundEffect(){
 }
@@ -58,9 +60,10 @@ bool SoundEffect::isLooping(){ return static_cast<sf::Sound*>(s)->getLoop(); }
 
 
 
-SoundMusic::SoundMusic(std::string file):SoundEffectBasic(file){
+SoundMusic::SoundMusic(std::string file, bool loop):SoundEffectBasic(file){
 	s = new sf::Music();
 	static_cast<sf::Music*>(s)->openFromFile(file);
+	static_cast<sf::Music*>(s)->setLoop(loop);
 }
 SoundMusic::~SoundMusic(){
 }

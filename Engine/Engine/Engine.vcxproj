@@ -121,6 +121,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command
     <ClCompile Include="Engine_Sounds.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameCamera.cpp" />
+    <ClCompile Include="GameSkybox.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Lagrange.cpp" />
@@ -154,6 +155,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command
     <ClInclude Include="Engine_Events.h" />
     <ClInclude Include="Engine_Sounds.h" />
     <ClInclude Include="GameCamera.h" />
+    <ClInclude Include="GameSkybox.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="Lagrange.h" />

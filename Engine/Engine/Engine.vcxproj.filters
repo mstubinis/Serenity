@@ -165,6 +165,9 @@
     <ClCompile Include="GBuffer.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="GameSkybox.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="GBuffer.h">
       <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSkybox.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

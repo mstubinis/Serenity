@@ -55,7 +55,7 @@ void CapsuleStar::update(float dt){
 		setPosition(x*100,y*100,-200*100);
 	}
 	if(m_Light != nullptr)
-		m_Light->setPosition(pos/static_cast<glm::nType>(100));
+		m_Light->setPosition(pos/static_cast<glm::nType>(150));
 
 	this->m_Orientation = Resources::getActiveCamera()->getOrientation();
 
@@ -91,7 +91,7 @@ void CapsuleRibbon::draw(GLuint shader,bool debug){
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	setSkybox(nullptr);
-	setAmbientLightColor(40.0f,22.0f,0);
+	setAmbientLightColor(20.0f,12.0f,0);
 	setBackgroundColor(255.0f,0,0);
 
 	PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
@@ -146,7 +146,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 		glm::v3 pos = glm::v3(x,y,step)*glm::v3(100);
 
 		bool spawnLight = false;
-		if(i % 5 == 0){
+		if(i % 7 == 0){
 			spawnLight = true;
 		}
 		m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star" + boost::lexical_cast<std::string>(i),this,spawnLight));
