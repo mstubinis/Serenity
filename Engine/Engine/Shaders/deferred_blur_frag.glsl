@@ -9,39 +9,33 @@ uniform int G;
 uniform int B;
 uniform int A;
 
-varying vec2 offset[14];
+varying vec2 offset[28];
 varying float Radius;
 
-vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
+float g[7] = float[](
+	0.0044299121055113265,
+	0.00895781211794,
+	0.0215963866053,
+	0.0443683338718,
+	0.0776744219933,
+	0.115876621105,
+	0.147308056121
+);
 void main(void){
     vec4 sum = vec4(0.0);
-    vec2 uv = CalcTexCoord();
+    vec2 uv = gl_FragCoord.xy / gScreenSize;
     vec4 color = texture2D(texture, uv );
 
 	float strength = max(1.0, Radius * strengthModifier);
 
-	sum += texture2D(texture, uv+offset[ 0])*0.0044 * strength;
-	sum += texture2D(texture, uv+offset[ 1])*0.009 * strength;
-	sum += texture2D(texture, uv+offset[ 2])*0.0216 * strength;
-	sum += texture2D(texture, uv+offset[ 3])*0.044 * strength;
-	sum += texture2D(texture, uv+offset[ 4])*0.078 * strength;
-	sum += texture2D(texture, uv+offset[ 5])*0.116 * strength;
-	sum += texture2D(texture, uv+offset[ 6])*0.147 * strength;
-	sum += texture2D(texture, uv )*0.16 * strength;
-	sum += texture2D(texture, uv+offset[ 7])*0.147 * strength;
-	sum += texture2D(texture, uv+offset[ 8])*0.116 * strength;
-	sum += texture2D(texture, uv+offset[ 9])*0.078 * strength;
-	sum += texture2D(texture, uv+offset[10])*0.044 * strength;
-	sum += texture2D(texture, uv+offset[11])*0.0216 * strength;
-	sum += texture2D(texture, uv+offset[12])*0.009 * strength;
-	sum += texture2D(texture, uv+offset[13])*0.0044 * strength;
+	for(int i = 0; i < 7; i++){
+		sum += texture2D(texture, uv + offset[i])    *g[i] * strength;
+		sum += texture2D(texture, uv + offset[13-i]) *g[i] * strength;
+	}
+	sum += texture2D(texture, uv ) * 0.159576912161 * strength;
 
-	if(R == 1)
-		gl_FragColor.r = sum.r;
-	if(G == 1)
-		gl_FragColor.g = sum.g;
-	if(B == 1)
-		gl_FragColor.b = sum.b;
-	if(A == 1)
-		gl_FragColor.a = sum.a;
+	if(R == 1) gl_FragColor.r = sum.r;
+	if(G == 1) gl_FragColor.g = sum.g;
+	if(B == 1) gl_FragColor.b = sum.b;
+	if(A == 1) gl_FragColor.a = sum.a;
 }

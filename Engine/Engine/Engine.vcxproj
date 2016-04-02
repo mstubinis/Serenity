@@ -188,8 +188,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command
     <None Include="Shaders\AS_skyFromSpace_vert.glsl" />
     <None Include="Shaders\deferred_bloom_frag.glsl" />
     <None Include="Shaders\deferred_blur_frag.glsl" />
-    <None Include="Shaders\deferred_blur_horizontal.glsl" />
-    <None Include="Shaders\deferred_blur_vertical.glsl" />
+    <None Include="Shaders\deferred_blur_vert.glsl" />
     <None Include="Shaders\deferred_edge_frag.glsl" />
     <None Include="Shaders\deferred_final_frag.glsl" />
     <None Include="Shaders\deferred_frag.glsl" />

@@ -95,7 +95,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 	setBackgroundColor(255.0f,0,0);
 
 	PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
-	l->setColor(255,235,235,255);
+	l->setColor(255,225,235,255);
 	l->setSpecularPower(0.0f);
 
 	if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleTunnel")){

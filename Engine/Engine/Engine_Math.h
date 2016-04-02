@@ -39,7 +39,7 @@ namespace glm{
 
 namespace Engine{
 	namespace Math{
-		glm::vec3 getScreenCoordinates(glm::vec3);
+		glm::vec3 getScreenCoordinates(glm::vec3,bool clampToEdge = true);
 
 		glm::vec3 midpoint(glm::v3,glm::v3);
 		glm::vec3 midpoint(glm::vec3,glm::vec3);

@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "ShaderProgram.h"
 #include "Engine_Math.h"
+#include "Engine_Renderer.h"
 
 using namespace Engine;
 
@@ -42,11 +43,11 @@ void GameSkybox::render(){
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
-		Texture* texture = Resources::getTexture("Textures/Skyboxes/StarFlare");
+		Texture* texture = Resources::getTexture("Textures/Skyboxes/StarFlare.png");
 		GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
 		glUseProgram(shader);
 		for(auto flare:m_SunFlares){
-			glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position);
+			glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position,false);
 			glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
 			glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
 
@@ -65,7 +66,7 @@ void GameSkybox::render(){
 			model = glm::rotate(model,0.0f,glm::vec3(0,0,1));
 			model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
 			model = glm::scale(model, glm::vec3(scl.x,scl.y,1));
-			glm::mat4 world = Resources::getCamera("HUD")->getProjection() * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
+			glm::mat4 world = Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
 			glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(world));
 			glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));
@@ -74,5 +75,6 @@ void GameSkybox::render(){
 		}
 		glUseProgram(0);
 		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
 	}
 }

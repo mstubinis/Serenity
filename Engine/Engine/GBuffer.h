@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include <glm/glm.hpp>
 
 const int GBUFFER_TYPES[] =		       {GL_RGB,		       // (diffuse.rgba)
 									    GL_RGB,			   // (diffuse forward rendering.rgba)
@@ -68,12 +69,10 @@ class TextureBuffer final{
 		unsigned int m_height;
 		
 		GLuint m_Texture;
-
 	public:
 		TextureBuffer(int,int,int,int,unsigned int,unsigned int);
 		~TextureBuffer();
 
-		void clear(GLuint& fbo);
 		void resize(unsigned int, unsigned int);
 		GLuint getTexture() const { return m_Texture; }
 		int getAttatchment() const { return m_BufferAttatchment; }
@@ -95,15 +94,13 @@ class GBuffer final{
 
 		void resizeBaseBuffer(unsigned int w, unsigned int h);
 		void resizeBuffer(unsigned int, unsigned int w, unsigned int h);
-		void clearBuffer(unsigned int);
-		void clearBuffers();
 
 		void start(std::vector<unsigned int>&,std::string = "RGBA");
 		void start(unsigned int,std::string = "RGBA");
 		void start(unsigned int,unsigned int,std::string = "RGBA");
 		void start(unsigned int,unsigned int,unsigned int,std::string = "RGBA");
 		void start(unsigned int,unsigned int,unsigned int,unsigned int,std::string = "RGBA");
-		void stop(std::string = "RGBA");
+		void stop();
 
 		std::unordered_map<unsigned int,TextureBuffer*> getBuffers();
 		GLuint getTexture(unsigned int);

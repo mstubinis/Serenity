@@ -2,6 +2,8 @@
 
 uniform int LightType;
 
+uniform int HasSSAO;
+
 uniform vec3 LightColor;
 uniform float LightAmbientIntensity;
 uniform float LightDiffuseIntensity;
@@ -49,14 +51,18 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 		//SpecularAngle = pow(SpecularAngle, LightSpecularPower/4.0);
 
         if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
-			float materialSpecularity = texture2D(gGlowMap,CalcTexCoord()).b;
+			float materialSpecularity = texture2D(gGlowMap,uv).b;
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }
 	if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
 		return diffuseMapColor;
 	}
-    return (((AmbientColor + DiffuseColor) * diffuseMapColor) + SpecularColor);
+	float ssao = 1.0;
+	if(HasSSAO == 1){
+		ssao = texture2D(gGlowMap,uv).g;
+	}
+    return (((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao)) + SpecularColor;
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = PxlWorldPos + LightPosition;

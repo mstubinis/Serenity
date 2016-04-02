@@ -161,8 +161,7 @@ void Engine::Resources::initResources(){
 
 	addShader("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
 	addShader("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
-	addShader("Deferred_Blur_Horizontal","Shaders/deferred_blur_horizontal.glsl","Shaders/deferred_blur_frag.glsl");
-	addShader("Deferred_Blur_Vertical","Shaders/deferred_blur_vertical.glsl","Shaders/deferred_blur_frag.glsl");
+	addShader("Deferred_Blur","Shaders/deferred_blur_vert.glsl","Shaders/deferred_blur_frag.glsl");
 	addShader("Deferred_SSAO","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_ssao_frag.glsl");
 	addShader("Deferred_Edge","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_edge_frag.glsl");
 	addShader("Deferred_Bloom","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_bloom_frag.glsl");

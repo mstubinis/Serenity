@@ -48,11 +48,16 @@ namespace Engine{
 	namespace Renderer{
 		struct RendererInfo final{
 			static bool ssao;
+			static bool ssao_do_blur;
 			static unsigned int ssao_samples;
 			static float ssao_bias;
 			static float ssao_scale;
 			static float ssao_radius;
 			static float ssao_intensity;
+
+			static glm::vec2 ssao_Kernels[64];
+			static GLuint ssao_noise_texture;
+			static unsigned int ssao_noise_texture_size;
 
 			static bool bloom;
 			static bool lighting;
@@ -93,11 +98,9 @@ namespace Engine{
 					static void _passFinal();
 				public:
 					static GBuffer* m_gBuffer;
-					static Texture* RandomMapSSAO;
 					static glm::mat4 m_2DProjectionMatrix;
 
 					static void render();
-					static void hardClear();
 
 					static void init();
 					static void initOpenGL();

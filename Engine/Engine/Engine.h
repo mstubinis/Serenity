@@ -61,7 +61,7 @@ namespace Engine{
 				static void run();
 		};
 	};
-
+	static float getFPS(){ return 1.0f / Resources::dt(); }
 	static sf::Window* getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
 	static std::string getWindowName(){ return Resources::Detail::ResourceManagement::m_WindowName; }
 	static sf::Vector2u getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
@@ -85,8 +85,8 @@ namespace Engine{
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
-		Engine::Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y);
+		Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+		Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y);
 	}
 };
 

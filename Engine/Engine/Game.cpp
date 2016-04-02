@@ -44,14 +44,14 @@ void Game::initResources(){
 	Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
-	Engine::Renderer::Settings::enableSSAO(false); //i dont feel ssao is needed here
+	Engine::Renderer::Settings::enableSSAO(true);
 
-	new SolarSystem("Sol","Systems/Sol.txt");
+	//new SolarSystem("Sol","Systems/Sol.txt");
+	new SolarSystem("Sol","");
 	new CapsuleSpace();
-	//new SolarSystem("Sol","");
+	
 	Resources::setCurrentScene("Sol");
 	Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
-	////Resources::setCurrentScene("CapsuleSpace");
 
 	Sound::setCurrentMusicAndPlay("Test");
 	Sound::loop("Test");
@@ -59,9 +59,7 @@ void Game::initLogic(){
 	m_HUD = new HUD();
 }
 void Game::update(float dt){
-
 	SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
-
 	if(Events::Keyboard::isKeyDown("esc"))
 		Engine::stop();
 	if(Events::Keyboard::isKeyDownOnce("f6")){
@@ -72,7 +70,9 @@ void Game::update(float dt){
 		Resources::setCurrentScene("Sol");
 		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 	}
-
+	if(Events::Keyboard::isKeyDownOnce("f8")){
+		Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
+	}
 	m_HUD->update(dt);
 }
 void Game::render(){

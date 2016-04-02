@@ -13,9 +13,12 @@ uniform float C;
 
 void main(){
 	if(DiffuseMapEnabled == 1.0){
-		gl_FragColor = texture2D(DiffuseMap, UV) * Object_Color;
+		gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
 	}
 	else{
-		gl_FragColor = Object_Color;
+		gl_FragData[0] = Object_Color;
 	}
+    gl_FragData[1] = vec4(1.0);
+	gl_FragData[2].r = 0.0;
+	gl_FragData[2].b = 0.0;
 }

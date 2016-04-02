@@ -283,12 +283,6 @@
     <None Include="Shaders\deferred_final_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering</Filter>
     </None>
-    <None Include="Shaders\deferred_blur_vertical.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
-    </None>
-    <None Include="Shaders\deferred_blur_horizontal.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
-    </None>
     <None Include="Shaders\deferred_blur_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
     </None>
@@ -327,6 +321,9 @@
     </None>
     <None Include="Shaders\deferred_bloom_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\Bloom</Filter>
+    </None>
+    <None Include="Shaders\deferred_blur_vert.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
     </None>
   </ItemGroup>
 </Project>
