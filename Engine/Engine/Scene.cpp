@@ -41,12 +41,6 @@ void Scene::centerSceneToObject(Object* center){
 			particle->setPosition(objPos + offset);
 		}
 	}
-	for(auto object:s->getLights()){
-		Object* obj = object.second;
-		if(obj != center && obj->getParent() == nullptr){
-			obj->setPosition(obj->getPosition() + offset);
-		}
-	}
 	if(center->getParent() == nullptr)
 		center->setPosition(0,0,0);
 }

@@ -46,8 +46,8 @@ void Game::initResources(){
 void Game::initLogic(){
 	Engine::Renderer::Settings::enableSSAO(true);
 
-	//new SolarSystem("Sol","Systems/Sol.txt");
-	new SolarSystem("Sol","");
+	new SolarSystem("Sol","Systems/Sol.txt");
+	//new SolarSystem("Sol","");
 	new CapsuleSpace();
 	
 	Resources::setCurrentScene("Sol");

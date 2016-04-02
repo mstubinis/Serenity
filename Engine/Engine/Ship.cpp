@@ -250,11 +250,6 @@ void Ship::update(float dt){
 					obj.second->setPosition(obj.second->getPosition() + s);
 				}
 			}
-			for(auto obj:Resources::getCurrentScene()->getLights()){
-				if(obj.second->getParent() == nullptr){
-					obj.second->setPosition(obj.second->getPosition() + s);
-				}
-			}
 		}
 
 		#pragma endregion
