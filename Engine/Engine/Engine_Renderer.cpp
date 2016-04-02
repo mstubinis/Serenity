@@ -147,9 +147,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 			model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
 		model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
-		glm::mat4 world = m_2DProjectionMatrix * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
-
-		glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(world));
+		glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m_2DProjectionMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(model));
 
 		Resources::getMesh("Plane")->render();
@@ -185,9 +183,8 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 				glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,item.pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.001f - item.depth));
 				glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
 				glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
-				glyph->m_World = m_2DProjectionMatrix * glyph->m_Model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 
-				glUniformMatrix4fv(glGetUniformLocation(shader, "MVP"), 1, GL_FALSE, glm::value_ptr(glyph->m_World));
+				glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m_2DProjectionMatrix));
 				glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));
 
 				glyph->char_mesh->render();
@@ -332,8 +329,6 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
-
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniform1f(glGetUniformLocation(shader,"gIntensity"), RendererInfo::ssao_intensity);
 	glUniform1f(glGetUniformLocation(shader,"gBias"), RendererInfo::ssao_bias);
@@ -363,7 +358,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
 	glUniform1i(glGetUniformLocation(shader,"gDepthMap"), 3 );
 
-	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	for(unsigned int i = 0; i < 4; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -378,8 +373,6 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 	GLuint shader = Resources::getShader("Deferred_Edge")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
-
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 
@@ -388,7 +381,7 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -402,8 +395,6 @@ void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLui
 	GLuint shader = Resources::getShader("Deferred_Bloom")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
-
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 
 	glActiveTexture(GL_TEXTURE0);
@@ -416,7 +407,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLui
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture1));
 	glUniform1i(glGetUniformLocation(shader,"texture1"), 1 );
 
-	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	for(unsigned int i = 0; i < 2; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -428,8 +419,6 @@ void Engine::Renderer::Detail::RenderManagement::_passBloom(GLuint texture, GLui
 void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float strengthModifier,std::string channels){
 	GLuint shader = Resources::getShader("Deferred_Blur")->getShaderProgram();
 	glUseProgram(shader);
-
-	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniform1f(glGetUniformLocation(shader,"radius"), radius);
@@ -458,7 +447,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLu
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
 	glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
-	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -471,8 +460,6 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
 	GLuint shader = Resources::getShader("Deferred_Final")->getShaderProgram();
 	glUseProgram(shader);
-
-	glUniform1i(glGetUniformLocation(shader,"NotFullscreenQuad"), 0);
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
@@ -506,7 +493,7 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
 	glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 4 );
 
-	Engine::Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	for(unsigned int i = 0; i < 5; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -514,4 +501,17 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	glUseProgram(0);
+}
+
+void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale){
+	glm::mat4 m(1);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "World"), 1, GL_FALSE, glm::value_ptr(m));
+	glViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+	glBegin(GL_QUADS);
+		glVertex2f(-1,-1);
+		glVertex2f(1,-1);
+		glVertex2f(1,1);
+		glVertex2f(-1,1);
+    glEnd();
 }

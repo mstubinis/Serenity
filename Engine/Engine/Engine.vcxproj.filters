@@ -271,9 +271,6 @@
     <None Include="Shaders\vert_skybox.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering</Filter>
     </None>
-    <None Include="Shaders\deferred_lighting_vert.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
-    </None>
     <None Include="Shaders\deferred_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering</Filter>
     </None>
@@ -322,8 +319,8 @@
     <None Include="Shaders\deferred_bloom_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\Bloom</Filter>
     </None>
-    <None Include="Shaders\deferred_blur_vert.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
+    <None Include="Shaders\vert_fullscreenQuad.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
     </None>
   </ItemGroup>
 </Project>

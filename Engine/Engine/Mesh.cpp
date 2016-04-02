@@ -329,10 +329,10 @@ void Mesh::_init(){
 	#pragma endregion
 }
 void Mesh::render(GLuint mode){
-	//for each unique vertex data type (position, color, uv, normal, tangent)...
+	//for each unique vertex data type (position, color, uv, normal, binormal,tangent)...
 	for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++){
-		glEnableVertexAttribArray(i);
 		glBindBuffer( GL_ARRAY_BUFFER, m_buffers[i] );
+		glEnableVertexAttribArray(i);
 		glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0, 0);
 	}
 	glDrawArrays(mode, 0, m_Points.size());

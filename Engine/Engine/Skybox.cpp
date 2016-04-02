@@ -94,7 +94,7 @@ void Skybox::render(){
 	GLuint shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();
 	glUseProgram(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "MVP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()*m_Model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
 	glActiveTexture(GL_TEXTURE0);

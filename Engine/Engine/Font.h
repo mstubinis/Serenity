@@ -21,7 +21,6 @@ struct FontGlyph final{
 	 unsigned int xadvance;
 	 Mesh* char_mesh;
 	 glm::mat4 m_Model;
-	 glm::mat4 m_World;
 };
 class FontData final{
 	private:

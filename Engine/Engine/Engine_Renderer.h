@@ -111,40 +111,7 @@ namespace Engine{
 					static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
 					static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
 			};
-			static void renderFullscreenQuad(unsigned int width, unsigned int height,float scale = 1.0f){
-				//Projection setup
-				glMatrixMode(GL_PROJECTION);
-				glPushMatrix();
-				glLoadIdentity();
-				glOrtho(0,Engine::Resources::getWindowSize().x,0,Engine::Resources::getWindowSize().y,0.1f,2);	
-	
-				//Model setup
-				glMatrixMode(GL_MODELVIEW);
-				glPushMatrix();
-
-				// Render the quad
-				glLoadIdentity();
-				glColor3f(1,1,1);
-				glTranslatef(0,0,-1);
-	
-				//glScalef(scale,scale,1.0f);
-				glBegin(GL_QUADS);
-				glTexCoord2f(0,0);
-				glVertex3f(0,0,0);
-				glTexCoord2f(0,0);
-				glVertex3f((float)width*scale,0,0);
-				glTexCoord2f(0,0);
-				glVertex3f((float)width*scale,(float)height*scale,0);
-				glTexCoord2f(0,0);
-				glVertex3f(0,(float)height*scale,0);
-				glEnd();
-
-				//Reset the matrices	
-				glMatrixMode(GL_PROJECTION);
-				glPopMatrix();
-				glMatrixMode(GL_MODELVIEW);
-				glPopMatrix();
-			}
+			void renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale = 1.0f);
 		};
 		void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
 	};

@@ -161,14 +161,14 @@ void Engine::Resources::initResources(){
 
 	addShader("Deferred","Shaders/vert.glsl","Shaders/deferred_frag.glsl");
 	addShader("Deferred_HUD","Shaders/vert_HUD.glsl","Shaders/deferred_frag_HUD.glsl");
-	addShader("Deferred_Blur","Shaders/deferred_blur_vert.glsl","Shaders/deferred_blur_frag.glsl");
-	addShader("Deferred_SSAO","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_ssao_frag.glsl");
-	addShader("Deferred_Edge","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_edge_frag.glsl");
-	addShader("Deferred_Bloom","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_bloom_frag.glsl");
-	addShader("Deferred_Final","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_final_frag.glsl");
+	addShader("Deferred_Blur","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_blur_frag.glsl");
+	addShader("Deferred_SSAO","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_ssao_frag.glsl");
+	addShader("Deferred_Edge","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_edge_frag.glsl");
+	addShader("Deferred_Bloom","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_bloom_frag.glsl");
+	addShader("Deferred_Final","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_final_frag.glsl");
 	addShader("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
 	addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
-	addShader("Deferred_Light","Shaders/deferred_lighting_vert.glsl","Shaders/deferred_lighting_frag.glsl");
+	addShader("Deferred_Light","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_lighting_frag.glsl");
 
 	Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }

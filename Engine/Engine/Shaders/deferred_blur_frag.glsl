@@ -9,8 +9,22 @@ uniform int G;
 uniform int B;
 uniform int A;
 
-varying vec2 offset[28];
-varying float Radius;
+uniform float H;
+uniform float V;
+
+vec2 offset[14];
+
+uniform float radius;
+
+float weights[7] = float[](
+	0.028,
+	0.024,
+	0.020,
+	0.016,
+	0.012,
+	0.008,
+	0.004
+);
 
 float g[7] = float[](
 	0.0044299121055113265,
@@ -22,11 +36,20 @@ float g[7] = float[](
 	0.147308056121
 );
 void main(void){
+
+
+	for(int i = 0; i < 7; i++){
+		offset[i] = vec2(-weights[i] * radius * H, -weights[i] * radius * V);
+		offset[13-i] = vec2(weights[i] * radius * H, weights[i] * radius * V);
+	}
+
+
+
     vec4 sum = vec4(0.0);
     vec2 uv = gl_FragCoord.xy / gScreenSize;
     vec4 color = texture2D(texture, uv );
 
-	float strength = max(1.0, Radius * strengthModifier);
+	float strength = max(1.0, radius * strengthModifier);
 
 	for(int i = 0; i < 7; i++){
 		sum += texture2D(texture, uv + offset[i])    *g[i] * strength;

@@ -48,7 +48,6 @@ void FontData::_loadTextFile(std::string filename){
 				else if(key == "xadvance") font->xadvance = stoi(value);
 			}
 			font->m_Model = glm::mat4(1);
-			font->m_World = glm::mat4(1);
 			font->char_mesh = new Mesh(font->x,font->y,font->width,font->height);
 
 			_Font_Chars[font->id] = font;
