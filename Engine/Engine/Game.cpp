@@ -7,6 +7,7 @@
 #include "Station.h"
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
+#include "Light.h"
 
 using namespace Engine;
 

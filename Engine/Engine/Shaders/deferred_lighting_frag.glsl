@@ -45,11 +45,6 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 		float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
 		SpecularAngle = pow(SpecularAngle, LightSpecularPower);
 
-		//this is regular phong
-		//vec3 reflectDir = reflect(-LightDir, PxlNormal);
-		//float SpecularAngle = max(dot(reflectDir, ViewVector), 0.0);
-		//SpecularAngle = pow(SpecularAngle, LightSpecularPower/4.0);
-
         if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
 			float materialSpecularity = texture2D(gGlowMap,uv).b;
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
@@ -65,14 +60,13 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     return (((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao)) + SpecularColor;
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
-    vec3 LightDir = PxlWorldPos + LightPosition;
+    vec3 LightDir = LightPosition - PxlWorldPos;
     float Distance = length(LightDir);
     LightDir = normalize(LightDir);
 
     vec4 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
-    float a =  LightConstant + (LightLinear * Distance) + (LightExp * Distance * Distance);
-    a = max(1.0, a);
+    float a =  max(1.0 , LightConstant + (LightLinear * Distance) + (LightExp * Distance * Distance));
     return c / a;
 }
 vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
@@ -86,7 +80,7 @@ void main(){
 	vec4 lightCalculation = vec4(0);
 
 	if(LightType == 0)
-		lightCalculation = CalcLightInternal(normalize(PxlPosition + LightPosition),PxlPosition,PxlNormal,texCoord);
+		lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,texCoord);
 	else if(LightType == 1)
 		lightCalculation = CalcPointLight(PxlPosition,PxlNormal,texCoord);
 	else if(LightType == 2)
