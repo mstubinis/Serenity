@@ -29,6 +29,7 @@ uniform float fScaleDepth;
 uniform float fScale;               // 1 / (fOuterRadius - fInnerRadius)
 uniform float fScaleOverScaleDepth; // fScale / fScaleDepth
 
+varying vec3 WorldPosition;
 varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
@@ -86,4 +87,6 @@ void main(){
 	v3Direction = v3CameraPos - v3Pos;
 	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
+
+	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

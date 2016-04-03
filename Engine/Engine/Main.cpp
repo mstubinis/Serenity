@@ -5,8 +5,10 @@
 #endif
 
 int main(){
-	#ifdef _WIN32 
+	#ifdef _WIN32
+	#ifndef ENGINE_DEBUG
 	ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+	#endif
     #endif
 
 	Engine::Detail::EngineClass::init("Engine",1024,768);

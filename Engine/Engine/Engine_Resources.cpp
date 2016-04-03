@@ -174,7 +174,8 @@ void Engine::Resources::initResources(){
 }
 
 void Engine::Resources::setCurrentScene(Scene* s){ 
-
+	if(Detail::ResourceManagement::m_CurrentScene == s)
+		return;
 	Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
 	for(auto obj:previousScene->getObjects()){
 		ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);

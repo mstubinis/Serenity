@@ -1,8 +1,8 @@
 #version 120
 
 uniform sampler2D gNormalMap;
+uniform sampler2D gPositionMap;
 uniform sampler2D gRandomMap;
-uniform sampler2D gRegularDepthMap;
 
 uniform vec2 gScreenSize;
 uniform float gRadius;
@@ -14,24 +14,16 @@ uniform int gNoiseTextureSize;
 
 uniform vec2 poisson[64];
 
-uniform mat4 VPInverse;
-
-vec3 DecodePosition(vec2 uv){
-	vec4 clipSpace = vec4(uv * 2.0 - 1.0,texture2D(gRegularDepthMap, uv).r * 2.0 - 1.0,1.0);
-	vec4 pos = VPInverse * clipSpace;
-	return pos.xyz / pos.w;
-}
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
-    vec3 diff = DecodePosition(uv+offsetUV);
-	diff -= origin;
+    vec3 diff = texture2D(gPositionMap,uv+offsetUV).xyz - origin;
     vec3 vec = normalize(diff);
     float dist = length(diff)/gScale;
     return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;
 }
 void main(){
 	vec2 uv = gl_FragCoord.xy / gScreenSize;
-    vec3 worldPosition = DecodePosition(uv);
-    vec3 normal = texture2D(gNormalMap, uv).rgb;
+    vec3 worldPosition = texture2D(gPositionMap,uv).xyz;
+    vec3 normal = texture2D(gNormalMap, uv).xyz;
     vec2 randomVector = normalize(texture2D(gRandomMap, gScreenSize * uv / gNoiseTextureSize).xy * 2.0 - 1.0);
 
 	if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.g = 1.0; }

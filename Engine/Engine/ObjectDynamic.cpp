@@ -187,14 +187,15 @@ void ObjectDynamic::setPosition(glm::nType x, glm::nType y, glm::nType z){
     m_MotionState->setWorldTransform(initialTransform);
 }
 void ObjectDynamic::setOrientation(glm::quat q){
-	btTransform initialTransform;
+	btTransform t;
     btQuaternion quat(q.x,q.y,q.z,q.w);
 
-	initialTransform.setOrigin(m_RigidBody->getWorldTransform().getOrigin());
-	initialTransform.setRotation(quat);
+	t.setOrigin(m_RigidBody->getWorldTransform().getOrigin());
+	t.setRotation(quat);
 
-    m_RigidBody->setWorldTransform(initialTransform);
-    m_MotionState->setWorldTransform(initialTransform);
+    m_RigidBody->setWorldTransform(t);
+	m_RigidBody->setCenterOfMassTransform(t);
+    m_MotionState->setWorldTransform(t);
 
 	clearAngularForces();
 }

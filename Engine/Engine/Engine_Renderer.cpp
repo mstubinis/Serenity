@@ -227,7 +227,6 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->calculateViewProjInverted()));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -236,19 +235,18 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GLOW));
-	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 1 );
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
+	glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
-	glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 2 );
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GLOW));
+	glUniform1i( glGetUniformLocation(shader,"gGlowMap"), 2 );
 
 	glActiveTexture(GL_TEXTURE3);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_REGULARDEPTH));
-	glUniform1i( glGetUniformLocation(shader,"gRegularDepthMap"), 3 );
-
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
+	glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 3 );
 
 	for (auto light:Resources::getCurrentScene()->getLights()) {
 		light.second->lighten(shader);
@@ -262,7 +260,7 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
-	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_REGULARDEPTH);
+	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
 	Renderer::Detail::RenderManagement::_geometryPass();
 	m_gBuffer->stop();
 
@@ -338,7 +336,6 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 	glUniform1i(glGetUniformLocation(shader,"gSampleCount"), RendererInfo::ssao_samples);
 	glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"), RendererInfo::ssao_noise_texture_size);
 	glUniform2fv(glGetUniformLocation(shader,"poisson"),64, glm::value_ptr(Renderer::RendererInfo::ssao_Kernels[0]));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->calculateViewProjInverted()));
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -347,18 +344,22 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,Renderer::RendererInfo::ssao_noise_texture);
-	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 1 );
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
+	glUniform1i(glGetUniformLocation(shader,"gPositionMap"), 1 );
 
 	glActiveTexture(GL_TEXTURE2);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_REGULARDEPTH));
-	glUniform1i( glGetUniformLocation(shader,"gRegularDepthMap"), 2 );
+	glBindTexture(GL_TEXTURE_2D,Renderer::RendererInfo::ssao_noise_texture);
+	glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
+	glActiveTexture(GL_TEXTURE3);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
+	glUniform1i(glGetUniformLocation(shader,"gDepthMap"), 3 );
 
 	Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-	for(unsigned int i = 0; i < 3; i++){
+	for(unsigned int i = 0; i < 4; i++){
 		glActiveTexture(GL_TEXTURE0 + i);
 		glDisable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -500,6 +501,7 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 	}
 	glUseProgram(0);
 }
+
 void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale){
 	glm::mat4 m(1);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m));

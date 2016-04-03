@@ -5,6 +5,7 @@ uniform int DiffuseMapEnabled;
 
 uniform vec4 Object_Color;
 
+varying vec3 WorldPosition;
 varying vec2 UV;
 
 uniform float far;
@@ -17,8 +18,7 @@ void main(){
 	else{
 		gl_FragData[0] = Object_Color;
 	}
-    gl_FragData[1].rgb = vec3(1.0);
+    gl_FragData[1] = vec4(1.0);
 	gl_FragData[2].r = 0.0;
 	gl_FragData[2].b = 0.0;
-	gl_FragData[3].r = gl_FragCoord.z;
 }
