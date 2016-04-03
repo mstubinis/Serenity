@@ -12,60 +12,60 @@
 using namespace Engine;
 
 FontData::FontData(std::string filename){
-	_loadTextFile(filename);
-	std::string texture_filename = filename.substr(0,filename.size()-4);
-	texture_filename += "_0.png";
-	m_FontTexture = new Texture(texture_filename);
+    _loadTextFile(filename);
+    std::string texture_filename = filename.substr(0,filename.size()-4);
+    texture_filename += "_0.png";
+    m_FontTexture = new Texture(texture_filename);
 }
 FontData::~FontData(){
-	for(auto glyph:m_FontGlyphs){
-		SAFE_DELETE(glyph.second->char_mesh);
-		SAFE_DELETE(glyph.second);
-	}
+    for(auto glyph:m_FontGlyphs){
+        SAFE_DELETE(glyph.second->char_mesh);
+        SAFE_DELETE(glyph.second);
+    }
 }
 FontGlyph* FontData::getGlyphData(unsigned char c){ return m_FontGlyphs[c]; }
 void FontData::_loadTextFile(std::string filename){
-	std::unordered_map<unsigned char,FontGlyph*> _Font_Chars;
-	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-	for(std::string line; std::getline(str, line, '\n');){
-		if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
-			FontGlyph* font = new FontGlyph();
-			std::string token;
-			std::istringstream stream(line);
-			while(std::getline(stream, token, ' ')) {
-				size_t pos = token.find("=");
+    std::unordered_map<unsigned char,FontGlyph*> _Font_Chars;
+    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+    for(std::string line; std::getline(str, line, '\n');){
+        if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
+            FontGlyph* font = new FontGlyph();
+            std::string token;
+            std::istringstream stream(line);
+            while(std::getline(stream, token, ' ')) {
+                size_t pos = token.find("=");
 
-				std::string key = token.substr(0, pos);
-				std::string value = token.substr(pos + 1, std::string::npos);
+                std::string key = token.substr(0, pos);
+                std::string value = token.substr(pos + 1, std::string::npos);
 
-				if(key == "id")            font->id = stoi(value);
-				else if(key == "x")        font->x = stoi(value);
-				else if(key == "y")        font->y = stoi(value);
-				else if(key == "width")    font->width = stoi(value);
-				else if(key == "height")   font->height = stoi(value); 
-				else if(key == "xoffset")  font->xoffset = stoi(value);
-				else if(key == "yoffset")  font->yoffset = stoi(value);
-				else if(key == "xadvance") font->xadvance = stoi(value);
-			}
-			font->m_Model = glm::mat4(1);
-			font->char_mesh = new Mesh(font->x,font->y,font->width,font->height);
+                if(key == "id")            font->id = stoi(value);
+                else if(key == "x")        font->x = stoi(value);
+                else if(key == "y")        font->y = stoi(value);
+                else if(key == "width")    font->width = stoi(value);
+                else if(key == "height")   font->height = stoi(value); 
+                else if(key == "xoffset")  font->xoffset = stoi(value);
+                else if(key == "yoffset")  font->yoffset = stoi(value);
+                else if(key == "xadvance") font->xadvance = stoi(value);
+            }
+            font->m_Model = glm::mat4(1);
+            font->char_mesh = new Mesh(font->x,font->y,font->width,font->height);
 
-			_Font_Chars[font->id] = font;
-		}
-	}
-	m_FontGlyphs = _Font_Chars;
+            _Font_Chars[font->id] = font;
+        }
+    }
+    m_FontGlyphs = _Font_Chars;
 }
 
 Font::Font(std::string filename){
-	m_FontData = new FontData(filename);
+    m_FontData = new FontData(filename);
 
-	m_Name = filename.substr(0,filename.size()-4);
+    m_Name = filename.substr(0,filename.size()-4);
 
-	Resources::Detail::ResourceManagement::m_Fonts[m_Name] = boost::shared_ptr<Font>(this);
+    Resources::Detail::ResourceManagement::m_Fonts[m_Name] = boost::shared_ptr<Font>(this);
 }
 Font::~Font(){
-	SAFE_DELETE(m_FontData);
+    SAFE_DELETE(m_FontData);
 }
 void Font::renderText(std::string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-	Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
+    Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
 }

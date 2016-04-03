@@ -28,31 +28,31 @@ vec3 CalcBumpedNormal(){
     return normalize(TBN * normalMapTexture);
 }
 void main(){
-	if(DiffuseMapEnabled == 1){
-		gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
-	}
-	else{
-		gl_FragData[0] = Object_Color;
-	}
-	if(Shadeless == 0){
-		if(NormalMapEnabled == 1){
-			gl_FragData[1].rgb = CalcBumpedNormal();
-		}
-		else{
-			gl_FragData[1].rgb = normalize(Normals);
-		}
-		if(GlowMapEnabled == 1){
-			gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
-		}
-		else
-			gl_FragData[2].r = BaseGlow;
-	}
-	else{
-		gl_FragData[1].rgb = vec3(1.0);
-		gl_FragData[2].r = BaseGlow;
-	}
-	gl_FragData[1].a = Object_Color.a;
-	gl_FragData[2].b = Specularity;
-	gl_FragData[3] = vec4(WorldPosition,1.0);
+    if(DiffuseMapEnabled == 1){
+        gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
+    }
+    else{
+        gl_FragData[0] = Object_Color;
+    }
+    if(Shadeless == 0){
+        if(NormalMapEnabled == 1){
+            gl_FragData[1].rgb = CalcBumpedNormal();
+        }
+        else{
+            gl_FragData[1].rgb = normalize(Normals);
+        }
+        if(GlowMapEnabled == 1){
+            gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
+        }
+        else
+            gl_FragData[2].r = BaseGlow;
+    }
+    else{
+        gl_FragData[1].rgb = vec3(1.0);
+        gl_FragData[2].r = BaseGlow;
+    }
+    gl_FragData[1].a = Object_Color.a;
+    gl_FragData[2].b = Specularity;
+    gl_FragData[3] = vec4(WorldPosition,1.0);
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

@@ -6,24 +6,24 @@ using namespace Engine;
 sf::SoundBuffer* Sound::Detail::SoundManagement::m_Buffer = NULL;
 
 void Sound::Detail::SoundManagement::init(){
-	m_Buffer = new sf::SoundBuffer();
+    m_Buffer = new sf::SoundBuffer();
 }
 void Sound::Detail::SoundManagement::destruct(){
-	SAFE_DELETE(m_Buffer);
+    SAFE_DELETE(m_Buffer);
 }
 bool Sound::Detail::SoundManagement::isStopped(sf::SoundSource::Status status){
-	if(status == sf::SoundSource::Status::Stopped) return true; return false;
+    if(status == sf::SoundSource::Status::Stopped) return true; return false;
 }
 bool Sound::Detail::SoundManagement::isPlaying(sf::SoundSource::Status status){
-	if(status == sf::SoundSource::Status::Playing) return true; return false;
+    if(status == sf::SoundSource::Status::Playing) return true; return false;
 }
 bool Sound::Detail::SoundManagement::isPaused(sf::SoundSource::Status status){
-	if(status == sf::SoundSource::Status::Paused) return true; return false;
+    if(status == sf::SoundSource::Status::Paused) return true; return false;
 }
 
 SoundEffectBasic::SoundEffectBasic(std::string file){ s = nullptr; }
 SoundEffectBasic::~SoundEffectBasic(){
-	SAFE_DELETE(s);
+    SAFE_DELETE(s);
 }
 glm::vec3 SoundEffectBasic::getPosition(){ sf::Vector3f v = s->getPosition(); return glm::vec3(v.x,v.y,v.z); }
 float SoundEffectBasic::getAttenuation(){ return s->getAttenuation(); }
@@ -40,10 +40,10 @@ void SoundEffectBasic::setMinDistance(float d){ s->setMinDistance(d); }
 
 
 SoundEffect::SoundEffect(std::string file, bool loop, glm::vec3 sourceOrigin):SoundEffectBasic(file){
-	Sound::Detail::SoundManagement::m_Buffer->loadFromFile(file);
-	s = new sf::Sound(*Sound::Detail::SoundManagement::m_Buffer);
-	static_cast<sf::Sound*>(s)->setLoop(loop);
-	static_cast<sf::Sound*>(s)->setPosition(sf::Vector3f(sourceOrigin.x,sourceOrigin.y,sourceOrigin.z));
+    Sound::Detail::SoundManagement::m_Buffer->loadFromFile(file);
+    s = new sf::Sound(*Sound::Detail::SoundManagement::m_Buffer);
+    static_cast<sf::Sound*>(s)->setLoop(loop);
+    static_cast<sf::Sound*>(s)->setPosition(sf::Vector3f(sourceOrigin.x,sourceOrigin.y,sourceOrigin.z));
 }
 SoundEffect::~SoundEffect(){
 }
@@ -61,9 +61,9 @@ bool SoundEffect::isLooping(){ return static_cast<sf::Sound*>(s)->getLoop(); }
 
 
 SoundMusic::SoundMusic(std::string file, bool loop):SoundEffectBasic(file){
-	s = new sf::Music();
-	static_cast<sf::Music*>(s)->openFromFile(file);
-	static_cast<sf::Music*>(s)->setLoop(loop);
+    s = new sf::Music();
+    static_cast<sf::Music*>(s)->openFromFile(file);
+    static_cast<sf::Music*>(s)->setLoop(loop);
 }
 SoundMusic::~SoundMusic(){
 }

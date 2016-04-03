@@ -5,15 +5,15 @@
 #endif
 
 int main(){
-	#ifdef _WIN32
-	#ifndef ENGINE_DEBUG
-	ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
-	#endif
+    #ifdef _WIN32
+    #ifndef ENGINE_DEBUG
+    ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+    #endif
     #endif
 
-	Engine::Detail::EngineClass::init("Engine",1024,768);
-	Engine::Detail::EngineClass::run();
-	Engine::Detail::EngineClass::destruct();
+    Engine::Detail::EngineClass::init("Engine",1024,768);
+    Engine::Detail::EngineClass::run();
+    Engine::Detail::EngineClass::destruct();
 
     return 0;
 }

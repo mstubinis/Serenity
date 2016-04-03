@@ -14,9 +14,9 @@ varying vec2 UV;
 varying vec3 WorldPosition;
 
 void main(){
-	mat4 MVP = VP * World;
-	UV = uv;
-	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = gl_Position;
-	WorldPosition = (World * vec4(position,1.0)).xyz;
+    mat4 MVP = VP * World;
+    UV = uv;
+    gl_Position = MVP * vec4(position, 1.0);
+    gl_TexCoord[6] = gl_Position;
+    WorldPosition = (World * vec4(position,1.0)).xyz;
 }

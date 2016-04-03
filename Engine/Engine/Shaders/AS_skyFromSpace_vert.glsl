@@ -37,21 +37,21 @@ varying vec3 v3LightPosition;
 varying float Depth;
 
 float scale(float fCos){
-	float x = 1.0 - fCos;
-	return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
+    float x = 1.0 - fCos;
+    return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
 }
 float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadius2){
-	float B = 2.0 * dot(v3Pos, v3Ray);
-	float C = fDistance2 - fRadius2;
-	float fDet = max(0.0, B*B - 4.0 * C);
-	return 0.5 * (-B - sqrt(fDet));
+    float B = 2.0 * dot(v3Pos, v3Ray);
+    float C = fDistance2 - fRadius2;
+    float fDet = max(0.0, B*B - 4.0 * C);
+    return 0.5 * (-B - sqrt(fDet));
 }
 void main(){
-	mat4 MVP = VP * World;
-	vec3 v3Pos = position * vec3(fOuterRadius);
-	vec3 v3Ray = v3Pos - v3CameraPos;
-	float fFar = length(v3Ray);
-	v3Ray /= fFar;
+    mat4 MVP = VP * World;
+    vec3 v3Pos = position * vec3(fOuterRadius);
+    vec3 v3Ray = v3Pos - v3CameraPos;
+    float fFar = length(v3Ray);
+    v3Ray /= fFar;
 
     float fNear = getNearIntersection(v3CameraPos, v3Ray, fCameraHeight2,fOuterRadius2);
 
@@ -61,7 +61,7 @@ void main(){
     float fStartAngle = dot(v3Ray, v3Start) / fOuterRadius;
     float fStartDepth = exp(-1.0 / fScaleDepth);
     float fStartOffset = fStartDepth * scale(fStartAngle);
-	Depth = clamp(fStartOffset,0.0,1.0);
+    Depth = clamp(fStartOffset,0.0,1.0);
 
     float fSampleLength = fFar / fSamples;
     float fScaledLength = fSampleLength * fScale;
@@ -80,13 +80,13 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = MVP * vec4(position, 1.0);
+    gl_Position = MVP * vec4(position, 1.0);
+    gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
-	v3LightPosition = v3LightDir;
-	v3Direction = v3CameraPos - v3Pos;
-	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
+    v3LightPosition = v3LightDir;
+    v3Direction = v3CameraPos - v3Pos;
+    c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
 
-	WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (World * vec4(position,1.0)).xyz;
 }

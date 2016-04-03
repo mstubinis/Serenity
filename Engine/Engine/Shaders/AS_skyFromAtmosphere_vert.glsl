@@ -41,24 +41,24 @@ varying float outerRadius;
 varying float planetRadius;
 
 float scale(float fCos){
-	float x = 1.0 - fCos;
-	return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
+    float x = 1.0 - fCos;
+    return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
 }
 void main(){
-	mat4 MVP = VP * World;
-	vec3 v3Pos = position * vec3(fOuterRadius);
-	vec3 v3Ray = v3Pos - v3CameraPos;
-	float fFar = length(v3Ray);
-	v3Ray /= fFar;
+    mat4 MVP = VP * World;
+    vec3 v3Pos = position * vec3(fOuterRadius);
+    vec3 v3Ray = v3Pos - v3CameraPos;
+    float fFar = length(v3Ray);
+    v3Ray /= fFar;
 
-	vec3 v3Start = v3CameraPos;
-	float fHeight = length(v3Start);
-	float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
-	float fStartAngle = dot(v3Ray, v3Start) / fHeight;
-	float fStartOffset = fDepth*scale(fStartAngle);
+    vec3 v3Start = v3CameraPos;
+    float fHeight = length(v3Start);
+    float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
+    float fStartAngle = dot(v3Ray, v3Start) / fHeight;
+    float fStartOffset = fDepth*scale(fStartAngle);
 
-	float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
-	Depth = clamp(fStartDepth*scale(fStartAngle),0.0,1.0);
+    float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
+    Depth = clamp(fStartDepth*scale(fStartAngle),0.0,1.0);
 
     float fSampleLength = fFar / fSamples;
     float fScaledLength = fSampleLength * fScale;
@@ -66,7 +66,7 @@ void main(){
     vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;
 
     vec3 v3FrontColor = vec3(0);
-	vec3 v3Attenuate = vec3(0);
+    vec3 v3Attenuate = vec3(0);
     for(int i = 0; i < nSamples; i++) {
         float fHeight = length(v3SamplePoint);
         float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));
@@ -78,18 +78,18 @@ void main(){
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         v3SamplePoint += v3SampleRay;
     }
-	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = MVP * vec4(position, 1.0);
+    gl_Position = MVP * vec4(position, 1.0);
+    gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
-	v3LightPosition = v3LightDir;
-	v3Direction = v3CameraPos - v3Pos;
+    v3LightPosition = v3LightDir;
+    v3Direction = v3CameraPos - v3Pos;
 
-	c0 = v3FrontColor * (v3InvWavelength * fKrESun);
+    c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
 
-	cameraHeight = fCameraHeight;
-	outerRadius = fOuterRadius;
-	planetRadius = fInnerRadius;
+    cameraHeight = fCameraHeight;
+    outerRadius = fOuterRadius;
+    planetRadius = fInnerRadius;
 
-	WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (World * vec4(position,1.0)).xyz;
 }

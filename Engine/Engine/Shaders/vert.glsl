@@ -17,15 +17,15 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 void main(){
-	mat4 MVP = VP * World;
-	gl_Position = MVP * vec4(position, 1.0);
-	gl_TexCoord[6] = gl_Position;
+    mat4 MVP = VP * World;
+    gl_Position = MVP * vec4(position, 1.0);
+    gl_TexCoord[6] = gl_Position;
 
-	UV = uv;
+    UV = uv;
 
-	Normals = (World * vec4(normal,0.0)).xyz;
-	Tangents = (World * vec4(tangent,0.0)).xyz;
-	Binormals = (World * vec4(binormal,0.0)).xyz;
+    Normals = (World * vec4(normal,0.0)).xyz;
+    Tangents = (World * vec4(tangent,0.0)).xyz;
+    Binormals = (World * vec4(binormal,0.0)).xyz;
 
-	WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (World * vec4(position,1.0)).xyz;
 }

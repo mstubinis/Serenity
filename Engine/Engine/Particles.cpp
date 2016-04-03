@@ -12,90 +12,90 @@
 #include <boost/lexical_cast.hpp>
 
 ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::v3 pos, glm::vec3 scl,std::string name, Scene* scene):ObjectBasic(pos,scl,name,scene){
-	m_info = info;
-	unsigned int count = 0;
-	if(scene == nullptr){
-		scene = Engine::Resources::getCurrentScene();
-	}
-	if (scene->getParticleEmitters().size() > 0){
-		while(scene->getParticleEmitters().count(m_Name)){
-			m_Name = name + " " + boost::lexical_cast<std::string>(count);
-			count++;
-		}
-	}
-	scene->getParticleEmitters()[m_Name] = this;
+    m_info = info;
+    unsigned int count = 0;
+    if(scene == nullptr){
+        scene = Engine::Resources::getCurrentScene();
+    }
+    if (scene->getParticleEmitters().size() > 0){
+        while(scene->getParticleEmitters().count(m_Name)){
+            m_Name = name + " " + boost::lexical_cast<std::string>(count);
+            count++;
+        }
+    }
+    scene->getParticleEmitters()[m_Name] = this;
 }
 ParticleEmitter::~ParticleEmitter(){
-	for(auto particle:m_Particles) SAFE_DELETE(particle);
+    for(auto particle:m_Particles) SAFE_DELETE(particle);
 }
 void ParticleEmitter::addParticle(){
-	float rot = static_cast<float>(rand() % 360);
+    float rot = static_cast<float>(rand() % 360);
 
-	glm::vec3 velocity = glm::vec3(0,0.05f,0);
-	float rotationalVelocity = 0.05f;
-	m_Particles.push_back(new Particle(this,this->getPosition(),m_info->startColor,glm::vec2(1,1),rot,velocity,rotationalVelocity,glm::vec2(0,0)));
+    glm::vec3 velocity = glm::vec3(0,0.05f,0);
+    float rotationalVelocity = 0.05f;
+    m_Particles.push_back(new Particle(this,this->getPosition(),m_info->startColor,glm::vec2(1,1),rot,velocity,rotationalVelocity,glm::vec2(0,0)));
 }
 void ParticleEmitter::deleteParticles(){
-	std::vector<Particle*> copies = m_Particles;
-	for(auto p:m_Particles){
-		if(p->ToBeErased()){
-			copies.erase(std::remove(copies.begin(), copies.end(), p), copies.end());
-			SAFE_DELETE(p);
-		}
-	}
-	m_Particles = copies;
+    std::vector<Particle*> copies = m_Particles;
+    for(auto p:m_Particles){
+        if(p->ToBeErased()){
+            copies.erase(std::remove(copies.begin(), copies.end(), p), copies.end());
+            SAFE_DELETE(p);
+        }
+    }
+    m_Particles = copies;
 }
 void ParticleEmitter::update(float dt){
-	Object::update(dt);
-	for(auto particle:m_Particles)
-		particle->update(dt);
-	deleteParticles();
+    Object::update(dt);
+    for(auto particle:m_Particles)
+        particle->update(dt);
+    deleteParticles();
 }
 void ParticleEmitter::render(){
-	return;
+    return;
 }
 
 Particle::Particle(ParticleEmitter* _emitter,glm::v3 pos,glm::vec4 col,glm::vec2 scl ,float rot,glm::vec3 vel,float rVel, glm::vec2 sVel){
-	emitter = _emitter;
-	position = pos;
-	color = col;
-	scale = scl;
-	zRot = rot;
-	velocity = vel;
-	zRotVelocity = rVel;
-	scaleVelocity = sVel;
-	toBeErased = false;
+    emitter = _emitter;
+    position = pos;
+    color = col;
+    scale = scl;
+    zRot = rot;
+    velocity = vel;
+    zRotVelocity = rVel;
+    scaleVelocity = sVel;
+    toBeErased = false;
 
-	model = glm::mat4(1);
-	model = glm::translate(model,position);
-	model = glm::rotate(model, zRot,glm::vec3(0,0,1));
-	model = glm::scale(model, glm::vec3(scale.x,scale.y,1));
+    model = glm::mat4(1);
+    model = glm::translate(model,position);
+    model = glm::rotate(model, zRot,glm::vec3(0,0,1));
+    model = glm::scale(model, glm::vec3(scale.x,scale.y,1));
 }
 Particle::~Particle(){
-	//delete light; 
+    //delete light; 
 }
 void Particle::setPosition(glm::nType x,glm::nType y,glm::nType z){
-	position.x = static_cast<float>(x);
-	position.y = static_cast<float>(y);
-	position.z = static_cast<float>(z);
+    position.x = static_cast<float>(x);
+    position.y = static_cast<float>(y);
+    position.z = static_cast<float>(z);
 
-	model[3][0] = position.x;
-	model[3][1] = position.y;
-	model[3][2] = position.z;
+    model[3][0] = position.x;
+    model[3][1] = position.y;
+    model[3][2] = position.z;
 }
 void Particle::setPosition(glm::v3 pos){ setPosition(pos.x,pos.y,pos.z); }
 void Particle::update(float dt){
-	position += velocity*dt;
-	zRot += zRotVelocity*dt;
-	scale += scaleVelocity*dt;
+    position += velocity*dt;
+    zRot += zRotVelocity*dt;
+    scale += scaleVelocity*dt;
 
-	model = glm::mat4(1);
-	model = glm::translate(model,position);
-	model = glm::rotate(model, zRot,glm::vec3(0,0,1));
-	model = glm::scale(model, glm::vec3(scale.x,scale.y,1));
+    model = glm::mat4(1);
+    model = glm::translate(model,position);
+    model = glm::rotate(model, zRot,glm::vec3(0,0,1));
+    model = glm::scale(model, glm::vec3(scale.x,scale.y,1));
 
-	if(lifetime >= lifetimeMax)
-		toBeErased = true;
+    if(lifetime >= lifetimeMax)
+        toBeErased = true;
 }
 void Particle::render(GLuint shader){
 

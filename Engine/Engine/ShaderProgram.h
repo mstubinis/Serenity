@@ -12,27 +12,27 @@
 
 
 static GLuint CompileShader(const char* vShader, const char* fShader, bool fromFile = true){
-	// Create the shaders
+    // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
  
-	std::string VertexShaderCode = "";
-	std::string FragmentShaderCode = "";
+    std::string VertexShaderCode = "";
+    std::string FragmentShaderCode = "";
 
-	if(fromFile){
-		boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vShader);
-		for(std::string line; std::getline(str, line, '\n');){
-			VertexShaderCode += "\n" + line;
-		}
-		boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(fShader);
-		for(std::string line; std::getline(str1, line, '\n');){
-			FragmentShaderCode += "\n" + line;
-		}
-	}
-	else{
-		VertexShaderCode = vShader;
-		FragmentShaderCode = fShader;
-	}
+    if(fromFile){
+        boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vShader);
+        for(std::string line; std::getline(str, line, '\n');){
+            VertexShaderCode += "\n" + line;
+        }
+        boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(fShader);
+        for(std::string line; std::getline(str1, line, '\n');){
+            FragmentShaderCode += "\n" + line;
+        }
+    }
+    else{
+        VertexShaderCode = vShader;
+        FragmentShaderCode = fShader;
+    }
  
     GLint Result = GL_FALSE;
     int InfoLogLength;
@@ -78,19 +78,19 @@ static GLuint CompileShader(const char* vShader, const char* fShader, bool fromF
 }
 
 class ShaderP final{
-	private:
-		GLuint m_Shader;
+    private:
+        GLuint m_Shader;
 
-		std::string m_VertexShader;
-		std::string m_PixelShader;
-	public:
-		ShaderP(std::string vs,std::string ps, bool fromFile = true);
-		~ShaderP();
+        std::string m_VertexShader;
+        std::string m_PixelShader;
+    public:
+        ShaderP(std::string vs,std::string ps, bool fromFile = true);
+        ~ShaderP();
 
-		const GLuint getShaderProgram() const{ return m_Shader; }
+        const GLuint getShaderProgram() const{ return m_Shader; }
 
-		const std::string getVertexShader() const{ return m_VertexShader; }
-		const std::string getPixelShader() const{ return m_PixelShader; }
+        const std::string getVertexShader() const{ return m_VertexShader; }
+        const std::string getPixelShader() const{ return m_PixelShader; }
 };
 
 #endif

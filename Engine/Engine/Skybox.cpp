@@ -12,100 +12,100 @@ GLuint Skybox::m_Buffer;
 std::vector<glm::vec3> Skybox::m_Vertices;
 
 Skybox::Skybox(std::string name,Scene* scene){
-	if(Skybox::m_Vertices.size() == 0){
-		std::vector<glm::vec3> temp;
-		temp.push_back(glm::vec3(-1,1,1));//1
-		temp.push_back(glm::vec3(1,1,1));//2
-		temp.push_back(glm::vec3(1,-1,1));//3
-		temp.push_back(glm::vec3(-1,-1,1));//4
-		temp.push_back(glm::vec3(-1,1,-1));//5
-		temp.push_back(glm::vec3(-1,-1,-1));//6
-		temp.push_back(glm::vec3(1,-1,-1));//7
-		temp.push_back(glm::vec3(1,1,-1));//8
-		temp.push_back(glm::vec3(-1,1,1));//9
-		temp.push_back(glm::vec3(-1,-1,1));//10
-		temp.push_back(glm::vec3(-1,-1,-1));//11
-		temp.push_back(glm::vec3(-1,1,-1));//12
-		temp.push_back(glm::vec3(-1,-1,1));//13
-		temp.push_back(glm::vec3(1,-1,1));//14
-		temp.push_back(glm::vec3(1,-1 ,-1));//15
-		temp.push_back(glm::vec3(-1,-1,-1));//16
-		temp.push_back(glm::vec3(1,-1,1));//17
-		temp.push_back(glm::vec3(1,1,1));//18
-		temp.push_back(glm::vec3(1,1,-1));//19
-		temp.push_back(glm::vec3(1,-1,-1));//20
-		temp.push_back(glm::vec3(1,1,1));//21
-		temp.push_back(glm::vec3(-1,1,1));//22
-		temp.push_back(glm::vec3(-1,1,-1));//23
-		temp.push_back(glm::vec3(1,1,-1));//24
+    if(Skybox::m_Vertices.size() == 0){
+        std::vector<glm::vec3> temp;
+        temp.push_back(glm::vec3(-1,1,1));//1
+        temp.push_back(glm::vec3(1,1,1));//2
+        temp.push_back(glm::vec3(1,-1,1));//3
+        temp.push_back(glm::vec3(-1,-1,1));//4
+        temp.push_back(glm::vec3(-1,1,-1));//5
+        temp.push_back(glm::vec3(-1,-1,-1));//6
+        temp.push_back(glm::vec3(1,-1,-1));//7
+        temp.push_back(glm::vec3(1,1,-1));//8
+        temp.push_back(glm::vec3(-1,1,1));//9
+        temp.push_back(glm::vec3(-1,-1,1));//10
+        temp.push_back(glm::vec3(-1,-1,-1));//11
+        temp.push_back(glm::vec3(-1,1,-1));//12
+        temp.push_back(glm::vec3(-1,-1,1));//13
+        temp.push_back(glm::vec3(1,-1,1));//14
+        temp.push_back(glm::vec3(1,-1 ,-1));//15
+        temp.push_back(glm::vec3(-1,-1,-1));//16
+        temp.push_back(glm::vec3(1,-1,1));//17
+        temp.push_back(glm::vec3(1,1,1));//18
+        temp.push_back(glm::vec3(1,1,-1));//19
+        temp.push_back(glm::vec3(1,-1,-1));//20
+        temp.push_back(glm::vec3(1,1,1));//21
+        temp.push_back(glm::vec3(-1,1,1));//22
+        temp.push_back(glm::vec3(-1,1,-1));//23
+        temp.push_back(glm::vec3(1,1,-1));//24
 
-		for(unsigned int i = 0; i < 6; i++){
-			glm::vec3 v1,v2,v3,v4;
-			v1 = temp[ 0 + (i*4) ];
-			v2 = temp[ 1 + (i*4) ];
-			v3 = temp[ 2 + (i*4) ];
-			v4 = temp[ 3 + (i*4) ];
+        for(unsigned int i = 0; i < 6; i++){
+            glm::vec3 v1,v2,v3,v4;
+            v1 = temp[ 0 + (i*4) ];
+            v2 = temp[ 1 + (i*4) ];
+            v3 = temp[ 2 + (i*4) ];
+            v4 = temp[ 3 + (i*4) ];
 
-			Skybox::m_Vertices.push_back(v1);
-			Skybox::m_Vertices.push_back(v2);
-			Skybox::m_Vertices.push_back(v3);
+            Skybox::m_Vertices.push_back(v1);
+            Skybox::m_Vertices.push_back(v2);
+            Skybox::m_Vertices.push_back(v3);
 
-			Skybox::m_Vertices.push_back(v1);
-			Skybox::m_Vertices.push_back(v3);
-			Skybox::m_Vertices.push_back(v4);
-		}
-		glGenBuffers(1, &Skybox::m_Buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, Skybox::m_Buffer );
-		glBufferData(GL_ARRAY_BUFFER, Skybox::m_Vertices.size() * sizeof(glm::vec3),&Skybox::m_Vertices[0], GL_STATIC_DRAW );
-	}
+            Skybox::m_Vertices.push_back(v1);
+            Skybox::m_Vertices.push_back(v3);
+            Skybox::m_Vertices.push_back(v4);
+        }
+        glGenBuffers(1, &Skybox::m_Buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, Skybox::m_Buffer );
+        glBufferData(GL_ARRAY_BUFFER, Skybox::m_Vertices.size() * sizeof(glm::vec3),&Skybox::m_Vertices[0], GL_STATIC_DRAW );
+    }
 
-	m_Model = glm::mat4(1);
+    m_Model = glm::mat4(1);
 
-	glActiveTexture(GL_TEXTURE0);
-	std::string front = "Textures/Skyboxes/" + name + "/Front.jpg";
-	std::string back = "Textures/Skyboxes/" + name + "/Back.jpg";
-	std::string left = "Textures/Skyboxes/" + name + "/Left.jpg";
-	std::string right = "Textures/Skyboxes/" + name + "/Right.jpg";
-	std::string top = "Textures/Skyboxes/" + name + "/Top.jpg";
-	std::string bottom = "Textures/Skyboxes/" + name + "/Bottom.jpg";
-	std::string names[6] = {front,back,left,right,top,bottom};
+    glActiveTexture(GL_TEXTURE0);
+    std::string front = "Textures/Skyboxes/" + name + "/Front.jpg";
+    std::string back = "Textures/Skyboxes/" + name + "/Back.jpg";
+    std::string left = "Textures/Skyboxes/" + name + "/Left.jpg";
+    std::string right = "Textures/Skyboxes/" + name + "/Right.jpg";
+    std::string top = "Textures/Skyboxes/" + name + "/Top.jpg";
+    std::string bottom = "Textures/Skyboxes/" + name + "/Bottom.jpg";
+    std::string names[6] = {front,back,left,right,top,bottom};
 
-	m_Texture = new Texture(names,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+    m_Texture = new Texture(names,"Cubemap ",GL_TEXTURE_CUBE_MAP);
 
-	m_Model = glm::mat4(1);
-	m_Model = glm::translate(m_Model, glm::vec3(Resources::getActiveCamera()->getPosition()));
-	m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
+    m_Model = glm::mat4(1);
+    m_Model = glm::translate(m_Model, glm::vec3(Resources::getActiveCamera()->getPosition()));
+    m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
 
-	if(scene == nullptr) scene = Resources::getCurrentScene();
-	if(scene->getSkybox() == nullptr)
-		scene->setSkybox(this);
+    if(scene == nullptr) scene = Resources::getCurrentScene();
+    if(scene->getSkybox() == nullptr)
+        scene->setSkybox(this);
 }
 Skybox::~Skybox(){
-	SAFE_DELETE(m_Texture);
+    SAFE_DELETE(m_Texture);
 }
 void Skybox::update(){
-	glm::vec3 p = glm::vec3(Resources::getActiveCamera()->getPosition());
-	m_Model[3][0] = p.x;
-	m_Model[3][1] = p.y;
-	m_Model[3][2] = p.z;
+    glm::vec3 p = glm::vec3(Resources::getActiveCamera()->getPosition());
+    m_Model[3][0] = p.x;
+    m_Model[3][1] = p.y;
+    m_Model[3][2] = p.z;
 }
 
 void Skybox::render(){
-	GLuint shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();
-	glUseProgram(shader);
+    GLuint shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();
+    glUseProgram(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->getTextureAddress());
-	glUniform1i(glGetUniformLocation(shader, "Texture"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->getTextureAddress());
+    glUniform1i(glGetUniformLocation(shader, "Texture"), 0);
 
-	glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
-	glDisableVertexAttribArray(0);
-	glUseProgram(0);
+    glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
+    glDisableVertexAttribArray(0);
+    glUseProgram(0);
 }
