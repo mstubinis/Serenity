@@ -14,7 +14,7 @@ const int GBUFFER_TYPES[] =		       {GL_RGB,		       // (diffuse.rgba)
 								        GL_RGB,		           // (lighting.rgb)
 										GL_RGBA,               // bloom
 										GL_RGBA16F,            // free buffer
-										GL_DEPTH_COMPONENT16}; // depth
+										GL_DEPTH_COMPONENT32}; // depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			   // (diffuse.rgba)
 										GL_RGB,			   // (diffuse forward rendering.rgba)

@@ -183,6 +183,7 @@ void ObjectDynamic::setPosition(glm::nType x, glm::nType y, glm::nType z){
 	initialTransform.setRotation(m_RigidBody->getOrientation());
 
     m_RigidBody->setWorldTransform(initialTransform);
+	m_RigidBody->setCenterOfMassTransform(initialTransform);
     m_MotionState->setWorldTransform(initialTransform);
 }
 void ObjectDynamic::setOrientation(glm::quat q){

@@ -23,9 +23,6 @@ uniform sampler2D gDiffuseMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
-uniform mat4 VPInverse;
-
-vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
 
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
@@ -73,20 +70,20 @@ vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 	return vec4(0);
 }
 void main(){
-	vec2 texCoord = CalcTexCoord();
-	vec3 PxlPosition = texture2D(gPositionMap,texCoord).xyz;
-    vec3 PxlNormal = (texture2D(gNormalMap, texCoord).rgb);
+	vec2 uv = gl_FragCoord.xy / gScreenSize;
+	vec3 PxlPosition = texture2D(gPositionMap,uv).xyz;
+    vec3 PxlNormal = (texture2D(gNormalMap, uv).rgb);
 
 	vec4 lightCalculation = vec4(0);
 
 	if(LightType == 0)
-		lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,texCoord);
+		lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);
 	else if(LightType == 1)
-		lightCalculation = CalcPointLight(PxlPosition,PxlNormal,texCoord);
+		lightCalculation = CalcPointLight(PxlPosition,PxlNormal,uv);
 	else if(LightType == 2)
-		lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,texCoord);
+		lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);
 	else if(LightType == 3)
-		lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,texCoord);
+		lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
 
 	gl_FragColor = lightCalculation;
 }

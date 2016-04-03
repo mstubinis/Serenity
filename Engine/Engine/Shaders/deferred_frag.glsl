@@ -24,7 +24,7 @@ varying vec3 Tangents;
 
 vec3 CalcBumpedNormal(){
     vec3 normalMapTexture = (texture2D(NormalMap, UV).xyz) * 2.0 - 1.0;
-    mat3 TBN = mat3(-Tangents, Binormals, Normals);
+    mat3 TBN = mat3(Tangents, Binormals, Normals);
     return normalize(TBN * normalMapTexture);
 }
 void main(){

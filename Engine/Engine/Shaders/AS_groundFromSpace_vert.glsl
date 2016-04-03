@@ -95,9 +95,9 @@ void main(void)	{
 	UV = uv;
 
 	//normalizing these solved a problem, but might cause more. Be careful here
-	Normals = normalize((World * vec4(normal,0.0)).xyz);
-	Tangents = normalize((World * vec4(tangent,0.0)).xyz);
-	Binormals = normalize((World * vec4(binormal,0.0)).xyz);
+	Normals = ((World * vec4(normal,0.0)).xyz);
+	Tangents = ((World * vec4(tangent,0.0)).xyz);
+	Binormals = ((World * vec4(binormal,0.0)).xyz);
 
 	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

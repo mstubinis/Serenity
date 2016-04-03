@@ -13,12 +13,12 @@ uniform vec2 gScreenSize;
 uniform vec3 gAmbientColor;
 
 void main(){
-	vec2 texCoords = gl_FragCoord.xy / gScreenSize;
-	vec4 image = texture2D(gColorMap, texCoords);
-	vec4 lightMap = texture2D(gLightMap, texCoords);
-	vec4 normals = texture2D(gNormalMap,texCoords);
-	float glow = texture2D(gGlowMap, texCoords).r;
-	vec4 bloom = texture2D(gBloomMap,texCoords);
+	vec2 uv = gl_FragCoord.xy / gScreenSize;
+	vec4 image = texture2D(gColorMap, uv);
+	vec4 lightMap = texture2D(gLightMap, uv);
+	vec4 normals = texture2D(gNormalMap,uv);
+	float glow = texture2D(gGlowMap, uv).r;
+	vec4 bloom = texture2D(gBloomMap,uv);
 
 	if(normals.r > 0.9999 && normals.g > 0.9999 && normals.b > 0.9999){
 		if(HasBloom == 1){
@@ -37,6 +37,5 @@ void main(){
 			illumination = max((bloom*(1.0-(lightMap/image))), illumination);
 		}
 		gl_FragColor = lightMap+illumination;
-		//gl_FragColor = image;
 	}
 }

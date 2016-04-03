@@ -33,13 +33,13 @@ bool Renderer::RendererInfo::bloom = true;
 bool Renderer::RendererInfo::lighting = true;
 bool Renderer::RendererInfo::debug = false;
 
-GBuffer* Engine::Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
-glm::mat4 Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::mat4(1);
+GBuffer* Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
+glm::mat4 Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::mat4(1);
 
-std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ObjectsToBeRendered;
-std::vector<GeometryRenderInfo> Engine::Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
-std::vector<FontRenderInfo> Engine::Renderer::Detail::RenderManagement::m_FontsToBeRendered;
-std::vector<TextureRenderInfo> Engine::Renderer::Detail::RenderManagement::m_TexturesToBeRendered;
+std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeRendered;
+std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
+std::vector<FontRenderInfo> Renderer::Detail::RenderManagement::m_FontsToBeRendered;
+std::vector<TextureRenderInfo> Renderer::Detail::RenderManagement::m_TexturesToBeRendered;
 
 void Engine::Renderer::Detail::RenderManagement::init(){
 	std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
@@ -81,8 +81,8 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 
 	initOpenGL();
 
-	Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
-	Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
+	Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
 
 	#ifdef ENGINE_DEBUG
 	Renderer::RendererInfo::debug = true;
@@ -97,10 +97,10 @@ void Engine::Renderer::Detail::RenderManagement::initOpenGL(){
 	glCullFace(GL_BACK);
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
-	SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
+	SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
 }
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
-	Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
+	Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
 }
 void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
 	for(auto item:m_ObjectsToBeRendered){
@@ -201,7 +201,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
 	glm::vec3 clear = s->getBackgroundColor();
 	const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
 	const float black[4] = {0.0f,0.0f,0.0f,0.0f};
-	glClearBufferfv(GL_COLOR,0,colors);
+	glClearBufferfv(GL_COLOR,BUFFER_TYPE_DIFFUSE,colors);
 	glDisable(GL_BLEND); //disable blending on all mrts
 
 	s->renderSkybox();
@@ -226,7 +226,6 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 	glUniform1i(glGetUniformLocation(shader,"HasSSAO"), static_cast<int>(RendererInfo::ssao));
 
 	glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VPInverse" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->calculateViewProjInverted()));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 
 	glActiveTexture(GL_TEXTURE0);
@@ -262,7 +261,7 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
 	m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
-	Engine::Renderer::Detail::RenderManagement::_geometryPass();
+	Renderer::Detail::RenderManagement::_geometryPass();
 	m_gBuffer->stop();
 
 	glEnable(GL_BLEND);
@@ -271,39 +270,39 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	if(RendererInfo::ssao){
 		//only write to the G channel of the glow buffer for SSAO pass
 		m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-		Engine::Renderer::Detail::RenderManagement::_passSSAO();
+		Renderer::Detail::RenderManagement::_passSSAO();
 		m_gBuffer->stop();
 
 		if(RendererInfo::ssao_do_blur){
 			//only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
 			m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
-			Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_GLOW,0.5f,0.5f,"G");
+			Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_GLOW,0.5f,0.5f,"G");
 			m_gBuffer->stop();
 			m_gBuffer->start(BUFFER_TYPE_GLOW,"G");
-			Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"G");
+			Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"G");
 			m_gBuffer->stop();
 		}
 		
 	}
 	if(RendererInfo::lighting){
 		m_gBuffer->start(BUFFER_TYPE_LIGHTING);
-		Engine::Renderer::Detail::RenderManagement::_lightingPass();
+		Renderer::Detail::RenderManagement::_lightingPass();
 		m_gBuffer->stop();
 	}
 	if(RendererInfo::bloom){
 		glDisable(GL_BLEND);
 		m_gBuffer->start(BUFFER_TYPE_BLOOM);
-		Engine::Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
+		Renderer::Detail::RenderManagement::_passBloom(BUFFER_TYPE_GLOW,BUFFER_TYPE_DIFFUSE);
 		m_gBuffer->stop();
 
 		m_gBuffer->start(BUFFER_TYPE_FREE1);
-		Engine::Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.42f,3.8f);
+		Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.42f,3.8f);
 		m_gBuffer->stop();
 		m_gBuffer->start(BUFFER_TYPE_BLOOM);
-		Engine::Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.42f,3.8f);
+		Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.42f,3.8f);
 		m_gBuffer->stop();
 	}
-	Engine::Renderer::Detail::RenderManagement::_passFinal();
+	Renderer::Detail::RenderManagement::_passFinal();
 
 	glEnable(GL_BLEND);
 	if(RendererInfo::debug)

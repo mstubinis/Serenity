@@ -12,6 +12,7 @@
 using namespace Engine;
 
 HUD* m_HUD;
+PointLight* m_Light;
 
 void Game::cleanup(){
 	for(auto part:stationPartsInfo)
@@ -58,6 +59,13 @@ void Game::initLogic(){
 	Sound::loop("Test");
 
 	m_HUD = new HUD();
+
+	m_Light = new PointLight("pl");
+	m_Light->setConstant(0.1f);
+	m_Light->setLinear(0.1f);
+	m_Light->setExponent(0.1f);
+
+	m_Light->setColor(255,124,27,255);
 }
 void Game::update(float dt){
 	SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -70,9 +78,6 @@ void Game::update(float dt){
 	if(Events::Keyboard::isKeyDownOnce("f7")){
 		Resources::setCurrentScene("Sol");
 		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
-	}
-	if(Events::Keyboard::isKeyDownOnce("f8")){
-		Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
 	}
 	m_HUD->update(dt);
 }
