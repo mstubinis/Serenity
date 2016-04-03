@@ -16,7 +16,6 @@ uniform int GlowMapEnabled;
 
 uniform vec4 Object_Color;
 
-varying vec3 WorldPosition;
 varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;
@@ -51,8 +50,7 @@ void main(){
 		gl_FragData[1].rgb = vec3(1.0);
 		gl_FragData[2].r = BaseGlow;
 	}
-	gl_FragData[1].a = Object_Color.a;
 	gl_FragData[2].b = Specularity;
-	gl_FragData[3] = vec4(WorldPosition,1.0);
+	gl_FragData[3].r = gl_FragCoord.z;
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

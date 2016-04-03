@@ -17,12 +17,14 @@ uniform vec3 LightDirection;
 uniform vec3 LightPosition;
 
 uniform sampler2D gNormalMap;
-uniform sampler2D gPositionMap;
 uniform sampler2D gGlowMap;
 uniform sampler2D gDiffuseMap;
+uniform sampler2D gRegularDepthMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
+
+uniform mat4 VPInverse;
 
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
@@ -69,10 +71,15 @@ vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 	return vec4(0);
 }
+vec3 DecodePosition(vec2 uv){
+	vec4 clipSpace = vec4(uv * 2.0 - 1.0,texture2D(gRegularDepthMap, uv).r * 2.0 - 1.0,1.0);
+	vec4 pos = VPInverse * clipSpace;
+	return pos.xyz / pos.w;
+}
 void main(){
 	vec2 uv = gl_FragCoord.xy / gScreenSize;
-	vec3 PxlPosition = texture2D(gPositionMap,uv).xyz;
-    vec3 PxlNormal = (texture2D(gNormalMap, uv).rgb);
+	vec3 PxlPosition = DecodePosition(uv);
+    vec3 PxlNormal = texture2D(gNormalMap, uv).rgb;
 
 	vec4 lightCalculation = vec4(0);
 

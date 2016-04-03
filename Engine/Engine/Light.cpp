@@ -10,7 +10,7 @@
 
 using namespace Engine;
 
-SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("Plane","Defiant",pos,glm::vec3(1),name,scene){
+SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),name,scene){
 	m_Type = type;
 
     m_AmbientIntensity = 0.05f;

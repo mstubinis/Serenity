@@ -4,8 +4,6 @@ uniform vec2 gScreenSize;
 uniform sampler2D texture;
 uniform float radius;
 
-vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
-
 float threshold(float thr1,float thr2 ,float val) {
 	if (val < thr1) {
 		return 0.0;
@@ -20,11 +18,11 @@ float threshold(float thr1,float thr2 ,float val) {
 float avg_intensity(vec4 pix) {
 	return (pix.r + pix.g + pix.b)/3.0;
 }
-vec4 get_pixel(vec2 coords,float dx,float dy) {
-	float value = texture2D(texture,coords + vec2(dx, dy)).r;
+vec4 get_pixel(vec2 uv,float dx,float dy) {
+	float value = texture2D(texture,uv + vec2(dx, dy)).r;
 	return vec4(value);
 }
-float IsEdge(vec2 coords){
+float IsEdge(vec2 uv){
 	float dxtex = 1.0 / gScreenSize.x;
 	float dytex = 1.0 / gScreenSize.y;
 	float pix[9];
@@ -35,7 +33,7 @@ float IsEdge(vec2 coords){
 	for (int i=-1; i<2; i++) {
 		for(int j=-1; j<2; j++) {
 			k++;
-			pix[k] = avg_intensity(get_pixel(coords,float(i)*dxtex,float(j)*dytex));
+			pix[k] = avg_intensity(get_pixel(uv,float(i)*dxtex,float(j)*dytex));
 		}
 	}
 
@@ -45,7 +43,7 @@ float IsEdge(vec2 coords){
     return threshold(0.15,0.6,clamp(1.8*delta,0.0,1.0));
 }
 void main(){
-	vec2 uv = CalcTexCoord();
+	vec2 uv = gl_FragCoord.xy / gScreenSize;
 	float edge = IsEdge(gl_TexCoord[0].xy);
 	gl_FragColor = vec4(edge);
 }

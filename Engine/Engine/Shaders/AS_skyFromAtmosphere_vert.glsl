@@ -33,7 +33,6 @@ varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
 varying vec3 v3LightPosition;
-varying vec3 WorldPosition;
 
 varying float Depth;
 varying float cameraHeight;
@@ -90,6 +89,4 @@ void main(){
 	cameraHeight = fCameraHeight;
 	outerRadius = fOuterRadius;
 	planetRadius = fInnerRadius;
-
-	WorldPosition = (World * vec4(position,1.0)).xyz;
 }

@@ -6,32 +6,29 @@
 #include <GL/GL.h>
 #include <glm/glm.hpp>
 
-const int GBUFFER_TYPES[] =		       {GL_RGB,		       // (diffuse.rgba)
-									    GL_RGB,			   // (diffuse forward rendering.rgba)
-								        GL_RGB16F,		       // (normals.rgb)
-										GL_RGB,			       // Glow & SSAO & Specular
-										GL_RGB32F,			   // World Position
-								        GL_RGB,		           // (lighting.rgb)
-										GL_RGBA,               // bloom
-										GL_RGBA16F,            // free buffer
-										GL_DEPTH_COMPONENT32}; // depth
+const int GBUFFER_TYPES[] =		       {GL_RGB8,		       // (diffuse.rgb)
+								        GL_RGB10_A2,		   // (normals.rgb)
+										GL_R32F,               // normal depth
+										GL_RGB8,			   // Glow & SSAO & Specular
+								        GL_RGB8,		       // (lighting.rgb)
+										GL_RGB8,               // bloom
+										GL_RGBA8,              // free buffer
+										GL_DEPTH_COMPONENT24}; // depth
 
-const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			   // (diffuse.rgba)
-										GL_RGB,			   // (diffuse forward rendering.rgba)
-							            GL_RGB,			       // (normals.rgb)
+const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			       // (diffuse.rgb)
+							            GL_RGB,                // (normals.rgb)
+										GL_RED,				   // normal depth
 										GL_RGB,			       // Glow & SSAO & Specular
-										GL_RGB,				   // World Position
 								        GL_RGB,			       // (lighting.rgb)
-								        GL_RGBA,			   // bloom
+								        GL_RGB,			       // bloom
 								        GL_RGBA,			   // free buffer
 								        GL_DEPTH_COMPONENT};   // depth
 
 const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,
 						                GL_UNSIGNED_BYTE,
-						                GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
 										GL_UNSIGNED_BYTE,
-								        GL_UNSIGNED_BYTE,
+										GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
 								        GL_UNSIGNED_BYTE,
 								        GL_FLOAT};
@@ -43,14 +40,12 @@ const int GBUFFER_ATTACHMENT_TYPES[] = {GL_COLOR_ATTACHMENT0,
 										GL_COLOR_ATTACHMENT4,
 										GL_COLOR_ATTACHMENT5,
 										GL_COLOR_ATTACHMENT6,
-										GL_COLOR_ATTACHMENT7,
 										GL_DEPTH_ATTACHMENT};
 
 enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,
-				   BUFFER_TYPE_DIFFUSE_FORWARD,
 	               BUFFER_TYPE_NORMAL,
+	               BUFFER_TYPE_REGULARDEPTH,
 				   BUFFER_TYPE_GLOW,
-				   BUFFER_TYPE_POSITION,
 				   BUFFER_TYPE_LIGHTING,
 				   BUFFER_TYPE_BLOOM,
 				   BUFFER_TYPE_FREE1,

@@ -79,6 +79,9 @@ void Game::update(float dt){
 		Resources::setCurrentScene("Sol");
 		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 	}
+	if(Events::Keyboard::isKeyDownOnce("f8")){
+		Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
+	}
 	m_HUD->update(dt);
 }
 void Game::render(){

@@ -16,9 +16,10 @@ void main(){
 	vec2 uv = gl_FragCoord.xy / gScreenSize;
 	vec4 image = texture2D(gColorMap, uv);
 	vec4 lightMap = texture2D(gLightMap, uv);
-	vec4 normals = texture2D(gNormalMap,uv);
+	vec3 normals = texture2D(gNormalMap,uv).rgb;
 	float glow = texture2D(gGlowMap, uv).r;
 	vec4 bloom = texture2D(gBloomMap,uv);
+	float ssao = texture2D(gGlowMap, uv).g;
 
 	if(normals.r > 0.9999 && normals.g > 0.9999 && normals.b > 0.9999){
 		if(HasBloom == 1){

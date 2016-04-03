@@ -22,7 +22,6 @@ uniform vec3 gAmbientColor;
 varying vec3 c0;
 varying vec3 c1;
 
-varying vec3 WorldPosition;
 varying vec4 Color;
 varying vec2 UV;
 varying vec3 Normals; 
@@ -47,7 +46,7 @@ void main(){
 		else{
 			gl_FragData[0] = vec4(0.0);
 		}
-		gl_FragData[1] = vec4(1.0);
+		gl_FragData[1].rgb = vec3(1.0);
 		gl_FragData[2].r = 0.0;
 	}
 	else{
@@ -58,11 +57,9 @@ void main(){
 
 		if(NormalMapEnabled == 1){
 			gl_FragData[1].rgb = normalize(CalcBumpedNormal());
-			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 		else{
 			gl_FragData[1].rgb = normalize(Normals);
-			gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
 		}
 
 		if(GlowMapEnabled == 1)
@@ -71,7 +68,7 @@ void main(){
 			gl_FragData[2].r = BaseGlow;
 	}
 	gl_FragData[2].b = Specularity;
-	gl_FragData[3] = vec4(WorldPosition,1.0);
     const float offset = 1.0;
+	gl_FragData[3].r = gl_FragCoord.z;
     gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));
 }

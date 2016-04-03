@@ -35,7 +35,6 @@ varying vec3 c1;
 
 varying vec2 UV;
 
-varying vec3 WorldPosition;
 varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
@@ -98,6 +97,4 @@ void main(void)	{
 	Normals = ((World * vec4(normal,0.0)).xyz);
 	Tangents = ((World * vec4(tangent,0.0)).xyz);
 	Binormals = ((World * vec4(binormal,0.0)).xyz);
-
-	WorldPosition = (World * vec4(position,1.0)).xyz;
 }
