@@ -12,7 +12,6 @@
 using namespace Engine;
 
 HUD* m_HUD;
-PointLight* m_Light;
 
 void Game::cleanup(){
     for(auto part:stationPartsInfo)
@@ -59,13 +58,6 @@ void Game::initLogic(){
     Sound::loop("Test");
 
     m_HUD = new HUD();
-
-    m_Light = new PointLight("pl");
-    m_Light->setConstant(0.1f);
-    m_Light->setLinear(0.1f);
-    m_Light->setExponent(0.1f);
-
-    m_Light->setColor(255,124,27,255);
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));

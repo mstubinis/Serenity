@@ -22,7 +22,7 @@ class Camera: public ObjectBasic{
         float m_Near, m_Far;
         glm::mat4 m_View, m_Projection;
     public:
-        Camera(std::string,float,float,float,float,Scene* = nullptr);			  // Perspective camera Constructor
+        Camera(std::string,float,float,float,float,Scene* = nullptr);             // Perspective camera Constructor
         Camera(std::string,float,float,float,float,float,float,Scene* = nullptr); // Orthographic camera Constructor
         ~Camera();
 

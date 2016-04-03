@@ -6,7 +6,7 @@
 #include <GL/GL.h>
 #include <glm/glm.hpp>
 
-const int GBUFFER_TYPES[] =		       {GL_RGB8,		       // (diffuse.rgba)
+const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgba)
                                         GL_RGB16F,		       // (normals.rgb)
                                         GL_RGB8,			   // Glow & SSAO & Specular
                                         GL_RGB32F,			   // World Position

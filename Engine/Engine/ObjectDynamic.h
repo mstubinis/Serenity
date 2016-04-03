@@ -33,6 +33,8 @@ class ObjectDynamic: public Object{
         btRigidBody* m_RigidBody;
         btDefaultMotionState* m_MotionState;
     public:
+		virtual void collisionResponse(ObjectDynamic* other);
+
         ObjectDynamic( std::string = "",
                        std::string = "",
                        glm::v3 = glm::v3(0),            //Position
@@ -49,6 +51,8 @@ class ObjectDynamic: public Object{
         virtual void setPosition(glm::v3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
+		virtual void setColor(float,float,float,float);
+		virtual void setColor(glm::vec4);
 
         virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
 
@@ -115,9 +119,7 @@ class ObjectDynamic: public Object{
         virtual void clearAngularForces();
         virtual void clearAllForces();
 
-        void activateCollisionObject();
         void activateRigidBody();
-        void deactivateCollisionObject();
         void deactivateRigidBody();
 
         virtual void update(float);

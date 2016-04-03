@@ -73,7 +73,30 @@ void Engine::Physics::removeRigidBody(btRigidBody* body){
 }
 void Engine::Physics::removeRigidBody(ObjectDynamic* obj){ Engine::Physics::removeRigidBody(obj->getRigidBody()); }
 
-void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int maxSteps,float other){ m_dynamicsWorld->stepSimulation(dt,maxSteps,other); }
+void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int maxSteps,float other){ 
+	m_dynamicsWorld->stepSimulation(dt,maxSteps,other); 
+    unsigned int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
+    for (unsigned int i = 0; i < numManifolds; i++){
+        btPersistentManifold* contactManifold =  m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
+        btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
+        unsigned int numContacts = contactManifold->getNumContacts();
+        for (unsigned int j = 0; j<numContacts; j++){
+            btManifoldPoint& pt = contactManifold->getContactPoint(j);
+            if (pt.getDistance() < 0.0f){
+                const btVector3& ptA = pt.getPositionWorldOnA();
+                const btVector3& ptB = pt.getPositionWorldOnB();
+                const btVector3& normalOnB = pt.m_normalWorldOnB;
+
+				ObjectDynamic* a = static_cast<ObjectDynamic*>(obA->getUserPointer());
+				ObjectDynamic* b = static_cast<ObjectDynamic*>(obB->getUserPointer());
+
+				a->collisionResponse(b);
+				b->collisionResponse(a);
+            }
+        }
+    }
+}
 void Engine::Physics::Detail::PhysicsManagement::render(){
     glUseProgram(0);
 

@@ -82,7 +82,9 @@ namespace Engine{
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ObjectsToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
+					static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
+					static void _renderForwardRenderedObjects();
                     static void _renderObjects();
                     static void _renderForegroundObjects();
                     static void _renderText();

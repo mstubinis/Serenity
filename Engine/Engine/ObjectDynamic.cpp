@@ -12,6 +12,11 @@
 
 using namespace Engine;
 
+void ObjectDynamic::collisionResponse(ObjectDynamic* other){
+	// inherit this virtual method for derived classes for collision detection. 
+	// if this collides with other, execute the following code:
+}
+
 ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): Object(name,scene){
     m_Forward = glm::v3(0,0,-1);
     m_Right = glm::v3(1,0,0);
@@ -80,6 +85,8 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     if(m_Parent == nullptr){
         ObjectDynamic::update(0);
     }
+	m_Collision->getMeshCollision()->getCollisionShape()->setUserPointer(this);
+	m_RigidBody->setUserPointer(this);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
@@ -103,6 +110,10 @@ void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool loca
     }
     setPosition(getPosition() + p);
 }
+void ObjectDynamic::setColor(float r, float g, float b, float a){
+	Math::setColor(m_Color,r,g,b,a);
+}
+void ObjectDynamic::setColor(glm::vec4 color){ ObjectDynamic::setColor(color.r,color.g,color.b,color.a); }
 void ObjectDynamic::translate(glm::v3 t,bool l){ ObjectDynamic::translate(t.x,t.y,t.z,l); }
 void ObjectDynamic::update(float dt){
     glm::mat4 m(1);
@@ -361,13 +372,8 @@ void ObjectDynamic::clearAllForces(){
     ObjectDynamic::setLinearVelocity(0,0,0);
     ObjectDynamic::setAngularVelocity(0,0,0);
 }
-
-void ObjectDynamic::activateCollisionObject(){
-}
 void ObjectDynamic::activateRigidBody(){
     m_RigidBody->activate();
-}
-void ObjectDynamic::deactivateCollisionObject(){
 }
 void ObjectDynamic::deactivateRigidBody(){
     m_RigidBody->setActivationState(WANTS_DEACTIVATION);

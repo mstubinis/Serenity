@@ -40,6 +40,7 @@ std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToB
 std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
 std::vector<FontRenderInfo> Renderer::Detail::RenderManagement::m_FontsToBeRendered;
 std::vector<TextureRenderInfo> Renderer::Detail::RenderManagement::m_TexturesToBeRendered;
+std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeForwardRendered;
 
 void Engine::Renderer::Detail::RenderManagement::init(){
     std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
@@ -113,6 +114,12 @@ void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
         item.object->draw(item.shader,RendererInfo::debug);
     }
     m_ForegroundObjectsToBeRendered.clear();
+}
+void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects(){
+    for(auto item:m_ObjectsToBeForwardRendered){
+        item.object->draw(item.shader,RendererInfo::debug);
+    }
+	m_ObjectsToBeForwardRendered.clear();
 }
 
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
@@ -210,9 +217,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
     glBlendEquationi(GL_FUNC_ADD,0);
     glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
-    for(auto object:s->getObjects()){
-        object.second->render(0,RendererInfo::debug);
-    }
+
     _renderObjects();
 
     glDepthMask(GL_FALSE);
@@ -260,6 +265,8 @@ void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
+    for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::debug); }
+
     m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
     Renderer::Detail::RenderManagement::_geometryPass();
     m_gBuffer->stop();
@@ -310,6 +317,8 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _renderForegroundObjects();
+
+	_renderForwardRenderedObjects();
 
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f);
