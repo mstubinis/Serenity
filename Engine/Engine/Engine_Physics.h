@@ -4,8 +4,8 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
-#include "ObjectDynamic.h"
 
+class ObjectDynamic;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -13,6 +13,8 @@ class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
 class GLDebugDrawer;
 class btCollisionShape;
+class btRigidBody;
+class btVector3;
 
 enum COLLISION_TYPE { 
     COLLISION_TYPE_CONVEXHULL, 
@@ -21,31 +23,23 @@ enum COLLISION_TYPE {
     COLLISION_TYPE_BOXSHAPE,
     COLLISION_TYPE_NONE
 };
-class MeshCollision final{
+class Collision final{
     private:
+        btVector3* m_Inertia;
         unsigned int m_CollisionType;
         btCollisionShape* m_CollisionShape;
+		void _init(COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
+		void _load(std::string filename, COLLISION_TYPE);
     public:
-        MeshCollision(btCollisionShape* shape = nullptr,COLLISION_TYPE = COLLISION_TYPE_NONE);
-        MeshCollision(std::string filename,COLLISION_TYPE);
-        ~MeshCollision();
+        Collision(btCollisionShape* shape = nullptr,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
+		Collision(std::string file,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
+        ~Collision();
 
-        void load(std::string filename, COLLISION_TYPE);
+        void setMass(float mass);
+        btVector3* getInertia() const { return m_Inertia; }
 
         btCollisionShape* getCollisionShape() const { return m_CollisionShape; }
         const unsigned int getCollisionType() const { return m_CollisionType; }
-};
-class Collision final{
-    private:
-        MeshCollision* m_MeshCollision;
-        btVector3* m_Inertia;
-    public:
-        Collision(MeshCollision*,float mass);
-        ~Collision();
-
-        void recalculate(float mass);
-        btVector3* getInertia() const { return m_Inertia; }
-        MeshCollision* getMeshCollision() const { return m_MeshCollision; }
 };
 
 namespace Engine{
@@ -67,7 +61,7 @@ namespace Engine{
                     static void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
                     static void render();
 
-                    static std::vector<MeshCollision*> m_MeshCollisions;
+                    static std::vector<Collision*> m_Collisions;
             };
         };
         void setGravity(float,float,float); 
@@ -79,7 +73,6 @@ namespace Engine{
         void removeRigidBody(ObjectDynamic*);
     };
 };
-
 
 
 #include <bullet/LinearMath/btIDebugDraw.h>
@@ -104,6 +97,5 @@ void GLDebugDrawStringInternal(int x,int y,const char* string,const btVector3& r
 void GLDebugDrawStringInternal(int x,int y,const char* string,const btVector3& rgb);
 void GLDebugDrawString(int x,int y,const char* string);
 void GLDebugResetFont(int screenWidth,int screenHeight);
-
 
 #endif

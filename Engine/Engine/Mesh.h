@@ -6,10 +6,7 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <GL/GL.h>
-
-class MeshCollision;
-class btTriangleMesh;
-class btConvexHullShape;
+#include "Engine_Physics.h"
 
 const unsigned int NUM_VERTEX_DATA = 5;
 const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
@@ -29,15 +26,14 @@ struct Vertex final{
     glm::vec3 tangent;
     glm::vec3 binormal;
     Vertex(){
-        uv = glm::vec2(0,0);
-        normal = tangent = binormal = glm::vec3(0,0,0);
+        uv = glm::vec2(0); normal = tangent = binormal = glm::vec3(0);
     }
 };
 
 class Mesh final{
     private:
         GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
-        MeshCollision* m_Collision;
+        Collision* m_Collision;
 
         glm::vec3 m_radiusBox;
         float m_radius;
@@ -52,19 +48,19 @@ class Mesh final{
 
         void _calculateTangent(Vertex&, Vertex&, Vertex&);
 
-        void _loadFromFile(std::string);
-        void _loadFromOBJ(std::string);
+        void _loadFromFile(std::string,COLLISION_TYPE);
+        void _loadFromOBJ(std::string,COLLISION_TYPE);
 
         void _init();
     public:
         Mesh(float width, float height);
         Mesh(int x, int y, int width, int height);
-        Mesh(std::string = "");
+		Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
         ~Mesh();
 
         //GLuint* VAO();
         const GLuint* getBuffers() const { return m_buffers; }
-        MeshCollision* getCollision() const { return m_Collision; }
+        Collision* getCollision() const { return m_Collision; }
 
         const glm::vec3& getRadiusBox() const { return m_radiusBox; }
         const float getRadius() const { return m_radius; }

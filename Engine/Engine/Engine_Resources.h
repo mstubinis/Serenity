@@ -23,8 +23,9 @@ class SunLight;
 class SoundEffectBasic;
 class SoundEffect;
 class SoundMusic;
-
 struct ParticleInfo;
+
+#include "Engine_Physics.h"
 
 template<typename T> void SAFE_DELETE(T*& p){
     delete p;
@@ -135,8 +136,8 @@ namespace Engine{
             return Detail::ResourceManagement::m_Shaders[n].get(); 
         }
 
-        void addMesh(std::string name,std::string file);
-        void addMesh(std::string file);
+        void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
+        void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
         void removeMesh(std::string name);
 
         void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");

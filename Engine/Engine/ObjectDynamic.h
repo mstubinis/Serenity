@@ -45,6 +45,8 @@ class ObjectDynamic: public Object{
                      );
         virtual ~ObjectDynamic();
 
+		virtual void setDynamic(bool=true);
+
         std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setPosition(glm::nType,glm::nType,glm::nType); 
@@ -118,9 +120,6 @@ class ObjectDynamic: public Object{
         virtual void clearLinearForces();
         virtual void clearAngularForces();
         virtual void clearAllForces();
-
-        void activateRigidBody();
-        void deactivateRigidBody();
 
         virtual void update(float);
         virtual void render(GLuint=0,bool=false);

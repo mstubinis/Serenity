@@ -12,6 +12,20 @@
 
 using namespace Engine;
 
+void ObjectDynamic::setDynamic(bool dynamic){
+	if(dynamic){
+		Physics::removeRigidBody(this);
+		m_RigidBody->setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
+		Physics::addRigidBody(this);
+		m_RigidBody->activate();
+	}
+	else{
+		Physics::removeRigidBody(this);
+		m_RigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+		clearAllForces();
+		Physics::addRigidBody(this);
+	}
+}
 void ObjectDynamic::collisionResponse(ObjectDynamic* other){
 	// inherit this virtual method for derived classes for collision detection. 
 	// if this collides with other, execute the following code:
@@ -32,30 +46,18 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Mass = 0.5f * m_Radius;
     if(m_Collision == nullptr){
         if(m_DisplayItems.size() > 0){
-            if(m_DisplayItems.size() == 1){
-                if(m_DisplayItems[0]->mesh->getCollision() == nullptr){
-                    //causes memory leaks
-                    //m_Collision_Shape = new Collision(nullptr,COLLISION_TYPE_NONE);
-                    //m_Collision_Shape->setCollision(new btBoxShape(btVector3(m_BoundingBoxRadius.x,m_BoundingBoxRadius.y,m_BoundingBoxRadius.z)),COLLISION_TYPE_BOXSHAPE,m_Mass);
-                }
-                else
-                    m_Collision = new Collision(m_DisplayItems[0]->mesh->getCollision(),m_Mass);
-            }
-            else{
-                btCompoundShape* shape = new btCompoundShape();
-                for(auto item:m_DisplayItems){
-                    btTransform t;
-                    glm::mat4 m = glm::mat4(1);
-                    m = glm::translate(m,item->position);
-                    m *= glm::mat4_cast(item->orientation);
-                    m = glm::scale(m,item->scale);
-                    t.setFromOpenGLMatrix(glm::value_ptr(m));
+            btCompoundShape* shape = new btCompoundShape();
+            for(auto item:m_DisplayItems){
+                btTransform t;
+                glm::mat4 m = glm::mat4(1);
+                m = glm::translate(m,item->position);
+                m *= glm::mat4_cast(item->orientation);
+                m = glm::scale(m,item->scale);
+                t.setFromOpenGLMatrix(glm::value_ptr(m));
 
-                    shape->addChildShape(t,item->mesh->getCollision()->getCollisionShape());
-                }
-                MeshCollision* compoundMesh = new MeshCollision(shape,COLLISION_TYPE_COMPOUND);
-                m_Collision = new Collision(compoundMesh,m_Mass);
+                shape->addChildShape(t,item->mesh->getCollision()->getCollisionShape());
             }
+            m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
         }
     }
 
@@ -72,8 +74,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     calculateRadius();
     m_Mass = 0.5f * m_Radius;
 
-    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getMeshCollision()->getCollisionShape(),*(m_Collision->getInertia()));
-
+    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
     m_RigidBody = new btRigidBody(rigidBodyCI);
     m_RigidBody->setSleepingThresholds(0.015f,0.015f);
     m_RigidBody->setFriction(0.3f);
@@ -85,15 +86,13 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     if(m_Parent == nullptr){
         ObjectDynamic::update(0);
     }
-	m_Collision->getMeshCollision()->getCollisionShape()->setUserPointer(this);
+	m_Collision->getCollisionShape()->setUserPointer(this);
 	m_RigidBody->setUserPointer(this);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
-
     SAFE_DELETE(m_RigidBody);
     SAFE_DELETE(m_MotionState);
-    SAFE_DELETE(m_Collision);
 }
 void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
     m_RigidBody->activate();
@@ -177,13 +176,13 @@ glm::v3 ObjectDynamic::getPosition(){
     return glm::v3(m[3][0],m[3][1],m[3][2]);
 }
 void ObjectDynamic::scale(float x,float y,float z){
-    btVector3 localScale = m_Collision->getMeshCollision()->getCollisionShape()->getLocalScaling();
-    m_Collision->getMeshCollision()->getCollisionShape()->setLocalScaling(btVector3(localScale.x()+x,localScale.y()+y,localScale.z()+z));
+    btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
+    m_Collision->getCollisionShape()->setLocalScaling(btVector3(localScale.x()+x,localScale.y()+y,localScale.z()+z));
     this->calculateRadius();
 }
 void ObjectDynamic::scale(glm::vec3 s){ ObjectDynamic::scale(s.x,s.y,s.z); }
 void ObjectDynamic::setScale(float x, float y, float z){
-    m_Collision->getMeshCollision()->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
+    m_Collision->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
     this->calculateRadius();
 }
 void ObjectDynamic::setScale(glm::vec3 s){ ObjectDynamic::setScale(s.x,s.y,s.z); }
@@ -329,7 +328,7 @@ void ObjectDynamic::setAngularVelocityZ(float z, bool l){
 }
 void ObjectDynamic::setMass(float mass){
     m_Mass = mass;
-    m_Collision->recalculate(m_Mass);
+    m_Collision->setMass(m_Mass);
     if(m_RigidBody != nullptr)
         m_RigidBody->setMassProps(m_Mass,*(m_Collision->getInertia()));
 }
@@ -372,12 +371,6 @@ void ObjectDynamic::clearAllForces(){
     ObjectDynamic::setLinearVelocity(0,0,0);
     ObjectDynamic::setAngularVelocity(0,0,0);
 }
-void ObjectDynamic::activateRigidBody(){
-    m_RigidBody->activate();
-}
-void ObjectDynamic::deactivateRigidBody(){
-    m_RigidBody->setActivationState(WANTS_DEACTIVATION);
-}
 
 bool ObjectDynamic::rayIntersectSphere(Camera* cam){ return cam->rayIntersectSphere(this); }
 void ObjectDynamic::calculateRadius(){
@@ -403,7 +396,7 @@ void ObjectDynamic::calculateRadius(){
     }
     glm::vec3 scale(1);
     if(m_Collision != nullptr){
-        btVector3 s = m_Collision->getMeshCollision()->getCollisionShape()->getLocalScaling();
+        btVector3 s = m_Collision->getCollisionShape()->getLocalScaling();
         scale = glm::vec3(s.x(),s.y(),s.z());
     }
     m_BoundingBoxRadius = maxLength * scale;
@@ -437,7 +430,7 @@ glm::quat ObjectDynamic::getOrientation(){
     return glm::quat(q.w(),q.x(),q.y(),q.z());
 }
 glm::vec3 ObjectDynamic::getScale(){
-    btVector3 localScale = m_Collision->getMeshCollision()->getCollisionShape()->getLocalScaling();
+    btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
 glm::m4 ObjectDynamic::getModel(){

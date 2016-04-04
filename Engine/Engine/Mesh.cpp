@@ -120,30 +120,33 @@ Mesh::Mesh(float width, float height){
 
     _init();
 }
-Mesh::Mesh(std::string filename){
+Mesh::Mesh(std::string filename,COLLISION_TYPE type){
     m_Collision = nullptr;
-    _loadFromFile(filename);
+    _loadFromFile(filename, type);
     _init();
 }
 Mesh::~Mesh(){
     for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++) glDeleteBuffers(1, &m_buffers[i]);
 }
-void Mesh::_loadFromFile(std::string filename){
-    std::string extention;
-    for(unsigned int i = filename.length() - 4; i < filename.length(); i++)extention += tolower(filename.at(i));
+void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
+    std::string extention; for(unsigned int i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
     if(extention == ".obj")
-        _loadFromOBJ(filename);
+        _loadFromOBJ(file,type);
 }
-void Mesh::_loadFromOBJ(std::string filename){
-    std::string colFile = filename.substr(0,filename.size()-4);
-    colFile += "Col.obj";
-    if(boost::filesystem::exists(colFile)){
-        m_Collision = new MeshCollision(colFile,COLLISION_TYPE_CONVEXHULL);
-    }
-    else{
-        m_Collision = new MeshCollision(filename,COLLISION_TYPE_CONVEXHULL);
-    }
-
+void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
+	if(type == COLLISION_TYPE_NONE){
+		m_Collision = new Collision(new btEmptyShape());
+	}
+	else{
+		std::string colFile = filename.substr(0,filename.size()-4);
+		colFile += "Col.obj";
+		if(boost::filesystem::exists(colFile)){
+			m_Collision = new Collision(colFile,type);
+		}
+		else{
+			m_Collision = new Collision(filename,type);
+		}
+	}
     std::vector<glm::vec3> pointData;
     std::vector<glm::vec2> uvData;
     std::vector<glm::vec3> normalData;

@@ -73,13 +73,14 @@ boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return Detail:
 void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
 void Engine::Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
-void Engine::Resources::addMesh(std::string name,std::string file){
+void Engine::Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type){
     if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
         return;
-    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file);
+    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file,type);
 }
-void Engine::Resources::addMesh(std::string file){
-    std::string name = file.substr(0, file.size()-4); Engine::Resources::addMesh(name,file);
+void Engine::Resources::addMesh(std::string file, COLLISION_TYPE type){
+    std::string name = file.substr(0, file.size()-4);
+	Engine::Resources::addMesh(name,file,type);
 }
 
 void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
