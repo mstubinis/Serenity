@@ -29,8 +29,8 @@ class Texture final{
 
         const GLuint getTextureAddress() const { return m_TextureAddress; }
         const GLuint getTextureType() const { return m_Type; }
-        const unsigned int getWidth() const { return m_Width; }
-        const unsigned int getHeight() const { return m_Height; }
+        const unsigned int width() const { return m_Width; }
+        const unsigned int height() const { return m_Height; }
         const std::string getName() const { return m_Name; }
 
         void generatePixelPointer();

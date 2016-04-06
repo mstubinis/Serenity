@@ -2,14 +2,13 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include <unordered_map>
-
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <bullet/btBulletDynamicsCommon.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include "Engine_Physics.h"
 
 class Scene;
 class Font;
@@ -25,13 +24,11 @@ class SoundEffect;
 class SoundMusic;
 struct ParticleInfo;
 
-#include "Engine_Physics.h"
-
 template<typename T> void SAFE_DELETE(T*& p){
     delete p;
     p = nullptr;
 }
-                              
+
 namespace Engine{
     namespace Resources{
         namespace Detail{
@@ -45,7 +42,7 @@ namespace Engine{
                     static boost::weak_ptr<Camera> m_ActiveCamera;
 
                     static sf::Window* m_Window;
-                    static std::string m_WindowName;
+					static std::string m_WindowName;
                     static sf::Mouse* m_Mouse;
 
                     static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
@@ -69,7 +66,7 @@ namespace Engine{
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
 
         static sf::Window* getWindow(){ return Detail::ResourceManagement::m_Window; }
-        static sf::Vector2u getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
+		static sf::Vector2u getWindowSize(){ return getWindow()->getSize(); }
         static sf::Mouse* getMouse(){ return Detail::ResourceManagement::m_Mouse; }
 
         Camera* getActiveCamera();

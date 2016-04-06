@@ -5,7 +5,6 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-
 class SunLight;
 class Material;
 struct ParticleInfo{
@@ -17,18 +16,9 @@ struct ParticleInfo{
     glm::vec4 startColor;
     glm::vec4 endColor;
 
-    ParticleInfo(std::string _material,glm::vec4 _startColor = glm::vec4(1,1,1,1), glm::vec4 _endColor = glm::vec4(1,1,1,1)){
-        material = Engine::Resources::getMaterial(_material);
-        startColor = _startColor;
-        endColor = _endColor;
-    }
-    ParticleInfo(Material* _material,glm::vec4 _startColor = glm::vec4(1,1,1,1), glm::vec4 _endColor = glm::vec4(1,1,1,1)){
-        material = _material;
-        startColor = _startColor;
-        endColor = _endColor;
-    }
-    ~ParticleInfo(){
-    }
+    ParticleInfo(std::string material,glm::vec4 startColor = glm::vec4(1), glm::vec4 endColor = glm::vec4(1));
+    ParticleInfo(Material* material,glm::vec4 startColor = glm::vec4(1), glm::vec4 endColor = glm::vec4(1));
+    ~ParticleInfo();
 };
 
 class Particle;

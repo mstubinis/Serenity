@@ -10,6 +10,7 @@ class Mesh;
 class Material;
 class Scene;
 class Camera;
+typedef unsigned int GLuint;
 
 template <typename T> bool exists(boost::weak_ptr<T> t){ return !(t.expired()); }
 
@@ -71,7 +72,7 @@ class Object: public ObjectInterface{
         virtual void render(GLuint=0,bool=false){}
         virtual void draw(GLuint shader,bool=false){}
 
-        virtual float& getRadius(){ return m_Radius; }
+        virtual float getRadius(){ return m_Radius; }
         virtual std::string& getName(){ return m_Name; }
 
         virtual Object* getParent(){ return m_Parent; }

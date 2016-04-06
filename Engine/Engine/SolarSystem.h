@@ -2,8 +2,6 @@
 #define SOLARSYSTEM_H
 
 #include "Scene.h"
-#include <unordered_map>
-#include <map>
 
 class Star;
 class Object;

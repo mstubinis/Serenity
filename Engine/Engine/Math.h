@@ -1,13 +1,10 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include "Object.h"
-
-#include <vector>
-#include <map>
+#include "Engine_Math.h"
 #include <list>
-#include <unordered_map>
-#include <glm/glm.hpp>
+
+class Object;
 
 namespace Game{
     namespace Pathfinding{

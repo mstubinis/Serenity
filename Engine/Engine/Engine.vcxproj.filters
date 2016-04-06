@@ -67,6 +67,42 @@
     <Filter Include="Header Files\Engine\Rendering">
       <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Engine_Physics">
+      <UniqueIdentifier>{3a2e7bad-5480-4d3f-ac97-ba47fa346f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Renderer">
+      <UniqueIdentifier>{d529601b-d679-4638-8aae-fc2429ce4691}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Math">
+      <UniqueIdentifier>{c568e9d7-2000-4077-93df-48cd2e59fa8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Events">
+      <UniqueIdentifier>{620d7c82-669b-4f83-b649-4b75621f5150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Resources">
+      <UniqueIdentifier>{2f4fa588-bf8e-4b29-aa14-95dc93c5a1d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Sounds">
+      <UniqueIdentifier>{d5080043-c92e-4001-af0a-1a27236d37ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Engine_Events">
+      <UniqueIdentifier>{ee1964bf-1312-47ec-833d-9e38c51aad1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Engine_Math">
+      <UniqueIdentifier>{8aeedacf-411b-41a7-b8a8-b0149a690779}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Engine_Physics">
+      <UniqueIdentifier>{9820b271-cdad-405e-a893-39d83e18a5f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Engine_Renderer">
+      <UniqueIdentifier>{d57a90f3-d121-4412-b97f-245021f8d522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Engine_Resources">
+      <UniqueIdentifier>{dbaccab7-f3ae-4526-9729-c7e44b96dec9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Engine_Sounds">
+      <UniqueIdentifier>{07d88ca6-17f1-4dec-9f36-86551628c236}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -93,15 +129,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine_Events.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine_Renderer.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine_Resources.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -119,9 +146,6 @@
     </ClCompile>
     <ClCompile Include="Ship.cpp">
       <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine_Physics.cpp">
-      <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Station.cpp">
       <Filter>Source Files\Game</Filter>
@@ -153,12 +177,6 @@
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine_Sounds.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine_Math.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="CapsuleSpace.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
@@ -167,6 +185,24 @@
     </ClCompile>
     <ClCompile Include="GameSkybox.cpp">
       <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Physics.cpp">
+      <Filter>Source Files\Engine\Engine_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Renderer.cpp">
+      <Filter>Source Files\Engine\Engine_Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Math.cpp">
+      <Filter>Source Files\Engine\Engine_Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Events.cpp">
+      <Filter>Source Files\Engine\Engine_Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Resources.cpp">
+      <Filter>Source Files\Engine\Engine_Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Sounds.cpp">
+      <Filter>Source Files\Engine\Engine_Sounds</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -194,15 +230,6 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine_Events.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine_Renderer.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine_Resources.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="SolarSystem.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -214,9 +241,6 @@
     </ClInclude>
     <ClInclude Include="Ship.h">
       <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine_Physics.h">
-      <Filter>Header Files\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Station.h">
       <Filter>Header Files\Game</Filter>
@@ -248,12 +272,6 @@
     <ClInclude Include="Engine.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine_Sounds.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine_Math.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="CapsuleSpace.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -262,6 +280,24 @@
     </ClInclude>
     <ClInclude Include="GameSkybox.h">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Events.h">
+      <Filter>Header Files\Engine\Engine_Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Math.h">
+      <Filter>Header Files\Engine\Engine_Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Physics.h">
+      <Filter>Header Files\Engine\Engine_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Renderer.h">
+      <Filter>Header Files\Engine\Engine_Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Resources.h">
+      <Filter>Header Files\Engine\Engine_Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Sounds.h">
+      <Filter>Header Files\Engine\Engine_Sounds</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -320,6 +356,9 @@
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\Bloom</Filter>
     </None>
     <None Include="Shaders\vert_fullscreenQuad.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
+    </None>
+    <None Include="Shaders\copy_depth_frag.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering</Filter>
     </None>
   </ItemGroup>

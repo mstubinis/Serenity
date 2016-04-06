@@ -4,18 +4,11 @@
 #include <string>
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
 
-#include "Engine_Resources.h"
-#include "Engine_Renderer.h"
-#include "Engine_Events.h"
-#include "Engine_Physics.h"
-#include "Engine_Sounds.h"
-
-#include "Texture.h"
-
-#include "GBuffer.h"
+class Texture;
 
 namespace Engine{
     namespace Detail{
@@ -61,33 +54,17 @@ namespace Engine{
                 static void run();
         };
     };
-    static float getFPS(){ return 1.0f / Resources::dt(); }
-    static sf::Window* getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
-    static std::string getWindowName(){ return Resources::Detail::ResourceManagement::m_WindowName; }
-    static sf::Vector2u getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
-    static sf::Mouse* getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
-    static void setWindowIcon(Texture* texture){texture->generatePixelPointer();Resources::getWindow()->setIcon(texture->getWidth(),texture->getHeight(),texture->getPixelsPtr()); }
-    static void showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
-    static void hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
-    static void stop(){ Resources::getWindow()->close(); }
+    float getFPS();
+    sf::Window* getWindow();
+    sf::Vector2u getWindowSize();
+    sf::Mouse* getMouse();
+    void setWindowIcon(Texture* texture);
+    void showMouseCursor();
+    void hideMouseCursor();
+    void stop();
 
-    static void setFullScreen(bool b){
-        sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
-        unsigned int style = sf::Style::Fullscreen;
-        if(!b){
-            style = sf::Style::Default;
-            videoMode.width = Resources::getWindowSize().x;
-            videoMode.height = Resources::getWindowSize().y;
-        }
-        SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-        Resources::Detail::ResourceManagement::m_Window->create(videoMode,Resources::Detail::ResourceManagement::m_WindowName,style,Resources::getWindow()->getSettings());
 
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
-        Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y);
-    }
+    void setFullScreen(bool b);
 };
 
 namespace Game{

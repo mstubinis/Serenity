@@ -3,7 +3,7 @@
 
 #include <SFML/Audio.hpp>
 #include <glm/glm.hpp>
-#include "Engine_Resources.h"
+#include <string>
 
 class SoundEffectBasic{
     protected:
@@ -94,47 +94,13 @@ namespace Engine{
                     static bool isPaused(sf::SoundSource::Status);
             };
         };
-        static void stop(std::string music){
-            Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->stop();
-        }
-        static void play(std::string music, bool loop = true){
-            Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->play();
-            Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
-        }
-        static void playAt(std::string music, float seconds,bool loop = true){
-            Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->playAt(seconds);
-            Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
-        }
-        static void loop(std::string music, bool loop = true){
-            Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
-        }
-        static void setCurrentMusicAndPlay(std::string music){
-            for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
-                SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());
-                if(music != NULL){
-                    if(music->isPlaying()){
-                        music->stop();
-                    }
-                }
-            }
-            dynamic_cast<SoundMusic*>(Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get())->play();
-        }
-        static void setMasterMusicVolume(float volume){
-            for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
-                SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());
-                if(music != NULL){
-                    music->setVolume(volume);
-                }
-            }
-        }
-        static void setMasterEffectVolume(float volume){
-            for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
-                SoundEffect* effect = dynamic_cast<SoundEffect*>(sound.second.get());
-                if(effect != NULL){
-                    effect->setVolume(volume);
-                }
-            }
-        }
+        void stop(std::string music);
+        void play(std::string music, bool loop = true);
+        void playAt(std::string music, float seconds,bool loop = true);
+        void loop(std::string music, bool loop = true);
+        void setCurrentMusicAndPlay(std::string music);
+        void setMasterMusicVolume(float volume);
+        void setMasterEffectVolume(float volume);
     };
 };
 

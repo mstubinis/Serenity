@@ -1,4 +1,8 @@
 #include "Engine.h"
+#include "Engine_Events.h"
+#include "Engine_Renderer.h"
+#include "Engine_Sounds.h"
+#include "Engine_Resources.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
@@ -72,6 +76,12 @@ void Game::update(float dt){
     }
     if(Events::Keyboard::isKeyDownOnce("f8")){
         Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
+    }
+    if(Events::Keyboard::isKeyDownOnce("f9")){
+		Engine::setFullScreen(true);
+    }
+    if(Events::Keyboard::isKeyDownOnce("f10")){
+        Engine::setFullScreen(false);
     }
     m_HUD->update(dt);
 }

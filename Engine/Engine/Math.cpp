@@ -2,6 +2,7 @@
 #include "Engine_Resources.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "Object.h"
 
 using namespace Engine;
 

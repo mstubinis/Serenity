@@ -64,7 +64,7 @@ void GameSkybox::render(){
                                                     Resources::getWindowSize().y-pos.y,
                                                     -0.5 - 1));
             model = glm::rotate(model,0.0f,glm::vec3(0,0,1));
-            model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
+            model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
             model = glm::scale(model, glm::vec3(scl.x,scl.y,1));
             glm::mat4 world = Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix * model; //we dont want the view matrix as we want to assume this "World" matrix originates from (0,0,0)
 

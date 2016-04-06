@@ -10,6 +10,14 @@
 
 using namespace Engine;
 
+OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,std::string _parent){
+    angle = _angle;
+    eccentricity = _eccentricity;
+    days = _days;
+    majorRadius = _majorRadius;
+    minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
+    parent = Engine::Resources::getObjectPtr(_parent);
+}
 glm::v3 OrbitInfo::getOrbitalPosition(glm::nType angle,Object* thisPlanet){
     glm::v3 offset = glm::v3(0);
     glm::v3 currentPos = thisPlanet->getPosition();
@@ -61,7 +69,7 @@ void Planet::render(GLuint shader,bool debug){
 }
 void Planet::draw(GLuint shader,bool debug){
     bool renderPlanet = true;
-    if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
+	if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
         renderPlanet = false;
     Camera* activeCamera = Resources::getActiveCamera();
     if(activeCamera->getDistance(this) > 700 * getRadius())

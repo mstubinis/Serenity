@@ -2,10 +2,12 @@
 #define ENGINE_ENGINE_RENDERER_H
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "Engine_Resources.h"
+#include <string>
+#include <vector>
 
 class GBuffer;
+class Object;
+typedef unsigned int GLuint;
 
 struct GeometryRenderInfo final{
     Object* object;

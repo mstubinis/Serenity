@@ -1,7 +1,12 @@
 #include "Engine.h"
+#include "Engine_Resources.h"
+#include "Engine_Renderer.h"
+#include "Engine_Sounds.h"
+#include "Engine_Events.h"
 #include "Camera.h"
 #include "GBuffer.h"
 #include "Scene.h"
+#include "Texture.h"
 
 #include "ObjectDynamic.h"
 #include "Light.h"
@@ -185,7 +190,34 @@ void Engine::Detail::EngineClass::EVENT_JOYSTICK_CONNECTED(){
 void Engine::Detail::EngineClass::EVENT_JOYSTICK_DISCONNECTED(){
 }
 */
+float Engine::getFPS(){ return 1.0f / Resources::dt(); }
+sf::Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
+sf::Vector2u Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
+sf::Mouse* Engine::getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
+void Engine::setWindowIcon(Texture* texture){
+	texture->generatePixelPointer();
+	Resources::getWindow()->setIcon(texture->width(),texture->height(),texture->getPixelsPtr()); 
+}
+void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
+void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
+void Engine::stop(){ Resources::getWindow()->close(); }
+void Engine::setFullScreen(bool b){
+    sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
+    unsigned int style = sf::Style::Fullscreen;
+    if(!b){
+        style = sf::Style::Default;
+        videoMode.width = Resources::getWindowSize().x;
+        videoMode.height = Resources::getWindowSize().y;
+    }
+    SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
+	Resources::Detail::ResourceManagement::m_Window->create(videoMode,Resources::Detail::ResourceManagement::m_WindowName,style,Resources::Detail::ResourceManagement::m_Window->getSettings());
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y);
+}
 void Engine::Detail::EngineClass::run(){
     while(Resources::getWindow()->isOpen()){
         sf::Event event;

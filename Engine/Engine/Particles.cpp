@@ -1,3 +1,4 @@
+#include "Engine_Resources.h"
 #include "Particles.h"
 #include "Mesh.h"
 #include "Material.h"
@@ -6,10 +7,23 @@
 #include "Light.h"
 #include "Scene.h"
 #include "Engine.h"
-#include "Engine_Resources.h"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+
+
+ParticleInfo::ParticleInfo(std::string _material,glm::vec4 _startColor, glm::vec4 _endColor){
+    material = Engine::Resources::getMaterial(_material);
+    startColor = _startColor;
+    endColor = _endColor;
+}
+ParticleInfo::ParticleInfo(Material* _material,glm::vec4 _startColor, glm::vec4 _endColor){
+    material = _material;
+    startColor = _startColor;
+    endColor = _endColor;
+}
+ParticleInfo::~ParticleInfo(){
+}
 
 ParticleEmitter::ParticleEmitter(ParticleInfo* info, glm::v3 pos, glm::vec3 scl,std::string name, Scene* scene):ObjectBasic(pos,scl,name,scene){
     m_info = info;

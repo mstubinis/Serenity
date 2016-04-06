@@ -1,5 +1,4 @@
 #include "Engine_Resources.h"
-#include "Engine_Physics.h"
 #include "Engine_Sounds.h"
 
 #include "ShaderProgram.h"
@@ -25,7 +24,6 @@
 using namespace Engine::Resources;
 
 float Detail::ResourceManagement::m_DeltaTime = 1;
-
 sf::Window* Detail::ResourceManagement::m_Window;
 std::string Detail::ResourceManagement::m_WindowName;
 sf::Mouse* Detail::ResourceManagement::m_Mouse;
@@ -67,7 +65,6 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
     SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
     SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
-
 Camera* Engine::Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
 boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
 void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
@@ -168,6 +165,7 @@ void Engine::Resources::initResources(){
     addShader("Deferred_Bloom","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_bloom_frag.glsl");
     addShader("Deferred_Final","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_final_frag.glsl");
     addShader("Deferred_Skybox","Shaders/vert_skybox.glsl","Shaders/deferred_frag_skybox.glsl");
+	addShader("Copy_Depth","Shaders/vert_fullscreenQuad.glsl","Shaders/copy_depth_frag.glsl");
     addShader("Deferred_Skybox_HUD","Shaders/vert_skybox.glsl","Shaders/deferred_frag_HUD.glsl");
     addShader("Deferred_Light","Shaders/vert_fullscreenQuad.glsl","Shaders/deferred_lighting_frag.glsl");
 

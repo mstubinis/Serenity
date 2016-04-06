@@ -50,7 +50,7 @@ class ObjectDisplay: public ObjectBasic{
         glm::vec4& getColor(){ return m_Color; }
         std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
-        void setVisible(bool b);
+        virtual void setVisible(bool b);
 
         virtual bool rayIntersectSphere(Camera*);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);

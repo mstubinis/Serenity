@@ -3,6 +3,7 @@
 
 #include "ObjectDynamic.h"
 #include "ObjectDisplay.h"
+#include <map>
 
 enum STATION_PRESET{
     STATION_PRESET_SHIPYARD_SMALL,

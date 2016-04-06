@@ -1,19 +1,17 @@
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
+#include "Engine_Physics.h"
 #include "ShaderProgram.h"
 #include "GBuffer.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Font.h"
-#include "Engine_Physics.h"
 #include "Scene.h"
 #include "Texture.h"
 #include "Mesh.h"
-#include "Material.h"
 #include "Skybox.h"
 #include "Particles.h"
 
-#include <glm/gtc/constants.hpp>
 #include <boost/lexical_cast.hpp>
 #include <random>
 
@@ -151,7 +149,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
                                                 -0.001f - item.depth));
         model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
         if(item.texture != "")
-            model = glm::scale(model, glm::vec3(texture->getWidth(),texture->getHeight(),1));
+            model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
         model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
         glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m_2DProjectionMatrix));
@@ -311,14 +309,35 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     }
     Renderer::Detail::RenderManagement::_passFinal();
 
+	//copy depth over
+	glColorMask(0,0,0,0);
+    GLuint shader = Resources::getShader("Copy_Depth")->getShaderProgram();
+    glUseProgram(shader);
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
+    glUniform1i(glGetUniformLocation(shader,"gDepthMap"), 0 );
+
+    Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+
+    glActiveTexture(GL_TEXTURE0);
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+	glUseProgram(0);
+	glColorMask(1,1,1,1);
+	/////////////
+
     glEnable(GL_BLEND);
     if(RendererInfo::debug)
         Physics::Detail::PhysicsManagement::render();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    _renderForegroundObjects();
 
 	_renderForwardRenderedObjects();
+    _renderForegroundObjects();
 
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f);
@@ -361,14 +380,10 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
     glBindTexture(GL_TEXTURE_2D,Renderer::RendererInfo::ssao_noise_texture);
     glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
-    glActiveTexture(GL_TEXTURE3);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
-    glUniform1i(glGetUniformLocation(shader,"gDepthMap"), 3 );
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 4; i++){
+    for(unsigned int i = 0; i < 3; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);

@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "Engine.h"
 #include <algorithm>
 #include <cctype>

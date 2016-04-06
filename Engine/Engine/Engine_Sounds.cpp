@@ -80,3 +80,46 @@ bool SoundMusic::isLooping(){ return static_cast<sf::Music*>(s)->getLoop(); }
 unsigned int SoundMusic::getChannelCount(){ return static_cast<sf::Music*>(s)->getChannelCount(); }
 bool SoundMusic::isMono(){ if(this->getChannelCount() == 1) return true; return false; }
 bool SoundMusic::isStereo(){ if(this->getChannelCount() == 2) return true; return false; }
+
+
+void Sound::stop(std::string music){
+    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->stop();
+}
+void Sound::play(std::string music, bool loop){
+    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->play();
+    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+}
+void Sound::playAt(std::string music, float seconds,bool loop){
+    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->playAt(seconds);
+    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+}
+void Sound::loop(std::string music, bool loop){
+    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+}
+void Sound::setCurrentMusicAndPlay(std::string music){
+    for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
+        SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());
+        if(music != NULL){
+            if(music->isPlaying()){
+                music->stop();
+            }
+        }
+    }
+    dynamic_cast<SoundMusic*>(Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get())->play();
+}
+void Sound::setMasterMusicVolume(float volume){
+    for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
+        SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());
+        if(music != NULL){
+            music->setVolume(volume);
+        }
+    }
+}
+void Sound::setMasterEffectVolume(float volume){
+    for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
+        SoundEffect* effect = dynamic_cast<SoundEffect*>(sound.second.get());
+        if(effect != NULL){
+            effect->setVolume(volume);
+        }
+    }
+}
