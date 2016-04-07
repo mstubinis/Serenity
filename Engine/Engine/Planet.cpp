@@ -159,7 +159,7 @@ void Planet::draw(GLuint shader,bool debug){
             for(auto item:m_DisplayItems){
                 glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
                 for(auto component:item->material->getComponents())
-                    item->material->bindTexture(component.first,shader);
+                    item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
                 item->mesh->render();
             }
             glUseProgram(0);
@@ -390,6 +390,6 @@ void Ring::draw(GLuint shader){
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
     for(auto component:material->getComponents())
-        material->bindTexture(component.first,shader);
+        material->bindTexture(component.first,shader,Engine::Resources::getAPI());
     mesh->render();
 }

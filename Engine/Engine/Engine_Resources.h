@@ -10,6 +10,11 @@
 #include <boost/weak_ptr.hpp>
 #include "Engine_Physics.h"
 
+enum ENGINE_RENDERING_API{
+    ENGINE_RENDERING_API_OPENGL,
+    ENGINE_RENDERING_API_DIRECTX
+};
+
 class Engine_Window;
 class Engine_Mouse;
 
@@ -37,6 +42,7 @@ namespace Engine{
         namespace Detail{
             class ResourceManagement final{
                 public:
+					static ENGINE_RENDERING_API m_RenderingAPI;
                     static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
                     static Scene* m_CurrentScene;
 
@@ -63,6 +69,8 @@ namespace Engine{
         static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
+
+		static ENGINE_RENDERING_API getAPI(){ return Detail::ResourceManagement::m_RenderingAPI; }
 
         static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
@@ -157,8 +165,8 @@ namespace Engine{
         void removeSound(std::string name);
 
         void initResources();
-		void initRenderingContexts();
-		void cleanupRenderingContexts();
+		void initRenderingContexts(unsigned int api);
+		void cleanupRenderingContexts(unsigned int api);
     };
     //TODO: Move this somewhere else
     template<typename T>

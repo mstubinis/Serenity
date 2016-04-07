@@ -3,7 +3,6 @@
 
 #include <string>
 #include <SFML/Window.hpp>
-#include "Engine.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -19,6 +18,8 @@ class Engine_Window final{
     #endif
 
     private:
+		uint m_Style;
+		sf::VideoMode m_VideoMode;
         const char* m_WindowName;
         sf::Window* m_SFMLWindow;
         uint m_Width;
@@ -26,12 +27,13 @@ class Engine_Window final{
         void _createOpenGLWindow(const char* name,uint width,uint height);
 		void _destroyOpenGLContext();
     public:
-        Engine_Window(const char* name,uint width,uint height,ENGINE_RENDERING_API);
+        Engine_Window(const char* name,uint width,uint height,uint api);
         ~Engine_Window();
 
         const char* name();
         sf::Vector2u getSize();
         void setName(const char* name);
+		void setSize(uint w, uint h);
         void setIcon(uint width, uint height, const sf::Uint8* pixels);
         void setMouseCursorVisible(bool);
         void setKeyRepeatEnabled(bool);
@@ -39,10 +41,12 @@ class Engine_Window final{
         void close();
         void requestFocus();
 
+		uint getStyle(){ return m_Style; }
         bool hasFocus();
         bool isOpen();
         bool pollEventSFML(sf::Event&);
         void setFullScreen(bool);
+		void setStyle(uint style);
 
         void display();
 

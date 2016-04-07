@@ -1,11 +1,6 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
-enum ENGINE_RENDERING_API{
-    ENGINE_RENDERING_API_OPENGL,
-    ENGINE_RENDERING_API_DIRECTX
-};
-
 class Texture;
 class Engine_Window;
 class Engine_Mouse;
@@ -28,10 +23,10 @@ namespace Engine{
     namespace Detail{
          class EngineClass final{
             public:
-                static void initGame(ENGINE_RENDERING_API);
+                static void initGame(uint api);
 
                 #pragma region Event Handlers
-                static void EVENT_RESIZE(unsigned int width, unsigned int height);
+                static void EVENT_RESIZE(unsigned int width, unsigned int height,bool saveSize = true);
                 static void EVENT_CLOSE();
                 static void EVENT_LOST_FOCUS();
                 static void EVENT_GAINED_FOCUS();
@@ -55,17 +50,16 @@ namespace Engine{
 
                 static void RESET_EVENTS();
 
-                static ENGINE_RENDERING_API m_RenderingAPI;
                 static GLuint m_vao;
                 static sf::Clock clock;
 
-                static void update(ENGINE_RENDERING_API);
-                static void render(ENGINE_RENDERING_API);
+                static void update(uint api);
+                static void render(uint api);
 
-                static void init(ENGINE_RENDERING_API,const char* name,uint width=0,uint height=0);
+                static void init(uint api,const char* name,uint width=0,uint height=0);
                 static void destruct();
 
-                static void run(ENGINE_RENDERING_API);
+                static void run(uint api);
         };
     };
     float getFPS();

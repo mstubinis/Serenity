@@ -57,7 +57,7 @@ void ObjectDisplay::draw(GLuint shader, bool debug){
         glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m));
 
         for(auto component:item->material->getComponents())
-            item->material->bindTexture(component.first,shader);
+			item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
         item->mesh->render();
     }
     glUseProgram(0);

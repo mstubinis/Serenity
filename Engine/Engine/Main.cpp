@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Engine_Resources.h"
 #include <iostream>
 
 #ifdef _WIN32
@@ -6,9 +7,11 @@
 #include <windowsx.h>
 #endif
 
+using namespace Engine;
+
 int main(){
-    Engine::Detail::EngineClass::m_RenderingAPI = ENGINE_RENDERING_API_OPENGL;
-    //Engine::Detail::EngineClass::m_RenderingAPI = ENGINE_RENDERING_API_DIRECTX;
+    Resources::Detail::ResourceManagement::m_RenderingAPI = ENGINE_RENDERING_API_OPENGL;
+    //Resources::Detail::ResourceManagement::m_RenderingAPI = ENGINE_RENDERING_API_DIRECTX;
     #ifdef _WIN32
         if(GetConsoleWindow() == NULL){ 
             AllocConsole();
@@ -21,9 +24,9 @@ int main(){
         #endif
     #endif
 
-    Engine::Detail::EngineClass::init(Engine::Detail::EngineClass::m_RenderingAPI,"Engine",1024,768);
-    Engine::Detail::EngineClass::run(Engine::Detail::EngineClass::m_RenderingAPI);
-    Engine::Detail::EngineClass::destruct();
+    Detail::EngineClass::init(Resources::Detail::ResourceManagement::m_RenderingAPI,"Engine",1024,768);
+    Detail::EngineClass::run(Resources::Detail::ResourceManagement::m_RenderingAPI);
+    Detail::EngineClass::destruct();
     FreeConsole();
     return 0;
 }

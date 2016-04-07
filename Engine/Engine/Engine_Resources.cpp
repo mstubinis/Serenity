@@ -24,6 +24,7 @@
 
 using namespace Engine::Resources;
 
+ENGINE_RENDERING_API Detail::ResourceManagement::m_RenderingAPI;
 float Detail::ResourceManagement::m_DeltaTime = 1;
 Engine_Window* Detail::ResourceManagement::m_Window;
 Engine_Mouse* Detail::ResourceManagement::m_Mouse;
@@ -179,17 +180,17 @@ void Engine::Resources::initResources(){
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }
-void Engine::Resources::initRenderingContexts(){
+void Engine::Resources::initRenderingContexts(unsigned int api){
 	for(auto mesh:Detail::ResourceManagement::m_Meshes)
-		mesh.second.get()->initRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+		mesh.second.get()->initRenderingContext(api);
 	for(auto shader:Detail::ResourceManagement::m_Shaders)
-		shader.second.get()->initRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+		shader.second.get()->initRenderingContext(api);
 }
-void Engine::Resources::cleanupRenderingContexts(){
+void Engine::Resources::cleanupRenderingContexts(unsigned int api){
 	for(auto mesh:Detail::ResourceManagement::m_Meshes)
-		mesh.second.get()->cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+		mesh.second.get()->cleanupRenderingContext(api);
 	for(auto shader:Detail::ResourceManagement::m_Shaders)
-		shader.second.get()->cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+		shader.second.get()->cleanupRenderingContext(api);
 }
 void Engine::Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s)

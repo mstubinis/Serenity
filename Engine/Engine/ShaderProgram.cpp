@@ -1,5 +1,5 @@
 #include "ShaderProgram.h"
-#include "Engine.h"
+#include "Engine_Resources.h"
 
 ShaderP::ShaderP(std::string vs, std::string ps, bool fromFile){
     m_VertexShader = vs;
@@ -7,7 +7,7 @@ ShaderP::ShaderP(std::string vs, std::string ps, bool fromFile){
 	m_FromFile = fromFile;
 }
 ShaderP::~ShaderP(){
-	cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+	cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
 }
 void ShaderP::initRenderingContext(unsigned int api){
 	if(api == ENGINE_RENDERING_API_OPENGL){

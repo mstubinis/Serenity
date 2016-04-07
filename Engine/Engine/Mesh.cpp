@@ -1,4 +1,3 @@
-#include "Engine.h"
 #include "Engine_Physics.h"
 #include "Engine_Resources.h"
 #include "Mesh.h"
@@ -126,7 +125,7 @@ Mesh::Mesh(std::string filename,COLLISION_TYPE type){
 	_calculateMeshRadius();
 }
 Mesh::~Mesh(){
-	cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+	cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
     std::string extention; for(unsigned int i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));

@@ -43,7 +43,7 @@ class Material final{
         Texture* getComponent(unsigned int i){ return m_Components[i]; }
         void addComponent(unsigned int, std::string file);
 
-        void bindTexture(unsigned int,GLuint shader);
+        void bindTexture(unsigned int,GLuint shader,unsigned int api);
 
         const bool getShadeless() const { return m_Shadeless; }
         const float getBaseGlow() const { return m_BaseGlow; }

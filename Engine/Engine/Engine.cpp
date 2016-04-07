@@ -17,11 +17,10 @@
 #include <iostream>
 #endif
 
-ENGINE_RENDERING_API Engine::Detail::EngineClass::m_RenderingAPI;
 sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
 GLuint Engine::Detail::EngineClass::m_vao = 0;
 
-void Engine::Detail::EngineClass::init(ENGINE_RENDERING_API api, const char* name,uint width,uint height){
+void Engine::Detail::EngineClass::init(uint api, const char* name,uint width,uint height){
 	srand((unsigned)time(0));
     Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height,api);
     Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
@@ -35,7 +34,7 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Renderer::Detail::RenderManagement::destruct();
     Engine::Sound::Detail::SoundManagement::destruct();
 }
-void Engine::Detail::EngineClass::initGame(ENGINE_RENDERING_API api){
+void Engine::Detail::EngineClass::initGame(uint api){
 	if(api == ENGINE_RENDERING_API_DIRECTX)
 		return;
 
@@ -57,7 +56,7 @@ void Engine::Detail::EngineClass::initGame(ENGINE_RENDERING_API api){
     Game::initResources();
     Game::initLogic();
 
-	Resources::initRenderingContexts();
+	Resources::initRenderingContexts(api);
 
     //glGenVertexArrays( 1, &m_vao );
     //glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
@@ -80,7 +79,7 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
         }
     }
 }
-void Engine::Detail::EngineClass::update(ENGINE_RENDERING_API api){
+void Engine::Detail::EngineClass::update(uint api){
 	if(api == ENGINE_RENDERING_API_DIRECTX)
 		return;
     Game::update(Resources::dt());
@@ -89,7 +88,7 @@ void Engine::Detail::EngineClass::update(ENGINE_RENDERING_API api){
     Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-Resources::dt()));
     RESET_EVENTS();
 }
-void Engine::Detail::EngineClass::render(ENGINE_RENDERING_API api){
+void Engine::Detail::EngineClass::render(uint api){
 	if(api == ENGINE_RENDERING_API_DIRECTX)
 		return;
     Game::render();
@@ -97,17 +96,19 @@ void Engine::Detail::EngineClass::render(ENGINE_RENDERING_API api){
     Resources::getWindow()->display();
 }
 #pragma region Event Handler Methods
-void Engine::Detail::EngineClass::EVENT_RESIZE(unsigned int width, unsigned int height){
+void Engine::Detail::EngineClass::EVENT_RESIZE(unsigned int width, unsigned int height,bool saveSize){
     glViewport(0,0,width,height);
 
     Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(width,height);
-    Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
+    Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)width,0.0f,(float)height,0.005f,1000.0f);
     for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
         Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,width,height);
     }
     for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){
         camera.second.get()->resize(width,height);
     }
+	if(saveSize)
+		Engine::Resources::getWindow()->setSize(width,height);
 }
 void Engine::Detail::EngineClass::EVENT_CLOSE(){
     Resources::getWindow()->close();
@@ -189,7 +190,7 @@ void Engine::stop(){ Resources::getWindow()->close(); }
 void Engine::setFullScreen(bool b){
     Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b);
 }
-void Engine::Detail::EngineClass::run(ENGINE_RENDERING_API api){
+void Engine::Detail::EngineClass::run(uint api){
     while(Resources::getWindow()->isOpen()){
         sf::Event event;
         Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();

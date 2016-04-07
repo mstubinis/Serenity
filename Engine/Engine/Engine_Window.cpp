@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Engine_Window.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -5,6 +6,7 @@
 #include <SFML/Window.hpp>
 #include <string>
 
+using namespace Engine;
 
 #ifdef _WIN32
 void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height){
@@ -16,20 +18,20 @@ void Engine_Window::setRenderingAPI(uint api){
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
-    Engine::Detail::EngineClass::m_RenderingAPI = static_cast<ENGINE_RENDERING_API>(api);
+	Resources::Detail::ResourceManagement::m_RenderingAPI = static_cast<ENGINE_RENDERING_API>(api);
 }
 #endif
 void Engine_Window::_destroyOpenGLContext(){
     HGLRC    hglrc; 
     HDC      hdc ; 
-    if(hglrc = wglGetCurrentContext()) { 
+    if(hglrc = wglGetCurrentContext()){ 
         hdc = wglGetCurrentDC(); 
-        wglMakeCurrent(NULL, NULL); 
-		ReleaseDC (m_SFMLWindow->getSystemHandle(), hdc) ; 
+        wglMakeCurrent(0, 0); 
+		ReleaseDC (m_SFMLWindow->getSystemHandle(), hdc); 
         wglDeleteContext(hglrc); 
     }
 }
-Engine_Window::Engine_Window(const char* name,uint width,uint height,ENGINE_RENDERING_API api){
+Engine_Window::Engine_Window(const char* name,uint width,uint height,uint api){
     m_WindowName = name;
     m_Width = width; m_Height = height;
     m_SFMLWindow = new sf::Window();
@@ -56,19 +58,18 @@ void Engine_Window::_createOpenGLWindow(const char* name,uint width,uint height)
     settings.majorVersion = 3;
     settings.minorVersion = 0;
 
-    sf::VideoMode mode;
-    mode.width = m_Width;
-    mode.height = m_Height;
-    mode.bitsPerPixel = 32;
+    m_VideoMode.width = m_Width;
+    m_VideoMode.height = m_Height;
+    m_VideoMode.bitsPerPixel = 32;
 
-    uint style = sf::Style::Default;
+    m_Style = sf::Style::Default;
     if(m_Width == 0 || m_Height == 0){
-        style = sf::Style::Fullscreen;
-        mode = sf::VideoMode::getDesktopMode();
-        m_Width = mode.width;
-        m_Height = mode.height;
+        m_Style = sf::Style::Fullscreen;
+        m_VideoMode = sf::VideoMode::getDesktopMode();
+        m_Width = m_VideoMode.width;
+        m_Height = m_VideoMode.height;
     }
-    m_SFMLWindow->create(mode,name,style,settings);
+    m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
 }
 Engine_Window::~Engine_Window(){
     delete(m_SFMLWindow);
@@ -113,24 +114,38 @@ bool Engine_Window::pollEventSFML(sf::Event& e){
 void Engine_Window::display(){
     m_SFMLWindow->display();
 }
+void Engine_Window::setSize(uint w, uint h){
+	m_Width = w;
+	m_Height = h;
+	const sf::Vector2u size = sf::Vector2u(w,h);
+	m_SFMLWindow->setSize(size);
+}
+void Engine_Window::setStyle(uint style){
+	if(m_Style == style) return;
+	m_Style = style;
+	m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
+}
 void Engine_Window::setFullScreen(bool fullscreen){
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
-        unsigned int style = sf::Style::Fullscreen;
+	if(m_Style == sf::Style::Fullscreen && fullscreen == true) return;
+	if(m_Style != sf::Style::Fullscreen && fullscreen == false) return;
+
+    if(Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
+        m_VideoMode = sf::VideoMode::getDesktopMode();
+        m_Style = sf::Style::Fullscreen;
         if(!fullscreen){
-            style = sf::Style::Default;
-            videoMode.width = m_Width;
-            videoMode.height = m_Height;
+            m_Style = sf::Style::Default;
+            m_VideoMode.width = m_Width;
+            m_VideoMode.height = m_Height;
         }
-        delete(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
-        m_SFMLWindow->create(videoMode,Engine::Resources::Detail::ResourceManagement::m_Window->name(),style);
+        delete(Renderer::Detail::RenderManagement::m_gBuffer);
+        m_SFMLWindow->create(m_VideoMode,Resources::Detail::ResourceManagement::m_Window->name(),m_Style);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        Engine::Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Engine::Resources::getWindowSize().x,Engine::Resources::getWindowSize().y);
-        Engine::Detail::EngineClass::EVENT_RESIZE(Engine::Resources::getWindowSize().x,Engine::Resources::getWindowSize().y);
+        Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+        Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
     }
-    else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
+    else if(Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
     }
 }

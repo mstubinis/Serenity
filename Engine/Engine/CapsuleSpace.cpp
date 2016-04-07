@@ -126,8 +126,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_TunnelB = new CapsuleTunnel(5000,"AAAAAA_Capsule_Tunnel_B","Capsule_B",this);
     m_Ribbon = new CapsuleRibbon(5000,"AAAAAA_Capsule_Tunnel_C_Ribbon","Capsule_C",this);
 
-    m_FrontEnd = new CapsuleEnd(370,glm::v3(0,0,-5000),glm::vec3(1),"AAAAAA_Capsule_Tunnel_B_Front",this);
-    m_BackEnd = new CapsuleEnd(230,glm::v3(0,0,5000),glm::vec3(0),"AAAAAA_Capsule_Tunnel_B_Back",this);
+    m_FrontEnd = new CapsuleEnd(450,glm::v3(0,0,-5000),glm::vec3(1),"AAAAAA_Capsule_Tunnel_B_Front",this);
+    m_BackEnd = new CapsuleEnd(260,glm::v3(0,0,5000),glm::vec3(0),"AAAAAA_Capsule_Tunnel_B_Back",this);
 
     m_BackEnd->rotate(0,180,0,false);
 
