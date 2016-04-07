@@ -7,20 +7,25 @@
 #include "GBuffer.h"
 #include "Scene.h"
 #include "Texture.h"
-
 #include "ObjectDynamic.h"
 #include "Light.h"
-
-#include <SFML/Window.hpp>
+#include "Engine_Window.h"
+#include "Engine_Mouse.h"
 #include <SFML/System.hpp>
 
+ENGINE_RENDERING_API Engine::Detail::EngineClass::m_RenderingAPI;
 sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
 GLuint Engine::Detail::EngineClass::m_vao = 0;
 
-void Engine::Detail::EngineClass::init(std::string name, unsigned int width, unsigned int height){
-    srand((unsigned)time(0));
-    initWindow(name,width,height);
-    initGame();
+void Engine::Detail::EngineClass::initOpenGL(const char* name,uint width,uint height){
+    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height);
+	Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
+    initGameOpenGL();
+}
+void Engine::Detail::EngineClass::initDirectX(const char* wCName,const char* name,HINSTANCE hInst,int nCmdShow,uint width,uint height,uint xPos, uint yPos){
+    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(wCName,name,hInst,nCmdShow,width,height,xPos,yPos);
+	Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
+    //initGameDirectX();
 }
 void Engine::Detail::EngineClass::destruct(){
     //glDeleteVertexArrays( 1, &m_vao );
@@ -30,38 +35,8 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Renderer::Detail::RenderManagement::destruct();
     Engine::Sound::Detail::SoundManagement::destruct();
 }
-void Engine::Detail::EngineClass::initWindow(std::string name, unsigned int width, unsigned int height){
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.stencilBits = 8;
-    settings.antialiasingLevel = 4;
-    settings.majorVersion = 3;
-    settings.minorVersion = 0;
-
-    sf::VideoMode videoMode;
-    videoMode.width = width;
-    videoMode.height = height;
-    videoMode.bitsPerPixel = 32;
-
-    int style = sf::Style::Default;
-    if(width == 0 || height == 0){
-        style = sf::Style::Fullscreen;
-        videoMode = sf::VideoMode::getDesktopMode();
-        width = videoMode.width;
-        height = videoMode.height;
-    }
-
-    Resources::Detail::ResourceManagement::m_WindowName = name;
-    Resources::Detail::ResourceManagement::m_Window = new sf::Window(videoMode, name, style, settings);
-
-    //Resources::getWindow()->setVerticalSyncEnabled(true);
-    Resources::getWindow()->setMouseCursorVisible(false);
-    Resources::getWindow()->setKeyRepeatEnabled(false);
-    //Resources::getWindow()->setFramerateLimit(60);
-}
-
-void Engine::Detail::EngineClass::initGame(){
-    Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2),*Resources::getWindow());
+void Engine::Detail::EngineClass::initGameOpenGL(){
+    Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
 
@@ -82,6 +57,25 @@ void Engine::Detail::EngineClass::initGame(){
     //glGenVertexArrays( 1, &m_vao );
     //glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
 }
+void Engine::Detail::EngineClass::initGameDirectX(){
+    Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
+
+    Renderer::Detail::RenderManagement::init();
+    Physics::Detail::PhysicsManagement::init();
+    Sound::Detail::SoundManagement::init();
+
+    Resources::initResources();
+
+    //the scene is the root of all games. create the default scene
+    //Scene* scene;
+    //if(Resources::getCurrentScene() == nullptr)
+        //scene = new Scene("Default");
+
+    Game::initResources();
+    Game::initLogic();
+}
 void Engine::Detail::EngineClass::RESET_EVENTS(){
     Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
     Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
@@ -95,13 +89,12 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
         glm::vec2 mousePos = Engine::Events::Mouse::getMousePosition();
         float mouseDistFromCenter = glm::abs(glm::distance(mousePos,glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2)));
         if(mouseDistFromCenter > 50){
-            Resources::getMouse()->setPosition(sf::Vector2i(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2),*Resources::getWindow());
+            Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
             Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
         }
     }
 }
 void Engine::Detail::EngineClass::update(){
-    
     Game::update(Resources::dt());
     Resources::getCurrentScene()->update(Resources::dt());
     Engine::Physics::Detail::PhysicsManagement::update(Resources::dt());
@@ -191,9 +184,9 @@ void Engine::Detail::EngineClass::EVENT_JOYSTICK_DISCONNECTED(){
 }
 */
 float Engine::getFPS(){ return 1.0f / Resources::dt(); }
-sf::Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
+Engine_Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
 sf::Vector2u Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
-sf::Mouse* Engine::getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
+Engine_Mouse* Engine::getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
 void Engine::setWindowIcon(Texture* texture){
 	texture->generatePixelPointer();
 	Resources::getWindow()->setIcon(texture->width(),texture->height(),texture->getPixelsPtr()); 
@@ -202,46 +195,44 @@ void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(tr
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
 void Engine::stop(){ Resources::getWindow()->close(); }
 void Engine::setFullScreen(bool b){
-    sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
-    unsigned int style = sf::Style::Fullscreen;
-    if(!b){
-        style = sf::Style::Default;
-        videoMode.width = Resources::getWindowSize().x;
-        videoMode.height = Resources::getWindowSize().y;
-    }
-    SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-	Resources::Detail::ResourceManagement::m_Window->create(videoMode,Resources::Detail::ResourceManagement::m_WindowName,style,Resources::Detail::ResourceManagement::m_Window->getSettings());
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
-    Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b);
 }
 void Engine::Detail::EngineClass::run(){
-    while(Resources::getWindow()->isOpen()){
-        sf::Event event;
-        Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-        while(Resources::getWindow()->pollEvent(event)){
-            #pragma region Event Handlers
-            switch (event.type){
-                case sf::Event::Closed:               EVENT_CLOSE();break;
-                case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(event.key);break;
-                case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(event.key);break;
-                case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(event.mouseButton);break;
-                case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(event.mouseButton);break;
-                case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
-                case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
-                case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(event.mouseWheel);break;
-                case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(event.mouseMove);break;
-                case sf::Event::Resized:              EVENT_RESIZE(event.size.width,event.size.height);break;
-                case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(event.text);break;
-                default:                              break;
-            }
-            #pragma endregion
-        }
-        update();
-        render();
-    }
+	if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
+		#pragma region OpenGL
+		while(Resources::getWindow()->isOpen()){
+			sf::Event event;
+			Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
+			while(Resources::getWindow()->pollEvent(event)){
+				switch (event.type){
+					case sf::Event::Closed:               EVENT_CLOSE();break;
+					case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(event.key);break;
+					case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(event.key);break;
+					case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(event.mouseButton);break;
+					case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(event.mouseButton);break;
+					case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
+					case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
+					case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(event.mouseWheel);break;
+					case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(event.mouseMove);break;
+					case sf::Event::Resized:              EVENT_RESIZE(event.size.width,event.size.height);break;
+					case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(event.text);break;
+					default:                              break;
+				}
+			}
+			update();
+			render();
+		}
+		#pragma endregion
+	}
+	else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
+		#pragma region DirectX
+		Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
+
+		if(Resources::getWindow()->isOpen()){
+
+		}
+
+		#pragma endregion
+	}
 }
 #pragma endregion

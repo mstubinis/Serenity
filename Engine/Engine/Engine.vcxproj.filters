@@ -103,6 +103,12 @@
     <Filter Include="Header Files\Engine\Engine_Sounds">
       <UniqueIdentifier>{07d88ca6-17f1-4dec-9f36-86551628c236}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Engine_Core">
+      <UniqueIdentifier>{ac5d78b3-752a-4ed2-82fe-e3cd4035a453}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Core">
+      <UniqueIdentifier>{649f9f71-2a39-41c2-ac03-16a3c954441d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -174,9 +180,6 @@
     <ClCompile Include="Math.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="CapsuleSpace.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
@@ -203,6 +206,15 @@
     </ClCompile>
     <ClCompile Include="Engine_Sounds.cpp">
       <Filter>Source Files\Engine\Engine_Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files\Engine\Engine_Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Window.cpp">
+      <Filter>Source Files\Engine\Engine_Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Mouse.cpp">
+      <Filter>Source Files\Engine\Engine_Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -269,9 +281,6 @@
     <ClInclude Include="Math.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="CapsuleSpace.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -298,6 +307,15 @@
     </ClInclude>
     <ClInclude Include="Engine_Sounds.h">
       <Filter>Header Files\Engine\Engine_Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files\Engine\Engine_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Window.h">
+      <Filter>Header Files\Engine\Engine_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Mouse.h">
+      <Filter>Header Files\Engine\Engine_Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

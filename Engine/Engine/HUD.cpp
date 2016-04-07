@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "SolarSystem.h"
 #include "Planet.h"
+#include "Engine_Window.h"
 
 #include <boost/lexical_cast.hpp>
 

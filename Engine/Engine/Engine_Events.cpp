@@ -3,8 +3,8 @@
 using namespace Engine::Events;
 
 //return string dictionaries of keys / mouse buttons
-std::unordered_map<std::string,unsigned int> _getkeymap(){
-    std::unordered_map<std::string,unsigned int> k;
+std::unordered_map<std::string,uint> _getkeymap(){
+    std::unordered_map<std::string,uint> k;
     k["a"] = sf::Keyboard::A;
     k["add"] = sf::Keyboard::Add;
     k["b"] = sf::Keyboard::B;
@@ -222,8 +222,8 @@ std::unordered_map<std::string,unsigned int> _getkeymap(){
     k["z"] = sf::Keyboard::Z;
     return k;
 }
-std::unordered_map<std::string,unsigned int> _getmousemap(){
-    std::unordered_map<std::string,unsigned int> m;
+std::unordered_map<std::string,uint> _getmousemap(){
+    std::unordered_map<std::string,uint> m;
 
     m["l"] = sf::Mouse::Button::Left;
     m["left"] = sf::Mouse::Button::Left;
@@ -240,23 +240,22 @@ std::unordered_map<std::string,unsigned int> _getmousemap(){
     m["middle button"] = sf::Mouse::Button::Middle;
     m["middlebutton"] = sf::Mouse::Button::Middle;
 
-    m["none"] = static_cast<unsigned int>(5);
-
+    m["none"] = static_cast<uint>(5);
     return m;
 }
 
 //init static values with actual objects
-std::unordered_map<std::string,unsigned int> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
-std::unordered_map<std::string,unsigned int> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
-std::unordered_map<unsigned int,bool> Keyboard::KeyProcessing::m_KeyStatus;
-std::unordered_map<unsigned int,bool> Mouse::MouseProcessing::m_MouseStatus;
+std::unordered_map<std::string,uint> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
+std::unordered_map<std::string,uint> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
+std::unordered_map<uint,bool> Keyboard::KeyProcessing::m_KeyStatus;
+std::unordered_map<uint,bool> Mouse::MouseProcessing::m_MouseStatus;
 float Mouse::MouseProcessing::m_Delta = 0;
 glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0);
 glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0);
 glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0);
 
 //init prev / current variables
-unsigned int Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-unsigned int Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-unsigned int Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
-unsigned int Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
+uint Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
+uint Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
+uint Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
+uint Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key

@@ -6,6 +6,7 @@
 #include "ShaderProgram.h"
 #include "Engine_Math.h"
 #include "Engine_Renderer.h"
+#include "Engine_Window.h"
 
 using namespace Engine;
 

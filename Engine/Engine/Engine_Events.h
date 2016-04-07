@@ -9,30 +9,32 @@
 
 #include <glm/glm.hpp>
 
+typedef unsigned int uint;
+
 namespace Engine{
     namespace Events{
         namespace Mouse{
             class MouseProcessing final{
                 private:
-                    static std::unordered_map<std::string,unsigned int> m_MouseMap;
+                    static std::unordered_map<std::string,uint> m_MouseMap;
                 public:
                     static float m_Delta;
-                    static unsigned int m_currentButton;
-                    static unsigned int m_previousButton;
-                    static std::unordered_map<unsigned int,bool> m_MouseStatus;
+                    static uint m_currentButton;
+                    static uint m_previousButton;
+                    static std::unordered_map<uint,bool> m_MouseStatus;
 
                     static glm::vec2 m_Position, m_Position_Previous,m_Difference;
 
                     static bool MouseProcessing::_IsMouseButtonDown(std::string str){
                         boost::algorithm::to_lower(str);
-                        unsigned int key = MouseProcessing::m_MouseMap[str];
+                        uint key = MouseProcessing::m_MouseMap[str];
                         if(MouseProcessing::m_MouseStatus[key] == true)
                             return true;
                         return false;
                     }
                     static bool MouseProcessing::_IsMouseButtonDownOnce(std::string str){
                         bool result = MouseProcessing::_IsMouseButtonDown(str);
-                        unsigned int key = MouseProcessing::m_MouseMap[str];
+                        uint key = MouseProcessing::m_MouseMap[str];
                         if(result == true && m_currentButton == key && (m_currentButton != m_previousButton))
                             return true;
                         return false;
@@ -48,29 +50,29 @@ namespace Engine{
         namespace Keyboard{
             class KeyProcessing final{
                 private:
-                    static std::unordered_map<std::string,unsigned int> m_KeyMap;
+                    static std::unordered_map<std::string,uint> m_KeyMap;
                 public:
-                    static unsigned int m_currentKey;
-                    static unsigned int m_previousKey;
-                    static std::unordered_map<unsigned int,bool> m_KeyStatus;
+                    static uint m_currentKey;
+                    static uint m_previousKey;
+                    static std::unordered_map<uint,bool> m_KeyStatus;
 
                     static bool KeyProcessing::_IsKeyDown(std::string str){
                         boost::algorithm::to_lower(str);
-                        unsigned int key = KeyProcessing::m_KeyMap[str];
+                        uint key = KeyProcessing::m_KeyMap[str];
                         if(KeyProcessing::m_KeyStatus[key] == true)
                             return true;
                         return false;
                     }
                     static bool KeyProcessing::_IsKeyUp(std::string str){
                         boost::algorithm::to_lower(str);
-                        unsigned int key = KeyProcessing::m_KeyMap[str];
+                        uint key = KeyProcessing::m_KeyMap[str];
                         if(KeyProcessing::m_KeyStatus[key] == false)
                             return true;
                         return false;
                     }
                     static bool KeyProcessing::_IsKeyDownOnce(std::string str){
                         bool result = KeyProcessing::_IsKeyDown(str);
-                        unsigned int key = KeyProcessing::m_KeyMap[str];
+                        uint key = KeyProcessing::m_KeyMap[str];
                         if(result == true && m_currentKey == key && (m_currentKey != m_previousKey))
                             return true;
                         return false;

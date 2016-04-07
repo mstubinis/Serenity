@@ -1,6 +1,15 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
+enum ENGINE_RENDERING_API{
+	ENGINE_RENDERING_API_OPENGL,
+	ENGINE_RENDERING_API_DIRECTX
+};
+
+class Texture;
+class Engine_Window;
+class Engine_Mouse;
+
 #include <string>
 #include <GL/glew.h>
 #include <GL/GL.h>
@@ -8,14 +17,19 @@
 #include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
 
-class Texture;
+#ifdef _WIN32
+#include <windows.h>
+#include <windowsx.h>
+#endif
+
+typedef unsigned int uint;
 
 namespace Engine{
     namespace Detail{
          class EngineClass final{
             public:
-                static void initWindow(std::string name, unsigned int width, unsigned int height);
-                static void initGame();
+                static void initGameOpenGL();
+				static void initGameDirectX();
 
                 #pragma region Event Handlers
                 static void EVENT_RESIZE(unsigned int width, unsigned int height);
@@ -42,28 +56,28 @@ namespace Engine{
 
                 static void RESET_EVENTS();
 
+				static ENGINE_RENDERING_API m_RenderingAPI;
                 static GLuint m_vao;
                 static sf::Clock clock;
 
                 static void update();
                 static void render();
 
-                static void init(std::string app_name, unsigned int width=0, unsigned int height=0);
+                static void initOpenGL(const char* name,uint width=0,uint height=0);
+				static void initDirectX(const char* wCName,const char* name,HINSTANCE hInst,int nCmdShow,uint width = 0,uint height = 0, uint xPos = 0, uint yPos = 0);
                 static void destruct();
 
                 static void run();
         };
     };
     float getFPS();
-    sf::Window* getWindow();
+    Engine_Window* getWindow();
     sf::Vector2u getWindowSize();
-    sf::Mouse* getMouse();
+    Engine_Mouse* getMouse();
     void setWindowIcon(Texture* texture);
     void showMouseCursor();
     void hideMouseCursor();
     void stop();
-
-
     void setFullScreen(bool b);
 };
 

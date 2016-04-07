@@ -99,22 +99,24 @@ void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int ma
     }
 }
 void Engine::Physics::Detail::PhysicsManagement::render(){
-    glUseProgram(0);
+	#if defined(ENGINE_OPENGL)
+		glUseProgram(0);
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
 
-    m_dynamicsWorld->debugDrawWorld();
+		m_dynamicsWorld->debugDrawWorld();
 
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+	#endif
 }
 
 
@@ -328,14 +330,6 @@ void Collision::setMass(float mass){
     }
 }
 
-
-
-
-
-
-
-
-
 GLDebugDrawer::GLDebugDrawer():m_debugMode(0){}
 GLDebugDrawer::~GLDebugDrawer(){}
 void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor){
@@ -406,8 +400,6 @@ void GLDebugDrawer::draw3dText(const btVector3& location,const char* textString)
     glRasterPos3f(location.x(),location.y(),location.z());
 }
 void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }
-
-
 
 #ifdef _WIN32//for glut.h
 #include <windows.h>

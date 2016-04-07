@@ -45,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\bullet;C:\boost155\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_DEBUG;ENGINE_PRECISION_VERY_HIGH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_DEBUG;ENGINE_PRECISION_VERY_HIGH;ENGINE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -80,7 +80,7 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\bullet;C:\boost155\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;ENGINE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -115,10 +115,12 @@ xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command
     <ClCompile Include="CapsuleSpace.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_Math.cpp" />
+    <ClCompile Include="Engine_Mouse.cpp" />
     <ClCompile Include="Engine_Physics.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine_Events.cpp" />
     <ClCompile Include="Engine_Sounds.cpp" />
+    <ClCompile Include="Engine_Window.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameCamera.cpp" />
     <ClCompile Include="GameSkybox.cpp" />
@@ -150,10 +152,12 @@ xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command
     <ClInclude Include="CapsuleSpace.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Engine_Math.h" />
+    <ClInclude Include="Engine_Mouse.h" />
     <ClInclude Include="Engine_Physics.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine_Events.h" />
     <ClInclude Include="Engine_Sounds.h" />
+    <ClInclude Include="Engine_Window.h" />
     <ClInclude Include="GameCamera.h" />
     <ClInclude Include="GameSkybox.h" />
     <ClInclude Include="GBuffer.h" />

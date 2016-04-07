@@ -1,6 +1,7 @@
 #include "Engine_Resources.h"
 #include "Engine_Sounds.h"
-
+#include "Engine_Window.h"
+#include "Engine_Mouse.h"
 #include "ShaderProgram.h"
 #include "Object.h"
 #include "Light.h"
@@ -24,9 +25,8 @@
 using namespace Engine::Resources;
 
 float Detail::ResourceManagement::m_DeltaTime = 1;
-sf::Window* Detail::ResourceManagement::m_Window;
-std::string Detail::ResourceManagement::m_WindowName;
-sf::Mouse* Detail::ResourceManagement::m_Mouse;
+Engine_Window* Detail::ResourceManagement::m_Window;
+Engine_Mouse* Detail::ResourceManagement::m_Mouse;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 
@@ -65,6 +65,9 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
     SAFE_DELETE( Detail::ResourceManagement::m_Mouse);
     SAFE_DELETE( Detail::ResourceManagement::m_Window);
 }
+Engine_Window* Engine::Resources::getWindow(){ return Detail::ResourceManagement::m_Window; }
+sf::Vector2u Engine::Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
+Engine_Mouse* Engine::Resources::getMouse(){ return Detail::ResourceManagement::m_Mouse; }
 Camera* Engine::Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
 boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
 void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }

@@ -10,6 +10,9 @@
 #include <boost/weak_ptr.hpp>
 #include "Engine_Physics.h"
 
+class Engine_Window;
+class Engine_Mouse;
+
 class Scene;
 class Font;
 class Texture;
@@ -41,9 +44,8 @@ namespace Engine{
 
                     static boost::weak_ptr<Camera> m_ActiveCamera;
 
-                    static sf::Window* m_Window;
-					static std::string m_WindowName;
-                    static sf::Mouse* m_Mouse;
+                    static Engine_Window* m_Window;
+                    static Engine_Mouse* m_Mouse;
 
                     static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
                     static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
@@ -65,9 +67,9 @@ namespace Engine{
         static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
 
-        static sf::Window* getWindow(){ return Detail::ResourceManagement::m_Window; }
-		static sf::Vector2u getWindowSize(){ return getWindow()->getSize(); }
-        static sf::Mouse* getMouse(){ return Detail::ResourceManagement::m_Mouse; }
+        Engine_Window* getWindow();
+		sf::Vector2u getWindowSize();
+        Engine_Mouse* getMouse();
 
         Camera* getActiveCamera();
         boost::weak_ptr<Camera>& getActiveCameraPtr();
