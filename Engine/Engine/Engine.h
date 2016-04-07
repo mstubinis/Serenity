@@ -28,12 +28,7 @@ namespace Engine{
     namespace Detail{
          class EngineClass final{
             public:
-                #ifdef _WIN32
-                    static LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
-                    static int runDirectX();
-                #endif
-
-                static void initGame();
+                static void initGame(ENGINE_RENDERING_API);
 
                 #pragma region Event Handlers
                 static void EVENT_RESIZE(unsigned int width, unsigned int height);
@@ -64,13 +59,13 @@ namespace Engine{
                 static GLuint m_vao;
                 static sf::Clock clock;
 
-                static void update();
-                static void render();
+                static void update(ENGINE_RENDERING_API);
+                static void render(ENGINE_RENDERING_API);
 
-                static void init(const char* name,uint width=0,uint height=0);
+                static void init(ENGINE_RENDERING_API,const char* name,uint width=0,uint height=0);
                 static void destruct();
 
-                static void run();
+                static void run(ENGINE_RENDERING_API);
         };
     };
     float getFPS();

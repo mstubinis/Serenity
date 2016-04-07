@@ -14,10 +14,7 @@ typedef unsigned int uint;
 
 class Engine_Window final{
     #ifdef _WIN32
-        private: HWND m_DirectXWindow;
-        private: void _createDirectXWindow(const char* wCName,const char* name,HINSTANCE,int nCmdShow,uint width,uint height,uint x, uint y);
-
-        public: HWND& getDirectXHandle(){ return m_DirectXWindow; }
+        private: void _createDirectXWindow(const char* name,uint width,uint height);
         public: void setRenderingAPI(uint);
     #endif
 
@@ -27,6 +24,7 @@ class Engine_Window final{
         uint m_Width;
         uint m_Height;
         void _createOpenGLWindow(const char* name,uint width,uint height);
+		void _destroyOpenGLContext();
     public:
         Engine_Window(const char* name,uint width,uint height,ENGINE_RENDERING_API);
         ~Engine_Window();
@@ -48,7 +46,7 @@ class Engine_Window final{
 
         void display();
 
-        sf::Window* getOpenGLHandle(){ return m_SFMLWindow; }
+		sf::Window* getSFMLHandle(){ return m_SFMLWindow; }
 };
 
 #endif

@@ -7,61 +7,44 @@
 
 
 #ifdef _WIN32
-void Engine_Window::_createDirectXWindow(const char* wCName,const char* name,HINSTANCE hInst,int nCmdShow,uint width,uint height,uint xPos, uint yPos){
-    WNDCLASSEX wc;
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));// clear out the window class for use
+void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height){
 
-    // fill in the struct with the needed information
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = Engine::Detail::EngineClass::WndProc;
-    wc.hInstance = hInst;
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-    wc.lpszClassName = wCName;
-    RegisterClassEx(&wc); // register the window class
-
-    m_DirectXWindow = CreateWindowEx(0,wCName,name,WS_OVERLAPPEDWINDOW,xPos,yPos,width,height,0,0,hInst,0);
 }
 void Engine_Window::setRenderingAPI(uint api){
     //do alot of crap here...
     if(api == ENGINE_RENDERING_API_OPENGL){
-        m_SFMLWindow->setActive(true);
-        m_SFMLWindow->setVisible(true);
-        // and hide directx window
-        ShowWindow(m_DirectXWindow,SW_HIDE);
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
-        m_SFMLWindow->setActive(false);
-        m_SFMLWindow->setVisible(false);
-        // and show directx window
-        ShowWindow(m_DirectXWindow,SW_SHOW);
     }
     Engine::Detail::EngineClass::m_RenderingAPI = static_cast<ENGINE_RENDERING_API>(api);
 }
 #endif
-
+void Engine_Window::_destroyOpenGLContext(){
+    HGLRC    hglrc; 
+    HDC      hdc ; 
+    if(hglrc = wglGetCurrentContext()) { 
+        hdc = wglGetCurrentDC(); 
+        wglMakeCurrent(NULL, NULL); 
+		ReleaseDC (m_SFMLWindow->getSystemHandle(), hdc) ; 
+        wglDeleteContext(hglrc); 
+    }
+}
 Engine_Window::Engine_Window(const char* name,uint width,uint height,ENGINE_RENDERING_API api){
     m_WindowName = name;
     m_Width = width; m_Height = height;
     m_SFMLWindow = new sf::Window();
-    this->_createOpenGLWindow(name,width,height);
-    #ifdef _WIN32
-        this->_createDirectXWindow("WindowClass1",name,GetModuleHandle(0),1,width,height,0,0);
-        if(api == ENGINE_RENDERING_API_DIRECTX){
-            m_SFMLWindow->setActive(false);
-            m_SFMLWindow->setVisible(false);
-            ShowWindow(m_DirectXWindow, SW_SHOW);
-        }
-    #endif
 
-    if(api == ENGINE_RENDERING_API_OPENGL){
-        #ifdef _WIN32
-            ShowWindow(m_DirectXWindow,SW_HIDE);
-        #endif
-        m_SFMLWindow->setActive(true);
-        m_SFMLWindow->setVisible(true);
-    }
+	_destroyOpenGLContext();
+
+	if(api == ENGINE_RENDERING_API_OPENGL){
+		this->_createOpenGLWindow(name,width,height);
+	}
+	else if(api == ENGINE_RENDERING_API_DIRECTX){
+		this->_createOpenGLWindow(name,width,height);
+		_destroyOpenGLContext();
+		m_SFMLWindow->requestFocus();
+		this->_createDirectXWindow(name,width,height);
+	}
     setMouseCursorVisible(false);
     setKeyRepeatEnabled(false);
 }
@@ -91,20 +74,7 @@ Engine_Window::~Engine_Window(){
     delete(m_SFMLWindow);
 }
 sf::Vector2u Engine_Window::getSize(){
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        return m_SFMLWindow->getSize();
-    }
-    else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-        #ifdef _WIN32
-            RECT rect;
-            if(GetWindowRect(m_DirectXWindow, &rect)){
-                int width = rect.right - rect.left;
-                int height = rect.bottom - rect.top;
-                return sf::Vector2u(width,height);
-            }
-        #endif
-    }
-    return sf::Vector2u(0,0);
+    return m_SFMLWindow->getSize();
 }
 void Engine_Window::setIcon(uint width, uint height, const sf::Uint8* pixels){
     m_SFMLWindow->setIcon(width,height,pixels);
@@ -115,9 +85,6 @@ const char* Engine_Window::name(){
 void Engine_Window::setName(const char* name){
     m_WindowName = name;
     m_SFMLWindow->setTitle(m_WindowName);
-    #ifdef _WIN32
-        SetWindowText(m_DirectXWindow,m_WindowName);
-    #endif
 }
 void Engine_Window::setVerticalSyncEnabled(bool enabled){
     m_SFMLWindow->setVerticalSyncEnabled(enabled);
@@ -127,61 +94,24 @@ void Engine_Window::setKeyRepeatEnabled(bool enabled){
 }
 void Engine_Window::setMouseCursorVisible(bool visible){
     m_SFMLWindow->setMouseCursorVisible(visible);
-    #ifdef _WIN32
-        ShowCursor(visible);
-    #endif
 }
 void Engine_Window::requestFocus(){
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        m_SFMLWindow->requestFocus();
-        EnableWindow(m_DirectXWindow,false);
-    }
-    else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-        #ifdef _WIN32
-            EnableWindow(m_DirectXWindow,true);
-            EnableWindow(m_SFMLWindow->getSystemHandle(),false);
-        #endif
-    }
+    m_SFMLWindow->requestFocus();
 }
 void Engine_Window::close(){
     m_SFMLWindow->close();
-    #ifdef _WIN32
-        CloseWindow(m_DirectXWindow);
-    #endif
 }
 bool Engine_Window::hasFocus(){
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        return m_SFMLWindow->hasFocus();
-    }
-    else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-        //double check this function
-        #ifdef _WIN32
-            if(GetForegroundWindow() == m_DirectXWindow) return true; return false;
-        #endif
-    }
-    return false;
+    return m_SFMLWindow->hasFocus();
 }
 bool Engine_Window::isOpen(){
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        return m_SFMLWindow->isOpen();
-    }
-    else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-        //double check this function
-        #ifdef _WIN32
-            if(IsWindowVisible(m_DirectXWindow) == 1)return true; return false;
-        #endif
-    }
-    return false;
+    return m_SFMLWindow->isOpen();
 }
 bool Engine_Window::pollEventSFML(sf::Event& e){
     return m_SFMLWindow->pollEvent(e);
 }
 void Engine_Window::display(){
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        m_SFMLWindow->display();
-    }
-    else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-    }
+    m_SFMLWindow->display();
 }
 void Engine_Window::setFullScreen(bool fullscreen){
     if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){

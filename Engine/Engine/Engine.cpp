@@ -21,12 +21,11 @@ ENGINE_RENDERING_API Engine::Detail::EngineClass::m_RenderingAPI;
 sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
 GLuint Engine::Detail::EngineClass::m_vao = 0;
 
-void Engine::Detail::EngineClass::init(const char* name,uint width,uint height){
-    ENGINE_RENDERING_API api = Engine::Detail::EngineClass::m_RenderingAPI;
+void Engine::Detail::EngineClass::init(ENGINE_RENDERING_API api, const char* name,uint width,uint height){
+	srand((unsigned)time(0));
     Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height,api);
     Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
-
-    initGame();
+    initGame(api);
 }
 void Engine::Detail::EngineClass::destruct(){
     //glDeleteVertexArrays( 1, &m_vao );
@@ -36,7 +35,10 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Renderer::Detail::RenderManagement::destruct();
     Engine::Sound::Detail::SoundManagement::destruct();
 }
-void Engine::Detail::EngineClass::initGame(){
+void Engine::Detail::EngineClass::initGame(ENGINE_RENDERING_API api){
+	if(api == ENGINE_RENDERING_API_DIRECTX)
+		return;
+
     Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
@@ -76,14 +78,18 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
         }
     }
 }
-void Engine::Detail::EngineClass::update(){
+void Engine::Detail::EngineClass::update(ENGINE_RENDERING_API api){
+	if(api == ENGINE_RENDERING_API_DIRECTX)
+		return;
     Game::update(Resources::dt());
     Resources::getCurrentScene()->update(Resources::dt());
     Engine::Physics::Detail::PhysicsManagement::update(Resources::dt());
     Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-Resources::dt()));
     RESET_EVENTS();
 }
-void Engine::Detail::EngineClass::render(){
+void Engine::Detail::EngineClass::render(ENGINE_RENDERING_API api){
+	if(api == ENGINE_RENDERING_API_DIRECTX)
+		return;
     Game::render();
     Engine::Renderer::Detail::RenderManagement::render();
     Resources::getWindow()->display();
@@ -181,7 +187,7 @@ void Engine::stop(){ Resources::getWindow()->close(); }
 void Engine::setFullScreen(bool b){
     Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b);
 }
-void Engine::Detail::EngineClass::run(){
+void Engine::Detail::EngineClass::run(ENGINE_RENDERING_API api){
     while(Resources::getWindow()->isOpen()){
         sf::Event event;
         Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
@@ -201,53 +207,7 @@ void Engine::Detail::EngineClass::run(){
                 default:                              break;
             }
         }
-        update();
-        render();
+        update(api);
+		render(api);
     }
 }
-#pragma endregion
-
-#ifdef _WIN32
-
-int Engine::Detail::EngineClass::runDirectX(){
-    MSG msg = {0};
-    Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-    while(msg.message != WM_QUIT){
-        if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)){
-            TranslateMessage( &msg );
-            DispatchMessage( &msg );
-        }
-        else{
-            //update();
-            //render();
-        }
-    }
-    Engine::Detail::EngineClass::destruct();
-    FreeConsole();
-    return (int)msg.wParam;
-}
-LRESULT CALLBACK Engine::Detail::EngineClass::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
-    switch(message){
-        case WM_KEYUP:{
-            EVENT_KEY_PRESSED(Events::Keyboard::KeyProcessing::_WinKeyToSFML(wParam));
-            break;
-        }
-        case WM_KEYDOWN:{
-            EVENT_KEY_RELEASED(Events::Keyboard::KeyProcessing::_WinKeyToSFML(wParam));
-            break;
-        }
-        case WM_CLOSE:{
-            DestroyWindow(hWnd);
-            Engine::stop();
-            break;
-        }
-        case WM_DESTROY:{
-            PostQuitMessage(0);// close the application entirely
-            return 0;
-        } 
-        break;
-    }
-    return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
-#endif
