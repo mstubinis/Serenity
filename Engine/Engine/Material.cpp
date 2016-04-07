@@ -27,6 +27,8 @@ void Material::_init(Texture* diffuse, Texture* normal, Texture* glow){
     m_BaseGlow = 0.0f;
     m_Specularity = 1.0f;
     m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
+
+
 }
 Material::~Material(){
 }

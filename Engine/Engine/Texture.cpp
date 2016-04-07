@@ -11,9 +11,7 @@
 using namespace Engine;
 
 Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,std::string name,GLuint type){
-    m_TextureAddress = 0;
-    m_Width = 0;
-    m_Height = 0;
+	_init();
     m_Type = type;
     _loadFromPixels(pixels,w,h,type);
     m_Name = name;
@@ -22,9 +20,7 @@ Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,std:
 }
 Texture::Texture(std::string file,std::string name,GLuint type){
     m_Directory = file;
-    m_TextureAddress = 0;
-    m_Width = 0;
-    m_Height = 0;
+	_init();
     m_Type = type;
     if(file != "")
         _loadFromFile(file,type);
@@ -39,11 +35,9 @@ Texture::Texture(std::string file,std::string name,GLuint type){
 }
 Texture::Texture(std::string files[],std::string name,GLuint type){
     m_Directory = "";
-    m_TextureAddress = 0;
-    m_Width = 0;
-    m_Height = 0;
+	_init();
     m_Type = type;
-    _loadFromFiles(files,type);
+    _loadFromFileCubemap(files,type);
     m_Name = name;
     if(name == "Cubemap "){
         unsigned int total = 0;
@@ -58,24 +52,27 @@ Texture::Texture(std::string files[],std::string name,GLuint type){
     }
     Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);
 }
-Texture::~Texture(){
-    m_PixelsPointer.clear();
-    glDeleteTextures(1,&m_TextureAddress);
+void Texture::_init(){
     m_TextureAddress = 0;
     m_Width = 0;
     m_Height = 0;
+}
+Texture::~Texture(){
+    m_PixelsPointer.clear();
+    glDeleteTextures(1,&m_TextureAddress);
+	_init();
 }
 void Texture::_loadFromPixels(const unsigned char* pixels, unsigned int w, unsigned int h,GLuint type){
     if(type == GL_TEXTURE_2D){
         glGenTextures(1, &m_TextureAddress);
 
-        glBindTexture(GL_TEXTURE_2D, m_TextureAddress);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,GL_UNSIGNED_BYTE, pixels);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(type, m_TextureAddress);
+        glTexImage2D(type, 0, GL_RGBA, w, h, 0, GL_RGBA,GL_UNSIGNED_BYTE, pixels);
+        glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glGenerateMipmap(type);
 
         m_Width = w;
         m_Height = h;
@@ -84,35 +81,16 @@ void Texture::_loadFromPixels(const unsigned char* pixels, unsigned int w, unsig
 void Texture::_loadFromFile(std::string file,GLuint type){
     std::string extention;
     for(unsigned int i = file.length() - 4; i < file.length(); i++) extention += tolower(file.at(i));
-    if(type == GL_TEXTURE_2D){
-        glGenTextures(1, &m_TextureAddress);
-        glBindTexture(GL_TEXTURE_2D, m_TextureAddress);
 
-        sf::Image image;
-        image.loadFromFile(file.c_str());
-
-        if(extention == ".png")
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-        else if(extention == ".jpg")
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-        else
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        m_Width = image.getSize().x;
-        m_Height = image.getSize().y;
-    }
+    sf::Image image;
+    image.loadFromFile(file.c_str());
+	_loadFromPixels(image.getPixelsPtr(), image.getSize().x, image.getSize().y, type);
 }
-void Texture::_loadFromFiles(std::string file[],GLuint type){
+void Texture::_loadFromFileCubemap(std::string file[],GLuint type){
 
     if(type == GL_TEXTURE_CUBE_MAP){
         glGenTextures(1, &m_TextureAddress);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureAddress);
+        glBindTexture(type, m_TextureAddress);
         for(unsigned int i = 0; i < 6; i++){
             std::string extention;
             for(unsigned int s = file[i].length() - 4; s < file[i].length(); s++) extention += tolower(file[i].at(s));
@@ -128,9 +106,7 @@ void Texture::_loadFromFiles(std::string file[],GLuint type){
             else if(i == 4)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
             else               skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
 
-            if(extention == ".png")      glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
-            else if(extention == ".jpg") glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
-            else                         glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
+            glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
         }
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -50,13 +50,15 @@ class Mesh final{
 
         void _loadFromFile(std::string,COLLISION_TYPE);
         void _loadFromOBJ(std::string,COLLISION_TYPE);
-
-        void _init();
+		void _calculateMeshRadius();
     public:
         Mesh(float width, float height);
-        Mesh(int x, int y, int width, int height);
+        Mesh(float x, float y, float width, float height);
 		Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
         ~Mesh();
+
+		void initRenderingContext(unsigned int api);
+		void cleanupRenderingContext(unsigned int api);
 
         //GLuint* VAO();
         const GLuint* getBuffers() const { return m_buffers; }

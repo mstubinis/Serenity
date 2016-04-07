@@ -57,6 +57,8 @@ void Engine::Detail::EngineClass::initGame(ENGINE_RENDERING_API api){
     Game::initResources();
     Game::initLogic();
 
+	Resources::initRenderingContexts();
+
     //glGenVertexArrays( 1, &m_vao );
     //glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
 }

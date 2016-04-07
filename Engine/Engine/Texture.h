@@ -16,9 +16,10 @@ class Texture final{
         GLuint m_TextureAddress;
         void _loadFromPixels(const unsigned char*,unsigned int, unsigned int,GLuint);
         void _loadFromFile(std::string file,GLuint);
-        void _loadFromFiles(std::string file[],GLuint);
+        void _loadFromFileCubemap(std::string file[],GLuint);
         GLuint m_Type;
         unsigned int m_Width, m_Height;
+		void _init();
     public:
         Texture(const unsigned char*,unsigned int, unsigned int,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);

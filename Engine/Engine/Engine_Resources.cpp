@@ -78,6 +78,11 @@ void Engine::Resources::addMesh(std::string name,std::string file, COLLISION_TYP
         return;
     Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file,type);
 }
+void Engine::Resources::addMesh(std::string name,float x,float y,float w,float h){
+    if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
+        return;
+    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(x,y,w,h);
+}
 void Engine::Resources::addMesh(std::string file, COLLISION_TYPE type){
     std::string name = file.substr(0, file.size()-4);
 	Engine::Resources::addMesh(name,file,type);
@@ -174,7 +179,18 @@ void Engine::Resources::initResources(){
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }
-
+void Engine::Resources::initRenderingContexts(){
+	for(auto mesh:Detail::ResourceManagement::m_Meshes)
+		mesh.second.get()->initRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+	for(auto shader:Detail::ResourceManagement::m_Shaders)
+		shader.second.get()->initRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+}
+void Engine::Resources::cleanupRenderingContexts(){
+	for(auto mesh:Detail::ResourceManagement::m_Meshes)
+		mesh.second.get()->cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+	for(auto shader:Detail::ResourceManagement::m_Shaders)
+		shader.second.get()->cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
+}
 void Engine::Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s)
         return;

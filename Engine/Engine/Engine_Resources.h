@@ -137,6 +137,7 @@ namespace Engine{
 
         void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
         void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
+		void addMesh(std::string name, float x, float y, float w, float h);
         void removeMesh(std::string name);
 
         void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
@@ -156,6 +157,8 @@ namespace Engine{
         void removeSound(std::string name);
 
         void initResources();
+		void initRenderingContexts();
+		void cleanupRenderingContexts();
     };
     //TODO: Move this somewhere else
     template<typename T>

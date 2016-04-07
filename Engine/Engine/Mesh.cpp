@@ -1,3 +1,6 @@
+#include "Engine.h"
+#include "Engine_Physics.h"
+#include "Engine_Resources.h"
 #include "Mesh.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
@@ -8,10 +11,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "Engine_Physics.h"
-#include "Engine_Resources.h"
-
-Mesh::Mesh(int x, int y,int width, int height){
+Mesh::Mesh(float x, float y,float width, float height){
     m_Collision = nullptr;
 
     m_Points.push_back(glm::vec3(0,0,0));
@@ -63,7 +63,7 @@ Mesh::Mesh(int x, int y,int width, int height){
     m_Binormals.push_back(glm::vec3(1,1,1));
     m_Binormals.push_back(glm::vec3(1,1,1));
 
-    _init();
+	_calculateMeshRadius();
 }
 Mesh::Mesh(float width, float height){
     m_Collision = nullptr;
@@ -118,15 +118,15 @@ Mesh::Mesh(float width, float height){
     m_Binormals.push_back(glm::vec3(1,1,1));
     m_Binormals.push_back(glm::vec3(1,1,1));
 
-    _init();
+	_calculateMeshRadius();
 }
 Mesh::Mesh(std::string filename,COLLISION_TYPE type){
     m_Collision = nullptr;
     _loadFromFile(filename, type);
-    _init();
+	_calculateMeshRadius();
 }
 Mesh::~Mesh(){
-    for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++) glDeleteBuffers(1, &m_buffers[i]);
+	cleanupRenderingContext(Engine::Detail::EngineClass::m_RenderingAPI);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
     std::string extention; for(unsigned int i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
@@ -292,44 +292,46 @@ void Mesh::_generateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
     _generateTriangle(v1,v2,v3);
     _generateTriangle(v1,v3,v4);
 }
-void Mesh::_init(){
-    //Bind the data to the buffers
-    glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
+void Mesh::initRenderingContext(unsigned int api){
+	if(api == ENGINE_RENDERING_API_OPENGL){
+		//Bind the data to the buffers
+		glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0] );
-    glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
+		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0] );
+		glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
-    glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(glm::vec2), &m_UVs[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
+		glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(glm::vec2), &m_UVs[0], GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-    glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
+		glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
+		glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
-
-    #pragma region Calculate Mesh Radius (x, y, and z)
-    float maxX = 0;
-    float maxY = 0;
-    float maxZ = 0;
+		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
+		glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
+	}
+	else if(api == ENGINE_RENDERING_API_DIRECTX){
+	}
+}
+void Mesh::cleanupRenderingContext(unsigned int api){
+	if(api == ENGINE_RENDERING_API_OPENGL){
+		for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++){
+			glDeleteBuffers(1, &m_buffers[i]);
+		}
+	}
+	else if(api == ENGINE_RENDERING_API_DIRECTX){
+	}
+}
+void Mesh::_calculateMeshRadius(){
+    float maxX = 0; float maxY = 0; float maxZ = 0;
     for(auto point:m_Points){
-        float x = abs(point.x);
-        float y = abs(point.y);
-        float z = abs(point.z);
-
-        if(x > maxX)
-            maxX = x;
-        if(y > maxY)
-            maxY = y;
-        if(z > maxZ)
-            maxZ = z;
+        float x = abs(point.x); float y = abs(point.y); float z = abs(point.z);
+        if(x > maxX) maxX = x; if(y > maxY) maxY = y; if(z > maxZ) maxZ = z;
     }
     m_radiusBox = glm::vec3(maxX,maxY,maxZ);
     m_radius = glm::max(maxX, glm::max(maxY,maxZ));
-    #pragma endregion
 }
 void Mesh::render(GLuint mode){
     //for each unique vertex data type (position, color, uv, normal, binormal,tangent)...

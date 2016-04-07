@@ -8,6 +8,7 @@
 #include <sstream>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace Engine;
 
@@ -19,7 +20,6 @@ FontData::FontData(std::string filename){
 }
 FontData::~FontData(){
     for(auto glyph:m_FontGlyphs){
-        SAFE_DELETE(glyph.second->char_mesh);
         SAFE_DELETE(glyph.second);
     }
 }
@@ -48,8 +48,13 @@ void FontData::_loadTextFile(std::string filename){
                 else if(key == "xadvance") font->xadvance = stoi(value);
             }
             font->m_Model = glm::mat4(1);
-            font->char_mesh = new Mesh(font->x,font->y,font->width,font->height);
-
+			std::string name = filename.substr(0,filename.size()-4);
+			Resources::addMesh(name + "_" + boost::lexical_cast<std::string>(font->id),
+				static_cast<float>(font->x),
+				static_cast<float>(font->y),
+				static_cast<float>(font->width),
+				static_cast<float>(font->height));
+			font->char_mesh = Resources::getMesh(name + "_" + boost::lexical_cast<std::string>(font->id));
             _Font_Chars[font->id] = font;
         }
     }
