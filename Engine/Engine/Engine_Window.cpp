@@ -49,9 +49,9 @@ Engine_Window::Engine_Window(const char* name,uint width,uint height,ENGINE_REND
     #ifdef _WIN32
         this->_createDirectXWindow("WindowClass1",name,GetModuleHandle(0),1,width,height,0,0);
         if(api == ENGINE_RENDERING_API_DIRECTX){
-            ShowWindow(m_DirectXWindow, SW_SHOW);
             m_SFMLWindow->setActive(false);
             m_SFMLWindow->setVisible(false);
+            ShowWindow(m_DirectXWindow, SW_SHOW);
         }
     #endif
 

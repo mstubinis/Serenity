@@ -25,12 +25,8 @@ void Engine::Detail::EngineClass::init(const char* name,uint width,uint height){
     ENGINE_RENDERING_API api = Engine::Detail::EngineClass::m_RenderingAPI;
     Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height,api);
     Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		initGameOpenGL();
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
-		initGameDirectX();
-	}
+
+    initGame();
 }
 void Engine::Detail::EngineClass::destruct(){
     //glDeleteVertexArrays( 1, &m_vao );
@@ -40,7 +36,7 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Renderer::Detail::RenderManagement::destruct();
     Engine::Sound::Detail::SoundManagement::destruct();
 }
-void Engine::Detail::EngineClass::initGameOpenGL(){
+void Engine::Detail::EngineClass::initGame(){
     Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
@@ -213,25 +209,6 @@ void Engine::Detail::EngineClass::run(){
 
 #ifdef _WIN32
 
-void Engine::Detail::EngineClass::initGameDirectX(){
-    Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
-
-    Renderer::Detail::RenderManagement::init();
-    Physics::Detail::PhysicsManagement::init();
-    Sound::Detail::SoundManagement::init();
-
-    Resources::initResources();
-
-    //the scene is the root of all games. create the default scene
-    //Scene* scene;
-    //if(Resources::getCurrentScene() == nullptr)
-        //scene = new Scene("Default");
-
-    Game::initResources();
-    Game::initLogic();
-}
 int Engine::Detail::EngineClass::runDirectX(){
     MSG msg = {0};
     Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();

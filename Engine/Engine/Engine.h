@@ -31,10 +31,9 @@ namespace Engine{
                 #ifdef _WIN32
                     static LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
                     static int runDirectX();
-                    static void initGameDirectX();
                 #endif
 
-                static void initGameOpenGL();
+                static void initGame();
 
                 #pragma region Event Handlers
                 static void EVENT_RESIZE(unsigned int width, unsigned int height);
