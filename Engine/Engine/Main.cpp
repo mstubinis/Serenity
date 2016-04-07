@@ -1,8 +1,7 @@
 #include "Engine.h"
-#include "Engine_Events.h"
 #include <iostream>
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #include <windowsx.h>
 #ifdef _MSC_VER
@@ -16,36 +15,30 @@ int main(){
     const unsigned int appHeight = 768;
     srand((unsigned)time(0));
 	Engine::Detail::EngineClass::m_RenderingAPI = ENGINE_RENDERING_API_OPENGL;
-	#if defined(_WIN32)
-		if(GetConsoleWindow() == NULL){ AllocConsole(); }
-		#if !defined(ENGINE_DEBUG)
+	//Engine::Detail::EngineClass::m_RenderingAPI = ENGINE_RENDERING_API_DIRECTX;
+	#ifdef _WIN32
+		if(GetConsoleWindow() == NULL){ 
+			AllocConsole();
+		}
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+		#ifndef ENGINE_DEBUG
 			ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
-		#endif
-		#if defined(ENGINE_DIRECTX)
-			Engine::Detail::EngineClass::m_RenderingAPI = ENGINE_RENDERING_API_DIRECTX;
 		#endif
 	#endif
 
-    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        Engine::Detail::EngineClass::initOpenGL(appName,appWidth,appHeight);
-        Engine::Detail::EngineClass::run();
-        Engine::Detail::EngineClass::destruct();
-		FreeConsole();
-        return 0;
-	}
-	else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-        // enter the main loop:
-		Engine::Detail::EngineClass::initDirectX("WindowClass1",appName,GetModuleHandle(0),1,appWidth,appHeight);
-        Engine::Detail::EngineClass::run();
+	Engine::Detail::EngineClass::init(appName,appWidth,appHeight);
 
-        //end main loop
-        MSG msg;// this struct holds Windows event messages
-        while(GetMessage(&msg, NULL, 0, 0)){// wait for the next message in the queue, store the result in 'msg'
-            TranslateMessage(&msg);// translate keystroke messages into the right format
-            DispatchMessage(&msg);// send the message to the WindowProc function
-        }
+	#ifdef _WIN32
+	if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
+        Engine::Detail::EngineClass::runDirectX();
+	}
+	#endif
+    if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
+        Engine::Detail::EngineClass::run();
 		Engine::Detail::EngineClass::destruct();
 		FreeConsole();
-        return msg.wParam;// return this part of the WM_QUIT message to Windows
 	}
+	return 0;
 }

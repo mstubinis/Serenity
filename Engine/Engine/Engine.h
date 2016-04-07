@@ -2,8 +2,8 @@
 #define ENGINE_ENGINE_H
 
 enum ENGINE_RENDERING_API{
-	ENGINE_RENDERING_API_OPENGL,
-	ENGINE_RENDERING_API_DIRECTX
+    ENGINE_RENDERING_API_OPENGL,
+    ENGINE_RENDERING_API_DIRECTX
 };
 
 class Texture;
@@ -28,8 +28,13 @@ namespace Engine{
     namespace Detail{
          class EngineClass final{
             public:
+                #ifdef _WIN32
+                    static LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
+                    static int runDirectX();
+                    static void initGameDirectX();
+                #endif
+
                 static void initGameOpenGL();
-				static void initGameDirectX();
 
                 #pragma region Event Handlers
                 static void EVENT_RESIZE(unsigned int width, unsigned int height);
@@ -37,8 +42,8 @@ namespace Engine{
                 static void EVENT_LOST_FOCUS();
                 static void EVENT_GAINED_FOCUS();
                 static void EVENT_TEXT_ENTERED(sf::Event::TextEvent);
-                static void EVENT_KEY_PRESSED(sf::Event::KeyEvent);
-                static void EVENT_KEY_RELEASED(sf::Event::KeyEvent);
+                static void EVENT_KEY_PRESSED(uint);
+                static void EVENT_KEY_RELEASED(uint);
                 static void EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent);
                 static void EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent);
                 static void EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent);
@@ -56,15 +61,14 @@ namespace Engine{
 
                 static void RESET_EVENTS();
 
-				static ENGINE_RENDERING_API m_RenderingAPI;
+                static ENGINE_RENDERING_API m_RenderingAPI;
                 static GLuint m_vao;
                 static sf::Clock clock;
 
                 static void update();
                 static void render();
 
-                static void initOpenGL(const char* name,uint width=0,uint height=0);
-				static void initDirectX(const char* wCName,const char* name,HINSTANCE hInst,int nCmdShow,uint width = 0,uint height = 0, uint xPos = 0, uint yPos = 0);
+                static void init(const char* name,uint width=0,uint height=0);
                 static void destruct();
 
                 static void run();

@@ -11,6 +11,7 @@
 
 typedef unsigned int uint;
 
+
 namespace Engine{
     namespace Events{
         namespace Mouse{
@@ -49,6 +50,11 @@ namespace Engine{
         };
         namespace Keyboard{
             class KeyProcessing final{
+				#ifdef _WIN32
+				private: static std::unordered_map<uint,uint> m_WindowsKeyMap;
+				public: static uint _WinKeyToSFML(uint k){ return m_WindowsKeyMap[k]; }
+				#endif
+
                 private:
                     static std::unordered_map<std::string,uint> m_KeyMap;
                 public:

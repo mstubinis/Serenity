@@ -3,19 +3,17 @@
 
 #include <string>
 
-namespace sf{
-	class Mouse;
-};
+namespace sf{class Mouse;};
 
 typedef unsigned int uint;
 
 class Engine_Mouse final{
-	private:
-		sf::Mouse* m_SFMLMouse;
-	public:
-		Engine_Mouse();
-		~Engine_Mouse();
+    private:
+        sf::Mouse* m_SFMLMouse;
+    public:
+        Engine_Mouse();
+        ~Engine_Mouse();
 
-		void setPosition(uint x, uint y);
+        void setPosition(uint x, uint y);
 };
 #endif

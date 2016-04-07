@@ -13,19 +13,24 @@
 #include "Engine_Mouse.h"
 #include <SFML/System.hpp>
 
+#ifdef ENGINE_DEBUG
+#include <iostream>
+#endif
+
 ENGINE_RENDERING_API Engine::Detail::EngineClass::m_RenderingAPI;
 sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
 GLuint Engine::Detail::EngineClass::m_vao = 0;
 
-void Engine::Detail::EngineClass::initOpenGL(const char* name,uint width,uint height){
-    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height);
-	Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
-    initGameOpenGL();
-}
-void Engine::Detail::EngineClass::initDirectX(const char* wCName,const char* name,HINSTANCE hInst,int nCmdShow,uint width,uint height,uint xPos, uint yPos){
-    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(wCName,name,hInst,nCmdShow,width,height,xPos,yPos);
-	Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
-    //initGameDirectX();
+void Engine::Detail::EngineClass::init(const char* name,uint width,uint height){
+    ENGINE_RENDERING_API api = Engine::Detail::EngineClass::m_RenderingAPI;
+    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height,api);
+    Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
+	if(api == ENGINE_RENDERING_API_OPENGL){
+		initGameOpenGL();
+	}
+	else if(api == ENGINE_RENDERING_API_DIRECTX){
+		initGameDirectX();
+	}
 }
 void Engine::Detail::EngineClass::destruct(){
     //glDeleteVertexArrays( 1, &m_vao );
@@ -56,25 +61,6 @@ void Engine::Detail::EngineClass::initGameOpenGL(){
 
     //glGenVertexArrays( 1, &m_vao );
     //glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
-}
-void Engine::Detail::EngineClass::initGameDirectX(){
-    Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
-
-    Renderer::Detail::RenderManagement::init();
-    Physics::Detail::PhysicsManagement::init();
-    Sound::Detail::SoundManagement::init();
-
-    Resources::initResources();
-
-    //the scene is the root of all games. create the default scene
-    //Scene* scene;
-    //if(Resources::getCurrentScene() == nullptr)
-        //scene = new Scene("Default");
-
-    Game::initResources();
-    Game::initLogic();
 }
 void Engine::Detail::EngineClass::RESET_EVENTS(){
     Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
@@ -130,31 +116,33 @@ void Engine::Detail::EngineClass::EVENT_GAINED_FOCUS(){
 }
 void Engine::Detail::EngineClass::EVENT_TEXT_ENTERED(sf::Event::TextEvent text){
 }
-void Engine::Detail::EngineClass::EVENT_KEY_PRESSED(sf::Event::KeyEvent key){
+void Engine::Detail::EngineClass::EVENT_KEY_PRESSED(uint key){
     Events::Keyboard::KeyProcessing::m_previousKey = Events::Keyboard::KeyProcessing::m_currentKey;
-    Events::Keyboard::KeyProcessing::m_currentKey = key.code;
-    Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = true;
+
+    Events::Keyboard::KeyProcessing::m_currentKey = key;
+    Events::Keyboard::KeyProcessing::m_KeyStatus[key] = true;
 }
-void Engine::Detail::EngineClass::EVENT_KEY_RELEASED(sf::Event::KeyEvent key){
+void Engine::Detail::EngineClass::EVENT_KEY_RELEASED(uint key){
     Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
     Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-    Events::Keyboard::KeyProcessing::m_KeyStatus[key.code] = false;
+
+    Events::Keyboard::KeyProcessing::m_KeyStatus[key] = false;
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
     Events::Mouse::MouseProcessing::m_Delta += (mouseWheel.delta * 10);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
     Resources::getWindow()->setMouseCursorVisible(false);
-    Engine::Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
+    Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
 
-    Engine::Events::Mouse::MouseProcessing::m_currentButton = mouseButton.button;
-    Engine::Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = true;
+    Events::Mouse::MouseProcessing::m_currentButton = mouseButton.button;
+    Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = true;
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent mouseButton){
-    Engine::Events::Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
-    Engine::Events::Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
+    Events::Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
+    Events::Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
 
-    Engine::Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = false;
+    Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = false;
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
     if(Resources::getWindow()->hasFocus()){
@@ -188,51 +176,101 @@ Engine_Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement
 sf::Vector2u Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
 Engine_Mouse* Engine::getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
 void Engine::setWindowIcon(Texture* texture){
-	texture->generatePixelPointer();
-	Resources::getWindow()->setIcon(texture->width(),texture->height(),texture->getPixelsPtr()); 
+    texture->generatePixelPointer();
+    Resources::getWindow()->setIcon(texture->width(),texture->height(),texture->getPixelsPtr()); 
 }
 void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
 void Engine::stop(){ Resources::getWindow()->close(); }
 void Engine::setFullScreen(bool b){
-	Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b);
+    Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b);
 }
 void Engine::Detail::EngineClass::run(){
-	if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-		#pragma region OpenGL
-		while(Resources::getWindow()->isOpen()){
-			sf::Event event;
-			Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-			while(Resources::getWindow()->pollEvent(event)){
-				switch (event.type){
-					case sf::Event::Closed:               EVENT_CLOSE();break;
-					case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(event.key);break;
-					case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(event.key);break;
-					case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(event.mouseButton);break;
-					case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(event.mouseButton);break;
-					case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
-					case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
-					case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(event.mouseWheel);break;
-					case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(event.mouseMove);break;
-					case sf::Event::Resized:              EVENT_RESIZE(event.size.width,event.size.height);break;
-					case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(event.text);break;
-					default:                              break;
-				}
-			}
-			update();
-			render();
-		}
-		#pragma endregion
-	}
-	else if(Engine::Detail::EngineClass::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
-		#pragma region DirectX
-		Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-
-		if(Resources::getWindow()->isOpen()){
-
-		}
-
-		#pragma endregion
-	}
+    while(Resources::getWindow()->isOpen()){
+        sf::Event event;
+        Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
+        while(Resources::getWindow()->pollEventSFML(event)){
+            switch (event.type){
+                case sf::Event::Closed:               EVENT_CLOSE();break;
+                case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(event.key.code);break;
+                case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(event.key.code);break;
+                case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(event.mouseButton);break;
+                case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(event.mouseButton);break;
+                case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
+                case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
+                case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(event.mouseWheel);break;
+                case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(event.mouseMove);break;
+                case sf::Event::Resized:              EVENT_RESIZE(event.size.width,event.size.height);break;
+                case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(event.text);break;
+                default:                              break;
+            }
+        }
+        update();
+        render();
+    }
 }
 #pragma endregion
+
+#ifdef _WIN32
+
+void Engine::Detail::EngineClass::initGameDirectX(){
+    Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
+
+    Renderer::Detail::RenderManagement::init();
+    Physics::Detail::PhysicsManagement::init();
+    Sound::Detail::SoundManagement::init();
+
+    Resources::initResources();
+
+    //the scene is the root of all games. create the default scene
+    //Scene* scene;
+    //if(Resources::getCurrentScene() == nullptr)
+        //scene = new Scene("Default");
+
+    Game::initResources();
+    Game::initLogic();
+}
+int Engine::Detail::EngineClass::runDirectX(){
+    MSG msg = {0};
+    Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
+    while(msg.message != WM_QUIT){
+        if(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)){
+            TranslateMessage( &msg );
+            DispatchMessage( &msg );
+        }
+        else{
+            //update();
+            //render();
+        }
+    }
+    Engine::Detail::EngineClass::destruct();
+    FreeConsole();
+    return (int)msg.wParam;
+}
+LRESULT CALLBACK Engine::Detail::EngineClass::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+    switch(message){
+        case WM_KEYUP:{
+            EVENT_KEY_PRESSED(Events::Keyboard::KeyProcessing::_WinKeyToSFML(wParam));
+            break;
+        }
+        case WM_KEYDOWN:{
+            EVENT_KEY_RELEASED(Events::Keyboard::KeyProcessing::_WinKeyToSFML(wParam));
+            break;
+        }
+        case WM_CLOSE:{
+            DestroyWindow(hWnd);
+            Engine::stop();
+            break;
+        }
+        case WM_DESTROY:{
+            PostQuitMessage(0);// close the application entirely
+            return 0;
+        } 
+        break;
+    }
+    return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+#endif

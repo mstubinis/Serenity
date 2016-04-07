@@ -3,8 +3,9 @@
 
 #include <string>
 #include <SFML/Window.hpp>
+#include "Engine.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #include <windowsx.h>
 #endif
@@ -12,41 +13,42 @@
 typedef unsigned int uint;
 
 class Engine_Window final{
-	private:
-		const char* m_WindowName;
-		sf::Window* m_SFMLWindow;
-		HWND m_DirectXWindow;
-		uint m_Width;
-		uint m_Height;
-		void _createOpenGLWindow(const char* name,uint width,uint height);
-		void _createDirectXWindow(const char* wCName,const char* name,HINSTANCE,int nCmdShow,uint width,uint height,uint xPos, uint yPos);
-	public:
-		Engine_Window(const char* name,uint width,uint height);
-		Engine_Window(const char* wCName,const char* name,HINSTANCE,int nCmdShow,uint width,uint height,uint xPos, uint yPos);
-		~Engine_Window();
+    #ifdef _WIN32
+        private: HWND m_DirectXWindow;
+        private: void _createDirectXWindow(const char* wCName,const char* name,HINSTANCE,int nCmdShow,uint width,uint height,uint x, uint y);
 
-		const char* name();
-		sf::Vector2u getSize();
-		void setName(const char* name);
-		void setIcon(uint width, uint height, const sf::Uint8* pixels);
-		void setMouseCursorVisible(bool);
-		void setKeyRepeatEnabled(bool);
-		void setVerticalSyncEnabled(bool);
-		void close();
+        public: HWND& getDirectXHandle(){ return m_DirectXWindow; }
+        public: void setRenderingAPI(uint);
+    #endif
 
-		bool hasFocus();
-		bool isOpen();
-		bool pollEvent(sf::Event&);
-		void setFullScreen(bool);
+    private:
+        const char* m_WindowName;
+        sf::Window* m_SFMLWindow;
+        uint m_Width;
+        uint m_Height;
+        void _createOpenGLWindow(const char* name,uint width,uint height);
+    public:
+        Engine_Window(const char* name,uint width,uint height,ENGINE_RENDERING_API);
+        ~Engine_Window();
 
-		void display();
+        const char* name();
+        sf::Vector2u getSize();
+        void setName(const char* name);
+        void setIcon(uint width, uint height, const sf::Uint8* pixels);
+        void setMouseCursorVisible(bool);
+        void setKeyRepeatEnabled(bool);
+        void setVerticalSyncEnabled(bool);
+        void close();
+        void requestFocus();
 
-		sf::Window* getOpenGLHandle();
-		HWND& getDirectXHandle();
+        bool hasFocus();
+        bool isOpen();
+        bool pollEventSFML(sf::Event&);
+        void setFullScreen(bool);
 
-		#if defined(_WIN32)
-		void setRenderingAPI(uint);
-		#endif
+        void display();
+
+        sf::Window* getOpenGLHandle(){ return m_SFMLWindow; }
 };
 
 #endif
