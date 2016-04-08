@@ -79,10 +79,10 @@ void Game::update(float dt){
         Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
     }
     if(Events::Keyboard::isKeyDownOnce("f9")){
-		Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
+		Engine::setFullScreen(true);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
-        Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_OPENGL);
+        Engine::setFullScreen(false);
     }
     m_HUD->update(dt);
 }

@@ -100,6 +100,8 @@ void Engine::Detail::EngineClass::render(uint api){
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint api, unsigned int w, unsigned int h,bool saveSize){
+	Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
+	for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
 	if(api == ENGINE_RENDERING_API_OPENGL){
 		glViewport(0,0,w,h);
 		Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
@@ -110,9 +112,7 @@ void Engine::Detail::EngineClass::EVENT_RESIZE(uint api, unsigned int w, unsigne
 	else if(api == ENGINE_RENDERING_API_DIRECTX){
 	}
 
-    for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
 	if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
-	Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.f,(float)w,0.f,(float)h,0.005f,1000.f);
 }
 void Engine::Detail::EngineClass::EVENT_CLOSE(){
     Resources::getWindow()->close();

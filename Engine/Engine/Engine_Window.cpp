@@ -16,7 +16,7 @@ using namespace Engine;
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3d10.lib")
 
-void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height){
+void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height,BOOL windowed){
 	// create a struct to hold information about the swap chain
     DXGI_SWAP_CHAIN_DESC scd;
 
@@ -27,9 +27,11 @@ void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height
     scd.BufferCount = 1;                                    // one back buffer
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;     // use 32-bit color
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
+    scd.BufferDesc.Width = width;                           // set the back buffer width
+    scd.BufferDesc.Height = height;                         // set the back buffer height
 	scd.OutputWindow = m_SFMLWindow->getSystemHandle();     // the window to be used
     scd.SampleDesc.Count = 4;                               // how many multisamples
-    scd.Windowed = TRUE;                                    // windowed/full-screen mode
+    scd.Windowed = windowed;                                // windowed/full-screen mode
 
     // create a device, device context and swap chain using the information in the scd struct
     D3D11CreateDeviceAndSwapChain(0,D3D_DRIVER_TYPE_HARDWARE,0,0,0,0,D3D11_SDK_VERSION,&scd,
@@ -54,8 +56,8 @@ void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height
 
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
-	viewport.Width = static_cast<FLOAT>(m_Width);
-    viewport.Height = static_cast<FLOAT>(m_Height);
+	viewport.Width = static_cast<FLOAT>(width);
+    viewport.Height = static_cast<FLOAT>(height);
 
     Renderer::Detail::RenderManagement::m_DirectXDeviceContext->RSSetViewports(1, &viewport);
 }
@@ -75,7 +77,7 @@ void Engine_Window::setRenderingAPI(uint newAPI){
 	Resources::Detail::ResourceManagement::m_RenderingAPI = static_cast<ENGINE_RENDERING_API>(newAPI);
 }
 void Engine_Window::_destroyDirectXContext(){
-	Renderer::Detail::RenderManagement::m_DirectXSwapChain->SetFullscreenState(false, NULL);//this might not even be needed
+	//Renderer::Detail::RenderManagement::m_DirectXSwapChain->SetFullscreenState(FALSE, NULL);//this might not even be needed
 	Renderer::Detail::RenderManagement::m_DirectXDeviceContext->ClearState();//this might not even be needed
 	Renderer::Detail::RenderManagement::m_DirectXDeviceContext->Flush();//this might not even be needed
 	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
@@ -85,10 +87,6 @@ void Engine_Window::_destroyDirectXContext(){
 }
 #endif
 void Engine_Window::_destroyOpenGLContext(){
-	glClearColor(0,0,0,0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_SFMLWindow->display();
-
     HGLRC    hglrc; 
     HDC      hdc ; 
     if(hglrc = wglGetCurrentContext()){ 
@@ -100,16 +98,12 @@ void Engine_Window::_destroyOpenGLContext(){
 }
 Engine_Window::Engine_Window(const char* name,uint width,uint height,uint api){
     m_WindowName = name;
-    m_Width = width; m_Height = height;
+    m_Width = width;
+	m_Height = height;
     m_SFMLWindow = new sf::Window();
+	_createOpenGLWindow(name,width,height);
 
-	_destroyOpenGLContext();
-
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		_createOpenGLWindow(name,width,height);
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
-		_createOpenGLWindow(name,width,height);
+	if(api == ENGINE_RENDERING_API_DIRECTX){
 		_destroyOpenGLContext();
 		requestFocus();
 		_createDirectXWindow(name,width,height);
@@ -125,8 +119,10 @@ void Engine_Window::_createOpenGLWindow(const char* name,uint width,uint height)
     settings.majorVersion = 3;
     settings.minorVersion = 0;
 
-    m_VideoMode.width = m_Width;
-    m_VideoMode.height = m_Height;
+    m_VideoMode.width = width;
+    m_VideoMode.height = height;
+	m_Width = width;
+	m_Height = height;
     m_VideoMode.bitsPerPixel = 32;
 
     m_Style = sf::Style::Default;
@@ -137,9 +133,6 @@ void Engine_Window::_createOpenGLWindow(const char* name,uint width,uint height)
         m_Height = m_VideoMode.height;
     }
     m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 }
 Engine_Window::~Engine_Window(){
     delete(m_SFMLWindow);
@@ -184,6 +177,7 @@ bool Engine_Window::pollEvent(sf::Event& e){
 void Engine_Window::display(){
     m_SFMLWindow->display();
 }
+void Engine_Window::setActive(bool active){ m_SFMLWindow->setActive(active); }
 void Engine_Window::setSize(uint w, uint h){
 	m_Width = w;
 	m_Height = h;
@@ -206,6 +200,7 @@ void Engine_Window::setStyle(uint style){
 void Engine_Window::setFullScreen(bool fullscreen){
 	if(m_Style == sf::Style::Fullscreen && fullscreen == true) return;
 	if(m_Style != sf::Style::Fullscreen && fullscreen == false) return;
+	if(!hasFocus()) return;
 
     if(Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
         m_VideoMode = sf::VideoMode::getDesktopMode();
@@ -216,14 +211,20 @@ void Engine_Window::setFullScreen(bool fullscreen){
             m_VideoMode.height = m_Height;
         }
         delete(Renderer::Detail::RenderManagement::m_gBuffer);
-        m_SFMLWindow->create(m_VideoMode,Resources::Detail::ResourceManagement::m_Window->name(),m_Style);
+		m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
-        Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
+        Detail::EngineClass::EVENT_RESIZE(
+			Resources::Detail::ResourceManagement::m_RenderingAPI,
+			Resources::getWindowSize().x,
+			Resources::getWindowSize().y,
+			false
+		);
     }
     else if(Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
+
     }
 }

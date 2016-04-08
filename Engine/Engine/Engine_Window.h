@@ -13,7 +13,7 @@ typedef unsigned int uint;
 
 class Engine_Window final{
     #ifdef _WIN32
-        private: void _createDirectXWindow(const char* name,uint width,uint height);
+        private: void _createDirectXWindow(const char* name,uint width,uint height,BOOL windowed = TRUE);
         public: void setRenderingAPI(uint);
 		private: void _destroyDirectXContext();
     #endif
@@ -41,6 +41,7 @@ class Engine_Window final{
         void setVerticalSyncEnabled(bool);
         void close();
         void requestFocus();
+		void setActive(bool);
 
 		uint getStyle(){ return m_Style; }
         bool hasFocus();
