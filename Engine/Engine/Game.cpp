@@ -3,6 +3,7 @@
 #include "Engine_Renderer.h"
 #include "Engine_Sounds.h"
 #include "Engine_Resources.h"
+#include "Engine_Window.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
@@ -78,10 +79,10 @@ void Game::update(float dt){
         Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
     }
     if(Events::Keyboard::isKeyDownOnce("f9")){
-		Engine::setFullScreen(true);
+		Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
-        Engine::setFullScreen(false);
+        Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_OPENGL);
     }
     m_HUD->update(dt);
 }

@@ -26,7 +26,7 @@ namespace Engine{
                 static void initGame(uint api);
 
                 #pragma region Event Handlers
-                static void EVENT_RESIZE(unsigned int width, unsigned int height,bool saveSize = true);
+                static void EVENT_RESIZE(uint api,unsigned int width, unsigned int height,bool saveSize = true);
                 static void EVENT_CLOSE();
                 static void EVENT_LOST_FOCUS();
                 static void EVENT_GAINED_FOCUS();
@@ -59,7 +59,7 @@ namespace Engine{
                 static void init(uint api,const char* name,uint width=0,uint height=0);
                 static void destruct();
 
-                static void run(uint api);
+                static void run();
         };
     };
     float getFPS();

@@ -80,8 +80,6 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
     }
 }
 void Engine::Detail::EngineClass::update(uint api){
-	if(api == ENGINE_RENDERING_API_DIRECTX)
-		return;
     Game::update(Resources::dt());
     Resources::getCurrentScene()->update(Resources::dt());
     Engine::Physics::Detail::PhysicsManagement::update(Resources::dt());
@@ -89,26 +87,32 @@ void Engine::Detail::EngineClass::update(uint api){
     RESET_EVENTS();
 }
 void Engine::Detail::EngineClass::render(uint api){
-	if(api == ENGINE_RENDERING_API_DIRECTX)
-		return;
-    Game::render();
-    Engine::Renderer::Detail::RenderManagement::render();
-    Resources::getWindow()->display();
+	if(api == ENGINE_RENDERING_API_OPENGL){
+		Game::render();
+		Engine::Renderer::Detail::RenderManagement::render();
+		Resources::getWindow()->display();
+	}
+	else if(api == ENGINE_RENDERING_API_DIRECTX){
+		//Game::render();
+		Engine::Renderer::Detail::RenderManagement::renderDirectX();
+		//Resources::getWindow()->display();
+	}
 }
 #pragma region Event Handler Methods
-void Engine::Detail::EngineClass::EVENT_RESIZE(unsigned int width, unsigned int height,bool saveSize){
-    glViewport(0,0,width,height);
+void Engine::Detail::EngineClass::EVENT_RESIZE(uint api, unsigned int w, unsigned int h,bool saveSize){
+	if(api == ENGINE_RENDERING_API_OPENGL){
+		glViewport(0,0,w,h);
+		Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
+		for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
+			Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,w,h);
+		}
+	}
+	else if(api == ENGINE_RENDERING_API_DIRECTX){
+	}
 
-    Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(width,height);
-    Engine::Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)width,0.0f,(float)height,0.005f,1000.0f);
-    for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
-        Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,width,height);
-    }
-    for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){
-        camera.second.get()->resize(width,height);
-    }
-	if(saveSize)
-		Engine::Resources::getWindow()->setSize(width,height);
+    for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
+	if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
+	Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.f,(float)w,0.f,(float)h,0.005f,1000.f);
 }
 void Engine::Detail::EngineClass::EVENT_CLOSE(){
     Resources::getWindow()->close();
@@ -190,27 +194,27 @@ void Engine::stop(){ Resources::getWindow()->close(); }
 void Engine::setFullScreen(bool b){
     Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b);
 }
-void Engine::Detail::EngineClass::run(uint api){
+void Engine::Detail::EngineClass::run(){
     while(Resources::getWindow()->isOpen()){
-        sf::Event event;
+        sf::Event e;
         Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-        while(Resources::getWindow()->pollEventSFML(event)){
-            switch (event.type){
+        while(Resources::getWindow()->pollEvent(e)){
+            switch (e.type){
                 case sf::Event::Closed:               EVENT_CLOSE();break;
-                case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(event.key.code);break;
-                case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(event.key.code);break;
-                case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(event.mouseButton);break;
-                case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(event.mouseButton);break;
+                case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(e.key.code);break;
+                case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(e.key.code);break;
+                case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
+                case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
                 case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
                 case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
-                case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(event.mouseWheel);break;
-                case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(event.mouseMove);break;
-                case sf::Event::Resized:              EVENT_RESIZE(event.size.width,event.size.height);break;
-                case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(event.text);break;
+                case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
+                case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(e.mouseMove);break;
+                case sf::Event::Resized:              EVENT_RESIZE(Resources::Detail::ResourceManagement::m_RenderingAPI,e.size.width,e.size.height);break;
+                case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(e.text);break;
                 default:                              break;
             }
         }
-        update(api);
-		render(api);
+        update(Resources::Detail::ResourceManagement::m_RenderingAPI);
+		render(Resources::Detail::ResourceManagement::m_RenderingAPI);
     }
 }

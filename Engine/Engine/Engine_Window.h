@@ -15,6 +15,7 @@ class Engine_Window final{
     #ifdef _WIN32
         private: void _createDirectXWindow(const char* name,uint width,uint height);
         public: void setRenderingAPI(uint);
+		private: void _destroyDirectXContext();
     #endif
 
     private:
@@ -44,7 +45,7 @@ class Engine_Window final{
 		uint getStyle(){ return m_Style; }
         bool hasFocus();
         bool isOpen();
-        bool pollEventSFML(sf::Event&);
+        bool pollEvent(sf::Event&);
         void setFullScreen(bool);
 		void setStyle(uint style);
 

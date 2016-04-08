@@ -25,7 +25,7 @@ int main(){
     #endif
 
     Detail::EngineClass::init(Resources::Detail::ResourceManagement::m_RenderingAPI,"Engine",1024,768);
-    Detail::EngineClass::run(Resources::Detail::ResourceManagement::m_RenderingAPI);
+    Detail::EngineClass::run();
     Detail::EngineClass::destruct();
     FreeConsole();
     return 0;

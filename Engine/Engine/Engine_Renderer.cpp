@@ -16,6 +16,14 @@
 #include <random>
 
 using namespace Engine;
+
+#ifdef _WIN32
+IDXGISwapChain* Renderer::Detail::RenderManagement::m_DirectXSwapChain;
+ID3D11Device* Renderer::Detail::RenderManagement::m_DirectXDevice;
+ID3D11DeviceContext* Renderer::Detail::RenderManagement::m_DirectXDeviceContext;
+ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
+#endif
+
 bool Renderer::RendererInfo::ssao = true;
 bool Renderer::RendererInfo::ssao_do_blur = true;
 unsigned int Renderer::RendererInfo::ssao_samples = 5;
@@ -41,6 +49,12 @@ std::vector<TextureRenderInfo> Renderer::Detail::RenderManagement::m_TexturesToB
 std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeForwardRendered;
 
 void Engine::Renderer::Detail::RenderManagement::init(){
+    #ifdef ENGINE_DEBUG
+    Renderer::RendererInfo::debug = true;
+    #else
+    Renderer::RendererInfo::debug = false;
+    #endif
+
     std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
     std::default_random_engine generator;
     std::vector<glm::vec2> kernels;
@@ -82,12 +96,6 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 
     Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
-
-    #ifdef ENGINE_DEBUG
-    Renderer::RendererInfo::debug = true;
-    #else
-    Renderer::RendererInfo::debug = false;
-    #endif
 }
 void Engine::Renderer::Detail::RenderManagement::initOpenGL(){
     glewExperimental = GL_TRUE; 
@@ -97,6 +105,14 @@ void Engine::Renderer::Detail::RenderManagement::initOpenGL(){
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
     SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
+
+
+	#ifdef _WIN32
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXBackBuffer);
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDevice);
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDeviceContext);
+	#endif
 }
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
     Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
@@ -200,7 +216,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
     glUseProgram(0);
     m_FontsToBeRendered.clear();
 }
-void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
+void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();
@@ -221,7 +237,7 @@ void Engine::Renderer::Detail::RenderManagement::_geometryPass(){
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
 }
-void Engine::Renderer::Detail::RenderManagement::_lightingPass(){
+void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUseProgram(shader);
@@ -266,7 +282,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::debug); }
 
     m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_GLOW,BUFFER_TYPE_POSITION);
-    Renderer::Detail::RenderManagement::_geometryPass();
+    Renderer::Detail::RenderManagement::_passGeometry();
     m_gBuffer->stop();
 
     glEnable(GL_BLEND);
@@ -291,7 +307,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     }
     if(RendererInfo::lighting){
         m_gBuffer->start(BUFFER_TYPE_LIGHTING);
-        Renderer::Detail::RenderManagement::_lightingPass();
+        Renderer::Detail::RenderManagement::_passLighting();
         m_gBuffer->stop();
     }
     if(RendererInfo::bloom){
@@ -538,3 +554,17 @@ void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader, unsigned int 
         glVertex2f(-1,1);
     glEnd();
 }
+
+
+
+#ifdef _WIN32
+void Engine::Renderer::Detail::RenderManagement::renderDirectX(){
+    // clear the back buffer to a deep blue
+	float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
+	m_DirectXDeviceContext->ClearRenderTargetView(m_DirectXBackBuffer,clearColor);
+    // do 3D rendering on the back buffer here
+
+    // switch the back buffer and the front buffer
+	m_DirectXSwapChain->Present(0, 0);
+}
+#endif

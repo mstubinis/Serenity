@@ -5,6 +5,15 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <d3d11.h>
+#include <d3d10.h>
+
+// include the Direct3D Library file
+#pragma comment (lib, "d3d11.lib")
+#pragma comment (lib, "d3d10.lib")
+#endif
+
 class GBuffer;
 class Object;
 typedef unsigned int GLuint;
@@ -79,6 +88,15 @@ namespace Engine{
         };
         namespace Detail{
             class RenderManagement final{
+				#ifdef _WIN32
+					public: static IDXGISwapChain* m_DirectXSwapChain;
+					public: static ID3D11Device* m_DirectXDevice;
+					public: static ID3D11DeviceContext* m_DirectXDeviceContext;
+					public: static ID3D11RenderTargetView* m_DirectXBackBuffer;
+					public: static void renderDirectX();
+				#endif
+
+
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
@@ -92,9 +110,8 @@ namespace Engine{
                     static void _renderText();
                     static void _renderTextures();
 
-                    static void _geometryPass();
-                    static void _lightingPass();
-
+                    static void _passGeometry();
+                    static void _passLighting();
                     static void _passSSAO();
                     static void _passEdge(GLuint texture,float radius = 1.0f);
                     static void _passBloom(GLuint texture,GLuint texture1);

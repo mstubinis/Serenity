@@ -32,6 +32,7 @@ class SoundEffect;
 class SoundMusic;
 struct ParticleInfo;
 
+#define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 template<typename T> void SAFE_DELETE(T*& p){
     delete p;
     p = nullptr;
