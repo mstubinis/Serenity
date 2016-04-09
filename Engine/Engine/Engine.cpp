@@ -13,7 +13,7 @@
 #include "Engine_Mouse.h"
 #include <SFML/System.hpp>
 
-#ifdef ENGINE_DEBUG
+#ifdef _DEBUG
 #include <iostream>
 #endif
 
@@ -197,7 +197,7 @@ void Engine::Detail::EngineClass::run(){
     while(Resources::getWindow()->isOpen()){
         sf::Event e;
         Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-        while(Resources::getWindow()->pollEvent(e)){
+        while(Resources::getWindow()->getSFMLHandle()->pollEvent(e)){
             switch (e.type){
                 case sf::Event::Closed:               EVENT_CLOSE();break;
                 case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(e.key.code);break;

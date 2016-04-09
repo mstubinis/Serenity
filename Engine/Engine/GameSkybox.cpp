@@ -13,7 +13,7 @@ using namespace Engine;
 GameSkybox::GameSkybox(std::string name, unsigned int numFlares, Scene* scene):Skybox(name,scene){
     if(numFlares > 0){
         for(unsigned int i = 0; i < numFlares; i++){
-            SkyboxSunFlare flare;
+            SkyboxSunFlare* flare = new SkyboxSunFlare();
 
             float x = (((rand() % 100) - 50.0f) / 100.0f); x*=999999;
             float y = (((rand() % 100) - 50.0f) / 100.0f); y*=999999;
@@ -25,14 +25,17 @@ GameSkybox::GameSkybox(std::string name, unsigned int numFlares, Scene* scene):S
 
             float scl = ((rand() % 100)) / 300.0f; scl += 0.25;
 
-            flare.position = glm::vec3(x,y,z);
-            flare.scale = scl;
-            flare.color = glm::vec3(r,g,b);
+            flare->position = glm::vec3(x,y,z);
+            flare->scale = scl;
+            flare->color = glm::vec3(r,g,b);
             m_SunFlares.push_back(flare);
         }
     }
 }
 GameSkybox::~GameSkybox(){
+	for(auto flare:m_SunFlares)
+		SAFE_DELETE(flare);
+	m_SunFlares.clear();
 }
 void GameSkybox::update(){
     Skybox::update();
@@ -48,9 +51,9 @@ void GameSkybox::render(){
         GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
         glUseProgram(shader);
         for(auto flare:m_SunFlares){
-            glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position,false);
-            glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
-            glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
+            glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare->position,false);
+            glm::vec4 col = glm::vec4(flare->color.x,flare->color.y,flare->color.z,1);
+            glm::vec2 scl = glm::vec2(flare->scale,flare->scale);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());

@@ -35,10 +35,11 @@ class SoundMusic;
 struct ParticleInfo;
 
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
-template<typename T> void SAFE_DELETE(T*& p){
-    delete p;
-    p = nullptr;
-}
+#define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for releasing a pointer
+//template<typename T> void SAFE_DELETE(T*& p){
+//    delete p;
+//    p = nullptr;
+//}
 
 template<class K, class V> std::string incrementName(std::unordered_map<K,V>& map, std::string name){
 	std::string ret = name;unsigned int count = 0;

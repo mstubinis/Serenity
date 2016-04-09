@@ -93,6 +93,7 @@ ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
     SAFE_DELETE(m_RigidBody);
     SAFE_DELETE(m_MotionState);
+	for(auto item:m_DisplayItems) SAFE_DELETE(item);
 }
 void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
     m_RigidBody->activate();

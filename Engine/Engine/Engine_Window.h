@@ -47,7 +47,6 @@ class Engine_Window final{
 		uint getStyle(){ return m_Style; }
         bool hasFocus();
         bool isOpen();
-        bool pollEvent(sf::Event&);
         void setFullScreen(bool);
 		void setStyle(uint style);
 

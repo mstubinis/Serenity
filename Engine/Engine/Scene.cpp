@@ -10,6 +10,7 @@ using namespace Engine;
 using namespace boost;
 
 Scene::Scene(std::string name,glm::vec3 ambientLightColor){
+	m_Skybox = nullptr;
     if(Resources::getCurrentScene() == nullptr){
         Resources::Detail::ResourceManagement::m_CurrentScene = this;
     }
@@ -45,6 +46,7 @@ void Scene::centerSceneToObject(Object* center){
         center->setPosition(0,0,0);
 }
 Scene::~Scene(){
+	SAFE_DELETE(m_Skybox);
 }
 void Scene::setName(std::string name){
     if(name == m_Name) return;

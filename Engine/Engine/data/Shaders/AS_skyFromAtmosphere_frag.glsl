@@ -33,7 +33,7 @@ void main(){
     float range = outerRadius - planetRadius;
     float alpha = (range-camHeightOffGround) / (range*0.5);
 
-    gl_FragData[0] = vec4(HDR.xyz,nightmult);
+    gl_FragData[0] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
     gl_FragData[0].a = clamp(alpha * (gl_FragData[0].rgb * 5.5),0.01,0.99);
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;

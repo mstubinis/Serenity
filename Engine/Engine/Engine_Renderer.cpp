@@ -49,7 +49,7 @@ std::vector<TextureRenderInfo> Renderer::Detail::RenderManagement::m_TexturesToB
 std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeForwardRendered;
 
 void Engine::Renderer::Detail::RenderManagement::init(){
-    #ifdef ENGINE_DEBUG
+    #ifdef _DEBUG
     Renderer::RendererInfo::debug = true;
     #else
     Renderer::RendererInfo::debug = false;
@@ -91,21 +91,10 @@ void Engine::Renderer::Detail::RenderManagement::init(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
 
-
-    initOpenGL();
-
-    Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
-}
-void Engine::Renderer::Detail::RenderManagement::initOpenGL(){
-    glewExperimental = GL_TRUE; 
-    glewInit();
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
     SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-
 
 	#ifdef _WIN32
 	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
@@ -541,7 +530,6 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     }
     glUseProgram(0);
 }
-
 void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale){
     glm::mat4 m(1);
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m));
@@ -555,13 +543,13 @@ void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader, unsigned int 
     glEnd();
 }
 
-
-
 #ifdef _WIN32
 void Engine::Renderer::Detail::RenderManagement::renderDirectX(){
     // clear the back buffer to a deep blue
-	float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
-	m_DirectXDeviceContext->ClearRenderTargetView(m_DirectXBackBuffer,clearColor);
+    Scene* s = Resources::getCurrentScene();
+    glm::vec3 clear = s->getBackgroundColor();
+    const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
+	m_DirectXDeviceContext->ClearRenderTargetView(m_DirectXBackBuffer,colors);
     // do 3D rendering on the back buffer here
 
     // switch the back buffer and the front buffer

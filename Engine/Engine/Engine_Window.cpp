@@ -18,6 +18,11 @@ using namespace Engine;
 #pragma comment (lib, "d3d10.lib")
 
 void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height,BOOL windowed){
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDevice);
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDeviceContext);
+	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXBackBuffer);
+
 	// create a struct to hold information about the swap chain
     DXGI_SWAP_CHAIN_DESC scd;
 
@@ -61,6 +66,7 @@ void Engine_Window::_createDirectXWindow(const char* name,uint width,uint height
     viewport.Height = static_cast<FLOAT>(height);
 
     Renderer::Detail::RenderManagement::m_DirectXDeviceContext->RSSetViewports(1, &viewport);
+	//Resources::initRenderingContexts(ENGINE_RENDERING_API_DIRECTX);
 }
 void Engine_Window::setRenderingAPI(uint newAPI){
 	if(newAPI == Resources::Detail::ResourceManagement::m_RenderingAPI) return;
@@ -68,19 +74,18 @@ void Engine_Window::setRenderingAPI(uint newAPI){
     if(newAPI == ENGINE_RENDERING_API_OPENGL){
 		_destroyDirectXContext();
 		_createOpenGLWindow(m_WindowName,m_Width,m_Height);
-		setMouseCursorVisible(false);
     }
     else if(newAPI == ENGINE_RENDERING_API_DIRECTX){
 		_destroyOpenGLContext();
 		_createDirectXWindow(m_WindowName,m_Width,m_Height);
     }
-	requestFocus();
 	Resources::Detail::ResourceManagement::m_RenderingAPI = static_cast<ENGINE_RENDERING_API>(newAPI);
 }
 void Engine_Window::_destroyDirectXContext(){
+	//Resources::cleanupRenderingContexts(ENGINE_RENDERING_API_DIRECTX);
 	//Renderer::Detail::RenderManagement::m_DirectXSwapChain->SetFullscreenState(FALSE, NULL);//this might not even be needed
-	Renderer::Detail::RenderManagement::m_DirectXDeviceContext->ClearState();//this might not even be needed
 	Renderer::Detail::RenderManagement::m_DirectXDeviceContext->Flush();//this might not even be needed
+	Renderer::Detail::RenderManagement::m_DirectXDeviceContext->ClearState();//this might not even be needed
 	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
 	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXBackBuffer);
 	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDevice);
@@ -88,6 +93,7 @@ void Engine_Window::_destroyDirectXContext(){
 }
 #endif
 void Engine_Window::_destroyOpenGLContext(){
+	//Resources::cleanupRenderingContexts(ENGINE_RENDERING_API_OPENGL);
     HGLRC    hglrc; 
     HDC      hdc ; 
     if(hglrc = wglGetCurrentContext()){ 
@@ -96,6 +102,7 @@ void Engine_Window::_destroyOpenGLContext(){
 		ReleaseDC(m_SFMLWindow->getSystemHandle(), hdc); 
         wglDeleteContext(hglrc); 
     }
+	SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
 }
 Engine_Window::Engine_Window(const char* name,uint width,uint height,uint api){
     m_WindowName = name;
@@ -106,11 +113,8 @@ Engine_Window::Engine_Window(const char* name,uint width,uint height,uint api){
 
 	if(api == ENGINE_RENDERING_API_DIRECTX){
 		_destroyOpenGLContext();
-		requestFocus();
 		_createDirectXWindow(name,width,height);
 	}
-    setMouseCursorVisible(false);
-    setKeyRepeatEnabled(false);
 }
 void Engine_Window::_createOpenGLWindow(const char* name,uint width,uint height){
     sf::ContextSettings settings;
@@ -134,9 +138,19 @@ void Engine_Window::_createOpenGLWindow(const char* name,uint width,uint height)
         m_Height = m_VideoMode.height;
     }
     m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
+
+    glewExperimental = GL_TRUE; 
+    glewInit();
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+	SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
+	Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
+
+	//Resources::initRenderingContexts(ENGINE_RENDERING_API_OPENGL);
 }
 Engine_Window::~Engine_Window(){
-    delete(m_SFMLWindow);
+    SAFE_DELETE(m_SFMLWindow);
 }
 sf::Vector2u Engine_Window::getSize(){
     return m_SFMLWindow->getSize();
@@ -179,9 +193,6 @@ bool Engine_Window::hasFocus(){
 bool Engine_Window::isOpen(){
     return m_SFMLWindow->isOpen();
 }
-bool Engine_Window::pollEvent(sf::Event& e){
-    return m_SFMLWindow->pollEvent(e);
-}
 void Engine_Window::display(){
     m_SFMLWindow->display();
 }
@@ -218,7 +229,7 @@ void Engine_Window::setFullScreen(bool fullscreen){
             m_VideoMode.width = m_Width;
             m_VideoMode.height = m_Height;
         }
-        delete(Renderer::Detail::RenderManagement::m_gBuffer);
+        SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
 		m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
 
         glEnable(GL_CULL_FACE);

@@ -51,6 +51,8 @@ void Game::initResources(){
     Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
+	Engine::getWindow()->setMouseCursorVisible(false);
+    Engine::getWindow()->setKeyRepeatEnabled(false);
     Engine::Renderer::Settings::enableSSAO(true);
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
@@ -67,8 +69,9 @@ void Game::initLogic(){
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
-    if(Events::Keyboard::isKeyDown("esc"))
+    if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
+	}
     if(Events::Keyboard::isKeyDownOnce("f6")){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
@@ -85,6 +88,12 @@ void Game::update(float dt){
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
         Engine::setFullScreen(false);
+    }
+    if(Events::Keyboard::isKeyDownOnce("f11")){
+		Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
+    }
+    if(Events::Keyboard::isKeyDownOnce("f12")){
+        Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_OPENGL);
     }
     m_HUD->update(dt);
 }

@@ -12,9 +12,9 @@ Material::Material(std::string diffuse, std::string normal, std::string glow){
     Texture* diffuseT = Resources::getTexture(diffuse); 
     Texture* normalT = Resources::getTexture(normal); 
     Texture* glowT = Resources::getTexture(glow);
-    if(diffuseT == nullptr) diffuseT = new Texture(diffuse);
-    if(normalT == nullptr)  normalT = new Texture(normal);
-    if(glowT == nullptr)    glowT = new Texture(glow);
+    if(diffuseT == nullptr && diffuse != "") diffuseT = new Texture(diffuse);
+    if(normalT == nullptr && normal != "")  normalT = new Texture(normal);
+    if(glowT == nullptr && glow != "")    glowT = new Texture(glow);
     _init(diffuseT,normalT,glowT);
 }
 void Material::_init(Texture* diffuse, Texture* normal, Texture* glow){

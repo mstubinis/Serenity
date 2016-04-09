@@ -96,7 +96,6 @@ namespace Engine{
 					public: static void renderDirectX();
 				#endif
 
-
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
@@ -124,7 +123,6 @@ namespace Engine{
                     static void render();
 
                     static void init();
-                    static void initOpenGL();
                     static void destruct();
 
                     static std::vector<GeometryRenderInfo>& getForegroundObjectRenderQueue(){ return m_ForegroundObjectsToBeRendered; }

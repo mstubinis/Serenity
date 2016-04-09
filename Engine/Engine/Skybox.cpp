@@ -81,7 +81,6 @@ Skybox::Skybox(std::string name,Scene* scene){
         scene->setSkybox(this);
 }
 Skybox::~Skybox(){
-    SAFE_DELETE(m_Texture);
 }
 void Skybox::update(){
     glm::vec3 p = glm::vec3(Resources::getActiveCamera()->getPosition());
