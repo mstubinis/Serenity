@@ -2,6 +2,7 @@
 #include "Engine_Window.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Texture.h"
 #include "GBuffer.h"
 #include <SFML/Window.hpp>
 #include <string>
@@ -140,8 +141,15 @@ Engine_Window::~Engine_Window(){
 sf::Vector2u Engine_Window::getSize(){
     return m_SFMLWindow->getSize();
 }
-void Engine_Window::setIcon(uint width, uint height, const sf::Uint8* pixels){
-    m_SFMLWindow->setIcon(width,height,pixels);
+void Engine_Window::setIcon(Texture* texture){
+	m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->getPixels());
+}
+void Engine_Window::setIcon(std::string name){
+	if(!Resources::Detail::ResourceManagement::m_Textures.count(name)){
+		new Texture(name);
+	}
+	Texture* texture = Resources::getTexture(name);
+	m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->getPixels());
 }
 const char* Engine_Window::name(){
     return m_WindowName;

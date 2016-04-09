@@ -53,12 +53,12 @@ Texture::Texture(std::string files[],std::string name,GLuint type){
     Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);
 }
 void Texture::_init(){
+	m_Pixels.clear();
     m_TextureAddress = 0;
     m_Width = 0;
     m_Height = 0;
 }
 Texture::~Texture(){
-    m_PixelsPointer.clear();
     glDeleteTextures(1,&m_TextureAddress);
 	_init();
 }
@@ -116,20 +116,15 @@ void Texture::_loadFromFileCubemap(std::string file[],GLuint type){
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     }
 }
-void Texture::generatePixelPointer(){
-    sf::Image image;
-    image.loadFromFile(m_Directory.c_str());
-    std::vector<sf::Uint8> pixels;
-    for(unsigned int i = 0; i < image.getSize().x; i++){
-        for(unsigned int s = 0; s < image.getSize().y; s++){
-            sf::Color pixel = image.getPixel(s,i);
-            m_PixelsPointer.push_back(pixel.r);
-            m_PixelsPointer.push_back(pixel.g);
-            m_PixelsPointer.push_back(pixel.b);
-            m_PixelsPointer.push_back(pixel.a);
-        }
-    }
-}
 void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
+}
+const unsigned char* Texture::getPixels(){
+	if(m_Pixels.size() == 0){
+		m_Pixels.resize(m_Width*m_Height*4);
+		glBindTexture(m_Type,m_TextureAddress);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
+	}
+	return &m_Pixels[0];
 }

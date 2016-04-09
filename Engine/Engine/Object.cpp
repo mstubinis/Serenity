@@ -20,12 +20,7 @@ Object::Object(std::string name,Scene* scene, bool isNotCamera){
         if(scene == nullptr){
             scene = Resources::getCurrentScene();
         }
-        if (scene->getObjects().size() > 0){
-            while(scene->getObjects().count(m_Name)){
-                m_Name = name + " " + boost::lexical_cast<std::string>(count);
-                count++;
-            }
-        }
+		m_Name = incrementName(scene->getObjects(), name);
         scene->getObjects()[m_Name] = this;
         Resources::Detail::ResourceManagement::m_Objects[m_Name] = boost::shared_ptr<Object>(this);
     }

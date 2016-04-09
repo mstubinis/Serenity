@@ -35,7 +35,8 @@ class Engine_Window final{
         sf::Vector2u getSize();
         void setName(const char* name);
 		void setSize(uint w, uint h);
-        void setIcon(uint width, uint height, const sf::Uint8* pixels);
+        void setIcon(Texture* texture);
+		void setIcon(std::string);
         void setMouseCursorVisible(bool);
         void setKeyRepeatEnabled(bool);
         void setVerticalSyncEnabled(bool);

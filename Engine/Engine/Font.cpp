@@ -15,7 +15,7 @@ using namespace Engine;
 FontData::FontData(std::string filename){
     _loadTextFile(filename);
     std::string texture_filename = filename.substr(0,filename.size()-4);
-    texture_filename += "_0.png";
+    texture_filename += ".png";
     m_FontTexture = new Texture(texture_filename);
 }
 FontData::~FontData(){

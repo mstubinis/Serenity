@@ -16,7 +16,7 @@ using namespace Engine;
 using namespace Engine::Events;
 
 HUD::HUD(){
-    m_Font = new Font("Fonts/consolas.fnt");
+    m_Font = new Font("data/Fonts/consolas.fnt");
 	Engine::Math::setColor(m_Color,255,255,0);
     m_TargetIterator = 0;
     m_WarpIndicatorSize = glm::vec2(30,115);
@@ -64,7 +64,7 @@ void HUD::render(bool debug){
         glm::nType scl = glm::max(static_cast<glm::nType>(0.5f),static_cast<glm::nType>(player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getActiveCamera())));
 
         if(pos.z == 1){
-            Resources::getTexture("Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
+            Resources::getTexture("data/Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
             std::string stringRepresentation = "";
             if(distanceInKm > 0){
@@ -102,7 +102,7 @@ void HUD::render(bool debug){
                 else
                     angle = 135;
             }
-            Resources::getTexture("Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0.1f);
+            Resources::getTexture("data/Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0.1f);
         }
 
     }

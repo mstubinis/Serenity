@@ -99,26 +99,26 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     l->setSpecularPower(0.0f);
 
     if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleTunnel")){
-        Resources::addMesh("CapsuleTunnel","Models/capsuleTunnel.obj");
+        Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj");
     }
     if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleRibbon")){
-        Resources::addMesh("CapsuleRibbon","Models/capsuleRibbon.obj");
+        Resources::addMesh("CapsuleRibbon","data/Models/capsuleRibbon.obj");
     }
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_A")){
-        Resources::addMaterial("Capsule_A","Textures/Effects/capsule_a.png");
+        Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");
         Resources::getMaterial("Capsule_A")->setShadeless(true);
     }
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_B")){
-        Resources::addMaterial("Capsule_B","Textures/Effects/capsule_b.png");
+        Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.png");
         Resources::getMaterial("Capsule_B")->setShadeless(true);
     }
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_C")){
-        Resources::addMaterial("Capsule_C","Textures/Effects/capsule_c.png");
+        Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
         Resources::getMaterial("Capsule_C")->setShadeless(true);
         Resources::getMaterial("Capsule_C")->setBaseGlow(0.12f);
     }
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_D")){
-        Resources::addMaterial("Capsule_D","Textures/Effects/capsule_d.png");
+        Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
         Resources::getMaterial("Capsule_D")->setShadeless(true);
     }
 

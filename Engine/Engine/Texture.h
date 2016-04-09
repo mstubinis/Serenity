@@ -10,7 +10,7 @@
 
 class Texture final{
     private:
-        std::vector<const sf::Uint8> m_PixelsPointer;
+		std::vector<unsigned char> m_Pixels;
         std::string m_Directory;
         std::string m_Name;
         GLuint m_TextureAddress;
@@ -26,15 +26,13 @@ class Texture final{
         Texture(std::string file[],std::string name = "Cubemap ",GLuint = GL_TEXTURE_CUBE_MAP);
         ~Texture();
 
-        const sf::Uint8* getPixelsPtr(unsigned int index = 0) const { return &m_PixelsPointer[index]; }
+		const unsigned char* getPixels();
 
         const GLuint getTextureAddress() const { return m_TextureAddress; }
         const GLuint getTextureType() const { return m_Type; }
         const unsigned int width() const { return m_Width; }
         const unsigned int height() const { return m_Height; }
         const std::string getName() const { return m_Name; }
-
-        void generatePixelPointer();
 
         void render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
 

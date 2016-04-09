@@ -99,7 +99,7 @@ void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int ma
     }
 }
 void Engine::Physics::Detail::PhysicsManagement::render(){
-	#if defined(ENGINE_OPENGL)
+	if(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
 		glUseProgram(0);
 
 		glMatrixMode(GL_PROJECTION);
@@ -116,7 +116,7 @@ void Engine::Physics::Detail::PhysicsManagement::render(){
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
-	#endif
+	}
 }
 
 

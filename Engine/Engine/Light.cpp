@@ -17,16 +17,10 @@ SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):
     m_DiffuseIntensity = 1.0f;
     m_SpecularPower = 50;
 
-    unsigned int count = 0;
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
     }
-    if (scene->getLights().size() > 0){
-        while(scene->getLights().count(m_Name)){
-            m_Name = name + " " + boost::lexical_cast<std::string>(count);
-            count++;
-        }
-    }
+	m_Name = incrementName(scene->getLights(), name);
     scene->getLights()[m_Name] = this;
 }
 SunLight::~SunLight(){

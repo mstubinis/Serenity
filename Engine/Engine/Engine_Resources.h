@@ -2,12 +2,14 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include <unordered_map>
+#include <map>
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 #include "Engine_Physics.h"
 
 enum ENGINE_RENDERING_API{
@@ -36,6 +38,17 @@ struct ParticleInfo;
 template<typename T> void SAFE_DELETE(T*& p){
     delete p;
     p = nullptr;
+}
+
+template<class K, class V> std::string incrementName(std::unordered_map<K,V>& map, std::string name){
+	std::string ret = name;unsigned int count = 0;
+    if(map.size() > 0){while(map.count(name)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
+	return ret;
+}
+template<class K, class V> std::string incrementName(std::map<K,V>& map, std::string name){
+	std::string ret = name;unsigned int count = 0;
+    if(map.size() > 0){while(map.count(name)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
+	return ret;
 }
 
 namespace Engine{

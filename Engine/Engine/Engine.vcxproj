@@ -56,17 +56,10 @@
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir “$(TargetDir)Fonts\”
-mkdir “$(TargetDir)Systems\”
-mkdir “$(TargetDir)Shaders\”
-mkdir “$(TargetDir)Models\”
-mkdir “$(TargetDir)Textures\”
+      <Command>mkdir “$(TargetDir)data\”
 xcopy "$(SolutionDir)\dependencies\bin" "$(TargetDir)" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Systems" "$(TargetDir)Systems" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Command>
+xcopy "$(SolutionDir)$(SolutionName)\data" "$(TargetDir)data" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying Binary...</Message>
@@ -93,19 +86,10 @@ xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y</Com
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir “$(TargetDir)Fonts\”
-mkdir “$(TargetDir)Systems\”
-mkdir “$(TargetDir)Shaders\”
-mkdir “$(TargetDir)Models\”
-mkdir “$(TargetDir)Textures\”
-mkdir “$(TargetDir)Sounds\”
+      <Command>mkdir “$(TargetDir)data\”
 xcopy "$(SolutionDir)\dependencies\bin" "$(TargetDir)" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Fonts" "$(TargetDir)Fonts" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Systems" "$(TargetDir)Systems" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Shaders" "$(TargetDir)Shaders" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Models" "$(TargetDir)Models" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Textures" "$(TargetDir)Textures" /e /y
-xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command>
+xcopy "$(SolutionDir)$(SolutionName)\data" "$(TargetDir)data" /e /y
+xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying Binary...</Message>
@@ -184,26 +168,26 @@ xcopy "$(SolutionDir)$(SolutionName)\Sounds" "$(TargetDir)Sounds" /e /y</Command
     <ClInclude Include="Font.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\AS_groundFromSpace_frag.glsl" />
-    <None Include="Shaders\AS_groundFromSpace_vert.glsl" />
-    <None Include="Shaders\AS_skyFromAtmosphere_frag.glsl" />
-    <None Include="Shaders\AS_skyFromAtmosphere_vert.glsl" />
-    <None Include="Shaders\AS_skyFromSpace_frag.glsl" />
-    <None Include="Shaders\AS_skyFromSpace_vert.glsl" />
-    <None Include="Shaders\copy_depth_frag.glsl" />
-    <None Include="Shaders\deferred_bloom_frag.glsl" />
-    <None Include="Shaders\deferred_blur_frag.glsl" />
-    <None Include="Shaders\deferred_edge_frag.glsl" />
-    <None Include="Shaders\deferred_final_frag.glsl" />
-    <None Include="Shaders\deferred_frag.glsl" />
-    <None Include="Shaders\deferred_frag_HUD.glsl" />
-    <None Include="Shaders\deferred_frag_skybox.glsl" />
-    <None Include="Shaders\deferred_lighting_frag.glsl" />
-    <None Include="Shaders\vert_fullscreenQuad.glsl" />
-    <None Include="Shaders\deferred_ssao_frag.glsl" />
-    <None Include="Shaders\vert.glsl" />
-    <None Include="Shaders\vert_HUD.glsl" />
-    <None Include="Shaders\vert_skybox.glsl" />
+    <None Include="data\Shaders\AS_groundFromSpace_frag.glsl" />
+    <None Include="data\Shaders\AS_groundFromSpace_vert.glsl" />
+    <None Include="data\Shaders\AS_skyFromAtmosphere_frag.glsl" />
+    <None Include="data\Shaders\AS_skyFromAtmosphere_vert.glsl" />
+    <None Include="data\Shaders\AS_skyFromSpace_frag.glsl" />
+    <None Include="data\Shaders\AS_skyFromSpace_vert.glsl" />
+    <None Include="data\Shaders\copy_depth_frag.glsl" />
+    <None Include="data\Shaders\deferred_bloom_frag.glsl" />
+    <None Include="data\Shaders\deferred_blur_frag.glsl" />
+    <None Include="data\Shaders\deferred_edge_frag.glsl" />
+    <None Include="data\Shaders\deferred_final_frag.glsl" />
+    <None Include="data\Shaders\deferred_frag.glsl" />
+    <None Include="data\Shaders\deferred_frag_HUD.glsl" />
+    <None Include="data\Shaders\deferred_frag_skybox.glsl" />
+    <None Include="data\Shaders\deferred_lighting_frag.glsl" />
+    <None Include="data\Shaders\vert_fullscreenQuad.glsl" />
+    <None Include="data\Shaders\deferred_ssao_frag.glsl" />
+    <None Include="data\Shaders\vert.glsl" />
+    <None Include="data\Shaders\vert_HUD.glsl" />
+    <None Include="data\Shaders\vert_skybox.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

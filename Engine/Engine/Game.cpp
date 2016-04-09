@@ -23,35 +23,37 @@ void Game::cleanup(){
     delete m_HUD;
 }
 void Game::initResources(){
-    Resources::addSoundAsMusic("Test","Sounds/Music/test.ogg");
+	Resources::getWindow()->setIcon("data/Textures/icon.png");
 
-    Resources::addShader("AS_SkyFromSpace","Shaders/AS_skyFromSpace_vert.glsl","Shaders/AS_skyFromSpace_frag.glsl");
-    Resources::addShader("AS_SkyFromAtmosphere","Shaders/AS_skyFromAtmosphere_vert.glsl","Shaders/AS_skyFromAtmosphere_frag.glsl");
-    Resources::addShader("AS_GroundFromSpace","Shaders/AS_groundFromSpace_vert.glsl","Shaders/AS_groundFromSpace_frag.glsl");
+    Resources::addSoundAsMusic("Test","data/Sounds/Music/test.ogg");
 
-    Resources::addMesh("Planet","Models/planet.obj");
-    Resources::addMesh("Defiant","Models/defiant.obj");
-    Resources::addMesh("Akira","Models/akira.obj");
-    Resources::addMesh("Starbase","Models/starbase.obj");
-    Resources::addMesh("Ring","Models/ring.obj");
-    Resources::addMesh("Dreadnaught","Models/dreadnaught.obj");
+    Resources::addShader("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl");
+    Resources::addShader("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl");
+    Resources::addShader("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl");
 
-    Resources::addMaterial("Star","Textures/Planets/Sun.jpg");
-    Resources::addMaterial("Earth","Textures/Planets/Earth.jpg","","Textures/Planets/EarthNight.jpg");
-    Resources::addMaterial("Defiant","Textures/defiant.png","Textures/defiant_Normal.png","Textures/defiant_Glow.png");
-    Resources::addMaterial("Akira","Textures/akira.png","Textures/akira_Normal.png","Textures/akira_Glow.png");
-    Resources::addMaterial("Crosshair","Textures/HUD/Crosshair.png");
-    Resources::addMaterial("CrosshairArrow","Textures/HUD/CrosshairArrow.png");
-    Resources::addMaterial("SunFlare","Textures/Skyboxes/StarFlare.png");
-    Resources::addMaterial("Smoke","Textures/Effects/Smoke.png");
-    Resources::addMaterial("Dreadnaught","Textures/dreadnaught.png","Textures/dreadnaught_Normal.png","Textures/dreadnaught_Glow.png");
+    Resources::addMesh("Planet","data/Models/planet.obj");
+    Resources::addMesh("Defiant","data/Models/defiant.obj");
+    Resources::addMesh("Akira","data/Models/akira.obj");
+    Resources::addMesh("Starbase","data/Models/starbase.obj");
+    Resources::addMesh("Ring","data/Models/ring.obj");
+    Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
+
+    Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg");
+    Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg");
+    Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
+    Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
+    Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png");
+    Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png");
+    Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
+    Resources::addMaterial("Smoke","data/Textures/Effects/Smoke.png");
+    Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
 
     Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
     Engine::Renderer::Settings::enableSSAO(true);
 
-    new SolarSystem("Sol","Systems/Sol.txt");
+    new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
     new CapsuleSpace();
     

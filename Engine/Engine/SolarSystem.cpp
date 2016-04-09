@@ -69,7 +69,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                 float ATMOSPHERE_HEIGHT;
                 std::string LIGHTCOLOR;
                 std::string TYPE;
-                std::string TEXTURE = "Textures/Planets/";
+                std::string TEXTURE = "data/Textures/Planets/";
                 std::string MATERIAL_NAME = "";
 
                 float ORBIT_PERIOD = -1;
@@ -246,7 +246,7 @@ void SolarSystem::_loadRandomly(){
     #pragma region Skybox
     //get random skybox folder from the skybox directory
     std::vector<std::string> folders;
-    std::string path = "Textures/Skyboxes/";
+    std::string path = "data/Textures/Skyboxes/";
     if ( boost::filesystem::exists( path ) ) {
         boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
         for ( boost::filesystem::directory_iterator itr( path );itr != end_itr;++itr ){
@@ -366,7 +366,7 @@ void SolarSystem::_loadRandomly(){
     //First get the database of random textures to choose from
     std::unordered_map<std::string,std::string> planets_folders;
     std::unordered_map<std::string,std::vector<std::string>> planet_textures;
-    std::string planets_path = "Textures/Planets/Random/Planet";
+    std::string planets_path = "data/Textures/Planets/Random/Planet";
     if ( boost::filesystem::exists( planets_path ) ) {
         boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
         for ( boost::filesystem::directory_iterator itr( planets_path );itr != end_itr;++itr ){

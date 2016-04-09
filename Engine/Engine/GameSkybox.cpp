@@ -44,7 +44,7 @@ void GameSkybox::render(){
         glDisable(GL_DEPTH_TEST);
         glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
-        Texture* texture = Resources::getTexture("Textures/Skyboxes/StarFlare.png");
+        Texture* texture = Resources::getTexture("data/Textures/Skyboxes/StarFlare.png");
         GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
         glUseProgram(shader);
         for(auto flare:m_SunFlares){

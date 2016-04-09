@@ -185,8 +185,7 @@ Engine_Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement
 sf::Vector2u Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
 Engine_Mouse* Engine::getMouse(){ return Resources::Detail::ResourceManagement::m_Mouse; }
 void Engine::setWindowIcon(Texture* texture){
-    texture->generatePixelPointer();
-    Resources::getWindow()->setIcon(texture->width(),texture->height(),texture->getPixelsPtr()); 
+    Resources::getWindow()->setIcon(texture); 
 }
 void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
