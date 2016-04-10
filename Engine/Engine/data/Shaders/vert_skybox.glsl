@@ -2,15 +2,15 @@
 
 attribute vec3 position;
 uniform mat4 VP;
-uniform mat4 World;
+uniform mat4 Model;
 
 varying vec3 UV;
 varying vec3 WorldPosition;
 
 void main(){
-    mat4 MVP = VP * World;
+    mat4 MVP = VP * Model;
     UV = position;
     gl_Position = MVP * vec4(position, 1.0);
     gl_Position.z = gl_Position.w;
-    WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (Model * vec4(position,1.0)).xyz;
 }

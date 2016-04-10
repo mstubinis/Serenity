@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
 
+
 class Texture final{
     private:
 		std::vector<unsigned char> m_Pixels;
@@ -16,7 +17,7 @@ class Texture final{
         GLuint m_TextureAddress;
         void _loadFromPixels(const unsigned char*,unsigned int, unsigned int,GLuint);
         void _loadFromFile(std::string file,GLuint);
-        void _loadFromFileCubemap(std::string file[],GLuint);
+        void _loadFromFilesCubemap(std::string file[],GLuint);
         GLuint m_Type;
         unsigned int m_Width, m_Height;
 		void _init();

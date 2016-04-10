@@ -53,7 +53,7 @@ void GameCamera::update(float dt){
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
 
-            rotate(-Mouse::getMouseDifference().y*0.6f,-Mouse::getMouseDifference().x*0.6f,0);
+            rotate(-Mouse::getMouseDifference().y*0.6f,-Mouse::getMouseDifference().x*0.6f,0,true);
 
             glm::v3 pos = (glm::v3(0,0,1)*static_cast<glm::nType>(glm::length(m_Target->getRadius()))*static_cast<glm::nType>(0.37)) + (glm::v3(0,0,1)*static_cast<glm::nType>(glm::length(m_Target->getRadius()) * (1.0+m_OrbitRadius)));
 
@@ -79,10 +79,8 @@ Object* GameCamera::getObjectInCenterRay(Object* exclusion){
                 objs.push_back(object.second);
         }
     }
-    if(objs.size() == 0)
-        return nullptr;
-    if(objs.size() == 1)
-        return objs.at(0);
+    if(objs.size() == 0) return nullptr;
+    if(objs.size() == 1) return objs.at(0);
 
     glm::nType distance = -1;
     for(auto object:objs){

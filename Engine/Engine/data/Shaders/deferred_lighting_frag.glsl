@@ -18,7 +18,7 @@ uniform vec3 LightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
-uniform sampler2D gGlowMap;
+uniform sampler2D gMiscMap;
 uniform sampler2D gDiffuseMap;
 
 uniform vec3 gCameraPosition;
@@ -27,6 +27,7 @@ uniform vec2 gScreenSize;
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
     float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
+	float Glow = texture2D(gMiscMap,uv).r;
 
     vec4 diffuseMapColor = vec4(texture2D(gDiffuseMap,uv).rgb, 1.0);
 
@@ -43,18 +44,22 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularAngle = pow(SpecularAngle, LightSpecularPower);
 
         if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
-            float materialSpecularity = texture2D(gGlowMap,uv).b;
+            float materialSpecularity = texture2D(gMiscMap,uv).b;
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }
     if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
-        return diffuseMapColor;
+        return vec4(0);
     }
     float ssao = 1.0;
     if(HasSSAO == 1){
-        ssao = texture2D(gGlowMap,uv).g;
+        ssao = texture2D(gMiscMap,uv).g;
     }
-    return (((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao)) + SpecularColor;
+	vec4 lightWithoutSpecular = (((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao));
+	if(Glow > 0.99){
+		return diffuseMapColor;
+	}
+    return clamp(max(Glow*diffuseMapColor,lightWithoutSpecular + SpecularColor),0.01,0.95);
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = LightPosition - PxlWorldPos;

@@ -83,7 +83,8 @@ void Engine::Detail::EngineClass::update(uint api){
     Game::update(Resources::dt());
     Resources::getCurrentScene()->update(Resources::dt());
     Engine::Physics::Detail::PhysicsManagement::update(Resources::dt());
-    Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-Resources::dt()));
+    //Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-Resources::dt()));
+	Events::Mouse::MouseProcessing::m_Difference *= (0.975f);
     RESET_EVENTS();
 }
 void Engine::Detail::EngineClass::render(uint api){

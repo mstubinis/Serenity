@@ -54,7 +54,7 @@ void ObjectDisplay::draw(GLuint shader, bool debug){
         glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
         glUniform1f(glGetUniformLocation(shader, "Specularity"),item->material->getSpecularity());
 
-        glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m));
+        glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 
         for(auto component:item->material->getComponents())
 			item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());

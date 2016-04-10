@@ -11,7 +11,7 @@
 using namespace Engine;
 
 Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,std::string name,GLuint type){
-	_init();
+    _init();
     m_Type = type;
     _loadFromPixels(pixels,w,h,type);
     m_Name = name;
@@ -20,11 +20,11 @@ Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,std:
 }
 Texture::Texture(std::string file,std::string name,GLuint type){
     m_Directory = file;
-	_init();
+    _init();
     m_Type = type;
-    if(file != "")
-        _loadFromFile(file,type);
-
+    if(file != ""){
+		_loadFromFile(file,type);
+	}
     m_Name = name;
     if(name == ""){
         m_Name = file;
@@ -35,9 +35,9 @@ Texture::Texture(std::string file,std::string name,GLuint type){
 }
 Texture::Texture(std::string files[],std::string name,GLuint type){
     m_Directory = "";
-	_init();
+    _init();
     m_Type = type;
-    _loadFromFileCubemap(files,type);
+    _loadFromFilesCubemap(files,type);
     m_Name = name;
     if(name == "Cubemap "){
         unsigned int total = 0;
@@ -53,14 +53,14 @@ Texture::Texture(std::string files[],std::string name,GLuint type){
     Resources::Detail::ResourceManagement::m_Textures[m_Name] = boost::shared_ptr<Texture>(this);
 }
 void Texture::_init(){
-	m_Pixels.clear();
+    m_Pixels.clear();
     m_TextureAddress = 0;
     m_Width = 0;
     m_Height = 0;
 }
 Texture::~Texture(){
     glDeleteTextures(1,&m_TextureAddress);
-	_init();
+    _init();
 }
 void Texture::_loadFromPixels(const unsigned char* pixels, unsigned int w, unsigned int h,GLuint type){
     if(type == GL_TEXTURE_2D){
@@ -84,10 +84,9 @@ void Texture::_loadFromFile(std::string file,GLuint type){
 
     sf::Image image;
     image.loadFromFile(file.c_str());
-	_loadFromPixels(image.getPixelsPtr(), image.getSize().x, image.getSize().y, type);
+    _loadFromPixels(image.getPixelsPtr(), image.getSize().x, image.getSize().y, type);
 }
-void Texture::_loadFromFileCubemap(std::string file[],GLuint type){
-
+void Texture::_loadFromFilesCubemap(std::string file[],GLuint type){
     if(type == GL_TEXTURE_CUBE_MAP){
         glGenTextures(1, &m_TextureAddress);
         glBindTexture(type, m_TextureAddress);
@@ -98,15 +97,7 @@ void Texture::_loadFromFileCubemap(std::string file[],GLuint type){
             sf::Image image;
             image.loadFromFile(file[i].c_str());
 
-            GLenum skyboxSide;
-            if(i==0)           skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-            else if(i == 1)    skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-            else if(i == 2)    skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-            else if(i == 3)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-            else if(i == 4)    skyboxSide = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-            else               skyboxSide = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-
-            glTexImage2D(skyboxSide, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
         }
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -116,15 +107,16 @@ void Texture::_loadFromFileCubemap(std::string file[],GLuint type){
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     }
 }
+
 void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(m_Name,pos,color,scl,angle,depth));
 }
 const unsigned char* Texture::getPixels(){
-	if(m_Pixels.size() == 0){
-		m_Pixels.resize(m_Width*m_Height*4);
-		glBindTexture(m_Type,m_TextureAddress);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
-	}
-	return &m_Pixels[0];
+    if(m_Pixels.size() == 0){
+        m_Pixels.resize(m_Width*m_Height*4);
+        glBindTexture(m_Type,m_TextureAddress);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
+    }
+    return &m_Pixels[0];
 }

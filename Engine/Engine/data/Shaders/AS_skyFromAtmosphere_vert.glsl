@@ -3,7 +3,7 @@
 attribute vec3 position;
 
 uniform mat4 VP;
-uniform mat4 World;
+uniform mat4 Model;
 
 uniform int nSamples;
 uniform float fSamples;
@@ -45,7 +45,7 @@ float scale(float fCos){
     return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
 }
 void main(){
-    mat4 MVP = VP * World;
+    mat4 MVP = VP * Model;
     vec3 v3Pos = position * vec3(fOuterRadius);
     vec3 v3Ray = v3Pos - v3CameraPos;
     float fFar = length(v3Ray);
@@ -91,5 +91,5 @@ void main(){
     outerRadius = fOuterRadius;
     planetRadius = fInnerRadius;
 
-    WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (Model * vec4(position,1.0)).xyz;
 }

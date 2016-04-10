@@ -62,12 +62,13 @@ Skybox::Skybox(std::string name,Scene* scene){
     m_Model = glm::mat4(1);
 
     glActiveTexture(GL_TEXTURE0);
-    std::string front = "data/Textures/Skyboxes/" + name + "/Front.jpg";
-    std::string back = "data/Textures/Skyboxes/" + name + "/Back.jpg";
-    std::string left = "data/Textures/Skyboxes/" + name + "/Left.jpg";
-    std::string right = "data/Textures/Skyboxes/" + name + "/Right.jpg";
-    std::string top = "data/Textures/Skyboxes/" + name + "/Top.jpg";
-    std::string bottom = "data/Textures/Skyboxes/" + name + "/Bottom.jpg";
+
+    std::string front = name + "/Right.jpg";
+    std::string back = name + "/Left.jpg";
+    std::string left = name + "/Top.jpg";
+    std::string right = name + "/Bottom.jpg";
+    std::string top = name + "/Front.jpg";
+    std::string bottom = name + "/Back.jpg";
     std::string names[6] = {front,back,left,right,top,bottom};
 
     m_Texture = new Texture(names,"Cubemap ",GL_TEXTURE_CUBE_MAP);
@@ -94,7 +95,7 @@ void Skybox::render(){
     glUseProgram(shader);
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
-    glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m_Model));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->getTextureAddress());

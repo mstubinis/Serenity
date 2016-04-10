@@ -123,7 +123,7 @@ void PointLight::lighten(GLuint shader){
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
-    glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(m));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 
     if(glm::distance(campos,glm::vec3(pos)) > m_PointLightRadius){
         glCullFace(GL_BACK);

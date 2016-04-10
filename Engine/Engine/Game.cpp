@@ -31,11 +31,11 @@ void Game::initResources(){
     Resources::addShader("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl");
     Resources::addShader("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl");
 
-    Resources::addMesh("Planet","data/Models/planet.obj");
+    Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
     Resources::addMesh("Starbase","data/Models/starbase.obj");
-    Resources::addMesh("Ring","data/Models/ring.obj");
+    Resources::addMesh("Ring","data/Models/ring.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
 
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg");

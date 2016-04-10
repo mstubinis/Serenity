@@ -3,7 +3,7 @@
 attribute vec3 position;
 
 uniform mat4 VP;
-uniform mat4 World;
+uniform mat4 Model;
 
 uniform int nSamples;
 uniform float fSamples;
@@ -47,7 +47,7 @@ float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadiu
     return 0.5 * (-B - sqrt(fDet));
 }
 void main(){
-    mat4 MVP = VP * World;
+    mat4 MVP = VP * Model;
     vec3 v3Pos = position * vec3(fOuterRadius);
     vec3 v3Ray = v3Pos - v3CameraPos;
     float fFar = length(v3Ray);
@@ -88,5 +88,5 @@ void main(){
     c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
 
-    WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (Model * vec4(position,1.0)).xyz;
 }

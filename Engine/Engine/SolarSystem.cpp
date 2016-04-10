@@ -262,7 +262,7 @@ void SolarSystem::_loadRandomly(){
     unsigned int random_skybox_index = static_cast<unsigned int>((rand() % folders.size()));
     std::string skybox = folders.at(random_skybox_index);
     unsigned int numFlares = rand() % 200;
-    new GameSkybox(skybox,numFlares,this);
+    new GameSkybox(path + skybox,numFlares,this);
     #pragma endregion
 
     #pragma region ConstructStars

@@ -7,16 +7,16 @@ attribute vec3 tangent;
 attribute vec3 binormal;
 
 uniform mat4 VP;
-uniform mat4 World;
+uniform mat4 Model;
 
 varying vec2 UV;
 
 varying vec3 WorldPosition;
 
 void main(){
-    mat4 MVP = VP * World;
+    mat4 MVP = VP * Model;
     UV = uv;
     gl_Position = MVP * vec4(position, 1.0);
     gl_TexCoord[6] = gl_Position;
-    WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (Model * vec4(position,1.0)).xyz;
 }

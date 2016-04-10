@@ -10,7 +10,7 @@ uniform int hasAtmosphere;
 
 uniform mat4 Rot;
 uniform mat4 VP;
-uniform mat4 World;
+uniform mat4 Model;
 
 uniform vec3 v3CameraPos;
 uniform vec3 v3LightDir;		// The direction vector to the light source 
@@ -51,7 +51,7 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
     return 0.5 * (-B - sqrt(fDet));
 }
 void main(void)	{
-    mat4 MVP = VP * World;
+    mat4 MVP = VP * Model;
     if(hasAtmosphere == 1){
         vec4 test = (Rot * vec4(position,1.0));
         vec3 v3Pos = vec3(test) * vec3(fInnerRadius);
@@ -94,10 +94,9 @@ void main(void)	{
 
     UV = uv;
 
-    //normalizing these solved a problem, but might cause more. Be careful here
-    Normals = ((World * vec4(normal,0.0)).xyz);
-    Tangents = ((World * vec4(tangent,0.0)).xyz);
-    Binormals = ((World * vec4(binormal,0.0)).xyz);
+    Normals = (Model * vec4(normal,0.0)).xyz;
+    Tangents = (Model * vec4(tangent,0.0)).xyz;
+    Binormals = (Model * vec4(binormal,0.0)).xyz;
 
-    WorldPosition = (World * vec4(position,1.0)).xyz;
+    WorldPosition = (Model * vec4(position,1.0)).xyz;
 }

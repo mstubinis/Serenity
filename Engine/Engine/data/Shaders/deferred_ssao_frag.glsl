@@ -11,8 +11,13 @@ uniform float gBias;
 uniform float gScale;
 uniform int gSampleCount;
 uniform int gNoiseTextureSize;
+uniform int far;
 
 uniform vec2 poisson[64];
+
+float l(float a, float b, float w){
+	return a + w*(b-a);
+}
 
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
     vec3 diff = texture2D(gPositionMap,uv+offsetUV).xyz - origin;

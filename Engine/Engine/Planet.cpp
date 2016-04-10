@@ -90,7 +90,7 @@ void Planet::draw(GLuint shader,bool debug){
 
             glUseProgram(shader);
             glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-            glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(mod));
+            glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(mod));
             glUniformMatrix4fv(glGetUniformLocation(shader, "Rot" ), 1, GL_FALSE, glm::value_ptr(rot));
 
             glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
@@ -193,7 +193,7 @@ void Planet::draw(GLuint shader,bool debug){
             mod = glm::scale(mod,glm::vec3(1 + m_AtmosphereHeight));
 
             glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-            glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(mod));
+            glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(mod));
             glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
             glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
@@ -382,7 +382,7 @@ void Ring::draw(GLuint shader){
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "World" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
     glm::vec4 color = m_Parent->getColor();
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
     glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
