@@ -20,7 +20,6 @@ SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
     }
-	m_Name = incrementName(scene->getLights(), name);
     scene->getLights()[m_Name] = this;
 }
 SunLight::~SunLight(){

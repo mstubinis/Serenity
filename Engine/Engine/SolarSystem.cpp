@@ -476,14 +476,14 @@ void SolarSystem::_loadRandomly(){
 
             if(boost::filesystem::exists(diffuseFile)){
                 Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
-
-                planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(posX,0,posZ),RADIUS,"Planet " + boost::lexical_cast<std::string>(i + 1),ATMOSPHERE_HEIGHT,this);
+				std::string pName = "Planet " + boost::lexical_cast<std::string>(i + 1);
+                planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(posX,0,posZ),RADIUS,pName,ATMOSPHERE_HEIGHT,this);
 
                 float R = (rand() % 1000)/1000.0f;
                 float G = (rand() % 1000)/1000.0f;
                 float B = (rand() % 1000)/1000.0f;
                 planet->setColor(R,G,B,1);
-                m_Planets["Planet " + boost::lexical_cast<std::string>(i + 1)] = planet;
+                m_Planets[pName] = planet;
 
                 //rings
                 std::vector<RingInfo> rings;

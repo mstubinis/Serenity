@@ -110,6 +110,8 @@ bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 
     glm::vec3 C = glm::vec3(getPosition());
     float r = getRadius();
+	if(r <= 0)
+		return false;
 
     //check if point is behind
     float dot = glm::dot(rayVector,C-a1);

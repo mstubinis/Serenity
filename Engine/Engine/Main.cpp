@@ -4,7 +4,9 @@
 #include <iostream>
 
 //TODO: remove this header, it's only used to track memory leaks
+#ifdef _DEBUG
 #include <vld.h>
+#endif
 
 using namespace Engine;
 

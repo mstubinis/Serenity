@@ -43,12 +43,12 @@ struct ParticleInfo;
 
 template<class K, class V> std::string incrementName(std::unordered_map<K,V>& map, std::string name){
 	std::string ret = name;unsigned int count = 0;
-    if(map.size() > 0){while(map.count(name)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
+    if(map.size() > 0){while(map.count(ret)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
 	return ret;
 }
 template<class K, class V> std::string incrementName(std::map<K,V>& map, std::string name){
 	std::string ret = name;unsigned int count = 0;
-    if(map.size() > 0){while(map.count(name)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
+    if(map.size() > 0){while(map.count(ret)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
 	return ret;
 }
 

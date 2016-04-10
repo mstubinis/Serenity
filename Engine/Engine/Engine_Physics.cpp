@@ -320,7 +320,7 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
     }
 }
 void Collision::setMass(float mass){
-    if(m_CollisionShape != nullptr){
+	if(m_CollisionShape != nullptr && m_CollisionType != COLLISION_TYPE_NONE){
 		if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
             m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
         }

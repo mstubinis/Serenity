@@ -59,7 +59,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 	if(Glow > 0.99){
 		return diffuseMapColor;
 	}
-    return clamp(max(Glow*diffuseMapColor,lightWithoutSpecular + SpecularColor),0.01,0.95);
+    return max(Glow*diffuseMapColor,lightWithoutSpecular + SpecularColor);
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = LightPosition - PxlWorldPos;
