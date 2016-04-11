@@ -33,8 +33,9 @@ void main(){
 		if(HasLighting == 0){
 			lightMap = image;
 		}
-		vec4 illumination = calc;
+		vec4 illumination = vec4(0);
 		if(HasBloom == 1){
+			illumination = calc;
 			illumination = max((bloom*(1.0-(lightMap/image))), illumination);
 		}
 		gl_FragColor = illumination + lightMap;

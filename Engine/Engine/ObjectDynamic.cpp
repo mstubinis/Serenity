@@ -38,7 +38,8 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Radius = 0;
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0);
-    m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
+	if(mesh != "" && mat != "")
+		m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
     m_Color = glm::vec4(1);
     
     m_Collision = col;
@@ -74,8 +75,15 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     calculateRadius();
     m_Mass = 0.5f * m_Radius;
 
-    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
-    m_RigidBody = new btRigidBody(rigidBodyCI);
+	if(m_Collision != nullptr){
+		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
+		m_RigidBody = new btRigidBody(rigidBodyCI);
+	}
+	else{
+		m_Collision = new Collision(new btEmptyShape(),COLLISION_TYPE_NONE,0.0f);
+		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
+		m_RigidBody = new btRigidBody(rigidBodyCI);
+	}
     m_RigidBody->setSleepingThresholds(0.015f,0.015f);
     m_RigidBody->setFriction(0.3f);
     m_RigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
@@ -121,6 +129,9 @@ void ObjectDynamic::update(float dt){
     btTransform tr;
     m_RigidBody->getMotionState()->getWorldTransform(tr);
     tr.getOpenGLMatrix(glm::value_ptr(m));
+
+	btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
+	m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
 
     m_Forward = Engine::Math::getForward(m_RigidBody);
     m_Right = Engine::Math::getRight(m_RigidBody);
@@ -377,6 +388,7 @@ bool ObjectDynamic::rayIntersectSphere(Camera* cam){ return cam->rayIntersectSph
 void ObjectDynamic::calculateRadius(){
     if(m_DisplayItems.size() == 0){
         m_BoundingBoxRadius = glm::vec3(0);
+		m_Radius = 0;
         return;
     }
     float maxLength = 0;

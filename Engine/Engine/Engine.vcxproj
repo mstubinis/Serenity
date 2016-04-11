@@ -129,6 +129,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="Station.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Font.cpp" />
   </ItemGroup>
@@ -164,6 +165,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="Station.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Font.h" />
   </ItemGroup>

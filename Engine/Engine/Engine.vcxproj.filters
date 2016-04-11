@@ -216,6 +216,9 @@
     <ClCompile Include="Engine_Mouse.cpp">
       <Filter>Source Files\Engine\Engine_Core</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -316,6 +319,9 @@
     </ClInclude>
     <ClInclude Include="Engine_Mouse.h">
       <Filter>Header Files\Engine\Engine_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

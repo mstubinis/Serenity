@@ -55,7 +55,7 @@ void Game::initLogic(){
     Engine::getWindow()->setKeyRepeatEnabled(false);
     Engine::Renderer::Settings::enableSSAO(true);
 
-    new SolarSystem("Sol","data/Systems/Sol.txt");
+    new SolarSystem("Sol","data/Systems/Sol.txt",true);
     //new SolarSystem("Sol","");
     new CapsuleSpace();
     

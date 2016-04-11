@@ -8,6 +8,10 @@
 #include <GL/GL.h>
 #include "Engine_Physics.h"
 
+namespace sf{ class Image; };
+
+class btHeightfieldTerrainShape;
+
 const unsigned int NUM_VERTEX_DATA = 5;
 const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
@@ -52,6 +56,7 @@ class Mesh final{
         void _loadFromOBJ(std::string,COLLISION_TYPE);
 		void _calculateMeshRadius();
     public:
+		Mesh(btHeightfieldTerrainShape*);
         Mesh(float width, float height);
         Mesh(float x, float y, float width, float height);
 		Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
