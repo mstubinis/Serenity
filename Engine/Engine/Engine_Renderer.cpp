@@ -24,6 +24,12 @@ ID3D11DeviceContext* Renderer::Detail::RenderManagement::m_DirectXDeviceContext;
 ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
+bool Renderer::RendererInfo::positionOnly = false;
+bool Renderer::RendererInfo::normalsOnly = false;
+bool Renderer::RendererInfo::ssaoOnly = false;
+bool Renderer::RendererInfo::diffuseOnly = false;
+bool Renderer::RendererInfo::bloomOnly = false;
+
 bool Renderer::RendererInfo::ssao = true;
 bool Renderer::RendererInfo::ssao_do_blur = true;
 unsigned int Renderer::RendererInfo::ssao_samples = 5;
@@ -490,6 +496,12 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     GLuint shader = Resources::getShader("Deferred_Final")->getShaderProgram();
     glUseProgram(shader);
 
+    glUniform1i( glGetUniformLocation(shader,"PositionOnly"), static_cast<int>(RendererInfo::positionOnly));
+    glUniform1i( glGetUniformLocation(shader,"NormalsOnly"), static_cast<int>(RendererInfo::normalsOnly));
+    glUniform1i( glGetUniformLocation(shader,"SSAOOnly"), static_cast<int>(RendererInfo::ssaoOnly));
+    glUniform1i( glGetUniformLocation(shader,"DiffuseOnly"), static_cast<int>(RendererInfo::diffuseOnly));
+    glUniform1i( glGetUniformLocation(shader,"BloomOnly"), static_cast<int>(RendererInfo::bloomOnly));
+
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
     glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
@@ -517,9 +529,19 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
     glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 3 );
 
+    glActiveTexture(GL_TEXTURE4);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_MISC));
+    glUniform1i( glGetUniformLocation(shader,"gMiscMap"), 4 );
+
+    glActiveTexture(GL_TEXTURE5);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
+    glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 5 );
+
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 4; i++){
+    for(unsigned int i = 0; i < 6; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);

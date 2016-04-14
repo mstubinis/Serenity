@@ -11,7 +11,6 @@
 #include <bullet/btBulletDynamicsCommon.h>
 
 namespace glm{
-
     #ifdef ENGINE_PRECISION_NORMAL
     typedef float nType;
     typedef glm::detail::tvec3<float> v3;

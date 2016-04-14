@@ -58,6 +58,12 @@ struct FontRenderInfo final: public TextureRenderInfo{
 namespace Engine{
     namespace Renderer{
         struct RendererInfo final{
+			static bool positionOnly;
+			static bool normalsOnly;
+			static bool ssaoOnly;
+			static bool diffuseOnly;
+			static bool bloomOnly;
+
             static bool ssao;
             static bool ssao_do_blur;
             static unsigned int ssao_samples;
@@ -80,6 +86,54 @@ namespace Engine{
             static void setSSAOScale(float s){ Renderer::RendererInfo::ssao_scale = s; }
             static void setSSAOBias(float b){ Renderer::RendererInfo::ssao_bias = b; }
             static void setSSAOSamples(unsigned int s){ Renderer::RendererInfo::ssao_samples = s; }
+
+			static void renderDiffuseOnly(bool = true){
+				Renderer::RendererInfo::diffuseOnly = true;
+
+				Renderer::RendererInfo::positionOnly = false;
+				Renderer::RendererInfo::normalsOnly = false;
+				Renderer::RendererInfo::ssaoOnly = false;
+				Renderer::RendererInfo::bloomOnly = false;
+			}
+			static void renderNormalsOnly(bool = true){
+				Renderer::RendererInfo::normalsOnly = true;
+
+				Renderer::RendererInfo::diffuseOnly = false;
+				Renderer::RendererInfo::positionOnly = false;
+				Renderer::RendererInfo::ssaoOnly = false;
+				Renderer::RendererInfo::bloomOnly = false;
+			}
+			static void renderPositionOnly(bool = true){
+				Renderer::RendererInfo::positionOnly = true;
+
+				Renderer::RendererInfo::diffuseOnly = false;
+				Renderer::RendererInfo::normalsOnly = false;
+				Renderer::RendererInfo::ssaoOnly = false;
+				Renderer::RendererInfo::bloomOnly = false;
+			}
+			static void renderSSAOOnly(bool = true){
+				Renderer::RendererInfo::ssaoOnly = true;
+
+				Renderer::RendererInfo::diffuseOnly = false;
+				Renderer::RendererInfo::positionOnly = false;
+				Renderer::RendererInfo::normalsOnly = false;
+				Renderer::RendererInfo::bloomOnly = false;
+			}
+			static void renderBloomOnly(bool = true){
+				Renderer::RendererInfo::bloomOnly = true;
+
+				Renderer::RendererInfo::diffuseOnly = false;
+				Renderer::RendererInfo::positionOnly = false;
+				Renderer::RendererInfo::normalsOnly = false;
+				Renderer::RendererInfo::ssaoOnly = false;
+			}
+			static void renderNormally(bool = true){
+				Renderer::RendererInfo::bloomOnly = false;
+				Renderer::RendererInfo::diffuseOnly = false;
+				Renderer::RendererInfo::positionOnly = false;
+				Renderer::RendererInfo::normalsOnly = false;
+				Renderer::RendererInfo::ssaoOnly = false;
+			}
 
             static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
             static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }

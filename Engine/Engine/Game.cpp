@@ -25,7 +25,7 @@ void Game::cleanup(){
 void Game::initResources(){
 	Resources::getWindow()->setIcon("data/Textures/icon.png");
 
-    Resources::addSoundAsMusic("Test","data/Sounds/Music/test.ogg");
+    //Resources::addSoundAsMusic("Test","data/Sounds/Music/test.ogg");
 
     Resources::addShader("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl");
     Resources::addShader("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl");
@@ -34,7 +34,7 @@ void Game::initResources(){
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
-    Resources::addMesh("Starbase","data/Models/starbase.obj");
+    //Resources::addMesh("Starbase","data/Models/starbase.obj");
     Resources::addMesh("Ring","data/Models/ring.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
 
@@ -55,15 +55,15 @@ void Game::initLogic(){
     Engine::getWindow()->setKeyRepeatEnabled(false);
     Engine::Renderer::Settings::enableSSAO(true);
 
-    new SolarSystem("Sol","data/Systems/Sol.txt",true);
+    new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
     new CapsuleSpace();
     
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 
-    Sound::setCurrentMusicAndPlay("Test");
-    Sound::loop("Test");
+    //Sound::setCurrentMusicAndPlay("Test");
+    //Sound::loop("Test");
 
     m_HUD = new HUD();
 }
@@ -72,17 +72,37 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
 	}
+    if(Events::Keyboard::isKeyDownOnce("f4")){
+		Engine::Renderer::Settings::renderDiffuseOnly();
+    }
+    if(Events::Keyboard::isKeyDownOnce("f5")){
+		Engine::Renderer::Settings::renderPositionOnly();
+    }
     if(Events::Keyboard::isKeyDownOnce("f6")){
+		Engine::Renderer::Settings::renderNormalsOnly();
+    }
+    if(Events::Keyboard::isKeyDownOnce("f7")){
+		Engine::Renderer::Settings::renderSSAOOnly();
+    }
+    if(Events::Keyboard::isKeyDownOnce("f8")){
+		Engine::Renderer::Settings::renderBloomOnly();
+    }
+    if(Events::Keyboard::isKeyDownOnce("f9")){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f7")){
+    if(Events::Keyboard::isKeyDownOnce("f10")){
         Resources::setCurrentScene("Sol");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f8")){
+    if(Events::Keyboard::isKeyDownOnce("f11")){
         Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
     }
+    if(Events::Keyboard::isKeyDownOnce("f12")){
+        Engine::Renderer::Settings::renderNormally();
+    }
+	/*
+
     if(Events::Keyboard::isKeyDownOnce("f9")){
 		Engine::setFullScreen(true);
     }
@@ -95,6 +115,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f12")){
         Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_OPENGL);
     }
+	*/
     m_HUD->update(dt);
 }
 void Game::render(){

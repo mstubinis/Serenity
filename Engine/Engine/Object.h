@@ -14,7 +14,7 @@ typedef unsigned int GLuint;
 
 template <typename T> bool exists(boost::weak_ptr<T> t){ return !(t.expired()); }
 
-class ObjectInterface{
+class IObject{
     public:
         virtual void update(float) = 0;
 
@@ -40,7 +40,7 @@ class ObjectInterface{
         virtual glm::v3 getMotionVector() = 0;
 };
 
-class Object: public ObjectInterface{
+class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
     protected:
