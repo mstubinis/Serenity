@@ -32,7 +32,7 @@ void GameCamera::update(float dt){
             m_Model = glm::m4(1);
             m_Model = glm::translate(m_Model,m_Target->getPosition()+((glm::v3(m_Target->getForward())*static_cast<glm::nType>(glm::length(m_Target->getRadius()))*static_cast<glm::nType>(2.0))+ glm::v3(m_Target->getUp()) * static_cast<glm::nType>(glm::length(m_Target->getRadius()))*static_cast<glm::nType>(0.3))* (static_cast<glm::nType>(1.0)+m_OrbitRadius));
 
-            lookAt(getPosition(),m_Target->getPosition()-(glm::v3(m_Target->getForward())*static_cast<glm::nType>(500.0)),glm::v3(m_Target->getUp()));
+            lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*static_cast<glm::nType>(500.0)),m_Target->getUp());
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
@@ -45,7 +45,7 @@ void GameCamera::update(float dt){
                                             ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*static_cast<glm::nType>(2.7))* (static_cast<glm::nType>(1.0)+m_OrbitRadius))
                                             - glm::v3(m_Player->getUp()) * static_cast<glm::nType>(glm::length(m_Player->getRadius()))*static_cast<glm::nType>(0.3)));
 
-            lookAt(getPosition(),m_Target->getPosition(),glm::v3(m_Player->getUp()));
+            lookAt(getPosition(),m_Target->getPosition(),m_Player->getUp());
             break;
         }
         case CAMERA_STATE_ORBIT:{
@@ -62,7 +62,7 @@ void GameCamera::update(float dt){
             m_Model *= glm::m4(glm::mat4_cast(m_Orientation));
             m_Model = glm::translate(m_Model,pos);
 
-            lookAt(getPosition(),m_Target->getPosition(),glm::v3(getUp()));
+            lookAt(getPosition(),m_Target->getPosition(),getUp());
             break;
         }
         case CAMERA_STATE_FREEFORM:{

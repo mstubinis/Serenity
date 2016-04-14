@@ -12,7 +12,7 @@
 
 using namespace Engine;
 
-Terrain::Terrain(std::string name, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::v3(0),glm::vec3(1),"Terrain",nullptr,scene){
+Terrain::Terrain(std::string name, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::v3(0),glm::vec3(1),name,nullptr,scene){
 	for(unsigned int i = 0; i < image.getSize().x; i++){
 		for(unsigned int j = 0; j < image.getSize().y; j++){
 			float pixel(image.getPixel(i,j).r / 255.0f);
@@ -36,10 +36,10 @@ Terrain::Terrain(std::string name, sf::Image& image,std::string material,Scene* 
 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
     m_RigidBody = new btRigidBody(rigidBodyCI);
 
-	Resources::Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()));
+	Resources::Detail::ResourceManagement::m_Meshes[m_Name] = boost::make_shared<Mesh>(static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()));
 
 	if(material != "")
-		m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(name),Resources::getMaterial(material)));
+		m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(m_Name),Resources::getMaterial(material)));
 
     if(Resources::getCurrentScene() == scene)
 		Physics::addRigidBody(m_RigidBody);
@@ -48,6 +48,7 @@ Terrain::Terrain(std::string name, sf::Image& image,std::string material,Scene* 
 	m_RigidBody->setUserPointer(this);
 	Terrain::setScale(1,1,1);
 	setDynamic(false);
+	m_RigidBody->setGravity(btVector3(0,0,0));
 }
 Terrain::~Terrain(){
 	m_Pixels.clear();
@@ -64,7 +65,7 @@ void Terrain::setPosition(glm::nType x,glm::nType y,glm::nType z){
 	Physics::removeRigidBody(m_RigidBody);
 	SAFE_DELETE(m_RigidBody);
 
-    btTransform tr;tr.setIdentity();tr.setOrigin(btVector3(x,y,z));
+    btTransform tr;tr.setIdentity();tr.setOrigin(btVector3(btScalar(x),btScalar(y),btScalar(z)));
 	m_MotionState->setWorldTransform(tr);
 
 	btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());

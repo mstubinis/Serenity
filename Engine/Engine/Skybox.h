@@ -19,10 +19,26 @@ struct SkyboxTextures final{
     std::string top;
     std::string bottom;
 };
-class Skybox{
-    private:
+
+class ISkybox{
+    public:
+		virtual ~ISkybox(){}
+        virtual void update() = 0;
+        virtual void render() = 0;
+};
+class SkyboxEmpty: public ISkybox{
+	protected:
+		glm::mat4 m_Model;
+    public:
+		SkyboxEmpty(std::string name,Scene* = nullptr);
+		virtual ~SkyboxEmpty();
+		virtual void update(){}
+		virtual void render(){}
+};
+
+class Skybox: public SkyboxEmpty{
+    protected:
         Texture* m_Texture;
-        glm::mat4 m_Model;
 
         static GLuint m_Buffer;
         static std::vector<glm::vec3> m_Vertices;

@@ -11,12 +11,12 @@
 class Object;
 class Camera;
 class SunLight;
-class Skybox;
+class SkyboxEmpty;
 class ParticleEmitter;
 
 class Scene{
     private:
-        Skybox* m_Skybox;
+        SkyboxEmpty* m_Skybox;
     protected:
         std::map<std::string,Object*> m_Objects;
         std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
@@ -49,8 +49,8 @@ class Scene{
         void setAmbientLightColor(float,float,float);
         void setBackgroundColor(float,float,float);
 
-        Skybox* getSkybox() const { return m_Skybox; }
-        void setSkybox(Skybox* s){ m_Skybox = s; }
+        SkyboxEmpty* getSkybox() const { return m_Skybox; }
+        void setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
         void centerSceneToObject(Object*);
         void renderSkybox();
 };

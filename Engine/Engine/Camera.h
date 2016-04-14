@@ -15,29 +15,27 @@ class Camera: public ObjectBasic{
         Scene* m_Scene;
     protected:
         CAMERA_TYPE m_Type;
-
         float m_Angle;
         float m_AspectRatio;
-
         float m_Near, m_Far;
         glm::mat4 m_View, m_Projection;
     public:
         Camera(std::string,float,float,float,float,Scene* = nullptr);             // Perspective camera Constructor
         Camera(std::string,float,float,float,float,float,float,Scene* = nullptr); // Orthographic camera Constructor
-        ~Camera();
+        virtual ~Camera();
 
-        void resize(unsigned int w, unsigned int h);
-        void setPerspectiveProjection();
-        void setOrthoProjection(float,float,float,float);
+        virtual void resize(unsigned int w, unsigned int h);
+        virtual void setPerspectiveProjection();
+        virtual void setOrthoProjection(float,float,float,float);
 
         virtual void update(float);
 
-        void lookAt(glm::v3);  
-        void lookAt(glm::v3,glm::v3); 
-        void lookAt(glm::v3,glm::v3,glm::v3); 
-        void lookAt(Object*,bool targetUp = false);
+        virtual void lookAt(glm::v3);  
+        virtual void lookAt(glm::v3,glm::v3); 
+        virtual void lookAt(glm::v3,glm::v3,glm::v3); 
+        virtual void lookAt(Object*,bool targetUp = false);
 
-        void setAspectRatio(float);
+        virtual void setAspectRatio(float);
 
         const float getAngle() const { return m_Angle; }
         const float getAspectRatio() const { return m_AspectRatio; }
@@ -48,19 +46,19 @@ class Camera: public ObjectBasic{
 
         glm::quat getOrientation(){ return m_Orientation; }
 
-        glm::mat4 calculateProjection(glm::mat4 model){ return m_Projection * m_View * model; }
-        glm::mat4 calculateModelView(glm::mat4 model){ return m_View * model; }
-        glm::mat4 calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
+        virtual glm::mat4 calculateProjection(glm::mat4 model){ return m_Projection * m_View * model; }
+        virtual glm::mat4 calculateModelView(glm::mat4 model){ return m_View * model; }
+        virtual glm::mat4 calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
         glm::mat4 getProjection(){ return m_Projection; }
         glm::mat4 getView(){ return m_View; }
         glm::mat4 getViewProjection(){ return m_Projection * m_View; }
         glm::vec3 getViewVector(){ return glm::vec3(m_View[0][2],m_View[1][2],m_View[2][2]); }
         const CAMERA_TYPE getType() const{ return m_Type; }
 
-        bool sphereIntersectTest(Object*);
-        bool sphereIntersectTest(glm::v3 pos, float radius);
+        virtual bool sphereIntersectTest(Object*);
+        virtual bool sphereIntersectTest(glm::v3 pos, float radius);
 
         //ray tests
-        bool rayIntersectSphere(Object*);
+        virtual bool rayIntersectSphere(Object*);
 };
 #endif

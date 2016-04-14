@@ -37,7 +37,7 @@ void Engine::Detail::EngineClass::destruct(){
 void Engine::Detail::EngineClass::initGame(uint api){
 	if(api == ENGINE_RENDERING_API_DIRECTX)
 		return;
-
+	Engine::getWindow()->setKeyRepeatEnabled(false);
     Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
@@ -48,13 +48,12 @@ void Engine::Detail::EngineClass::initGame(uint api){
 
     Resources::initResources();
 
-    //the scene is the root of all games. create the default scene
-    //Scene* scene;
-    //if(Resources::getCurrentScene() == nullptr)
-        //scene = new Scene("Default");
-
     Game::initResources();
     Game::initLogic();
+
+    //the scene is the root of all games. create the default scene if 1 does not exist already
+	if(Resources::Detail::ResourceManagement::m_Scenes.size() == 0)
+        new Scene("Default");
 
 	Resources::initRenderingContexts(api);
 
@@ -78,6 +77,7 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
             Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
         }
     }
+
 }
 void Engine::Detail::EngineClass::update(uint api){
     Game::update(Resources::dt());

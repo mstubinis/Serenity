@@ -11,7 +11,18 @@ using namespace Engine;
 GLuint Skybox::m_Buffer;
 std::vector<glm::vec3> Skybox::m_Vertices;
 
-Skybox::Skybox(std::string name,Scene* scene){
+SkyboxEmpty::SkyboxEmpty(std::string name,Scene* scene){
+	m_Model = glm::mat4(1);
+    if(scene == nullptr) scene = Resources::getCurrentScene();
+    if(scene->getSkybox() == nullptr)
+        scene->setSkybox(this);
+}
+SkyboxEmpty::~SkyboxEmpty(){
+
+}
+		
+
+Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
     if(Skybox::m_Vertices.size() == 0){
         std::vector<glm::vec3> temp;
         temp.push_back(glm::vec3(-1,1,1));//1
@@ -58,9 +69,6 @@ Skybox::Skybox(std::string name,Scene* scene){
         glBindBuffer(GL_ARRAY_BUFFER, Skybox::m_Buffer );
         glBufferData(GL_ARRAY_BUFFER, Skybox::m_Vertices.size() * sizeof(glm::vec3),&Skybox::m_Vertices[0], GL_STATIC_DRAW );
     }
-
-    m_Model = glm::mat4(1);
-
     glActiveTexture(GL_TEXTURE0);
 
     std::string front = name + "/Right.jpg";
@@ -76,10 +84,6 @@ Skybox::Skybox(std::string name,Scene* scene){
     m_Model = glm::mat4(1);
     m_Model = glm::translate(m_Model, glm::vec3(Resources::getActiveCamera()->getPosition()));
     m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
-
-    if(scene == nullptr) scene = Resources::getCurrentScene();
-    if(scene->getSkybox() == nullptr)
-        scene->setSkybox(this);
 }
 Skybox::~Skybox(){
 }
