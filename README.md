@@ -1,5 +1,5 @@
 # Serenity
-A game engine made for space simulators / shooters that focuses on the issues of floating point precision, and producing stunning visual effects.
+A game engine made for addressing the problems of floating point precision and producing stunning visual effects.
 
 Note
 ----
