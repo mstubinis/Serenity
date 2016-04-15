@@ -46,8 +46,6 @@ class Camera: public ObjectBasic{
 
         glm::quat getOrientation(){ return m_Orientation; }
 
-        virtual glm::mat4 calculateProjection(glm::mat4 model){ return m_Projection * m_View * model; }
-        virtual glm::mat4 calculateModelView(glm::mat4 model){ return m_View * model; }
         virtual glm::mat4 calculateViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
         glm::mat4 getProjection(){ return m_Projection; }
         glm::mat4 getView(){ return m_View; }
