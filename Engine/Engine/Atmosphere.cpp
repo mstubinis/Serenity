@@ -4,55 +4,547 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "Light.h"
+#include "Engine_Events.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 using namespace Engine;
 
 Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEmpty(name,scene){
-	m_FollowCamera = followCamera;
-	m_Mesh = Resources::getMesh("Planet");
-	m_Model = glm::mat4(1);
-	m_Position = glm::vec3(0.0f,-10024.0f,0.0f);
-	m_Scale = glm::vec3(10000,10000,10000);
+    m_Atmosphere = AtmosphereInformation();
+    m_Model = glm::mat4(1);
+    m_Scale = glm::vec3(1);
+    m_FollowCamera = followCamera;
 
-	m_Atmosphere = AtmosphereInformation();
+    if(!Resources::Detail::ResourceManagement::m_Meshes.count("Atmosphere")){
+        #pragma region MeshData
+             std::string data = "v -0.000000 -1.000000 0.000000\n"
+                                "v 0.723607 -0.447220 0.525725\n"
+                                "v -0.276388 -0.447220 0.850649\n"
+                                "v -0.894426 -0.447216 0.000000\n"
+                                "v -0.276388 -0.447220 -0.850649\n"
+                                "v 0.723607 -0.447220 -0.525725\n"
+                                "v 0.276388 0.447220 0.850649\n"
+                                "v -0.723607 0.447219 0.525725\n"
+                                "v -0.723607 0.447219 -0.525725\n"
+                                "v 0.276388 0.447220 -0.850649\n"
+                                "v 0.894426 0.447216 0.000000\n"
+                                "v -0.000000 1.000000 0.000000\n"
+                                "v -0.232822 -0.657519 0.716563\n"
+                                "v -0.162456 -0.850654 0.499995\n"
+                                "v -0.077607 -0.967950 0.238853\n"
+                                "v 0.203181 -0.967950 0.147618\n"
+                                "v 0.425323 -0.850654 0.309011\n"
+                                "v 0.609547 -0.657519 0.442856\n"
+                                "v 0.531941 -0.502302 0.681712\n"
+                                "v 0.262869 -0.525738 0.809012\n"
+                                "v -0.029639 -0.502302 0.864184\n"
+                                "v 0.812729 -0.502301 -0.295238\n"
+                                "v 0.850648 -0.525736 0.000000\n"
+                                "v 0.812729 -0.502301 0.295238\n"
+                                "v 0.203181 -0.967950 -0.147618\n"
+                                "v 0.425323 -0.850654 -0.309011\n"
+                                "v 0.609547 -0.657519 -0.442856\n"
+                                "v -0.753442 -0.657515 0.000000\n"
+                                "v -0.525730 -0.850652 0.000000\n"
+                                "v -0.251147 -0.967949 0.000000\n"
+                                "v -0.483971 -0.502302 0.716565\n"
+                                "v -0.688189 -0.525736 0.499997\n"
+                                "v -0.831051 -0.502299 0.238853\n"
+                                "v -0.232822 -0.657519 -0.716563\n"
+                                "v -0.162456 -0.850654 -0.499995\n"
+                                "v -0.077607 -0.967950 -0.238853\n"
+                                "v -0.831051 -0.502299 -0.238853\n"
+                                "v -0.688189 -0.525736 -0.499997\n"
+                                "v -0.483971 -0.502302 -0.716565\n"
+                                "v -0.029639 -0.502302 -0.864184\n"
+                                "v 0.262869 -0.525738 -0.809012\n"
+                                "v 0.531941 -0.502302 -0.681713\n"
+                                "v 0.956626 0.251149 0.147618\n"
+                                "v 0.951058 -0.000000 0.309013\n"
+                                "v 0.860698 -0.251151 0.442858\n"
+                                "v 0.860698 -0.251151 -0.442858\n"
+                                "v 0.951058 0.000000 -0.309013\n"
+                                "v 0.956626 0.251149 -0.147618\n"
+                                "v 0.155215 0.251152 0.955422\n"
+                                "v -0.000000 -0.000000 1.000000\n"
+                                "v -0.155215 -0.251152 0.955422\n"
+                                "v 0.687159 -0.251152 0.681715\n"
+                                "v 0.587786 0.000000 0.809017\n"
+                                "v 0.436007 0.251152 0.864188\n"
+                                "v -0.860698 0.251151 0.442858\n"
+                                "v -0.951058 -0.000000 0.309013\n"
+                                "v -0.956626 -0.251149 0.147618\n"
+                                "v -0.436007 -0.251152 0.864188\n"
+                                "v -0.587786 0.000000 0.809017\n"
+                                "v -0.687158 0.251152 0.681715\n"
+                                "v -0.687159 0.251152 -0.681715\n"
+                                "v -0.587786 -0.000000 -0.809017\n"
+                                "v -0.436007 -0.251152 -0.864188\n"
+                                "v -0.956626 -0.251149 -0.147618\n"
+                                "v -0.951058 0.000000 -0.309013\n"
+                                "v -0.860698 0.251151 -0.442858\n"
+                                "v 0.436007 0.251152 -0.864188\n"
+                                "v 0.587786 -0.000000 -0.809017\n"
+                                "v 0.687159 -0.251152 -0.681715\n"
+                                "v -0.155215 -0.251152 -0.955422\n"
+                                "v -0.000000 0.000000 -1.000000\n"
+                                "v 0.155215 0.251152 -0.955422\n"
+                                "v 0.831051 0.502299 0.238853\n"
+                                "v 0.688190 0.525736 0.499997\n"
+                                "v 0.483972 0.502302 0.716565\n"
+                                "v 0.029639 0.502302 0.864184\n"
+                                "v -0.262869 0.525738 0.809012\n"
+                                "v -0.531941 0.502302 0.681713\n"
+                                "v -0.812729 0.502301 0.295238\n"
+                                "v -0.850648 0.525736 -0.000000\n"
+                                "v -0.812729 0.502301 -0.295238\n"
+                                "v -0.531941 0.502302 -0.681712\n"
+                                "v -0.262869 0.525738 -0.809012\n"
+                                "v 0.029639 0.502302 -0.864184\n"
+                                "v 0.483972 0.502302 -0.716565\n"
+                                "v 0.688190 0.525736 -0.499997\n"
+                                "v 0.831051 0.502299 -0.238853\n"
+                                "v 0.077607 0.967950 0.238853\n"
+                                "v 0.162456 0.850654 0.499995\n"
+                                "v 0.232822 0.657519 0.716563\n"
+                                "v 0.753442 0.657515 0.000000\n"
+                                "v 0.525730 0.850652 0.000000\n"
+                                "v 0.251147 0.967949 0.000000\n"
+                                "v -0.203181 0.967950 0.147618\n"
+                                "v -0.425323 0.850654 0.309011\n"
+                                "v -0.609547 0.657519 0.442856\n"
+                                "v -0.203181 0.967950 -0.147618\n"
+                                "v -0.425323 0.850654 -0.309011\n"
+                                "v -0.609547 0.657519 -0.442856\n"
+                                "v 0.077607 0.967950 -0.238853\n"
+                                "v 0.162456 0.850654 -0.499995\n"
+                                "v 0.232822 0.657519 -0.716563\n"
+                                "v 0.052790 -0.723612 0.688185\n"
+                                "v 0.138199 -0.894429 0.425321\n"
+                                "v 0.361805 -0.723611 0.587779\n"
+                                "v 0.670817 -0.723611 -0.162457\n"
+                                "v 0.670818 -0.723610 0.162458\n"
+                                "v 0.447211 -0.894429 0.000001\n"
+                                "v -0.638195 -0.723609 0.262864\n"
+                                "v -0.361801 -0.894428 0.262864\n"
+                                "v -0.447211 -0.723611 0.525729\n"
+                                "v -0.447211 -0.723612 -0.525727\n"
+                                "v -0.361801 -0.894429 -0.262863\n"
+                                "v -0.638195 -0.723610 -0.262863\n"
+                                "v 0.361804 -0.723612 -0.587779\n"
+                                "v 0.138197 -0.894429 -0.425321\n"
+                                "v 0.052789 -0.723611 -0.688186\n"
+                                "v 1.000000 -0.000000 0.000000\n"
+                                "v 0.947213 -0.276396 0.162458\n"
+                                "v 0.947213 -0.276396 -0.162458\n"
+                                "v 0.309017 -0.000000 0.951057\n"
+                                "v 0.138199 -0.276398 0.951055\n"
+                                "v 0.447216 -0.276398 0.850648\n"
+                                "v -0.809018 -0.000000 0.587783\n"
+                                "v -0.861803 -0.276396 0.425324\n"
+                                "v -0.670819 -0.276397 0.688191\n"
+                                "v -0.809018 -0.000000 -0.587783\n"
+                                "v -0.670819 -0.276397 -0.688191\n"
+                                "v -0.861803 -0.276396 -0.425324\n"
+                                "v 0.309017 -0.000000 -0.951056\n"
+                                "v 0.447216 -0.276398 -0.850648\n"
+                                "v 0.138199 -0.276398 -0.951055\n"
+                                "v 0.670821 0.276396 0.688190\n"
+                                "v 0.809019 -0.000002 0.587783\n"
+                                "v 0.861804 0.276394 0.425323\n"
+                                "v -0.447216 0.276397 0.850649\n"
+                                "v -0.309017 -0.000001 0.951057\n"
+                                "v -0.138199 0.276397 0.951055\n"
+                                "v -0.947213 0.276396 -0.162458\n"
+                                "v -1.000000 0.000001 0.000000\n"
+                                "v -0.947213 0.276397 0.162458\n"
+                                "v -0.138199 0.276397 -0.951055\n"
+                                "v -0.309017 -0.000000 -0.951057\n"
+                                "v -0.447215 0.276397 -0.850649\n"
+                                "v 0.861804 0.276396 -0.425322\n"
+                                "v 0.809019 -0.000000 -0.587782\n"
+                                "v 0.670821 0.276397 -0.688189\n"
+                                "v 0.361800 0.894429 0.262863\n"
+                                "v 0.447209 0.723612 0.525728\n"
+                                "v 0.638194 0.723610 0.262864\n"
+                                "v -0.138197 0.894430 0.425320\n"
+                                "v -0.361804 0.723612 0.587779\n"
+                                "v -0.052790 0.723612 0.688185\n"
+                                "v -0.447210 0.894429 0.000000\n"
+                                "v -0.670817 0.723611 -0.162457\n"
+                                "v -0.670817 0.723611 0.162457\n"
+                                "v -0.138197 0.894430 -0.425320\n"
+                                "v -0.052790 0.723612 -0.688185\n"
+                                "v -0.361804 0.723612 -0.587779\n"
+                                "v 0.361800 0.894429 -0.262863\n"
+                                "v 0.638194 0.723610 -0.262864\n"
+                                "v 0.447209 0.723612 -0.525728\n"
+                                "f 1 16 15\n"
+                                "f 2 18 24\n"
+                                "f 1 15 30\n"
+                                "f 1 30 36\n"
+                                "f 1 36 25\n"
+                                "f 2 24 45\n"
+                                "f 3 21 51\n"
+                                "f 4 33 57\n"
+                                "f 5 39 63\n"
+                                "f 6 42 69\n"
+                                "f 2 45 52\n"
+                                "f 3 51 58\n"
+                                "f 4 57 64\n"
+                                "f 5 63 70\n"
+                                "f 6 69 46\n"
+                                "f 7 75 90\n"
+                                "f 8 78 96\n"
+                                "f 9 81 99\n"
+                                "f 10 84 102\n"
+                                "f 11 87 91\n"
+                                "f 13 21 3\n"
+                                "f 14 103 13\n"
+                                "f 15 104 14\n"
+                                "f 13 103 21\n"
+                                "f 103 20 21\n"
+                                "f 14 104 103\n"
+                                "f 104 105 103\n"
+                                "f 103 105 20\n"
+                                "f 105 19 20\n"
+                                "f 15 16 104\n"
+                                "f 16 17 104\n"
+                                "f 104 17 105\n"
+                                "f 17 18 105\n"
+                                "f 105 18 19\n"
+                                "f 18 2 19\n"
+                                "f 22 27 6\n"
+                                "f 23 106 22\n"
+                                "f 24 107 23\n"
+                                "f 22 106 27\n"
+                                "f 106 26 27\n"
+                                "f 23 107 106\n"
+                                "f 107 108 106\n"
+                                "f 106 108 26\n"
+                                "f 108 25 26\n"
+                                "f 24 18 107\n"
+                                "f 18 17 107\n"
+                                "f 107 17 108\n"
+                                "f 17 16 108\n"
+                                "f 108 16 25\n"
+                                "f 16 1 25\n"
+                                "f 28 33 4\n"
+                                "f 29 109 28\n"
+                                "f 30 110 29\n"
+                                "f 28 109 33\n"
+                                "f 109 32 33\n"
+                                "f 29 110 109\n"
+                                "f 110 111 109\n"
+                                "f 109 111 32\n"
+                                "f 111 31 32\n"
+                                "f 30 15 110\n"
+                                "f 15 14 110\n"
+                                "f 110 14 111\n"
+                                "f 14 13 111\n"
+                                "f 111 13 31\n"
+                                "f 13 3 31\n"
+                                "f 34 39 5\n"
+                                "f 35 112 34\n"
+                                "f 36 113 35\n"
+                                "f 34 112 39\n"
+                                "f 112 38 39\n"
+                                "f 35 113 112\n"
+                                "f 113 114 112\n"
+                                "f 112 114 38\n"
+                                "f 114 37 38\n"
+                                "f 36 30 113\n"
+                                "f 30 29 113\n"
+                                "f 113 29 114\n"
+                                "f 29 28 114\n"
+                                "f 114 28 37\n"
+                                "f 28 4 37\n"
+                                "f 27 42 6\n"
+                                "f 26 115 27\n"
+                                "f 25 116 26\n"
+                                "f 27 115 42\n"
+                                "f 115 41 42\n"
+                                "f 26 116 115\n"
+                                "f 116 117 115\n"
+                                "f 115 117 41\n"
+                                "f 117 40 41\n"
+                                "f 25 36 116\n"
+                                "f 36 35 116\n"
+                                "f 116 35 117\n"
+                                "f 35 34 117\n"
+                                "f 117 34 40\n"
+                                "f 34 5 40\n"
+                                "f 43 48 11\n"
+                                "f 44 118 43\n"
+                                "f 45 119 44\n"
+                                "f 43 118 48\n"
+                                "f 118 47 48\n"
+                                "f 44 119 118\n"
+                                "f 119 120 118\n"
+                                "f 118 120 47\n"
+                                "f 120 46 47\n"
+                                "f 45 24 119\n"
+                                "f 24 23 119\n"
+                                "f 119 23 120\n"
+                                "f 23 22 120\n"
+                                "f 120 22 46\n"
+                                "f 22 6 46\n"
+                                "f 49 54 7\n"
+                                "f 50 121 49\n"
+                                "f 51 122 50\n"
+                                "f 49 121 54\n"
+                                "f 121 53 54\n"
+                                "f 50 122 121\n"
+                                "f 122 123 121\n"
+                                "f 121 123 53\n"
+                                "f 123 52 53\n"
+                                "f 51 21 122\n"
+                                "f 21 20 122\n"
+                                "f 122 20 123\n"
+                                "f 20 19 123\n"
+                                "f 123 19 52\n"
+                                "f 19 2 52\n"
+                                "f 55 60 8\n"
+                                "f 56 124 55\n"
+                                "f 57 125 56\n"
+                                "f 55 124 60\n"
+                                "f 124 59 60\n"
+                                "f 56 125 124\n"
+                                "f 125 126 124\n"
+                                "f 124 126 59\n"
+                                "f 126 58 59\n"
+                                "f 57 33 125\n"
+                                "f 33 32 125\n"
+                                "f 125 32 126\n"
+                                "f 32 31 126\n"
+                                "f 126 31 58\n"
+                                "f 31 3 58\n"
+                                "f 61 66 9\n"
+                                "f 62 127 61\n"
+                                "f 63 128 62\n"
+                                "f 61 127 66\n"
+                                "f 127 65 66\n"
+                                "f 62 128 127\n"
+                                "f 128 129 127\n"
+                                "f 127 129 65\n"
+                                "f 129 64 65\n"
+                                "f 63 39 128\n"
+                                "f 39 38 128\n"
+                                "f 128 38 129\n"
+                                "f 38 37 129\n"
+                                "f 129 37 64\n"
+                                "f 37 4 64\n"
+                                "f 67 72 10\n"
+                                "f 68 130 67\n"
+                                "f 69 131 68\n"
+                                "f 67 130 72\n"
+                                "f 130 71 72\n"
+                                "f 68 131 130\n"
+                                "f 131 132 130\n"
+                                "f 130 132 71\n"
+                                "f 132 70 71\n"
+                                "f 69 42 131\n"
+                                "f 42 41 131\n"
+                                "f 131 41 132\n"
+                                "f 41 40 132\n"
+                                "f 132 40 70\n"
+                                "f 40 5 70\n"
+                                "f 54 75 7\n"
+                                "f 53 133 54\n"
+                                "f 52 134 53\n"
+                                "f 54 133 75\n"
+                                "f 133 74 75\n"
+                                "f 53 134 133\n"
+                                "f 134 135 133\n"
+                                "f 133 135 74\n"
+                                "f 135 73 74\n"
+                                "f 52 45 134\n"
+                                "f 45 44 134\n"
+                                "f 134 44 135\n"
+                                "f 44 43 135\n"
+                                "f 135 43 73\n"
+                                "f 43 11 73\n"
+                                "f 60 78 8\n"
+                                "f 59 136 60\n"
+                                "f 58 137 59\n"
+                                "f 60 136 78\n"
+                                "f 136 77 78\n"
+                                "f 59 137 136\n"
+                                "f 137 138 136\n"
+                                "f 136 138 77\n"
+                                "f 138 76 77\n"
+                                "f 58 51 137\n"
+                                "f 51 50 137\n"
+                                "f 137 50 138\n"
+                                "f 50 49 138\n"
+                                "f 138 49 76\n"
+                                "f 49 7 76\n"
+                                "f 66 81 9\n"
+                                "f 65 139 66\n"
+                                "f 64 140 65\n"
+                                "f 66 139 81\n"
+                                "f 139 80 81\n"
+                                "f 65 140 139\n"
+                                "f 140 141 139\n"
+                                "f 139 141 80\n"
+                                "f 141 79 80\n"
+                                "f 64 57 140\n"
+                                "f 57 56 140\n"
+                                "f 140 56 141\n"
+                                "f 56 55 141\n"
+                                "f 141 55 79\n"
+                                "f 55 8 79\n"
+                                "f 72 84 10\n"
+                                "f 71 142 72\n"
+                                "f 70 143 71\n"
+                                "f 72 142 84\n"
+                                "f 142 83 84\n"
+                                "f 71 143 142\n"
+                                "f 143 144 142\n"
+                                "f 142 144 83\n"
+                                "f 144 82 83\n"
+                                "f 70 63 143\n"
+                                "f 63 62 143\n"
+                                "f 143 62 144\n"
+                                "f 62 61 144\n"
+                                "f 144 61 82\n"
+                                "f 61 9 82\n"
+                                "f 48 87 11\n"
+                                "f 47 145 48\n"
+                                "f 46 146 47\n"
+                                "f 48 145 87\n"
+                                "f 145 86 87\n"
+                                "f 47 146 145\n"
+                                "f 146 147 145\n"
+                                "f 145 147 86\n"
+                                "f 147 85 86\n"
+                                "f 46 69 146\n"
+                                "f 69 68 146\n"
+                                "f 146 68 147\n"
+                                "f 68 67 147\n"
+                                "f 147 67 85\n"
+                                "f 67 10 85\n"
+                                "f 88 93 12\n"
+                                "f 89 148 88\n"
+                                "f 90 149 89\n"
+                                "f 88 148 93\n"
+                                "f 148 92 93\n"
+                                "f 89 149 148\n"
+                                "f 149 150 148\n"
+                                "f 148 150 92\n"
+                                "f 150 91 92\n"
+                                "f 90 75 149\n"
+                                "f 75 74 149\n"
+                                "f 149 74 150\n"
+                                "f 74 73 150\n"
+                                "f 150 73 91\n"
+                                "f 73 11 91\n"
+                                "f 94 88 12\n"
+                                "f 95 151 94\n"
+                                "f 96 152 95\n"
+                                "f 94 151 88\n"
+                                "f 151 89 88\n"
+                                "f 95 152 151\n"
+                                "f 152 153 151\n"
+                                "f 151 153 89\n"
+                                "f 153 90 89\n"
+                                "f 96 78 152\n"
+                                "f 78 77 152\n"
+                                "f 152 77 153\n"
+                                "f 77 76 153\n"
+                                "f 153 76 90\n"
+                                "f 76 7 90\n"
+                                "f 97 94 12\n"
+                                "f 98 154 97\n"
+                                "f 99 155 98\n"
+                                "f 97 154 94\n"
+                                "f 154 95 94\n"
+                                "f 98 155 154\n"
+                                "f 155 156 154\n"
+                                "f 154 156 95\n"
+                                "f 156 96 95\n"
+                                "f 99 81 155\n"
+                                "f 81 80 155\n"
+                                "f 155 80 156\n"
+                                "f 80 79 156\n"
+                                "f 156 79 96\n"
+                                "f 79 8 96\n"
+                                "f 100 97 12\n"
+                                "f 101 157 100\n"
+                                "f 102 158 101\n"
+                                "f 100 157 97\n"
+                                "f 157 98 97\n"
+                                "f 101 158 157\n"
+                                "f 158 159 157\n"
+                                "f 157 159 98\n"
+                                "f 159 99 98\n"
+                                "f 102 84 158\n"
+                                "f 84 83 158\n"
+                                "f 158 83 159\n"
+                                "f 83 82 159\n"
+                                "f 159 82 99\n"
+                                "f 82 9 99\n"
+                                "f 93 100 12\n"
+                                "f 92 160 93\n"
+                                "f 91 161 92\n"
+                                "f 93 160 100\n"
+                                "f 160 101 100\n"
+                                "f 92 161 160\n"
+                                "f 161 162 160\n"
+                                "f 160 162 101\n"
+                                "f 162 102 101\n"
+                                "f 91 87 161\n"
+                                "f 87 86 161\n"
+                                "f 161 86 162\n"
+                                "f 86 85 162\n"
+                                "f 162 85 102\n"
+                                "f 85 10 102";
+        #pragma endregion
+        Resources::Detail::ResourceManagement::m_Meshes["Atmosphere"] = boost::make_shared<Mesh>(data,COLLISION_TYPE_NONE,false);
+    }
 
-	m_Model = glm::translate(m_Model,m_Position);
-	m_Model = glm::scale(m_Model,m_Scale);
-	m_Model = glm::scale(m_Model,glm::vec3(1 + m_Atmosphere.height));
+    m_Mesh = Resources::getMesh("Atmosphere");
+
+    m_Position = glm::vec3(0,-10024,0);
+    m_Scale *= glm::vec3(10000,10000,10000);
+
+    m_Model = glm::translate(m_Model,m_Position);
+    m_Model = glm::scale(m_Model,m_Scale * glm::vec3(1 + m_Atmosphere.height));
 }
 Atmosphere::~Atmosphere(){
 }
 void Atmosphere::update(){
-	if(m_FollowCamera){
-		glm::v3 cameraPos = Resources::getActiveCamera()->getPosition();
-		m_Model[3][0] = (float)cameraPos.x + m_Position.x;
-		m_Model[3][1] = (float)cameraPos.y + m_Position.y;
-		m_Model[3][2] = (float)cameraPos.z + m_Position.z;
-	}
+    if(m_FollowCamera){
+        glm::v3 cameraPos = Resources::getActiveCamera()->getPosition();
+        m_Model[3][0] = (float)cameraPos.x + m_Position.x;
+        m_Model[3][1] = (float)cameraPos.y + m_Position.y;
+        m_Model[3][2] = (float)cameraPos.z + m_Position.z;
+    }
 }
 float Atmosphere::getRadius(){
-	return m_Mesh->getRadius() * glm::max(glm::max(m_Scale.x,m_Scale.y),m_Scale.z);
+    return m_Mesh->getRadius() * glm::max(glm::max(m_Scale.x,m_Scale.y),m_Scale.z);
 }
 glm::v3 Atmosphere::getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 void Atmosphere::render(){
     GLuint shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram();
-	Camera* cam = Resources::getActiveCamera();
-	SunLight* sun = static_cast<SunLight*>(Resources::getObject("Sun Light"));
+    Camera* cam = Resources::getActiveCamera();
+    SunLight* sun = static_cast<SunLight*>(Resources::getObject("Sun Light"));
     glUseProgram(shader);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	glm::v3 earthPosition = getPosition();
-	glm::v3 camPos = glm::v3(cam->getPosition() - earthPosition);
+    glm::v3 earthPosition = getPosition();
+    glm::v3 camPos = glm::v3(cam->getPosition() - earthPosition);
 
     glm::vec3 lightDir = glm::vec3(sun->getPosition() - earthPosition);
     lightDir = glm::normalize(lightDir);
 
     float innerRadius = getRadius();
-	float outerRadius = innerRadius + (innerRadius * m_Atmosphere.height);
+    float outerRadius = innerRadius + (innerRadius * m_Atmosphere.height);
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(cam->getViewProjection()));
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m_Model));
-	glUniform1f(glGetUniformLocation(shader, "far"),cam->getFar());
+    glUniform1f(glGetUniformLocation(shader, "far"),cam->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
     glUniform1i(glGetUniformLocation(shader,"nSamples"), 2);
@@ -60,38 +552,38 @@ void Atmosphere::render(){
     glUniform3f(glGetUniformLocation(shader,"v3CameraPos"), float(camPos.x),float(camPos.y),float(camPos.z));
     glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 
-	glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), m_Atmosphere.inverseWavelength.x,m_Atmosphere.inverseWavelength.y,m_Atmosphere.inverseWavelength.z);
+    glUniform3f(glGetUniformLocation(shader,"v3InvWavelength"), m_Atmosphere.inverseWavelength.x,m_Atmosphere.inverseWavelength.y,m_Atmosphere.inverseWavelength.z);
     float camHeight = float(glm::length(camPos));
     float camHeight2 = camHeight*camHeight;
-	glUniform1f(glGetUniformLocation(shader,"fCameraHeight"),camHeight);
+    glUniform1f(glGetUniformLocation(shader,"fCameraHeight"),camHeight);
     glUniform1f(glGetUniformLocation(shader,"fCameraHeight2"), camHeight2);
     glUniform1f(glGetUniformLocation(shader,"fOuterRadius"), outerRadius);
     glUniform1f(glGetUniformLocation(shader,"fOuterRadius2"), outerRadius*outerRadius);
     glUniform1f(glGetUniformLocation(shader,"fInnerRadius"), innerRadius);
     glUniform1f(glGetUniformLocation(shader,"fInnerRadius2"), innerRadius*innerRadius);
 
-	glUniform1f(glGetUniformLocation(shader,"fKrESun"), m_Atmosphere.Kr * m_Atmosphere.ESun);
+    glUniform1f(glGetUniformLocation(shader,"fKrESun"), m_Atmosphere.Kr * m_Atmosphere.ESun);
     glUniform1f(glGetUniformLocation(shader,"fKmESun"), m_Atmosphere.Km * m_Atmosphere.ESun);
     glUniform1f(glGetUniformLocation(shader,"fKr4PI"), m_Atmosphere.Kr * 4 * 3.14159f);
     glUniform1f(glGetUniformLocation(shader,"fKm4PI"), m_Atmosphere.Km * 4 * 3.14159f);
 
     float fScale = 1.0f / (outerRadius - innerRadius);
-	glUniform1f(glGetUniformLocation(shader,"fScaleDepth"),m_Atmosphere.scaledepth);
+    glUniform1f(glGetUniformLocation(shader,"fScaleDepth"),m_Atmosphere.scaledepth);
     glUniform1f(glGetUniformLocation(shader,"fScale"),fScale);
     glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / m_Atmosphere.scaledepth);
 
     // Gravity
-	glUniform1f(glGetUniformLocation(shader,"g"),m_Atmosphere.gravity);
+    glUniform1f(glGetUniformLocation(shader,"g"),m_Atmosphere.gravity);
     glUniform1f(glGetUniformLocation(shader,"g2"), m_Atmosphere.gravity*m_Atmosphere.gravity);
     glUniform1f(glGetUniformLocation(shader,"fExposure"),m_Atmosphere.exposure);
 
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
-	glCullFace(GL_FRONT);
+    glCullFace(GL_FRONT);
 
-	m_Mesh->render();
+    m_Mesh->render();
 
-	glCullFace(GL_BACK);
-	glDisable(GL_BLEND);
+    glCullFace(GL_BACK);
+    glDisable(GL_BLEND);
     glUseProgram(0);
 }

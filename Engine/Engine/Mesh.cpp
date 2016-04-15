@@ -158,9 +158,12 @@ Mesh::Mesh(float width, float height){
 
 	_calculateMeshRadius();
 }
-Mesh::Mesh(std::string filename,COLLISION_TYPE type){
+Mesh::Mesh(std::string filename,COLLISION_TYPE type,bool notMemory){
     m_Collision = nullptr;
-    _loadFromFile(filename, type);
+	if(notMemory)
+		_loadFromFile(filename, type);
+	else
+		_loadFromOBJMemory(filename,type);
 	_calculateMeshRadius();
 }
 Mesh::~Mesh(){
@@ -193,12 +196,133 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
     std::map<std::string,ObjectLoadingData> objects;
 
     std::string last = "";
-
-    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+	boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
     //first read in all vertex data
     int index = 1;
     for(std::string line; std::getline(str, line, '\n');){
+        std::string x; std::string y; std::string z;
+        unsigned int whilespaceCount = 0;
+        unsigned int slashCount = 0;
+        if(line[0] == 'o'){
+            if(last != ""){
+                ObjectLoadingData data;
+                data.Faces = listOfVerts;
+                data.Normals = normalData;
+                data.Points = pointData;
+                data.UVs = uvData;
+                objects[last] = data;
+                listOfVerts.clear();
+            }
+            last = line;
+        }
+        else if(line[0] == 'v'){ 
+            for(auto c:line){
+                if(c == ' ')                      whilespaceCount++;
+                else{
+                    if(whilespaceCount == 1)      x += c;
+                    else if(whilespaceCount == 2) y += c;
+                    else if(whilespaceCount == 3) z += c;
+                }
+            }
+            if(line[1] == ' ')//vertex point
+                pointData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+            else if(line[1] == 't')//vertex uv
+                uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),1-static_cast<float>(::atof(y.c_str()))));
+            else if(line[1] == 'n')//vertex norm
+                normalData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+            index++;
+        }
+        //faces
+        else if(line[0] == 'f' && line[1] == ' '){
+            std::vector<glm::vec3> vertices;
+            unsigned int count = 0;
+            for(auto c:line){
+                if(c == '/') {
+                    slashCount++;
+                }
+                else if(c == ' '){ 
+                    //global listOfVerts
+                    if(whilespaceCount != 0){
+                        glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+                        vertices.push_back(vertex);
+                        x = ""; y = ""; z = "";
+                        slashCount = 0;
+                    }
+                    whilespaceCount++;
+                }
+                else{
+                    if(whilespaceCount > 0){
+                        if(slashCount == 0)      x += c;
+                        else if(slashCount == 1) y += c;
+                        else if(slashCount == 2) z += c;
+                    }
+                }
+                count++;
+            }
+            glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+            vertices.push_back(vertex);
+            listOfVerts.push_back(vertices);
+        }
+    }
+    ObjectLoadingData data;
+    data.Faces = listOfVerts;
+    data.Normals = normalData;
+    data.Points = pointData;
+    data.UVs = uvData;
+    objects[last] = data;
+
+    for(auto o:objects){
+        for(auto face:o.second.Faces){
+            Vertex v1,v2,v3,v4;
+            v1.position = o.second.Points.at(static_cast<unsigned int>(face.at(0).x-1));
+            v2.position = o.second.Points.at(static_cast<unsigned int>(face.at(1).x-1));
+            v3.position = o.second.Points.at(static_cast<unsigned int>(face.at(2).x-1));
+        
+            if(o.second.UVs.size() > 0){
+                v1.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(0).y-1));
+                v2.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(1).y-1));
+                v3.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(2).y-1));
+            }
+            if(o.second.Normals.size() > 0){
+                v1.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(0).z-1));
+                v2.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(1).z-1));
+                v3.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(2).z-1));
+            }
+            if(face.size() == 4){//quad
+                v4.position = o.second.Points.at(static_cast<unsigned int>(face.at(3).x-1));
+                if(o.second.UVs.size() > 0)
+                    v4.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(3).y-1));
+                if(o.second.Normals.size() > 0)
+                    v4.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(3).z-1));
+                _generateQuad(v1,v2,v3,v4);
+            }
+            else{//triangle
+                _generateTriangle(v1,v2,v3);
+            }
+        }
+    }
+}
+void Mesh::_loadFromOBJMemory(std::string d,COLLISION_TYPE type){
+	if(type == COLLISION_TYPE_NONE){
+		m_Collision = new Collision(new btEmptyShape());
+	}
+
+    std::vector<glm::vec3> pointData;
+    std::vector<glm::vec2> uvData;
+    std::vector<glm::vec3> normalData;
+    std::vector<std::vector<glm::vec3>> listOfVerts;
+
+    std::map<std::string,ObjectLoadingData> objects;
+
+    std::string last = "";
+
+	std::istringstream input;
+    input.str(d);
+
+    //first read in all vertex data
+    int index = 1;
+    for(std::string line; std::getline(input, line, '\n');){
         std::string x; std::string y; std::string z;
         unsigned int whilespaceCount = 0;
         unsigned int slashCount = 0;
