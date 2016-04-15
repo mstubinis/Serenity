@@ -22,7 +22,6 @@ GameCamera::~GameCamera()
 {
 }
 void GameCamera::update(float dt){
-    Camera::update(dt);
     switch(m_State){
         case CAMERA_STATE_FOLLOW:{
             m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * 0.02f);
@@ -66,6 +65,7 @@ void GameCamera::update(float dt){
             break;
         }
         case CAMERA_STATE_FREEFORM:{
+			lookAt(getPosition(),getPosition() + getForward(), getUp());
             break;
         }
     }

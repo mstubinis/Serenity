@@ -21,7 +21,7 @@ Camera::Camera(std::string name, float angle, float aspectRatio, float near, flo
     m_Type = CAMERA_TYPE_PERSPECTIVE;
 
     setPerspectiveProjection();
-    lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
+    lookAt(getPosition(),getPosition() + getForward(), getUp());
 
     Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
 }
@@ -36,7 +36,7 @@ Camera::Camera(std::string name, float left, float right, float bottom, float to
     m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
 
     setOrthoProjection(left,right,bottom,top);
-    lookAt(getPosition(),getPosition() + glm::v3(getForward()), glm::v3(getUp()));
+    lookAt(getPosition(),getPosition() + getForward(), getUp());
 
     Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
 }
@@ -60,39 +60,36 @@ void Camera::_constructFrustrum(){
     }
 }
 void Camera::resize(unsigned int width, unsigned int height){
-    if(m_Type == CAMERA_TYPE_PERSPECTIVE){
-        setAspectRatio(float(width)/float(height));
-    }
-    else{
-        setOrthoProjection(0,float(width),0,float(height));
-    }
+    if(m_Type == CAMERA_TYPE_PERSPECTIVE){setAspectRatio(float(width)/float(height));}
+    else{setOrthoProjection(0,float(width),0,float(height));}
 }
 Camera::~Camera()
 { 
 }
-void Camera::setPerspectiveProjection(){ 
-    m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far); 
-}
-void Camera::setOrthoProjection(float left, float right, float bottom, float top){
-    m_Projection = glm::ortho(left,right,bottom,top,m_Near,m_Far);
-}
+void Camera::setPerspectiveProjection(){m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far);}
+void Camera::setOrthoProjection(float l, float r, float b, float t){m_Projection = glm::ortho(l,r,b,t,m_Near,m_Far);}
 void Camera::setAspectRatio(float ratio){ 
     m_AspectRatio = ratio;
     setPerspectiveProjection();
 }
 void Camera::lookAt(glm::v3 target){ Camera::lookAt(getPosition(),target,glm::v3(getUp())); }
 void Camera::lookAt(glm::v3 target,glm::v3 up){ Camera::lookAt(getPosition(),target,up); }
-void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){ 
+void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
+	setPosition(eye);
     m_View = glm::lookAt(eye,target,up);
-    m_Orientation = glm::toQuat(glm::inverse(m_View));
+	m_Orientation = glm::conjugate(glm::toQuat(m_View));
+	m_Forward = -glm::normalize(eye-target);
+	m_Up = glm::normalize(up);
+	m_Right = glm::normalize(glm::cross(m_Forward,m_Up));
+	_constructFrustrum();
+	ObjectBasic::update(Resources::dt());
 }
 void Camera::lookAt(Object* target, bool targetUp){
     glm::v3 u; if(!targetUp) u = glm::v3(getUp()); else u = target->getUp();
     Camera::lookAt((getPosition(),target->getPosition(),u));
 }
 void Camera::update(float dt){
-    _constructFrustrum();
-    ObjectBasic::update(dt);
+	lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
 bool Camera::sphereIntersectTest(Object* obj){
     return sphereIntersectTest(obj->getPosition(),obj->getRadius());
