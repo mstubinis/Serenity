@@ -1,5 +1,7 @@
 #include "Vehicle.h"
 #include "Engine_Physics.h"
+#include <bullet/btBulletCollisionCommon.h>
+#include <bullet/btBulletDynamicsCommon.h>
 
 using namespace Engine;
 

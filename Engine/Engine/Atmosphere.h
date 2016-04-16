@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_ATMOSPHERE_H
 #define ENGINE_ATMOSPHERE_H
 

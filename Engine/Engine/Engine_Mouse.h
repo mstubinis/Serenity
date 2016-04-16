@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_MOUSE_H
 #define ENGINE_MOUSE_H
 

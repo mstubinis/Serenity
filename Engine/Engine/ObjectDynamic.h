@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_OBJECTDYNAMIC_H
 #define ENGINE_OBJECTDYNAMIC_H
 

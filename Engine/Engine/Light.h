@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_LIGHT_H
 #define ENGINE_LIGHT_H
 #include "ObjectDisplay.h"

@@ -1,5 +1,8 @@
 #include "ShaderProgram.h"
 #include "Engine_Resources.h"
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/stream.hpp>
 
 ShaderP::ShaderP(std::string vs, std::string ps, bool fromFile){
     m_VertexShader = vs;

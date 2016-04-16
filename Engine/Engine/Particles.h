@@ -1,12 +1,13 @@
+#pragma once
 #ifndef ENGINE_PARTICLES_H
 #define ENGINE_PARTICLES_H
 
 #include "Object.h"
-#include <GL/glew.h>
-#include <GL/GL.h>
 
 class SunLight;
 class Material;
+class Particle;
+
 struct ParticleInfo{
     Material* material;
 
@@ -20,9 +21,6 @@ struct ParticleInfo{
     ParticleInfo(Material* material,glm::vec4 startColor = glm::vec4(1), glm::vec4 endColor = glm::vec4(1));
     ~ParticleInfo();
 };
-
-class Particle;
-
 class ParticleEmitter: public ObjectBasic{
     private:
         ParticleInfo* m_info;
@@ -60,7 +58,7 @@ class Particle{
         float zRot;
         float zRotVelocity;
     public:
-        Particle(ParticleEmitter*,glm::v3 pos,glm::vec4 col,glm::vec2 scl = glm::vec2(1,1) ,float rot = 0,glm::vec3 vel = glm::vec3(0,0,0),float rVel = 0, glm::vec2 sVel = glm::vec2(0,0));
+        Particle(ParticleEmitter*,glm::v3 pos,glm::vec4 col,glm::vec2 scl = glm::vec2(1) ,float rot = 0,glm::vec3 vel = glm::vec3(0),float rVel = 0, glm::vec2 sVel = glm::vec2(0));
         ~Particle();
         void update(float);
 

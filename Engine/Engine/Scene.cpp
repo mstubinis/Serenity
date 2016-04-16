@@ -5,6 +5,7 @@
 #include "Skybox.h"
 #include "Particles.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 using namespace Engine;
 using namespace boost;

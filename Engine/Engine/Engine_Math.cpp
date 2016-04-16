@@ -1,6 +1,8 @@
 #include "Engine_Math.h"
 #include "Engine_Resources.h"
 #include "Camera.h"
+#include <bullet/btBulletCollisionCommon.h>
+#include <bullet/btBulletDynamicsCommon.h>
 
 using namespace Engine;
 

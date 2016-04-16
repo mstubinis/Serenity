@@ -1,8 +1,11 @@
+#pragma once
 #ifndef ENGINE_VEHICLE_H
 #define ENGINE_VEHICLE_H
 
 #include "ObjectDynamic.h"
 #include "ObjectDisplay.h"
+#include <bullet/BulletDynamics/Vehicle/btRaycastVehicle.h>
+class btDefaultVehicleRaycaster;
 
 class Wheel: public ObjectDynamic{
 	protected:

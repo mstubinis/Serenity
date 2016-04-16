@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_TERRAIN_H
 #define ENINGE_TERRAIN_H
 

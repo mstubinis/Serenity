@@ -1,16 +1,12 @@
+#pragma once
 #ifndef ENGINE_ENGINE_EVENTS_H
 #define ENGINE_ENGINE_EVENTS_H
 
 #include <string>
-#include <SFML/Window.hpp>
-
 #include <unordered_map>
-#include <boost/algorithm/string.hpp> 
-
 #include <glm/glm.hpp>
 
 typedef unsigned int uint;
-
 
 namespace Engine{
     namespace Events{
@@ -26,20 +22,8 @@ namespace Engine{
 
                     static glm::vec2 m_Position, m_Position_Previous,m_Difference;
 
-                    static bool MouseProcessing::_IsMouseButtonDown(std::string str){
-                        boost::algorithm::to_lower(str);
-                        uint key = MouseProcessing::m_MouseMap[str];
-                        if(MouseProcessing::m_MouseStatus[key] == true)
-                            return true;
-                        return false;
-                    }
-                    static bool MouseProcessing::_IsMouseButtonDownOnce(std::string str){
-                        bool result = MouseProcessing::_IsMouseButtonDown(str);
-                        uint key = MouseProcessing::m_MouseMap[str];
-                        if(result == true && m_currentButton == key && (m_currentButton != m_previousButton))
-                            return true;
-                        return false;
-                    }
+                    static bool MouseProcessing::_IsMouseButtonDown(std::string str);
+                    static bool MouseProcessing::_IsMouseButtonDownOnce(std::string str);
             };
             static glm::vec2 getMouseDifference(){ return MouseProcessing::m_Difference; }
             static glm::vec2 getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
@@ -57,27 +41,9 @@ namespace Engine{
                     static uint m_previousKey;
                     static std::unordered_map<uint,bool> m_KeyStatus;
 
-                    static bool KeyProcessing::_IsKeyDown(std::string str){
-                        boost::algorithm::to_lower(str);
-                        uint key = KeyProcessing::m_KeyMap[str];
-                        if(KeyProcessing::m_KeyStatus[key] == true)
-                            return true;
-                        return false;
-                    }
-                    static bool KeyProcessing::_IsKeyUp(std::string str){
-                        boost::algorithm::to_lower(str);
-                        uint key = KeyProcessing::m_KeyMap[str];
-                        if(KeyProcessing::m_KeyStatus[key] == false)
-                            return true;
-                        return false;
-                    }
-                    static bool KeyProcessing::_IsKeyDownOnce(std::string str){
-                        bool result = KeyProcessing::_IsKeyDown(str);
-                        uint key = KeyProcessing::m_KeyMap[str];
-                        if(result == true && m_currentKey == key && (m_currentKey != m_previousKey))
-                            return true;
-                        return false;
-                    }
+                    static bool KeyProcessing::_IsKeyDown(std::string str);
+                    static bool KeyProcessing::_IsKeyUp(std::string str);
+                    static bool KeyProcessing::_IsKeyDownOnce(std::string str);
             };
             static bool isKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }
             static bool isKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }

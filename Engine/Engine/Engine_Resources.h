@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_ENGINE_RESOURCES_H
 #define ENGINE_ENGINE_RESOURCES_H
 

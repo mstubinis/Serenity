@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_SKYBOX_H
 #define ENGINE_SKYBOX_H
 

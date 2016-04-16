@@ -1,13 +1,15 @@
+#pragma once
 #ifndef ENGINE_TEXTURE_H
 #define ENGINE_TEXTURE_H
 
+#define GL_TEXTURE_2D 0x0DE1
+#define GL_TEXTURE_CUBE_MAP 0x8513
+
 #include <string>
 #include <vector>
-#include <GL/glew.h>
-#include <GL/GL.h>
-#include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
 
+typedef unsigned int GLuint;
 
 class Texture final{
     private:

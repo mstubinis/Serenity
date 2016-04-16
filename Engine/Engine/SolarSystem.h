@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SOLARSYSTEM_H
 #define SOLARSYSTEM_H
 

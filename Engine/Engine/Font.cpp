@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include <sstream>
+#include <GLM/gtc/type_ptr.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>

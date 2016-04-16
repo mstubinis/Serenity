@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_ENGINE_MATH_H
 #define ENGINE_ENGINE_MATH_H
 
@@ -7,8 +8,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+
+class btRigidBody;
 
 namespace glm{
     #ifdef ENGINE_PRECISION_NORMAL

@@ -1,7 +1,6 @@
 #include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
-#include "Engine.h"
 
 using namespace Engine;
 

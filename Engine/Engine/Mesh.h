@@ -1,16 +1,15 @@
+#pragma once
 #ifndef ENGINE_MESH_H
 #define ENGINE_MESH_H
 
-#include <string>
-#include <vector>
-#include <glm/glm.hpp>
-#include <GL/glew.h>
-#include <GL/GL.h>
+#define GL_TRIANGLES 0x0004
+
 #include "Engine_Physics.h"
 
 namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
+typedef unsigned int GLuint;
 
 const unsigned int NUM_VERTEX_DATA = 5;
 const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};

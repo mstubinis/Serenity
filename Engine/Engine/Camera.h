@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_CAMERA_H
 #define ENGINE_CAMERA_H
 

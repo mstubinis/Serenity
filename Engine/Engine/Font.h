@@ -1,9 +1,8 @@
+#pragma once
 #ifndef ENGINE_FONT_H
 #define ENGINE_FONT_H
-#include <GL/glew.h>
-#include <GL/GL.h>
+
 #include <GLM/gtc/matrix_transform.hpp>
-#include <GLM/gtc/type_ptr.hpp>
 #include <string>
 #include <unordered_map>
 

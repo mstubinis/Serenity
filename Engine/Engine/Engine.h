@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
@@ -6,17 +7,15 @@ class Engine_Window;
 class Engine_Mouse;
 
 #include <string>
-#include <GL/glew.h>
-#include <GL/GL.h>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <glm/glm.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
 #include <windowsx.h>
 #endif
 
+typedef unsigned int GLuint;
 typedef unsigned int uint;
 
 namespace Engine{

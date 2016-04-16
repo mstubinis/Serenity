@@ -98,6 +98,47 @@ void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int ma
         }
     }
 }
+std::vector<glm::v3> Engine::Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
+ 	if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(ignored);
+ 	std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
+ 	if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(ignored);
+ 	return result;
+}
+std::vector<glm::v3> Engine::Physics::rayCast(const btVector3& s, const btVector3& e,std::vector<btRigidBody*> ignored){
+ 	for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(object);
+ 	std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
+ 	for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(object);
+ 	return result;
+ }
+std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,Object* ignored){
+ 	btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
+ 	btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
+ 	ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
+ 	if(b != NULL) return Engine::Physics::rayCast(_s,_e,b->getRigidBody());
+ 	return Engine::Physics::rayCast(_s,_e,nullptr);
+ }
+std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,std::vector<Object*> ignored){
+ 	btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
+ 	btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
+ 	std::vector<btRigidBody*> objs;
+	for(auto o:ignored){
+ 		ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(o);
+ 		if(b != NULL) objs.push_back(b->getRigidBody());
+ 	}
+ 	return Engine::Physics::rayCast(_s,_e,objs);
+}
+std::vector<glm::v3> Engine::Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
+ 	btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+ 	Detail::PhysicsManagement::m_dynamicsWorld->rayTest(start, end, RayCallback);
+ 	std::vector<glm::v3> result;
+ 	if(RayCallback.hasHit()){
+ 		glm::v3 res1 = glm::v3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
+ 		glm::v3 res2 = glm::v3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
+ 		result.push_back(res1);
+ 		result.push_back(res2);
+ 	}
+ 	return result;
+}
 void Engine::Physics::Detail::PhysicsManagement::render(){
 	if(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
 		glUseProgram(0);

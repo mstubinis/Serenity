@@ -1,3 +1,4 @@
+#pragma once
 #ifndef STATION_H
 #define STATION_H
 

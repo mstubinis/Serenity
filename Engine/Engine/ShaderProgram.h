@@ -1,14 +1,9 @@
+#pragma once
 #ifndef ENGINE_SHADERPROGRAM_H
 #define ENGINE_SHADERPROGRAM_H
 
-#include <vector>
 #include <string>
-#include <GL/glew.h>
-#include <GL/GL.h>
-
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/iostreams/stream.hpp>
+typedef unsigned int GLuint;
 
 class ShaderP final{
     private:

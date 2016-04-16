@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_ENGINE_SOUNDS_H
 #define ENGINE_ENGINE_SOUNDS_H
 

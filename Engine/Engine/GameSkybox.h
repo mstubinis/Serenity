@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GAMESKYBOX_H
 #define GAMESKYBOX_H
 

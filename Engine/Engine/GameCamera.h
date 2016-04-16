@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GAMECAMERA_H
 #define GAMECAMERA_H
 

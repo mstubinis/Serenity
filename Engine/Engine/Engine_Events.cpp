@@ -1,4 +1,6 @@
 #include "Engine_Events.h"
+#include <SFML/Window.hpp>
+#include <boost/algorithm/string.hpp> 
 
 using namespace Engine::Events;
 
@@ -260,3 +262,39 @@ uint Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
 uint Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
 uint Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
 uint Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
+
+bool Mouse::MouseProcessing::_IsMouseButtonDown(std::string str){
+    boost::algorithm::to_lower(str);
+    uint key = MouseProcessing::m_MouseMap[str];
+    if(MouseProcessing::m_MouseStatus[key] == true)
+        return true;
+    return false;
+}
+bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(std::string str){
+    bool result = MouseProcessing::_IsMouseButtonDown(str);
+    uint key = MouseProcessing::m_MouseMap[str];
+    if(result == true && m_currentButton == key && (m_currentButton != m_previousButton))
+        return true;
+    return false;
+}
+bool Keyboard::KeyProcessing::_IsKeyDown(std::string str){
+    boost::algorithm::to_lower(str);
+    uint key = KeyProcessing::m_KeyMap[str];
+    if(KeyProcessing::m_KeyStatus[key] == true)
+        return true;
+    return false;
+}
+bool Keyboard::KeyProcessing::_IsKeyUp(std::string str){
+    boost::algorithm::to_lower(str);
+    uint key = KeyProcessing::m_KeyMap[str];
+    if(KeyProcessing::m_KeyStatus[key] == false)
+        return true;
+    return false;
+}
+bool Keyboard::KeyProcessing::_IsKeyDownOnce(std::string str){
+    bool result = KeyProcessing::_IsKeyDown(str);
+    uint key = KeyProcessing::m_KeyMap[str];
+    if(result == true && m_currentKey == key && (m_currentKey != m_previousKey))
+        return true;
+    return false;
+}

@@ -1,10 +1,13 @@
+#pragma once
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
 #include <string>
 #include <unordered_map>
-#include <GL/glew.h>
-#include <GL/GL.h>
+
+class Texture;
+typedef unsigned int GLuint;
+typedef char GLchar;
 
 enum MATERIAL_COMPONENT_TYPE{
     MATERIAL_COMPONENT_TEXTURE_DIFFUSE,
@@ -25,7 +28,6 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_N
     "NormalMap",
     "GlowMap"
 };
-class Texture;
 class Material final{
     private:
         void _init(Texture*,Texture*,Texture*);

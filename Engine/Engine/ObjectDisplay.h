@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_OBJECTDISPLAY_H
 #define ENGINE_OBJECTDISPLAY_H
 

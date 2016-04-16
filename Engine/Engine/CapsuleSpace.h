@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CAPSULE_SPACE_H
 #define CAPSULE_SPACE_H
 

@@ -1,12 +1,10 @@
+#pragma once
 #ifndef ENGINE_SCENE_H
 #define ENGINE_SCENE_H
 
 #include <map>
 #include <string>
 #include <glm/glm.hpp>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 class Object;
 class Camera;
