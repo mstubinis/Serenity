@@ -21,7 +21,7 @@ sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
 GLuint Engine::Detail::EngineClass::m_vao = 0;
 
 void Engine::Detail::EngineClass::init(uint api, const char* name,uint width,uint height){
-	srand((unsigned)time(0));
+    srand((unsigned)time(0));
     Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,width,height,api);
     Resources::Detail::ResourceManagement::m_Mouse = new Engine_Mouse();
     initGame(api);
@@ -35,9 +35,9 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Sound::Detail::SoundManagement::destruct();
 }
 void Engine::Detail::EngineClass::initGame(uint api){
-	if(api == ENGINE_RENDERING_API_DIRECTX)
-		return;
-	Engine::getWindow()->setKeyRepeatEnabled(false);
+    if(api == ENGINE_RENDERING_API_DIRECTX)
+        return;
+    Engine::getWindow()->setKeyRepeatEnabled(false);
     Resources::getMouse()->setPosition(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
@@ -52,10 +52,10 @@ void Engine::Detail::EngineClass::initGame(uint api){
     Game::initLogic();
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
-	if(Resources::Detail::ResourceManagement::m_Scenes.size() == 0)
+    if(Resources::Detail::ResourceManagement::m_Scenes.size() == 0)
         new Scene("Default");
 
-	Resources::initRenderingContexts(api);
+    Resources::initRenderingContexts(api);
 
     //glGenVertexArrays( 1, &m_vao );
     //glBindVertexArray( m_vao ); //Binds vao, all vertex attributes will be bound to this VAO
@@ -84,36 +84,36 @@ void Engine::Detail::EngineClass::update(uint api){
     Resources::getCurrentScene()->update(Resources::dt());
     Engine::Physics::Detail::PhysicsManagement::update(Resources::dt());
     //Events::Mouse::MouseProcessing::m_Difference *= (0.975f * (1-Resources::dt()));
-	Events::Mouse::MouseProcessing::m_Difference *= (0.975f);
+    Events::Mouse::MouseProcessing::m_Difference *= (0.975f);
     RESET_EVENTS();
 }
 void Engine::Detail::EngineClass::render(uint api){
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		Game::render();
-		Engine::Renderer::Detail::RenderManagement::render();
-		Resources::getWindow()->display();
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
-		//Game::render();
-		Engine::Renderer::Detail::RenderManagement::renderDirectX();
-		//Resources::getWindow()->display();
-	}
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        Game::render();
+        Engine::Renderer::Detail::RenderManagement::render();
+        Resources::getWindow()->display();
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
+        //Game::render();
+        Engine::Renderer::Detail::RenderManagement::renderDirectX();
+        //Resources::getWindow()->display();
+    }
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint api, unsigned int w, unsigned int h,bool saveSize){
-	Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
-	for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		glViewport(0,0,w,h);
-		Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
-		for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
-			Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,w,h);
-		}
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
-	}
+    Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
+    for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        glViewport(0,0,w,h);
+        Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
+        for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
+            Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,w,h);
+        }
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
+    }
 
-	if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
+    if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
 }
 void Engine::Detail::EngineClass::EVENT_CLOSE(){
     Resources::getWindow()->close();
@@ -215,6 +215,6 @@ void Engine::Detail::EngineClass::run(){
             }
         }
         update(Resources::Detail::ResourceManagement::m_RenderingAPI);
-		render(Resources::Detail::ResourceManagement::m_RenderingAPI);
+        render(Resources::Detail::ResourceManagement::m_RenderingAPI);
     }
 }

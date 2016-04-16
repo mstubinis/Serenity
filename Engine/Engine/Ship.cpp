@@ -284,7 +284,7 @@ void Ship::update(float dt){
         }
         #pragma endregion
 
-		if(Keyboard::isKeyDownOnce("t") && Resources::getCurrentScene()->getName() != "CapsuleSpace"){
+        if(Keyboard::isKeyDownOnce("t") && Resources::getCurrentScene()->getName() != "CapsuleSpace"){
             setTarget(m_PlayerCamera->getObjectInCenterRay(this));
         }
     }

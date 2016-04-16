@@ -86,7 +86,7 @@ void Engine::Resources::addMesh(std::string name,float x,float y,float w,float h
 }
 void Engine::Resources::addMesh(std::string file, COLLISION_TYPE type){
     std::string name = file.substr(0, file.size()-4);
-	Engine::Resources::addMesh(name,file,type);
+    Engine::Resources::addMesh(name,file,type);
 }
 
 void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
@@ -174,23 +174,23 @@ void Engine::Resources::initResources(){
     addShader("Deferred_Bloom","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_bloom_frag.glsl");
     addShader("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl");
     addShader("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl");
-	addShader("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl");
+    addShader("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl");
     addShader("Deferred_Skybox_HUD","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_HUD.glsl");
     addShader("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl");
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }
 void Engine::Resources::initRenderingContexts(unsigned int api){
-	for(auto mesh:Detail::ResourceManagement::m_Meshes)
-		mesh.second.get()->initRenderingContext(api);
-	for(auto shader:Detail::ResourceManagement::m_Shaders)
-		shader.second.get()->initRenderingContext(api);
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)
+        mesh.second.get()->initRenderingContext(api);
+    for(auto shader:Detail::ResourceManagement::m_Shaders)
+        shader.second.get()->initRenderingContext(api);
 }
 void Engine::Resources::cleanupRenderingContexts(unsigned int api){
-	for(auto mesh:Detail::ResourceManagement::m_Meshes)
-		mesh.second.get()->cleanupRenderingContext(api);
-	for(auto shader:Detail::ResourceManagement::m_Shaders)
-		shader.second.get()->cleanupRenderingContext(api);
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)
+        mesh.second.get()->cleanupRenderingContext(api);
+    for(auto shader:Detail::ResourceManagement::m_Shaders)
+        shader.second.get()->cleanupRenderingContext(api);
 }
 void Engine::Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s)

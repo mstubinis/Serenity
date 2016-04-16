@@ -23,18 +23,18 @@ struct SkyboxTextures final{
 
 class ISkybox{
     public:
-		virtual ~ISkybox(){}
+        virtual ~ISkybox(){}
         virtual void update() = 0;
         virtual void render() = 0;
 };
 class SkyboxEmpty: public ISkybox{
-	protected:
-		glm::mat4 m_Model;
+    protected:
+        glm::mat4 m_Model;
     public:
-		SkyboxEmpty(std::string name,Scene* = nullptr);
-		virtual ~SkyboxEmpty();
-		virtual void update(){}
-		virtual void render(){}
+        SkyboxEmpty(std::string name,Scene* = nullptr);
+        virtual ~SkyboxEmpty();
+        virtual void update(){}
+        virtual void render(){}
 };
 
 class Skybox: public SkyboxEmpty{

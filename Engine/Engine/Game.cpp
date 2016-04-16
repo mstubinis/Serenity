@@ -23,7 +23,7 @@ void Game::cleanup(){
     delete m_HUD;
 }
 void Game::initResources(){
-	Resources::getWindow()->setIcon("data/Textures/icon.png");
+    Resources::getWindow()->setIcon("data/Textures/icon.png");
 
     //Resources::addSoundAsMusic("Test","data/Sounds/Music/test.ogg");
 
@@ -51,7 +51,7 @@ void Game::initResources(){
     Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
-	Engine::getWindow()->setMouseCursorVisible(false);
+    Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
     Engine::Renderer::Settings::enableSSAO(true);
 
@@ -71,21 +71,21 @@ void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
-	}
+    }
     if(Events::Keyboard::isKeyDownOnce("f4")){
-		Engine::Renderer::Settings::renderDiffuseOnly();
+        Engine::Renderer::Settings::renderDiffuseOnly();
     }
     if(Events::Keyboard::isKeyDownOnce("f5")){
-		Engine::Renderer::Settings::renderPositionOnly();
+        Engine::Renderer::Settings::renderPositionOnly();
     }
     if(Events::Keyboard::isKeyDownOnce("f6")){
-		Engine::Renderer::Settings::renderNormalsOnly();
+        Engine::Renderer::Settings::renderNormalsOnly();
     }
     if(Events::Keyboard::isKeyDownOnce("f7")){
-		Engine::Renderer::Settings::renderSSAOOnly();
+        Engine::Renderer::Settings::renderSSAOOnly();
     }
     if(Events::Keyboard::isKeyDownOnce("f8")){
-		Engine::Renderer::Settings::renderBloomOnly();
+        Engine::Renderer::Settings::renderBloomOnly();
     }
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Resources::setCurrentScene("CapsuleSpace");
@@ -101,21 +101,21 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f12")){
         Engine::Renderer::Settings::renderNormally();
     }
-	/*
+    /*
 
     if(Events::Keyboard::isKeyDownOnce("f9")){
-		Engine::setFullScreen(true);
+        Engine::setFullScreen(true);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
         Engine::setFullScreen(false);
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-		Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
+        Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
     }
     if(Events::Keyboard::isKeyDownOnce("f12")){
         Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_OPENGL);
     }
-	*/
+    */
     m_HUD->update(dt);
 }
 void Game::render(){

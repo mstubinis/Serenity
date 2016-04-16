@@ -8,8 +8,8 @@ struct SkyboxSunFlare final{
     glm::vec3 position;
     glm::vec3 color;
     float scale;
-	SkyboxSunFlare(){ position = glm::vec3(0); color = glm::vec3(0); scale = 0;}
-	~SkyboxSunFlare(){ position = glm::vec3(0); color = glm::vec3(0); scale = 0;}
+    SkyboxSunFlare(){ position = glm::vec3(0); color = glm::vec3(0); scale = 0;}
+    ~SkyboxSunFlare(){ position = glm::vec3(0); color = glm::vec3(0); scale = 0;}
 };
 
 class GameSkybox: public Skybox{

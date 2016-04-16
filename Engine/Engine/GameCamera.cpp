@@ -65,7 +65,7 @@ void GameCamera::update(float dt){
             break;
         }
         case CAMERA_STATE_FREEFORM:{
-			lookAt(getPosition(),getPosition() + getForward(), getUp());
+            lookAt(getPosition(),getPosition() + getForward(), getUp());
             break;
         }
     }
@@ -75,7 +75,7 @@ Object* GameCamera::getObjectInCenterRay(Object* exclusion){
     std::vector<Object*> objs;
     for(auto object:Engine::Resources::getCurrentScene()->getObjects()){
         if(object.second->rayIntersectSphere(this)){
-			if(object.second != exclusion)
+            if(object.second != exclusion)
                 objs.push_back(object.second);
         }
     }

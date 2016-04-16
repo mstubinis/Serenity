@@ -16,15 +16,15 @@ int main(){
         if(GetConsoleWindow() == NULL){ 
             AllocConsole();
         }
-		freopen("CONIN$", "r", stdin);
-		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
+        freopen("CONIN$", "r", stdin);
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
         #ifndef _DEBUG
             ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
         #endif
     #endif
     Detail::EngineClass::init(Resources::Detail::ResourceManagement::m_RenderingAPI,"Engine",1024,768);
-	//Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
+    //Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
     Detail::EngineClass::run();
     Detail::EngineClass::destruct();
     FreeConsole();

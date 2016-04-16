@@ -13,7 +13,7 @@ typedef unsigned int GLuint;
 
 class Texture final{
     private:
-		std::vector<unsigned char> m_Pixels;
+        std::vector<unsigned char> m_Pixels;
         std::string m_Directory;
         std::string m_Name;
         GLuint m_TextureAddress;
@@ -22,14 +22,14 @@ class Texture final{
         void _loadFromFilesCubemap(std::string file[],GLuint);
         GLuint m_Type;
         unsigned int m_Width, m_Height;
-		void _init();
+        void _init();
     public:
         Texture(const unsigned char*,unsigned int, unsigned int,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file[],std::string name = "Cubemap ",GLuint = GL_TEXTURE_CUBE_MAP);
         ~Texture();
 
-		const unsigned char* getPixels();
+        const unsigned char* getPixels();
 
         const GLuint getTextureAddress() const { return m_TextureAddress; }
         const GLuint getTextureType() const { return m_Type; }

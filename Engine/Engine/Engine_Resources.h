@@ -43,14 +43,14 @@ struct ParticleInfo;
 //}
 
 template<class K, class V> std::string incrementName(std::unordered_map<K,V>& map, std::string name){
-	std::string ret = name;unsigned int count = 0;
+    std::string ret = name;unsigned int count = 0;
     if(map.size() > 0){while(map.count(ret)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
-	return ret;
+    return ret;
 }
 template<class K, class V> std::string incrementName(std::map<K,V>& map, std::string name){
-	std::string ret = name;unsigned int count = 0;
+    std::string ret = name;unsigned int count = 0;
     if(map.size() > 0){while(map.count(ret)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
-	return ret;
+    return ret;
 }
 
 namespace Engine{
@@ -58,7 +58,7 @@ namespace Engine{
         namespace Detail{
             class ResourceManagement final{
                 public:
-					static ENGINE_RENDERING_API m_RenderingAPI;
+                    static ENGINE_RENDERING_API m_RenderingAPI;
                     static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
                     static Scene* m_CurrentScene;
 
@@ -86,13 +86,13 @@ namespace Engine{
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
 
-		static ENGINE_RENDERING_API getAPI(){ return Detail::ResourceManagement::m_RenderingAPI; }
+        static ENGINE_RENDERING_API getAPI(){ return Detail::ResourceManagement::m_RenderingAPI; }
 
         static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
 
         Engine_Window* getWindow();
-		sf::Vector2u getWindowSize();
+        sf::Vector2u getWindowSize();
         Engine_Mouse* getMouse();
 
         Camera* getActiveCamera();
@@ -161,7 +161,7 @@ namespace Engine{
 
         void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
         void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
-		void addMesh(std::string name, float x, float y, float w, float h);
+        void addMesh(std::string name, float x, float y, float w, float h);
         void removeMesh(std::string name);
 
         void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
@@ -181,8 +181,8 @@ namespace Engine{
         void removeSound(std::string name);
 
         void initResources();
-		void initRenderingContexts(unsigned int api);
-		void cleanupRenderingContexts(unsigned int api);
+        void initRenderingContexts(unsigned int api);
+        void cleanupRenderingContexts(unsigned int api);
     };
     //TODO: Move this somewhere else
     template<typename T>

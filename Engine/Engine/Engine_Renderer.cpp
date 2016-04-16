@@ -102,12 +102,12 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 void Engine::Renderer::Detail::RenderManagement::destruct(){
     SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
 
-	#ifdef _WIN32
-	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
-	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXBackBuffer);
-	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDevice);
-	SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDeviceContext);
-	#endif
+    #ifdef _WIN32
+    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
+    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXBackBuffer);
+    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDevice);
+    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDeviceContext);
+    #endif
 }
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
     Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,color,glm::vec2(width,height),angle,depth));
@@ -128,7 +128,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects()
     for(auto item:m_ObjectsToBeForwardRendered){
         item.object->draw(item.shader,RendererInfo::debug);
     }
-	m_ObjectsToBeForwardRendered.clear();
+    m_ObjectsToBeForwardRendered.clear();
 }
 
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
@@ -320,8 +320,8 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     }
     Renderer::Detail::RenderManagement::_passFinal();
 
-	//copy depth over
-	glColorMask(0,0,0,0);
+    //copy depth over
+    glColorMask(0,0,0,0);
     GLuint shader = Resources::getShader("Copy_Depth")->getShaderProgram();
     glUseProgram(shader);
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
@@ -337,9 +337,9 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-	glUseProgram(0);
-	glColorMask(1,1,1,1);
-	/////////////
+    glUseProgram(0);
+    glColorMask(1,1,1,1);
+    /////////////
 
     glEnable(GL_BLEND);
     if(RendererInfo::debug)
@@ -347,7 +347,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
-	_renderForwardRenderedObjects();
+    _renderForwardRenderedObjects();
     _renderForegroundObjects();
 
     glEnable(GL_ALPHA_TEST);
@@ -375,7 +375,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
     glUniform1i(glGetUniformLocation(shader,"gSampleCount"), RendererInfo::ssao_samples);
     glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"), RendererInfo::ssao_noise_texture_size);
     glUniform2fv(glGetUniformLocation(shader,"poisson"),64, glm::value_ptr(Renderer::RendererInfo::ssao_Kernels[0]));
-	glUniform1i(glGetUniformLocation(shader,"far"), static_cast<int>(Resources::getActiveCamera()->getFar()));
+    glUniform1i(glGetUniformLocation(shader,"far"), static_cast<int>(Resources::getActiveCamera()->getFar()));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
@@ -567,10 +567,10 @@ void Engine::Renderer::Detail::RenderManagement::renderDirectX(){
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
-	m_DirectXDeviceContext->ClearRenderTargetView(m_DirectXBackBuffer,colors);
+    m_DirectXDeviceContext->ClearRenderTargetView(m_DirectXBackBuffer,colors);
     // do 3D rendering on the back buffer here
 
     // switch the back buffer and the front buffer
-	m_DirectXSwapChain->Present(0, 0);
+    m_DirectXSwapChain->Present(0, 0);
 }
 #endif

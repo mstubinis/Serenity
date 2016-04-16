@@ -75,7 +75,7 @@ void Engine::Physics::removeRigidBody(btRigidBody* body){
 void Engine::Physics::removeRigidBody(ObjectDynamic* obj){ Engine::Physics::removeRigidBody(obj->getRigidBody()); }
 
 void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int maxSteps,float other){ 
-	m_dynamicsWorld->stepSimulation(dt,maxSteps,other); 
+    m_dynamicsWorld->stepSimulation(dt,maxSteps,other); 
     unsigned int numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
     for (unsigned int i = 0; i < numManifolds; i++){
         btPersistentManifold* contactManifold =  m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
@@ -89,85 +89,85 @@ void Engine::Physics::Detail::PhysicsManagement::update(float dt,unsigned int ma
                 const btVector3& ptB = pt.getPositionWorldOnB();
                 const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-				ObjectDynamic* a = static_cast<ObjectDynamic*>(obA->getUserPointer());
-				ObjectDynamic* b = static_cast<ObjectDynamic*>(obB->getUserPointer());
+                ObjectDynamic* a = static_cast<ObjectDynamic*>(obA->getUserPointer());
+                ObjectDynamic* b = static_cast<ObjectDynamic*>(obB->getUserPointer());
 
-				a->collisionResponse(b);
-				b->collisionResponse(a);
+                a->collisionResponse(b);
+                b->collisionResponse(a);
             }
         }
     }
 }
 std::vector<glm::v3> Engine::Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
- 	if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(ignored);
- 	std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
- 	if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(ignored);
- 	return result;
+    if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(ignored);
+    std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
+    if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(ignored);
+    return result;
 }
 std::vector<glm::v3> Engine::Physics::rayCast(const btVector3& s, const btVector3& e,std::vector<btRigidBody*> ignored){
- 	for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(object);
- 	std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
- 	for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(object);
- 	return result;
+    for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(object);
+    std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
+    for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(object);
+    return result;
  }
 std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,Object* ignored){
- 	btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
- 	btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
- 	ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
- 	if(b != NULL) return Engine::Physics::rayCast(_s,_e,b->getRigidBody());
- 	return Engine::Physics::rayCast(_s,_e,nullptr);
+    btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
+    btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
+    ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
+    if(b != NULL) return Engine::Physics::rayCast(_s,_e,b->getRigidBody());
+    return Engine::Physics::rayCast(_s,_e,nullptr);
  }
 std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,std::vector<Object*> ignored){
- 	btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
- 	btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
- 	std::vector<btRigidBody*> objs;
-	for(auto o:ignored){
- 		ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(o);
- 		if(b != NULL) objs.push_back(b->getRigidBody());
- 	}
- 	return Engine::Physics::rayCast(_s,_e,objs);
+    btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
+    btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
+    std::vector<btRigidBody*> objs;
+    for(auto o:ignored){
+        ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(o);
+        if(b != NULL) objs.push_back(b->getRigidBody());
+    }
+    return Engine::Physics::rayCast(_s,_e,objs);
 }
 std::vector<glm::v3> Engine::Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
- 	btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
- 	Detail::PhysicsManagement::m_dynamicsWorld->rayTest(start, end, RayCallback);
- 	std::vector<glm::v3> result;
- 	if(RayCallback.hasHit()){
- 		glm::v3 res1 = glm::v3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
- 		glm::v3 res2 = glm::v3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
- 		result.push_back(res1);
- 		result.push_back(res2);
- 	}
- 	return result;
+    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+    Detail::PhysicsManagement::m_dynamicsWorld->rayTest(start, end, RayCallback);
+    std::vector<glm::v3> result;
+    if(RayCallback.hasHit()){
+        glm::v3 res1 = glm::v3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
+        glm::v3 res2 = glm::v3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
+        result.push_back(res1);
+        result.push_back(res2);
+    }
+    return result;
 }
 void Engine::Physics::Detail::PhysicsManagement::render(){
-	if(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-		glUseProgram(0);
+    if(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
+        glUseProgram(0);
 
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
 
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
 
-		m_dynamicsWorld->debugDrawWorld();
+        m_dynamicsWorld->debugDrawWorld();
 
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		glPopMatrix();
-	}
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+    }
 }
 
 
 Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type, float mass){ 
     m_CollisionShape = shape;
-	m_CollisionType = type;
+    m_CollisionType = type;
     _init(type,mass);
 }
 Collision::Collision(std::string file,COLLISION_TYPE type, float mass){ 
-	_load(file,type);
+    _load(file,type);
     _init(type,mass);
 }
 void Collision::_init(COLLISION_TYPE type, float mass){
@@ -177,8 +177,8 @@ void Collision::_init(COLLISION_TYPE type, float mass){
     else{
         m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
     }
-	setMass(mass);
-	Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+    setMass(mass);
+    Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
 }
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);
@@ -361,8 +361,8 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
     }
 }
 void Collision::setMass(float mass){
-	if(m_CollisionShape != nullptr && m_CollisionType != COLLISION_TYPE_NONE){
-		if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
+    if(m_CollisionShape != nullptr && m_CollisionType != COLLISION_TYPE_NONE){
+        if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
             m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
         }
         else{

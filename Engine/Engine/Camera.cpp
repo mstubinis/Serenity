@@ -75,21 +75,21 @@ void Camera::setAspectRatio(float ratio){
 void Camera::lookAt(glm::v3 target){ Camera::lookAt(getPosition(),target,glm::v3(getUp())); }
 void Camera::lookAt(glm::v3 target,glm::v3 up){ Camera::lookAt(getPosition(),target,up); }
 void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
-	setPosition(eye);
+    setPosition(eye);
     m_View = glm::lookAt(eye,target,up);
-	m_Orientation = glm::conjugate(glm::toQuat(m_View));
-	m_Forward = -glm::normalize(eye-target);
-	m_Up = glm::normalize(up);
-	m_Right = glm::normalize(glm::cross(m_Forward,m_Up));
-	_constructFrustrum();
-	ObjectBasic::update(Resources::dt());
+    m_Orientation = glm::conjugate(glm::toQuat(m_View));
+    m_Forward = -glm::normalize(eye-target);
+    m_Up = glm::normalize(up);
+    m_Right = glm::normalize(glm::cross(m_Forward,m_Up));
+    _constructFrustrum();
+    ObjectBasic::update(Resources::dt());
 }
 void Camera::lookAt(Object* target, bool targetUp){
     glm::v3 u; if(!targetUp) u = glm::v3(getUp()); else u = target->getUp();
     Camera::lookAt((getPosition(),target->getPosition(),u));
 }
 void Camera::update(float dt){
-	lookAt(getPosition(),getPosition() + getForward(), getUp());
+    lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
 bool Camera::sphereIntersectTest(Object* obj){
     return sphereIntersectTest(obj->getPosition(),obj->getRadius());

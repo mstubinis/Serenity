@@ -34,7 +34,7 @@ class ObjectDynamic: public Object{
         btRigidBody* m_RigidBody;
         btDefaultMotionState* m_MotionState;
     public:
-		virtual void collisionResponse(ObjectDynamic* other);
+        virtual void collisionResponse(ObjectDynamic* other);
 
         ObjectDynamic( std::string = "",
                        std::string = "",
@@ -46,7 +46,7 @@ class ObjectDynamic: public Object{
                      );
         virtual ~ObjectDynamic();
 
-		virtual void setDynamic(bool=true);
+        virtual void setDynamic(bool=true);
 
         std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
@@ -54,8 +54,8 @@ class ObjectDynamic: public Object{
         virtual void setPosition(glm::v3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
-		virtual void setColor(float,float,float,float);
-		virtual void setColor(glm::vec4);
+        virtual void setColor(float,float,float,float);
+        virtual void setColor(glm::vec4);
 
         virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
 

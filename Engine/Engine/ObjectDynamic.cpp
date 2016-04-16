@@ -13,22 +13,22 @@
 using namespace Engine;
 
 void ObjectDynamic::setDynamic(bool dynamic){
-	if(dynamic){
-		Physics::removeRigidBody(this);
-		m_RigidBody->setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
-		Physics::addRigidBody(this);
-		m_RigidBody->activate();
-	}
-	else{
-		Physics::removeRigidBody(this);
-		m_RigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-		clearAllForces();
-		Physics::addRigidBody(this);
-	}
+    if(dynamic){
+        Physics::removeRigidBody(this);
+        m_RigidBody->setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
+        Physics::addRigidBody(this);
+        m_RigidBody->activate();
+    }
+    else{
+        Physics::removeRigidBody(this);
+        m_RigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+        clearAllForces();
+        Physics::addRigidBody(this);
+    }
 }
 void ObjectDynamic::collisionResponse(ObjectDynamic* other){
-	// inherit this virtual method for derived classes for collision detection. 
-	// if this collides with other, execute the following code:
+    // inherit this virtual method for derived classes for collision detection. 
+    // if this collides with other, execute the following code:
 }
 
 ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): Object(name,scene){
@@ -38,8 +38,8 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Radius = 0;
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0);
-	if(mesh != "" && mat != "")
-		m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
+    if(mesh != "" && mat != "")
+        m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
     m_Color = glm::vec4(1);
     
     m_Collision = col;
@@ -75,15 +75,15 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     calculateRadius();
     m_Mass = 0.5f * m_Radius;
 
-	if(m_Collision != nullptr){
-		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
-		m_RigidBody = new btRigidBody(rigidBodyCI);
-	}
-	else{
-		m_Collision = new Collision(new btEmptyShape(),COLLISION_TYPE_NONE,0.0f);
-		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
-		m_RigidBody = new btRigidBody(rigidBodyCI);
-	}
+    if(m_Collision != nullptr){
+        btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
+        m_RigidBody = new btRigidBody(rigidBodyCI);
+    }
+    else{
+        m_Collision = new Collision(new btEmptyShape(),COLLISION_TYPE_NONE,0.0f);
+        btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
+        m_RigidBody = new btRigidBody(rigidBodyCI);
+    }
     m_RigidBody->setSleepingThresholds(0.015f,0.015f);
     m_RigidBody->setFriction(0.3f);
     m_RigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
@@ -94,14 +94,14 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     if(m_Parent == nullptr){
         ObjectDynamic::update(0);
     }
-	m_Collision->getCollisionShape()->setUserPointer(this);
-	m_RigidBody->setUserPointer(this);
+    m_Collision->getCollisionShape()->setUserPointer(this);
+    m_RigidBody->setUserPointer(this);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
     SAFE_DELETE(m_RigidBody);
     SAFE_DELETE(m_MotionState);
-	for(auto item:m_DisplayItems) SAFE_DELETE(item);
+    for(auto item:m_DisplayItems) SAFE_DELETE(item);
 }
 void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
     m_RigidBody->activate();
@@ -119,7 +119,7 @@ void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool loca
     setPosition(getPosition() + p);
 }
 void ObjectDynamic::setColor(float r, float g, float b, float a){
-	Math::setColor(m_Color,r,g,b,a);
+    Math::setColor(m_Color,r,g,b,a);
 }
 void ObjectDynamic::setColor(glm::vec4 color){ ObjectDynamic::setColor(color.r,color.g,color.b,color.a); }
 void ObjectDynamic::translate(glm::v3 t,bool l){ ObjectDynamic::translate(t.x,t.y,t.z,l); }
@@ -130,8 +130,8 @@ void ObjectDynamic::update(float dt){
     m_RigidBody->getMotionState()->getWorldTransform(tr);
     tr.getOpenGLMatrix(glm::value_ptr(m));
 
-	btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
-	m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
+    btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
+    m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
 
     m_Forward = Engine::Math::getForward(m_RigidBody);
     m_Right = Engine::Math::getRight(m_RigidBody);
@@ -388,7 +388,7 @@ bool ObjectDynamic::rayIntersectSphere(Camera* cam){ return cam->rayIntersectSph
 void ObjectDynamic::calculateRadius(){
     if(m_DisplayItems.size() == 0){
         m_BoundingBoxRadius = glm::vec3(0);
-		m_Radius = 0;
+        m_Radius = 0;
         return;
     }
     float maxLength = 0;

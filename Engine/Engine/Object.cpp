@@ -20,7 +20,7 @@ Object::Object(std::string name,Scene* scene, bool isNotCamera){
         if(scene == nullptr){
             scene = Resources::getCurrentScene();
         }
-		m_Name = incrementName(Resources::Detail::ResourceManagement::m_Objects, m_Name);
+        m_Name = incrementName(Resources::Detail::ResourceManagement::m_Objects, m_Name);
         scene->getObjects()[m_Name] = this;
         Resources::Detail::ResourceManagement::m_Objects[m_Name] = boost::shared_ptr<Object>(this);
     }

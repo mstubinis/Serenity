@@ -36,17 +36,17 @@ void Material::addComponent(unsigned int type, std::string file){
     m_Components[type] = new Texture(file);
 }
 void Material::bindTexture(unsigned int c,GLuint shader,unsigned int api){
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[c];
-		if(m_Components[c] == nullptr || m_Components[c]->getTextureAddress() == 0){//Texture / Material type not present; disable this material
-			glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
-			return;
-		}
-		glActiveTexture(GL_TEXTURE0 + c);
-		glBindTexture(m_Components[c]->getTextureType(), m_Components[c]->getTextureAddress());
-		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), c);
-		glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
-	}
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[c];
+        if(m_Components[c] == nullptr || m_Components[c]->getTextureAddress() == 0){//Texture / Material type not present; disable this material
+            glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
+            return;
+        }
+        glActiveTexture(GL_TEXTURE0 + c);
+        glBindTexture(m_Components[c]->getTextureType(), m_Components[c]->getTextureAddress());
+        glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), c);
+        glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
+    }
 }

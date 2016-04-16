@@ -7,26 +7,26 @@
 ShaderP::ShaderP(std::string vs, std::string ps, bool fromFile){
     m_VertexShader = vs;
     m_PixelShader = ps;
-	m_FromFile = fromFile;
+    m_FromFile = fromFile;
 }
 ShaderP::~ShaderP(){
-	cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
+    cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
 }
 void ShaderP::initRenderingContext(unsigned int api){
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		m_Shader = CompileOpenGL(m_VertexShader.c_str(),m_PixelShader.c_str(), m_FromFile);
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        m_Shader = CompileOpenGL(m_VertexShader.c_str(),m_PixelShader.c_str(), m_FromFile);
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
 
-	}
+    }
 }
 void ShaderP::cleanupRenderingContext(unsigned int api){
-	if(api == ENGINE_RENDERING_API_OPENGL){
-		glDeleteShader(m_Shader);
-	}
-	else if(api == ENGINE_RENDERING_API_DIRECTX){
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        glDeleteShader(m_Shader);
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
 
-	}
+    }
 }
 GLuint ShaderP::CompileOpenGL(std::string vs, std::string ps, bool fromFile){
     // Create the shaders

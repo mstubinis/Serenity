@@ -69,7 +69,7 @@ void Planet::render(GLuint shader,bool debug){
 }
 void Planet::draw(GLuint shader,bool debug){
     bool renderPlanet = true;
-	if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
+    if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
         renderPlanet = false;
     Camera* activeCamera = Resources::getActiveCamera();
     if(activeCamera->getDistance(this) > 700 * getRadius())

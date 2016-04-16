@@ -12,7 +12,7 @@ GLuint Skybox::m_Buffer;
 std::vector<glm::vec3> Skybox::m_Vertices;
 
 SkyboxEmpty::SkyboxEmpty(std::string name,Scene* scene){
-	m_Model = glm::mat4(1);
+    m_Model = glm::mat4(1);
     if(scene == nullptr) scene = Resources::getCurrentScene();
     if(scene->getSkybox() == nullptr)
         scene->setSkybox(this);
@@ -20,7 +20,7 @@ SkyboxEmpty::SkyboxEmpty(std::string name,Scene* scene){
 SkyboxEmpty::~SkyboxEmpty(){
 
 }
-		
+        
 
 Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
     if(Skybox::m_Vertices.size() == 0){

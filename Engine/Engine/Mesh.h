@@ -53,17 +53,17 @@ class Mesh final{
 
         void _loadFromFile(std::string,COLLISION_TYPE);
         void _loadFromOBJ(std::string,COLLISION_TYPE);
-		void _loadFromOBJMemory(std::string,COLLISION_TYPE);
-		void _calculateMeshRadius();
+        void _loadFromOBJMemory(std::string,COLLISION_TYPE);
+        void _calculateMeshRadius();
     public:
-		Mesh(btHeightfieldTerrainShape*);
+        Mesh(btHeightfieldTerrainShape*);
         Mesh(float width, float height);
         Mesh(float x, float y, float width, float height);
-		Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
+        Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
         ~Mesh();
 
-		void initRenderingContext(unsigned int api);
-		void cleanupRenderingContext(unsigned int api);
+        void initRenderingContext(unsigned int api);
+        void cleanupRenderingContext(unsigned int api);
 
         //GLuint* VAO();
         const GLuint* getBuffers() const { return m_buffers; }

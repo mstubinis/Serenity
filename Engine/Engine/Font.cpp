@@ -49,13 +49,13 @@ void FontData::_loadTextFile(std::string filename){
                 else if(key == "xadvance") font->xadvance = stoi(value);
             }
             font->m_Model = glm::mat4(1);
-			std::string name = filename.substr(0,filename.size()-4);
-			Resources::addMesh(name + "_" + boost::lexical_cast<std::string>(font->id),
-				static_cast<float>(font->x),
-				static_cast<float>(font->y),
-				static_cast<float>(font->width),
-				static_cast<float>(font->height));
-			font->char_mesh = Resources::getMesh(name + "_" + boost::lexical_cast<std::string>(font->id));
+            std::string name = filename.substr(0,filename.size()-4);
+            Resources::addMesh(name + "_" + boost::lexical_cast<std::string>(font->id),
+                static_cast<float>(font->x),
+                static_cast<float>(font->y),
+                static_cast<float>(font->width),
+                static_cast<float>(font->height));
+            font->char_mesh = Resources::getMesh(name + "_" + boost::lexical_cast<std::string>(font->id));
             _Font_Chars[font->id] = font;
         }
     }

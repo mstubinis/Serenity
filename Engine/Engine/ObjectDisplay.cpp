@@ -57,7 +57,7 @@ void ObjectDisplay::draw(GLuint shader, bool debug){
         glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 
         for(auto component:item->material->getComponents())
-			item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
+            item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
         item->mesh->render();
     }
     glUseProgram(0);
@@ -110,8 +110,8 @@ bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 
     glm::vec3 C = glm::vec3(getPosition());
     float r = getRadius();
-	if(r <= 0)
-		return false;
+    if(r <= 0)
+        return false;
 
     //check if point is behind
     float dot = glm::dot(rayVector,C-a1);

@@ -23,8 +23,8 @@ Texture::Texture(std::string file,std::string name,GLuint type){
     _init();
     m_Type = type;
     if(file != ""){
-		_loadFromFile(file,type);
-	}
+        _loadFromFile(file,type);
+    }
     m_Name = name;
     if(name == ""){
         m_Name = file;

@@ -59,11 +59,11 @@ struct FontRenderInfo final: public TextureRenderInfo{
 namespace Engine{
     namespace Renderer{
         struct RendererInfo final{
-			static bool positionOnly;
-			static bool normalsOnly;
-			static bool ssaoOnly;
-			static bool diffuseOnly;
-			static bool bloomOnly;
+            static bool positionOnly;
+            static bool normalsOnly;
+            static bool ssaoOnly;
+            static bool diffuseOnly;
+            static bool bloomOnly;
 
             static bool ssao;
             static bool ssao_do_blur;
@@ -88,53 +88,53 @@ namespace Engine{
             static void setSSAOBias(float b){ Renderer::RendererInfo::ssao_bias = b; }
             static void setSSAOSamples(unsigned int s){ Renderer::RendererInfo::ssao_samples = s; }
 
-			static void renderDiffuseOnly(bool = true){
-				Renderer::RendererInfo::diffuseOnly = true;
+            static void renderDiffuseOnly(bool = true){
+                Renderer::RendererInfo::diffuseOnly = true;
 
-				Renderer::RendererInfo::positionOnly = false;
-				Renderer::RendererInfo::normalsOnly = false;
-				Renderer::RendererInfo::ssaoOnly = false;
-				Renderer::RendererInfo::bloomOnly = false;
-			}
-			static void renderNormalsOnly(bool = true){
-				Renderer::RendererInfo::normalsOnly = true;
+                Renderer::RendererInfo::positionOnly = false;
+                Renderer::RendererInfo::normalsOnly = false;
+                Renderer::RendererInfo::ssaoOnly = false;
+                Renderer::RendererInfo::bloomOnly = false;
+            }
+            static void renderNormalsOnly(bool = true){
+                Renderer::RendererInfo::normalsOnly = true;
 
-				Renderer::RendererInfo::diffuseOnly = false;
-				Renderer::RendererInfo::positionOnly = false;
-				Renderer::RendererInfo::ssaoOnly = false;
-				Renderer::RendererInfo::bloomOnly = false;
-			}
-			static void renderPositionOnly(bool = true){
-				Renderer::RendererInfo::positionOnly = true;
+                Renderer::RendererInfo::diffuseOnly = false;
+                Renderer::RendererInfo::positionOnly = false;
+                Renderer::RendererInfo::ssaoOnly = false;
+                Renderer::RendererInfo::bloomOnly = false;
+            }
+            static void renderPositionOnly(bool = true){
+                Renderer::RendererInfo::positionOnly = true;
 
-				Renderer::RendererInfo::diffuseOnly = false;
-				Renderer::RendererInfo::normalsOnly = false;
-				Renderer::RendererInfo::ssaoOnly = false;
-				Renderer::RendererInfo::bloomOnly = false;
-			}
-			static void renderSSAOOnly(bool = true){
-				Renderer::RendererInfo::ssaoOnly = true;
+                Renderer::RendererInfo::diffuseOnly = false;
+                Renderer::RendererInfo::normalsOnly = false;
+                Renderer::RendererInfo::ssaoOnly = false;
+                Renderer::RendererInfo::bloomOnly = false;
+            }
+            static void renderSSAOOnly(bool = true){
+                Renderer::RendererInfo::ssaoOnly = true;
 
-				Renderer::RendererInfo::diffuseOnly = false;
-				Renderer::RendererInfo::positionOnly = false;
-				Renderer::RendererInfo::normalsOnly = false;
-				Renderer::RendererInfo::bloomOnly = false;
-			}
-			static void renderBloomOnly(bool = true){
-				Renderer::RendererInfo::bloomOnly = true;
+                Renderer::RendererInfo::diffuseOnly = false;
+                Renderer::RendererInfo::positionOnly = false;
+                Renderer::RendererInfo::normalsOnly = false;
+                Renderer::RendererInfo::bloomOnly = false;
+            }
+            static void renderBloomOnly(bool = true){
+                Renderer::RendererInfo::bloomOnly = true;
 
-				Renderer::RendererInfo::diffuseOnly = false;
-				Renderer::RendererInfo::positionOnly = false;
-				Renderer::RendererInfo::normalsOnly = false;
-				Renderer::RendererInfo::ssaoOnly = false;
-			}
-			static void renderNormally(bool = true){
-				Renderer::RendererInfo::bloomOnly = false;
-				Renderer::RendererInfo::diffuseOnly = false;
-				Renderer::RendererInfo::positionOnly = false;
-				Renderer::RendererInfo::normalsOnly = false;
-				Renderer::RendererInfo::ssaoOnly = false;
-			}
+                Renderer::RendererInfo::diffuseOnly = false;
+                Renderer::RendererInfo::positionOnly = false;
+                Renderer::RendererInfo::normalsOnly = false;
+                Renderer::RendererInfo::ssaoOnly = false;
+            }
+            static void renderNormally(bool = true){
+                Renderer::RendererInfo::bloomOnly = false;
+                Renderer::RendererInfo::diffuseOnly = false;
+                Renderer::RendererInfo::positionOnly = false;
+                Renderer::RendererInfo::normalsOnly = false;
+                Renderer::RendererInfo::ssaoOnly = false;
+            }
 
             static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
             static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }
@@ -143,22 +143,22 @@ namespace Engine{
         };
         namespace Detail{
             class RenderManagement final{
-				#ifdef _WIN32
-					public: static IDXGISwapChain* m_DirectXSwapChain;
-					public: static ID3D11Device* m_DirectXDevice;
-					public: static ID3D11DeviceContext* m_DirectXDeviceContext;
-					public: static ID3D11RenderTargetView* m_DirectXBackBuffer;
-					public: static void renderDirectX();
-				#endif
+                #ifdef _WIN32
+                    public: static IDXGISwapChain* m_DirectXSwapChain;
+                    public: static ID3D11Device* m_DirectXDevice;
+                    public: static ID3D11DeviceContext* m_DirectXDeviceContext;
+                    public: static ID3D11RenderTargetView* m_DirectXBackBuffer;
+                    public: static void renderDirectX();
+                #endif
 
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ObjectsToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
-					static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
+                    static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
-					static void _renderForwardRenderedObjects();
+                    static void _renderForwardRenderedObjects();
                     static void _renderObjects();
                     static void _renderForegroundObjects();
                     static void _renderText();

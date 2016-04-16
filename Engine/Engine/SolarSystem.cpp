@@ -26,25 +26,25 @@ SolarSystem::SolarSystem(std::string name, std::string file,bool test):Scene(nam
     playerCamera = new GameCamera("PlayerCamera_" + m_Name,45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
     Resources::setActiveCamera(playerCamera);
 
-	if(!test){
-		if(file != "NULL"){
-			if(file == ""){
-				SolarSystem::_loadRandomly();
-			}
-			else{
-				SolarSystem::_loadFromFile(file);
-			}
-		}
-	}
-	else{
-		SolarSystem::_loadTest();
-	}
+    if(!test){
+        if(file != "NULL"){
+            if(file == ""){
+                SolarSystem::_loadRandomly();
+            }
+            else{
+                SolarSystem::_loadFromFile(file);
+            }
+        }
+    }
+    else{
+        SolarSystem::_loadTest();
+    }
 }
 SolarSystem::~SolarSystem(){
 
 }
 void SolarSystem::_loadTest(){
-	new GameSkybox("data/Textures/Skyboxes/SolarSystem",0,this);
+    new GameSkybox("data/Textures/Skyboxes/SolarSystem",0,this);
 
     Star* star = new Star(glm::vec3(1,1,0),glm::vec3(1,1,1),glm::v3(0),static_cast<float>(1000000),"Sun",this);
     star->setPosition(glm::v3(0,3000000,-1000000));
@@ -55,10 +55,10 @@ void SolarSystem::_loadTest(){
     playerCamera->follow(player);
 
 
-	sf::Image heightmap;
-	heightmap.loadFromFile("data/Textures/test.png");
-	Terrain* t = new Terrain("Heightfield",heightmap,"Defiant",this);
-	t->setScale(3,16,3);
+    sf::Image heightmap;
+    heightmap.loadFromFile("data/Textures/test.png");
+    Terrain* t = new Terrain("Heightfield",heightmap,"Defiant",this);
+    t->setScale(3,16,3);
 }
 void SolarSystem::_loadFromFile(std::string filename){
     unsigned int count = 0;
@@ -76,7 +76,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                 skybox = line;
             }
             else if(count == 3){//this line has the system's skybox's number of flares
-				new GameSkybox(skybox,boost::lexical_cast<unsigned int>(line),this);
+                new GameSkybox(skybox,boost::lexical_cast<unsigned int>(line),this);
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;
@@ -499,7 +499,7 @@ void SolarSystem::_loadRandomly(){
 
             if(boost::filesystem::exists(diffuseFile)){
                 Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
-				std::string pName = "Planet " + boost::lexical_cast<std::string>(i + 1);
+                std::string pName = "Planet " + boost::lexical_cast<std::string>(i + 1);
                 planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(posX,0,posZ),RADIUS,pName,ATMOSPHERE_HEIGHT,this);
 
                 float R = (rand() % 1000)/1000.0f;

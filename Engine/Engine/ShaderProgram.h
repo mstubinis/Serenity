@@ -8,18 +8,18 @@ typedef unsigned int GLuint;
 class ShaderP final{
     private:
         GLuint m_Shader;
-		bool m_FromFile;
+        bool m_FromFile;
         std::string m_VertexShader;
         std::string m_PixelShader;
     public:
         ShaderP(std::string vs,std::string ps, bool fromFile = true);
         ~ShaderP();
 
-		void initRenderingContext(unsigned int api);
-		void cleanupRenderingContext(unsigned int api);
+        void initRenderingContext(unsigned int api);
+        void cleanupRenderingContext(unsigned int api);
 
-		GLuint CompileOpenGL(std::string vs, std::string ps, bool fromFile);
-		void CompileDirectX(std::string vs, std::string ps, bool fromFile);
+        GLuint CompileOpenGL(std::string vs, std::string ps, bool fromFile);
+        void CompileDirectX(std::string vs, std::string ps, bool fromFile);
 
         const GLuint getShaderProgram() const{ return m_Shader; }
 

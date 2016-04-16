@@ -17,7 +17,7 @@ using namespace Engine::Events;
 
 HUD::HUD(){
     m_Font = new Font("data/Fonts/consolas.fnt");
-	Engine::Math::setColor(m_Color,255,255,0);
+    Engine::Math::setColor(m_Color,255,255,0);
     m_TargetIterator = 0;
     m_WarpIndicatorSize = glm::vec2(30,115);
 }

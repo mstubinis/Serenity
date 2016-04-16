@@ -6,18 +6,18 @@
 #include <SFML/System.hpp>
 
 namespace sf{ 
-	class Image;
+    class Image;
 }
 class Scene;
 class btRigidBody;
 
 class Terrain final: public ObjectDynamic{
-	private:
-		std::vector<float> m_Pixels;
-		btRigidBody* m_RigidBody;
-	public:
-		Terrain(std::string name,sf::Image& img,std::string material,Scene* = nullptr);
-		virtual ~Terrain();
+    private:
+        std::vector<float> m_Pixels;
+        btRigidBody* m_RigidBody;
+    public:
+        Terrain(std::string name,sf::Image& img,std::string material,Scene* = nullptr);
+        virtual ~Terrain();
 
         virtual void setPosition(glm::nType,glm::nType,glm::nType); 
         virtual void setPosition(glm::v3);
@@ -25,7 +25,7 @@ class Terrain final: public ObjectDynamic{
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
 
-		virtual void update(float);
-		virtual void render();
+        virtual void update(float);
+        virtual void render();
 };
 #endif

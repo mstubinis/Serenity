@@ -33,7 +33,7 @@ GameSkybox::GameSkybox(std::string name, unsigned int numFlares, Scene* scene):S
     }
 }
 GameSkybox::~GameSkybox(){
-	m_SunFlares.clear();
+    m_SunFlares.clear();
 }
 void GameSkybox::update(){
     Skybox::update();
