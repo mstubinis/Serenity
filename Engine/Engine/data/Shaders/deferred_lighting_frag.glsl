@@ -25,6 +25,9 @@ uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
 
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
+    if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
+        return vec4(0);
+    }
     vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
     float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
 	float Glow = texture2D(gMiscMap,uv).r;
@@ -48,9 +51,6 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }
-    if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
-        return vec4(0);
-    }
     float ssao = 1.0;
     if(HasSSAO == 1){
         ssao = texture2D(gMiscMap,uv).g;
@@ -59,7 +59,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 	if(Glow > 0.99){
 		return diffuseMapColor;
 	}
-    return max(Glow*diffuseMapColor,lightWithoutSpecular + SpecularColor);
+    return max(Glow*diffuseMapColor,lightWithoutSpecular + (SpecularColor));
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = LightPosition - PxlWorldPos;
@@ -90,5 +90,11 @@ void main(){
     else if(LightType == 3)
         lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
 
-    gl_FragColor = lightCalculation;
+    gl_FragData[0] = lightCalculation;
+
+	//for bloom...
+	float Glow = texture2D(gMiscMap,uv).r;
+    float brightness = dot(lightCalculation.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.05 || Glow > 0.01f)
+        gl_FragData[1] = vec4(lightCalculation.rgb*max(Glow,brightness), 1.0);
 }

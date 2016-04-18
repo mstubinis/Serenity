@@ -96,7 +96,7 @@ void Game::update(float dt){
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-        Renderer::Settings::enableSSAO(!Renderer::RendererInfo::ssao);
+		Renderer::Settings::enableSSAO(!Renderer::RendererInfo::SSAOInfo::ssao);
     }
     if(Events::Keyboard::isKeyDownOnce("f12")){
         Engine::Renderer::Settings::renderNormally();

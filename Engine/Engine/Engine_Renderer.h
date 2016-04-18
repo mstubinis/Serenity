@@ -65,29 +65,36 @@ namespace Engine{
             static bool diffuseOnly;
             static bool bloomOnly;
 
-            static bool ssao;
-            static bool ssao_do_blur;
-            static unsigned int ssao_samples;
-            static float ssao_bias;
-            static float ssao_scale;
-            static float ssao_radius;
-            static float ssao_intensity;
-
-            static glm::vec2 ssao_Kernels[64];
-            static GLuint ssao_noise_texture;
-            static unsigned int ssao_noise_texture_size;
-
             static bool bloom;
             static bool lighting;
             static bool debug;
+
+			struct HDRInfo{
+				static bool hdr;
+				static float hdr_exposure;
+				static float hdr_gamma;
+			};
+			struct SSAOInfo{
+				static bool ssao;
+				static bool ssao_do_blur;
+				static unsigned int ssao_samples;
+				static float ssao_bias;
+				static float ssao_scale;
+				static float ssao_radius;
+				static float ssao_intensity;
+				static glm::vec2 ssao_Kernels[64];
+				static GLuint ssao_noise_texture;
+				static unsigned int ssao_noise_texture_size;
+			};
         };
         namespace Settings{
-            static void setSSAOIntensity(float i){ Renderer::RendererInfo::ssao_intensity = i; }
-            static void setSSAORadius(float r){ Renderer::RendererInfo::ssao_radius = r; }
-            static void setSSAOScale(float s){ Renderer::RendererInfo::ssao_scale = s; }
-            static void setSSAOBias(float b){ Renderer::RendererInfo::ssao_bias = b; }
-            static void setSSAOSamples(unsigned int s){ Renderer::RendererInfo::ssao_samples = s; }
-
+			namespace SSAO{
+				static void setIntensity(float i){ Renderer::RendererInfo::SSAOInfo::ssao_intensity = i; }
+				static void setRadius(float r){ Renderer::RendererInfo::SSAOInfo::ssao_radius = r; }
+				static void setScale(float s){ Renderer::RendererInfo::SSAOInfo::ssao_scale = s; }
+				static void setBias(float b){ Renderer::RendererInfo::SSAOInfo::ssao_bias = b; }
+				static void setSamples(unsigned int s){ Renderer::RendererInfo::SSAOInfo::ssao_samples = s; }
+			};
             static void renderDiffuseOnly(bool = true){
                 Renderer::RendererInfo::diffuseOnly = true;
 
@@ -138,7 +145,7 @@ namespace Engine{
 
             static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
             static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }
-            static void enableSSAO(bool enabled = true){ Renderer::RendererInfo::ssao = enabled;  }
+            static void enableSSAO(bool enabled = true){ Renderer::RendererInfo::SSAOInfo::ssao = enabled;  }
             static void enableDebugDrawing(bool enabled = true){ Renderer::RendererInfo::debug = enabled;  }
         };
         namespace Detail{
@@ -164,11 +171,11 @@ namespace Engine{
                     static void _renderText();
                     static void _renderTextures();
 
+					static void _passHDR();
                     static void _passGeometry();
                     static void _passLighting();
                     static void _passSSAO();
                     static void _passEdge(GLuint texture,float radius = 1.0f);
-                    static void _passBloom(GLuint texture,GLuint texture1);
                     static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
                     static void _passFinal();
                 public:
