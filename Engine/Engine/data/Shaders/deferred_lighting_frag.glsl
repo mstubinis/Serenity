@@ -95,6 +95,6 @@ void main(){
 	//for bloom...
 	float Glow = texture2D(gMiscMap,uv).r;
     float brightness = dot(lightCalculation.rgb, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 1.05 || Glow > 0.01f)
+    if(brightness > 1.14 || Glow > 0.01f)
         gl_FragData[1] = vec4(lightCalculation.rgb*max(Glow,brightness), 1.0);
 }
