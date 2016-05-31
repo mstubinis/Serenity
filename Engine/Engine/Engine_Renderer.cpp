@@ -34,6 +34,13 @@ bool Renderer::RendererInfo::bloom = true;
 bool Renderer::RendererInfo::lighting = true;
 bool Renderer::RendererInfo::debug = false;
 
+bool Renderer::RendererInfo::GodRaysInfo::godRays = true;
+float Renderer::RendererInfo::GodRaysInfo::godRays_exposure = 1.0f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_density = 1.0f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_weight = 1.0f;
+unsigned int Renderer::RendererInfo::GodRaysInfo::godRays_samples = 100; //might be too much
+
 bool Renderer::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::RendererInfo::SSAOInfo::ssao_do_blur = true;
 unsigned int Renderer::RendererInfo::SSAOInfo::ssao_samples = 5;
@@ -318,11 +325,11 @@ void Engine::Renderer::Detail::RenderManagement::render(){
         Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.34f,4.0f);
         m_gBuffer->stop();
     }
-	if(RendererInfo::HDRInfo::hdr){
+    if(RendererInfo::HDRInfo::hdr){
         m_gBuffer->start(BUFFER_TYPE_MISC);
         Renderer::Detail::RenderManagement::_passHDR();
         m_gBuffer->stop();
-	}
+    }
     Renderer::Detail::RenderManagement::_passFinal();
 
     //copy depth over
@@ -429,25 +436,51 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 
     glUseProgram(0);
 }
+void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen){
+    glClear(GL_COLOR_BUFFER_BIT);
 
+    GLuint shader = Resources::getShader("Deferred_GodsRays")->getShaderProgram();
+    glUseProgram(shader);
+
+    glUniform1f(glGetUniformLocation(shader,"decay"), Renderer::RendererInfo::GodRaysInfo::godRays_decay);
+    glUniform1f(glGetUniformLocation(shader,"density"), RendererInfo::GodRaysInfo::godRays_density);
+    glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::GodRaysInfo::godRays_exposure);
+    glUniform1i(glGetUniformLocation(shader,"samples"), RendererInfo::GodRaysInfo::godRays_samples);
+    glUniform1f(glGetUniformLocation(shader,"weight"), RendererInfo::GodRaysInfo::godRays_weight);
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+    glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"), static_cast<float>(lightPositionOnScreen.x),static_cast<float>(lightPositionOnScreen.y));
+
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING)); //change this
+    glUniform1i(glGetUniformLocation(shader,"firstPass"), 0 );
+
+    Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+
+    glActiveTexture(GL_TEXTURE0);
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    glUseProgram(0);
+}
 void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLuint shader = Resources::getShader("Deferred_HDR")->getShaderProgram();
     glUseProgram(shader);
 
-	glUniform1f(glGetUniformLocation(shader,"gamma"), Renderer::RendererInfo::HDRInfo::hdr_gamma);
-	glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::HDRInfo::hdr_exposure);
+    glUniform1f(glGetUniformLocation(shader,"gamma"), Renderer::RendererInfo::HDRInfo::hdr_gamma);
+    glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::HDRInfo::hdr_exposure);
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
-	
+    
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
     glUniform1i(glGetUniformLocation(shader,"hdrBuffer"), 0 );
 
     glActiveTexture(GL_TEXTURE1);
     glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
     glUniform1i(glGetUniformLocation(shader,"bloomBuffer"), 1 );
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);

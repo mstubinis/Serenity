@@ -168,8 +168,9 @@ void Engine::Resources::initResources(){
 
     addShader("Deferred","data/Shaders/vert.glsl","data/Shaders/deferred_frag.glsl");
     addShader("Deferred_HUD","data/Shaders/vert_HUD.glsl","data/Shaders/deferred_frag_HUD.glsl");
+    addShader("Deferred_GodsRays","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_raysa_frag.glsl");
     addShader("Deferred_Blur","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_blur_frag.glsl");
-	addShader("Deferred_HDR","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_hdr_frag.glsl");
+    addShader("Deferred_HDR","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_hdr_frag.glsl");
     addShader("Deferred_SSAO","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_ssao_frag.glsl");
     addShader("Deferred_Edge","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_edge_frag.glsl");
     addShader("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl");

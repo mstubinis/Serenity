@@ -69,32 +69,47 @@ namespace Engine{
             static bool lighting;
             static bool debug;
 
-			struct HDRInfo{
-				static bool hdr;
-				static float hdr_exposure;
-				static float hdr_gamma;
-			};
-			struct SSAOInfo{
-				static bool ssao;
-				static bool ssao_do_blur;
-				static unsigned int ssao_samples;
-				static float ssao_bias;
-				static float ssao_scale;
-				static float ssao_radius;
-				static float ssao_intensity;
-				static glm::vec2 ssao_Kernels[64];
-				static GLuint ssao_noise_texture;
-				static unsigned int ssao_noise_texture_size;
-			};
+            struct HDRInfo{
+                static bool hdr;
+                static float hdr_exposure;
+                static float hdr_gamma;
+            };
+            struct GodRaysInfo{
+                static bool godRays;
+                static float godRays_exposure;
+                static float godRays_decay;
+                static float godRays_density;
+                static float godRays_weight;
+                static unsigned int godRays_samples;
+            };
+            struct SSAOInfo{
+                static bool ssao;
+                static bool ssao_do_blur;
+                static unsigned int ssao_samples;
+                static float ssao_bias;
+                static float ssao_scale;
+                static float ssao_radius;
+                static float ssao_intensity;
+                static glm::vec2 ssao_Kernels[64];
+                static GLuint ssao_noise_texture;
+                static unsigned int ssao_noise_texture_size;
+            };
         };
         namespace Settings{
-			namespace SSAO{
-				static void setIntensity(float i){ Renderer::RendererInfo::SSAOInfo::ssao_intensity = i; }
-				static void setRadius(float r){ Renderer::RendererInfo::SSAOInfo::ssao_radius = r; }
-				static void setScale(float s){ Renderer::RendererInfo::SSAOInfo::ssao_scale = s; }
-				static void setBias(float b){ Renderer::RendererInfo::SSAOInfo::ssao_bias = b; }
-				static void setSamples(unsigned int s){ Renderer::RendererInfo::SSAOInfo::ssao_samples = s; }
-			};
+            namespace GodRays{
+                static void setExposure(float e){ Renderer::RendererInfo::GodRaysInfo::godRays_exposure = e; }
+                static void setDecay(float d){ Renderer::RendererInfo::GodRaysInfo::godRays_decay = d; }
+                static void setDensity(float d){ Renderer::RendererInfo::GodRaysInfo::godRays_density = d; }
+                static void setWeight(float w){ Renderer::RendererInfo::GodRaysInfo::godRays_weight = w; }
+                static void setSamples(unsigned int s){ Renderer::RendererInfo::GodRaysInfo::godRays_samples = s; }
+            };
+            namespace SSAO{
+                static void setIntensity(float i){ Renderer::RendererInfo::SSAOInfo::ssao_intensity = i; }
+                static void setRadius(float r){ Renderer::RendererInfo::SSAOInfo::ssao_radius = r; }
+                static void setScale(float s){ Renderer::RendererInfo::SSAOInfo::ssao_scale = s; }
+                static void setBias(float b){ Renderer::RendererInfo::SSAOInfo::ssao_bias = b; }
+                static void setSamples(unsigned int s){ Renderer::RendererInfo::SSAOInfo::ssao_samples = s; }
+            };
             static void renderDiffuseOnly(bool = true){
                 Renderer::RendererInfo::diffuseOnly = true;
 
@@ -142,7 +157,7 @@ namespace Engine{
                 Renderer::RendererInfo::normalsOnly = false;
                 Renderer::RendererInfo::ssaoOnly = false;
             }
-
+            static void enableGodsRays(bool enabled = true){ Renderer::RendererInfo::GodRaysInfo::godRays = enabled; }
             static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
             static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }
             static void enableSSAO(bool enabled = true){ Renderer::RendererInfo::SSAOInfo::ssao = enabled;  }
@@ -171,7 +186,8 @@ namespace Engine{
                     static void _renderText();
                     static void _renderTextures();
 
-					static void _passHDR();
+                    static void _passGodsRays(glm::vec2);
+                    static void _passHDR();
                     static void _passGeometry();
                     static void _passLighting();
                     static void _passSSAO();

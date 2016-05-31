@@ -25,7 +25,6 @@ float weights[7] = float[](
     0.008,
     0.004
 );
-
 float g[7] = float[](
     0.0044299121055113265,
     0.00895781211794,
@@ -36,15 +35,10 @@ float g[7] = float[](
     0.147308056121
 );
 void main(void){
-
-
     for(int i = 0; i < 7; i++){
         offset[i] = vec2(-weights[i] * radius * H, -weights[i] * radius * V);
         offset[13-i] = vec2(weights[i] * radius * H, weights[i] * radius * V);
     }
-
-
-
     vec4 sum = vec4(0.0);
     vec2 uv = gl_FragCoord.xy / gScreenSize;
     vec4 color = texture2D(texture, uv );

@@ -532,5 +532,5 @@ void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
     /////////////////////////////////////////////////////////////////
 
     v1.tangent = t1;   v2.tangent = t2;   v3.tangent = t3;
-    v1.binormal = -b1; v2.binormal = -b2; v3.binormal = -b3;
+    v1.binormal = b1; v2.binormal = b2; v3.binormal = b3;
 }

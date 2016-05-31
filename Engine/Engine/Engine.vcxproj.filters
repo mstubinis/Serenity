@@ -109,6 +109,9 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\HDR">
       <UniqueIdentifier>{e9991f44-6a12-4e55-84d2-d13a7b50adcf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays">
+      <UniqueIdentifier>{cb419439-da42-4a8b-8393-4bc8c7160745}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -396,6 +399,9 @@
     </None>
     <None Include="data\Shaders\deferred_hdr_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\HDR</Filter>
+    </None>
+    <None Include="data\Shaders\deferred_rays_frag.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays</Filter>
     </None>
   </ItemGroup>
 </Project>

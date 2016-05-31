@@ -4,8 +4,6 @@ uniform vec2 gScreenSize;
 uniform sampler2D texture;
 uniform float radius;
 
-vec2 CalcTexCoord(){return gl_FragCoord.xy / gScreenSize;}
-
 float threshold(float thr1,float thr2 ,float val) {
     if (val < thr1) {
         return 0.0;
@@ -38,14 +36,12 @@ float IsEdge(vec2 coords){
             pix[k] = avg_intensity(get_pixel(coords,float(i)*dxtex,float(j)*dytex));
         }
     }
-
     // average color differences around neighboring pixels
     delta = (abs(pix[1]-pix[7])+abs(pix[5]-pix[3]) +abs(pix[0]-pix[8])+abs(pix[2]-pix[6]))/2.0;
-
     return threshold(0.15,0.6,clamp(1.8*delta,0.0,1.0));
 }
 void main(){
-    vec2 uv = CalcTexCoord();
+    vec2 uv = gl_FragCoord.xy / gScreenSize;
     float edge = IsEdge(gl_TexCoord[0].xy);
     gl_FragColor = vec4(edge);
 }

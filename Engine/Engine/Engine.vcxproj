@@ -189,6 +189,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <None Include="data\Shaders\deferred_frag_skybox.glsl" />
     <None Include="data\Shaders\deferred_hdr_frag.glsl" />
     <None Include="data\Shaders\deferred_lighting_frag.glsl" />
+    <None Include="data\Shaders\deferred_rays_frag.glsl" />
     <None Include="data\Shaders\vert_fullscreenQuad.glsl" />
     <None Include="data\Shaders\deferred_ssao_frag.glsl" />
     <None Include="data\Shaders\vert.glsl" />
