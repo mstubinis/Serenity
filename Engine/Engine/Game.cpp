@@ -57,6 +57,8 @@ void Game::initLogic(){
     Engine::getWindow()->setKeyRepeatEnabled(false);
     Engine::Renderer::Settings::enableSSAO(true);
 	Engine::Renderer::Settings::enableGodsRays(false);
+	//Engine::Renderer::Settings::enableBloom(false);
+	//Engine::Renderer::Settings::enableHDR(false);
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");

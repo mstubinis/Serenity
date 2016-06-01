@@ -35,11 +35,11 @@ bool Renderer::RendererInfo::lighting = true;
 bool Renderer::RendererInfo::debug = false;
 
 bool Renderer::RendererInfo::GodRaysInfo::godRays = true;
-float Renderer::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
 float Renderer::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_density = 0.80f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
-unsigned int Renderer::RendererInfo::GodRaysInfo::godRays_samples = 100;
+float Renderer::RendererInfo::GodRaysInfo::godRays_density = 0.30f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
+unsigned int Renderer::RendererInfo::GodRaysInfo::godRays_samples = 75;
 
 bool Renderer::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::RendererInfo::SSAOInfo::ssao_do_blur = true;
@@ -585,6 +585,7 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
     glUniform1i( glGetUniformLocation(shader,"HasLighting"), static_cast<int>(RendererInfo::lighting));
     glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::bloom));
+	glUniform1i( glGetUniformLocation(shader,"HasHDR"), static_cast<int>(RendererInfo::HDRInfo::hdr));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);

@@ -42,7 +42,12 @@ void main(){
     gl_FragData[2].b = 0.0;
     gl_FragData[3] = vec4(WorldPosition,1.0);
 	if(HasGodsRays == 1){
-		gl_FragData[4] = vec4(0.259,0.224,0.290,1);
+		gl_FragData[4] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
+		gl_FragData[4].r = pow(gl_FragData[4].r,4.0);
+		gl_FragData[4].g = pow(gl_FragData[4].g,4.0);
+		gl_FragData[4].b = pow(gl_FragData[4].b,4.0);
+		gl_FragData[4] = clamp(gl_FragData[4],0.01,0.99);
+		gl_FragData[4].a = clamp(alpha * (gl_FragData[4].rgb * 5.5),0.01,0.99);
 	}
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

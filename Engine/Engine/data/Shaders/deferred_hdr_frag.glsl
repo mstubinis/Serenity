@@ -2,8 +2,10 @@
 
 uniform float exposure;
 uniform float gamma;
+
 uniform sampler2D hdrBuffer;
 uniform sampler2D bloomBuffer;
+
 uniform vec2 gScreenSize;
 
 void main(void){

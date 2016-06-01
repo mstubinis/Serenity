@@ -158,6 +158,7 @@ namespace Engine{
                 Renderer::RendererInfo::ssaoOnly = false;
             }
             static void enableGodsRays(bool enabled = true){ Renderer::RendererInfo::GodRaysInfo::godRays = enabled; }
+			static void enableHDR(bool enabled = true){ Renderer::RendererInfo::HDRInfo::hdr = enabled; }
             static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
             static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }
             static void enableSSAO(bool enabled = true){ Renderer::RendererInfo::SSAOInfo::ssao = enabled;  }

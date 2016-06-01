@@ -10,6 +10,7 @@ uniform sampler2D gGodsRaysMap;
 
 uniform int HasLighting;
 uniform int HasBloom;
+uniform int HasHDR;
 
 uniform int PositionOnly;
 uniform int DiffuseOnly;
@@ -42,7 +43,12 @@ void main(){
 	else{
 		if(normals.r > 0.999 && normals.g > 0.999 && normals.b > 0.999){
 			if(HasBloom == 1){
-				image += vec4(hdr,1.0);
+				if(HasHDR == 1){
+					image += vec4(hdr,1.0);
+				}
+				else{
+					image = max(image,bloom);
+				}
 			}
 			gl_FragColor = image;
 		}
@@ -51,7 +57,15 @@ void main(){
 			if(HasLighting == 0){
 				lightMap = image;
 			}
-			gl_FragColor = vec4(hdr,1.0);
+			if(HasHDR == 1){
+				gl_FragColor = vec4(hdr,1.0);
+			}
+			else{
+				gl_FragColor = lightMap;
+				if(HasBloom == 1){
+					gl_FragColor = max(lightMap,bloom);
+				}
+			}
 		}
 		gl_FragColor += vec4(rays,1.0);
 	}

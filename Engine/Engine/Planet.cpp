@@ -89,6 +89,13 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             rot *= glm::mat4_cast(m_Orientation);
 
             glUseProgram(shader);
+
+			if(godsRays)
+				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+			else
+				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
+
+
             glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
             glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(mod));
             glUniformMatrix4fv(glGetUniformLocation(shader, "Rot" ), 1, GL_FALSE, glm::value_ptr(rot));
@@ -172,7 +179,6 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
         if(m_AtmosphereHeight <= 0.0f) renderAtmosphere = false;
 
         if(renderAtmosphere){
-			glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1);
             if(camHeight > outerRadius){ 
                 shader = Resources::getShader("AS_SkyFromSpace")->getShaderProgram(); 
                 glBlendFunc(GL_ONE, GL_ONE);
@@ -185,6 +191,11 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
                 glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             }
             glUseProgram(shader);
+
+			if(godsRays)
+				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+			else
+				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
 
             glCullFace(GL_FRONT);
 
