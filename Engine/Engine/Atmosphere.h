@@ -49,6 +49,6 @@ class Atmosphere final: public SkyboxEmpty{
         virtual glm::v3 getPosition();
 
         virtual void update();
-        virtual void render();
+        virtual void render(bool godsRays);
 };
 #endif

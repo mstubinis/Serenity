@@ -6,6 +6,7 @@ uniform sampler2D gBloomMap;
 uniform sampler2D gNormalMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gPositionMap;
+uniform sampler2D gGodsRaysMap;
 
 uniform int HasLighting;
 uniform int HasBloom;
@@ -25,6 +26,8 @@ void main(){
 	vec3 normals = texture2D(gNormalMap,uv).rgb;
     vec4 lightMap = texture2D(gLightMap, uv);
     vec4 bloom = texture2D(gBloomMap,uv);
+
+	vec3 rays = texture2D(gGodsRaysMap,uv).rgb;
 
 	vec3 positions = texture2D(gPositionMap,uv).rgb;
 	float ssao = texture2D(gMiscMap,uv).g;
@@ -50,5 +53,6 @@ void main(){
 			}
 			gl_FragColor = vec4(hdr,1.0);
 		}
+		gl_FragColor += vec4(rays,1.0);
 	}
 }

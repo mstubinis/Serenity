@@ -35,11 +35,11 @@ bool Renderer::RendererInfo::lighting = true;
 bool Renderer::RendererInfo::debug = false;
 
 bool Renderer::RendererInfo::GodRaysInfo::godRays = true;
-float Renderer::RendererInfo::GodRaysInfo::godRays_exposure = 1.0f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
 float Renderer::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_density = 1.0f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_weight = 1.0f;
-unsigned int Renderer::RendererInfo::GodRaysInfo::godRays_samples = 100; //might be too much
+float Renderer::RendererInfo::GodRaysInfo::godRays_density = 0.80f;
+float Renderer::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
+unsigned int Renderer::RendererInfo::GodRaysInfo::godRays_samples = 100;
 
 bool Renderer::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::RendererInfo::SSAOInfo::ssao_do_blur = true;
@@ -125,21 +125,18 @@ void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float wid
 }
 void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
-        item.object->draw(item.shader,RendererInfo::debug);
+		item.object->draw(item.shader,RendererInfo::debug,RendererInfo::GodRaysInfo::godRays);
     }
-    m_ObjectsToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
     for(auto item:m_ForegroundObjectsToBeRendered){
         item.object->draw(item.shader,RendererInfo::debug);
     }
-    m_ForegroundObjectsToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects(){
     for(auto item:m_ObjectsToBeForwardRendered){
         item.object->draw(item.shader,RendererInfo::debug);
     }
-    m_ObjectsToBeForwardRendered.clear();
 }
 
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
@@ -180,7 +177,6 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
         Resources::getMesh("Plane")->render();
     }
     glUseProgram(0);
-    m_TexturesToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_renderText(){
     GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
@@ -220,7 +216,6 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
         }
     }
     glUseProgram(0);
-    m_FontsToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -231,7 +226,8 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     glClearBufferfv(GL_COLOR,BUFFER_TYPE_DIFFUSE,colors);
     glDisable(GL_BLEND); //disable blending on all mrts
 
-    s->renderSkybox();
+    s->renderSkybox(RendererInfo::GodRaysInfo::godRays);
+
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
@@ -287,10 +283,43 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 void Engine::Renderer::Detail::RenderManagement::render(){
     for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::debug); }
 
-    m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
-    Renderer::Detail::RenderManagement::_passGeometry();
-    m_gBuffer->stop();
+	if(RendererInfo::GodRaysInfo::godRays == false){
+		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
+		Renderer::Detail::RenderManagement::_passGeometry();
+		m_gBuffer->stop();
+	}
+	else{
+		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
+		Renderer::Detail::RenderManagement::_passGeometry();
+		m_gBuffer->stop();
+	}
 
+	if(RendererInfo::GodRaysInfo::godRays){
+		m_gBuffer->start(BUFFER_TYPE_GODSRAYS);
+		Object* o = Resources::getObject("Sun");
+		glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
+		_passGodsRays(glm::vec2(sp.x,sp.y));
+		/*
+		for(auto const &ent1:Resources::getCurrentScene()->getLights()){
+			SunLight* p = dynamic_cast<SunLight*>(ent1.second);
+			if(p != NULL){
+				if(p->getParent() != nullptr){
+					ObjectDisplay* d = dynamic_cast<ObjectDisplay*>(p->getParent());
+					if(d != NULL){
+						glm::vec3 sp = d->getScreenCoordinates();
+						if(sp.z < 0){
+							_passGodsRays(glm::vec2(sp.x,sp.y));
+						}
+						else{
+							_passGodsRays(glm::vec2(99999,99999));
+						}
+					}
+				}
+			}
+		}
+		*/
+		m_gBuffer->stop();
+	}
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
@@ -374,6 +403,12 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     Renderer::Detail::RenderManagement::_renderText();
 
     glDisable(GL_ALPHA_TEST);
+
+	m_ObjectsToBeRendered.clear();
+	m_ForegroundObjectsToBeRendered.clear();
+	m_ObjectsToBeForwardRendered.clear();
+	m_FontsToBeRendered.clear();
+	m_TexturesToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
     GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
@@ -436,6 +471,7 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 
     glUseProgram(0);
 }
+
 void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen){
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -452,7 +488,7 @@ void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPo
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING)); //change this
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
     glUniform1i(glGetUniformLocation(shader,"firstPass"), 0 );
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -580,9 +616,14 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
     glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 5 );
 
+    glActiveTexture(GL_TEXTURE6);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS));
+    glUniform1i( glGetUniformLocation(shader,"gGodsRaysMap"), 6 );
+
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 6; i++){
+    for(unsigned int i = 0; i < 7; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);

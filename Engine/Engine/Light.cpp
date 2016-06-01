@@ -44,7 +44,7 @@ void SunLight::update(float dt){
     ObjectBasic::update(dt);
 }
 void SunLight::render(GLuint shader,bool debug){ ObjectDisplay::render(shader,debug); }
-void SunLight::draw(GLuint shader, bool debug){ ObjectDisplay::draw(shader,debug); }
+void SunLight::draw(GLuint shader, bool debug,bool godsRays){ ObjectDisplay::draw(shader,debug,godsRays); }
 void SunLight::sendGenericAttributesToShader(GLuint shader){
     glUniform1i(glGetUniformLocation(shader,"LightType"), static_cast<int>(m_Type));
     glUniform3f(glGetUniformLocation(shader,"LightColor"), m_Color.x, m_Color.y, m_Color.z);

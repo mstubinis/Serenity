@@ -24,6 +24,7 @@ class ObjectDynamic: public Object{
         bool m_Visible;
         std::vector<DisplayItem*> m_DisplayItems;
         glm::vec4 m_Color;
+		glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
         glm::m4 m_Model;
@@ -124,7 +125,7 @@ class ObjectDynamic: public Object{
 
         virtual void update(float);
         virtual void render(GLuint=0,bool=false);
-        virtual void draw(GLuint shader,bool=false);
+        virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual bool rayIntersectSphere(Camera*);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);

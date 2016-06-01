@@ -27,8 +27,8 @@ void ObjectDynamic::setDynamic(bool dynamic){
     }
 }
 void ObjectDynamic::collisionResponse(ObjectDynamic* other){
-    // inherit this virtual method for derived classes for collision detection. 
-    // if this collides with other, execute the following code:
+    // inherit this virtual function for derived classes for collision detection. 
+    // if this collides with other, execute this function
 }
 
 ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): Object(name,scene){
@@ -41,7 +41,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     if(mesh != "" && mat != "")
         m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
     m_Color = glm::vec4(1);
-    
+    m_GodsRaysColor = glm::vec3(0);
     m_Collision = col;
     calculateRadius();
     m_Mass = 0.5f * m_Radius;
@@ -149,7 +149,7 @@ void ObjectDynamic::render(GLuint shader,bool debug){
     }
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
-void ObjectDynamic::draw(GLuint shader, bool debug){
+void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
     Camera* camera = Resources::getActiveCamera();
     if((m_DisplayItems.size() == 0 || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
         return;	
@@ -162,6 +162,11 @@ void ObjectDynamic::draw(GLuint shader, bool debug){
     glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
+	glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
+	if(godsRays)
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+	else
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
 
     for(auto item:m_DisplayItems){
         glm::mat4 m = glm::mat4(m_Model);

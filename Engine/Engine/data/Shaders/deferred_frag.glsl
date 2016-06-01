@@ -15,12 +15,15 @@ uniform int NormalMapEnabled;
 uniform int GlowMapEnabled;
 
 uniform vec4 Object_Color;
+uniform vec3 Gods_Rays_Color;
 
 varying vec3 WorldPosition;
 varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;
 varying vec3 Tangents;
+
+uniform int HasGodsRays;
 
 vec3 CalcBumpedNormal(){
     vec3 normalMapTexture = ((texture2D(NormalMap, UV).xyz) * 2.0) - 1.0;
@@ -54,5 +57,8 @@ void main(){
     gl_FragData[1].a = Object_Color.a;
     gl_FragData[2].b = Specularity;
     gl_FragData[3] = vec4(WorldPosition,1.0);
+	if(HasGodsRays == 1){
+		gl_FragData[4] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);
+	}
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

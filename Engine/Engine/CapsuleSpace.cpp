@@ -20,9 +20,9 @@ CapsuleEnd::~CapsuleEnd(){
 void CapsuleEnd::update(float dt){
     ObjectBasic::update(dt);
 }
-void CapsuleEnd::draw(GLuint shader,bool debug){
+void CapsuleEnd::draw(GLuint shader,bool debug,bool godsRays){
     glDisable(GL_DEPTH_TEST);
-    ObjectDisplay::draw(shader,debug);
+    ObjectDisplay::draw(shader,debug,godsRays);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -71,11 +71,11 @@ CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string m
 }
 CapsuleTunnel::~CapsuleTunnel(){
 }
-void CapsuleTunnel::draw(GLuint shader,bool debug){
+void CapsuleTunnel::draw(GLuint shader,bool debug,bool godsRays){
     glEnablei(GL_BLEND,0);
     glBlendFunci(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,0);
 
-    ObjectDisplay::draw(shader,debug);
+    ObjectDisplay::draw(shader,debug,godsRays);
 }
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::v3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
@@ -83,9 +83,9 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string m
 }
 CapsuleRibbon::~CapsuleRibbon(){
 }
-void CapsuleRibbon::draw(GLuint shader,bool debug){
+void CapsuleRibbon::draw(GLuint shader,bool debug,bool godsRays){
     glDisable(GL_DEPTH_TEST);
-    ObjectDisplay::draw(shader,debug);
+    ObjectDisplay::draw(shader,debug,godsRays);
     glEnable(GL_DEPTH_TEST);
 }
 

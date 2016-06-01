@@ -65,9 +65,9 @@ void Planet::update(float dt){
 }
 void Planet::render(GLuint shader,bool debug){
     shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
-    ObjectDisplay::render(shader,debug);
+	ObjectDisplay::render(shader,debug);
 }
-void Planet::draw(GLuint shader,bool debug){
+void Planet::draw(GLuint shader,bool debug,bool godsRays){
     bool renderPlanet = true;
     if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
         renderPlanet = false;
@@ -98,6 +98,7 @@ void Planet::draw(GLuint shader,bool debug){
 
 
             glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
+			glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
 
             if(m_AtmosphereHeight > 0){
                 glUniform1i(glGetUniformLocation(shader,"hasAtmosphere"),1);
@@ -171,13 +172,15 @@ void Planet::draw(GLuint shader,bool debug){
         if(m_AtmosphereHeight <= 0.0f) renderAtmosphere = false;
 
         if(renderAtmosphere){
+			glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1);
             if(camHeight > outerRadius){ 
                 shader = Resources::getShader("AS_SkyFromSpace")->getShaderProgram(); 
                 glBlendFunc(GL_ONE, GL_ONE);
                 //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
             else{ 
-                shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram(); 
+                shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram();
+				
                 //glBlendFunc(GL_ONE, GL_ONE);
                 glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             }
@@ -258,12 +261,11 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::nType scl
     m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     setColor(starColor.x,starColor.y,starColor.z,1);
-
+	setGodsRaysColor(starColor.x,starColor.y,starColor.z);
     for(auto item:m_DisplayItems){
         item->material->setShadeless(true);
         item->material->setBaseGlow(0.21f);
     }
-
     addChild(m_Light);
 }
 Star::~Star(){
@@ -271,8 +273,8 @@ Star::~Star(){
 void Star::render(GLuint shader,bool debug){
     ObjectDisplay::render(shader,debug);
 }
-void Star::draw(GLuint shader,bool debug){
-    ObjectDisplay::draw(shader,debug);
+void Star::draw(GLuint shader,bool debug,bool godsRays){
+    ObjectDisplay::draw(shader,debug,godsRays);
 }
 Ring::Ring(std::vector<RingInfo> rings,Planet* parent){
     m_Parent = parent;

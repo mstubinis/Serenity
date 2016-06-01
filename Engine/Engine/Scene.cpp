@@ -97,4 +97,4 @@ void Scene::update(float dt){
 void Scene::setAmbientLightColor(glm::vec3 c){ setAmbientLightColor(c.r,c.g,c.b); }
 void Scene::setAmbientLightColor(float r,float g,float b){ Engine::Math::setColor(m_AmbientLighting,r,g,b); }
 void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
-void Scene::renderSkybox(){ if(m_Skybox != nullptr) m_Skybox->render(); }
+void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->render(godsRays); }

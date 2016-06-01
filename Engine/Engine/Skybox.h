@@ -25,7 +25,7 @@ class ISkybox{
     public:
         virtual ~ISkybox(){}
         virtual void update() = 0;
-        virtual void render() = 0;
+        virtual void render(bool godsRays) = 0;
 };
 class SkyboxEmpty: public ISkybox{
     protected:
@@ -34,7 +34,7 @@ class SkyboxEmpty: public ISkybox{
         SkyboxEmpty(std::string name,Scene* = nullptr);
         virtual ~SkyboxEmpty();
         virtual void update(){}
-        virtual void render(){}
+        virtual void render(bool godsRays){}
 };
 
 class Skybox: public SkyboxEmpty{
@@ -48,6 +48,6 @@ class Skybox: public SkyboxEmpty{
         virtual ~Skybox();
 
         virtual void update();
-        virtual void render();
+        virtual void render(bool godsRays);
 };
 #endif

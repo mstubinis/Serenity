@@ -16,6 +16,7 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     if(mesh != "" && mat != "")
         m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
     m_Color = glm::vec4(1);
+	m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
 }
 ObjectDisplay::~ObjectDisplay(){
@@ -28,7 +29,7 @@ void ObjectDisplay::render(GLuint shader,bool debug){
     }
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
-void ObjectDisplay::draw(GLuint shader, bool debug){
+void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
     Camera* camera = Resources::getActiveCamera();
     if((m_DisplayItems.size() == 0 || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
         return;	
@@ -38,9 +39,13 @@ void ObjectDisplay::draw(GLuint shader, bool debug){
     glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
-
+	glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
     if(m_Shadeless)
         glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
+	if(godsRays)
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+	else
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
 
     for(auto item:m_DisplayItems){
         glm::mat4 m = glm::mat4(m_Model);
@@ -88,6 +93,8 @@ void ObjectDisplay::calculateRadius(){
 }
 void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
 void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }
+void ObjectDisplay::setGodsRaysColor(float r, float g, float b){ Engine::Math::setColor(m_GodsRaysColor,r,g,b); }
+void ObjectDisplay::setGodsRaysColor(glm::vec3 c){ setGodsRaysColor(c.x,c.y,c.z); }
 void ObjectDisplay::setVisible(bool v){ m_Visible = v; }
 
 void ObjectDisplay::setScale(float x,float y,float z){

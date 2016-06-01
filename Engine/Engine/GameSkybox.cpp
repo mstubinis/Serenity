@@ -38,8 +38,8 @@ GameSkybox::~GameSkybox(){
 void GameSkybox::update(){
     Skybox::update();
 }
-void GameSkybox::render(){
-    Skybox::render();
+void GameSkybox::render(bool godsRays){
+    Skybox::render(godsRays);
     if(m_SunFlares.size() > 0){
         glEnablei(GL_BLEND,0);
         glDisable(GL_DEPTH_TEST);

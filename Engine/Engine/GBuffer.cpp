@@ -122,6 +122,15 @@ void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,unsi
     types.push_back(m_Buffers[type3]->getAttatchment());
     start(types,channels);
 }
+void GBuffer::start(unsigned int type,unsigned int type1,unsigned int type2,unsigned int type3,unsigned int type4,std::string channels){
+    std::vector<unsigned int> types;
+    types.push_back(m_Buffers[type]->getAttatchment());
+    types.push_back(m_Buffers[type1]->getAttatchment());
+    types.push_back(m_Buffers[type2]->getAttatchment());
+    types.push_back(m_Buffers[type3]->getAttatchment());
+	types.push_back(m_Buffers[type4]->getAttatchment());
+    start(types,channels);
+}
 void GBuffer::stop(){	
     // Stop acquiring and unbind the FBO
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

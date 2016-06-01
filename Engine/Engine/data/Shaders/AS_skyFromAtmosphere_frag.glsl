@@ -16,6 +16,8 @@ varying float outerRadius;
 varying float cameraHeight;
 varying float planetRadius;
 
+uniform int HasGodsRays;
+
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
     float fRayleighPhase = 0.75 * (1.0 + (fCos*fCos));
@@ -39,7 +41,8 @@ void main(){
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
     gl_FragData[3] = vec4(WorldPosition,1.0);
-
-    const float offset = 1.0;
-    gl_FragDepth = (log(C * gl_TexCoord[6].z + offset) / log(C * far + offset));
+	if(HasGodsRays == 1){
+		gl_FragData[4] = vec4(0.259,0.224,0.290,1);
+	}
+    gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

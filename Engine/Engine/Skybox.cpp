@@ -94,7 +94,7 @@ void Skybox::update(){
     m_Model[3][2] = p.z;
 }
 
-void Skybox::render(){
+void Skybox::render(bool godsRays){
     GLuint shader = Resources::getShader("Deferred_Skybox")->getShaderProgram();
     glUseProgram(shader);
 
@@ -104,6 +104,13 @@ void Skybox::render(){
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->getTextureAddress());
     glUniform1i(glGetUniformLocation(shader, "Texture"), 0);
+
+	if(godsRays == true){
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1);
+	}
+	else{
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0);
+	}
 
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
     glEnableVertexAttribArray(0);

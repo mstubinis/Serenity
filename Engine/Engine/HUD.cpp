@@ -33,7 +33,7 @@ void HUD::update(float dt){
         for(auto p:scene->getPlanets()){
             objs.push_back(p.second);
         }
-        scene->getPlayer()->setTarget(objs[count]);
+		scene->getPlayer()->setTarget(Resources::getObject("Sun"));
         count++;
         if (count > scene->getPlanets().size()-1){ count = 0; }
     }

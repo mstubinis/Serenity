@@ -13,7 +13,7 @@ class CapsuleEnd final: public ObjectDisplay{
         ~CapsuleEnd();
 
         void update(float);
-        void draw(GLuint shader,bool=false);
+        void draw(GLuint shader,bool=false,bool=false);
 };
 
 class CapsuleStar final: public ObjectDisplay{
@@ -34,7 +34,7 @@ class CapsuleTunnel final: public ObjectDisplay{
         ~CapsuleTunnel();
 
         float getTunnelRadius(){ return m_TunnelRadius; }
-        void draw(GLuint shader,bool=false);
+        void draw(GLuint shader,bool=false,bool=false);
 };
 class CapsuleRibbon final: public ObjectDisplay{
     private:
@@ -44,7 +44,7 @@ class CapsuleRibbon final: public ObjectDisplay{
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }
-        void draw(GLuint shader,bool=false);
+        void draw(GLuint shader,bool=false,bool=false);
 };
 
 class CapsuleSpace final: public SolarSystem{

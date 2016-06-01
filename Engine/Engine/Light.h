@@ -22,7 +22,7 @@ class SunLight: public ObjectDisplay{
         void update(float);
 
         virtual void render(GLuint=0,bool=false);
-        virtual void draw(GLuint shader,bool=false);
+        virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual void lighten(GLuint);
         float getSpecularPower(){ return m_SpecularPower; }

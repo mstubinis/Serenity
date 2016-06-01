@@ -525,7 +525,7 @@ float Atmosphere::getRadius(){
     return m_Mesh->getRadius() * glm::max(glm::max(m_Scale.x,m_Scale.y),m_Scale.z);
 }
 glm::v3 Atmosphere::getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
-void Atmosphere::render(){
+void Atmosphere::render(bool godsRays){
     GLuint shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram();
     Camera* cam = Resources::getActiveCamera();
     SunLight* sun = static_cast<SunLight*>(Resources::getObject("Sun Light"));
@@ -576,6 +576,13 @@ void Atmosphere::render(){
     glUniform1f(glGetUniformLocation(shader,"g"),m_Atmosphere.gravity);
     glUniform1f(glGetUniformLocation(shader,"g2"), m_Atmosphere.gravity*m_Atmosphere.gravity);
     glUniform1f(glGetUniformLocation(shader,"fExposure"),m_Atmosphere.exposure);
+
+	if(godsRays == true){
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1);
+	}
+	else{
+		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0);
+	}
 
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);

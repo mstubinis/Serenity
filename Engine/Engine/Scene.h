@@ -50,6 +50,6 @@ class Scene{
         SkyboxEmpty* getSkybox() const { return m_Skybox; }
         void setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
         void centerSceneToObject(Object*);
-        void renderSkybox();
+        void renderSkybox(bool);
 };
 #endif

@@ -10,14 +10,14 @@ uniform int samples;
 uniform vec2 gScreenSize;
 
 void main(void){
-    vec2 uv = gl_FragCoord.xy / gScreenSize;
-    vec2 deltaTextCoord = vec2( uv - lightPositionOnScreen.xy );
+	vec2 uv = gl_FragCoord.xy / gScreenSize;
+    vec2 deltaTextCoord = vec2( uv - (lightPositionOnScreen.xy / gScreenSize) );
     deltaTextCoord *= 1.0 /  float(samples) * density;
     float illuminationDecay = 1.0;
     
     for(int i=0; i < samples; i++){
         uv -= deltaTextCoord;
-        vec4 sample = texture2D(firstPass, uv );	
+        vec4 sample = texture2D(firstPass,uv);	
         sample *= illuminationDecay * weight;
         gl_FragColor += sample;
         illuminationDecay *= decay;
