@@ -15,17 +15,12 @@ void main(void){
     deltaTextCoord *= 1.0 /  float(samples) * density;
     float illuminationDecay = 1.0;
     
-	if(lightPositionOnScreen.x < 10000 && lightPositionOnScreen.y < 10000){
-		for(int i=0; i < samples; i++){
-			uv -= deltaTextCoord;
-			vec4 sample = texture2D(firstPass,uv);	
-			sample *= illuminationDecay * weight;
-			gl_FragColor += sample;
-			illuminationDecay *= decay;
-		}
-		gl_FragColor *= exposure;
+	for(int i=0; i < samples; i++){
+		uv -= deltaTextCoord;
+		vec4 sample = texture2D(firstPass,uv);	
+		sample *= illuminationDecay * weight;
+		gl_FragColor += sample;
+		illuminationDecay *= decay;
 	}
-	else{
-		gl_FragColor = vec4(0);
-	}
+	gl_FragColor *= exposure;
 }

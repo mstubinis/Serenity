@@ -55,10 +55,9 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     if(HasSSAO == 1){
         ssao = texture2D(gMiscMap,uv).g;
     }
-	vec4 lightWithoutSpecular = (((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao));
-	if(Glow > 0.99){
-		return diffuseMapColor;
-	}
+	vec4 lightWithoutSpecular = ((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao);
+
+	if(Glow > 0.99){ return diffuseMapColor; }
     return max(Glow*diffuseMapColor,lightWithoutSpecular + (SpecularColor));
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){

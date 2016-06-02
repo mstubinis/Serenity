@@ -55,10 +55,8 @@ void Game::initResources(){
 void Game::initLogic(){
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
-    Engine::Renderer::Settings::enableSSAO(true);
-	Engine::Renderer::Settings::enableGodsRays(false);
-	//Engine::Renderer::Settings::enableBloom(false);
-	//Engine::Renderer::Settings::enableHDR(false);
+
+	Engine::Renderer::Settings::GodRays::disable();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -67,9 +65,6 @@ void Game::initLogic(){
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 
-    //Sound::setCurrentMusicAndPlay("Test");
-    //Sound::loop("Test");
-
     m_HUD = new HUD();
 }
 void Game::update(float dt){
@@ -77,21 +72,20 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
     }
-    if(Events::Keyboard::isKeyDownOnce("f4")){
-        Engine::Renderer::Settings::renderDiffuseOnly();
-    }
-    if(Events::Keyboard::isKeyDownOnce("f5")){
-        Engine::Renderer::Settings::renderPositionOnly();
-    }
-    if(Events::Keyboard::isKeyDownOnce("f6")){
-        Engine::Renderer::Settings::renderNormalsOnly();
-    }
-    if(Events::Keyboard::isKeyDownOnce("f7")){
-        Engine::Renderer::Settings::renderSSAOOnly();
-    }
-    if(Events::Keyboard::isKeyDownOnce("f8")){
-        Engine::Renderer::Settings::renderBloomOnly();
-    }
+
+	if(Events::Keyboard::isKeyDown("f5")){
+		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure()-0.01f);
+	}
+	if(Events::Keyboard::isKeyDown("f6")){
+		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure()+0.01f);
+	}
+	if(Events::Keyboard::isKeyDown("f7")){
+		Renderer::Settings::HDR::setGamma(Renderer::Settings::HDR::getGamma()-0.01f);
+	}
+	if(Events::Keyboard::isKeyDown("f8")){
+		Renderer::Settings::HDR::setGamma(Renderer::Settings::HDR::getGamma()+0.01f);
+	}
+
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
@@ -101,13 +95,10 @@ void Game::update(float dt){
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-		Renderer::Settings::enableSSAO(!Renderer::RendererInfo::SSAOInfo::ssao);
+		Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
-    if(Events::Keyboard::isKeyDownOnce("f12")){
-        Engine::Renderer::Settings::renderNormally();
-    }
-    /*
 
+    /*
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Engine::setFullScreen(true);
     }
@@ -124,5 +115,5 @@ void Game::update(float dt){
     m_HUD->update(dt);
 }
 void Game::render(){
-    m_HUD->render(Engine::Renderer::RendererInfo::debug);
+    m_HUD->render(Renderer::Detail::RendererInfo::DebugDrawingInfo::debug);
 }

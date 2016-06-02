@@ -58,113 +58,47 @@ struct FontRenderInfo final: public TextureRenderInfo{
 
 namespace Engine{
     namespace Renderer{
-        struct RendererInfo final{
-            static bool positionOnly;
-            static bool normalsOnly;
-            static bool ssaoOnly;
-            static bool diffuseOnly;
-            static bool bloomOnly;
-
-            static bool bloom;
-            static bool lighting;
-            static bool debug;
-
-            struct HDRInfo{
-                static bool hdr;
-                static float hdr_exposure;
-                static float hdr_gamma;
-            };
-            struct GodRaysInfo{
-                static bool godRays;
-                static float godRays_exposure;
-                static float godRays_decay;
-                static float godRays_density;
-                static float godRays_weight;
-                static unsigned int godRays_samples;
-            };
-            struct SSAOInfo{
-                static bool ssao;
-                static bool ssao_do_blur;
-                static unsigned int ssao_samples;
-                static float ssao_bias;
-                static float ssao_scale;
-                static float ssao_radius;
-                static float ssao_intensity;
-                static glm::vec2 ssao_Kernels[64];
-                static GLuint ssao_noise_texture;
-                static unsigned int ssao_noise_texture_size;
-            };
-        };
-        namespace Settings{
-            namespace GodRays{
-                static void setExposure(float e){ Renderer::RendererInfo::GodRaysInfo::godRays_exposure = e; }
-                static void setDecay(float d){ Renderer::RendererInfo::GodRaysInfo::godRays_decay = d; }
-                static void setDensity(float d){ Renderer::RendererInfo::GodRaysInfo::godRays_density = d; }
-                static void setWeight(float w){ Renderer::RendererInfo::GodRaysInfo::godRays_weight = w; }
-                static void setSamples(unsigned int s){ Renderer::RendererInfo::GodRaysInfo::godRays_samples = s; }
-            };
-            namespace SSAO{
-                static void setIntensity(float i){ Renderer::RendererInfo::SSAOInfo::ssao_intensity = i; }
-                static void setRadius(float r){ Renderer::RendererInfo::SSAOInfo::ssao_radius = r; }
-                static void setScale(float s){ Renderer::RendererInfo::SSAOInfo::ssao_scale = s; }
-                static void setBias(float b){ Renderer::RendererInfo::SSAOInfo::ssao_bias = b; }
-                static void setSamples(unsigned int s){ Renderer::RendererInfo::SSAOInfo::ssao_samples = s; }
-            };
-            static void renderDiffuseOnly(bool = true){
-                Renderer::RendererInfo::diffuseOnly = true;
-
-                Renderer::RendererInfo::positionOnly = false;
-                Renderer::RendererInfo::normalsOnly = false;
-                Renderer::RendererInfo::ssaoOnly = false;
-                Renderer::RendererInfo::bloomOnly = false;
-            }
-            static void renderNormalsOnly(bool = true){
-                Renderer::RendererInfo::normalsOnly = true;
-
-                Renderer::RendererInfo::diffuseOnly = false;
-                Renderer::RendererInfo::positionOnly = false;
-                Renderer::RendererInfo::ssaoOnly = false;
-                Renderer::RendererInfo::bloomOnly = false;
-            }
-            static void renderPositionOnly(bool = true){
-                Renderer::RendererInfo::positionOnly = true;
-
-                Renderer::RendererInfo::diffuseOnly = false;
-                Renderer::RendererInfo::normalsOnly = false;
-                Renderer::RendererInfo::ssaoOnly = false;
-                Renderer::RendererInfo::bloomOnly = false;
-            }
-            static void renderSSAOOnly(bool = true){
-                Renderer::RendererInfo::ssaoOnly = true;
-
-                Renderer::RendererInfo::diffuseOnly = false;
-                Renderer::RendererInfo::positionOnly = false;
-                Renderer::RendererInfo::normalsOnly = false;
-                Renderer::RendererInfo::bloomOnly = false;
-            }
-            static void renderBloomOnly(bool = true){
-                Renderer::RendererInfo::bloomOnly = true;
-
-                Renderer::RendererInfo::diffuseOnly = false;
-                Renderer::RendererInfo::positionOnly = false;
-                Renderer::RendererInfo::normalsOnly = false;
-                Renderer::RendererInfo::ssaoOnly = false;
-            }
-            static void renderNormally(bool = true){
-                Renderer::RendererInfo::bloomOnly = false;
-                Renderer::RendererInfo::diffuseOnly = false;
-                Renderer::RendererInfo::positionOnly = false;
-                Renderer::RendererInfo::normalsOnly = false;
-                Renderer::RendererInfo::ssaoOnly = false;
-            }
-            static void enableGodsRays(bool enabled = true){ Renderer::RendererInfo::GodRaysInfo::godRays = enabled; }
-			static void enableHDR(bool enabled = true){ Renderer::RendererInfo::HDRInfo::hdr = enabled; }
-            static void enableLighting(bool enabled = true){ Renderer::RendererInfo::lighting = enabled; }
-            static void enableBloom(bool enabled = true){ Renderer::RendererInfo::bloom = enabled; }
-            static void enableSSAO(bool enabled = true){ Renderer::RendererInfo::SSAOInfo::ssao = enabled;  }
-            static void enableDebugDrawing(bool enabled = true){ Renderer::RendererInfo::debug = enabled;  }
-        };
         namespace Detail{
+
+			struct RendererInfo{
+				struct DebugDrawingInfo{
+					static bool debug;
+				};
+				struct LightingInfo{
+					static bool lighting;
+				};
+				struct BloomInfo{
+					static bool bloom;
+					static float bloom_radius;
+					static float bloom_strength;
+				};
+				struct HDRInfo{
+					static bool hdr;
+					static float hdr_exposure;
+					static float hdr_gamma;
+				};
+				struct GodRaysInfo{
+					static bool godRays;
+					static float godRays_exposure;
+					static float godRays_decay;
+					static float godRays_density;
+					static float godRays_weight;
+					static unsigned int godRays_samples;
+				};
+				struct SSAOInfo{
+					static bool ssao;
+					static bool ssao_do_blur;
+					static unsigned int ssao_samples;
+					static float ssao_bias;
+					static float ssao_scale;
+					static float ssao_radius;
+					static float ssao_intensity;
+					static glm::vec2 ssao_Kernels[64];
+					static GLuint ssao_noise_texture;
+					static unsigned int ssao_noise_texture_size;
+				};
+			};
+
             class RenderManagement final{
                 #ifdef _WIN32
                     public: static IDXGISwapChain* m_DirectXSwapChain;
@@ -211,6 +145,68 @@ namespace Engine{
             };
             void renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale = 1.0f);
         };
+
+		namespace Settings{
+			namespace HDR{
+				static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
+				static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
+
+				static float getExposure(){ return Detail::RendererInfo::HDRInfo::hdr_exposure; }
+				static float getGamma(){ return Detail::RendererInfo::HDRInfo::hdr_gamma; }
+				static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
+				static void setGamma(float g){ Detail::RendererInfo::HDRInfo::hdr_gamma = g; }
+			};
+			namespace Bloom{
+				static void enable(bool b = true){ Detail::RendererInfo::BloomInfo::bloom = b; }
+				static void disable(){ Detail::RendererInfo::BloomInfo::bloom = false; }
+
+				static float getRadius(){ return Detail::RendererInfo::BloomInfo::bloom_radius; }
+				static float getStrength(){ return Detail::RendererInfo::BloomInfo::bloom_strength; }
+				static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = r; }
+				static void setStrength(float r){ Detail::RendererInfo::BloomInfo::bloom_strength = r; }
+			};
+            namespace GodRays{
+				static void enable(bool b = true){ Detail::RendererInfo::GodRaysInfo::godRays = b; }
+				static void disable(){ Detail::RendererInfo::GodRaysInfo::godRays = false; }
+
+                static float getExposure(){ return Detail::RendererInfo::GodRaysInfo::godRays_exposure; }
+                static float getDecay(){ return Detail::RendererInfo::GodRaysInfo::godRays_decay; }
+                static float getDensity(){ return Detail::RendererInfo::GodRaysInfo::godRays_density; }
+                static float getWeight(){ return Detail::RendererInfo::GodRaysInfo::godRays_weight; }
+                static unsigned int getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
+
+                static void setExposure(float e){ Detail::RendererInfo::GodRaysInfo::godRays_exposure = e; }
+                static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
+                static void setDensity(float d){ Detail::RendererInfo::GodRaysInfo::godRays_density = d; }
+                static void setWeight(float w){ Detail::RendererInfo::GodRaysInfo::godRays_weight = w; }
+                static void setSamples(unsigned int s){ Detail::RendererInfo::GodRaysInfo::godRays_samples = s; }
+            };
+            namespace SSAO{
+				static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }
+				static void disable(){ Detail::RendererInfo::SSAOInfo::ssao = false;  }
+
+                static float getIntensity(){ return Detail::RendererInfo::SSAOInfo::ssao_intensity; }
+                static float getRadius(){ return Detail::RendererInfo::SSAOInfo::ssao_radius; }
+                static float getScale(){ return Detail::RendererInfo::SSAOInfo::ssao_scale; }
+                static float getBias(){ return Detail::RendererInfo::SSAOInfo::ssao_bias; }
+                static unsigned int getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
+
+                static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = i; }
+                static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = r; }
+                static void setScale(float s){ Detail::RendererInfo::SSAOInfo::ssao_scale = s; }
+                static void setBias(float b){ Detail::RendererInfo::SSAOInfo::ssao_bias = b; }
+                static void setSamples(unsigned int s){ Detail::RendererInfo::SSAOInfo::ssao_samples = s; }
+            };
+			namespace Lighting{
+				static void enable(bool b = true){ Detail::RendererInfo::LightingInfo::lighting = b; }
+				static void disable(){ Detail::RendererInfo::LightingInfo::lighting = false; }
+			};
+			namespace Debug{
+				static void enable(bool b = true){ Detail::RendererInfo::DebugDrawingInfo::debug = b;  }
+				static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
+			};
+        };
+
         void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
     };
 };

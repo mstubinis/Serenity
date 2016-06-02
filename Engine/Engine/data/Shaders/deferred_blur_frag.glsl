@@ -9,8 +9,7 @@ uniform int G;
 uniform int B;
 uniform int A;
 
-uniform float H;
-uniform float V;
+uniform vec2 HV;
 
 vec2 offset[14];
 
@@ -36,8 +35,8 @@ float g[7] = float[](
 );
 void main(void){
     for(int i = 0; i < 7; i++){
-        offset[i] = vec2(-weights[i] * radius * H, -weights[i] * radius * V);
-        offset[13-i] = vec2(weights[i] * radius * H, weights[i] * radius * V);
+        offset[i] = vec2(-weights[i] * radius * HV.x, -weights[i] * radius * HV.y);
+        offset[13-i] = vec2(weights[i] * radius * HV.x, weights[i] * radius * HV.y);
     }
     vec4 sum = vec4(0.0);
     vec2 uv = gl_FragCoord.xy / gScreenSize;

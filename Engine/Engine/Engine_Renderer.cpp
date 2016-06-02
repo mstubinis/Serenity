@@ -24,37 +24,35 @@ ID3D11DeviceContext* Renderer::Detail::RenderManagement::m_DirectXDeviceContext;
 ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
-bool Renderer::RendererInfo::positionOnly = false;
-bool Renderer::RendererInfo::normalsOnly = false;
-bool Renderer::RendererInfo::ssaoOnly = false;
-bool Renderer::RendererInfo::diffuseOnly = false;
-bool Renderer::RendererInfo::bloomOnly = false;
+bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.34f;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 4.0f;
 
-bool Renderer::RendererInfo::bloom = true;
-bool Renderer::RendererInfo::lighting = true;
-bool Renderer::RendererInfo::debug = false;
+bool Renderer::Detail::RendererInfo::LightingInfo::lighting = true;
 
-bool Renderer::RendererInfo::GodRaysInfo::godRays = true;
-float Renderer::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_density = 0.30f;
-float Renderer::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
-unsigned int Renderer::RendererInfo::GodRaysInfo::godRays_samples = 75;
+bool Renderer::Detail::RendererInfo::DebugDrawingInfo::debug = false;
 
-bool Renderer::RendererInfo::SSAOInfo::ssao = true;
-bool Renderer::RendererInfo::SSAOInfo::ssao_do_blur = true;
-unsigned int Renderer::RendererInfo::SSAOInfo::ssao_samples = 5;
-float Renderer::RendererInfo::SSAOInfo::ssao_scale = 0.03f;
-float Renderer::RendererInfo::SSAOInfo::ssao_intensity = 2.2f;
-float Renderer::RendererInfo::SSAOInfo::ssao_bias = 0.02f;
-float Renderer::RendererInfo::SSAOInfo::ssao_radius = 0.09f;
-glm::vec2 Renderer::RendererInfo::SSAOInfo::ssao_Kernels[64];
-GLuint Renderer::RendererInfo::SSAOInfo::ssao_noise_texture;
-unsigned int Renderer::RendererInfo::SSAOInfo::ssao_noise_texture_size = 16;
+bool Renderer::Detail::RendererInfo::GodRaysInfo::godRays = true;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.30f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
+unsigned int Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 75;
 
-bool Renderer::RendererInfo::HDRInfo::hdr = true;
-float Renderer::RendererInfo::HDRInfo::hdr_exposure = 1.0f;
-float Renderer::RendererInfo::HDRInfo::hdr_gamma = 1.0f;
+bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
+bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
+unsigned int Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 5;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.03f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 2.2f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.02f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.09f;
+glm::vec2 Renderer::Detail::RendererInfo::SSAOInfo::ssao_Kernels[64];
+GLuint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
+unsigned int Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size = 16;
+
+bool Renderer::Detail::RendererInfo::HDRInfo::hdr = true;
+float Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure = 1.0f;
+float Renderer::Detail::RendererInfo::HDRInfo::hdr_gamma = 1.0f;
 
 GBuffer* Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 glm::mat4 Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::mat4(1);
@@ -67,9 +65,9 @@ std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToB
 
 void Engine::Renderer::Detail::RenderManagement::init(){
     #ifdef _DEBUG
-    Renderer::RendererInfo::debug = true;
+    Detail::RendererInfo::DebugDrawingInfo::debug = true;
     #else
-    Renderer::RendererInfo::debug = false;
+    Detail::RendererInfo::DebugDrawingInfo::debug = false;
     #endif
 
     std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
@@ -89,35 +87,35 @@ void Engine::Renderer::Detail::RenderManagement::init(){
         sample *= scale;
         kernels.push_back(sample);
     }
-    std::copy(kernels.begin(),kernels.end(),Renderer::RendererInfo::SSAOInfo::ssao_Kernels);
+    std::copy(kernels.begin(),kernels.end(),Detail::RendererInfo::SSAOInfo::ssao_Kernels);
 
     std::vector<glm::vec3> ssaoNoise;
-    for (unsigned int i = 0; i < Renderer::RendererInfo::SSAOInfo::ssao_noise_texture_size*Renderer::RendererInfo::SSAOInfo::ssao_noise_texture_size; i++){
+    for (unsigned int i = 0; i < Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size*Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size; i++){
         glm::vec3 noise(
             randomFloats(generator) * 2.0 - 1.0, 
             randomFloats(generator) * 2.0 - 1.0, 
             0.0f); 
         ssaoNoise.push_back(noise);
     } 
-    glGenTextures(1, &Renderer::RendererInfo::SSAOInfo::ssao_noise_texture);
-    glBindTexture(GL_TEXTURE_2D, Renderer::RendererInfo::SSAOInfo::ssao_noise_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Renderer::RendererInfo::SSAOInfo::ssao_noise_texture_size, 
-                                              Renderer::RendererInfo::SSAOInfo::ssao_noise_texture_size, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    glGenTextures(1, &Detail::RendererInfo::SSAOInfo::ssao_noise_texture);
+    glBindTexture(GL_TEXTURE_2D, Detail::RendererInfo::SSAOInfo::ssao_noise_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size, 
+                                              Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
 
-    Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
+    RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)Resources::getWindowSize().x,0.0f,(float)Resources::getWindowSize().y,0.005f,1000.0f);
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
-    SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
+    SAFE_DELETE(RenderManagement::m_gBuffer);
 
     #ifdef _WIN32
-    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXSwapChain);
-    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXBackBuffer);
-    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDevice);
-    SAFE_DELETE_COM(Renderer::Detail::RenderManagement::m_DirectXDeviceContext);
+    SAFE_DELETE_COM(RenderManagement::m_DirectXSwapChain);
+    SAFE_DELETE_COM(RenderManagement::m_DirectXBackBuffer);
+    SAFE_DELETE_COM(RenderManagement::m_DirectXDevice);
+    SAFE_DELETE_COM(RenderManagement::m_DirectXDeviceContext);
     #endif
 }
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth){
@@ -125,17 +123,17 @@ void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 color, float wid
 }
 void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
-		item.object->draw(item.shader,RendererInfo::debug,RendererInfo::GodRaysInfo::godRays);
+		item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
     }
 }
 void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
     for(auto item:m_ForegroundObjectsToBeRendered){
-        item.object->draw(item.shader,RendererInfo::debug);
+        item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
 void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects(){
     for(auto item:m_ObjectsToBeForwardRendered){
-        item.object->draw(item.shader,RendererInfo::debug);
+        item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
 
@@ -281,16 +279,16 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
-    for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::debug); }
+    for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::DebugDrawingInfo::debug); }
 
 	if(RendererInfo::GodRaysInfo::godRays == false){
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
-		Renderer::Detail::RenderManagement::_passGeometry();
+		RenderManagement::_passGeometry();
 		m_gBuffer->stop();
 	}
 	else{
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
-		Renderer::Detail::RenderManagement::_passGeometry();
+		RenderManagement::_passGeometry();
 		m_gBuffer->stop();
 	}
 
@@ -326,40 +324,39 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     if(RendererInfo::SSAOInfo::ssao){
         //only write to the G channel of the glow buffer for SSAO pass
         m_gBuffer->start(BUFFER_TYPE_MISC,"G");
-        Renderer::Detail::RenderManagement::_passSSAO();
+        RenderManagement::_passSSAO();
         m_gBuffer->stop();
 
         if(RendererInfo::SSAOInfo::ssao_do_blur){
             //only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
             m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
-            Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_MISC,0.5f,0.5f,"G");
+            RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_MISC,0.5f,0.5f,"G");
             m_gBuffer->stop();
             m_gBuffer->start(BUFFER_TYPE_MISC,"G");
-            Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"G");
+            RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"G");
             m_gBuffer->stop();
         }
-        
     }
-    if(RendererInfo::lighting){
+    if(RendererInfo::LightingInfo::lighting){
         m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM);
-        Renderer::Detail::RenderManagement::_passLighting();
+        RenderManagement::_passLighting();
         m_gBuffer->stop();
     }
-    if(RendererInfo::bloom){
+    if(RendererInfo::BloomInfo::bloom){
         glDisable(GL_BLEND);
         m_gBuffer->start(BUFFER_TYPE_FREE1);
-        Renderer::Detail::RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.34f,4.0f);
+        RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength);
         m_gBuffer->stop();
         m_gBuffer->start(BUFFER_TYPE_BLOOM);
-        Renderer::Detail::RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.34f,4.0f);
+        RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength);
         m_gBuffer->stop();
     }
     if(RendererInfo::HDRInfo::hdr){
         m_gBuffer->start(BUFFER_TYPE_MISC);
-        Renderer::Detail::RenderManagement::_passHDR();
+        RenderManagement::_passHDR();
         m_gBuffer->stop();
     }
-    Renderer::Detail::RenderManagement::_passFinal();
+    RenderManagement::_passFinal();
 
     //copy depth over
     glColorMask(0,0,0,0);
@@ -383,7 +380,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     /////////////
 
     glEnable(GL_BLEND);
-    if(RendererInfo::debug)
+    if(RendererInfo::DebugDrawingInfo::debug)
         Physics::Detail::PhysicsManagement::render();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -399,8 +396,8 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    Renderer::Detail::RenderManagement::_renderTextures();
-    Renderer::Detail::RenderManagement::_renderText();
+    RenderManagement::_renderTextures();
+    RenderManagement::_renderText();
 
     glDisable(GL_ALPHA_TEST);
 
@@ -421,7 +418,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
     glUniform1f(glGetUniformLocation(shader,"gScale"), RendererInfo::SSAOInfo::ssao_scale);
     glUniform1i(glGetUniformLocation(shader,"gSampleCount"), RendererInfo::SSAOInfo::ssao_samples);
     glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"), RendererInfo::SSAOInfo::ssao_noise_texture_size);
-    glUniform2fv(glGetUniformLocation(shader,"poisson"),64, glm::value_ptr(Renderer::RendererInfo::SSAOInfo::ssao_Kernels[0]));
+    glUniform2fv(glGetUniformLocation(shader,"poisson"),64, glm::value_ptr(RendererInfo::SSAOInfo::ssao_Kernels[0]));
     glUniform1i(glGetUniformLocation(shader,"far"), static_cast<int>(Resources::getActiveCamera()->getFar()));
 
     glActiveTexture(GL_TEXTURE0);
@@ -436,7 +433,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 
     glActiveTexture(GL_TEXTURE2);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D,Renderer::RendererInfo::SSAOInfo::ssao_noise_texture);
+    glBindTexture(GL_TEXTURE_2D,RendererInfo::SSAOInfo::ssao_noise_texture);
     glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
 
@@ -471,14 +468,13 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 
     glUseProgram(0);
 }
-
 void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen){
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLuint shader = Resources::getShader("Deferred_GodsRays")->getShaderProgram();
     glUseProgram(shader);
 
-    glUniform1f(glGetUniformLocation(shader,"decay"), Renderer::RendererInfo::GodRaysInfo::godRays_decay);
+    glUniform1f(glGetUniformLocation(shader,"decay"), RendererInfo::GodRaysInfo::godRays_decay);
     glUniform1f(glGetUniformLocation(shader,"density"), RendererInfo::GodRaysInfo::godRays_density);
     glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::GodRaysInfo::godRays_exposure);
     glUniform1i(glGetUniformLocation(shader,"samples"), RendererInfo::GodRaysInfo::godRays_samples);
@@ -505,14 +501,15 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     GLuint shader = Resources::getShader("Deferred_HDR")->getShaderProgram();
     glUseProgram(shader);
 
-    glUniform1f(glGetUniformLocation(shader,"gamma"), Renderer::RendererInfo::HDRInfo::hdr_gamma);
+	glUniform1i(glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::BloomInfo::bloom));
+    glUniform1f(glGetUniformLocation(shader,"gamma"), RendererInfo::HDRInfo::hdr_gamma);
     glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::HDRInfo::hdr_exposure);
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
     
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-    glUniform1i(glGetUniformLocation(shader,"hdrBuffer"), 0 );
+    glUniform1i(glGetUniformLocation(shader,"lightingBuffer"), 0 );
 
     glActiveTexture(GL_TEXTURE1);
     glEnable(GL_TEXTURE_2D);
@@ -546,14 +543,11 @@ void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLu
     else                                        glUniform1i(glGetUniformLocation(shader,"A"), 0);
 
     if(type == "Horizontal"){ 
-        glUniform1f(glGetUniformLocation(shader,"H"), 1.0f);
-        glUniform1f(glGetUniformLocation(shader,"V"), 0.0f);
+        glUniform2f(glGetUniformLocation(shader,"HV"), 1.0f,0.0f);
     }
     else{
-        glUniform1f(glGetUniformLocation(shader,"H"), 0.0f);
-        glUniform1f(glGetUniformLocation(shader,"V"), 1.0f);
+        glUniform2f(glGetUniformLocation(shader,"HV"), 0.0f,1.0f);
     }
-
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
@@ -573,24 +567,18 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     GLuint shader = Resources::getShader("Deferred_Final")->getShaderProgram();
     glUseProgram(shader);
 
-    glUniform1i( glGetUniformLocation(shader,"PositionOnly"), static_cast<int>(RendererInfo::positionOnly));
-    glUniform1i( glGetUniformLocation(shader,"NormalsOnly"), static_cast<int>(RendererInfo::normalsOnly));
-    glUniform1i( glGetUniformLocation(shader,"SSAOOnly"), static_cast<int>(RendererInfo::ssaoOnly));
-    glUniform1i( glGetUniformLocation(shader,"DiffuseOnly"), static_cast<int>(RendererInfo::diffuseOnly));
-    glUniform1i( glGetUniformLocation(shader,"BloomOnly"), static_cast<int>(RendererInfo::bloomOnly));
-
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
     glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
-    glUniform1i( glGetUniformLocation(shader,"HasLighting"), static_cast<int>(RendererInfo::lighting));
-    glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::bloom));
+    glUniform1i( glGetUniformLocation(shader,"HasLighting"), static_cast<int>(RendererInfo::LightingInfo::lighting));
+    glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::BloomInfo::bloom));
 	glUniform1i( glGetUniformLocation(shader,"HasHDR"), static_cast<int>(RendererInfo::HDRInfo::hdr));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
-    glUniform1i( glGetUniformLocation(shader,"gColorMap"), 0 );
+    glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 0 );
 
     glActiveTexture(GL_TEXTURE1);
     glEnable(GL_TEXTURE_2D);
@@ -614,17 +602,12 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
     glActiveTexture(GL_TEXTURE5);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
-    glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 5 );
-
-    glActiveTexture(GL_TEXTURE6);
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS));
-    glUniform1i( glGetUniformLocation(shader,"gGodsRaysMap"), 6 );
+    glUniform1i( glGetUniformLocation(shader,"gGodsRaysMap"), 5 );
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 7; i++){
+    for(unsigned int i = 0; i < 6; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
