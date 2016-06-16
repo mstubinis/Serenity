@@ -13,11 +13,14 @@ uniform int HasBloom;
 void main(void){
     vec2 uv = gl_FragCoord.xy / gScreenSize;
 	vec3 lighting = texture2D(lightingBuffer, uv).rgb;
+
 	if(HasBloom == 1){
 		vec3 bloomColor = texture2D(bloomBuffer, uv).rgb;
 		lighting += bloomColor; // additive blending
 	}
+
     vec3 mapped = vec3(1.0) - exp(-lighting * exposure); // Exposure tone mapping
     mapped = pow(mapped, vec3(1.0 / gamma));             // Gamma correction 
+
     gl_FragColor = vec4(mapped, 1.0);
 }

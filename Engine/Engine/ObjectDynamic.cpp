@@ -145,7 +145,7 @@ void ObjectDynamic::update(float dt){
 void ObjectDynamic::render(GLuint shader,bool debug){
     //add to render queue
     if(shader == 0){
-        shader = Resources::getShader("Deferred")->getShaderProgram();
+        shader = Resources::getShader("Deferred")->program();
     }
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }

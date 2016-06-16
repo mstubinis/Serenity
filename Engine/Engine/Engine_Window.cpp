@@ -156,14 +156,14 @@ sf::Vector2u Engine_Window::getSize(){
     return m_SFMLWindow->getSize();
 }
 void Engine_Window::setIcon(Texture* texture){
-    m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->getPixels());
+    m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
 }
 void Engine_Window::setIcon(std::string name){
     if(!Resources::Detail::ResourceManagement::m_Textures.count(name)){
         new Texture(name);
     }
     Texture* texture = Resources::getTexture(name);
-    m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->getPixels());
+    m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
 }
 const char* Engine_Window::name(){
     return m_WindowName;

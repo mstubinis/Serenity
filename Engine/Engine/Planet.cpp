@@ -64,7 +64,7 @@ void Planet::update(float dt){
     ObjectDisplay::update(dt);
 }
 void Planet::render(GLuint shader,bool debug){
-    shader = Resources::getShader("AS_GroundFromSpace")->getShaderProgram();
+    shader = Resources::getShader("AS_GroundFromSpace")->program();
 	ObjectDisplay::render(shader,debug);
 }
 void Planet::draw(GLuint shader,bool debug,bool godsRays){
@@ -180,12 +180,12 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 
         if(renderAtmosphere){
             if(camHeight > outerRadius){ 
-                shader = Resources::getShader("AS_SkyFromSpace")->getShaderProgram(); 
+                shader = Resources::getShader("AS_SkyFromSpace")->program(); 
                 glBlendFunc(GL_ONE, GL_ONE);
                 //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
             else{ 
-                shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram();
+                shader = Resources::getShader("AS_SkyFromAtmosphere")->program();
 				
                 //glBlendFunc(GL_ONE, GL_ONE);
                 glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -255,7 +255,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 
         #pragma endregion
     }
-    shader = Resources::getShader("Deferred")->getShaderProgram();
+    shader = Resources::getShader("Deferred")->program();
     glUseProgram(shader);
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);

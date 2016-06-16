@@ -2,7 +2,7 @@
 #ifndef ENGINE_MOUSE_H
 #define ENGINE_MOUSE_H
 
-#include <string>
+#include <memory>
 
 namespace sf{class Mouse;};
 
@@ -10,7 +10,8 @@ typedef unsigned int uint;
 
 class Engine_Mouse final{
     private:
-        sf::Mouse* m_SFMLMouse;
+		class impl;
+		std::unique_ptr<impl> m_i;
     public:
         Engine_Mouse();
         ~Engine_Mouse();

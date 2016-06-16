@@ -51,8 +51,8 @@ GLuint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 unsigned int Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size = 16;
 
 bool Renderer::Detail::RendererInfo::HDRInfo::hdr = true;
-float Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure = 1.0f;
-float Renderer::Detail::RendererInfo::HDRInfo::hdr_gamma = 1.0f;
+float Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
+float Renderer::Detail::RendererInfo::HDRInfo::hdr_gamma = 0.8f;
 
 GBuffer* Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
 glm::mat4 Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::mat4(1);
@@ -138,7 +138,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects()
 }
 
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
-    GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_HUD")->program();
     glUseProgram(shader);
     glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
@@ -147,7 +147,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
+            glBindTexture(GL_TEXTURE_2D, texture->address());
             glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
             glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
         }
@@ -177,12 +177,12 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_renderText(){
-    GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_HUD")->program();
     glUseProgram(shader);
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->getTextureAddress());
+        glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->address());
         glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
         glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
         glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
@@ -238,7 +238,7 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     glDisable(GL_DEPTH_TEST);
 }
 void Engine::Renderer::Detail::RenderManagement::_passLighting(){
-    GLuint shader = Resources::getShader("Deferred_Light")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_Light")->program();
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUseProgram(shader);
 
@@ -326,7 +326,6 @@ void Engine::Renderer::Detail::RenderManagement::render(){
         m_gBuffer->start(BUFFER_TYPE_MISC,"G");
         RenderManagement::_passSSAO();
         m_gBuffer->stop();
-
         if(RendererInfo::SSAOInfo::ssao_do_blur){
             //only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
             m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
@@ -360,7 +359,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 
     //copy depth over
     glColorMask(0,0,0,0);
-    GLuint shader = Resources::getShader("Copy_Depth")->getShaderProgram();
+    GLuint shader = Resources::getShader("Copy_Depth")->program();
     glUseProgram(shader);
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
 
@@ -408,7 +407,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	m_TexturesToBeRendered.clear();
 }
 void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
-    GLuint shader = Resources::getShader("Deferred_SSAO")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_SSAO")->program();
     glUseProgram(shader);
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
@@ -449,7 +448,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShader("Deferred_Edge")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_Edge")->program();
     glUseProgram(shader);
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
@@ -471,7 +470,7 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShader("Deferred_GodsRays")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_GodsRays")->program();
     glUseProgram(shader);
 
     glUniform1f(glGetUniformLocation(shader,"decay"), RendererInfo::GodRaysInfo::godRays_decay);
@@ -498,7 +497,7 @@ void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPo
 void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShader("Deferred_HDR")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_HDR")->program();
     glUseProgram(shader);
 
 	glUniform1i(glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::BloomInfo::bloom));
@@ -526,7 +525,7 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float strengthModifier,std::string channels){
-    GLuint shader = Resources::getShader("Deferred_Blur")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_Blur")->program();
     glUseProgram(shader);
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
@@ -564,7 +563,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLu
 void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShader("Deferred_Final")->getShaderProgram();
+    GLuint shader = Resources::getShader("Deferred_Final")->program();
     glUseProgram(shader);
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));

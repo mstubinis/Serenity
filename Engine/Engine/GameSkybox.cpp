@@ -46,7 +46,7 @@ void GameSkybox::render(bool godsRays){
         glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
         Texture* texture = Resources::getTexture("data/Textures/Skyboxes/StarFlare.png");
-        GLuint shader = Resources::getShader("Deferred_HUD")->getShaderProgram();
+        GLuint shader = Resources::getShader("Deferred_HUD")->program();
         glUseProgram(shader);
         for(auto flare:m_SunFlares){
             glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position,false);
@@ -54,7 +54,7 @@ void GameSkybox::render(bool godsRays){
             glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture->getTextureAddress());
+            glBindTexture(GL_TEXTURE_2D, texture->address());
             glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
             glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
 

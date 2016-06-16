@@ -526,7 +526,7 @@ float Atmosphere::getRadius(){
 }
 glm::v3 Atmosphere::getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 void Atmosphere::render(bool godsRays){
-    GLuint shader = Resources::getShader("AS_SkyFromAtmosphere")->getShaderProgram();
+    GLuint shader = Resources::getShader("AS_SkyFromAtmosphere")->program();
     Camera* cam = Resources::getActiveCamera();
     SunLight* sun = static_cast<SunLight*>(Resources::getObject("Sun Light"));
     glUseProgram(shader);
