@@ -16,7 +16,7 @@ void main(void){
 
 	if(HasBloom == 1){
 		vec3 bloomColor = texture2D(bloomBuffer, uv).rgb;
-		lighting += bloomColor; // additive blending
+		lighting += bloomColor / gamma; // additive blending. normally divided by gamma is not used but i thought it looked better
 	}
 
     vec3 mapped = vec3(1.0) - exp(-lighting * exposure); // Exposure tone mapping
