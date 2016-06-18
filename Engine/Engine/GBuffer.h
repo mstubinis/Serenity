@@ -2,17 +2,19 @@
 #ifndef ENGINE_GBUFFER_H
 #define ENGINE_GBUFFER_H
 
-#include <unordered_map>
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include <memory>
 
-const int GBUFFER_TYPES[] =	           {GL_RGB8,              // (diffuse.rgb)
+typedef unsigned int uint;
+
+const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgb)
                                         GL_RGB16F,		       // (normals.rgb)
                                         GL_RGB8,			   // Glow & SSAO & Specular THEN HDR
                                         GL_RGB32F,			   // World Position
                                         GL_RGB16F,		       // (lighting.rgb)
                                         GL_RGB8,               // bloom
-										GL_RGB8,			   // gods rays
+                                        GL_RGB8,			   // gods rays
                                         GL_RGBA8,              // free buffer
                                         GL_DEPTH_COMPONENT24}; // depth
 
@@ -22,7 +24,7 @@ const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			       // (diffuse.rgb)
                                         GL_RGB,				   // World Position
                                         GL_RGB,			       // (lighting.rgb)
                                         GL_RGB,			       // bloom
-										GL_RGB,			       // gods rays
+                                        GL_RGB,			       // gods rays
                                         GL_RGBA,			   // free buffer
                                         GL_DEPTH_COMPONENT};   // depth
 
@@ -60,50 +62,38 @@ enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,
 
 class TextureBuffer final{
     private:
-        int m_BufferInternalFormat;
-        int m_BufferFormat;
-        int m_BufferType;
-        int m_BufferAttatchment;
-
-        unsigned int m_width;
-        unsigned int m_height;
-        
-        GLuint m_Texture;
+        class impl;
+        std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(int,int,int,int,unsigned int,unsigned int);
+        TextureBuffer(int,int,int,int,uint,uint);
         ~TextureBuffer();
 
-        void resize(unsigned int, unsigned int);
-        GLuint getTexture() const { return m_Texture; }
-        int getAttatchment() const { return m_BufferAttatchment; }
+        void resize(uint,uint);
+        GLuint texture() const;
+        int attatchment() const;
 };
 
 class GBuffer final{
     private:
-        GLuint m_fbo;
-        GLuint m_depth;
-
-        std::unordered_map<unsigned int,TextureBuffer*> m_Buffers;
-
-        unsigned int m_width;
-        unsigned int m_height;
-
+        class impl;
+        std::unique_ptr<impl> m_i;
     public:
-        GBuffer(int width, int height);
+        GBuffer(uint width,uint height);
         ~GBuffer();
 
-        void resizeBaseBuffer(unsigned int w, unsigned int h);
-        void resizeBuffer(unsigned int, unsigned int w, unsigned int h);
+        void resizeBaseBuffer(uint w,uint h);
+        void resizeBuffer(uint,uint w,uint h);
 
-        void start(std::vector<unsigned int>&,std::string = "RGBA");
-        void start(unsigned int,std::string = "RGBA");
-        void start(unsigned int,unsigned int,std::string = "RGBA");
-        void start(unsigned int,unsigned int,unsigned int,std::string = "RGBA");
-        void start(unsigned int,unsigned int,unsigned int,unsigned int,std::string = "RGBA");
-		void start(unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,std::string = "RGBA");
+        void start(std::vector<uint>&,std::string = "RGBA");
+        void start(uint,std::string = "RGBA");
+        void start(uint,uint,std::string = "RGBA");
+        void start(uint,uint,uint,std::string = "RGBA");
+        void start(uint,uint,uint,uint,std::string = "RGBA");
+        void start(uint,uint,uint,uint,uint,std::string = "RGBA");
+        void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA");
         void stop();
 
-        std::unordered_map<unsigned int,TextureBuffer*> getBuffers();
-        GLuint getTexture(unsigned int);
+        std::unordered_map<uint,TextureBuffer*> getBuffers();
+        GLuint getTexture(uint);
 };
 #endif

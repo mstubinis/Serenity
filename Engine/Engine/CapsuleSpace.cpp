@@ -115,7 +115,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_C")){
         Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
         Resources::getMaterial("Capsule_C")->setShadeless(true);
-        Resources::getMaterial("Capsule_C")->setBaseGlow(0.12f);
+        Resources::getMaterial("Capsule_C")->setGlow(0.12f);
     }
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_D")){
         Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");

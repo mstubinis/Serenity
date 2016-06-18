@@ -3,7 +3,7 @@
 #define ENGINE_MATERIAL_H
 
 #include <string>
-#include <unordered_map>
+#include <memory>
 
 class Texture;
 typedef unsigned int GLuint;
@@ -30,30 +30,26 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_N
 };
 class Material final{
     private:
-        void _init(Texture*,Texture*,Texture*);
-        std::unordered_map<unsigned int,Texture*> m_Components;
-        unsigned int m_LightingMode;
-        bool m_Shadeless;
-        float m_BaseGlow;
-        float m_Specularity;
+		class impl;
+		std::unique_ptr<impl> m_i;
     public:
         Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr);
         Material(std::string diffuse,std::string normal="",std::string glow="");
         ~Material();
 
-        std::unordered_map<unsigned int,Texture*>& getComponents(){ return m_Components; }
-        Texture* getComponent(unsigned int i){ return m_Components[i]; }
+        std::unordered_map<unsigned int,Texture*>& getComponents();
+        Texture* getComponent(unsigned int i);
         void addComponent(unsigned int, std::string file);
 
         void bindTexture(unsigned int,GLuint shader,unsigned int api);
 
-        const bool getShadeless() const { return m_Shadeless; }
-        const float getBaseGlow() const { return m_BaseGlow; }
-        const float getSpecularity() const { return m_Specularity; }
-        const unsigned int getLightingMode() const { return m_LightingMode; }
-        void setShadeless(bool b){ m_Shadeless = b; }
-        void setBaseGlow(float f){ m_BaseGlow = f; }
-        void setSpecularity(float s){ m_Specularity = s; }
-        void setLightingMode(unsigned int m){ m_LightingMode = m; }
+        const bool shadeless() const;
+        const float glow() const;
+        const float specularity() const;
+        const unsigned int lightingMode() const;
+        void setShadeless(bool b);
+        void setGlow(float f);
+        void setSpecularity(float s);
+        void setLightingMode(unsigned int m);
 };
 #endif

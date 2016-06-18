@@ -174,9 +174,9 @@ void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
         m *= glm::mat4_cast(item->orientation);
         m = glm::scale(m,item->scale);
 
-        glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(item->material->getShadeless()));
-        glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
-        glUniform1f(glGetUniformLocation(shader, "Specularity"),item->material->getSpecularity());
+        glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(item->material->shadeless()));
+        glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
+        glUniform1f(glGetUniformLocation(shader, "Specularity"),item->material->specularity());
 
         glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 

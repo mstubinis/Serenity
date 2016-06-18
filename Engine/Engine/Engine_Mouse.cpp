@@ -4,7 +4,7 @@
 #include "Engine_Mouse.h"
 #include <SFML/Window.hpp>
 
-class Engine_Mouse::impl{
+class Engine_Mouse::impl final{
 	private:
 		sf::Mouse* m_handle;
 	public:

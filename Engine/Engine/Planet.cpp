@@ -165,7 +165,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 
             glUniform1f(glGetUniformLocation(shader, "Specularity"),0.08f);
             for(auto item:m_DisplayItems){
-                glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->getBaseGlow());
+                glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
                 for(auto component:item->material->getComponents())
                     item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
                 item->mesh->render();
@@ -275,7 +275,7 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::nType scl
 	setGodsRaysColor(starColor.x,starColor.y,starColor.z);
     for(auto item:m_DisplayItems){
         item->material->setShadeless(true);
-        item->material->setBaseGlow(0.21f);
+        item->material->setGlow(0.21f);
     }
     addChild(m_Light);
 }
@@ -398,7 +398,7 @@ void Ring::draw(GLuint shader){
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
     glm::vec4 color = m_Parent->getColor();
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
-    glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->getShadeless()));
+    glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->shadeless()));
 
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
