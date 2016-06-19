@@ -16,9 +16,7 @@ int main(){
         if(GetConsoleWindow() == NULL){ 
             AllocConsole();
         }
-        freopen("CONIN$", "r", stdin);
-        freopen("CONOUT$", "w", stdout);
-        freopen("CONOUT$", "w", stderr);
+        freopen("CONIN$", "r", stdin);freopen("CONOUT$", "w", stdout);freopen("CONOUT$", "w", stderr);
         #ifndef _DEBUG
             ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
         #endif

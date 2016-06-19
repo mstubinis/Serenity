@@ -113,7 +113,6 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 }
 void Engine::Renderer::Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
-
     #ifdef _WIN32
     SAFE_DELETE_COM(RenderManagement::m_DirectXSwapChain);
     SAFE_DELETE_COM(RenderManagement::m_DirectXBackBuffer);
@@ -139,7 +138,6 @@ void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects()
         item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
-
 void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
     GLuint shader = Resources::getShader("Deferred_HUD")->program();
     glUseProgram(shader);
@@ -245,9 +243,9 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUseProgram(shader);
 
-    glUniform1i(glGetUniformLocation(shader,"HasSSAO"), static_cast<int>(RendererInfo::SSAOInfo::ssao));
+    glUniform1i(glGetUniformLocation(shader,"HasSSAO"),int(RendererInfo::SSAOInfo::ssao));
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 
     glActiveTexture(GL_TEXTURE0);
@@ -270,11 +268,11 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
     glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 3 );
 
-    for (auto light:Resources::getCurrentScene()->getLights()) {
+    for (auto light:Resources::getCurrentScene()->getLights()){
         light.second->lighten(shader);
     }
     // Reset OpenGL state
-    for(unsigned int i = 0; i < 4; i++){
+    for(uint i = 0; i < 4; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -284,53 +282,28 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 void Engine::Renderer::Detail::RenderManagement::render(){
     for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::DebugDrawingInfo::debug); }
 
-	if(RendererInfo::GodRaysInfo::godRays == false){
+	if(!RendererInfo::GodRaysInfo::godRays)
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
-		RenderManagement::_passGeometry();
-		m_gBuffer->stop();
-	}
-	else{
+	else
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
-		RenderManagement::_passGeometry();
-		m_gBuffer->stop();
-	}
+	RenderManagement::_passGeometry();
+	m_gBuffer->stop();
 
 	if(RendererInfo::GodRaysInfo::godRays){
 		m_gBuffer->start(BUFFER_TYPE_GODSRAYS);
 		Object* o = Resources::getObject("Sun");
 		glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
 		_passGodsRays(glm::vec2(sp.x,sp.y));
-		/*
-		for(auto const &ent1:Resources::getCurrentScene()->getLights()){
-			SunLight* p = dynamic_cast<SunLight*>(ent1.second);
-			if(p != NULL){
-				if(p->getParent() != nullptr){
-					ObjectDisplay* d = dynamic_cast<ObjectDisplay*>(p->getParent());
-					if(d != NULL){
-						glm::vec3 sp = d->getScreenCoordinates();
-						if(sp.z < 0){
-							_passGodsRays(glm::vec2(sp.x,sp.y));
-						}
-						else{
-							_passGodsRays(glm::vec2(99999,99999));
-						}
-					}
-				}
-			}
-		}
-		*/
 		m_gBuffer->stop();
 	}
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::SSAOInfo::ssao){
-        //only write to the G channel of the glow buffer for SSAO pass
         m_gBuffer->start(BUFFER_TYPE_MISC,"G");
         RenderManagement::_passSSAO();
         m_gBuffer->stop();
         if(RendererInfo::SSAOInfo::ssao_do_blur){
-            //only blurr the G channel (SSAO) of the glow buffer for the Gaussian blur pass
             m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
             RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_MISC,0.5f,0.5f,"G");
             m_gBuffer->stop();
@@ -364,7 +337,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glColorMask(0,0,0,0);
     GLuint shader = Resources::getShader("Copy_Depth")->program();
     glUseProgram(shader);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
@@ -413,15 +386,15 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
     GLuint shader = Resources::getShader("Deferred_SSAO")->program();
     glUseProgram(shader);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
-    glUniform1f(glGetUniformLocation(shader,"gIntensity"), RendererInfo::SSAOInfo::ssao_intensity);
-    glUniform1f(glGetUniformLocation(shader,"gBias"), RendererInfo::SSAOInfo::ssao_bias);
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
+    glUniform1f(glGetUniformLocation(shader,"gIntensity"),RendererInfo::SSAOInfo::ssao_intensity);
+    glUniform1f(glGetUniformLocation(shader,"gBias"),RendererInfo::SSAOInfo::ssao_bias);
     glUniform1f(glGetUniformLocation(shader,"gRadius"),RendererInfo::SSAOInfo::ssao_radius);
-    glUniform1f(glGetUniformLocation(shader,"gScale"), RendererInfo::SSAOInfo::ssao_scale);
-    glUniform1i(glGetUniformLocation(shader,"gSampleCount"), RendererInfo::SSAOInfo::ssao_samples);
-    glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"), RendererInfo::SSAOInfo::ssao_noise_texture_size);
+    glUniform1f(glGetUniformLocation(shader,"gScale"),RendererInfo::SSAOInfo::ssao_scale);
+    glUniform1i(glGetUniformLocation(shader,"gSampleCount"),RendererInfo::SSAOInfo::ssao_samples);
+    glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"),RendererInfo::SSAOInfo::ssao_noise_texture_size);
     glUniform2fv(glGetUniformLocation(shader,"poisson"),64, glm::value_ptr(RendererInfo::SSAOInfo::ssao_Kernels[0]));
-    glUniform1i(glGetUniformLocation(shader,"far"), static_cast<int>(Resources::getActiveCamera()->getFar()));
+    glUniform1i(glGetUniformLocation(shader,"far"),int(Resources::getActiveCamera()->getFar()));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
@@ -441,7 +414,7 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 3; i++){
+    for(uint i = 0; i < 3; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -454,7 +427,7 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
     GLuint shader = Resources::getShader("Deferred_Edge")->program();
     glUseProgram(shader);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 
     glActiveTexture(GL_TEXTURE0);
@@ -481,8 +454,8 @@ void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPo
     glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::GodRaysInfo::godRays_exposure);
     glUniform1i(glGetUniformLocation(shader,"samples"), RendererInfo::GodRaysInfo::godRays_samples);
     glUniform1f(glGetUniformLocation(shader,"weight"), RendererInfo::GodRaysInfo::godRays_weight);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
-    glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"), static_cast<float>(lightPositionOnScreen.x),static_cast<float>(lightPositionOnScreen.y));
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
+    glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"),float(lightPositionOnScreen.x),float(lightPositionOnScreen.y));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
@@ -503,24 +476,18 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     GLuint shader = Resources::getShader("Deferred_HDR")->program();
     glUseProgram(shader);
 
-	glUniform1i(glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::BloomInfo::bloom));
-    glUniform1f(glGetUniformLocation(shader,"gamma"), RendererInfo::HDRInfo::hdr_gamma);
-    glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::HDRInfo::hdr_exposure);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+    glUniform1f(glGetUniformLocation(shader,"gamma"),RendererInfo::HDRInfo::hdr_gamma);
+    glUniform1f(glGetUniformLocation(shader,"exposure"),RendererInfo::HDRInfo::hdr_exposure);
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
     glUniform1i(glGetUniformLocation(shader,"lightingBuffer"), 0 );
 
-    glActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
-    glUniform1i(glGetUniformLocation(shader,"bloomBuffer"), 1 );
-
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 2; i++){
+    for(uint i = 0; i < 1; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, i);
@@ -531,7 +498,7 @@ void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLu
     GLuint shader = Resources::getShader("Deferred_Blur")->program();
     glUseProgram(shader);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"radius"), radius);
     glUniform1f(glGetUniformLocation(shader,"strengthModifier"), strengthModifier);
 
@@ -569,13 +536,14 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     GLuint shader = Resources::getShader("Deferred_Final")->program();
     glUseProgram(shader);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"), static_cast<float>(Resources::getWindowSize().x),static_cast<float>(Resources::getWindowSize().y));
+	glUniform1f(glGetUniformLocation(shader,"gamma"),RendererInfo::HDRInfo::hdr_gamma);
+    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
     glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
-    glUniform1i( glGetUniformLocation(shader,"HasLighting"), static_cast<int>(RendererInfo::LightingInfo::lighting));
-    glUniform1i( glGetUniformLocation(shader,"HasBloom"), static_cast<int>(RendererInfo::BloomInfo::bloom));
-	glUniform1i( glGetUniformLocation(shader,"HasHDR"), static_cast<int>(RendererInfo::HDRInfo::hdr));
+    glUniform1i( glGetUniformLocation(shader,"HasLighting"),int(RendererInfo::LightingInfo::lighting));
+    glUniform1i( glGetUniformLocation(shader,"HasBloom"),int(RendererInfo::BloomInfo::bloom));
+	glUniform1i( glGetUniformLocation(shader,"HasHDR"),int(RendererInfo::HDRInfo::hdr));
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
@@ -609,14 +577,14 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(unsigned int i = 0; i < 6; i++){
+    for(uint i = 0; i < 6; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     glUseProgram(0);
 }
-void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale){
+void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height,float scale){
     glm::mat4 m(1);
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m));
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(m));

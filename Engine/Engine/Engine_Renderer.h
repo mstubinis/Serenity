@@ -9,10 +9,8 @@
 #ifdef _WIN32
 #include <d3d11.h>
 #include <d3d10.h>
-
-// include the Direct3D Library file
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3d10.lib")
+#pragma comment (lib, "d3d11.lib")// include the Direct3D Library file
+#pragma comment (lib, "d3d10.lib")// include the Direct3D Library file
 #endif
 
 class GBuffer;
@@ -23,8 +21,7 @@ struct GeometryRenderInfo final{
     Object* object;
     GLuint shader;
     GeometryRenderInfo(Object* _object, GLuint _shader){
-        object = _object;
-        shader = _shader;
+        object = _object; shader = _shader;
     }
 };
 struct TextureRenderInfo{
@@ -38,12 +35,7 @@ struct TextureRenderInfo{
         texture = ""; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
     }
     TextureRenderInfo(std::string _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
-        texture = _texture;
-        pos = _pos;
-        col = _col;
-        scl = _scl;
-        rot = _rot;
-        depth = _depth;
+        texture = _texture; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
     }
 };
 struct FontRenderInfo final: public TextureRenderInfo{
@@ -59,25 +51,24 @@ struct FontRenderInfo final: public TextureRenderInfo{
 namespace Engine{
     namespace Renderer{
         namespace Detail{
-
-			struct RendererInfo{
-				struct DebugDrawingInfo{
+			struct RendererInfo final{
+				struct DebugDrawingInfo final{
 					static bool debug;
 				};
-				struct LightingInfo{
+				struct LightingInfo final{
 					static bool lighting;
 				};
-				struct BloomInfo{
+				struct BloomInfo final{
 					static bool bloom;
 					static float bloom_radius;
 					static float bloom_strength;
 				};
-				struct HDRInfo{
+				struct HDRInfo final{
 					static bool hdr;
 					static float hdr_exposure;
 					static float hdr_gamma;
 				};
-				struct GodRaysInfo{
+				struct GodRaysInfo final{
 					static bool godRays;
 					static float godRays_exposure;
 					static float godRays_decay;
@@ -85,7 +76,7 @@ namespace Engine{
 					static float godRays_weight;
 					static unsigned int godRays_samples;
 				};
-				struct SSAOInfo{
+				struct SSAOInfo final{
 					static bool ssao;
 					static bool ssao_do_blur;
 					static unsigned int ssao_samples;
@@ -206,7 +197,6 @@ namespace Engine{
 				static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
 			};
         };
-
         void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
     };
 };

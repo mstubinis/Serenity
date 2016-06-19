@@ -6,7 +6,6 @@ class Texture;
 class Engine_Window;
 class Engine_Mouse;
 
-#include <string>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 

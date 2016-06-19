@@ -2,8 +2,6 @@
 #ifndef ENGINE_ENGINE_PHYSICS_H
 #define ENGINE_ENGINE_PHYSICS_H
 
-#include <glm/glm.hpp>
-#include <string>
 #include <vector>
 #include "Engine_Math.h"
 
@@ -19,6 +17,8 @@ class btCollisionShape;
 class btRigidBody;
 class btVector3;
 
+typedef unsigned int uint;
+
 enum COLLISION_TYPE { 
     COLLISION_TYPE_CONVEXHULL, 
     COLLISION_TYPE_TRIANGLESHAPE,
@@ -29,7 +29,7 @@ enum COLLISION_TYPE {
 class Collision final{
     private:
         btVector3* m_Inertia;
-        unsigned int m_CollisionType;
+        uint m_CollisionType;
         btCollisionShape* m_CollisionShape;
         void _init(COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
         void _load(std::string filename, COLLISION_TYPE);
@@ -42,7 +42,7 @@ class Collision final{
         btVector3* getInertia() const { return m_Inertia; }
 
         btCollisionShape* getCollisionShape() const { return m_CollisionShape; }
-        const unsigned int getCollisionType() const { return m_CollisionType; }
+        const uint getCollisionType() const { return m_CollisionType; }
 };
 
 namespace Engine{
@@ -61,7 +61,7 @@ namespace Engine{
 
                     static void init();
                     static void destruct();
-                    static void update(float dt,unsigned int maxSteps = 1,float = 1/60.0f);
+                    static void update(float dt,uint maxSteps = 1,float = 1/60.0f);
                     static void render();
 
                     static std::vector<glm::v3> rayCastInternal(const btVector3& start, const btVector3& end);

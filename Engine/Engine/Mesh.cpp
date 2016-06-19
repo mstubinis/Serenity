@@ -12,10 +12,10 @@
 
 Mesh::Mesh(btHeightfieldTerrainShape* heightfield){
     m_Collision = nullptr;
-    unsigned int width = heightfield->getHeightStickWidth();
-    unsigned int length = heightfield->getHeightStickLength();
-    for(unsigned int i = 0; i < width-1; i++){
-        for(unsigned int j = 0; j < length-1; j++){
+    uint width = heightfield->getHeightStickWidth();
+    uint length = heightfield->getHeightStickLength();
+    for(uint i = 0; i < width-1; i++){
+        for(uint j = 0; j < length-1; j++){
             btVector3 vert1,vert2,vert3,vert4;
             heightfield->getVertex1(i,  j,  vert1);
             heightfield->getVertex1(i+1,j,  vert2);
@@ -169,7 +169,7 @@ Mesh::~Mesh(){
     cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
-    std::string extention; for(unsigned int i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
+    std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
     if(extention == ".obj")
         _loadFromOBJ(file,type);
 }
@@ -201,8 +201,8 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
     int index = 1;
     for(std::string line; std::getline(str, line, '\n');){
         std::string x; std::string y; std::string z;
-        unsigned int whilespaceCount = 0;
-        unsigned int slashCount = 0;
+        uint whilespaceCount = 0;
+        uint slashCount = 0;
         if(line[0] == 'o'){
             if(last != ""){
                 ObjectLoadingData data;
@@ -225,17 +225,17 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
                 }
             }
             if(line[1] == ' ')//vertex point
-                pointData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+                pointData.push_back(glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str()))));
             else if(line[1] == 't')//vertex uv
-                uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),1-static_cast<float>(::atof(y.c_str()))));
+                uvData.push_back(glm::vec2(float(::atof(x.c_str())),1-float(::atof(y.c_str()))));
             else if(line[1] == 'n')//vertex norm
-                normalData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+                normalData.push_back(glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str()))));
             index++;
         }
         //faces
         else if(line[0] == 'f' && line[1] == ' '){
             std::vector<glm::vec3> vertices;
-            unsigned int count = 0;
+            uint count = 0;
             for(auto c:line){
                 if(c == '/') {
                     slashCount++;
@@ -243,7 +243,7 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
                 else if(c == ' '){ 
                     //global listOfVerts
                     if(whilespaceCount != 0){
-                        glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+                        glm::vec3 vertex = glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str())));
                         vertices.push_back(vertex);
                         x = ""; y = ""; z = "";
                         slashCount = 0;
@@ -259,7 +259,7 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
                 }
                 count++;
             }
-            glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+            glm::vec3 vertex = glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str())));
             vertices.push_back(vertex);
             listOfVerts.push_back(vertices);
         }
@@ -274,26 +274,26 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
     for(auto o:objects){
         for(auto face:o.second.Faces){
             Vertex v1,v2,v3,v4;
-            v1.position = o.second.Points.at(static_cast<unsigned int>(face.at(0).x-1));
-            v2.position = o.second.Points.at(static_cast<unsigned int>(face.at(1).x-1));
-            v3.position = o.second.Points.at(static_cast<unsigned int>(face.at(2).x-1));
+            v1.position = o.second.Points.at(uint(face.at(0).x-1));
+            v2.position = o.second.Points.at(uint(face.at(1).x-1));
+            v3.position = o.second.Points.at(uint(face.at(2).x-1));
         
             if(o.second.UVs.size() > 0){
-                v1.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(0).y-1));
-                v2.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(1).y-1));
-                v3.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(2).y-1));
+                v1.uv = o.second.UVs.at(uint(face.at(0).y-1));
+                v2.uv = o.second.UVs.at(uint(face.at(1).y-1));
+                v3.uv = o.second.UVs.at(uint(face.at(2).y-1));
             }
             if(o.second.Normals.size() > 0){
-                v1.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(0).z-1));
-                v2.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(1).z-1));
-                v3.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(2).z-1));
+                v1.normal = o.second.Normals.at(uint(face.at(0).z-1));
+                v2.normal = o.second.Normals.at(uint(face.at(1).z-1));
+                v3.normal = o.second.Normals.at(uint(face.at(2).z-1));
             }
             if(face.size() == 4){//quad
-                v4.position = o.second.Points.at(static_cast<unsigned int>(face.at(3).x-1));
+                v4.position = o.second.Points.at(uint(face.at(3).x-1));
                 if(o.second.UVs.size() > 0)
-                    v4.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(3).y-1));
+                    v4.uv = o.second.UVs.at(uint(face.at(3).y-1));
                 if(o.second.Normals.size() > 0)
-                    v4.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(3).z-1));
+                    v4.normal = o.second.Normals.at(uint(face.at(3).z-1));
                 _generateQuad(v1,v2,v3,v4);
             }
             else{//triangle
@@ -323,8 +323,8 @@ void Mesh::_loadFromOBJMemory(std::string d,COLLISION_TYPE type){
     int index = 1;
     for(std::string line; std::getline(input, line, '\n');){
         std::string x; std::string y; std::string z;
-        unsigned int whilespaceCount = 0;
-        unsigned int slashCount = 0;
+        uint whilespaceCount = 0;
+        uint slashCount = 0;
         if(line[0] == 'o'){
             if(last != ""){
                 ObjectLoadingData data;
@@ -347,17 +347,17 @@ void Mesh::_loadFromOBJMemory(std::string d,COLLISION_TYPE type){
                 }
             }
             if(line[1] == ' ')//vertex point
-                pointData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+                pointData.push_back(glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str()))));
             else if(line[1] == 't')//vertex uv
-                uvData.push_back(glm::vec2(static_cast<float>(::atof(x.c_str())),1-static_cast<float>(::atof(y.c_str()))));
+                uvData.push_back(glm::vec2(float(::atof(x.c_str())),1-float(::atof(y.c_str()))));
             else if(line[1] == 'n')//vertex norm
-                normalData.push_back(glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str()))));
+                normalData.push_back(glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str()))));
             index++;
         }
         //faces
         else if(line[0] == 'f' && line[1] == ' '){
             std::vector<glm::vec3> vertices;
-            unsigned int count = 0;
+            uint count = 0;
             for(auto c:line){
                 if(c == '/') {
                     slashCount++;
@@ -365,7 +365,7 @@ void Mesh::_loadFromOBJMemory(std::string d,COLLISION_TYPE type){
                 else if(c == ' '){ 
                     //global listOfVerts
                     if(whilespaceCount != 0){
-                        glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+                        glm::vec3 vertex = glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str())));
                         vertices.push_back(vertex);
                         x = ""; y = ""; z = "";
                         slashCount = 0;
@@ -381,7 +381,7 @@ void Mesh::_loadFromOBJMemory(std::string d,COLLISION_TYPE type){
                 }
                 count++;
             }
-            glm::vec3 vertex = glm::vec3(static_cast<float>(::atof(x.c_str())),static_cast<float>(::atof(y.c_str())),static_cast<float>(::atof(z.c_str())));
+            glm::vec3 vertex = glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str())));
             vertices.push_back(vertex);
             listOfVerts.push_back(vertices);
         }
@@ -396,26 +396,26 @@ void Mesh::_loadFromOBJMemory(std::string d,COLLISION_TYPE type){
     for(auto o:objects){
         for(auto face:o.second.Faces){
             Vertex v1,v2,v3,v4;
-            v1.position = o.second.Points.at(static_cast<unsigned int>(face.at(0).x-1));
-            v2.position = o.second.Points.at(static_cast<unsigned int>(face.at(1).x-1));
-            v3.position = o.second.Points.at(static_cast<unsigned int>(face.at(2).x-1));
+            v1.position = o.second.Points.at(uint(face.at(0).x-1));
+            v2.position = o.second.Points.at(uint(face.at(1).x-1));
+            v3.position = o.second.Points.at(uint(face.at(2).x-1));
         
             if(o.second.UVs.size() > 0){
-                v1.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(0).y-1));
-                v2.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(1).y-1));
-                v3.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(2).y-1));
+                v1.uv = o.second.UVs.at(uint(face.at(0).y-1));
+                v2.uv = o.second.UVs.at(uint(face.at(1).y-1));
+                v3.uv = o.second.UVs.at(uint(face.at(2).y-1));
             }
             if(o.second.Normals.size() > 0){
-                v1.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(0).z-1));
-                v2.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(1).z-1));
-                v3.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(2).z-1));
+                v1.normal = o.second.Normals.at(uint(face.at(0).z-1));
+                v2.normal = o.second.Normals.at(uint(face.at(1).z-1));
+                v3.normal = o.second.Normals.at(uint(face.at(2).z-1));
             }
             if(face.size() == 4){//quad
-                v4.position = o.second.Points.at(static_cast<unsigned int>(face.at(3).x-1));
+                v4.position = o.second.Points.at(uint(face.at(3).x-1));
                 if(o.second.UVs.size() > 0)
-                    v4.uv = o.second.UVs.at(static_cast<unsigned int>(face.at(3).y-1));
+                    v4.uv = o.second.UVs.at(uint(face.at(3).y-1));
                 if(o.second.Normals.size() > 0)
-                    v4.normal = o.second.Normals.at(static_cast<unsigned int>(face.at(3).z-1));
+                    v4.normal = o.second.Normals.at(uint(face.at(3).z-1));
                 _generateQuad(v1,v2,v3,v4);
             }
             else{//triangle
@@ -453,7 +453,7 @@ void Mesh::_generateQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
     _generateTriangle(v1,v2,v3);
     _generateTriangle(v2,v4,v3);
 }
-void Mesh::initRenderingContext(unsigned int api){
+void Mesh::initRenderingContext(uint api){
     if(api == ENGINE_RENDERING_API_OPENGL){
         //Bind the data to the buffers
         glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
@@ -476,9 +476,9 @@ void Mesh::initRenderingContext(unsigned int api){
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
 }
-void Mesh::cleanupRenderingContext(unsigned int api){
+void Mesh::cleanupRenderingContext(uint api){
     if(api == ENGINE_RENDERING_API_OPENGL){
-        for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++){
+        for(uint i = 0; i < NUM_VERTEX_DATA; i++){
             glDeleteBuffers(1, &m_buffers[i]);
         }
     }
@@ -496,13 +496,13 @@ void Mesh::_calculateMeshRadius(){
 }
 void Mesh::render(GLuint mode){
     //for each unique vertex data type (position, color, uv, normal, binormal,tangent)...
-    for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++){
+    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
         glBindBuffer( GL_ARRAY_BUFFER, m_buffers[i] );
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0, 0);
     }
     glDrawArrays(mode, 0, m_Points.size());
-    for(unsigned int i = 0; i < NUM_VERTEX_DATA; i++)
+    for(uint i = 0; i < NUM_VERTEX_DATA; i++)
         glDisableVertexAttribArray(i);
 }
 void Mesh::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){

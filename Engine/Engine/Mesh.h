@@ -10,9 +10,10 @@ namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
 typedef unsigned int GLuint;
+typedef unsigned int uint;
 
-const unsigned int NUM_VERTEX_DATA = 5;
-const unsigned int VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
+const uint NUM_VERTEX_DATA = 5;
+const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
 struct ObjectLoadingData final{
     std::vector<glm::vec3> Points;
@@ -62,8 +63,8 @@ class Mesh final{
         Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
         ~Mesh();
 
-        void initRenderingContext(unsigned int api);
-        void cleanupRenderingContext(unsigned int api);
+        void initRenderingContext(uint api);
+        void cleanupRenderingContext(uint api);
 
         //GLuint* VAO();
         const GLuint* getBuffers() const { return m_buffers; }
