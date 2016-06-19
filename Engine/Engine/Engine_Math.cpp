@@ -19,8 +19,8 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
     //check if point is behind
     float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos-glm::vec3(Resources::getActiveCamera()->getPosition()));
 
-    float resX = static_cast<float>(screen.x);
-    float resY = static_cast<float>(windowSize.y-screen.y);
+    float resX = float(screen.x);
+    float resY = float(windowSize.y-screen.y);
 
     unsigned int inBounds = 1;
 
@@ -45,11 +45,18 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
 
     return glm::vec3(fX,fY,inBounds);
 }
-glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
-glm::vec3 Math::midpoint(glm::v3 a, glm::v3 b){
-    return glm::vec3(static_cast<float>((a.x+b.x)/2),static_cast<float>((a.y+b.y)/2),static_cast<float>((a.z+b.z)/2));
+glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){ 
+	return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); 
 }
-
+glm::vec3 Math::midpoint(glm::v3 a, glm::v3 b){ 
+	return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); 
+}
+glm::vec3 Math::direction(glm::v3 eye,glm::v3 target){ 
+	return glm::normalize(glm::vec3(eye)-glm::vec3(target)); 
+}
+glm::vec3 Math::direction(glm::vec3 eye,glm::vec3 target){ 
+	return glm::normalize(eye-target); 
+}
 glm::v3 Math::getForward(glm::quat& q){
     return glm::normalize(glm::v3(2*(q.x*q.z+q.w*q.y),2*(q.y*q.x-q.w*q.x),1-2*(q.x*q.x+q.y*q.y)));
 }
@@ -65,9 +72,15 @@ glm::v3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
     btVector3 v = t.getBasis().getColumn(column);
     return glm::v3(v.x(),v.y(),v.z());
 }
-glm::v3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
-glm::v3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
-glm::v3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
+glm::v3 Math::getForward(const btRigidBody* b){ 
+	return Math::getColumnVector(b,2); 
+}
+glm::v3 Math::getRight(const btRigidBody* b){ 
+	return Math::getColumnVector(b,0); 
+}
+glm::v3 Math::getUp(const btRigidBody* b){ 
+	return Math::getColumnVector(b,1); 
+}
 
 float Math::getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees){
     if(degrees == true)

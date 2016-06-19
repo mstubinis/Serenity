@@ -40,6 +40,9 @@ namespace Engine{
         glm::vec3 midpoint(glm::v3,glm::v3);
         glm::vec3 midpoint(glm::vec3,glm::vec3);
 
+		glm::vec3 direction(glm::v3 eye,glm::v3 target);
+		glm::vec3 direction(glm::vec3 eye,glm::vec3 target);
+
         glm::v3 getForward(glm::quat& q);
         glm::v3 getRight(glm::quat& q);
         glm::v3 getUp(glm::quat& q);

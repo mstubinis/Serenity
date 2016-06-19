@@ -53,6 +53,7 @@ void CapsuleStar::update(float dt){
         float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
         setPosition(x*100,y*100,-200*100);
     }
+
 	if(m_Light != nullptr){
 		m_Light->setPosition(pos/static_cast<glm::nType>(150));
 		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
@@ -62,13 +63,11 @@ void CapsuleStar::update(float dt){
 			m_Light->activate();
 		}
 	}
+
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
     ObjectBasic::update(dt);
 }
 void CapsuleStar::draw(GLuint shader,bool debug, bool godsRays){
-	if(m_Light != nullptr && !m_Light->isActive()){
-		return;
-	}
     ObjectDisplay::draw(shader,debug,godsRays);
 }
 
