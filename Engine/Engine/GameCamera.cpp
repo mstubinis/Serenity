@@ -4,6 +4,10 @@
 #include "ObjectDisplay.h"
 #include "Scene.h"
 
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace Engine::Events;
 
 GameCamera::GameCamera(std::string name, float a, float r, float n, float f,Scene* scene):Camera(name,a,r,n,f,scene){

@@ -8,6 +8,10 @@
 #include "Engine_Renderer.h"
 #include "Engine_Window.h"
 
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace Engine;
 
 GameSkybox::GameSkybox(std::string name, unsigned int numFlares, Scene* scene):Skybox(name,scene){

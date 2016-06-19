@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "Engine_Renderer.h"
 #include "Texture.h"
+
 #include <boost/lexical_cast.hpp>
 
 using namespace Engine;
@@ -46,23 +47,29 @@ CapsuleStar::~CapsuleStar(){
 }
 void CapsuleStar::update(float dt){
     glm::v3 pos = getPosition();
-
     translate(0,0,(-120 * 100 ) * dt);
-
     if(pos.z >= 200 * 100){
         float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
         float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
         setPosition(x*100,y*100,-200*100);
     }
-    if(m_Light != nullptr)
-        m_Light->setPosition(pos/static_cast<glm::nType>(150));
-
+	if(m_Light != nullptr){
+		m_Light->setPosition(pos/static_cast<glm::nType>(150));
+		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
+			m_Light->deactivate();
+		}
+		else{
+			m_Light->activate();
+		}
+	}
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
-
     ObjectBasic::update(dt);
 }
-void CapsuleStar::draw(GLuint shader,bool debug){
-    ObjectDisplay::draw(shader,debug);
+void CapsuleStar::draw(GLuint shader,bool debug, bool godsRays){
+	if(m_Light != nullptr && !m_Light->isActive()){
+		return;
+	}
+    ObjectDisplay::draw(shader,debug,godsRays);
 }
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::v3(0),glm::vec3(1),name,scene){
@@ -149,7 +156,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         if(i % 7 == 0){
             spawnLight = true;
         }
-        m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star" + boost::lexical_cast<std::string>(i),this,spawnLight));
+        m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star_" + boost::lexical_cast<std::string>(i),this,spawnLight));
         step -= 6.0f;
     }
 

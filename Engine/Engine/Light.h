@@ -13,6 +13,7 @@ class Scene;
 class SunLight: public ObjectDisplay{
     protected:
         unsigned int m_Type;
+		bool m_Active;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularPower;
         void sendGenericAttributesToShader(GLuint);
     public:
@@ -27,6 +28,10 @@ class SunLight: public ObjectDisplay{
         virtual void lighten(GLuint);
         float getSpecularPower(){ return m_SpecularPower; }
         void setSpecularPower(float s){ m_SpecularPower = s; }
+
+		void activate(){ m_Active = true; }
+		void deactivate(){ m_Active = false; }
+		bool isActive(){ return m_Active; }
 
         void setName(std::string);
 };
@@ -52,6 +57,8 @@ class PointLight: public SunLight{
         virtual void setConstant(float c);
         virtual void setLinear(float l);
         virtual void setExponent(float e);
+
+		float& getLightRadius(){ return m_PointLightRadius; }
 
         float& getConstant(){ return m_Constant; }
         float& getLinear(){ return m_Linear; }

@@ -11,6 +11,10 @@
 #include "Light.h"
 #include "Engine_Window.h"
 #include "Engine_Mouse.h"
+
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <SFML/System.hpp>
 
 #ifdef _DEBUG

@@ -5,8 +5,13 @@
 #include "Mesh.h"
 #include "Light.h"
 #include "Engine_Events.h"
+
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+
 using namespace Engine;
 
 Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEmpty(name,scene){

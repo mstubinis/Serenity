@@ -6,6 +6,10 @@
 #include "Mesh.h"
 #include "ShaderProgram.h"
 
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace Engine;
 
 ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Scene* scene):ObjectBasic(pos,scl,name,scene){

@@ -6,13 +6,16 @@
 #include "Mesh.h"
 #include "Scene.h"
 
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace Engine;
 
 SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),name,scene){
     m_Type = type;
-
+	m_Active = true;
     m_AmbientIntensity = 0.05f;
     m_DiffuseIntensity = 1.0f;
     m_SpecularPower = 50;
@@ -33,7 +36,6 @@ void SunLight::setName(std::string name){
     if(Resources::Detail::ResourceManagement::m_CurrentScene->getLights().count(oldName)){
         Resources::Detail::ResourceManagement::m_CurrentScene->getLights().erase(oldName);
     }
-
     Resources::Detail::ResourceManagement::m_Objects[name] = boost::shared_ptr<Object>(this);
     if(Resources::Detail::ResourceManagement::m_Objects.count(oldName)){
         Resources::Detail::ResourceManagement::m_Objects[oldName].reset();
@@ -52,7 +54,8 @@ void SunLight::sendGenericAttributesToShader(GLuint shader){
     glUniform1f(glGetUniformLocation(shader,"LightDiffuseIntensity"), m_DiffuseIntensity);
     glUniform1f(glGetUniformLocation(shader,"LightSpecularPower"), m_SpecularPower);
 }
-void SunLight::lighten(GLuint shader){ 
+void SunLight::lighten(GLuint shader){
+	if(!m_Active) return;
     sendGenericAttributesToShader(shader);
     glm::vec3 pos = glm::vec3(getPosition());
     glUniform3f(glGetUniformLocation(shader,"LightPosition"), pos.x, pos.y, pos.z);
@@ -68,6 +71,7 @@ DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene)
 DirectionalLight::~DirectionalLight(){
 }
 void DirectionalLight::lighten(GLuint shader){
+	if(!m_Active) return;
     sendGenericAttributesToShader(shader);
     glUniform3f(glGetUniformLocation(shader,"LightDirection"), m_Direction.x, m_Direction.y,m_Direction.z);
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x/2,Resources::getWindowSize().y/2,2.0f);
@@ -100,6 +104,8 @@ void PointLight::setExponent(float e){
     m_PointLightRadius = calculatePointLightRadius();
 }
 void PointLight::lighten(GLuint shader){
+	if(!m_Active) return;
+
     Camera* camera = Resources::getActiveCamera();
     glm::v3 pos = getPosition();
     if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
@@ -142,5 +148,6 @@ SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,n
 SpotLight::~SpotLight(){
 }
 void SpotLight::lighten(GLuint shader){
+	if(!m_Active) return;
     sendGenericAttributesToShader(shader);
 }

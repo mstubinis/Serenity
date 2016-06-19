@@ -5,6 +5,7 @@
 #include "GameCamera.h"
 #include "SolarSystem.h"
 #include "Particles.h"
+
 #include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
 using namespace Engine;

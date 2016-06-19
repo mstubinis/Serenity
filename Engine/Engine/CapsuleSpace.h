@@ -23,7 +23,7 @@ class CapsuleStar final: public ObjectDisplay{
         ~CapsuleStar();
 
         void update(float);
-        void draw(GLuint shader,bool=false);
+        void draw(GLuint shader,bool=false,bool=false);
 };
 
 class CapsuleTunnel final: public ObjectDisplay{
