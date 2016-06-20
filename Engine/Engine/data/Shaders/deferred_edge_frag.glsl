@@ -5,12 +5,8 @@ uniform sampler2D texture;
 uniform float radius;
 
 float threshold(float thr1,float thr2 ,float val) {
-    if (val < thr1) {
-        return 0.0;
-    }
-    if (val > thr2) {
-        return 1.0;
-    }
+    if (val < thr1) { return 0.0; }
+    if (val > thr2) { return 1.0; }
     return val;
 }
 

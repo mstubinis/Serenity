@@ -267,11 +267,16 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
     glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 3 );
 
+    glActiveTexture(GL_TEXTURE4);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
+    glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 4 );
+
     for (auto light:Resources::getCurrentScene()->getLights()){
         light.second->lighten(shader);
     }
     // Reset OpenGL state
-    for(uint i = 0; i < 4; i++){
+    for(uint i = 0; i < 5; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -299,30 +304,30 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::SSAOInfo::ssao){
-        m_gBuffer->start(BUFFER_TYPE_MISC,"G");
+        m_gBuffer->start(BUFFER_TYPE_BLOOM,"A");
         RenderManagement::_passSSAO();
         m_gBuffer->stop();
         if(RendererInfo::SSAOInfo::ssao_do_blur){
-            m_gBuffer->start(BUFFER_TYPE_FREE1,"G");
-            RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_MISC,0.5f,0.5f,"G");
+            m_gBuffer->start(BUFFER_TYPE_FREE1,"A");
+            RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.5f,0.5f,"A");
             m_gBuffer->stop();
-            m_gBuffer->start(BUFFER_TYPE_MISC,"G");
-            RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"G");
+            m_gBuffer->start(BUFFER_TYPE_BLOOM,"A");
+            RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"A");
             m_gBuffer->stop();
         }
     }
     if(RendererInfo::LightingInfo::lighting){
-        m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM);
+        m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM,"RGB");
         RenderManagement::_passLighting();
         m_gBuffer->stop();
     }
     if(RendererInfo::BloomInfo::bloom){
         glDisable(GL_BLEND);
-        m_gBuffer->start(BUFFER_TYPE_FREE1);
-        RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength);
+        m_gBuffer->start(BUFFER_TYPE_FREE1,"RGB");
+        RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength,"RGB");
         m_gBuffer->stop();
-        m_gBuffer->start(BUFFER_TYPE_BLOOM);
-        RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength);
+        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGB");
+        RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength,"RGB");
         m_gBuffer->stop();
     }
     if(RendererInfo::HDRInfo::hdr){
@@ -585,15 +590,21 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 }
 void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height,float scale){
     glm::mat4 m(1);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m));
+	glm::mat4 vp = glm::ortho(0.f,1.f,0.f,1.f);
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(m));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(vp));
     glViewport(0,0,GLsizei(width*scale),GLsizei(height*scale));
-    glBegin(GL_QUADS);
-        glVertex2f(-1,-1);
-        glVertex2f(1,-1);
-        glVertex2f(1,1);
-        glVertex2f(-1,1);
-    glEnd();
+
+	glBegin(GL_QUADS);
+		glVertex2f(0,0);
+
+		glVertex2f(1,0);
+
+		glVertex2f(1,1);
+
+		glVertex2f(0,1);
+
+	glEnd();
 }
 
 #ifdef _WIN32

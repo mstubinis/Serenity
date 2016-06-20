@@ -30,7 +30,9 @@ class TextureBuffer::impl final{
         void _resize(uint width,uint height){
             m_width = width; m_height = height;
             glBindTexture(GL_TEXTURE_2D, m_Texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, m_BufferInternalFormat, m_width*m_SizeScalar, m_height*m_SizeScalar, 0, m_BufferFormat, m_BufferType, 0);
+			GLsizei realW = GLsizei(m_width*m_SizeScalar);
+			GLsizei realH = GLsizei(m_height*m_SizeScalar);
+            glTexImage2D(GL_TEXTURE_2D, 0, m_BufferInternalFormat, realW, realH, 0, m_BufferFormat, m_BufferType, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

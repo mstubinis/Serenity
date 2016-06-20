@@ -31,7 +31,7 @@ void main(){
     vec3 normal = texture2D(gNormalMap, uv).xyz;
     vec2 randomVector = normalize(texture2D(gRandomMap, gScreenSize * uv / gNoiseTextureSize).xy * 2.0 - 1.0);
 
-    if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.g = 1.0; }
+    if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }
     else{
         float occlusion = 0.0;
         for (int i = 0; i < gSampleCount; i++) {
@@ -43,6 +43,6 @@ void main(){
             occlusion += occlude(uv, coord2, worldPosition, normal);
         }
         occlusion /= (gSampleCount*4.0);
-        gl_FragColor.g = 1.0-occlusion;
+        gl_FragColor.a = 1.0-occlusion;
     }
 }

@@ -40,30 +40,30 @@ typedef unsigned int uint;
 //framebuffer pixel size = window size * this value here
 const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
 	                                1.0f, // (normals.rgb)
-								    1.0f, // Glow & SSAO & Specular THEN HDR
+								    1.0f, // Glow & NULL & Specular THEN HDR
 								    1.0f, // World Position
 								    1.0f, // (lighting.rgb)
-								    1.0f, // bloom
+								    1.0f, // bloom, & ssao as alpha
 								    1.0f, // gods rays
 								    1.0f, // free buffer
 								    1.0f};// depth
 
 const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgb)
                                         GL_RGB16F,		       // (normals.rgb)
-                                        GL_RGB8,			   // Glow & SSAO & Specular THEN HDR
+                                        GL_RGB8,			   // Glow & NULL & Specular THEN HDR
                                         GL_RGB32F,			   // World Position
                                         GL_RGB16F,		       // (lighting.rgb)
-                                        GL_RGB8,               // bloom
+                                        GL_RGBA8,              // bloom, & ssao as alpha
                                         GL_RGB8,			   // gods rays
                                         GL_RGBA8,              // free buffer
                                         GL_DEPTH_COMPONENT24}; // depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			       // (diffuse.rgb)
                                         GL_RGB,			       // (normals.rgb)
-                                        GL_RGB,			       // Glow & SSAO & Specular THEN HDR
+                                        GL_RGB,			       // Glow & NULL & Specular THEN HDR
                                         GL_RGB,				   // World Position
                                         GL_RGB,			       // (lighting.rgb)
-                                        GL_RGB,			       // bloom
+                                        GL_RGBA,			   // bloom, & ssao as alpha
                                         GL_RGB,			       // gods rays
                                         GL_RGBA,			   // free buffer
                                         GL_DEPTH_COMPONENT};   // depth

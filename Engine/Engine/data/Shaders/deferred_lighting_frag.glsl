@@ -19,6 +19,7 @@ uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gDiffuseMap;
+uniform sampler2D gBloomMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
@@ -52,7 +53,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     }
     float ssao = 1.0;
     if(HasSSAO == 1){
-        ssao = texture2D(gMiscMap,uv).g;
+        ssao = texture2D(gBloomMap,uv).a;
     }
 	vec4 lightWithoutSpecular = ((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao);
 
@@ -88,11 +89,11 @@ void main(){
     else if(LightType == 3)
         lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
 
-    gl_FragData[0] = lightCalculation;
+    gl_FragData[0].rgb = lightCalculation.rgb;
 
 	//for bloom...
 	float Glow = texture2D(gMiscMap,uv).r;
     float brightness = dot(lightCalculation.rgb, vec3(0.2126, 0.7152, 0.0722));
     if(brightness > 1.14 || Glow > 0.01f)
-        gl_FragData[1] = vec4(lightCalculation.rgb*max(Glow,brightness), 1.0);
+        gl_FragData[1].rgb = vec3(lightCalculation.rgb*max(Glow,brightness));
 }
