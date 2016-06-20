@@ -25,7 +25,6 @@ SkyboxEmpty::~SkyboxEmpty(){
 
 }
         
-
 Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
     if(Skybox::m_Vertices.size() == 0){
         std::vector<glm::vec3> temp;

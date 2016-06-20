@@ -4,12 +4,10 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "Light.h"
-#include "Engine_Events.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
 using namespace Engine;
@@ -521,9 +519,9 @@ Atmosphere::~Atmosphere(){
 void Atmosphere::update(){
     if(m_FollowCamera){
         glm::v3 cameraPos = Resources::getActiveCamera()->getPosition();
-        m_Model[3][0] = (float)cameraPos.x + m_Position.x;
-        m_Model[3][1] = (float)cameraPos.y + m_Position.y;
-        m_Model[3][2] = (float)cameraPos.z + m_Position.z;
+        m_Model[3][0] = float(cameraPos.x + m_Position.x);
+        m_Model[3][1] = float(cameraPos.y + m_Position.y);
+        m_Model[3][2] = float(cameraPos.z + m_Position.z);
     }
 }
 float Atmosphere::getRadius(){

@@ -37,6 +37,17 @@
 
 typedef unsigned int uint;
 
+//framebuffer pixel size = window size * this value here
+const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
+	                                1.0f, // (normals.rgb)
+								    1.0f, // Glow & SSAO & Specular THEN HDR
+								    1.0f, // World Position
+								    1.0f, // (lighting.rgb)
+								    1.0f, // bloom
+								    1.0f, // gods rays
+								    1.0f, // free buffer
+								    1.0f};// depth
+
 const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgb)
                                         GL_RGB16F,		       // (normals.rgb)
                                         GL_RGB8,			   // Glow & SSAO & Specular THEN HDR
@@ -94,9 +105,10 @@ class TextureBuffer final{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(int,int,int,int,uint,uint);
+        TextureBuffer(int,int,int,int,uint,uint,float=1.0f);
         ~TextureBuffer();
 
+		float sizeScalar() const;
         void resize(uint,uint);
         GLuint texture() const;
         int attatchment() const;

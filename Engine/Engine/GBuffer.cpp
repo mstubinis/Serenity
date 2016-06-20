@@ -10,28 +10,19 @@ class TextureBuffer::impl final{
         int m_BufferType;
         int m_BufferAttatchment;
 
-        uint m_width; uint m_height;
-        
+		float m_SizeScalar;
+
+        uint m_width; uint m_height;    
         GLuint m_Texture;
-        void _init(int internalformat, int format, int type, int attatchment,uint width,uint height){
+
+        void _init(int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar){
             m_BufferInternalFormat = internalformat;
             m_BufferFormat = format;
             m_BufferType = type;
             m_BufferAttatchment = attatchment;
-
-            m_width = width; m_height = height;
-
+			m_SizeScalar = sizeScalar;
             glGenTextures(1, &m_Texture);
-            glBindTexture(GL_TEXTURE_2D, m_Texture);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
-    
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, GL_TEXTURE_2D, m_Texture, 0);
+			_resize(width,height);
         }
         void _destruct(){
             glDeleteTextures(1, &m_Texture);
@@ -39,7 +30,7 @@ class TextureBuffer::impl final{
         void _resize(uint width,uint height){
             m_width = width; m_height = height;
             glBindTexture(GL_TEXTURE_2D, m_Texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, m_BufferInternalFormat, width, height, 0, m_BufferFormat, m_BufferType, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, m_BufferInternalFormat, m_width*m_SizeScalar, m_height*m_SizeScalar, 0, m_BufferFormat, m_BufferType, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -47,8 +38,6 @@ class TextureBuffer::impl final{
             glFramebufferTexture2D(GL_FRAMEBUFFER, m_BufferAttatchment, GL_TEXTURE_2D, m_Texture, 0);
         }
 };
-
-
 class GBuffer::impl final{
     public:
         GLuint m_fbo;
@@ -65,8 +54,15 @@ class GBuffer::impl final{
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
 
-            for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
-                TextureBuffer* tbo = new TextureBuffer(GBUFFER_TYPES[i],GBUFFER_PIXEL_TYPES[i],GBUFFER_FLOAT_TYPES[i],GBUFFER_ATTACHMENT_TYPES[i],m_width,m_height);
+            for(uint i = 0; i < BUFFER_TYPE_NUMBER; i++){
+                TextureBuffer* tbo = new TextureBuffer(
+					GBUFFER_TYPES[i],
+					GBUFFER_PIXEL_TYPES[i],
+					GBUFFER_FLOAT_TYPES[i],
+					GBUFFER_ATTACHMENT_TYPES[i],
+					m_width,
+					m_height,
+					GBUFFER_DIVISIBLES[i]);
                 m_Buffers[i] = tbo;
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -92,23 +88,17 @@ class GBuffer::impl final{
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
         void _start(std::vector<uint>& types,std::string& channels){
-            uint r,g,b,a;
-            if(channels.find("R") != std::string::npos) r=1; else r=0;
-            if(channels.find("G") != std::string::npos) g=1; else g=0;
-            if(channels.find("B") != std::string::npos) b=1; else b=0;
-            if(channels.find("A") != std::string::npos) a=1; else a=0;
+            bool r,g,b,a;
+            if(channels.find("R") != std::string::npos) r=true; else r=false;
+            if(channels.find("G") != std::string::npos) g=true; else g=false;
+            if(channels.find("B") != std::string::npos) b=true; else b=false;
+            if(channels.find("A") != std::string::npos) a=true; else a=false;
             glColorMask(r,g,b,a);
+			glEnable(GL_TEXTURE_2D);
             glActiveTexture(GL_TEXTURE0);
-            glEnable(GL_TEXTURE_2D);
-
-            // Bind our FBO and set the viewport to the proper size
-            glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
-            // Specify what to render an start acquiring
-            glDrawBuffers(types.size(), &types[0]);
-
-            // Clear the render targets
-            glClear(GL_COLOR_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);// Bind our FBO and set the viewport to the proper size
+            glDrawBuffers(types.size(), &types[0]);  // Specify what to render an start acquiring
+            glClear(GL_COLOR_BUFFER_BIT);            // Clear the render targets
         }
         void _start(uint type,std::string& channels){
             std::vector<uint> types;
@@ -163,8 +153,8 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attatchment,uint width,uint height):m_i(new impl()){
-    m_i->_init(internalformat,format,type,attatchment,width,height);
+TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar):m_i(new impl()){
+    m_i->_init(internalformat,format,type,attatchment,width,height,sizeScalar);
 }
 TextureBuffer::~TextureBuffer(){
     m_i->_destruct();
@@ -174,6 +164,9 @@ void TextureBuffer::resize(uint width,uint height){
 }
 GLuint TextureBuffer::texture() const{
     return m_i->m_Texture;
+}
+float TextureBuffer::sizeScalar() const{
+	return m_i->m_SizeScalar;
 }
 int TextureBuffer::attatchment() const{
     return m_i->m_BufferAttatchment;

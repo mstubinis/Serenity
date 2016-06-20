@@ -266,35 +266,54 @@ uint Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "n
 bool Mouse::MouseProcessing::_IsMouseButtonDown(std::string str){
     boost::algorithm::to_lower(str);
     uint key = MouseProcessing::m_MouseMap[str];
-    if(MouseProcessing::m_MouseStatus[key] == true)
+    if(MouseProcessing::m_MouseStatus[key])
         return true;
     return false;
 }
 bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(std::string str){
     bool result = MouseProcessing::_IsMouseButtonDown(str);
     uint key = MouseProcessing::m_MouseMap[str];
-    if(result == true && m_currentButton == key && (m_currentButton != m_previousButton))
+    if(result && m_currentButton == key && (m_currentButton != m_previousButton))
         return true;
     return false;
 }
 bool Keyboard::KeyProcessing::_IsKeyDown(std::string str){
     boost::algorithm::to_lower(str);
     uint key = KeyProcessing::m_KeyMap[str];
-    if(KeyProcessing::m_KeyStatus[key] == true)
+    if(KeyProcessing::m_KeyStatus[key])
         return true;
     return false;
 }
 bool Keyboard::KeyProcessing::_IsKeyUp(std::string str){
     boost::algorithm::to_lower(str);
     uint key = KeyProcessing::m_KeyMap[str];
-    if(KeyProcessing::m_KeyStatus[key] == false)
+    if(!KeyProcessing::m_KeyStatus[key])
         return true;
     return false;
 }
 bool Keyboard::KeyProcessing::_IsKeyDownOnce(std::string str){
     bool result = KeyProcessing::_IsKeyDown(str);
     uint key = KeyProcessing::m_KeyMap[str];
-    if(result == true && m_currentKey == key && (m_currentKey != m_previousKey))
+    if(result && m_currentKey == key && (m_currentKey != m_previousKey))
         return true;
     return false;
 }
+glm::vec2 Mouse::getMouseDifference(){ return MouseProcessing::m_Difference; }
+glm::vec2 Mouse::getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
+glm::vec2 Mouse::getMousePosition(){ return MouseProcessing::m_Position; }
+bool Mouse::isMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
+bool Mouse::isMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
+float Mouse::getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
+
+bool Keyboard::isKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }
+bool Keyboard::isKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }
+bool Keyboard::isKeyUp(std::string str){ return KeyProcessing::_IsKeyUp(str); }
+
+bool Engine::Events::isKeyDown(std::string str){ return Keyboard::KeyProcessing::_IsKeyDown(str); }
+bool Engine::Events::isKeyDownOnce(std::string str){ return Keyboard::KeyProcessing::_IsKeyDownOnce(str); }
+bool Engine::Events::isKeyUp(std::string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
+
+glm::vec2 Engine::Events::getMousePosition(){ return Mouse::MouseProcessing::m_Position; }
+bool Engine::Events::isMouseButtonDown(std::string str){ return Mouse::MouseProcessing::_IsMouseButtonDown(str); }
+bool Engine::Events::isMouseButtonDownOnce(std::string str){ return Mouse::MouseProcessing::_IsMouseButtonDownOnce(str); }
+float Engine::Events::getMouseWheelDelta(){ return Mouse::MouseProcessing::m_Delta; }

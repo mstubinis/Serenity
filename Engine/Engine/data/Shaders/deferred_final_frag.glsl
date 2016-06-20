@@ -20,15 +20,10 @@ void main(){
     vec2 uv = gl_FragCoord.xy / gScreenSize;
     vec4 diffuse = texture2D(gDiffuseMap, uv);
 	vec3 normals = texture2D(gNormalMap,uv).rgb;
-    vec4 lightMap = texture2D(gLightMap, uv);
     vec4 bloom = texture2D(gBloomMap,uv);
-
 	vec3 rays = texture2D(gGodsRaysMap,uv).rgb;
-
-	float ssao = texture2D(gMiscMap,uv).g;
 	vec3 hdr = texture2D(gMiscMap,uv).rgb;
-
-	lightMap = max(vec4(gAmbientColor,1.0),lightMap);
+	vec4 lightMap = max(vec4(gAmbientColor,1.0),texture2D(gLightMap, uv));
 	if(HasLighting == 0){
 		lightMap = diffuse;
 	}

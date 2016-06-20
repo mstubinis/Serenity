@@ -1,7 +1,6 @@
 #version 120
 
 uniform int LightType;
-
 uniform int HasSSAO;
 
 uniform vec3 LightColor;

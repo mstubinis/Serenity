@@ -17,11 +17,7 @@ struct AtmosphereInformation{
 
         glm::vec3 inverseWavelength;
 
-        AtmosphereInformation(float _height = 0.025f,
-                              float _km = 0.0025f,
-                              float _kr = 0.0015f,
-                              float _esun = 20.0f)
-        { 
+        AtmosphereInformation(float _height = 0.025f,float _km = 0.0025f,float _kr = 0.0015f,float _esun = 20.0f){ 
             height = _height;
             Km = _km;
             Kr = _kr;

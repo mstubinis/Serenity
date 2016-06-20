@@ -244,7 +244,6 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glUseProgram(shader);
 
     glUniform1i(glGetUniformLocation(shader,"HasSSAO"),int(RendererInfo::SSAOInfo::ssao));
-
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 
@@ -588,7 +587,7 @@ void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uin
     glm::mat4 m(1);
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m));
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(m));
-    glViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    glViewport(0,0,GLsizei(width*scale),GLsizei(height*scale));
     glBegin(GL_QUADS);
         glVertex2f(-1,-1);
         glVertex2f(1,-1);
