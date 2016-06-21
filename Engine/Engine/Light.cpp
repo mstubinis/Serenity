@@ -52,7 +52,7 @@ void SunLight::draw(GLuint shader, bool debug,bool godsRays){
 	ObjectDisplay::draw(shader,debug,godsRays); 
 }
 void SunLight::sendGenericAttributesToShader(GLuint shader){
-    glUniform1i(glGetUniformLocation(shader,"LightType"), static_cast<int>(m_Type));
+    glUniform1i(glGetUniformLocation(shader,"LightType"), int(m_Type));
     glUniform3f(glGetUniformLocation(shader,"LightColor"), m_Color.x, m_Color.y, m_Color.z);
     glUniform1f(glGetUniformLocation(shader,"LightAmbientIntensity"), m_AmbientIntensity);
     glUniform1f(glGetUniformLocation(shader,"LightDiffuseIntensity"), m_DiffuseIntensity);
@@ -115,7 +115,7 @@ void PointLight::lighten(GLuint shader){
     if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
         return;
     sendGenericAttributesToShader(shader);
-    glUniform3f(glGetUniformLocation(shader,"LightPosition"),static_cast<float>(pos.x),static_cast<float>(pos.y),static_cast<float>(pos.z));
+    glUniform3f(glGetUniformLocation(shader,"LightPosition"),float(pos.x),float(pos.y),float(pos.z));
 
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);

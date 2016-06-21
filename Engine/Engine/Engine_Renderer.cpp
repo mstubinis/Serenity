@@ -28,8 +28,8 @@ ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
 bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.34f;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 4.0f;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.52f;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 2.0f;
 
 bool Renderer::Detail::RendererInfo::LightingInfo::lighting = true;
 
@@ -243,7 +243,6 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUseProgram(shader);
 
-    glUniform1i(glGetUniformLocation(shader,"HasSSAO"),int(RendererInfo::SSAOInfo::ssao));
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 
@@ -267,16 +266,11 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
     glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 3 );
 
-    glActiveTexture(GL_TEXTURE4);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
-    glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 4 );
-
     for (auto light:Resources::getCurrentScene()->getLights()){
         light.second->lighten(shader);
     }
     // Reset OpenGL state
-    for(uint i = 0; i < 5; i++){
+    for(uint i = 0; i < 4; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -303,6 +297,11 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
+    if(RendererInfo::LightingInfo::lighting){
+        m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM,"RGB");
+        RenderManagement::_passLighting();
+        m_gBuffer->stop();
+    }
     if(RendererInfo::SSAOInfo::ssao){
         m_gBuffer->start(BUFFER_TYPE_BLOOM,"A");
         RenderManagement::_passSSAO();
@@ -316,18 +315,16 @@ void Engine::Renderer::Detail::RenderManagement::render(){
             m_gBuffer->stop();
         }
     }
-    if(RendererInfo::LightingInfo::lighting){
-        m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM,"RGB");
-        RenderManagement::_passLighting();
-        m_gBuffer->stop();
-    }
     if(RendererInfo::BloomInfo::bloom){
         glDisable(GL_BLEND);
-        m_gBuffer->start(BUFFER_TYPE_FREE1,"RGB");
-        RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength,"RGB");
+
+		glm::vec4 str(RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,0.5f);
+
+        m_gBuffer->start(BUFFER_TYPE_FREE1,"RGBA");
+        RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
         m_gBuffer->stop();
-        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGB");
-        RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,RendererInfo::BloomInfo::bloom_radius,RendererInfo::BloomInfo::bloom_strength,"RGB");
+        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA");
+        RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
         m_gBuffer->stop();
     }
     if(RendererInfo::HDRInfo::hdr){
@@ -499,12 +496,15 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float strengthModifier,std::string channels){
+	Engine::Renderer::Detail::RenderManagement::_passBlur(type,texture,radius,glm::vec4(strengthModifier),channels);
+}
+void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,glm::vec4 str,std::string channels){
     GLuint shader = Resources::getShader("Deferred_Blur")->program();
     glUseProgram(shader);
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"radius"), radius);
-    glUniform1f(glGetUniformLocation(shader,"strengthModifier"), strengthModifier);
+    glUniform4f(glGetUniformLocation(shader,"strengthModifier"), str.x,str.y,str.z,str.w);
 
     if(channels.find("R") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"R"), 1);
     else                                        glUniform1i(glGetUniformLocation(shader,"R"), 0);
@@ -545,6 +545,7 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
     glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
+	glUniform1i( glGetUniformLocation(shader,"HasSSAO"),int(RendererInfo::SSAOInfo::ssao));
     glUniform1i( glGetUniformLocation(shader,"HasLighting"),int(RendererInfo::LightingInfo::lighting));
     glUniform1i( glGetUniformLocation(shader,"HasBloom"),int(RendererInfo::BloomInfo::bloom));
 	glUniform1i( glGetUniformLocation(shader,"HasHDR"),int(RendererInfo::HDRInfo::hdr));

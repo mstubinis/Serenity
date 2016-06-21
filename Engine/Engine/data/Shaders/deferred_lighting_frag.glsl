@@ -1,7 +1,6 @@
 #version 120
 
 uniform int LightType;
-uniform int HasSSAO;
 
 uniform vec3 LightColor;
 uniform float LightAmbientIntensity;
@@ -19,7 +18,6 @@ uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gDiffuseMap;
-uniform sampler2D gBloomMap;
 
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
@@ -51,11 +49,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }
-    float ssao = 1.0;
-    if(HasSSAO == 1){
-        ssao = texture2D(gBloomMap,uv).a;
-    }
-	vec4 lightWithoutSpecular = ((AmbientColor + DiffuseColor) * diffuseMapColor ) * vec4(ssao);
+	vec4 lightWithoutSpecular = ((AmbientColor + DiffuseColor) * diffuseMapColor );
 
 	if(Glow > 0.99){ return diffuseMapColor; }
     return max(Glow*diffuseMapColor,lightWithoutSpecular + (SpecularColor));
