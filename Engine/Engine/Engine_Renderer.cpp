@@ -302,24 +302,15 @@ void Engine::Renderer::Detail::RenderManagement::render(){
         RenderManagement::_passLighting();
         m_gBuffer->stop();
     }
+	glDisable(GL_BLEND);
     if(RendererInfo::SSAOInfo::ssao){
         m_gBuffer->start(BUFFER_TYPE_BLOOM,"A");
         RenderManagement::_passSSAO();
         m_gBuffer->stop();
-        if(RendererInfo::SSAOInfo::ssao_do_blur){
-            m_gBuffer->start(BUFFER_TYPE_FREE1,"A");
-            RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,0.5f,0.5f,"A");
-            m_gBuffer->stop();
-            m_gBuffer->start(BUFFER_TYPE_BLOOM,"A");
-            RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE1,0.5f,0.5f,"A");
-            m_gBuffer->stop();
-        }
     }
     if(RendererInfo::BloomInfo::bloom){
-        glDisable(GL_BLEND);
-
-		glm::vec4 str(RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,0.5f);
-
+		float& bloom_str = RendererInfo::BloomInfo::bloom_strength;
+		glm::vec4 str(bloom_str,bloom_str,bloom_str,0.5f);
         m_gBuffer->start(BUFFER_TYPE_FREE1,"RGBA");
         RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
         m_gBuffer->stop();
