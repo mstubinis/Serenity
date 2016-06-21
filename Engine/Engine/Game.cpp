@@ -74,16 +74,16 @@ void Game::update(float dt){
     }
 
 	if(Events::Keyboard::isKeyDown("f5")){
-		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure()-0.01f);
+		Renderer::Settings::Bloom::setRadius(Renderer::Settings::Bloom::getRadius()-0.01f);
 	}
 	if(Events::Keyboard::isKeyDown("f6")){
-		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure()+0.01f);
+		Renderer::Settings::Bloom::setRadius(Renderer::Settings::Bloom::getRadius()+0.01f);
 	}
 	if(Events::Keyboard::isKeyDown("f7")){
-		Renderer::Settings::HDR::setGamma(Renderer::Settings::HDR::getGamma()-0.01f);
+		Renderer::Settings::Bloom::setStrength(Renderer::Settings::Bloom::getStrength()-0.01f);
 	}
 	if(Events::Keyboard::isKeyDown("f8")){
-		Renderer::Settings::HDR::setGamma(Renderer::Settings::HDR::getGamma()+0.01f);
+		Renderer::Settings::Bloom::setStrength(Renderer::Settings::Bloom::getStrength()+0.01f);
 	}
 
     if(Events::Keyboard::isKeyDownOnce("f9")){

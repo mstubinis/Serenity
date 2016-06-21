@@ -84,10 +84,4 @@ void main(){
         lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
 
     gl_FragData[0].rgb = lightCalculation.rgb;
-
-	//for bloom...
-	float Glow = texture2D(gMiscMap,uv).r;
-    float brightness = dot(lightCalculation.rgb, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 1.14 || Glow > 0.01f)
-        gl_FragData[1].rgb = vec3(lightCalculation.rgb*max(Glow,brightness));
 }

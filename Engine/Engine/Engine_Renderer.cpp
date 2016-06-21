@@ -298,16 +298,16 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::LightingInfo::lighting){
-        m_gBuffer->start(BUFFER_TYPE_LIGHTING,BUFFER_TYPE_BLOOM,"RGB");
+        m_gBuffer->start(BUFFER_TYPE_LIGHTING,"RGB");
         RenderManagement::_passLighting();
         m_gBuffer->stop();
     }
 	glDisable(GL_BLEND);
-    if(RendererInfo::SSAOInfo::ssao){
-        m_gBuffer->start(BUFFER_TYPE_BLOOM,"A");
-        RenderManagement::_passSSAO();
-        m_gBuffer->stop();
-    }
+
+    m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA");
+    RenderManagement::_passSSAO(RendererInfo::SSAOInfo::ssao,RendererInfo::BloomInfo::bloom);
+    m_gBuffer->stop();
+
     if(RendererInfo::BloomInfo::bloom){
 		float& bloom_str = RendererInfo::BloomInfo::bloom_strength;
 		glm::vec4 str(bloom_str,bloom_str,bloom_str,0.5f);
@@ -374,9 +374,12 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	m_FontsToBeRendered.clear();
 	m_TexturesToBeRendered.clear();
 }
-void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
+void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom){
     GLuint shader = Resources::getShader("Deferred_SSAO")->program();
     glUseProgram(shader);
+
+    glUniform1i(glGetUniformLocation(shader,"doSSAO"),int(ssao));
+    glUniform1i(glGetUniformLocation(shader,"doBloom"),int(bloom));
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"gIntensity"),RendererInfo::SSAOInfo::ssao_intensity);
@@ -403,10 +406,20 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(){
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SSAOInfo::ssao_noise_texture);
     glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
 
+    glActiveTexture(GL_TEXTURE3);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_MISC));
+    glUniform1i(glGetUniformLocation(shader,"gMiscMap"), 3 );
+
+    glActiveTexture(GL_TEXTURE4);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
+    glUniform1i(glGetUniformLocation(shader,"gLightMap"), 4 );
+
 
     Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 3; i++){
+    for(uint i = 0; i < 5; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);

@@ -115,7 +115,7 @@ namespace Engine{
                     static void _passHDR();
                     static void _passGeometry();
                     static void _passLighting();
-                    static void _passSSAO();
+                    static void _passSSAO(bool ssao,bool bloom);
                     static void _passEdge(GLuint texture,float radius = 1.0f);
 					static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,glm::vec4 strengthModifier = glm::vec4(1.0f),std::string channels = "RGBA");
                     static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
