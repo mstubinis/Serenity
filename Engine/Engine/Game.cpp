@@ -57,6 +57,7 @@ void Game::initLogic(){
     Engine::getWindow()->setKeyRepeatEnabled(false);
 
 	Engine::Renderer::Settings::GodRays::disable();
+	//Engine::Renderer::Settings::HDR::disable();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");

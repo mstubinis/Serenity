@@ -28,8 +28,8 @@ ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
 bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.52f;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 2.0f;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.58f;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 2.25f;
 
 bool Renderer::Detail::RendererInfo::LightingInfo::lighting = true;
 
@@ -40,18 +40,18 @@ float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.30f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
-unsigned int Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 75;
+uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 75;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
-unsigned int Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 6;
+uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 8;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.03f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 2.2f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.02f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.09f;
 glm::vec2 Renderer::Detail::RendererInfo::SSAOInfo::ssao_Kernels[64];
 GLuint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
-unsigned int Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size = 16;
+uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size = 16;
 
 bool Renderer::Detail::RendererInfo::HDRInfo::hdr = true;
 float Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
