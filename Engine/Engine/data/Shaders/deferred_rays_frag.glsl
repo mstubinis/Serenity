@@ -9,12 +9,11 @@ uniform sampler2D firstPass;
 uniform int samples;
 uniform vec2 gScreenSize;
 
-void main(void){
+void main(){
 	vec2 uv = gl_FragCoord.xy / gScreenSize;
     vec2 deltaTextCoord = vec2( uv - (lightPositionOnScreen.xy / gScreenSize) );
     deltaTextCoord *= 1.0 /  float(samples) * density;
     float illuminationDecay = 1.0;
-    
 	for(int i=0; i < samples; i++){
 		uv -= deltaTextCoord;
 		vec4 sample = texture2D(firstPass,uv);	

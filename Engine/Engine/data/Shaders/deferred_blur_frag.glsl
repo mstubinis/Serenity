@@ -31,7 +31,7 @@ void main(){
         offset[i] = vec2(-weights[i] * radius * HV.x, -weights[i] * radius * HV.y);
         offset[13-i] = vec2(weights[i] * radius * HV.x, weights[i] * radius * HV.y);
     }
-    vec4 sum = vec4(0.0); vec2 uv = gl_FragCoord.xy / gScreenSize;
+    vec4 sum = vec4(0.0); vec2 uv = gl_FragCoord.xy / gScreenSize*2.0;
 
     float strengthR = max(1.0, radius * strengthModifier.r);
 	float strengthG = max(1.0, radius * strengthModifier.g);

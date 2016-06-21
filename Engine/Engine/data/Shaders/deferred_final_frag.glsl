@@ -26,18 +26,12 @@ void main(){
 	vec3 hdr = texture2D(gMiscMap,uv).rgb;
 	vec4 lightMap = max(vec4(gAmbientColor,1.0),texture2D(gLightMap, uv));
 	float ssao = texture2D(gBloomMap,uv).a;
-	if(HasLighting == 0){
-		lightMap = diffuse;
-	}
-	if(HasHDR == 1){
-		lightMap = vec4(hdr,1.0);
-	}
-	if(HasSSAO == 1){
-		lightMap *= vec4(ssao);
-	}
-	if(HasBloom == 1){
-		lightMap += (vec4(bloom,0.0) / gamma);
-	}
+
+	if(HasLighting == 0){ lightMap = diffuse; }
+	if(HasHDR == 1){ lightMap = vec4(hdr,1.0); }
+	if(HasSSAO == 1){ lightMap *= vec4(ssao); }
+	if(HasBloom == 1){ lightMap += (vec4(bloom,0.0) / gamma); }
+
 	if(normals.r > 0.999 && normals.g > 0.999 && normals.b > 0.999){
 		gl_FragColor = diffuse;
 	}
