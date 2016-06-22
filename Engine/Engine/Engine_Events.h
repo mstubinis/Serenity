@@ -23,6 +23,7 @@ namespace Engine{namespace Events{
 
                 static bool _IsMouseButtonDown(std::string str);
                 static bool _IsMouseButtonDownOnce(std::string str);
+				static void _SetMousePositionInternal(float x, float y);
         };
         glm::vec2 getMouseDifference();
         glm::vec2 getMousePositionPrevious();
@@ -30,6 +31,10 @@ namespace Engine{namespace Events{
         bool isMouseButtonDown(std::string str);
         bool isMouseButtonDownOnce(std::string str);
         float getMouseWheelDelta();
+
+		void setMousePosition(float x,float y);
+		void setMousePosition(glm::vec2);
+		void setMousePosition(glm::uvec2);
     };
     namespace Keyboard{
         class KeyProcessing final{

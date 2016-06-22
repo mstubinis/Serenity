@@ -289,5 +289,8 @@ void Engine_Window::setStyle(uint style){
 void Engine_Window::setFullScreen(bool fullscreen){
 	m_i->_setFullScreen(fullscreen);
 }
+void Engine_Window::keepMouseInWindow(bool keep){
+	m_i->m_SFMLWindow->setMouseCursorGrabbed(keep);
+}
 sf::Window* Engine_Window::getSFMLHandle(){ return m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }

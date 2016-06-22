@@ -53,11 +53,10 @@ void Game::initResources(){
     Resources::addParticleInfo("Smoke","Smoke");
 }
 void Game::initLogic(){
+	Engine::getWindow()->keepMouseInWindow(true);
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
-
 	Engine::Renderer::Settings::GodRays::disable();
-	//Engine::Renderer::Settings::HDR::disable();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -105,3 +104,57 @@ void Game::update(float dt){
 void Game::render(){
     m_HUD->render(Renderer::Detail::RendererInfo::DebugDrawingInfo::debug);
 }
+
+#pragma region EventHandlers
+void Game::onResize(uint width,uint height){
+}
+void Game::onClose(){
+}
+void Game::onLostFocus(){
+}
+void Game::onGainedFocus(){
+}
+void Game::onTextEntered(sf::Event::TextEvent textEvent){
+}
+void Game::onKeyPressed(uint key){
+}
+void Game::onKeyReleased(uint key){
+}
+void Game::onMouseWheelMoved(sf::Event::MouseWheelEvent mwEvent){
+}
+void Game::onMouseButtonPressed(sf::Event::MouseButtonEvent mbEvent){
+}
+void Game::onMouseButtonReleased(sf::Event::MouseButtonEvent mbEvent){
+}
+void Game::onMouseMoved(sf::Event::MouseMoveEvent mmEvent){
+}
+void Game::onMouseEntered(){
+}
+void Game::onMouseLeft(){
+}
+void Game::onPreUpdate(float dt){
+}
+void Game::onPostUpdate(float dt){
+	const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    if(Resources::getWindow()->hasFocus()){
+        glm::vec2 mousePos = Events::Mouse::getMousePosition();
+        float mouseDistFromCenter = glm::distance(mousePos,halfRes);
+        if(mouseDistFromCenter > 1.0f){
+			sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
+            Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
+        }
+    }
+}
+/*
+void Game::onJoystickButtonPressed(){
+}
+void Game::onJoystickButtonReleased(){
+}
+void Game::onJoystickMoved(){
+}
+void Game::onJoystickConnected(){
+}
+void Game::onJoystuckDisconnected(){
+}
+*/
+#pragma endregion

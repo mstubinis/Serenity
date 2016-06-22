@@ -4,7 +4,6 @@
 
 class Texture;
 class Engine_Window;
-class Engine_Mouse;
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -48,7 +47,6 @@ namespace Engine{
 
                 static void RESET_EVENTS();
 
-                static GLuint m_vao;
                 static sf::Clock clock;
 
                 static void update(uint api);
@@ -63,7 +61,6 @@ namespace Engine{
     float getFPS();
     Engine_Window* getWindow();
     sf::Vector2u getWindowSize();
-    Engine_Mouse* getMouse();
     void setWindowIcon(Texture* texture);
     void showMouseCursor();
     void hideMouseCursor();
@@ -77,5 +74,30 @@ namespace Game{
     void update(float);
     void render();
     void cleanup();
+
+	#pragma region EventHandlers
+    void onResize(uint width,uint height);
+    void onClose();
+    void onLostFocus();
+    void onGainedFocus();
+    void onTextEntered(sf::Event::TextEvent);
+    void onKeyPressed(uint);
+    void onKeyReleased(uint);
+    void onMouseWheelMoved(sf::Event::MouseWheelEvent);
+    void onMouseButtonPressed(sf::Event::MouseButtonEvent);
+    void onMouseButtonReleased(sf::Event::MouseButtonEvent);
+    void onMouseMoved(sf::Event::MouseMoveEvent);
+    void onMouseEntered();
+    void onMouseLeft();
+	void onPreUpdate(float dt);
+	void onPostUpdate(float dt);
+    /*
+    void onJoystickButtonPressed();
+    void onJoystickButtonReleased();
+    void onJoystickMoved();
+    void onJoystickConnected();
+    void onJoystuckDisconnected();
+    */
+	#pragma endregion
 };
 #endif

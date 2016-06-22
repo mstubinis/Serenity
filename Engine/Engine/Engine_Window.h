@@ -36,6 +36,7 @@ class Engine_Window final{
         void setFullScreen(bool);
         void setStyle(uint style);
         void display();
+		void keepMouseInWindow(bool=true);
 
         sf::Window* getSFMLHandle();
 };

@@ -1,5 +1,6 @@
 #include "Engine_Events.h"
-#include <SFML/Window.hpp>
+#include "Engine_Resources.h"
+#include "Engine_Window.h"
 #include <boost/algorithm/string.hpp> 
 
 using namespace Engine::Events;
@@ -266,37 +267,33 @@ uint Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "n
 bool Mouse::MouseProcessing::_IsMouseButtonDown(std::string str){
     boost::algorithm::to_lower(str);
     uint key = MouseProcessing::m_MouseMap[str];
-    if(MouseProcessing::m_MouseStatus[key])
-        return true;
-    return false;
+    if(MouseProcessing::m_MouseStatus[key]) return true; return false;
 }
 bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(std::string str){
-    bool result = MouseProcessing::_IsMouseButtonDown(str);
+    bool res = MouseProcessing::_IsMouseButtonDown(str);
     uint key = MouseProcessing::m_MouseMap[str];
-    if(result && m_currentButton == key && (m_currentButton != m_previousButton))
-        return true;
-    return false;
+    if(res && m_currentButton == key && (m_currentButton != m_previousButton)) return true; return false;
+}
+void Mouse::MouseProcessing::_SetMousePositionInternal(float x, float y){
+	m_Position_Previous = m_Position;
+	m_Position = glm::vec2(x,y);
+    m_Difference.x += (m_Position.x - m_Position_Previous.x);
+    m_Difference.y += (m_Position.y - m_Position_Previous.y);
 }
 bool Keyboard::KeyProcessing::_IsKeyDown(std::string str){
     boost::algorithm::to_lower(str);
     uint key = KeyProcessing::m_KeyMap[str];
-    if(KeyProcessing::m_KeyStatus[key])
-        return true;
-    return false;
+    if(KeyProcessing::m_KeyStatus[key]) return true; return false;
 }
 bool Keyboard::KeyProcessing::_IsKeyUp(std::string str){
     boost::algorithm::to_lower(str);
     uint key = KeyProcessing::m_KeyMap[str];
-    if(!KeyProcessing::m_KeyStatus[key])
-        return true;
-    return false;
+    if(!KeyProcessing::m_KeyStatus[key]) return true; return false;
 }
 bool Keyboard::KeyProcessing::_IsKeyDownOnce(std::string str){
-    bool result = KeyProcessing::_IsKeyDown(str);
+    bool res = KeyProcessing::_IsKeyDown(str);
     uint key = KeyProcessing::m_KeyMap[str];
-    if(result && m_currentKey == key && (m_currentKey != m_previousKey))
-        return true;
-    return false;
+    if(res && m_currentKey == key && (m_currentKey != m_previousKey)) return true; return false;
 }
 glm::vec2 Mouse::getMouseDifference(){ return MouseProcessing::m_Difference; }
 glm::vec2 Mouse::getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
@@ -304,6 +301,19 @@ glm::vec2 Mouse::getMousePosition(){ return MouseProcessing::m_Position; }
 bool Mouse::isMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
 bool Mouse::isMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
 float Mouse::getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
+
+void Mouse::setMousePosition(float x,float y){ 
+	sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
+	Mouse::MouseProcessing::_SetMousePositionInternal(x,y); 
+}
+void Mouse::setMousePosition(glm::vec2 pos){ 
+	sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
+	Mouse::MouseProcessing::_SetMousePositionInternal(pos.x,pos.y); 
+}
+void Mouse::setMousePosition(glm::uvec2 pos){ 
+	sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
+	Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y)); 
+}
 
 bool Keyboard::isKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }
 bool Keyboard::isKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }

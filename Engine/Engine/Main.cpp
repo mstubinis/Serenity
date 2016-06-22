@@ -11,6 +11,7 @@
 using namespace Engine;
 
 int main(){
+	srand((unsigned)time(0));
     Resources::Detail::ResourceManagement::m_RenderingAPI = ENGINE_RENDERING_API_OPENGL;
     #ifdef _WIN32
         if(GetConsoleWindow() == NULL){ 
