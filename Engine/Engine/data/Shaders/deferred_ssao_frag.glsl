@@ -10,6 +10,7 @@ uniform int doSSAO;
 uniform int doBloom;
 
 uniform vec2 gScreenSize;
+uniform vec3 gCameraPosition;
 uniform float gRadius;
 uniform float gIntensity;
 uniform float gBias;
@@ -18,7 +19,7 @@ uniform int gSampleCount;
 uniform int gNoiseTextureSize;
 uniform int far;
 
-uniform vec2 poisson[64];
+uniform vec2 poisson[32];
 
 float l(float a, float b, float w){
 	return a + w*(b-a);
@@ -36,12 +37,15 @@ void main(){
     vec3 normal = texture2D(gNormalMap, uv).xyz;
     vec2 randomVector = normalize(texture2D(gRandomMap, gScreenSize * uv / gNoiseTextureSize).xy * 2.0 - 1.0);
 
+	float camDist = distance(worldPosition,gCameraPosition);
+	float rad = gRadius / camDist;
+
 	if(doSSAO == 1){
 		if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }
 		else{
 			float occlusion = 0.0;
-			for (int i = 0; i < gSampleCount; i++) {
-				vec2 coord1 = reflect(poisson[i], randomVector)*gRadius;
+			for (int i = 0; i < gSampleCount; ++i) {
+				vec2 coord1 = reflect(poisson[i], randomVector)*rad;
 				vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
 				occlusion += occlude(uv, coord1 * 0.25, worldPosition, normal);
 				occlusion += occlude(uv, coord2 * 0.50, worldPosition, normal);
@@ -60,7 +64,7 @@ void main(){
 		float Glow = texture2D(gMiscMap,uv).r;
 		vec3 lighting = texture2D(gLightMap,uv).rgb;
 		float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
-		if(brightness > 1.14 || Glow > 0.01f)
+		if(brightness > 1.22 || Glow > 0.01f)
 			gl_FragColor.rgb = vec3(lighting*max(Glow,brightness));
 	}
 	else{

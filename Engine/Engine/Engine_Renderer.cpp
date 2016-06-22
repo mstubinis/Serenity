@@ -45,13 +45,13 @@ uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 75;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
 uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 7;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.03f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 2.2f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.02f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.09f;
-glm::vec2 Renderer::Detail::RendererInfo::SSAOInfo::ssao_Kernels[64];
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.24f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.17f;
+glm::vec2 Renderer::Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
 GLuint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
-uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture_size = 16;
 
 bool Renderer::Detail::RendererInfo::HDRInfo::hdr = true;
 float Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
@@ -73,14 +73,15 @@ void Engine::Renderer::Detail::RenderManagement::init(){
     Detail::RendererInfo::DebugDrawingInfo::debug = false;
     #endif
 
-    std::uniform_real_distribution<float> randFloats(0.0,1.0);//random floats between 0.0-1.0
+    std::uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
+	std::uniform_real_distribution<float> randFloats1(0.0f,1.0f);
     std::default_random_engine gen;
     std::vector<glm::vec2> kernels;
-    for(uint i = 0; i < 64; ++i){
+    for(uint i = 0; i < Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT; ++i){
         glm::vec2 sample(randFloats(gen)*2.0f-1.0f,randFloats(gen)*2.0f-1.0f);
         sample = glm::normalize(sample);
         sample *= randFloats(gen);
-        float scale = float(i) / 64.0f;
+        float scale = float(i) / float(Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
         float a = 0.1f; float b = 1.0f; float f = scale * scale;
         scale = a + f * (b - a); //basic lerp
         sample *= scale;
@@ -88,14 +89,14 @@ void Engine::Renderer::Detail::RenderManagement::init(){
     }
     std::copy(kernels.begin(),kernels.end(),RendererInfo::SSAOInfo::ssao_Kernels);
     std::vector<glm::vec3> ssaoNoise;
-    for(uint i = 0; i < RendererInfo::SSAOInfo::ssao_noise_texture_size*RendererInfo::SSAOInfo::ssao_noise_texture_size; i++){
-        glm::vec3 noise(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f); 
+    for(uint i = 0; i < RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE*RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE; i++){
+        glm::vec3 noise(randFloats1(gen)*2.0-1.0,randFloats1(gen)*2.0-1.0,0.0f); 
         ssaoNoise.push_back(noise);
     } 
     glGenTextures(1, &RendererInfo::SSAOInfo::ssao_noise_texture);
     glBindTexture(GL_TEXTURE_2D, RendererInfo::SSAOInfo::ssao_noise_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, RendererInfo::SSAOInfo::ssao_noise_texture_size, 
-                                              RendererInfo::SSAOInfo::ssao_noise_texture_size, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE, 
+                                              RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -297,17 +298,20 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     RenderManagement::_passSSAO(RendererInfo::SSAOInfo::ssao,RendererInfo::BloomInfo::bloom);
     m_gBuffer->stop();
 
-    if(RendererInfo::BloomInfo::bloom){
-		float& bloom_str = RendererInfo::BloomInfo::bloom_strength;
-		glm::vec4 str(bloom_str,bloom_str,bloom_str,0.5f);
 
-        m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
-        RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
-        m_gBuffer->stop();
-        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-        RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE2,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
-        m_gBuffer->stop();
-    }
+	if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
+		float& bloom_str = RendererInfo::BloomInfo::bloom_strength;
+		float& ssao_str = RendererInfo::SSAOInfo::ssao_blur_strength;
+		glm::vec4 str(bloom_str,bloom_str,bloom_str,ssao_str);
+
+		m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
+		RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
+		m_gBuffer->stop();
+		m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
+		RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE2,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
+		m_gBuffer->stop();
+	}
+
     if(RendererInfo::HDRInfo::hdr){
         m_gBuffer->start(BUFFER_TYPE_MISC);
         RenderManagement::_passHDR();
@@ -371,14 +375,16 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom
     glUniform1i(glGetUniformLocation(shader,"doSSAO"),int(ssao));
     glUniform1i(glGetUniformLocation(shader,"doBloom"),int(bloom));
 
+	glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
+	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"),camPos.x,camPos.y,camPos.z);
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"gIntensity"),RendererInfo::SSAOInfo::ssao_intensity);
     glUniform1f(glGetUniformLocation(shader,"gBias"),RendererInfo::SSAOInfo::ssao_bias);
     glUniform1f(glGetUniformLocation(shader,"gRadius"),RendererInfo::SSAOInfo::ssao_radius);
     glUniform1f(glGetUniformLocation(shader,"gScale"),RendererInfo::SSAOInfo::ssao_scale);
     glUniform1i(glGetUniformLocation(shader,"gSampleCount"),RendererInfo::SSAOInfo::ssao_samples);
-    glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"),RendererInfo::SSAOInfo::ssao_noise_texture_size);
-    glUniform2fv(glGetUniformLocation(shader,"poisson"),64, glm::value_ptr(RendererInfo::SSAOInfo::ssao_Kernels[0]));
+    glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"),RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+    glUniform2fv(glGetUniformLocation(shader,"poisson"),Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT, glm::value_ptr(RendererInfo::SSAOInfo::ssao_Kernels[0]));
     glUniform1i(glGetUniformLocation(shader,"far"),int(Resources::getActiveCamera()->getFar()));
 
 	glEnable(GL_TEXTURE_2D);

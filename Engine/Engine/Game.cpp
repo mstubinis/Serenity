@@ -74,19 +74,6 @@ void Game::update(float dt){
         Engine::stop();
     }
 
-	if(Events::Keyboard::isKeyDown("f5")){
-		Renderer::Settings::Bloom::setRadius(Renderer::Settings::Bloom::getRadius()-0.01f);
-	}
-	if(Events::Keyboard::isKeyDown("f6")){
-		Renderer::Settings::Bloom::setRadius(Renderer::Settings::Bloom::getRadius()+0.01f);
-	}
-	if(Events::Keyboard::isKeyDown("f7")){
-		Renderer::Settings::Bloom::setStrength(Renderer::Settings::Bloom::getStrength()-0.01f);
-	}
-	if(Events::Keyboard::isKeyDown("f8")){
-		Renderer::Settings::Bloom::setStrength(Renderer::Settings::Bloom::getStrength()+0.01f);
-	}
-
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
@@ -98,8 +85,8 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f11")){
 		Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
+	/*
 
-    /*
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Engine::setFullScreen(true);
     }

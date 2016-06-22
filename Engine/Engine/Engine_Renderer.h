@@ -16,12 +16,13 @@
 class GBuffer;
 class Object;
 typedef unsigned int GLuint;
+typedef unsigned int uint;
 
 struct GeometryRenderInfo final{
     Object* object;
     GLuint shader;
-    GeometryRenderInfo(Object* _object, GLuint _shader){
-        object = _object; shader = _shader;
+    GeometryRenderInfo(Object* _obj, GLuint _shader){
+        object = _obj; shader = _shader;
     }
 };
 struct TextureRenderInfo{
@@ -74,19 +75,23 @@ namespace Engine{
 					static float godRays_decay;
 					static float godRays_density;
 					static float godRays_weight;
-					static unsigned int godRays_samples;
+					static uint godRays_samples;
 				};
 				struct SSAOInfo final{
 					static bool ssao;
 					static bool ssao_do_blur;
-					static unsigned int ssao_samples;
+					static float ssao_blur_strength;
+					static uint ssao_samples;
 					static float ssao_bias;
 					static float ssao_scale;
 					static float ssao_radius;
 					static float ssao_intensity;
-					static glm::vec2 ssao_Kernels[64];
+
+					static const int SSAO_KERNEL_COUNT = 32;
+					static const int SSAO_NORMALMAP_SIZE = 128;
+					static glm::vec2 ssao_Kernels[SSAO_KERNEL_COUNT];
 					static GLuint ssao_noise_texture;
-					static unsigned int ssao_noise_texture_size;
+					static uint ssao_noise_texture_size;
 				};
 			};
 
@@ -134,7 +139,7 @@ namespace Engine{
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
             };
-            void renderFullscreenQuad(GLuint shader, unsigned int width, unsigned int height,float scale = 1.0f);
+            void renderFullscreenQuad(GLuint shader, uint width, uint height,float scale = 1.0f);
         };
 
 		namespace Settings{
@@ -164,7 +169,7 @@ namespace Engine{
                 static float getDecay(){ return Detail::RendererInfo::GodRaysInfo::godRays_decay; }
                 static float getDensity(){ return Detail::RendererInfo::GodRaysInfo::godRays_density; }
                 static float getWeight(){ return Detail::RendererInfo::GodRaysInfo::godRays_weight; }
-                static unsigned int getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
+                static uint getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
 
                 static void setExposure(float e){ Detail::RendererInfo::GodRaysInfo::godRays_exposure = e; }
                 static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
@@ -176,11 +181,18 @@ namespace Engine{
 				static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }
 				static void disable(){ Detail::RendererInfo::SSAOInfo::ssao = false;  }
 
+				static void enableBlur(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = b;  }
+				static void disableBlur(){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = false;  }
+
+				static float getBlurStrength(){ return Detail::RendererInfo::SSAOInfo::ssao_blur_strength; }
+
                 static float getIntensity(){ return Detail::RendererInfo::SSAOInfo::ssao_intensity; }
                 static float getRadius(){ return Detail::RendererInfo::SSAOInfo::ssao_radius; }
                 static float getScale(){ return Detail::RendererInfo::SSAOInfo::ssao_scale; }
                 static float getBias(){ return Detail::RendererInfo::SSAOInfo::ssao_bias; }
-                static unsigned int getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
+                static uint getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
+
+				static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = s; }
 
                 static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = i; }
                 static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = r; }

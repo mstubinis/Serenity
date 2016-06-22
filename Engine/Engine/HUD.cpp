@@ -1,6 +1,7 @@
 #include "HUD.h"
 #include "Engine_Resources.h"
 #include "Engine_Events.h"
+#include "Engine_Renderer.h"
 #include "Font.h"
 #include "Texture.h"
 #include "Scene.h"
@@ -111,12 +112,12 @@ void HUD::render(bool debug){
     #pragma region DrawDebugStuff
     if(debug){
         m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
-                           "\nFPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())) + 
+                           "\nFPS: " + boost::lexical_cast<std::string>(unsigned int(1.0f/Resources::dt())) + 
                            "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->getObjects().size()),
                            glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     else{
-        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(static_cast<unsigned int>(1.0f/Resources::dt())),
+        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(unsigned int(1.0f/Resources::dt())),
                            glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     #pragma endregion
