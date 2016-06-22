@@ -28,7 +28,7 @@ ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
 bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.58f;
+float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
 float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 2.25f;
 
 bool Renderer::Detail::RendererInfo::LightingInfo::lighting = true;
@@ -44,7 +44,7 @@ uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 75;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
-uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 8;
+uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 7;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.03f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 2.2f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.02f;
