@@ -4,7 +4,6 @@ uniform float fExposure;
 uniform float far;
 uniform float C;
 uniform float BaseGlow;
-uniform float Specularity;
 
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
@@ -72,7 +71,7 @@ void main(){
         else
             gl_FragData[2].r = BaseGlow;
     }
-    gl_FragData[2].b = Specularity;
+    gl_FragData[2].b = 0.0;
     gl_FragData[3] = vec4(WorldPosition,1.0);
 	if(HasGodsRays == 1){
 		gl_FragData[4] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);

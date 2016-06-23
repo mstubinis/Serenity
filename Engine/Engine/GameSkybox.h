@@ -16,7 +16,7 @@ class GameSkybox: public Skybox{
     private:
         std::vector<SkyboxSunFlare> m_SunFlares;
     public:
-        GameSkybox(std::string name,unsigned int numSunFlares = 0,Scene* = nullptr);
+        GameSkybox(std::string name,uint numSunFlares = 0,Scene* = nullptr);
         virtual ~GameSkybox();
 
         virtual void update();

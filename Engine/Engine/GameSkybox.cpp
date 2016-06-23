@@ -14,9 +14,9 @@
 
 using namespace Engine;
 
-GameSkybox::GameSkybox(std::string name, unsigned int numFlares, Scene* scene):Skybox(name,scene){
+GameSkybox::GameSkybox(std::string name, uint numFlares, Scene* scene):Skybox(name,scene){
     if(numFlares > 0){
-        for(unsigned int i = 0; i < numFlares; i++){
+        for(uint i = 0; i < numFlares; i++){
             SkyboxSunFlare flare;
 
             float x = (((rand() % 100) - 50.0f) / 100.0f); x*=999999;

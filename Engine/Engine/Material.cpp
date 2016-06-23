@@ -5,17 +5,18 @@
 
 using namespace Engine;
 
+std::vector<glm::vec4> Material::m_MaterialProperities;
 
 class Material::impl final{
     public:
-        std::unordered_map<unsigned int,Texture*> m_Components;
-        unsigned int m_LightingMode;
+        std::unordered_map<uint,Texture*> m_Components;
+        uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
         float m_Specularity;
-
+		uint m_ID;
         void _init(Texture* diffuse,Texture* normal,Texture* glow){
-            for(unsigned int i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++)
+            for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++)
                 m_Components[i] = nullptr;
             m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = diffuse;
             m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = normal;
@@ -25,6 +26,7 @@ class Material::impl final{
             m_BaseGlow = 0.0f;
             m_Specularity = 1.0f;
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
+			_addToMaterialPool();
         }
         void _init(std::string& diffuse, std::string& normal, std::string& glow){
             Texture* diffuseT = Resources::getTexture(diffuse); 
@@ -35,14 +37,25 @@ class Material::impl final{
             if(glowT == nullptr && glow != "")    glowT = new Texture(glow);
             _init(diffuseT,normalT,glowT);
         }
+		void _addToMaterialPool(){
+			this->m_ID = Material::m_MaterialProperities.size();
+			Material::m_MaterialProperities.push_back(glm::vec4(m_BaseGlow,m_Specularity,m_LightingMode,m_Shadeless));
+		}
+		void _updateGlobalMaterialPool(){
+			glm::vec4& ref = Material::m_MaterialProperities.at(m_ID);
+			ref.r = m_BaseGlow;
+			ref.g = m_Specularity;
+			ref.b = float(m_LightingMode);
+			ref.a = m_Shadeless;
+		}
         void _destruct(){
         }
-        void _addComponent(unsigned int type, std::string& file){
+        void _addComponent(uint type, std::string& file){
             if(m_Components[type] != nullptr)
                 return;
             m_Components[type] = new Texture(file);
         }
-        void _bindTexture(unsigned int c,GLuint shader,unsigned int api){
+        void _bindTexture(uint c,GLuint shader,uint api){
             if(api == ENGINE_RENDERING_API_OPENGL){
                 std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[c];
                 if(m_Components[c] == nullptr || m_Components[c]->address() == 0){//Texture / Material type not present; disable this material
@@ -57,10 +70,10 @@ class Material::impl final{
             else if(api == ENGINE_RENDERING_API_DIRECTX){
             }
         }
-        void setShadeless(bool b){ m_Shadeless = b; }
-        void setBaseGlow(float f){ m_BaseGlow = f; }
-        void setSpecularity(float s){ m_Specularity = s; }
-        void setLightingMode(unsigned int m){ m_LightingMode = m; }
+        void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
+        void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
+        void _setSpecularity(float& s){ m_Specularity = s; _updateGlobalMaterialPool(); }
+        void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
 
 Material::Material(Texture* diffuse,Texture* normal,Texture* glow):m_i(new impl()){
@@ -72,23 +85,25 @@ Material::Material(std::string diffuse, std::string normal, std::string glow):m_
 Material::~Material(){
     m_i->_destruct();
 }
-void Material::addComponent(unsigned int type, std::string file){
+void Material::addComponent(uint type, std::string file){
     m_i->_addComponent(type,file);
 }
-void Material::bindTexture(unsigned int c,GLuint shader,unsigned int api){
+void Material::bindTexture(uint c,GLuint shader,unsigned int api){
     m_i->_bindTexture(c,shader,api);
 }
-std::unordered_map<unsigned int,Texture*>& Material::getComponents(){ 
+std::unordered_map<uint,Texture*>& Material::getComponents(){ 
     return m_i->m_Components;
 }
-Texture* Material::getComponent(unsigned int i){ 
-    return m_i->m_Components[i];
+Texture* Material::getComponent(uint index){ 
+    return m_i->m_Components[index];
 }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const float Material::specularity() const { return m_i->m_Specularity; }
-const unsigned int Material::lightingMode() const { return m_i->m_LightingMode; }
-void Material::setShadeless(bool b){ m_i->m_Shadeless = b; }
-void Material::setGlow(float f){ m_i->m_BaseGlow = f; }
-void Material::setSpecularity(float s){ m_i->m_Specularity = s; }
-void Material::setLightingMode(unsigned int m){ m_i->m_LightingMode = m; }
+const uint Material::lightingMode() const { return m_i->m_LightingMode; }
+const uint Material::id() const { return m_i->m_ID; }
+
+void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
+void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
+void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
+void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }

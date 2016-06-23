@@ -12,7 +12,7 @@ static std::list<glm::v3> Game::Pathfinding::getPathFrom(Object* start, Object* 
     //first generate the final end point
     glm::v3 end = finish->getPosition() - start->getPosition();
     end = glm::normalize(end);
-    end = finish->getPosition() - end * static_cast<glm::nType>(finish->getRadius()*2);
+    end = finish->getPosition() - end * glm::nType(finish->getRadius()*2);
 
     //now add the start & end points to the list
     path.push_front(start->getPosition());

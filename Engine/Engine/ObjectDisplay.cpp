@@ -39,6 +39,10 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
         return;	
     glUseProgram(shader);
 
+	//check if these 2 lines are needed
+    glEnablei(GL_BLEND,0);
+    glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
+
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
     glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
@@ -58,10 +62,10 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
         m = glm::scale(m,item->scale);
 
         if(!m_Shadeless)
-            glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(item->material->shadeless()));
+            glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(item->material->shadeless()));
 
         glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
-        glUniform1f(glGetUniformLocation(shader, "Specularity"),item->material->specularity());
+		glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
 
         glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 

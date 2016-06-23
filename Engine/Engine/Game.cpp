@@ -12,6 +12,7 @@
 #include "Station.h"
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
+#include "Material.h"
 
 using namespace Engine;
 

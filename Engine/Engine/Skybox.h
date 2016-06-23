@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 typedef unsigned int GLuint;
+typedef unsigned int uint;
 
 class Scene;
 class Texture;

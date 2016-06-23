@@ -11,6 +11,7 @@
 #include "Mesh.h"
 #include "Skybox.h"
 #include "Particles.h"
+#include "Material.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -244,6 +245,7 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
+	glUniform4fv(glGetUniformLocation(shader,"materials"),MATERIAL_COUNT_LIMIT, glm::value_ptr(Material::m_MaterialProperities[0]));
 
 	glEnable(GL_TEXTURE_2D);
 

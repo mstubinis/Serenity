@@ -205,7 +205,7 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
         float sizeRatio = p1->getRadius() / p2->getRadius();
         float planetaryDistanceToSubtractFromDistance = p1->getRadius() + p2->getRadius();
         glm::nType distanceFromP2AndP1 = glm::distance(p1Position,p2Position);
-        glm::nType actualDistance = distanceFromP2AndP1 - static_cast<glm::nType>(planetaryDistanceToSubtractFromDistance);
+        glm::nType actualDistance = distanceFromP2AndP1 - glm::nType(planetaryDistanceToSubtractFromDistance);
 
         glm::nType step1 = actualDistance / (sizeRatio + 1);
         glm::nType distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
@@ -221,7 +221,7 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
         glm::nType d = ((glm::distance(p2Position,p1Position)) * glm::sqrt(3.0f)) / 2.0f;
         glm::v3 midway = glm::v3(Engine::Math::midpoint(p2Position,p1Position));
 
-        glm::v3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + static_cast<glm::nType>(0.5f),p2);
+        glm::v3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + glm::nType(0.5f),p2);
 
         glm::v3 D = glm::normalize(p2Position - p1Position);
         this->alignTo(D);

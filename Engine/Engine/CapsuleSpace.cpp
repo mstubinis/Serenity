@@ -31,7 +31,7 @@ void CapsuleEnd::draw(GLuint shader,bool debug,bool godsRays){
 CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
-        m_Light = new PointLight(name + " Light",pos/static_cast<glm::nType>(100),scene);
+        m_Light = new PointLight(name + " Light",pos/glm::nType(100),scene);
 
         m_Light->setConstant(0.1f);
         m_Light->setLinear(0.1f);
@@ -49,13 +49,13 @@ void CapsuleStar::update(float dt){
     glm::v3 pos = getPosition();
     translate(0,0,(-120 * 100 ) * dt);
     if(pos.z >= 200 * 100){
-        float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
-        float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
+        float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
+        float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
         setPosition(x*100,y*100,-200*100);
     }
 
 	if(m_Light != nullptr){
-		m_Light->setPosition(pos/static_cast<glm::nType>(150));
+		m_Light->setPosition(pos/glm::nType(150));
 		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
 			m_Light->deactivate();
 		}
@@ -145,9 +145,9 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_Ribbon->setPosition(0,300,0);
 
     float step = -10.0f;
-    for(unsigned int i = 0; i < 120; i++){
-        float x = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
-        float y = static_cast<float>(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
+    for(uint i = 0; i < 120; i++){
+        float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
+        float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
 
         glm::v3 pos = glm::v3(x,y,step)*glm::v3(100);
 
@@ -178,8 +178,8 @@ void CapsuleSpace::update(float dt){
     m_TunnelB->translate(0,0,(18 * bRadius) * dt);
     m_Ribbon->translate(0,0,(-15 * aRadius) * dt);
 
-    float tunnelARotRand = static_cast<float>(rand() % 4) + 14.0f;
-    float tunnelBRotRand = static_cast<float>(rand() % 2) + 2;
+    float tunnelARotRand = float(rand() % 4) + 14.0f;
+    float tunnelBRotRand = float(rand() % 2) + 2;
 
     m_TunnelA->rotate(0,0,tunnelARotRand);
     m_TunnelB->rotate(0,0,-tunnelBRotRand);

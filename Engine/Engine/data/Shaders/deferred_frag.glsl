@@ -8,7 +8,7 @@ uniform int Shadeless;
 uniform float far;
 uniform float C;
 uniform float BaseGlow;
-uniform float Specularity;
+uniform float matID;
 
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
@@ -55,7 +55,7 @@ void main(){
         gl_FragData[2].r = BaseGlow;
     }
     gl_FragData[1].a = Object_Color.a;
-    gl_FragData[2].b = Specularity;
+    gl_FragData[2].b = matID;
     gl_FragData[3] = vec4(WorldPosition,1.0);
 	if(HasGodsRays == 1){
 		gl_FragData[4] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);

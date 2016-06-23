@@ -22,6 +22,8 @@ uniform sampler2D gDiffuseMap;
 uniform vec3 gCameraPosition;
 uniform vec2 gScreenSize;
 
+uniform vec4 materials[255];
+
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
         return vec4(0);
@@ -45,7 +47,8 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularAngle = pow(SpecularAngle, LightSpecularPower);
 
         if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
-            float materialSpecularity = texture2D(gMiscMap,uv).b;
+			highp int index = int(texture2D(gMiscMap,uv).b * 255.0);
+            float materialSpecularity = materials[index].g;
             SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
         }
     }

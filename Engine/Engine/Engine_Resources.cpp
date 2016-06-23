@@ -160,6 +160,8 @@ void Engine::Resources::removeSound(std::string name){
 
 
 void Engine::Resources::initResources(){
+	addMaterial("Default",nullptr,nullptr,nullptr);
+
     addMesh("PointLightBounds","data/Models/pointLightBounds.obj",COLLISION_TYPE_NONE);
 
     addShader("Deferred","data/Shaders/vert.glsl","data/Shaders/deferred_frag.glsl");

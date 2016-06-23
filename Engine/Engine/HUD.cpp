@@ -62,18 +62,18 @@ void HUD::render(bool debug){
     #pragma region renderCrossHairAndOtherInfo
     if(player->getTarget() != nullptr){
         glm::vec3 pos = player->getTarget()->getScreenCoordinates();
-        glm::nType scl = glm::max(static_cast<glm::nType>(0.5f),static_cast<glm::nType>(player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getActiveCamera())));
+        glm::nType scl = glm::max(glm::nType(0.5f),glm::nType(player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getActiveCamera())));
 
         if(pos.z == 1){
             Resources::getTexture("data/Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
             std::string stringRepresentation = "";
             if(distanceInKm > 0){
-                stringRepresentation = Engine::convertNumToNumWithCommas(static_cast<unsigned long long>(distanceInKm)) + " Km";
+                stringRepresentation = Engine::convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
             }
             else{
                 glm::nType distanceInm = (player->getTarget()->getDistance(player))*100.0f;
-                stringRepresentation = boost::lexical_cast<std::string>(static_cast<unsigned int>(distanceInm)) + " m";
+                stringRepresentation = boost::lexical_cast<std::string>(uint(distanceInm)) + " m";
             }
             m_Font->renderText(player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
@@ -112,12 +112,12 @@ void HUD::render(bool debug){
     #pragma region DrawDebugStuff
     if(debug){
         m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
-                           "\nFPS: " + boost::lexical_cast<std::string>(unsigned int(1.0f/Resources::dt())) + 
+                           "\nFPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) + 
                            "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->getObjects().size()),
                            glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     else{
-        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(unsigned int(1.0f/Resources::dt())),
+        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())),
                            glm::vec2(10,10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     #pragma endregion

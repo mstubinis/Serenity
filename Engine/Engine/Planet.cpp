@@ -57,8 +57,8 @@ void Planet::update(float dt){
     if(m_RotationInfo != nullptr){
         float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
         glm::nType secondsToRotate = m_RotationInfo->days * 86400.0;
-        glm::nType finalSpeed = 1.0 / (secondsToRotate * static_cast<glm::nType>(speed));
-        rotate(0,static_cast<float>(finalSpeed),0);
+        glm::nType finalSpeed = 1.0 / (secondsToRotate * glm::nType(speed));
+        rotate(0,float(finalSpeed),0);
     }
     if(m_OrbitInfo != nullptr){
         m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
@@ -166,8 +166,6 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             glUniform1f(glGetUniformLocation(shader,"fScaleOverScaleDepth"), fScale / fScaledepth);
 
             glUniform1f(glGetUniformLocation(shader,"fExposure"), 2.0f);
-
-            glUniform1f(glGetUniformLocation(shader, "Specularity"),0.08f);
             for(auto item:m_DisplayItems){
                 glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
                 for(auto component:item->material->getComponents())
@@ -303,17 +301,17 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
     ringImage.create(1024,2,sf::Color::Black);
     ringImage.createMaskFromColor(sf::Color::Black,0);
 
-    unsigned int count = 0;
+    uint count = 0;
     for(auto ringInfo: rings){
         sf::Color paintCol = sf::Color(ringInfo.color.r,ringInfo.color.g,ringInfo.color.b,255);
         glm::vec4 pC = glm::vec4(paintCol.r/255.0f,paintCol.g/255.0f,paintCol.b/255.0f,paintCol.a/255.0f);
-        unsigned int alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
-        unsigned int newI = 0;
-        for(unsigned int i = 0; i < ringInfo.size; i++){
+        uint alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
+        uint newI = 0;
+        for(uint i = 0; i < ringInfo.size; i++){
             if(i > ringInfo.alphaBreakpoint){
-                unsigned int numerator = alphaChangeRange - newI;
-                pC.a = static_cast<float>(numerator/(alphaChangeRange));
-                paintCol.a = static_cast<unsigned int>(pC.a * 255);
+                uint numerator = alphaChangeRange - newI;
+                pC.a = float(numerator/(alphaChangeRange));
+                paintCol.a = uint(pC.a * 255);
                 newI++;
             }
             else{
@@ -331,25 +329,25 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 
                 float fAFront = pC.a + bCFront.a * (1-pC.a);
                 float fABack = pC.a + bCBack.a * (1-pC.a);
-                finalColorFront.a = static_cast<unsigned int>(fAFront * 255);
-                finalColorBack.a = static_cast<unsigned int>(fABack * 255);
+                finalColorFront.a = uint(fAFront * 255);
+                finalColorBack.a = uint(fABack * 255);
 
-                finalColorFront.r = static_cast<unsigned int>(((pC.r*pC.a + bCFront.r*bCFront.a * (1-pC.a)) / fAFront)* 255);
-                finalColorFront.g = static_cast<unsigned int>(((pC.g*pC.a + bCFront.g*bCFront.a * (1-pC.a)) / fAFront)* 255);
-                finalColorFront.b = static_cast<unsigned int>(((pC.b*pC.a + bCFront.b*bCFront.a * (1-pC.a)) / fAFront)* 255);
+                finalColorFront.r = uint(((pC.r*pC.a + bCFront.r*bCFront.a * (1-pC.a)) / fAFront)* 255);
+                finalColorFront.g = uint(((pC.g*pC.a + bCFront.g*bCFront.a * (1-pC.a)) / fAFront)* 255);
+                finalColorFront.b = uint(((pC.b*pC.a + bCFront.b*bCFront.a * (1-pC.a)) / fAFront)* 255);
 
-                finalColorBack.r = static_cast<unsigned int>(((pC.r*pC.a + bCBack.r*bCBack.a * (1-pC.a)) / fABack)* 255);
-                finalColorBack.g = static_cast<unsigned int>(((pC.g*pC.a + bCBack.g*bCBack.a * (1-pC.a)) / fABack)* 255);
-                finalColorBack.b = static_cast<unsigned int>(((pC.b*pC.a + bCBack.b*bCBack.a * (1-pC.a)) / fABack)* 255);
+                finalColorBack.r = uint(((pC.r*pC.a + bCBack.r*bCBack.a * (1-pC.a)) / fABack)* 255);
+                finalColorBack.g = uint(((pC.g*pC.a + bCBack.g*bCBack.a * (1-pC.a)) / fABack)* 255);
+                finalColorBack.b = uint(((pC.b*pC.a + bCBack.b*bCBack.a * (1-pC.a)) / fABack)* 255);
 
                 if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
                     finalColorFront = sf::Color(backgroundColorFront.r,backgroundColorFront.g,backgroundColorFront.b,0);
                     finalColorBack = sf::Color(backgroundColorBack.r,backgroundColorBack.g,backgroundColorBack.b,0);
 
-                    unsigned int numerator = ringInfo.size - i;
-                    pC.a = static_cast<float>(numerator/(ringInfo.size));
-                    finalColorFront.a = 255 - static_cast<unsigned int>(pC.a *255);
-                    finalColorBack.a = 255 - static_cast<unsigned int>(pC.a *255);
+                    uint numerator = ringInfo.size - i;
+                    pC.a = float(numerator/(ringInfo.size));
+                    finalColorFront.a = 255 - uint(pC.a *255);
+                    finalColorBack.a = 255 - uint(pC.a *255);
                 }
 
                 int ra = rand() % 10 - 5;
@@ -402,7 +400,8 @@ void Ring::draw(GLuint shader){
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
     glm::vec4 color = m_Parent->getColor();
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
-    glUniform1i(glGetUniformLocation(shader, "Shadeless"),static_cast<int>(material->shadeless()));
+    glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(material->shadeless()));
+	glUniform1f(glGetUniformLocation(shader, "matID"),float(float(material->id())/255.0f));
 
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);

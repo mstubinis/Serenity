@@ -4,9 +4,12 @@
 
 #include <string>
 #include <memory>
+#include <glm/glm.hpp>
+#include <vector>
 
 class Texture;
 typedef unsigned int GLuint;
+typedef unsigned int uint;
 typedef char GLchar;
 
 enum MATERIAL_COMPONENT_TYPE{
@@ -28,7 +31,15 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_N
     "NormalMap",
     "GlowMap"
 };
+
+static const uint MATERIAL_COUNT_LIMIT = 255;
+
 class Material final{
+	public:
+		//this is very important here
+		//vec4:  (  glow,  specularity, lightingMode, shadeless    )
+		static std::vector<glm::vec4> m_MaterialProperities;
+
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
@@ -37,19 +48,20 @@ class Material final{
         Material(std::string diffuse,std::string normal="",std::string glow="");
         ~Material();
 
-        std::unordered_map<unsigned int,Texture*>& getComponents();
-        Texture* getComponent(unsigned int i);
-        void addComponent(unsigned int, std::string file);
+        std::unordered_map<uint,Texture*>& getComponents();
+        Texture* getComponent(uint i);
+        void addComponent(uint, std::string file);
 
-        void bindTexture(unsigned int,GLuint shader,unsigned int api);
+        void bindTexture(uint texture,GLuint shader,uint api);
 
         const bool shadeless() const;
         const float glow() const;
         const float specularity() const;
-        const unsigned int lightingMode() const;
+        const uint lightingMode() const;
+		const uint id() const;
         void setShadeless(bool b);
         void setGlow(float f);
         void setSpecularity(float s);
-        void setLightingMode(unsigned int m);
+        void setLightingMode(uint m);
 };
 #endif

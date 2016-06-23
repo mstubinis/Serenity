@@ -92,9 +92,9 @@ Particle::~Particle(){
     //delete light; 
 }
 void Particle::setPosition(glm::nType x,glm::nType y,glm::nType z){
-    position.x = static_cast<float>(x);
-    position.y = static_cast<float>(y);
-    position.z = static_cast<float>(z);
+    position.x = float(x);
+    position.y = float(y);
+    position.z = float(z);
 
     model[3][0] = position.x;
     model[3][1] = position.y;
