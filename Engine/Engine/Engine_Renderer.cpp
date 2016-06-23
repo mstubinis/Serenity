@@ -41,7 +41,7 @@ float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.25f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.04f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
-uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 15;
+uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
@@ -287,7 +287,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	m_gBuffer->stop();
 
 	if(RendererInfo::GodRaysInfo::godRays){
-		m_gBuffer->start(BUFFER_TYPE_GODSRAYS);
+		m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
 		Object* o = Resources::getObject("Sun");
 		glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
 		_passGodsRays(glm::vec2(sp.x,sp.y));

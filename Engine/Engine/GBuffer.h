@@ -44,7 +44,7 @@ const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
 								    1.0f, // World Position
 								    1.0f, // (lighting.rgb)
 								    0.5f, // bloom, & ssao as alpha
-								    1.0f, // gods rays
+								    0.5f, // gods rays
 								    1.0f, // free buffer
 								    0.5f, // free2 buffer
 								    1.0f};// depth

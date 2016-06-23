@@ -10,7 +10,7 @@ uniform int samples;
 uniform vec2 gScreenSize;
 
 void main(){
-	vec2 uv = gl_FragCoord.xy / gScreenSize;
+	vec2 uv = gl_FragCoord.xy / gScreenSize * 2.0;
     vec2 deltaTextCoord = vec2( uv - (lightPositionOnScreen.xy / gScreenSize) );
     deltaTextCoord *= 1.0 /  float(samples) * density;
     float illuminationDecay = 1.0;
