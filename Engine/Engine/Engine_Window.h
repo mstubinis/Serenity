@@ -10,20 +10,20 @@ class Engine_Window final{
 		class impl;
 		std::unique_ptr<impl> m_i;
 
-    #ifdef _WIN32
-		public: void setRenderingAPI(uint);
-    #endif
-
     public:
         Engine_Window(const char* name,uint width,uint height,uint api);
         ~Engine_Window();
+
+		#ifdef _WIN32
+		void setRenderingAPI(uint);
+		#endif
 
         const char* name();
         sf::Vector2u getSize();
         void setName(const char* name);
         void setSize(uint w, uint h);
         void setIcon(Texture* texture);
-        void setIcon(const char*);
+        void setIcon(const char* file);
         void setMouseCursorVisible(bool);
         void setKeyRepeatEnabled(bool);
         void setVerticalSyncEnabled(bool);

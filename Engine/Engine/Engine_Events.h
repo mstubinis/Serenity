@@ -28,9 +28,9 @@ namespace Engine{namespace Events{
         glm::vec2 getMouseDifference();
         glm::vec2 getMousePositionPrevious();
         glm::vec2 getMousePosition();
+		float getMouseWheelDelta();
         bool isMouseButtonDown(std::string str);
         bool isMouseButtonDownOnce(std::string str);
-        float getMouseWheelDelta();
 
 		void setMousePosition(float x,float y);
 		void setMousePosition(glm::vec2);
@@ -58,8 +58,5 @@ namespace Engine{namespace Events{
     bool isKeyUp(std::string str);
 
     glm::vec2 getMousePosition();
-    bool isMouseButtonDown(std::string str);
-    bool isMouseButtonDownOnce(std::string str);
-    float getMouseWheelDelta();
 };    };
 #endif

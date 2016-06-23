@@ -58,7 +58,6 @@ namespace Engine{
 
                     static GLDebugDrawer* m_debugDrawer;
 
-
                     static void init();
                     static void destruct();
                     static void update(float dt,uint maxSteps = 1,float = 1/60.0f);

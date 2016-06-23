@@ -103,18 +103,6 @@ class Engine_Window::impl{
 		}
 		#endif
 
-		void _destroyOpenGLContext(){
-			//Resources::cleanupRenderingContexts(ENGINE_RENDERING_API_OPENGL);
-			HGLRC    hglrc; 
-			HDC      hdc ; 
-			if(hglrc = wglGetCurrentContext()){ 
-				hdc = wglGetCurrentDC(); 
-				wglMakeCurrent(0, 0); 
-				ReleaseDC(m_SFMLWindow->getSystemHandle(), hdc); 
-				wglDeleteContext(hglrc); 
-			}
-			SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
-		}
 		void _init(const char* name,uint width,uint height,uint api){
 			m_WindowName = name;
 			m_Width = width;
@@ -162,6 +150,17 @@ class Engine_Window::impl{
 
 			//Resources::initRenderingContexts(ENGINE_RENDERING_API_OPENGL);
 		}
+		void _destroyOpenGLContext(){
+			//Resources::cleanupRenderingContexts(ENGINE_RENDERING_API_OPENGL);
+			HGLRC hglrc; HDC hdc ; 
+			if(hglrc = wglGetCurrentContext()){ 
+				hdc = wglGetCurrentDC(); 
+				wglMakeCurrent(0,0); 
+				ReleaseDC(m_SFMLWindow->getSystemHandle(), hdc); 
+				wglDeleteContext(hglrc); 
+			}
+			SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
+		}
 		void _setFullScreen(bool fullscreen){
 			if(m_Style == sf::Style::Fullscreen && fullscreen == true) return;
 			if(m_Style != sf::Style::Fullscreen && fullscreen == false) return;
@@ -184,9 +183,7 @@ class Engine_Window::impl{
 				Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
 				Detail::EngineClass::EVENT_RESIZE(
 					Resources::Detail::ResourceManagement::m_RenderingAPI,
-					Resources::getWindowSize().x,
-					Resources::getWindowSize().y,
-					false
+					Resources::getWindowSize().x,Resources::getWindowSize().y,false
 				);
 			}
 			else if(Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_DIRECTX){
@@ -213,14 +210,15 @@ class Engine_Window::impl{
 			m_SFMLWindow->setSize(size);
 		}
 		void _setName(const char* name){
+			if(m_WindowName == name) return;
 			m_WindowName = name;
 			m_SFMLWindow->setTitle(m_WindowName);
 		}
-		void _setIcon(const char* name){
-			if(!Resources::Detail::ResourceManagement::m_Textures.count(name)){
-				new Texture(name);
+		void _setIcon(const char* file){
+			if(!Resources::Detail::ResourceManagement::m_Textures.count(file)){
+				new Texture(file);
 			}
-			Texture* texture = Resources::getTexture(name);
+			Texture* texture = Resources::getTexture(file);
 			m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
 		}
 		void _setIcon(Texture* texture){
@@ -244,8 +242,8 @@ sf::Vector2u Engine_Window::getSize(){
 void Engine_Window::setIcon(Texture* texture){
     m_i->_setIcon(texture);
 }
-void Engine_Window::setIcon(const char* name){
-	m_i->_setIcon(name);
+void Engine_Window::setIcon(const char* file){
+	m_i->_setIcon(file);
 }
 const char* Engine_Window::name(){
     return m_i->m_WindowName;

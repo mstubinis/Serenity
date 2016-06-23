@@ -116,6 +116,13 @@ void Engine::Renderer::Detail::RenderManagement::destruct(){
 void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, float angle, float depth){
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
 }
+void Engine::Renderer::renderTexture(Texture* texture,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth){
+	texture->render(pos,col,angle,scl,depth);
+}
+void Engine::Renderer::renderText(std::string text,Font* font, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth){
+	font->renderText(text,pos,color,angle,scl,depth);
+}
+
 void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
 		item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);

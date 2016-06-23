@@ -324,6 +324,3 @@ bool Engine::Events::isKeyDownOnce(std::string str){ return Keyboard::KeyProcess
 bool Engine::Events::isKeyUp(std::string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
 
 glm::vec2 Engine::Events::getMousePosition(){ return Mouse::MouseProcessing::m_Position; }
-bool Engine::Events::isMouseButtonDown(std::string str){ return Mouse::MouseProcessing::_IsMouseButtonDown(str); }
-bool Engine::Events::isMouseButtonDownOnce(std::string str){ return Mouse::MouseProcessing::_IsMouseButtonDownOnce(str); }
-float Engine::Events::getMouseWheelDelta(){ return Mouse::MouseProcessing::m_Delta; }

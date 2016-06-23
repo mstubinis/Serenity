@@ -13,6 +13,8 @@
 #pragma comment (lib, "d3d10.lib")// include the Direct3D Library file
 #endif
 
+class Texture;
+class Font;
 class GBuffer;
 class Object;
 typedef unsigned int GLuint;
@@ -94,7 +96,6 @@ namespace Engine{
 					static uint ssao_noise_texture_size;
 				};
 			};
-
             class RenderManagement final{
                 #ifdef _WIN32
                     public: static IDXGISwapChain* m_DirectXSwapChain;
@@ -209,7 +210,9 @@ namespace Engine{
 				static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
 			};
         };
-        void renderRectangle(glm::vec2 pos, glm::vec4 color, float width, float height, float angle, float depth);
+		void renderTexture(Texture*,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth);
+		void renderText(std::string text,Font*, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth);
+        void renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, float angle, float depth);
     };
 };
 #endif
