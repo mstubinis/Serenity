@@ -87,7 +87,7 @@ void ObjectBasic::setPosition(glm::nType x, glm::nType y, glm::nType z){
 
     glm::v3 parentPos(0);
     if(m_Parent != nullptr){
-        glm::v3 parentPos = m_Parent->getPosition();
+        parentPos = m_Parent->getPosition();
     }
     m_Model[3][0] = parentPos.x + x;
     m_Model[3][1] = parentPos.y + y;
