@@ -1,4 +1,4 @@
-#version 110
+#version 120
 
 uniform float g;
 uniform float g2;

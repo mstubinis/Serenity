@@ -159,10 +159,6 @@ void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
         return;	
     glUseProgram(shader);
 
-	//check if these 2 lines are needed
-    glEnablei(GL_BLEND,0);
-    glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
-
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
     glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);

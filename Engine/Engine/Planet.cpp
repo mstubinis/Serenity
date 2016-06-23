@@ -73,10 +73,8 @@ void Planet::render(GLuint shader,bool debug){
 }
 void Planet::draw(GLuint shader,bool debug,bool godsRays){
     bool renderPlanet = true;
-    if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this))
-        renderPlanet = false;
-    Camera* activeCamera = Resources::getActiveCamera();
-    if(activeCamera->getDistance(this) > 700 * getRadius())
+	Camera* activeCamera = Resources::getActiveCamera();
+    if(m_DisplayItems.size() == 0 || !Resources::getActiveCamera()->sphereIntersectTest(this) || (activeCamera->getDistance(this) > 700 * getRadius()))
         renderPlanet = false;
 
     if(renderPlanet){
@@ -168,6 +166,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             glUniform1f(glGetUniformLocation(shader,"fExposure"), 2.0f);
             for(auto item:m_DisplayItems){
                 glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
+				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
                 for(auto component:item->material->getComponents())
                     item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
                 item->mesh->render();
