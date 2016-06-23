@@ -10,6 +10,7 @@
 #include "Particles.h"
 #include "Station.h"
 #include "Terrain.h"
+#include "Atmosphere.h"
 
 #include <algorithm>
 #include <sstream>
@@ -77,6 +78,7 @@ void SolarSystem::_loadFromFile(std::string filename){
             }
             else if(count == 3){//this line has the system's skybox's number of flares
                 new GameSkybox(skybox,boost::lexical_cast<unsigned int>(line),this);
+				//new Atmosphere();
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;

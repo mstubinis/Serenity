@@ -38,10 +38,10 @@ bool Renderer::Detail::RendererInfo::DebugDrawingInfo::debug = false;
 
 bool Renderer::Detail::RendererInfo::GodRaysInfo::godRays = true;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.30f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.25f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.04f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
-uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 75;
+uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 15;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;

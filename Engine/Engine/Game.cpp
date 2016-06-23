@@ -57,7 +57,7 @@ void Game::initLogic(){
 	Engine::getWindow()->keepMouseInWindow(true);
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
-	Engine::Renderer::Settings::GodRays::disable();
+	//Engine::Renderer::Settings::GodRays::disable();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -73,6 +73,25 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
     }
+
+	//exposure
+	//decay
+	//density
+	//weight
+	//samples
+    if(Events::Keyboard::isKeyDown("f5")){
+        Engine::Renderer::Settings::GodRays::setDecay(Engine::Renderer::Settings::GodRays::getDecay()-0.01f);
+    }
+    if(Events::Keyboard::isKeyDown("f6")){
+		Engine::Renderer::Settings::GodRays::setDecay(Engine::Renderer::Settings::GodRays::getDecay()+0.01f);
+    }
+    if(Events::Keyboard::isKeyDown("f7")){
+		Engine::Renderer::Settings::GodRays::setDensity(Engine::Renderer::Settings::GodRays::getDensity()-0.01f);
+    }
+    if(Events::Keyboard::isKeyDown("f8")){
+		Engine::Renderer::Settings::GodRays::setDensity(Engine::Renderer::Settings::GodRays::getDensity()+0.01f);
+    }
+
 
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Resources::setCurrentScene("CapsuleSpace");
