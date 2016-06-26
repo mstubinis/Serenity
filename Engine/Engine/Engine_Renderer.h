@@ -78,6 +78,7 @@ namespace Engine{
 					static float godRays_density;
 					static float godRays_weight;
 					static uint godRays_samples;
+					static float godRays_fovDegrees;
 				};
 				struct SSAOInfo final{
 					static bool ssao;
@@ -117,7 +118,7 @@ namespace Engine{
                     static void _renderForegroundObjects();
                     static void _renderText();
                     static void _renderTextures();
-                    static void _passGodsRays(glm::vec2);
+                    static void _passGodsRays(glm::vec2,bool,float);
                     static void _passHDR();
                     static void _passGeometry();
                     static void _passLighting();
@@ -171,12 +172,14 @@ namespace Engine{
                 static float getDensity(){ return Detail::RendererInfo::GodRaysInfo::godRays_density; }
                 static float getWeight(){ return Detail::RendererInfo::GodRaysInfo::godRays_weight; }
                 static uint getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
+				static float getFOVDegrees(){ return Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees; }
 
                 static void setExposure(float e){ Detail::RendererInfo::GodRaysInfo::godRays_exposure = e; }
                 static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
                 static void setDensity(float d){ Detail::RendererInfo::GodRaysInfo::godRays_density = d; }
                 static void setWeight(float w){ Detail::RendererInfo::GodRaysInfo::godRays_weight = w; }
                 static void setSamples(unsigned int s){ Detail::RendererInfo::GodRaysInfo::godRays_samples = s; }
+				static float setFOVDegrees(float d){ return Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = d; }
             };
             namespace SSAO{
 				static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }

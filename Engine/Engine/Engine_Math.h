@@ -35,13 +35,13 @@ namespace glm{
 
 namespace Engine{
     namespace Math{
-        glm::vec3 getScreenCoordinates(glm::vec3,bool clampToEdge = true);
+        glm::vec3 getScreenCoordinates(glm::vec3&,bool clampToEdge = true);
 
-        glm::vec3 midpoint(glm::v3,glm::v3);
-        glm::vec3 midpoint(glm::vec3,glm::vec3);
+        glm::vec3 midpoint(glm::v3&,glm::v3&);
+        glm::vec3 midpoint(glm::vec3&,glm::vec3&);
 
-		glm::vec3 direction(glm::v3 eye,glm::v3 target);
-		glm::vec3 direction(glm::vec3 eye,glm::vec3 target);
+		glm::vec3 direction(glm::v3& eye,glm::v3& target);
+		glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
         glm::v3 getForward(glm::quat& q);
         glm::v3 getRight(glm::quat& q);
@@ -51,11 +51,19 @@ namespace Engine{
         glm::v3 getRight(const btRigidBody* b);
         glm::v3 getUp(const btRigidBody* b);
 
-        float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true);
-        void alignTo(glm::quat& o, glm::vec3 direction,float speed=0, bool overTime=false);
+        float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
+        void alignTo(glm::quat& o, glm::vec3& direction,float speed=0, bool overTime=false);
 
         void setColor(glm::vec3&,float r,float g,float b);
         void setColor(glm::vec4&,float r,float g,float b,float a);
+
+		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians);
+		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians,const float fovDistance);
+
+		float toRadians(float degrees);
+		float toDegrees(float radians);
+		float toRadians(double degrees);
+		float toDegrees(double radians);
     };
 };
 #endif

@@ -10,7 +10,25 @@
 
 using namespace Engine;
 
-glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
+float Math::toRadians(float degrees){ return degrees * 0.0174533f; }
+float Math::toDegrees(float radians){ return radians * 57.2958f; }
+float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
+float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
+
+bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians){
+	glm::v3 differenceVector = glm::normalize(point - conePos);
+	glm::nType t = glm::dot(coneVector,differenceVector);
+    return ( t >= glm::cos( fovRadians ) );
+}
+bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians,const float maxDistance){
+    glm::v3 differenceVector = glm::normalize(point - conePos);
+	glm::nType t = glm::dot(coneVector,differenceVector);
+	float length = glm::length(point-conePos);
+    if ( length > maxDistance ){ return false; }
+    return ( t >= glm::cos( fovRadians ) );
+}
+
+glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
     glm::mat4 MV = Resources::getActiveCamera()->getView();
     glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
@@ -45,16 +63,16 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
 
     return glm::vec3(fX,fY,inBounds);
 }
-glm::vec3 Math::midpoint(glm::vec3 a, glm::vec3 b){ 
+glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ 
 	return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); 
 }
-glm::vec3 Math::midpoint(glm::v3 a, glm::v3 b){ 
+glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ 
 	return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); 
 }
-glm::vec3 Math::direction(glm::v3 eye,glm::v3 target){ 
+glm::vec3 Math::direction(glm::v3& eye,glm::v3& target){ 
 	return glm::normalize(glm::vec3(eye)-glm::vec3(target)); 
 }
-glm::vec3 Math::direction(glm::vec3 eye,glm::vec3 target){ 
+glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ 
 	return glm::normalize(eye-target); 
 }
 glm::v3 Math::getForward(glm::quat& q){
@@ -82,13 +100,14 @@ glm::v3 Math::getUp(const btRigidBody* b){
 	return Math::getColumnVector(b,1); 
 }
 
-float Math::getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees){
-    if(degrees == true)
-        return glm::acos(glm::dot(a,b)) * 57.2958f;
-    return glm::acos(glm::dot(a,b));
+float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
+	float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
+    if(degrees)
+        angle *= 57.2958f;
+    return angle;
 }
 
-void Math::alignTo(glm::quat& o, glm::vec3 direction,float speed, bool overTime){
+void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed, bool overTime){
     glm::quat original(o);
 
     glm::vec3 forward = glm::normalize(glm::vec3(getForward(o)));
@@ -98,15 +117,15 @@ void Math::alignTo(glm::quat& o, glm::vec3 direction,float speed, bool overTime)
     glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
 
     glm::mat3 rot;
-    rot[0][0] = static_cast<float>(xaxis.x);
-    rot[1][0] = static_cast<float>(yaxis.x);
-    rot[2][0] = static_cast<float>(direction.x);
-    rot[0][1] = static_cast<float>(xaxis.y);
-    rot[1][1] = static_cast<float>(yaxis.y);
-    rot[2][1] = static_cast<float>(direction.y);
-    rot[0][2] = static_cast<float>(xaxis.z);
-    rot[1][2] = static_cast<float>(yaxis.z);
-    rot[2][2] = static_cast<float>(direction.z);
+    rot[0][0] = float(xaxis.x);
+    rot[1][0] = float(yaxis.x);
+    rot[2][0] = float(direction.x);
+    rot[0][1] = float(xaxis.y);
+    rot[1][1] = float(yaxis.y);
+    rot[2][1] = float(direction.y);
+    rot[0][2] = float(xaxis.z);
+    rot[1][2] = float(yaxis.z);
+    rot[2][2] = float(direction.z);
     o = glm::quat_cast(rot);
     if(speed != 0){
         speed *= Resources::dt();

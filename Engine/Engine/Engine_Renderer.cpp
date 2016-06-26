@@ -39,9 +39,10 @@ bool Renderer::Detail::RendererInfo::DebugDrawingInfo::debug = false;
 bool Renderer::Detail::RendererInfo::GodRaysInfo::godRays = true;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.25f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.04f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.033f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
-uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
+uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 15;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 90.0f;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
@@ -290,7 +291,11 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 		m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
 		Object* o = Resources::getObject("Sun");
 		glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
-		_passGodsRays(glm::vec2(sp.x,sp.y));
+
+		bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
+		float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
+			glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+		_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
 		m_gBuffer->stop();
 	}
     glEnable(GL_BLEND);
@@ -450,7 +455,7 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
 
     glUseProgram(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen){
+void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLuint shader = Resources::getShader("Deferred_GodsRays")->program();
@@ -463,6 +468,9 @@ void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPo
     glUniform1f(glGetUniformLocation(shader,"weight"), RendererInfo::GodRaysInfo::godRays_weight);
     glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"),float(lightPositionOnScreen.x),float(lightPositionOnScreen.y));
+
+	glUniform1i(glGetUniformLocation(shader,"behind"), int(behind));
+	glUniform1f(glGetUniformLocation(shader,"alpha"), alpha);
 
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
