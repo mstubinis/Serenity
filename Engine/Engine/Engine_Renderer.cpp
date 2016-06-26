@@ -43,6 +43,7 @@ float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.033f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
 uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 15;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 90.0f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
@@ -295,6 +296,10 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 		bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
 		float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
 			glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+		
+		alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
+		alpha = glm::clamp(alpha,0.0f,1.0f);
+		
 		_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
 		m_gBuffer->stop();
 	}
