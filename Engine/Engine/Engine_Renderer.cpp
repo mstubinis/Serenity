@@ -42,7 +42,7 @@ float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.25f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.033f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
 uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 15;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 90.0f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 75.0f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
@@ -52,7 +52,7 @@ float Renderer::Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
 float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.24f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.17f;
+float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.215f;
 glm::vec2 Renderer::Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
 GLuint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
