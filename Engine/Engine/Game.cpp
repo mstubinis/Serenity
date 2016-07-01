@@ -35,7 +35,8 @@ void Game::initResources(){
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
-	Resources::addMesh("Intrepid","data/Models/intrepid.obj",COLLISION_TYPE_CONVEXHULL);
+	Resources::addMesh("Intrepid","data/Models/intrepid.obj");
+	Resources::addMesh("Norway","data/Models/norway.obj");
     //Resources::addMesh("Starbase","data/Models/starbase.obj");
     Resources::addMesh("Ring","data/Models/ring.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
@@ -45,6 +46,7 @@ void Game::initResources(){
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
 	Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
+	Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png");
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");

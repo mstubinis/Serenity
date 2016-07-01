@@ -227,7 +227,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship("Intrepid","Intrepid",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    setPlayer(new Ship("Norway","Norway",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 
@@ -271,11 +271,11 @@ void SolarSystem::_loadFromFile(std::string filename){
 	glm::nType zPos = Resources::getObject("Valiant")->getPosition().z;
 
 	new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
-	new Ship("Defiant","Defiant",false,"Defiant 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
+	new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
 	new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
-	new Ship("Defiant","Defiant",false,"Defiant 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
-	new Ship("Defiant","Defiant",false,"Defiant 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
-	new Ship("Defiant","Defiant",false,"Defiant 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
+	new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
+	new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
+	new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
 
 	player->translate(0,0,11);
 }
