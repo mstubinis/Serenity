@@ -97,7 +97,7 @@ bool Camera::sphereIntersectTest(Object* obj){
 bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
     if(radius <= 0) return false;
     for (unsigned int i = 0; i < 6; i++){
-        glm::nType dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
+        glm::num dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
         if (dist > 0) return false;
     }
     return true;

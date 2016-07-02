@@ -91,7 +91,7 @@ Particle::Particle(ParticleEmitter* _emitter,glm::v3 pos,glm::vec4 col,glm::vec2
 Particle::~Particle(){
     //delete light; 
 }
-void Particle::setPosition(glm::nType x,glm::nType y,glm::nType z){
+void Particle::setPosition(glm::num x,glm::num y,glm::num z){
     position.x = float(x);
     position.y = float(y);
     position.z = float(z);

@@ -31,7 +31,7 @@ void CapsuleEnd::draw(GLuint shader,bool debug,bool godsRays){
 CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
-        m_Light = new PointLight(name + " Light",pos/glm::nType(100),scene);
+        m_Light = new PointLight(name + " Light",pos/glm::num(100),scene);
 
         m_Light->setConstant(0.1f);
         m_Light->setLinear(0.1f);
@@ -55,7 +55,7 @@ void CapsuleStar::update(float dt){
     }
 
 	if(m_Light != nullptr){
-		m_Light->setPosition(pos/glm::nType(150));
+		m_Light->setPosition(pos/glm::num(150));
 		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
 			m_Light->deactivate();
 		}

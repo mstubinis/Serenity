@@ -62,7 +62,7 @@ class Particle{
         ~Particle();
         void update(float);
 
-        void setPosition(glm::nType,glm::nType,glm::nType); 
+        void setPosition(glm::num,glm::num,glm::num); 
         void setPosition(glm::v3);
 
         const bool ToBeErased() const { return toBeErased; }

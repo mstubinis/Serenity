@@ -19,12 +19,12 @@ class IObject{
     public:
         virtual void update(float) = 0;
 
-        virtual void setPosition(glm::nType,glm::nType,glm::nType) = 0;
+        virtual void setPosition(glm::num,glm::num,glm::num) = 0;
         virtual void setPosition(glm::v3) = 0;
         virtual void setScale(float,float,float) = 0;
         virtual void setScale(glm::vec3) = 0;
 
-        virtual void translate(glm::nType,glm::nType,glm::nType,bool local=true) = 0;
+        virtual void translate(glm::num,glm::num,glm::num,bool local=true) = 0;
         virtual void translate(glm::v3,bool local=true) = 0;
         virtual void rotate(float,float,float,bool overTime = true) = 0;
         virtual void rotate(glm::vec3, bool overTime = true) = 0;
@@ -60,7 +60,7 @@ class Object: public IObject{
         void destroy(){ m_IsToBeDestroyed = true; }
         bool isDestroyed(){ return m_IsToBeDestroyed; }
 
-        virtual glm::nType getDistance(Object*);
+        virtual glm::num getDistance(Object*);
         virtual unsigned long long getDistanceLL(Object*);
 
         virtual glm::vec3 getScreenCoordinates();
@@ -103,14 +103,14 @@ class ObjectBasic: public Object{
         );
         virtual ~ObjectBasic();
 
-        virtual void setPosition(glm::nType,glm::nType,glm::nType);
+        virtual void setPosition(glm::num,glm::num,glm::num);
         virtual void setPosition(glm::v3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
 
         virtual void rotate(float,float,float,bool overTime = true); 
         virtual void rotate(glm::vec3, bool overTime = true);
-        virtual void translate(glm::nType,glm::nType,glm::nType,bool local=true); 
+        virtual void translate(glm::num,glm::num,glm::num,bool local=true); 
         virtual void translate(glm::v3,bool local=true);
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);

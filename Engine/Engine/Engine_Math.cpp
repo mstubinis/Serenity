@@ -15,15 +15,21 @@ float Math::toDegrees(float radians){ return radians * 57.2958f; }
 float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 
-bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians){
+bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians){
+	// forced protection against NaN if vectors happen to be equal
+	point.x += 0.01f;
+	//
 	glm::v3 differenceVector = glm::normalize(point - conePos);
-	glm::nType t = glm::dot(coneVector,differenceVector);
+	glm::num t = glm::dot(coneVector,differenceVector);
     return ( t >= glm::cos( fovRadians ) );
 }
-bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians,const float maxDistance){
-    glm::v3 differenceVector = glm::normalize(point - conePos);
-	glm::nType t = glm::dot(coneVector,differenceVector);
-	float length = glm::length(point-conePos);
+bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num maxDistance){
+ 	// forced protection against NaN if vectors happen to be equal
+	point.x += 0.01f;
+	//
+	glm::v3 differenceVector = glm::normalize(point - conePos);
+	glm::num t = glm::dot(coneVector,differenceVector);
+	glm::num length = glm::length(point-conePos);
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
@@ -63,47 +69,29 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
 
     return glm::vec3(fX,fY,inBounds);
 }
-glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ 
-	return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); 
-}
-glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ 
-	return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); 
-}
-glm::vec3 Math::direction(glm::v3& eye,glm::v3& target){ 
-	return glm::normalize(glm::vec3(eye)-glm::vec3(target)); 
-}
-glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ 
-	return glm::normalize(eye-target); 
-}
-glm::v3 Math::getForward(glm::quat& q){
-    return glm::normalize(glm::v3(2*(q.x*q.z+q.w*q.y),2*(q.y*q.x-q.w*q.x),1-2*(q.x*q.x+q.y*q.y)));
-}
-glm::v3 Math::getRight(glm::quat& q){
-    return glm::normalize(glm::v3(1-2*(q.y*q.y+q.z*q.z),2*(q.x*q.y+q.w*q.z),2*(q.x*q.z-q.w*q.y)));
-}
-glm::v3 Math::getUp(glm::quat& q){
-    return glm::normalize(glm::v3(2*(q.x*q.y-q.w*q.z),1-2*(q.x*q.x+q.z*q.z),2*(q.y*q.z+q.w*q.x)));
-}
+glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
+glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); }
+glm::vec3 Math::direction(glm::v3& eye,glm::v3& target){ return glm::normalize(glm::vec3(eye)-glm::vec3(target)); }
+glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normalize(eye-target); }
+glm::v3 Math::getForward(glm::quat& q){return glm::normalize(glm::v3(2*(q.x*q.z+q.w*q.y),2*(q.y*q.x-q.w*q.x),1-2*(q.x*q.x+q.y*q.y)));}
+glm::v3 Math::getRight(glm::quat& q){return glm::normalize(glm::v3(1-2*(q.y*q.y+q.z*q.z),2*(q.x*q.y+q.w*q.z),2*(q.x*q.z-q.w*q.y)));}
+glm::v3 Math::getUp(glm::quat& q){return glm::normalize(glm::v3(2*(q.x*q.y-q.w*q.z),1-2*(q.x*q.x+q.z*q.z),2*(q.y*q.z+q.w*q.x)));}
 glm::v3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
     btTransform t;
     b->getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
     return glm::v3(v.x(),v.y(),v.z());
 }
-glm::v3 Math::getForward(const btRigidBody* b){ 
-	return Math::getColumnVector(b,2); 
-}
-glm::v3 Math::getRight(const btRigidBody* b){ 
-	return Math::getColumnVector(b,0); 
-}
-glm::v3 Math::getUp(const btRigidBody* b){ 
-	return Math::getColumnVector(b,1); 
-}
+glm::v3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
+glm::v3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
+glm::v3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
 
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
+	// forced protection against NaN if a and b happen to be equal
+	a.x += 0.01f;
+	//
 	float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
-    if(degrees)
-        angle *= 57.2958f;
+    if(degrees) angle *= 57.2958f;
     return angle;
 }
 

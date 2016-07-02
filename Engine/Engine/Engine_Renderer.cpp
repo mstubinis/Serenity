@@ -18,6 +18,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <random>
+#include <math.h>
 
 using namespace Engine;
 
@@ -298,8 +299,8 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 			glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
 		
 		alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
-		alpha = glm::clamp(alpha,0.0f,1.0f);
-		
+		alpha = glm::clamp(alpha,0.001f,0.999f);
+
 		_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
 		m_gBuffer->stop();
 	}

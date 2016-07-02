@@ -107,7 +107,7 @@ ObjectDynamic::~ObjectDynamic(){
     SAFE_DELETE(m_MotionState);
     for(auto item:m_DisplayItems) SAFE_DELETE(item);
 }
-void ObjectDynamic::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
+void ObjectDynamic::translate(glm::num x, glm::num y, glm::num z,bool local){
     m_RigidBody->activate();
     btTransform t = m_RigidBody->getWorldTransform();
     btVector3 pos = t.getOrigin();
@@ -204,7 +204,7 @@ void ObjectDynamic::setScale(float x, float y, float z){
     this->calculateRadius();
 }
 void ObjectDynamic::setScale(glm::vec3 s){ ObjectDynamic::setScale(s.x,s.y,s.z); }
-void ObjectDynamic::setPosition(glm::nType x, glm::nType y, glm::nType z){
+void ObjectDynamic::setPosition(glm::num x, glm::num y, glm::num z){
     btTransform initialTransform;
 
     initialTransform.setOrigin(btVector3(static_cast<btScalar>(x),static_cast<btScalar>(y),static_cast<btScalar>(z)));
@@ -433,11 +433,11 @@ bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     if(dot >= 0)
         return false;
 
-    glm::nType a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
-    glm::nType b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
-    glm::nType c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
+    glm::num a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
+    glm::num b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
+    glm::num c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
 
-    glm::nType Delta = (b*b) - (4*a*c);
+    glm::num Delta = (b*b) - (4*a*c);
 
     if(Delta < 0)
         return false;

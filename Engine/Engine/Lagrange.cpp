@@ -204,11 +204,11 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
     if(type == LAGRANGE_TYPE_L1){
         float sizeRatio = p1->getRadius() / p2->getRadius();
         float planetaryDistanceToSubtractFromDistance = p1->getRadius() + p2->getRadius();
-        glm::nType distanceFromP2AndP1 = glm::distance(p1Position,p2Position);
-        glm::nType actualDistance = distanceFromP2AndP1 - glm::nType(planetaryDistanceToSubtractFromDistance);
+        glm::num distanceFromP2AndP1 = glm::distance(p1Position,p2Position);
+        glm::num actualDistance = distanceFromP2AndP1 - glm::num(planetaryDistanceToSubtractFromDistance);
 
-        glm::nType step1 = actualDistance / (sizeRatio + 1);
-        glm::nType distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
+        glm::num step1 = actualDistance / (sizeRatio + 1);
+        glm::num distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
 
         glm::v3 unitVector = glm::normalize(p2Position - p1Position);
         this->alignTo(unitVector);
@@ -218,15 +218,15 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 
     }
     else if(type == LAGRANGE_TYPE_L4 || type == LAGRANGE_TYPE_L5){
-        glm::nType d = ((glm::distance(p2Position,p1Position)) * glm::sqrt(3.0f)) / 2.0f;
+        glm::num d = ((glm::distance(p2Position,p1Position)) * glm::sqrt(3.0f)) / 2.0f;
         glm::v3 midway = glm::v3(Engine::Math::midpoint(p2Position,p1Position));
 
-        glm::v3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + glm::nType(0.5f),p2);
+        glm::v3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + glm::num(0.5f),p2);
 
         glm::v3 D = glm::normalize(p2Position - p1Position);
         this->alignTo(D);
 
-        glm::nType dotProduct = glm::dot((P-p1Position),D);
+        glm::num dotProduct = glm::dot((P-p1Position),D);
         glm::v3 X = p1Position + (dotProduct * D);
         glm::v3 cross = glm::normalize(X - P);
 

@@ -144,11 +144,11 @@ void SolarSystem::_loadFromFile(std::string filename){
                     }
 
                 }
-                glm::nType randAngle = rand() % 3600;
+                glm::num randAngle = rand() % 3600;
                 randAngle /= 10;
                 randAngle *= 3.14159 / 180.0;
-                glm::nType xPos = glm::cos(randAngle) * static_cast<glm::nType>(POSITION);
-                glm::nType zPos = glm::sin(randAngle) * static_cast<glm::nType>(POSITION);
+                glm::num xPos = glm::cos(randAngle) * static_cast<glm::num>(POSITION);
+                glm::num zPos = glm::sin(randAngle) * static_cast<glm::num>(POSITION);
 
                 if(MATERIAL_NAME != ""){
                     std::string normalFile = "";
@@ -222,8 +222,8 @@ void SolarSystem::_loadFromFile(std::string filename){
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
-                        glm::nType parentX = getObjects()[PARENT]->getPosition().x;
-                        glm::nType parentZ = getObjects()[PARENT]->getPosition().z;
+                        glm::num parentX = getObjects()[PARENT]->getPosition().x;
+                        glm::num parentZ = getObjects()[PARENT]->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
@@ -234,8 +234,8 @@ void SolarSystem::_loadFromFile(std::string filename){
                 }
                 else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
-                        glm::nType parentX = getObjects()[PARENT]->getPosition().x;
-                        glm::nType parentZ = getObjects()[PARENT]->getPosition().z;
+                        glm::num parentX = getObjects()[PARENT]->getPosition().x;
+                        glm::num parentZ = getObjects()[PARENT]->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
@@ -267,8 +267,8 @@ void SolarSystem::_loadFromFile(std::string filename){
     }
     centerSceneToObject(player);
 
-	glm::nType xPos = Resources::getObject("Valiant")->getPosition().x;
-	glm::nType zPos = Resources::getObject("Valiant")->getPosition().z;
+	glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
+	glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
 
 	new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
 	new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
@@ -323,8 +323,8 @@ void SolarSystem::_loadRandomly(){
     for(unsigned int i = 0; i < numberOfStars; i++){
         Star* star = nullptr;
         //star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
-        glm::nType radius = static_cast<glm::nType>(97412.0 + (rand() % 1252440000))*10.0;
-        glm::nType position = static_cast<glm::nType>(radius * 2.0 + (rand() % 841252440000));
+        glm::num radius = static_cast<glm::num>(97412.0 + (rand() % 1252440000))*10.0;
+        glm::num position = static_cast<glm::num>(radius * 2.0 + (rand() % 841252440000));
 
         float R = static_cast<float>((rand()%100)/100.0f);
         float G = static_cast<float>((rand()%100)/100.0f);
@@ -332,7 +332,7 @@ void SolarSystem::_loadRandomly(){
 
         glm::vec3 starColor = glm::vec3(R,G,B);
         glm::vec3 lightColor = glm::vec3(glm::min(1.0f,R+0.1f),glm::min(1.0f,G+0.1f),glm::min(1.0f,B+0.1f));
-        glm::nType posX,posZ;
+        glm::num posX,posZ;
 
         float randomDegree = (rand() % 36000)/100.0f;
         posX = glm::sin(randomDegree) * position;
@@ -348,27 +348,27 @@ void SolarSystem::_loadRandomly(){
     bool allStarsGood = true;
     glm::v3 centerOfMassPosition;
 
-    std::vector<glm::nType> starMasses;
+    std::vector<glm::num> starMasses;
     std::vector<glm::v3> starPositions;
-    glm::nType totalMasses = 0.0;
-    glm::nType biggestRadius = 0.0;
+    glm::num totalMasses = 0.0;
+    glm::num biggestRadius = 0.0;
     for(auto star:m_Stars){
         for(auto otherStar:m_Stars){
             if(star != otherStar){
-                glm::nType biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
+                glm::num biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
                 unsigned long long dist = star.second->getDistanceLL(otherStar.second);
                 if(dist < biggerRadius * 10.0f){
                     allStarsGood = false;
                 }
             }
         }
-        biggestRadius = glm::max(static_cast<glm::nType>(star.second->getRadius()),biggestRadius);
+        biggestRadius = glm::max(static_cast<glm::num>(star.second->getRadius()),biggestRadius);
         starPositions.push_back(star.second->getPosition());
         starMasses.push_back(star.second->getRadius());
         totalMasses += star.second->getRadius();
     }
 
-    glm::nType numerator1 = 0,numerator2 = 0;
+    glm::num numerator1 = 0,numerator2 = 0;
     for(unsigned int i = 0; i < starMasses.size(); i++){
         numerator1 += (starMasses.at(i) * starPositions.at(i).x);
         numerator2 += (starMasses.at(i) * starPositions.at(i).z);
@@ -381,13 +381,13 @@ void SolarSystem::_loadRandomly(){
             glm::v3 starPos = star.second->getPosition();
             glm::v3 offset = starPos - centerOfMassPosition;
             glm::v3 normOffset = glm::normalize(offset);
-            star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*static_cast<glm::nType>(2.0)));
+            star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*static_cast<glm::num>(2.0)));
         }
         allStarsGood = true;
         for(auto star:m_Stars){
             for(auto otherStar:m_Stars){
                 if(star != otherStar){
-                    glm::nType biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
+                    glm::num biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
                     unsigned long long dist = star.second->getDistanceLL(otherStar.second);
                     if(dist < biggerRadius * 10.0f){
                         allStarsGood = false;
@@ -442,19 +442,19 @@ void SolarSystem::_loadRandomly(){
         for(unsigned int i = 0; i < numberOfPlanets; i++){
             Planet* planet = nullptr;
 
-            glm::nType maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
+            glm::num maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
             maxPositionAwayFromSun -= (maxPositionAwayFromSun / 4.0f);
             if(m_Stars.size() == 1)
                 maxPositionAwayFromSun = glm::abs(glm::length(star.second->getRadius()*2000.0f));
-            glm::nType minPositionAwayFromSun = star.second->getRadius() * 4.0f;
-            glm::nType positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
+            glm::num minPositionAwayFromSun = star.second->getRadius() * 4.0f;
+            glm::num positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
 
-            glm::nType posX,posZ;
-            glm::nType randomDegree = rand() % 36000 / 100.0f;
+            glm::num posX,posZ;
+            glm::num randomDegree = rand() % 36000 / 100.0f;
             posX = sin(randomDegree) * positionAwayFromSun;
             posZ = cos(randomDegree) * positionAwayFromSun;
 
-            glm::nType RADIUS = (500.0 + rand() % 85000)*10.0;
+            glm::num RADIUS = (500.0 + rand() % 85000)*10.0;
             PlanetType PLANET_TYPE = PLANET_TYPE_ROCKY;
             if(RADIUS <= 15000){
                 float chance = rand() % 1000 / 1000.0f;

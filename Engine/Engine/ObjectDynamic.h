@@ -51,7 +51,7 @@ class ObjectDynamic: public Object{
 
         std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
-        virtual void setPosition(glm::nType,glm::nType,glm::nType); 
+        virtual void setPosition(glm::num,glm::num,glm::num); 
         virtual void setPosition(glm::v3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
@@ -66,7 +66,7 @@ class ObjectDynamic: public Object{
         virtual void rotate(float,float,float,bool overTime = true); 
         virtual void rotate(glm::vec3, bool overTime = true);
 
-        virtual void translate(glm::nType,glm::nType,glm::nType,bool local=true); 
+        virtual void translate(glm::num,glm::num,glm::num,bool local=true); 
         virtual void translate(glm::v3,bool local=true);
 
         virtual void applyForce(float,float,float,bool local=true);

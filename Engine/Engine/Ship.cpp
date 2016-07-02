@@ -245,11 +245,11 @@ void Ship::update(float dt){
 
         #pragma region PlayerFlightControls
         if(m_IsWarping && m_WarpFactor > 0){
-            glm::nType speed = (m_WarpFactor * static_cast<glm::nType>(1.0L)/static_cast<glm::nType>(0.46L))*static_cast<glm::nType>(2.0L);
-            glm::v3 s = (getForward() * glm::pow(speed,static_cast<glm::nType>(15.0L)))/static_cast<glm::nType>(getMass());
+            glm::num speed = (m_WarpFactor * glm::num(1.0L)/glm::num(0.46L))*glm::num(2.0L);
+            glm::v3 s = (getForward() * glm::pow(speed,glm::num(15.0L)))/glm::num(getMass());
             for(auto obj:Resources::getCurrentScene()->getObjects()){
                 if((obj.second->getName().find("Skybox") == std::string::npos) && (obj.second->getName().find("Camera") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
-                    obj.second->setPosition(obj.second->getPosition() + (s * static_cast<glm::nType>(dt)));
+                    obj.second->setPosition(obj.second->getPosition() + (s * glm::num(dt)));
                 }
             }
         }

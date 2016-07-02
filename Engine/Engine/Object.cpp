@@ -31,7 +31,7 @@ Object::Object(std::string name,Scene* scene, bool isNotCamera){
 Object::~Object()
 {
 }
-glm::nType Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
+glm::num Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return unsigned long long(glm::abs(glm::length(vecTo))); }
 glm::vec3 Object::getScreenCoordinates(){
     return Math::getScreenCoordinates(glm::vec3(getPosition()),true);
@@ -80,7 +80,7 @@ void ObjectBasic::update(float dt){
     m_Model *= glm::m4(glm::mat4_cast(m_Orientation));
     m_Model = glm::scale(m_Model,glm::v3(m_Scale));
 }
-void ObjectBasic::setPosition(glm::nType x, glm::nType y, glm::nType z){ 
+void ObjectBasic::setPosition(glm::num x, glm::num y, glm::num z){ 
     m_Position.x = x;
     m_Position.y = y;
     m_Position.z = z;
@@ -114,7 +114,7 @@ void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::rotate(glm::vec3 rotation,bool overTime){ ObjectBasic::rotate(rotation.x,rotation.y,rotation.z,overTime); }
-void ObjectBasic::translate(glm::nType x, glm::nType y, glm::nType z,bool local){
+void ObjectBasic::translate(glm::num x, glm::num y, glm::num z,bool local){
     glm::v3 offset = glm::v3(0);
     if(local){
         offset += getForward() * z;

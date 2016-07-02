@@ -10,17 +10,20 @@ class btRigidBody;
 
 namespace glm{
     #ifdef ENGINE_PRECISION_NORMAL
-    typedef float nType;
+	typedef float number;
+	typedef float num;
     typedef glm::detail::tvec3<float> v3;
     typedef glm::detail::tmat4x4<float> m4;
     #endif
     #ifdef ENGINE_PRECISION_HIGH
-    typedef double nType;
+	typedef double number;
+	typedef double num;
     typedef glm::detail::tvec3<double> v3;
     typedef glm::detail::tmat4x4<double> m4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
-    typedef long double nType;
+	typedef long double number;
+	typedef long double num;
     typedef glm::detail::tvec3<long double> v3;
     typedef glm::detail::tmat4x4<long double> m4;
     #endif
@@ -57,8 +60,8 @@ namespace Engine{
         void setColor(glm::vec3&,float r,float g,float b);
         void setColor(glm::vec4&,float r,float g,float b,float a);
 
-		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians);
-		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,const glm::v3& point,const float fovRadians,const float fovDistance);
+		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians);
+		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num fovDistance);
 
 		float toRadians(float degrees);
 		float toDegrees(float radians);

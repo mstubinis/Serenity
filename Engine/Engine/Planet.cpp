@@ -14,7 +14,7 @@
 
 using namespace Engine;
 
-OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::nType _angle,std::string _parent){
+OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::num _angle,std::string _parent){
     angle = _angle;
     eccentricity = _eccentricity;
     days = _days;
@@ -22,27 +22,27 @@ OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,glm::n
     minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
     parent = Engine::Resources::getObjectPtr(_parent);
 }
-glm::v3 OrbitInfo::getOrbitalPosition(glm::nType angle,Object* thisPlanet){
+glm::v3 OrbitInfo::getOrbitalPosition(glm::num angle,Object* thisPlanet){
     glm::v3 offset = glm::v3(0);
     glm::v3 currentPos = thisPlanet->getPosition();
     if(exists(parent)){
         glm::v3 parentPos = glm::v3(parent.lock().get()->getPosition());
 
-        glm::nType newX = parentPos.x - glm::cos(angle)*majorRadius;
-        glm::nType newZ = parentPos.z - glm::sin(angle)*minorRadius;
+        glm::num newX = parentPos.x - glm::cos(angle)*majorRadius;
+        glm::num newZ = parentPos.z - glm::sin(angle)*minorRadius;
 
         offset = glm::vec3(newX - currentPos.x,0,newZ - currentPos.z);
     }
     return (currentPos + offset);
 }
-void OrbitInfo::setOrbitalPosition(glm::nType a,Object* thisPlanet){
+void OrbitInfo::setOrbitalPosition(glm::num a,Object* thisPlanet){
     angle += a;
     glm::v3 nextPos = getOrbitalPosition(angle,thisPlanet);
     thisPlanet->setPosition(nextPos);
 }
 
 
-Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::nType scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl),name,scene){
+Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl),name,scene){
     m_AtmosphereHeight = atmosphere;
     m_Type = type;
     m_OrbitInfo = nullptr;
@@ -56,8 +56,8 @@ Planet::~Planet(){
 void Planet::update(float dt){
     if(m_RotationInfo != nullptr){
         float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
-        glm::nType secondsToRotate = m_RotationInfo->days * 86400.0;
-        glm::nType finalSpeed = 1.0 / (secondsToRotate * glm::nType(speed));
+        glm::num secondsToRotate = m_RotationInfo->days * 86400.0;
+        glm::num finalSpeed = 1.0 / (secondsToRotate * glm::num(speed));
         rotate(0,float(finalSpeed),0);
     }
     if(m_OrbitInfo != nullptr){
@@ -269,7 +269,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
-Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::nType scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
+Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
     m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     setColor(starColor.x,starColor.y,starColor.z,1);

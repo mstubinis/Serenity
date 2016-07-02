@@ -33,9 +33,9 @@ void GameCamera::update(float dt){
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
             m_Model = glm::m4(1);
-            m_Model = glm::translate(m_Model,m_Target->getPosition()+((glm::v3(m_Target->getForward())*glm::nType(glm::length(m_Target->getRadius()))*glm::nType(2.0))+ glm::v3(m_Target->getUp())*glm::nType(glm::length(m_Target->getRadius()))*glm::nType(0.3))*(glm::nType(1.0)+m_OrbitRadius));
+            m_Model = glm::translate(m_Model,m_Target->getPosition()+((glm::v3(m_Target->getForward())*glm::num(glm::length(m_Target->getRadius()))*glm::num(2.0))+ glm::v3(m_Target->getUp())*glm::num(glm::length(m_Target->getRadius()))*glm::num(0.3))*(glm::num(1.0)+m_OrbitRadius));
 
-            lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*glm::nType(500.0)),m_Target->getUp());
+            lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*glm::num(500.0)),m_Target->getUp());
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
@@ -45,8 +45,8 @@ void GameCamera::update(float dt){
 
             m_Model = glm::mat4(1);
             m_Model = glm::translate(m_Model,m_Player->getPosition() -
-                                            ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*glm::nType(2.7))* (glm::nType(1.0)+m_OrbitRadius))
-                                            - glm::v3(m_Player->getUp()) * glm::nType(glm::length(m_Player->getRadius()))*glm::nType(0.3)));
+                                            ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*glm::num(2.7))* (glm::num(1.0)+m_OrbitRadius))
+                                            - glm::v3(m_Player->getUp()) * glm::num(glm::length(m_Player->getRadius()))*glm::num(0.3)));
 
             lookAt(getPosition(),m_Target->getPosition(),m_Player->getUp());
             break;
@@ -58,7 +58,7 @@ void GameCamera::update(float dt){
 
             rotate(-Mouse::getMouseDifference().y*0.6f,-Mouse::getMouseDifference().x*0.6f,0,true);
 
-            glm::v3 pos = (glm::v3(0,0,1)*glm::nType(glm::length(m_Target->getRadius()))*glm::nType(0.37)) + (glm::v3(0,0,1)*glm::nType(glm::length(m_Target->getRadius()) * (1.0+m_OrbitRadius)));
+            glm::v3 pos = (glm::v3(0,0,1)*glm::num(glm::length(m_Target->getRadius()))*glm::num(0.37)) + (glm::v3(0,0,1)*glm::num(glm::length(m_Target->getRadius()) * (1.0+m_OrbitRadius)));
 
             m_Model = glm::m4(1);
             m_Model = glm::translate(m_Model,m_Target->getPosition());
@@ -86,9 +86,9 @@ Object* GameCamera::getObjectInCenterRay(Object* exclusion){
     if(objs.size() == 0) return nullptr;
     if(objs.size() == 1) return objs.at(0);
 
-    glm::nType distance = -1;
+    glm::num distance = -1;
     for(auto object:objs){
-        glm::nType d = glm::distance(object->getPosition(),this->getPosition());
+        glm::num d = glm::distance(object->getPosition(),this->getPosition());
         if(distance == -1 || d < distance){
             distance = d;
             ret = object;
