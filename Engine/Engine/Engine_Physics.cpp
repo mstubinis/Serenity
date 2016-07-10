@@ -212,8 +212,8 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
                 }
                 #pragma endregion
             }
-            this->m_CollisionShape = shape;
-            this->m_CollisionType = COLLISION_TYPE_CONVEXHULL;
+            m_CollisionShape = shape;
+            m_CollisionType = COLLISION_TYPE_CONVEXHULL;
             return;
             break;
         }
@@ -309,11 +309,106 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
             ((btGImpactMeshShape*)shape)->setMargin(0.001f);
             ((btGImpactMeshShape*)shape)->updateBound();
             
-            this->m_CollisionShape = shape;
-            this->m_CollisionType = COLLISION_TYPE_TRIANGLESHAPE;
+            m_CollisionShape = shape;
+            m_CollisionType = COLLISION_TYPE_TRIANGLESHAPE;
             return;
             break;
         }
+		case COLLISION_TYPE_STATIC_TRIANGLESHAPE:{
+           std::vector<int> indices;
+           std::vector<float> positions;
+           btTriangleMesh* mesh = new btTriangleMesh();
+            if(extention == ".obj"){
+                #pragma region OBJ
+                int index = 1;
+                std::vector<glm::vec3> pointData;
+                std::vector<std::vector<glm::vec3>> listOfVerts;
+                for(std::string line; std::getline(str, line, '\n');){
+                    std::string x; std::string y; std::string z;
+                    uint spaceCount = 0;
+                    uint slashCount = 0;
+                    if(line[0] == 'v'){ 
+                        for(auto c:line){
+                            if(c == ' ')                 spaceCount++;
+                            else{
+                                if(spaceCount == 1)      x += c;
+                                else if(spaceCount == 2) y += c;
+                                else if(spaceCount == 3) z += c;
+                            }
+                        }
+                        if(line[1] == ' '){//vertex point
+                            float x1 = float(::atof(x.c_str()));
+                            float y1 = float(::atof(y.c_str()));
+                            float z1 = float(::atof(z.c_str()));
+                            pointData.push_back(glm::vec3(x1,y1,z1));
+                        }
+                        index++;
+                    }
+                    //faces
+                    else if(line[0] == 'f' && line[1] == ' '){
+                        std::vector<glm::vec3> vertices;
+                        uint count = 0;
+                        for(auto c:line){
+                            if(c == '/') {
+                                slashCount++;
+                            }
+                            else if(c == ' '){ 
+                                //global listOfVerts
+                                if(spaceCount != 0){
+                                    glm::vec3 vertex = glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str())));
+                                    vertices.push_back(vertex);
+                                    x = ""; y = ""; z = "";
+                                    slashCount = 0;
+                                }
+                                spaceCount++;
+                            }
+                            else{
+                                if(spaceCount > 0){
+                                    if(slashCount == 0)      x += c;
+                                    else if(slashCount == 1) y += c;
+                                    else if(slashCount == 2) z += c;
+                                }
+                            }
+                            count++;
+                        }
+                        glm::vec3 vertex = glm::vec3(float(::atof(x.c_str())),float(::atof(y.c_str())),float(::atof(z.c_str())));
+                        vertices.push_back(vertex);
+                        listOfVerts.push_back(vertices);
+                    }
+                }
+                for(auto face:listOfVerts){
+                    glm::vec3 v1,v2,v3,v4;
+
+                    v1 = pointData.at(uint(face.at(0).x-1));
+                    v2 = pointData.at(uint(face.at(1).x-1));
+                    v3 = pointData.at(uint(face.at(2).x-1));
+
+                    btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
+                    btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
+                    btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
+
+                    if(face.size() == 4){//quad
+                        v4 = pointData.at(uint(face.at(3).x-1));
+                        btVector3 bv4 = btVector3(v4.x,v4.y,v4.z);
+    
+                        mesh->addTriangle(bv1, bv2, bv3,true);
+                        mesh->addTriangle(bv1, bv3, bv4,true);
+                    }
+                    else{//triangle
+                        mesh->addTriangle(bv1, bv2, bv3,true);
+                    }
+                }
+                #pragma endregion
+            }
+            shape = new btBvhTriangleMeshShape(mesh,true);
+            (shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+            (shape)->setMargin(0.001f);
+
+            m_CollisionShape = shape;
+            m_CollisionType = COLLISION_TYPE_STATIC_TRIANGLESHAPE;
+            return;
+            break;
+		}
         case COLLISION_TYPE_BOXSHAPE:{
             glm::vec3 max = glm::vec3(0);
             if(extention == ".obj"){
@@ -351,8 +446,8 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
                 #pragma endregion
             }
             shape = new btBoxShape(btVector3(max.x,max.y,max.z));
-            this->m_CollisionShape = shape;
-            this->m_CollisionType = COLLISION_TYPE_BOXSHAPE;
+            m_CollisionShape = shape;
+            m_CollisionType = COLLISION_TYPE_BOXSHAPE;
             return;
             break;
         }

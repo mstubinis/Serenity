@@ -277,6 +277,8 @@ void SolarSystem::_loadFromFile(std::string filename){
 	new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
 	new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
 
+	new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
+
 	player->translate(0,0,11);
 }
 void SolarSystem::_loadRandomly(){

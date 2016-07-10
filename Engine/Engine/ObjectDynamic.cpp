@@ -205,14 +205,23 @@ void ObjectDynamic::setScale(float x, float y, float z){
 }
 void ObjectDynamic::setScale(glm::vec3 s){ ObjectDynamic::setScale(s.x,s.y,s.z); }
 void ObjectDynamic::setPosition(glm::num x, glm::num y, glm::num z){
-    btTransform initialTransform;
-
-    initialTransform.setOrigin(btVector3(static_cast<btScalar>(x),static_cast<btScalar>(y),static_cast<btScalar>(z)));
-    initialTransform.setRotation(m_RigidBody->getOrientation());
-
-    m_RigidBody->setWorldTransform(initialTransform);
-    m_RigidBody->setCenterOfMassTransform(initialTransform);
-    m_MotionState->setWorldTransform(initialTransform);
+    btTransform tr;
+	tr.setOrigin(btVector3(btScalar(x),btScalar(y),btScalar(z)));
+	tr.setRotation(m_RigidBody->getOrientation());
+	
+	if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
+		Physics::removeRigidBody(m_RigidBody);
+		SAFE_DELETE(m_RigidBody);
+	}
+	m_MotionState->setWorldTransform(tr);
+	if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
+		btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
+		m_RigidBody = new btRigidBody(ci);
+		m_RigidBody->setUserPointer(this);
+		Physics::addRigidBody(m_RigidBody);
+	}
+    m_RigidBody->setWorldTransform(tr);
+    m_RigidBody->setCenterOfMassTransform(tr);
 }
 void ObjectDynamic::setOrientation(glm::quat q){
     btTransform t;
