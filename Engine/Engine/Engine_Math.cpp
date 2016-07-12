@@ -16,20 +16,20 @@ float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 
 bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians){
-	// forced protection against NaN if vectors happen to be equal
-	point.x += 0.01f;
-	//
-	glm::v3 differenceVector = glm::normalize(point - conePos);
-	glm::num t = glm::dot(coneVector,differenceVector);
+    // forced protection against NaN if vectors happen to be equal
+    point.x += 0.01f;
+    //
+    glm::v3 differenceVector = glm::normalize(point - conePos);
+    glm::num t = glm::dot(coneVector,differenceVector);
     return ( t >= glm::cos( fovRadians ) );
 }
 bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num maxDistance){
- 	// forced protection against NaN if vectors happen to be equal
-	point.x += 0.01f;
-	//
-	glm::v3 differenceVector = glm::normalize(point - conePos);
-	glm::num t = glm::dot(coneVector,differenceVector);
-	glm::num length = glm::length(point-conePos);
+    // forced protection against NaN if vectors happen to be equal
+    point.x += 0.01f;
+    //
+    glm::v3 differenceVector = glm::normalize(point - conePos);
+    glm::num t = glm::dot(coneVector,differenceVector);
+    glm::num length = glm::length(point-conePos);
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
@@ -87,10 +87,10 @@ glm::v3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0);
 glm::v3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
 
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
-	// forced protection against NaN if a and b happen to be equal
-	a.x += 0.01f;
-	//
-	float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
+    // forced protection against NaN if a and b happen to be equal
+    a.x += 0.01f;
+    //
+    float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
     if(degrees) angle *= 57.2958f;
     return angle;
 }
@@ -137,4 +137,25 @@ void Math::setColor(glm::vec4& color,float r, float g, float b,float a){
     if(b > 1) b = b / 255.0f;
     if(a > 1) a = a / 255.0f;
     color.x = r; color.y = g; color.z = b; color.w = a; 
+}
+float Math::fade(float t){ return t*t*t*(t*(t*6.0f-15.0f)+10.0f); }
+double Math::fade(double t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+glm::num Math::fade(glm::num t){ return t*t*t*(t*(t*glm::num(6.0)-glm::num(15.0))+glm::num(10.0)); }
+float Math::lerp(float t, float a, float b){return a + t * (b - a);}
+double Math::lerp(double t, double a, double b){return a + t * (b - a);}
+glm::num Math::lerp(glm::num t, glm::num a, glm::num b){return a + t * (b - a);}
+float Math::grad(int hash, float x, float y, float z){
+    int h = hash & 15;
+    double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
+    return float(((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v));
+}
+double Math::grad(int hash, double x, double y, double z){
+    int h = hash & 15;
+    double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
+    return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
+}
+glm::num Math::grad(int hash, glm::num x, glm::num y, glm::num z){
+    int h = hash & 15;
+    double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
+    return glm::num(((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v));
 }

@@ -5,6 +5,7 @@
 #define GL_TRIANGLES 0x0004
 
 #include "Engine_Physics.h"
+#include <unordered_map>
 
 namespace sf{ class Image; };
 
@@ -58,6 +59,7 @@ class Mesh final{
         void _calculateMeshRadius();
     public:
         Mesh(btHeightfieldTerrainShape*);
+		Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length);
         Mesh(float width, float height);
         Mesh(float x, float y, float width, float height);
         Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);

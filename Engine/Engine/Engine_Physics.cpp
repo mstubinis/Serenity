@@ -454,13 +454,13 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
     }
 }
 void Collision::setMass(float mass){
-    if(m_CollisionShape != nullptr && m_CollisionType != COLLISION_TYPE_NONE){
-        if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
-            m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
-        }
-        else{
-            ((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
-        }
+	if(m_CollisionShape == nullptr || m_CollisionType == COLLISION_TYPE_STATIC_TRIANGLESHAPE || m_CollisionType == COLLISION_TYPE_NONE) return;
+
+    if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
+        m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
+    }
+    else{
+        ((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
     }
 }
 

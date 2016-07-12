@@ -70,10 +70,10 @@ boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return Detail:
 void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
 void Engine::Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
-void Engine::Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type){
+void Engine::Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type, bool fromFile){
     if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
         return;
-    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file,type);
+    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file,type,fromFile);
 }
 void Engine::Resources::addMesh(std::string name,float x,float y,float w,float h){
     if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
@@ -83,6 +83,11 @@ void Engine::Resources::addMesh(std::string name,float x,float y,float w,float h
 void Engine::Resources::addMesh(std::string file, COLLISION_TYPE type){
     std::string name = file.substr(0, file.size()-4);
     Engine::Resources::addMesh(name,file,type);
+}
+void Engine::Resources::addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length){
+    if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
+        return;
+    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(grid,width,length);
 }
 
 void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
@@ -164,6 +169,35 @@ void Engine::Resources::initResources(){
 
     addMesh("PointLightBounds","data/Models/pointLightBounds.obj",COLLISION_TYPE_NONE);
 
+	//add a basic cube mesh
+	std::string cubeMesh =  "v -1.000000 -1.000000 1.000000\n"
+							"v -1.000000 1.000000 1.000000\n"
+							"v -1.000000 -1.000000 -1.000000\n"
+							"v -1.000000 1.000000 -1.000000\n"
+							"v 1.000000 -1.000000 1.000000\n"
+							"v 1.000000 1.000000 1.000000\n"
+							"v 1.000000 -1.000000 -1.000000\n"
+							"v 1.000000 1.000000 -1.000000\n"
+							"vn -1.0000 0.0000 0.0000\n"
+							"vn 0.0000 0.0000 -1.0000\n"
+							"vn 1.0000 0.0000 0.0000\n"
+							"vn 0.0000 0.0000 1.0000\n"
+							"vn 0.0000 -1.0000 0.0000\n"
+							"vn 0.0000 1.0000 0.0000\n"
+							"f 4//1 1//1 2//1\n"
+							"f 8//2 3//2 4//2\n"
+							"f 6//3 7//3 8//3\n"
+							"f 2//4 5//4 6//4\n"
+							"f 3//5 5//5 1//5\n"
+							"f 8//6 2//6 6//6\n"
+							"f 4//1 3//1 1//1\n"
+							"f 8//2 7//2 3//2\n"
+							"f 6//3 5//3 7//3\n"
+							"f 2//4 1//4 5//4\n"
+							"f 3//5 7//5 5//5\n"
+							"f 8//6 4//6 2//6\n";
+	addMesh("Cube",cubeMesh,COLLISION_TYPE_NONE,false);
+
     addShader("Deferred","data/Shaders/vert.glsl","data/Shaders/deferred_frag.glsl");
     addShader("Deferred_HUD","data/Shaders/vert_HUD.glsl","data/Shaders/deferred_frag_HUD.glsl");
     addShader("Deferred_GodsRays","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_rays_frag.glsl");
@@ -192,8 +226,8 @@ void Engine::Resources::cleanupRenderingContexts(unsigned int api){
         shader.second.get()->cleanupRenderingContext(api);
 }
 void Engine::Resources::setCurrentScene(Scene* s){ 
-    if(Detail::ResourceManagement::m_CurrentScene == s)
-        return;
+    if(Detail::ResourceManagement::m_CurrentScene == s) return;
+
     Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
     for(auto obj:previousScene->getObjects()){
         ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
@@ -211,6 +245,4 @@ void Engine::Resources::setCurrentScene(Scene* s){
         }
     }
 }
-void Engine::Resources::setCurrentScene(std::string s){ 
-    Engine::Resources::setCurrentScene(Detail::ResourceManagement::m_Scenes[s].get());
-}
+void Engine::Resources::setCurrentScene(std::string s){ Engine::Resources::setCurrentScene(Detail::ResourceManagement::m_Scenes[s].get()); }

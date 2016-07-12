@@ -4,6 +4,7 @@
 #include "Engine_Sounds.h"
 #include "Engine_Resources.h"
 #include "Engine_Window.h"
+#include "Engine_Noise.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
@@ -13,6 +14,8 @@
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
 #include "Material.h"
+
+#include <unordered_map>
 
 using namespace Engine;
 
@@ -60,7 +63,6 @@ void Game::initLogic(){
 	Engine::getWindow()->keepMouseInWindow(true);
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
-	//Engine::Renderer::Settings::GodRays::disable();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -77,25 +79,6 @@ void Game::update(float dt){
         Engine::stop();
     }
 
-	//exposure
-	//decay
-	//density
-	//weight
-	//samples
-    if(Events::Keyboard::isKeyDown("f5")){
-        Engine::Renderer::Settings::GodRays::setDecay(Engine::Renderer::Settings::GodRays::getDecay()-0.01f);
-    }
-    if(Events::Keyboard::isKeyDown("f6")){
-		Engine::Renderer::Settings::GodRays::setDecay(Engine::Renderer::Settings::GodRays::getDecay()+0.01f);
-    }
-    if(Events::Keyboard::isKeyDown("f7")){
-		Engine::Renderer::Settings::GodRays::setDensity(Engine::Renderer::Settings::GodRays::getDensity()-0.01f);
-    }
-    if(Events::Keyboard::isKeyDown("f8")){
-		Engine::Renderer::Settings::GodRays::setDensity(Engine::Renderer::Settings::GodRays::getDensity()+0.01f);
-    }
-
-
     if(Events::Keyboard::isKeyDownOnce("f9")){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
@@ -107,21 +90,6 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f11")){
 		Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
-	/*
-
-    if(Events::Keyboard::isKeyDownOnce("f9")){
-        Engine::setFullScreen(true);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f10")){
-        Engine::setFullScreen(false);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f11")){
-        Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f12")){
-        Engine::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_OPENGL);
-    }
-    */
     m_HUD->update(dt);
 }
 void Game::render(){

@@ -3,6 +3,7 @@
 #include "Engine_Renderer.h"
 #include "Engine_Sounds.h"
 #include "Engine_Events.h"
+#include "Engine_Noise.h"
 #include "Camera.h"
 #include "GBuffer.h"
 #include "Scene.h"
@@ -40,7 +41,8 @@ void Engine::Detail::EngineClass::initGame(uint api){
 	Events::Mouse::setMousePosition(halfRes);
 	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
 
-    Renderer::Detail::RenderManagement::init();
+	Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
+	Renderer::Detail::RenderManagement::init();
     Physics::Detail::PhysicsManagement::init();
     Sound::Detail::SoundManagement::init();
 

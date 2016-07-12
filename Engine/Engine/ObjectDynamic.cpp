@@ -92,7 +92,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_RigidBody->setFriction(0.3f);
     m_RigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
 
-    if(Resources::getCurrentScene() == scene)
+    if(Resources::getCurrentScene() == scene || scene == nullptr)
         Physics::addRigidBody(m_RigidBody);
 
     if(m_Parent == nullptr){

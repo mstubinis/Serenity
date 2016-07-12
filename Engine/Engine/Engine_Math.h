@@ -5,8 +5,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <vector>
 
 class btRigidBody;
+typedef unsigned int uint;
 
 namespace glm{
     #ifdef ENGINE_PRECISION_NORMAL
@@ -67,6 +69,19 @@ namespace Engine{
 		float toDegrees(float radians);
 		float toRadians(double degrees);
 		float toDegrees(double radians);
+
+		float fade(float t);
+		double fade(double t);
+		glm::num fade(glm::num t);
+
+		float lerp(float t, float a, float b);
+		double lerp(double t, double a, double b);
+		glm::num lerp(glm::num t,glm::num a,glm::num b);
+
+		float grad(int hash, float x, float y, float z);
+		double grad(int hash, double x, double y, double z);
+		glm::num grad(int hash,glm::num x,glm::num y,glm::num z);
+
     };
 };
 #endif

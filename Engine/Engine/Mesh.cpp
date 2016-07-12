@@ -48,6 +48,41 @@ Mesh::Mesh(btHeightfieldTerrainShape* heightfield){
     }
     _calculateMeshRadius();
 }
+Mesh::Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length){
+    m_Collision = nullptr;
+    for(uint i = 0; i < width-1; i++){
+        for(uint j = 0; j < length-1; j++){
+			std::string key1 = boost::lexical_cast<std::string>(i) + "," + boost::lexical_cast<std::string>(j);
+			std::string key2 = boost::lexical_cast<std::string>(i+1) + "," + boost::lexical_cast<std::string>(j);
+			std::string key3 = boost::lexical_cast<std::string>(i) + "," + boost::lexical_cast<std::string>(j+1);
+			std::string key4 = boost::lexical_cast<std::string>(i+1) + "," + boost::lexical_cast<std::string>(j+1);
+
+            Vertex v1,v2,v3,v4;
+            v1.position = glm::vec3(i-width/2.0f,   grid[key1], j-length/2.0f);
+            v2.position = glm::vec3((i+1)-width/2.0f, grid[key2], j-length/2.0f);
+            v3.position = glm::vec3(i-width/2.0f,   grid[key3], (j+1)-length/2.0f);
+            v4.position = glm::vec3((i+1)-width/2.0f, grid[key4], (j+1)-length/2.0f);
+
+            glm::vec3 a = v4.position - v1.position;
+            glm::vec3 b = v2.position - v3.position;
+            glm::vec3 normal = glm::normalize(glm::cross(a,b));
+
+            v1.normal = normal;
+            v2.normal = normal;
+            v3.normal = normal;
+            v4.normal = normal;
+            
+            v1.uv = glm::vec2(float(i) / float(width),float(j) / float(length));
+            v2.uv = glm::vec2(float(i+1) / float(width),float(j) / float(length));
+            v3.uv = glm::vec2(float(i) / float(width),float(j+1) / float(length));
+            v4.uv = glm::vec2(float(i+1) / float(width),float(j+1) / float(length));
+
+            _generateTriangle(v3,v2,v1);
+            _generateTriangle(v3,v4,v2);
+        }
+    }
+    _calculateMeshRadius();
+}
 Mesh::Mesh(float x, float y,float width, float height){
     m_Collision = nullptr;
 
