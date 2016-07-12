@@ -8,10 +8,12 @@ uniform float BaseGlow;
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
 uniform sampler2D GlowMap;
+uniform sampler2D SpecularMap;
 
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
 uniform int GlowMapEnabled;
+uniform int SpecularMapEnabled;
 
 uniform int HasAtmosphere;
 uniform int HasGodsRays;
@@ -50,12 +52,15 @@ void main(){
         }
         gl_FragData[1] = vec4(1.0);
         gl_FragData[2].r = 0.0;
+		gl_FragData[2].g = 1.0;
     }
     else{
-        if(DiffuseMapEnabled == 1)
+        if(DiffuseMapEnabled == 1){
             gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
-        else
+		}
+        else{
             gl_FragData[0] = vec4(0.0);
+		}
 
         if(NormalMapEnabled == 1){
             gl_FragData[1].rgb = normalize(CalcBumpedNormal());
@@ -66,10 +71,19 @@ void main(){
             gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
         }
 
-        if(GlowMapEnabled == 1)
+        if(GlowMapEnabled == 1){
             gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
-        else
+		}
+        else{
             gl_FragData[2].r = BaseGlow;
+		}
+
+		if(SpecularMapEnabled == 1){
+			gl_FragData[2].g = texture2D(SpecularMap, UV).r;
+		}
+		else{
+			gl_FragData[2].g = 1.0;
+		}
     }
     gl_FragData[2].b = 0.0;
     gl_FragData[3] = vec4(WorldPosition,1.0);

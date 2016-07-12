@@ -40,7 +40,7 @@ typedef unsigned int uint;
 //framebuffer pixel size = window size * this value here
 const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
 	                                1.0f, // (normals.rgb)
-								    1.0f, // Glow & NULL & MaterialID THEN HDR
+								    1.0f, // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
 								    1.0f, // World Position
 								    1.0f, // (lighting.rgb)
 								    0.5f, // bloom, & ssao as alpha
@@ -51,7 +51,7 @@ const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
 
 const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgb)
                                         GL_RGB16F,		       // (normals.rgb)
-                                        GL_RGB8,			   // Glow & NULL & MaterialID THEN HDR
+                                        GL_RGB8,			   // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
                                         GL_RGB32F,			   // World Position
                                         GL_RGB16F,		       // (lighting.rgb)
                                         GL_RGBA8,              // bloom, & ssao as alpha
@@ -62,7 +62,7 @@ const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgb)
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			       // (diffuse.rgb)
                                         GL_RGB,			       // (normals.rgb)
-                                        GL_RGB,			       // Glow & NULL & MaterialID THEN HDR
+                                        GL_RGB,			       // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
                                         GL_RGB,				   // World Position
                                         GL_RGB,			       // (lighting.rgb)
                                         GL_RGBA,			   // bloom, & ssao as alpha

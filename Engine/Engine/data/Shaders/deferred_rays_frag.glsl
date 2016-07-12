@@ -19,11 +19,8 @@ void main(){
 		deltaTextCoord *= 1.0 /  float(samples) * density;
 		float illuminationDecay = 1.0;
 		for(int i=0; i < samples; i++){
-
-			//uv -= deltaTextCoord;
-
-			uv.x -= deltaTextCoord.x/2;
-			uv.y += deltaTextCoord.y/2;
+			uv.x -= deltaTextCoord.x/2.0;
+			uv.y += deltaTextCoord.y/2.0;
 
 			vec4 sample = texture2D(firstPass,uv);	
 			sample *= illuminationDecay * weight;

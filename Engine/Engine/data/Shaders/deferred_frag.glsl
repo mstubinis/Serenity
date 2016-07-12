@@ -3,6 +3,7 @@
 uniform sampler2D DiffuseMap;
 uniform sampler2D NormalMap;
 uniform sampler2D GlowMap;
+uniform sampler2D SpecularMap;
 
 uniform int Shadeless;
 uniform float far;
@@ -13,6 +14,7 @@ uniform float matID;
 uniform int DiffuseMapEnabled;
 uniform int NormalMapEnabled;
 uniform int GlowMapEnabled;
+uniform int SpecularMapEnabled;
 
 uniform vec4 Object_Color;
 uniform vec3 Gods_Rays_Color;
@@ -47,12 +49,20 @@ void main(){
         if(GlowMapEnabled == 1){
             gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
         }
-        else
+        else{
             gl_FragData[2].r = BaseGlow;
+		}
+		if(SpecularMapEnabled == 1){
+			gl_FragData[2].g = texture2D(SpecularMap, UV).r;
+		}
+		else{
+			gl_FragData[2].g = 1.0;
+		}
     }
     else{
         gl_FragData[1].rgb = vec3(1.0);
         gl_FragData[2].r = BaseGlow;
+		gl_FragData[2].g = 1.0;
     }
     gl_FragData[1].a = Object_Color.a;
     gl_FragData[2].b = matID;

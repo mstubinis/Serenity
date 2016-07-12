@@ -50,7 +50,7 @@ void Game::initResources(){
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
 	Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
-	Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
+	Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png","data/Textures/norway_Specular.png");
     Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png");
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");

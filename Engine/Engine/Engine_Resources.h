@@ -162,8 +162,8 @@ namespace Engine{
 		void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length);
         void removeMesh(std::string name);
 
-        void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "");
-        void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr);
+        void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "");
+        void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr);
         void removeMaterial(std::string name);
 
         void addShader(std::string name, std::string vertexShader, std::string fragmentShader, bool fromFile = true);

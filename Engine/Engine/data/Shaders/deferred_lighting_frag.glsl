@@ -31,6 +31,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
     float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
 	float Glow = texture2D(gMiscMap,uv).r;
+	float SpecularMap = texture2D(gMiscMap,uv).g;
 
     vec4 diffuseMapColor = vec4(texture2D(gDiffuseMap,uv).rgb, 1.0);
 
@@ -49,7 +50,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
 			highp int index = int(texture2D(gMiscMap,uv).b * 255.0);
             float materialSpecularity = materials[index].g;
-            SpecularColor = vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle;
+            SpecularColor = (vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle) * SpecularMap;
         }
     }
 	vec4 lightWithoutSpecular = ((AmbientColor + DiffuseColor) * diffuseMapColor );

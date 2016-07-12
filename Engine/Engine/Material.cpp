@@ -15,12 +15,13 @@ class Material::impl final{
         float m_BaseGlow;
         float m_Specularity;
 		uint m_ID;
-        void _init(Texture* diffuse,Texture* normal,Texture* glow){
+        void _init(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular){
             for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++)
                 m_Components[i] = nullptr;
             m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = diffuse;
             m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = normal;
             m_Components[MATERIAL_COMPONENT_TEXTURE_GLOW] = glow;
+			m_Components[MATERIAL_COMPONENT_TEXTURE_SPECULAR] = specular;
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
@@ -28,14 +29,16 @@ class Material::impl final{
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
 			_addToMaterialPool();
         }
-        void _init(std::string& diffuse, std::string& normal, std::string& glow){
+        void _init(std::string& diffuse, std::string& normal, std::string& glow, std::string& specular){
             Texture* diffuseT = Resources::getTexture(diffuse); 
             Texture* normalT = Resources::getTexture(normal); 
             Texture* glowT = Resources::getTexture(glow);
+			Texture* specularT = Resources::getTexture(specular);
             if(diffuseT == nullptr && diffuse != "") diffuseT = new Texture(diffuse);
             if(normalT == nullptr && normal != "")  normalT = new Texture(normal);
             if(glowT == nullptr && glow != "")    glowT = new Texture(glow);
-            _init(diffuseT,normalT,glowT);
+			if(specularT == nullptr && specular != "")    specularT = new Texture(specular);
+            _init(diffuseT,normalT,glowT,specularT);
         }
 		void _addToMaterialPool(){
 			this->m_ID = Material::m_MaterialProperities.size();
@@ -76,11 +79,11 @@ class Material::impl final{
         void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
 
-Material::Material(Texture* diffuse,Texture* normal,Texture* glow):m_i(new impl()){
-    m_i->_init(diffuse,normal,glow);
+Material::Material(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl()){
+    m_i->_init(diffuse,normal,glow,specular);
 }
-Material::Material(std::string diffuse, std::string normal, std::string glow):m_i(new impl()){
-    m_i->_init(diffuse,normal,glow);
+Material::Material(std::string diffuse, std::string normal, std::string glow,std::string specular):m_i(new impl()){
+    m_i->_init(diffuse,normal,glow,specular);
 }
 Material::~Material(){
     m_i->_destruct();

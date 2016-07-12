@@ -90,15 +90,15 @@ void Engine::Resources::addMesh(std::string name, std::unordered_map<std::string
     Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(grid,width,length);
 }
 
-void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow ){
+void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow, std::string specular){
     if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
         return;
-    Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow);
+    Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow,specular);
 }
-void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture* normal, Texture* glow){
+void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
     if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
         return;
-    Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow);
+    Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow,specular);
 }
 
 void Engine::Resources::addParticleInfo(std::string name, std::string material){

@@ -16,6 +16,7 @@ enum MATERIAL_COMPONENT_TYPE{
     MATERIAL_COMPONENT_TEXTURE_DIFFUSE,
     MATERIAL_COMPONENT_TEXTURE_NORMAL,
     MATERIAL_COMPONENT_TEXTURE_GLOW,
+    MATERIAL_COMPONENT_TEXTURE_SPECULAR,
     MATERIAL_COMPONENT_TYPE_NUMBER
 };
 enum MATERIAL_LIGHTING_MODE{
@@ -29,7 +30,8 @@ enum MATERIAL_LIGHTING_MODE{
 static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_NUMBER] = {
     "DiffuseMap",
     "NormalMap",
-    "GlowMap"
+    "GlowMap",
+	"SpecularMap"
 };
 
 static const uint MATERIAL_COUNT_LIMIT = 255;
@@ -37,15 +39,15 @@ static const uint MATERIAL_COUNT_LIMIT = 255;
 class Material final{
 	public:
 		//this is very important here
-		//vec4:  (  glow,  specularity, lightingMode, shadeless    )
+		//vec4:  (  glow,  specularity, lightingMode, shadeless  )
 		static std::vector<glm::vec4> m_MaterialProperities;
 
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
-        Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr);
-        Material(std::string diffuse,std::string normal="",std::string glow="");
+        Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
+        Material(std::string diffuse,std::string normal="",std::string glow="", std::string specular="");
         ~Material();
 
         std::unordered_map<uint,Texture*>& getComponents();
