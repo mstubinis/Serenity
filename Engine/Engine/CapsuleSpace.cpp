@@ -78,10 +78,12 @@ CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string m
 CapsuleTunnel::~CapsuleTunnel(){
 }
 void CapsuleTunnel::draw(GLuint shader,bool debug,bool godsRays){
+	glDisable(GL_DEPTH_TEST);
     glEnablei(GL_BLEND,0);
     glBlendFunci(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,0);
 
     ObjectDisplay::draw(shader,debug,godsRays);
+	glEnable(GL_DEPTH_TEST);
 }
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::v3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
@@ -133,7 +135,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_Ribbon = new CapsuleRibbon(5000,"AAAAAA_Capsule_Tunnel_C_Ribbon","Capsule_C",this);
 
     m_FrontEnd = new CapsuleEnd(450,glm::v3(0,0,-5000),glm::vec3(1),"AAAAAA_Capsule_Tunnel_B_Front",this);
-    m_BackEnd = new CapsuleEnd(260,glm::v3(0,0,5000),glm::vec3(0),"AAAAAA_Capsule_Tunnel_B_Back",this);
+    m_BackEnd = new CapsuleEnd(330,glm::v3(0,0,5000),glm::vec3(0),"AAAAAA_Capsule_Tunnel_B_Back",this);
 
     m_BackEnd->rotate(0,180,0,false);
 
