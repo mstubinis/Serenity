@@ -10,276 +10,232 @@
 
 using namespace Engine::Resources;
 
-void MeshLoader::loadObj(MeshData& ret,std::string filename,unsigned char _loadWhat){
+void MeshLoader::_loadObjDataFromLine(std::string& l, std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u, std::vector<glm::vec3>& _n, std::vector<uint>& _pi, std::vector<uint>& _ui, std::vector<uint>& _ni, const char _f){
+	if(l[0] == 'o'){
+	}	
+	else if(l[0] == 'v' && l[1] == ' '){ 
+		if(_f && LOAD_POINTS){
+			glm::vec3 position;
+			sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&position.x,&position.y,&position.z);
+			_p.push_back(position);
+		}
+	}
+	else if(l[0] == 'v' && l[1] == 't'){
+		if(_f && LOAD_UVS){
+			glm::vec2 uv;
+			sscanf(l.substr(2,l.size()).c_str(),"%f %f",&uv.x,&uv.y);
+			uv.y = 1.0f - uv.y;
+			_u.push_back(uv);
+		}
+	}
+	else if(l[0] == 'v' && l[1] == 'n'){
+		if(_f && LOAD_NORMALS){
+			glm::vec3 normal;
+			sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&normal.x,&normal.y,&normal.z);
+			_n.push_back(normal);
+		}
+	}
+	//faces
+	else if(l[0] == 'f' && l[1] == ' '){
+		if(_f && LOAD_FACES){
+			glm::uvec3 f1,f2,f3;
+			std::string li = l.substr(2,l.size());
+			sscanf(li.c_str(),"%d/%d/%d %d/%d/%d %d/%d/%d",&f1.x,&f1.y,&f1.z,&f2.x,&f2.y,&f2.z,&f3.x,&f3.y,&f3.z);
+			if(f2.x == 0 && f2.y == 0 && f2.z == 0 && f3.x == 0 && f3.y == 0 && f3.z == 0){
+				sscanf(li.c_str(),"%d %d %d",&f1.x,&f2.x,&f3.x);
+				if(f1.x <= 0) f1.x = 1; if(f2.x <= 0) f2.x = 1; if(f3.x <= 0) f3.x = 1;
+				f1.y = 1; f1.z = 1; f2.y = 1; f2.z = 1; f3.y = 1; f3.z = 1;
+			}
+			_pi.push_back(f1.x);
+			_pi.push_back(f2.x);
+			_pi.push_back(f3.x);
+			_ui.push_back(f1.y);
+			_ui.push_back(f2.y);
+			_ui.push_back(f3.y);
+			_ni.push_back(f1.z);
+			_ni.push_back(f2.z);
+			_ni.push_back(f3.z);
+		}
+	}
+}
+
+void MeshLoader::loadObj(MeshData& data,std::string filename,unsigned char _flags){
     std::vector<glm::vec3> _p;
     std::vector<glm::vec2> _u;
     std::vector<glm::vec3> _n;
-    std::vector<std::vector<glm::vec3>> _f;
-    std::map<std::string,ObjectLoadingData> objects;
-    std::string last = "";
+
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
-    //first read in all vertex data
+	std::vector<uint> positionIndices;
+	std::vector<uint> uvIndices;
+	std::vector<uint> normalIndices;
+
+    //first read in all data
     for(std::string line; std::getline(str, line, '\n');){
-        if(line[0] == 'o'){
-            if(last != ""){
-                ObjectLoadingData data;
-                data.Faces = _f;
-				data.Normals = _n;
-				data.Points = _p;
-				data.UVs = _u;
-                objects[last] = data;
-                _f.clear();
-            }
-            last = line;
-        }	
-		else if(line[0] == 'v' && line[1] == ' '){ 
-			if(_loadWhat && LOAD_POINTS){
-				glm::vec3 position;
-				sscanf(line.substr(2,line.size()).c_str(),"%f %f %f",&position.x,&position.y,&position.z);
-				_p.push_back(position);
-			}
-		}
-		else if(line[0] == 'v' && line[1] == 't'){
-			if(_loadWhat && LOAD_UVS){
-				glm::vec2 uv;
-				sscanf(line.substr(2,line.size()).c_str(),"%f %f",&uv.x,&uv.y);
-				uv.y = 1.0f - uv.y;
-				_u.push_back(uv);
-			}
-		}
-		else if(line[0] == 'v' && line[1] == 'n'){
-			if(_loadWhat && LOAD_NORMALS){
-				glm::vec3 normal;
-				sscanf(line.substr(2,line.size()).c_str(),"%f %f %f",&normal.x,&normal.y,&normal.z);
-				_n.push_back(normal);
-			}
-		}
-        //faces
-        else if(line[0] == 'f' && line[1] == ' '){
-			if(_loadWhat && LOAD_FACES){
-				std::vector<glm::vec3> vertices;
-				glm::uvec3 f1,f2,f3;
-				std::string l = line.substr(2,line.size());
-				sscanf(l.c_str(),"%d/%d/%d %d/%d/%d %d/%d/%d",&f1.x,&f1.y,&f1.z,&f2.x,&f2.y,&f2.z,&f3.x,&f3.y,&f3.z);
-				if(f2.x == 0 && f2.y == 0 && f2.z == 0 && f3.x == 0 && f3.y == 0 && f3.z == 0){
-					sscanf(l.c_str(),"%d %d %d",&f1.x,&f2.x,&f3.x);
-					if(f1.x <= 0) f1.x = 1; if(f2.x <= 0) f2.x = 1; if(f3.x <= 0) f3.x = 1;
-					f1.y = 1; f1.z = 1; f2.y = 1; f2.z = 1; f3.y = 1; f3.z = 1;
-					vertices.push_back(glm::vec3(f1));
-					vertices.push_back(glm::vec3(f2));
-					vertices.push_back(glm::vec3(f3));
-				}
-				else{
-					vertices.push_back(glm::vec3(f1));
-					vertices.push_back(glm::vec3(f2));
-					vertices.push_back(glm::vec3(f3));
-				}
-				_f.push_back(vertices);
-			}
-        }
+		_loadObjDataFromLine(line,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
     }
-    ObjectLoadingData data;
-    data.Faces = _f;
-	data.Normals = _n;
-	data.Points = _p;
-	data.UVs = _u;
-    objects[last] = data;
+	if(_flags && LOAD_POINTS)  data.file_points = _p;
+	if(_flags && LOAD_UVS)     data.file_uvs = _u;
+	if(_flags && LOAD_NORMALS) data.file_normals = _n;
 
-	if(_loadWhat && LOAD_POINTS)  ret.file_points = _p;
-	if(_loadWhat && LOAD_UVS)     ret.file_uvs = _u;
-	if(_loadWhat && LOAD_NORMALS) ret.file_normals = _n;
-	if(_loadWhat && LOAD_FACES)   ret.file_faces = _f;
+	std::vector<Triangle> _f;
+	uint count = 0;
+	Triangle triangle;
+	for(uint i=0; i < positionIndices.size(); i++ ){
+		data.points.push_back(  _p[ positionIndices[i]-1 ]  );
+		if(_u.size() > 0){
+			data.uvs.push_back(  _u[ uvIndices[i]-1 ]  );
+		}
+		if(_n.size() > 0){
+			data.normals.push_back(  _n[ normalIndices[i]-1 ]  );
+		}
+		count++;
 
-    for(auto o:objects){
-        for(auto face:o.second.Faces){
-            Vertex v1,v2,v3,v4;
-            v1.position = o.second.Points.at(uint(face.at(0).x-1));
-            v2.position = o.second.Points.at(uint(face.at(1).x-1));
-            v3.position = o.second.Points.at(uint(face.at(2).x-1));
-        
-            if(o.second.UVs.size() > 0){
-                v1.uv = o.second.UVs.at(uint(face.at(0).y-1));
-                v2.uv = o.second.UVs.at(uint(face.at(1).y-1));
-                v3.uv = o.second.UVs.at(uint(face.at(2).y-1));
-            }
-            if(o.second.Normals.size() > 0){
-                v1.normal = o.second.Normals.at(uint(face.at(0).z-1));
-                v2.normal = o.second.Normals.at(uint(face.at(1).z-1));
-                v3.normal = o.second.Normals.at(uint(face.at(2).z-1));
-            }
-            if(face.size() == 4){//quad
-                v4.position = o.second.Points.at(uint(face.at(3).x-1));
-                if(o.second.UVs.size() > 0)
-                    v4.uv = o.second.UVs.at(uint(face.at(3).y-1));
-                if(o.second.Normals.size() > 0)
-                    v4.normal = o.second.Normals.at(uint(face.at(3).z-1));
-                _generateQuad(ret,v1,v2,v3,v4);
-            }
-            else{//triangle
-                _generateTriangle(ret,v1,v2,v3);
-            }
-        }
-    }
+		if(count == 1){
+			triangle.v1.position = _p[ positionIndices[i]-1 ];
+			if(_n.size() > 0){
+				triangle.v1.normal = _n[ normalIndices[i]-1 ];
+			}
+			if(_u.size() > 0){
+				triangle.v1.uv = _u[ uvIndices[i]-1 ];
+			}
+		}
+		else if(count == 2){
+			triangle.v2.position = _p[ positionIndices[i]-1 ];
+			if(_n.size() > 0){
+				triangle.v2.normal = _n[ normalIndices[i]-1 ];
+			}
+			if(_u.size() > 0){
+				triangle.v2.uv = _u[ uvIndices[i]-1 ];
+			}
+		}
+		else if(count >= 3){
+			triangle.v3.position = _p[ positionIndices[i]-1 ];
+			if(_n.size() > 0){
+				triangle.v3.normal = _n[ normalIndices[i]-1 ];
+			}
+			if(_u.size() > 0){
+				triangle.v3.uv = _u[ uvIndices[i]-1 ];
+			}
+			_f.push_back(triangle);
+			triangle.v1.clear(); triangle.v2.clear(); triangle.v3.clear();
+		}
+
+	}
+
+	if(_flags && LOAD_FACES) data.file_triangles = _f;
+	//tangents and binormals now
+	if(_flags && LOAD_TBN && _u.size() > 0 && _n.size() > 0){
+		MeshLoader::_calculateTBN(data);
+	}
 }
-void MeshLoader::loadObjFromMemory(MeshData& ret,std::string data,unsigned char _loadWhat){
+void MeshLoader::loadObjFromMemory(MeshData& data,std::string input,unsigned char _flags){
     std::vector<glm::vec3> _p;
     std::vector<glm::vec2> _u;
     std::vector<glm::vec3> _n;
-    std::vector<std::vector<glm::vec3>> _f;
-    std::map<std::string,ObjectLoadingData> objects;
-    std::string last = "";
 
-    std::istringstream input;  input.str(data);
+	std::vector<uint> positionIndices;
+	std::vector<uint> uvIndices;
+	std::vector<uint> normalIndices;
 
-    //first read in all vertex data
-    for(std::string line; std::getline(input, line, '\n');){
-        if(line[0] == 'o'){
-            if(last != ""){
-                ObjectLoadingData data;
-                data.Faces = _f;
-				data.Normals = _n;
-				data.Points = _p;
-				data.UVs = _u;
-                objects[last] = data;
-                _f.clear();
-            }
-            last = line;
-        }
-        else if(line[0] == 'v' && line[1] == ' '){ 
-			if(_loadWhat && LOAD_POINTS){
-				glm::vec3 position;
-				sscanf(line.substr(2,line.size()).c_str(),"%f %f %f",&position.x,&position.y,&position.z);
-				_p.push_back(position);
+    std::istringstream stream;  stream.str(input);
+
+    //first read in all data
+    for(std::string line; std::getline(stream, line, '\n');){
+		_loadObjDataFromLine(line,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
+    }
+	if(_flags && LOAD_POINTS)  data.file_points = _p;
+	if(_flags && LOAD_UVS)     data.file_uvs = _u;
+	if(_flags && LOAD_NORMALS) data.file_normals = _n;
+
+	std::vector<Triangle> _f;
+	uint count = 0;
+	Triangle triangle;
+	for(uint i=0; i < positionIndices.size(); i++ ){
+		data.points.push_back(  _p[ positionIndices[i]-1 ]  );
+		if(_u.size() > 0){
+			data.uvs.push_back(  _u[ uvIndices[i]-1 ]  );
+		}
+		else{
+			data.uvs.push_back( glm::vec2(0) );
+		}
+		if(_n.size() > 0){
+			data.normals.push_back(  _n[ normalIndices[i]-1 ]  );
+		}
+		else{
+			data.normals.push_back( glm::vec3(0) );
+		}
+		count++;
+
+		if(count == 1){
+			triangle.v1.position = _p[ positionIndices[i]-1 ];
+			if(_n.size() > 0){
+				triangle.v1.normal = _n[ normalIndices[i]-1 ];
 			}
-        }
-		else if(line[0] == 'v' && line[1] == 't'){
-			if(_loadWhat && LOAD_UVS){
-				glm::vec2 uv;
-				sscanf(line.substr(2,line.size()).c_str(),"%f %f",&uv.x,&uv.y);
-				uv.y = 1.0f - uv.y;
-				_u.push_back(uv);
+			if(_u.size() > 0){
+				triangle.v1.uv = _u[ uvIndices[i]-1 ];
 			}
 		}
-		else if(line[0] == 'v' && line[1] == 'n'){
-			if(_loadWhat && LOAD_NORMALS){
-				glm::vec3 normal;
-				sscanf(line.substr(2,line.size()).c_str(),"%f %f %f",&normal.x,&normal.y,&normal.z);
-				_n.push_back(normal);
+		else if(count == 2){
+			triangle.v2.position = _p[ positionIndices[i]-1 ];
+			if(_n.size() > 0){
+				triangle.v2.normal = _n[ normalIndices[i]-1 ];
+			}
+			if(_u.size() > 0){
+				triangle.v2.uv = _u[ uvIndices[i]-1 ];
 			}
 		}
-        //faces
-        else if(line[0] == 'f' && line[1] == ' '){
-			if(_loadWhat && LOAD_FACES){
-				std::vector<glm::vec3> vertices;
-				glm::uvec3 f1,f2,f3;
-				std::string l = line.substr(2,line.size());
-				sscanf(l.c_str(),"%d/%d/%d %d/%d/%d %d/%d/%d",&f1.x,&f1.y,&f1.z,&f2.x,&f2.y,&f2.z,&f3.x,&f3.y,&f3.z);
-				if(f2.x == 0 && f2.y == 0 && f2.z == 0 && f3.x == 0 && f3.y == 0 && f3.z == 0){
-					sscanf(l.c_str(),"%d %d %d",&f1.x,&f2.x,&f3.x);
-					if(f1.x <= 0) f1.x = 1; if(f2.x <= 0) f2.x = 1; if(f3.x <= 0) f3.x = 1;
-					f1.y = 1; f1.z = 1; f2.y = 1; f2.z = 1; f3.y = 1; f3.z = 1;
-					vertices.push_back(glm::vec3(f1));
-					vertices.push_back(glm::vec3(f2));
-					vertices.push_back(glm::vec3(f3));
-				}
-				else{
-					vertices.push_back(glm::vec3(f1));
-					vertices.push_back(glm::vec3(f2));
-					vertices.push_back(glm::vec3(f3));
-				}
-				_f.push_back(vertices);
+		else if(count >= 3){
+			triangle.v3.position = _p[ positionIndices[i]-1 ];
+			if(_n.size() > 0){
+				triangle.v3.normal = _n[ normalIndices[i]-1 ];
 			}
-        }
-    }
-    ObjectLoadingData da;
-    da.Faces = _f;
-	da.Normals = _n;
-	da.Points = _p;
-	da.UVs = _u;
-    objects[last] = da;
+			if(_u.size() > 0){
+				triangle.v3.uv = _u[ uvIndices[i]-1 ];
+			}
+			_f.push_back(triangle);
+			triangle.v1.clear(); triangle.v2.clear(); triangle.v3.clear();
+		}
+	}
 
-	if(_loadWhat && LOAD_POINTS)  ret.file_points = _p;
-	if(_loadWhat && LOAD_UVS)     ret.file_uvs = _u;
-	if(_loadWhat && LOAD_NORMALS) ret.file_normals = _n;
-	if(_loadWhat && LOAD_FACES)   ret.file_faces = _f;
+	if(_flags && LOAD_FACES) data.file_triangles = _f;
 
-    for(auto o:objects){
-        for(auto face:o.second.Faces){
-            Vertex v1,v2,v3,v4;
-            v1.position = o.second.Points.at(uint(face.at(0).x-1));
-            v2.position = o.second.Points.at(uint(face.at(1).x-1));
-            v3.position = o.second.Points.at(uint(face.at(2).x-1));
-        
-            if(o.second.UVs.size() > 0){
-                v1.uv = o.second.UVs.at(uint(face.at(0).y-1));
-                v2.uv = o.second.UVs.at(uint(face.at(1).y-1));
-                v3.uv = o.second.UVs.at(uint(face.at(2).y-1));
-            }
-            if(o.second.Normals.size() > 0){
-                v1.normal = o.second.Normals.at(uint(face.at(0).z-1));
-                v2.normal = o.second.Normals.at(uint(face.at(1).z-1));
-                v3.normal = o.second.Normals.at(uint(face.at(2).z-1));
-            }
-            if(face.size() == 4){//quad
-                v4.position = o.second.Points.at(uint(face.at(3).x-1));
-                if(o.second.UVs.size() > 0)
-                    v4.uv = o.second.UVs.at(uint(face.at(3).y-1));
-                if(o.second.Normals.size() > 0)
-                    v4.normal = o.second.Normals.at(uint(face.at(3).z-1));
-                _generateQuad(ret,v1,v2,v3,v4);
-            }
-            else{//triangle
-                _generateTriangle(ret,v1,v2,v3);
-            }
-        }
-    }
+	//tangents and binormals now
+	if(_flags && LOAD_TBN && _u.size() > 0 && _n.size() > 0){
+		MeshLoader::_calculateTBN(data);
+	}
 }
-void MeshLoader::_calculateTangent(Vertex& v1, Vertex& v2, Vertex& v3){
-    glm::vec3 deltaPos1 = v2.position - v1.position;
-    glm::vec3 deltaPos2 = v3.position - v1.position;
- 
-    glm::vec2 deltaUV1 = v2.uv-v1.uv;
-    glm::vec2 deltaUV2 = v3.uv-v1.uv;
-    float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-    glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*r;
-    glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*r;
 
-    glm::vec3 t1 = glm::normalize(tangent - v1.normal * glm::dot(v1.normal, tangent));
-    glm::vec3 t2 = glm::normalize(tangent - v2.normal * glm::dot(v2.normal, tangent));
-    glm::vec3 t3 = glm::normalize(tangent - v3.normal * glm::dot(v3.normal, tangent));
+void MeshLoader::_calculateTBN(MeshData& data){
+	for(uint i=0; i < data.points.size(); i+=3){
+		glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];
+		glm::vec3 deltaPos2 = data.points[i + 2] - data.points[i + 0];
 
-    glm::vec3 b1 = glm::normalize(bitangent - v1.normal * glm::dot(v1.normal, bitangent));
-    glm::vec3 b2 = glm::normalize(bitangent - v2.normal * glm::dot(v2.normal, bitangent));
-    glm::vec3 b3 = glm::normalize(bitangent - v3.normal * glm::dot(v3.normal, bitangent));
+		glm::vec2 deltaUV1 = data.uvs[i + 1] - data.uvs[i + 0];
+		glm::vec2 deltaUV2 = data.uvs[i + 2] - data.uvs[i + 0];
 
-    v1.tangent = t1;   v2.tangent = t2;   v3.tangent = t3;
-    v1.binormal = b1; v2.binormal = b2; v3.binormal = b3;
-}
-void MeshLoader::_generateTriangle(MeshData& data,Vertex& v1, Vertex& v2, Vertex& v3){
-    data.points.push_back(v1.position);
-    data.uvs.push_back(v1.uv);
-	data.normals.push_back(v1.normal);
+		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+		glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y) * r;
+		glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x) * r;
 
-	data.points.push_back(v2.position);
-	data.uvs.push_back(v2.uv);
-	data.normals.push_back(v2.normal);
+		glm::vec3 t1 = glm::normalize(tangent - data.normals[i + 0] * glm::dot(data.normals[i + 0], tangent));
+		glm::vec3 t2 = glm::normalize(tangent - data.normals[i + 1] * glm::dot(data.normals[i + 1], tangent));
+		glm::vec3 t3 = glm::normalize(tangent - data.normals[i + 2] * glm::dot(data.normals[i + 2], tangent));
 
-	data.points.push_back(v3.position);
-	data.uvs.push_back(v3.uv);
-	data.normals.push_back(v3.normal);
+		glm::vec3 b1 = glm::normalize(bitangent - data.normals[i + 0] * glm::dot(data.normals[i + 0], bitangent));
+		glm::vec3 b2 = glm::normalize(bitangent - data.normals[i + 1] * glm::dot(data.normals[i + 1], bitangent));
+		glm::vec3 b3 = glm::normalize(bitangent - data.normals[i + 2] * glm::dot(data.normals[i + 2], bitangent));
 
-    _calculateTangent(v1,v2,v3);
-
-    data.tangents.push_back(v1.tangent);
-    data.tangents.push_back(v2.tangent);
-    data.tangents.push_back(v3.tangent);
-
-	data.binormals.push_back(v1.binormal);
-	data.binormals.push_back(v2.binormal);
-	data.binormals.push_back(v3.binormal);
-}
-void MeshLoader::_generateQuad(MeshData& data,Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4){
-    _generateTriangle(data,v1,v2,v3);
-    _generateTriangle(data,v2,v4,v3);
+		data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
+		data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
+	}
+	for(uint i=0; i < data.points.size(); i++){
+		glm::vec3& n = data.normals[i];
+		glm::vec3& t = data.tangents[i];
+		glm::vec3& b = data.binormals[i];
+		// Gram-Schmidt orthogonalize
+		t = glm::normalize(t - n * glm::dot(n, t));
+		// Calculate handedness
+		if (glm::dot(glm::cross(n, t), b) < 0.0f){ t = t * -1.0f; }
+	}
 }

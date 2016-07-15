@@ -211,27 +211,17 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
                 #pragma region OBJ
 				MeshData data;
 				Engine::Resources::MeshLoader::loadObj(data,file,LOAD_POINTS | LOAD_FACES);
-
-                for(auto face:data.file_faces){
+				for(auto triangle:data.file_triangles){
                     glm::vec3 v1,v2,v3,v4;
 
-                    v1 = data.file_points.at(uint(face.at(0).x-1));
-                    v2 = data.file_points.at(uint(face.at(1).x-1));
-                    v3 = data.file_points.at(uint(face.at(2).x-1));
+					v1 = triangle.v1.position;
+					v2 = triangle.v2.position;
+					v3 = triangle.v3.position;
 
                     btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
                     btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
                     btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
-
-                    if(face.size() == 4){//quad
-                        v4 = data.file_points.at(uint(face.at(3).x-1));
-                        btVector3 bv4 = btVector3(v4.x,v4.y,v4.z);
-                        mesh->addTriangle(bv1, bv2, bv3,true);
-                        mesh->addTriangle(bv1, bv3, bv4,true);
-                    }
-                    else{//triangle
-                        mesh->addTriangle(bv1, bv2, bv3,true);
-                    }
+                    mesh->addTriangle(bv1, bv2, bv3,true);
                 }
                 #pragma endregion
             }
@@ -253,25 +243,17 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
                 #pragma region OBJ
 				MeshData data;
 				Engine::Resources::MeshLoader::loadObj(data,file,LOAD_POINTS | LOAD_FACES);
-                for(auto face:data.file_faces){
+				for(auto triangle:data.file_triangles){
                     glm::vec3 v1,v2,v3,v4;
 
-                    v1 = data.file_points.at(uint(face.at(0).x-1));
-                    v2 = data.file_points.at(uint(face.at(1).x-1));
-                    v3 = data.file_points.at(uint(face.at(2).x-1));
+					v1 = triangle.v1.position;
+					v2 = triangle.v2.position;
+					v3 = triangle.v3.position;
 
                     btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
                     btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
                     btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
-                    if(face.size() == 4){//quad
-                        v4 = data.file_points.at(uint(face.at(3).x-1));
-                        btVector3 bv4 = btVector3(v4.x,v4.y,v4.z);
-                        mesh->addTriangle(bv1, bv2, bv3,true);
-                        mesh->addTriangle(bv1, bv3, bv4,true);
-                    }
-                    else{//triangle
-                        mesh->addTriangle(bv1, bv2, bv3,true);
-                    }
+                    mesh->addTriangle(bv1, bv2, bv3,true);
                 }
                 #pragma endregion
             }

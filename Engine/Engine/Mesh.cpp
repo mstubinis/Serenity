@@ -40,8 +40,16 @@ Mesh::Mesh(btHeightfieldTerrainShape* heightfield){
             v3.uv = glm::vec2(float(i) / float(width),float(j+1) / float(length));
             v4.uv = glm::vec2(float(i+1) / float(width),float(j+1) / float(length));
 
-            Engine::Resources::MeshLoader::_generateTriangle(d,v3,v2,v1);
-            Engine::Resources::MeshLoader::_generateTriangle(d,v3,v4,v2);
+			d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
+			d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
+			d.points.push_back(v1.position); d.uvs.push_back(v1.uv); d.normals.push_back(v1.normal);
+
+			d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
+			d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
+			d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
+
+			Engine::Resources::MeshLoader::_calculateTBN(d);
+
         }
     }
 	_loadData(d);
@@ -77,8 +85,15 @@ Mesh::Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length){
             v3.uv = glm::vec2(float(i) / float(width),float(j+1) / float(length));
             v4.uv = glm::vec2(float(i+1) / float(width),float(j+1) / float(length));
 
-			Engine::Resources::MeshLoader::_generateTriangle(d,v3,v2,v1);
-            Engine::Resources::MeshLoader::_generateTriangle(d,v3,v4,v2);
+			d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
+			d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
+			d.points.push_back(v1.position); d.uvs.push_back(v1.uv); d.normals.push_back(v1.normal);
+
+			d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
+			d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
+			d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
+
+			Engine::Resources::MeshLoader::_calculateTBN(d);
         }
     }
 	_loadData(d);
