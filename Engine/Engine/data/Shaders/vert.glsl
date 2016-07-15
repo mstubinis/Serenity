@@ -23,9 +23,9 @@ void main(){
 
     UV = uv;
 
-    Normals = (Model * vec4(normal,0.0)).xyz;
-    Tangents = (Model * vec4(tangent,0.0)).xyz;
+    Normals = (Model * vec4(normal,0.0)).xyz; 
     Binormals = (Model * vec4(binormal,0.0)).xyz;
+	Tangents = (Model * vec4(tangent,0.0)).xyz;
 
     WorldPosition = (Model * vec4(position,1.0)).xyz;
 }

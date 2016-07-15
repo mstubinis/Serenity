@@ -10,30 +10,12 @@
 namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
+struct MeshData;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 
 const uint NUM_VERTEX_DATA = 5;
 const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
-
-struct ObjectLoadingData final{
-    std::vector<glm::vec3> Points;
-    std::vector<glm::vec2> UVs;
-    std::vector<glm::vec3> Normals;
-    std::vector<std::vector<glm::vec3>> Faces;
-    ObjectLoadingData(){}
-};
-
-struct Vertex final{
-    glm::vec3 position;
-    glm::vec2 uv;
-    glm::vec3 normal;
-    glm::vec3 tangent;
-    glm::vec3 binormal;
-    Vertex(){
-        uv = glm::vec2(0); normal = tangent = binormal = glm::vec3(0);
-    }
-};
 
 class Mesh final{
     private:
@@ -48,11 +30,7 @@ class Mesh final{
         std::vector<glm::vec3> m_Tangents;
         std::vector<glm::vec3> m_Binormals;
 
-        void _generateQuad(Vertex&,Vertex&,Vertex&,Vertex&);
-        void _generateTriangle(Vertex&,Vertex&,Vertex&);
-
-        void _calculateTangent(Vertex&, Vertex&, Vertex&);
-
+		void _loadData(MeshData&);
         void _loadFromFile(std::string,COLLISION_TYPE);
         void _loadFromOBJ(std::string,COLLISION_TYPE);
         void _loadFromOBJMemory(std::string,COLLISION_TYPE);

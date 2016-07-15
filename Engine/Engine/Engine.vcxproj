@@ -100,6 +100,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="CapsuleSpace.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_Math.cpp" />
+    <ClCompile Include="Engine_MeshLoader.cpp" />
     <ClCompile Include="Engine_Noise.cpp" />
     <ClCompile Include="Engine_Physics.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -140,6 +141,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="CapsuleSpace.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Engine_Math.h" />
+    <ClInclude Include="Engine_MeshLoader.h" />
     <ClInclude Include="Engine_Noise.h" />
     <ClInclude Include="Engine_Physics.h" />
     <ClInclude Include="Camera.h" />

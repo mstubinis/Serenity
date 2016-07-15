@@ -228,6 +228,9 @@
     <ClCompile Include="Engine_Noise.cpp">
       <Filter>Source Files\Engine\Engine_Math</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_MeshLoader.cpp">
+      <Filter>Source Files\Engine\Engine_Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -337,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="Engine_Noise.h">
       <Filter>Header Files\Engine\Engine_Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_MeshLoader.h">
+      <Filter>Header Files\Engine\Engine_Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
