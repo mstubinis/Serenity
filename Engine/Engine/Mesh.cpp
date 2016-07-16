@@ -101,14 +101,14 @@ Mesh::Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length){
 }
 Mesh::Mesh(float x, float y,float width, float height){
     m_Collision = nullptr;
+	MeshData d;
+	d.points.push_back(glm::vec3(0,0,0));
+    d.points.push_back(glm::vec3(width,height,0));
+    d.points.push_back(glm::vec3(0,height,0));
 
-    m_Points.push_back(glm::vec3(0,0,0));
-    m_Points.push_back(glm::vec3(width,height,0));
-    m_Points.push_back(glm::vec3(0,height,0));
-
-    m_Points.push_back(glm::vec3(width,0,0));
-    m_Points.push_back(glm::vec3(width,height,0));
-    m_Points.push_back(glm::vec3(0,0,0));
+    d.points.push_back(glm::vec3(width,0,0));
+    d.points.push_back(glm::vec3(width,height,0));
+    d.points.push_back(glm::vec3(0,0,0));
 
     float uv_topLeft_x = float(x/256.0f);
     float uv_topLeft_y = float(y/256.0f);
@@ -122,47 +122,48 @@ Mesh::Mesh(float x, float y,float width, float height){
     float uv_topRight_x = float(x/256.0f) + float(width/256.0f);
     float uv_topRight_y = float(y/256.0f);
 
-    m_UVs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
-    m_UVs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-    m_UVs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
+	d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+    d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+    d.uvs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
 
-    m_UVs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
-    m_UVs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-    m_UVs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+    d.uvs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
+    d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+    d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
+	d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
 
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
+	d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
 
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
+	d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
 
+	_loadData(d);
     _calculateMeshRadius();
 }
 Mesh::Mesh(float width, float height){
     m_Collision = nullptr;
+	MeshData d;
+	d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
+    d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
+    d.points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
 
-    m_Points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
-    m_Points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
-    m_Points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
-
-    m_Points.push_back(glm::vec3(width/2.0f,-height/2.0f,0));
-    m_Points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
-    m_Points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
+    d.points.push_back(glm::vec3(width/2.0f,-height/2.0f,0));
+    d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
+    d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
 
     float uv_topLeft_x = float(0);
     float uv_topLeft_y = float(0);
@@ -176,35 +177,36 @@ Mesh::Mesh(float width, float height){
     float uv_topRight_x = float(0) + float(width);
     float uv_topRight_y = float(0);
 
-    m_UVs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
-    m_UVs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-    m_UVs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
+	d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+    d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+    d.uvs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
 
-    m_UVs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
-    m_UVs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-    m_UVs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+    d.uvs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
+    d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+    d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
-    m_Normals.push_back(glm::vec3(1,1,1));
+	d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
+    d.normals.push_back(glm::vec3(1,1,1));
 
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
-    m_Tangents.push_back(glm::vec3(1,1,1));
+	d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
+    d.tangents.push_back(glm::vec3(1,1,1));
 
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
-    m_Binormals.push_back(glm::vec3(1,1,1));
+	d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
+    d.binormals.push_back(glm::vec3(1,1,1));
 
+	_loadData(d);
     _calculateMeshRadius();
 }
 Mesh::Mesh(std::string filename,COLLISION_TYPE type,bool notMemory){
@@ -218,12 +220,13 @@ Mesh::Mesh(std::string filename,COLLISION_TYPE type,bool notMemory){
 Mesh::~Mesh(){
     cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
 }
-void Mesh::_loadData(MeshData& data){
-	m_Points = data.points;
-	m_Normals = data.normals;
-	m_UVs = data.uvs;
-	m_Binormals = data.binormals;
-	m_Tangents = data.tangents;
+void Mesh::_loadData(MeshData& data,float threshold){
+	if(data.uvs.size() == 0) data.uvs.resize(data.points.size());
+	if(data.normals.size() == 0) data.normals.resize(data.points.size());
+	if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
+	if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
+
+	Engine::Resources::MeshLoader::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
     std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
@@ -258,7 +261,6 @@ void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type){
 }
 void Mesh::initRenderingContext(uint api){
     if(api == ENGINE_RENDERING_API_OPENGL){
-        //Bind the data to the buffers
         glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0] );
@@ -275,6 +277,10 @@ void Mesh::initRenderingContext(uint api){
 
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
         glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
+
+		glGenBuffers(1, &m_elementbuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
@@ -284,6 +290,7 @@ void Mesh::cleanupRenderingContext(uint api){
         for(uint i = 0; i < NUM_VERTEX_DATA; i++){
             glDeleteBuffers(1, &m_buffers[i]);
         }
+		glDeleteBuffers(1,&m_elementbuffer);
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
@@ -298,13 +305,15 @@ void Mesh::_calculateMeshRadius(){
     m_radius = glm::max(maxX, glm::max(maxY,maxZ));
 }
 void Mesh::render(GLuint mode){
-    //for each unique vertex data type (position, color, uv, normal, binormal,tangent)...
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){
         glBindBuffer( GL_ARRAY_BUFFER, m_buffers[i] );
         glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
     }
-    glDrawArrays(mode, 0, m_Points.size());
+    //glDrawArrays(mode, 0, m_Points.size());
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
+	glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
     for(uint i = 0; i < NUM_VERTEX_DATA; i++)
         glDisableVertexAttribArray(i);
 }
