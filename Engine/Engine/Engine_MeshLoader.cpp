@@ -40,23 +40,28 @@ void MeshLoader::_loadObjDataFromLine(std::string& l, std::vector<glm::vec3>& _p
 	//faces
 	else if(l[0] == 'f' && l[1] == ' '){
 		if(_f && LOAD_FACES){
-			glm::uvec3 f1,f2,f3;
+			glm::uvec3 f1,f2,f3,f4 = glm::uvec3(1);
 			std::string li = l.substr(2,l.size());
-			sscanf(li.c_str(),"%d/%d/%d %d/%d/%d %d/%d/%d",&f1.x,&f1.y,&f1.z,&f2.x,&f2.y,&f2.z,&f3.x,&f3.y,&f3.z);
-			if(f2.x == 0 && f2.y == 0 && f2.z == 0 && f3.x == 0 && f3.y == 0 && f3.z == 0){
-				sscanf(li.c_str(),"%d %d %d",&f1.x,&f2.x,&f3.x);
-				if(f1.x <= 0) f1.x = 1; if(f2.x <= 0) f2.x = 1; if(f3.x <= 0) f3.x = 1;
-				f1.y = 1; f1.z = 1; f2.y = 1; f2.z = 1; f3.y = 1; f3.z = 1;
+			int matches = sscanf(li.c_str(),"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",&f1.x,&f1.y,&f1.z,&f2.x,&f2.y,&f2.z,&f3.x,&f3.y,&f3.z,&f4.x,&f4.y,&f4.z);
+
+			if(matches < 3){
+				matches = sscanf(li.c_str(),"%d %d %d %d",&f1.x,&f2.x,&f3.x,&f4.x);
 			}
-			_pi.push_back(f1.x);
-			_pi.push_back(f2.x);
-			_pi.push_back(f3.x);
-			_ui.push_back(f1.y);
-			_ui.push_back(f2.y);
-			_ui.push_back(f3.y);
-			_ni.push_back(f1.z);
-			_ni.push_back(f2.z);
-			_ni.push_back(f3.z);
+
+			if(matches == 3 || matches == 6 || matches == 9){ //triangle
+				_pi.push_back(f1.x); _pi.push_back(f2.x); _pi.push_back(f3.x);
+				_ui.push_back(f1.y); _ui.push_back(f2.y); _ui.push_back(f3.y);
+				_ni.push_back(f1.z); _ni.push_back(f2.z); _ni.push_back(f3.z);
+			}
+			else if(matches == 4 || matches == 8 || matches == 12){//quad
+				_pi.push_back(f1.x); _pi.push_back(f2.x); _pi.push_back(f3.x);
+				_ui.push_back(f1.y); _ui.push_back(f2.y); _ui.push_back(f3.y);
+				_ni.push_back(f1.z); _ni.push_back(f2.z); _ni.push_back(f3.z);
+
+				_pi.push_back(f1.x); _pi.push_back(f3.x); _pi.push_back(f4.x);
+				_ui.push_back(f1.y); _ui.push_back(f3.y); _ui.push_back(f4.y);
+				_ni.push_back(f1.z); _ni.push_back(f3.z); _ni.push_back(f4.z);
+			}
 		}
 	}
 }
