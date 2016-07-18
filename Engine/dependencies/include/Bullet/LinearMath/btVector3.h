@@ -294,9 +294,7 @@ public:
 
   /**@brief Normalize this vector 
    * x^2 + y^2 + z^2 = 1 */
-	SIMD_FORCE_INLINE btVector3& normalize() 
-	{
-		
+	SIMD_FORCE_INLINE btVector3& normalize() {	
 		btAssert(length() != btScalar(0));
 
 #if defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE)		

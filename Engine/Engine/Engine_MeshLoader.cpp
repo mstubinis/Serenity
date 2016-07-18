@@ -48,6 +48,8 @@ void MeshLoader::_loadObjDataFromLine(std::string& l, std::vector<glm::vec3>& _p
 				matches = sscanf(li.c_str(),"%d %d %d %d",&f1.x,&f2.x,&f3.x,&f4.x);
 			}
 
+			f1 = glm::max(f1,glm::uvec3(1)); f2 = glm::max(f2,glm::uvec3(1)); f3 = glm::max(f3,glm::uvec3(1)); f4 = glm::max(f4,glm::uvec3(1));
+
 			if(matches == 3 || matches == 6 || matches == 9){ //triangle
 				_pi.push_back(f1.x); _pi.push_back(f2.x); _pi.push_back(f3.x);
 				_ui.push_back(f1.y); _ui.push_back(f2.y); _ui.push_back(f3.y);
@@ -67,9 +69,7 @@ void MeshLoader::_loadObjDataFromLine(std::string& l, std::vector<glm::vec3>& _p
 }
 
 void MeshLoader::loadObj(MeshData& data,std::string filename,unsigned char _flags){
-    std::vector<glm::vec3> _p;
-    std::vector<glm::vec2> _u;
-    std::vector<glm::vec3> _n;
+    std::vector<glm::vec3> _p; std::vector<glm::vec2> _u; std::vector<glm::vec3> _n;
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
@@ -81,43 +81,16 @@ void MeshLoader::loadObj(MeshData& data,std::string filename,unsigned char _flag
     for(std::string line; std::getline(str, line, '\n');){
 		_loadObjDataFromLine(line,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
     }
-	std::vector<Triangle> _f;
-	uint count = 0;
-	Triangle triangle;
-
 	uint max = _p.size(); if(_n.size() > max) max = _n.size(); if(_u.size() > max) max = _u.size();
 	if(_u.size() == 0) _u.resize(max); if(_n.size() == 0) _n.resize(max);
 
 	if(_flags && LOAD_POINTS)  data.file_points = _p;
 	if(_flags && LOAD_UVS)     data.file_uvs = _u;
 	if(_flags && LOAD_NORMALS) data.file_normals = _n;
-
-	for(uint i=0; i < positionIndices.size(); i++ ){
-		data.points.push_back(  _p[ positionIndices[i]-1 ]  );
-		data.uvs.push_back(  _u[ uvIndices[i]-1 ]  );
-		data.normals.push_back(  _n[ normalIndices[i]-1 ]  );
-		count++;
-		if(count == 1){
-			triangle.v1.position = _p[ positionIndices[i]-1 ];
-			triangle.v1.normal = _n[ normalIndices[i]-1 ];
-			triangle.v1.uv = _u[ uvIndices[i]-1 ];
-		}
-		else if(count == 2){
-			triangle.v2.position = _p[ positionIndices[i]-1 ];
-			triangle.v2.normal = _n[ normalIndices[i]-1 ];
-			triangle.v2.uv = _u[ uvIndices[i]-1 ];
-		}
-		else if(count >= 3){
-			triangle.v3.position = _p[ positionIndices[i]-1 ];
-			triangle.v3.normal = _n[ normalIndices[i]-1 ];
-			triangle.v3.uv = _u[ uvIndices[i]-1 ];
-			_f.push_back(triangle);
-			triangle.v1.clear(); triangle.v2.clear(); triangle.v3.clear();
-		}
+	if(_flags && LOAD_FACES){
+		MeshLoader::_loadObjDataIntoTriangles(data,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
 	}
-	if(_flags && LOAD_FACES) data.file_triangles = _f;
-	//tangents and binormals now
-	if(_flags && LOAD_TBN){
+	if(_flags && LOAD_TBN && data.normals.size() > 0){
 		MeshLoader::_calculateTBN(data);
 	}
 }
@@ -132,49 +105,48 @@ void MeshLoader::loadObjFromMemory(MeshData& data,std::string input,unsigned cha
     for(std::string line; std::getline(stream, line, '\n');){
 		_loadObjDataFromLine(line,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
     }
-
-	std::vector<Triangle> _f;
-	uint count = 0;
-	Triangle triangle;
-
 	uint max = _p.size(); if(_n.size() > max) max = _n.size(); if(_u.size() > max) max = _u.size();
 	if(_u.size() == 0) _u.resize(max); if(_n.size() == 0) _n.resize(max);
 
 	if(_flags && LOAD_POINTS)  data.file_points = _p;
 	if(_flags && LOAD_UVS)     data.file_uvs = _u;
 	if(_flags && LOAD_NORMALS) data.file_normals = _n;
-
-	for(uint i=0; i < positionIndices.size(); i++ ){
-		data.points.push_back(  _p[ positionIndices[i]-1 ]  );
-		data.uvs.push_back(  _u[ uvIndices[i]-1 ]  );
-		data.normals.push_back(  _n[ normalIndices[i]-1 ]  );
-		count++;
-		if(count == 1){
-			triangle.v1.position = _p[ positionIndices[i]-1 ];
-			triangle.v1.normal = _n[ normalIndices[i]-1 ];
-			triangle.v1.uv = _u[ uvIndices[i]-1 ];
-		}
-		else if(count == 2){
-			triangle.v2.position = _p[ positionIndices[i]-1 ];
-			triangle.v2.normal = _n[ normalIndices[i]-1 ];
-			triangle.v2.uv = _u[ uvIndices[i]-1 ];
-		}
-		else if(count >= 3){
-			triangle.v3.position = _p[ positionIndices[i]-1 ];
-			triangle.v3.normal = _n[ normalIndices[i]-1 ];
-			triangle.v3.uv = _u[ uvIndices[i]-1 ];
-			_f.push_back(triangle);
-			triangle.v1.clear(); triangle.v2.clear(); triangle.v3.clear();
-		}
+	if(_flags && LOAD_FACES){
+		MeshLoader::_loadObjDataIntoTriangles(data,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
 	}
-	if(_flags && LOAD_FACES) data.file_triangles = _f;
-
-	//tangents and binormals now
-	if(_flags && LOAD_TBN){
+	if(_flags && LOAD_TBN && data.normals.size() > 0){
 		MeshLoader::_calculateTBN(data);
 	}
 }
-
+void MeshLoader::_loadObjDataIntoTriangles(MeshData& data,std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u,std::vector<glm::vec3>& _n,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
+	uint count = 0; Triangle triangle;
+	for(uint i=0; i < _pi.size(); i++ ){
+		glm::vec3 pos = _p[ _pi[i]-1 ];
+		glm::vec2 uv = _u[ _ui[i]-1 ];
+		glm::vec3 norm = _n[ _ni[i]-1 ];
+		if(_flags && LOAD_POINTS)  data.points .push_back(pos);
+		if(_flags && LOAD_UVS)     data.uvs    .push_back(uv);
+		if(_flags && LOAD_NORMALS) data.normals.push_back(norm);
+		count++;
+		if(count == 1){
+			triangle.v1.position = pos;
+			triangle.v1.uv = uv;
+			triangle.v1.normal = norm;
+		}
+		else if(count == 2){
+			triangle.v2.position = pos;
+			triangle.v2.uv = uv;
+			triangle.v2.normal = norm;
+		}
+		else if(count >= 3){
+			triangle.v3.position = pos;
+			triangle.v3.uv = uv;
+			triangle.v3.normal = norm;
+			data.file_triangles.push_back(triangle);
+			count = 0;
+		}
+	}
+}
 void MeshLoader::_calculateTBN(MeshData& data){
 	for(uint i=0; i < data.points.size(); i+=3){
 		glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];

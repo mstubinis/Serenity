@@ -68,7 +68,9 @@ void CapsuleStar::update(float dt){
     ObjectBasic::update(dt);
 }
 void CapsuleStar::draw(GLuint shader,bool debug, bool godsRays){
+	glDisable(GL_DEPTH_TEST);
     ObjectDisplay::draw(shader,debug,godsRays);
+	glEnable(GL_DEPTH_TEST);
 }
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::v3(0),glm::vec3(1),name,scene){
@@ -123,7 +125,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_C")){
         Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
         Resources::getMaterial("Capsule_C")->setShadeless(true);
-        Resources::getMaterial("Capsule_C")->setGlow(0.12f);
+        Resources::getMaterial("Capsule_C")->setGlow(1.0f);
     }
     if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_D")){
         Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
@@ -144,6 +146,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 
     m_TunnelA->setPosition(0,0,0);
     m_TunnelB->setPosition(0,0,0);
+
     m_Ribbon->setPosition(0,300,0);
 
     float step = -10.0f;
@@ -194,7 +197,7 @@ void CapsuleSpace::update(float dt){
     if(m_TunnelB->getPosition().z >= 12.112 * bRadius || m_TunnelB->getPosition().z <= -12.112 * bRadius){
         m_TunnelB->setPosition(0,0,0);
     }
-    if(m_Ribbon->getPosition().z >= 11.6 * aRadius || m_Ribbon->getPosition().z <= -11.6 * aRadius){
+    if(m_Ribbon->getPosition().z >= 20 * aRadius || m_Ribbon->getPosition().z <= -20 * aRadius){
         m_Ribbon->setPosition(0,300,0);
     }
     getPlayer()->setPosition(0,0,0);

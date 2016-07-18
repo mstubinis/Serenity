@@ -61,13 +61,12 @@ void main(){
 	}
 
 	if(doBloom == 1){
+
 		float Glow = texture2D(gMiscMap,uv).r;
 		vec3 lighting = texture2D(gLightMap,uv).rgb;
 		float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
-		if(brightness > 1.22 || Glow > 0.01f){
-
-			float scl = log(brightness) * 0.41;
-
+		if(brightness > 1.5 || Glow > 0.01f){
+			float scl = log(brightness);
 			gl_FragColor.rgb = vec3(lighting * max(Glow, scl));
 		}
 	}
