@@ -37,7 +37,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);
-
+	vec4 lightWithoutSpecular = vec4(0.0);
     if (Lambertian > 0.0) {
         DiffuseColor = vec4(LightColor, 1.0) * LightDiffuseIntensity * Lambertian;
         vec3 ViewVector = normalize(-PxlWorldPos + gCameraPosition);
@@ -47,13 +47,16 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
         SpecularAngle = pow(SpecularAngle, LightSpecularPower);
 
-        if (SpecularAngle > 0.0 && LightSpecularPower > 0.001f) {
+        if (SpecularAngle > 0.0 && LightSpecularPower > 0.001) {
 			highp int index = int(texture2D(gMiscMap,uv).b * 255.0);
             float materialSpecularity = materials[index].g;
             SpecularColor = (vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle) * SpecularMap;
         }
+		lightWithoutSpecular = (AmbientColor + DiffuseColor) * diffuseMapColor;
     }
-	vec4 lightWithoutSpecular = ((AmbientColor + DiffuseColor) * diffuseMapColor );
+	else{
+		lightWithoutSpecular = (AmbientColor);
+	}
 
 	if(Glow > 0.99){ return diffuseMapColor; }
     return max(Glow*diffuseMapColor,lightWithoutSpecular + (SpecularColor));

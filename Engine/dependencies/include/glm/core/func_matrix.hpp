@@ -40,8 +40,7 @@
 #ifndef GLM_CORE_func_matrix
 #define GLM_CORE_func_matrix GLM_VERSION
 
-namespace glm
-{
+namespace glm{
 	/// @addtogroup core_func_matrix
 	/// @{
 
@@ -53,9 +52,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/matrixCompMult.xml">GLSL matrixCompMult man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>
 	template <typename matType> 
-	GLM_FUNC_DECL matType matrixCompMult(
-		matType const & x, 
-		matType const & y);
+	GLM_FUNC_DECL matType matrixCompMult(matType const & x, matType const & y);
 
 	/// Treats the first parameter c as a column vector 
 	/// and the second parameter r as a row vector
@@ -68,9 +65,7 @@ namespace glm
 	/// 
 	/// @todo Clarify the declaration to specify that matType doesn't have to be provided when used.
 	template <typename vecType, typename matType> 
-	GLM_FUNC_DECL matType outerProduct(
-		vecType const & c, 
-		vecType const & r);
+	GLM_FUNC_DECL matType outerProduct(vecType const & c, vecType const & r);
 
 	/// Returns the transposed matrix of x
 	/// 
@@ -79,8 +74,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/transpose.xml">GLSL transpose man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>	
 	template <typename matType> 
-	GLM_FUNC_DECL typename matType::transpose_type transpose(
-		matType const & x);
+	GLM_FUNC_DECL typename matType::transpose_type transpose(matType const & x);
 	
 	/// Return the determinant of a mat2 matrix. 
 	/// 
@@ -89,8 +83,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/determinant.xml">GLSL determinant man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>	
 	template <typename valType> 
-	GLM_FUNC_DECL typename detail::tmat2x2<valType>::value_type determinant(
-		detail::tmat2x2<valType> const & m);
+	GLM_FUNC_DECL typename detail::tmat2x2<valType>::value_type determinant(detail::tmat2x2<valType> const & m);
 
 	/// Return the determinant of a mat3 matrix. 
 	/// 
@@ -99,8 +92,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/determinant.xml">GLSL determinant man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>	
 	template <typename valType> 
-	GLM_FUNC_DECL typename detail::tmat3x3<valType>::value_type determinant(
-		detail::tmat3x3<valType> const & m);
+	GLM_FUNC_DECL typename detail::tmat3x3<valType>::value_type determinant(detail::tmat3x3<valType> const & m);
 
 	/// Return the determinant of a mat4 matrix. 
 	/// 
@@ -109,8 +101,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/determinant.xml">GLSL determinant man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>		
 	template <typename valType> 
-	GLM_FUNC_DECL typename detail::tmat4x4<valType>::value_type determinant(
-		detail::tmat4x4<valType> const & m);
+	GLM_FUNC_DECL typename detail::tmat4x4<valType>::value_type determinant(detail::tmat4x4<valType> const & m);
 
 	/// Return the inverse of a mat2 matrix. 
 	/// 
@@ -119,8 +110,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/inverse.xml">GLSL inverse man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>	 
 	template <typename valType> 
-	GLM_FUNC_DECL detail::tmat2x2<valType> inverse(
-		detail::tmat2x2<valType> const & m);
+	GLM_FUNC_DECL detail::tmat2x2<valType> inverse(detail::tmat2x2<valType> const & m);
 
 	/// Return the inverse of a mat3 matrix. 
 	/// 
@@ -129,8 +119,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/inverse.xml">GLSL inverse man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a> 
 	template <typename valType> 
-	GLM_FUNC_DECL detail::tmat3x3<valType> inverse(
-		detail::tmat3x3<valType> const & m);
+	GLM_FUNC_DECL detail::tmat3x3<valType> inverse(detail::tmat3x3<valType> const & m);
 
 	/// Return the inverse of a mat4 matrix. 
 	/// 
@@ -139,8 +128,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/sdk/docs/manglsl/xhtml/inverse.xml">GLSL inverse man page</a>
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.6 Matrix Functions</a>
 	template <typename valType> 
-	GLM_FUNC_DECL detail::tmat4x4<valType> inverse(
-		detail::tmat4x4<valType> const & m);
+	GLM_FUNC_DECL detail::tmat4x4<valType> inverse(detail::tmat4x4<valType> const & m);
 
 	/// @}
 }//namespace glm
