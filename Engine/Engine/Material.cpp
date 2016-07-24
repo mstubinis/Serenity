@@ -13,7 +13,7 @@ class Material::impl final{
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
-        float m_Specularity;
+        float m_SpecularityPower;
 		uint m_ID;
         void _init(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular){
             for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++)
@@ -25,7 +25,7 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-            m_Specularity = 1.0f;
+            m_SpecularityPower = 50.0f;
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
 			_addToMaterialPool();
         }
@@ -42,12 +42,12 @@ class Material::impl final{
         }
 		void _addToMaterialPool(){
 			this->m_ID = Material::m_MaterialProperities.size();
-			Material::m_MaterialProperities.push_back(glm::vec4(m_BaseGlow,m_Specularity,m_LightingMode,m_Shadeless));
+			Material::m_MaterialProperities.push_back(glm::vec4(m_BaseGlow,m_SpecularityPower,m_LightingMode,m_Shadeless));
 		}
 		void _updateGlobalMaterialPool(){
 			glm::vec4& ref = Material::m_MaterialProperities.at(m_ID);
 			ref.r = m_BaseGlow;
-			ref.g = m_Specularity;
+			ref.g = m_SpecularityPower;
 			ref.b = float(m_LightingMode);
 			ref.a = m_Shadeless;
 		}
@@ -75,7 +75,7 @@ class Material::impl final{
         }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
-        void _setSpecularity(float& s){ m_Specularity = s; _updateGlobalMaterialPool(); }
+        void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
         void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
 
@@ -102,7 +102,7 @@ Texture* Material::getComponent(uint index){
 }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
-const float Material::specularity() const { return m_i->m_Specularity; }
+const float Material::specularity() const { return m_i->m_SpecularityPower; }
 const uint Material::lightingMode() const { return m_i->m_LightingMode; }
 const uint Material::id() const { return m_i->m_ID; }
 

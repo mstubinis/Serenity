@@ -14,7 +14,7 @@ class SunLight: public ObjectDisplay{
     protected:
         unsigned int m_Type;
 		bool m_Active;
-        float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularPower;
+        float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
         void sendGenericAttributesToShader(GLuint);
     public:
         SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
@@ -26,8 +26,8 @@ class SunLight: public ObjectDisplay{
         virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual void lighten(GLuint);
-        float getSpecularPower(){ return m_SpecularPower; }
-        void setSpecularPower(float s){ m_SpecularPower = s; }
+        float getSpecularPower(){ return m_SpecularIntensity; }
+        void setSpecularPower(float s){ m_SpecularIntensity = s; }
 
 		void activate(){ m_Active = true; }
 		void deactivate(){ m_Active = false; }

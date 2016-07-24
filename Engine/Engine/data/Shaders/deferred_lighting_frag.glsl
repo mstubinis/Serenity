@@ -5,7 +5,7 @@ uniform int LightType;
 uniform vec3 LightColor;
 uniform float LightAmbientIntensity;
 uniform float LightDiffuseIntensity;
-uniform float LightSpecularPower;
+uniform float LightSpecularIntensity;
 
 uniform float LightConstant;
 uniform float LightLinear;
@@ -45,21 +45,21 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         // this is blinn phong
         vec3 halfDir = normalize(LightDir + ViewVector);
         float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
-        SpecularAngle = pow(SpecularAngle, LightSpecularPower);
+		highp int index = int(texture2D(gMiscMap,uv).b * 255.0);
+		float materialSpecularity = materials[index].g;
+        SpecularAngle = pow(SpecularAngle, materialSpecularity);
 
-        if (SpecularAngle > 0.0 && LightSpecularPower > 0.001) {
-			highp int index = int(texture2D(gMiscMap,uv).b * 255.0);
-            float materialSpecularity = materials[index].g;
-            SpecularColor = (vec4(LightColor, 1.0) * materialSpecularity * SpecularAngle) * SpecularMap;
+        if (SpecularAngle > 0.0 && LightSpecularIntensity > 0.001) {
+            SpecularColor = (vec4(LightColor, 1.0) * LightSpecularIntensity * SpecularAngle) * SpecularMap;
         }
 		lightWithoutSpecular = (AmbientColor + DiffuseColor) * diffuseMapColor;
     }
 	else{
-		lightWithoutSpecular = (AmbientColor);
+		lightWithoutSpecular = AmbientColor;
 	}
 
 	if(Glow > 0.99){ return diffuseMapColor; }
-    return max(Glow*diffuseMapColor,lightWithoutSpecular + (SpecularColor));
+    return max(Glow*diffuseMapColor,lightWithoutSpecular + SpecularColor);
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = LightPosition - PxlWorldPos;

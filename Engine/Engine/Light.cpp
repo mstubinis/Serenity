@@ -18,7 +18,7 @@ SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):
 	m_Active = true;
     m_AmbientIntensity = 0.05f;
     m_DiffuseIntensity = 1.0f;
-    m_SpecularPower = 50;
+    m_SpecularIntensity = 1.0f;
 
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
@@ -56,7 +56,7 @@ void SunLight::sendGenericAttributesToShader(GLuint shader){
     glUniform3f(glGetUniformLocation(shader,"LightColor"), m_Color.x, m_Color.y, m_Color.z);
     glUniform1f(glGetUniformLocation(shader,"LightAmbientIntensity"), m_AmbientIntensity);
     glUniform1f(glGetUniformLocation(shader,"LightDiffuseIntensity"), m_DiffuseIntensity);
-    glUniform1f(glGetUniformLocation(shader,"LightSpecularPower"), m_SpecularPower);
+    glUniform1f(glGetUniformLocation(shader,"LightSpecularIntensity"), m_SpecularIntensity);
 }
 void SunLight::lighten(GLuint shader){
 	if(!m_Active) return;
