@@ -43,9 +43,9 @@ class Font final{
 
         void renderText(std::string text, 
                         glm::vec2& pos, 
-                        glm::vec4 color, 
+                        glm::vec4 color = glm::vec4(1), 
                         float angle = 0, 
-                        glm::vec2 scl = glm::vec2(1,1), 
+                        glm::vec2 scl = glm::vec2(1), 
                         float depth = 0
                         );
 

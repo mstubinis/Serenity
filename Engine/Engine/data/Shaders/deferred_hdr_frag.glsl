@@ -5,10 +5,8 @@ uniform float gamma;
 
 uniform sampler2D lightingBuffer;
 
-uniform vec2 gScreenSize;
-
 void main(){
-    vec2 uv = gl_FragCoord.xy / gScreenSize;
+    vec2 uv = gl_TexCoord[0].st;
 	vec3 lighting = texture2D(lightingBuffer, uv).rgb;
 
     vec3 mapped = vec3(1.0) - exp(-lighting * exposure); // Exposure tone mapping

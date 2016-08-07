@@ -14,11 +14,10 @@ uniform int HasHDR;
 
 uniform float gamma;
 
-uniform vec2 gScreenSize;
 uniform vec3 gAmbientColor;
 
 void main(){
-    vec2 uv = gl_FragCoord.xy / gScreenSize;
+    vec2 uv = gl_TexCoord[0].st;
     vec4 diffuse = texture2D(gDiffuseMap, uv);
 	vec3 normals = texture2D(gNormalMap,uv).rgb;
     vec3 bloom = texture2D(gBloomMap,uv).rgb;

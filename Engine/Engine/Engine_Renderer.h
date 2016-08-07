@@ -142,7 +142,7 @@ namespace Engine{
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
             };
-            void renderFullscreenQuad(GLuint shader, uint width, uint height,float scale = 1.0f);
+            void renderFullscreenQuad(GLuint shader, uint width, uint height);
         };
 
 		namespace Settings{

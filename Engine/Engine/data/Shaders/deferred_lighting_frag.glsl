@@ -20,7 +20,6 @@ uniform sampler2D gMiscMap;
 uniform sampler2D gDiffuseMap;
 
 uniform vec3 gCameraPosition;
-uniform vec2 gScreenSize;
 
 uniform vec4 materials[255];
 
@@ -75,7 +74,7 @@ vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     return vec4(0);
 }
 void main(){
-    vec2 uv = gl_FragCoord.xy / gScreenSize;
+    vec2 uv = gl_TexCoord[0].st;
     vec3 PxlPosition = texture2D(gPositionMap,uv).xyz;
     vec3 PxlNormal = (texture2D(gNormalMap, uv).rgb);
 

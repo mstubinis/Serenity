@@ -34,7 +34,7 @@ Object::~Object()
 glm::num Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return unsigned long long(glm::abs(glm::length(vecTo))); }
 glm::vec3 Object::getScreenCoordinates(){
-    return Math::getScreenCoordinates(glm::vec3(getPosition()),true);
+    return Math::getScreenCoordinates(glm::vec3(getPosition()));
 }
 void Object::addChild(Object* child){
     child->m_Parent = this;

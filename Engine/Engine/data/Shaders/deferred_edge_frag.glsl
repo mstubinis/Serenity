@@ -37,7 +37,7 @@ float IsEdge(vec2 coords){
     return threshold(0.15,0.6,clamp(1.8*delta,0.0,1.0));
 }
 void main(){
-    vec2 uv = gl_FragCoord.xy / gScreenSize;
+    vec2 uv = gl_TexCoord[0].st;
     float edge = IsEdge(gl_TexCoord[0].xy);
     gl_FragColor = vec4(edge);
 }

@@ -36,15 +36,14 @@ bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,gl
 
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
-    glm::mat4 MV = Resources::getActiveCamera()->getView();
     glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
-    glm::vec3 screen = glm::project(objPos,MV,Resources::getActiveCamera()->getProjection(),viewport);
+    glm::vec3 screen = glm::project(objPos,Resources::getActiveCamera()->getView(),Resources::getActiveCamera()->getProjection(),viewport);
 
     //check if point is behind
     float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos-glm::vec3(Resources::getActiveCamera()->getPosition()));
 
     float resX = float(screen.x);
-    float resY = float(windowSize.y-screen.y);
+    float resY = float(screen.y);
 
     unsigned int inBounds = 1;
 
@@ -60,7 +59,7 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     }
     inBounds = 0;
     float fX = windowSize.x - screen.x;
-    float fY = windowSize.y - resY;
+    float fY = windowSize.y - screen.y;
     
     if(fX < windowSize.x/2){ if(clampToEdge) fX = 0; else fX = -9999999999.0f; }
     else if(fX > windowSize.x/2){ if(clampToEdge) fX = windowSize.x; else fX = -9999999999.0f; }

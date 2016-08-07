@@ -67,7 +67,7 @@ void GameSkybox::render(bool godsRays){
 
             glm::mat4 model = glm::mat4(1);
             model = glm::translate(model, glm::vec3(pos.x,
-                                                    Resources::getWindowSize().y-pos.y,
+                                                    pos.y,
                                                     -0.5 - 1));
             model = glm::rotate(model,0.0f,glm::vec3(0,0,1));
             model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));

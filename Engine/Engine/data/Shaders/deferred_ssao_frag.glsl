@@ -9,7 +9,6 @@ uniform sampler2D gLightMap;
 uniform int doSSAO;
 uniform int doBloom;
 
-uniform vec2 gScreenSize;
 uniform vec3 gCameraPosition;
 uniform float gRadius;
 uniform float gIntensity;
@@ -32,10 +31,10 @@ float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
     return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;
 }
 void main(){
-    vec2 uv = gl_FragCoord.xy / gScreenSize*2.0;
+    vec2 uv = gl_TexCoord[0].st*2.0;
     vec3 worldPosition = texture2D(gPositionMap,uv).xyz;
     vec3 normal = texture2D(gNormalMap, uv).xyz;
-    vec2 randomVector = normalize(texture2D(gRandomMap, gScreenSize * uv / gNoiseTextureSize).xy * 2.0 - 1.0);
+    vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / gNoiseTextureSize).xy * 2.0 - 1.0);
 
 	float camDist = distance(worldPosition,gCameraPosition);
 	float rad = gRadius / camDist;

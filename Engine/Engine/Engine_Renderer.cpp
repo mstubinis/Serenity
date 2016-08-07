@@ -167,7 +167,7 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
 
         glm::mat4 model = glm::mat4(1);
         model = glm::translate(model, glm::vec3(item.pos.x,
-                                                Resources::getWindowSize().y-item.pos.y,
+                                                item.pos.y,
                                                 -0.001f - item.depth));
         model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
         if(item.texture != "")
@@ -196,7 +196,6 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
 
         float y_offset = 0;
         float x = item.pos.x;
-        item.pos.y = Resources::getWindowSize().y - item.pos.y;
         for(auto c:item.text){
             if(c == '\n'){
                 y_offset += (font->getFontData()->getGlyphData('X')->height+6) * item.scl.y;
@@ -246,7 +245,6 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUseProgram(shader);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 	glUniform4fv(glGetUniformLocation(shader,"materials"),MATERIAL_COUNT_LIMIT, glm::value_ptr(Material::m_MaterialProperities[0]));
 
@@ -343,8 +341,6 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     glColorMask(0,0,0,0);
     GLuint shader = Resources::getShader("Copy_Depth")->program();
     glUseProgram(shader);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
-
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
@@ -397,7 +393,6 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom
 
 	glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"),camPos.x,camPos.y,camPos.z);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"gIntensity"),RendererInfo::SSAOInfo::ssao_intensity);
     glUniform1f(glGetUniformLocation(shader,"gBias"),RendererInfo::SSAOInfo::ssao_bias);
     glUniform1f(glGetUniformLocation(shader,"gRadius"),RendererInfo::SSAOInfo::ssao_radius);
@@ -472,8 +467,10 @@ void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPo
     glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::GodRaysInfo::godRays_exposure);
     glUniform1i(glGetUniformLocation(shader,"samples"), RendererInfo::GodRaysInfo::godRays_samples);
     glUniform1f(glGetUniformLocation(shader,"weight"), RendererInfo::GodRaysInfo::godRays_weight);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
-    glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"),float(lightPositionOnScreen.x),float(lightPositionOnScreen.y));
+    glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"),
+		float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
+		float(lightPositionOnScreen.y/float(Resources::getWindowSize().y)
+	));
 
 	glUniform1i(glGetUniformLocation(shader,"behind"), int(behind));
 	glUniform1f(glGetUniformLocation(shader,"alpha"), alpha);
@@ -499,7 +496,6 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
 
     glUniform1f(glGetUniformLocation(shader,"gamma"),RendererInfo::HDRInfo::hdr_gamma);
     glUniform1f(glGetUniformLocation(shader,"exposure"),RendererInfo::HDRInfo::hdr_exposure);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
@@ -522,7 +518,6 @@ void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLu
     GLuint shader = Resources::getShader("Deferred_Blur")->program();
     glUseProgram(shader);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glUniform1f(glGetUniformLocation(shader,"radius"), radius);
     glUniform4f(glGetUniformLocation(shader,"strengthModifier"), str.x,str.y,str.z,str.w);
 
@@ -561,7 +556,6 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     glUseProgram(shader);
 
 	glUniform1f(glGetUniformLocation(shader,"gamma"),RendererInfo::HDRInfo::hdr_gamma);
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
     glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
@@ -605,22 +599,25 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     }
     glUseProgram(0);
 }
-void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height,float scale){
+void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height){
     glm::mat4 m(1);
-	glm::mat4 vp = glm::ortho(0.f,1.f,0.f,1.f);
+	glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(m));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(vp));
-    glViewport(0,0,GLsizei(width*scale),GLsizei(height*scale));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(p));
+    glViewport(0,0,width,height);
 
 	glBegin(GL_QUADS);
-		glVertex2f(0,0);
+		glTexCoord2f(0,0);
+		glVertex2f(-float(width)/2,-float(height)/2);
 
-		glVertex2f(1,0);
+		glTexCoord2f(1,0);
+		glVertex2f(float(width)/2,-float(height)/2);
 
-		glVertex2f(1,1);
+		glTexCoord2f(1,1);
+		glVertex2f(float(width)/2,float(height)/2);
 
-		glVertex2f(0,1);
-
+		glTexCoord2f(0,1);
+		glVertex2f(-float(width)/2,float(height)/2);
 	glEnd();
 }
 
