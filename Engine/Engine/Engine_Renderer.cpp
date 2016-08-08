@@ -38,12 +38,12 @@ bool Renderer::Detail::RendererInfo::LightingInfo::lighting = true;
 bool Renderer::Detail::RendererInfo::DebugDrawingInfo::debug = false;
 
 bool Renderer::Detail::RendererInfo::GodRaysInfo::godRays = true;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0032f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.25f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.033f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.05f;
-uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 15;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 75.0f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.84f;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
+uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
+float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 55.0f;
 float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
 bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
