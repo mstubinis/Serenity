@@ -247,6 +247,7 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 	glUniform4fv(glGetUniformLocation(shader,"materials"),MATERIAL_COUNT_LIMIT, glm::value_ptr(Material::m_MaterialProperities[0]));
+	glUniform2f( glGetUniformLocation(shader,"gScreenSize"), Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -607,17 +608,10 @@ void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uin
     glViewport(0,0,width,height);
 
 	glBegin(GL_QUADS);
-		glTexCoord2f(0,0);
-		glVertex2f(-float(width)/2,-float(height)/2);
-
-		glTexCoord2f(1,0);
-		glVertex2f(float(width)/2,-float(height)/2);
-
-		glTexCoord2f(1,1);
-		glVertex2f(float(width)/2,float(height)/2);
-
-		glTexCoord2f(0,1);
-		glVertex2f(-float(width)/2,float(height)/2);
+		glTexCoord2f(0,0); glVertex2f(-float(width)/2,-float(height)/2);
+		glTexCoord2f(1,0); glVertex2f(float(width)/2,-float(height)/2);
+		glTexCoord2f(1,1); glVertex2f(float(width)/2,float(height)/2);
+		glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
 	glEnd();
 }
 

@@ -311,7 +311,6 @@ void Mesh::render(GLuint mode){
         glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
     }
     //glDrawArrays(mode, 0, m_Points.size());
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
 	glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
     for(uint i = 0; i < NUM_VERTEX_DATA; i++)

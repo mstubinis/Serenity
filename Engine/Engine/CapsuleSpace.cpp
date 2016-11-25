@@ -81,9 +81,6 @@ CapsuleTunnel::~CapsuleTunnel(){
 }
 void CapsuleTunnel::draw(GLuint shader,bool debug,bool godsRays){
 	glDisable(GL_DEPTH_TEST);
-    glEnablei(GL_BLEND,0);
-    glBlendFunci(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,0);
-
     ObjectDisplay::draw(shader,debug,godsRays);
 	glEnable(GL_DEPTH_TEST);
 }
@@ -157,7 +154,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         glm::v3 pos = glm::v3(x,y,step)*glm::v3(100);
 
         bool spawnLight = false;
-        if(i % 7 == 0){
+        if(i % 3 == 0){
             spawnLight = true;
         }
         m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star_" + boost::lexical_cast<std::string>(i),this,spawnLight));

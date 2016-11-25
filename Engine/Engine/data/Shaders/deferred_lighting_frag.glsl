@@ -18,6 +18,7 @@ uniform sampler2D gNormalMap;
 uniform sampler2D gPositionMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gDiffuseMap;
+uniform vec2 gScreenSize;
 
 uniform vec3 gCameraPosition;
 
@@ -74,7 +75,9 @@ vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     return vec4(0);
 }
 void main(){
-    vec2 uv = gl_TexCoord[0].st;
+    //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
+	vec2 uv = gl_FragCoord.xy / gScreenSize;
+
     vec3 PxlPosition = texture2D(gPositionMap,uv).xyz;
     vec3 PxlNormal = (texture2D(gNormalMap, uv).rgb);
 
@@ -89,5 +92,5 @@ void main(){
     else if(LightType == 3)
         lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
 
-    gl_FragData[0].rgb = lightCalculation.rgb;
+	gl_FragData[0].rgb = lightCalculation.rgb;
 }

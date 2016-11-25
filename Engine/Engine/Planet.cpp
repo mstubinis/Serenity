@@ -49,19 +49,20 @@ Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::
     m_RotationInfo = nullptr;	
 }
 Planet::~Planet(){
-    for(auto ring:m_Rings)    SAFE_DELETE(ring);
+    for(auto ring:m_Rings)    
+		SAFE_DELETE(ring);
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
 void Planet::update(float dt){
     if(m_RotationInfo != nullptr){
         float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
-        glm::num secondsToRotate = m_RotationInfo->days * 86400.0;
-        glm::num finalSpeed = 1.0 / (secondsToRotate * glm::num(speed));
-        rotate(0,float(finalSpeed),0);
+        float secondsToRotate = m_RotationInfo->days * 86400.0;
+        float finalSpeed = 1.0f / (secondsToRotate * (speed));
+        rotate(0,finalSpeed,0);
     }
     if(m_OrbitInfo != nullptr){
-        m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
+        //m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
     }
     for(auto ring:m_Rings)  ring->update(dt);
 

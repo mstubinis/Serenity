@@ -167,7 +167,7 @@ void Engine::Resources::removeSound(std::string name){
 void Engine::Resources::initResources(){
 	addMaterial("Default",nullptr,nullptr,nullptr);
 
-    addMesh("PointLightBounds","data/Models/pointLightBounds.obj",COLLISION_TYPE_NONE);
+    //addMesh("PointLightBounds","data/Models/pointLightBounds.obj");
 
 	//add a basic cube mesh
 	std::string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"

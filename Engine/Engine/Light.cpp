@@ -67,7 +67,7 @@ void SunLight::lighten(GLuint shader){
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     glUniform3f(glGetUniformLocation(shader,"gCameraPosition"), campos.x, campos.y, campos.z);
 
-    Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LIGHT_TYPE_DIRECTIONAL,scene){
     m_Direction = glm::normalize(dir);
@@ -78,7 +78,7 @@ void DirectionalLight::lighten(GLuint shader){
 	if(!m_Active) return;
     sendGenericAttributesToShader(shader);
     glUniform3f(glGetUniformLocation(shader,"LightDirection"), m_Direction.x, m_Direction.y,m_Direction.z);
-    Engine::Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::Detail::renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
 PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_POINT,scene){
@@ -136,12 +136,11 @@ void PointLight::lighten(GLuint shader){
 
     if(glm::distance(campos,glm::vec3(pos)) > m_PointLightRadius){
         glCullFace(GL_BACK);
-    }
+	}
     else{
         glCullFace(GL_FRONT);
     }
-
-    Resources::getMesh("PointLightBounds")->render();
+    Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
 
     glCullFace(GL_BACK);
 }
