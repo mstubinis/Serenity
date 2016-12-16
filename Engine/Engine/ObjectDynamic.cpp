@@ -154,6 +154,7 @@ void ObjectDynamic::render(GLuint shader,bool debug){
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
 void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
+	ENGINE_RENDERING_API api = Engine::Resources::getAPI();
     Camera* camera = Resources::getActiveCamera();
     if((m_DisplayItems.size() == 0 || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
         return;	
@@ -182,7 +183,7 @@ void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
         glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 
         for(auto component:item->material->getComponents())
-            item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
+			component.second->bind(shader,api);
         item->mesh->render();
     }
     glUseProgram(0);

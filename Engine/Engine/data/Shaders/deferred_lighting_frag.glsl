@@ -39,7 +39,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 SpecularColor = vec4(0.0);
 	vec4 lightWithoutSpecular = vec4(0.0);
     if (Lambertian > 0.0) {
-        DiffuseColor = vec4(LightColor, 1.0) * LightDiffuseIntensity * Lambertian;
+        DiffuseColor = vec4(LightColor, 1.0) * LightDiffuseIntensity * (pow(Lambertian,0.75) * 1.2); //this modification to Lambertian makes lighting look more realistic
         vec3 ViewVector = normalize(-PxlWorldPos + gCameraPosition);
 
         // this is blinn phong
@@ -52,7 +52,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         if (SpecularAngle > 0.0 && LightSpecularIntensity > 0.001) {
             SpecularColor = (vec4(LightColor, 1.0) * LightSpecularIntensity * SpecularAngle) * SpecularMap;
         }
-		lightWithoutSpecular = (AmbientColor + DiffuseColor) * diffuseMapColor;
+		lightWithoutSpecular = max(AmbientColor, (AmbientColor + DiffuseColor) * diffuseMapColor);
     }
 	else{
 		lightWithoutSpecular = AmbientColor;

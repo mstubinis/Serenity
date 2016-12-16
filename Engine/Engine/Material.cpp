@@ -7,21 +7,81 @@ using namespace Engine;
 
 std::vector<glm::vec4> Material::m_MaterialProperities;
 
+MaterialComponent::MaterialComponent(uint type,Texture* texture){
+	m_Texture = texture;
+	m_ComponentType = type;
+}
+MaterialComponent::MaterialComponent(uint type,std::string texture){
+	m_ComponentType = type;
+
+    m_Texture = Resources::getTexture(texture); 
+    if(m_Texture == nullptr && texture != "") m_Texture = new Texture(texture);
+}
+MaterialComponent::~MaterialComponent(){
+}
+void MaterialComponent::bind(GLuint shader,uint api){
+	uint c = (uint)m_ComponentType;
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[c];
+		if(m_Texture == nullptr || m_Texture->address() == 0){//Texture / Material type not present; disable this material
+            glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
+            return;
+        }
+		glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
+		glActiveTexture(GL_TEXTURE0 + c);
+        glBindTexture(m_Texture->type(), m_Texture->address());
+        glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), c);
+        
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
+    }
+}
+MaterialComponentReflection::MaterialComponentReflection(uint type,Texture* cubemap,Texture* map):MaterialComponent(type,cubemap){
+	m_ReflectionMap = map;
+}
+MaterialComponentReflection::MaterialComponentReflection(uint type,std::string cubemap,std::string map):MaterialComponent(type,cubemap){
+    m_ReflectionMap = Resources::getTexture(map); 
+    if(m_ReflectionMap == nullptr && map != "") m_ReflectionMap = new Texture(map);
+}
+MaterialComponentReflection::~MaterialComponentReflection(){
+	MaterialComponent::~MaterialComponent();
+}
+void MaterialComponentReflection::bind(GLuint shader,uint api){
+	uint c = (uint)m_ComponentType;
+    if(api == ENGINE_RENDERING_API_OPENGL){
+        std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[c];
+		if(m_Texture == nullptr || m_Texture->address() == 0){//Texture / Material type not present; disable this material
+            glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
+            return;
+        }
+		glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
+		glActiveTexture(GL_TEXTURE0 + c);
+        glBindTexture(m_Texture->type(), m_Texture->address());
+        glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), c);
+
+		glActiveTexture(GL_TEXTURE0 + c + 1);
+		glBindTexture(m_ReflectionMap->type(), m_ReflectionMap->address());
+        glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), c + 1);
+        
+    }
+    else if(api == ENGINE_RENDERING_API_DIRECTX){
+    }
+}
+
 class Material::impl final{
     public:
-        std::unordered_map<uint,Texture*> m_Components;
+        std::unordered_map<uint,MaterialComponent*> m_Components;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
         float m_SpecularityPower;
 		uint m_ID;
         void _init(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular){
-            for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++)
-                m_Components[i] = nullptr;
-            m_Components[MATERIAL_COMPONENT_TEXTURE_DIFFUSE] = diffuse;
-            m_Components[MATERIAL_COMPONENT_TEXTURE_NORMAL] = normal;
-            m_Components[MATERIAL_COMPONENT_TEXTURE_GLOW] = glow;
-			m_Components[MATERIAL_COMPONENT_TEXTURE_SPECULAR] = specular;
+
+			_addComponent(MATERIAL_COMPONENT_TEXTURE_DIFFUSE,diffuse);
+			_addComponent(MATERIAL_COMPONENT_TEXTURE_NORMAL,normal);
+			_addComponent(MATERIAL_COMPONENT_TEXTURE_GLOW,glow);
+			_addComponent(MATERIAL_COMPONENT_TEXTURE_SPECULAR,specular);
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
@@ -52,26 +112,13 @@ class Material::impl final{
 			ref.a = m_Shadeless;
 		}
         void _destruct(){
+			for(auto component:m_Components)
+				delete component.second;
         }
-        void _addComponent(uint type, std::string& file){
-            if(m_Components[type] != nullptr)
+        void _addComponent(uint type, Texture* texture){
+			if(m_Components.count(type) && m_Components[type] != nullptr)
                 return;
-            m_Components[type] = new Texture(file);
-        }
-        void _bindTexture(uint c,GLuint shader,uint api){
-            if(api == ENGINE_RENDERING_API_OPENGL){
-                std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[c];
-                if(m_Components[c] == nullptr || m_Components[c]->address() == 0){//Texture / Material type not present; disable this material
-                    glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
-                    return;
-                }
-                glActiveTexture(GL_TEXTURE0 + c);
-                glBindTexture(m_Components[c]->type(), m_Components[c]->address());
-                glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), c);
-                glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
-            }
-            else if(api == ENGINE_RENDERING_API_DIRECTX){
-            }
+            m_Components[type] = new MaterialComponent(type,texture);
         }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
@@ -88,16 +135,13 @@ Material::Material(std::string diffuse, std::string normal, std::string glow,std
 Material::~Material(){
     m_i->_destruct();
 }
-void Material::addComponent(uint type, std::string file){
-    m_i->_addComponent(type,file);
+void Material::addComponent(uint type, Texture* texture){
+    m_i->_addComponent(type,texture);
 }
-void Material::bindTexture(uint c,GLuint shader,unsigned int api){
-    m_i->_bindTexture(c,shader,api);
+std::unordered_map<uint,MaterialComponent*>& Material::getComponents(){
+	return m_i->m_Components;
 }
-std::unordered_map<uint,Texture*>& Material::getComponents(){ 
-    return m_i->m_Components;
-}
-Texture* Material::getComponent(uint index){ 
+MaterialComponent* Material::getComponent(uint index){ 
     return m_i->m_Components[index];
 }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }

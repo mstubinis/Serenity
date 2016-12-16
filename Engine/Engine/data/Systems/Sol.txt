@@ -3,7 +3,7 @@ Sol
 data/Textures/Skyboxes/SolarSystem
 0
 
-S name=Sun radius=695800 r=1 g=1 b=0 r1=0.8 g1=0.8 b1=1 position=0
+S name=Sun radius=695800 r=1 g=1 b=0 r1=0.9 g1=0.9 b1=1 position=0
 
 P name=Mercuery parent=Sun radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.jpg eccentricity=0.20563 period=87.969 majorAxis=57909050 tilt=0.03 days=58.646
 

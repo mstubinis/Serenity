@@ -57,7 +57,7 @@ Planet::~Planet(){
 void Planet::update(float dt){
     if(m_RotationInfo != nullptr){
         float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
-        float secondsToRotate = m_RotationInfo->days * 86400.0;
+        float secondsToRotate = m_RotationInfo->days * 86400.0f;
         float finalSpeed = 1.0f / (secondsToRotate * (speed));
         rotate(0,finalSpeed,0);
     }
@@ -169,7 +169,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
                 glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
 				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
                 for(auto component:item->material->getComponents())
-                    item->material->bindTexture(component.first,shader,Engine::Resources::getAPI());
+					component.second->bind(shader,Resources::getAPI());
                 item->mesh->render();
             }
             glUseProgram(0);
@@ -406,6 +406,6 @@ void Ring::draw(GLuint shader){
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
     for(auto component:material->getComponents())
-        material->bindTexture(component.first,shader,Engine::Resources::getAPI());
+		component.second->bind(shader,Resources::getAPI());
     mesh->render();
 }
