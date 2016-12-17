@@ -5,15 +5,23 @@ uniform float far;
 uniform float C;
 uniform float BaseGlow;
 
-uniform sampler2D DiffuseMap;
-uniform sampler2D NormalMap;
-uniform sampler2D GlowMap;
-uniform sampler2D SpecularMap;
+uniform sampler2D DiffuseTexture;
 
-uniform int DiffuseMapEnabled;
-uniform int NormalMapEnabled;
-uniform int GlowMapEnabled;
-uniform int SpecularMapEnabled;
+uniform sampler2D NormalTexture;
+
+uniform sampler2D GlowTexture;
+
+uniform sampler2D SpecularTexture;
+
+uniform sampler2D ReflectionTexture; //the cubemap texture
+uniform sampler2D ReflectionTextureMap;
+uniform float ReflectionMixFactor;
+
+uniform int DiffuseTextureEnabled;
+uniform int NormalTextureEnabled;
+uniform int GlowTextureEnabled;
+uniform int SpecularTextureEnabled;
+uniform int ReflectionTextureEnabled;
 
 uniform int HasAtmosphere;
 uniform int HasGodsRays;
@@ -25,6 +33,7 @@ uniform vec3 gAmbientColor;
 varying vec3 c0;
 varying vec3 c1;
 
+varying vec3 CameraPosition;
 varying vec3 WorldPosition;
 varying vec4 Color;
 varying vec2 UV;
@@ -33,18 +42,18 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 vec3 CalcBumpedNormal(){
-    vec3 normalMapTexture = (texture2D(NormalMap, UV).xyz) * 2.0 - 1.0;
-    mat3 TBN = mat3(-Tangents, Binormals, Normals);
-    return normalize(TBN * normalMapTexture);
+    vec3 t = ((texture2D(NormalTexture, UV).xyz) * 2.0) - 1.0;
+    mat3 TBN = mat3(Tangents, Binormals, Normals);
+    return normalize(TBN * t);
 }
 void main(){
     if(HasAtmosphere == 1){
-        if(DiffuseMapEnabled == 1){
-            vec4 diffuse = texture2D(DiffuseMap, UV) * Object_Color;
+        if(DiffuseTextureEnabled == 1){
+            vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
             gl_FragData[0].rgb = max(gAmbientColor*diffuse.rgb,(1 - exp( -fExposure * ((c0+diffuse.rgb) * c1) )));
-            if(GlowMapEnabled == 1){
+            if(GlowTextureEnabled == 1){
                 vec3 lightIntensity = max(gAmbientColor*vec3(1),(1 - exp( -fExposure * ((c0+vec3(1)) * c1) )));
-                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1-lightIntensity)*texture2D(GlowMap, UV).rgb);
+                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1-lightIntensity)*texture2D(GlowTexture, UV).rgb);
             }
         }
         else{
@@ -55,31 +64,31 @@ void main(){
 		gl_FragData[2].g = 1.0;
     }
     else{
-        if(DiffuseMapEnabled == 1){
-            gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
+        if(DiffuseTextureEnabled == 1){
+            gl_FragData[0] = texture2D(DiffuseTexture, UV) * Object_Color;
 		}
         else{
             gl_FragData[0] = vec4(0.0);
 		}
 
-        if(NormalMapEnabled == 1){
+        if(NormalTextureEnabled == 1){
             gl_FragData[1].rgb = normalize(CalcBumpedNormal());
-            gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
+            gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
         else{
             gl_FragData[1].rgb = normalize(Normals);
-            gl_FragData[1].a = texture2D(DiffuseMap, UV).a;
+            gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
 
-        if(GlowMapEnabled == 1){
-            gl_FragData[2].r = texture2D(GlowMap, UV).r + BaseGlow;
+        if(GlowTextureEnabled == 1){
+            gl_FragData[2].r = texture2D(GlowTexture, UV).r + BaseGlow;
 		}
         else{
             gl_FragData[2].r = BaseGlow;
 		}
 
-		if(SpecularMapEnabled == 1){
-			gl_FragData[2].g = texture2D(SpecularMap, UV).r;
+		if(SpecularTextureEnabled == 1){
+			gl_FragData[2].g = texture2D(SpecularTexture, UV).r;
 		}
 		else{
 			gl_FragData[2].g = 1.0;

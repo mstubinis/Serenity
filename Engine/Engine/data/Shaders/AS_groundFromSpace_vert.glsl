@@ -35,6 +35,7 @@ varying vec3 c1;
 
 varying vec2 UV;
 
+varying vec3 CameraPosition;
 varying vec3 WorldPosition;
 varying vec3 Normals;
 varying vec3 Binormals;
@@ -93,6 +94,7 @@ void main()	{
     gl_TexCoord[6] = gl_Position;
 
     UV = uv;
+	CameraPosition = v3CameraPos;
 
     Normals = (Model * vec4(normal,0.0)).xyz;
     Tangents = (Model * vec4(tangent,0.0)).xyz;

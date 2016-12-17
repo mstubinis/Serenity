@@ -49,9 +49,6 @@
     <Filter Include="Resource Files\Shaders\ForwardRendering\AtmopshericScattering">
       <UniqueIdentifier>{9482e4ed-522e-4fe0-b336-5a2cc2814377}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Game">
-      <UniqueIdentifier>{9abb022b-e50f-4975-b26b-f67845d85b53}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Game">
       <UniqueIdentifier>{3f40b499-c23f-4f0d-8e66-2af89ecc0fd4}</UniqueIdentifier>
     </Filter>
@@ -112,6 +109,9 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays">
       <UniqueIdentifier>{cb419439-da42-4a8b-8393-4bc8c7160745}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Game">
+      <UniqueIdentifier>{9abb022b-e50f-4975-b26b-f67845d85b53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -142,22 +142,22 @@
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="Planet.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="SolarSystem.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="GameCamera.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="Ship.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="Station.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="Font.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
@@ -169,7 +169,7 @@
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="HUD.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="ObjectDisplay.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
@@ -178,19 +178,19 @@
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Lagrange.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="Math.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="CapsuleSpace.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="GBuffer.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="GameSkybox.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
     <ClCompile Include="Engine_Physics.cpp">
       <Filter>Source Files\Engine\Engine_Physics</Filter>

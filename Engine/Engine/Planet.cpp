@@ -110,6 +110,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 			glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
 
+
             if(m_AtmosphereHeight > 0){
                 glUniform1i(glGetUniformLocation(shader,"hasAtmosphere"),1);
                 glUniform1i(glGetUniformLocation(shader,"HasAtmosphere"),1);
@@ -168,9 +169,9 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             for(auto item:m_DisplayItems){
                 glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
 				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
-                for(auto component:item->material->getComponents())
-					component.second->bind(shader,Resources::getAPI());
-                item->mesh->render();
+				item->material->bind(shader,Resources::getAPI());
+				item->mesh->render();
+				item->material->unbind(Resources::getAPI());
             }
             glUseProgram(0);
             #pragma endregion
@@ -405,7 +406,8 @@ void Ring::draw(GLuint shader){
 
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-    for(auto component:material->getComponents())
-		component.second->bind(shader,Resources::getAPI());
+
+	material->bind(shader,Resources::getAPI());
     mesh->render();
+	material->unbind(Resources::getAPI());
 }

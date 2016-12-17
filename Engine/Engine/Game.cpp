@@ -58,6 +58,17 @@ void Game::initResources(){
     Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
 
     Resources::addParticleInfo("Smoke","Smoke");
+
+	//custom cubemap
+    std::string front = "data/Textures/Effects/Right.jpg";
+    std::string back = "data/Textures/Effects/Left.jpg";
+    std::string left = "data/Textures/Effects/Top.jpg";
+    std::string right = "data/Textures/Effects/Bottom.jpg";
+    std::string top = "data/Textures/Effects/Front.jpg";
+    std::string bottom = "data/Textures/Effects/Back.jpg";
+    std::string names[6] = {front,back,left,right,top,bottom};
+
+	Resources::getMaterial("Defiant")->addComponentReflection(names,"data/Textures/defiant_Reflection.png");
 }
 void Game::initLogic(){
 	Engine::getWindow()->keepMouseInWindow(true);

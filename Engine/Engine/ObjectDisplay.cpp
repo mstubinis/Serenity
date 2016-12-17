@@ -45,6 +45,10 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
 	glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
+
+	glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
+	glUniform3f(glGetUniformLocation(shader,"CameraPosition"),camPos.x,camPos.y,camPos.z);
+
     if(m_Shadeless)
         glUniform1i(glGetUniformLocation(shader, "Shadeless"),1);
 	if(godsRays)
@@ -66,9 +70,9 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 
         glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 
-        for(auto component:item->material->getComponents())
-			component.second->bind(shader,Resources::getAPI());
+		item->material->bind(shader,Resources::getAPI());
         item->mesh->render();
+		item->material->unbind(Resources::getAPI());
     }
     glUseProgram(0);
 }

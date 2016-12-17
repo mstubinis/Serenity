@@ -153,14 +153,14 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture->address());
-            glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
-            glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
+            glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"),0);
+            glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"),1);
         }
         else{
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, 0);
-            glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
-            glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),0);
+            glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"),0);
+            glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"),0);
         }
         glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
         glUniform4f(glGetUniformLocation(shader,"Object_Color"),item.col.r,item.col.g,item.col.b,item.col.a);
@@ -188,8 +188,8 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->address());
-        glUniform1i(glGetUniformLocation(shader,"DiffuseMap"),0);
-        glUniform1i(glGetUniformLocation(shader,"DiffuseMapEnabled"),1);
+        glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"),0);
+        glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"),1);
         glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
 
         glUniform4f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z,item.col.w);
@@ -226,7 +226,6 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
     glClearBufferfv(GL_COLOR,BUFFER_TYPE_DIFFUSE,colors);
     glDisable(GL_BLEND); //disable blending on all mrts
-
     s->renderSkybox(RendererInfo::GodRaysInfo::godRays);
 
     glDepthMask(GL_TRUE);
@@ -247,7 +246,7 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
 	glUniform4fv(glGetUniformLocation(shader,"materials"),MATERIAL_COUNT_LIMIT, glm::value_ptr(Material::m_MaterialProperities[0]));
-	glUniform2f( glGetUniformLocation(shader,"gScreenSize"), Resources::getWindowSize().x,Resources::getWindowSize().y);
+	glUniform2f( glGetUniformLocation(shader,"gScreenSize"), (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -273,9 +272,9 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     // Reset OpenGL state
     for(uint i = 0; i < 4; i++){
         glActiveTexture(GL_TEXTURE0 + i);
-        glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
@@ -430,9 +429,9 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom
 
     for(uint i = 0; i < 5; i++){
         glActiveTexture(GL_TEXTURE0 + i);
-        glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
@@ -507,9 +506,9 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
 
     for(uint i = 0; i < 1; i++){
         glActiveTexture(GL_TEXTURE0 + i);
-        glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, i);
     }
+	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float str,std::string channels){
@@ -595,9 +594,9 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
 
     for(uint i = 0; i < 6; i++){
         glActiveTexture(GL_TEXTURE0 + i);
-        glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height){

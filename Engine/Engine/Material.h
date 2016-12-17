@@ -29,11 +29,11 @@ enum MATERIAL_LIGHTING_MODE{
 };
 
 static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_NUMBER] = {
-    "DiffuseMap",
-    "NormalMap",
-    "GlowMap",
-	"SpecularMap",
-	"ReflectionMap"
+    "DiffuseTexture",
+    "NormalTexture",
+    "GlowTexture",
+	"SpecularTexture",
+	"ReflectionTexture"
 };
 
 static const uint MATERIAL_COUNT_LIMIT = 255;
@@ -42,13 +42,14 @@ static const uint MATERIAL_COUNT_LIMIT = 255;
 class MaterialComponent{
 	protected:
 		Texture* m_Texture;
-		uint m_ComponentType;
+		MATERIAL_COMPONENT_TYPE m_ComponentType;
 	public:
 		MaterialComponent(uint type,Texture*);
-		MaterialComponent(uint type,std::string texture);
-		virtual ~MaterialComponent();
+		MaterialComponent(uint type,std::string& texture);
+		~MaterialComponent();
 
 		virtual void bind(GLuint shader,uint api);
+		virtual void unbind(uint api);
 
 		const Texture* texture() const { return m_Texture; }
 		const MATERIAL_COMPONENT_TYPE type() const { return static_cast<MATERIAL_COMPONENT_TYPE>(m_ComponentType); }
@@ -56,13 +57,17 @@ class MaterialComponent{
 class MaterialComponentReflection: public MaterialComponent{
 	private:
 		Texture* m_ReflectionMap; //the texture that maps the reflection cubemap to the object
+		float m_MixFactor;
 	public:
-		MaterialComponentReflection(uint type,Texture* cubemap,Texture* map);
-		MaterialComponentReflection(uint type,std::string cubemap,std::string map);
+		MaterialComponentReflection(Texture* cubemap,Texture* map);
+		MaterialComponentReflection(std::string& cubemap,std::string& map);
 		~MaterialComponentReflection();
 
 		void bind(GLuint shader,uint api);
+		void unbind(uint api);
+		void setMixFactor(float);
 
+		const float mixFactor() const { return m_MixFactor; }
 		const Texture* reflection() const { return m_ReflectionMap; }
 };
 
@@ -81,8 +86,27 @@ class Material final{
         ~Material();
 
 		std::unordered_map<uint,MaterialComponent*>& getComponents();
-        MaterialComponent* getComponent(uint type);
+        const MaterialComponent* getComponent(uint type) const;
+
+		const MaterialComponentReflection* getComponentReflection() const;
+
+		void bind(GLuint shader,GLuint api);
+		void unbind(GLuint api);
+
         void addComponent(uint type, Texture* texture);
+
+		void addComponentDiffuse(Texture* texture);
+		void addComponentDiffuse(std::string& textureFile);
+
+		void addComponentNormal(Texture* texture);
+		void addComponentNormal(std::string& textureFile);
+
+		void addComponentSpecular(Texture* texture);
+		void addComponentSpecular(std::string& textureFile);
+
+		void addComponentReflection(Texture* cubeMap,Texture* map);
+		void addComponentReflection(std::string cubeMapName,std::string mapFile);
+		void addComponentReflection(std::string cubeMapTextureFiles[],std::string mapFile);
 
         const bool shadeless() const;
         const float glow() const;

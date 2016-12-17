@@ -1,7 +1,7 @@
 #version 120
 
-uniform sampler2D DiffuseMap;
-uniform int DiffuseMapEnabled;
+uniform sampler2D DiffuseTexture;
+uniform int DiffuseTextureEnabled;
 
 uniform vec4 Object_Color;
 
@@ -12,8 +12,8 @@ uniform float far;
 uniform float C;
 
 void main(){
-    if(DiffuseMapEnabled == 1.0){
-        gl_FragData[0] = texture2D(DiffuseMap, UV) * Object_Color;
+    if(DiffuseTextureEnabled == 1.0){
+        gl_FragData[0] = texture2D(DiffuseTexture, UV) * Object_Color;
     }
     else{
         gl_FragData[0] = Object_Color;
