@@ -42,18 +42,12 @@ void MaterialComponent::bind(GLuint shader,uint api){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-		if(m_Texture == nullptr || m_Texture->address() == 0){//disable this material
-            glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
-            return;
-        }
 		for(uint i = 0; i < slots.size(); i++){
 			glEnable(m_Texture->type());
-			glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
 			glActiveTexture(GL_TEXTURE0 + slots.at(i));
 			glBindTexture(m_Texture->type(), m_Texture->address());
 			glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(i));
 		}
-        
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
@@ -88,12 +82,8 @@ void MaterialComponentReflection::bind(GLuint shader,uint api){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-		if(m_Texture == nullptr || m_Texture->address() == 0){//disable this material component
-            glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
-            return;
-        }
+
 		glUniform1f(glGetUniformLocation(shader, "CubemapMixFactor"), m_MixFactor);
-		glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
 
 		glEnable(m_Texture->type());
 		glActiveTexture(GL_TEXTURE0 + slots.at(0));
@@ -133,13 +123,9 @@ void MaterialComponentRefraction::bind(GLuint shader,uint api){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-		if(m_Texture == nullptr || m_Texture->address() == 0){//disable this material component
-            glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
-            return;
-        }
+
 		glUniform1f(glGetUniformLocation(shader, "CubemapMixFactor"), m_MixFactor);
 		glUniform1f(glGetUniformLocation(shader, "RefractionRatio"), m_RefractionRatio);
-		glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 1);
 
 		glEnable(m_Texture->type());
 		glActiveTexture(GL_TEXTURE0 + slots.at(0));
@@ -304,28 +290,31 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 
 
 void Material::bind(GLuint shader,GLuint api){
+	glm::vec3 first(0.0f);
+	glm::vec3 second(0.0f);
 	for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
 		MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-		if(!m_i->m_Components.count(type)){
-			//disable
-			std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[(uint)type];
-			glUniform1i(glGetUniformLocation(shader,(textureTypeName+"Enabled").c_str()), 0);
-		}
-		else{
-			m_i->m_Components[type]->bind(shader,api);
-		}
-	}
-}
-void Material::unbind(GLuint api){
-	for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
-		MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-		if(!m_i->m_Components.count(type)){
-		}
-		else{
-			m_i->m_Components[type]->unbind(api);
+		if(m_i->m_Components.count(type)){
+			MaterialComponent* c = m_i->m_Components[type];
+			if(c->texture() != nullptr && c->texture()->address() != 0){
+				//enable
+				if     (i == 0){ first.x = 1.0f; }
+				else if(i == 1){ first.y = 1.0f; }
+				else if(i == 2){ first.z = 1.0f; }
+				else if(i == 3){ second.x = 1.0f; }
+				else if(i == 4){ second.y = 1.0f; }
+				else if(i == 5){ second.z = 1.0f; }
+				c->bind(shader,api);
+			}
+			else{
+				c->unbind(api);
+			}
 		}
 	}
+	glUniform3f(glGetUniformLocation(shader,"FirstConditionals"), first.x,first.y,first.z);
+	glUniform3f(glGetUniformLocation(shader,"SecondConditionals"), second.x,second.y,second.z);
 }
+
 std::unordered_map<uint,MaterialComponent*>& Material::getComponents(){ return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components[index]; }
 const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components[(uint)MATERIAL_COMPONENT_TYPE_REFLECTION]); }

@@ -171,7 +171,6 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
 				item->material->bind(shader,Resources::getAPI());
 				item->mesh->render();
-				item->material->unbind(Resources::getAPI());
             }
             glUseProgram(0);
             #pragma endregion
@@ -304,55 +303,41 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 
     uint count = 0;
     for(auto ringInfo: rings){
-        sf::Color paintCol = sf::Color(ringInfo.color.r,ringInfo.color.g,ringInfo.color.b,255);
-        glm::vec4 pC = glm::vec4(paintCol.r/255.0f,paintCol.g/255.0f,paintCol.b/255.0f,paintCol.a/255.0f);
+        glm::vec4 pC = glm::vec4(ringInfo.color.r/255.0f,ringInfo.color.g/255.0f,ringInfo.color.b/255.0f,1.0f);
         uint alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
         uint newI = 0;
         for(uint i = 0; i < ringInfo.size; i++){
             if(i > ringInfo.alphaBreakpoint){
                 uint numerator = alphaChangeRange - newI;
                 pC.a = float(numerator/(alphaChangeRange));
-                paintCol.a = uint(pC.a * 255);
                 newI++;
             }
             else{
                 pC.a = 1;
-                paintCol.a = 255;
             }
 
             if(count > 0){
-                sf::Color backgroundColorFront = ringImage.getPixel(ringInfo.position + i,0);
-                sf::Color backgroundColorBack = ringImage.getPixel(ringInfo.position - i,0);
-                glm::vec4 bCFront = glm::vec4(backgroundColorFront.r/255.0f,backgroundColorFront.g/255.0f,backgroundColorFront.b/255.0f,backgroundColorFront.a/255.0f);
-                glm::vec4 bCBack = glm::vec4(backgroundColorBack.r/255.0f,backgroundColorBack.g/255.0f,backgroundColorBack.b/255.0f,backgroundColorBack.a/255.0f);
-                sf::Color finalColorFront = sf::Color::White;
-                sf::Color finalColorBack = sf::Color::White;
+                sf::Color bgFrontPixel = ringImage.getPixel(ringInfo.position + i,0);
+                sf::Color bgBackPixel = ringImage.getPixel(ringInfo.position - i,0);
 
-                float fAFront = pC.a + bCFront.a * (1-pC.a);
-                float fABack = pC.a + bCBack.a * (1-pC.a);
-                finalColorFront.a = uint(fAFront * 255);
-                finalColorBack.a = uint(fABack * 255);
+				glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r/255.0f,bgFrontPixel.g/255.0f,bgFrontPixel.b/255.0f,bgFrontPixel.a/255.0f);
+				glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r/255.0f,bgBackPixel.g/255.0f,bgBackPixel.b/255.0f,bgBackPixel.a/255.0f);
 
-                finalColorFront.r = uint(((pC.r*pC.a + bCFront.r*bCFront.a * (1-pC.a)) / fAFront)* 255);
-                finalColorFront.g = uint(((pC.g*pC.a + bCFront.g*bCFront.a * (1-pC.a)) / fAFront)* 255);
-                finalColorFront.b = uint(((pC.b*pC.a + bCFront.b*bCFront.a * (1-pC.a)) / fAFront)* 255);
-
-                finalColorBack.r = uint(((pC.r*pC.a + bCBack.r*bCBack.a * (1-pC.a)) / fABack)* 255);
-                finalColorBack.g = uint(((pC.g*pC.a + bCBack.g*bCBack.a * (1-pC.a)) / fABack)* 255);
-                finalColorBack.b = uint(((pC.b*pC.a + bCBack.b*bCBack.a * (1-pC.a)) / fABack)* 255);
+				glm::vec4 finalColorFront = Engine::Math::PaintersAlgorithm(bgColorFront,pC);
+				glm::vec4 finalColorBack = Engine::Math::PaintersAlgorithm(bgColorBack,pC);
 
                 if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
-                    finalColorFront = sf::Color(backgroundColorFront.r,backgroundColorFront.g,backgroundColorFront.b,0);
-                    finalColorBack = sf::Color(backgroundColorBack.r,backgroundColorBack.g,backgroundColorBack.b,0);
+                    finalColorFront = glm::vec4(bgColorFront.r,bgColorFront.g,bgColorFront.b,0);
+                    finalColorBack = glm::vec4(bgColorBack.r,bgColorBack.g,bgColorBack.b,0);
 
                     uint numerator = ringInfo.size - i;
                     pC.a = float(numerator/(ringInfo.size));
-                    finalColorFront.a = 255 - uint(pC.a *255);
-                    finalColorBack.a = 255 - uint(pC.a *255);
+					finalColorFront.a = 1.0f - pC.a;
+                    finalColorBack.a = 1.0f - pC.a;
                 }
 
-                int ra = rand() % 10 - 5;
-                int ra1 = rand() % 10 - 5;
+                float ra = float(int(rand() % 10 - 5))/255.0f;
+                float ra1 = float(int(rand() % 10 - 5))/255.0f;
 
                 finalColorFront.r += ra;
                 finalColorFront.g += ra;
@@ -362,22 +347,25 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
                 finalColorBack.g += ra1;
                 finalColorBack.b += ra1;
 
+				sf::Color fFront = sf::Color(finalColorFront.r * 255, finalColorFront.g * 255, finalColorFront.b * 255, finalColorFront.a * 255);
+				sf::Color fBack = sf::Color(finalColorBack.r * 255, finalColorBack.g * 255, finalColorBack.b * 255, finalColorBack.a * 255);
+
                 for(unsigned int s = 0; s < ringImage.getSize().y; s++){
-                    ringImage.setPixel(ringInfo.position + i,s,finalColorFront);
-                    ringImage.setPixel(ringInfo.position - i,s,finalColorBack);
+                    ringImage.setPixel(ringInfo.position + i,s,fFront);
+                    ringImage.setPixel(ringInfo.position - i,s,fBack);
                 }
             }
             else{
-                sf::Color finalColor = paintCol;
                 int ra = rand() % 10 - 5;
 
-                finalColor.r += ra;
-                finalColor.g += ra;
-                finalColor.b += ra;
+                pC.r += ra;
+                pC.g += ra;
+                pC.b += ra;
+				sf::Color paintColor = sf::Color(pC.r * 255, pC.g * 255, pC.b * 255, pC.a * 255);
 
                 for(unsigned int s = 0; s < ringImage.getSize().y; s++){
-                    ringImage.setPixel(ringInfo.position + i,s,paintCol);
-                    ringImage.setPixel(ringInfo.position - i,s,paintCol);
+                    ringImage.setPixel(ringInfo.position + i,s,paintColor);
+                    ringImage.setPixel(ringInfo.position - i,s,paintColor);
                 }
             }
         }
@@ -409,5 +397,4 @@ void Ring::draw(GLuint shader){
 
 	material->bind(shader,Resources::getAPI());
     mesh->render();
-	material->unbind(Resources::getAPI());
 }

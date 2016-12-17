@@ -72,7 +72,6 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 
 		item->material->bind(shader,Resources::getAPI());
         item->mesh->render();
-		item->material->unbind(Resources::getAPI());
     }
     glUseProgram(0);
 }

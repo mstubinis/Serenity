@@ -68,8 +68,8 @@ void Game::initResources(){
     std::string bottom = "data/Textures/Effects/Back.jpg";
     std::string names[6] = {front,back,left,right,top,bottom};
 
-	//Resources::getMaterial("Defiant")->addComponentReflection(names,"data/Textures/defiant_Reflection.png");
-	Resources::getMaterial("Defiant")->addComponentRefraction(names,"data/Textures/defiant_Reflection.png",1.0f,1.33f);
+	Resources::getMaterial("Defiant")->addComponentReflection(names,"data/Textures/defiant_Reflection.png");
+	//Resources::getMaterial("Defiant")->addComponentRefraction(names,"data/Textures/defiant_Reflection.png",1.0f,1.53f);
 }
 void Game::initLogic(){
 	Engine::getWindow()->keepMouseInWindow(true);

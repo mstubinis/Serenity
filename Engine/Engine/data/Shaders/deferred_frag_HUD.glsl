@@ -1,6 +1,7 @@
 #version 120
 
 uniform sampler2D DiffuseTexture;
+
 uniform int DiffuseTextureEnabled;
 
 uniform vec4 Object_Color;

@@ -17,12 +17,8 @@ uniform samplerCube RefractionTexture;
 uniform sampler2D   RefractionTextureMap;
 uniform float       RefractionRatio;
 
-uniform int DiffuseTextureEnabled;
-uniform int NormalTextureEnabled;
-uniform int GlowTextureEnabled;
-uniform int SpecularTextureEnabled;
-uniform int ReflectionTextureEnabled;
-uniform int RefractionTextureEnabled;
+uniform vec3 FirstConditionals;  //x = diffuse  y = normals    z = glow
+uniform vec3 SecondConditionals; //x = specular y = reflection z = refraction
 
 uniform int HasAtmosphere;
 uniform int HasGodsRays;
@@ -49,10 +45,10 @@ vec3 CalcBumpedNormal(){
 }
 void main(void){
     if(HasAtmosphere == 1){
-        if(DiffuseTextureEnabled == 1){
+        if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
             gl_FragData[0].rgb = max(gAmbientColor*diffuse.rgb,(1 - exp( -fExposure * ((c0+diffuse.rgb) * c1) )));
-            if(GlowTextureEnabled == 1){
+            if(FirstConditionals.z > 0.5){
                 vec3 lightIntensity = max(gAmbientColor*vec3(1),(1 - exp( -fExposure * ((c0+vec3(1)) * c1) )));
                 gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1-lightIntensity)*texture2D(GlowTexture, UV).rgb);
             }
@@ -65,14 +61,14 @@ void main(void){
 		gl_FragData[2].g = 1.0;
     }
     else{
-        if(DiffuseTextureEnabled == 1){
+        if(FirstConditionals.x > 0.5){
             gl_FragData[0] = texture2D(DiffuseTexture, UV) * Object_Color;
 		}
         else{
             gl_FragData[0] = vec4(0.0);
 		}
 
-        if(NormalTextureEnabled == 1){
+        if(FirstConditionals.y > 0.5){
             gl_FragData[1].rgb = normalize(CalcBumpedNormal());
             gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
@@ -81,14 +77,14 @@ void main(void){
             gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
 
-        if(GlowTextureEnabled == 1){
+        if(FirstConditionals.z > 0.5){
             gl_FragData[2].r = texture2D(GlowTexture, UV).r + BaseGlow;
 		}
         else{
             gl_FragData[2].r = BaseGlow;
 		}
 
-		if(SpecularTextureEnabled == 1){
+		if(SecondConditionals.x > 0.5){
 			gl_FragData[2].g = texture2D(SpecularTexture, UV).r;
 		}
 		else{

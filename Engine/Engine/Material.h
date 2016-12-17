@@ -65,7 +65,7 @@ class MaterialComponent{
 		virtual void bind(GLuint shader,uint api);
 		virtual void unbind(uint api);
 
-		const Texture* texture() const { return m_Texture; }
+		Texture* texture() const { return m_Texture; }
 		const MATERIAL_COMPONENT_TYPE type() const { return static_cast<MATERIAL_COMPONENT_TYPE>(m_ComponentType); }
 };
 class MaterialComponentReflection: public MaterialComponent{
@@ -120,7 +120,6 @@ class Material final{
 		const MaterialComponentRefraction* getComponentRefraction() const;
 
 		void bind(GLuint shader,GLuint api);
-		void unbind(GLuint api);
 
         void addComponent(uint type, Texture* texture);
 
