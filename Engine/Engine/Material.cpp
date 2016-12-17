@@ -10,16 +10,16 @@ std::vector<glm::vec4> Material::m_MaterialProperities;
 std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
 	std::unordered_map<uint,std::vector<uint>> map;
 
-	map[MATERIAL_COMPONENT_TYPE_DIFFUSE].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_DIFFUSE);
-	map[MATERIAL_COMPONENT_TYPE_NORMAL].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_NORMAL);
-	map[MATERIAL_COMPONENT_TYPE_GLOW].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_GLOW);
-	map[MATERIAL_COMPONENT_TYPE_SPECULAR].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_SPECULAR);
+	map[MATERIAL_COMPONENT_TYPE_DIFFUSE].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_DIFFUSE);
+	map[MATERIAL_COMPONENT_TYPE_NORMAL].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_NORMAL);
+	map[MATERIAL_COMPONENT_TYPE_GLOW].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_GLOW);
+	map[MATERIAL_COMPONENT_TYPE_SPECULAR].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_SPECULAR);
 
-	map[MATERIAL_COMPONENT_TYPE_REFLECTION].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP);
-	map[MATERIAL_COMPONENT_TYPE_REFLECTION].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP_MAP);
+	map[MATERIAL_COMPONENT_TYPE_REFLECTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP);
+	map[MATERIAL_COMPONENT_TYPE_REFLECTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP_MAP);
 
-	map[MATERIAL_COMPONENT_TYPE_REFRACTION].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP);
-	map[MATERIAL_COMPONENT_TYPE_REFRACTION].push_back(MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP_MAP);
+	map[MATERIAL_COMPONENT_TYPE_REFRACTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP);
+	map[MATERIAL_COMPONENT_TYPE_REFRACTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP_MAP);
 
 	return map;
 }
@@ -39,11 +39,10 @@ MaterialComponent::MaterialComponent(uint type,std::string& textureFile){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(GLuint shader,uint api){
-	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 		for(uint i = 0; i < slots.size(); i++){
-			glEnable(m_Texture->type());
 			glActiveTexture(GL_TEXTURE0 + slots.at(i));
 			glBindTexture(m_Texture->type(), m_Texture->address());
 			glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(i));
@@ -52,12 +51,14 @@ void MaterialComponent::bind(GLuint shader,uint api){
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
 }
-void MaterialComponent::unbind(uint api){
-	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+void MaterialComponent::unbind(GLuint shader,uint api){
+	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
 	for(uint i = 0; i < slots.size(); i++){
 		if(api == ENGINE_RENDERING_API_OPENGL){
+			std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 			glActiveTexture(GL_TEXTURE0 + slots.at(i));
 			glBindTexture(m_Texture->type(), 0);
+			glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(i));
 		}
 		else if(api == ENGINE_RENDERING_API_DIRECTX){
 		}
@@ -79,18 +80,15 @@ void MaterialComponentReflection::setMixFactor(float factor){
 	m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(GLuint shader,uint api){
-	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-
 		glUniform1f(glGetUniformLocation(shader, "CubemapMixFactor"), m_MixFactor);
 
-		glEnable(m_Texture->type());
 		glActiveTexture(GL_TEXTURE0 + slots.at(0));
         glBindTexture(m_Texture->type(), m_Texture->address());
 		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(0));
 
-		glEnable(m_Map->type());
 		glActiveTexture(GL_TEXTURE0 + slots.at(1));
 		glBindTexture(m_Map->type(), m_Map->address());
 		glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), slots.at(1));
@@ -98,14 +96,17 @@ void MaterialComponentReflection::bind(GLuint shader,uint api){
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
 }
-void MaterialComponentReflection::unbind(uint api){
-	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+void MaterialComponentReflection::unbind(GLuint shader,uint api){
+	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
+		std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 		glActiveTexture(GL_TEXTURE0 + slots.at(0));
 		glBindTexture(m_Texture->type(), 0);
+		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(0));
 
 		glActiveTexture(GL_TEXTURE0 + slots.at(1));
 		glBindTexture(m_Map->type(), 0);
+		glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), slots.at(1));
 	}
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
@@ -120,19 +121,17 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
 	MaterialComponentReflection::~MaterialComponentReflection();
 }
 void MaterialComponentRefraction::bind(GLuint shader,uint api){
-	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
 		glUniform1f(glGetUniformLocation(shader, "CubemapMixFactor"), m_MixFactor);
 		glUniform1f(glGetUniformLocation(shader, "RefractionRatio"), m_RefractionRatio);
 
-		glEnable(m_Texture->type());
 		glActiveTexture(GL_TEXTURE0 + slots.at(0));
         glBindTexture(m_Texture->type(), m_Texture->address());
 		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(0));
 
-		glEnable(m_Map->type());
 		glActiveTexture(GL_TEXTURE0 + slots.at(1));
 		glBindTexture(m_Map->type(), m_Map->address());
 		glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), slots.at(1));
@@ -307,7 +306,7 @@ void Material::bind(GLuint shader,GLuint api){
 				c->bind(shader,api);
 			}
 			else{
-				c->unbind(api);
+				c->unbind(shader,api);
 			}
 		}
 	}

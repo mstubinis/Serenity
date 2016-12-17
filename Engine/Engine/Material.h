@@ -31,7 +31,6 @@ enum MATERIAL_COMPONENT_TYPE_TEXTURE_SLOTS{
 	MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP_MAP,
 	MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP,
 	MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP_MAP,
-    MATERIAL_COMPONENT_TYPE_SLOT_NUMBER
 };
 
 enum MATERIAL_LIGHTING_MODE{
@@ -63,7 +62,7 @@ class MaterialComponent{
 		virtual ~MaterialComponent();
 
 		virtual void bind(GLuint shader,uint api);
-		virtual void unbind(uint api);
+		virtual void unbind(GLuint shader,uint api);
 
 		Texture* texture() const { return m_Texture; }
 		const MATERIAL_COMPONENT_TYPE type() const { return static_cast<MATERIAL_COMPONENT_TYPE>(m_ComponentType); }
@@ -78,7 +77,7 @@ class MaterialComponentReflection: public MaterialComponent{
 		~MaterialComponentReflection();
 
 		virtual void bind(GLuint shader,uint api);
-		virtual void unbind(uint api);
+		void unbind(GLuint shader,uint api);
 		void setMixFactor(float);
 
 		const float mixFactor() const { return m_MixFactor; }

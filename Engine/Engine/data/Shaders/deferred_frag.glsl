@@ -7,9 +7,10 @@ uniform sampler2D SpecularTexture;
 
 uniform samplerCube ReflectionTexture;
 uniform sampler2D   ReflectionTextureMap;
-uniform float       CubemapMixFactor;
 uniform samplerCube RefractionTexture;
 uniform sampler2D   RefractionTextureMap;
+
+uniform float       CubemapMixFactor;
 uniform float       RefractionRatio;
 
 uniform float far;
@@ -80,16 +81,10 @@ void main(void){
 	*/
 
     if(Shadeless == 0){
-        if(FirstConditionals.z > 0.5){
-            gl_FragData[2].r += texture2D(GlowTexture, UV).r;
-        }
-		if(SecondConditionals.x > 0.5){
-			gl_FragData[2].g = texture2D(SpecularTexture, UV).r;
-		}
+        if(FirstConditionals.z > 0.5){ gl_FragData[2].r += texture2D(GlowTexture, UV).r; }
+		if(SecondConditionals.x > 0.5){ gl_FragData[2].g = texture2D(SpecularTexture, UV).r; }
     }
-    else{
-        gl_FragData[1].rgb = vec3(1.0);
-    }
+    else{ gl_FragData[1].rgb = vec3(1.0); }
 
     gl_FragData[1].a = Object_Color.a;
     gl_FragData[2].b = matID;

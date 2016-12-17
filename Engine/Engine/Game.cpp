@@ -14,6 +14,7 @@
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
 #include "Material.h"
+#include "Texture.h"
 
 #include <unordered_map>
 
@@ -60,6 +61,7 @@ void Game::initResources(){
     Resources::addParticleInfo("Smoke","Smoke");
 
 	//custom cubemap
+	/*
     std::string front = "data/Textures/Effects/Right.jpg";
     std::string back = "data/Textures/Effects/Left.jpg";
     std::string left = "data/Textures/Effects/Top.jpg";
@@ -68,8 +70,11 @@ void Game::initResources(){
     std::string bottom = "data/Textures/Effects/Back.jpg";
     std::string names[6] = {front,back,left,right,top,bottom};
 
-	Resources::getMaterial("Defiant")->addComponentReflection(names,"data/Textures/defiant_Reflection.png");
-	//Resources::getMaterial("Defiant")->addComponentRefraction(names,"data/Textures/defiant_Reflection.png",1.0f,1.53f);
+	new Texture(names,"CubemapGold");
+
+	//Resources::getMaterial("Defiant")->addComponentReflection("CubemapGold","data/Textures/defiant_Reflection.png");
+	//Resources::getMaterial("Defiant")->addComponentRefraction("CubemapGold","data/Textures/defiant_Reflection.png",1.0f,1.53f);
+	*/
 }
 void Game::initLogic(){
 	Engine::getWindow()->keepMouseInWindow(true);

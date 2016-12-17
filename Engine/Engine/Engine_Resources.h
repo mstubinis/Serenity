@@ -18,8 +18,9 @@ enum ENGINE_RENDERING_API{
     ENGINE_RENDERING_API_DIRECTX
 };
 
-class Engine_Window;
+typedef unsigned int uint;
 
+class Engine_Window;
 class Scene;
 class Font;
 class Texture;
@@ -41,15 +42,11 @@ struct ParticleInfo;
 //    p = nullptr;
 //}
 
-template<class K, class V> std::string incrementName(std::unordered_map<K,V>& map, std::string name){
-    std::string ret = name;unsigned int count = 0;
-    if(map.size() > 0){while(map.count(ret)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
-    return ret;
+template<class K, class V> std::string incrementName(std::unordered_map<K,V>& m, std::string n){
+    std::string r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<std::string>(c);c++;}}return r;
 }
-template<class K, class V> std::string incrementName(std::map<K,V>& map, std::string name){
-    std::string ret = name;unsigned int count = 0;
-    if(map.size() > 0){while(map.count(ret)){ret = name + " " + boost::lexical_cast<std::string>(count);count++;}}
-    return ret;
+template<class K, class V> std::string incrementName(std::map<K,V>& m, std::string n){
+    std::string r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<std::string>(c);c++;}}return r;
 }
 
 namespace Engine{

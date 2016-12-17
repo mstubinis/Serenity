@@ -19,6 +19,7 @@ class Texture::impl final{
         GLuint m_Type;
         unsigned int m_Width, m_Height;
         void _loadFromPixels(const unsigned char* pixels,unsigned int w, unsigned int h,GLuint type){
+			m_Type = type;
             if(type == GL_TEXTURE_2D){
                 glGenTextures(1, &m_TextureAddress);
 
@@ -35,24 +36,19 @@ class Texture::impl final{
             }
         }
         void _loadFromFile(std::string file,GLuint type){
-            std::string extention;
-            for(unsigned int i = file.length() - 4; i < file.length(); i++) extention += tolower(file.at(i));
-
+			m_Type = type;
             sf::Image image;
             image.loadFromFile(file.c_str());
             _loadFromPixels(image.getPixelsPtr(), image.getSize().x, image.getSize().y, type);
         }
         void _loadFromFilesCubemap(std::string file[],GLuint type){
+			m_Type = type;
             if(type == GL_TEXTURE_CUBE_MAP){
                 glGenTextures(1, &m_TextureAddress);
                 glBindTexture(type, m_TextureAddress);
                 for(unsigned int i = 0; i < 6; i++){
-                    std::string extention;
-                    for(unsigned int s = file[i].length() - 4; s < file[i].length(); s++) extention += tolower(file[i].at(s));
-
                     sf::Image image;
                     image.loadFromFile(file[i].c_str());
-
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
                 }
                 glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -64,16 +60,14 @@ class Texture::impl final{
             }
         }
     public:
-        void _construct(const unsigned char* pixels,unsigned int w, unsigned int h,std::string name,GLuint type){
+        void _construct(const unsigned char* pixels,uint w, uint h,std::string name,GLuint type){
             _init();
-            m_Type = type;
             _loadFromPixels(pixels,w,h,type);
-            m_Name = name;
+			m_Name = incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
         }
         void _construct(std::string file,std::string name,GLuint type){
+			_init();
             m_Directory = file;
-            _init();
-            m_Type = type;
             if(file != ""){
                 _loadFromFile(file,type);
             }
@@ -81,30 +75,17 @@ class Texture::impl final{
             if(name == ""){
                 m_Name = file;
             }
+			m_Name = incrementName(Resources::Detail::ResourceManagement::m_Textures,m_Name);
         }
         void _construct(std::string files[],std::string name,GLuint type){
-            m_Directory = "";
-            _init();
-            m_Type = type;
+			_init();
             _loadFromFilesCubemap(files,type);
-            m_Name = name;
-            if(name == "Cubemap "){
-                unsigned int total = 0;
-                for(auto texture:Resources::Detail::ResourceManagement::m_Textures){
-                    std::string lower = texture.second->name();
-                    boost::to_lower(lower);
-                    if(boost::algorithm::contains(lower,"cubemap")){
-                        total++;
-                    }
-                }
-                m_Name = "Cubemap " + boost::lexical_cast<std::string>(total);
-            }
+			m_Name = incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
         }
         void _init(){
+			m_Directory = "";
             m_Pixels.clear();
-            m_TextureAddress = 0;
-            m_Width = 0;
-            m_Height = 0;
+            m_Width = m_Height = m_TextureAddress = 0;
         }
         void _destruct(){
             glDeleteTextures(1,&m_TextureAddress);
@@ -121,13 +102,13 @@ class Texture::impl final{
         }
         const GLuint _address() const { return m_TextureAddress; }
         const GLuint _type() const { return m_Type; }
-        const unsigned int _width() const { return m_Width; }
-        const unsigned int _height() const { return m_Height; }
+        const uint _width() const { return m_Width; }
+        const uint _height() const { return m_Height; }
         const std::string _name() const { return m_Name; }
 };
 
 
-Texture::Texture(const unsigned char* pixels,unsigned int w, unsigned int h,std::string name,GLuint type):m_i(new impl()){
+Texture::Texture(const unsigned char* pixels,uint w, uint h,std::string name,GLuint type):m_i(new impl()){
     m_i->_construct(pixels,w,h,name,type);
     Resources::Detail::ResourceManagement::m_Textures[m_i->_name()] = boost::shared_ptr<Texture>(this);
 }
@@ -150,6 +131,6 @@ void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, 
 unsigned char* Texture::pixels(){ return m_i->_getPixels(); }
 GLuint Texture::address() { return m_i->_address(); }
 GLuint Texture::type() { return m_i->_type(); }
-unsigned int Texture::width() { return m_i->_width(); }
-unsigned int Texture::height() { return m_i->_height(); }
+uint Texture::width() { return m_i->_width(); }
+uint Texture::height() { return m_i->_height(); }
 std::string Texture::name() { return m_i->_name(); }

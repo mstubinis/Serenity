@@ -361,7 +361,6 @@ void Engine::Renderer::Detail::RenderManagement::render(){
         Physics::Detail::PhysicsManagement::render();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
     _renderForwardRenderedObjects();
     _renderForegroundObjects();
 

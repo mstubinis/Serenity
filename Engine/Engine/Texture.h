@@ -19,7 +19,7 @@ class Texture final{
     public:
         Texture(const unsigned char*,unsigned int, unsigned int,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
-        Texture(std::string file[],std::string name = "Cubemap ",GLuint = GL_TEXTURE_CUBE_MAP);
+        Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP);
         ~Texture();
 
 		unsigned char* pixels();

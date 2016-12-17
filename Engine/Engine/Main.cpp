@@ -13,13 +13,13 @@ using namespace Engine;
 int main(){
 	srand((unsigned)time(0));
     Resources::Detail::ResourceManagement::m_RenderingAPI = ENGINE_RENDERING_API_OPENGL;
-    #ifdef _WIN32
+	#ifdef _WIN32
         if(GetConsoleWindow() == NULL){ 
             AllocConsole();
         }
         freopen("CONIN$", "r", stdin);freopen("CONOUT$", "w", stdout);freopen("CONOUT$", "w", stderr);
         #ifndef _DEBUG
-            ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
+            //ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
         #endif
     #endif
     Detail::EngineClass::init(Resources::Detail::ResourceManagement::m_RenderingAPI,"Engine",1024,768);
