@@ -58,9 +58,6 @@
     <Filter Include="Source Files\Engine\Rendering">
       <UniqueIdentifier>{445d46fd-3b43-47ff-abec-53ef9754382a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Rendering">
-      <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine\Engine_Physics">
       <UniqueIdentifier>{3a2e7bad-5480-4d3f-ac97-ba47fa346f19}</UniqueIdentifier>
     </Filter>
@@ -111,6 +108,9 @@
     </Filter>
     <Filter Include="Source Files\Engine\Game">
       <UniqueIdentifier>{9abb022b-e50f-4975-b26b-f67845d85b53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Rendering">
+      <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

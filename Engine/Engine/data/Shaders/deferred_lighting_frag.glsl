@@ -74,7 +74,7 @@ vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     return vec4(0);
 }
-void main(){
+void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
 	vec2 uv = gl_FragCoord.xy / gScreenSize;
 

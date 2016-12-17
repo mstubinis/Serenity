@@ -5,7 +5,7 @@ uniform float gamma;
 
 uniform sampler2D lightingBuffer;
 
-void main(){
+void main(void){
     vec2 uv = gl_TexCoord[0].st;
 	vec3 lighting = texture2D(lightingBuffer, uv).rgb;
 

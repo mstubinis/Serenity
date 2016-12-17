@@ -158,3 +158,14 @@ glm::num Math::grad(int hash, glm::num x, glm::num y, glm::num z){
     double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
     return glm::num(((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v));
 }
+glm::vec4 Math::PaintersAlgorithm(glm::vec4& bottomColor, glm::vec4& topColor){
+	glm::vec4 ret(0);
+
+	float _a = topColor.a + bottomColor.a * (1-topColor.a);
+	ret.r = ((topColor.r*topColor.a + bottomColor.r*bottomColor.a * (1-topColor.a)) / _a);
+    ret.g = ((topColor.g*topColor.a + bottomColor.g*bottomColor.a * (1-topColor.a)) / _a);
+    ret.b = ((topColor.b*topColor.a + bottomColor.b*bottomColor.a * (1-topColor.a)) / _a);
+	ret.a = _a;
+
+	return ret;
+}

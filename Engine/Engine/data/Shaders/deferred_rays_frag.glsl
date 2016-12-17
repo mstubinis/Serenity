@@ -11,7 +11,7 @@ uniform int samples;
 uniform int behind;
 uniform float alpha;
 
-void main(){
+void main(void){
 	if(behind == 0){
 		vec2 uv = gl_TexCoord[0].st*2.0;
 		vec2 deltaUV = vec2(uv - lightPositionOnScreen);

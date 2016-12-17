@@ -16,7 +16,7 @@ uniform float gamma;
 
 uniform vec3 gAmbientColor;
 
-void main(){
+void main(void){
     vec2 uv = gl_TexCoord[0].st;
     vec4 diffuse = texture2D(gDiffuseMap, uv);
 	vec3 normals = texture2D(gNormalMap,uv).rgb;

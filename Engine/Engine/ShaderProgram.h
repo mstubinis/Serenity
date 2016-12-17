@@ -11,7 +11,7 @@ class ShaderP final{
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
-        ShaderP(std::string vs,std::string ps, bool fromFile = true);
+        ShaderP(std::string shaderName, std::string vs,std::string ps, bool fromFile = true);
         ~ShaderP();
 
         void initRenderingContext(uint api);

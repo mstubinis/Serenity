@@ -82,6 +82,8 @@ namespace Engine{
 		double grad(int hash, double x, double y, double z);
 		glm::num grad(int hash,glm::num x,glm::num y,glm::num z);
 
+		glm::vec4 PaintersAlgorithm(glm::vec4& bottomColor, glm::vec4& topColor);
+
     };
 };
 #endif

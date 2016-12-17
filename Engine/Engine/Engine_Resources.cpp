@@ -61,7 +61,7 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
         it->second.reset();
     for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               
         it->second.reset();
-    SAFE_DELETE( Detail::ResourceManagement::m_Window);
+    SAFE_DELETE(Detail::ResourceManagement::m_Window);
 }
 Engine_Window* Engine::Resources::getWindow(){ return Detail::ResourceManagement::m_Window; }
 sf::Vector2u Engine::Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
@@ -115,7 +115,7 @@ void Engine::Resources::addParticleInfo(std::string name, Material* material){
 void Engine::Resources::addShader(std::string name, std::string vShader, std::string fShader, bool fromFile){
     if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
         return;
-    Detail::ResourceManagement::m_Shaders[name] = boost::make_shared<ShaderP>(vShader,fShader,fromFile);
+    Detail::ResourceManagement::m_Shaders[name] = boost::make_shared<ShaderP>(name,vShader,fShader,fromFile);
 }
 
 void Engine::Resources::addSound(std::string name, std::string file, bool asEffect){
@@ -208,7 +208,6 @@ void Engine::Resources::initResources(){
     addShader("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl");
     addShader("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl");
     addShader("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl");
-    addShader("Deferred_Skybox_HUD","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_HUD.glsl");
     addShader("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl");
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);

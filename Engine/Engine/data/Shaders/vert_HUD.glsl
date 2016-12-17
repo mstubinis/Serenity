@@ -13,7 +13,7 @@ varying vec2 UV;
 
 varying vec3 WorldPosition;
 
-void main(){
+void main(void){
     mat4 MVP = VP * Model;
     UV = uv;
     gl_Position = MVP * vec4(position, 1.0);

@@ -160,7 +160,7 @@ void Engine::Physics::Detail::PhysicsManagement::render(){
         glPopMatrix();
     }
 }
-Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type, float mass){ 
+Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type, float mass){
     m_CollisionShape = shape;
     m_CollisionType = type;
     _init(type,mass);
@@ -181,10 +181,12 @@ void Collision::_init(COLLISION_TYPE type, float mass){
 }
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);
-    SAFE_DELETE(m_CollisionShape); 
+	SAFE_DELETE(m_InternalMeshData);
+    SAFE_DELETE(m_CollisionShape);
     m_CollisionType = COLLISION_TYPE_NONE;
 }
 void Collision::_load(std::string file, COLLISION_TYPE collisionType){
+	m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
     std::string extention; for(uint i = file.length() - 4; i < file.length(); i++) extention += tolower(file.at(i));
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(file);
@@ -204,7 +206,7 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
             break;
         }
         case COLLISION_TYPE_TRIANGLESHAPE:{
-           btTriangleMesh* mesh = new btTriangleMesh();
+           m_InternalMeshData = new btTriangleMesh();
             if(extention == ".obj"){
                 #pragma region OBJ
 				MeshData data;
@@ -219,22 +221,22 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
                     btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
                     btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
                     btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
-                    mesh->addTriangle(bv1, bv2, bv3,true);
+                    m_InternalMeshData->addTriangle(bv1, bv2, bv3,true);
                 }
                 #pragma endregion
             }
 
-            shape = new btGImpactMeshShape(mesh);
+            shape = new btGImpactMeshShape(m_InternalMeshData);
             ((btGImpactMeshShape*)shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             ((btGImpactMeshShape*)shape)->setMargin(0.001f);
             ((btGImpactMeshShape*)shape)->updateBound();
-            
+
             m_CollisionShape = shape;
             m_CollisionType = COLLISION_TYPE_TRIANGLESHAPE;
             break;
         }
 		case COLLISION_TYPE_STATIC_TRIANGLESHAPE:{
-           btTriangleMesh* mesh = new btTriangleMesh();
+            m_InternalMeshData = new btTriangleMesh();
             if(extention == ".obj"){
                 #pragma region OBJ
 				MeshData data;
@@ -249,11 +251,11 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
                     btVector3 v1 = btVector3(v1Pos.x,v1Pos.y,v1Pos.z);
                     btVector3 v2 = btVector3(v2Pos.x,v2Pos.y,v2Pos.z);
                     btVector3 v3 = btVector3(v3Pos.x,v3Pos.y,v3Pos.z);
-                    mesh->addTriangle(v1, v2, v3,true);
+                    m_InternalMeshData->addTriangle(v1, v2, v3,true);
                 }
                 #pragma endregion
             }
-            shape = new btBvhTriangleMeshShape(mesh,true);
+            shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
             (shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             (shape)->setMargin(0.001f);
 

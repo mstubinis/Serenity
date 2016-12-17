@@ -16,7 +16,7 @@ varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
 
-void main(){
+void main(void){
     mat4 MVP = VP * Model;
     gl_Position = MVP * vec4(position, 1.0);
     gl_TexCoord[6] = gl_Position;

@@ -51,7 +51,7 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
     float fDet = max(0.0, B*B - 4.0 * C);
     return 0.5 * (-B - sqrt(fDet));
 }
-void main()	{
+void main(void){
     mat4 MVP = VP * Model;
     if(hasAtmosphere == 1){
         vec4 test = (Rot * vec4(position,1.0));

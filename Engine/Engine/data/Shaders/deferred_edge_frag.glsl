@@ -36,7 +36,7 @@ float IsEdge(vec2 coords){
     delta = (abs(pix[1]-pix[7])+abs(pix[5]-pix[3]) +abs(pix[0]-pix[8])+abs(pix[2]-pix[6]))/2.0;
     return threshold(0.15,0.6,clamp(1.8*delta,0.0,1.0));
 }
-void main(){
+void main(void){
     vec2 uv = gl_TexCoord[0].st;
     float edge = IsEdge(gl_TexCoord[0].xy);
     gl_FragColor = vec4(edge);

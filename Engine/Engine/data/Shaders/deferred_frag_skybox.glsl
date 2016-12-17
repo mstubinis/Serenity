@@ -7,7 +7,7 @@ varying vec3 WorldPosition;
 
 uniform int HasGodsRays;
 
-void main(){
+void main(void){
     gl_FragData[0] = textureCube(Texture, UV);
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;

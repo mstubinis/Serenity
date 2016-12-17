@@ -11,12 +11,10 @@ varying vec2 UV;
 uniform float far;
 uniform float C;
 
-void main(){
-    if(DiffuseTextureEnabled == 1.0){
-        gl_FragData[0] = texture2D(DiffuseTexture, UV) * Object_Color;
-    }
-    else{
-        gl_FragData[0] = Object_Color;
+void main(void){
+	gl_FragData[0] = Object_Color;
+    if(DiffuseTextureEnabled == 1){
+        gl_FragData[0] *= texture2D(DiffuseTexture, UV);
     }
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;

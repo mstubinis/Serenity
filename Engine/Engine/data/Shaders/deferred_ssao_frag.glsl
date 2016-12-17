@@ -30,7 +30,7 @@ float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
     float dist = length(diff)/gScale;
     return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;
 }
-void main(){
+void main(void){
     vec2 uv = gl_TexCoord[0].st*2.0;
     vec3 worldPosition = texture2D(gPositionMap,uv).xyz;
     vec3 normal = texture2D(gNormalMap, uv).xyz;

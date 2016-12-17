@@ -46,7 +46,7 @@ float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadiu
     float fDet = max(0.0, B*B - 4.0 * C);
     return 0.5 * (-B - sqrt(fDet));
 }
-void main(){
+void main(void){
     mat4 MVP = VP * Model;
     vec3 v3Pos = position * vec3(fOuterRadius);
     vec3 v3Ray = v3Pos - v3CameraPos;

@@ -25,7 +25,7 @@ float gauss[7] = float[](
     0.115876621105,
     0.147308056121
 );
-void main(){
+void main(void){
     for(int i = 0; i < 7; i++){
         offset[i] = vec2(-weights[i] * radius * HV.x, -weights[i] * radius * HV.y);
         offset[13-i] = vec2(weights[i] * radius * HV.x, weights[i] * radius * HV.y);

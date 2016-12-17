@@ -16,6 +16,7 @@ class GLDebugDrawer;
 class btCollisionShape;
 class btRigidBody;
 class btVector3;
+class btTriangleMesh;
 
 typedef unsigned int uint;
 
@@ -29,6 +30,7 @@ enum COLLISION_TYPE {
 };
 class Collision final{
     private:
+		btTriangleMesh* m_InternalMeshData;
         btVector3* m_Inertia;
         uint m_CollisionType;
         btCollisionShape* m_CollisionShape;

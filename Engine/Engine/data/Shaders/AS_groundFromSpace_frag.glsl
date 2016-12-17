@@ -6,22 +6,23 @@ uniform float C;
 uniform float BaseGlow;
 
 uniform sampler2D DiffuseTexture;
-
 uniform sampler2D NormalTexture;
-
 uniform sampler2D GlowTexture;
-
 uniform sampler2D SpecularTexture;
 
-uniform sampler2D ReflectionTexture; //the cubemap texture
-uniform sampler2D ReflectionTextureMap;
-uniform float ReflectionMixFactor;
+uniform samplerCube ReflectionTexture;
+uniform sampler2D   ReflectionTextureMap;
+uniform float       CubemapMixFactor;
+uniform samplerCube RefractionTexture;
+uniform sampler2D   RefractionTextureMap;
+uniform float       RefractionRatio;
 
 uniform int DiffuseTextureEnabled;
 uniform int NormalTextureEnabled;
 uniform int GlowTextureEnabled;
 uniform int SpecularTextureEnabled;
 uniform int ReflectionTextureEnabled;
+uniform int RefractionTextureEnabled;
 
 uniform int HasAtmosphere;
 uniform int HasGodsRays;
@@ -42,11 +43,11 @@ varying vec3 Binormals;
 varying vec3 Tangents;
 
 vec3 CalcBumpedNormal(){
-    vec3 t = ((texture2D(NormalTexture, UV).xyz) * 2.0) - 1.0;
+    vec3 t = (texture2D(NormalTexture, UV).xyz * 2.0) - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
     return normalize(TBN * t);
 }
-void main(){
+void main(void){
     if(HasAtmosphere == 1){
         if(DiffuseTextureEnabled == 1){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
