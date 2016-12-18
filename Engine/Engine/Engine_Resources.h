@@ -139,13 +139,13 @@ namespace Engine{
     //TODO: Move this somewhere else
     template<typename T>
     static std::string convertNumToNumWithCommas(T n){
-        std::string numWithCommas = std::to_string(n);
-        int insertPosition = numWithCommas.length() - 3;
+        std::string r = std::to_string(n);
+        int insertPosition = r.length() - 3;
         while (insertPosition > 0) {
-            numWithCommas.insert(insertPosition, ",");
+            r.insert(insertPosition, ",");
             insertPosition-=3;
         }
-        return numWithCommas;
+        return r;
     }
 };
 #endif

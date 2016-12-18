@@ -2020,12 +2020,8 @@ void Atmosphere::render(bool godsRays){
     glUniform1f(glGetUniformLocation(shader,"g2"), m_Atmosphere.gravity*m_Atmosphere.gravity);
     glUniform1f(glGetUniformLocation(shader,"fExposure"),m_Atmosphere.exposure);
 
-	if(godsRays == true){
-		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1);
-	}
-	else{
-		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0);
-	}
+	if(godsRays){ glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1); }
+	else{         glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0); }
 
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);

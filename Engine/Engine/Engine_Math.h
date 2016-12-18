@@ -59,8 +59,8 @@ namespace Engine{
         float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
         void alignTo(glm::quat& o, glm::vec3& direction,float speed=0, bool overTime=false);
 
-        void setColor(glm::vec3&,float r,float g,float b);
-        void setColor(glm::vec4&,float r,float g,float b,float a);
+        void setColor(glm::vec3& color,float r,float g,float b);
+        void setColor(glm::vec4& color,float r,float g,float b,float a);
 
 		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians);
 		bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num fovDistance);
@@ -82,8 +82,9 @@ namespace Engine{
 		double grad(int hash, double x, double y, double z);
 		glm::num grad(int hash,glm::num x,glm::num y,glm::num z);
 
-		glm::vec4 PaintersAlgorithm(glm::vec4& bottomColor, glm::vec4& topColor);
+		glm::vec4 PaintersAlgorithm(glm::vec4& paintColor, glm::vec4& canvasColor);
 
+		bool rayIntersectSphere(glm::vec3& position, float radius, glm::v3& A, glm::vec3& rayVector);
     };
 };
 #endif

@@ -403,26 +403,7 @@ void ObjectDynamic::calculateRadius(){
     m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
 }
 bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
-    glm::vec3 a1 = glm::vec3(A);
-    glm::vec3 B = a1 + rayVector;
-
-    glm::vec3 C = glm::vec3(getPosition());
-    float r = getRadius();
-
-    //check if point is behind
-    float dot = glm::dot(rayVector,C-a1);
-    if(dot >= 0)
-        return false;
-
-    glm::num a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
-    glm::num b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
-    glm::num c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
-
-    glm::num Delta = (b*b) - (4*a*c);
-
-    if(Delta < 0)
-        return false;
-    return true;
+	return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
 
 glm::quat ObjectDynamic::getOrientation(){
@@ -433,13 +414,4 @@ glm::vec3 ObjectDynamic::getScale(){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
-glm::m4 ObjectDynamic::getModel(){
-	/*
-    glm::mat4 m1(1);
-    btTransform tr;
-    m_RigidBody->getMotionState()->getWorldTransform(tr);
-    tr.getOpenGLMatrix(glm::value_ptr(m1));
-    return glm::m4(m1);
-	*/
-	return m_Model;
-}
+glm::m4 ObjectDynamic::getModel(){ return m_Model; }

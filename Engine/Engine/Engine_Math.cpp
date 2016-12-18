@@ -124,18 +124,18 @@ void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed, bool overTime
         }
     }
 }
-void Math::setColor(glm::vec3& color,float r, float g, float b){
+void Math::setColor(glm::vec3& c,float r, float g, float b){
     if(r > 1) r = r / 255.0f;
     if(g > 1) g = g / 255.0f;
     if(b > 1) b = b / 255.0f;
-    color.x = r; color.y = g; color.z = b;
+    c.x = r; c.y = g; c.z = b;
 }
-void Math::setColor(glm::vec4& color,float r, float g, float b,float a){
+void Math::setColor(glm::vec4& c,float r, float g, float b,float a){
     if(r > 1) r = r / 255.0f;
     if(g > 1) g = g / 255.0f;
     if(b > 1) b = b / 255.0f;
     if(a > 1) a = a / 255.0f;
-    color.x = r; color.y = g; color.z = b; color.w = a; 
+    c.x = r; c.y = g; c.z = b; c.w = a; 
 }
 float Math::fade(float t){ return t*t*t*(t*(t*6.0f-15.0f)+10.0f); }
 double Math::fade(double t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
@@ -158,14 +158,28 @@ glm::num Math::grad(int hash, glm::num x, glm::num y, glm::num z){
     double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
     return glm::num(((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v));
 }
-glm::vec4 Math::PaintersAlgorithm(glm::vec4& bottomColor, glm::vec4& topColor){
+glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
 	glm::vec4 ret(0);
-
-	float _a = topColor.a + bottomColor.a * (1-topColor.a);
-	ret.r = ((topColor.r*topColor.a + bottomColor.r*bottomColor.a * (1-topColor.a)) / _a);
-    ret.g = ((topColor.g*topColor.a + bottomColor.g*bottomColor.a * (1-topColor.a)) / _a);
-    ret.b = ((topColor.b*topColor.a + bottomColor.b*bottomColor.a * (1-topColor.a)) / _a);
-	ret.a = _a;
-
+	float a = p.a + c.a * (1-p.a);
+	ret.r = ((p.r*p.a + c.r*c.a * (1-p.a)) / a);
+    ret.g = ((p.g*p.a + c.g*c.a * (1-p.a)) / a);
+    ret.b = ((p.b*p.a + c.b*c.a * (1-p.a)) / a);
+	ret.a = a;
 	return ret;
+}
+bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::v3& A, glm::vec3& rayVector){
+    glm::vec3 _a = glm::vec3(A);
+    glm::vec3 B = _a + rayVector;
+
+    //check if point is behind
+    float dot = glm::dot(rayVector,C-_a);
+    if(dot >= 0)
+        return false;
+    glm::num a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
+    glm::num b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
+    glm::num c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
+    glm::num d = (b*b) - (4*a*c);
+    if(d < 0)
+        return false;
+    return true;
 }

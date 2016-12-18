@@ -142,6 +142,7 @@ class Engine_Window::impl{
 
 			glewExperimental = GL_TRUE; 
 			glewInit();
+			glEnable(GL_TEXTURE_2D);
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
 
@@ -177,6 +178,7 @@ class Engine_Window::impl{
 				SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
 				m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
 
+				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_CULL_FACE);
 				glCullFace(GL_BACK);
 

@@ -255,7 +255,6 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
 	glUniform4fv(glGetUniformLocation(shader,"materials"),MATERIAL_COUNT_LIMIT, glm::value_ptr(Material::m_MaterialProperities[0]));
 	glUniform2f( glGetUniformLocation(shader,"gScreenSize"), (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
-	glEnable(GL_TEXTURE_2D);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
@@ -281,7 +280,6 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
@@ -349,14 +347,12 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     GLuint shader = Resources::getShader("Copy_Depth")->program();
     glUseProgram(shader);
     glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
     glUniform1i(glGetUniformLocation(shader,"gDepthMap"), 0 );
 
     renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glUseProgram(0);
@@ -408,8 +404,6 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom
     glUniform2fv(glGetUniformLocation(shader,"poisson"),Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT, glm::value_ptr(RendererInfo::SSAOInfo::ssao_Kernels[0]));
     glUniform1i(glGetUniformLocation(shader,"far"),int(Resources::getActiveCamera()->getFar()));
 
-	glEnable(GL_TEXTURE_2D);
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
     glUniform1i(glGetUniformLocation(shader,"gNormalMap"), 0 );
@@ -437,7 +431,6 @@ void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
@@ -450,14 +443,12 @@ void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float
     glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 
     glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
     glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
     renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glUseProgram(0);
@@ -482,14 +473,12 @@ void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPo
 	glUniform1f(glGetUniformLocation(shader,"alpha"), alpha);
 
     glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
     glUniform1i(glGetUniformLocation(shader,"firstPass"), 0 );
 
     renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D,0);
 
     glUseProgram(0);
@@ -504,7 +493,6 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
     glUniform1f(glGetUniformLocation(shader,"exposure"),RendererInfo::HDRInfo::hdr_exposure);
     
     glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
     glUniform1i(glGetUniformLocation(shader,"lightingBuffer"), 0 );
 
@@ -514,7 +502,6 @@ void Engine::Renderer::Detail::RenderManagement::_passHDR(){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, i);
     }
-	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float str,std::string channels){
@@ -543,14 +530,12 @@ void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLu
         glUniform2f(glGetUniformLocation(shader,"HV"), 0.0f,1.0f);
     }
     glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
     glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
 
     renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glUseProgram(0);
@@ -569,8 +554,6 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
     glUniform1i( glGetUniformLocation(shader,"HasLighting"),int(RendererInfo::LightingInfo::lighting));
     glUniform1i( glGetUniformLocation(shader,"HasBloom"),int(RendererInfo::BloomInfo::bloom));
 	glUniform1i( glGetUniformLocation(shader,"HasHDR"),int(RendererInfo::HDRInfo::hdr));
-
-	glEnable(GL_TEXTURE_2D);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
@@ -602,7 +585,6 @@ void Engine::Renderer::Detail::RenderManagement::_passFinal(){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-	glDisable(GL_TEXTURE_2D);
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height){

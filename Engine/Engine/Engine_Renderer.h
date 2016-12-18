@@ -14,6 +14,9 @@
 #pragma comment (lib, "d3d10.lib")// include the Direct3D Library file
 #endif
 
+typedef unsigned int GLuint;
+typedef unsigned int uint;
+
 class Texture;
 class Font;
 class GBuffer;
@@ -22,8 +25,6 @@ class ObjectDisplay;
 class ObjectDynamic;
 class Camera;
 struct DisplayItem;
-typedef unsigned int GLuint;
-typedef unsigned int uint;
 
 struct GeometryRenderInfo final{
     Object* object;
@@ -106,10 +107,10 @@ namespace Engine{
             class RenderManagement final{
                 #ifdef _WIN32
                     public: static IDXGISwapChain* m_DirectXSwapChain;
-                    public: static ID3D11Device* m_DirectXDevice;
-                    public: static ID3D11DeviceContext* m_DirectXDeviceContext;
-                    public: static ID3D11RenderTargetView* m_DirectXBackBuffer;
-                    public: static void renderDirectX();
+                            static ID3D11Device* m_DirectXDevice;
+                            static ID3D11DeviceContext* m_DirectXDeviceContext;
+                            static ID3D11RenderTargetView* m_DirectXBackBuffer;
+                            static void renderDirectX();
                 #endif
 
                 private:
@@ -189,7 +190,7 @@ namespace Engine{
                 static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
                 static void setDensity(float d){ Detail::RendererInfo::GodRaysInfo::godRays_density = d; }
                 static void setWeight(float w){ Detail::RendererInfo::GodRaysInfo::godRays_weight = w; }
-                static void setSamples(unsigned int s){ Detail::RendererInfo::GodRaysInfo::godRays_samples = s; }
+                static void setSamples(uint s){ Detail::RendererInfo::GodRaysInfo::godRays_samples = s; }
 				static void setFOVDegrees(float d){ Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = d; }
 				static void setAlphaFalloff(float a){ Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = a; }
             };
@@ -214,7 +215,7 @@ namespace Engine{
                 static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = r; }
                 static void setScale(float s){ Detail::RendererInfo::SSAOInfo::ssao_scale = s; }
                 static void setBias(float b){ Detail::RendererInfo::SSAOInfo::ssao_bias = b; }
-                static void setSamples(unsigned int s){ Detail::RendererInfo::SSAOInfo::ssao_samples = s; }
+                static void setSamples(uint s){ Detail::RendererInfo::SSAOInfo::ssao_samples = s; }
             };
 			namespace Lighting{
 				static void enable(bool b = true){ Detail::RendererInfo::LightingInfo::lighting = b; }
