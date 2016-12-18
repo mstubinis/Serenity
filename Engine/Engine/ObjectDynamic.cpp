@@ -154,42 +154,7 @@ void ObjectDynamic::render(GLuint shader,bool debug){
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
 void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
-	ENGINE_RENDERING_API api = Engine::Resources::getAPI();
-    Camera* camera = Resources::getActiveCamera();
-    if((m_DisplayItems.size() == 0 || m_Visible == false) || (!camera->sphereIntersectTest(this)) || (camera->getDistance(this) > 1100 * getRadius()))
-        return;	
-    glUseProgram(shader);
-
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
-    glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
-    glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-    glUniform4f(glGetUniformLocation(shader, "Object_Color"),m_Color.x,m_Color.y,m_Color.z,m_Color.w);
-	glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
-
-	glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-	glUniform3f(glGetUniformLocation(shader,"CameraPosition"),camPos.x,camPos.y,camPos.z);
-
-	if(godsRays)
-		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
-	else
-		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
-
-    for(auto item:m_DisplayItems){
-        glm::mat4 m = glm::mat4(m_Model);
-        m = glm::translate(m,item->position);
-        m *= glm::mat4_cast(item->orientation);
-        m = glm::scale(m,item->scale);
-
-        glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(item->material->shadeless()));
-        glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
-		glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
-
-        glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
-
-		item->material->bind(shader,Resources::getAPI());
-        item->mesh->render();
-    }
-    glUseProgram(0);
+	Engine::Renderer::Detail::drawObject(this,shader,debug,godsRays);
 }
 glm::v3 ObjectDynamic::getPosition(){
     glm::mat4 m(1);
@@ -403,7 +368,10 @@ void ObjectDynamic::clearAllForces(){
     ObjectDynamic::setAngularVelocity(0,0,0);
 }
 
-bool ObjectDynamic::rayIntersectSphere(Camera* cam){ return cam->rayIntersectSphere(this); }
+bool ObjectDynamic::rayIntersectSphere(Camera* c){
+	if(c == nullptr) c = Resources::getActiveCamera();
+	return c->rayIntersectSphere(this); 
+}
 void ObjectDynamic::calculateRadius(){
     if(m_DisplayItems.size() == 0){
         m_BoundingBoxRadius = glm::vec3(0);
@@ -466,9 +434,12 @@ glm::vec3 ObjectDynamic::getScale(){
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
 glm::m4 ObjectDynamic::getModel(){
+	/*
     glm::mat4 m1(1);
     btTransform tr;
     m_RigidBody->getMotionState()->getWorldTransform(tr);
     tr.getOpenGLMatrix(glm::value_ptr(m1));
     return glm::m4(m1);
+	*/
+	return m_Model;
 }

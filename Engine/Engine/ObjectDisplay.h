@@ -58,7 +58,9 @@ class ObjectDisplay: public ObjectBasic{
 
         virtual void setVisible(bool b);
 
-        virtual bool rayIntersectSphere(Camera*);
+		bool visible() { return m_Visible; }
+
+        virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 };
 #endif

@@ -2,6 +2,7 @@
 #ifndef ENGINE_ENGINE_RENDERER_H
 #define ENGINE_ENGINE_RENDERER_H
 
+#include "Engine_Math.h"
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
@@ -17,6 +18,10 @@ class Texture;
 class Font;
 class GBuffer;
 class Object;
+class ObjectDisplay;
+class ObjectDynamic;
+class Camera;
+struct DisplayItem;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 
@@ -141,8 +146,12 @@ namespace Engine{
                     static std::vector<GeometryRenderInfo>& getObjectRenderQueue(){ return m_ObjectsToBeRendered; }
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
+
+					static void _drawObjectInternal(Camera*,glm::num distFromCamera,bool sphereIntersectTest,glm::vec4& color,glm::vec3& godRaysColor,float radius,std::vector<DisplayItem*>&,glm::m4 model,bool visible,GLuint shader,bool debug = false,bool godsRays = false);
             };
             void renderFullscreenQuad(GLuint shader, uint width, uint height);
+			void drawObject(ObjectDisplay*,GLuint shader, bool debug = false,bool godsRays = false);
+			void drawObject(ObjectDynamic*,GLuint shader, bool debug = false,bool godsRays = false);
         };
 
 		namespace Settings{

@@ -105,6 +105,8 @@ class ObjectDynamic: public Object{
         virtual void setAngularVelocityY(float,bool local=true);
         virtual void setAngularVelocityZ(float,bool local=true);
 
+		virtual glm::vec4 getColor(){ return m_Color; }
+		virtual glm::vec3 getGodsRaysColor(){ return m_GodsRaysColor; }
         virtual glm::v3 getForward(){ return m_Forward; }
         virtual glm::v3 getRight(){ return m_Right; }
         virtual glm::v3 getUp(){ return m_Up; }
@@ -116,6 +118,7 @@ class ObjectDynamic: public Object{
         virtual glm::vec3 getScale();
         virtual glm::m4 getModel();
         virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }
+		virtual bool visible() { return m_Visible; }
 
         virtual void setMass(float);
 
@@ -127,7 +130,7 @@ class ObjectDynamic: public Object{
         virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 
-        virtual bool rayIntersectSphere(Camera*);
+        virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 };
 #endif

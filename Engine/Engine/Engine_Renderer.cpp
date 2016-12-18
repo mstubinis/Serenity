@@ -12,6 +12,8 @@
 #include "Skybox.h"
 #include "Particles.h"
 #include "Material.h"
+#include "ObjectDisplay.h"
+#include "ObjectDynamic.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -611,6 +613,49 @@ void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uin
 		glTexCoord2f(1,1); glVertex2f(float(width)/2,float(height)/2);
 		glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
 	glEnd();
+}
+
+void Engine::Renderer::Detail::drawObject(ObjectDisplay* o, GLuint shader, bool debug,bool godsRays){
+	Camera* camera = Resources::getActiveCamera();
+	Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),shader,debug,godsRays);
+}
+void Engine::Renderer::Detail::drawObject(ObjectDynamic* o, GLuint shader, bool debug,bool godsRays){
+	Camera* camera = Resources::getActiveCamera();
+	Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),shader,debug,godsRays);
+}
+void Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* camera,glm::num dist,bool intTest,glm::vec4& color, glm::vec3& raysColor,float radius,std::vector<DisplayItem*>& items,glm::m4 model,bool visible,GLuint shader, bool debug,bool godsRays){
+	if((items.size() == 0 || visible == false) || (!intTest) || (dist > 1100 * radius))
+        return;
+    glUseProgram(shader);
+
+    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
+    glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
+    glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
+	glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
+	glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),raysColor.x,raysColor.y,raysColor.z);
+
+	glm::vec3 camPos = glm::vec3(camera->getPosition());
+	glUniform3f(glGetUniformLocation(shader,"CameraPosition"),camPos.x,camPos.y,camPos.z);
+
+	if(godsRays) glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+	else         glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
+
+    for(auto item:items){
+		glm::mat4 m = glm::mat4(model);
+        m = glm::translate(m,item->position);
+        m *= glm::mat4_cast(item->orientation);
+        m = glm::scale(m,item->scale);
+
+        glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(item->material->shadeless()));
+        glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
+		glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
+
+        glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
+
+		item->material->bind(shader,Resources::getAPI());
+        item->mesh->render();
+    }
+    glUseProgram(0);
 }
 
 #ifdef _WIN32

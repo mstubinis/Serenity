@@ -81,7 +81,7 @@ class Object: public IObject{
 
         virtual void setName(std::string);
 
-        virtual bool rayIntersectSphere(Camera*){return false;}
+        virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}
 };
 
