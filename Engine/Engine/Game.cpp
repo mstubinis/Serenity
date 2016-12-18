@@ -34,8 +34,6 @@ void Game::initResources(){
     Resources::addShader("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl");
     Resources::addShader("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl");
 
-	Resources::addMesh("PointLightBounds","data/Models/pointLightBounds.obj");
-
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
@@ -55,10 +53,9 @@ void Game::initResources(){
     Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png");
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
+	Resources::getMaterial("SunFlare")->setShadeless(true);
     Resources::addMaterial("Smoke","data/Textures/Effects/Smoke.png");
     Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
-
-    Resources::addParticleInfo("Smoke","Smoke");
 
 	//custom cubemap
 	/*

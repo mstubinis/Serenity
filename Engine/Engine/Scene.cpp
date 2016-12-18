@@ -3,7 +3,6 @@
 #include "Engine_Resources.h"
 #include "Camera.h"
 #include "Skybox.h"
-#include "Particles.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -33,14 +32,6 @@ void Scene::centerSceneToObject(Object* center){
         Object* obj = object.second;
         if(obj != center && obj->getParent() == nullptr){
             obj->setPosition(obj->getPosition() + offset);
-        }
-    }
-    for(auto emitter:m_ParticleEmitters){
-        glm::v3 objPos = emitter.second->getPosition();
-        emitter.second->setPosition(objPos + offset);
-        for(auto particle:emitter.second->getParticles()){
-            objPos = particle->getPosition();
-            particle->setPosition(objPos + offset);
         }
     }
     if(center->getParent() == nullptr)
@@ -84,12 +75,6 @@ void Scene::update(float dt){
                 it->second->update(dt);
             }
             ++it;
-        }
-    }
-
-    for(auto emitter:m_ParticleEmitters){
-        for(auto particle:emitter.second->getParticles()){
-            particle->update(dt);
         }
     }
     if(m_Skybox != nullptr) m_Skybox->update();

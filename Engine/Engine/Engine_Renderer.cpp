@@ -10,7 +10,6 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "Skybox.h"
-#include "Particles.h"
 #include "Material.h"
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"

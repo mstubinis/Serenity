@@ -9,7 +9,6 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
-#include "Particles.h"
 #include "Texture.h"
 #include "Font.h"
 #include "Scene.h"
@@ -36,7 +35,6 @@ std::unordered_map<std::string,boost::shared_ptr<Texture>> Detail::ResourceManag
 std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
 std::unordered_map<std::string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
 std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
-std::unordered_map<std::string,boost::shared_ptr<ParticleInfo>> Detail::ResourceManagement::m_ParticleInfos;
 std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_Shaders;
 std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 
@@ -48,8 +46,6 @@ void Engine::Resources::Detail::ResourceManagement::destruct(){
     for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                 
         it->second.reset();
     for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )         
-        it->second.reset();
-    for (auto it = m_ParticleInfos.begin();it != m_ParticleInfos.end(); ++it ) 
         it->second.reset();
     for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             
         it->second.reset();
@@ -101,17 +97,6 @@ void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture*
     Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow,specular);
 }
 
-void Engine::Resources::addParticleInfo(std::string name, std::string material){
-    if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
-        return;
-    Detail::ResourceManagement::m_ParticleInfos[name] = boost::make_shared<ParticleInfo>(material);
-}
-void Engine::Resources::addParticleInfo(std::string name, Material* material){
-    if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name))
-        return;
-    Detail::ResourceManagement::m_ParticleInfos[name] = boost::make_shared<ParticleInfo>(material);
-}
-
 void Engine::Resources::addShader(std::string name, std::string vShader, std::string fShader, bool fromFile){
     if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
         return;
@@ -150,12 +135,6 @@ void Engine::Resources::removeMaterial(std::string name){
         Detail::ResourceManagement::m_Materials.erase(name);
     }
 }
-void Engine::Resources::removeParticleInfo(std::string name){
-    if (Detail::ResourceManagement::m_ParticleInfos.size() > 0 && Detail::ResourceManagement::m_ParticleInfos.count(name)){
-        Detail::ResourceManagement::m_ParticleInfos[name].reset();
-        Detail::ResourceManagement::m_ParticleInfos.erase(name);
-    }
-}
 void Engine::Resources::removeSound(std::string name){
     if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name)){
         Detail::ResourceManagement::m_Sounds[name].reset();
@@ -165,10 +144,6 @@ void Engine::Resources::removeSound(std::string name){
 
 
 void Engine::Resources::initResources(){
-	addMaterial("Default",nullptr,nullptr,nullptr);
-
-    //addMesh("PointLightBounds","data/Models/pointLightBounds.obj");
-
 	//add a basic cube mesh
 	std::string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"
 							"v -1.0000 1.0000 1.0000\n"
@@ -209,6 +184,8 @@ void Engine::Resources::initResources(){
     addShader("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl");
     addShader("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl");
     addShader("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl");
+
+	addMaterial("Default",nullptr,nullptr,nullptr);
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }

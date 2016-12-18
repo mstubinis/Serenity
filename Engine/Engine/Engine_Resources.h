@@ -33,7 +33,6 @@ class SunLight;
 class SoundEffectBasic;
 class SoundEffect;
 class SoundMusic;
-struct ParticleInfo;
 
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 #define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for releasing a pointer
@@ -72,7 +71,6 @@ namespace Engine{
                     static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
                     static std::unordered_map<std::string,boost::shared_ptr<Material>> m_Materials;
                     static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_Shaders;
-                    static std::unordered_map<std::string,boost::shared_ptr<ParticleInfo>> m_ParticleInfos;
 
                     static void destruct();
             };
@@ -142,11 +140,6 @@ namespace Engine{
             if(!Detail::ResourceManagement::m_Materials.count(n))
                 return nullptr;
             return Detail::ResourceManagement::m_Materials[n].get(); 
-        }
-        static ParticleInfo* getParticleInfo(std::string n){ 
-            if(!Detail::ResourceManagement::m_ParticleInfos.count(n))
-                return nullptr;
-            return Detail::ResourceManagement::m_ParticleInfos[n].get(); 
         }
         static ShaderP* getShader(std::string n){ 
             if(!Detail::ResourceManagement::m_Shaders.count(n)) return nullptr;

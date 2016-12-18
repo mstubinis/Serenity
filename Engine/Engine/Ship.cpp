@@ -4,7 +4,6 @@
 #include "Engine_Events.h"
 #include "GameCamera.h"
 #include "SolarSystem.h"
-#include "Particles.h"
 
 #include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
