@@ -20,6 +20,7 @@
 
 #include <SFML/Graphics.hpp>
 
+using namespace Engine;
 using namespace Engine::Resources;
 
 ENGINE_RENDERING_API Detail::ResourceManagement::m_RenderingAPI;
@@ -38,113 +39,77 @@ std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceMana
 std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_Shaders;
 std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 
-void Engine::Resources::Detail::ResourceManagement::destruct(){
-    for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )               
-        it->second.reset();
-    for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )           
-        it->second.reset();
-    for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                 
-        it->second.reset();
-    for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )         
-        it->second.reset();
-    for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )             
-        it->second.reset();
-    for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )             
-        it->second.reset();
-    for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )             
-        it->second.reset();
-    for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )               
-        it->second.reset();
-    for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )               
-        it->second.reset();
+void Resources::Detail::ResourceManagement::destruct(){
+    for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )       it->second.reset();
+    for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )   it->second.reset();
+    for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )         it->second.reset();
+    for (auto it = m_Materials.begin();it != m_Materials.end(); ++it ) it->second.reset();
+    for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )     it->second.reset();
+    for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )     it->second.reset();
+    for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )     it->second.reset();
+    for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )       it->second.reset();
+    for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )       it->second.reset();
     SAFE_DELETE(Detail::ResourceManagement::m_Window);
 }
-Engine_Window* Engine::Resources::getWindow(){ return Detail::ResourceManagement::m_Window; }
-sf::Vector2u Engine::Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
-Camera* Engine::Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
-boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
-void Engine::Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
-void Engine::Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
+Engine_Window* Resources::getWindow(){ return Detail::ResourceManagement::m_Window; }
+sf::Vector2u Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
+Camera* Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
+boost::weak_ptr<Camera>& Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
+void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
+void Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
-void Engine::Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type, bool fromFile){
-    if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
-        return;
-    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(file,type,fromFile);
-}
-void Engine::Resources::addMesh(std::string name,float x,float y,float w,float h){
-    if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
-        return;
-    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(x,y,w,h);
-}
-void Engine::Resources::addMesh(std::string file, COLLISION_TYPE type){
-    std::string name = file.substr(0, file.size()-4);
-    Engine::Resources::addMesh(name,file,type);
-}
-void Engine::Resources::addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length){
-    if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name))
-        return;
-    Detail::ResourceManagement::m_Meshes[name] = boost::make_shared<Mesh>(grid,width,length);
-}
+boost::shared_ptr<Object>& Resources::getObjectPtr(std::string n){return Detail::ResourceManagement::m_Objects[n];}
+boost::shared_ptr<Camera>& Resources::getCameraPtr(std::string n){return Detail::ResourceManagement::m_Cameras[n];}
 
-void Engine::Resources::addMaterial(std::string name, std::string diffuse, std::string normal , std::string glow, std::string specular){
-    if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
-        return;
-    Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow,specular);
+Scene* Resources::getScene(std::string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
+SoundEffectBasic* Resources::getSound(std::string n){return static_cast<SoundEffectBasic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
+Object* Resources::getObject(std::string n){return static_cast<Object*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Objects,n));}
+Camera* Resources::getCamera(std::string n){return static_cast<Camera*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Cameras,n));}
+Font* Resources::getFont(std::string n){return static_cast<Font*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Fonts,n));}
+Texture* Resources::getTexture(std::string n){return static_cast<Texture*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Textures,n));}
+Mesh* Resources::getMesh(std::string n){return static_cast<Mesh*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Meshes,n));}
+Material* Resources::getMaterial(std::string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
+ShaderP* Resources::getShader(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
+
+void Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type, bool fromFile){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,name,boost::make_shared<Mesh>(file,type,fromFile));
 }
-void Engine::Resources::addMaterial(std::string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular){
-    if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name))
-        return;
-    Detail::ResourceManagement::m_Materials[name] = boost::make_shared<Material>(diffuse,normal,glow,specular);
+void Resources::addMesh(std::string name,float x,float y,float w,float h){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,name,boost::make_shared<Mesh>(x,y,w,h));
+}
+void Resources::addMesh(std::string f, COLLISION_TYPE t){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t);}
+void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g, uint w, uint l){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(g,w,l));
 }
 
-void Engine::Resources::addShader(std::string name, std::string vShader, std::string fShader, bool fromFile){
-    if (Detail::ResourceManagement::m_Shaders.size() > 0 && Detail::ResourceManagement::m_Shaders.count(name))
-        return;
-    Detail::ResourceManagement::m_Shaders[name] = boost::make_shared<ShaderP>(name,vShader,fShader,fromFile);
+void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s));
+}
+void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s));
 }
 
-void Engine::Resources::addSound(std::string name, std::string file, bool asEffect){
-    if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name))
-        return;
-    if(asEffect) Detail::ResourceManagement::m_Sounds[name] = boost::make_shared<SoundEffect>(file);
-    else         Detail::ResourceManagement::m_Sounds[name] = boost::make_shared<SoundMusic>(file);
-}
-void Engine::Resources::addSoundAsEffect(std::string name, std::string file){ addSound(name,file,true); }
-void Engine::Resources::addSoundAsMusic(std::string name, std::string file){ addSound(name,file,false); }
-
-SoundMusic* Engine::Resources::getSoundAsMusic(std::string n){ 
-    if(!Detail::ResourceManagement::m_Sounds.count(n))
-        return nullptr;
-    return static_cast<SoundMusic*>(Detail::ResourceManagement::m_Sounds[n].get()); 
-}
-SoundEffect* Engine::Resources::getSoundAsEffect(std::string n){ 
-    if(!Detail::ResourceManagement::m_Sounds.count(n))
-        return nullptr;
-    return static_cast<SoundEffect*>(Detail::ResourceManagement::m_Sounds[n].get()); 
+void Resources::addShader(std::string n, std::string v, std::string f, bool b){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<ShaderP>(n,v,f,b));
 }
 
-void Engine::Resources::removeMesh(std::string name){
-    if (Detail::ResourceManagement::m_Meshes.size() > 0 && Detail::ResourceManagement::m_Meshes.count(name)){
-        Detail::ResourceManagement::m_Meshes[name].reset();
-        Detail::ResourceManagement::m_Meshes.erase(name);
-    }
+void Resources::addSound(std::string n, std::string f, bool b){
+	if(b){Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundEffect>(f));}
+	else{Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundMusic>(f));}
 }
-void Engine::Resources::removeMaterial(std::string name){
-    if (Detail::ResourceManagement::m_Materials.size() > 0 && Detail::ResourceManagement::m_Materials.count(name)){
-        Detail::ResourceManagement::m_Materials[name].reset();
-        Detail::ResourceManagement::m_Materials.erase(name);
-    }
-}
-void Engine::Resources::removeSound(std::string name){
-    if (Detail::ResourceManagement::m_Sounds.size() > 0 && Detail::ResourceManagement::m_Sounds.count(name)){
-        Detail::ResourceManagement::m_Sounds[name].reset();
-        Detail::ResourceManagement::m_Sounds.erase(name);
-    }
-}
+void Resources::addSoundAsEffect(std::string n, std::string f){ addSound(n,f,true); }
+void Resources::addSoundAsMusic(std::string n, std::string f){ addSound(n,f,false); }
 
+SoundMusic* Resources::getSoundAsMusic(std::string n){return static_cast<SoundMusic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
+SoundEffect* Resources::getSoundAsEffect(std::string n){ return static_cast<SoundEffect*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
 
-void Engine::Resources::initResources(){
+void Resources::removeMesh(std::string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Meshes,n);}
+void Resources::removeMaterial(std::string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Materials,n);}
+void Resources::removeSound(std::string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Sounds,n);}
+
+void Resources::initResources(){
 	//add a basic cube mesh
+	#pragma region MeshData
 	std::string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"
 							"v -1.0000 1.0000 1.0000\n"
 							"v -1.0000 -1.0000 -1.0000\n"
@@ -171,6 +136,7 @@ void Engine::Resources::initResources(){
 							"f 2/4 1/4 5/4\n"
 							"f 3/5 7/5 5/5\n"
 							"f 8/6 4/6 2/6\n";
+	#pragma endregion
 	//addMesh("Cube",cubeMesh,COLLISION_TYPE_NONE,false);
 
     addShader("Deferred","data/Shaders/vert.glsl","data/Shaders/deferred_frag.glsl");
@@ -189,36 +155,25 @@ void Engine::Resources::initResources(){
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }
-void Engine::Resources::initRenderingContexts(unsigned int api){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)
-        mesh.second.get()->initRenderingContext(api);
-    for(auto shader:Detail::ResourceManagement::m_Shaders)
-        shader.second.get()->initRenderingContext(api);
+void Resources::initRenderingContexts(uint a){
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)    mesh.second.get()->initRenderingContext(a);
+    for(auto shader:Detail::ResourceManagement::m_Shaders) shader.second.get()->initRenderingContext(a);
 }
-void Engine::Resources::cleanupRenderingContexts(unsigned int api){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)
-        mesh.second.get()->cleanupRenderingContext(api);
-    for(auto shader:Detail::ResourceManagement::m_Shaders)
-        shader.second.get()->cleanupRenderingContext(api);
+void Resources::cleanupRenderingContexts(uint a){
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)    mesh.second.get()->cleanupRenderingContext(a);
+    for(auto shader:Detail::ResourceManagement::m_Shaders) shader.second.get()->cleanupRenderingContext(a);
 }
-void Engine::Resources::setCurrentScene(Scene* s){ 
+void Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s) return;
-
     Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
     for(auto obj:previousScene->getObjects()){
         ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-        if(dynamicObj != NULL){
-            Engine::Physics::removeRigidBody(dynamicObj);
-        }
+        if(dynamicObj != NULL){ Physics::removeRigidBody(dynamicObj); }
     }
-
     Detail::ResourceManagement::m_CurrentScene = s;
-
     for(auto obj:s->getObjects()){
         ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-        if(dynamicObj != NULL){
-            Engine::Physics::addRigidBody(dynamicObj);
-        }
+        if(dynamicObj != NULL){ Physics::addRigidBody(dynamicObj); }
     }
 }
-void Engine::Resources::setCurrentScene(std::string s){ Engine::Resources::setCurrentScene(Detail::ResourceManagement::m_Scenes[s].get()); }
+void Resources::setCurrentScene(std::string s){ Resources::setCurrentScene(Detail::ResourceManagement::m_Scenes[s].get()); }

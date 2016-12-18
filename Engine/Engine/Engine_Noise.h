@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_NOISE_H
 #define ENGINE_NOISE_H
 

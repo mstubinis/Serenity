@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ENGINE_MESHLOADER_H
 #define ENGINE_MESHLOADER_H
 

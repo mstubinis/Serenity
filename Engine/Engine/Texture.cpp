@@ -63,7 +63,7 @@ class Texture::impl final{
         void _construct(const unsigned char* pixels,uint w, uint h,std::string name,GLuint type){
             _init();
             _loadFromPixels(pixels,w,h,type);
-			m_Name = incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
+			m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
         }
         void _construct(std::string file,std::string name,GLuint type){
 			_init();
@@ -75,12 +75,12 @@ class Texture::impl final{
             if(name == ""){
                 m_Name = file;
             }
-			m_Name = incrementName(Resources::Detail::ResourceManagement::m_Textures,m_Name);
+			m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,m_Name);
         }
         void _construct(std::string files[],std::string name,GLuint type){
 			_init();
             _loadFromFilesCubemap(files,type);
-			m_Name = incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
+			m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
         }
         void _init(){
 			m_Directory = "";
