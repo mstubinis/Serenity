@@ -229,6 +229,8 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     glDisable(GL_BLEND); //disable blending on all mrts
     s->renderSkybox(RendererInfo::GodRaysInfo::godRays);
 
+	//RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
+
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
@@ -237,8 +239,12 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
 
     _renderObjects();
 
+	//RENDER NORMAL OBJECTS HERE
+
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
+
+	//RENDER FOREGROUND OBJECTS HERE
 }
 void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     GLuint shader = Resources::getShader("Deferred_Light")->program();
