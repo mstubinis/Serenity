@@ -15,14 +15,10 @@ Camera::Camera(std::string name, float angle, float aspectRatio, float near, flo
     m_AspectRatio = aspectRatio;
     m_Near = near;
     m_Far = far;
-
     m_Scene = scene;
-
     m_Type = CAMERA_TYPE_PERSPECTIVE;
-
     setPerspectiveProjection();
     lookAt(getPosition(),getPosition() + getForward(), getUp());
-
     Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
 }
 Camera::Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene,false){//create an orthographic camera
@@ -30,14 +26,10 @@ Camera::Camera(std::string name, float left, float right, float bottom, float to
     m_AspectRatio = 1.0f;
     m_Near = near;
     m_Far = far;
-
     m_Scene = scene;
-
     m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
-
     setOrthoProjection(left,right,bottom,top);
     lookAt(getPosition(),getPosition() + getForward(), getUp());
-
     Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
 }
 void Camera::_constructFrustrum(){
@@ -91,9 +83,7 @@ void Camera::lookAt(Object* target, bool targetUp){
 void Camera::update(float dt){
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
-bool Camera::sphereIntersectTest(Object* obj){
-    return sphereIntersectTest(obj->getPosition(),obj->getRadius());
-}
+bool Camera::sphereIntersectTest(Object* obj){return sphereIntersectTest(obj->getPosition(),obj->getRadius());}
 bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
     if(radius <= 0) return false;
     for (unsigned int i = 0; i < 6; i++){
@@ -102,6 +92,4 @@ bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
     }
     return true;
 }
-bool Camera::rayIntersectSphere(Object* obj){
-    return obj->rayIntersectSphere(getPosition(),getViewVector());
-}
+bool Camera::rayIntersectSphere(Object* obj){return obj->rayIntersectSphere(getPosition(),getViewVector());}

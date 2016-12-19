@@ -246,7 +246,7 @@ void Lagrange::update(float dt){
 void Lagrange::render(GLuint shader, bool debug){
     //add to render queue
     if(shader == 0){
-        shader = Resources::getShader("Deferred")->program();
+        shader = Resources::getShaderProgram("Deferred")->program();
     }
     Engine::Renderer::Detail::RenderManagement::getForegroundObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }

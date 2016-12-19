@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "Engine_Physics.h"
+#include "ShaderProgram.h"
 
 #include <unordered_map>
 #include <map>
@@ -29,7 +30,6 @@ class Texture;
 class Camera;
 class Mesh;
 class Material;
-class ShaderP;
 class Object;
 class SunLight;
 class SoundEffectBasic;
@@ -73,7 +73,8 @@ namespace Engine{
                     static std::unordered_map<std::string,boost::shared_ptr<Mesh>> m_Meshes;
                     static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
                     static std::unordered_map<std::string,boost::shared_ptr<Material>> m_Materials;
-                    static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_Shaders;
+                    static std::unordered_map<std::string,boost::shared_ptr<Shader>> m_Shaders;
+					static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_ShaderPrograms;
 
                     static void destruct();
             };
@@ -108,7 +109,8 @@ namespace Engine{
         Texture* getTexture(std::string n);
         Mesh* getMesh(std::string n);
         Material* getMaterial(std::string n);
-        ShaderP* getShader(std::string n);
+        Shader* getShader(std::string n);
+		ShaderP* getShaderProgram(std::string n);
 
         void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL,bool fromFile = true);
         void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
@@ -120,7 +122,10 @@ namespace Engine{
         void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr);
         void removeMaterial(std::string name);
 
-        void addShader(std::string name, std::string vertexShader, std::string fragmentShader, bool fromFile = true);
+		void addShader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
+
+		void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
 
         void addParticleInfo(std::string name, std::string material);
         void addParticleInfo(std::string name, Material* diffuse);

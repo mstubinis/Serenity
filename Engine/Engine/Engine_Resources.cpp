@@ -36,19 +36,21 @@ std::unordered_map<std::string,boost::shared_ptr<Texture>> Detail::ResourceManag
 std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
 std::unordered_map<std::string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
 std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
-std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_Shaders;
+std::unordered_map<std::string,boost::shared_ptr<Shader>> Detail::ResourceManagement::m_Shaders;
+std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_ShaderPrograms;
 std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 
 void Resources::Detail::ResourceManagement::destruct(){
-    for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )       it->second.reset();
-    for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )   it->second.reset();
-    for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )         it->second.reset();
-    for (auto it = m_Materials.begin();it != m_Materials.end(); ++it ) it->second.reset();
-    for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )     it->second.reset();
-    for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )     it->second.reset();
-    for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )     it->second.reset();
-    for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )       it->second.reset();
-    for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )       it->second.reset();
+    for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
+    for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
+    for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                   it->second.reset();
+    for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )           it->second.reset();
+    for (auto it = m_ShaderPrograms.begin();it != m_ShaderPrograms.end(); ++it ) it->second.reset();
+	for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )               it->second.reset();
+    for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
+    for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
+    for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )                 it->second.reset();
+    for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
     SAFE_DELETE(Detail::ResourceManagement::m_Window);
 }
 Engine_Window* Resources::getWindow(){ return Detail::ResourceManagement::m_Window; }
@@ -69,7 +71,8 @@ Font* Resources::getFont(std::string n){return static_cast<Font*>(Detail::Resour
 Texture* Resources::getTexture(std::string n){return static_cast<Texture*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Textures,n));}
 Mesh* Resources::getMesh(std::string n){return static_cast<Mesh*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Meshes,n));}
 Material* Resources::getMaterial(std::string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
-ShaderP* Resources::getShader(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
+Shader* Resources::getShader(std::string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
+ShaderP* Resources::getShaderProgram(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
 
 void Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type, bool fromFile){
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,name,boost::make_shared<Mesh>(file,type,fromFile));
@@ -89,8 +92,14 @@ void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, 
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s));
 }
 
-void Resources::addShader(std::string n, std::string v, std::string f, bool b){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<ShaderP>(n,v,f,b));
+void Resources::addShader(std::string n, std::string s, SHADER_TYPE t, bool b){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<Shader>(s,t,b));
+}
+void Resources::addShaderProgram(std::string n, Shader* v, Shader* f, SHADER_PIPELINE_STAGE s){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(v,f,s));
+}
+void Resources::addShaderProgram(std::string n, std::string v, std::string f, SHADER_PIPELINE_STAGE s){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(v,f,s));
 }
 
 void Resources::addSound(std::string n, std::string f, bool b){
@@ -139,29 +148,29 @@ void Resources::initResources(){
 	#pragma endregion
 	//addMesh("Cube",cubeMesh,COLLISION_TYPE_NONE,false);
 
-    addShader("Deferred","data/Shaders/vert.glsl","data/Shaders/deferred_frag.glsl");
-    addShader("Deferred_HUD","data/Shaders/vert_HUD.glsl","data/Shaders/deferred_frag_HUD.glsl");
-    addShader("Deferred_GodsRays","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_rays_frag.glsl");
-    addShader("Deferred_Blur","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_blur_frag.glsl");
-    addShader("Deferred_HDR","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_hdr_frag.glsl");
-    addShader("Deferred_SSAO","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_ssao_frag.glsl");
-    addShader("Deferred_Edge","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_edge_frag.glsl");
-    addShader("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl");
-    addShader("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl");
-    addShader("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl");
-    addShader("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl");
+	addShaderProgram("Deferred","data/Shaders/vert.glsl","data/Shaders/deferred_frag.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
+	addShaderProgram("Deferred_HUD","data/Shaders/vert_HUD.glsl","data/Shaders/deferred_frag_HUD.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
+	addShaderProgram("Deferred_GodsRays","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_rays_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_Blur","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_blur_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_HDR","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_hdr_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_SSAO","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_ssao_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_Edge","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_edge_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
+	addShaderProgram("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl",SHADER_PIPELINE_STAGE_LIGHTING);
 
 	addMaterial("Default",nullptr,nullptr,nullptr);
 
     Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
 }
 void Resources::initRenderingContexts(uint a){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)    mesh.second.get()->initRenderingContext(a);
-    for(auto shader:Detail::ResourceManagement::m_Shaders) shader.second.get()->initRenderingContext(a);
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->initRenderingContext(a);
+    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->initRenderingContext(a);
 }
 void Resources::cleanupRenderingContexts(uint a){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)    mesh.second.get()->cleanupRenderingContext(a);
-    for(auto shader:Detail::ResourceManagement::m_Shaders) shader.second.get()->cleanupRenderingContext(a);
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->cleanupRenderingContext(a);
+    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->cleanupRenderingContext(a);
 }
 void Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s) return;

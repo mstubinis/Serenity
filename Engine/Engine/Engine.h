@@ -36,13 +36,11 @@ namespace Engine{
                 static void EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent);
                 static void EVENT_MOUSE_ENTERED();
                 static void EVENT_MOUSE_LEFT();
-                /*
                 static void EVENT_JOYSTICK_BUTTON_PRESSED();
                 static void EVENT_JOYSTICK_BUTTON_RELEASED();
                 static void EVENT_JOYSTICK_MOVED();
                 static void EVENT_JOYSTICK_CONNECTED();
                 static void EVENT_JOYSTICK_DISCONNECTED();
-                */
                 #pragma endregion
 
                 static void RESET_EVENTS();
@@ -91,13 +89,11 @@ namespace Game{
     void onMouseLeft();
 	void onPreUpdate(float dt);
 	void onPostUpdate(float dt);
-    /*
     void onJoystickButtonPressed();
     void onJoystickButtonReleased();
     void onJoystickMoved();
     void onJoystickConnected();
-    void onJoystuckDisconnected();
-    */
+    void onJoystickDisconnected();
 	#pragma endregion
 };
 #endif

@@ -158,7 +158,6 @@ void Engine::Detail::EngineClass::EVENT_MOUSE_ENTERED(){
 void Engine::Detail::EngineClass::EVENT_MOUSE_LEFT(){
 	Game::onMouseLeft();
 }
-/*
 void Engine::Detail::EngineClass::EVENT_JOYSTICK_BUTTON_PRESSED(){
 	Game::onJoystickButtonPressed();
 }
@@ -174,7 +173,6 @@ void Engine::Detail::EngineClass::EVENT_JOYSTICK_CONNECTED(){
 void Engine::Detail::EngineClass::EVENT_JOYSTICK_DISCONNECTED(){
 	Game::onJoystickDisconnected();
 }
-*/
 #pragma endregion
 float Engine::getFPS(){ return 1.0f / Resources::dt(); }
 Engine_Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }

@@ -29,7 +29,7 @@ ObjectDisplay::~ObjectDisplay(){
 void ObjectDisplay::render(GLuint shader,bool debug){
     //add to render queue
     if(shader == 0){
-        shader = Resources::getShader("Deferred")->program();
+        shader = Resources::getShaderProgram("Deferred")->program();
     }
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }

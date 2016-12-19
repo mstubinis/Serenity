@@ -53,7 +53,7 @@ Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
         temp.push_back(glm::vec3(-1,1,-1));//23
         temp.push_back(glm::vec3(1,1,-1));//24
 
-        for(unsigned int i = 0; i < 6; i++){
+        for(uint i = 0; i < 6; i++){
             glm::vec3 v1,v2,v3,v4;
             v1 = temp[ 0 + (i*4) ];
             v2 = temp[ 1 + (i*4) ];
@@ -96,9 +96,8 @@ void Skybox::update(){
     m_Model[3][1] = p.y;
     m_Model[3][2] = p.z;
 }
-
 void Skybox::render(bool godsRays){
-    GLuint shader = Resources::getShader("Deferred_Skybox")->program();
+    GLuint shader = Resources::getShaderProgram("Deferred_Skybox")->program();
     glUseProgram(shader);
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
@@ -108,12 +107,8 @@ void Skybox::render(bool godsRays){
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->address());
     glUniform1i(glGetUniformLocation(shader, "Texture"), 0);
 
-	if(godsRays == true){
-		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1);
-	}
-	else{
-		glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0);
-	}
+	if(godsRays == true){ glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1); }
+	else{                 glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0); }
 
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
     glEnableVertexAttribArray(0);
