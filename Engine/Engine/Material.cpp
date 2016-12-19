@@ -2,6 +2,7 @@
 #include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
+#include "ShaderProgram.h"
 
 using namespace Engine;
 
@@ -27,28 +28,28 @@ std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
 std::unordered_map<uint,std::vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 
 
-MaterialComponent::MaterialComponent(uint type,Texture* texture){
-	m_ComponentType = (MATERIAL_COMPONENT_TYPE)type;
-	m_Texture = texture;
+MaterialComponent::MaterialComponent(uint ty,Texture* t){
+	m_ComponentType = (MATERIAL_COMPONENT_TYPE)ty;
+	m_Texture = t;
 }
-MaterialComponent::MaterialComponent(uint type,std::string& textureFile){
-	m_ComponentType = (MATERIAL_COMPONENT_TYPE)type;
-    m_Texture = Resources::getTexture(textureFile); 
-    if(m_Texture == nullptr && textureFile != "") m_Texture = new Texture(textureFile);
+MaterialComponent::MaterialComponent(uint ty,std::string& t){
+	m_ComponentType = (MATERIAL_COMPONENT_TYPE)ty;
+    m_Texture = Resources::getTexture(t); 
+    if(m_Texture == nullptr && t != "") m_Texture = new Texture(t);
 }
 MaterialComponent::~MaterialComponent(){
 }
-void MaterialComponent::bind(GLuint shader,uint api){
+void MaterialComponent::bind(GLuint s,uint a){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
-    if(api == ENGINE_RENDERING_API_OPENGL){
+    if(a == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 		for(uint i = 0; i < slots.size(); i++){
 			glActiveTexture(GL_TEXTURE0 + slots.at(i));
 			glBindTexture(m_Texture->type(), m_Texture->address());
-			glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(i));
+			glUniform1i(glGetUniformLocation(s, textureTypeName.c_str()), slots.at(i));
 		}
     }
-    else if(api == ENGINE_RENDERING_API_DIRECTX){
+    else if(a == ENGINE_RENDERING_API_DIRECTX){
     }
 }
 void MaterialComponent::unbind(GLuint shader,uint api){
@@ -149,12 +150,10 @@ class Material::impl final{
         float m_SpecularityPower;
 		uint m_ID;
         void _init(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular){
-
 			_addComponent(MATERIAL_COMPONENT_TYPE_DIFFUSE,diffuse);
 			_addComponent(MATERIAL_COMPONENT_TYPE_NORMAL,normal);
 			_addComponent(MATERIAL_COMPONENT_TYPE_GLOW,glow);
 			_addComponent(MATERIAL_COMPONENT_TYPE_SPECULAR,specular);
-
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
             m_SpecularityPower = 50.0f;
@@ -210,11 +209,15 @@ class Material::impl final{
         void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
 
-Material::Material(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl()){
+Material::Material(std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
     m_i->_init(diffuse,normal,glow,specular);
+	if(program == "") program = "Deferred";
+	Resources::getShaderProgram(program)->addMaterial(this);
 }
-Material::Material(std::string diffuse, std::string normal, std::string glow,std::string specular):m_i(new impl()){
+Material::Material(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
     m_i->_init(diffuse,normal,glow,specular);
+	if(program == nullptr) program = Resources::getShaderProgram("Deferred");
+	program->addMaterial(this);
 }
 Material::~Material(){
     m_i->_destruct();

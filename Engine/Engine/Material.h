@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 class Texture;
+class ShaderP;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef char GLchar;
@@ -108,8 +109,8 @@ class Material final{
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
-        Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
-        Material(std::string diffuse,std::string normal="",std::string glow="", std::string specular="");
+        Material(std::string diffuse,std::string normal="",std::string glow="", std::string specular="",std::string shader = "");
+        Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         ~Material();
 
 		std::unordered_map<uint,MaterialComponent*>& getComponents();

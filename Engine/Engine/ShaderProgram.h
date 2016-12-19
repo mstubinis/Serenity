@@ -4,6 +4,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 typedef unsigned int uint;
 
 enum SHADER_PIPELINE_STAGE{
@@ -17,6 +18,7 @@ enum SHADER_TYPE{
 	SHADER_TYPE_GEOMETRY
 };
 
+class Material;
 class Shader final{
 	private:
 		class impl;
@@ -47,6 +49,10 @@ class ShaderP final{
 		SHADER_PIPELINE_STAGE stage();
         Shader* vertexShader();
         Shader* fragmentShader();
+		std::vector<Material*>& getMaterials();
+
+		void addMaterial(std::string);
+		void addMaterial(Material*);
 };
 
 #endif

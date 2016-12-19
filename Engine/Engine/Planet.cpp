@@ -275,10 +275,6 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, 
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     setColor(starColor.x,starColor.y,starColor.z,1);
 	setGodsRaysColor(starColor.x,starColor.y,starColor.z);
-    for(auto item:m_DisplayItems){
-        item->material->setShadeless(true);
-        item->material->setGlow(0.21f);
-    }
     addChild(m_Light);
 }
 Star::~Star(){
@@ -323,32 +319,32 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 				glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r/255.0f,bgFrontPixel.g/255.0f,bgFrontPixel.b/255.0f,bgFrontPixel.a/255.0f);
 				glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r/255.0f,bgBackPixel.g/255.0f,bgBackPixel.b/255.0f,bgBackPixel.a/255.0f);
 
-				glm::vec4 finalColorFront = Engine::Math::PaintersAlgorithm(bgColorFront,pC);
-				glm::vec4 finalColorBack = Engine::Math::PaintersAlgorithm(bgColorBack,pC);
+				glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(bgColorFront,pC);
+				glm::vec4 _fcb = Engine::Math::PaintersAlgorithm(bgColorBack,pC);
 
                 if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
-                    finalColorFront = glm::vec4(bgColorFront.r,bgColorFront.g,bgColorFront.b,0);
-                    finalColorBack = glm::vec4(bgColorBack.r,bgColorBack.g,bgColorBack.b,0);
+                    _fcf = glm::vec4(bgColorFront.r,bgColorFront.g,bgColorFront.b,0);
+                    _fcb = glm::vec4(bgColorBack.r,bgColorBack.g,bgColorBack.b,0);
 
                     uint numerator = ringInfo.size - i;
                     pC.a = float(numerator/(ringInfo.size));
-					finalColorFront.a = 1.0f - pC.a;
-                    finalColorBack.a = 1.0f - pC.a;
+					_fcf.a = 1.0f - pC.a;
+                    _fcb.a = 1.0f - pC.a;
                 }
 
                 float ra = float(int(rand() % 10 - 5))/255.0f;
                 float ra1 = float(int(rand() % 10 - 5))/255.0f;
 
-                finalColorFront.r += ra;
-                finalColorFront.g += ra;
-                finalColorFront.b += ra;
+                _fcf.r += ra;
+                _fcf.g += ra;
+                _fcf.b += ra;
 
-                finalColorBack.r += ra1;
-                finalColorBack.g += ra1;
-                finalColorBack.b += ra1;
+                _fcb.r += ra1;
+                _fcb.g += ra1;
+                _fcb.b += ra1;
 
-				sf::Color fFront = sf::Color(finalColorFront.r * 255, finalColorFront.g * 255, finalColorFront.b * 255, finalColorFront.a * 255);
-				sf::Color fBack = sf::Color(finalColorBack.r * 255, finalColorBack.g * 255, finalColorBack.b * 255, finalColorBack.a * 255);
+				sf::Color fFront = sf::Color(sf::Uint8(_fcf.r) * 255, sf::Uint8(_fcf.g) * 255, sf::Uint8(_fcf.b) * 255, sf::Uint8(_fcf.a) * 255);
+				sf::Color fBack = sf::Color(sf::Uint8(_fcb.r) * 255, sf::Uint8(_fcb.g) * 255, sf::Uint8(_fcb.b) * 255, sf::Uint8(_fcb.a) * 255);
 
                 for(unsigned int s = 0; s < ringImage.getSize().y; s++){
                     ringImage.setPixel(ringInfo.position + i,s,fFront);
@@ -361,11 +357,11 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
                 pC.r += ra;
                 pC.g += ra;
                 pC.b += ra;
-				sf::Color paintColor = sf::Color(pC.r * 255, pC.g * 255, pC.b * 255, pC.a * 255);
+				sf::Color _pc = sf::Color(sf::Uint8(pC.r) * 255, sf::Uint8(pC.g) * 255, sf::Uint8(pC.b) * 255, sf::Uint8(pC.a) * 255);
 
                 for(unsigned int s = 0; s < ringImage.getSize().y; s++){
-                    ringImage.setPixel(ringInfo.position + i,s,paintColor);
-                    ringImage.setPixel(ringInfo.position - i,s,paintColor);
+                    ringImage.setPixel(ringInfo.position + i,s,_pc);
+                    ringImage.setPixel(ringInfo.position - i,s,_pc);
                 }
             }
         }

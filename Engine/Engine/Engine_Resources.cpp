@@ -85,11 +85,11 @@ void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g,
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(g,w,l));
 }
 
-void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s));
+void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s,std::string shader){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s,shader));
 }
-void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s));
+void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* shader){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s,shader));
 }
 
 void Resources::addShader(std::string n, std::string s, SHADER_TYPE t, bool b){
