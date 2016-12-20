@@ -163,7 +163,7 @@ void ObjectDynamic::render(GLuint shader,bool debug){
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
 void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
-	Engine::Renderer::Detail::drawObject(this,shader,debug,godsRays);
+	Engine::Renderer::Detail::drawObject(this,debug,godsRays);
 }
 glm::v3 ObjectDynamic::getPosition(){
     glm::mat4 m(1);

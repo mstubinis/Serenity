@@ -22,22 +22,14 @@ void CapsuleEnd::update(float dt){
     ObjectBasic::update(dt);
 }
 void CapsuleEnd::draw(GLuint shader,bool debug,bool godsRays){
-    glDisable(GL_DEPTH_TEST);
     ObjectDisplay::draw(shader,debug,godsRays);
-    glEnable(GL_DEPTH_TEST);
 }
-
 
 CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/glm::num(100),scene);
-
-        m_Light->setConstant(0.1f);
-        m_Light->setLinear(0.1f);
-        m_Light->setExponent(0.1f);
-
-        m_Light->setColor(255,124,27,255);
+        m_Light->setConstant(0.1f);m_Light->setLinear(0.1f);m_Light->setExponent(0.1f);m_Light->setColor(255,124,27,255);
         m_Light->setSpecularPower(2.0f);
     }
     setColor(255,235,206,255);
@@ -53,24 +45,16 @@ void CapsuleStar::update(float dt){
         float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
         setPosition(x*100,y*100,-200*100);
     }
-
 	if(m_Light != nullptr){
 		m_Light->setPosition(pos/glm::num(150));
-		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
-			m_Light->deactivate();
-		}
-		else{
-			m_Light->activate();
-		}
+		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){m_Light->deactivate();}
+		else{m_Light->activate();}
 	}
-
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
     ObjectBasic::update(dt);
 }
 void CapsuleStar::draw(GLuint shader,bool debug, bool godsRays){
-	glDisable(GL_DEPTH_TEST);
     ObjectDisplay::draw(shader,debug,godsRays);
-	glEnable(GL_DEPTH_TEST);
 }
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::v3(0),glm::vec3(1),name,scene){
@@ -80,9 +64,7 @@ CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string m
 CapsuleTunnel::~CapsuleTunnel(){
 }
 void CapsuleTunnel::draw(GLuint shader,bool debug,bool godsRays){
-	glDisable(GL_DEPTH_TEST);
     ObjectDisplay::draw(shader,debug,godsRays);
-	glEnable(GL_DEPTH_TEST);
 }
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::v3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
@@ -91,9 +73,7 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string m
 CapsuleRibbon::~CapsuleRibbon(){
 }
 void CapsuleRibbon::draw(GLuint shader,bool debug,bool godsRays){
-    glDisable(GL_DEPTH_TEST);
     ObjectDisplay::draw(shader,debug,godsRays);
-    glEnable(GL_DEPTH_TEST);
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
@@ -104,7 +84,6 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
     l->setColor(255,225,235,255);
     l->setSpecularPower(0.0f);
-
 
     if(!Resources::getMaterial("CapsuleTunnel")){
         Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",COLLISION_TYPE_NONE);
@@ -130,12 +109,12 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         Resources::getMaterial("Capsule_D")->setShadeless(true);
     }
 
-    m_TunnelA = new CapsuleTunnel(5000,"AAAAAA_Capsule_Tunnel_A","Capsule_A",this);
-    m_TunnelB = new CapsuleTunnel(5000,"AAAAAA_Capsule_Tunnel_B","Capsule_B",this);
-    m_Ribbon = new CapsuleRibbon(5000,"AAAAAA_Capsule_Tunnel_C_Ribbon","Capsule_C",this);
+    m_TunnelA = new CapsuleTunnel(5000,"AAAAAA_A","Capsule_A",this);
+    m_TunnelB = new CapsuleTunnel(5000,"AAAAAB_B","Capsule_B",this);
+    m_Ribbon = new CapsuleRibbon(5000,"AAAAAD_Ribbon","Capsule_C",this);
 
-    m_FrontEnd = new CapsuleEnd(450,glm::v3(0,0,-5000),glm::vec3(1),"AAAAAA_Capsule_Tunnel_B_Front",this);
-    m_BackEnd = new CapsuleEnd(330,glm::v3(0,0,5000),glm::vec3(0),"AAAAAA_Capsule_Tunnel_B_Back",this);
+    m_FrontEnd = new CapsuleEnd(450,glm::v3(0,0,-5000),glm::vec3(1),"AAAACC_Front",this);
+    m_BackEnd = new CapsuleEnd(330,glm::v3(0,0,5000),glm::vec3(0),"AAAACD_Back",this);
 
     m_BackEnd->rotate(0,180,0,false);
 
@@ -158,7 +137,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         if(i % 3 == 0){
             spawnLight = true;
         }
-        m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAA_Capsule_Tunnel_D_Star_" + boost::lexical_cast<std::string>(i),this,spawnLight));
+        m_CapsuleStars.push_back(new CapsuleStar(100,pos,"AAAAAE_Star_" + boost::lexical_cast<std::string>(i),this,spawnLight));
         step -= 6.0f;
     }
 

@@ -31,6 +31,11 @@ ID3D11DeviceContext* Renderer::Detail::RenderManagement::m_DirectXDeviceContext;
 ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
+bool Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
+bool Renderer::Detail::RendererInfo::GeneralInfo::depth_test = true;
+bool Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = true;
+GLuint Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = 0;
+
 bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
 float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
 float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 2.25f;
@@ -74,7 +79,139 @@ std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToB
 
 std::vector<ShaderP*> Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
-void Engine::Renderer::Detail::RenderManagement::init(){
+
+
+void Renderer::Settings::enableAlphaTest(bool b){
+	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+		glEnable(GL_ALPHA_TEST);
+		Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = true;
+	}
+	else if(!b && Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+		glDisable(GL_ALPHA_TEST);
+		Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
+	}
+}
+void Renderer::Settings::disableAlphaTest(){
+	if(Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+		glDisable(GL_ALPHA_TEST);
+		Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
+	}
+}
+void Renderer::Settings::enableDepthTest(bool b){
+	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::depth_test){
+		glEnable(GL_DEPTH_TEST);
+		Renderer::Detail::RendererInfo::GeneralInfo::depth_test = true;
+	}
+	else if(!b && Renderer::Detail::RendererInfo::GeneralInfo::depth_test){
+		glDisable(GL_DEPTH_TEST);
+		Renderer::Detail::RendererInfo::GeneralInfo::depth_test = false;
+	}
+}
+void Renderer::Settings::disableDepthTest(){
+	if(Renderer::Detail::RendererInfo::GeneralInfo::depth_test){
+		glDisable(GL_DEPTH_TEST);
+		Renderer::Detail::RendererInfo::GeneralInfo::depth_test = false;
+	}
+}
+void Renderer::Settings::enableDepthMask(bool b){
+	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::depth_mask){
+		glDepthMask(GL_TRUE);
+		Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = true;
+	}
+	else if(!b && Renderer::Detail::RendererInfo::GeneralInfo::depth_mask){
+		glDepthMask(GL_FALSE);
+		Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = false;
+	}
+}
+void Renderer::Settings::disableDepthMask(){
+	if(Renderer::Detail::RendererInfo::GeneralInfo::depth_mask){
+		glDepthMask(GL_FALSE);
+		Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = false;
+	}
+}
+void Renderer::useShader(ShaderP* program){
+	if(program != 0){
+		GLuint p = program->program();
+		if(Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != p){
+			glUseProgram(p);
+			Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = p;
+		}
+	}
+	else{
+		if(Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != 0){
+			glUseProgram(0);
+			Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = 0;
+		}
+	}
+}
+void Renderer::useShader(std::string programName){
+	Renderer::useShader(Resources::getShaderProgram(programName));
+}
+void Renderer::sendUniform1d(const char* location,double x){
+	glUniform1d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
+}
+void Renderer::sendUniform1i(const char* location,int x){
+	glUniform1i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
+}
+void Renderer::sendUniform1f(const char* location,float x){
+	glUniform1f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
+}
+void Renderer::sendUniform2d(const char* location,double x,double y){
+	glUniform2d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y );
+}
+void Renderer::sendUniform2i(const char* location,int x,int y){
+	glUniform2i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y );
+}
+void Renderer::sendUniform2f(const char* location,float x,float y){
+	glUniform2f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y );
+}
+void Renderer::sendUniform3d(const char* location,double x,double y,double z){
+	glUniform3d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z );
+}
+void Renderer::sendUniform3i(const char* location,int x,int y,int z){
+	glUniform3i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z );
+}
+void Renderer::sendUniform3f(const char* location,float x,float y,float z){
+	glUniform3f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z );
+}
+void Renderer::sendUniform4d(const char* location,double x,double y,double z,double w){
+	glUniform4d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z,w );
+}
+void Renderer::sendUniform4i(const char* location,int x,int y,int z,int w){
+	glUniform4i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z,w );
+}
+void Renderer::sendUniform4f(const char* location,float x,float y,float z,float w){
+	glUniform4f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z,w );
+}
+void Renderer::sendUniformMatrix4f(const char* location,glm::mat4& m){
+	glUniformMatrix4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), 1, GL_FALSE, glm::value_ptr(m));
+}
+void Renderer::sendUniformMatrix4d(const char* location,glm::dmat4& m){
+	glUniformMatrix4dv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), 1, GL_FALSE, glm::value_ptr(m));
+}
+void Renderer::sendUniform2fv(const char* location,std::vector<glm::vec2>& data,uint limit){
+	glUniform2fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
+}
+void Renderer::sendUniform3fv(const char* location,std::vector<glm::vec3>& data,uint limit){
+	glUniform3fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
+}
+void Renderer::sendUniform4fv(const char* location,std::vector<glm::vec4>& data,uint limit){
+	glUniform4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
+}
+
+void Renderer::sendUniform2fv(const char* location,glm::vec2* data,uint limit){
+	glUniform2fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
+}
+void Renderer::sendUniform3fv(const char* location,glm::vec3* data,uint limit){
+	glUniform3fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
+}
+void Renderer::sendUniform4fv(const char* location,glm::vec4* data,uint limit){
+	glUniform4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
+}
+
+
+
+void Renderer::Detail::RenderManagement::init(){
     #ifdef _DEBUG
     Detail::RendererInfo::DebugDrawingInfo::debug = true;
     #else
@@ -112,7 +249,7 @@ void Engine::Renderer::Detail::RenderManagement::init(){
 
     RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,float(Resources::getWindowSize().x),0.0f,float(Resources::getWindowSize().y),0.005f,1000.0f);
 }
-void Engine::Renderer::Detail::RenderManagement::destruct(){
+void Renderer::Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
     #ifdef _WIN32
     SAFE_DELETE_COM(RenderManagement::m_DirectXSwapChain);
@@ -121,53 +258,54 @@ void Engine::Renderer::Detail::RenderManagement::destruct(){
     SAFE_DELETE_COM(RenderManagement::m_DirectXDeviceContext);
     #endif
 }
-void Engine::Renderer::renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, float angle, float depth){
+void Renderer::renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, float angle, float depth){
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
 }
-void Engine::Renderer::renderTexture(Texture* texture,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth){
+void Renderer::renderTexture(Texture* texture,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth){
 	texture->render(pos,col,angle,scl,depth);
 }
-void Engine::Renderer::renderText(std::string text,Font* font, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth){
+void Renderer::renderText(std::string text,Font* font, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth){
 	font->renderText(text,pos,color,angle,scl,depth);
 }
 
-void Engine::Renderer::Detail::RenderManagement::_renderObjects(){
+void Renderer::Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
 		item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
     }
 }
-void Engine::Renderer::Detail::RenderManagement::_renderForegroundObjects(){
+void Renderer::Detail::RenderManagement::_renderForegroundObjects(){
     for(auto item:m_ForegroundObjectsToBeRendered){
         item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
-void Engine::Renderer::Detail::RenderManagement::_renderForwardRenderedObjects(){
+void Renderer::Detail::RenderManagement::_renderForwardRenderedObjects(){
     for(auto item:m_ObjectsToBeForwardRendered){
         item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
-void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
-    GLuint shader = Resources::getShaderProgram("Deferred_HUD")->program();
-    glUseProgram(shader);
-    glUniform1f(glGetUniformLocation(shader, "far"),Resources::getActiveCamera()->getFar());
-    glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
+void Renderer::Detail::RenderManagement::_renderTextures(){
+	useShader("Deferred_HUD");
+
+	sendUniform1f("far",Resources::getActiveCamera()->getFar());
+	sendUniform1f("C",1.0f);
+
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture->address());
-            glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"),0);
-            glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"),1);
+			sendUniform1i("DiffuseTexture",0);
+			sendUniform1i("DiffuseTextureEnabled",1);
         }
         else{
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, 0);
-            glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"),0);
-            glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"),0);
+			sendUniform1i("DiffuseTexture",0);
+			sendUniform1i("DiffuseTextureEnabled",0);
         }
-        glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
-        glUniform4f(glGetUniformLocation(shader,"Object_Color"),item.col.r,item.col.g,item.col.b,item.col.a);
+		sendUniform1i("Shadeless",1);
+		sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
         glm::mat4 model = glm::mat4(1);
         model = glm::translate(model, glm::vec3(item.pos.x,
@@ -178,25 +316,24 @@ void Engine::Renderer::Detail::RenderManagement::_renderTextures(){
             model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
         model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
-        glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m_2DProjectionMatrix));
-        glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(model));
+		sendUniformMatrix4f("VP",m_2DProjectionMatrix);
+		sendUniformMatrix4f("Model",model);
 
         Resources::getMesh("Plane")->render();
     }
-    glUseProgram(0);
+    useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_renderText(){
-    GLuint shader = Resources::getShaderProgram("Deferred_HUD")->program();
-    glUseProgram(shader);
+void Renderer::Detail::RenderManagement::_renderText(){
+	useShader("Deferred_HUD");
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->address());
-        glUniform1i(glGetUniformLocation(shader,"DiffuseTexture"),0);
-        glUniform1i(glGetUniformLocation(shader,"DiffuseTextureEnabled"),1);
-        glUniform1i(glGetUniformLocation(shader,"Shadeless"),1);
+		sendUniform1i("DiffuseTexture",0);
+		sendUniform1i("DiffuseTextureEnabled",1);
+        sendUniform1i("Shadeless",1);
 
-        glUniform4f(glGetUniformLocation(shader, "Object_Color"),item.col.x,item.col.y,item.col.z,item.col.w);
+		sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
 
         float y_offset = 0;
         float x = item.pos.x;
@@ -213,17 +350,17 @@ void Engine::Renderer::Detail::RenderManagement::_renderText(){
                 glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
                 glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
 
-                glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(m_2DProjectionMatrix));
-                glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(glyph->m_Model));
+				sendUniformMatrix4f("VP",m_2DProjectionMatrix);
+				sendUniformMatrix4f("Model",glyph->m_Model);
 
                 glyph->char_mesh->render();
                 x += (glyph->xadvance) * item.scl.x;
             }
         }
     }
-    glUseProgram(0);
+    useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
+void Renderer::Detail::RenderManagement::_passGeometry(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();
@@ -234,73 +371,68 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
 
 	//RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
-    glDepthMask(GL_TRUE);
-    glEnable(GL_DEPTH_TEST);
+	Settings::enableDepthTest();
+	Settings::enableDepthMask();
+
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
     glBlendEquationi(GL_FUNC_ADD,0);
     glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
-    //_renderObjects();
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
-		glUseProgram(shaderProgram->program());
+		Renderer::useShader(shaderProgram);
 		for(auto material:shaderProgram->getMaterials()){
 			Material* m = Resources::getMaterial(material);
 			m->bind(shaderProgram->program(),Resources::getAPI());
 			for(auto object:m->getObjects()){
 				if(s->getObjects().count(object)){
-					Resources::getObject(object)->draw(shaderProgram->program());
+					Resources::getObject(object)->draw(shaderProgram->program(),Detail::RendererInfo::DebugDrawingInfo::debug,Detail::RendererInfo::GodRaysInfo::godRays);
 				}
 			}
 		}
-		glUseProgram(0);
+		Renderer::useShader(0);
 	}
-
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
+	Settings::disableDepthTest();
+	Settings::disableDepthMask();
 
 	//RENDER FOREGROUND OBJECTS HERE
 }
-void Engine::Renderer::Detail::RenderManagement::_passLighting(){
-    GLuint shader = Resources::getShaderProgram("Deferred_Light")->program();
+void Renderer::Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-    glUseProgram(shader);
+	useShader("Deferred_Light");
 
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
-	glUniform4fv(glGetUniformLocation(shader,"materials"),MATERIAL_COUNT_LIMIT, glm::value_ptr(Material::m_MaterialProperities[0]));
-	glUniform2f( glGetUniformLocation(shader,"gScreenSize"), (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+	sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+	sendUniform4fv("materials",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
 
+	sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-    glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 0 );
+	sendUniform1i("gNormalMap",0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
-    glUniform1i( glGetUniformLocation(shader,"gPositionMap"), 1 );
+    sendUniform1i("gPositionMap",1);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_MISC));
-    glUniform1i( glGetUniformLocation(shader,"gMiscMap"), 2 );
+    sendUniform1i("gMiscMap",2);
 
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
-    glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 3 );
+    sendUniform1i("gDiffuseMap",3);
 
     for (auto light:Resources::getCurrentScene()->getLights()){
-        light.second->lighten(shader);
+        light.second->lighten();
     }
     // Reset OpenGL state
     for(uint i = 0; i < 4; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    glUseProgram(0);
+	useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::render(){
-    //for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::DebugDrawingInfo::debug); }
-
-
+void Renderer::Detail::RenderManagement::render(){
 	if(!RendererInfo::GodRaysInfo::godRays)
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
 	else
@@ -336,20 +468,15 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	glDisable(GL_BLEND);
 
     m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-    RenderManagement::_passSSAO(RendererInfo::SSAOInfo::ssao,RendererInfo::BloomInfo::bloom);
+    RenderManagement::_passSSAO();
     m_gBuffer->stop();
 
-
 	if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
-		float& bloom_str = RendererInfo::BloomInfo::bloom_strength;
-		float& ssao_str = RendererInfo::SSAOInfo::ssao_blur_strength;
-		glm::vec4 str(bloom_str,bloom_str,bloom_str,ssao_str);
-
 		m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
-		RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
+		RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
 		m_gBuffer->stop();
 		m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-		RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE2,RendererInfo::BloomInfo::bloom_radius,str,"RGBA");
+		RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
 		m_gBuffer->stop();
 	}
 
@@ -362,18 +489,17 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 
     //copy depth over
     glColorMask(0,0,0,0);
-    GLuint shader = Resources::getShaderProgram("Copy_Depth")->program();
-    glUseProgram(shader);
+	useShader("Copy_Depth");
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
-    glUniform1i(glGetUniformLocation(shader,"gDepthMap"), 0 );
-
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+	sendUniform1i("gDepthMap",0);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glUseProgram(0);
+	useShader(0);
     glColorMask(1,1,1,1);
     /////////////
 
@@ -385,18 +511,19 @@ void Engine::Renderer::Detail::RenderManagement::render(){
     _renderForwardRenderedObjects();
     _renderForegroundObjects();
 
-    glEnable(GL_ALPHA_TEST);
+	Settings::enableAlphaTest();
     glAlphaFunc(GL_GREATER, 0.1f);
 
-    glDepthMask(GL_TRUE);
-    glEnable(GL_DEPTH_TEST);
+
+	Settings::enableDepthTest();
+	Settings::enableDepthMask();
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
     _renderTextures();
     _renderText();
 
-    glDisable(GL_ALPHA_TEST);
+	Settings::disableAlphaTest();
 
 	m_ObjectsToBeRendered.clear();
 	m_ForegroundObjectsToBeRendered.clear();
@@ -404,212 +531,210 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	m_FontsToBeRendered.clear();
 	m_TexturesToBeRendered.clear();
 }
-void Engine::Renderer::Detail::RenderManagement::_passSSAO(bool ssao, bool bloom){
-    GLuint shader = Resources::getShaderProgram("Deferred_SSAO")->program();
-    glUseProgram(shader);
+void Renderer::Detail::RenderManagement::_passSSAO(){
+	useShader("Deferred_SSAO");
 
-    glUniform1i(glGetUniformLocation(shader,"doSSAO"),int(ssao));
-    glUniform1i(glGetUniformLocation(shader,"doBloom"),int(bloom));
+	sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
+	sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
 
-	glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-	glUniform3f(glGetUniformLocation(shader,"gCameraPosition"),camPos.x,camPos.y,camPos.z);
-    glUniform1f(glGetUniformLocation(shader,"gIntensity"),RendererInfo::SSAOInfo::ssao_intensity);
-    glUniform1f(glGetUniformLocation(shader,"gBias"),RendererInfo::SSAOInfo::ssao_bias);
-    glUniform1f(glGetUniformLocation(shader,"gRadius"),RendererInfo::SSAOInfo::ssao_radius);
-    glUniform1f(glGetUniformLocation(shader,"gScale"),RendererInfo::SSAOInfo::ssao_scale);
-    glUniform1i(glGetUniformLocation(shader,"gSampleCount"),RendererInfo::SSAOInfo::ssao_samples);
-    glUniform1i(glGetUniformLocation(shader,"gNoiseTextureSize"),RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
-    glUniform2fv(glGetUniformLocation(shader,"poisson"),Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT, glm::value_ptr(RendererInfo::SSAOInfo::ssao_Kernels[0]));
-    glUniform1i(glGetUniformLocation(shader,"far"),int(Resources::getActiveCamera()->getFar()));
+	Camera* c = Resources::getActiveCamera();
+	glm::vec3 camPos = glm::vec3(c->getPosition());
+
+	sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
+	sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
+	sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
+	sendUniform1f("gRadius",RendererInfo::SSAOInfo::ssao_radius);
+	sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
+	sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
+	sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+
+	sendUniform2fv("poisson",RendererInfo::SSAOInfo::ssao_Kernels,Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+
+	sendUniform1i("far",int(c->getFar()));
+
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-    glUniform1i(glGetUniformLocation(shader,"gNormalMap"), 0 );
+	sendUniform1i("gNormalMap",0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
-    glUniform1i(glGetUniformLocation(shader,"gPositionMap"), 1 );
+	sendUniform1i("gPositionMap",1);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SSAOInfo::ssao_noise_texture);
-    glUniform1i(glGetUniformLocation(shader,"gRandomMap"), 2 );
+	sendUniform1i("gRandomMap",2);
 
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_MISC));
-    glUniform1i(glGetUniformLocation(shader,"gMiscMap"), 3 );
+	sendUniform1i("gMiscMap",3);
 
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-    glUniform1i(glGetUniformLocation(shader,"gLightMap"), 4 );
+    sendUniform1i("gLightMap",4);
 
-
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 5; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    glUseProgram(0);
+	useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
+void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShaderProgram("Deferred_Edge")->program();
-    glUseProgram(shader);
+	useShader("Deferred_Edge");
+	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
+	sendUniform1f("radius", radius);
 
-    glUniform2f(glGetUniformLocation(shader,"gScreenSize"),float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
-    glUniform1f(glGetUniformLocation(shader,"radius"), radius);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
-    glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
+	sendUniform1i("texture",0);
 
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glUseProgram(0);
+    useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
+void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShaderProgram("Deferred_GodsRays")->program();
-    glUseProgram(shader);
-
-    glUniform1f(glGetUniformLocation(shader,"decay"), RendererInfo::GodRaysInfo::godRays_decay);
-    glUniform1f(glGetUniformLocation(shader,"density"), RendererInfo::GodRaysInfo::godRays_density);
-    glUniform1f(glGetUniformLocation(shader,"exposure"), RendererInfo::GodRaysInfo::godRays_exposure);
-    glUniform1i(glGetUniformLocation(shader,"samples"), RendererInfo::GodRaysInfo::godRays_samples);
-    glUniform1f(glGetUniformLocation(shader,"weight"), RendererInfo::GodRaysInfo::godRays_weight);
-    glUniform2f(glGetUniformLocation(shader,"lightPositionOnScreen"),
+	useShader("Deferred_GodsRays");
+	sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
+	sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
+	sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
+	sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
+	sendUniform1f("weight",RendererInfo::GodRaysInfo::godRays_weight);
+	sendUniform2f("lightPositionOnScreen",
 		float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
-		float(lightPositionOnScreen.y/float(Resources::getWindowSize().y)
-	));
+		float(lightPositionOnScreen.y/float(Resources::getWindowSize().y))
+	);
 
-	glUniform1i(glGetUniformLocation(shader,"behind"), int(behind));
-	glUniform1f(glGetUniformLocation(shader,"alpha"), alpha);
+	sendUniform1i("behind",int(behind));
+	sendUniform1f("alpha",alpha);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
-    glUniform1i(glGetUniformLocation(shader,"firstPass"), 0 );
+	sendUniform1i("firstPass",0);
 
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,0);
 
-    glUseProgram(0);
+    useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passHDR(){
+void Renderer::Detail::RenderManagement::_passHDR(){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShaderProgram("Deferred_HDR")->program();
-    glUseProgram(shader);
+	useShader("Deferred_HDR");
+	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
-    glUniform1f(glGetUniformLocation(shader,"gamma"),RendererInfo::HDRInfo::hdr_gamma);
-    glUniform1f(glGetUniformLocation(shader,"exposure"),RendererInfo::HDRInfo::hdr_exposure);
-    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-    glUniform1i(glGetUniformLocation(shader,"lightingBuffer"), 0 );
+	sendUniform1i("lightingBuffer",0);
 
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 1; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, i);
     }
-    glUseProgram(0);
+	useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,float str,std::string channels){
-	_passBlur(type,texture,radius,glm::vec4(str),channels);
-}
-void Engine::Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture, float radius,glm::vec4 str,std::string channels){
-    GLuint shader = Resources::getShaderProgram("Deferred_Blur")->program();
-    glUseProgram(shader);
 
-    glUniform1f(glGetUniformLocation(shader,"radius"), radius);
-    glUniform4f(glGetUniformLocation(shader,"strengthModifier"), str.x,str.y,str.z,str.w);
+void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture,std::string channels){
+	useShader("Deferred_Blur");
 
-    if(channels.find("R") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"R"), 1);
-    else                                        glUniform1i(glGetUniformLocation(shader,"R"), 0);
-    if(channels.find("G") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"G"), 1);
-    else                                        glUniform1i(glGetUniformLocation(shader,"G"), 0);
-    if(channels.find("B") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"B"), 1);
-    else                                        glUniform1i(glGetUniformLocation(shader,"B"), 0);
-    if(channels.find("A") != std::string::npos) glUniform1i(glGetUniformLocation(shader,"A"), 1);
-    else                                        glUniform1i(glGetUniformLocation(shader,"A"), 0);
+	sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
+	sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
+		RendererInfo::BloomInfo::bloom_strength,
+		RendererInfo::BloomInfo::bloom_strength,
+		RendererInfo::SSAOInfo::ssao_blur_strength
+	);
 
-    if(type == "Horizontal"){ 
-        glUniform2f(glGetUniformLocation(shader,"HV"), 1.0f,0.0f);
-    }
-    else{
-        glUniform2f(glGetUniformLocation(shader,"HV"), 0.0f,1.0f);
-    }
+    if(channels.find("R") != std::string::npos) sendUniform1i("R",1);
+    else                                        sendUniform1i("R",0);
+    if(channels.find("G") != std::string::npos) sendUniform1i("G",1);
+    else                                        sendUniform1i("G",0);
+    if(channels.find("B") != std::string::npos) sendUniform1i("B",1);
+    else                                        sendUniform1i("B",0);
+    if(channels.find("A") != std::string::npos) sendUniform1i("A",1);
+    else                                        sendUniform1i("A",0);
+
+    if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
+    else{                     sendUniform2f("HV",0.0f,1.0f); }
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
-    glUniform1i(glGetUniformLocation(shader,"texture"), 0 );
+	sendUniform1i("texture",0);
 
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glUseProgram(0);
+    useShader(0);
 }
-void Engine::Renderer::Detail::RenderManagement::_passFinal(){
+void Renderer::Detail::RenderManagement::_passFinal(){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint shader = Resources::getShaderProgram("Deferred_Final")->program();
-    glUseProgram(shader);
+	useShader("Deferred_Final");
 
-	glUniform1f(glGetUniformLocation(shader,"gamma"),RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
+
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-    glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
+    sendUniform3f("gAmbientColor",ambient.x,ambient.y,ambient.z);
 
-	glUniform1i( glGetUniformLocation(shader,"HasSSAO"),int(RendererInfo::SSAOInfo::ssao));
-    glUniform1i( glGetUniformLocation(shader,"HasLighting"),int(RendererInfo::LightingInfo::lighting));
-    glUniform1i( glGetUniformLocation(shader,"HasBloom"),int(RendererInfo::BloomInfo::bloom));
-	glUniform1i( glGetUniformLocation(shader,"HasHDR"),int(RendererInfo::HDRInfo::hdr));
+	sendUniform1i("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
+    sendUniform1i("HasLighting",int(RendererInfo::LightingInfo::lighting));
+    sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
+	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
-    glUniform1i( glGetUniformLocation(shader,"gDiffuseMap"), 0 );
+    sendUniform1i("gDiffuseMap", 0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-    glUniform1i( glGetUniformLocation(shader,"gLightMap"), 1 );
+    sendUniform1i("gLightMap", 1);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
-    glUniform1i( glGetUniformLocation(shader,"gBloomMap"), 2 );
+    sendUniform1i("gBloomMap", 2);
 
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-    glUniform1i( glGetUniformLocation(shader,"gNormalMap"), 3 );
+    sendUniform1i("gNormalMap", 3);
 
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_MISC));
-    glUniform1i( glGetUniformLocation(shader,"gMiscMap"), 4 );
+    sendUniform1i("gMiscMap", 4);
 
     glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS));
-    glUniform1i( glGetUniformLocation(shader,"gGodsRaysMap"), 5 );
+    sendUniform1i("gGodsRaysMap", 5);
 
-    renderFullscreenQuad(shader,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 6; i++){
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    glUseProgram(0);
+	useShader(0);
 }
-void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uint height){
+void Renderer::Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);
 	glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(m));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(p));
+
+	sendUniformMatrix4f("Model",m);
+	sendUniformMatrix4f("VP",p);
+
     glViewport(0,0,width,height);
 
 	glBegin(GL_QUADS);
@@ -620,30 +745,29 @@ void Engine::Renderer::Detail::renderFullscreenQuad(GLuint shader,uint width,uin
 	glEnd();
 }
 
-void Engine::Renderer::Detail::drawObject(ObjectDisplay* o, GLuint shader, bool debug,bool godsRays){
+void Renderer::Detail::drawObject(ObjectDisplay* o, bool debug,bool godsRays){
 	Camera* camera = Resources::getActiveCamera();
-	Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),shader,debug,godsRays);
+	Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),debug,godsRays);
 }
-void Engine::Renderer::Detail::drawObject(ObjectDynamic* o, GLuint shader, bool debug,bool godsRays){
+void Renderer::Detail::drawObject(ObjectDynamic* o, bool debug,bool godsRays){
 	Camera* camera = Resources::getActiveCamera();
-	Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),shader,debug,godsRays);
+	Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),debug,godsRays);
 }
-void Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* camera,glm::num dist,bool intTest,glm::vec4& color, glm::vec3& raysColor,float radius,std::vector<DisplayItem*>& items,glm::m4 model,bool visible,GLuint shader, bool debug,bool godsRays){
+void Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* camera,glm::num dist,bool intTest,glm::vec4& color, glm::vec3& raysColor,float radius,std::vector<DisplayItem*>& items,glm::m4 model,bool visible, bool debug,bool godsRays){
 	if((items.size() == 0 || visible == false) || (!intTest) || (dist > 1100 * radius))
         return;
-    //glUseProgram(shader);
 
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
-    glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
-    glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-	glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
-	glUniform3f(glGetUniformLocation(shader, "Gods_Rays_Color"),raysColor.x,raysColor.y,raysColor.z);
+	sendUniformMatrix4f("VP",camera->getViewProjection());
+	sendUniform1f("far",camera->getFar());
+	sendUniform1f("C",1.0f);
+	sendUniform4f("Object_Color",color.x,color.y,color.z,color.w);
+	sendUniform3f("Gods_Rays_Color",raysColor.x,raysColor.y,raysColor.z);
 
 	glm::vec3 camPos = glm::vec3(camera->getPosition());
-	glUniform3f(glGetUniformLocation(shader,"CameraPosition"),camPos.x,camPos.y,camPos.z);
+	sendUniform3f("CameraPosition",camPos.x,camPos.y,camPos.z);
 
-	if(godsRays) glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
-	else         glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
+	if(godsRays) sendUniform1i("HasGodsRays",1);
+	else         sendUniform1i("HasGodsRays",0);
 
     for(auto item:items){
 		glm::mat4 m = glm::mat4(model);
@@ -651,20 +775,17 @@ void Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* cam
         m *= glm::mat4_cast(item->orientation);
         m = glm::scale(m,item->scale);
 
-        glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(item->material->shadeless()));
-        glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
-		glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
+        sendUniform1i("Shadeless",int(item->material->shadeless()));
+        sendUniform1f("BaseGlow",item->material->glow());
+		sendUniform1f("matID",float(float(item->material->id())/255.0f));
+        sendUniformMatrix4f("Model",m);
 
-        glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
-
-		//item->material->bind(shader,Resources::getAPI());
         item->mesh->render();
     }
-    //glUseProgram(0);
 }
 
 #ifdef _WIN32
-void Engine::Renderer::Detail::RenderManagement::renderDirectX(){
+void Renderer::Detail::RenderManagement::renderDirectX(){
     // clear the back buffer to a deep blue
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();

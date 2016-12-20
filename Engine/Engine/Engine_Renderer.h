@@ -62,6 +62,12 @@ namespace Engine{
     namespace Renderer{
         namespace Detail{
 			struct RendererInfo final{
+				struct GeneralInfo final{
+					static bool alpha_test;
+					static bool depth_mask;
+					static bool depth_test;
+					static GLuint current_shader_program;
+				};
 				struct DebugDrawingInfo final{
 					static bool debug;
 				};
@@ -121,7 +127,7 @@ namespace Engine{
                     static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
-				
+				    static bool depthMaskEnabled;
 
                     static void _renderForwardRenderedObjects();
                     static void _renderObjects();
@@ -132,10 +138,9 @@ namespace Engine{
                     static void _passHDR();
                     static void _passGeometry();
                     static void _passLighting();
-                    static void _passSSAO(bool ssao,bool bloom);
+                    static void _passSSAO();
                     static void _passEdge(GLuint texture,float radius = 1.0f);
-					static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,glm::vec4 strengthModifier = glm::vec4(1.0f),std::string channels = "RGBA");
-                    static void _passBlur(std::string type,GLuint texture,float radius = 1.0f,float strengthModifier = 1.0f,std::string channels = "RGBA");
+					static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal();
                 public:
                     static GBuffer* m_gBuffer;
@@ -152,14 +157,22 @@ namespace Engine{
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
 
-					static void _drawObjectInternal(Camera*,glm::num distFromCamera,bool sphereIntersectTest,glm::vec4& color,glm::vec3& godRaysColor,float radius,std::vector<DisplayItem*>&,glm::m4 model,bool visible,GLuint shader,bool debug = false,bool godsRays = false);
+					static void _drawObjectInternal(Camera*,glm::num distFromCamera,bool sphereIntersectTest,glm::vec4& color,glm::vec3& godRaysColor,float radius,std::vector<DisplayItem*>&,glm::m4 model,bool visible,bool debug = false,bool godsRays = false);
             };
-            void renderFullscreenQuad(GLuint shader, uint width, uint height);
-			void drawObject(ObjectDisplay*,GLuint shader, bool debug = false,bool godsRays = false);
-			void drawObject(ObjectDynamic*,GLuint shader, bool debug = false,bool godsRays = false);
+            void renderFullscreenQuad(uint width, uint height);
+			void drawObject(ObjectDisplay*, bool debug = false,bool godsRays = false);
+			void drawObject(ObjectDynamic*, bool debug = false,bool godsRays = false);
         };
 
 		namespace Settings{
+
+			void enableAlphaTest(bool b = true);
+			void disableAlphaTest();
+			void enableDepthTest(bool b = true);
+			void disableDepthTest();
+			void enableDepthMask(bool b = true);
+			void disableDepthMask();
+
 			namespace HDR{
 				static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
 				static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
@@ -230,6 +243,33 @@ namespace Engine{
 				static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
 			};
         };
+
+		void useShader(ShaderP*);
+		void useShader(std::string);
+		inline void sendUniform1d(const char* location,double);
+		inline void sendUniform1i(const char* location,int);
+		inline void sendUniform1f(const char* location,float);
+		inline void sendUniform2d(const char* location,double,double);
+		inline void sendUniform2i(const char* location,int,int);
+		inline void sendUniform2f(const char* location,float,float);
+		inline void sendUniform3d(const char* location,double,double,double);
+		inline void sendUniform3i(const char* location,int,int,int);
+		inline void sendUniform3f(const char* location,float,float,float);
+		inline void sendUniform4d(const char* location,double,double,double,double);
+		inline void sendUniform4i(const char* location,int,int,int,int);
+		inline void sendUniform4f(const char* location,float,float,float,float);
+
+		inline void sendUniform2fv(const char* location,glm::vec2*,uint limit);
+		inline void sendUniform3fv(const char* location,glm::vec3*,uint limit);
+		inline void sendUniform4fv(const char* location,glm::vec4*,uint limit);
+
+		inline void sendUniform2fv(const char* location,std::vector<glm::vec2>&,uint limit);
+		inline void sendUniform3fv(const char* location,std::vector<glm::vec3>&,uint limit);
+		inline void sendUniform4fv(const char* location,std::vector<glm::vec4>&,uint limit);
+
+		inline void sendUniformMatrix4f(const char* location,glm::mat4&);
+		inline void sendUniformMatrix4d(const char* location,glm::dmat4&);
+
 		void renderTexture(Texture*,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth);
 		void renderText(std::string text,Font*, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth);
         void renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, float angle, float depth);

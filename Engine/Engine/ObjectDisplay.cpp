@@ -43,7 +43,7 @@ void ObjectDisplay::setMaterial(std::string materialName, uint index){
 	newMaterial->addObject(name());
 }
 void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
-	Engine::Renderer::Detail::drawObject(this,shader,debug,godsRays);
+	Engine::Renderer::Detail::drawObject(this,debug,godsRays);
 }
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){

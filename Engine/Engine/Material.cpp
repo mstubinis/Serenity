@@ -148,7 +148,7 @@ void MaterialComponentRefraction::bind(GLuint shader,uint api){
 class Material::impl final{
     public:
         std::unordered_map<uint,MaterialComponent*> m_Components;
-		std::vector<std::string> m_Objects;
+		boost::container::flat_set<std::string> m_Objects;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
@@ -336,11 +336,13 @@ void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 
 void Material::addObject(std::string objectName){
 	Object* o = Resources::getObject(objectName);
-	if(o != nullptr) m_i->m_Objects.push_back(objectName);
+	if(o != nullptr) m_i->m_Objects.insert(objectName);
+	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
 }
 void Material::removeObject(std::string objectName){
-	std::vector<std::string>::iterator result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
+	auto result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
     if (result == m_i->m_Objects.end()) return;
     m_i->m_Objects.erase(result);
+	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
 }
-std::vector<std::string>& Material::getObjects(){ return m_i->m_Objects; }
+boost::container::flat_set<std::string>& Material::getObjects(){ return m_i->m_Objects; }

@@ -3,13 +3,9 @@
 uniform int LightType;
 
 uniform vec3 LightColor;
-uniform float LightAmbientIntensity;
-uniform float LightDiffuseIntensity;
-uniform float LightSpecularIntensity;
 
-uniform float LightConstant;
-uniform float LightLinear;
-uniform float LightExp;
+uniform vec3 LightIntensities; //x = ambient, y = diffuse, z = specular
+uniform vec3 LightData; //x = constant, y = linear z = exponent
 
 uniform vec3 LightDirection;
 uniform vec3 LightPosition;
@@ -28,7 +24,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
         return vec4(0);
     }
-    vec4 AmbientColor = vec4(LightColor, 1.0) * LightAmbientIntensity;
+    vec4 AmbientColor = vec4(LightColor, 1.0) * LightIntensities.x;
     float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
 	float Glow = texture2D(gMiscMap,uv).r;
 	float SpecularMap = texture2D(gMiscMap,uv).g;
@@ -39,7 +35,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec4 SpecularColor = vec4(0.0);
 	vec4 lightWithoutSpecular = vec4(0.0);
     if (Lambertian > 0.0) {
-        DiffuseColor = vec4(LightColor, 1.0) * LightDiffuseIntensity * (pow(Lambertian,0.75) * 1.2); //this modification to Lambertian makes lighting look more realistic
+        DiffuseColor = vec4(LightColor, 1.0) * LightIntensities.y * (pow(Lambertian,0.75) * 1.2); //this modification to Lambertian makes lighting look more realistic
         vec3 ViewVector = normalize(-PxlWorldPos + gCameraPosition);
 
         // this is blinn phong
@@ -49,8 +45,8 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 		float materialSpecularity = materials[index].g;
         SpecularAngle = pow(SpecularAngle, materialSpecularity);
 
-        if (SpecularAngle > 0.0 && LightSpecularIntensity > 0.001) {
-            SpecularColor = (vec4(LightColor, 1.0) * LightSpecularIntensity * SpecularAngle) * SpecularMap;
+        if (SpecularAngle > 0.0 && LightIntensities.z > 0.001) {
+            SpecularColor = (vec4(LightColor, 1.0) * LightIntensities.z * SpecularAngle) * SpecularMap;
         }
 		lightWithoutSpecular = max(AmbientColor, (AmbientColor + DiffuseColor) * diffuseMapColor);
     }
@@ -68,7 +64,7 @@ vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 
     vec4 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
-    float a =  max(1.0 , LightConstant + (LightLinear * Distance) + (LightExp * Distance * Distance));
+    float a =  max(1.0 , LightData.x + (LightData.y * Distance) + (LightData.z * Distance * Distance));
     return c / a;
 }
 vec4 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){

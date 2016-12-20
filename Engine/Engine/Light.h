@@ -15,7 +15,7 @@ class SunLight: public ObjectDisplay{
         unsigned int m_Type;
 		bool m_Active;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
-        void sendGenericAttributesToShader(GLuint);
+        void sendGenericAttributesToShader();
     public:
         SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
         virtual ~SunLight();
@@ -25,7 +25,7 @@ class SunLight: public ObjectDisplay{
         virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 
-        virtual void lighten(GLuint);
+        virtual void lighten();
         float getSpecularPower(){ return m_SpecularIntensity; }
         void setSpecularPower(float s){ m_SpecularIntensity = s; }
 
@@ -40,7 +40,7 @@ class DirectionalLight: public SunLight{
         DirectionalLight(std::string = "Directional Light",glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
         virtual ~DirectionalLight();
 
-        virtual void lighten(GLuint);
+        virtual void lighten();
 };
 class PointLight: public SunLight{
     private:
@@ -63,7 +63,7 @@ class PointLight: public SunLight{
         float& getExponent(){ return m_Exp; }
         glm::vec3 getAttributes(){ return glm::vec3(m_Constant,m_Linear,m_Exp); }
 
-        virtual void lighten(GLuint);
+        virtual void lighten();
 };
 class SpotLight: public SunLight{
     private:
@@ -74,6 +74,6 @@ class SpotLight: public SunLight{
         SpotLight(std::string = "Spot Light",glm::v3 = glm::v3(0), Scene* = nullptr);
         virtual ~SpotLight();
 
-        virtual void lighten(GLuint);
+        virtual void lighten();
 };
 #endif
