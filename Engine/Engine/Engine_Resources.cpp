@@ -85,11 +85,15 @@ void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g,
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(g,w,l));
 }
 
-void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s,std::string shader){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s,shader));
+void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s,std::string program){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
+	if(program == "") program = "Deferred";
+	Resources::getShaderProgram(program)->addMaterial(n);
 }
-void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* shader){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(d,nm,g,s,shader));
+void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* program){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
+	if(program == nullptr) program = Resources::getShaderProgram("Deferred");
+	program->addMaterial(n);
 }
 
 void Resources::addShader(std::string n, std::string s, SHADER_TYPE t, bool b){

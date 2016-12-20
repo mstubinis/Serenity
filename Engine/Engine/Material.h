@@ -109,8 +109,8 @@ class Material final{
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
-        Material(std::string diffuse,std::string normal="",std::string glow="", std::string specular="",std::string shader = "");
-        Material(Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
+        Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="",std::string shader = "");
+        Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         ~Material();
 
 		std::unordered_map<uint,MaterialComponent*>& getComponents();

@@ -49,10 +49,9 @@ class ShaderP final{
 		SHADER_PIPELINE_STAGE stage();
         Shader* vertexShader();
         Shader* fragmentShader();
-		std::vector<Material*>& getMaterials();
+		std::vector<std::string>& getMaterials();
 
 		void addMaterial(std::string);
-		void addMaterial(Material*);
 };
 
 #endif

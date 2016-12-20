@@ -245,8 +245,9 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		glUseProgram(shaderProgram->program());
 		for(auto material:shaderProgram->getMaterials()){
-			material->bind(shaderProgram->program(),Resources::getAPI());
-			for(auto object:material->getObjects()){
+			Material* m = Resources::getMaterial(material);
+			m->bind(shaderProgram->program(),Resources::getAPI());
+			for(auto object:m->getObjects()){
 				if(s->getObjects().count(object)){
 					Resources::getObject(object)->draw(shaderProgram->program());
 				}

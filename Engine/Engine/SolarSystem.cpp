@@ -171,13 +171,11 @@ void SolarSystem::_loadFromFile(std::string filename){
                 }
 
                 if(line[0] == 'S'){//Sun
-					/*
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::v3(0),static_cast<float>(RADIUS),NAME,this);
                     if(PARENT != ""){
                         star->setPosition(getObjects()[PARENT]->getPosition()+glm::v3(xPos,0,zPos));
                     }
                     m_Stars[NAME] = star;
-					*/
                 }
                 else if(line[0] == 'P'){//Planet
 					/*

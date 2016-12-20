@@ -34,7 +34,7 @@ class ShaderP::impl final{
     public:
 		SHADER_PIPELINE_STAGE m_Stage;
         GLuint m_ShaderProgram;
-		std::vector<Material*> m_Materials;
+		std::vector<std::string> m_Materials;
 		Shader* m_VertexShader;
 		Shader* m_FragmentShader;
         void _construct(Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
@@ -184,19 +184,11 @@ GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }
 Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
 SHADER_PIPELINE_STAGE ShaderP::stage(){ return m_i->m_Stage; }
-std::vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
+std::vector<std::string>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::addMaterial(std::string m){
-	Material* mat = Resources::getMaterial(m);
-	if(mat == nullptr){
+	if(m == "" || !Resources::Detail::ResourceManagement::m_Materials.count(m)){
 		std::cout << "Material : '" << m << "' does not exist (ShaderP::addMaterial()) Returning..." << std::endl;
-		return;
-	}
-	m_i->m_Materials.push_back(mat);
-}
-void ShaderP::addMaterial(Material* m){
-	if(m == nullptr){
-		std::cout << "Material pointer does not exist (ShaderP::addMaterial()). Returning..." << std::endl;
 		return;
 	}
 	m_i->m_Materials.push_back(m);

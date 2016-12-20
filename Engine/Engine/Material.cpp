@@ -214,15 +214,13 @@ class Material::impl final{
         void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
 
-Material::Material(std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
+Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
     m_i->_init(diffuse,normal,glow,specular);
 	if(program == "") program = "Deferred";
-	Resources::getShaderProgram(program)->addMaterial(this);
 }
-Material::Material(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
+Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
     m_i->_init(diffuse,normal,glow,specular);
 	if(program == nullptr) program = Resources::getShaderProgram("Deferred");
-	program->addMaterial(this);
 }
 Material::~Material(){
     m_i->_destruct();
