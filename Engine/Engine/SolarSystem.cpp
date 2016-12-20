@@ -171,13 +171,16 @@ void SolarSystem::_loadFromFile(std::string filename){
                 }
 
                 if(line[0] == 'S'){//Sun
+					/*
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::v3(0),static_cast<float>(RADIUS),NAME,this);
                     if(PARENT != ""){
                         star->setPosition(getObjects()[PARENT]->getPosition()+glm::v3(xPos,0,zPos));
                     }
                     m_Stars[NAME] = star;
+					*/
                 }
                 else if(line[0] == 'P'){//Planet
+					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
@@ -197,8 +200,10 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                     }
                     m_Planets[NAME] = planetoid;
+					*/
                 }
                 else if(line[0] == 'M'){//Moon
+					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
@@ -218,29 +223,35 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                     }
                     m_Moons[NAME] = planetoid;
+					*/
                 }
                 else if(line[0] == '*'){//Player ship
+					/*
                     if(PARENT != ""){
                         glm::num parentX = getObjects()[PARENT]->getPosition().x;
                         glm::num parentZ = getObjects()[PARENT]->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
+					*/
                     setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 
                 }
                 else if(line[0] == '$'){//Other ship
+					/*
                     if(PARENT != ""){
                         glm::num parentX = getObjects()[PARENT]->getPosition().x;
                         glm::num parentZ = getObjects()[PARENT]->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
+					*/
                     new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
+					/*
                     if(PARENT != ""){
                         if(!planetRings.count(PARENT)){
                             std::vector<RingInfo> rings;
@@ -248,12 +259,13 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                         planetRings[PARENT].push_back(RingInfo(static_cast<unsigned int>(POSITION/10),static_cast<unsigned int>(RADIUS/10),glm::uvec3(R,G,B),BREAK));
                     }
+					*/
                 }
                 else if(line[0] == 'L'){//Lagrange Point
-                    m_LagrangePoints[NAME] = new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this);
+                    //m_LagrangePoints[NAME] = new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this);
                 }
                 else if(line[0] == 's'){//Station
-                    m_Stations[NAME] = new Station("","",glm::v3(xPos,0,zPos),glm::vec3(1),NAME,nullptr,this);
+                    //m_Stations[NAME] = new Station("","",glm::v3(xPos,0,zPos),glm::vec3(1),NAME,nullptr,this);
                 }
             }
         }
@@ -261,9 +273,12 @@ void SolarSystem::_loadFromFile(std::string filename){
     }
 
     //add planetary rings
+	/*
     for(auto rings:planetRings){
         new Ring(rings.second,static_cast<Planet*>(m_Objects[rings.first]));
     }
+	*/
+
     centerSceneToObject(player);
 
 	glm::num xPos = Resources::getObject("Valiant")->getPosition().x;

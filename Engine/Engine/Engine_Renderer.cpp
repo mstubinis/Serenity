@@ -11,6 +11,7 @@
 #include "Mesh.h"
 #include "Skybox.h"
 #include "Material.h"
+#include "Object.h"
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"
 
@@ -70,6 +71,8 @@ std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_Foreground
 std::vector<FontRenderInfo> Renderer::Detail::RenderManagement::m_FontsToBeRendered;
 std::vector<TextureRenderInfo> Renderer::Detail::RenderManagement::m_TexturesToBeRendered;
 std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeForwardRendered;
+
+std::vector<ShaderP*> Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
 void Engine::Renderer::Detail::RenderManagement::init(){
     #ifdef _DEBUG
@@ -237,9 +240,20 @@ void Engine::Renderer::Detail::RenderManagement::_passGeometry(){
     glBlendEquationi(GL_FUNC_ADD,0);
     glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
-    _renderObjects();
-
+    //_renderObjects();
 	//RENDER NORMAL OBJECTS HERE
+	for(auto shaderProgram:m_GeometryPassShaderPrograms){
+		glUseProgram(shaderProgram->program());
+		for(auto material:shaderProgram->getMaterials()){
+			material->bind(shaderProgram->program(),Resources::getAPI());
+			for(auto object:material->getObjects()){
+				if(s->getObjects().count(object)){
+					Resources::getObject(object)->draw(shaderProgram->program());
+				}
+			}
+		}
+		glUseProgram(0);
+	}
 
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
@@ -283,7 +297,8 @@ void Engine::Renderer::Detail::RenderManagement::_passLighting(){
     glUseProgram(0);
 }
 void Engine::Renderer::Detail::RenderManagement::render(){
-    for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::DebugDrawingInfo::debug); }
+    //for(auto object:Resources::getCurrentScene()->getObjects()){ object.second->render(0,RendererInfo::DebugDrawingInfo::debug); }
+
 
 	if(!RendererInfo::GodRaysInfo::godRays)
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
@@ -293,6 +308,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 	m_gBuffer->stop();
 
 	if(RendererInfo::GodRaysInfo::godRays){
+		/*
 		m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
 		Object* o = Resources::getObject("Sun");
 		glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
@@ -306,6 +322,7 @@ void Engine::Renderer::Detail::RenderManagement::render(){
 
 		_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
 		m_gBuffer->stop();
+		*/
 	}
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
@@ -613,7 +630,7 @@ void Engine::Renderer::Detail::drawObject(ObjectDynamic* o, GLuint shader, bool 
 void Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* camera,glm::num dist,bool intTest,glm::vec4& color, glm::vec3& raysColor,float radius,std::vector<DisplayItem*>& items,glm::m4 model,bool visible,GLuint shader, bool debug,bool godsRays){
 	if((items.size() == 0 || visible == false) || (!intTest) || (dist > 1100 * radius))
         return;
-    glUseProgram(shader);
+    //glUseProgram(shader);
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));
     glUniform1f(glGetUniformLocation(shader, "far"),camera->getFar());
@@ -639,10 +656,10 @@ void Engine::Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* cam
 
         glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m));
 
-		item->material->bind(shader,Resources::getAPI());
+		//item->material->bind(shader,Resources::getAPI());
         item->mesh->render();
     }
-    glUseProgram(0);
+    //glUseProgram(0);
 }
 
 #ifdef _WIN32

@@ -149,5 +149,10 @@ class Material final{
         void setGlow(float f);
         void setSpecularity(float s);
         void setLightingMode(uint m);
+
+
+		void addObject(std::string objectName);
+		void removeObject(std::string objectName);
+		std::vector<std::string>& getObjects();
 };
 #endif

@@ -1,5 +1,6 @@
 #include "ShaderProgram.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -36,12 +37,21 @@ class ShaderP::impl final{
 		std::vector<Material*> m_Materials;
 		Shader* m_VertexShader;
 		Shader* m_FragmentShader;
-        void _construct(Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage){
+        void _construct(Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
 			m_Stage = stage;
             m_VertexShader = vs;
             m_FragmentShader = ps;
+			if(stage == SHADER_PIPELINE_STAGE_GEOMETRY){
+				Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms.push_back(super);
+			}
+			else if(stage == SHADER_PIPELINE_STAGE_LIGHTING){
+			}
+			else if(stage == SHADER_PIPELINE_STAGE_POSTPROCESSING){
+			}
+			else{
+			}
         }
-        void _construct(std::string vs, std::string ps, SHADER_PIPELINE_STAGE stage){
+        void _construct(std::string vs, std::string ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
 			Shader* v = Resources::getShader(vs); Shader* f = Resources::getShader(ps);
 			if(v == nullptr){
 				Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true); v = Resources::getShader(vs);
@@ -49,7 +59,7 @@ class ShaderP::impl final{
 			if(f == nullptr){
 				Resources::addShader(ps,ps,SHADER_TYPE_FRAGMENT,true); f = Resources::getShader(ps);
 			}
-			_construct(v,f,stage);
+			_construct(v,f,stage,super);
         }
 
         void _destruct(){
@@ -156,10 +166,10 @@ class ShaderP::impl final{
 };
 
 ShaderP::ShaderP(std::string vs, std::string ps, SHADER_PIPELINE_STAGE stage):m_i(new impl()){
-    m_i->_construct(vs,ps,stage);
+    m_i->_construct(vs,ps,stage,this);
 }
 ShaderP::ShaderP(Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage):m_i(new impl()){
-    m_i->_construct(vs,ps,stage);
+    m_i->_construct(vs,ps,stage,this);
 }
 ShaderP::~ShaderP(){
     m_i->_destruct();

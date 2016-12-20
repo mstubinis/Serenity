@@ -42,8 +42,10 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Radius = 0;
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0);
-    if(mesh != "" && mat != "")
+    if(mesh != "" && mat != ""){
         m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
+		Resources::getMaterial(mat)->addObject(this->m_Name);
+	}
     m_Color = glm::vec4(1);
     m_GodsRaysColor = glm::vec3(0);
     m_Collision = col;
@@ -121,6 +123,13 @@ void ObjectDynamic::translate(glm::num x, glm::num y, glm::num z,bool local){
         p += glm::vec3(x,y,z);
     }
     setPosition(getPosition() + p);
+}
+void ObjectDynamic::setMaterial(std::string materialName, uint index){
+	Material* current = this->m_DisplayItems[index]->material;
+	Material* newMaterial = Resources::getMaterial(materialName);
+
+	current->removeObject(this->m_Name);
+	newMaterial->addObject(this->m_Name);
 }
 void ObjectDynamic::setColor(float r, float g, float b, float a){
     Math::setColor(m_Color,r,g,b,a);

@@ -47,6 +47,8 @@ class ObjectDynamic: public Object{
                      );
         virtual ~ObjectDynamic();
 
+		void setMaterial(std::string materialName, uint index = 0);
+
         virtual void setDynamic(bool=true);
 
         std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }

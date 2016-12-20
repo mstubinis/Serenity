@@ -17,8 +17,10 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Visible = true;
     m_Shadeless = false;
     m_BoundingBoxRadius = glm::vec3(0);
-    if(mesh != "" && mat != "")
+    if(mesh != "" && mat != ""){
         m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
+		Resources::getMaterial(mat)->addObject(this->m_Name);
+	}
     m_Color = glm::vec4(1);
 	m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
@@ -32,6 +34,13 @@ void ObjectDisplay::render(GLuint shader,bool debug){
         shader = Resources::getShaderProgram("Deferred")->program();
     }
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
+}
+void ObjectDisplay::setMaterial(std::string materialName, uint index){
+	Material* current = this->m_DisplayItems[index]->material;
+	Material* newMaterial = Resources::getMaterial(materialName);
+
+	current->removeObject(this->m_Name);
+	newMaterial->addObject(this->m_Name);
 }
 void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 	Engine::Renderer::Detail::drawObject(this,shader,debug,godsRays);

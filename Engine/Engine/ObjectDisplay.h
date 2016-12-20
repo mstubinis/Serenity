@@ -35,6 +35,8 @@ class ObjectDisplay: public ObjectBasic{
                      );
         virtual ~ObjectDisplay();
 
+		void setMaterial(std::string materialName, uint index = 0);
+
         virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 

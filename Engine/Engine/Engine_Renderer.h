@@ -25,6 +25,7 @@ class ObjectDisplay;
 class ObjectDynamic;
 class Camera;
 struct DisplayItem;
+class ShaderP;
 
 struct GeometryRenderInfo final{
     Object* object;
@@ -120,6 +121,8 @@ namespace Engine{
                     static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
+				
+
                     static void _renderForwardRenderedObjects();
                     static void _renderObjects();
                     static void _renderForegroundObjects();
@@ -143,6 +146,7 @@ namespace Engine{
                     static void init();
                     static void destruct();
 
+					static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
                     static std::vector<GeometryRenderInfo>& getForegroundObjectRenderQueue(){ return m_ForegroundObjectsToBeRendered; }
                     static std::vector<GeometryRenderInfo>& getObjectRenderQueue(){ return m_ObjectsToBeRendered; }
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }

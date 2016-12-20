@@ -82,7 +82,7 @@ Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
     std::string bottom = name + "/Back.jpg";
     std::string names[6] = {front,back,left,right,top,bottom};
 
-    m_Texture = new Texture(names,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+    m_Texture = new Texture(names,"Cubemap",GL_TEXTURE_CUBE_MAP);
 
     m_Model = glm::mat4(1);
     m_Model = glm::translate(m_Model, glm::vec3(Resources::getActiveCamera()->getPosition()));

@@ -1,8 +1,12 @@
-#include <unordered_map>
+#include "ObjectDynamic.h"
+#include "ObjectDisplay.h"
 #include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
 #include "ShaderProgram.h"
+
+#include <unordered_map>
+#include <algorithm>
 
 using namespace Engine;
 
@@ -144,6 +148,7 @@ void MaterialComponentRefraction::bind(GLuint shader,uint api){
 class Material::impl final{
     public:
         std::unordered_map<uint,MaterialComponent*> m_Components;
+		std::vector<std::string> m_Objects;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
@@ -331,3 +336,14 @@ void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
 void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
+
+void Material::addObject(std::string objectName){
+	Object* o = Resources::getObject(objectName);
+	if(o != nullptr) m_i->m_Objects.push_back(objectName);
+}
+void Material::removeObject(std::string objectName){
+	std::vector<std::string>::iterator result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
+    if (result == m_i->m_Objects.end()) return;
+    m_i->m_Objects.erase(result);
+}
+std::vector<std::string>& Material::getObjects(){ return m_i->m_Objects; }
