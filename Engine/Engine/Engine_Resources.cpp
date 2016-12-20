@@ -29,16 +29,16 @@ Engine_Window* Detail::ResourceManagement::m_Window;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 
-std::unordered_map<StringKey,boost::shared_ptr<Scene>,skh,skef> Detail::ResourceManagement::m_Scenes;
-std::unordered_map<StringKey,boost::shared_ptr<SoundEffectBasic>,skh,skef> Detail::ResourceManagement::m_Sounds;
-std::unordered_map<StringKey,boost::shared_ptr<Object>,skh,skef> Detail::ResourceManagement::m_Objects;
-std::unordered_map<StringKey,boost::shared_ptr<Camera>,skh,skef> Detail::ResourceManagement::m_Cameras;
-std::unordered_map<StringKey,boost::shared_ptr<Font>,skh,skef> Detail::ResourceManagement::m_Fonts;
-std::unordered_map<StringKey,boost::shared_ptr<Mesh>,skh,skef> Detail::ResourceManagement::m_Meshes;
-std::unordered_map<StringKey,boost::shared_ptr<Texture>,skh,skef> Detail::ResourceManagement::m_Textures;
-std::unordered_map<StringKey,boost::shared_ptr<Material>,skh,skef> Detail::ResourceManagement::m_Materials;
-std::unordered_map<StringKey,boost::shared_ptr<Shader>,skh,skef> Detail::ResourceManagement::m_Shaders;
-std::unordered_map<StringKey,boost::shared_ptr<ShaderP>,skh,skef> Detail::ResourceManagement::m_ShaderPrograms;
+std::unordered_map<skey,boost::shared_ptr<Scene>,skh,skef> Detail::ResourceManagement::m_Scenes;
+std::unordered_map<skey,boost::shared_ptr<SoundEffectBasic>,skh,skef> Detail::ResourceManagement::m_Sounds;
+std::unordered_map<skey,boost::shared_ptr<Object>,skh,skef> Detail::ResourceManagement::m_Objects;
+std::unordered_map<skey,boost::shared_ptr<Camera>,skh,skef> Detail::ResourceManagement::m_Cameras;
+std::unordered_map<skey,boost::shared_ptr<Font>,skh,skef> Detail::ResourceManagement::m_Fonts;
+std::unordered_map<skey,boost::shared_ptr<Mesh>,skh,skef> Detail::ResourceManagement::m_Meshes;
+std::unordered_map<skey,boost::shared_ptr<Texture>,skh,skef> Detail::ResourceManagement::m_Textures;
+std::unordered_map<skey,boost::shared_ptr<Material>,skh,skef> Detail::ResourceManagement::m_Materials;
+std::unordered_map<skey,boost::shared_ptr<Shader>,skh,skef> Detail::ResourceManagement::m_Shaders;
+std::unordered_map<skey,boost::shared_ptr<ShaderP>,skh,skef> Detail::ResourceManagement::m_ShaderPrograms;
 
 void Resources::Detail::ResourceManagement::destruct(){
     for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();

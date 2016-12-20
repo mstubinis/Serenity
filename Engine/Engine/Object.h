@@ -15,7 +15,7 @@ class Scene;
 class Camera;
 typedef unsigned int GLuint;
 
-template <typename T> bool exists(boost::weak_ptr<T> t){ return !(t.expired()); }
+template <typename T> bool exists(boost::weak_ptr<T> t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
 class IObject: public EngineResource{
     public:

@@ -6,7 +6,6 @@
 
 #include <string>
 #include <memory>
-#include <vector>
 typedef unsigned int uint;
 
 enum SHADER_PIPELINE_STAGE{

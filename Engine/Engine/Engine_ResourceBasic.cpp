@@ -1,18 +1,17 @@
 #include "Engine_ResourceBasic.h"
 
 EngineResource::EngineResource(std::string name){
-	m_Name = new std::string(name);
+	m_Name = boost::make_shared<std::string>(name);
 }
 EngineResource::~EngineResource(){
-	delete m_Name;
+	m_Name.reset();
 }
-void EngineResource::setName(std::string name){
-	delete m_Name;
-	m_Name = new std::string(name);
+void EngineResource::setName(std::string name){	
+	*(m_Name.get()) = name;
 }
-std::string& EngineResource::name(){ 
-	return (*m_Name); 
+std::string& EngineResource::name(){
+	return *(m_Name.get()); 
 }
-std::string* EngineResource::namePtr(){
+boost::shared_ptr<std::string>& EngineResource::namePtr(){
 	return m_Name;
 }
