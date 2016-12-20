@@ -2,6 +2,8 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
+#include "Engine_ResourceBasic.h"
+
 #include <string>
 #include <memory>
 #include <glm/glm.hpp>
@@ -98,7 +100,7 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 		const float refractionRatio() const { return m_RefractionRatio; }
 };
 
-class Material final{
+class Material final: public EngineResource{
 	public:
 		//this is very important here
 		//vec4:  (  glow,  specularity, lightingMode, shadeless  )

@@ -2,6 +2,8 @@
 #ifndef ENGINE_OBJECT_H
 #define ENGINE_OBJECT_H
 
+#include "Engine_ResourceBasic.h"
+
 #include "Engine_Math.h"
 #include <string>
 #include <vector>
@@ -15,7 +17,7 @@ typedef unsigned int GLuint;
 
 template <typename T> bool exists(boost::weak_ptr<T> t){ return !(t.expired()); }
 
-class IObject{
+class IObject: public EngineResource{
     public:
         virtual void update(float) = 0;
 
@@ -45,7 +47,6 @@ class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
     protected:
-        std::string m_Name;
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;
@@ -74,12 +75,9 @@ class Object: public IObject{
         virtual void draw(GLuint shader,bool=false,bool=false){}
 
         virtual float getRadius(){ return m_Radius; }
-        virtual std::string& getName(){ return m_Name; }
 
         virtual Object* getParent(){ return m_Parent; }
         virtual std::vector<Object*>& getChildren(){ return m_Children; }
-
-        virtual void setName(std::string);
 
         virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}

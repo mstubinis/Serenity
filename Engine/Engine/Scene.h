@@ -2,8 +2,9 @@
 #ifndef ENGINE_SCENE_H
 #define ENGINE_SCENE_H
 
+#include "Engine_ResourceBasic.h"
+
 #include <map>
-#include <string>
 #include <glm/glm.hpp>
 
 class Object;
@@ -12,15 +13,13 @@ class SunLight;
 class SkyboxEmpty;
 class ParticleEmitter;
 
-class Scene{
+class Scene: public EngineResource{
     private:
         SkyboxEmpty* m_Skybox;
     protected:
         std::map<std::string,Object*> m_Objects;
         std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
         std::map<std::string,SunLight*> m_Lights;
-
-        std::string m_Name;
 
         glm::vec3 m_AmbientLighting;
         glm::vec3 m_BackgroundColor;
@@ -35,10 +34,6 @@ class Scene{
         Object* getObject(std::string name){ return m_Objects[name]; }
         ParticleEmitter* getParticleEmitter(std::string name){ return m_ParticleEmitters[name]; }
         SunLight* getLight(std::string name){ return m_Lights[name]; }
-
-        const std::string getName() const { return m_Name; }
-
-        virtual void setName(std::string);
 
         virtual void update(float);
         glm::vec3 getAmbientLightColor(){ return m_AmbientLighting; }

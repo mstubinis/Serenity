@@ -57,7 +57,7 @@ Engine_Window* Resources::getWindow(){ return Detail::ResourceManagement::m_Wind
 sf::Vector2u Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
 Camera* Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
 boost::weak_ptr<Camera>& Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
-void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->getName()]; }
+void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->name()]; }
 void Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
 
 boost::shared_ptr<Object>& Resources::getObjectPtr(std::string n){return Detail::ResourceManagement::m_Objects[n];}
@@ -74,15 +74,18 @@ Material* Resources::getMaterial(std::string n){return static_cast<Material*>(De
 Shader* Resources::getShader(std::string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
 ShaderP* Resources::getShaderProgram(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
 
-void Resources::addMesh(std::string name,std::string file, COLLISION_TYPE type, bool fromFile){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,name,boost::make_shared<Mesh>(file,type,fromFile));
+void Resources::addMesh(std::string n,std::string f, COLLISION_TYPE t, bool b){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b));
 }
-void Resources::addMesh(std::string name,float x,float y,float w,float h){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,name,boost::make_shared<Mesh>(x,y,w,h));
+void Resources::addMesh(std::string n,float x,float y,float w,float h){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,x,y,w,h));
+}
+void Resources::addMesh(std::string n,float w,float h){
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,w,h));
 }
 void Resources::addMesh(std::string f, COLLISION_TYPE t){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t);}
 void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g, uint w, uint l){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(g,w,l));
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,g,w,l));
 }
 
 void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s,std::string program){
@@ -97,18 +100,18 @@ void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, 
 }
 
 void Resources::addShader(std::string n, std::string s, SHADER_TYPE t, bool b){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<Shader>(s,t,b));
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<Shader>(n,s,t,b));
 }
 void Resources::addShaderProgram(std::string n, Shader* v, Shader* f, SHADER_PIPELINE_STAGE s){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(v,f,s));
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
 void Resources::addShaderProgram(std::string n, std::string v, std::string f, SHADER_PIPELINE_STAGE s){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(v,f,s));
+	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
 
 void Resources::addSound(std::string n, std::string f, bool b){
-	if(b){Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundEffect>(f));}
-	else{Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundMusic>(f));}
+	if(b){Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundEffect>(n,f));}
+	else{Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundMusic>(n,f));}
 }
 void Resources::addSoundAsEffect(std::string n, std::string f){ addSound(n,f,true); }
 void Resources::addSoundAsMusic(std::string n, std::string f){ addSound(n,f,false); }
@@ -166,7 +169,7 @@ void Resources::initResources(){
 
 	addMaterial("Default","","","","","Deferred");
 
-    Resources::Detail::ResourceManagement::m_Meshes["Plane"] = boost::make_shared<Mesh>(1.0f,1.0f);
+	addMesh("Plane",1.0f,1.0f);
 }
 void Resources::initRenderingContexts(uint a){
     for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->initRenderingContext(a);

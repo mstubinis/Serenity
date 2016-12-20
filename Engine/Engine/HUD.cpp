@@ -75,7 +75,7 @@ void HUD::render(bool debug){
                 glm::num distanceInm = (player->getTarget()->getDistance(player))*100.0f;
                 stringRepresentation = boost::lexical_cast<std::string>(uint(distanceInm)) + " m";
             }
-            m_Font->renderText(player->getTarget()->getName() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
+            m_Font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
         else{
             glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);

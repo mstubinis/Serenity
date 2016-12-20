@@ -228,6 +228,9 @@
     <ClCompile Include="Engine_MeshLoader.cpp">
       <Filter>Source Files\Engine\Engine_Resources</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_ResourceBasic.cpp">
+      <Filter>Source Files\Engine\Engine_Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -336,6 +339,9 @@
       <Filter>Header Files\Engine\Engine_Math</Filter>
     </ClInclude>
     <ClInclude Include="Engine_MeshLoader.h">
+      <Filter>Header Files\Engine\Engine_Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_ResourceBasic.h">
       <Filter>Header Files\Engine\Engine_Resources</Filter>
     </ClInclude>
   </ItemGroup>

@@ -14,7 +14,7 @@
 
 using namespace Engine;
 
-SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),name,scene){
+SunLight::SunLight(glm::v3 pos,std::string n,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),n,scene){
     m_Type = type;
 	m_Active = true;
     m_AmbientIntensity = 0.05f;
@@ -24,24 +24,9 @@ SunLight::SunLight(glm::v3 pos,std::string name,unsigned int type,Scene* scene):
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
     }
-    scene->getLights()[m_Name] = this;
+    scene->getLights()[name()] = this;
 }
 SunLight::~SunLight(){
-}
-void SunLight::setName(std::string name){
-    if(name == m_Name) return;
-
-    std::string oldName = m_Name; m_Name = name;
-
-    Resources::Detail::ResourceManagement::m_CurrentScene->getLights()[name] = this;
-    if(Resources::Detail::ResourceManagement::m_CurrentScene->getLights().count(oldName)){
-        Resources::Detail::ResourceManagement::m_CurrentScene->getLights().erase(oldName);
-    }
-    Resources::Detail::ResourceManagement::m_Objects[name] = boost::shared_ptr<Object>(this);
-    if(Resources::Detail::ResourceManagement::m_Objects.count(oldName)){
-        Resources::Detail::ResourceManagement::m_Objects[oldName].reset();
-        Resources::Detail::ResourceManagement::m_Objects.erase(oldName);
-    }
 }
 void SunLight::update(float dt){
     ObjectBasic::update(dt);
@@ -569,7 +554,8 @@ PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos
 							"f 162 136 39\n"
 							"f 136 37 39\n";
 		#pragma endregion
-		Resources::Detail::ResourceManagement::m_Meshes["PointLightBounds"] = boost::make_shared<Mesh>(data,COLLISION_TYPE_NONE,false);
+
+		Resources::addMesh("PointLightBounds",data,COLLISION_TYPE_NONE,false);
 	}
 
     m_Constant = 0.3f;

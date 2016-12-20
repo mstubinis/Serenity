@@ -2,6 +2,8 @@
 #ifndef ENGINE_FONT_H
 #define ENGINE_FONT_H
 
+#include "Engine_ResourceBasic.h"
+
 #include <GLM/gtc/matrix_transform.hpp>
 #include <string>
 #include <unordered_map>
@@ -33,10 +35,9 @@ class FontData final{
         Texture* getGlyphTexture() { return m_FontTexture; }
         FontGlyph* getGlyphData(unsigned char);
 };
-class Font final{
+class Font final: public EngineResource{
     private:
         FontData* m_FontData;
-        std::string m_Name;
     public:
         Font(std::string);
         ~Font();
@@ -50,6 +51,5 @@ class Font final{
                         );
 
         FontData* getFontData() { return m_FontData; }
-        const std::string getName() const { return m_Name; }
 };
 #endif

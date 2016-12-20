@@ -12,20 +12,20 @@
 
 using namespace Engine;
 
-Object::Object(std::string name,Scene* scene, bool isNotCamera){
+Object::Object(std::string n,Scene* scene, bool isNotCamera){
     m_Radius = 0;
     m_Parent = nullptr;
     m_IsToBeDestroyed = false;
-    m_Name = name;
+    setName(n);
     unsigned int count = 0;
 
     if(isNotCamera){
         if(scene == nullptr){
             scene = Resources::getCurrentScene();
         }
-        m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, m_Name);
-        scene->getObjects()[m_Name] = this;
-        Resources::Detail::ResourceManagement::m_Objects[m_Name] = boost::shared_ptr<Object>(this);
+        setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, name()));
+        scene->getObjects()[name()] = this;
+        Resources::Detail::ResourceManagement::m_Objects[name()] = boost::shared_ptr<Object>(this);
     }
 }
 Object::~Object()
@@ -40,22 +40,7 @@ void Object::addChild(Object* child){
     child->m_Parent = this;
     m_Children.push_back(child);
 }
-void Object::setName(std::string name){
-    if(name == m_Name) return;
 
-    std::string oldName = m_Name; m_Name = name;
-
-    Resources::Detail::ResourceManagement::m_CurrentScene->getObjects()[name] = this;
-    if(Resources::Detail::ResourceManagement::m_CurrentScene->getObjects().count(oldName)){
-        Resources::Detail::ResourceManagement::m_CurrentScene->getObjects().erase(oldName);
-    }
-
-    Resources::Detail::ResourceManagement::m_Objects[name] = boost::shared_ptr<Object>(this);
-    if(Resources::Detail::ResourceManagement::m_Objects.count(oldName)){
-        Resources::Detail::ResourceManagement::m_Objects[oldName].reset();
-        Resources::Detail::ResourceManagement::m_Objects.erase(oldName);
-    }
-}
 
 ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene,bool isNotCameras):Object(name,scene,isNotCameras){
     m_Forward = glm::v3(0,0,-1);

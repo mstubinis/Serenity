@@ -7,7 +7,7 @@
 
 #include <boost/filesystem.hpp>
 
-Mesh::Mesh(btHeightfieldTerrainShape* heightfield){
+Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield){
     m_Collision = nullptr;
 	MeshData d;
     uint width = heightfield->getHeightStickWidth();
@@ -54,8 +54,9 @@ Mesh::Mesh(btHeightfieldTerrainShape* heightfield){
     }
 	_loadData(d);
     _calculateMeshRadius();
+	this->setName(name);
 }
-Mesh::Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length){
+Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length){
     m_Collision = nullptr;
 	MeshData d;
     for(uint i = 0; i < width-1; i++){
@@ -98,8 +99,9 @@ Mesh::Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length){
     }
 	_loadData(d);
     _calculateMeshRadius();
+	this->setName(name);
 }
-Mesh::Mesh(float x, float y,float width, float height){
+Mesh::Mesh(std::string& name,float x, float y,float width, float height){
     m_Collision = nullptr;
 	MeshData d;
 	d.points.push_back(glm::vec3(0,0,0));
@@ -153,8 +155,9 @@ Mesh::Mesh(float x, float y,float width, float height){
 
 	_loadData(d);
     _calculateMeshRadius();
+	this->setName(name);
 }
-Mesh::Mesh(float width, float height){
+Mesh::Mesh(std::string& name,float width, float height){
     m_Collision = nullptr;
 	MeshData d;
 	d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
@@ -208,14 +211,16 @@ Mesh::Mesh(float width, float height){
 
 	_loadData(d);
     _calculateMeshRadius();
+	this->setName(name);
 }
-Mesh::Mesh(std::string filename,COLLISION_TYPE type,bool notMemory){
+Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory){
     m_Collision = nullptr;
     if(notMemory)
         _loadFromFile(filename, type);
     else
         _loadFromOBJMemory(filename,type);
     _calculateMeshRadius();
+	this->setName(name);
 }
 Mesh::~Mesh(){
     cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);

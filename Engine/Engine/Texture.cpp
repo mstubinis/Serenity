@@ -8,13 +8,14 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+
+
 using namespace Engine;
 
 class Texture::impl final{
     private:
         std::vector<unsigned char> m_Pixels;
         std::string m_Directory;
-        std::string m_Name;
         GLuint m_TextureAddress;
         GLuint m_Type;
         unsigned int m_Width, m_Height;
@@ -60,27 +61,27 @@ class Texture::impl final{
             }
         }
     public:
-        void _construct(const unsigned char* pixels,uint w, uint h,std::string name,GLuint type){
+        void _construct(const unsigned char* pixels,uint w, uint h,std::string name,GLuint type,Texture* super){
             _init();
             _loadFromPixels(pixels,w,h,type);
-			m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
+			super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
         }
-        void _construct(std::string file,std::string name,GLuint type){
+        void _construct(std::string file,std::string name,GLuint type,Texture* super){
 			_init();
             m_Directory = file;
             if(file != ""){
                 _loadFromFile(file,type);
             }
-            m_Name = name;
+			super->setName(name);
             if(name == ""){
-                m_Name = file;
+				super->setName(file);
             }
-			m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,m_Name);
+			super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,super->name()));
         }
-        void _construct(std::string files[],std::string name,GLuint type){
+        void _construct(std::string files[],std::string name,GLuint type,Texture* super){
 			_init();
             _loadFromFilesCubemap(files,type);
-			m_Name = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name);
+			super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
         }
         void _init(){
 			m_Directory = "";
@@ -104,33 +105,32 @@ class Texture::impl final{
         const GLuint _type() const { return m_Type; }
         const uint _width() const { return m_Width; }
         const uint _height() const { return m_Height; }
-        const std::string _name() const { return m_Name; }
 };
 
 
-Texture::Texture(const unsigned char* pixels,uint w, uint h,std::string name,GLuint type):m_i(new impl()){
-    m_i->_construct(pixels,w,h,name,type);
-    Resources::Detail::ResourceManagement::m_Textures[m_i->_name()] = boost::shared_ptr<Texture>(this);
+Texture::Texture(const unsigned char* pixels,uint w, uint h,std::string _name,GLuint type):m_i(new impl()){
+	m_i->_construct(pixels,w,h,_name,type,this);
+	Resources::Detail::ResourceManagement::m_Textures[this->name()] = boost::shared_ptr<Texture>(this);
 }
-Texture::Texture(std::string file,std::string name,GLuint type):m_i(new impl()){
-    m_i->_construct(file,name,type);
+
+Texture::Texture(std::string file,std::string _name,GLuint type):m_i(new impl()){
+    m_i->_construct(file,_name,type,this);
     if(file != ""){
-        Resources::Detail::ResourceManagement::m_Textures[m_i->_name()] = boost::shared_ptr<Texture>(this);
+        Resources::Detail::ResourceManagement::m_Textures[this->name()] = boost::shared_ptr<Texture>(this);
     }
 }
-Texture::Texture(std::string files[],std::string name,GLuint type):m_i(new impl()){
-    m_i->_construct(files,name,type);
-    Resources::Detail::ResourceManagement::m_Textures[m_i->_name()] = boost::shared_ptr<Texture>(this);
+Texture::Texture(std::string files[],std::string _name,GLuint type):m_i(new impl()){
+    m_i->_construct(files,_name,type,this);
+    Resources::Detail::ResourceManagement::m_Textures[this->name()] = boost::shared_ptr<Texture>(this);
 }
 Texture::~Texture(){
     m_i->_destruct();
 }
 void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-    Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(m_i->_name(),pos,color,scl,angle,depth));
+    Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(this->name(),pos,color,scl,angle,depth));
 }
 unsigned char* Texture::pixels(){ return m_i->_getPixels(); }
 GLuint Texture::address() { return m_i->_address(); }
 GLuint Texture::type() { return m_i->_type(); }
 uint Texture::width() { return m_i->_width(); }
 uint Texture::height() { return m_i->_height(); }
-std::string Texture::name() { return m_i->_name(); }

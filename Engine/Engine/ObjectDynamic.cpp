@@ -35,7 +35,7 @@ void ObjectDynamic::collisionResponse(ObjectDynamic* other){
     // if this collides with other, execute this function
 }
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Collision* col,Scene* scene): Object(name,scene){
+ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string n,Collision* col,Scene* scene): Object(n,scene){
     m_Forward = glm::v3(0,0,-1);
     m_Right = glm::v3(1,0,0);
     m_Up = glm::v3(0,1,0);
@@ -44,7 +44,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_BoundingBoxRadius = glm::vec3(0);
     if(mesh != "" && mat != ""){
         m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
-		Resources::getMaterial(mat)->addObject(this->m_Name);
+		Resources::getMaterial(mat)->addObject(name());
 	}
     m_Color = glm::vec4(1);
     m_GodsRaysColor = glm::vec3(0);
@@ -128,8 +128,8 @@ void ObjectDynamic::setMaterial(std::string materialName, uint index){
 	Material* current = this->m_DisplayItems[index]->material;
 	Material* newMaterial = Resources::getMaterial(materialName);
 
-	current->removeObject(this->m_Name);
-	newMaterial->addObject(this->m_Name);
+	current->removeObject(name());
+	newMaterial->addObject(name());
 }
 void ObjectDynamic::setColor(float r, float g, float b, float a){
     Math::setColor(m_Color,r,g,b,a);

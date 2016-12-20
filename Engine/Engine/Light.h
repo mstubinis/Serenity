@@ -32,8 +32,6 @@ class SunLight: public ObjectDisplay{
 		void activate(){ m_Active = true; }
 		void deactivate(){ m_Active = false; }
 		bool isActive(){ return m_Active; }
-
-        void setName(std::string);
 };
 class DirectionalLight: public SunLight{
     private:

@@ -5,6 +5,8 @@
 #define GL_TEXTURE_2D 0x0DE1
 #define GL_TEXTURE_CUBE_MAP 0x8513
 
+#include "Engine_ResourceBasic.h"
+
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
@@ -12,7 +14,7 @@
 
 typedef unsigned int GLuint;
 
-class Texture final{
+class Texture final: EngineResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
@@ -27,7 +29,6 @@ class Texture final{
 		GLuint type();
 		unsigned int width();
 		unsigned int height();
-		std::string name();
 
         void render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
 

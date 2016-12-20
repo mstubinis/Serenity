@@ -1943,7 +1943,7 @@ Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEm
 								"f 642 26 27\n"
 								"f 26 2 27\n";
         #pragma endregion
-        Resources::Detail::ResourceManagement::m_Meshes["Atmosphere"] = boost::make_shared<Mesh>(data,COLLISION_TYPE_NONE,false);
+		Resources::addMesh("Atmosphere",data,COLLISION_TYPE_NONE,false);
     }
 
     m_Mesh = Resources::getMesh("Atmosphere");

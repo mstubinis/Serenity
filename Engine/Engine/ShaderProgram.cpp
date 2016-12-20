@@ -15,14 +15,15 @@ class Shader::impl final{
 		bool m_FromFile;
 		std::string m_Data;
 
-		void _construct(std::string data, SHADER_TYPE type, bool fromFile){
+		void _construct(std::string& name, std::string& data, SHADER_TYPE type, bool fromFile,Shader* super){
 			m_Data = data;
 			m_Type = type;
 			m_FromFile = fromFile;
+			super->setName(name);
 		}
 };
-Shader::Shader(std::string shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl()){
-	m_i->_construct(shaderFileOrData,shaderType,fromFile);
+Shader::Shader(std::string& name, std::string& shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl()){
+	m_i->_construct(name,shaderFileOrData,shaderType,fromFile,this);
 }
 Shader::~Shader(){
 }
@@ -37,7 +38,7 @@ class ShaderP::impl final{
 		std::vector<std::string> m_Materials;
 		Shader* m_VertexShader;
 		Shader* m_FragmentShader;
-        void _construct(Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(std::string& name, Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
 			m_Stage = stage;
             m_VertexShader = vs;
             m_FragmentShader = ps;
@@ -50,16 +51,19 @@ class ShaderP::impl final{
 			}
 			else{
 			}
+			super->setName(name);
         }
-        void _construct(std::string vs, std::string ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(std::string& name, std::string& vs, std::string& ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
 			Shader* v = Resources::getShader(vs); Shader* f = Resources::getShader(ps);
 			if(v == nullptr){
-				Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true); v = Resources::getShader(vs);
+				Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true);
+				v = Resources::getShader(vs);
 			}
 			if(f == nullptr){
-				Resources::addShader(ps,ps,SHADER_TYPE_FRAGMENT,true); f = Resources::getShader(ps);
+				Resources::addShader(ps,ps,SHADER_TYPE_FRAGMENT,true);
+				f = Resources::getShader(ps);
 			}
-			_construct(v,f,stage,super);
+			_construct(name,v,f,stage,super);
         }
 
         void _destruct(){
@@ -165,11 +169,11 @@ class ShaderP::impl final{
         }
 };
 
-ShaderP::ShaderP(std::string vs, std::string ps, SHADER_PIPELINE_STAGE stage):m_i(new impl()){
-    m_i->_construct(vs,ps,stage,this);
+ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
+    m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage):m_i(new impl()){
-    m_i->_construct(vs,ps,stage,this);
+ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
+    m_i->_construct(n,vs,fs,s,this);
 }
 ShaderP::~ShaderP(){
     m_i->_destruct();

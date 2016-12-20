@@ -4,6 +4,7 @@
 
 #define GL_TRIANGLES 0x0004
 
+#include "Engine_ResourceBasic.h"
 #include "Engine_Physics.h"
 #include <unordered_map>
 
@@ -17,7 +18,7 @@ typedef unsigned int uint;
 const uint NUM_VERTEX_DATA = 5;
 const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
-class Mesh final{
+class Mesh final: public EngineResource{
     private:
         GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
 		GLuint m_elementbuffer;
@@ -38,11 +39,11 @@ class Mesh final{
         void _loadFromOBJMemory(std::string,COLLISION_TYPE);
         void _calculateMeshRadius();
     public:
-        Mesh(btHeightfieldTerrainShape*);
-		Mesh(std::unordered_map<std::string,float>& grid,uint width,uint length);
-        Mesh(float width, float height);
-        Mesh(float x, float y, float width, float height);
-        Mesh(std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
+        Mesh(std::string& name,btHeightfieldTerrainShape*);
+		Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length);
+        Mesh(std::string& name,float width, float height);
+        Mesh(std::string& name,float x, float y, float width, float height);
+        Mesh(std::string& name,std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
         ~Mesh();
 
         void initRenderingContext(uint api);

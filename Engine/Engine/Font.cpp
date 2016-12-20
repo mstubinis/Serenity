@@ -64,14 +64,14 @@ void FontData::_loadTextFile(std::string filename){
 
 Font::Font(std::string filename){
     m_FontData = new FontData(filename);
+	std::string n = filename.substr(0,filename.size()-4);
+    setName(n);
 
-    m_Name = filename.substr(0,filename.size()-4);
-
-    Resources::Detail::ResourceManagement::m_Fonts[m_Name] = boost::shared_ptr<Font>(this);
+    Resources::Detail::ResourceManagement::m_Fonts[n] = boost::shared_ptr<Font>(this);
 }
 Font::~Font(){
     SAFE_DELETE(m_FontData);
 }
 void Font::renderText(std::string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-    Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(m_Name,text,pos,color,scl,angle,depth));
+    Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(name(),text,pos,color,scl,angle,depth));
 }

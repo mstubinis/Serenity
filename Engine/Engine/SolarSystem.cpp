@@ -22,8 +22,8 @@
 using namespace Engine;
 using namespace Engine::Events;
 
-SolarSystem::SolarSystem(std::string name, std::string file,bool test):Scene(name){
-    playerCamera = new GameCamera("PlayerCamera_" + m_Name,45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
+SolarSystem::SolarSystem(std::string n, std::string file,bool test):Scene(n){
+    playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
     Resources::setActiveCamera(playerCamera);
 
     if(!test){

@@ -12,7 +12,7 @@
 
 using namespace Engine;
 
-Terrain::Terrain(std::string name, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::v3(0),glm::vec3(1),name,nullptr,scene){
+Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::v3(0),glm::vec3(1),n,nullptr,scene){
     for(unsigned int i = 0; i < image.getSize().x; i++){
         for(unsigned int j = 0; j < image.getSize().y; j++){
             float pixel(image.getPixel(i,j).r / 255.0f);
@@ -36,10 +36,10 @@ Terrain::Terrain(std::string name, sf::Image& image,std::string material,Scene* 
     btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
     m_RigidBody = new btRigidBody(rigidBodyCI);
 
-    Resources::Detail::ResourceManagement::m_Meshes[m_Name] = boost::make_shared<Mesh>(static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()));
+    Resources::Detail::ResourceManagement::m_Meshes[name()] = boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()));
 
     if(material != "")
-        m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(m_Name),Resources::getMaterial(material)));
+        m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(name()),Resources::getMaterial(material)));
 
     if(Resources::getCurrentScene() == scene)
         Physics::addRigidBody(m_RigidBody);

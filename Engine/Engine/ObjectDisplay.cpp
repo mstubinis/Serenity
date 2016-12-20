@@ -12,14 +12,14 @@
 
 using namespace Engine;
 
-ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string name,Scene* scene):ObjectBasic(pos,scl,name,scene){
+ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
     m_Visible = true;
     m_Shadeless = false;
     m_BoundingBoxRadius = glm::vec3(0);
     if(mesh != "" && mat != ""){
         m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
-		Resources::getMaterial(mat)->addObject(this->m_Name);
+		Resources::getMaterial(mat)->addObject(name());
 	}
     m_Color = glm::vec4(1);
 	m_GodsRaysColor = glm::vec3(0);
@@ -39,8 +39,8 @@ void ObjectDisplay::setMaterial(std::string materialName, uint index){
 	Material* current = this->m_DisplayItems[index]->material;
 	Material* newMaterial = Resources::getMaterial(materialName);
 
-	current->removeObject(this->m_Name);
-	newMaterial->addObject(this->m_Name);
+	current->removeObject(name());
+	newMaterial->addObject(name());
 }
 void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 	Engine::Renderer::Detail::drawObject(this,shader,debug,godsRays);

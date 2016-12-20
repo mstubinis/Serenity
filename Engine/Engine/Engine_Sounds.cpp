@@ -21,7 +21,10 @@ bool Sound::Detail::SoundManagement::isPaused(sf::SoundSource::Status status){
     if(status == sf::SoundSource::Status::Paused) return true; return false;
 }
 
-SoundEffectBasic::SoundEffectBasic(std::string file){ s = nullptr; }
+SoundEffectBasic::SoundEffectBasic(std::string& name,std::string file){ 
+	s = nullptr;
+	this->setName(name); 
+}
 SoundEffectBasic::~SoundEffectBasic(){
     SAFE_DELETE(s);
 }
@@ -39,7 +42,7 @@ void SoundEffectBasic::setMinDistance(float d){ s->setMinDistance(d); }
 
 
 
-SoundEffect::SoundEffect(std::string file, bool loop, glm::vec3 sourceOrigin):SoundEffectBasic(file){
+SoundEffect::SoundEffect(std::string& name, std::string file, bool loop, glm::vec3 sourceOrigin):SoundEffectBasic(name,file){
     Sound::Detail::SoundManagement::m_Buffer->loadFromFile(file);
     s = new sf::Sound(*Sound::Detail::SoundManagement::m_Buffer);
     static_cast<sf::Sound*>(s)->setLoop(loop);
@@ -60,7 +63,7 @@ bool SoundEffect::isLooping(){ return static_cast<sf::Sound*>(s)->getLoop(); }
 
 
 
-SoundMusic::SoundMusic(std::string file, bool loop):SoundEffectBasic(file){
+SoundMusic::SoundMusic(std::string& name, std::string file, bool loop):SoundEffectBasic(name,file){
     s = new sf::Music();
     static_cast<sf::Music*>(s)->openFromFile(file);
     static_cast<sf::Music*>(s)->setLoop(loop);

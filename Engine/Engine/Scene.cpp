@@ -14,16 +14,16 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
     if(Resources::getCurrentScene() == nullptr){
         Resources::Detail::ResourceManagement::m_CurrentScene = this;
     }
-    m_Name = name;
     m_AmbientLighting = ambientLightColor;
     m_BackgroundColor = glm::vec3(0,0,0);
 
     if(!exists(Resources::getActiveCameraPtr())){
-        new Camera("Default_" + m_Name,45.0f,1.0f,0.1f,100.0f,this);
-        Resources::setActiveCamera("Default_" + m_Name);
+        new Camera("Default_" + name,45.0f,1.0f,0.1f,100.0f,this);
+        Resources::setActiveCamera("Default_" + name);
     }
 
-    Resources::Detail::ResourceManagement::m_Scenes[m_Name] = shared_ptr<Scene>(this);
+    Resources::Detail::ResourceManagement::m_Scenes[name] = shared_ptr<Scene>(this);
+	setName(name);
 }
 void Scene::centerSceneToObject(Object* center){
     glm::v3 offset = -(center->getPosition());
@@ -40,21 +40,10 @@ void Scene::centerSceneToObject(Object* center){
 Scene::~Scene(){
     SAFE_DELETE(m_Skybox);
 }
-void Scene::setName(std::string name){
-    if(name == m_Name) return;
-
-    std::string oldName = m_Name; m_Name = name;
-    Resources::Detail::ResourceManagement::m_Scenes[name] = boost::shared_ptr<Scene>(this);
-
-    if(Resources::Detail::ResourceManagement::m_Scenes.count(oldName)){
-        Resources::Detail::ResourceManagement::m_Scenes[oldName].reset();
-        Resources::Detail::ResourceManagement::m_Scenes.erase(oldName);
-    }
-}
 void Scene::update(float dt){
     for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
         if (it->second->isDestroyed()){
-            std::string name = it->second->getName();
+            std::string name = it->second->name();
             Resources::getObjectPtr(name).reset();
             Resources::Detail::ResourceManagement::m_Objects.erase(name);
             m_Objects.erase(it++);
@@ -66,7 +55,7 @@ void Scene::update(float dt){
     }
     for (auto it = Resources::Detail::ResourceManagement::m_Cameras.cbegin(); it != Resources::Detail::ResourceManagement::m_Cameras.cend();){
         if (it->second->isDestroyed()){
-            std::string name = it->second->getName();
+            std::string name = it->second->name();
             Resources::getCameraPtr(name).reset();
             Resources::Detail::ResourceManagement::m_Cameras.erase(it++);
         }

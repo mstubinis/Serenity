@@ -2,6 +2,8 @@
 #ifndef ENGINE_SHADERPROGRAM_H
 #define ENGINE_SHADERPROGRAM_H
 
+#include "Engine_ResourceBasic.h"
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -19,12 +21,12 @@ enum SHADER_TYPE{
 };
 
 class Material;
-class Shader final{
+class Shader final: public EngineResource{
 	private:
 		class impl;
 		std::unique_ptr<impl> m_i;
 	public:
-		Shader(std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
+		Shader(std::string& name, std::string& shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
 		~Shader();
 
 		SHADER_TYPE type();
@@ -33,13 +35,13 @@ class Shader final{
 };
 
 
-class ShaderP final{
+class ShaderP final: public EngineResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
-        ShaderP(std::string vertexShader,std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-		ShaderP(Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+		ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
         ~ShaderP();
 
         void initRenderingContext(uint api);

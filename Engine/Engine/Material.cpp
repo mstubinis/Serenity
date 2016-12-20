@@ -154,7 +154,7 @@ class Material::impl final{
         float m_BaseGlow;
         float m_SpecularityPower;
 		uint m_ID;
-        void _init(Texture* diffuse,Texture* normal,Texture* glow,Texture* specular){
+        void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* base){
 			_addComponent(MATERIAL_COMPONENT_TYPE_DIFFUSE,diffuse);
 			_addComponent(MATERIAL_COMPONENT_TYPE_NORMAL,normal);
 			_addComponent(MATERIAL_COMPONENT_TYPE_GLOW,glow);
@@ -164,8 +164,9 @@ class Material::impl final{
             m_SpecularityPower = 50.0f;
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
 			_addToMaterialPool();
+			base->setName(name);
         }
-        void _init(std::string& diffuse, std::string& normal, std::string& glow, std::string& specular){
+        void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* base){
             Texture* diffuseT = Resources::getTexture(diffuse); 
             Texture* normalT = Resources::getTexture(normal); 
             Texture* glowT = Resources::getTexture(glow);
@@ -174,7 +175,7 @@ class Material::impl final{
             if(normalT == nullptr && normal != "")  normalT = new Texture(normal);
             if(glowT == nullptr && glow != "")    glowT = new Texture(glow);
 			if(specularT == nullptr && specular != "")    specularT = new Texture(specular);
-            _init(diffuseT,normalT,glowT,specularT);
+            _init(name,diffuseT,normalT,glowT,specularT,base);
         }
 		void _addToMaterialPool(){
 			this->m_ID = Material::m_MaterialProperities.size();
@@ -215,12 +216,10 @@ class Material::impl final{
 };
 
 Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
-    m_i->_init(diffuse,normal,glow,specular);
-	if(program == "") program = "Deferred";
+    m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
-    m_i->_init(diffuse,normal,glow,specular);
-	if(program == nullptr) program = Resources::getShaderProgram("Deferred");
+    m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){
     m_i->_destruct();

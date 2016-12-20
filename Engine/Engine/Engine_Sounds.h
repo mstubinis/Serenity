@@ -2,15 +2,17 @@
 #ifndef ENGINE_ENGINE_SOUNDS_H
 #define ENGINE_ENGINE_SOUNDS_H
 
+#include "Engine_ResourceBasic.h"
+
 #include <SFML/Audio.hpp>
 #include <glm/glm.hpp>
 #include <string>
 
-class SoundEffectBasic{
+class SoundEffectBasic: public EngineResource{
     protected:
         sf::SoundSource* s;
     public:
-        SoundEffectBasic(std::string file);
+        SoundEffectBasic(std::string& name,std::string file);
         virtual ~SoundEffectBasic();
 
         glm::vec3 getPosition();
@@ -43,7 +45,7 @@ class SoundEffectBasic{
 };
 class SoundEffect: public SoundEffectBasic{
     public:
-        SoundEffect(std::string file, bool loop = false, glm::vec3 sourceOrigin = glm::vec3(0));
+        SoundEffect(std::string& name,std::string file, bool loop = false, glm::vec3 sourceOrigin = glm::vec3(0));
         virtual ~SoundEffect();
 
         virtual void play();
@@ -60,7 +62,7 @@ class SoundEffect: public SoundEffectBasic{
 };
 class SoundMusic: public SoundEffectBasic{
     public:
-        SoundMusic(std::string file, bool loop = true);
+        SoundMusic(std::string& name,std::string file, bool loop = true);
         virtual ~SoundMusic();
 
         virtual void play();
