@@ -217,7 +217,7 @@ class Engine_Window::impl{
 			m_SFMLWindow->setTitle(m_WindowName);
 		}
 		void _setIcon(const char* file){
-			if(!Resources::Detail::ResourceManagement::m_Textures.count(file)){
+			if(!Resources::Detail::ResourceManagement::m_Textures.count(StringKey(file))){
 				new Texture(file);
 			}
 			Texture* texture = Resources::getTexture(file);

@@ -7,7 +7,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <boost/make_shared.hpp>
 
 
 using namespace Engine;
@@ -110,18 +110,19 @@ class Texture::impl final{
 
 Texture::Texture(const unsigned char* pixels,uint w, uint h,std::string _name,GLuint type):m_i(new impl()){
 	m_i->_construct(pixels,w,h,_name,type,this);
-	Resources::Detail::ResourceManagement::m_Textures[this->name()] = boost::shared_ptr<Texture>(this);
+
+	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,name(),boost::shared_ptr<Texture>(this));
 }
 
 Texture::Texture(std::string file,std::string _name,GLuint type):m_i(new impl()){
     m_i->_construct(file,_name,type,this);
     if(file != ""){
-        Resources::Detail::ResourceManagement::m_Textures[this->name()] = boost::shared_ptr<Texture>(this);
+        Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,name(),boost::shared_ptr<Texture>(this));
     }
 }
 Texture::Texture(std::string files[],std::string _name,GLuint type):m_i(new impl()){
     m_i->_construct(files,_name,type,this);
-    Resources::Detail::ResourceManagement::m_Textures[this->name()] = boost::shared_ptr<Texture>(this);
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,name(),boost::shared_ptr<Texture>(this));
 }
 Texture::~Texture(){
     m_i->_destruct();

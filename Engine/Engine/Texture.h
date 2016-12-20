@@ -14,7 +14,7 @@
 
 typedef unsigned int GLuint;
 
-class Texture final: EngineResource{
+class Texture final: public EngineResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;

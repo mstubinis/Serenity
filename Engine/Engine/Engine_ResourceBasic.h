@@ -6,12 +6,13 @@
 
 class EngineResource{
 	private:
-		std::string m_Name;
+		std::string* m_Name;
 	public:
 		EngineResource(std::string = "");
 		~EngineResource();
 
 		std::string& name();
+		std::string* namePtr();
 		void setName(std::string);
 };
 #endif

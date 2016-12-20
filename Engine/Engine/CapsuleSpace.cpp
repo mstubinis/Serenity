@@ -105,26 +105,26 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     l->setColor(255,225,235,255);
     l->setSpecularPower(0.0f);
 
-    if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleTunnel")){
+    if(!Resources::Detail::ResourceManagement::m_Meshes.count(StringKey("CapsuleTunnel"))){
         Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",COLLISION_TYPE_NONE);
     }
-    if(!Resources::Detail::ResourceManagement::m_Meshes.count("CapsuleRibbon")){
+    if(!Resources::Detail::ResourceManagement::m_Meshes.count(StringKey("CapsuleRibbon"))){
         Resources::addMesh("CapsuleRibbon","data/Models/capsuleRibbon.obj",COLLISION_TYPE_NONE);
     }
-    if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_A")){
+    if(!Resources::Detail::ResourceManagement::m_Materials.count(StringKey("Capsule_A"))){
         Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");
         Resources::getMaterial("Capsule_A")->setShadeless(true);
     }
-    if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_B")){
+    if(!Resources::Detail::ResourceManagement::m_Materials.count(StringKey("Capsule_B"))){
         Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.png");
         Resources::getMaterial("Capsule_B")->setShadeless(true);
     }
-    if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_C")){
+    if(!Resources::Detail::ResourceManagement::m_Materials.count(StringKey("Capsule_C"))){
         Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
         Resources::getMaterial("Capsule_C")->setShadeless(true);
         Resources::getMaterial("Capsule_C")->setGlow(1.0f);
     }
-    if(!Resources::Detail::ResourceManagement::m_Materials.count("Capsule_D")){
+    if(!Resources::Detail::ResourceManagement::m_Materials.count(StringKey("Capsule_D"))){
         Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
         Resources::getMaterial("Capsule_D")->setShadeless(true);
     }

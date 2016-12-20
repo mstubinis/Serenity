@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Engine;
 
@@ -25,7 +26,8 @@ Object::Object(std::string n,Scene* scene, bool isNotCamera){
         }
         setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, name()));
         scene->getObjects()[name()] = this;
-        Resources::Detail::ResourceManagement::m_Objects[name()] = boost::shared_ptr<Object>(this);
+
+		Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
     }
 }
 Object::~Object()

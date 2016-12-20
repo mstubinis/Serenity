@@ -10,6 +10,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Engine;
 
@@ -67,7 +68,7 @@ Font::Font(std::string filename){
 	std::string n = filename.substr(0,filename.size()-4);
     setName(n);
 
-    Resources::Detail::ResourceManagement::m_Fonts[n] = boost::shared_ptr<Font>(this);
+	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Fonts,name(),boost::shared_ptr<Font>(this));
 }
 Font::~Font(){
     SAFE_DELETE(m_FontData);

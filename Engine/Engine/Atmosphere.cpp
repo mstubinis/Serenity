@@ -18,7 +18,7 @@ Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEm
     m_Scale = glm::vec3(1);
     m_FollowCamera = followCamera;
 
-    if(!Resources::Detail::ResourceManagement::m_Meshes.count("Atmosphere")){
+    if(!Resources::Detail::ResourceManagement::m_Meshes.count(StringKey("Atmosphere"))){
         #pragma region MeshData
              std::string data = "v 0.000000 -1.000000 0.000000\n"
 								"v 0.723607 -0.447220 0.525725\n"

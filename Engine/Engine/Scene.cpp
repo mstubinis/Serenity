@@ -5,9 +5,9 @@
 #include "Skybox.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Engine;
-using namespace boost;
 
 Scene::Scene(std::string name,glm::vec3 ambientLightColor){
     m_Skybox = nullptr;
@@ -21,9 +21,8 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
         new Camera("Default_" + name,45.0f,1.0f,0.1f,100.0f,this);
         Resources::setActiveCamera("Default_" + name);
     }
-
-    Resources::Detail::ResourceManagement::m_Scenes[name] = shared_ptr<Scene>(this);
 	setName(name);
+	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Scenes,name,boost::shared_ptr<Scene>(this));
 }
 void Scene::centerSceneToObject(Object* center){
     glm::v3 offset = -(center->getPosition());

@@ -6,11 +6,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Engine;
 using namespace boost;
 
-Camera::Camera(std::string name, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene,false){//create a perspective camera
+Camera::Camera(std::string n, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),n,scene,false){//create a perspective camera
     m_Angle = angle;
     m_AspectRatio = aspectRatio;
     m_Near = near;
@@ -19,9 +20,10 @@ Camera::Camera(std::string name, float angle, float aspectRatio, float near, flo
     m_Type = CAMERA_TYPE_PERSPECTIVE;
     setPerspectiveProjection();
     lookAt(getPosition(),getPosition() + getForward(), getUp());
-    Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
+
+	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
 }
-Camera::Camera(std::string name, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene,false){//create an orthographic camera
+Camera::Camera(std::string n, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;
     m_AspectRatio = 1.0f;
     m_Near = near;
@@ -30,7 +32,8 @@ Camera::Camera(std::string name, float left, float right, float bottom, float to
     m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
     setOrthoProjection(left,right,bottom,top);
     lookAt(getPosition(),getPosition() + getForward(), getUp());
-    Resources::Detail::ResourceManagement::m_Cameras[name] = boost::shared_ptr<Camera>(this);
+
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
 }
 void Camera::_constructFrustrum(){
     glm::mat4 vp = m_Projection * m_View;
