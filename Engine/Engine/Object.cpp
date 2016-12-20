@@ -18,16 +18,16 @@ Object::Object(std::string n,Scene* scene, bool isNotCamera){
     m_Parent = nullptr;
     m_IsToBeDestroyed = false;
     setName(n);
-    unsigned int count = 0;
 
     if(isNotCamera){
         if(scene == nullptr){
             scene = Resources::getCurrentScene();
         }
         setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, name()));
-        scene->getObjects()[name()] = this;
-
 		Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
+
+		skey k(this);
+		scene->getObjects()[k] = this;
     }
 }
 Object::~Object()

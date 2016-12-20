@@ -52,19 +52,17 @@ namespace Engine{
 					}
 
 					template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::map<K,V,H,F>& m,S& n,O& o){
-						K k(n);
+						K k(o.get());
 						if(m.size() > 0 && m.count(k)){
 							o.reset();return;
 						}
-						k.lock(o->namePtr());
 						m.insert(std::pair<K,O>(k,o));
 					}
 					template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::unordered_map<K,V,H,F>& m,S& n,O& o){
-						K k(n);
+						K k(o.get());
 						if(m.size() > 0 && m.count(k)){
 							o.reset();return;
 						}
-						k.lock(o->namePtr());
 						m.insert(std::pair<K,O>(k,o));
 					}
 

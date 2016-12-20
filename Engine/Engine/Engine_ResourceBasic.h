@@ -8,6 +8,19 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+class EngineResource{
+	private:
+		boost::shared_ptr<std::string> m_Name;
+	public:
+		EngineResource(std::string = "");
+		~EngineResource();
+
+		std::string& name();
+		boost::shared_ptr<std::string>& namePtr();
+		void setName(std::string);
+};
+
+
 class skey final{
 	public:
 		std::string* s;boost::weak_ptr<std::string> w;bool d;
@@ -22,8 +35,10 @@ class skey final{
 			return *(s) < *(o.s);
 		}
 		skey(std::string _key = ""){ s = new std::string(_key);d = true;}
+		skey(EngineResource* o){ s = nullptr; w = boost::dynamic_pointer_cast<std::string>(o->namePtr()); d = false;}
 		~skey(){if(d){delete s;d = false;}}
 		void lock(boost::shared_ptr<std::string>& p){ delete s;w = boost::dynamic_pointer_cast<std::string>(p); d = false; }
+		void lock(EngineResource* o){ delete s;w = boost::dynamic_pointer_cast<std::string>(o->namePtr()); d = false; }
 };
 class skh final{
 	public: size_t operator() (skey const& key) const{
@@ -42,15 +57,5 @@ class skef final{
 };
 
 
-class EngineResource{
-	private:
-		boost::shared_ptr<std::string> m_Name;
-	public:
-		EngineResource(std::string = "");
-		~EngineResource();
 
-		std::string& name();
-		boost::shared_ptr<std::string>& namePtr();
-		void setName(std::string);
-};
 #endif

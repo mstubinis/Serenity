@@ -4,22 +4,20 @@
 
 #include "Engine_ResourceBasic.h"
 
-#include <map>
+#include <unordered_map>
 #include <glm/glm.hpp>
 
 class Object;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
-class ParticleEmitter;
 
 class Scene: public EngineResource{
     private:
         SkyboxEmpty* m_Skybox;
     protected:
-        std::map<std::string,Object*> m_Objects;
-        std::map<std::string,ParticleEmitter*> m_ParticleEmitters;
-        std::map<std::string,SunLight*> m_Lights;
+        std::unordered_map<skey,Object*,skh,skef> m_Objects;
+        std::unordered_map<skey,SunLight*,skh,skef> m_Lights;
 
         glm::vec3 m_AmbientLighting;
         glm::vec3 m_BackgroundColor;
@@ -27,13 +25,11 @@ class Scene: public EngineResource{
         Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
         virtual ~Scene();
 
-        std::map<std::string,Object*>& getObjects(){ return m_Objects; }
-        std::map<std::string,ParticleEmitter*>& getParticleEmitters(){ return m_ParticleEmitters; }
-        std::map<std::string,SunLight*>& getLights(){ return m_Lights; }
+        std::unordered_map<skey,Object*,skh,skef>& getObjects(){ return m_Objects; }
+        std::unordered_map<skey,SunLight*,skh,skef>& getLights(){ return m_Lights; }
 
-        Object* getObject(std::string name){ return m_Objects[name]; }
-        ParticleEmitter* getParticleEmitter(std::string name){ return m_ParticleEmitters[name]; }
-        SunLight* getLight(std::string name){ return m_Lights[name]; }
+        Object* getObject(std::string name){ return m_Objects[skey(name)]; }
+        SunLight* getLight(std::string name){ return m_Lights[skey(name)]; }
 
         virtual void update(float);
         glm::vec3 getAmbientLightColor(){ return m_AmbientLighting; }

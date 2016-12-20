@@ -42,9 +42,7 @@ Scene::~Scene(){
 void Scene::update(float dt){
     for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
         if (it->second->isDestroyed()){
-            std::string name = it->second->name();
-            Resources::getObjectPtr(name).reset();
-            Resources::Detail::ResourceManagement::m_Objects.erase(name);
+			Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Objects,it->second->name());
             m_Objects.erase(it++);
         }
         else{
@@ -54,9 +52,7 @@ void Scene::update(float dt){
     }
     for (auto it = Resources::Detail::ResourceManagement::m_Cameras.cbegin(); it != Resources::Detail::ResourceManagement::m_Cameras.cend();){
         if (it->second->isDestroyed()){
-            std::string name = it->second->name();
-            Resources::getCameraPtr(name).reset();
-            Resources::Detail::ResourceManagement::m_Cameras.erase(it++);
+			Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Cameras,it->second->name());
         }
         else{
             if(it->second->getScene() == this){
