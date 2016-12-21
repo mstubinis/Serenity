@@ -11,33 +11,17 @@ class TextureBuffer::impl final{
         int m_BufferAttatchment;
 
 		float m_SizeScalar;
-
-        uint m_width; uint m_height;    
-        GLuint m_Texture;
-
-        void _init(int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar){
+        void _init(int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar,TextureBuffer* super){
             m_BufferInternalFormat = internalformat;
             m_BufferFormat = format;
             m_BufferType = type;
             m_BufferAttatchment = attatchment;
 			m_SizeScalar = sizeScalar;
-            glGenTextures(1, &m_Texture);
-			_resize(width,height);
+			glGenTextures(1, &(super->address()));
+			_resize(width,height,super);
         }
-        void _destruct(){
-            glDeleteTextures(1, &m_Texture);
-        }
-        void _resize(uint width,uint height){
-            m_width = width; m_height = height;
-            glBindTexture(GL_TEXTURE_2D, m_Texture);
-			GLsizei realW = GLsizei(m_width*m_SizeScalar);
-			GLsizei realH = GLsizei(m_height*m_SizeScalar);
-            glTexImage2D(GL_TEXTURE_2D, 0, m_BufferInternalFormat, realW, realH, 0, m_BufferFormat, m_BufferType, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, m_BufferAttatchment, GL_TEXTURE_2D, m_Texture, 0);
+        void _resize(uint width,uint height,TextureBuffer* super){
+			super->_constructAsFramebuffer(width,height,m_SizeScalar,m_BufferInternalFormat,m_BufferFormat,m_BufferType,m_BufferAttatchment);
         }
 };
 class GBuffer::impl final{
@@ -60,19 +44,19 @@ class GBuffer::impl final{
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
 
-			TextureBuffer* tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_DIFFUSE],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_DIFFUSE]);
+			TextureBuffer* tbo = new TextureBuffer("BUFFER_DIFFUSE",GBUFFER_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_DIFFUSE],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_DIFFUSE]);
             m_Buffers[BUFFER_TYPE_DIFFUSE] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_NORMAL],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_NORMAL]);
+			tbo = new TextureBuffer("BUFFER_NORMAL",GBUFFER_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_NORMAL],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_NORMAL]);
             m_Buffers[BUFFER_TYPE_NORMAL] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_MISC],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_MISC],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_MISC],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_MISC],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_MISC]);
+			tbo = new TextureBuffer("BUFFER_MISC",GBUFFER_TYPES[BUFFER_TYPE_MISC],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_MISC],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_MISC],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_MISC],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_MISC]);
             m_Buffers[BUFFER_TYPE_MISC] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_POSITION],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_POSITION],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_POSITION],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_POSITION],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_POSITION]);
+			tbo = new TextureBuffer("BUFFER_POSITION",GBUFFER_TYPES[BUFFER_TYPE_POSITION],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_POSITION],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_POSITION],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_POSITION],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_POSITION]);
             m_Buffers[BUFFER_TYPE_POSITION] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_LIGHTING],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_LIGHTING]);
+			tbo = new TextureBuffer("BUFFER_LIGHTING",GBUFFER_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_LIGHTING],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_LIGHTING]);
             m_Buffers[BUFFER_TYPE_LIGHTING] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_FREE1],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_FREE1],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_FREE1],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_FREE1],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_FREE1]);
+			tbo = new TextureBuffer("BUFFER_FREE1",GBUFFER_TYPES[BUFFER_TYPE_FREE1],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_FREE1],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_FREE1],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_FREE1],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_FREE1]);
             m_Buffers[BUFFER_TYPE_FREE1] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_DEPTH],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_DEPTH]);
+			tbo = new TextureBuffer("BUFFER_DEPTH",GBUFFER_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_DEPTH],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_DEPTH]);
             m_Buffers[BUFFER_TYPE_DEPTH] = tbo;
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -84,11 +68,11 @@ class GBuffer::impl final{
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_fake);
 
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_BLOOM],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_BLOOM]);
+			tbo = new TextureBuffer("BUFFER_TYPE_BLOOM",GBUFFER_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_BLOOM],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_BLOOM]);
             m_Buffers[BUFFER_TYPE_BLOOM] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_FREE2],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_FREE2],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_FREE2],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_FREE2],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_FREE2]);
+			tbo = new TextureBuffer("BUFFER_TYPE_FREE2",GBUFFER_TYPES[BUFFER_TYPE_FREE2],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_FREE2],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_FREE2],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_FREE2],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_FREE2]);
             m_Buffers[BUFFER_TYPE_FREE2] = tbo;
-			tbo = new TextureBuffer(GBUFFER_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_GODSRAYS],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_GODSRAYS]);
+			tbo = new TextureBuffer("BUFFER_TYPE_GODSRAYS",GBUFFER_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_GODSRAYS],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_GODSRAYS]);
             m_Buffers[BUFFER_TYPE_GODSRAYS] = tbo;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -103,11 +87,6 @@ class GBuffer::impl final{
             glDeleteRenderbuffers(1, &m_depth_fake);
             glDeleteFramebuffers(1, &m_fbo_bloom);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-            for(auto buffer:m_Buffers){
-                delete(buffer.second);
-            }
-            m_Buffers.clear();
         }
         void _resizeBaseBuffer(uint w,uint h){
             m_width  = w; m_height = h;
@@ -195,17 +174,13 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar):m_i(new impl()){
-    m_i->_init(internalformat,format,type,attatchment,width,height,sizeScalar);
+TextureBuffer::TextureBuffer(std::string name,int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar):Texture(name,width,height),m_i(new impl()){
+    m_i->_init(internalformat,format,type,attatchment,width,height,sizeScalar,this);
 }
 TextureBuffer::~TextureBuffer(){
-    m_i->_destruct();
 }
 void TextureBuffer::resize(uint width,uint height){
-    m_i->_resize(width,height);
-}
-GLuint TextureBuffer::texture() const{
-    return m_i->m_Texture;
+    m_i->_resize(width,height,this);
 }
 float TextureBuffer::sizeScalar() const{
 	return m_i->m_SizeScalar;
@@ -254,6 +229,6 @@ void GBuffer::stop(){
 std::unordered_map<uint,TextureBuffer*> GBuffer::getBuffers(){ 
     return m_i->m_Buffers; 
 }
-GLuint GBuffer::getTexture(uint type){ 
-    return m_i->m_Buffers[type]->texture(); 
+Texture* GBuffer::getTexture(uint type){ 
+	return m_i->m_Buffers[type];
 }

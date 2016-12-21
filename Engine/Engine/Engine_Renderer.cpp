@@ -147,6 +147,22 @@ void Renderer::useShader(ShaderP* program){
 void Renderer::useShader(std::string programName){
 	Renderer::useShader(Resources::getShaderProgram(programName));
 }
+void Renderer::bindTexture(const char* location,Texture* texture,uint slot){
+	Renderer::bindTexture(location,texture->address(),slot);
+}
+void Renderer::bindTexture(const char* location,GLuint textureAddress,uint slot){
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, textureAddress);
+	sendUniform1i(location,slot);
+}
+void Renderer::unbindTexture2D(uint slot){
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+void Renderer::unbindTextureCubemap(uint slot){
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
 void Renderer::sendUniform1d(const char* location,double x){
 	glUniform1d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
 }
@@ -293,15 +309,11 @@ void Renderer::Detail::RenderManagement::_renderTextures(){
         Texture* texture = nullptr;
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, texture->address());
-			sendUniform1i("DiffuseTexture",0);
+			bindTexture("DiffuseTexture",texture->address(),0);
 			sendUniform1i("DiffuseTextureEnabled",1);
         }
         else{
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, 0);
-			sendUniform1i("DiffuseTexture",0);
+			bindTexture("DiffuseTexture",(GLuint)0,0);
 			sendUniform1i("DiffuseTextureEnabled",0);
         }
 		sendUniform1i("Shadeless",1);
@@ -327,9 +339,8 @@ void Renderer::Detail::RenderManagement::_renderText(){
 	useShader("Deferred_HUD");
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, font->getFontData()->getGlyphTexture()->address());
-		sendUniform1i("DiffuseTexture",0);
+
+		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture()->address(),0);
 		sendUniform1i("DiffuseTextureEnabled",1);
         sendUniform1i("Shadeless",1);
 
@@ -406,30 +417,16 @@ void Renderer::Detail::RenderManagement::_passLighting(){
 
 	sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-	sendUniform1i("gNormalMap",0);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
-    sendUniform1i("gPositionMap",1);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_MISC));
-    sendUniform1i("gMiscMap",2);
-
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
-    sendUniform1i("gDiffuseMap",3);
+	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
+	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
+	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),3);
 
     for (auto light:Resources::getCurrentScene()->getLights()){
         light.second->lighten();
     }
-    // Reset OpenGL state
-    for(uint i = 0; i < 4; i++){
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+
+    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
 	useShader(0);
 }
 void Renderer::Detail::RenderManagement::render(){
@@ -491,14 +488,11 @@ void Renderer::Detail::RenderManagement::render(){
     glColorMask(0,0,0,0);
 	useShader("Copy_Depth");
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DEPTH));
-	sendUniform1i("gDepthMap",0);
+	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
+
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+	unbindTexture2D(0);
 	useShader(0);
     glColorMask(1,1,1,1);
     /////////////
@@ -547,38 +541,18 @@ void Renderer::Detail::RenderManagement::_passSSAO(){
 	sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
 	sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
 	sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
-
 	sendUniform2fv("poisson",RendererInfo::SSAOInfo::ssao_Kernels,Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
-
 	sendUniform1i("far",int(c->getFar()));
 
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-	sendUniform1i("gNormalMap",0);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_POSITION));
-	sendUniform1i("gPositionMap",1);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D,RendererInfo::SSAOInfo::ssao_noise_texture);
-	sendUniform1i("gRandomMap",2);
-
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_MISC));
-	sendUniform1i("gMiscMap",3);
-
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D,m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-    sendUniform1i("gLightMap",4);
+	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
+	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
+	bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2);
+	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
+	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 5; i++){
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
 	useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
@@ -588,16 +562,11 @@ void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius)
 	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
 	sendUniform1f("radius", radius);
 
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
-	sendUniform1i("texture",0);
+	bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+	unbindTexture2D(0);
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
@@ -617,15 +586,11 @@ void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOn
 	sendUniform1i("behind",int(behind));
 	sendUniform1f("alpha",alpha);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_FREE1));
-	sendUniform1i("firstPass",0);
+	bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D,0);
-
+	unbindTexture2D(0);
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passHDR(){
@@ -635,16 +600,10 @@ void Renderer::Detail::RenderManagement::_passHDR(){
 	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 	sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-	sendUniform1i("lightingBuffer",0);
-
+	bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 1; i++){
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, i);
-    }
+	unbindTexture2D(0);
 	useShader(0);
 }
 
@@ -670,15 +629,11 @@ void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint text
     if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
     else{                     sendUniform2f("HV",0.0f,1.0f); }
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(texture));
-	sendUniform1i("texture",0);
+	bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+	unbindTexture2D(0);
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passFinal(){
@@ -696,36 +651,16 @@ void Renderer::Detail::RenderManagement::_passFinal(){
     sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
 	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE));
-    sendUniform1i("gDiffuseMap", 0);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING));
-    sendUniform1i("gLightMap", 1);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_BLOOM));
-    sendUniform1i("gBloomMap", 2);
-
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_NORMAL));
-    sendUniform1i("gNormalMap", 3);
-
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_MISC));
-    sendUniform1i("gMiscMap", 4);
-
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_2D, m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS));
-    sendUniform1i("gGodsRaysMap", 5);
+	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
+	bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
+	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
+	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
+	bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 6; i++){
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
 	useShader(0);
 }
 void Renderer::Detail::renderFullscreenQuad(uint width,uint height){

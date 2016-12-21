@@ -13,22 +13,26 @@
 #include <memory>
 
 typedef unsigned int GLuint;
+typedef unsigned int uint;
 
-class Texture final: public EngineResource{
+class Texture: public EngineResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
+		Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D);
         Texture(const unsigned char*,unsigned int, unsigned int,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP);
         ~Texture();
 
 		unsigned char* pixels();
-		GLuint address();
+		GLuint& address();
 		GLuint type();
-		unsigned int width();
-		unsigned int height();
+		uint width();
+		uint height();
+
+		void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
 
         void render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
 

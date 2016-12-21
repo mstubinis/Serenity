@@ -18,7 +18,7 @@ class Texture::impl final{
         std::string m_Directory;
         GLuint m_TextureAddress;
         GLuint m_Type;
-        unsigned int m_Width, m_Height;
+        uint m_Width, m_Height;
         void _loadFromPixels(const unsigned char* pixels,unsigned int w, unsigned int h,GLuint type){
 			m_Type = type;
             if(type == GL_TEXTURE_2D){
@@ -47,17 +47,17 @@ class Texture::impl final{
             if(type == GL_TEXTURE_CUBE_MAP){
                 glGenTextures(1, &m_TextureAddress);
                 glBindTexture(type, m_TextureAddress);
-                for(unsigned int i = 0; i < 6; i++){
+                for(uint i = 0; i < 6; i++){
                     sf::Image image;
                     image.loadFromFile(file[i].c_str());
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
                 }
-                glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+                glTexParameteri (type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri (type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri (type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                glTexParameteri (type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri (type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glGenerateMipmap(type);
             }
         }
     public:
@@ -92,6 +92,8 @@ class Texture::impl final{
             glDeleteTextures(1,&m_TextureAddress);
             _init();
         }
+		void _setType(uint type){ m_Type = type; }
+		void _setSize(uint w, uint h){ m_Width = w; m_Height = h; }
         unsigned char* _getPixels(){
             if(m_Pixels.size() == 0){
                 m_Pixels.resize(m_Width*m_Height*4);
@@ -101,12 +103,19 @@ class Texture::impl final{
             }
             return &m_Pixels[0];
         }
-        const GLuint _address() const { return m_TextureAddress; }
+        GLuint& _address(){ return m_TextureAddress; }
         const GLuint _type() const { return m_Type; }
         const uint _width() const { return m_Width; }
         const uint _height() const { return m_Height; }
 };
 
+
+Texture::Texture(std::string name,uint w, uint h,GLuint type):m_i(new impl()){
+	m_i->_init();
+	m_i->_setType(type);
+	setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
+	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,name,boost::shared_ptr<Texture>(this));
+}
 
 Texture::Texture(const unsigned char* pixels,uint w, uint h,std::string _name,GLuint type):m_i(new impl()){
 	m_i->_construct(pixels,w,h,_name,type,this);
@@ -131,7 +140,21 @@ void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, 
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(this->name(),pos,color,scl,angle,depth));
 }
 unsigned char* Texture::pixels(){ return m_i->_getPixels(); }
-GLuint Texture::address() { return m_i->_address(); }
+GLuint& Texture::address() { return m_i->_address(); }
 GLuint Texture::type() { return m_i->_type(); }
 uint Texture::width() { return m_i->_width(); }
 uint Texture::height() { return m_i->_height(); }
+
+void Texture::_constructAsFramebuffer(uint w,uint h,float scaler,int internalFormat,int format,int type,int attatchment){
+	GLuint _texture_type = m_i->_type();
+	m_i->_setSize(w,h);
+    glBindTexture(_texture_type, m_i->_address());
+	GLsizei realW = GLsizei(w*scaler);
+	GLsizei realH = GLsizei(h*scaler);
+    glTexImage2D(_texture_type, 0, internalFormat, realW, realH, 0, format, type, 0);
+	glTexParameteri(_texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(_texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(_texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(_texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, _texture_type, m_i->_address(), 0);
+}

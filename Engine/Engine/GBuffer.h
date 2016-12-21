@@ -3,6 +3,7 @@
 #define ENGINE_GBUFFER_H
 
 #include <memory>
+#include "Texture.h"
 
 #define GL_RGB 0x1907
 #define GL_RGBA 0x1908
@@ -106,17 +107,16 @@ enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,
                    BUFFER_TYPE_NUMBER};
 
 
-class TextureBuffer final{
+class TextureBuffer final: public Texture{
     private:
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(int,int,int,int,uint,uint,float=1.0f);
+        TextureBuffer(std::string name,int,int,int,int,uint,uint,float=1.0f);
         ~TextureBuffer();
 
 		float sizeScalar() const;
         void resize(uint,uint);
-        GLuint texture() const;
         int attatchment() const;
 };
 
@@ -141,6 +141,6 @@ class GBuffer final{
         void stop();
 
         std::unordered_map<uint,TextureBuffer*> getBuffers();
-        GLuint getTexture(uint);
+        Texture* getTexture(uint);
 };
 #endif

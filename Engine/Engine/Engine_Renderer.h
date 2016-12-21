@@ -246,6 +246,10 @@ namespace Engine{
 
 		void useShader(ShaderP*);
 		void useShader(std::string);
+		void bindTexture(const char* location,Texture*,uint slot);
+		void bindTexture(const char* location,GLuint textureAddress,uint slot);
+		void unbindTexture2D(uint slot);
+		void unbindTextureCubemap(uint slot);
 		inline void sendUniform1d(const char* location,double);
 		inline void sendUniform1i(const char* location,int);
 		inline void sendUniform1f(const char* location,float);
