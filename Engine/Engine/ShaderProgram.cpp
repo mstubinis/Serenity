@@ -199,4 +199,5 @@ void ShaderP::addMaterial(std::string m){
 	Material* mat = Resources::getMaterial(m);
 	skey k(mat);
 	m_i->m_Materials.push_back(k);
+	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),sksortlessthan());
 }

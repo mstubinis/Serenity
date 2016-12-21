@@ -166,6 +166,8 @@ namespace Engine{
 
 		namespace Settings{
 
+			void clear(bool color = true, bool depth = true, bool stencil = true);
+
 			void enableAlphaTest(bool b = true);
 			void disableAlphaTest();
 			void enableDepthTest(bool b = true);

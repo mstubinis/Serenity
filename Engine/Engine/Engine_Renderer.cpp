@@ -79,8 +79,18 @@ std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToB
 
 std::vector<ShaderP*> Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
-
-
+void Renderer::Settings::clear(bool color, bool depth, bool stencil){
+	if(depth){ 
+		Settings::enableDepthMask();
+		if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
+		else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+		else{ glClear(GL_DEPTH_BUFFER_BIT); }
+	}else{
+		if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
+		else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT); }
+		else{ glClear(GL_STENCIL_BUFFER_BIT); }
+	}
+}
 void Renderer::Settings::enableAlphaTest(bool b){
 	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
 		glEnable(GL_ALPHA_TEST);
@@ -214,7 +224,6 @@ void Renderer::sendUniform3fv(const char* location,std::vector<glm::vec3>& data,
 void Renderer::sendUniform4fv(const char* location,std::vector<glm::vec4>& data,uint limit){
 	glUniform4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
 }
-
 void Renderer::sendUniform2fv(const char* location,glm::vec2* data,uint limit){
 	glUniform2fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
 }
@@ -224,8 +233,6 @@ void Renderer::sendUniform3fv(const char* location,glm::vec3* data,uint limit){
 void Renderer::sendUniform4fv(const char* location,glm::vec4* data,uint limit){
 	glUniform4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
 }
-
-
 
 void Renderer::Detail::RenderManagement::init(){
     #ifdef _DEBUG
@@ -372,7 +379,7 @@ void Renderer::Detail::RenderManagement::_renderText(){
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passGeometry(){
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Settings::clear();
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
@@ -514,7 +521,7 @@ void Renderer::Detail::RenderManagement::render(){
 	Settings::enableDepthTest();
 	Settings::enableDepthMask();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+	Settings::clear(false,true,false); //clear depth only
 
     _renderTextures();
     _renderText();
@@ -558,7 +565,7 @@ void Renderer::Detail::RenderManagement::_passSSAO(){
 	useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
-    glClear(GL_COLOR_BUFFER_BIT);
+	Settings::clear(true,false,false);
 
 	useShader("Deferred_Edge");
 	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
@@ -572,7 +579,7 @@ void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius)
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
-    glClear(GL_COLOR_BUFFER_BIT);
+    Settings::clear(true,false,false);
 
 	useShader("Deferred_GodsRays");
 	sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
@@ -596,7 +603,7 @@ void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOn
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passHDR(){
-    glClear(GL_COLOR_BUFFER_BIT);
+    Settings::clear(true,false,false);
 
 	useShader("Deferred_HDR");
 	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
@@ -639,7 +646,7 @@ void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint text
     useShader(0);
 }
 void Renderer::Detail::RenderManagement::_passFinal(){
-    glClear(GL_COLOR_BUFFER_BIT);
+    Settings::clear(true,false,false);
 
 	useShader("Deferred_Final");
 

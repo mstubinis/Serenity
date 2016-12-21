@@ -170,18 +170,7 @@ void MeshLoader::_calculateTBN(MeshData& data){
         data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
         data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
     }
-    //this does something funky with mirrored uvs.
-    /*
-    for(uint i=0; i < data.points.size(); i++){
-        glm::vec3& n = data.normals[i];
-        glm::vec3& t = data.tangents[i];
-        glm::vec3& b = data.binormals[i];
-        // Gram-Schmidt orthogonalize
-        t = glm::normalize(t - n * glm::dot(n, t));
-        // Calculate handedness
-        if (glm::dot(glm::cross(n, t), b) < 0.0f){ t = t * -1.0f; }
-    }
-    */
+	MeshLoader::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 
 bool MeshLoader::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result, float threshold){
@@ -201,6 +190,28 @@ bool MeshLoader::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm
     }
     return false;
 }
+void MeshLoader::_calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents){
+	//this does something funky with mirrored uvs.
+	for(uint i=0; i < points.size(); i++){
+		glm::vec3& n = normals[i];
+		glm::vec3& t = binormals[i];
+		glm::vec3& b = tangents[i];
+		// Gram-Schmidt orthogonalize
+		t = glm::normalize(t - n * glm::dot(n, t));
+	}
+	/*
+	//this is bad for mirrored uvs in most cases...
+	for(uint i=0; i < points.size(); i++){
+		// Calculate handedness
+		glm::vec3& n = normals[i];
+		glm::vec3& t = binormals[i];
+		glm::vec3& b = tangents[i];
+		if (glm::dot(glm::cross(n, t), b) < 0.0f){ 
+			t *= -1.0f; 
+		}
+	}
+	*/
+}
 void MeshLoader::_indexVBO(MeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
@@ -217,9 +228,8 @@ void MeshLoader::_indexVBO(MeshData& data,std::vector<ushort> & out_indices,std:
             out_indices.push_back( index );
 
             //average out TBN. I think this does more harm than good though
-
-            //out_tangents[index] += data.tangents[i];
-            //out_binorm[index] += data.binormals[i];
+            out_tangents[index] += data.tangents[i];
+            out_binorm[index] += data.binormals[i];
         }
         else{
             out_pos.push_back( data.points[i]);

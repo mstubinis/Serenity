@@ -339,13 +339,13 @@ void Material::addObject(std::string objectName){
 	if(o != nullptr){
 		skey k(o);
 		m_i->m_Objects.push_back(k);
-		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
+		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),sksortlessthan());
 	}
 }
 void Material::removeObject(std::string objectName){
 	auto result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
     if (result == m_i->m_Objects.end()) return;
     m_i->m_Objects.erase(result);
-	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
+	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),sksortlessthan());
 }
 std::vector<skey>& Material::getObjects(){ return m_i->m_Objects; }

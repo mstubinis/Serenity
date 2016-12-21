@@ -52,6 +52,8 @@ namespace Engine{
 			void loadObj(MeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
 			void loadObjFromMemory(MeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
 
+			void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
+
 			void _loadObjDataFromLine(std::string& line, std::vector<glm::vec3>& positions, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& normals, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
 			void _loadObjDataIntoTriangles(MeshData& data,std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u,std::vector<glm::vec3>& _n,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
 
