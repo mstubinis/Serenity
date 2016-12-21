@@ -2,6 +2,9 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include "GBuffer.h"
+#include "Engine_Resources.h"
+
+using namespace Engine;
 
 class TextureBuffer::impl final{
     public:
@@ -32,32 +35,25 @@ class GBuffer::impl final{
         GLuint m_fbo_bloom;
         GLuint m_depth_fake;
 
-        std::unordered_map<uint,TextureBuffer*> m_Buffers;
-        uint m_width; uint m_height;
+        std::unordered_map<uint,boost::weak_ptr<TextureBuffer>> m_Buffers;
+        uint m_Width; uint m_Height;
         void _init(uint w,uint h){
-            m_width = w; m_height = h;
+            m_Width = w; m_Height = h;
 
             glGenFramebuffers(1, &m_fbo);
             glGenRenderbuffers(1, &m_depth);
             glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
             glBindRenderbuffer(GL_RENDERBUFFER, m_depth);// Bind the depth buffer
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
 
-			TextureBuffer* tbo = new TextureBuffer("BUFFER_DIFFUSE",GBUFFER_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_DIFFUSE],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_DIFFUSE],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_DIFFUSE]);
-            m_Buffers[BUFFER_TYPE_DIFFUSE] = tbo;
-			tbo = new TextureBuffer("BUFFER_NORMAL",GBUFFER_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_NORMAL],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_NORMAL],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_NORMAL]);
-            m_Buffers[BUFFER_TYPE_NORMAL] = tbo;
-			tbo = new TextureBuffer("BUFFER_MISC",GBUFFER_TYPES[BUFFER_TYPE_MISC],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_MISC],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_MISC],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_MISC],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_MISC]);
-            m_Buffers[BUFFER_TYPE_MISC] = tbo;
-			tbo = new TextureBuffer("BUFFER_POSITION",GBUFFER_TYPES[BUFFER_TYPE_POSITION],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_POSITION],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_POSITION],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_POSITION],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_POSITION]);
-            m_Buffers[BUFFER_TYPE_POSITION] = tbo;
-			tbo = new TextureBuffer("BUFFER_LIGHTING",GBUFFER_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_LIGHTING],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_LIGHTING],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_LIGHTING]);
-            m_Buffers[BUFFER_TYPE_LIGHTING] = tbo;
-			tbo = new TextureBuffer("BUFFER_FREE1",GBUFFER_TYPES[BUFFER_TYPE_FREE1],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_FREE1],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_FREE1],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_FREE1],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_FREE1]);
-            m_Buffers[BUFFER_TYPE_FREE1] = tbo;
-			tbo = new TextureBuffer("BUFFER_DEPTH",GBUFFER_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_DEPTH],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_DEPTH],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_DEPTH]);
-            m_Buffers[BUFFER_TYPE_DEPTH] = tbo;
+			_constructFramebuffer("BUFFER_DIFFUSE",BUFFER_TYPE_DIFFUSE,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_NORMAL",BUFFER_TYPE_NORMAL,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_MISC",BUFFER_TYPE_MISC,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_POSITION",BUFFER_TYPE_POSITION,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_LIGHTING",BUFFER_TYPE_LIGHTING,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_FREE1",BUFFER_TYPE_FREE1,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_DEPTH",BUFFER_TYPE_DEPTH,m_Width,m_Height);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -65,18 +61,21 @@ class GBuffer::impl final{
             glGenRenderbuffers(1, &m_depth_fake);
             glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_bloom);
             glBindRenderbuffer(GL_RENDERBUFFER, m_depth_fake);// Bind the depth buffer
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_width, m_height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_fake);
 
-			tbo = new TextureBuffer("BUFFER_TYPE_BLOOM",GBUFFER_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_BLOOM],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_BLOOM],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_BLOOM]);
-            m_Buffers[BUFFER_TYPE_BLOOM] = tbo;
-			tbo = new TextureBuffer("BUFFER_TYPE_FREE2",GBUFFER_TYPES[BUFFER_TYPE_FREE2],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_FREE2],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_FREE2],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_FREE2],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_FREE2]);
-            m_Buffers[BUFFER_TYPE_FREE2] = tbo;
-			tbo = new TextureBuffer("BUFFER_TYPE_GODSRAYS",GBUFFER_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_PIXEL_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_FLOAT_TYPES[BUFFER_TYPE_GODSRAYS],GBUFFER_ATTACHMENT_TYPES[BUFFER_TYPE_GODSRAYS],m_width,m_height,GBUFFER_DIVISIBLES[BUFFER_TYPE_GODSRAYS]);
-            m_Buffers[BUFFER_TYPE_GODSRAYS] = tbo;
+			_constructFramebuffer("BUFFER_BLOOM",BUFFER_TYPE_BLOOM,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_FREE2",BUFFER_TYPE_FREE2,m_Width,m_Height);
+			_constructFramebuffer("BUFFER_GODSRAYS",BUFFER_TYPE_GODSRAYS,m_Width,m_Height);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
+		void _constructFramebuffer(std::string n,BUFFER_TYPES t,uint w,uint h){
+			TextureBuffer* tbo = nullptr;
+			tbo = new TextureBuffer(n,GBUFFER_TYPES[t],GBUFFER_PIXEL_TYPES[t],GBUFFER_FLOAT_TYPES[t],GBUFFER_ATTACHMENT_TYPES[t],w,h,GBUFFER_DIVISIBLES[t]);
+			boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
+			m_Buffers[t] = ptr;
+		}
         void _destruct(){
             glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
             glDeleteRenderbuffers(1, &m_depth);
@@ -87,9 +86,13 @@ class GBuffer::impl final{
             glDeleteRenderbuffers(1, &m_depth_fake);
             glDeleteFramebuffers(1, &m_fbo_bloom);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			for(auto buffer:m_Buffers){
+				buffer.second.reset();
+			}
         }
         void _resizeBaseBuffer(uint w,uint h){
-            m_width  = w; m_height = h;
+            m_Width  = w; m_Height = h;
             glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
             glBindRenderbuffer(GL_RENDERBUFFER, m_depth);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
@@ -123,47 +126,47 @@ class GBuffer::impl final{
         }
         void _start(uint type,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type]->attatchment());
+			types.push_back(m_Buffers[type].lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type]->attatchment());
-            types.push_back(m_Buffers[type1]->attatchment());
+            types.push_back(m_Buffers[type].lock().get()->attatchment());
+            types.push_back(m_Buffers[type1].lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type]->attatchment());
-            types.push_back(m_Buffers[type1]->attatchment());
-            types.push_back(m_Buffers[type2]->attatchment());
+            types.push_back(m_Buffers[type].lock().get()->attatchment());
+            types.push_back(m_Buffers[type1].lock().get()->attatchment());
+            types.push_back(m_Buffers[type2].lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,uint type3,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type]->attatchment());
-            types.push_back(m_Buffers[type1]->attatchment());
-            types.push_back(m_Buffers[type2]->attatchment());
-            types.push_back(m_Buffers[type3]->attatchment());
+            types.push_back(m_Buffers[type].lock().get()->attatchment());
+            types.push_back(m_Buffers[type1].lock().get()->attatchment());
+            types.push_back(m_Buffers[type2].lock().get()->attatchment());
+            types.push_back(m_Buffers[type3].lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,uint type3,uint type4,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type]->attatchment());
-            types.push_back(m_Buffers[type1]->attatchment());
-            types.push_back(m_Buffers[type2]->attatchment());
-            types.push_back(m_Buffers[type3]->attatchment());
-            types.push_back(m_Buffers[type4]->attatchment());
+            types.push_back(m_Buffers[type].lock().get()->attatchment());
+            types.push_back(m_Buffers[type1].lock().get()->attatchment());
+            types.push_back(m_Buffers[type2].lock().get()->attatchment());
+            types.push_back(m_Buffers[type3].lock().get()->attatchment());
+            types.push_back(m_Buffers[type4].lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,uint type3,uint type4,uint type5,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type]->attatchment());
-            types.push_back(m_Buffers[type1]->attatchment());
-            types.push_back(m_Buffers[type2]->attatchment());
-            types.push_back(m_Buffers[type3]->attatchment());
-            types.push_back(m_Buffers[type4]->attatchment());
-            types.push_back(m_Buffers[type5]->attatchment());
+            types.push_back(m_Buffers[type].lock().get()->attatchment());
+            types.push_back(m_Buffers[type1].lock().get()->attatchment());
+            types.push_back(m_Buffers[type2].lock().get()->attatchment());
+            types.push_back(m_Buffers[type3].lock().get()->attatchment());
+            types.push_back(m_Buffers[type4].lock().get()->attatchment());
+            types.push_back(m_Buffers[type5].lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _stop(){
@@ -200,7 +203,7 @@ void GBuffer::resizeBaseBuffer(uint width,uint height){
     m_i->_resizeBaseBuffer(width,height);
 }
 void GBuffer::resizeBuffer(uint buffer,uint width,uint height){ 
-    m_i->m_Buffers[buffer]->resize(width,height); 
+	m_i->m_Buffers[buffer].lock().get()->resize(width,height); 
 }
 void GBuffer::start(std::vector<uint>& types,std::string channels,bool first_fbo){
     m_i->_start(types,channels,first_fbo);
@@ -226,9 +229,9 @@ void GBuffer::start(uint type,uint type1,uint type2,uint type3,uint type4,uint t
 void GBuffer::stop(){	
     m_i->_stop();
 }
-std::unordered_map<uint,TextureBuffer*> GBuffer::getBuffers(){ 
+std::unordered_map<uint,boost::weak_ptr<TextureBuffer>> GBuffer::getBuffers(){ 
     return m_i->m_Buffers; 
 }
 Texture* GBuffer::getTexture(uint type){ 
-	return m_i->m_Buffers[type];
+	return m_i->m_Buffers[type].lock().get();
 }

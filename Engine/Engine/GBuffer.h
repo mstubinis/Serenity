@@ -125,7 +125,7 @@ class GBuffer final{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        GBuffer(uint width,uint height);
+        GBuffer(uint w,uint h);
         ~GBuffer();
 
         void resizeBaseBuffer(uint w,uint h);
@@ -140,7 +140,7 @@ class GBuffer final{
         void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool=true);
         void stop();
 
-        std::unordered_map<uint,TextureBuffer*> getBuffers();
+		std::unordered_map<uint,boost::weak_ptr<TextureBuffer>> getBuffers();
         Texture* getTexture(uint);
 };
 #endif

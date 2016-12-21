@@ -62,6 +62,7 @@ void Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m
 
 boost::shared_ptr<Object>& Resources::getObjectPtr(std::string n){return Detail::ResourceManagement::m_Objects[n];}
 boost::shared_ptr<Camera>& Resources::getCameraPtr(std::string n){return Detail::ResourceManagement::m_Cameras[n];}
+boost::shared_ptr<Texture>& Resources::getTexturePtr(std::string n){return Detail::ResourceManagement::m_Textures[n];}
 
 Scene* Resources::getScene(std::string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
 SoundEffectBasic* Resources::getSound(std::string n){return static_cast<SoundEffectBasic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
@@ -182,12 +183,12 @@ void Resources::cleanupRenderingContexts(uint a){
 void Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s) return;
     Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
-    for(auto obj:previousScene->getObjects()){
+    for(auto obj:previousScene->objects()){
         ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
         if(dynamicObj != NULL){ Physics::removeRigidBody(dynamicObj); }
     }
     Detail::ResourceManagement::m_CurrentScene = s;
-    for(auto obj:s->getObjects()){
+    for(auto obj:s->objects()){
         ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
         if(dynamicObj != NULL){ Physics::addRigidBody(dynamicObj); }
     }

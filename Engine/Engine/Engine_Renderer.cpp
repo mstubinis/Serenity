@@ -398,7 +398,7 @@ void Renderer::Detail::RenderManagement::_passGeometry(){
 			m->bind(shaderProgram->program(),Resources::getAPI());
 			for(auto object:m->getObjects()){
 				std::string objName = *(object.w.lock().get());
-				if(s->getObjects().count(objName)){
+				if(s->objects().count(objName)){
 					Resources::getObject(objName)->draw(shaderProgram->program(),Detail::RendererInfo::DebugDrawingInfo::debug,Detail::RendererInfo::GodRaysInfo::godRays);
 				}
 			}
@@ -424,7 +424,7 @@ void Renderer::Detail::RenderManagement::_passLighting(){
 	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
 	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),3);
 
-    for (auto light:Resources::getCurrentScene()->getLights()){
+    for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
     }
 

@@ -22,7 +22,7 @@ static std::list<glm::v3> Game::Pathfinding::getPathFrom(Object* start, Object* 
     bool objInWay = true;
     while(objInWay == true){
         objInWay = false;
-        for(auto obj:Resources::getCurrentScene()->getObjects()){
+        for(auto obj:Resources::getCurrentScene()->objects()){
             if(Resources::getActiveCamera()->sphereIntersectTest(finish->getPosition(),finish->getRadius()*2) == true){
                 objInWay = true;
 

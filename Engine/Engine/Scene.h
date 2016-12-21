@@ -25,21 +25,22 @@ class Scene: public EngineResource{
         Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
         virtual ~Scene();
 
-        std::unordered_map<skey,Object*,skh,skef>& getObjects(){ return m_Objects; }
-        std::unordered_map<skey,SunLight*,skh,skef>& getLights(){ return m_Lights; }
+		virtual void update(float);
 
-        Object* getObject(std::string name){ return m_Objects[skey(name)]; }
-        SunLight* getLight(std::string name){ return m_Lights[skey(name)]; }
+        std::unordered_map<skey,Object*,skh,skef>& objects();
+        std::unordered_map<skey,SunLight*,skh,skef>& lights();
 
-        virtual void update(float);
-        glm::vec3 getAmbientLightColor(){ return m_AmbientLighting; }
-        glm::vec3 getBackgroundColor(){ return m_BackgroundColor; }
-        void setAmbientLightColor(glm::vec3);
+        Object* getObject(std::string);
+        SunLight* getLight(std::string);
+
+        glm::vec3 getAmbientLightColor();
+        glm::vec3 getBackgroundColor();
+        void setAmbientLightColor(glm::vec3&);
         void setAmbientLightColor(float,float,float);
         void setBackgroundColor(float,float,float);
 
-        SkyboxEmpty* getSkybox() const { return m_Skybox; }
-        void setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
+        SkyboxEmpty* getSkybox() const;
+        void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Object*);
         void renderSkybox(bool);
 };

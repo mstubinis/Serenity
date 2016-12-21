@@ -105,7 +105,6 @@ void HUD::render(bool debug){
             }
             Resources::getTexture("data/Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0.1f);
         }
-
     }
     #pragma endregion
 
@@ -113,7 +112,7 @@ void HUD::render(bool debug){
     if(debug){
         m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
                            "\nFPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) + 
-                           "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->getObjects().size()),
+                           "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->objects().size()),
 						   glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     else{

@@ -59,11 +59,9 @@ void main(void){
 	if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }
     if(FirstConditionals.y > 0.5){ gl_FragData[1].rgb = CalcBumpedNormal(); }
 
-	/*
 	if(SecondConditionals.y > 0.5){
 		gl_FragData[0] = Reflection(gl_FragData[0],CameraPosition,gl_FragData[1].rgb,WorldPosition);
 	}
-	*/
 
     if(Shadeless == 0){
         if(FirstConditionals.z > 0.5){ gl_FragData[2].r += texture2D(GlowTexture, UV).r; }

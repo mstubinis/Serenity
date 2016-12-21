@@ -21,10 +21,10 @@ class Texture: public EngineResource{
 		std::unique_ptr<impl> m_i;
     public:
 		Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D);
-        Texture(const unsigned char*,unsigned int, unsigned int,std::string name = "",GLuint = GL_TEXTURE_2D);
+        Texture(const unsigned char*,uint, uint,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP);
-        ~Texture();
+        virtual ~Texture();
 
 		unsigned char* pixels();
 		GLuint& address();

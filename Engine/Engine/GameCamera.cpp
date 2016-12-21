@@ -77,7 +77,7 @@ void GameCamera::update(float dt){
 Object* GameCamera::getObjectInCenterRay(Object* exclusion){
     Object* ret = nullptr;
     std::vector<Object*> objs;
-    for(auto object:Engine::Resources::getCurrentScene()->getObjects()){
+    for(auto object:Engine::Resources::getCurrentScene()->objects()){
         if(object.second->rayIntersectSphere(this)){
             if(object.second != exclusion)
                 objs.push_back(object.second);

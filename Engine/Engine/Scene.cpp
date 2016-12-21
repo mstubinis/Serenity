@@ -26,8 +26,7 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
 }
 void Scene::centerSceneToObject(Object* center){
     glm::v3 offset = -(center->getPosition());
-    Scene* s =  Resources::getCurrentScene();
-    for(auto object:s->getObjects()){
+	for(auto object:m_Objects){
         Object* obj = object.second;
         if(obj != center && obj->getParent() == nullptr){
             obj->setPosition(obj->getPosition() + offset);
@@ -63,7 +62,19 @@ void Scene::update(float dt){
     }
     if(m_Skybox != nullptr) m_Skybox->update();
 }
-void Scene::setAmbientLightColor(glm::vec3 c){ setAmbientLightColor(c.r,c.g,c.b); }
+void Scene::setAmbientLightColor(glm::vec3& c){ setAmbientLightColor(c.r,c.g,c.b); }
 void Scene::setAmbientLightColor(float r,float g,float b){ Engine::Math::setColor(m_AmbientLighting,r,g,b); }
 void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
 void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->render(godsRays); }
+
+glm::vec3 Scene::getAmbientLightColor(){ return m_AmbientLighting; }
+glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
+
+std::unordered_map<skey,Object*,skh,skef>& Scene::objects(){ return m_Objects; }
+std::unordered_map<skey,SunLight*,skh,skef>& Scene::lights(){ return m_Lights; }
+
+Object* Scene::getObject(std::string name){ return m_Objects[skey(name)]; }
+SunLight* Scene::getLight(std::string name){ return m_Lights[skey(name)]; }
+
+SkyboxEmpty* Scene::getSkybox() const { return m_Skybox; }
+void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

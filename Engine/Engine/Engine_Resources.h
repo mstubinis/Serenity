@@ -114,8 +114,10 @@ namespace Engine{
         SoundMusic* getSoundAsMusic(std::string n);
         SoundEffect* getSoundAsEffect(std::string n);
 
-        boost::shared_ptr<Object>& getObjectPtr(std::string n);
-        boost::shared_ptr<Camera>& getCameraPtr(std::string n);
+        boost::shared_ptr<Object>& getObjectPtr(std::string);
+        boost::shared_ptr<Camera>& getCameraPtr(std::string);
+		boost::shared_ptr<Texture>& getTexturePtr(std::string);
+
         Object* getObject(std::string n);
         Camera* getCamera(std::string n);
         Font* getFont(std::string n);

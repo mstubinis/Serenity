@@ -93,10 +93,8 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 
             glUseProgram(shader);
 
-			if(godsRays)
-				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
-			else
-				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
+			if(godsRays) glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+			else         glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
 
 
             glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
@@ -133,7 +131,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
             glUniform3f(glGetUniformLocation(shader,"gAmbientColor"),ambient.x,ambient.y,ambient.z);
 
-            glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->getLights().begin()->second->getPosition() - getPosition());
+            glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition() - getPosition());
             lightDir = glm::normalize(lightDir);
             glUniform3f(glGetUniformLocation(shader,"v3LightDir"), lightDir.x,lightDir.y,lightDir.z);
 

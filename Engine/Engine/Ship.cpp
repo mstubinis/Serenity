@@ -246,7 +246,7 @@ void Ship::update(float dt){
         if(m_IsWarping && m_WarpFactor > 0){
             glm::num speed = (m_WarpFactor * glm::num(1.0L)/glm::num(0.46L))*glm::num(2.0L);
             glm::v3 s = (getForward() * glm::pow(speed,glm::num(15.0L)))/glm::num(getMass());
-            for(auto obj:Resources::getCurrentScene()->getObjects()){
+            for(auto obj:Resources::getCurrentScene()->objects()){
                 if((obj.second->name().find("Skybox") == std::string::npos) && (obj.second->name().find("Camera") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
                     obj.second->setPosition(obj.second->getPosition() + (s * glm::num(dt)));
                 }
