@@ -68,7 +68,7 @@ void DirectionalLight::lighten(){
 }
 
 PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_POINT,scene){
-	if(!Resources::getMesh("PointLightBounds")){
+	if(Resources::getMesh("PointLightBounds") == nullptr){
 		#pragma region MeshData
 		std::string data =  "v 0.000000 -0.138668 0.000000\n"
 							"v 0.028175 -0.134224 0.020470\n"

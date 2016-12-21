@@ -393,11 +393,13 @@ void Renderer::Detail::RenderManagement::_passGeometry(){
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		Renderer::useShader(shaderProgram);
 		for(auto material:shaderProgram->getMaterials()){
-			Material* m = Resources::getMaterial(material);
+			std::string matName = *(material.w.lock().get());
+			Material* m = Resources::getMaterial(matName);
 			m->bind(shaderProgram->program(),Resources::getAPI());
 			for(auto object:m->getObjects()){
-				if(s->getObjects().count(object)){
-					Resources::getObject(object)->draw(shaderProgram->program(),Detail::RendererInfo::DebugDrawingInfo::debug,Detail::RendererInfo::GodRaysInfo::godRays);
+				std::string objName = *(object.w.lock().get());
+				if(s->getObjects().count(objName)){
+					Resources::getObject(objName)->draw(shaderProgram->program(),Detail::RendererInfo::DebugDrawingInfo::debug,Detail::RendererInfo::GodRaysInfo::godRays);
 				}
 			}
 		}

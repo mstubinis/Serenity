@@ -50,7 +50,7 @@ class ShaderP final: public EngineResource{
 		SHADER_PIPELINE_STAGE stage();
         Shader* vertexShader();
         Shader* fragmentShader();
-		std::vector<std::string>& getMaterials();
+		std::vector<skey>& getMaterials();
 
 		void addMaterial(std::string);
 };

@@ -9,7 +9,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <unordered_map>
-#include <boost/container/flat_set.hpp>
 
 class Texture;
 class ShaderP;
@@ -156,6 +155,6 @@ class Material final: public EngineResource{
 
 		void addObject(std::string objectName);
 		void removeObject(std::string objectName);
-		boost::container::flat_set<std::string>& getObjects();
+		std::vector<skey>& getObjects();
 };
 #endif

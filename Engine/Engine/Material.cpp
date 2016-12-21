@@ -148,7 +148,7 @@ void MaterialComponentRefraction::bind(GLuint shader,uint api){
 class Material::impl final{
     public:
         std::unordered_map<uint,MaterialComponent*> m_Components;
-		boost::container::flat_set<std::string> m_Objects;
+		std::vector<skey> m_Objects;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
@@ -336,8 +336,11 @@ void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 
 void Material::addObject(std::string objectName){
 	Object* o = Resources::getObject(objectName);
-	if(o != nullptr) m_i->m_Objects.insert(objectName);
-	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
+	if(o != nullptr){
+		skey k(o);
+		m_i->m_Objects.push_back(k);
+		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
+	}
 }
 void Material::removeObject(std::string objectName){
 	auto result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
@@ -345,4 +348,4 @@ void Material::removeObject(std::string objectName){
     m_i->m_Objects.erase(result);
 	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
 }
-boost::container::flat_set<std::string>& Material::getObjects(){ return m_i->m_Objects; }
+std::vector<skey>& Material::getObjects(){ return m_i->m_Objects; }
