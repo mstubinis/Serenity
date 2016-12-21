@@ -23,8 +23,8 @@ class GBuffer;
 class Object;
 class ObjectDisplay;
 class ObjectDynamic;
+class RenderedItem;
 class Camera;
-struct DisplayItem;
 class ShaderP;
 
 struct GeometryRenderInfo final{
@@ -67,6 +67,7 @@ namespace Engine{
 					static bool depth_mask;
 					static bool depth_test;
 					static GLuint current_shader_program;
+					static std::string current_bound_material;
 				};
 				struct DebugDrawingInfo final{
 					static bool debug;
@@ -156,12 +157,8 @@ namespace Engine{
                     static std::vector<GeometryRenderInfo>& getObjectRenderQueue(){ return m_ObjectsToBeRendered; }
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
-
-					static void _drawObjectInternal(Camera*,glm::num distFromCamera,bool sphereIntersectTest,glm::vec4& color,glm::vec3& godRaysColor,float radius,std::vector<DisplayItem*>&,glm::m4 model,bool visible,bool debug = false,bool godsRays = false);
             };
             void renderFullscreenQuad(uint width, uint height);
-			void drawObject(ObjectDisplay*, bool debug = false,bool godsRays = false);
-			void drawObject(ObjectDynamic*, bool debug = false,bool godsRays = false);
         };
 
 		namespace Settings{

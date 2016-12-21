@@ -3,12 +3,12 @@
 #define ENGINE_OBJECTDYNAMIC_H
 
 #include "Object.h"
+#include "RenderedItem.h"
 
 class Collision;
 class btRigidBody;
 struct btDefaultMotionState;
 class btVector3;
-struct DisplayItem;
 
 /*
 #define BIT(x) (1<<(x))
@@ -22,7 +22,7 @@ class ObjectDynamic: public Object{
     protected:
         glm::v3 m_Forward, m_Right, m_Up;
         bool m_Visible;
-        std::vector<DisplayItem*> m_DisplayItems;
+        std::vector<RenderedItem*> m_DisplayItems;
         glm::vec4 m_Color;
 		glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
@@ -47,11 +47,9 @@ class ObjectDynamic: public Object{
                      );
         virtual ~ObjectDynamic();
 
-		void setMaterial(std::string materialName, uint index = 0);
-
         virtual void setDynamic(bool=true);
 
-        std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
+        std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setPosition(glm::num,glm::num,glm::num); 
         virtual void setPosition(glm::v3);
@@ -129,6 +127,8 @@ class ObjectDynamic: public Object{
         virtual void clearAllForces();
 
         virtual void update(float);
+
+		virtual void bind();
         virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 

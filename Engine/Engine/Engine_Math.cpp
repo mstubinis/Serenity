@@ -68,6 +68,9 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
 
     return glm::vec3(fX,fY,inBounds);
 }
+float Math::Max(glm::vec2& v){ return glm::max(v.x,v.y); }
+float Math::Max(glm::vec3& v){ return glm::max(v.x,glm::max(v.y,v.z)); }
+float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w))); }
 glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
 glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); }
 glm::vec3 Math::direction(glm::v3& eye,glm::v3& target){ return glm::normalize(glm::vec3(eye)-glm::vec3(target)); }

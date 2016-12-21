@@ -18,15 +18,24 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Shadeless = false;
     m_BoundingBoxRadius = glm::vec3(0);
     if(mesh != "" && mat != ""){
-        m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(mesh),Resources::getMaterial(mat)));
-		Resources::getMaterial(mat)->addObject(name());
+		RenderedItem* item = new RenderedItem(namePtr(),mesh,mat);
+        m_DisplayItems.push_back(item);
 	}
     m_Color = glm::vec4(1);
 	m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
 }
 ObjectDisplay::~ObjectDisplay(){
-    for(auto item:m_DisplayItems) SAFE_DELETE(item);
+    //for(auto item:m_DisplayItems) SAFE_DELETE(item);
+}
+void ObjectDisplay::bind(){
+	Renderer::sendUniform4f("Object_Color",m_Color.x,m_Color.y,m_Color.z,m_Color.w);
+	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
+}
+void ObjectDisplay::update(float dt){
+	ObjectBasic::update(dt);
+	for(auto renderedItem:m_DisplayItems)
+		renderedItem->update(dt);
 }
 void ObjectDisplay::render(GLuint shader,bool debug){
     //add to render queue
@@ -35,15 +44,8 @@ void ObjectDisplay::render(GLuint shader,bool debug){
     }
     Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
-void ObjectDisplay::setMaterial(std::string materialName, uint index){
-	Material* current = this->m_DisplayItems[index]->material;
-	Material* newMaterial = Resources::getMaterial(materialName);
-
-	current->removeObject(name());
-	newMaterial->addObject(name());
-}
 void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
-	Engine::Renderer::Detail::drawObject(this,debug,godsRays);
+
 }
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){
@@ -53,15 +55,9 @@ void ObjectDisplay::calculateRadius(){
     float maxLength = 0;
     for(auto item:m_DisplayItems){
         float length = 0;
-        glm::mat4 m = glm::mat4(1);
-        m = glm::translate(m,item->position);
-        m *= glm::mat4_cast(item->orientation);
-        m = glm::scale(m,item->scale);
-
+		glm::mat4 m = item->model();
         glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
-        
-        length = glm::length(localPosition) + item->mesh->getRadius() * glm::max(glm::abs(item->scale.z), glm::max(glm::abs(item->scale.x),glm::abs(item->scale.y)));
-
+		length = glm::length(localPosition) + item->mesh()->getRadius() * Engine::Math::Max(item->getScale());
         if(length > maxLength){
             maxLength = length;
         }

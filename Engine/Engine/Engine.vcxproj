@@ -127,12 +127,12 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine_Renderer.cpp" />
     <ClCompile Include="Engine_Resources.cpp" />
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="RenderedItem.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
-    <ClCompile Include="Station.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Font.cpp" />
@@ -166,12 +166,12 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_Renderer.h" />
     <ClInclude Include="Engine_Resources.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="RenderedItem.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SolarSystem.h" />
-    <ClInclude Include="Station.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Font.h" />

@@ -4,6 +4,7 @@
 #include "Engine_Physics.h"
 #include "Engine_Events.h"
 #include "ObjectDisplay.h"
+#include "RenderedItem.h"
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletDynamicsCommon.h>
@@ -38,8 +39,10 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
 
 	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Meshes,name(),boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape())));
 
-    if(material != "")
-        m_DisplayItems.push_back(new DisplayItem(Resources::getMesh(name()),Resources::getMaterial(material)));
+    if(material != ""){
+		RenderedItem* item = new RenderedItem(namePtr(),name(),material);
+        m_DisplayItems.push_back(item);
+	}
 
     if(Resources::getCurrentScene() == scene)
         Physics::addRigidBody(m_RigidBody);

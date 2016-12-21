@@ -29,6 +29,7 @@ Engine_Window* Detail::ResourceManagement::m_Window;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 
+std::unordered_map<skey,boost::shared_ptr<RenderedItem>,skh,skef> Detail::ResourceManagement::m_RenderedItems;
 std::unordered_map<skey,boost::shared_ptr<Scene>,skh,skef> Detail::ResourceManagement::m_Scenes;
 std::unordered_map<skey,boost::shared_ptr<SoundEffectBasic>,skh,skef> Detail::ResourceManagement::m_Sounds;
 std::unordered_map<skey,boost::shared_ptr<Object>,skh,skef> Detail::ResourceManagement::m_Objects;
@@ -41,6 +42,7 @@ std::unordered_map<skey,boost::shared_ptr<Shader>,skh,skef> Detail::ResourceMana
 std::unordered_map<skey,boost::shared_ptr<ShaderP>,skh,skef> Detail::ResourceManagement::m_ShaderPrograms;
 
 void Resources::Detail::ResourceManagement::destruct(){
+	for (auto it = m_RenderedItems.begin();it != m_RenderedItems.end(); ++it )   it->second.reset();
     for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
     for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
     for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                   it->second.reset();
@@ -74,6 +76,7 @@ Mesh* Resources::getMesh(std::string n){return static_cast<Mesh*>(Detail::Resour
 Material* Resources::getMaterial(std::string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
 Shader* Resources::getShader(std::string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
 ShaderP* Resources::getShaderProgram(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
+RenderedItem* Resources::getRenderedItem(std::string n){return static_cast<RenderedItem*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
 
 void Resources::addMesh(std::string n,std::string f, COLLISION_TYPE t, bool b){
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b));

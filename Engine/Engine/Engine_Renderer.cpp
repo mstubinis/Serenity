@@ -35,6 +35,7 @@ bool Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
 bool Renderer::Detail::RendererInfo::GeneralInfo::depth_test = true;
 bool Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = true;
 GLuint Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = 0;
+std::string Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "";
 
 bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
 float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
@@ -399,14 +400,29 @@ void Renderer::Detail::RenderManagement::_passGeometry(){
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		Renderer::useShader(shaderProgram);
+		if(RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
+		else                                   Renderer::sendUniform1i("HasGodsRays",0);
+
+		Camera* camera = Resources::getActiveCamera();
+		sendUniformMatrix4f("VP",camera->getViewProjection());
+		sendUniform1f("far",camera->getFar());
+		sendUniform1f("C",1.0f);
+		glm::vec3 camPos = glm::vec3(camera->getPosition());
+		sendUniform3f("CameraPosition",camPos.x,camPos.y,camPos.z);
+
 		for(auto material:shaderProgram->getMaterials()){
 			std::string matName = *(material.w.lock().get());
 			Material* m = Resources::getMaterial(matName);
 			m->bind(shaderProgram->program(),Resources::getAPI());
-			for(auto object:m->getObjects()){
-				std::string objName = *(object.w.lock().get());
-				if(s->objects().count(objName)){
-					Resources::getObject(objName)->draw(shaderProgram->program(),Detail::RendererInfo::DebugDrawingInfo::debug,Detail::RendererInfo::GodRaysInfo::godRays);
+			for(auto key:m->getObjects()){
+				std::string renderedItemName = *(key.w.lock().get());
+				RenderedItem* item = Resources::getRenderedItem(renderedItemName);
+				std::string parentObjectName = item->parent();
+				Object* o = Resources::getObject(parentObjectName);
+
+				if(s->objects().count(parentObjectName)){
+					o->bind();
+					item->draw(RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
 				}
 			}
 		}
@@ -615,7 +631,6 @@ void Renderer::Detail::RenderManagement::_passHDR(){
 	unbindTexture2D(0);
 	useShader(0);
 }
-
 void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture,std::string channels){
 	useShader("Deferred_Blur");
 
@@ -687,45 +702,6 @@ void Renderer::Detail::renderFullscreenQuad(uint width,uint height){
 		glTexCoord2f(1,1); glVertex2f(float(width)/2,float(height)/2);
 		glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
 	glEnd();
-}
-
-void Renderer::Detail::drawObject(ObjectDisplay* o, bool debug,bool godsRays){
-	Camera* camera = Resources::getActiveCamera();
-	Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),debug,godsRays);
-}
-void Renderer::Detail::drawObject(ObjectDynamic* o, bool debug,bool godsRays){
-	Camera* camera = Resources::getActiveCamera();
-	Renderer::Detail::RenderManagement::_drawObjectInternal(camera,camera->getDistance(o),camera->sphereIntersectTest(o),o->getColor(),o->getGodsRaysColor(),o->getRadius(),o->getDisplayItems(),o->getModel(),o->visible(),debug,godsRays);
-}
-void Renderer::Detail::RenderManagement::_drawObjectInternal(Camera* camera,glm::num dist,bool intTest,glm::vec4& color, glm::vec3& raysColor,float radius,std::vector<DisplayItem*>& items,glm::m4 model,bool visible, bool debug,bool godsRays){
-	if((items.size() == 0 || visible == false) || (!intTest) || (dist > 1100 * radius))
-        return;
-
-	sendUniformMatrix4f("VP",camera->getViewProjection());
-	sendUniform1f("far",camera->getFar());
-	sendUniform1f("C",1.0f);
-	sendUniform4f("Object_Color",color.x,color.y,color.z,color.w);
-	sendUniform3f("Gods_Rays_Color",raysColor.x,raysColor.y,raysColor.z);
-
-	glm::vec3 camPos = glm::vec3(camera->getPosition());
-	sendUniform3f("CameraPosition",camPos.x,camPos.y,camPos.z);
-
-	if(godsRays) sendUniform1i("HasGodsRays",1);
-	else         sendUniform1i("HasGodsRays",0);
-
-    for(auto item:items){
-		glm::mat4 m = glm::mat4(model);
-        m = glm::translate(m,item->position);
-        m *= glm::mat4_cast(item->orientation);
-        m = glm::scale(m,item->scale);
-
-        sendUniform1i("Shadeless",int(item->material->shadeless()));
-        sendUniform1f("BaseGlow",item->material->glow());
-		sendUniform1f("matID",float(float(item->material->id())/255.0f));
-        sendUniformMatrix4f("Model",m);
-
-        item->mesh->render();
-    }
 }
 
 #ifdef _WIN32

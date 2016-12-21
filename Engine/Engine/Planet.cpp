@@ -1,4 +1,5 @@
 ﻿#include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "Light.h"
 #include "Planet.h"
 #include "ShaderProgram.h"
@@ -165,10 +166,11 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 
             glUniform1f(glGetUniformLocation(shader,"fExposure"), 2.0f);
             for(auto item:m_DisplayItems){
-                glUniform1f(glGetUniformLocation(shader, "BaseGlow"),item->material->glow());
-				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(item->material->id())/255.0f));
-				item->material->bind(shader,Resources::getAPI());
-				item->mesh->render();
+				Material* mat = item->material();
+                glUniform1f(glGetUniformLocation(shader, "BaseGlow"),mat->glow());
+				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(mat->id())/255.0f));
+				mat->bind(shader,Resources::getAPI());
+				item->mesh()->render();
             }
             glUseProgram(0);
             #pragma endregion
@@ -192,10 +194,8 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             }
             glUseProgram(shader);
 
-			if(godsRays)
-				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
-			else
-				glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
+			if(godsRays) glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),1);
+			else         glUniform1i(glGetUniformLocation(shader, "HasGodsRays"),0);
 
             glCullFace(GL_FRONT);
 
@@ -245,7 +245,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
             glUniform1f(glGetUniformLocation(shader,"fExposure"),2.0f);
 
             for(auto item:m_DisplayItems){
-                item->mesh->render();
+                item->mesh()->render();
             }
             glUseProgram(0);
 

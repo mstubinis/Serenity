@@ -156,9 +156,6 @@
     <ClCompile Include="Ship.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Station.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Font.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -231,6 +228,9 @@
     <ClCompile Include="Engine_ResourceBasic.cpp">
       <Filter>Source Files\Engine\Engine_Resources</Filter>
     </ClCompile>
+    <ClCompile Include="RenderedItem.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -267,9 +267,6 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Ship.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Station.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Font.h">
@@ -343,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="Engine_ResourceBasic.h">
       <Filter>Header Files\Engine\Engine_Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderedItem.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

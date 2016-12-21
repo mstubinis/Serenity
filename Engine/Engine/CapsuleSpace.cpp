@@ -184,8 +184,7 @@ void CapsuleSpace::update(float dt){
     float rot = glm::sin(m_Timer)*13;
 
     for(auto item:getPlayer()->getDisplayItems()){
-        item->position = glm::vec3(x*1.2f,-y,0);
-
-        item->orientation = (glm::angleAxis(rot,  glm::vec3(0,0,1)));   //roll
+        item->setPosition(glm::vec3(x*1.2f,-y,0));
+		item->setOrientation(0,0,rot);
     }
 }

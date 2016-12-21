@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "ShaderProgram.h"
 
 #include <unordered_map>
@@ -294,29 +295,32 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 
 
 void Material::bind(GLuint shader,GLuint api){
-	glm::vec3 first(0.0f);
-	glm::vec3 second(0.0f);
-	for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
-		MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-		if(m_i->m_Components.count(type)){
-			MaterialComponent* c = m_i->m_Components[type];
-			if(c->texture() != nullptr && c->texture()->address() != 0){
-				//enable
-				if     (i == 0){ first.x = 1.0f; }
-				else if(i == 1){ first.y = 1.0f; }
-				else if(i == 2){ first.z = 1.0f; }
-				else if(i == 3){ second.x = 1.0f; }
-				else if(i == 4){ second.y = 1.0f; }
-				else if(i == 5){ second.z = 1.0f; }
-				c->bind(shader,api);
-			}
-			else{
-				c->unbind(shader,api);
+	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != this->name()){
+		glm::vec3 first(0); glm::vec3 second(0);
+		for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
+			MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
+			if(m_i->m_Components.count(type)){
+				MaterialComponent* c = m_i->m_Components[type];
+				if(c->texture() != nullptr && c->texture()->address() != 0){
+					//enable
+					if     (i == 0){ first.x = 1.0f; }
+					else if(i == 1){ first.y = 1.0f; }
+					else if(i == 2){ first.z = 1.0f; }
+					else if(i == 3){ second.x = 1.0f; }
+					else if(i == 4){ second.y = 1.0f; }
+					else if(i == 5){ second.z = 1.0f; }
+					c->bind(shader,api);
+				}
+				else{ c->unbind(shader,api); }
 			}
 		}
+		Renderer::sendUniform1i("Shadeless",int(shadeless()));
+		Renderer::sendUniform1f("BaseGlow",glow());
+		Renderer::sendUniform1f("matID",float(float(id())/255.0f));
+		Renderer::sendUniform3f("FirstConditionals", first.x,first.y,first.z);
+		Renderer::sendUniform3f("SecondConditionals",second.x,second.y,second.z);
+		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = this->name();
 	}
-	glUniform3f(glGetUniformLocation(shader,"FirstConditionals"), first.x,first.y,first.z);
-	glUniform3f(glGetUniformLocation(shader,"SecondConditionals"), second.x,second.y,second.z);
 }
 
 std::unordered_map<uint,MaterialComponent*>& Material::getComponents(){ return m_i->m_Components; }
@@ -335,7 +339,7 @@ void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
 void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 
 void Material::addObject(std::string objectName){
-	Object* o = Resources::getObject(objectName);
+	RenderedItem* o = Resources::getRenderedItem(objectName);
 	if(o != nullptr){
 		skey k(o);
 		m_i->m_Objects.push_back(k);

@@ -70,6 +70,10 @@ namespace Engine{
 		float toRadians(double degrees);
 		float toDegrees(double radians);
 
+		float Max(glm::vec2&);
+		float Max(glm::vec3&);
+		float Max(glm::vec4&);
+
 		float fade(float t);
 		double fade(double t);
 		glm::num fade(glm::num t);

@@ -10,7 +10,6 @@
 #include "Ship.h"
 #include "Planet.h"
 #include "Lagrange.h"
-#include "Station.h"
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
 #include "Material.h"
@@ -23,8 +22,6 @@ using namespace Engine;
 HUD* m_HUD;
 
 void Game::cleanup(){
-    for(auto part:stationPartsInfo)
-        delete part.second;
     delete m_HUD;
 }
 void Game::initResources(){

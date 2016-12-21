@@ -35,6 +35,7 @@ class SunLight;
 class SoundEffectBasic;
 class SoundEffect;
 class SoundMusic;
+class RenderedItem;
 
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 #define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
@@ -78,6 +79,7 @@ namespace Engine{
 
                     static Engine_Window* m_Window;
 
+					static std::unordered_map<skey,boost::shared_ptr<RenderedItem>,skh,skef> m_RenderedItems;
 					static std::unordered_map<skey,boost::shared_ptr<Scene>,skh,skef> m_Scenes;
                     static std::unordered_map<skey,boost::shared_ptr<SoundEffectBasic>,skh,skef> m_Sounds;
                     static std::unordered_map<skey,boost::shared_ptr<Object>,skh,skef> m_Objects;
@@ -126,6 +128,7 @@ namespace Engine{
         Material* getMaterial(std::string n);
         Shader* getShader(std::string n);
 		ShaderP* getShaderProgram(std::string n);
+		RenderedItem* getRenderedItem(std::string n);
 
         void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL,bool fromFile = true);
         void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
@@ -142,10 +145,6 @@ namespace Engine{
 
 		void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
         void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-
-        void addParticleInfo(std::string name, std::string material);
-        void addParticleInfo(std::string name, Material* diffuse);
-        void removeParticleInfo(std::string name);
 
         void addSound(std::string name, std::string file,bool asEffect = true);
         void addSoundAsEffect(std::string name, std::string file);

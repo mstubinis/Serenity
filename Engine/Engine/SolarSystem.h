@@ -9,12 +9,10 @@ class Object;
 class Ship;
 class GameCamera;
 class Planet;
-class Station;
 class Lagrange;
 
 class SolarSystem: public Scene{
     private:
-        std::unordered_map<std::string,Station*> m_Stations;
         std::unordered_map<std::string,Lagrange*> m_LagrangePoints;
 
         std::unordered_map<std::string,Planet*> m_Planets;
@@ -38,7 +36,6 @@ class SolarSystem: public Scene{
         GameCamera* getPlayerCamera(){ return playerCamera; }
         void setPlayerCamera(GameCamera* c){ playerCamera = c; }
 
-        std::unordered_map<std::string,Station*>& getStations() { return m_Stations; }
         std::unordered_map<std::string,Lagrange*>& getLagrangePoints() { return m_LagrangePoints; }
         std::unordered_map<std::string,Planet*>& getPlanets() { return m_Planets; }
         std::unordered_map<std::string,Planet*>& getMoons() { return m_Moons; }

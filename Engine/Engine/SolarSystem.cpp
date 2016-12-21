@@ -7,7 +7,6 @@
 #include "Ship.h"
 #include "GameSkybox.h"
 #include "Light.h"
-#include "Station.h"
 #include "Terrain.h"
 #include "Atmosphere.h"
 

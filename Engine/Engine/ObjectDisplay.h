@@ -3,24 +3,13 @@
 #define ENGINE_OBJECTDISPLAY_H
 
 #include "Object.h"
+#include "RenderedItem.h"
 
-struct DisplayItem{
-    Mesh* mesh;
-    Material* material;
-    glm::vec3 position;
-    glm::quat orientation;
-    glm::vec3 scale;
-    DisplayItem(Mesh* _m, Material* _mat, glm::vec3 _p = glm::vec3(0), glm::quat _o = glm::quat(), glm::vec3 _s = glm::vec3(1)){
-        mesh = _m; material = _mat; position = _p; orientation = _o; scale = _s;
-    }
-    ~DisplayItem(){
-    }
-};
 class ObjectDisplay: public ObjectBasic{
     protected:
         bool m_Shadeless;
         bool m_Visible;
-        std::vector<DisplayItem*> m_DisplayItems;
+        std::vector<RenderedItem*> m_DisplayItems;
         glm::vec4 m_Color;
 		glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
@@ -35,8 +24,8 @@ class ObjectDisplay: public ObjectBasic{
                      );
         virtual ~ObjectDisplay();
 
-		void setMaterial(std::string materialName, uint index = 0);
-
+		virtual void update(float);
+		virtual void bind();
         virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 
@@ -56,7 +45,7 @@ class ObjectDisplay: public ObjectBasic{
 
         glm::vec4& getColor(){ return m_Color; }
 		glm::vec3& getGodsRaysColor(){ return m_GodsRaysColor; }
-        std::vector<DisplayItem*>&  getDisplayItems(){ return m_DisplayItems; }
+        std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setVisible(bool b);
 
