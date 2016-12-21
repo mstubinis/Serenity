@@ -148,11 +148,11 @@ void Renderer::useShader(std::string programName){
 	Renderer::useShader(Resources::getShaderProgram(programName));
 }
 void Renderer::bindTexture(const char* location,Texture* texture,uint slot){
-	Renderer::bindTexture(location,texture->address(),slot);
+	Renderer::bindTexture(location,texture->address(),slot,texture->type());
 }
-void Renderer::bindTexture(const char* location,GLuint textureAddress,uint slot){
+void Renderer::bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint textureType){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, textureAddress);
+    glBindTexture(textureType, textureAddress);
 	sendUniform1i(location,slot);
 }
 void Renderer::unbindTexture2D(uint slot){
@@ -309,7 +309,7 @@ void Renderer::Detail::RenderManagement::_renderTextures(){
         Texture* texture = nullptr;
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
-			bindTexture("DiffuseTexture",texture->address(),0);
+			bindTexture("DiffuseTexture",texture,0);
 			sendUniform1i("DiffuseTextureEnabled",1);
         }
         else{
@@ -340,7 +340,7 @@ void Renderer::Detail::RenderManagement::_renderText(){
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
-		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture()->address(),0);
+		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
 		sendUniform1i("DiffuseTextureEnabled",1);
         sendUniform1i("Shadeless",1);
 
@@ -546,7 +546,7 @@ void Renderer::Detail::RenderManagement::_passSSAO(){
 
 	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
 	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
-	bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2);
+	bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2,GL_TEXTURE_2D);
 	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
 	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
 
