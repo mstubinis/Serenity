@@ -1,11 +1,11 @@
 #include "ShaderProgram.h"
 #include "Material.h"
+#include "Camera.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
-
 #include <iostream>
 
 using namespace Engine;
@@ -37,12 +37,14 @@ class ShaderP::impl final{
 		SHADER_PIPELINE_STAGE m_Stage;
         GLuint m_ShaderProgram;
 		std::vector<skey> m_Materials;
+		std::unordered_map<std::string,GLint> m_UniformLocations;
 		Shader* m_VertexShader;
 		Shader* m_FragmentShader;
         void _construct(std::string& name, Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
 			m_Stage = stage;
             m_VertexShader = vs;
             m_FragmentShader = ps;
+			m_UniformLocations.clear();
 			if(stage == SHADER_PIPELINE_STAGE_GEOMETRY){
 				Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms.push_back(super);
 			}
@@ -70,9 +72,9 @@ class ShaderP::impl final{
         void _destruct(){
             _cleanupRenderingContext(Resources::Detail::ResourceManagement::m_RenderingAPI);
         }
-        void _initRenderingContext(uint api){
+        void _initRenderingContext(uint api,std::string& name){
             if(api == ENGINE_RENDERING_API_OPENGL){
-                m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader);
+                m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
             }
             else if(api == ENGINE_RENDERING_API_DIRECTX){
 
@@ -81,12 +83,15 @@ class ShaderP::impl final{
         void _cleanupRenderingContext(uint api){
             if(api == ENGINE_RENDERING_API_OPENGL){
                 glDeleteShader(m_ShaderProgram);
+				glDeleteProgram(m_ShaderProgram);
+				m_UniformLocations.clear();
             }
             else if(api == ENGINE_RENDERING_API_DIRECTX){
 
             }
         }
-        GLuint _compileOGL(Shader* vs,Shader*  ps){
+        GLuint _compileOGL(Shader* vs,Shader*  ps,std::string& _shaderProgramName){
+			m_UniformLocations.clear();
             // Create the shaders id's
             GLuint vid = glCreateShader(GL_VERTEX_SHADER);
             GLuint fid = glCreateShader(GL_FRAGMENT_SHADER);
@@ -161,13 +166,45 @@ class ShaderP::impl final{
 				std::cout << "ShaderProgram Log : " << std::endl;
 				std::cout << &pError[0] << std::endl;
 			}
+			glDetachShader(pid,vid);
+			glDetachShader(pid,fid);
+
             glDeleteShader(vid);
             glDeleteShader(fid);
- 
+
+			//populate uniform table
+			if(res == GL_TRUE) {
+				GLint _i;GLint _count;
+				GLint _size; // size of the variable
+				GLenum _type; // type of the variable (float, vec3 or mat4, etc)
+
+				const GLsizei _bufSize = 256; // maximum name length
+				GLchar _name[_bufSize]; // variable name in GLSL
+				GLsizei _length; // name length
+				glGetProgramiv(pid,GL_ACTIVE_UNIFORMS,&_count);
+				for(_i = 0; _i < _count; ++_i){
+					glGetActiveUniform(pid, (GLuint)_i, _bufSize, &_length, &_size, &_type, _name);
+					if(_length > 0){
+						std::string _name1((char*)_name, _length);
+						GLint _uniformLoc = glGetUniformLocation(pid,_name);
+						this->m_UniformLocations[_name1] = _uniformLoc;
+					}
+				}
+			}
             return pid;
         }
         void _compileDX(std::string vs, std::string ps, bool fromFile){
         
+		}
+		void _bind(){
+			Camera* c = Resources::getActiveCamera();
+			Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+			Renderer::sendUniform1f("far",c->getFar());
+			Renderer::sendUniform1f("C",1.0f);
+			glm::vec3 camPos = glm::vec3(c->getPosition());
+
+			if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
+			else                                                     Renderer::sendUniform1i("HasGodsRays",0);
 		}
 };
 
@@ -181,7 +218,7 @@ ShaderP::~ShaderP(){
     m_i->_destruct();
 }
 void ShaderP::initRenderingContext(uint api){
-    m_i->_initRenderingContext(api);
+	m_i->_initRenderingContext(api,this->name());
 }
 void ShaderP::cleanupRenderingContext(uint api){
     m_i->_cleanupRenderingContext(api);
@@ -203,7 +240,13 @@ void ShaderP::addMaterial(std::string m){
 	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),sksortlessthan());
 }
 void ShaderP::bind(){
-	Renderer::useShader(this);
-	if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
-	else                                                     Renderer::sendUniform1i("HasGodsRays",0);
+	m_i->_bind();
 }
+void ShaderP::_bind(){
+	_bindDefaults(); //bind defaults for all shaders,default or custom
+	bind();          //bind custom data
+}
+void ShaderP::_bindDefaults(){
+	Renderer::bindShaderProgram(this);
+}
+const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }

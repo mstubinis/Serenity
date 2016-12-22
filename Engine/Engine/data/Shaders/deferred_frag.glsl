@@ -18,7 +18,6 @@ uniform vec3 SecondConditionals; //x = specular y = reflection z = refraction
 
 uniform vec4 Object_Color;
 uniform vec3 Gods_Rays_Color;
-uniform vec3 CameraPosition;
 
 varying vec3 WorldPosition;
 varying vec2 UV;

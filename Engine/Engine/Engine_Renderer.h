@@ -16,6 +16,7 @@
 
 typedef unsigned int GLuint;
 typedef unsigned int uint;
+typedef int GLint;
 
 class Texture;
 class Font;
@@ -66,7 +67,7 @@ namespace Engine{
 					static bool alpha_test;
 					static bool depth_mask;
 					static bool depth_test;
-					static GLuint current_shader_program;
+					static ShaderP* current_shader_program;
 					static std::string current_bound_material;
 				};
 				struct DebugDrawingInfo final{
@@ -242,9 +243,9 @@ namespace Engine{
 				static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
 			};
         };
-
-		void useShader(ShaderP*);
-		void useShader(std::string);
+		inline const GLint getUniformLocation(const char* location);
+		void bindShaderProgram(ShaderP*);
+		void bindShaderProgram(std::string);
 		void bindTexture(const char* location,Texture*,uint slot);
 		void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
 		void unbindTexture2D(uint slot);
@@ -261,6 +262,16 @@ namespace Engine{
 		inline void sendUniform4d(const char* location,double,double,double,double);
 		inline void sendUniform4i(const char* location,int,int,int,int);
 		inline void sendUniform4f(const char* location,float,float,float,float);
+
+		inline void sendUniform2d(const char* location,glm::dvec2&);
+		inline void sendUniform2i(const char* location,glm::ivec2&);
+		inline void sendUniform2f(const char* location,glm::vec2&);
+		inline void sendUniform3d(const char* location,glm::dvec3&);
+		inline void sendUniform3i(const char* location,glm::ivec3&);
+		inline void sendUniform3f(const char* location,glm::vec3&);
+		inline void sendUniform4d(const char* location,glm::dvec4&);
+		inline void sendUniform4i(const char* location,glm::ivec4&);
+		inline void sendUniform4f(const char* location,glm::vec4&);
 
 		inline void sendUniform2fv(const char* location,glm::vec2*,uint limit);
 		inline void sendUniform3fv(const char* location,glm::vec3*,uint limit);

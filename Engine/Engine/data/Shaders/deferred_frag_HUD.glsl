@@ -1,16 +1,11 @@
 #version 120
 
 uniform sampler2D DiffuseTexture;
-
 uniform int DiffuseTextureEnabled;
-
 uniform vec4 Object_Color;
 
 varying vec3 WorldPosition;
 varying vec2 UV;
-
-uniform float far;
-uniform float C;
 
 void main(void){
 	gl_FragData[0] = Object_Color;

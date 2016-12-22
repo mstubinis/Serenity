@@ -40,27 +40,15 @@ class RenderedItem::impl{
 		}
 		void _destruct(){
 		}
-		void _setPosition(float x, float y, float z){
-			m_Position.x = x; m_Position.y = y; m_Position.z = z;
-			m_NeedsUpdate = true;
-		}
-		void _setScale(float x, float y,float z){
-			m_Scale.x = x; m_Scale.y = y; m_Scale.z = z;
-			m_NeedsUpdate = true;
-		}
-		void _translate(float x, float y, float z){
-			m_Position.x += x; m_Position.y += y; m_Position.z += z;
-			m_NeedsUpdate = true;
-		}
+		void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; m_NeedsUpdate = true; }
+		void _setScale(float x, float y,float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_NeedsUpdate = true; }
+		void _translate(float x, float y, float z){ m_Position.x += x; m_Position.y += y; m_Position.z += z; m_NeedsUpdate = true; }
+		void _scale(float x,float y,float z){ m_Scale.x += x; m_Scale.y += y; m_Scale.z += z; m_NeedsUpdate = true; }
 		void _rotate(float x,float y,float z){
 			float threshold = 0;
 			if(abs(x) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1,0,0)));   //pitch
 			if(abs(y) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));   //yaw
 			if(abs(z) > threshold) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
-			m_NeedsUpdate = true;
-		}
-		void _scale(float x,float y,float z){
-			m_Scale.x += x; m_Scale.y += y; m_Scale.z += z;
 			m_NeedsUpdate = true;
 		}
 		void _updateModelMatrix(){

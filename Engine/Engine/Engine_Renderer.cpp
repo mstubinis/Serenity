@@ -23,66 +23,68 @@
 #include <math.h>
 
 using namespace Engine;
+using namespace Engine::Renderer;
+using namespace std;
 
 #ifdef _WIN32
-IDXGISwapChain* Renderer::Detail::RenderManagement::m_DirectXSwapChain;
-ID3D11Device* Renderer::Detail::RenderManagement::m_DirectXDevice;
-ID3D11DeviceContext* Renderer::Detail::RenderManagement::m_DirectXDeviceContext;
-ID3D11RenderTargetView* Renderer::Detail::RenderManagement::m_DirectXBackBuffer;
+IDXGISwapChain* Detail::RenderManagement::m_DirectXSwapChain;
+ID3D11Device* Detail::RenderManagement::m_DirectXDevice;
+ID3D11DeviceContext* Detail::RenderManagement::m_DirectXDeviceContext;
+ID3D11RenderTargetView* Detail::RenderManagement::m_DirectXBackBuffer;
 #endif
 
-bool Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
-bool Renderer::Detail::RendererInfo::GeneralInfo::depth_test = true;
-bool Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = true;
-GLuint Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = 0;
-std::string Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "";
+bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
+bool Detail::RendererInfo::GeneralInfo::depth_test = true;
+bool Detail::RendererInfo::GeneralInfo::depth_mask = true;
+ShaderP* Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
+string Detail::RendererInfo::GeneralInfo::current_bound_material = "";
 
-bool Renderer::Detail::RendererInfo::BloomInfo::bloom = true;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
-float Renderer::Detail::RendererInfo::BloomInfo::bloom_strength = 2.25f;
+bool Detail::RendererInfo::BloomInfo::bloom = true;
+float Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
+float Detail::RendererInfo::BloomInfo::bloom_strength = 2.25f;
 
-bool Renderer::Detail::RendererInfo::LightingInfo::lighting = true;
+bool Detail::RendererInfo::LightingInfo::lighting = true;
 
-bool Renderer::Detail::RendererInfo::DebugDrawingInfo::debug = false;
+bool Detail::RendererInfo::DebugDrawingInfo::debug = false;
 
-bool Renderer::Detail::RendererInfo::GodRaysInfo::godRays = true;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_density = 0.84f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
-uint Renderer::Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 55.0f;
-float Renderer::Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
+bool Detail::RendererInfo::GodRaysInfo::godRays = true;
+float Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
+float Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
+float Detail::RendererInfo::GodRaysInfo::godRays_density = 0.84f;
+float Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
+uint Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
+float Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 55.0f;
+float Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
-bool Renderer::Detail::RendererInfo::SSAOInfo::ssao = true;
-bool Renderer::Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
-uint Renderer::Detail::RendererInfo::SSAOInfo::ssao_samples = 7;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_bias = 0.24f;
-float Renderer::Detail::RendererInfo::SSAOInfo::ssao_radius = 0.215f;
-glm::vec2 Renderer::Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
-GLuint Renderer::Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
+bool Detail::RendererInfo::SSAOInfo::ssao = true;
+bool Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
+uint Detail::RendererInfo::SSAOInfo::ssao_samples = 7;
+float Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
+float Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
+float Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
+float Detail::RendererInfo::SSAOInfo::ssao_bias = 0.24f;
+float Detail::RendererInfo::SSAOInfo::ssao_radius = 0.215f;
+glm::vec2 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
+GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
-bool Renderer::Detail::RendererInfo::HDRInfo::hdr = true;
-float Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
-float Renderer::Detail::RendererInfo::HDRInfo::hdr_gamma = 0.8f;
+bool Detail::RendererInfo::HDRInfo::hdr = true;
+float Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
+float Detail::RendererInfo::HDRInfo::hdr_gamma = 0.8f;
 
-GBuffer* Renderer::Detail::RenderManagement::m_gBuffer = nullptr;
-glm::mat4 Renderer::Detail::RenderManagement::m_2DProjectionMatrix;
+GBuffer* Detail::RenderManagement::m_gBuffer = nullptr;
+glm::mat4 Detail::RenderManagement::m_2DProjectionMatrix;
 
-std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeRendered;
-std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
-std::vector<FontRenderInfo> Renderer::Detail::RenderManagement::m_FontsToBeRendered;
-std::vector<TextureRenderInfo> Renderer::Detail::RenderManagement::m_TexturesToBeRendered;
-std::vector<GeometryRenderInfo> Renderer::Detail::RenderManagement::m_ObjectsToBeForwardRendered;
+vector<GeometryRenderInfo> Detail::RenderManagement::m_ObjectsToBeRendered;
+vector<GeometryRenderInfo> Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
+vector<FontRenderInfo> Detail::RenderManagement::m_FontsToBeRendered;
+vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
+vector<GeometryRenderInfo> Detail::RenderManagement::m_ObjectsToBeForwardRendered;
 
-std::vector<ShaderP*> Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms;
+vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
-void Renderer::Settings::clear(bool color, bool depth, bool stencil){
+void Settings::clear(bool color, bool depth, bool stencil){
 	if(depth){ 
-		Settings::enableDepthMask();
+		enableDepthMask();
 		if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
 		else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 		else{ glClear(GL_DEPTH_BUFFER_BIT); }
@@ -92,79 +94,79 @@ void Renderer::Settings::clear(bool color, bool depth, bool stencil){
 		else{ glClear(GL_STENCIL_BUFFER_BIT); }
 	}
 }
-void Renderer::Settings::enableAlphaTest(bool b){
+void Settings::enableAlphaTest(bool b){
 	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
 		glEnable(GL_ALPHA_TEST);
-		Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = true;
+		Detail::RendererInfo::GeneralInfo::alpha_test = true;
 	}
-	else if(!b && Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+	else if(!b && Detail::RendererInfo::GeneralInfo::alpha_test){
 		glDisable(GL_ALPHA_TEST);
-		Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
+		Detail::RendererInfo::GeneralInfo::alpha_test = false;
 	}
 }
-void Renderer::Settings::disableAlphaTest(){
-	if(Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+void Settings::disableAlphaTest(){
+	if(Detail::RendererInfo::GeneralInfo::alpha_test){
 		glDisable(GL_ALPHA_TEST);
-		Renderer::Detail::RendererInfo::GeneralInfo::alpha_test = false;
+		Detail::RendererInfo::GeneralInfo::alpha_test = false;
 	}
 }
-void Renderer::Settings::enableDepthTest(bool b){
-	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::depth_test){
+void Settings::enableDepthTest(bool b){
+	if(b && !Detail::RendererInfo::GeneralInfo::depth_test){
 		glEnable(GL_DEPTH_TEST);
-		Renderer::Detail::RendererInfo::GeneralInfo::depth_test = true;
+		Detail::RendererInfo::GeneralInfo::depth_test = true;
 	}
-	else if(!b && Renderer::Detail::RendererInfo::GeneralInfo::depth_test){
+	else if(!b && Detail::RendererInfo::GeneralInfo::depth_test){
 		glDisable(GL_DEPTH_TEST);
-		Renderer::Detail::RendererInfo::GeneralInfo::depth_test = false;
+		Detail::RendererInfo::GeneralInfo::depth_test = false;
 	}
 }
-void Renderer::Settings::disableDepthTest(){
-	if(Renderer::Detail::RendererInfo::GeneralInfo::depth_test){
+void Settings::disableDepthTest(){
+	if(Detail::RendererInfo::GeneralInfo::depth_test){
 		glDisable(GL_DEPTH_TEST);
-		Renderer::Detail::RendererInfo::GeneralInfo::depth_test = false;
+		Detail::RendererInfo::GeneralInfo::depth_test = false;
 	}
 }
-void Renderer::Settings::enableDepthMask(bool b){
-	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::depth_mask){
+void Settings::enableDepthMask(bool b){
+	if(b && !Detail::RendererInfo::GeneralInfo::depth_mask){
 		glDepthMask(GL_TRUE);
-		Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = true;
+		Detail::RendererInfo::GeneralInfo::depth_mask = true;
 	}
-	else if(!b && Renderer::Detail::RendererInfo::GeneralInfo::depth_mask){
+	else if(!b && Detail::RendererInfo::GeneralInfo::depth_mask){
 		glDepthMask(GL_FALSE);
-		Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = false;
+		Detail::RendererInfo::GeneralInfo::depth_mask = false;
 	}
 }
-void Renderer::Settings::disableDepthMask(){
-	if(Renderer::Detail::RendererInfo::GeneralInfo::depth_mask){
+void Settings::disableDepthMask(){
+	if(Detail::RendererInfo::GeneralInfo::depth_mask){
 		glDepthMask(GL_FALSE);
-		Renderer::Detail::RendererInfo::GeneralInfo::depth_mask = false;
+		Detail::RendererInfo::GeneralInfo::depth_mask = false;
 	}
 }
-void Renderer::useShader(ShaderP* program){
+void Renderer::bindShaderProgram(ShaderP* program){
 	if(program != 0){
-		GLuint p = program->program();
-		if(Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != p){
+		if(Detail::RendererInfo::GeneralInfo::current_shader_program != program){
+			GLuint p = program->program();
 			glUseProgram(p);
-			Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = p;
+			Detail::RendererInfo::GeneralInfo::current_shader_program = program;
 		}
 	}
 	else{
-		if(Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != 0){
+		if(Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
 			glUseProgram(0);
-			Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = 0;
+			Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
 		}
 	}
 }
-void Renderer::useShader(std::string programName){
-	Renderer::useShader(Resources::getShaderProgram(programName));
+void Renderer::bindShaderProgram(string programName){
+	Renderer::bindShaderProgram(Resources::getShaderProgram(programName));
 }
-void Renderer::bindTexture(const char* location,Texture* texture,uint slot){
-	Renderer::bindTexture(location,texture->address(),slot,texture->type());
+void Renderer::bindTexture(const char* l,Texture* t,uint slot){
+	Renderer::bindTexture(l,t->address(),slot,t->type());
 }
-void Renderer::bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint textureType){
+void Renderer::bindTexture(const char* l,GLuint address,uint slot,GLuint type){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(textureType, textureAddress);
-	sendUniform1i(location,slot);
+    glBindTexture(type, address);
+	sendUniform1i(l,slot);
 }
 void Renderer::unbindTexture2D(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -174,90 +176,62 @@ void Renderer::unbindTextureCubemap(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
-void Renderer::sendUniform1d(const char* location,double x){
-	glUniform1d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
+const GLint Renderer::getUniformLocation(const char* l){
+	const unordered_map<string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(l))return-1;return m.at(l);
 }
-void Renderer::sendUniform1i(const char* location,int x){
-	glUniform1i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
-}
-void Renderer::sendUniform1f(const char* location,float x){
-	glUniform1f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x );
-}
-void Renderer::sendUniform2d(const char* location,double x,double y){
-	glUniform2d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y );
-}
-void Renderer::sendUniform2i(const char* location,int x,int y){
-	glUniform2i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y );
-}
-void Renderer::sendUniform2f(const char* location,float x,float y){
-	glUniform2f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y );
-}
-void Renderer::sendUniform3d(const char* location,double x,double y,double z){
-	glUniform3d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z );
-}
-void Renderer::sendUniform3i(const char* location,int x,int y,int z){
-	glUniform3i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z );
-}
-void Renderer::sendUniform3f(const char* location,float x,float y,float z){
-	glUniform3f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z );
-}
-void Renderer::sendUniform4d(const char* location,double x,double y,double z,double w){
-	glUniform4d(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z,w );
-}
-void Renderer::sendUniform4i(const char* location,int x,int y,int z,int w){
-	glUniform4i(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z,w );
-}
-void Renderer::sendUniform4f(const char* location,float x,float y,float z,float w){
-	glUniform4f(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), x,y,z,w );
-}
-void Renderer::sendUniformMatrix4f(const char* location,glm::mat4& m){
-	glUniformMatrix4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), 1, GL_FALSE, glm::value_ptr(m));
-}
-void Renderer::sendUniformMatrix4d(const char* location,glm::dmat4& m){
-	glUniformMatrix4dv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location), 1, GL_FALSE, glm::value_ptr(m));
-}
-void Renderer::sendUniform2fv(const char* location,std::vector<glm::vec2>& data,uint limit){
-	glUniform2fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
-}
-void Renderer::sendUniform3fv(const char* location,std::vector<glm::vec3>& data,uint limit){
-	glUniform3fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
-}
-void Renderer::sendUniform4fv(const char* location,std::vector<glm::vec4>& data,uint limit){
-	glUniform4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
-}
-void Renderer::sendUniform2fv(const char* location,glm::vec2* data,uint limit){
-	glUniform2fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
-}
-void Renderer::sendUniform3fv(const char* location,glm::vec3* data,uint limit){
-	glUniform3fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
-}
-void Renderer::sendUniform4fv(const char* location,glm::vec4* data,uint limit){
-	glUniform4fv(glGetUniformLocation(Detail::RendererInfo::GeneralInfo::current_shader_program,location),limit, glm::value_ptr(data[0]));
-}
+void Renderer::sendUniform1d(const char* l,double x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1d(o,x); }
+void Renderer::sendUniform1i(const char* l,int x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1i(o,x); }
+void Renderer::sendUniform1f(const char* l,float x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1f(o,x); }
+void Renderer::sendUniform2d(const char* l,double x,double y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,x,y); }
+void Renderer::sendUniform2i(const char* l,int x,int y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,x,y); }
+void Renderer::sendUniform2f(const char* l,float x,float y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,x,y); }
+void Renderer::sendUniform3d(const char* l,double x,double y,double z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,x,y,z); }
+void Renderer::sendUniform3i(const char* l,int x,int y,int z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,x,y,z); }
+void Renderer::sendUniform3f(const char* l,float x,float y,float z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,x,y,z); }
+void Renderer::sendUniform4d(const char* l,double x,double y,double z,double w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,x,y,z,w); }
+void Renderer::sendUniform4i(const char* l,int x,int y,int z,int w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,x,y,z,w); }
+void Renderer::sendUniform4f(const char* l,float x,float y,float z,float w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,x,y,z,w); }
+void Renderer::sendUniform2d(const char* l,glm::dvec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,v.x,v.y); }
+void Renderer::sendUniform2i(const char* l,glm::ivec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,v.x,v.y); }
+void Renderer::sendUniform2f(const char* l,glm::vec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,v.x,v.y); }
+void Renderer::sendUniform3d(const char* l,glm::dvec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,v.x,v.y,v.z); }
+void Renderer::sendUniform3i(const char* l,glm::ivec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,v.x,v.y,v.z); }
+void Renderer::sendUniform3f(const char* l,glm::vec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,v.x,v.y,v.z); }
+void Renderer::sendUniform4d(const char* l,glm::dvec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,v.x,v.y,v.z,v.w); }
+void Renderer::sendUniform4i(const char* l,glm::ivec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,v.x,v.y,v.z,v.w); }
+void Renderer::sendUniform4f(const char* l,glm::vec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,v.x,v.y,v.z,v.w); }
+void Renderer::sendUniformMatrix4f(const char* l,glm::mat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4fv(o,1,0,glm::value_ptr(m)); }
+void Renderer::sendUniformMatrix4d(const char* l,glm::dmat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4dv(o,1,0,glm::value_ptr(m)); }
+void Renderer::sendUniform2fv(const char* l,vector<glm::vec2>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
+void Renderer::sendUniform3fv(const char* l,vector<glm::vec3>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
+void Renderer::sendUniform4fv(const char* l,vector<glm::vec4>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
+void Renderer::sendUniform2fv(const char* l,glm::vec2* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
+void Renderer::sendUniform3fv(const char* l,glm::vec3* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
+void Renderer::sendUniform4fv(const char* l,glm::vec4* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
 
-void Renderer::Detail::RenderManagement::init(){
+void Detail::RenderManagement::init(){
     #ifdef _DEBUG
-    Detail::RendererInfo::DebugDrawingInfo::debug = true;
+    RendererInfo::DebugDrawingInfo::debug = true;
     #else
-    Detail::RendererInfo::DebugDrawingInfo::debug = false;
+    RendererInfo::DebugDrawingInfo::debug = false;
     #endif
 
-    std::uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
-	std::uniform_real_distribution<float> randFloats1(0.0f,1.0f);
-    std::default_random_engine gen;
-    std::vector<glm::vec2> kernels;
-    for(uint i = 0; i < Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT; ++i){
+    uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
+	uniform_real_distribution<float> randFloats1(0.0f,1.0f);
+    default_random_engine gen;
+    vector<glm::vec2> kernels;
+    for(uint i = 0; i < RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT; ++i){
         glm::vec2 sample(randFloats(gen)*2.0f-1.0f,randFloats(gen)*2.0f-1.0f);
         sample = glm::normalize(sample);
         sample *= randFloats(gen);
-        float scale = float(i) / float(Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+        float scale = float(i) / float(RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
         float a = 0.1f; float b = 1.0f; float f = scale * scale;
         scale = a + f * (b - a); //basic lerp
         sample *= scale;
         kernels.push_back(sample);
     }
-    std::copy(kernels.begin(),kernels.end(),RendererInfo::SSAOInfo::ssao_Kernels);
-    std::vector<glm::vec3> ssaoNoise;
+    copy(kernels.begin(),kernels.end(),RendererInfo::SSAOInfo::ssao_Kernels);
+    vector<glm::vec3> ssaoNoise;
     for(uint i = 0; i < RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE*RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE; i++){
         glm::vec3 noise(randFloats1(gen)*2.0-1.0,randFloats1(gen)*2.0-1.0,0.0f); 
         ssaoNoise.push_back(noise);
@@ -273,7 +247,7 @@ void Renderer::Detail::RenderManagement::init(){
 
     RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,float(Resources::getWindowSize().x),0.0f,float(Resources::getWindowSize().y),0.005f,1000.0f);
 }
-void Renderer::Detail::RenderManagement::destruct(){
+void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
     #ifdef _WIN32
     SAFE_DELETE_COM(RenderManagement::m_DirectXSwapChain);
@@ -288,31 +262,27 @@ void Renderer::renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, f
 void Renderer::renderTexture(Texture* texture,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth){
 	texture->render(pos,col,angle,scl,depth);
 }
-void Renderer::renderText(std::string text,Font* font, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth){
+void Renderer::renderText(string text,Font* font, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth){
 	font->renderText(text,pos,color,angle,scl,depth);
 }
 
-void Renderer::Detail::RenderManagement::_renderObjects(){
+void Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
 		item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
     }
 }
-void Renderer::Detail::RenderManagement::_renderForegroundObjects(){
+void Detail::RenderManagement::_renderForegroundObjects(){
     for(auto item:m_ForegroundObjectsToBeRendered){
         item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
-void Renderer::Detail::RenderManagement::_renderForwardRenderedObjects(){
+void Detail::RenderManagement::_renderForwardRenderedObjects(){
     for(auto item:m_ObjectsToBeForwardRendered){
         item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
     }
 }
-void Renderer::Detail::RenderManagement::_renderTextures(){
-	useShader("Deferred_HUD");
-
-	sendUniform1f("far",Resources::getActiveCamera()->getFar());
-	sendUniform1f("C",1.0f);
-
+void Detail::RenderManagement::_renderTextures(){
+	bindShaderProgram("Deferred_HUD");
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
@@ -324,7 +294,6 @@ void Renderer::Detail::RenderManagement::_renderTextures(){
 			bindTexture("DiffuseTexture",(GLuint)0,0);
 			sendUniform1i("DiffuseTextureEnabled",0);
         }
-		sendUniform1i("Shadeless",1);
 		sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
         glm::mat4 model = glm::mat4(1);
@@ -341,17 +310,15 @@ void Renderer::Detail::RenderManagement::_renderTextures(){
 
         Resources::getMesh("Plane")->render();
     }
-    useShader(0);
+    bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_renderText(){
-	useShader("Deferred_HUD");
+void Detail::RenderManagement::_renderText(){
+	bindShaderProgram("Deferred_HUD");
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
 		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
 		sendUniform1i("DiffuseTextureEnabled",1);
-        sendUniform1i("Shadeless",1);
-
 		sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
 
         float y_offset = 0;
@@ -377,9 +344,9 @@ void Renderer::Detail::RenderManagement::_renderText(){
             }
         }
     }
-    useShader(0);
+    bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_passGeometry(){
+void Detail::RenderManagement::_passGeometry(){
 	Settings::clear();
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();
@@ -399,24 +366,15 @@ void Renderer::Detail::RenderManagement::_passGeometry(){
 
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
-
-		shaderProgram->bind();
-
-		Camera* camera = Resources::getActiveCamera();
-		sendUniformMatrix4f("VP",camera->getViewProjection());
-		sendUniform1f("far",camera->getFar());
-		sendUniform1f("C",1.0f);
-		glm::vec3 camPos = glm::vec3(camera->getPosition());
-		sendUniform3f("CameraPosition",camPos.x,camPos.y,camPos.z);
-
+		shaderProgram->_bind();
 		for(auto material:shaderProgram->getMaterials()){
-			std::string matName = *(material.w.lock().get());
+			string matName = *(material.w.lock().get());
 			Material* m = Resources::getMaterial(matName);
-			m->bind(shaderProgram->program(),Resources::getAPI());
+			m->_bind(shaderProgram->program(),Resources::getAPI());
 			for(auto key:m->getObjects()){
-				std::string renderedItemName = *(key.w.lock().get());
+				string renderedItemName = *(key.w.lock().get());
 				RenderedItem* item = Resources::getRenderedItem(renderedItemName);
-				std::string parentObjectName = item->parent();
+				string parentObjectName = item->parent();
 				Object* o = Resources::getObject(parentObjectName);
 
 				if(s->objects().count(parentObjectName)){
@@ -425,19 +383,19 @@ void Renderer::Detail::RenderManagement::_passGeometry(){
 				}
 			}
 		}
-		Renderer::useShader(0);
+		bindShaderProgram(0);
 	}
 	Settings::disableDepthTest();
 	Settings::disableDepthMask();
 
 	//RENDER FOREGROUND OBJECTS HERE
 }
-void Renderer::Detail::RenderManagement::_passLighting(){
+void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-	useShader("Deferred_Light");
+	bindShaderProgram("Deferred_Light");
 
 	sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-	sendUniform4fv("materials",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
+	sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
 
 	sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
@@ -451,14 +409,14 @@ void Renderer::Detail::RenderManagement::_passLighting(){
     }
 
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
-	useShader(0);
+	bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::render(){
+void Detail::RenderManagement::render(){
 	if(!RendererInfo::GodRaysInfo::godRays)
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
 	else
 		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
-	RenderManagement::_passGeometry();
+	_passGeometry();
 	m_gBuffer->stop();
 
 	if(RendererInfo::GodRaysInfo::godRays){
@@ -483,41 +441,41 @@ void Renderer::Detail::RenderManagement::render(){
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::LightingInfo::lighting){
         m_gBuffer->start(BUFFER_TYPE_LIGHTING,"RGB");
-        RenderManagement::_passLighting();
+        _passLighting();
         m_gBuffer->stop();
     }
 	glDisable(GL_BLEND);
 
     m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-    RenderManagement::_passSSAO();
+    _passSSAO();
     m_gBuffer->stop();
 
 	if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
 		m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
-		RenderManagement::_passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
+		_passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
 		m_gBuffer->stop();
 		m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-		RenderManagement::_passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
+		_passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
 		m_gBuffer->stop();
 	}
 
     if(RendererInfo::HDRInfo::hdr){
         m_gBuffer->start(BUFFER_TYPE_MISC);
-        RenderManagement::_passHDR();
+        _passHDR();
         m_gBuffer->stop();
     }
-    RenderManagement::_passFinal();
+    _passFinal();
 
     //copy depth over
     glColorMask(0,0,0,0);
-	useShader("Copy_Depth");
+	bindShaderProgram("Copy_Depth");
 
 	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	unbindTexture2D(0);
-	useShader(0);
+	bindShaderProgram(0);
     glColorMask(1,1,1,1);
     /////////////
 
@@ -531,7 +489,6 @@ void Renderer::Detail::RenderManagement::render(){
 
 	Settings::enableAlphaTest();
     glAlphaFunc(GL_GREATER, 0.1f);
-
 
 	Settings::enableDepthTest();
 	Settings::enableDepthMask();
@@ -549,8 +506,8 @@ void Renderer::Detail::RenderManagement::render(){
 	m_FontsToBeRendered.clear();
 	m_TexturesToBeRendered.clear();
 }
-void Renderer::Detail::RenderManagement::_passSSAO(){
-	useShader("Deferred_SSAO");
+void Detail::RenderManagement::_passSSAO(){
+	bindShaderProgram("Deferred_SSAO");
 
 	sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
 	sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
@@ -565,7 +522,7 @@ void Renderer::Detail::RenderManagement::_passSSAO(){
 	sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
 	sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
 	sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
-	sendUniform2fv("poisson",RendererInfo::SSAOInfo::ssao_Kernels,Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+	sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 	sendUniform1i("far",int(c->getFar()));
 
 	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
@@ -577,12 +534,12 @@ void Renderer::Detail::RenderManagement::_passSSAO(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
-	useShader(0);
+	bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius){
+void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
 	Settings::clear(true,false,false);
 
-	useShader("Deferred_Edge");
+	bindShaderProgram("Deferred_Edge");
 	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
 	sendUniform1f("radius", radius);
 
@@ -591,12 +548,12 @@ void Renderer::Detail::RenderManagement::_passEdge(GLuint texture, float radius)
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	unbindTexture2D(0);
-    useShader(0);
+    bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
+void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     Settings::clear(true,false,false);
 
-	useShader("Deferred_GodsRays");
+	bindShaderProgram("Deferred_GodsRays");
 	sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
 	sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
 	sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
@@ -615,12 +572,12 @@ void Renderer::Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOn
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	unbindTexture2D(0);
-    useShader(0);
+    bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_passHDR(){
+void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
-	useShader("Deferred_HDR");
+	bindShaderProgram("Deferred_HDR");
 	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 	sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
@@ -628,10 +585,10 @@ void Renderer::Detail::RenderManagement::_passHDR(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	unbindTexture2D(0);
-	useShader(0);
+	bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint texture,std::string channels){
-	useShader("Deferred_Blur");
+void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
+	bindShaderProgram("Deferred_Blur");
 
 	sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
 	sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
@@ -640,13 +597,13 @@ void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint text
 		RendererInfo::SSAOInfo::ssao_blur_strength
 	);
 
-    if(channels.find("R") != std::string::npos) sendUniform1i("R",1);
+    if(channels.find("R") != string::npos) sendUniform1i("R",1);
     else                                        sendUniform1i("R",0);
-    if(channels.find("G") != std::string::npos) sendUniform1i("G",1);
+    if(channels.find("G") != string::npos) sendUniform1i("G",1);
     else                                        sendUniform1i("G",0);
-    if(channels.find("B") != std::string::npos) sendUniform1i("B",1);
+    if(channels.find("B") != string::npos) sendUniform1i("B",1);
     else                                        sendUniform1i("B",0);
-    if(channels.find("A") != std::string::npos) sendUniform1i("A",1);
+    if(channels.find("A") != string::npos) sendUniform1i("A",1);
     else                                        sendUniform1i("A",0);
 
     if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
@@ -657,12 +614,12 @@ void Renderer::Detail::RenderManagement::_passBlur(std::string type, GLuint text
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
 	unbindTexture2D(0);
-    useShader(0);
+    bindShaderProgram(0);
 }
-void Renderer::Detail::RenderManagement::_passFinal(){
+void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);
 
-	useShader("Deferred_Final");
+	bindShaderProgram("Deferred_Final");
 
 	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
@@ -684,9 +641,9 @@ void Renderer::Detail::RenderManagement::_passFinal(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
-	useShader(0);
+	bindShaderProgram(0);
 }
-void Renderer::Detail::renderFullscreenQuad(uint width,uint height){
+void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);
 	glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
 
@@ -704,7 +661,7 @@ void Renderer::Detail::renderFullscreenQuad(uint width,uint height){
 }
 
 #ifdef _WIN32
-void Renderer::Detail::RenderManagement::renderDirectX(){
+void Detail::RenderManagement::renderDirectX(){
     // clear the back buffer to a deep blue
     Scene* s = Resources::getCurrentScene();
     glm::vec3 clear = s->getBackgroundColor();

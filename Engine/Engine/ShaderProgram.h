@@ -3,7 +3,7 @@
 #define ENGINE_SHADERPROGRAM_H
 
 #include "Engine_ResourceBasic.h"
-
+#include <unordered_map>
 #include <string>
 #include <memory>
 typedef unsigned int uint;
@@ -20,6 +20,8 @@ enum SHADER_TYPE{
 };
 
 class Material;
+typedef int GLint;
+typedef unsigned int GLuint;
 class Shader final: public EngineResource{
 	private:
 		class impl;
@@ -46,13 +48,17 @@ class ShaderP: public EngineResource{
         void initRenderingContext(uint api);
         void cleanupRenderingContext(uint api);
 
-        uint program();
+        GLuint program();
 		SHADER_PIPELINE_STAGE stage();
         Shader* vertexShader();
         Shader* fragmentShader();
 		std::vector<skey>& getMaterials();
 
+		const std::unordered_map<std::string,GLint>& uniforms() const;
+
 		virtual void bind();
+		void _bindDefaults();
+		void _bind();
 		void addMaterial(std::string);
 };
 

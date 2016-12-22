@@ -10,7 +10,6 @@ uniform mat4 VP;
 uniform mat4 Model;
 
 varying vec2 UV;
-
 varying vec3 WorldPosition;
 
 void main(void){

@@ -121,6 +121,7 @@ class Material final: public EngineResource{
 		const MaterialComponentReflection* getComponentReflection() const;
 		const MaterialComponentRefraction* getComponentRefraction() const;
 
+		void _bind(GLuint shader,GLuint api);
 		void bind(GLuint shader,GLuint api);
 
         void addComponent(uint type, Texture* texture);

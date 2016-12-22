@@ -49,9 +49,7 @@ void MaterialComponent::bind(GLuint s,uint a){
     if(a == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 		for(uint i = 0; i < slots.size(); i++){
-			glActiveTexture(GL_TEXTURE0 + slots.at(i));
-			glBindTexture(m_Texture->type(), m_Texture->address());
-			glUniform1i(glGetUniformLocation(s, textureTypeName.c_str()), slots.at(i));
+			Renderer::bindTexture(textureTypeName.c_str(),m_Texture,slots.at(i));
 		}
     }
     else if(a == ENGINE_RENDERING_API_DIRECTX){
@@ -60,11 +58,9 @@ void MaterialComponent::bind(GLuint s,uint a){
 void MaterialComponent::unbind(GLuint shader,uint api){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
 	for(uint i = 0; i < slots.size(); i++){
+		std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 		if(api == ENGINE_RENDERING_API_OPENGL){
-			std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-			glActiveTexture(GL_TEXTURE0 + slots.at(i));
-			glBindTexture(m_Texture->type(), 0);
-			glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(i));
+			Renderer::unbindTexture2D(slots.at(i));
 		}
 		else if(api == ENGINE_RENDERING_API_DIRECTX){
 		}
@@ -87,32 +83,21 @@ void MaterialComponentReflection::setMixFactor(float factor){
 }
 void MaterialComponentReflection::bind(GLuint shader,uint api){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+	std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
-        std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-		glUniform1f(glGetUniformLocation(shader, "CubemapMixFactor"), m_MixFactor);
-
-		glActiveTexture(GL_TEXTURE0 + slots.at(0));
-        glBindTexture(m_Texture->type(), m_Texture->address());
-		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(0));
-
-		glActiveTexture(GL_TEXTURE0 + slots.at(1));
-		glBindTexture(m_Map->type(), m_Map->address());
-		glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), slots.at(1));
+		Renderer::sendUniform1f("CubemapMixFactor",m_MixFactor);
+		Renderer::bindTexture(textureTypeName.c_str(),m_Texture,slots.at(0));
+		Renderer::bindTexture((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
 }
 void MaterialComponentReflection::unbind(GLuint shader,uint api){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+	std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     if(api == ENGINE_RENDERING_API_OPENGL){
-		std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-		glActiveTexture(GL_TEXTURE0 + slots.at(0));
-		glBindTexture(m_Texture->type(), 0);
-		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(0));
-
-		glActiveTexture(GL_TEXTURE0 + slots.at(1));
-		glBindTexture(m_Map->type(), 0);
-		glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), slots.at(1));
+		Renderer::unbindTexture2D(slots.at(0));
+		Renderer::unbindTextureCubemap(slots.at(1));
 	}
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
@@ -131,16 +116,11 @@ void MaterialComponentRefraction::bind(GLuint shader,uint api){
     if(api == ENGINE_RENDERING_API_OPENGL){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
-		glUniform1f(glGetUniformLocation(shader, "CubemapMixFactor"), m_MixFactor);
-		glUniform1f(glGetUniformLocation(shader, "RefractionRatio"), m_RefractionRatio);
+		Renderer::sendUniform1f("CubemapMixFactor",m_MixFactor);
+		Renderer::sendUniform1f("RefractionRatio",m_RefractionRatio);
 
-		glActiveTexture(GL_TEXTURE0 + slots.at(0));
-        glBindTexture(m_Texture->type(), m_Texture->address());
-		glUniform1i(glGetUniformLocation(shader, textureTypeName.c_str()), slots.at(0));
-
-		glActiveTexture(GL_TEXTURE0 + slots.at(1));
-		glBindTexture(m_Map->type(), m_Map->address());
-		glUniform1i(glGetUniformLocation(shader, (textureTypeName + "Map").c_str()), slots.at(1));
+		Renderer::bindTexture(textureTypeName.c_str(),m_Texture,slots.at(0));
+		Renderer::bindTexture((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
     }
     else if(api == ENGINE_RENDERING_API_DIRECTX){
     }
@@ -210,6 +190,31 @@ class Material::impl final{
                 return;
             m_Components[type] = new MaterialComponentRefraction(type,cubemap,map,mixFactor,ratio);
         }
+		void _bind(GLuint shader,GLuint api){
+			glm::vec3 first(0); glm::vec3 second(0);
+			for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
+				MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
+				if(m_Components.count(type)){
+					MaterialComponent* c = m_Components[type];
+					if(c->texture() != nullptr && c->texture()->address() != 0){
+						//enable
+						if     (i == 0){ first.x = 1.0f; }
+						else if(i == 1){ first.y = 1.0f; }
+						else if(i == 2){ first.z = 1.0f; }
+						else if(i == 3){ second.x = 1.0f; }
+						else if(i == 4){ second.y = 1.0f; }
+						else if(i == 5){ second.z = 1.0f; }
+						c->bind(shader,api);
+					}
+					else{ c->unbind(shader,api); }
+				}
+			}
+			Renderer::sendUniform1i("Shadeless",int(m_Shadeless));
+			Renderer::sendUniform1f("BaseGlow",m_BaseGlow);
+			Renderer::sendUniform1f("matID",float(float(m_ID)/255.0f));
+			Renderer::sendUniform3f("FirstConditionals", first.x,first.y,first.z);
+			Renderer::sendUniform3f("SecondConditionals",second.x,second.y,second.z);
+		}
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
@@ -292,35 +297,15 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 	Material::addComponentRefraction(cubemap,map,mixFactor,ratio);
 }
 
-
-
-void Material::bind(GLuint shader,GLuint api){
-	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != this->name()){
-		glm::vec3 first(0); glm::vec3 second(0);
-		for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
-			MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-			if(m_i->m_Components.count(type)){
-				MaterialComponent* c = m_i->m_Components[type];
-				if(c->texture() != nullptr && c->texture()->address() != 0){
-					//enable
-					if     (i == 0){ first.x = 1.0f; }
-					else if(i == 1){ first.y = 1.0f; }
-					else if(i == 2){ first.z = 1.0f; }
-					else if(i == 3){ second.x = 1.0f; }
-					else if(i == 4){ second.y = 1.0f; }
-					else if(i == 5){ second.z = 1.0f; }
-					c->bind(shader,api);
-				}
-				else{ c->unbind(shader,api); }
-			}
-		}
-		Renderer::sendUniform1i("Shadeless",int(shadeless()));
-		Renderer::sendUniform1f("BaseGlow",glow());
-		Renderer::sendUniform1f("matID",float(float(id())/255.0f));
-		Renderer::sendUniform3f("FirstConditionals", first.x,first.y,first.z);
-		Renderer::sendUniform3f("SecondConditionals",second.x,second.y,second.z);
-		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = this->name();
+void Material::_bind(GLuint shader, GLuint api){
+	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != name()){
+		m_i->_bind(shader,api); //bind defaults that should be used across all shaders, default or custom
+		this->bind(shader,api); //bind custom data
+		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = name();
 	}
+}
+void Material::bind(GLuint shader,GLuint api){
+
 }
 
 std::unordered_map<uint,MaterialComponent*>& Material::getComponents(){ return m_i->m_Components; }
