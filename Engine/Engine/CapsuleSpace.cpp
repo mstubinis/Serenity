@@ -17,7 +17,7 @@ CapsuleEnd::CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name
 }
 CapsuleEnd::~CapsuleEnd(){}
 void CapsuleEnd::update(float dt){
-    ObjectBasic::update(dt);
+    ObjectDisplay::update(dt);
 }
 void CapsuleEnd::draw(GLuint shader,bool debug,bool godsRays){
     ObjectDisplay::draw(shader,debug,godsRays);
@@ -47,7 +47,7 @@ void CapsuleStar::update(float dt){
 		else{m_Light->activate();}
 	}
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
-    ObjectBasic::update(dt);
+    ObjectDisplay::update(dt);
 }
 void CapsuleStar::draw(GLuint shader,bool debug, bool godsRays){
 	Renderer::Settings::disableDepthMask();

@@ -34,14 +34,14 @@ class Shader final: public EngineResource{
 };
 
 
-class ShaderP final: public EngineResource{
+class ShaderP: public EngineResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
         ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
 		ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        ~ShaderP();
+        virtual ~ShaderP();
 
         void initRenderingContext(uint api);
         void cleanupRenderingContext(uint api);
@@ -52,6 +52,7 @@ class ShaderP final: public EngineResource{
         Shader* fragmentShader();
 		std::vector<skey>& getMaterials();
 
+		virtual void bind();
 		void addMaterial(std::string);
 };
 

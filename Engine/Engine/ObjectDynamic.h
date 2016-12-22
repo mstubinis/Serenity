@@ -22,6 +22,7 @@ class ObjectDynamic: public Object{
     protected:
         glm::v3 m_Forward, m_Right, m_Up;
         bool m_Visible;
+		bool m_PassedRenderCheck;
         std::vector<RenderedItem*> m_DisplayItems;
         glm::vec4 m_Color;
 		glm::vec3 m_GodsRaysColor;
@@ -119,6 +120,7 @@ class ObjectDynamic: public Object{
         virtual glm::m4 getModel();
         virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }
 		virtual bool visible() { return m_Visible; }
+		virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
 
         virtual void setMass(float);
 

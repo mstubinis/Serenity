@@ -167,7 +167,8 @@ class ShaderP::impl final{
             return pid;
         }
         void _compileDX(std::string vs, std::string ps, bool fromFile){
-        }
+        
+		}
 };
 
 ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
@@ -200,4 +201,9 @@ void ShaderP::addMaterial(std::string m){
 	skey k(mat);
 	m_i->m_Materials.push_back(k);
 	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),sksortlessthan());
+}
+void ShaderP::bind(){
+	Renderer::useShader(this);
+	if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
+	else                                                     Renderer::sendUniform1i("HasGodsRays",0);
 }

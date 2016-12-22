@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Object.h"
+#include "Camera.h"
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <boost/weak_ptr.hpp>
@@ -74,8 +75,12 @@ class RenderedItem::impl{
 		void _draw(bool debug, bool godsRays){
 			boost::weak_ptr<Object> o = Resources::getObjectPtr(*m_ParentPtr.lock().get());
 			if(exists(o)){
-				Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * m_Model);
-				m_Mesh->render();
+				Object* obj = o.lock().get();
+				Camera* c = Resources::getActiveCamera();
+				if(obj->passedRenderCheck()){
+					Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * m_Model);
+					m_Mesh->render();
+				}
 			}
 		}
 };

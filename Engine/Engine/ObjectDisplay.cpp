@@ -34,8 +34,14 @@ void ObjectDisplay::bind(){
 }
 void ObjectDisplay::update(float dt){
 	ObjectBasic::update(dt);
-	for(auto renderedItem:m_DisplayItems)
+	for(auto renderedItem:m_DisplayItems){
 		renderedItem->update(dt);
+	}
+	Camera* c = Resources::getActiveCamera();
+	m_PassedRenderCheck = true;
+	if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
+		m_PassedRenderCheck = false;
+	}
 }
 void ObjectDisplay::render(GLuint shader,bool debug){
     //add to render queue
@@ -50,6 +56,7 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){
         m_BoundingBoxRadius = glm::vec3(0);
+		m_Radius = 0;
         return;
     }
     float maxLength = 0;
@@ -63,7 +70,7 @@ void ObjectDisplay::calculateRadius(){
         }
     }
     m_BoundingBoxRadius = maxLength * m_Scale;
-    m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
+	m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
 }
 void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
 void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }

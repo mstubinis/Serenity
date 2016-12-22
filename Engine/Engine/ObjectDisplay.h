@@ -9,6 +9,7 @@ class ObjectDisplay: public ObjectBasic{
     protected:
         bool m_Shadeless;
         bool m_Visible;
+		bool m_PassedRenderCheck;
         std::vector<RenderedItem*> m_DisplayItems;
         glm::vec4 m_Color;
 		glm::vec3 m_GodsRaysColor;
@@ -49,8 +50,8 @@ class ObjectDisplay: public ObjectBasic{
 
         virtual void setVisible(bool b);
 
-		bool visible() { return m_Visible; }
-
+		virtual bool visible() { return m_Visible; }
+		virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 };

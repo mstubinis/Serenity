@@ -399,9 +399,8 @@ void Renderer::Detail::RenderManagement::_passGeometry(){
 
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
-		Renderer::useShader(shaderProgram);
-		if(RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
-		else                                   Renderer::sendUniform1i("HasGodsRays",0);
+
+		shaderProgram->bind();
 
 		Camera* camera = Resources::getActiveCamera();
 		sendUniformMatrix4f("VP",camera->getViewProjection());

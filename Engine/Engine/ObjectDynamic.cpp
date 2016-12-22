@@ -142,8 +142,14 @@ void ObjectDynamic::update(float dt){
     if(m_Parent != nullptr){
         m_Model =  m_Parent->getModel() * m_Model;
     }
-	for(auto renderedItem:m_DisplayItems)
+	for(auto renderedItem:m_DisplayItems){
 		renderedItem->update(dt);
+	}
+	Camera* c = Resources::getActiveCamera();
+	m_PassedRenderCheck = true;
+	if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
+		m_PassedRenderCheck = false;
+	}
 }
 void ObjectDynamic::bind(){
 	Renderer::sendUniform4f("Object_Color",m_Color.x,m_Color.y,m_Color.z,m_Color.w);
@@ -397,7 +403,7 @@ void ObjectDynamic::calculateRadius(){
         scale = glm::vec3(s.x(),s.y(),s.z());
     }
     m_BoundingBoxRadius = maxLength * scale;
-    m_Radius = glm::max(glm::abs(m_BoundingBoxRadius.x),glm::max(glm::abs(m_BoundingBoxRadius.y),glm::abs(m_BoundingBoxRadius.z)));
+	m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
 }
 bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 	return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
