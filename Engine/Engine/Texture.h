@@ -14,6 +14,8 @@
 
 typedef unsigned int GLuint;
 typedef unsigned int uint;
+typedef unsigned char uchar;
+namespace sf{ class Image; }
 
 class Texture: public EngineResource{
     private:
@@ -21,16 +23,19 @@ class Texture: public EngineResource{
 		std::unique_ptr<impl> m_i;
     public:
 		Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D);
-        Texture(const unsigned char*,uint, uint,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
+		Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP);
         virtual ~Texture();
 
-		unsigned char* pixels();
+		uchar* pixels();
 		GLuint& address();
 		GLuint type();
 		uint width();
 		uint height();
+
+		virtual void load();
+		virtual void unload();
 
 		void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
 

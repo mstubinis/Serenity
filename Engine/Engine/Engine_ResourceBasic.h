@@ -11,13 +11,19 @@
 class EngineResource{
 	private:
 		boost::shared_ptr<std::string> m_Name;
+		bool m_IsLoaded;
 	public:
 		EngineResource(std::string = "");
-		~EngineResource();
+		virtual ~EngineResource();
 
 		std::string& name();
 		boost::shared_ptr<std::string>& namePtr();
 		void setName(std::string);
+
+		bool isLoaded();
+
+		virtual void load();
+		virtual void unload();
 };
 
 

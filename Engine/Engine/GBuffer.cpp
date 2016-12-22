@@ -20,7 +20,7 @@ class TextureBuffer::impl final{
             m_BufferType = type;
             m_BufferAttatchment = attatchment;
 			m_SizeScalar = sizeScalar;
-			glGenTextures(1, &(super->address()));
+
 			_resize(width,height,super);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
