@@ -2,14 +2,13 @@
 #ifndef RENDERED_ITEM_H
 #define RENDERED_ITEM_H
 
-#include <memory>
 #include "Engine_Math.h"
-#include "Engine_ResourceBasic.h"
+#include "BindableResource.h"
 
 class Mesh;
 class Material;
 
-class RenderedItem final: public EngineResource{
+class RenderedItem final: public BindableResource{
 	private:
 		class impl;
 		std::unique_ptr<impl> m_i;
@@ -26,9 +25,6 @@ class RenderedItem final: public EngineResource{
 		glm::vec3& getScale();
 		std::string& parent();
 		boost::weak_ptr<std::string>& parentPtr();
-
-		void bind();
-		void unbind();
 
 		void setOrientation(glm::quat&);
 		void setOrientation(float x,float y,float z);
@@ -52,8 +48,5 @@ class RenderedItem final: public EngineResource{
 		void scale(glm::vec3&);
 
 		void update(float dt);
-
-		template<class T> void setCustomBindFunctor(T& functor);
-		template<class T> void setCustomUnbindFunctor(T& functor);
 };
 #endif

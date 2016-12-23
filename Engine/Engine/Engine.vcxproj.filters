@@ -231,6 +231,9 @@
     <ClCompile Include="RenderedItem.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="BindableResource.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -342,6 +345,9 @@
       <Filter>Header Files\Engine\Engine_Resources</Filter>
     </ClInclude>
     <ClInclude Include="RenderedItem.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="BindableResource.h">
       <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>

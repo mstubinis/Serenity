@@ -11,12 +11,11 @@
 
 #include <boost/weak_ptr.hpp>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
 using namespace Engine;
 
-struct DefaultRenderedItemBindFunctor{void operator()(RenderedItem* i) const {
+struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
+	RenderedItem* i = static_cast<RenderedItem*>(r);
+
 	boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
 	if(exists(o)){
 		Object* obj = o.lock().get();
@@ -27,15 +26,14 @@ struct DefaultRenderedItemBindFunctor{void operator()(RenderedItem* i) const {
 		}
 	}
 }};
-struct DefaultRenderedItemUnbindFunctor{void operator()(RenderedItem* i) const {
+struct DefaultRenderedItemUnbindFunctor{void operator()(EngineResource* r) const {
+	//RenderedItem* i = static_cast<RenderedItem*>(r);
 }};
 
 class RenderedItem::impl{
 	public:
 		static DefaultRenderedItemUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 		static DefaultRenderedItemBindFunctor DEFAULT_BIND_FUNCTOR;
-		boost::function<void()> m_CustomBindFunctor;
-		boost::function<void()> m_CustomUnbindFunctor;
 
 		Mesh* m_Mesh;
 		Material* m_Material;
@@ -56,10 +54,9 @@ class RenderedItem::impl{
 
 			std::string n = m_Mesh->name() + "_" + m_Material->name();
 			n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);
-			super->setName(n);
-
 			m_ParentPtr = boost::dynamic_pointer_cast<std::string>(parentNamePtr);
 
+			super->setName(n);
 			super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_BIND_FUNCTOR);
 			super->setCustomUnbindFunctor(RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR);
 		}
@@ -89,12 +86,12 @@ class RenderedItem::impl{
 DefaultRenderedItemBindFunctor RenderedItem::impl::DEFAULT_BIND_FUNCTOR;
 DefaultRenderedItemUnbindFunctor RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR;
 
-RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
+RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):BindableResource(),m_i(new impl()){
 	m_i->_init(mesh,mat,pos,rot,scl,this,parentNamePtr);
 	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<RenderedItem>(this));
 	mat->addObject(name());
 }
-RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr,std::string mesh,std::string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
+RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr,std::string mesh,std::string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):BindableResource(),m_i(new impl()){
 	Mesh* _mesh = Resources::getMesh(mesh);
 	Material* _mat = Resources::getMaterial(mat);
 	m_i->_init(_mesh,_mat,pos,rot,scl,this,parentNamePtr);
@@ -148,7 +145,3 @@ boost::weak_ptr<std::string>& RenderedItem::parentPtr(){ return m_i->m_ParentPtr
 void RenderedItem::update(float dt){
 	m_i->_updateModelMatrix();
 }
-void RenderedItem::bind(){ m_i->m_CustomBindFunctor(); }
-void RenderedItem::unbind(){ m_i->m_CustomUnbindFunctor(); }
-template<class T> void RenderedItem::setCustomBindFunctor(T& functor){ m_i->m_CustomBindFunctor = boost::bind<void>(functor,this); }
-template<class T> void RenderedItem::setCustomUnbindFunctor(T& functor){ m_i->m_CustomUnbindFunctor = boost::bind<void>(functor,this); }

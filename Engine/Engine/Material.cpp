@@ -6,9 +6,6 @@
 #include "Engine_Renderer.h"
 #include "ShaderProgram.h"
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
 #include <unordered_map>
 #include <algorithm>
 
@@ -16,8 +13,8 @@ using namespace Engine;
 
 std::vector<glm::vec4> Material::m_MaterialProperities;
 
-
-struct DefaultMaterialBindFunctor{void operator()(Material* m) const {
+struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
+	Material* m = static_cast<Material*>(r);
 	glm::vec3 first(0); glm::vec3 second(0);
 	for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
 		MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
@@ -42,7 +39,8 @@ struct DefaultMaterialBindFunctor{void operator()(Material* m) const {
 	Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
 	Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
 }};
-struct DefaultMaterialUnbindFunctor{void operator()(Material* m) const {
+struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
+	//Material* m = static_cast<Material*>(r);
 }};
 
 
@@ -143,8 +141,6 @@ class Material::impl final{
     public:
 		static DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
 		static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-		boost::function<void()> m_CustomBindFunctor;
-		boost::function<void()> m_CustomUnbindFunctor;
 
         std::unordered_map<uint,MaterialComponent*> m_Components;
 		std::vector<skey> m_Objects;
@@ -219,10 +215,10 @@ class Material::impl final{
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
-Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
+Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):BindableResource(),m_i(new impl()){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
-Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
+Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):BindableResource(),m_i(new impl()){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){
@@ -295,9 +291,6 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 	Material::addComponentRefraction(cubemap,map,mixFactor,ratio);
 }
 
-void Material::bind(){ m_i->m_CustomBindFunctor(); }
-void Material::unbind(){ m_i->m_CustomUnbindFunctor(); }
-
 const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
 const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at((uint)MATERIAL_COMPONENT_TYPE_REFLECTION)); }
@@ -328,6 +321,3 @@ void Material::removeObject(std::string objectName){
 	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),sksortlessthan());
 }
 std::vector<skey>& Material::getObjects(){ return m_i->m_Objects; }
-
-template<class T> void Material::setCustomBindFunctor(T& functor){ m_i->m_CustomBindFunctor = boost::bind<void>(functor,this); }
-template<class T> void Material::setCustomUnbindFunctor(T& functor){ m_i->m_CustomUnbindFunctor = boost::bind<void>(functor,this); }

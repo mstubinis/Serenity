@@ -6,8 +6,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 #include <iostream>
 
 using namespace Engine;
@@ -38,7 +36,9 @@ bool Shader::fromFile(){ return m_i->m_FromFile; }
 
 #pragma endregion
 
-struct DefaultShaderBindFunctor{void operator()(ShaderP* program) const {
+struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
+	ShaderP* program = static_cast<ShaderP*>(r);
+
 	Camera* c = Resources::getActiveCamera();
 	Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
 	Renderer::sendUniform1fSafe("far",c->getFar());
@@ -48,16 +48,14 @@ struct DefaultShaderBindFunctor{void operator()(ShaderP* program) const {
 	if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
 	else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
 }};
-struct DefaultShaderUnbindFunctor{void operator()(ShaderP* program) const {
-
+struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
+	//ShaderP* program = static_cast<ShaderP*>(r);
 }};
 
 class ShaderP::impl final{
     public:
 		static DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
 		static DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-		boost::function<void()> m_CustomBindFunctor;
-		boost::function<void()> m_CustomUnbindFunctor;
 
 		SHADER_PIPELINE_STAGE m_Stage;
         GLuint m_ShaderProgram;
@@ -219,10 +217,10 @@ class ShaderP::impl final{
 DefaultShaderBindFunctor ShaderP::impl::DEFAULT_BIND_FUNCTOR;
 DefaultShaderUnbindFunctor ShaderP::impl::DEFAULT_UNBIND_FUNCTOR;
 
-ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
+ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):BindableResource(),m_i(new impl()){
     m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
+ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):BindableResource(),m_i(new impl()){
     m_i->_construct(n,vs,fs,s,this);
 }
 ShaderP::~ShaderP(){
@@ -250,9 +248,4 @@ void ShaderP::addMaterial(std::string m){
 	m_i->m_Materials.push_back(k);
 	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),sksortlessthan());
 }
-void ShaderP::bind(){ m_i->m_CustomBindFunctor(); }
-void ShaderP::unbind(){ m_i->m_CustomUnbindFunctor(); }
 const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
-
-template<class T> void ShaderP::setCustomBindFunctor(T& functor){m_i->m_CustomBindFunctor = boost::bind<void>(functor,this);}
-template<class T> void ShaderP::setCustomUnbindFunctor(T& functor){m_i->m_CustomUnbindFunctor = boost::bind<void>(functor,this);}

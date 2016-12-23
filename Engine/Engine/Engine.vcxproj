@@ -99,6 +99,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Atmosphere.cpp" />
+    <ClCompile Include="BindableResource.cpp" />
     <ClCompile Include="CapsuleSpace.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_Math.cpp" />
@@ -140,6 +141,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Atmosphere.h" />
+    <ClInclude Include="BindableResource.h" />
     <ClInclude Include="CapsuleSpace.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Engine_Math.h" />

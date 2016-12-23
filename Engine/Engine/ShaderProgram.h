@@ -2,10 +2,8 @@
 #ifndef ENGINE_SHADERPROGRAM_H
 #define ENGINE_SHADERPROGRAM_H
 
-#include "Engine_ResourceBasic.h"
+#include "BindableResource.h"
 #include <unordered_map>
-#include <string>
-#include <memory>
 typedef unsigned int uint;
 
 enum SHADER_PIPELINE_STAGE{
@@ -36,7 +34,7 @@ class Shader final: public EngineResource{
 };
 
 
-class ShaderP final: public EngineResource{
+class ShaderP final: public BindableResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
@@ -56,11 +54,6 @@ class ShaderP final: public EngineResource{
 
 		void addMaterial(std::string);
 		const std::unordered_map<std::string,GLint>& uniforms() const;
-
-		void bind();
-		void unbind();
-		template<class T> void setCustomBindFunctor(T& functor);
-		template<class T> void setCustomUnbindFunctor(T& functor);
 };
 
 #endif

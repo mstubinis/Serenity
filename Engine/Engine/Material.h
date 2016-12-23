@@ -2,12 +2,8 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
-#include "Engine_ResourceBasic.h"
-
-#include <string>
-#include <memory>
+#include "BindableResource.h"
 #include <glm/glm.hpp>
-#include <vector>
 #include <unordered_map>
 
 class Texture;
@@ -100,7 +96,7 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 		const float refractionRatio() const { return m_RefractionRatio; }
 };
 
-class Material final: public EngineResource{
+class Material final: public BindableResource{
 	public:
 		//this is very important here
 		//vec4:  (  glow,  specularity, lightingMode, shadeless  )
@@ -120,9 +116,6 @@ class Material final: public EngineResource{
 
 		const MaterialComponentReflection* getComponentReflection() const;
 		const MaterialComponentRefraction* getComponentRefraction() const;
-
-		void bind();
-		void unbind();
 
         void addComponent(uint type, Texture* texture);
 
@@ -156,8 +149,5 @@ class Material final: public EngineResource{
 		void addObject(std::string objectName);
 		void removeObject(std::string objectName);
 		std::vector<skey>& getObjects();
-
-		template<class T> void setCustomBindFunctor(T& functor);
-		template<class T> void setCustomUnbindFunctor(T& functor);
 };
 #endif
