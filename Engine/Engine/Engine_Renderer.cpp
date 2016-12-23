@@ -217,35 +217,9 @@ void Detail::RenderManagement::_bind(ShaderP* p){
 }
 void Detail::RenderManagement::_bind(Material* m){
 	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != m->name()){
-		glm::vec3 first(0); glm::vec3 second(0);
-		for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
-			MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-			if(m->getComponents().count(type)){
-				MaterialComponent* c = m->getComponents().at(type);
-				if(c->texture() != nullptr && c->texture()->address() != 0){
-					//enable
-					if     (i == 0){ first.x = 1.0f; }
-					else if(i == 1){ first.y = 1.0f; }
-					else if(i == 2){ first.z = 1.0f; }
-					else if(i == 3){ second.x = 1.0f; }
-					else if(i == 4){ second.y = 1.0f; }
-					else if(i == 5){ second.z = 1.0f; }
-					c->bind();
-				}
-				else{ c->unbind(); }
-			}
-		}
-		Renderer::sendUniform1iSafe("Shadeless",int(m->shadeless()));
-		Renderer::sendUniform1fSafe("BaseGlow",m->glow());
-		Renderer::sendUniform1fSafe("matID",float(float(m->id())/255.0f));
-		Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
-		Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
-
 		m->bind(); //bind custom data
 		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = m->name();
 	}
-}
-void Detail::RenderManagement::_bind(RenderedItem* i){
 }
 
 void Detail::RenderManagement::init(){
@@ -410,8 +384,8 @@ void Detail::RenderManagement::_passGeometry(){
 
 				if(scene->objects().count(parentObjectName)){
 					o->bind();   //bind object specific data shared between all of its rendered items
-					item->draw(RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
-					o->unbind(); //unbind any object specific data if needed
+					item->bind();
+					o->unbind();
 				}
 			}
 		}

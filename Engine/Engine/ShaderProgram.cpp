@@ -6,9 +6,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <iostream>
 
 using namespace Engine;
+
+#pragma region individualShaderFiles
 
 class Shader::impl final{
 	public:
@@ -32,8 +36,25 @@ SHADER_TYPE Shader::type(){ return m_i->m_Type; }
 std::string Shader::data(){ return m_i->m_Data; }
 bool Shader::fromFile(){ return m_i->m_FromFile; }
 
+#pragma endregion
+
+struct DefaultShaderBindFunctor{void operator()(ShaderP* program) const {
+	Camera* c = Resources::getActiveCamera();
+	Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
+	Renderer::sendUniform1fSafe("far",c->getFar());
+	Renderer::sendUniform1fSafe("C",1.0f);
+	glm::vec3 camPos = glm::vec3(c->getPosition());
+
+	if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
+	else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
+}};
+
 class ShaderP::impl final{
     public:
+		static DefaultShaderBindFunctor DEFAULT_FUNCTOR;
+
+		boost::function<void()> m_CustomBindFunctor;
+
 		SHADER_PIPELINE_STAGE m_Stage;
         GLuint m_ShaderProgram;
 		std::vector<skey> m_Materials;
@@ -45,6 +66,9 @@ class ShaderP::impl final{
             m_VertexShader = vs;
             m_FragmentShader = ps;
 			m_UniformLocations.clear();
+
+			super->setCustomBindFunctor(ShaderP::impl::DEFAULT_FUNCTOR);
+
 			if(stage == SHADER_PIPELINE_STAGE_GEOMETRY){
 				Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms.push_back(super);
 			}
@@ -186,17 +210,8 @@ class ShaderP::impl final{
         void _compileDX(std::string vs, std::string ps, bool fromFile){
         
 		}
-		void _bind(){
-			Camera* c = Resources::getActiveCamera();
-			Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
-			Renderer::sendUniform1fSafe("far",c->getFar());
-			Renderer::sendUniform1fSafe("C",1.0f);
-			glm::vec3 camPos = glm::vec3(c->getPosition());
-
-			if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
-			else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
-		}
 };
+DefaultShaderBindFunctor ShaderP::impl::DEFAULT_FUNCTOR;
 
 ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
     m_i->_construct(n,vs,fs,s,this);
@@ -230,6 +245,10 @@ void ShaderP::addMaterial(std::string m){
 	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),sksortlessthan());
 }
 void ShaderP::bind(){
-	m_i->_bind();
+	m_i->m_CustomBindFunctor();
 }
 const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
+
+template<class T> void ShaderP::setCustomBindFunctor(T& functor){
+	m_i->m_CustomBindFunctor = boost::bind<void>(functor,this);
+}

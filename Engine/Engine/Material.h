@@ -155,5 +155,7 @@ class Material final: public EngineResource{
 		void addObject(std::string objectName);
 		void removeObject(std::string objectName);
 		std::vector<skey>& getObjects();
+
+		template<class T> void setCustomBindFunctor(T& functor);
 };
 #endif

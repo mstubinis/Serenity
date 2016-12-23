@@ -85,6 +85,8 @@ class Object: public IObject{
 		virtual bool passedRenderCheck(){ return false; }
         virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}
+
+		template<class T> void setCustomBindFunctor(T& functor){}
 };
 
 class ObjectBasic: public Object{

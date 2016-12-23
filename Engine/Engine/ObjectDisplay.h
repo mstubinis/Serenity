@@ -4,9 +4,14 @@
 
 #include "Object.h"
 #include "RenderedItem.h"
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
+struct DefaultObjectDisplayBindFunctor;
 class ObjectDisplay: public ObjectBasic{
+	public: static DefaultObjectDisplayBindFunctor DEFAULT_FUNCTOR;
     protected:
+		boost::function<void()> m_CustomBindFunctor;
         bool m_Shadeless;
         bool m_Visible;
 		bool m_PassedRenderCheck;
@@ -55,5 +60,7 @@ class ObjectDisplay: public ObjectBasic{
 		virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
+
+		template<class T> void setCustomBindFunctor(T& functor);
 };
 #endif

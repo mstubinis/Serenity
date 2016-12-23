@@ -6,12 +6,45 @@
 #include "Engine_Renderer.h"
 #include "ShaderProgram.h"
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 #include <unordered_map>
 #include <algorithm>
 
 using namespace Engine;
 
 std::vector<glm::vec4> Material::m_MaterialProperities;
+
+
+struct DefaultMaterialBindFunctor{void operator()(Material* m) const {
+	glm::vec3 first(0); glm::vec3 second(0);
+	for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
+		MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
+		if(m->getComponents().count(type)){
+			MaterialComponent* c = m->getComponents().at(type);
+			if(c->texture() != nullptr && c->texture()->address() != 0){
+				//enable
+				if     (i == 0){ first.x = 1.0f; }
+				else if(i == 1){ first.y = 1.0f; }
+				else if(i == 2){ first.z = 1.0f; }
+				else if(i == 3){ second.x = 1.0f; }
+				else if(i == 4){ second.y = 1.0f; }
+				else if(i == 5){ second.z = 1.0f; }
+				c->bind();
+			}
+			else{ c->unbind(); }
+		}
+	}
+	Renderer::sendUniform1iSafe("Shadeless",int(m->shadeless()));
+	Renderer::sendUniform1fSafe("BaseGlow",m->glow());
+	Renderer::sendUniform1fSafe("matID",float(float(m->id())/255.0f));
+	Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
+	Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
+}};
+
+
+
 
 std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
 	std::unordered_map<uint,std::vector<uint>> map;
@@ -110,6 +143,9 @@ void MaterialComponentRefraction::bind(){
 
 class Material::impl final{
     public:
+		static DefaultMaterialBindFunctor DEFAULT_FUNCTOR;
+		boost::function<void()> m_CustomBindFunctor;
+
         std::unordered_map<uint,MaterialComponent*> m_Components;
 		std::vector<skey> m_Objects;
         uint m_LightingMode;
@@ -117,7 +153,7 @@ class Material::impl final{
         float m_BaseGlow;
         float m_SpecularityPower;
 		uint m_ID;
-        void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* base){
+        void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
 			_addComponent(MATERIAL_COMPONENT_TYPE_DIFFUSE,diffuse);
 			_addComponent(MATERIAL_COMPONENT_TYPE_NORMAL,normal);
 			_addComponent(MATERIAL_COMPONENT_TYPE_GLOW,glow);
@@ -127,9 +163,11 @@ class Material::impl final{
             m_SpecularityPower = 50.0f;
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
 			_addToMaterialPool();
-			base->setName(name);
+			super->setName(name);
+
+			super->setCustomBindFunctor(Material::impl::DEFAULT_FUNCTOR);
         }
-        void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* base){
+        void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* super){
             Texture* diffuseT = Resources::getTexture(diffuse); 
             Texture* normalT = Resources::getTexture(normal); 
             Texture* glowT = Resources::getTexture(glow);
@@ -138,7 +176,7 @@ class Material::impl final{
             if(normalT == nullptr && normal != "")  normalT = new Texture(normal);
             if(glowT == nullptr && glow != "")    glowT = new Texture(glow);
 			if(specularT == nullptr && specular != "")    specularT = new Texture(specular);
-            _init(name,diffuseT,normalT,glowT,specularT,base);
+            _init(name,diffuseT,normalT,glowT,specularT,super);
         }
 		void _addToMaterialPool(){
 			this->m_ID = Material::m_MaterialProperities.size();
@@ -177,6 +215,7 @@ class Material::impl final{
         void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
         void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
+DefaultMaterialBindFunctor Material::impl::DEFAULT_FUNCTOR;
 
 Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
     m_i->_init(name,diffuse,normal,glow,specular,this);
@@ -255,7 +294,7 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 }
 
 void Material::bind(){
-
+	m_i->m_CustomBindFunctor();
 }
 
 const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
@@ -288,3 +327,7 @@ void Material::removeObject(std::string objectName){
 	std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),sksortlessthan());
 }
 std::vector<skey>& Material::getObjects(){ return m_i->m_Objects; }
+
+template<class T> void Material::setCustomBindFunctor(T& functor){
+	m_i->m_CustomBindFunctor = boost::bind<void>(functor,this);
+}

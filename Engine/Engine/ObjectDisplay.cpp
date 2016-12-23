@@ -12,6 +12,12 @@
 
 using namespace Engine;
 
+struct DefaultObjectDisplayBindFunctor{void operator()(ObjectDisplay* o) const {
+	Renderer::sendUniform4f("Object_Color",o->getColor());
+	Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
+}};
+DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_FUNCTOR;
+
 ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
     m_Visible = true;
@@ -24,16 +30,14 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Color = glm::vec4(1);
 	m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
+
+	setCustomBindFunctor(ObjectDisplay::DEFAULT_FUNCTOR);
 }
 ObjectDisplay::~ObjectDisplay(){
-    //for(auto item:m_DisplayItems) SAFE_DELETE(item);
 }
-void ObjectDisplay::bind(){
-	Renderer::sendUniform4f("Object_Color",m_Color);
-	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor);
-}
-void ObjectDisplay::unbind(){
-}
+void ObjectDisplay::bind(){ m_CustomBindFunctor(); }
+void ObjectDisplay::unbind(){}
+
 void ObjectDisplay::update(float dt){
 	ObjectBasic::update(dt);
 	for(auto renderedItem:m_DisplayItems){
@@ -97,4 +101,8 @@ bool ObjectDisplay::rayIntersectSphere(Camera* c){
 }
 bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 	return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
+}
+
+template<class T> void ObjectDisplay::setCustomBindFunctor(T& functor){
+	m_CustomBindFunctor = boost::bind<void>(functor,this);
 }

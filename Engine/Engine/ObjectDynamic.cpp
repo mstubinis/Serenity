@@ -16,6 +16,13 @@
 
 using namespace Engine;
 
+
+struct DefaultObjectDynamicBindFunctor{void operator()(ObjectDynamic* o) const {
+	Renderer::sendUniform4f("Object_Color",o->getColor());
+	Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
+}};
+DefaultObjectDynamicBindFunctor ObjectDynamic::DEFAULT_FUNCTOR;
+
 void ObjectDynamic::setDynamic(bool dynamic){
     if(dynamic){
         Physics::removeRigidBody(this);
@@ -97,12 +104,13 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     }
     m_Collision->getCollisionShape()->setUserPointer(this);
     m_RigidBody->setUserPointer(this);
+
+	setCustomBindFunctor(ObjectDynamic::DEFAULT_FUNCTOR);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
     SAFE_DELETE(m_RigidBody);
     SAFE_DELETE(m_MotionState);
-    //for(auto item:m_DisplayItems) SAFE_DELETE(item);
 }
 void ObjectDynamic::translate(glm::num x, glm::num y, glm::num z,bool local){
     m_RigidBody->activate();
@@ -151,12 +159,8 @@ void ObjectDynamic::update(float dt){
 		m_PassedRenderCheck = false;
 	}
 }
-void ObjectDynamic::bind(){
-	Renderer::sendUniform4f("Object_Color",m_Color);
-	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor);
-}
-void ObjectDynamic::unbind(){
-}
+void ObjectDynamic::bind(){ m_CustomBindFunctor(); }
+void ObjectDynamic::unbind(){}
 void ObjectDynamic::render(GLuint shader,bool debug){
     //add to render queue
     if(shader == 0){
@@ -420,3 +424,7 @@ glm::vec3 ObjectDynamic::getScale(){
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
 glm::m4 ObjectDynamic::getModel(){ return m_Model; }
+
+template<class T> void ObjectDynamic::setCustomBindFunctor(T& functor){
+	m_CustomBindFunctor = boost::bind<void>(functor,this);
+}

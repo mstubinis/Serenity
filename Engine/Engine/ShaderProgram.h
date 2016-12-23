@@ -36,14 +36,14 @@ class Shader final: public EngineResource{
 };
 
 
-class ShaderP: public EngineResource{
+class ShaderP final: public EngineResource{
     private:
 		class impl;
 		std::unique_ptr<impl> m_i;
     public:
         ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
 		ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        virtual ~ShaderP();
+        ~ShaderP();
 
         void initRenderingContext();
         void cleanupRenderingContext();
@@ -56,7 +56,8 @@ class ShaderP: public EngineResource{
 
 		const std::unordered_map<std::string,GLint>& uniforms() const;
 
-		virtual void bind();
+		void bind();
+		template<class T> void setCustomBindFunctor(T& functor);
 		void addMaterial(std::string);
 };
 

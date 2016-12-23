@@ -5,14 +5,34 @@
 #include "Material.h"
 #include "Object.h"
 #include "Camera.h"
+
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <boost/weak_ptr.hpp>
+
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 using namespace Engine;
 
+struct DefaultRenderedItemBindFunctor{void operator()(RenderedItem* i) const {
+	boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
+	if(exists(o)){
+		Object* obj = o.lock().get();
+		Camera* c = Resources::getActiveCamera();
+		if(obj->passedRenderCheck()){
+			Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());
+			i->mesh()->render();
+		}
+	}
+}};
+
 class RenderedItem::impl{
 	public:
+		static DefaultRenderedItemBindFunctor DEFAULT_FUNCTOR;
+		boost::function<void()> m_CustomBindFunctor;
+
 		Mesh* m_Mesh;
 		Material* m_Material;
 		glm::vec3 m_Position;
@@ -20,9 +40,7 @@ class RenderedItem::impl{
 		glm::vec3 m_Scale;
 		glm::mat4 m_Model;
 		bool m_NeedsUpdate;
-
 		boost::weak_ptr<std::string> m_ParentPtr;
-
 		void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,RenderedItem* super,boost::shared_ptr<std::string>& parentNamePtr){
 			m_Mesh = mesh;
 			m_Material = mat;
@@ -37,6 +55,8 @@ class RenderedItem::impl{
 			super->setName(n);
 
 			m_ParentPtr = boost::dynamic_pointer_cast<std::string>(parentNamePtr);
+
+			super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_FUNCTOR);
 		}
 		void _destruct(){
 		}
@@ -60,18 +80,8 @@ class RenderedItem::impl{
 				m_NeedsUpdate = false;
 			}
 		}
-		void _draw(bool debug, bool godsRays){
-			boost::weak_ptr<Object> o = Resources::getObjectPtr(*m_ParentPtr.lock().get());
-			if(exists(o)){
-				Object* obj = o.lock().get();
-				Camera* c = Resources::getActiveCamera();
-				if(obj->passedRenderCheck()){
-					Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * m_Model);
-					m_Mesh->render();
-				}
-			}
-		}
 };
+DefaultRenderedItemBindFunctor RenderedItem::impl::DEFAULT_FUNCTOR;
 
 RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
 	m_i->_init(mesh,mat,pos,rot,scl,this,parentNamePtr);
@@ -128,9 +138,9 @@ void RenderedItem::setOrientation(float x,float y,float z){
 }
 std::string& RenderedItem::parent(){ return *(m_i->m_ParentPtr.lock().get()); }
 boost::weak_ptr<std::string>& RenderedItem::parentPtr(){ return m_i->m_ParentPtr; }
-void RenderedItem::draw(bool debug, bool godsRays){
-	m_i->_draw(debug,godsRays);
-}
+
 void RenderedItem::update(float dt){
 	m_i->_updateModelMatrix();
 }
+void RenderedItem::bind(){ m_i->m_CustomBindFunctor(); }
+template<class T> void RenderedItem::setCustomBindFunctor(T& functor){ m_i->m_CustomBindFunctor = boost::bind<void>(functor,this); }
