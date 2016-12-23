@@ -126,47 +126,47 @@ class GBuffer::impl final{
         }
         void _start(uint type,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-			types.push_back(m_Buffers[type].lock().get()->attatchment());
+			types.push_back(m_Buffers.at(type).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type].lock().get()->attatchment());
-            types.push_back(m_Buffers[type1].lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type1).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type].lock().get()->attatchment());
-            types.push_back(m_Buffers[type1].lock().get()->attatchment());
-            types.push_back(m_Buffers[type2].lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type1).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type2).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,uint type3,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type].lock().get()->attatchment());
-            types.push_back(m_Buffers[type1].lock().get()->attatchment());
-            types.push_back(m_Buffers[type2].lock().get()->attatchment());
-            types.push_back(m_Buffers[type3].lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type1).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type2).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type3).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,uint type3,uint type4,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type].lock().get()->attatchment());
-            types.push_back(m_Buffers[type1].lock().get()->attatchment());
-            types.push_back(m_Buffers[type2].lock().get()->attatchment());
-            types.push_back(m_Buffers[type3].lock().get()->attatchment());
-            types.push_back(m_Buffers[type4].lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type1).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type2).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type3).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type4).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,uint type2,uint type3,uint type4,uint type5,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-            types.push_back(m_Buffers[type].lock().get()->attatchment());
-            types.push_back(m_Buffers[type1].lock().get()->attatchment());
-            types.push_back(m_Buffers[type2].lock().get()->attatchment());
-            types.push_back(m_Buffers[type3].lock().get()->attatchment());
-            types.push_back(m_Buffers[type4].lock().get()->attatchment());
-            types.push_back(m_Buffers[type5].lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type1).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type2).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type3).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type4).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type5).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _stop(){
@@ -203,7 +203,7 @@ void GBuffer::resizeBaseBuffer(uint width,uint height){
     m_i->_resizeBaseBuffer(width,height);
 }
 void GBuffer::resizeBuffer(uint buffer,uint width,uint height){ 
-	m_i->m_Buffers[buffer].lock().get()->resize(width,height); 
+	m_i->m_Buffers.at(buffer).lock().get()->resize(width,height); 
 }
 void GBuffer::start(std::vector<uint>& types,std::string channels,bool first_fbo){
     m_i->_start(types,channels,first_fbo);
@@ -233,5 +233,5 @@ const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& GBuffer::getBuffe
     return m_i->m_Buffers; 
 }
 Texture* GBuffer::getTexture(uint type){ 
-	return m_i->m_Buffers[type].lock().get();
+	return m_i->m_Buffers.at(type).lock().get();
 }

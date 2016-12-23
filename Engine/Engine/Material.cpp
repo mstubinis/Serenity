@@ -158,19 +158,19 @@ class Material::impl final{
         void _addComponent(uint type, Texture* texture){
 			if((m_Components.count(type) && m_Components[type] != nullptr) || texture == nullptr)
                 return;
-            m_Components[type] = new MaterialComponent(type,texture);
+			m_Components.emplace(type,new MaterialComponent(type,texture));
         }
         void _addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
 			uint type = (uint)MATERIAL_COMPONENT_TYPE_REFLECTION;
 			if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
-            m_Components[type] = new MaterialComponentReflection(type,cubemap,map,mixFactor);
+            m_Components.emplace(type,new MaterialComponentReflection(type,cubemap,map,mixFactor));
         }
         void _addComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio){
 			uint type = (uint)MATERIAL_COMPONENT_TYPE_REFRACTION;
 			if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
-            m_Components[type] = new MaterialComponentRefraction(type,cubemap,map,mixFactor,ratio);
+            m_Components.emplace(type,new MaterialComponentRefraction(type,cubemap,map,mixFactor,ratio));
         }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
@@ -259,9 +259,9 @@ void Material::bind(){
 }
 
 const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
-const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components[index]; }
-const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components[(uint)MATERIAL_COMPONENT_TYPE_REFLECTION]); }
-const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components[(uint)MATERIAL_COMPONENT_TYPE_REFRACTION]); }
+const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
+const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at((uint)MATERIAL_COMPONENT_TYPE_REFLECTION)); }
+const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at((uint)MATERIAL_COMPONENT_TYPE_REFRACTION)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const float Material::specularity() const { return m_i->m_SpecularityPower; }

@@ -74,6 +74,10 @@ namespace Engine{
 		float Max(glm::vec3&);
 		float Max(glm::vec4&);
 
+		float Max(float,float);
+		float Max(float,float,float);
+		float Max(float,float,float,float);
+
 		float fade(float t);
 		double fade(double t);
 		glm::num fade(glm::num t);

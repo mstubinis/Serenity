@@ -47,22 +47,22 @@ namespace Engine{
 						S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
 					}
 					template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::map<K,V,H,F>& m,const S& n,O& o){
-						K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.insert(std::pair<K,O>(k,o));
+						K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
 					}
 					template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::unordered_map<K,V,H,F>& m,const S& n,O& o){
-						K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.insert(std::pair<K,O>(k,o));
+						K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
 					}
 					template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::map<K,V,H,F>& m,const S& n){
-						if(!m.count(n))return nullptr; return m[n].get(); 
+						if(!m.count(n))return nullptr; return m.at(n).get();
 					}
 					template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
-						if(!m.count(n)) return nullptr; return m[n].get(); 
+						if(!m.count(n)) return nullptr; return m.at(n).get();
 					}
 					template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::map<K,V,H,F>& m,const S& n){
-						if (m.size() > 0 && m.count(n)){m[n].reset();m.erase(n);}
+						if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
 					}
 					template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
-						if (m.size() > 0 && m.count(n)){m[n].reset();m.erase(n);}
+						if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
 					}
                     static Scene* m_CurrentScene;
 

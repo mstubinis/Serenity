@@ -1,5 +1,6 @@
 #include "Skybox.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
@@ -8,7 +9,6 @@
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 using namespace Engine;
 
@@ -96,25 +96,26 @@ void Skybox::update(){
     m_Model[3][1] = p.y;
     m_Model[3][2] = p.z;
 }
-void Skybox::render(bool godsRays){
-    GLuint shader = Resources::getShaderProgram("Deferred_Skybox")->program();
-    glUseProgram(shader);
+void Skybox::draw(bool godsRays){
+	Renderer::bindShaderProgram("Deferred_Skybox");
 
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(Resources::getActiveCamera()->getViewProjection()));
-    glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(m_Model));
+	Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+	Renderer::sendUniformMatrix4f("Model",m_Model);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_Texture->address());
-    glUniform1i(glGetUniformLocation(shader, "Texture"), 0);
+	Renderer::bindTexture("Texture",m_Texture,0);
 
-	if(godsRays == true){ glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1); }
-	else{                 glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0); }
+	Renderer::sendUniform1i("HasGodsRays",1);
+	Renderer::sendUniform1i("HasGodsRays",0);
+
+	if(godsRays){ Renderer::sendUniform1i("HasGodsRays",1); }
+	else{         Renderer::sendUniform1i("HasGodsRays",0); }
 
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
     glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
     glDisableVertexAttribArray(0);
-    glUseProgram(0);
+
+	Renderer::unbindTextureCubemap(0);
+	Renderer::bindShaderProgram(0);
 }

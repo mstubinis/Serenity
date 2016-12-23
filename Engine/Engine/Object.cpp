@@ -27,7 +27,7 @@ Object::Object(std::string n,Scene* scene, bool isNotCamera){
 		Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
 
 		skey k(this);
-		scene->objects()[k] = this;
+		scene->objects().emplace(k,this);
     }
 }
 Object::~Object()

@@ -42,26 +42,15 @@ GameSkybox::~GameSkybox(){
 void GameSkybox::update(){
     Skybox::update();
 }
-void GameSkybox::render(bool godsRays){
-    Skybox::render(godsRays);
+void GameSkybox::draw(bool godsRays){
+    Skybox::draw(godsRays);
     if(m_SunFlares.size() > 0){
-        glEnablei(GL_BLEND,0);
-        glDisable(GL_DEPTH_TEST);
-        glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
-
         Texture* texture = Resources::getTexture("data/Textures/Skyboxes/StarFlare.png");
-        GLuint shader = Resources::getShaderProgram("Deferred_HUD")->program();
-        glUseProgram(shader);
-
         for(auto flare:m_SunFlares){
             glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position,false);
             glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
             glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
-
 			texture->render(glm::vec2(pos.x,pos.y),col,0,scl,0.5f);
         }
-        glUseProgram(0);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
     }
 }

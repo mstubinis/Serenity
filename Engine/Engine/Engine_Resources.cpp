@@ -58,12 +58,12 @@ Engine_Window* Resources::getWindow(){ return Detail::ResourceManagement::m_Wind
 sf::Vector2u Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
 Camera* Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
 boost::weak_ptr<Camera>& Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
-void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[c->name()]; }
-void Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras[name]; }
+void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras.at(c->name()); }
+void Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras.at(name); }
 
-boost::shared_ptr<Object>& Resources::getObjectPtr(std::string n){return Detail::ResourceManagement::m_Objects[n];}
-boost::shared_ptr<Camera>& Resources::getCameraPtr(std::string n){return Detail::ResourceManagement::m_Cameras[n];}
-boost::shared_ptr<Texture>& Resources::getTexturePtr(std::string n){return Detail::ResourceManagement::m_Textures[n];}
+boost::shared_ptr<Object>& Resources::getObjectPtr(std::string n){return Detail::ResourceManagement::m_Objects.at(n);}
+boost::shared_ptr<Camera>& Resources::getCameraPtr(std::string n){return Detail::ResourceManagement::m_Cameras.at(n);}
+boost::shared_ptr<Texture>& Resources::getTexturePtr(std::string n){return Detail::ResourceManagement::m_Textures.at(n);}
 
 Scene* Resources::getScene(std::string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
 SoundEffectBasic* Resources::getSound(std::string n){return static_cast<SoundEffectBasic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}

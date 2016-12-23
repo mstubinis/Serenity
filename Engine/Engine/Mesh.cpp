@@ -299,7 +299,7 @@ void Mesh::_calculateMeshRadius(){
         if(x > maxX) maxX = x; if(y > maxY) maxY = y; if(z > maxZ) maxZ = z;
     }
     m_radiusBox = glm::vec3(maxX,maxY,maxZ);
-    m_radius = glm::max(maxX, glm::max(maxY,maxZ));
+    m_radius = Engine::Math::Max(m_radiusBox);
 }
 void Mesh::render(GLuint mode){
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){

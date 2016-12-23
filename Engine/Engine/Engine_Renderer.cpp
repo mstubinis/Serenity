@@ -380,12 +380,12 @@ void Detail::RenderManagement::_renderText(){
 }
 void Detail::RenderManagement::_passGeometry(){
 	Settings::clear();
-    Scene* s = Resources::getCurrentScene();
-    glm::vec3 clear = s->getBackgroundColor();
+    Scene* scene = Resources::getCurrentScene();
+    glm::vec3 clear = scene->getBackgroundColor();
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
     glClearBufferfv(GL_COLOR,BUFFER_TYPE_DIFFUSE,colors);
     glDisable(GL_BLEND); //disable blending on all mrts
-    s->renderSkybox(RendererInfo::GodRaysInfo::godRays);
+    scene->renderSkybox(RendererInfo::GodRaysInfo::godRays);
 
 	//RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
@@ -408,10 +408,10 @@ void Detail::RenderManagement::_passGeometry(){
 				string parentObjectName = item->parent();
 				Object* o = Resources::getObject(parentObjectName);
 
-				if(s->objects().count(parentObjectName)){
-					o->bind();
+				if(scene->objects().count(parentObjectName)){
+					o->bind();   //bind object specific data shared between all of its rendered items
 					item->draw(RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
-					o->unbind();
+					o->unbind(); //unbind any object specific data if needed
 				}
 			}
 		}

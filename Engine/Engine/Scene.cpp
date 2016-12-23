@@ -65,16 +65,16 @@ void Scene::update(float dt){
 void Scene::setAmbientLightColor(glm::vec3& c){ setAmbientLightColor(c.r,c.g,c.b); }
 void Scene::setAmbientLightColor(float r,float g,float b){ Engine::Math::setColor(m_AmbientLighting,r,g,b); }
 void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
-void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->render(godsRays); }
+void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->draw(godsRays); }
 
 glm::vec3 Scene::getAmbientLightColor(){ return m_AmbientLighting; }
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 
-std::unordered_map<skey,Object*,skh,skef>& Scene::objects(){ return m_Objects; }
-std::unordered_map<skey,SunLight*,skh,skef>& Scene::lights(){ return m_Lights; }
+std::unordered_map<skey,Object*,skh,skef>& Scene::objects() { return m_Objects; }
+std::unordered_map<skey,SunLight*,skh,skef>& Scene::lights() { return m_Lights; }
 
-Object* Scene::getObject(std::string name){ return m_Objects[skey(name)]; }
-SunLight* Scene::getLight(std::string name){ return m_Lights[skey(name)]; }
+Object* Scene::getObject(std::string name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
+SunLight* Scene::getLight(std::string name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()
 
 SkyboxEmpty* Scene::getSkybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

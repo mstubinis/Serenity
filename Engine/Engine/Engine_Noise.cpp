@@ -101,7 +101,6 @@ void Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long seed){
     }
 }
 
-
 double Noise::extrapolate(int xsb, int ysb, double dx, double dy){
     int index = Noise::Detail::MathNoiseManagement::perm[(Noise::Detail::MathNoiseManagement::perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
     return Detail::MathNoiseManagement::grad2[index].x * dx + Detail::MathNoiseManagement::grad2[index].y * dy;
