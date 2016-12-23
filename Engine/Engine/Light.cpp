@@ -595,25 +595,21 @@ void PointLight::lighten(){
 
 	Renderer::sendUniform3f("LightData",m_Constant,m_Linear,m_Exp);
 
-    this->m_Orientation = Resources::getActiveCamera()->getOrientation();
+    //m_Orientation = Resources::getActiveCamera()->getOrientation(); //this isnt really needed
 
     glm::mat4 m(1);
     m = glm::translate(m,glm::vec3(pos));
-    m *= glm::mat4_cast(m_Orientation);
+    //m *= glm::mat4_cast(m_Orientation); //this isnt really needed
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
 	Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
 	Renderer::sendUniformMatrix4f("Model",m);
 
-    if(glm::distance(campos,glm::vec3(pos)) > m_PointLightRadius){
-        glCullFace(GL_BACK);
-	}
-    else{
-        glCullFace(GL_FRONT);
-    }
+    if(glm::distance(campos,glm::vec3(pos)) > m_PointLightRadius){ Renderer::Settings::cullFace(GL_BACK); }
+    else{                                                          Renderer::Settings::cullFace(GL_FRONT);}
     Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
 
-    glCullFace(GL_BACK);
+	Renderer::Settings::cullFace(GL_BACK);
 }
 SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_SPOT){
     m_Direction = glm::vec3(0,0,-1);

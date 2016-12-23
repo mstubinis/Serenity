@@ -11,12 +11,8 @@ class Engine_Window final{
 		std::unique_ptr<impl> m_i;
 
     public:
-        Engine_Window(const char* name,uint width,uint height,uint api);
+        Engine_Window(const char* name,uint width,uint height);
         ~Engine_Window();
-
-		#ifdef _WIN32
-		void setRenderingAPI(uint);
-		#endif
 
         const char* name() const;
         sf::Vector2u getSize();

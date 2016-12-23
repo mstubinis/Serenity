@@ -32,6 +32,8 @@ void ObjectDisplay::bind(){
 	Renderer::sendUniform4f("Object_Color",m_Color);
 	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor);
 }
+void ObjectDisplay::unbind(){
+}
 void ObjectDisplay::update(float dt){
 	ObjectBasic::update(dt);
 	for(auto renderedItem:m_DisplayItems){

@@ -16,11 +16,6 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 
-enum ENGINE_RENDERING_API{
-    ENGINE_RENDERING_API_OPENGL,
-    ENGINE_RENDERING_API_DIRECTX
-};
-
 typedef unsigned int uint;
 
 class Engine_Window;
@@ -69,8 +64,6 @@ namespace Engine{
 					template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
 						if (m.size() > 0 && m.count(n)){m[n].reset();m.erase(n);}
 					}
-
-                    static ENGINE_RENDERING_API m_RenderingAPI;
                     static Scene* m_CurrentScene;
 
                     static float m_DeltaTime;
@@ -97,8 +90,6 @@ namespace Engine{
         static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
-
-        static ENGINE_RENDERING_API getAPI(){ return Detail::ResourceManagement::m_RenderingAPI; }
 
         static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
@@ -153,8 +144,8 @@ namespace Engine{
         void removeSound(std::string name);
 
         void initResources();
-        void initRenderingContexts(uint api);
-        void cleanupRenderingContexts(uint api);
+        void initRenderingContexts();
+        void cleanupRenderingContexts();
     };
     //TODO: Move this somewhere else
     template<typename T>

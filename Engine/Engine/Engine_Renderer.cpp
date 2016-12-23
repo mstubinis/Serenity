@@ -25,18 +25,13 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
-#ifdef _WIN32
-IDXGISwapChain* Detail::RenderManagement::m_DirectXSwapChain;
-ID3D11Device* Detail::RenderManagement::m_DirectXDevice;
-ID3D11DeviceContext* Detail::RenderManagement::m_DirectXDeviceContext;
-ID3D11RenderTargetView* Detail::RenderManagement::m_DirectXBackBuffer;
-#endif
-
 bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
 bool Detail::RendererInfo::GeneralInfo::depth_test = true;
 bool Detail::RendererInfo::GeneralInfo::depth_mask = true;
 ShaderP* Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
 string Detail::RendererInfo::GeneralInfo::current_bound_material = "";
+unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
+bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
 float Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
@@ -81,6 +76,45 @@ vector<GeometryRenderInfo> Detail::RenderManagement::m_ObjectsToBeForwardRendere
 
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
+void Settings::enableCullFace(bool b){
+	if(b && !Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+		glEnable(GL_CULL_FACE);
+		Detail::RendererInfo::GeneralInfo::cull_face_enabled = true;
+	}
+	else if(!b && Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+		glDisable(GL_CULL_FACE);
+		Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
+	}
+}
+void Settings::disableCullFace(){
+	if(Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+		glDisable(GL_CULL_FACE);
+		Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
+	}
+}
+void Settings::cullFace(uint s){
+	//0 = back 
+	//1 = front 
+	//2 = front and back
+	if(s == GL_BACK){
+		if(Detail::RendererInfo::GeneralInfo::cull_face_status != 0){
+			glCullFace(GL_BACK);
+			Detail::RendererInfo::GeneralInfo::cull_face_status = 0;
+		}
+	}
+	else if(s == GL_FRONT){
+		if(Detail::RendererInfo::GeneralInfo::cull_face_status != 1){
+			glCullFace(GL_FRONT);
+			Detail::RendererInfo::GeneralInfo::cull_face_status = 1;
+		}
+	}
+	else if(s == GL_FRONT_AND_BACK){
+		if(Detail::RendererInfo::GeneralInfo::cull_face_status != 2){
+			glCullFace(GL_FRONT_AND_BACK);
+			Detail::RendererInfo::GeneralInfo::cull_face_status = 2;
+		}
+	}
+}
 void Settings::clear(bool color, bool depth, bool stencil){
 	if(depth){ 
 		enableDepthMask();
@@ -176,6 +210,44 @@ void Renderer::unbindTextureCubemap(uint slot){
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
+
+void Detail::RenderManagement::_bind(ShaderP* p){
+	Renderer::bindShaderProgram(p);//bind defaults for all shaders,default or custom
+	p->bind();                     //bind custom data
+}
+void Detail::RenderManagement::_bind(Material* m){
+	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != m->name()){
+		glm::vec3 first(0); glm::vec3 second(0);
+		for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
+			MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
+			if(m->getComponents().count(type)){
+				MaterialComponent* c = m->getComponents().at(type);
+				if(c->texture() != nullptr && c->texture()->address() != 0){
+					//enable
+					if     (i == 0){ first.x = 1.0f; }
+					else if(i == 1){ first.y = 1.0f; }
+					else if(i == 2){ first.z = 1.0f; }
+					else if(i == 3){ second.x = 1.0f; }
+					else if(i == 4){ second.y = 1.0f; }
+					else if(i == 5){ second.z = 1.0f; }
+					c->bind();
+				}
+				else{ c->unbind(); }
+			}
+		}
+		Renderer::sendUniform1iSafe("Shadeless",int(m->shadeless()));
+		Renderer::sendUniform1fSafe("BaseGlow",m->glow());
+		Renderer::sendUniform1fSafe("matID",float(float(m->id())/255.0f));
+		Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
+		Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
+
+		m->bind(); //bind custom data
+		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = m->name();
+	}
+}
+void Detail::RenderManagement::_bind(RenderedItem* i){
+}
+
 void Detail::RenderManagement::init(){
     #ifdef _DEBUG
     RendererInfo::DebugDrawingInfo::debug = true;
@@ -216,12 +288,6 @@ void Detail::RenderManagement::init(){
 }
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
-    #ifdef _WIN32
-    SAFE_DELETE_COM(RenderManagement::m_DirectXSwapChain);
-    SAFE_DELETE_COM(RenderManagement::m_DirectXBackBuffer);
-    SAFE_DELETE_COM(RenderManagement::m_DirectXDevice);
-    SAFE_DELETE_COM(RenderManagement::m_DirectXDeviceContext);
-    #endif
 }
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
@@ -232,7 +298,6 @@ void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,flo
 void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth){
 	font->renderText(text,pos,color,angle,scl,depth);
 }
-
 void Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
 		item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
@@ -255,13 +320,13 @@ void Detail::RenderManagement::_renderTextures(){
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
 			bindTexture("DiffuseTexture",texture,0);
-			sendUniform1iUnsafe("DiffuseTextureEnabled",1);
+			sendUniform1i("DiffuseTextureEnabled",1);
         }
         else{
 			bindTexture("DiffuseTexture",(GLuint)0,0);
-			sendUniform1iUnsafe("DiffuseTextureEnabled",0);
+			sendUniform1i("DiffuseTextureEnabled",0);
         }
-		sendUniform4fUnsafe("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
+		sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
         glm::mat4 model = glm::mat4(1);
         model = glm::translate(model, glm::vec3(item.pos.x,
@@ -272,8 +337,8 @@ void Detail::RenderManagement::_renderTextures(){
             model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
         model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
-		sendUniformMatrix4fUnsafe("VP",m_2DProjectionMatrix);
-		sendUniformMatrix4fUnsafe("Model",model);
+		sendUniformMatrix4f("VP",m_2DProjectionMatrix);
+		sendUniformMatrix4f("Model",model);
 
         Resources::getMesh("Plane")->render();
     }
@@ -285,8 +350,8 @@ void Detail::RenderManagement::_renderText(){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
 		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
-		sendUniform1iUnsafe("DiffuseTextureEnabled",1);
-		sendUniform4fUnsafe("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
+		sendUniform1i("DiffuseTextureEnabled",1);
+		sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
 
         float y_offset = 0;
         float x = item.pos.x;
@@ -303,8 +368,8 @@ void Detail::RenderManagement::_renderText(){
                 glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
                 glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
 
-				sendUniformMatrix4fUnsafe("VP",m_2DProjectionMatrix);
-				sendUniformMatrix4fUnsafe("Model",glyph->m_Model);
+				sendUniformMatrix4f("VP",m_2DProjectionMatrix);
+				sendUniformMatrix4f("Model",glyph->m_Model);
 
                 glyph->char_mesh->render();
                 x += (glyph->xadvance) * item.scl.x;
@@ -333,11 +398,10 @@ void Detail::RenderManagement::_passGeometry(){
 
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
-		shaderProgram->_bind();
+		_bind(shaderProgram);
 		for(auto material:shaderProgram->getMaterials()){
-			string matName = *(material.w.lock().get());
-			Material* m = Resources::getMaterial(matName);
-			m->_bind(shaderProgram->program(),Resources::getAPI());
+			Material* m = Resources::getMaterial(*(material.w.lock().get()));
+			_bind(m);
 			for(auto key:m->getObjects()){
 				string renderedItemName = *(key.w.lock().get());
 				RenderedItem* item = Resources::getRenderedItem(renderedItemName);
@@ -347,6 +411,7 @@ void Detail::RenderManagement::_passGeometry(){
 				if(s->objects().count(parentObjectName)){
 					o->bind();
 					item->draw(RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
+					o->unbind();
 				}
 			}
 		}
@@ -361,10 +426,10 @@ void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	bindShaderProgram("Deferred_Light");
 
-	sendUniformMatrix4fUnsafe("VP",Resources::getActiveCamera()->getViewProjection());
-	sendUniform4fvUnsafe("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
+	sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+	sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
 
-	sendUniform2fUnsafe("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+	sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
 	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
 	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
@@ -476,20 +541,20 @@ void Detail::RenderManagement::render(){
 void Detail::RenderManagement::_passSSAO(){
 	bindShaderProgram("Deferred_SSAO");
 
-	sendUniform1iUnsafe("doSSAO",int(RendererInfo::SSAOInfo::ssao));
-	sendUniform1iUnsafe("doBloom",int(RendererInfo::BloomInfo::bloom));
+	sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
+	sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
 
 	Camera* c = Resources::getActiveCamera();
 	glm::vec3 camPos = glm::vec3(c->getPosition());
 
-	sendUniform3fUnsafe("gCameraPosition",camPos.x,camPos.y,camPos.z);
-	sendUniform1fUnsafe("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
-	sendUniform1fUnsafe("gBias",RendererInfo::SSAOInfo::ssao_bias);
-	sendUniform1fUnsafe("gRadius",RendererInfo::SSAOInfo::ssao_radius);
-	sendUniform1fUnsafe("gScale",RendererInfo::SSAOInfo::ssao_scale);
-	sendUniform1iUnsafe("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
-	sendUniform1iUnsafe("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
-	sendUniform2fvUnsafe("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+	sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
+	sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
+	sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
+	sendUniform1f("gRadius",RendererInfo::SSAOInfo::ssao_radius);
+	sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
+	sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
+	sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+	sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
 	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
 	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
@@ -506,8 +571,8 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
 	Settings::clear(true,false,false);
 
 	bindShaderProgram("Deferred_Edge");
-	sendUniform2fUnsafe("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
-	sendUniform1fUnsafe("radius", radius);
+	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
+	sendUniform1f("radius", radius);
 
 	bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
@@ -520,18 +585,18 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
     Settings::clear(true,false,false);
 
 	bindShaderProgram("Deferred_GodsRays");
-	sendUniform1fUnsafe("decay",RendererInfo::GodRaysInfo::godRays_decay);
-	sendUniform1fUnsafe("density",RendererInfo::GodRaysInfo::godRays_density);
-	sendUniform1fUnsafe("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
-	sendUniform1iUnsafe("samples",RendererInfo::GodRaysInfo::godRays_samples);
-	sendUniform1fUnsafe("weight",RendererInfo::GodRaysInfo::godRays_weight);
-	sendUniform2fUnsafe("lightPositionOnScreen",
+	sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
+	sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
+	sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
+	sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
+	sendUniform1f("weight",RendererInfo::GodRaysInfo::godRays_weight);
+	sendUniform2f("lightPositionOnScreen",
 		float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
 		float(lightPositionOnScreen.y/float(Resources::getWindowSize().y))
 	);
 
-	sendUniform1iUnsafe("behind",int(behind));
-	sendUniform1fUnsafe("alpha",alpha);
+	sendUniform1i("behind",int(behind));
+	sendUniform1f("alpha",alpha);
 
 	bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
 
@@ -544,8 +609,8 @@ void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
 	bindShaderProgram("Deferred_HDR");
-	sendUniform1fUnsafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
-	sendUniform1fUnsafe("exposure",RendererInfo::HDRInfo::hdr_exposure);
+	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
 	bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -556,20 +621,20 @@ void Detail::RenderManagement::_passHDR(){
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
 	bindShaderProgram("Deferred_Blur");
 
-	sendUniform1fUnsafe("radius",RendererInfo::BloomInfo::bloom_radius);
-	sendUniform4fUnsafe("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
+	sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
+	sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
-    if(channels.find("R") != string::npos) sendUniform1iUnsafe("R",1);
-    else                                   sendUniform1iUnsafe("R",0);
-    if(channels.find("G") != string::npos) sendUniform1iUnsafe("G",1);
-    else                                   sendUniform1iUnsafe("G",0);
-    if(channels.find("B") != string::npos) sendUniform1iUnsafe("B",1);
-    else                                   sendUniform1iUnsafe("B",0);
-    if(channels.find("A") != string::npos) sendUniform1iUnsafe("A",1);
-    else                                   sendUniform1iUnsafe("A",0);
+    if(channels.find("R") != string::npos) sendUniform1i("R",1);
+    else                                   sendUniform1i("R",0);
+    if(channels.find("G") != string::npos) sendUniform1i("G",1);
+    else                                   sendUniform1i("G",0);
+    if(channels.find("B") != string::npos) sendUniform1i("B",1);
+    else                                   sendUniform1i("B",0);
+    if(channels.find("A") != string::npos) sendUniform1i("A",1);
+    else                                   sendUniform1i("A",0);
 
-    if(type == "Horizontal"){ sendUniform2fUnsafe("HV",1.0f,0.0f); }
-    else{                     sendUniform2fUnsafe("HV",0.0f,1.0f); }
+    if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
+    else{                     sendUniform2f("HV",0.0f,1.0f); }
 
 	bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
@@ -583,15 +648,15 @@ void Detail::RenderManagement::_passFinal(){
 
 	bindShaderProgram("Deferred_Final");
 
-	sendUniform1fUnsafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-    sendUniform3fUnsafe("gAmbientColor",ambient.x,ambient.y,ambient.z);
+    sendUniform3f("gAmbientColor",ambient.x,ambient.y,ambient.z);
 
-	sendUniform1iUnsafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
-    sendUniform1iUnsafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
-    sendUniform1iUnsafe("HasBloom",int(RendererInfo::BloomInfo::bloom));
-	sendUniform1iUnsafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
+	sendUniform1i("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
+    sendUniform1i("HasLighting",int(RendererInfo::LightingInfo::lighting));
+    sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
+	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
 	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
 	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
@@ -609,8 +674,8 @@ void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);
 	glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
 
-	sendUniformMatrix4fUnsafe("Model",m);
-	sendUniformMatrix4fUnsafe("VP",p);
+	sendUniformMatrix4f("Model",m);
+	sendUniformMatrix4f("VP",p);
 
     glViewport(0,0,width,height);
 
@@ -621,17 +686,3 @@ void Detail::renderFullscreenQuad(uint width,uint height){
 		glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
 	glEnd();
 }
-
-#ifdef _WIN32
-void Detail::RenderManagement::renderDirectX(){
-    // clear the back buffer to a deep blue
-    Scene* s = Resources::getCurrentScene();
-    glm::vec3 clear = s->getBackgroundColor();
-    const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
-    m_DirectXDeviceContext->ClearRenderTargetView(m_DirectXBackBuffer,colors);
-    // do 3D rendering on the back buffer here
-
-    // switch the back buffer and the front buffer
-    m_DirectXSwapChain->Present(0, 0);
-}
-#endif

@@ -45,8 +45,8 @@ class ShaderP: public EngineResource{
 		ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
         virtual ~ShaderP();
 
-        void initRenderingContext(uint api);
-        void cleanupRenderingContext(uint api);
+        void initRenderingContext();
+        void cleanupRenderingContext();
 
         GLuint program();
 		SHADER_PIPELINE_STAGE stage();
@@ -57,8 +57,6 @@ class ShaderP: public EngineResource{
 		const std::unordered_map<std::string,GLint>& uniforms() const;
 
 		virtual void bind();
-		void _bindDefaults();
-		void _bind();
 		void addMaterial(std::string);
 };
 

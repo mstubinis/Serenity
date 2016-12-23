@@ -155,6 +155,8 @@ void ObjectDynamic::bind(){
 	Renderer::sendUniform4f("Object_Color",m_Color);
 	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor);
 }
+void ObjectDynamic::unbind(){
+}
 void ObjectDynamic::render(GLuint shader,bool debug){
     //add to render queue
     if(shader == 0){

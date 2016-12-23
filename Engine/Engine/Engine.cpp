@@ -23,9 +23,9 @@
 
 sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
 
-void Engine::Detail::EngineClass::init(uint api, const char* name,uint w,uint h){
-    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,w,h,api);
-    initGame(api);
+void Engine::Detail::EngineClass::init(const char* name,uint w,uint h){
+    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,w,h);
+    initGame();
 }
 void Engine::Detail::EngineClass::destruct(){
     Game::cleanup();
@@ -34,9 +34,7 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Renderer::Detail::RenderManagement::destruct();
     Engine::Sound::Detail::SoundManagement::destruct();
 }
-void Engine::Detail::EngineClass::initGame(uint api){
-    if(api == ENGINE_RENDERING_API_DIRECTX)
-        return;
+void Engine::Detail::EngineClass::initGame(){
 	const glm::uvec2 halfRes = glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
 	Events::Mouse::setMousePosition(halfRes);
 	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
@@ -55,7 +53,7 @@ void Engine::Detail::EngineClass::initGame(uint api){
     if(Resources::Detail::ResourceManagement::m_Scenes.size() == 0)
         new Scene("Default");
 
-    Resources::initRenderingContexts(api);
+    Resources::initRenderingContexts();
 }
 void Engine::Detail::EngineClass::RESET_EVENTS(){
     Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
@@ -66,7 +64,7 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
 
     Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1.0f-Resources::dt());
 }
-void Engine::Detail::EngineClass::update(uint api){
+void Engine::Detail::EngineClass::update(){
 	float dt = Resources::dt();
 	Game::onPreUpdate(dt);
     Game::update(dt);
@@ -76,30 +74,20 @@ void Engine::Detail::EngineClass::update(uint api){
     RESET_EVENTS();
 	Game::onPostUpdate(dt);
 }
-void Engine::Detail::EngineClass::render(uint api){
-    if(api == ENGINE_RENDERING_API_OPENGL){
-        Game::render();
-        Engine::Renderer::Detail::RenderManagement::render();
-        Resources::getWindow()->display();
-    }
-    else if(api == ENGINE_RENDERING_API_DIRECTX){
-        //Game::render();
-        Engine::Renderer::Detail::RenderManagement::renderDirectX();
-        //Resources::getWindow()->display();
-    }
+void Engine::Detail::EngineClass::render(){
+    Game::render();
+    Engine::Renderer::Detail::RenderManagement::render();
+    Resources::getWindow()->display();
 }
 #pragma region Event Handler Methods
-void Engine::Detail::EngineClass::EVENT_RESIZE(uint api, unsigned int w, unsigned int h,bool saveSize){
+void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
     for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
-    if(api == ENGINE_RENDERING_API_OPENGL){
-        glViewport(0,0,w,h);
-        Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
-        for(unsigned int i = 0; i < BUFFER_TYPE_NUMBER; i++){
-            Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,w,h);
-        }
-    }
-    else if(api == ENGINE_RENDERING_API_DIRECTX){
+
+    glViewport(0,0,w,h);
+    Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
+    for(uint i = 0; i < BUFFER_TYPE_NUMBER; i++){
+        Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,w,h);
     }
 
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
@@ -197,12 +185,12 @@ void Engine::Detail::EngineClass::run(){
                 case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
                 case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
                 case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(e.mouseMove);break;
-                case sf::Event::Resized:              EVENT_RESIZE(Resources::Detail::ResourceManagement::m_RenderingAPI,e.size.width,e.size.height);break;
+                case sf::Event::Resized:              EVENT_RESIZE(e.size.width,e.size.height);break;
                 case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(e.text);break;
                 default:                              break;
             }
         }
-        update(Resources::Detail::ResourceManagement::m_RenderingAPI);
-        render(Resources::Detail::ResourceManagement::m_RenderingAPI);
+        update();
+        render();
     }
 }

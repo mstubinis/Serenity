@@ -23,7 +23,6 @@
 using namespace Engine;
 using namespace Engine::Resources;
 
-ENGINE_RENDERING_API Detail::ResourceManagement::m_RenderingAPI;
 float Detail::ResourceManagement::m_DeltaTime = 1;
 Engine_Window* Detail::ResourceManagement::m_Window;
 Scene* Detail::ResourceManagement::m_CurrentScene;
@@ -175,13 +174,13 @@ void Resources::initResources(){
 
 	addMesh("Plane",1.0f,1.0f);
 }
-void Resources::initRenderingContexts(uint a){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->initRenderingContext(a);
-    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->initRenderingContext(a);
+void Resources::initRenderingContexts(){
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->initRenderingContext();
+    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->initRenderingContext();
 }
-void Resources::cleanupRenderingContexts(uint a){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->cleanupRenderingContext(a);
-    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->cleanupRenderingContext(a);
+void Resources::cleanupRenderingContexts(){
+    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->cleanupRenderingContext();
+    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->cleanupRenderingContext();
 }
 void Resources::setCurrentScene(Scene* s){ 
     if(Detail::ResourceManagement::m_CurrentScene == s) return;

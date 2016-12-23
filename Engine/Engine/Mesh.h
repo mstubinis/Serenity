@@ -46,8 +46,8 @@ class Mesh final: public EngineResource{
         Mesh(std::string& name,std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
         ~Mesh();
 
-        void initRenderingContext(uint api);
-        void cleanupRenderingContext(uint api);
+        void initRenderingContext();
+        void cleanupRenderingContext();
 
         Collision* getCollision() const { return m_Collision; }
 

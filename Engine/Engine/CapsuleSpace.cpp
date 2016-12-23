@@ -12,16 +12,10 @@
 
 using namespace Engine;
 
-CapsuleEnd::CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){
-    setColor(color.x,color.y,color.z,1);
-}
+CapsuleEnd::CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
 CapsuleEnd::~CapsuleEnd(){}
-void CapsuleEnd::update(float dt){
-    ObjectDisplay::update(dt);
-}
-void CapsuleEnd::draw(GLuint shader,bool debug,bool godsRays){
-    ObjectDisplay::draw(shader,debug,godsRays);
-}
+void CapsuleEnd::update(float dt){ObjectDisplay::update(dt);}
+
 CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
@@ -49,29 +43,26 @@ void CapsuleStar::update(float dt){
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
     ObjectDisplay::update(dt);
 }
-void CapsuleStar::draw(GLuint shader,bool debug, bool godsRays){
-	Renderer::Settings::disableDepthMask();
-    ObjectDisplay::draw(shader,debug,godsRays);
-	Renderer::Settings::enableDepthMask();
-}
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::v3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleTunnel::~CapsuleTunnel(){}
-void CapsuleTunnel::draw(GLuint shader,bool debug,bool godsRays){
-    ObjectDisplay::draw(shader,debug,godsRays);
-}
+
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::v3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleRibbon::~CapsuleRibbon(){}
-void CapsuleRibbon::draw(GLuint shader,bool debug,bool godsRays){
+void CapsuleRibbon::bind(){
+	ObjectDisplay::bind();
 	Renderer::Settings::disableDepthTest();
-    ObjectDisplay::draw(shader,debug,godsRays);
+	Renderer::Settings::disableDepthMask();
+}
+void CapsuleRibbon::unbind(){
 	Renderer::Settings::enableDepthTest();
+	Renderer::Settings::enableDepthMask();
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
@@ -145,8 +136,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     getPlayerCamera()->follow(getPlayer());
 
 }
-CapsuleSpace::~CapsuleSpace(){
-}
+CapsuleSpace::~CapsuleSpace(){}
 void CapsuleSpace::update(float dt){
     m_Timer += dt*2;
     SolarSystem::update(dt);

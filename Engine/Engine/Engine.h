@@ -20,10 +20,10 @@ namespace Engine{
     namespace Detail{
          class EngineClass final{
             public:
-                static void initGame(uint api);
+                static void initGame();
 
                 #pragma region Event Handlers
-                static void EVENT_RESIZE(uint api,unsigned int width, unsigned int height,bool saveSize = true);
+                static void EVENT_RESIZE(uint width, uint height,bool saveSize = true);
                 static void EVENT_CLOSE();
                 static void EVENT_LOST_FOCUS();
                 static void EVENT_GAINED_FOCUS();
@@ -47,10 +47,10 @@ namespace Engine{
 
                 static sf::Clock clock;
 
-                static void update(uint api);
-                static void render(uint api);
+                static void update();
+                static void render();
 
-                static void init(uint api,const char* name,uint width=0,uint height=0);
+                static void init(const char* name,uint width=0,uint height=0);
                 static void destruct();
 
                 static void run();

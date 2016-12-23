@@ -74,6 +74,7 @@ class Object: public IObject{
         virtual void render(GLuint=0,bool=false){}
         virtual void draw(GLuint shader,bool=false,bool=false){}
 		virtual void bind(){}
+		virtual void unbind(){}
 
         virtual float getRadius(){ return m_Radius; }
 

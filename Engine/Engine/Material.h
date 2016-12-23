@@ -64,8 +64,8 @@ class MaterialComponent{
 		MaterialComponent(uint type,std::string& texture);
 		virtual ~MaterialComponent();
 
-		virtual void bind(GLuint shader,uint api);
-		virtual void unbind(GLuint shader,uint api);
+		virtual void bind();
+		virtual void unbind();
 
 		Texture* texture() const { return m_Texture; }
 		const MATERIAL_COMPONENT_TYPE type() const { return static_cast<MATERIAL_COMPONENT_TYPE>(m_ComponentType); }
@@ -79,8 +79,8 @@ class MaterialComponentReflection: public MaterialComponent{
 		MaterialComponentReflection(uint type,std::string& cubemap,std::string& map,float mixFactor = 0.5f);
 		~MaterialComponentReflection();
 
-		virtual void bind(GLuint shader,uint api);
-		void unbind(GLuint shader,uint api);
+		virtual void bind();
+		void unbind();
 		void setMixFactor(float);
 
 		const float mixFactor() const { return m_MixFactor; }
@@ -94,7 +94,7 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 		MaterialComponentRefraction(uint type,std::string& cubemap,std::string& map,float mixFactor = 0.5f,float ratio = 1.0f);
 		~MaterialComponentRefraction();
 
-		void bind(GLuint shader,uint api);
+		void bind();
 
 		void setRefractionRatio(float);
 		const float refractionRatio() const { return m_RefractionRatio; }
@@ -121,8 +121,7 @@ class Material final: public EngineResource{
 		const MaterialComponentReflection* getComponentReflection() const;
 		const MaterialComponentRefraction* getComponentRefraction() const;
 
-		void _bind(GLuint shader,GLuint api);
-		void bind(GLuint shader,GLuint api);
+		void bind();
 
         void addComponent(uint type, Texture* texture);
 
@@ -152,7 +151,6 @@ class Material final: public EngineResource{
         void setGlow(float f);
         void setSpecularity(float s);
         void setLightingMode(uint m);
-
 
 		void addObject(std::string objectName);
 		void removeObject(std::string objectName);

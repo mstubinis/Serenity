@@ -169,7 +169,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
 				Material* mat = item->material();
                 glUniform1f(glGetUniformLocation(shader, "BaseGlow"),mat->glow());
 				glUniform1f(glGetUniformLocation(shader, "matID"),float(float(mat->id())/255.0f));
-				mat->bind(shader,Resources::getAPI());
+				mat->bind();
 				item->mesh()->render();
             }
             glUseProgram(0);
@@ -389,6 +389,6 @@ void Ring::draw(GLuint shader){
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
-	material->bind(shader,Resources::getAPI());
+	material->bind();
     mesh->render();
 }

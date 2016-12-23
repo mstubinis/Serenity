@@ -11,30 +11,22 @@ class CapsuleEnd final: public ObjectDisplay{
     public:
         CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* = nullptr);
         ~CapsuleEnd();
-
         void update(float);
-        void draw(GLuint shader,bool=false,bool=false);
 };
-
 class CapsuleStar final: public ObjectDisplay{
         PointLight* m_Light;
     public:
         CapsuleStar(float size,glm::v3 pos, std::string name, Scene* = nullptr,bool=true);
         ~CapsuleStar();
-
         void update(float);
-        void draw(GLuint shader,bool=false,bool=false);
 };
-
 class CapsuleTunnel final: public ObjectDisplay{
     private:
         float m_TunnelRadius;
     public:
         CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* = nullptr);
         ~CapsuleTunnel();
-
         float getTunnelRadius(){ return m_TunnelRadius; }
-        void draw(GLuint shader,bool=false,bool=false);
 };
 class CapsuleRibbon final: public ObjectDisplay{
     private:
@@ -44,9 +36,9 @@ class CapsuleRibbon final: public ObjectDisplay{
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }
-        void draw(GLuint shader,bool=false,bool=false);
+		void bind();
+		void unbind();
 };
-
 class CapsuleSpace final: public SolarSystem{
     private:
         float m_Timer;
@@ -55,12 +47,10 @@ class CapsuleSpace final: public SolarSystem{
         CapsuleRibbon* m_Ribbon;
         CapsuleEnd* m_FrontEnd;
         CapsuleEnd* m_BackEnd;
-
         std::vector<CapsuleStar*> m_CapsuleStars;
     public:
         CapsuleSpace();
         ~CapsuleSpace();
-
         void update(float);
 };
 #endif

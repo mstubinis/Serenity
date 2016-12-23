@@ -1,5 +1,9 @@
 #include "Engine_Physics.h"
 #include "Engine_MeshLoader.h"
+#include "Engine_Resources.h"
+#include "Engine_Renderer.h"
+#include "Camera.h"
+#include "ObjectDynamic.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/btBulletCollisionCommon.h>
@@ -18,22 +22,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Engine_Resources.h"
-#include "Camera.h"
-#include "ObjectDynamic.h"
-
 using namespace Engine;
 
-btBroadphaseInterface* Engine::Physics::Detail::PhysicsManagement::m_broadphase = nullptr;
-btDefaultCollisionConfiguration* Engine::Physics::Detail::PhysicsManagement::m_collisionConfiguration = nullptr;
-btCollisionDispatcher* Engine::Physics::Detail::PhysicsManagement::m_dispatcher = nullptr;
-btSequentialImpulseConstraintSolver* Engine::Physics::Detail::PhysicsManagement::m_solver = nullptr;
-btDiscreteDynamicsWorld* Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
-GLDebugDrawer* Engine::Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
+btBroadphaseInterface* Physics::Detail::PhysicsManagement::m_broadphase = nullptr;
+btDefaultCollisionConfiguration* Physics::Detail::PhysicsManagement::m_collisionConfiguration = nullptr;
+btCollisionDispatcher* Physics::Detail::PhysicsManagement::m_dispatcher = nullptr;
+btSequentialImpulseConstraintSolver* Physics::Detail::PhysicsManagement::m_solver = nullptr;
+btDiscreteDynamicsWorld* Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
+GLDebugDrawer* Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
-std::vector<Collision*> Engine::Physics::Detail::PhysicsManagement::m_Collisions;
+std::vector<Collision*> Physics::Detail::PhysicsManagement::m_Collisions;
 
-void Engine::Physics::Detail::PhysicsManagement::init(){
+void Physics::Detail::PhysicsManagement::init(){
     m_broadphase = new btDbvtBroadphase();
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
@@ -48,7 +48,7 @@ void Engine::Physics::Detail::PhysicsManagement::init(){
 
     btGImpactCollisionAlgorithm::registerAlgorithm(m_dispatcher);
 }
-void Engine::Physics::Detail::PhysicsManagement::destruct(){
+void Physics::Detail::PhysicsManagement::destruct(){
     SAFE_DELETE(m_debugDrawer);
     SAFE_DELETE(m_dynamicsWorld);
     SAFE_DELETE(m_solver);
@@ -59,23 +59,23 @@ void Engine::Physics::Detail::PhysicsManagement::destruct(){
         SAFE_DELETE(collision);
 }
 
-void Engine::Physics::setGravity(float x,float y,float z){ Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
-void Engine::Physics::setGravity(glm::vec3 gravity){ Engine::Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Engine::Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ 
-    Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(rigidBody,group,mask); 
+void Physics::setGravity(float x,float y,float z){ Physics::Detail::PhysicsManagement::m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
+void Physics::setGravity(glm::vec3 gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
+void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ 
+    Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(rigidBody,group,mask); 
 }
 
-void Engine::Physics::addRigidBody(ObjectDynamic* obj){ Engine::Physics::addRigidBody(obj->getRigidBody()); }
-void Engine::Physics::addRigidBody(btRigidBody* body){
-    Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(body); 
+void Physics::addRigidBody(ObjectDynamic* obj){ Physics::addRigidBody(obj->getRigidBody()); }
+void Physics::addRigidBody(btRigidBody* body){
+    Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(body); 
 }
 
-void Engine::Physics::removeRigidBody(btRigidBody* body){
-    Engine::Physics::Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(body);
+void Physics::removeRigidBody(btRigidBody* body){
+    Physics::Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(body);
 }
-void Engine::Physics::removeRigidBody(ObjectDynamic* obj){ Engine::Physics::removeRigidBody(obj->getRigidBody()); }
+void Physics::removeRigidBody(ObjectDynamic* obj){ Physics::removeRigidBody(obj->getRigidBody()); }
 
-void Engine::Physics::Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){ 
+void Physics::Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){ 
     m_dynamicsWorld->stepSimulation(dt,maxSteps,other); 
     uint numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
     for (uint i = 0; i < numManifolds; i++){
@@ -115,8 +115,8 @@ std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
-    if(b != NULL) return Engine::Physics::rayCast(_s,_e,b->getRigidBody());
-    return Engine::Physics::rayCast(_s,_e,nullptr);
+    if(b != NULL) return Physics::rayCast(_s,_e,b->getRigidBody());
+    return Physics::rayCast(_s,_e,nullptr);
  }
 std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,std::vector<Object*> ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
@@ -141,24 +141,22 @@ std::vector<glm::v3> Engine::Physics::Detail::PhysicsManagement::rayCastInternal
     return result;
 }
 void Engine::Physics::Detail::PhysicsManagement::render(){
-    if(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI == ENGINE_RENDERING_API_OPENGL){
-        glUseProgram(0);
+	Renderer::bindShaderProgram(0);
 
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
 
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
 
-        m_dynamicsWorld->debugDrawWorld();
+    m_dynamicsWorld->debugDrawWorld();
 
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-    }
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 }
 Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type, float mass){
     m_CollisionShape = shape;
@@ -177,7 +175,7 @@ void Collision::_init(COLLISION_TYPE type, float mass){
         m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
     }
     setMass(mass);
-    Engine::Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+    Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
 }
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);
@@ -196,7 +194,7 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
             if(extention == ".obj"){
                 #pragma region OBJ
 				MeshData data;
-				Engine::Resources::MeshLoader::loadObj(data,file,LOAD_POINTS);
+				Resources::MeshLoader::loadObj(data,file,LOAD_POINTS);
 				for(auto vertex:data.file_points)
 					((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
                 #pragma endregion
@@ -210,7 +208,7 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
             if(extention == ".obj"){
                 #pragma region OBJ
 				MeshData data;
-				Engine::Resources::MeshLoader::loadObj(data,file, LOAD_POINTS | LOAD_FACES);
+				Resources::MeshLoader::loadObj(data,file, LOAD_POINTS | LOAD_FACES);
 				for(auto triangle:data.file_triangles){
                     glm::vec3 v1,v2,v3;
 
@@ -240,7 +238,7 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
             if(extention == ".obj"){
                 #pragma region OBJ
 				MeshData data;
-				Engine::Resources::MeshLoader::loadObj(data,file, LOAD_POINTS | LOAD_FACES);
+				Resources::MeshLoader::loadObj(data,file, LOAD_POINTS | LOAD_FACES);
 				for(auto triangle:data.file_triangles){
                     glm::vec3 v1Pos,v2Pos,v3Pos;
 
@@ -268,7 +266,7 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
             if(extention == ".obj"){
                 #pragma region OBJ
 				MeshData data;
-				Engine::Resources::MeshLoader::loadObj(data,file,LOAD_POINTS);
+				Resources::MeshLoader::loadObj(data,file,LOAD_POINTS);
 				for(auto vertex:data.file_points){
                     float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
                     if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;

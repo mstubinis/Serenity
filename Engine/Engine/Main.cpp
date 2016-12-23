@@ -12,7 +12,6 @@ using namespace Engine;
 
 int main(){
 	srand((unsigned)time(0));
-    Resources::Detail::ResourceManagement::m_RenderingAPI = ENGINE_RENDERING_API_OPENGL;
 	#ifdef _WIN32
         if(GetConsoleWindow() == NULL){ 
             AllocConsole();
@@ -22,8 +21,7 @@ int main(){
             ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
         #endif
     #endif
-    Detail::EngineClass::init(Resources::Detail::ResourceManagement::m_RenderingAPI,"Engine",1024,768);
-    //Resources::getWindow()->setRenderingAPI(ENGINE_RENDERING_API_DIRECTX);
+    Detail::EngineClass::init("Engine",1024,768);
     Detail::EngineClass::run();
     Detail::EngineClass::destruct();
     FreeConsole();

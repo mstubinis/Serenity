@@ -70,25 +70,15 @@ class ShaderP::impl final{
         }
 
         void _destruct(){
-            _cleanupRenderingContext(Resources::Detail::ResourceManagement::m_RenderingAPI);
+            _cleanupRenderingContext();
         }
-        void _initRenderingContext(uint api,std::string& name){
-            if(api == ENGINE_RENDERING_API_OPENGL){
-                m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
-            }
-            else if(api == ENGINE_RENDERING_API_DIRECTX){
-
-            }
+        void _initRenderingContext(std::string& name){
+            m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
         }
-        void _cleanupRenderingContext(uint api){
-            if(api == ENGINE_RENDERING_API_OPENGL){
-                glDeleteShader(m_ShaderProgram);
-				glDeleteProgram(m_ShaderProgram);
-				m_UniformLocations.clear();
-            }
-            else if(api == ENGINE_RENDERING_API_DIRECTX){
-
-            }
+        void _cleanupRenderingContext(){
+            glDeleteShader(m_ShaderProgram);
+			glDeleteProgram(m_ShaderProgram);
+			m_UniformLocations.clear();
         }
         GLuint _compileOGL(Shader* vs,Shader*  ps,std::string& _shaderProgramName){
 			m_UniformLocations.clear();
@@ -198,13 +188,13 @@ class ShaderP::impl final{
 		}
 		void _bind(){
 			Camera* c = Resources::getActiveCamera();
-			Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
-			Renderer::sendUniform1f("far",c->getFar());
-			Renderer::sendUniform1f("C",1.0f);
+			Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
+			Renderer::sendUniform1fSafe("far",c->getFar());
+			Renderer::sendUniform1fSafe("C",1.0f);
 			glm::vec3 camPos = glm::vec3(c->getPosition());
 
-			if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
-			else                                                     Renderer::sendUniform1i("HasGodsRays",0);
+			if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
+			else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
 		}
 };
 
@@ -217,11 +207,11 @@ ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s
 ShaderP::~ShaderP(){
     m_i->_destruct();
 }
-void ShaderP::initRenderingContext(uint api){
-	m_i->_initRenderingContext(api,this->name());
+void ShaderP::initRenderingContext(){
+	m_i->_initRenderingContext(this->name());
 }
-void ShaderP::cleanupRenderingContext(uint api){
-    m_i->_cleanupRenderingContext(api);
+void ShaderP::cleanupRenderingContext(){
+    m_i->_cleanupRenderingContext();
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }
@@ -241,12 +231,5 @@ void ShaderP::addMaterial(std::string m){
 }
 void ShaderP::bind(){
 	m_i->_bind();
-}
-void ShaderP::_bind(){
-	_bindDefaults(); //bind defaults for all shaders,default or custom
-	bind();          //bind custom data
-}
-void ShaderP::_bindDefaults(){
-	Renderer::bindShaderProgram(this);
 }
 const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }

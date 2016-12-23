@@ -223,7 +223,7 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
 	this->setName(name);
 }
 Mesh::~Mesh(){
-    cleanupRenderingContext(Engine::Resources::Detail::ResourceManagement::m_RenderingAPI);
+    cleanupRenderingContext();
 }
 void Mesh::_loadData(MeshData& data,float threshold){
 	if(data.uvs.size() == 0) data.uvs.resize(data.points.size());
@@ -264,41 +264,33 @@ void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type){
 	Engine::Resources::MeshLoader::loadObjFromMemory(d,data);
 	_loadData(d);
 }
-void Mesh::initRenderingContext(uint api){
-    if(api == ENGINE_RENDERING_API_OPENGL){
-        glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
+void Mesh::initRenderingContext(){
+    glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0] );
-        glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0] );
+    glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
-        glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(glm::vec2), &m_UVs[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
+    glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(glm::vec2), &m_UVs[0], GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-        glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
+    glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-        glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
+    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-        glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
+    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
 
-		glGenBuffers(1, &m_elementbuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
-    }
-    else if(api == ENGINE_RENDERING_API_DIRECTX){
-    }
+	glGenBuffers(1, &m_elementbuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
 }
-void Mesh::cleanupRenderingContext(uint api){
-    if(api == ENGINE_RENDERING_API_OPENGL){
-        for(uint i = 0; i < NUM_VERTEX_DATA; i++){
-            glDeleteBuffers(1, &m_buffers[i]);
-        }
-		glDeleteBuffers(1,&m_elementbuffer);
+void Mesh::cleanupRenderingContext(){
+    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
+        glDeleteBuffers(1, &m_buffers[i]);
     }
-    else if(api == ENGINE_RENDERING_API_DIRECTX){
-    }
+	glDeleteBuffers(1,&m_elementbuffer);
 }
 void Mesh::_calculateMeshRadius(){
     float maxX = 0; float maxY = 0; float maxZ = 0;
