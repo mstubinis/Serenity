@@ -123,6 +123,8 @@ namespace Engine{
 
 					static void _bind(ShaderP*);
 					static void _bind(Material*);
+					static void _unbind(ShaderP*);
+					static void _unbind(Material*);
 
                     static void _renderForwardRenderedObjects();
                     static void _renderObjects();

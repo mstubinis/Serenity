@@ -27,11 +27,15 @@ struct DefaultRenderedItemBindFunctor{void operator()(RenderedItem* i) const {
 		}
 	}
 }};
+struct DefaultRenderedItemUnbindFunctor{void operator()(RenderedItem* i) const {
+}};
 
 class RenderedItem::impl{
 	public:
-		static DefaultRenderedItemBindFunctor DEFAULT_FUNCTOR;
+		static DefaultRenderedItemUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+		static DefaultRenderedItemBindFunctor DEFAULT_BIND_FUNCTOR;
 		boost::function<void()> m_CustomBindFunctor;
+		boost::function<void()> m_CustomUnbindFunctor;
 
 		Mesh* m_Mesh;
 		Material* m_Material;
@@ -56,7 +60,8 @@ class RenderedItem::impl{
 
 			m_ParentPtr = boost::dynamic_pointer_cast<std::string>(parentNamePtr);
 
-			super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_FUNCTOR);
+			super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_BIND_FUNCTOR);
+			super->setCustomUnbindFunctor(RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR);
 		}
 		void _destruct(){
 		}
@@ -81,7 +86,8 @@ class RenderedItem::impl{
 			}
 		}
 };
-DefaultRenderedItemBindFunctor RenderedItem::impl::DEFAULT_FUNCTOR;
+DefaultRenderedItemBindFunctor RenderedItem::impl::DEFAULT_BIND_FUNCTOR;
+DefaultRenderedItemUnbindFunctor RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR;
 
 RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
 	m_i->_init(mesh,mat,pos,rot,scl,this,parentNamePtr);
@@ -143,4 +149,6 @@ void RenderedItem::update(float dt){
 	m_i->_updateModelMatrix();
 }
 void RenderedItem::bind(){ m_i->m_CustomBindFunctor(); }
+void RenderedItem::unbind(){ m_i->m_CustomUnbindFunctor(); }
 template<class T> void RenderedItem::setCustomBindFunctor(T& functor){ m_i->m_CustomBindFunctor = boost::bind<void>(functor,this); }
+template<class T> void RenderedItem::setCustomUnbindFunctor(T& functor){ m_i->m_CustomUnbindFunctor = boost::bind<void>(functor,this); }

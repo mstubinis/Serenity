@@ -42,8 +42,8 @@ struct DefaultMaterialBindFunctor{void operator()(Material* m) const {
 	Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
 	Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
 }};
-
-
+struct DefaultMaterialUnbindFunctor{void operator()(Material* m) const {
+}};
 
 
 std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
@@ -62,9 +62,7 @@ std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
 
 	return map;
 }
-
 std::unordered_map<uint,std::vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
-
 
 MaterialComponent::MaterialComponent(uint ty,Texture* t){
 	m_ComponentType = (MATERIAL_COMPONENT_TYPE)ty;
@@ -143,8 +141,10 @@ void MaterialComponentRefraction::bind(){
 
 class Material::impl final{
     public:
-		static DefaultMaterialBindFunctor DEFAULT_FUNCTOR;
+		static DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
+		static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 		boost::function<void()> m_CustomBindFunctor;
+		boost::function<void()> m_CustomUnbindFunctor;
 
         std::unordered_map<uint,MaterialComponent*> m_Components;
 		std::vector<skey> m_Objects;
@@ -165,7 +165,8 @@ class Material::impl final{
 			_addToMaterialPool();
 			super->setName(name);
 
-			super->setCustomBindFunctor(Material::impl::DEFAULT_FUNCTOR);
+			super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
+			super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
         }
         void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* super){
             Texture* diffuseT = Resources::getTexture(diffuse); 
@@ -215,7 +216,8 @@ class Material::impl final{
         void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
         void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
 };
-DefaultMaterialBindFunctor Material::impl::DEFAULT_FUNCTOR;
+DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
+DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
 Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
     m_i->_init(name,diffuse,normal,glow,specular,this);
@@ -293,9 +295,8 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 	Material::addComponentRefraction(cubemap,map,mixFactor,ratio);
 }
 
-void Material::bind(){
-	m_i->m_CustomBindFunctor();
-}
+void Material::bind(){ m_i->m_CustomBindFunctor(); }
+void Material::unbind(){ m_i->m_CustomUnbindFunctor(); }
 
 const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
@@ -328,6 +329,5 @@ void Material::removeObject(std::string objectName){
 }
 std::vector<skey>& Material::getObjects(){ return m_i->m_Objects; }
 
-template<class T> void Material::setCustomBindFunctor(T& functor){
-	m_i->m_CustomBindFunctor = boost::bind<void>(functor,this);
-}
+template<class T> void Material::setCustomBindFunctor(T& functor){ m_i->m_CustomBindFunctor = boost::bind<void>(functor,this); }
+template<class T> void Material::setCustomUnbindFunctor(T& functor){ m_i->m_CustomUnbindFunctor = boost::bind<void>(functor,this); }

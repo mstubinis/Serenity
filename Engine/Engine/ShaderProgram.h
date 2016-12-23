@@ -54,11 +54,13 @@ class ShaderP final: public EngineResource{
         Shader* fragmentShader();
 		std::vector<skey>& getMaterials();
 
+		void addMaterial(std::string);
 		const std::unordered_map<std::string,GLint>& uniforms() const;
 
 		void bind();
+		void unbind();
 		template<class T> void setCustomBindFunctor(T& functor);
-		void addMaterial(std::string);
+		template<class T> void setCustomUnbindFunctor(T& functor);
 };
 
 #endif

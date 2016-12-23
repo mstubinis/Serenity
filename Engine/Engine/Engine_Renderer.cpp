@@ -221,6 +221,16 @@ void Detail::RenderManagement::_bind(Material* m){
 		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = m->name();
 	}
 }
+void Detail::RenderManagement::_unbind(ShaderP* p){
+	p->unbind();                   //unbind custom data
+	Renderer::bindShaderProgram(0);//unbind shader program                 
+}
+void Detail::RenderManagement::_unbind(Material* m){
+	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
+		m->unbind();
+		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
+	}
+}
 
 void Detail::RenderManagement::init(){
     #ifdef _DEBUG
@@ -373,10 +383,10 @@ void Detail::RenderManagement::_passGeometry(){
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		_bind(shaderProgram);
-		for(auto material:shaderProgram->getMaterials()){
-			Material* m = Resources::getMaterial(*(material.w.lock().get()));
-			_bind(m);
-			for(auto key:m->getObjects()){
+		for(auto materialNames:shaderProgram->getMaterials()){
+			Material* material = Resources::getMaterial(*(materialNames.w.lock().get()));
+			_bind(material);
+			for(auto key:material->getObjects()){
 				string renderedItemName = *(key.w.lock().get());
 				RenderedItem* item = Resources::getRenderedItem(renderedItemName);
 				string parentObjectName = item->parent();
@@ -384,12 +394,14 @@ void Detail::RenderManagement::_passGeometry(){
 
 				if(scene->objects().count(parentObjectName)){
 					o->bind();   //bind object specific data shared between all of its rendered items
-					item->bind();
+					item->bind();//the actual mesh drawing occurs here too
+					item->unbind();
 					o->unbind();
 				}
 			}
+			_unbind(material);
 		}
-		bindShaderProgram(0);
+		_unbind(shaderProgram);
 	}
 	Settings::disableDepthTest();
 	Settings::disableDepthMask();

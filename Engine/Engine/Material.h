@@ -122,6 +122,7 @@ class Material final: public EngineResource{
 		const MaterialComponentRefraction* getComponentRefraction() const;
 
 		void bind();
+		void unbind();
 
         void addComponent(uint type, Texture* texture);
 
@@ -157,5 +158,6 @@ class Material final: public EngineResource{
 		std::vector<skey>& getObjects();
 
 		template<class T> void setCustomBindFunctor(T& functor);
+		template<class T> void setCustomUnbindFunctor(T& functor);
 };
 #endif

@@ -28,6 +28,7 @@ class RenderedItem final: public EngineResource{
 		boost::weak_ptr<std::string>& parentPtr();
 
 		void bind();
+		void unbind();
 
 		void setOrientation(glm::quat&);
 		void setOrientation(float x,float y,float z);
@@ -51,8 +52,8 @@ class RenderedItem final: public EngineResource{
 		void scale(glm::vec3&);
 
 		void update(float dt);
-		void draw(bool debug, bool godsRays);
 
 		template<class T> void setCustomBindFunctor(T& functor);
+		template<class T> void setCustomUnbindFunctor(T& functor);
 };
 #endif
