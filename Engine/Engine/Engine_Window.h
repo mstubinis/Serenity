@@ -18,7 +18,7 @@ class Engine_Window final{
 		void setRenderingAPI(uint);
 		#endif
 
-        const char* name();
+        const char* name() const;
         sf::Vector2u getSize();
         void setName(const char* name);
         void setSize(uint w, uint h);
@@ -38,7 +38,7 @@ class Engine_Window final{
         void display();
 		void keepMouseInWindow(bool=true);
 
-        sf::Window* getSFMLHandle();
+        sf::Window* getSFMLHandle() const;
 };
 
 #endif

@@ -247,7 +247,7 @@ void Engine_Window::setIcon(Texture* texture){
 void Engine_Window::setIcon(const char* file){
 	m_i->_setIcon(file);
 }
-const char* Engine_Window::name(){
+const char* Engine_Window::name() const {
     return m_i->m_WindowName;
 }
 void Engine_Window::setName(const char* name){
@@ -292,5 +292,5 @@ void Engine_Window::setFullScreen(bool fullscreen){
 void Engine_Window::keepMouseInWindow(bool keep){
 	m_i->m_SFMLWindow->setMouseCursorGrabbed(keep);
 }
-sf::Window* Engine_Window::getSFMLHandle(){ return m_i->m_SFMLWindow; }
+sf::Window* Engine_Window::getSFMLHandle() const { return m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }

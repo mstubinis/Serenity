@@ -295,12 +295,12 @@ bool Keyboard::KeyProcessing::_IsKeyDownOnce(std::string str){
     uint key = KeyProcessing::m_KeyMap[str];
     if(res && m_currentKey == key && (m_currentKey != m_previousKey)) return true; return false;
 }
-glm::vec2 Mouse::getMouseDifference(){ return MouseProcessing::m_Difference; }
-glm::vec2 Mouse::getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
-glm::vec2 Mouse::getMousePosition(){ return MouseProcessing::m_Position; }
+const glm::vec2& Mouse::getMouseDifference(){ return MouseProcessing::m_Difference; }
+const glm::vec2& Mouse::getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
+const glm::vec2& Mouse::getMousePosition(){ return MouseProcessing::m_Position; }
+const float Mouse::getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
 bool Mouse::isMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
 bool Mouse::isMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
-float Mouse::getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
 
 void Mouse::setMousePosition(float x,float y){ 
 	sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
@@ -323,4 +323,4 @@ bool Engine::Events::isKeyDown(std::string str){ return Keyboard::KeyProcessing:
 bool Engine::Events::isKeyDownOnce(std::string str){ return Keyboard::KeyProcessing::_IsKeyDownOnce(str); }
 bool Engine::Events::isKeyUp(std::string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
 
-glm::vec2 Engine::Events::getMousePosition(){ return Mouse::MouseProcessing::m_Position; }
+const glm::vec2& Engine::Events::getMousePosition(){ return Mouse::MouseProcessing::m_Position; }

@@ -56,9 +56,9 @@ namespace Engine{
                 static void run();
         };
     };
-    float getFPS();
+    const float getFPS();
     Engine_Window* getWindow();
-    sf::Vector2u getWindowSize();
+    const sf::Vector2u& getWindowSize();
     void setWindowIcon(Texture* texture);
     void showMouseCursor();
     void hideMouseCursor();

@@ -17,7 +17,6 @@
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <random>
 #include <math.h>
@@ -176,38 +175,6 @@ void Renderer::unbindTextureCubemap(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
-const GLint Renderer::getUniformLocation(const char* l){
-	const unordered_map<string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(l))return-1;return m.at(l);
-}
-void Renderer::sendUniform1d(const char* l,double x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1d(o,x); }
-void Renderer::sendUniform1i(const char* l,int x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1i(o,x); }
-void Renderer::sendUniform1f(const char* l,float x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1f(o,x); }
-void Renderer::sendUniform2d(const char* l,double x,double y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,x,y); }
-void Renderer::sendUniform2i(const char* l,int x,int y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,x,y); }
-void Renderer::sendUniform2f(const char* l,float x,float y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,x,y); }
-void Renderer::sendUniform3d(const char* l,double x,double y,double z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,x,y,z); }
-void Renderer::sendUniform3i(const char* l,int x,int y,int z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,x,y,z); }
-void Renderer::sendUniform3f(const char* l,float x,float y,float z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,x,y,z); }
-void Renderer::sendUniform4d(const char* l,double x,double y,double z,double w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,x,y,z,w); }
-void Renderer::sendUniform4i(const char* l,int x,int y,int z,int w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,x,y,z,w); }
-void Renderer::sendUniform4f(const char* l,float x,float y,float z,float w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,x,y,z,w); }
-void Renderer::sendUniform2d(const char* l,glm::dvec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,v.x,v.y); }
-void Renderer::sendUniform2i(const char* l,glm::ivec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,v.x,v.y); }
-void Renderer::sendUniform2f(const char* l,glm::vec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,v.x,v.y); }
-void Renderer::sendUniform3d(const char* l,glm::dvec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,v.x,v.y,v.z); }
-void Renderer::sendUniform3i(const char* l,glm::ivec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,v.x,v.y,v.z); }
-void Renderer::sendUniform3f(const char* l,glm::vec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,v.x,v.y,v.z); }
-void Renderer::sendUniform4d(const char* l,glm::dvec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,v.x,v.y,v.z,v.w); }
-void Renderer::sendUniform4i(const char* l,glm::ivec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,v.x,v.y,v.z,v.w); }
-void Renderer::sendUniform4f(const char* l,glm::vec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,v.x,v.y,v.z,v.w); }
-void Renderer::sendUniformMatrix4f(const char* l,glm::mat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4fv(o,1,0,glm::value_ptr(m)); }
-void Renderer::sendUniformMatrix4d(const char* l,glm::dmat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4dv(o,1,0,glm::value_ptr(m)); }
-void Renderer::sendUniform2fv(const char* l,vector<glm::vec2>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
-void Renderer::sendUniform3fv(const char* l,vector<glm::vec3>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
-void Renderer::sendUniform4fv(const char* l,vector<glm::vec4>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
-void Renderer::sendUniform2fv(const char* l,glm::vec2* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
-void Renderer::sendUniform3fv(const char* l,glm::vec3* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
-void Renderer::sendUniform4fv(const char* l,glm::vec4* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
 
 void Detail::RenderManagement::init(){
     #ifdef _DEBUG
@@ -256,13 +223,13 @@ void Detail::RenderManagement::destruct(){
     SAFE_DELETE_COM(RenderManagement::m_DirectXDeviceContext);
     #endif
 }
-void Renderer::renderRectangle(glm::vec2 pos, glm::vec4 col, float w, float h, float angle, float depth){
+void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
 }
-void Renderer::renderTexture(Texture* texture,glm::vec2 pos, glm::vec4 col,float angle, glm::vec2 scl, float depth){
+void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth){
 	texture->render(pos,col,angle,scl,depth);
 }
-void Renderer::renderText(string text,Font* font, glm::vec2 pos,glm::vec4 color, float angle, glm::vec2 scl, float depth){
+void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth){
 	font->renderText(text,pos,color,angle,scl,depth);
 }
 
@@ -288,13 +255,13 @@ void Detail::RenderManagement::_renderTextures(){
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
 			bindTexture("DiffuseTexture",texture,0);
-			sendUniform1i("DiffuseTextureEnabled",1);
+			sendUniform1iUnsafe("DiffuseTextureEnabled",1);
         }
         else{
 			bindTexture("DiffuseTexture",(GLuint)0,0);
-			sendUniform1i("DiffuseTextureEnabled",0);
+			sendUniform1iUnsafe("DiffuseTextureEnabled",0);
         }
-		sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
+		sendUniform4fUnsafe("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
         glm::mat4 model = glm::mat4(1);
         model = glm::translate(model, glm::vec3(item.pos.x,
@@ -305,8 +272,8 @@ void Detail::RenderManagement::_renderTextures(){
             model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
         model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
-		sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-		sendUniformMatrix4f("Model",model);
+		sendUniformMatrix4fUnsafe("VP",m_2DProjectionMatrix);
+		sendUniformMatrix4fUnsafe("Model",model);
 
         Resources::getMesh("Plane")->render();
     }
@@ -318,8 +285,8 @@ void Detail::RenderManagement::_renderText(){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
 		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
-		sendUniform1i("DiffuseTextureEnabled",1);
-		sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
+		sendUniform1iUnsafe("DiffuseTextureEnabled",1);
+		sendUniform4fUnsafe("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
 
         float y_offset = 0;
         float x = item.pos.x;
@@ -336,8 +303,8 @@ void Detail::RenderManagement::_renderText(){
                 glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
                 glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
 
-				sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-				sendUniformMatrix4f("Model",glyph->m_Model);
+				sendUniformMatrix4fUnsafe("VP",m_2DProjectionMatrix);
+				sendUniformMatrix4fUnsafe("Model",glyph->m_Model);
 
                 glyph->char_mesh->render();
                 x += (glyph->xadvance) * item.scl.x;
@@ -394,10 +361,10 @@ void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
 	bindShaderProgram("Deferred_Light");
 
-	sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-	sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
+	sendUniformMatrix4fUnsafe("VP",Resources::getActiveCamera()->getViewProjection());
+	sendUniform4fvUnsafe("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
 
-	sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+	sendUniform2fUnsafe("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
 	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
 	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
@@ -509,21 +476,20 @@ void Detail::RenderManagement::render(){
 void Detail::RenderManagement::_passSSAO(){
 	bindShaderProgram("Deferred_SSAO");
 
-	sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
-	sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
+	sendUniform1iUnsafe("doSSAO",int(RendererInfo::SSAOInfo::ssao));
+	sendUniform1iUnsafe("doBloom",int(RendererInfo::BloomInfo::bloom));
 
 	Camera* c = Resources::getActiveCamera();
 	glm::vec3 camPos = glm::vec3(c->getPosition());
 
-	sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
-	sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
-	sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
-	sendUniform1f("gRadius",RendererInfo::SSAOInfo::ssao_radius);
-	sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
-	sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
-	sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
-	sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
-	sendUniform1i("far",int(c->getFar()));
+	sendUniform3fUnsafe("gCameraPosition",camPos.x,camPos.y,camPos.z);
+	sendUniform1fUnsafe("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
+	sendUniform1fUnsafe("gBias",RendererInfo::SSAOInfo::ssao_bias);
+	sendUniform1fUnsafe("gRadius",RendererInfo::SSAOInfo::ssao_radius);
+	sendUniform1fUnsafe("gScale",RendererInfo::SSAOInfo::ssao_scale);
+	sendUniform1iUnsafe("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
+	sendUniform1iUnsafe("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+	sendUniform2fvUnsafe("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
 	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
 	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
@@ -540,8 +506,8 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
 	Settings::clear(true,false,false);
 
 	bindShaderProgram("Deferred_Edge");
-	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
-	sendUniform1f("radius", radius);
+	sendUniform2fUnsafe("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
+	sendUniform1fUnsafe("radius", radius);
 
 	bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
@@ -554,18 +520,18 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
     Settings::clear(true,false,false);
 
 	bindShaderProgram("Deferred_GodsRays");
-	sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
-	sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
-	sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
-	sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
-	sendUniform1f("weight",RendererInfo::GodRaysInfo::godRays_weight);
-	sendUniform2f("lightPositionOnScreen",
+	sendUniform1fUnsafe("decay",RendererInfo::GodRaysInfo::godRays_decay);
+	sendUniform1fUnsafe("density",RendererInfo::GodRaysInfo::godRays_density);
+	sendUniform1fUnsafe("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
+	sendUniform1iUnsafe("samples",RendererInfo::GodRaysInfo::godRays_samples);
+	sendUniform1fUnsafe("weight",RendererInfo::GodRaysInfo::godRays_weight);
+	sendUniform2fUnsafe("lightPositionOnScreen",
 		float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
 		float(lightPositionOnScreen.y/float(Resources::getWindowSize().y))
 	);
 
-	sendUniform1i("behind",int(behind));
-	sendUniform1f("alpha",alpha);
+	sendUniform1iUnsafe("behind",int(behind));
+	sendUniform1fUnsafe("alpha",alpha);
 
 	bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
 
@@ -578,8 +544,8 @@ void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
 	bindShaderProgram("Deferred_HDR");
-	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
-	sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
+	sendUniform1fUnsafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1fUnsafe("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
 	bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -590,24 +556,20 @@ void Detail::RenderManagement::_passHDR(){
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
 	bindShaderProgram("Deferred_Blur");
 
-	sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
-	sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
-		RendererInfo::BloomInfo::bloom_strength,
-		RendererInfo::BloomInfo::bloom_strength,
-		RendererInfo::SSAOInfo::ssao_blur_strength
-	);
+	sendUniform1fUnsafe("radius",RendererInfo::BloomInfo::bloom_radius);
+	sendUniform4fUnsafe("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
-    if(channels.find("R") != string::npos) sendUniform1i("R",1);
-    else                                        sendUniform1i("R",0);
-    if(channels.find("G") != string::npos) sendUniform1i("G",1);
-    else                                        sendUniform1i("G",0);
-    if(channels.find("B") != string::npos) sendUniform1i("B",1);
-    else                                        sendUniform1i("B",0);
-    if(channels.find("A") != string::npos) sendUniform1i("A",1);
-    else                                        sendUniform1i("A",0);
+    if(channels.find("R") != string::npos) sendUniform1iUnsafe("R",1);
+    else                                   sendUniform1iUnsafe("R",0);
+    if(channels.find("G") != string::npos) sendUniform1iUnsafe("G",1);
+    else                                   sendUniform1iUnsafe("G",0);
+    if(channels.find("B") != string::npos) sendUniform1iUnsafe("B",1);
+    else                                   sendUniform1iUnsafe("B",0);
+    if(channels.find("A") != string::npos) sendUniform1iUnsafe("A",1);
+    else                                   sendUniform1iUnsafe("A",0);
 
-    if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
-    else{                     sendUniform2f("HV",0.0f,1.0f); }
+    if(type == "Horizontal"){ sendUniform2fUnsafe("HV",1.0f,0.0f); }
+    else{                     sendUniform2fUnsafe("HV",0.0f,1.0f); }
 
 	bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
@@ -621,15 +583,15 @@ void Detail::RenderManagement::_passFinal(){
 
 	bindShaderProgram("Deferred_Final");
 
-	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1fUnsafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-    sendUniform3f("gAmbientColor",ambient.x,ambient.y,ambient.z);
+    sendUniform3fUnsafe("gAmbientColor",ambient.x,ambient.y,ambient.z);
 
-	sendUniform1i("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
-    sendUniform1i("HasLighting",int(RendererInfo::LightingInfo::lighting));
-    sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
-	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
+	sendUniform1iUnsafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
+    sendUniform1iUnsafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
+    sendUniform1iUnsafe("HasBloom",int(RendererInfo::BloomInfo::bloom));
+	sendUniform1iUnsafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
 	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
 	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
@@ -647,8 +609,8 @@ void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);
 	glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
 
-	sendUniformMatrix4f("Model",m);
-	sendUniformMatrix4f("VP",p);
+	sendUniformMatrix4fUnsafe("Model",m);
+	sendUniformMatrix4fUnsafe("VP",p);
 
     glViewport(0,0,width,height);
 

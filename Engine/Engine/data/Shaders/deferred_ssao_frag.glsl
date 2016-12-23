@@ -16,7 +16,6 @@ uniform float gBias;
 uniform float gScale;
 uniform int gSampleCount;
 uniform int gNoiseTextureSize;
-uniform int far;
 
 uniform vec2 poisson[32];
 

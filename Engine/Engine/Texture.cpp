@@ -106,7 +106,7 @@ Texture::Texture(std::string files[],std::string _name,GLuint type):m_i(new impl
 Texture::~Texture(){
     unload();
 }
-void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
+void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
 void Texture::_constructAsFramebuffer(uint w,uint h,float scaler,int internalFormat,int format,int type,int attatchment){
@@ -133,7 +133,7 @@ void Texture::unload(){
 	}
 }
 uchar* Texture::pixels(){ return m_i->_getPixels(); }
-GLuint& Texture::address() { return m_i->m_TextureAddress; }
-GLuint Texture::type() { return m_i->m_Type; }
-uint Texture::width() { return m_i->m_Width; }
-uint Texture::height() { return m_i->m_Height; }
+GLuint& Texture::address(){ return m_i->m_TextureAddress; }
+GLuint Texture::type(){ return m_i->m_Type; }
+uint Texture::width(){ return m_i->m_Width; }
+uint Texture::height(){ return m_i->m_Height; }

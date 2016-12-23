@@ -152,8 +152,8 @@ void ObjectDynamic::update(float dt){
 	}
 }
 void ObjectDynamic::bind(){
-	Renderer::sendUniform4f("Object_Color",m_Color.x,m_Color.y,m_Color.z,m_Color.w);
-	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
+	Renderer::sendUniform4f("Object_Color",m_Color);
+	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor);
 }
 void ObjectDynamic::render(GLuint shader,bool debug){
     //add to render queue

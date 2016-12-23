@@ -174,9 +174,9 @@ void Engine::Detail::EngineClass::EVENT_JOYSTICK_DISCONNECTED(){
 	Game::onJoystickDisconnected();
 }
 #pragma endregion
-float Engine::getFPS(){ return 1.0f / Resources::dt(); }
+const float Engine::getFPS(){ return 1.0f / Resources::dt(); }
 Engine_Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
-sf::Vector2u Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
+const sf::Vector2u& Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
 void Engine::setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture); }
 void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }

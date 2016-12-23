@@ -115,7 +115,7 @@ class Material final: public EngineResource{
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         ~Material();
 
-		std::unordered_map<uint,MaterialComponent*>& getComponents();
+		const std::unordered_map<uint,MaterialComponent*>& getComponents() const;
         const MaterialComponent* getComponent(uint type) const;
 
 		const MaterialComponentReflection* getComponentReflection() const;

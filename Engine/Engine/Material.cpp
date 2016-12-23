@@ -308,7 +308,7 @@ void Material::bind(GLuint shader,GLuint api){
 
 }
 
-std::unordered_map<uint,MaterialComponent*>& Material::getComponents(){ return m_i->m_Components; }
+const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components[index]; }
 const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components[(uint)MATERIAL_COMPONENT_TYPE_REFLECTION]); }
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components[(uint)MATERIAL_COMPONENT_TYPE_REFRACTION]); }

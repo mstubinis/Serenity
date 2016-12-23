@@ -14,7 +14,7 @@
 
 using namespace Engine;
 
-FontData::FontData(std::string filename){
+FontData::FontData(std::string& filename){
     _loadTextFile(filename);
     std::string texture_filename = filename.substr(0,filename.size()-4);
     texture_filename += ".png";
@@ -26,7 +26,7 @@ FontData::~FontData(){
     }
 }
 FontGlyph* FontData::getGlyphData(unsigned char c){ return m_FontGlyphs[c]; }
-void FontData::_loadTextFile(std::string filename){
+void FontData::_loadTextFile(std::string& filename){
     std::unordered_map<unsigned char,FontGlyph*> _Font_Chars;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     for(std::string line; std::getline(str, line, '\n');){
@@ -73,6 +73,6 @@ Font::Font(std::string filename){
 Font::~Font(){
     SAFE_DELETE(m_FontData);
 }
-void Font::renderText(std::string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
+void Font::renderText(std::string& text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(name(),text,pos,color,scl,angle,depth));
 }

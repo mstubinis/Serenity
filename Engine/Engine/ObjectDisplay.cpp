@@ -29,8 +29,8 @@ ObjectDisplay::~ObjectDisplay(){
     //for(auto item:m_DisplayItems) SAFE_DELETE(item);
 }
 void ObjectDisplay::bind(){
-	Renderer::sendUniform4f("Object_Color",m_Color.x,m_Color.y,m_Color.z,m_Color.w);
-	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor.x,m_GodsRaysColor.y,m_GodsRaysColor.z);
+	Renderer::sendUniform4f("Object_Color",m_Color);
+	Renderer::sendUniform3f("Gods_Rays_Color",m_GodsRaysColor);
 }
 void ObjectDisplay::update(float dt){
 	ObjectBasic::update(dt);

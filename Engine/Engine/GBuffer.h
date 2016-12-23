@@ -140,7 +140,7 @@ class GBuffer final{
         void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool=true);
         void stop();
 
-		std::unordered_map<uint,boost::weak_ptr<TextureBuffer>> getBuffers();
+		const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& getBuffers() const;
         Texture* getTexture(uint);
 };
 #endif
