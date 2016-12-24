@@ -19,25 +19,25 @@ namespace sf{ class Image; }
 
 class Texture: public EngineResource{
     private:
-		class impl;
-		std::unique_ptr<impl> m_i;
+        class impl;
+        std::unique_ptr<impl> m_i;
     public:
-		Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D);
+        Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
-		Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D);
+        Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D);
         Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP);
         virtual ~Texture();
 
-		uchar* pixels();
-		GLuint& address();
-		GLuint type();
-		uint width();
-		uint height();
+        uchar* pixels();
+        GLuint& address();
+        GLuint type();
+        uint width();
+        uint height();
 
-		virtual void load();
-		virtual void unload();
+        virtual void load();
+        virtual void unload();
 
-		void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
+        void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
 
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
 

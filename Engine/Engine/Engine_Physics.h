@@ -23,14 +23,14 @@ typedef unsigned int uint;
 enum COLLISION_TYPE { 
     COLLISION_TYPE_CONVEXHULL, 
     COLLISION_TYPE_TRIANGLESHAPE,
-	COLLISION_TYPE_STATIC_TRIANGLESHAPE,
+    COLLISION_TYPE_STATIC_TRIANGLESHAPE,
     COLLISION_TYPE_COMPOUND,
     COLLISION_TYPE_BOXSHAPE,
     COLLISION_TYPE_NONE
 };
 class Collision final{
     private:
-		btTriangleMesh* m_InternalMeshData;
+        btTriangleMesh* m_InternalMeshData;
         btVector3* m_Inertia;
         uint m_CollisionType;
         btCollisionShape* m_CollisionShape;

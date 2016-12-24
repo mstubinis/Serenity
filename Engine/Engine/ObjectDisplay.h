@@ -9,15 +9,15 @@
 
 struct DefaultObjectDisplayBindFunctor;
 class ObjectDisplay: public ObjectBasic{
-	public: static DefaultObjectDisplayBindFunctor DEFAULT_FUNCTOR;
+    public: static DefaultObjectDisplayBindFunctor DEFAULT_FUNCTOR;
     protected:
-		boost::function<void()> m_CustomBindFunctor;
+        boost::function<void()> m_CustomBindFunctor;
         bool m_Shadeless;
         bool m_Visible;
-		bool m_PassedRenderCheck;
+        bool m_PassedRenderCheck;
         std::vector<RenderedItem*> m_DisplayItems;
         glm::vec4 m_Color;
-		glm::vec3 m_GodsRaysColor;
+        glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
     public:
@@ -30,9 +30,9 @@ class ObjectDisplay: public ObjectBasic{
                      );
         virtual ~ObjectDisplay();
 
-		virtual void update(float);
-		virtual void bind();
-		virtual void unbind();
+        virtual void update(float);
+        virtual void bind();
+        virtual void unbind();
         virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual void setScale(float,float,float); 
@@ -50,16 +50,16 @@ class ObjectDisplay: public ObjectBasic{
         virtual glm::vec3& getRadiusBox(){ return m_BoundingBoxRadius; }
 
         glm::vec4& getColor(){ return m_Color; }
-		glm::vec3& getGodsRaysColor(){ return m_GodsRaysColor; }
+        glm::vec3& getGodsRaysColor(){ return m_GodsRaysColor; }
         std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setVisible(bool b);
 
-		virtual bool visible() { return m_Visible; }
-		virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
+        virtual bool visible() { return m_Visible; }
+        virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 
-		template<class T> void setCustomBindFunctor(T& functor);
+        template<class T> void setCustomBindFunctor(T& functor);
 };
 #endif

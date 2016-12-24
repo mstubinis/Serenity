@@ -22,8 +22,8 @@ bool Sound::Detail::SoundManagement::isPaused(sf::SoundSource::Status status){
 }
 
 SoundEffectBasic::SoundEffectBasic(std::string& name,std::string file){ 
-	s = nullptr;
-	this->setName(name); 
+    s = nullptr;
+    this->setName(name); 
 }
 SoundEffectBasic::~SoundEffectBasic(){
     SAFE_DELETE(s);

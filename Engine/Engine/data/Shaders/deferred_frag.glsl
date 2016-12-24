@@ -32,23 +32,23 @@ vec3 CalcBumpedNormal(){
 }
 void main(void){
     gl_FragData[0] = Object_Color;
-	gl_FragData[1].rgb = normalize(Normals);
-	gl_FragData[2].r = BaseGlow;
-	gl_FragData[2].g = 1.0;
-	if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }
+    gl_FragData[1].rgb = normalize(Normals);
+    gl_FragData[2].r = BaseGlow;
+    gl_FragData[2].g = 1.0;
+    if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }
     if(FirstConditionals.y > 0.5){ gl_FragData[1].rgb = CalcBumpedNormal(); }
 
     if(Shadeless == 0){
         if(FirstConditionals.z > 0.5){ gl_FragData[2].r += texture2D(GlowTexture, UV).r; }
-		if(SecondConditionals.x > 0.5){ gl_FragData[2].g = texture2D(SpecularTexture, UV).r; }
+        if(SecondConditionals.x > 0.5){ gl_FragData[2].g = texture2D(SpecularTexture, UV).r; }
     }
     else{ gl_FragData[1].rgb = vec3(1.0); }
 
     gl_FragData[1].a = Object_Color.a;
     gl_FragData[2].b = matID;
     gl_FragData[3] = vec4(WorldPosition,1.0);
-	if(HasGodsRays == 1){
-		gl_FragData[4] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;
-	}
+    if(HasGodsRays == 1){
+        gl_FragData[4] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;
+    }
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

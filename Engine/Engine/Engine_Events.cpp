@@ -275,8 +275,8 @@ bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(std::string str){
     if(res && m_currentButton == key && (m_currentButton != m_previousButton)) return true; return false;
 }
 void Mouse::MouseProcessing::_SetMousePositionInternal(float x, float y){
-	m_Position_Previous = m_Position;
-	m_Position = glm::vec2(x,y);
+    m_Position_Previous = m_Position;
+    m_Position = glm::vec2(x,y);
     m_Difference.x += (m_Position.x - m_Position_Previous.x);
     m_Difference.y += (m_Position.y - m_Position_Previous.y);
 }
@@ -303,16 +303,16 @@ bool Mouse::isMouseButtonDown(std::string str){ return MouseProcessing::_IsMouse
 bool Mouse::isMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
 
 void Mouse::setMousePosition(float x,float y){ 
-	sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
-	Mouse::MouseProcessing::_SetMousePositionInternal(x,y); 
+    sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
+    Mouse::MouseProcessing::_SetMousePositionInternal(x,y); 
 }
 void Mouse::setMousePosition(glm::vec2 pos){ 
-	sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
-	Mouse::MouseProcessing::_SetMousePositionInternal(pos.x,pos.y); 
+    sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
+    Mouse::MouseProcessing::_SetMousePositionInternal(pos.x,pos.y); 
 }
 void Mouse::setMousePosition(glm::uvec2 pos){ 
-	sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
-	Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y)); 
+    sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
+    Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y)); 
 }
 
 bool Keyboard::isKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }

@@ -11,8 +11,8 @@
 using namespace Engine;
 
 int main(){
-	srand((unsigned)time(0));
-	#ifdef _WIN32
+    srand((unsigned)time(0));
+    #ifdef _WIN32
         if(GetConsoleWindow() == NULL){ 
             AllocConsole();
         }

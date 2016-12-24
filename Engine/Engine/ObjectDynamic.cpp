@@ -18,8 +18,8 @@ using namespace Engine;
 
 
 struct DefaultObjectDynamicBindFunctor{void operator()(ObjectDynamic* o) const {
-	Renderer::sendUniform4f("Object_Color",o->getColor());
-	Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
+    Renderer::sendUniform4f("Object_Color",o->getColor());
+    Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
 }};
 DefaultObjectDynamicBindFunctor ObjectDynamic::DEFAULT_FUNCTOR;
 
@@ -50,9 +50,9 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0);
     if(mesh != "" && mat != ""){
-		RenderedItem* item = new RenderedItem(namePtr(),mesh,mat);
+        RenderedItem* item = new RenderedItem(namePtr(),mesh,mat);
         m_DisplayItems.push_back(item);
-	}
+    }
     m_Color = glm::vec4(1);
     m_GodsRaysColor = glm::vec3(0);
     m_Collision = col;
@@ -63,7 +63,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
             btCompoundShape* shape = new btCompoundShape();
             for(auto item:m_DisplayItems){
                 btTransform t;
-				t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
+                t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
                 shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
             }
             m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
@@ -105,7 +105,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Collision->getCollisionShape()->setUserPointer(this);
     m_RigidBody->setUserPointer(this);
 
-	setCustomBindFunctor(ObjectDynamic::DEFAULT_FUNCTOR);
+    setCustomBindFunctor(ObjectDynamic::DEFAULT_FUNCTOR);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
@@ -150,14 +150,14 @@ void ObjectDynamic::update(float dt){
     if(m_Parent != nullptr){
         m_Model =  m_Parent->getModel() * m_Model;
     }
-	for(auto renderedItem:m_DisplayItems){
-		renderedItem->update(dt);
-	}
-	Camera* c = Resources::getActiveCamera();
-	m_PassedRenderCheck = true;
-	if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
-		m_PassedRenderCheck = false;
-	}
+    for(auto renderedItem:m_DisplayItems){
+        renderedItem->update(dt);
+    }
+    Camera* c = Resources::getActiveCamera();
+    m_PassedRenderCheck = true;
+    if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
+        m_PassedRenderCheck = false;
+    }
 }
 void ObjectDynamic::bind(){ m_CustomBindFunctor(); }
 void ObjectDynamic::unbind(){}
@@ -183,20 +183,20 @@ void ObjectDynamic::setScale(float x, float y, float z){
 void ObjectDynamic::setScale(glm::vec3 s){ ObjectDynamic::setScale(s.x,s.y,s.z); }
 void ObjectDynamic::setPosition(glm::num x, glm::num y, glm::num z){
     btTransform tr;
-	tr.setOrigin(btVector3(btScalar(x),btScalar(y),btScalar(z)));
-	tr.setRotation(m_RigidBody->getOrientation());
-	
-	if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
-		Physics::removeRigidBody(m_RigidBody);
-		SAFE_DELETE(m_RigidBody);
-	}
-	m_MotionState->setWorldTransform(tr);
-	if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
-		btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
-		m_RigidBody = new btRigidBody(ci);
-		m_RigidBody->setUserPointer(this);
-		Physics::addRigidBody(m_RigidBody);
-	}
+    tr.setOrigin(btVector3(btScalar(x),btScalar(y),btScalar(z)));
+    tr.setRotation(m_RigidBody->getOrientation());
+    
+    if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
+        Physics::removeRigidBody(m_RigidBody);
+        SAFE_DELETE(m_RigidBody);
+    }
+    m_MotionState->setWorldTransform(tr);
+    if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
+        btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
+        m_RigidBody = new btRigidBody(ci);
+        m_RigidBody->setUserPointer(this);
+        Physics::addRigidBody(m_RigidBody);
+    }
     m_RigidBody->setWorldTransform(tr);
     m_RigidBody->setCenterOfMassTransform(tr);
 }
@@ -377,8 +377,8 @@ void ObjectDynamic::clearAllForces(){
 }
 
 bool ObjectDynamic::rayIntersectSphere(Camera* c){
-	if(c == nullptr) c = Resources::getActiveCamera();
-	return c->rayIntersectSphere(this); 
+    if(c == nullptr) c = Resources::getActiveCamera();
+    return c->rayIntersectSphere(this); 
 }
 void ObjectDynamic::calculateRadius(){
     if(m_DisplayItems.size() == 0){
@@ -389,7 +389,7 @@ void ObjectDynamic::calculateRadius(){
     float maxLength = 0;
     for(auto item:m_DisplayItems){
         float length = 0;
-		glm::mat4 m = item->model();
+        glm::mat4 m = item->model();
         glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
         length = glm::length(localPosition) + item->mesh()->getRadius() * Engine::Math::Max(item->getScale());
         if(length > maxLength){
@@ -402,13 +402,13 @@ void ObjectDynamic::calculateRadius(){
         scale = glm::vec3(s.x(),s.y(),s.z());
     }
     m_BoundingBoxRadius = maxLength * scale;
-	m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
+    m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
 }
 bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
-	return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
+    return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
 
-glm::quat ObjectDynamic::getOrientation(){
+glm::quat& ObjectDynamic::getOrientation(){
     btQuaternion q = m_RigidBody->getOrientation();
     return glm::quat(q.w(),q.x(),q.y(),q.z());
 }
@@ -416,8 +416,8 @@ glm::vec3 ObjectDynamic::getScale(){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
-glm::m4 ObjectDynamic::getModel(){ return m_Model; }
+glm::m4& ObjectDynamic::getModel(){ return m_Model; }
 
 template<class T> void ObjectDynamic::setCustomBindFunctor(T& functor){
-	m_CustomBindFunctor = boost::bind<void>(functor,this);
+    m_CustomBindFunctor = boost::bind<void>(functor,this);
 }

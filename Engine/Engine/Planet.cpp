@@ -16,144 +16,144 @@
 using namespace Engine;
 
 struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResource* r) const {
-	RenderedItem* i = static_cast<RenderedItem*>(r);
-	ShaderP* firstProgram = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
+    RenderedItem* i = static_cast<RenderedItem*>(r);
+    ShaderP* firstProgram = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
 
-	boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
-	if(exists(o)){
-		Planet* obj = static_cast<Planet*>(o.lock().get());
-		Camera* c = Resources::getActiveCamera();
-		if(obj->passedRenderCheck()){
-			float atmosphereHeight = obj->getAtmosphereHeight();
-			if(atmosphereHeight > 0){
-				//GroundFromAtmosphere should be currently binded
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
+    if(exists(o)){
+        Planet* obj = static_cast<Planet*>(o.lock().get());
+        Camera* c = Resources::getActiveCamera();
+        if(obj->passedRenderCheck()){
+            float atmosphereHeight = obj->getAtmosphereHeight();
+            if(atmosphereHeight > 0){
+                //GroundFromAtmosphere should be currently binded
 
-				float innerRadius = obj->getDefaultRadius();
-				float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
+                float innerRadius = obj->getDefaultRadius();
+                float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
 
-				glm::vec3& pos = glm::vec3(obj->getPosition());
-				glm::quat& orientation = obj->getOrientation();
+                glm::vec3& pos = glm::vec3(obj->getPosition());
+                glm::quat& orientation = obj->getOrientation();
 
-				glm::mat4 mod = glm::mat4(1);
-				mod = glm::translate(mod,pos);
-				mod *= glm::mat4_cast(orientation);
-				mod = glm::scale(mod,obj->getScale());
+                glm::mat4 mod = glm::mat4(1);
+                mod = glm::translate(mod,pos);
+                mod *= glm::mat4_cast(orientation);
+                mod = glm::scale(mod,obj->getScale());
 
-				glm::mat4 rot = glm::mat4(1);
-				rot *= glm::mat4_cast(orientation);
+                glm::mat4 rot = glm::mat4(1);
+                rot *= glm::mat4_cast(orientation);
 
-				Renderer::sendUniformMatrix4f("Model",mod);
-				Renderer::sendUniformMatrix4f("Rot",rot);
+                Renderer::sendUniformMatrix4f("Model",mod);
+                Renderer::sendUniformMatrix4f("Rot",rot);
 
-				Renderer::sendUniform1i("hasAtmosphere",1);
-				Renderer::sendUniform1i("HasAtmosphere",1);
+                Renderer::sendUniform1i("hasAtmosphere",1);
+                Renderer::sendUniform1i("HasAtmosphere",1);
 
-				Renderer::sendUniform1i("nSamples", 2);
-				Renderer::sendUniform1f("fSamples", 2.0f);
+                Renderer::sendUniform1i("nSamples", 2);
+                Renderer::sendUniform1f("fSamples", 2.0f);
 
-				glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
-				Renderer::sendUniform3f("v3CameraPos", camPos);
+                glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
+                Renderer::sendUniform3f("v3CameraPos", camPos);
 
-				glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-				Renderer::sendUniform3f("gAmbientColor",ambient);
+                glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
+                Renderer::sendUniform3f("gAmbientColor",ambient);
 
-				glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
-				lightDir = glm::normalize(lightDir);
-				Renderer::sendUniform3f("v3LightDir", lightDir);
+                glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
+                lightDir = glm::normalize(lightDir);
+                Renderer::sendUniform3f("v3LightDir", lightDir);
 
-				glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),1.0f / glm::pow(0.57f, 4.0f),1.0f / glm::pow(0.475f, 4.0f));
-				Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+                glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),1.0f / glm::pow(0.57f, 4.0f),1.0f / glm::pow(0.475f, 4.0f));
+                Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
-				float Km = 0.0025f;
-				float Kr = 0.0015f;
-				float ESun = 20.0f;
-				float camHeight = glm::length(camPos);
-				float camHeight2 = camHeight*camHeight;
-				float fScaledepth = 0.25f;
-				float fScale = 1.0f / (outerRadius - innerRadius);
+                float Km = 0.0025f;
+                float Kr = 0.0015f;
+                float ESun = 20.0f;
+                float camHeight = glm::length(camPos);
+                float camHeight2 = camHeight*camHeight;
+                float fScaledepth = 0.25f;
+                float fScale = 1.0f / (outerRadius - innerRadius);
 
-				Renderer::sendUniform1f("fCameraHeight2", camHeight2);
-				Renderer::sendUniform1f("fOuterRadius", outerRadius);
-				Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
-				Renderer::sendUniform1f("fInnerRadius", innerRadius);
-				Renderer::sendUniform1f("fKrESun", Kr * ESun);
-				Renderer::sendUniform1f("fKmESun", Km * ESun);
-				Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-				Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
-				Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-				Renderer::sendUniform1f("fScale",fScale);
-				Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
-				Renderer::sendUniform1f("fExposure", 2.0f);
-				i->mesh()->render();
-				Engine::Renderer::bindShaderProgram(0);
+                Renderer::sendUniform1f("fCameraHeight2", camHeight2);
+                Renderer::sendUniform1f("fOuterRadius", outerRadius);
+                Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
+                Renderer::sendUniform1f("fInnerRadius", innerRadius);
+                Renderer::sendUniform1f("fKrESun", Kr * ESun);
+                Renderer::sendUniform1f("fKmESun", Km * ESun);
+                Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
+                Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+                Renderer::sendUniform1f("fScaleDepth",fScaledepth);
+                Renderer::sendUniform1f("fScale",fScale);
+                Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+                Renderer::sendUniform1f("fExposure", 2.0f);
+                i->mesh()->render();
+                Engine::Renderer::bindShaderProgram(0);
 
-				//now for actual atmosphere
-				ShaderP* program;
-				if(camHeight > outerRadius){ 
-					program = Resources::getShaderProgram("AS_SkyFromSpace"); 
-					glBlendFunc(GL_ONE, GL_ONE);
-					//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				}
-				else{
-					program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
-					//glBlendFunc(GL_ONE, GL_ONE);
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-				}
-				Engine::Renderer::bindShaderProgram(program);
+                //now for actual atmosphere
+                ShaderP* program;
+                if(camHeight > outerRadius){ 
+                    program = Resources::getShaderProgram("AS_SkyFromSpace"); 
+                    glBlendFunc(GL_ONE, GL_ONE);
+                    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
+                else{
+                    program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
+                    //glBlendFunc(GL_ONE, GL_ONE);
+                    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+                }
+                Engine::Renderer::bindShaderProgram(program);
 
-				if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
-				else                                                             Renderer::sendUniform1i("HasGodsRays",0);
+                if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
+                else                                                             Renderer::sendUniform1i("HasGodsRays",0);
 
-				Renderer::Settings::cullFace(GL_FRONT);
-				glEnable(GL_BLEND);
-				mod = glm::mat4(1);
-				mod = glm::translate(mod,pos);
-				mod = glm::scale(mod,obj->getScale());
-				mod = glm::scale(mod,glm::vec3(1 + atmosphereHeight));
+                Renderer::Settings::cullFace(GL_FRONT);
+                glEnable(GL_BLEND);
+                mod = glm::mat4(1);
+                mod = glm::translate(mod,pos);
+                mod = glm::scale(mod,obj->getScale());
+                mod = glm::scale(mod,glm::vec3(1 + atmosphereHeight));
 
-				Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
-				Renderer::sendUniformMatrix4f("Model",mod);
-				Renderer::sendUniform1f("far",c->getFar());
-				Renderer::sendUniform1f("C",1.0f);
+                Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+                Renderer::sendUniformMatrix4f("Model",mod);
+                Renderer::sendUniform1f("far",c->getFar());
+                Renderer::sendUniform1f("C",1.0f);
 
-				Renderer::sendUniform1i("nSamples", 2);
-				Renderer::sendUniform1f("fSamples", 2.0f);
-				Renderer::sendUniform3f("v3CameraPos", camPos);
-				Renderer::sendUniform3f("v3LightDir", lightDir);
-				Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+                Renderer::sendUniform1i("nSamples", 2);
+                Renderer::sendUniform1f("fSamples", 2.0f);
+                Renderer::sendUniform3f("v3CameraPos", camPos);
+                Renderer::sendUniform3f("v3LightDir", lightDir);
+                Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
-				Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
-				Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
+                Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
+                Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
 
-				Renderer::sendUniform1f("fOuterRadius", outerRadius);
-				Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
-				Renderer::sendUniform1f("fInnerRadius", innerRadius);
-				Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
+                Renderer::sendUniform1f("fOuterRadius", outerRadius);
+                Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
+                Renderer::sendUniform1f("fInnerRadius", innerRadius);
+                Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
 
-				Renderer::sendUniform1f("fKrESun", Kr * ESun);
-				Renderer::sendUniform1f("fKmESun", Km * ESun);
-				Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-				Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+                Renderer::sendUniform1f("fKrESun", Kr * ESun);
+                Renderer::sendUniform1f("fKmESun", Km * ESun);
+                Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
+                Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
 
-				Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-				Renderer::sendUniform1f("fScale",fScale);
-				Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+                Renderer::sendUniform1f("fScaleDepth",fScaledepth);
+                Renderer::sendUniform1f("fScale",fScale);
+                Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
 
-				// Gravity
-				float g = -0.98f;
-				Renderer::sendUniform1f("g",g);
-				Renderer::sendUniform1f("g2", g*g);
-				Renderer::sendUniform1f("fExposure",2.0f);
-				i->mesh()->render();
-				Renderer::Settings::cullFace(GL_BACK);
-				glDisable(GL_BLEND);
-			}
-			else{
-				Renderer::sendUniformMatrix4f("Model",glm::mat4(obj->getModel()) * i->model());
-				i->mesh()->render();
-			}
-		}
-	}
+                // Gravity
+                float g = -0.98f;
+                Renderer::sendUniform1f("g",g);
+                Renderer::sendUniform1f("g2", g*g);
+                Renderer::sendUniform1f("fExposure",2.0f);
+                i->mesh()->render();
+                Renderer::Settings::cullFace(GL_BACK);
+                glDisable(GL_BLEND);
+            }
+            else{
+                Renderer::sendUniformMatrix4f("Model",glm::mat4(obj->getModel()) * i->model());
+                i->mesh()->render();
+            }
+        }
+    }
 }};
 
 Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl),name,scene){
@@ -162,12 +162,12 @@ Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
 
-	AtmosphericScatteringRenderedItemBindFunctor f;
-	m_DisplayItems.at(0)->setCustomBindFunctor(f);
+    AtmosphericScatteringRenderedItemBindFunctor f;
+    m_DisplayItems.at(0)->setCustomBindFunctor(f);
 }
 Planet::~Planet(){
     for(auto ring:m_Rings)    
-		SAFE_DELETE(ring);
+        SAFE_DELETE(ring);
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
@@ -182,7 +182,7 @@ void Planet::update(float dt){
         //m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
     }
     for(auto ring:m_Rings)  ring->update(dt);
-	ObjectDisplay::update(dt);
+    ObjectDisplay::update(dt);
 }
 void Planet::draw(GLuint shader,bool debug,bool godsRays){
     shader = Resources::getShaderProgram("Deferred")->program();
@@ -201,7 +201,7 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, 
     m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     setColor(starColor.x,starColor.y,starColor.z,1);
-	setGodsRaysColor(starColor.x,starColor.y,starColor.z);
+    setGodsRaysColor(starColor.x,starColor.y,starColor.z);
     addChild(m_Light);
 }
 Star::~Star(){
@@ -240,11 +240,11 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
                 sf::Color bgFrontPixel = ringImage.getPixel(ringInfo.position + i,0);
                 sf::Color bgBackPixel = ringImage.getPixel(ringInfo.position - i,0);
 
-				glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r/255.0f,bgFrontPixel.g/255.0f,bgFrontPixel.b/255.0f,bgFrontPixel.a/255.0f);
-				glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r/255.0f,bgBackPixel.g/255.0f,bgBackPixel.b/255.0f,bgBackPixel.a/255.0f);
+                glm::vec4 bgColorFront = glm::vec4(bgFrontPixel.r/255.0f,bgFrontPixel.g/255.0f,bgFrontPixel.b/255.0f,bgFrontPixel.a/255.0f);
+                glm::vec4 bgColorBack = glm::vec4(bgBackPixel.r/255.0f,bgBackPixel.g/255.0f,bgBackPixel.b/255.0f,bgBackPixel.a/255.0f);
 
-				glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(bgColorFront,pC);
-				glm::vec4 _fcb = Engine::Math::PaintersAlgorithm(bgColorBack,pC);
+                glm::vec4 _fcf = Engine::Math::PaintersAlgorithm(bgColorFront,pC);
+                glm::vec4 _fcb = Engine::Math::PaintersAlgorithm(bgColorBack,pC);
 
                 if(ringInfo.color.r < 0 || ringInfo.color.g < 0 || ringInfo.color.b < 0){
                     _fcf = glm::vec4(bgColorFront.r,bgColorFront.g,bgColorFront.b,0);
@@ -252,7 +252,7 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
 
                     uint numerator = ringInfo.size - i;
                     pC.a = float(numerator/(ringInfo.size));
-					_fcf.a = 1.0f - pC.a;
+                    _fcf.a = 1.0f - pC.a;
                     _fcb.a = 1.0f - pC.a;
                 }
 
@@ -267,8 +267,8 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
                 _fcb.g += ra1;
                 _fcb.b += ra1;
 
-				sf::Color fFront = sf::Color(sf::Uint8(_fcf.r) * 255, sf::Uint8(_fcf.g) * 255, sf::Uint8(_fcf.b) * 255, sf::Uint8(_fcf.a) * 255);
-				sf::Color fBack = sf::Color(sf::Uint8(_fcb.r) * 255, sf::Uint8(_fcb.g) * 255, sf::Uint8(_fcb.b) * 255, sf::Uint8(_fcb.a) * 255);
+                sf::Color fFront = sf::Color(sf::Uint8(_fcf.r) * 255, sf::Uint8(_fcf.g) * 255, sf::Uint8(_fcf.b) * 255, sf::Uint8(_fcf.a) * 255);
+                sf::Color fBack = sf::Color(sf::Uint8(_fcb.r) * 255, sf::Uint8(_fcb.g) * 255, sf::Uint8(_fcb.b) * 255, sf::Uint8(_fcb.a) * 255);
 
                 for(uint s = 0; s < ringImage.getSize().y; s++){
                     ringImage.setPixel(ringInfo.position + i,s,fFront);
@@ -281,7 +281,7 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
                 pC.r += ra;
                 pC.g += ra;
                 pC.b += ra;
-				sf::Color _pc = sf::Color(sf::Uint8(pC.r) * 255, sf::Uint8(pC.g) * 255, sf::Uint8(pC.b) * 255, sf::Uint8(pC.a) * 255);
+                sf::Color _pc = sf::Color(sf::Uint8(pC.r) * 255, sf::Uint8(pC.g) * 255, sf::Uint8(pC.b) * 255, sf::Uint8(pC.a) * 255);
 
                 for(uint s = 0; s < ringImage.getSize().y; s++){
                     ringImage.setPixel(ringInfo.position + i,s,_pc);
@@ -310,12 +310,12 @@ void Ring::draw(GLuint shader){
     glm::vec4 color = m_Parent->getColor();
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
     glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(material->shadeless()));
-	glUniform1f(glGetUniformLocation(shader, "matID"),float(float(material->id())/255.0f));
+    glUniform1f(glGetUniformLocation(shader, "matID"),float(float(material->id())/255.0f));
 
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
 
-	material->bind();
+    material->bind();
     mesh->render();
 }
 

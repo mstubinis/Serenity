@@ -34,29 +34,29 @@ void Game::initResources(){
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
-	Resources::addMesh("Intrepid","data/Models/intrepid.obj");
-	Resources::addMesh("Norway","data/Models/norway.obj");
-	Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
+    Resources::addMesh("Intrepid","data/Models/intrepid.obj");
+    Resources::addMesh("Norway","data/Models/norway.obj");
+    Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
     Resources::addMesh("Ring","data/Models/ring.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
 
-	Resources::addMaterial("Starbase","data/Textures/starbase.png","","data/Textures/starbase_Glow.png");
+    Resources::addMaterial("Starbase","data/Textures/starbase.png","","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg");
-	Resources::getMaterial("Star")->setShadeless(true);
+    Resources::getMaterial("Star")->setShadeless(true);
     Resources::getMaterial("Star")->setGlow(0.21f);
     Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","","AS_GroundFromSpace");
-	Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
+    Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
-	Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
-	Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png","data/Textures/norway_Specular.png");
+    Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
+    Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png","data/Textures/norway_Specular.png");
     Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","","Deferred_HUD");
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","","Deferred_HUD");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
-	Resources::getMaterial("SunFlare")->setShadeless(true);
+    Resources::getMaterial("SunFlare")->setShadeless(true);
 
-	//custom cubemap
-	/*
+    //custom cubemap
+    /*
     std::string front = "data/Textures/Effects/Right.jpg";
     std::string back = "data/Textures/Effects/Left.jpg";
     std::string left = "data/Textures/Effects/Top.jpg";
@@ -65,14 +65,14 @@ void Game::initResources(){
     std::string bottom = "data/Textures/Effects/Back.jpg";
     std::string names[6] = {front,back,left,right,top,bottom};
 
-	new Texture(names,"CubemapGold");
+    new Texture(names,"CubemapGold");
 
-	//Resources::getMaterial("Defiant")->addComponentReflection("CubemapGold","data/Textures/defiant_Reflection.png");
-	//Resources::getMaterial("Defiant")->addComponentRefraction("CubemapGold","data/Textures/defiant_Reflection.png",1.0f,1.53f);
-	*/
+    //Resources::getMaterial("Defiant")->addComponentReflection("CubemapGold","data/Textures/defiant_Reflection.png");
+    //Resources::getMaterial("Defiant")->addComponentRefraction("CubemapGold","data/Textures/defiant_Reflection.png",1.0f,1.53f);
+    */
 }
 void Game::initLogic(){
-	Engine::getWindow()->keepMouseInWindow(true);
+    Engine::getWindow()->keepMouseInWindow(true);
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
 
@@ -100,7 +100,7 @@ void Game::update(float dt){
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-		Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
+        Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
     m_HUD->update(dt);
 }
@@ -114,14 +114,14 @@ void Game::onResize(uint width,uint height){
 void Game::onClose(){
 }
 void Game::onLostFocus(){
-	Engine::getWindow()->keepMouseInWindow(false);
+    Engine::getWindow()->keepMouseInWindow(false);
 }
 void Game::onGainedFocus(){
-	Engine::getWindow()->keepMouseInWindow(true);
-	const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-	sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
+    Engine::getWindow()->keepMouseInWindow(true);
+    const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
-	Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f);
+    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f);
 }
 void Game::onTextEntered(sf::Event::TextEvent textEvent){
 }
@@ -138,21 +138,21 @@ void Game::onMouseButtonReleased(sf::Event::MouseButtonEvent mbEvent){
 void Game::onMouseMoved(sf::Event::MouseMoveEvent mmEvent){
 }
 void Game::onMouseEntered(){
-	Engine::getWindow()->requestFocus();
-	Engine::getWindow()->keepMouseInWindow(true);
+    Engine::getWindow()->requestFocus();
+    Engine::getWindow()->keepMouseInWindow(true);
 }
 void Game::onMouseLeft(){
-	Engine::getWindow()->keepMouseInWindow(false);
+    Engine::getWindow()->keepMouseInWindow(false);
 }
 void Game::onPreUpdate(float dt){
 }
 void Game::onPostUpdate(float dt){
-	const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
+    const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     if(Resources::getWindow()->hasFocus()){
         glm::vec2 mousePos = Events::Mouse::getMousePosition();
         float mouseDistFromCenter = glm::distance(mousePos,halfRes);
         if(mouseDistFromCenter > 1.0f){
-			sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
+            sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
             Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
         }
     }

@@ -36,8 +36,8 @@ class CapsuleRibbon final: public ObjectDisplay{
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }
-		void bind();
-		void unbind();
+        void bind();
+        void unbind();
 };
 class CapsuleSpace final: public SolarSystem{
     private:

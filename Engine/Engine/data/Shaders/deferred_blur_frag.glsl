@@ -33,18 +33,18 @@ void main(void){
     vec4 sum = vec4(0.0); vec2 uv = gl_TexCoord[0].st * 2.0;
 
     float strengthR = max(1.0, radius * strengthModifier.r);
-	float strengthG = max(1.0, radius * strengthModifier.g);
-	float strengthB = max(1.0, radius * strengthModifier.b);
-	float strengthA = max(1.0, radius * strengthModifier.a);
-	vec4 strength = vec4(strengthR,strengthG,strengthB,strengthA);
+    float strengthG = max(1.0, radius * strengthModifier.g);
+    float strengthB = max(1.0, radius * strengthModifier.b);
+    float strengthA = max(1.0, radius * strengthModifier.a);
+    vec4 strength = vec4(strengthR,strengthG,strengthB,strengthA);
     for(int i = 0; i < 7; i++){
         sum += texture2D(texture, uv + offset[i])    * gauss[i] * strength;
         sum += texture2D(texture, uv + offset[13-i]) * gauss[i] * strength;
     }
     sum.r += texture2D(texture, uv ).r * 0.159576912161 * strengthR;
-	sum.g += texture2D(texture, uv ).g * 0.159576912161 * strengthG;
-	sum.b += texture2D(texture, uv ).b * 0.159576912161 * strengthB;
-	sum.a += texture2D(texture, uv ).a * 0.159576912161 * strengthA;
+    sum.g += texture2D(texture, uv ).g * 0.159576912161 * strengthG;
+    sum.b += texture2D(texture, uv ).b * 0.159576912161 * strengthB;
+    sum.a += texture2D(texture, uv ).a * 0.159576912161 * strengthA;
 
     if(R == 1) gl_FragColor.r = sum.r;
     if(G == 1) gl_FragColor.g = sum.g;

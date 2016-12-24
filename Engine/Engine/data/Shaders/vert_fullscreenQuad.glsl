@@ -5,6 +5,6 @@ uniform mat4 Model;
 
 void main(void){
     mat4 MVP = VP * Model;
-	gl_TexCoord[0] = gl_MultiTexCoord0;
+    gl_TexCoord[0] = gl_MultiTexCoord0;
     gl_Position = MVP * gl_Vertex;
 }

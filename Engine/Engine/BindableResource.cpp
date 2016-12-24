@@ -1,14 +1,10 @@
 #include "BindableResource.h"
 
-struct emptyFunctor{
-	template<class T> 
-	void operator()(T* r) const {
-	}
-};
+struct emptyFunctor{template<class T> void operator()(T* r) const {}};
 
 BindableResource::BindableResource(){
-	emptyFunctor a; emptyFunctor b;
-	setCustomBindFunctor(a); setCustomUnbindFunctor(b);
+    emptyFunctor a; emptyFunctor b;
+    setCustomBindFunctor(a); setCustomUnbindFunctor(b);
 }
 BindableResource::~BindableResource(){
 }

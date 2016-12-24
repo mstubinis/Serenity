@@ -166,13 +166,13 @@ glm::num Math::grad(int hash, glm::num x, glm::num y, glm::num z){
     return glm::num(((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v));
 }
 glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
-	glm::vec4 ret(0);
-	float a = p.a + c.a * (1-p.a);
-	ret.r = ((p.r*p.a + c.r*c.a * (1-p.a)) / a);
+    glm::vec4 ret(0);
+    float a = p.a + c.a * (1-p.a);
+    ret.r = ((p.r*p.a + c.r*c.a * (1-p.a)) / a);
     ret.g = ((p.g*p.a + c.g*c.a * (1-p.a)) / a);
     ret.b = ((p.b*p.a + c.b*c.a * (1-p.a)) / a);
-	ret.a = a;
-	return ret;
+    ret.a = a;
+    return ret;
 }
 bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::v3& A, glm::vec3& rayVector){
     glm::vec3 _a = glm::vec3(A);

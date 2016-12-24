@@ -73,7 +73,7 @@ namespace Game{
     void render();
     void cleanup();
 
-	#pragma region EventHandlers
+    #pragma region EventHandlers
     void onResize(uint width,uint height);
     void onClose();
     void onLostFocus();
@@ -87,13 +87,13 @@ namespace Game{
     void onMouseMoved(sf::Event::MouseMoveEvent);
     void onMouseEntered();
     void onMouseLeft();
-	void onPreUpdate(float dt);
-	void onPostUpdate(float dt);
+    void onPreUpdate(float dt);
+    void onPostUpdate(float dt);
     void onJoystickButtonPressed();
     void onJoystickButtonReleased();
     void onJoystickMoved();
     void onJoystickConnected();
     void onJoystickDisconnected();
-	#pragma endregion
+    #pragma endregion
 };
 #endif

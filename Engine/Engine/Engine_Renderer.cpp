@@ -77,131 +77,131 @@ vector<GeometryRenderInfo> Detail::RenderManagement::m_ObjectsToBeForwardRendere
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
 void Settings::enableCullFace(bool b){
-	if(b && !Detail::RendererInfo::GeneralInfo::cull_face_enabled){
-		glEnable(GL_CULL_FACE);
-		Detail::RendererInfo::GeneralInfo::cull_face_enabled = true;
-	}
-	else if(!b && Detail::RendererInfo::GeneralInfo::cull_face_enabled){
-		glDisable(GL_CULL_FACE);
-		Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
-	}
+    if(b && !Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+        glEnable(GL_CULL_FACE);
+        Detail::RendererInfo::GeneralInfo::cull_face_enabled = true;
+    }
+    else if(!b && Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+        glDisable(GL_CULL_FACE);
+        Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
+    }
 }
 void Settings::disableCullFace(){
-	if(Detail::RendererInfo::GeneralInfo::cull_face_enabled){
-		glDisable(GL_CULL_FACE);
-		Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
-	}
+    if(Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+        glDisable(GL_CULL_FACE);
+        Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
+    }
 }
 void Settings::cullFace(uint s){
-	//0 = back 
-	//1 = front 
-	//2 = front and back
-	if(s == GL_BACK){
-		if(Detail::RendererInfo::GeneralInfo::cull_face_status != 0){
-			glCullFace(GL_BACK);
-			Detail::RendererInfo::GeneralInfo::cull_face_status = 0;
-		}
-	}
-	else if(s == GL_FRONT){
-		if(Detail::RendererInfo::GeneralInfo::cull_face_status != 1){
-			glCullFace(GL_FRONT);
-			Detail::RendererInfo::GeneralInfo::cull_face_status = 1;
-		}
-	}
-	else if(s == GL_FRONT_AND_BACK){
-		if(Detail::RendererInfo::GeneralInfo::cull_face_status != 2){
-			glCullFace(GL_FRONT_AND_BACK);
-			Detail::RendererInfo::GeneralInfo::cull_face_status = 2;
-		}
-	}
+    //0 = back 
+    //1 = front 
+    //2 = front and back
+    if(s == GL_BACK){
+        if(Detail::RendererInfo::GeneralInfo::cull_face_status != 0){
+            glCullFace(GL_BACK);
+            Detail::RendererInfo::GeneralInfo::cull_face_status = 0;
+        }
+    }
+    else if(s == GL_FRONT){
+        if(Detail::RendererInfo::GeneralInfo::cull_face_status != 1){
+            glCullFace(GL_FRONT);
+            Detail::RendererInfo::GeneralInfo::cull_face_status = 1;
+        }
+    }
+    else if(s == GL_FRONT_AND_BACK){
+        if(Detail::RendererInfo::GeneralInfo::cull_face_status != 2){
+            glCullFace(GL_FRONT_AND_BACK);
+            Detail::RendererInfo::GeneralInfo::cull_face_status = 2;
+        }
+    }
 }
 void Settings::clear(bool color, bool depth, bool stencil){
-	if(depth){ 
-		enableDepthMask();
-		if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
-		else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
-		else{ glClear(GL_DEPTH_BUFFER_BIT); }
-	}else{
-		if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
-		else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT); }
-		else{ glClear(GL_STENCIL_BUFFER_BIT); }
-	}
+    if(depth){ 
+        enableDepthMask();
+        if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
+        else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+        else{ glClear(GL_DEPTH_BUFFER_BIT); }
+    }else{
+        if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
+        else if(color && !stencil){ glClear(GL_COLOR_BUFFER_BIT); }
+        else{ glClear(GL_STENCIL_BUFFER_BIT); }
+    }
 }
 void Settings::enableAlphaTest(bool b){
-	if(b && !Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
-		glEnable(GL_ALPHA_TEST);
-		Detail::RendererInfo::GeneralInfo::alpha_test = true;
-	}
-	else if(!b && Detail::RendererInfo::GeneralInfo::alpha_test){
-		glDisable(GL_ALPHA_TEST);
-		Detail::RendererInfo::GeneralInfo::alpha_test = false;
-	}
+    if(b && !Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+        glEnable(GL_ALPHA_TEST);
+        Detail::RendererInfo::GeneralInfo::alpha_test = true;
+    }
+    else if(!b && Detail::RendererInfo::GeneralInfo::alpha_test){
+        glDisable(GL_ALPHA_TEST);
+        Detail::RendererInfo::GeneralInfo::alpha_test = false;
+    }
 }
 void Settings::disableAlphaTest(){
-	if(Detail::RendererInfo::GeneralInfo::alpha_test){
-		glDisable(GL_ALPHA_TEST);
-		Detail::RendererInfo::GeneralInfo::alpha_test = false;
-	}
+    if(Detail::RendererInfo::GeneralInfo::alpha_test){
+        glDisable(GL_ALPHA_TEST);
+        Detail::RendererInfo::GeneralInfo::alpha_test = false;
+    }
 }
 void Settings::enableDepthTest(bool b){
-	if(b && !Detail::RendererInfo::GeneralInfo::depth_test){
-		glEnable(GL_DEPTH_TEST);
-		Detail::RendererInfo::GeneralInfo::depth_test = true;
-	}
-	else if(!b && Detail::RendererInfo::GeneralInfo::depth_test){
-		glDisable(GL_DEPTH_TEST);
-		Detail::RendererInfo::GeneralInfo::depth_test = false;
-	}
+    if(b && !Detail::RendererInfo::GeneralInfo::depth_test){
+        glEnable(GL_DEPTH_TEST);
+        Detail::RendererInfo::GeneralInfo::depth_test = true;
+    }
+    else if(!b && Detail::RendererInfo::GeneralInfo::depth_test){
+        glDisable(GL_DEPTH_TEST);
+        Detail::RendererInfo::GeneralInfo::depth_test = false;
+    }
 }
 void Settings::disableDepthTest(){
-	if(Detail::RendererInfo::GeneralInfo::depth_test){
-		glDisable(GL_DEPTH_TEST);
-		Detail::RendererInfo::GeneralInfo::depth_test = false;
-	}
+    if(Detail::RendererInfo::GeneralInfo::depth_test){
+        glDisable(GL_DEPTH_TEST);
+        Detail::RendererInfo::GeneralInfo::depth_test = false;
+    }
 }
 void Settings::enableDepthMask(bool b){
-	if(b && !Detail::RendererInfo::GeneralInfo::depth_mask){
-		glDepthMask(GL_TRUE);
-		Detail::RendererInfo::GeneralInfo::depth_mask = true;
-	}
-	else if(!b && Detail::RendererInfo::GeneralInfo::depth_mask){
-		glDepthMask(GL_FALSE);
-		Detail::RendererInfo::GeneralInfo::depth_mask = false;
-	}
+    if(b && !Detail::RendererInfo::GeneralInfo::depth_mask){
+        glDepthMask(GL_TRUE);
+        Detail::RendererInfo::GeneralInfo::depth_mask = true;
+    }
+    else if(!b && Detail::RendererInfo::GeneralInfo::depth_mask){
+        glDepthMask(GL_FALSE);
+        Detail::RendererInfo::GeneralInfo::depth_mask = false;
+    }
 }
 void Settings::disableDepthMask(){
-	if(Detail::RendererInfo::GeneralInfo::depth_mask){
-		glDepthMask(GL_FALSE);
-		Detail::RendererInfo::GeneralInfo::depth_mask = false;
-	}
+    if(Detail::RendererInfo::GeneralInfo::depth_mask){
+        glDepthMask(GL_FALSE);
+        Detail::RendererInfo::GeneralInfo::depth_mask = false;
+    }
 }
 void Renderer::bindShaderProgram(ShaderP* program){
-	if(program != 0){
-		if(Detail::RendererInfo::GeneralInfo::current_shader_program != program){
-			GLuint p = program->program();
-			glUseProgram(p);
-			Detail::RendererInfo::GeneralInfo::current_shader_program = program;
-		}
-	}
-	else{
-		if(Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
-			glUseProgram(0);
-			Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
-		}
-	}
+    if(program != 0){
+        if(Detail::RendererInfo::GeneralInfo::current_shader_program != program){
+            GLuint p = program->program();
+            glUseProgram(p);
+            Detail::RendererInfo::GeneralInfo::current_shader_program = program;
+        }
+    }
+    else{
+        if(Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
+            glUseProgram(0);
+            Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
+        }
+    }
 }
 void Renderer::bindShaderProgram(string programName){Renderer::bindShaderProgram(Resources::getShaderProgram(programName));}
 void Renderer::bindTexture(const char* l,Texture* t,uint slot){Renderer::bindTexture(l,t->address(),slot,t->type());}
 void Renderer::bindTexture(const char* l,GLuint address,uint slot,GLuint type){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(type, address);
-	sendUniform1i(l,slot);
+    sendUniform1i(l,slot);
 }
 void Renderer::bindTextureSafe(const char* l,Texture* t,uint slot){Renderer::bindTextureSafe(l,t->address(),slot,t->type());}
 void Renderer::bindTextureSafe(const char* l,GLuint address,uint slot,GLuint type){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(type, address);
-	sendUniform1iSafe(l,slot);
+    sendUniform1iSafe(l,slot);
 }
 void Renderer::unbindTexture2D(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -214,24 +214,24 @@ void Renderer::unbindTextureCubemap(uint slot){
 
 
 void Detail::RenderManagement::_bind(ShaderP* p){
-	Renderer::bindShaderProgram(p);//bind defaults for all shaders,default or custom
-	p->bind();                     //bind custom data
+    Renderer::bindShaderProgram(p);//bind defaults for all shaders,default or custom
+    p->bind();                     //bind custom data
 }
 void Detail::RenderManagement::_bind(Material* m){
-	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != m->name()){
-		m->bind(); //bind custom data
-		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = m->name();
-	}
+    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != m->name()){
+        m->bind(); //bind custom data
+        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = m->name();
+    }
 }
 void Detail::RenderManagement::_unbind(ShaderP* p){
-	p->unbind();                   //unbind custom data
-	Renderer::bindShaderProgram(0);//unbind shader program                 
+    p->unbind();                   //unbind custom data
+    Renderer::bindShaderProgram(0);//unbind shader program                 
 }
 void Detail::RenderManagement::_unbind(Material* m){
-	if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
-		m->unbind();
-		Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
-	}
+    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
+        m->unbind();
+        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
+    }
 }
 
 void Detail::RenderManagement::init(){
@@ -242,7 +242,7 @@ void Detail::RenderManagement::init(){
     #endif
 
     uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
-	uniform_real_distribution<float> randFloats1(0.0f,1.0f);
+    uniform_real_distribution<float> randFloats1(0.0f,1.0f);
     default_random_engine gen;
     vector<glm::vec2> kernels;
     for(uint i = 0; i < RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT; ++i){
@@ -279,14 +279,14 @@ void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h,
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
 }
 void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth){
-	texture->render(pos,col,angle,scl,depth);
+    texture->render(pos,col,angle,scl,depth);
 }
 void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth){
-	font->renderText(text,pos,color,angle,scl,depth);
+    font->renderText(text,pos,color,angle,scl,depth);
 }
 void Detail::RenderManagement::_renderObjects(){
     for(auto item:m_ObjectsToBeRendered){
-		item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
+        item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
     }
 }
 void Detail::RenderManagement::_renderForegroundObjects(){
@@ -300,19 +300,19 @@ void Detail::RenderManagement::_renderForwardRenderedObjects(){
     }
 }
 void Detail::RenderManagement::_renderTextures(){
-	bindShaderProgram("Deferred_HUD");
+    bindShaderProgram("Deferred_HUD");
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
             texture = Resources::Detail::ResourceManagement::m_Textures[item.texture].get();
-			bindTexture("DiffuseTexture",texture,0);
-			sendUniform1i("DiffuseTextureEnabled",1);
+            bindTexture("DiffuseTexture",texture,0);
+            sendUniform1i("DiffuseTextureEnabled",1);
         }
         else{
-			bindTexture("DiffuseTexture",(GLuint)0,0);
-			sendUniform1i("DiffuseTextureEnabled",0);
+            bindTexture("DiffuseTexture",(GLuint)0,0);
+            sendUniform1i("DiffuseTextureEnabled",0);
         }
-		sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
+        sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
         glm::mat4 model = glm::mat4(1);
         model = glm::translate(model, glm::vec3(item.pos.x,
@@ -323,21 +323,21 @@ void Detail::RenderManagement::_renderTextures(){
             model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
         model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
-		sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-		sendUniformMatrix4f("Model",model);
+        sendUniformMatrix4f("VP",m_2DProjectionMatrix);
+        sendUniformMatrix4f("Model",model);
 
         Resources::getMesh("Plane")->render();
     }
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::_renderText(){
-	bindShaderProgram("Deferred_HUD");
+    bindShaderProgram("Deferred_HUD");
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
-		bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
-		sendUniform1i("DiffuseTextureEnabled",1);
-		sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
+        bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
+        sendUniform1i("DiffuseTextureEnabled",1);
+        sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
 
         float y_offset = 0;
         float x = item.pos.x;
@@ -354,8 +354,8 @@ void Detail::RenderManagement::_renderText(){
                 glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
                 glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
 
-				sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-				sendUniformMatrix4f("Model",glyph->m_Model);
+                sendUniformMatrix4f("VP",m_2DProjectionMatrix);
+                sendUniformMatrix4f("Model",glyph->m_Model);
 
                 glyph->char_mesh->render();
                 x += (glyph->xadvance) * item.scl.x;
@@ -365,7 +365,7 @@ void Detail::RenderManagement::_renderText(){
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::_passGeometry(){
-	Settings::clear();
+    Settings::clear();
     Scene* scene = Resources::getCurrentScene();
     glm::vec3 clear = scene->getBackgroundColor();
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
@@ -377,91 +377,91 @@ void Detail::RenderManagement::_passGeometry(){
     glBlendEquationi(GL_FUNC_ADD,0);
     glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
-	//RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
+    //RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
-	Settings::enableDepthTest();
-	Settings::enableDepthMask();
+    Settings::enableDepthTest();
+    Settings::enableDepthMask();
 
 
-	//RENDER NORMAL OBJECTS HERE
-	for(auto shaderProgram:m_GeometryPassShaderPrograms){
-		_bind(shaderProgram);
-		for(auto materialNames:shaderProgram->getMaterials()){
-			Material* material = Resources::getMaterial(*(materialNames.w.lock().get()));
-			_bind(material);
-			for(auto key:material->getObjects()){
-				string renderedItemName = *(key.w.lock().get());
-				RenderedItem* item = Resources::getRenderedItem(renderedItemName);
-				string parentObjectName = item->parent();
-				Object* o = Resources::getObject(parentObjectName);
+    //RENDER NORMAL OBJECTS HERE
+    for(auto shaderProgram:m_GeometryPassShaderPrograms){
+        _bind(shaderProgram);
+        for(auto materialNames:shaderProgram->getMaterials()){
+            Material* material = Resources::getMaterial(*(materialNames.w.lock().get()));
+            _bind(material);
+            for(auto key:material->getObjects()){
+                string renderedItemName = *(key.w.lock().get());
+                RenderedItem* item = Resources::getRenderedItem(renderedItemName);
+                string parentObjectName = item->parent();
+                Object* o = Resources::getObject(parentObjectName);
 
-				if(scene->objects().count(parentObjectName)){
-					o->bind();   //bind object specific data shared between all of its rendered items
-					item->bind();//the actual mesh drawing occurs here too
-					item->unbind();
-					o->unbind();
-				}
-				//protect against any custom changes by restoring to the regular shader and material
-				if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-					_bind(shaderProgram);
-					_bind(material);
-				}
-			}
-			_unbind(material);
-		}
-		_unbind(shaderProgram);
-	}
-	Settings::disableDepthTest();
-	Settings::disableDepthMask();
+                if(scene->objects().count(parentObjectName)){
+                    o->bind();   //bind object specific data shared between all of its rendered items
+                    item->bind();//the actual mesh drawing occurs here too
+                    item->unbind();
+                    o->unbind();
+                }
+                //protect against any custom changes by restoring to the regular shader and material
+                if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+                    _bind(shaderProgram);
+                    _bind(material);
+                }
+            }
+            _unbind(material);
+        }
+        _unbind(shaderProgram);
+    }
+    Settings::disableDepthTest();
+    Settings::disableDepthMask();
 
-	//RENDER FOREGROUND OBJECTS HERE
+    //RENDER FOREGROUND OBJECTS HERE
 }
 void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-	bindShaderProgram("Deferred_Light");
+    bindShaderProgram("Deferred_Light");
 
-	sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-	sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
+    sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+    sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
 
-	sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+    sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
-	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
-	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
-	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
-	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),3);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
+    bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),3);
 
     for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
     }
 
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
-	bindShaderProgram(0);
+    bindShaderProgram(0);
 }
 void Detail::RenderManagement::render(){
-	if(!RendererInfo::GodRaysInfo::godRays)
-		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
-	else
-		m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
-	_passGeometry();
-	m_gBuffer->stop();
+    if(!RendererInfo::GodRaysInfo::godRays)
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
+    else
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
+    _passGeometry();
+    m_gBuffer->stop();
 
-	if(RendererInfo::GodRaysInfo::godRays){
-		/*
-		m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
-		Object* o = Resources::getObject("Sun");
-		glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
+    if(RendererInfo::GodRaysInfo::godRays){
+        /*
+        m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
+        Object* o = Resources::getObject("Sun");
+        glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
 
-		bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
-		float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
-			glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
-		
-		alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
-		alpha = glm::clamp(alpha,0.001f,0.999f);
+        bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
+        float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
+            glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+        
+        alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
+        alpha = glm::clamp(alpha,0.001f,0.999f);
 
-		_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
-		m_gBuffer->stop();
-		*/
-	}
+        _passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
+        m_gBuffer->stop();
+        */
+    }
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
@@ -470,20 +470,20 @@ void Detail::RenderManagement::render(){
         _passLighting();
         m_gBuffer->stop();
     }
-	glDisable(GL_BLEND);
+    glDisable(GL_BLEND);
 
     m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
     _passSSAO();
     m_gBuffer->stop();
 
-	if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
-		m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
-		_passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
-		m_gBuffer->stop();
-		m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-		_passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
-		m_gBuffer->stop();
-	}
+    if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
+        m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
+        _passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
+        m_gBuffer->stop();
+        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
+        _passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
+        m_gBuffer->stop();
+    }
 
     if(RendererInfo::HDRInfo::hdr){
         m_gBuffer->start(BUFFER_TYPE_MISC);
@@ -494,130 +494,130 @@ void Detail::RenderManagement::render(){
 
     //copy depth over
     glColorMask(0,0,0,0);
-	bindShaderProgram("Copy_Depth");
+    bindShaderProgram("Copy_Depth");
 
-	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-	unbindTexture2D(0);
-	bindShaderProgram(0);
+    unbindTexture2D(0);
+    bindShaderProgram(0);
     glColorMask(1,1,1,1);
     /////////////
 
     glEnable(GL_BLEND);
     if(RendererInfo::DebugDrawingInfo::debug){
         //Physics::Detail::PhysicsManagement::render();
-	}
+    }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _renderForwardRenderedObjects();
     _renderForegroundObjects();
 
-	Settings::enableAlphaTest();
+    Settings::enableAlphaTest();
     glAlphaFunc(GL_GREATER, 0.1f);
 
-	Settings::enableDepthTest();
-	Settings::enableDepthMask();
+    Settings::enableDepthTest();
+    Settings::enableDepthMask();
 
-	Settings::clear(false,true,false); //clear depth only
+    Settings::clear(false,true,false); //clear depth only
 
     _renderTextures();
     _renderText();
 
-	Settings::disableAlphaTest();
+    Settings::disableAlphaTest();
 
-	m_ObjectsToBeRendered.clear();
-	m_ForegroundObjectsToBeRendered.clear();
-	m_ObjectsToBeForwardRendered.clear();
-	m_FontsToBeRendered.clear();
-	m_TexturesToBeRendered.clear();
+    m_ObjectsToBeRendered.clear();
+    m_ForegroundObjectsToBeRendered.clear();
+    m_ObjectsToBeForwardRendered.clear();
+    m_FontsToBeRendered.clear();
+    m_TexturesToBeRendered.clear();
 }
 void Detail::RenderManagement::_passSSAO(){
-	bindShaderProgram("Deferred_SSAO");
+    bindShaderProgram("Deferred_SSAO");
 
-	sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
-	sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
+    sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
+    sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
 
-	Camera* c = Resources::getActiveCamera();
-	glm::vec3 camPos = glm::vec3(c->getPosition());
+    Camera* c = Resources::getActiveCamera();
+    glm::vec3 camPos = glm::vec3(c->getPosition());
 
-	sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
-	sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
-	sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
-	sendUniform1f("gRadius",RendererInfo::SSAOInfo::ssao_radius);
-	sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
-	sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
-	sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
-	sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+    sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
+    sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
+    sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
+    sendUniform1f("gRadius",RendererInfo::SSAOInfo::ssao_radius);
+    sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
+    sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
+    sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+    sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
-	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
-	bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
-	bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2,GL_TEXTURE_2D);
-	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
-	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
+    bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
+    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2,GL_TEXTURE_2D);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
+    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
-	bindShaderProgram(0);
+    bindShaderProgram(0);
 }
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
-	Settings::clear(true,false,false);
+    Settings::clear(true,false,false);
 
-	bindShaderProgram("Deferred_Edge");
-	sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
-	sendUniform1f("radius", radius);
+    bindShaderProgram("Deferred_Edge");
+    sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
+    sendUniform1f("radius", radius);
 
-	bindTexture("texture",m_gBuffer->getTexture(texture),0);
+    bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-	unbindTexture2D(0);
+    unbindTexture2D(0);
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     Settings::clear(true,false,false);
 
-	bindShaderProgram("Deferred_GodsRays");
-	sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
-	sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
-	sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
-	sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
-	sendUniform1f("weight",RendererInfo::GodRaysInfo::godRays_weight);
-	sendUniform2f("lightPositionOnScreen",
-		float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
-		float(lightPositionOnScreen.y/float(Resources::getWindowSize().y))
-	);
+    bindShaderProgram("Deferred_GodsRays");
+    sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
+    sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
+    sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
+    sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
+    sendUniform1f("weight",RendererInfo::GodRaysInfo::godRays_weight);
+    sendUniform2f("lightPositionOnScreen",
+        float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
+        float(lightPositionOnScreen.y/float(Resources::getWindowSize().y))
+    );
 
-	sendUniform1i("behind",int(behind));
-	sendUniform1f("alpha",alpha);
+    sendUniform1i("behind",int(behind));
+    sendUniform1f("alpha",alpha);
 
-	bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
+    bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-	unbindTexture2D(0);
+    unbindTexture2D(0);
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
-	bindShaderProgram("Deferred_HDR");
-	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
-	sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
+    bindShaderProgram("Deferred_HDR");
+    sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
+    sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
-	bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
+    bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-	unbindTexture2D(0);
-	bindShaderProgram(0);
+    unbindTexture2D(0);
+    bindShaderProgram(0);
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
-	bindShaderProgram("Deferred_Blur");
+    bindShaderProgram("Deferred_Blur");
 
-	sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
-	sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
+    sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
+    sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
     if(channels.find("R") != string::npos) sendUniform1i("R",1);
     else                                   sendUniform1i("R",0);
@@ -631,53 +631,53 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
     if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
     else{                     sendUniform2f("HV",0.0f,1.0f); }
 
-	bindTexture("texture",m_gBuffer->getTexture(texture),0);
+    bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-	unbindTexture2D(0);
+    unbindTexture2D(0);
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);
 
-	bindShaderProgram("Deferred_Final");
+    bindShaderProgram("Deferred_Final");
 
-	sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
+    sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
     sendUniform3f("gAmbientColor",ambient.x,ambient.y,ambient.z);
 
-	sendUniform1i("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
+    sendUniform1i("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1i("HasLighting",int(RendererInfo::LightingInfo::lighting));
     sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
-	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
+    sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
-	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
-	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
-	bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
-	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
-	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
-	bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
+    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
+    bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
+    bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
-	bindShaderProgram(0);
+    bindShaderProgram(0);
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);
-	glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
+    glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
 
-	sendUniformMatrix4f("Model",m);
-	sendUniformMatrix4f("VP",p);
+    sendUniformMatrix4f("Model",m);
+    sendUniformMatrix4f("VP",p);
 
     glViewport(0,0,width,height);
 
-	glBegin(GL_QUADS);
-		glTexCoord2f(0,0); glVertex2f(-float(width)/2,-float(height)/2);
-		glTexCoord2f(1,0); glVertex2f(float(width)/2,-float(height)/2);
-		glTexCoord2f(1,1); glVertex2f(float(width)/2,float(height)/2);
-		glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
-	glEnd();
+    glBegin(GL_QUADS);
+        glTexCoord2f(0,0); glVertex2f(-float(width)/2,-float(height)/2);
+        glTexCoord2f(1,0); glVertex2f(float(width)/2,-float(height)/2);
+        glTexCoord2f(1,1); glVertex2f(float(width)/2,float(height)/2);
+        glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
+    glEnd();
 }

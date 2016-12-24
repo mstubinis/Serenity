@@ -93,7 +93,7 @@ void main(void){
     gl_TexCoord[6] = gl_Position;
 
     UV = uv;
-	CameraPosition = v3CameraPos;
+    CameraPosition = v3CameraPos;
 
     Normals = (Model * vec4(normal,0.0)).xyz;
     Tangents = (Model * vec4(tangent,0.0)).xyz;

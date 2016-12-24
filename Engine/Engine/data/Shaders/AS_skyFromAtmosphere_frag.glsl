@@ -35,20 +35,20 @@ void main(void){
     float range = outerRadius - planetRadius;
     float alpha = (range-camHeightOffGround) / (range*0.5);
 
-	gl_FragData[0] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
-	gl_FragData[0].a = clamp(alpha * (gl_FragData[0].rgb * 5.5),0.01,0.99);
+    gl_FragData[0] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
+    gl_FragData[0].a = clamp(alpha * (gl_FragData[0].rgb * 5.5),0.01,0.99);
 
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
     gl_FragData[3] = vec4(WorldPosition,1.0);
-	if(HasGodsRays == 1){
-		gl_FragData[4] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
+    if(HasGodsRays == 1){
+        gl_FragData[4] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
 
-		gl_FragData[4] = pow(gl_FragData[4],vec4(11.0));
+        gl_FragData[4] = pow(gl_FragData[4],vec4(11.0));
 
-		gl_FragData[4] = clamp(gl_FragData[4],0.01,0.99);
-		gl_FragData[4].rgb = max(gl_FragData[4].rgb,vec3(0.125,0.116,0.25)) * 0.7;
-	}
+        gl_FragData[4] = clamp(gl_FragData[4],0.01,0.99);
+        gl_FragData[4].rgb = max(gl_FragData[4].rgb,vec3(0.125,0.116,0.25)) * 0.7;
+    }
     gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
 }

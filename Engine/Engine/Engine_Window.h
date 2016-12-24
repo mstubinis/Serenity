@@ -6,9 +6,9 @@
 namespace sf{ class Window; };
 typedef unsigned int uint;
 class Engine_Window final{
-	private:
-		class impl;
-		std::unique_ptr<impl> m_i;
+    private:
+        class impl;
+        std::unique_ptr<impl> m_i;
 
     public:
         Engine_Window(const char* name,uint width,uint height);
@@ -32,7 +32,7 @@ class Engine_Window final{
         void setFullScreen(bool);
         void setStyle(uint style);
         void display();
-		void keepMouseInWindow(bool=true);
+        void keepMouseInWindow(bool=true);
 
         sf::Window* getSFMLHandle() const;
 };

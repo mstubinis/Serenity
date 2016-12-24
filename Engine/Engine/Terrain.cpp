@@ -37,12 +37,12 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
     btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
     m_RigidBody = new btRigidBody(rigidBodyCI);
 
-	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Meshes,name(),boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape())));
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Meshes,name(),boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape())));
 
     if(material != ""){
-		RenderedItem* item = new RenderedItem(namePtr(),name(),material);
+        RenderedItem* item = new RenderedItem(namePtr(),name(),material);
         m_DisplayItems.push_back(item);
-	}
+    }
 
     if(Resources::getCurrentScene() == scene)
         Physics::addRigidBody(m_RigidBody);

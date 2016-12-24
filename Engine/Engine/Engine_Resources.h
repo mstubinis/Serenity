@@ -40,30 +40,30 @@ namespace Engine{
         namespace Detail{
             class ResourceManagement final{
                 public:
-					template<class K,class V,class H,class F,class S> static S _incrementName(std::unordered_map<K,V,H,F>& m,const S n){
-						S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
-					}
-					template<class K,class V,class H,class F,class S> static S _incrementName(std::map<K,V,H,F>& m,const S n){
-						S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
-					}
-					template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::map<K,V,H,F>& m,const S& n,O& o){
-						K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
-					}
-					template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::unordered_map<K,V,H,F>& m,const S& n,O& o){
-						K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
-					}
-					template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::map<K,V,H,F>& m,const S& n){
-						if(!m.count(n))return nullptr; return m.at(n).get();
-					}
-					template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
-						if(!m.count(n)) return nullptr; return m.at(n).get();
-					}
-					template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::map<K,V,H,F>& m,const S& n){
-						if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
-					}
-					template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
-						if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
-					}
+                    template<class K,class V,class H,class F,class S> static S _incrementName(std::unordered_map<K,V,H,F>& m,const S n){
+                        S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
+                    }
+                    template<class K,class V,class H,class F,class S> static S _incrementName(std::map<K,V,H,F>& m,const S n){
+                        S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
+                    }
+                    template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::map<K,V,H,F>& m,const S& n,O& o){
+                        K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
+                    }
+                    template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::unordered_map<K,V,H,F>& m,const S& n,O& o){
+                        K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
+                    }
+                    template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::map<K,V,H,F>& m,const S& n){
+                        if(!m.count(n))return nullptr; return m.at(n).get();
+                    }
+                    template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
+                        if(!m.count(n)) return nullptr; return m.at(n).get();
+                    }
+                    template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::map<K,V,H,F>& m,const S& n){
+                        if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
+                    }
+                    template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
+                        if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
+                    }
                     static Scene* m_CurrentScene;
 
                     static float m_DeltaTime;
@@ -72,8 +72,8 @@ namespace Engine{
 
                     static Engine_Window* m_Window;
 
-					static std::unordered_map<skey,boost::shared_ptr<RenderedItem>,skh,skef> m_RenderedItems;
-					static std::unordered_map<skey,boost::shared_ptr<Scene>,skh,skef> m_Scenes;
+                    static std::unordered_map<skey,boost::shared_ptr<RenderedItem>,skh,skef> m_RenderedItems;
+                    static std::unordered_map<skey,boost::shared_ptr<Scene>,skh,skef> m_Scenes;
                     static std::unordered_map<skey,boost::shared_ptr<SoundEffectBasic>,skh,skef> m_Sounds;
                     static std::unordered_map<skey,boost::shared_ptr<Object>,skh,skef> m_Objects;
                     static std::unordered_map<skey,boost::shared_ptr<Camera>,skh,skef> m_Cameras;
@@ -82,7 +82,7 @@ namespace Engine{
                     static std::unordered_map<skey,boost::shared_ptr<Texture>,skh,skef> m_Textures;
                     static std::unordered_map<skey,boost::shared_ptr<Material>,skh,skef> m_Materials;
                     static std::unordered_map<skey,boost::shared_ptr<Shader>,skh,skef> m_Shaders;
-					static std::unordered_map<skey,boost::shared_ptr<ShaderP>,skh,skef> m_ShaderPrograms;
+                    static std::unordered_map<skey,boost::shared_ptr<ShaderP>,skh,skef> m_ShaderPrograms;
 
                     static void destruct();
             };
@@ -109,7 +109,7 @@ namespace Engine{
 
         boost::shared_ptr<Object>& getObjectPtr(std::string);
         boost::shared_ptr<Camera>& getCameraPtr(std::string);
-		boost::shared_ptr<Texture>& getTexturePtr(std::string);
+        boost::shared_ptr<Texture>& getTexturePtr(std::string);
 
         Object* getObject(std::string n);
         Camera* getCamera(std::string n);
@@ -118,23 +118,23 @@ namespace Engine{
         Mesh* getMesh(std::string n);
         Material* getMaterial(std::string n);
         Shader* getShader(std::string n);
-		ShaderP* getShaderProgram(std::string n);
-		RenderedItem* getRenderedItem(std::string n);
+        ShaderP* getShaderProgram(std::string n);
+        RenderedItem* getRenderedItem(std::string n);
 
         void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL,bool fromFile = true);
         void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
         void addMesh(std::string name, float x, float y, float w, float h);
-		void addMesh(std::string name, float w, float h);
-		void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length);
+        void addMesh(std::string name, float w, float h);
+        void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length);
         void removeMesh(std::string name);
 
         void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",std::string shader = "");
         void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         void removeMaterial(std::string name);
 
-		void addShader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
+        void addShader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
 
-		void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
         void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
 
         void addSound(std::string name, std::string file,bool asEffect = true);

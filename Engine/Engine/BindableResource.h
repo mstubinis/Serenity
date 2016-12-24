@@ -9,22 +9,22 @@
 #include <boost/bind.hpp>
 
 class BindableResource: public EngineResource{
-	private:
-		boost::function<void()> m_CustomBindFunctor;
-		boost::function<void()> m_CustomUnbindFunctor;
-	public:
-		BindableResource();
-		virtual ~BindableResource();
+    private:
+        boost::function<void()> m_CustomBindFunctor;
+        boost::function<void()> m_CustomUnbindFunctor;
+    public:
+        BindableResource();
+        virtual ~BindableResource();
 
-		virtual void bind();
-		virtual void unbind();
+        virtual void bind();
+        virtual void unbind();
 
-		template<class T> void setCustomBindFunctor(T& functor){ 
-			m_CustomBindFunctor = boost::bind<void>(functor,this); 
-		}
-		template<class T> void setCustomUnbindFunctor(T& functor){ 
-			m_CustomUnbindFunctor = boost::bind<void>(functor,this); 
-		}
+        template<class T> void setCustomBindFunctor(T& functor){ 
+            m_CustomBindFunctor = boost::bind<void>(functor,this); 
+        }
+        template<class T> void setCustomUnbindFunctor(T& functor){ 
+            m_CustomUnbindFunctor = boost::bind<void>(functor,this); 
+        }
 
 };
 #endif

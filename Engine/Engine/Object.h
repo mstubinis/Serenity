@@ -33,13 +33,13 @@ class IObject: public EngineResource{
         virtual void scale(float,float,float) = 0;
         virtual void scale(glm::vec3) = 0;
 
-        virtual glm::quat getOrientation() = 0;
+        virtual glm::quat& getOrientation() = 0;
         virtual glm::v3 getPosition() = 0;
         virtual glm::vec3 getScale() = 0;
-        virtual glm::v3 getForward() = 0;
-        virtual glm::v3 getRight() = 0;
-        virtual glm::v3 getUp() = 0;
-        virtual glm::m4 getModel() = 0;
+        virtual glm::v3& getForward() = 0;
+        virtual glm::v3& getRight() = 0;
+        virtual glm::v3& getUp() = 0;
+        virtual glm::m4& getModel() = 0;
         virtual glm::v3 getMotionVector() = 0;
 };
 
@@ -72,20 +72,20 @@ class Object: public IObject{
 
         virtual void update(float){}
         virtual void draw(GLuint shader,bool=false,bool=false){}
-		virtual void bind(){}
-		virtual void unbind(){}
+        virtual void bind(){}
+        virtual void unbind(){}
 
         virtual float getRadius(){ return m_Radius; }
 
         virtual Object* getParent(){ return m_Parent; }
         virtual std::vector<Object*>& getChildren(){ return m_Children; }
 
-		virtual bool visible(){ return false; }
-		virtual bool passedRenderCheck(){ return false; }
+        virtual bool visible(){ return false; }
+        virtual bool passedRenderCheck(){ return false; }
         virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}
 
-		template<class T> void setCustomBindFunctor(T& functor){}
+        template<class T> void setCustomBindFunctor(T& functor){}
 };
 
 class ObjectBasic: public Object{
@@ -120,13 +120,13 @@ class ObjectBasic: public Object{
 
         virtual void update(float);
 
-        virtual glm::v3 getForward(){ return m_Forward; }
-        virtual glm::v3 getRight(){ return m_Right; }
-        virtual glm::v3 getUp(){ return m_Up; }
+        virtual glm::v3& getForward(){ return m_Forward; }
+        virtual glm::v3& getRight(){ return m_Right; }
+        virtual glm::v3& getUp(){ return m_Up; }
         virtual glm::v3 getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
         virtual glm::vec3 getScale(){ return m_Scale; }
-        virtual glm::m4 getModel(){ return m_Model; }
-        virtual glm::quat getOrientation(){ return m_Orientation; }
+        virtual glm::m4& getModel(){ return m_Model; }
+        virtual glm::quat& getOrientation(){ return m_Orientation; }
         virtual void setOrientation(glm::quat q){ m_Orientation = q; }
         virtual glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
 

@@ -13,8 +13,8 @@
 using namespace Engine;
 
 struct DefaultObjectDisplayBindFunctor{void operator()(ObjectDisplay* o) const {
-	Renderer::sendUniform4fSafe("Object_Color",o->getColor());
-	Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
+    Renderer::sendUniform4fSafe("Object_Color",o->getColor());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
 }};
 DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_FUNCTOR;
 
@@ -24,14 +24,14 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Shadeless = false;
     m_BoundingBoxRadius = glm::vec3(0);
     if(mesh != "" && mat != ""){
-		RenderedItem* item = new RenderedItem(namePtr(),mesh,mat);
+        RenderedItem* item = new RenderedItem(namePtr(),mesh,mat);
         m_DisplayItems.push_back(item);
-	}
+    }
     m_Color = glm::vec4(1);
-	m_GodsRaysColor = glm::vec3(0);
+    m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
 
-	setCustomBindFunctor(ObjectDisplay::DEFAULT_FUNCTOR);
+    setCustomBindFunctor(ObjectDisplay::DEFAULT_FUNCTOR);
 }
 ObjectDisplay::~ObjectDisplay(){
 }
@@ -39,16 +39,16 @@ void ObjectDisplay::bind(){ m_CustomBindFunctor(); }
 void ObjectDisplay::unbind(){}
 
 void ObjectDisplay::update(float dt){
-	ObjectBasic::update(dt);
-	for(auto renderedItem:m_DisplayItems){
-		renderedItem->update(dt);
-	}
-	Camera* c = Resources::getActiveCamera();
-	m_PassedRenderCheck = true;
-	float radius = getRadius();
-	if(!m_Visible || !c->sphereIntersectTest(getPosition(),radius) || c->getDistance(this) > radius * 1100.0f){
-		m_PassedRenderCheck = false;
-	}
+    ObjectBasic::update(dt);
+    for(auto renderedItem:m_DisplayItems){
+        renderedItem->update(dt);
+    }
+    Camera* c = Resources::getActiveCamera();
+    m_PassedRenderCheck = true;
+    float radius = getRadius();
+    if(!m_Visible || !c->sphereIntersectTest(getPosition(),radius) || c->getDistance(this) > radius * 1100.0f){
+        m_PassedRenderCheck = false;
+    }
 }
 void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 
@@ -56,21 +56,21 @@ void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){
         m_BoundingBoxRadius = glm::vec3(0);
-		m_Radius = 0;
+        m_Radius = 0;
         return;
     }
     float maxLength = 0;
     for(auto item:m_DisplayItems){
         float length = 0;
-		glm::mat4 m = item->model();
+        glm::mat4 m = item->model();
         glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
-		length = glm::length(localPosition) + item->mesh()->getRadius() * Engine::Math::Max(item->getScale());
+        length = glm::length(localPosition) + item->mesh()->getRadius() * Engine::Math::Max(item->getScale());
         if(length > maxLength){
             maxLength = length;
         }
     }
     m_BoundingBoxRadius = maxLength * m_Scale;
-	m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
+    m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
 }
 void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
 void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }
@@ -90,13 +90,13 @@ void ObjectDisplay::scale(float x, float y,float z){
 }
 void ObjectDisplay::scale(glm::vec3 s){ ObjectDisplay::scale(s.x,s.y,s.z); }
 bool ObjectDisplay::rayIntersectSphere(Camera* c){
-	if(c == nullptr) c = Resources::getActiveCamera();
+    if(c == nullptr) c = Resources::getActiveCamera();
     return c->rayIntersectSphere(this);
 }
 bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
-	return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
+    return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
 
 template<class T> void ObjectDisplay::setCustomBindFunctor(T& functor){
-	m_CustomBindFunctor = boost::bind<void>(functor,this);
+    m_CustomBindFunctor = boost::bind<void>(functor,this);
 }

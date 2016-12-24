@@ -8,7 +8,7 @@ varying vec3 WorldPosition;
 varying vec2 UV;
 
 void main(void){
-	gl_FragData[0] = Object_Color;
+    gl_FragData[0] = Object_Color;
     if(DiffuseTextureEnabled == 1){
         gl_FragData[0] *= texture2D(DiffuseTexture, UV);
     }

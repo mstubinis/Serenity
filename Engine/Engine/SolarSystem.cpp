@@ -76,7 +76,7 @@ void SolarSystem::_loadFromFile(std::string filename){
             }
             else if(count == 3){//this line has the system's skybox's number of flares
                 new GameSkybox(skybox,boost::lexical_cast<uint>(line),this);
-				//new Atmosphere();
+                //new Atmosphere();
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;
@@ -166,9 +166,9 @@ void SolarSystem::_loadFromFile(std::string filename){
                     if(boost::filesystem::exists(gloFile)){
                         glowFile = gloFile;
                     }
-					if(Resources::getMaterial(MATERIAL_NAME) == nullptr){
-						Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile);
-					}
+                    if(Resources::getMaterial(MATERIAL_NAME) == nullptr){
+                        Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile);
+                    }
                 }
                 if(line[0] == 'S'){//Sun
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::v3(0),(float)RADIUS,NAME,this);
@@ -217,7 +217,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
                         }
                     }
-					m_Moons.emplace(NAME,planetoid);
+                    m_Moons.emplace(NAME,planetoid);
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
@@ -241,7 +241,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                     new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
-					/*
+                    /*
                     if(PARENT != ""){
                         if(!planetRings.count(PARENT)){
                             std::vector<RingInfo> rings;
@@ -249,7 +249,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                         planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
                     }
-					*/
+                    */
                 }
                 else if(line[0] == 'L'){//Lagrange Point
                     //m_LagrangePoints.emplace(NAME,new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this));
@@ -263,27 +263,27 @@ void SolarSystem::_loadFromFile(std::string filename){
     }
 
     //add planetary rings
-	/*
+    /*
     for(auto rings:planetRings){
         new Ring(rings.second,static_cast<Planet*>(m_Objects.at(rings.first)));
     }
-	*/
+    */
 
     centerSceneToObject(player);
 
-	glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
-	glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
+    glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
+    glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
 
-	new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
-	new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
-	new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
-	new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
-	new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
-	new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
+    new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
+    new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
+    new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
+    new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
+    new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
+    new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
 
-	new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
+    new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
-	player->translate(0,0,11);
+    player->translate(0,0,11);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox

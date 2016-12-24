@@ -13,18 +13,18 @@ class TextureBuffer::impl final{
         int m_BufferType;
         int m_BufferAttatchment;
 
-		float m_SizeScalar;
+        float m_SizeScalar;
         void _init(int internalformat, int format, int type, int attatchment,uint width,uint height,float sizeScalar,TextureBuffer* super){
             m_BufferInternalFormat = internalformat;
             m_BufferFormat = format;
             m_BufferType = type;
             m_BufferAttatchment = attatchment;
-			m_SizeScalar = sizeScalar;
+            m_SizeScalar = sizeScalar;
 
-			_resize(width,height,super);
+            _resize(width,height,super);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
-			super->_constructAsFramebuffer(width,height,m_SizeScalar,m_BufferInternalFormat,m_BufferFormat,m_BufferType,m_BufferAttatchment);
+            super->_constructAsFramebuffer(width,height,m_SizeScalar,m_BufferInternalFormat,m_BufferFormat,m_BufferType,m_BufferAttatchment);
         }
 };
 class GBuffer::impl final{
@@ -47,13 +47,13 @@ class GBuffer::impl final{
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
 
-			_constructFramebuffer("BUFFER_DIFFUSE",BUFFER_TYPE_DIFFUSE,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_NORMAL",BUFFER_TYPE_NORMAL,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_MISC",BUFFER_TYPE_MISC,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_POSITION",BUFFER_TYPE_POSITION,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_LIGHTING",BUFFER_TYPE_LIGHTING,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_FREE1",BUFFER_TYPE_FREE1,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_DEPTH",BUFFER_TYPE_DEPTH,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_DIFFUSE",BUFFER_TYPE_DIFFUSE,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_NORMAL",BUFFER_TYPE_NORMAL,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_MISC",BUFFER_TYPE_MISC,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_POSITION",BUFFER_TYPE_POSITION,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_LIGHTING",BUFFER_TYPE_LIGHTING,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_FREE1",BUFFER_TYPE_FREE1,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_DEPTH",BUFFER_TYPE_DEPTH,m_Width,m_Height);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -64,18 +64,18 @@ class GBuffer::impl final{
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_fake);
 
-			_constructFramebuffer("BUFFER_BLOOM",BUFFER_TYPE_BLOOM,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_FREE2",BUFFER_TYPE_FREE2,m_Width,m_Height);
-			_constructFramebuffer("BUFFER_GODSRAYS",BUFFER_TYPE_GODSRAYS,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_BLOOM",BUFFER_TYPE_BLOOM,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_FREE2",BUFFER_TYPE_FREE2,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_GODSRAYS",BUFFER_TYPE_GODSRAYS,m_Width,m_Height);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
-		void _constructFramebuffer(std::string n,BUFFER_TYPES t,uint w,uint h){
-			TextureBuffer* tbo = nullptr;
-			tbo = new TextureBuffer(n,GBUFFER_TYPES[t],GBUFFER_PIXEL_TYPES[t],GBUFFER_FLOAT_TYPES[t],GBUFFER_ATTACHMENT_TYPES[t],w,h,GBUFFER_DIVISIBLES[t]);
-			boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
-			m_Buffers[t] = ptr;
-		}
+        void _constructFramebuffer(std::string n,BUFFER_TYPES t,uint w,uint h){
+            TextureBuffer* tbo = nullptr;
+            tbo = new TextureBuffer(n,GBUFFER_TYPES[t],GBUFFER_PIXEL_TYPES[t],GBUFFER_FLOAT_TYPES[t],GBUFFER_ATTACHMENT_TYPES[t],w,h,GBUFFER_DIVISIBLES[t]);
+            boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
+            m_Buffers[t] = ptr;
+        }
         void _destruct(){
             glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
             glDeleteRenderbuffers(1, &m_depth);
@@ -87,9 +87,9 @@ class GBuffer::impl final{
             glDeleteFramebuffers(1, &m_fbo_bloom);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			for(auto buffer:m_Buffers){
-				buffer.second.reset();
-			}
+            for(auto buffer:m_Buffers){
+                buffer.second.reset();
+            }
         }
         void _resizeBaseBuffer(uint w,uint h){
             m_Width  = w; m_Height = h;
@@ -106,19 +106,19 @@ class GBuffer::impl final{
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
         void _start(std::vector<uint>& types,std::string& channels,bool first_fbo){
-			if(first_fbo){
-				glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);      // Bind our FBO and set the viewport to the proper size
-			}
-			else{
-				glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_bloom);// Bind our FBO and set the viewport to the proper size
-			}
+            if(first_fbo){
+                glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);      // Bind our FBO and set the viewport to the proper size
+            }
+            else{
+                glBindFramebuffer(GL_FRAMEBUFFER, m_fbo_bloom);// Bind our FBO and set the viewport to the proper size
+            }
             bool r,g,b,a;
             if(channels.find("R") != std::string::npos) r=true; else r=false;
             if(channels.find("G") != std::string::npos) g=true; else g=false;
             if(channels.find("B") != std::string::npos) b=true; else b=false;
             if(channels.find("A") != std::string::npos) a=true; else a=false;
             glColorMask(r,g,b,a);
-			glEnable(GL_TEXTURE_2D);
+            glEnable(GL_TEXTURE_2D);
             glActiveTexture(GL_TEXTURE0);
 
             glDrawBuffers(types.size(), &types[0]);        // Specify what to render an start acquiring
@@ -126,7 +126,7 @@ class GBuffer::impl final{
         }
         void _start(uint type,std::string& channels,bool first_fbo){
             std::vector<uint> types;
-			types.push_back(m_Buffers.at(type).lock().get()->attatchment());
+            types.push_back(m_Buffers.at(type).lock().get()->attatchment());
             _start(types,channels,first_fbo);
         }
         void _start(uint type,uint type1,std::string& channels,bool first_fbo){
@@ -186,7 +186,7 @@ void TextureBuffer::resize(uint width,uint height){
     m_i->_resize(width,height,this);
 }
 float TextureBuffer::sizeScalar() const{
-	return m_i->m_SizeScalar;
+    return m_i->m_SizeScalar;
 }
 int TextureBuffer::attatchment() const{
     return m_i->m_BufferAttatchment;
@@ -203,7 +203,7 @@ void GBuffer::resizeBaseBuffer(uint width,uint height){
     m_i->_resizeBaseBuffer(width,height);
 }
 void GBuffer::resizeBuffer(uint buffer,uint width,uint height){ 
-	m_i->m_Buffers.at(buffer).lock().get()->resize(width,height); 
+    m_i->m_Buffers.at(buffer).lock().get()->resize(width,height); 
 }
 void GBuffer::start(std::vector<uint>& types,std::string channels,bool first_fbo){
     m_i->_start(types,channels,first_fbo);
@@ -233,5 +233,5 @@ const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& GBuffer::getBuffe
     return m_i->m_Buffers; 
 }
 Texture* GBuffer::getTexture(uint type){ 
-	return m_i->m_Buffers.at(type).lock().get();
+    return m_i->m_Buffers.at(type).lock().get();
 }

@@ -21,7 +21,7 @@ Camera::Camera(std::string n, float angle, float aspectRatio, float near, float 
     setPerspectiveProjection();
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
-	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
 }
 Camera::Camera(std::string n, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;

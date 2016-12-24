@@ -75,9 +75,9 @@ class Planet: public ObjectDisplay{
 
         OrbitInfo* getOrbitInfo() const { return m_OrbitInfo; }
         const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
-		float getDefaultRadius(){ return m_Radius; }
+        float getDefaultRadius(){ return m_Radius; }
         float getRadius() { return m_Radius + (m_Radius * m_AtmosphereHeight); }
-		float getAtmosphereHeight(){ return m_AtmosphereHeight; }
+        float getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
         void addRing(Ring*);
 

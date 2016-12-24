@@ -21,16 +21,16 @@ enum COLLISION_GROUPS {
 */
 struct DefaultObjectDynamicBindFunctor;
 class ObjectDynamic: public Object{
-	public: static DefaultObjectDynamicBindFunctor DEFAULT_FUNCTOR;
+    public: static DefaultObjectDynamicBindFunctor DEFAULT_FUNCTOR;
     protected:
-		boost::function<void()> m_CustomBindFunctor;
+        boost::function<void()> m_CustomBindFunctor;
 
         glm::v3 m_Forward, m_Right, m_Up;
         bool m_Visible;
-		bool m_PassedRenderCheck;
+        bool m_PassedRenderCheck;
         std::vector<RenderedItem*> m_DisplayItems;
         glm::vec4 m_Color;
-		glm::vec3 m_GodsRaysColor;
+        glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
         glm::m4 m_Model;
@@ -111,21 +111,21 @@ class ObjectDynamic: public Object{
         virtual void setAngularVelocityY(float,bool local=true);
         virtual void setAngularVelocityZ(float,bool local=true);
 
-		virtual glm::vec4 getColor(){ return m_Color; }
-		virtual glm::vec3 getGodsRaysColor(){ return m_GodsRaysColor; }
-        virtual glm::v3 getForward(){ return m_Forward; }
-        virtual glm::v3 getRight(){ return m_Right; }
-        virtual glm::v3 getUp(){ return m_Up; }
+        virtual glm::vec4 getColor(){ return m_Color; }
+        virtual glm::vec3 getGodsRaysColor(){ return m_GodsRaysColor; }
+        virtual glm::v3& getForward(){ return m_Forward; }
+        virtual glm::v3& getRight(){ return m_Right; }
+        virtual glm::v3& getUp(){ return m_Up; }
         virtual glm::v3 getPosition();
         virtual float getMass(){ return m_Mass; }
         virtual btRigidBody* getRigidBody(){ return m_RigidBody; }
-        virtual glm::quat getOrientation();
+        virtual glm::quat& getOrientation();
         virtual void setOrientation(glm::quat);
         virtual glm::vec3 getScale();
-        virtual glm::m4 getModel();
+        virtual glm::m4& getModel();
         virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }
-		virtual bool visible() { return m_Visible; }
-		virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
+        virtual bool visible() { return m_Visible; }
+        virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
 
         virtual void setMass(float);
 
@@ -135,13 +135,13 @@ class ObjectDynamic: public Object{
 
         virtual void update(float);
 
-		virtual void bind();
-		virtual void unbind();
+        virtual void bind();
+        virtual void unbind();
         virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 
-		template<class T> void setCustomBindFunctor(T& functor);
+        template<class T> void setCustomBindFunctor(T& functor);
 };
 #endif

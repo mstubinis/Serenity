@@ -35,11 +35,11 @@ void CapsuleStar::update(float dt){
         float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
         setPosition(x*50,y*50,-200*225);
     }
-	if(m_Light != nullptr){
-		m_Light->setPosition(pos/glm::num(75));
-		if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){m_Light->deactivate();}
-		else{m_Light->activate();}
-	}
+    if(m_Light != nullptr){
+        m_Light->setPosition(pos/glm::num(75));
+        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){m_Light->deactivate();}
+        else{m_Light->activate();}
+    }
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
     ObjectDisplay::update(dt);
 }
@@ -56,13 +56,13 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string m
 }
 CapsuleRibbon::~CapsuleRibbon(){}
 void CapsuleRibbon::bind(){
-	ObjectDisplay::bind();
-	Renderer::Settings::disableDepthTest();
-	Renderer::Settings::disableDepthMask();
+    ObjectDisplay::bind();
+    Renderer::Settings::disableDepthTest();
+    Renderer::Settings::disableDepthMask();
 }
 void CapsuleRibbon::unbind(){
-	Renderer::Settings::enableDepthTest();
-	Renderer::Settings::enableDepthMask();
+    Renderer::Settings::enableDepthTest();
+    Renderer::Settings::enableDepthMask();
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
@@ -175,6 +175,6 @@ void CapsuleSpace::update(float dt){
 
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));
-		item->setOrientation(0,0,rot);
+        item->setOrientation(0,0,rot);
     }
 }

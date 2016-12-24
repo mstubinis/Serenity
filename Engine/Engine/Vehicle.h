@@ -56,9 +56,9 @@ class Vehicle: public ObjectDynamic{
         virtual void resetSuspension();
         virtual float getCurrentSpeedKmHour();
 
-        virtual glm::v3 getForward(){ return m_Forward; }
-        virtual glm::v3 getRight(){ return m_Right; }
-        virtual glm::v3 getUp(){ return m_Up; }
+        virtual glm::v3& getForward(){ return m_Forward; }
+        virtual glm::v3& getRight(){ return m_Right; }
+        virtual glm::v3& getUp(){ return m_Up; }
 
         virtual void addWheel(Wheel*,glm::v3 pos,float suspensionRestLength = 0,bool isFront = true);
 

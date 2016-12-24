@@ -13,7 +13,7 @@ class Scene;
 class SunLight: public ObjectDisplay{
     protected:
         unsigned int m_Type;
-		bool m_Active;
+        bool m_Active;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
         void sendGenericAttributesToShader();
     public:
@@ -27,9 +27,9 @@ class SunLight: public ObjectDisplay{
         float getSpecularPower(){ return m_SpecularIntensity; }
         void setSpecularPower(float s){ m_SpecularIntensity = s; }
 
-		void activate(){ m_Active = true; }
-		void deactivate(){ m_Active = false; }
-		bool isActive(){ return m_Active; }
+        void activate(){ m_Active = true; }
+        void deactivate(){ m_Active = false; }
+        bool isActive(){ return m_Active; }
 };
 class DirectionalLight: public SunLight{
     private:
@@ -54,7 +54,7 @@ class PointLight: public SunLight{
         virtual void setLinear(float l);
         virtual void setExponent(float e);
 
-		float& getLightRadius(){ return m_PointLightRadius; }
+        float& getLightRadius(){ return m_PointLightRadius; }
 
         float& getConstant(){ return m_Constant; }
         float& getLinear(){ return m_Linear; }

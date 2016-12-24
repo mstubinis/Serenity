@@ -56,60 +56,60 @@ struct FontRenderInfo final: public TextureRenderInfo{
 namespace Engine{
     namespace Renderer{
         namespace Detail{
-			struct RendererInfo final{
-				struct GeneralInfo final{
-					static bool alpha_test;
-					static bool depth_mask;
-					static bool depth_test;
-					static ShaderP* current_shader_program;
-					static std::string current_bound_material;
+            struct RendererInfo final{
+                struct GeneralInfo final{
+                    static bool alpha_test;
+                    static bool depth_mask;
+                    static bool depth_test;
+                    static ShaderP* current_shader_program;
+                    static std::string current_bound_material;
 
-					static bool cull_face_enabled;
-					static unsigned char cull_face_status;
-				};
-				struct DebugDrawingInfo final{
-					static bool debug;
-				};
-				struct LightingInfo final{
-					static bool lighting;
-				};
-				struct BloomInfo final{
-					static bool bloom;
-					static float bloom_radius;
-					static float bloom_strength;
-				};
-				struct HDRInfo final{
-					static bool hdr;
-					static float hdr_exposure;
-					static float hdr_gamma;
-				};
-				struct GodRaysInfo final{
-					static bool godRays;
-					static float godRays_exposure;
-					static float godRays_decay;
-					static float godRays_density;
-					static float godRays_weight;
-					static uint godRays_samples;
-					static float godRays_fovDegrees;
-					static float godRays_alphaFalloff;
-				};
-				struct SSAOInfo final{
-					static bool ssao;
-					static bool ssao_do_blur;
-					static float ssao_blur_strength;
-					static uint ssao_samples;
-					static float ssao_bias;
-					static float ssao_scale;
-					static float ssao_radius;
-					static float ssao_intensity;
+                    static bool cull_face_enabled;
+                    static unsigned char cull_face_status;
+                };
+                struct DebugDrawingInfo final{
+                    static bool debug;
+                };
+                struct LightingInfo final{
+                    static bool lighting;
+                };
+                struct BloomInfo final{
+                    static bool bloom;
+                    static float bloom_radius;
+                    static float bloom_strength;
+                };
+                struct HDRInfo final{
+                    static bool hdr;
+                    static float hdr_exposure;
+                    static float hdr_gamma;
+                };
+                struct GodRaysInfo final{
+                    static bool godRays;
+                    static float godRays_exposure;
+                    static float godRays_decay;
+                    static float godRays_density;
+                    static float godRays_weight;
+                    static uint godRays_samples;
+                    static float godRays_fovDegrees;
+                    static float godRays_alphaFalloff;
+                };
+                struct SSAOInfo final{
+                    static bool ssao;
+                    static bool ssao_do_blur;
+                    static float ssao_blur_strength;
+                    static uint ssao_samples;
+                    static float ssao_bias;
+                    static float ssao_scale;
+                    static float ssao_radius;
+                    static float ssao_intensity;
 
-					static const int SSAO_KERNEL_COUNT = 32;
-					static const int SSAO_NORMALMAP_SIZE = 128;
-					static glm::vec2 ssao_Kernels[SSAO_KERNEL_COUNT];
-					static GLuint ssao_noise_texture;
-					static uint ssao_noise_texture_size;
-				};
-			};
+                    static const int SSAO_KERNEL_COUNT = 32;
+                    static const int SSAO_NORMALMAP_SIZE = 128;
+                    static glm::vec2 ssao_Kernels[SSAO_KERNEL_COUNT];
+                    static GLuint ssao_noise_texture;
+                    static uint ssao_noise_texture_size;
+                };
+            };
             class RenderManagement final{
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
@@ -118,10 +118,10 @@ namespace Engine{
                     static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
-					static void _bind(ShaderP*);
-					static void _bind(Material*);
-					static void _unbind(ShaderP*);
-					static void _unbind(Material*);
+                    static void _bind(ShaderP*);
+                    static void _bind(Material*);
+                    static void _unbind(ShaderP*);
+                    static void _unbind(Material*);
 
                     static void _renderForwardRenderedObjects();
                     static void _renderObjects();
@@ -134,7 +134,7 @@ namespace Engine{
                     static void _passLighting();
                     static void _passSSAO();
                     static void _passEdge(GLuint texture,float radius = 1.0f);
-					static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
+                    static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal();
                 public:
                     static GBuffer* m_gBuffer;
@@ -145,7 +145,7 @@ namespace Engine{
                     static void init();
                     static void destruct();
 
-					static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
+                    static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
                     static std::vector<GeometryRenderInfo>& getForegroundObjectRenderQueue(){ return m_ForegroundObjectsToBeRendered; }
                     static std::vector<GeometryRenderInfo>& getObjectRenderQueue(){ return m_ObjectsToBeRendered; }
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
@@ -154,67 +154,67 @@ namespace Engine{
             void renderFullscreenQuad(uint width, uint height);
         };
 
-		namespace Settings{
+        namespace Settings{
 
-			void clear(bool color = true, bool depth = true, bool stencil = true);
+            void clear(bool color = true, bool depth = true, bool stencil = true);
 
-			void enableCullFace(bool b = true);
-			void disableCullFace();
-			void cullFace(uint state);
+            void enableCullFace(bool b = true);
+            void disableCullFace();
+            void cullFace(uint state);
 
-			void enableAlphaTest(bool b = true);
-			void disableAlphaTest();
-			void enableDepthTest(bool b = true);
-			void disableDepthTest();
-			void enableDepthMask(bool b = true);
-			void disableDepthMask();
+            void enableAlphaTest(bool b = true);
+            void disableAlphaTest();
+            void enableDepthTest(bool b = true);
+            void disableDepthTest();
+            void enableDepthMask(bool b = true);
+            void disableDepthMask();
 
-			namespace HDR{
-				static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
-				static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
+            namespace HDR{
+                static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
+                static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
 
-				static float getExposure(){ return Detail::RendererInfo::HDRInfo::hdr_exposure; }
-				static float getGamma(){ return Detail::RendererInfo::HDRInfo::hdr_gamma; }
-				static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
-				static void setGamma(float g){ Detail::RendererInfo::HDRInfo::hdr_gamma = g; }
-			};
-			namespace Bloom{
-				static void enable(bool b = true){ Detail::RendererInfo::BloomInfo::bloom = b; }
-				static void disable(){ Detail::RendererInfo::BloomInfo::bloom = false; }
+                static float getExposure(){ return Detail::RendererInfo::HDRInfo::hdr_exposure; }
+                static float getGamma(){ return Detail::RendererInfo::HDRInfo::hdr_gamma; }
+                static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
+                static void setGamma(float g){ Detail::RendererInfo::HDRInfo::hdr_gamma = g; }
+            };
+            namespace Bloom{
+                static void enable(bool b = true){ Detail::RendererInfo::BloomInfo::bloom = b; }
+                static void disable(){ Detail::RendererInfo::BloomInfo::bloom = false; }
 
-				static float getRadius(){ return Detail::RendererInfo::BloomInfo::bloom_radius; }
-				static float getStrength(){ return Detail::RendererInfo::BloomInfo::bloom_strength; }
-				static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = r; }
-				static void setStrength(float r){ Detail::RendererInfo::BloomInfo::bloom_strength = r; }
-			};
+                static float getRadius(){ return Detail::RendererInfo::BloomInfo::bloom_radius; }
+                static float getStrength(){ return Detail::RendererInfo::BloomInfo::bloom_strength; }
+                static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = r; }
+                static void setStrength(float r){ Detail::RendererInfo::BloomInfo::bloom_strength = r; }
+            };
             namespace GodRays{
-				static void enable(bool b = true){ Detail::RendererInfo::GodRaysInfo::godRays = b; }
-				static void disable(){ Detail::RendererInfo::GodRaysInfo::godRays = false; }
+                static void enable(bool b = true){ Detail::RendererInfo::GodRaysInfo::godRays = b; }
+                static void disable(){ Detail::RendererInfo::GodRaysInfo::godRays = false; }
 
                 static float getExposure(){ return Detail::RendererInfo::GodRaysInfo::godRays_exposure; }
                 static float getDecay(){ return Detail::RendererInfo::GodRaysInfo::godRays_decay; }
                 static float getDensity(){ return Detail::RendererInfo::GodRaysInfo::godRays_density; }
                 static float getWeight(){ return Detail::RendererInfo::GodRaysInfo::godRays_weight; }
                 static uint getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
-				static float getFOVDegrees(){ return Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees; }
-				static float getAlphaFalloff(){ return Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff; }
+                static float getFOVDegrees(){ return Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees; }
+                static float getAlphaFalloff(){ return Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff; }
 
                 static void setExposure(float e){ Detail::RendererInfo::GodRaysInfo::godRays_exposure = e; }
                 static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
                 static void setDensity(float d){ Detail::RendererInfo::GodRaysInfo::godRays_density = d; }
                 static void setWeight(float w){ Detail::RendererInfo::GodRaysInfo::godRays_weight = w; }
                 static void setSamples(uint s){ Detail::RendererInfo::GodRaysInfo::godRays_samples = s; }
-				static void setFOVDegrees(float d){ Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = d; }
-				static void setAlphaFalloff(float a){ Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = a; }
+                static void setFOVDegrees(float d){ Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = d; }
+                static void setAlphaFalloff(float a){ Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = a; }
             };
             namespace SSAO{
-				static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }
-				static void disable(){ Detail::RendererInfo::SSAOInfo::ssao = false;  }
+                static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }
+                static void disable(){ Detail::RendererInfo::SSAOInfo::ssao = false;  }
 
-				static void enableBlur(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = b;  }
-				static void disableBlur(){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = false;  }
+                static void enableBlur(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = b;  }
+                static void disableBlur(){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = false;  }
 
-				static float getBlurStrength(){ return Detail::RendererInfo::SSAOInfo::ssao_blur_strength; }
+                static float getBlurStrength(){ return Detail::RendererInfo::SSAOInfo::ssao_blur_strength; }
 
                 static float getIntensity(){ return Detail::RendererInfo::SSAOInfo::ssao_intensity; }
                 static float getRadius(){ return Detail::RendererInfo::SSAOInfo::ssao_radius; }
@@ -222,7 +222,7 @@ namespace Engine{
                 static float getBias(){ return Detail::RendererInfo::SSAOInfo::ssao_bias; }
                 static uint getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
 
-				static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = s; }
+                static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = s; }
 
                 static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = i; }
                 static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = r; }
@@ -230,118 +230,118 @@ namespace Engine{
                 static void setBias(float b){ Detail::RendererInfo::SSAOInfo::ssao_bias = b; }
                 static void setSamples(uint s){ Detail::RendererInfo::SSAOInfo::ssao_samples = s; }
             };
-			namespace Lighting{
-				static void enable(bool b = true){ Detail::RendererInfo::LightingInfo::lighting = b; }
-				static void disable(){ Detail::RendererInfo::LightingInfo::lighting = false; }
-			};
-			namespace Debug{
-				static void enable(bool b = true){ Detail::RendererInfo::DebugDrawingInfo::debug = b;  }
-				static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
-			};
+            namespace Lighting{
+                static void enable(bool b = true){ Detail::RendererInfo::LightingInfo::lighting = b; }
+                static void disable(){ Detail::RendererInfo::LightingInfo::lighting = false; }
+            };
+            namespace Debug{
+                static void enable(bool b = true){ Detail::RendererInfo::DebugDrawingInfo::debug = b;  }
+                static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
+            };
         };
-		inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
-		inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
-		void bindShaderProgram(ShaderP*);
-		void bindShaderProgram(std::string);
-		void bindTexture(const char* location,Texture*,uint slot);
-		void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
-		void bindTextureSafe(const char* location,Texture*,uint slot);
-		void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint type);
-		void unbindTexture2D(uint slot);
-		void unbindTextureCubemap(uint slot);
+        inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
+        inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
+        void bindShaderProgram(ShaderP*);
+        void bindShaderProgram(std::string);
+        void bindTexture(const char* location,Texture*,uint slot);
+        void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
+        void bindTextureSafe(const char* location,Texture*,uint slot);
+        void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint type);
+        void unbindTexture2D(uint slot);
+        void unbindTextureCubemap(uint slot);
 
-		inline void sendUniform1dSafe(const char* l,double x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1d(o,x); }
-		inline void sendUniform1iSafe(const char* l,int x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1i(o,x); }
-		inline void sendUniform1fSafe(const char* l,float x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1f(o,x); }
-		inline void sendUniform2dSafe(const char* l,double x,double y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,x,y); }
-		inline void sendUniform2iSafe(const char* l,int x,int y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,x,y); }
-		inline void sendUniform2fSafe(const char* l,float x,float y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,x,y); }
-		inline void sendUniform3dSafe(const char* l,double x,double y,double z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,x,y,z); }
-		inline void sendUniform3iSafe(const char* l,int x,int y,int z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,x,y,z); }
-		inline void sendUniform3fSafe(const char* l,float x,float y,float z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,x,y,z); }
-		inline void sendUniform4dSafe(const char* l,double x,double y,double z,double w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,x,y,z,w); }
-		inline void sendUniform4iSafe(const char* l,int x,int y,int z,int w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,x,y,z,w); }
-		inline void sendUniform4fSafe(const char* l,float x,float y,float z,float w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,x,y,z,w); }
-		inline void sendUniform2dSafe(const char* l,glm::dvec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,v.x,v.y); }
-		inline void sendUniform2iSafe(const char* l,glm::ivec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,v.x,v.y); }
-		inline void sendUniform2fSafe(const char* l,glm::vec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,v.x,v.y); }
-		inline void sendUniform3dSafe(const char* l,glm::dvec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,v.x,v.y,v.z); }
-		inline void sendUniform3iSafe(const char* l,glm::ivec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,v.x,v.y,v.z); }
-		inline void sendUniform3fSafe(const char* l,glm::vec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,v.x,v.y,v.z); }
-		inline void sendUniform4dSafe(const char* l,glm::dvec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,v.x,v.y,v.z,v.w); }
-		inline void sendUniform4iSafe(const char* l,glm::ivec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,v.x,v.y,v.z,v.w); }
-		inline void sendUniform4fSafe(const char* l,glm::vec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,v.x,v.y,v.z,v.w); }
-		inline void sendUniformMatrix4fSafe(const char* l,glm::mat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4fv(o,1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4dSafe(const char* l,glm::dmat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4dv(o,1,0,glm::value_ptr(m)); }
-		inline void sendUniform2fvSafe(const char* l,std::vector<glm::vec2>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
-		inline void sendUniform3fvSafe(const char* l,std::vector<glm::vec3>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
-		inline void sendUniform4fvSafe(const char* l,std::vector<glm::vec4>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
-		inline void sendUniform2fvSafe(const char* l,glm::vec2* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
-		inline void sendUniform3fvSafe(const char* l,glm::vec3* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
-		inline void sendUniform4fvSafe(const char* l,glm::vec4* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
+        inline void sendUniform1dSafe(const char* l,double x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1d(o,x); }
+        inline void sendUniform1iSafe(const char* l,int x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1i(o,x); }
+        inline void sendUniform1fSafe(const char* l,float x){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform1f(o,x); }
+        inline void sendUniform2dSafe(const char* l,double x,double y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,x,y); }
+        inline void sendUniform2iSafe(const char* l,int x,int y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,x,y); }
+        inline void sendUniform2fSafe(const char* l,float x,float y){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,x,y); }
+        inline void sendUniform3dSafe(const char* l,double x,double y,double z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,x,y,z); }
+        inline void sendUniform3iSafe(const char* l,int x,int y,int z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,x,y,z); }
+        inline void sendUniform3fSafe(const char* l,float x,float y,float z){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,x,y,z); }
+        inline void sendUniform4dSafe(const char* l,double x,double y,double z,double w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,x,y,z,w); }
+        inline void sendUniform4iSafe(const char* l,int x,int y,int z,int w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,x,y,z,w); }
+        inline void sendUniform4fSafe(const char* l,float x,float y,float z,float w){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,x,y,z,w); }
+        inline void sendUniform2dSafe(const char* l,glm::dvec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2d(o,v.x,v.y); }
+        inline void sendUniform2iSafe(const char* l,glm::ivec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2i(o,v.x,v.y); }
+        inline void sendUniform2fSafe(const char* l,glm::vec2& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2f(o,v.x,v.y); }
+        inline void sendUniform3dSafe(const char* l,glm::dvec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3d(o,v.x,v.y,v.z); }
+        inline void sendUniform3iSafe(const char* l,glm::ivec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3i(o,v.x,v.y,v.z); }
+        inline void sendUniform3fSafe(const char* l,glm::vec3& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3f(o,v.x,v.y,v.z); }
+        inline void sendUniform4dSafe(const char* l,glm::dvec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4d(o,v.x,v.y,v.z,v.w); }
+        inline void sendUniform4iSafe(const char* l,glm::ivec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,v.x,v.y,v.z,v.w); }
+        inline void sendUniform4fSafe(const char* l,glm::vec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,v.x,v.y,v.z,v.w); }
+        inline void sendUniformMatrix4fSafe(const char* l,glm::mat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4fv(o,1,0,glm::value_ptr(m)); }
+        inline void sendUniformMatrix4dSafe(const char* l,glm::dmat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4dv(o,1,0,glm::value_ptr(m)); }
+        inline void sendUniform2fvSafe(const char* l,std::vector<glm::vec2>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
+        inline void sendUniform3fvSafe(const char* l,std::vector<glm::vec3>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
+        inline void sendUniform4fvSafe(const char* l,std::vector<glm::vec4>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
+        inline void sendUniform2fvSafe(const char* l,glm::vec2* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
+        inline void sendUniform3fvSafe(const char* l,glm::vec3* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
+        inline void sendUniform4fvSafe(const char* l,glm::vec4* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
 
-		inline void sendUniform1d(const char* l,double x){ glUniform1d(getUniformLocationUnsafe(l),x); }
-		inline void sendUniform1i(const char* l,int x){ glUniform1i(getUniformLocationUnsafe(l),x); }
-		inline void sendUniform1f(const char* l,float x){ glUniform1f(getUniformLocationUnsafe(l),x); }
-		inline void sendUniform2d(const char* l,double x,double y){ glUniform2d(getUniformLocationUnsafe(l),x,y); }
-		inline void sendUniform2i(const char* l,int x,int y){ glUniform2i(getUniformLocationUnsafe(l),x,y); }
-		inline void sendUniform2f(const char* l,float x,float y){ glUniform2f(getUniformLocationUnsafe(l),x,y); }
-		inline void sendUniform3d(const char* l,double x,double y,double z){ glUniform3d(getUniformLocationUnsafe(l),x,y,z); }
-		inline void sendUniform3i(const char* l,int x,int y,int z){ glUniform3i(getUniformLocationUnsafe(l),x,y,z); }
-		inline void sendUniform3f(const char* l,float x,float y,float z){ glUniform3f(getUniformLocationUnsafe(l),x,y,z); }
-		inline void sendUniform4d(const char* l,double x,double y,double z,double w){ glUniform4d(getUniformLocationUnsafe(l),x,y,z,w); }
-		inline void sendUniform4i(const char* l,int x,int y,int z,int w){ glUniform4i(getUniformLocationUnsafe(l),x,y,z,w); }
-		inline void sendUniform4f(const char* l,float x,float y,float z,float w){ glUniform4f(getUniformLocationUnsafe(l),x,y,z,w); }
-		inline void sendUniform2d(const char* l,glm::dvec2& v){ glUniform2d(getUniformLocationUnsafe(l),v.x,v.y); }
-		inline void sendUniform2i(const char* l,glm::ivec2& v){ glUniform2i(getUniformLocationUnsafe(l),v.x,v.y); }
-		inline void sendUniform2f(const char* l,glm::vec2& v){ glUniform2f(getUniformLocationUnsafe(l),v.x,v.y); }
-		inline void sendUniform3d(const char* l,glm::dvec3& v){ glUniform3d(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
-		inline void sendUniform3i(const char* l,glm::ivec3& v){ glUniform3i(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
-		inline void sendUniform3f(const char* l,glm::vec3& v){ glUniform3f(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
-		inline void sendUniform4d(const char* l,glm::dvec4& v){ glUniform4d(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
-		inline void sendUniform4i(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
-		inline void sendUniform4f(const char* l,glm::vec4& v){ glUniform4f(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
-		inline void sendUniformMatrix4f(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4d(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniform2fv(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform3fv(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform4fv(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform2fv(const char* l,glm::vec2* d,uint i){ glUniform2fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform3fv(const char* l,glm::vec3* d,uint i){ glUniform3fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform4fv(const char* l,glm::vec4* d,uint i){ glUniform4fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform1d(const char* l,double x){ glUniform1d(getUniformLocationUnsafe(l),x); }
+        inline void sendUniform1i(const char* l,int x){ glUniform1i(getUniformLocationUnsafe(l),x); }
+        inline void sendUniform1f(const char* l,float x){ glUniform1f(getUniformLocationUnsafe(l),x); }
+        inline void sendUniform2d(const char* l,double x,double y){ glUniform2d(getUniformLocationUnsafe(l),x,y); }
+        inline void sendUniform2i(const char* l,int x,int y){ glUniform2i(getUniformLocationUnsafe(l),x,y); }
+        inline void sendUniform2f(const char* l,float x,float y){ glUniform2f(getUniformLocationUnsafe(l),x,y); }
+        inline void sendUniform3d(const char* l,double x,double y,double z){ glUniform3d(getUniformLocationUnsafe(l),x,y,z); }
+        inline void sendUniform3i(const char* l,int x,int y,int z){ glUniform3i(getUniformLocationUnsafe(l),x,y,z); }
+        inline void sendUniform3f(const char* l,float x,float y,float z){ glUniform3f(getUniformLocationUnsafe(l),x,y,z); }
+        inline void sendUniform4d(const char* l,double x,double y,double z,double w){ glUniform4d(getUniformLocationUnsafe(l),x,y,z,w); }
+        inline void sendUniform4i(const char* l,int x,int y,int z,int w){ glUniform4i(getUniformLocationUnsafe(l),x,y,z,w); }
+        inline void sendUniform4f(const char* l,float x,float y,float z,float w){ glUniform4f(getUniformLocationUnsafe(l),x,y,z,w); }
+        inline void sendUniform2d(const char* l,glm::dvec2& v){ glUniform2d(getUniformLocationUnsafe(l),v.x,v.y); }
+        inline void sendUniform2i(const char* l,glm::ivec2& v){ glUniform2i(getUniformLocationUnsafe(l),v.x,v.y); }
+        inline void sendUniform2f(const char* l,glm::vec2& v){ glUniform2f(getUniformLocationUnsafe(l),v.x,v.y); }
+        inline void sendUniform3d(const char* l,glm::dvec3& v){ glUniform3d(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
+        inline void sendUniform3i(const char* l,glm::ivec3& v){ glUniform3i(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
+        inline void sendUniform3f(const char* l,glm::vec3& v){ glUniform3f(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
+        inline void sendUniform4d(const char* l,glm::dvec4& v){ glUniform4d(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
+        inline void sendUniform4i(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
+        inline void sendUniform4f(const char* l,glm::vec4& v){ glUniform4f(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
+        inline void sendUniformMatrix4f(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
+        inline void sendUniformMatrix4d(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
+        inline void sendUniform2fv(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform3fv(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform4fv(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform2fv(const char* l,glm::vec2* d,uint i){ glUniform2fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform3fv(const char* l,glm::vec3* d,uint i){ glUniform3fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform4fv(const char* l,glm::vec4* d,uint i){ glUniform4fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
 
-		inline void sendUniform1dForce(const char* l,double x){ glUniform1d(getUniformLocation(l),x); }
-		inline void sendUniform1iForce(const char* l,int x){ glUniform1i(getUniformLocation(l),x); }
-		inline void sendUniform1fForce(const char* l,float x){ glUniform1f(getUniformLocation(l),x); }
-		inline void sendUniform2dForce(const char* l,double x,double y){ glUniform2d(getUniformLocation(l),x,y); }
-		inline void sendUniform2iForce(const char* l,int x,int y){ glUniform2i(getUniformLocation(l),x,y); }
-		inline void sendUniform2fForce(const char* l,float x,float y){ glUniform2f(getUniformLocation(l),x,y); }
-		inline void sendUniform3dForce(const char* l,double x,double y,double z){ glUniform3d(getUniformLocation(l),x,y,z); }
-		inline void sendUniform3iForce(const char* l,int x,int y,int z){ glUniform3i(getUniformLocation(l),x,y,z); }
-		inline void sendUniform3fForce(const char* l,float x,float y,float z){ glUniform3f(getUniformLocation(l),x,y,z); }
-		inline void sendUniform4dForce(const char* l,double x,double y,double z,double w){ glUniform4d(getUniformLocation(l),x,y,z,w); }
-		inline void sendUniform4iForce(const char* l,int x,int y,int z,int w){ glUniform4i(getUniformLocation(l),x,y,z,w); }
-		inline void sendUniform4fForce(const char* l,float x,float y,float z,float w){ glUniform4f(getUniformLocation(l),x,y,z,w); }
-		inline void sendUniform2dForce(const char* l,glm::dvec2& v){ glUniform2d(getUniformLocation(l),v.x,v.y); }
-		inline void sendUniform2iForce(const char* l,glm::ivec2& v){ glUniform2i(getUniformLocation(l),v.x,v.y); }
-		inline void sendUniform2fForce(const char* l,glm::vec2& v){ glUniform2f(getUniformLocation(l),v.x,v.y); }
-		inline void sendUniform3dForce(const char* l,glm::dvec3& v){ glUniform3d(getUniformLocation(l),v.x,v.y,v.z); }
-		inline void sendUniform3iForce(const char* l,glm::ivec3& v){ glUniform3i(getUniformLocation(l),v.x,v.y,v.z); }
-		inline void sendUniform3fForce(const char* l,glm::vec3& v){ glUniform3f(getUniformLocation(l),v.x,v.y,v.z); }
-		inline void sendUniform4dForce(const char* l,glm::dvec4& v){ glUniform4d(getUniformLocation(l),v.x,v.y,v.z,v.w); }
-		inline void sendUniform4iForce(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocation(l),v.x,v.y,v.z,v.w); }
-		inline void sendUniform4fForce(const char* l,glm::vec4& v){ glUniform4f(getUniformLocation(l),v.x,v.y,v.z,v.w); }
-		inline void sendUniformMatrix4fForce(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4dForce(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniform2fvForce(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform3fvForce(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform4fvForce(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform2fvForce(const char* l,glm::vec2* d,uint i){ glUniform2fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform3fvForce(const char* l,glm::vec3* d,uint i){ glUniform3fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
-		inline void sendUniform4fvForce(const char* l,glm::vec4* d,uint i){ glUniform4fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform1dForce(const char* l,double x){ glUniform1d(getUniformLocation(l),x); }
+        inline void sendUniform1iForce(const char* l,int x){ glUniform1i(getUniformLocation(l),x); }
+        inline void sendUniform1fForce(const char* l,float x){ glUniform1f(getUniformLocation(l),x); }
+        inline void sendUniform2dForce(const char* l,double x,double y){ glUniform2d(getUniformLocation(l),x,y); }
+        inline void sendUniform2iForce(const char* l,int x,int y){ glUniform2i(getUniformLocation(l),x,y); }
+        inline void sendUniform2fForce(const char* l,float x,float y){ glUniform2f(getUniformLocation(l),x,y); }
+        inline void sendUniform3dForce(const char* l,double x,double y,double z){ glUniform3d(getUniformLocation(l),x,y,z); }
+        inline void sendUniform3iForce(const char* l,int x,int y,int z){ glUniform3i(getUniformLocation(l),x,y,z); }
+        inline void sendUniform3fForce(const char* l,float x,float y,float z){ glUniform3f(getUniformLocation(l),x,y,z); }
+        inline void sendUniform4dForce(const char* l,double x,double y,double z,double w){ glUniform4d(getUniformLocation(l),x,y,z,w); }
+        inline void sendUniform4iForce(const char* l,int x,int y,int z,int w){ glUniform4i(getUniformLocation(l),x,y,z,w); }
+        inline void sendUniform4fForce(const char* l,float x,float y,float z,float w){ glUniform4f(getUniformLocation(l),x,y,z,w); }
+        inline void sendUniform2dForce(const char* l,glm::dvec2& v){ glUniform2d(getUniformLocation(l),v.x,v.y); }
+        inline void sendUniform2iForce(const char* l,glm::ivec2& v){ glUniform2i(getUniformLocation(l),v.x,v.y); }
+        inline void sendUniform2fForce(const char* l,glm::vec2& v){ glUniform2f(getUniformLocation(l),v.x,v.y); }
+        inline void sendUniform3dForce(const char* l,glm::dvec3& v){ glUniform3d(getUniformLocation(l),v.x,v.y,v.z); }
+        inline void sendUniform3iForce(const char* l,glm::ivec3& v){ glUniform3i(getUniformLocation(l),v.x,v.y,v.z); }
+        inline void sendUniform3fForce(const char* l,glm::vec3& v){ glUniform3f(getUniformLocation(l),v.x,v.y,v.z); }
+        inline void sendUniform4dForce(const char* l,glm::dvec4& v){ glUniform4d(getUniformLocation(l),v.x,v.y,v.z,v.w); }
+        inline void sendUniform4iForce(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocation(l),v.x,v.y,v.z,v.w); }
+        inline void sendUniform4fForce(const char* l,glm::vec4& v){ glUniform4f(getUniformLocation(l),v.x,v.y,v.z,v.w); }
+        inline void sendUniformMatrix4fForce(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
+        inline void sendUniformMatrix4dForce(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
+        inline void sendUniform2fvForce(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform3fvForce(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform4fvForce(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform2fvForce(const char* l,glm::vec2* d,uint i){ glUniform2fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform3fvForce(const char* l,glm::vec3* d,uint i){ glUniform3fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
+        inline void sendUniform4fvForce(const char* l,glm::vec4* d,uint i){ glUniform4fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
 
-		void renderTexture(Texture*,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth);
-		void renderText(std::string& text,Font*, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth);
+        void renderTexture(Texture*,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth);
+        void renderText(std::string& text,Font*, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth);
         void renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth);
     };
 };
