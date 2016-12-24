@@ -373,14 +373,15 @@ void Detail::RenderManagement::_passGeometry(){
     glDisable(GL_BLEND); //disable blending on all mrts
     scene->renderSkybox(RendererInfo::GodRaysInfo::godRays);
 
+    glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
+    glBlendEquationi(GL_FUNC_ADD,0);
+    glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
+
 	//RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
 	Settings::enableDepthTest();
 	Settings::enableDepthMask();
 
-    glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
-    glBlendEquationi(GL_FUNC_ADD,0);
-    glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
 	//RENDER NORMAL OBJECTS HERE
 	for(auto shaderProgram:m_GeometryPassShaderPrograms){
@@ -505,8 +506,9 @@ void Detail::RenderManagement::render(){
     /////////////
 
     glEnable(GL_BLEND);
-    if(RendererInfo::DebugDrawingInfo::debug)
-        Physics::Detail::PhysicsManagement::render();
+    if(RendererInfo::DebugDrawingInfo::debug){
+        //Physics::Detail::PhysicsManagement::render();
+	}
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _renderForwardRenderedObjects();

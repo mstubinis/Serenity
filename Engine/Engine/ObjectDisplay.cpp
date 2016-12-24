@@ -45,7 +45,8 @@ void ObjectDisplay::update(float dt){
 	}
 	Camera* c = Resources::getActiveCamera();
 	m_PassedRenderCheck = true;
-	if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
+	float radius = getRadius();
+	if(!m_Visible || !c->sphereIntersectTest(getPosition(),radius) || c->getDistance(this) > radius * 1100.0f){
 		m_PassedRenderCheck = false;
 	}
 }
