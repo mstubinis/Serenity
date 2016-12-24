@@ -27,7 +27,7 @@ void main(void){
     
     vec4 f4Ambient = (sun * Depth )*vec4(0.05, 0.05, 0.1,1.0);
     
-    vec4 f4Color = (fRayleighPhase * vec4(c0,1) + fMiePhase * vec4(c1,1))+f4Ambient;
+    vec4 f4Color = (fRayleighPhase * vec4(c0,1.0) + fMiePhase * vec4(c1,1.0))+f4Ambient;
     vec4 HDR = 1.0 - exp(f4Color * -fExposure);
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 

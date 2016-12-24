@@ -161,13 +161,6 @@ void ObjectDynamic::update(float dt){
 }
 void ObjectDynamic::bind(){ m_CustomBindFunctor(); }
 void ObjectDynamic::unbind(){}
-void ObjectDynamic::render(GLuint shader,bool debug){
-    //add to render queue
-    if(shader == 0){
-        shader = Resources::getShaderProgram("Deferred")->program();
-    }
-    Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
-}
 void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
 
 }

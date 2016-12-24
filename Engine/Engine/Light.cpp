@@ -32,9 +32,6 @@ SunLight::~SunLight(){
 void SunLight::update(float dt){
     ObjectBasic::update(dt);
 }
-void SunLight::render(GLuint shader,bool debug){ 
-	ObjectDisplay::render(shader,debug); 
-}
 void SunLight::draw(GLuint shader, bool debug,bool godsRays){ 
 	ObjectDisplay::draw(shader,debug,godsRays); 
 }

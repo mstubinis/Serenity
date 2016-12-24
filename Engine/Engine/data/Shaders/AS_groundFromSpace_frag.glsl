@@ -20,7 +20,6 @@ uniform float       RefractionRatio;
 uniform vec3 FirstConditionals;  //x = diffuse  y = normals    z = glow
 uniform vec3 SecondConditionals; //x = specular y = reflection z = refraction
 
-uniform int HasAtmosphere;
 uniform int HasGodsRays;
 
 uniform vec4 Object_Color;
@@ -29,6 +28,8 @@ uniform vec3 gAmbientColor;
 
 varying vec3 c0;
 varying vec3 c1;
+
+uniform int HasAtmosphere;
 
 varying vec3 CameraPosition;
 varying vec3 WorldPosition;
@@ -47,11 +48,12 @@ void main(void){
     if(HasAtmosphere == 1){
         if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-            gl_FragData[0].rgb = max(gAmbientColor*diffuse.rgb,(1 - exp( -fExposure * ((c0+diffuse.rgb) * c1) )));
+            gl_FragData[0].rgb = max(gAmbientColor*diffuse.rgb,(1.0-exp(-fExposure*((c0+diffuse.rgb)*c1))));	
             if(FirstConditionals.z > 0.5){
-                vec3 lightIntensity = max(gAmbientColor*vec3(1),(1 - exp( -fExposure * ((c0+vec3(1)) * c1) )));
-                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1-lightIntensity)*texture2D(GlowTexture, UV).rgb);
+                vec3 lightIntensity = max(gAmbientColor*vec3(1.0),(1.0 - exp( -fExposure * ((c0+vec3(1.0)) * c1) )));
+                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0-lightIntensity)*texture2D(GlowTexture, UV).rgb);
             }
+			gl_FragData[0].a = diffuse.a;
         }
         else{
             gl_FragData[0] = vec4(0.0);

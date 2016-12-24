@@ -71,7 +71,6 @@ class Object: public IObject{
         virtual void addChild(Object*);
 
         virtual void update(float){}
-        virtual void render(GLuint=0,bool=false){}
         virtual void draw(GLuint shader,bool=false,bool=false){}
 		virtual void bind(){}
 		virtual void unbind(){}

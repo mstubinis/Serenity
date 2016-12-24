@@ -8,9 +8,9 @@ attribute vec3 binormal;
 
 uniform int hasAtmosphere;
 
-uniform mat4 Rot;
 uniform mat4 VP;
 uniform mat4 Model;
+uniform mat4 Rot;
 
 uniform vec3 v3CameraPos;
 uniform vec3 v3LightDir;		// The direction vector to the light source 
@@ -19,7 +19,6 @@ uniform float fCameraHeight2;	// fCameraHeight^2
 uniform float fOuterRadius;		// The outer (atmosphere) radius 
 uniform float fOuterRadius2;	// fOuterRadius^2 
 uniform float fInnerRadius;		// The inner (planetary) radius 
-uniform float fInnerRadius2;	// fInnerRadius^2 
 uniform float fKrESun;			// Kr * ESun 
 uniform float fKmESun;			// Km * ESun 
 uniform float fKr4PI;			// Kr * 4 * PI 

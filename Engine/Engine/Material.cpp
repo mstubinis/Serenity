@@ -77,7 +77,7 @@ void MaterialComponent::bind(){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 	for(uint i = 0; i < slots.size(); i++){
-		Renderer::bindTexture(textureTypeName.c_str(),m_Texture,slots.at(i));
+		Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
 	}
 }
 void MaterialComponent::unbind(){
@@ -106,9 +106,9 @@ void MaterialComponentReflection::bind(){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
 	std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
-	Renderer::sendUniform1f("CubemapMixFactor",m_MixFactor);
-	Renderer::bindTexture(textureTypeName.c_str(),m_Texture,slots.at(0));
-	Renderer::bindTexture((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
+	Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
+	Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+	Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
@@ -130,11 +130,11 @@ void MaterialComponentRefraction::bind(){
 	std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
-	Renderer::sendUniform1f("CubemapMixFactor",m_MixFactor);
-	Renderer::sendUniform1f("RefractionRatio",m_RefractionRatio);
+	Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
+	Renderer::sendUniform1fSafe("RefractionRatio",m_RefractionRatio);
 
-	Renderer::bindTexture(textureTypeName.c_str(),m_Texture,slots.at(0));
-	Renderer::bindTexture((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
+	Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+	Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 
 class Material::impl final{
@@ -215,10 +215,10 @@ class Material::impl final{
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
-Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):BindableResource(),m_i(new impl()){
+Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
-Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):BindableResource(),m_i(new impl()){
+Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){

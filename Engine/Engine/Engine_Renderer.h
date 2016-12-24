@@ -118,9 +118,6 @@ namespace Engine{
                     static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
                     static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
-				    static bool depthMaskEnabled;
-
-
 					static void _bind(ShaderP*);
 					static void _bind(Material*);
 					static void _unbind(ShaderP*);
@@ -248,6 +245,8 @@ namespace Engine{
 		void bindShaderProgram(std::string);
 		void bindTexture(const char* location,Texture*,uint slot);
 		void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
+		void bindTextureSafe(const char* location,Texture*,uint slot);
+		void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint type);
 		void unbindTexture2D(uint slot);
 		void unbindTextureCubemap(uint slot);
 

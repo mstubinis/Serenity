@@ -137,7 +137,6 @@ class ObjectDynamic: public Object{
 
 		virtual void bind();
 		virtual void unbind();
-        virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual bool rayIntersectSphere(Camera* = nullptr);

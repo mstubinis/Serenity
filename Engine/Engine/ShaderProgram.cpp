@@ -37,13 +37,13 @@ bool Shader::fromFile(){ return m_i->m_FromFile; }
 #pragma endregion
 
 struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
-	ShaderP* program = static_cast<ShaderP*>(r);
-
 	Camera* c = Resources::getActiveCamera();
 	Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
 	Renderer::sendUniform1fSafe("far",c->getFar());
 	Renderer::sendUniform1fSafe("C",1.0f);
-	glm::vec3 camPos = glm::vec3(c->getPosition());
+
+	//glm::vec3 camPos = glm::vec3(c->getPosition());
+	//Renderer::sendUniform3fSafe("CameraPosition",camPos);
 
 	if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
 	else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
@@ -204,7 +204,7 @@ class ShaderP::impl final{
 					if(_length > 0){
 						std::string _name1((char*)_name, _length);
 						GLint _uniformLoc = glGetUniformLocation(pid,_name);
-						this->m_UniformLocations[_name1] = _uniformLoc;
+						this->m_UniformLocations.emplace(_name1,_uniformLoc);
 					}
 				}
 			}
@@ -217,10 +217,10 @@ class ShaderP::impl final{
 DefaultShaderBindFunctor ShaderP::impl::DEFAULT_BIND_FUNCTOR;
 DefaultShaderUnbindFunctor ShaderP::impl::DEFAULT_UNBIND_FUNCTOR;
 
-ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):BindableResource(),m_i(new impl()){
+ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
     m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):BindableResource(),m_i(new impl()){
+ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
     m_i->_construct(n,vs,fs,s,this);
 }
 ShaderP::~ShaderP(){

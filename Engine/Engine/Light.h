@@ -21,8 +21,6 @@ class SunLight: public ObjectDisplay{
         virtual ~SunLight();
 
         void update(float);
-
-        virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual void lighten();

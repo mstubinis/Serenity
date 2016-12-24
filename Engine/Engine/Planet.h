@@ -40,11 +40,11 @@ class OrbitInfo final{
 };
 
 struct RingInfo final{
-    unsigned int position;
-    unsigned int size;
-    unsigned int alphaBreakpoint;
+    uint position;
+    uint size;
+    uint alphaBreakpoint;
     glm::uvec3 color;
-    RingInfo(unsigned int p, unsigned int s, glm::uvec3 col,unsigned int ab = 1){ 
+    RingInfo(uint p, uint s, glm::uvec3 col,uint ab = 1){ 
         position = p; 
         size = s; 
         color = col; 
@@ -71,11 +71,13 @@ class Planet: public ObjectDisplay{
               );
         virtual ~Planet();
 
-        glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*5,this->getRadius()*7); }
+        glm::vec2 getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
 
         OrbitInfo* getOrbitInfo() const { return m_OrbitInfo; }
         const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
+		float getDefaultRadius(){ return m_Radius; }
         float getRadius() { return m_Radius + (m_Radius * m_AtmosphereHeight); }
+		float getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
         void addRing(Ring*);
 
@@ -89,7 +91,6 @@ class Planet: public ObjectDisplay{
         }
 
         void update(float);
-        virtual void render(GLuint=0,bool=false);
         virtual void draw(GLuint shader,bool=false,bool=false);
 };
 
@@ -106,7 +107,6 @@ class Star: public Planet{
                 Scene* = nullptr
             );
         virtual ~Star();
-        void render(GLuint=0,bool=false);
         void draw(GLuint,bool=false,bool=false);
 };
 

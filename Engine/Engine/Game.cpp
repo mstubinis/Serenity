@@ -27,9 +27,9 @@ void Game::cleanup(){
 void Game::initResources(){
     Resources::getWindow()->setIcon("data/Textures/icon.png");
 
-    Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
-    Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
     Resources::addShaderProgram("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
+    Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
+    Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
 
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Defiant","data/Models/defiant.obj");

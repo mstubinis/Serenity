@@ -26,6 +26,5 @@ class Terrain final: public ObjectDynamic{
         virtual void setScale(glm::vec3);
 
         virtual void update(float);
-        virtual void render();
 };
 #endif

@@ -25,7 +25,7 @@ HUD::HUD(){
 HUD::~HUD(){
 }
 
-unsigned int count = 0;
+uint count = 0;
 void HUD::update(float dt){
     if(Keyboard::isKeyDownOnce(",")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
@@ -45,7 +45,7 @@ void HUD::update(float dt){
         for(auto p:scene->getPlanets()){
             objs.push_back(p.second);
         }
-        scene->getPlayer()->setTarget(objs[count]);
+        scene->getPlayer()->setTarget(objs.at(count));
         count--;
         if (count <= 0){ count = scene->getPlanets().size()-1; }
     }

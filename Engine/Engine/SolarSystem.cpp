@@ -69,13 +69,13 @@ void SolarSystem::_loadFromFile(std::string filename){
         line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() ); //remove \r from the line
         if(line[0] != '#'){//ignore commented lines
             if(count == 1){//this line has the system's name
-                this->setName(line);
+                setName(line);
             }
             else if(count == 2){//this line has the system's skybox
                 skybox = line;
             }
             else if(count == 3){//this line has the system's skybox's number of flares
-                new GameSkybox(skybox,boost::lexical_cast<unsigned int>(line),this);
+                new GameSkybox(skybox,boost::lexical_cast<uint>(line),this);
 				//new Atmosphere();
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
@@ -104,7 +104,7 @@ void SolarSystem::_loadFromFile(std::string filename){
 
                 unsigned long long RADIUS = 0;
                 unsigned long long POSITION = 0;
-                unsigned int BREAK = 0;
+                uint BREAK = 0;
 
                 while(std::getline(stream, token, ' ')) {
                     size_t pos = token.find("=");
@@ -154,7 +154,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                     std::string extention;
 
                     //get file extension
-                    for(unsigned int i = TEXTURE.length() - 4; i < TEXTURE.length(); i++) extention += tolower(TEXTURE.at(i));
+                    for(uint i = TEXTURE.length() - 4; i < TEXTURE.length(); i++) extention += tolower(TEXTURE.at(i));
 
                     std::string normFile = TEXTURE.substr(0,TEXTURE.size()-4);
                     normFile += "_Normal" + extention;
@@ -166,85 +166,78 @@ void SolarSystem::_loadFromFile(std::string filename){
                     if(boost::filesystem::exists(gloFile)){
                         glowFile = gloFile;
                     }
-                    Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile);
+					if(Resources::getMaterial(MATERIAL_NAME) == nullptr){
+						Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile);
+					}
                 }
-
                 if(line[0] == 'S'){//Sun
-                    Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::v3(0),static_cast<float>(RADIUS),NAME,this);
+                    Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::v3(0),(float)RADIUS,NAME,this);
                     if(PARENT != ""){
-                        star->setPosition(objects()[PARENT]->getPosition()+glm::v3(xPos,0,zPos));
+                        star->setPosition(objects().at(PARENT)->getPosition()+glm::v3(xPos,0,zPos));
                     }
-                    m_Stars[NAME] = star;
+                    m_Stars.emplace(NAME,star);
                 }
                 else if(line[0] == 'P'){//Planet
-					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
                     else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
                     else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
                     else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-                    planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
+                    planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
-                        Object* parent = getObjects()[PARENT];
+                        Object* parent = objects().at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,PARENT));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,PARENT));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
                         }
                     }
-                    m_Planets[NAME] = planetoid;
-					*/
+                    m_Planets.emplace(NAME,planetoid);
                 }
                 else if(line[0] == 'M'){//Moon
-					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
                     else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
                     else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
                     else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-                    planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(xPos,0,zPos),static_cast<float>(RADIUS),NAME,ATMOSPHERE_HEIGHT,this);
+                    planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::v3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
-                        Object* parent = getObjects()[PARENT];
+                        Object* parent = objects().at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,static_cast<float>(ORBIT_MAJOR_AXIS),randAngle,PARENT));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,PARENT));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
                         }
                     }
-                    m_Moons[NAME] = planetoid;
-					*/
+					m_Moons.emplace(NAME,planetoid);
                 }
                 else if(line[0] == '*'){//Player ship
-					/*
                     if(PARENT != ""){
-                        glm::num parentX = getObjects()[PARENT]->getPosition().x;
-                        glm::num parentZ = getObjects()[PARENT]->getPosition().z;
+                        glm::num parentX = objects().at(PARENT)->getPosition().x;
+                        glm::num parentZ = objects().at(PARENT)->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
-					*/
                     setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 
                 }
                 else if(line[0] == '$'){//Other ship
-					/*
                     if(PARENT != ""){
-                        glm::num parentX = getObjects()[PARENT]->getPosition().x;
-                        glm::num parentZ = getObjects()[PARENT]->getPosition().z;
+                        glm::num parentX = objects().at(PARENT)->getPosition().x;
+                        glm::num parentZ = objects().at(PARENT)->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
-					*/
                     new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
@@ -252,17 +245,17 @@ void SolarSystem::_loadFromFile(std::string filename){
                     if(PARENT != ""){
                         if(!planetRings.count(PARENT)){
                             std::vector<RingInfo> rings;
-                            planetRings[PARENT] = rings;
+                            planetRings.emplace(PARENT,rings);
                         }
-                        planetRings[PARENT].push_back(RingInfo(static_cast<unsigned int>(POSITION/10),static_cast<unsigned int>(RADIUS/10),glm::uvec3(R,G,B),BREAK));
+                        planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
                     }
 					*/
                 }
                 else if(line[0] == 'L'){//Lagrange Point
-                    //m_LagrangePoints[NAME] = new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this);
+                    //m_LagrangePoints.emplace(NAME,new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this));
                 }
                 else if(line[0] == 's'){//Station
-                    //m_Stations[NAME] = new Station("","",glm::v3(xPos,0,zPos),glm::vec3(1),NAME,nullptr,this);
+                    //m_Stations.emplace(NAME,new Station("","",glm::v3(xPos,0,zPos),glm::vec3(1),NAME,nullptr,this));
                 }
             }
         }
@@ -272,7 +265,7 @@ void SolarSystem::_loadFromFile(std::string filename){
     //add planetary rings
 	/*
     for(auto rings:planetRings){
-        new Ring(rings.second,static_cast<Planet*>(m_Objects[rings.first]));
+        new Ring(rings.second,static_cast<Planet*>(m_Objects.at(rings.first)));
     }
 	*/
 
@@ -309,16 +302,16 @@ void SolarSystem::_loadRandomly(){
             }
         }
     }
-    unsigned int random_skybox_index = static_cast<unsigned int>((rand() % folders.size()));
+    uint random_skybox_index = static_cast<uint>((rand() % folders.size()));
     std::string skybox = folders.at(random_skybox_index);
-    unsigned int numFlares = rand() % 200;
+    uint numFlares = rand() % 200;
     new GameSkybox(path + skybox,numFlares,this);
     #pragma endregion
 
     #pragma region ConstructStars
-    unsigned int percent = static_cast<unsigned int>(rand() % 1000);
+    uint percent = static_cast<uint>(rand() % 1000);
 
-    unsigned int numberOfStars = 1;
+    uint numberOfStars = 1;
     if(percent < 50) 
         numberOfStars = 7;
     else if(percent >= 50 && percent < 135)
@@ -333,7 +326,7 @@ void SolarSystem::_loadRandomly(){
         numberOfStars = 2;
 
 
-    for(unsigned int i = 0; i < numberOfStars; i++){
+    for(uint i = 0; i < numberOfStars; i++){
         Star* star = nullptr;
         //star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
         glm::num radius = static_cast<glm::num>(97412.0 + (rand() % 1252440000))*10.0;
@@ -382,7 +375,7 @@ void SolarSystem::_loadRandomly(){
     }
 
     glm::num numerator1 = 0,numerator2 = 0;
-    for(unsigned int i = 0; i < starMasses.size(); i++){
+    for(uint i = 0; i < starMasses.size(); i++){
         numerator1 += (starMasses.at(i) * starPositions.at(i).x);
         numerator2 += (starMasses.at(i) * starPositions.at(i).z);
     }
@@ -451,8 +444,8 @@ void SolarSystem::_loadRandomly(){
     }
 
     for(auto star:m_Stars){
-        unsigned int numberOfPlanets = static_cast<unsigned int>(1 + (rand() % 100));
-        for(unsigned int i = 0; i < numberOfPlanets; i++){
+        uint numberOfPlanets = static_cast<uint>(1 + (rand() % 100));
+        for(uint i = 0; i < numberOfPlanets; i++){
             Planet* planet = nullptr;
 
             glm::num maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
@@ -537,22 +530,22 @@ void SolarSystem::_loadRandomly(){
 
                 //rings
                 std::vector<RingInfo> rings;
-                unsigned int numRings = rand() % 20;
-                unsigned int chance = rand() % 100;
+                uint numRings = rand() % 20;
+                uint chance = rand() % 100;
                 if(chance <= 20){
-                    for(unsigned int i = 0; i < numRings; i++){
+                    for(uint i = 0; i < numRings; i++){
                         
-                        unsigned int randSize = ((rand() % 200 + 3));
+                        uint randSize = ((rand() % 200 + 3));
 
-                        unsigned int randPos = (randSize + 1 ) + (rand() % (1024 - ((randSize + 1)*2)));
+                        uint randPos = (randSize + 1 ) + (rand() % (1024 - ((randSize + 1)*2)));
 
-                        unsigned int RR = rand() % 255;
-                        unsigned int RG = rand() % 255;
-                        unsigned int RB = rand() % 255;
+                        uint RR = rand() % 255;
+                        uint RG = rand() % 255;
+                        uint RB = rand() % 255;
 
-                        unsigned int randBreak = (rand() % randSize);
-                        unsigned int chance1 = rand() % 100;
-                        unsigned int chance2 = rand() % 100;
+                        uint randBreak = (rand() % randSize);
+                        uint chance1 = rand() % 100;
+                        uint chance2 = rand() % 100;
 
                         if(chance1 > 25){
                             rings.push_back(RingInfo(randPos,randSize,glm::uvec3(RR,RG,RB),randBreak));

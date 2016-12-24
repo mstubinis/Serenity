@@ -190,16 +190,18 @@ void Renderer::bindShaderProgram(ShaderP* program){
 		}
 	}
 }
-void Renderer::bindShaderProgram(string programName){
-	Renderer::bindShaderProgram(Resources::getShaderProgram(programName));
-}
-void Renderer::bindTexture(const char* l,Texture* t,uint slot){
-	Renderer::bindTexture(l,t->address(),slot,t->type());
-}
+void Renderer::bindShaderProgram(string programName){Renderer::bindShaderProgram(Resources::getShaderProgram(programName));}
+void Renderer::bindTexture(const char* l,Texture* t,uint slot){Renderer::bindTexture(l,t->address(),slot,t->type());}
 void Renderer::bindTexture(const char* l,GLuint address,uint slot,GLuint type){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(type, address);
 	sendUniform1i(l,slot);
+}
+void Renderer::bindTextureSafe(const char* l,Texture* t,uint slot){Renderer::bindTextureSafe(l,t->address(),slot,t->type());}
+void Renderer::bindTextureSafe(const char* l,GLuint address,uint slot,GLuint type){
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(type, address);
+	sendUniform1iSafe(l,slot);
 }
 void Renderer::unbindTexture2D(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -397,6 +399,11 @@ void Detail::RenderManagement::_passGeometry(){
 					item->bind();//the actual mesh drawing occurs here too
 					item->unbind();
 					o->unbind();
+				}
+				//protect against any custom changes by restoring to the regular shader and material
+				if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+					_bind(shaderProgram);
+					_bind(material);
 				}
 			}
 			_unbind(material);

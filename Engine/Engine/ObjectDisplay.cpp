@@ -13,8 +13,8 @@
 using namespace Engine;
 
 struct DefaultObjectDisplayBindFunctor{void operator()(ObjectDisplay* o) const {
-	Renderer::sendUniform4f("Object_Color",o->getColor());
-	Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
+	Renderer::sendUniform4fSafe("Object_Color",o->getColor());
+	Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
 }};
 DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_FUNCTOR;
 
@@ -48,13 +48,6 @@ void ObjectDisplay::update(float dt){
 	if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
 		m_PassedRenderCheck = false;
 	}
-}
-void ObjectDisplay::render(GLuint shader,bool debug){
-    //add to render queue
-    if(shader == 0){
-        shader = Resources::getShaderProgram("Deferred")->program();
-    }
-    Engine::Renderer::Detail::RenderManagement::getObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
 }
 void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
 

@@ -61,9 +61,6 @@ Terrain::~Terrain(){
 void Terrain::update(float dt){
     ObjectDynamic::update(dt);
 }
-void Terrain::render(){
-    ObjectDynamic::render();
-}
 void Terrain::setPosition(glm::num x,glm::num y,glm::num z){
     Physics::removeRigidBody(m_RigidBody);
     SAFE_DELETE(m_RigidBody);
