@@ -1,5 +1,5 @@
 # Serenity
-A game engine made for addressing the problems of floating point precision and producing stunning visual effects.
+A game engine focused on producing stunning visual effects and supporting custom user made shaders.
 
 Note
 ----
