@@ -12,11 +12,16 @@
 
 using namespace Engine;
 
-struct DefaultObjectDisplayBindFunctor{void operator()(ObjectDisplay* o) const {
+struct DefaultObjectDisplayBindFunctor{void operator()(BindableResource* r) const {
+	ObjectDisplay* o = static_cast<ObjectDisplay*>(r);
+
     Renderer::sendUniform4fSafe("Object_Color",o->getColor());
     Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
 }};
-DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_FUNCTOR;
+struct DefaultObjectDisplayUnbindFunctor{void operator()(BindableResource* r) const {
+}};
+DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_BIND_FUNCTOR;
+DefaultObjectDisplayUnbindFunctor ObjectDisplay::DEFAULT_UNBIND_FUNCTOR;
 
 ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
@@ -31,13 +36,11 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
 
-    setCustomBindFunctor(ObjectDisplay::DEFAULT_FUNCTOR);
+    setCustomBindFunctor(ObjectDisplay::DEFAULT_BIND_FUNCTOR);
+	setCustomUnbindFunctor(ObjectDisplay::DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDisplay::~ObjectDisplay(){
 }
-void ObjectDisplay::bind(){ m_CustomBindFunctor(); }
-void ObjectDisplay::unbind(){}
-
 void ObjectDisplay::update(float dt){
     ObjectBasic::update(dt);
     for(auto renderedItem:m_DisplayItems){
@@ -49,9 +52,6 @@ void ObjectDisplay::update(float dt){
     if(!m_Visible || !c->sphereIntersectTest(getPosition(),radius) || c->getDistance(this) > radius * 1100.0f){
         m_PassedRenderCheck = false;
     }
-}
-void ObjectDisplay::draw(GLuint shader, bool debug,bool godsRays){
-
 }
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){
@@ -95,8 +95,4 @@ bool ObjectDisplay::rayIntersectSphere(Camera* c){
 }
 bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
-}
-
-template<class T> void ObjectDisplay::setCustomBindFunctor(T& functor){
-    m_CustomBindFunctor = boost::bind<void>(functor,this);
 }

@@ -21,46 +21,24 @@
 using namespace Engine;
 using namespace Engine::Events;
 
-SolarSystem::SolarSystem(std::string n, std::string file,bool test):Scene(n){
+SolarSystem::SolarSystem(std::string n, std::string file):Scene(n){
     playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
     Resources::setActiveCamera(playerCamera);
 
-    if(!test){
-        if(file != "NULL"){
-            if(file == ""){
-                SolarSystem::_loadRandomly();
-            }
-            else{
-                SolarSystem::_loadFromFile(file);
-            }
+    if(file != "NULL"){
+        if(file == ""){
+            SolarSystem::_loadRandomly();
         }
-    }
-    else{
-        SolarSystem::_loadTest();
+        else{
+            SolarSystem::_loadFromFile(file);
+        }
     }
 }
 SolarSystem::~SolarSystem(){
 
 }
-void SolarSystem::_loadTest(){
-    new GameSkybox("data/Textures/Skyboxes/SolarSystem",0,this);
-
-    Star* star = new Star(glm::vec3(1,1,0),glm::vec3(1,1,1),glm::v3(0),static_cast<float>(1000000),"Sun",this);
-    star->setPosition(glm::v3(0,3000000,-1000000));
-    m_Stars["Sun"] = star;
-
-    player = new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::v3(0,20,0),glm::vec3(1),nullptr,this);
-    playerCamera = static_cast<GameCamera*>(Resources::getActiveCamera());
-    playerCamera->follow(player);
-
-
-    sf::Image heightmap;
-    heightmap.loadFromFile("data/Textures/test.png");
-    Terrain* t = new Terrain("Heightfield",heightmap,"Defiant",this);
-    t->setScale(3,16,3);
-}
 void SolarSystem::_loadFromFile(std::string filename){
-    unsigned int count = 0;
+    uint count = 0;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     std::unordered_map<std::string,std::vector<RingInfo>> planetRings;
 

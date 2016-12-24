@@ -24,9 +24,8 @@ class SolarSystem: public Scene{
 
         void _loadRandomly();
         void _loadFromFile(std::string);
-        void _loadTest();
     public:
-        SolarSystem(std::string name, std::string file, bool test = false);
+        SolarSystem(std::string name, std::string file);
         virtual ~SolarSystem();
 
         virtual void update(float);

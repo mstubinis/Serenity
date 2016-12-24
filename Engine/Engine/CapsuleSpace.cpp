@@ -56,11 +56,12 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string m
 }
 CapsuleRibbon::~CapsuleRibbon(){}
 void CapsuleRibbon::bind(){
-    ObjectDisplay::bind();
     Renderer::Settings::disableDepthTest();
     Renderer::Settings::disableDepthMask();
+    BindableResource::bind();
 }
 void CapsuleRibbon::unbind(){
+	BindableResource::unbind();
     Renderer::Settings::enableDepthTest();
     Renderer::Settings::enableDepthMask();
 }

@@ -42,8 +42,8 @@ struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniform1fSafe("far",c->getFar());
     Renderer::sendUniform1fSafe("C",1.0f);
 
-    //glm::vec3 camPos = glm::vec3(c->getPosition());
-    //Renderer::sendUniform3fSafe("CameraPosition",camPos);
+    glm::vec3 camPos = glm::vec3(c->getPosition());
+    Renderer::sendUniform3fSafe("CameraPosition",camPos);
 
     if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
     else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);

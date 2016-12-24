@@ -17,11 +17,17 @@
 using namespace Engine;
 
 
-struct DefaultObjectDynamicBindFunctor{void operator()(ObjectDynamic* o) const {
+struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) const {
+	ObjectDynamic* o = static_cast<ObjectDynamic*>(r);
+
     Renderer::sendUniform4f("Object_Color",o->getColor());
     Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
 }};
-DefaultObjectDynamicBindFunctor ObjectDynamic::DEFAULT_FUNCTOR;
+struct DefaultObjectDynamicUnbindFunctor{void operator()(BindableResource* r) const {
+
+}};
+DefaultObjectDynamicBindFunctor ObjectDynamic::DEFAULT_BIND_FUNCTOR;
+DefaultObjectDynamicUnbindFunctor ObjectDynamic::DEFAULT_UNBIND_FUNCTOR;
 
 void ObjectDynamic::setDynamic(bool dynamic){
     if(dynamic){
@@ -99,13 +105,13 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     if(Resources::getCurrentScene() == scene || scene == nullptr)
         Physics::addRigidBody(m_RigidBody);
 
-    if(m_Parent == nullptr){
-        ObjectDynamic::update(0);
-    }
+    if(m_Parent == nullptr){ ObjectDynamic::update(0); }
+
     m_Collision->getCollisionShape()->setUserPointer(this);
     m_RigidBody->setUserPointer(this);
 
-    setCustomBindFunctor(ObjectDynamic::DEFAULT_FUNCTOR);
+    setCustomBindFunctor(ObjectDynamic::DEFAULT_BIND_FUNCTOR);
+	setCustomUnbindFunctor(ObjectDynamic::DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
@@ -158,11 +164,6 @@ void ObjectDynamic::update(float dt){
     if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * 1100.0f){
         m_PassedRenderCheck = false;
     }
-}
-void ObjectDynamic::bind(){ m_CustomBindFunctor(); }
-void ObjectDynamic::unbind(){}
-void ObjectDynamic::draw(GLuint shader, bool debug,bool godsRays){
-
 }
 glm::v3 ObjectDynamic::getPosition(){
     glm::mat4 m(1);
@@ -407,7 +408,6 @@ void ObjectDynamic::calculateRadius(){
 bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
-
 glm::quat& ObjectDynamic::getOrientation(){
     btQuaternion q = m_RigidBody->getOrientation();
     return glm::quat(q.w(),q.x(),q.y(),q.z());
@@ -417,7 +417,3 @@ glm::vec3 ObjectDynamic::getScale(){
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
 glm::m4& ObjectDynamic::getModel(){ return m_Model; }
-
-template<class T> void ObjectDynamic::setCustomBindFunctor(T& functor){
-    m_CustomBindFunctor = boost::bind<void>(functor,this);
-}

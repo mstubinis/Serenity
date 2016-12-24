@@ -22,13 +22,6 @@ class ObjectDynamic;
 class RenderedItem;
 class Camera;
 
-struct GeometryRenderInfo final{
-    Object* object;
-    GLuint shader;
-    GeometryRenderInfo(Object* _obj, GLuint _shader){
-        object = _obj; shader = _shader;
-    }
-};
 struct TextureRenderInfo{
     std::string texture;
     glm::vec2 pos;
@@ -114,18 +107,12 @@ namespace Engine{
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
-                    static std::vector<GeometryRenderInfo> m_ObjectsToBeRendered;
-                    static std::vector<GeometryRenderInfo> m_ForegroundObjectsToBeRendered;
-                    static std::vector<GeometryRenderInfo> m_ObjectsToBeForwardRendered;
 
                     static void _bind(ShaderP*);
                     static void _bind(Material*);
                     static void _unbind(ShaderP*);
                     static void _unbind(Material*);
 
-                    static void _renderForwardRenderedObjects();
-                    static void _renderObjects();
-                    static void _renderForegroundObjects();
                     static void _renderText();
                     static void _renderTextures();
                     static void _passGodsRays(glm::vec2,bool,float);
@@ -146,8 +133,6 @@ namespace Engine{
                     static void destruct();
 
                     static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
-                    static std::vector<GeometryRenderInfo>& getForegroundObjectRenderQueue(){ return m_ForegroundObjectsToBeRendered; }
-                    static std::vector<GeometryRenderInfo>& getObjectRenderQueue(){ return m_ObjectsToBeRendered; }
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
             };

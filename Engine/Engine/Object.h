@@ -2,7 +2,7 @@
 #ifndef ENGINE_OBJECT_H
 #define ENGINE_OBJECT_H
 
-#include "Engine_ResourceBasic.h"
+#include "BindableResource.h"
 
 #include "Engine_Math.h"
 #include <string>
@@ -17,7 +17,7 @@ typedef unsigned int GLuint;
 
 template <typename T> bool exists(boost::weak_ptr<T> t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
-class IObject: public EngineResource{
+class IObject: public BindableResource{
     public:
         virtual void update(float) = 0;
 
@@ -71,10 +71,6 @@ class Object: public IObject{
         virtual void addChild(Object*);
 
         virtual void update(float){}
-        virtual void draw(GLuint shader,bool=false,bool=false){}
-        virtual void bind(){}
-        virtual void unbind(){}
-
         virtual float getRadius(){ return m_Radius; }
 
         virtual Object* getParent(){ return m_Parent; }
@@ -84,8 +80,6 @@ class Object: public IObject{
         virtual bool passedRenderCheck(){ return false; }
         virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}
-
-        template<class T> void setCustomBindFunctor(T& functor){}
 };
 
 class ObjectBasic: public Object{

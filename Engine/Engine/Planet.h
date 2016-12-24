@@ -91,7 +91,6 @@ class Planet: public ObjectDisplay{
         }
 
         void update(float);
-        virtual void draw(GLuint shader,bool=false,bool=false);
 };
 
 class Star: public Planet{
@@ -107,7 +106,6 @@ class Star: public Planet{
                 Scene* = nullptr
             );
         virtual ~Star();
-        void draw(GLuint,bool=false,bool=false);
 };
 
 class Ring final{

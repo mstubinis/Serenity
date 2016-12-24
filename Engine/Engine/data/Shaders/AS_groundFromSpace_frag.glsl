@@ -39,7 +39,7 @@ varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
 
-vec3 CalcBumpedNormal(){
+vec3 CalcBumpedNormal(void){
     vec3 t = (texture2D(NormalTexture, UV).xyz * 2.0) - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
     return normalize(TBN * t);

@@ -68,11 +68,8 @@ float Detail::RendererInfo::HDRInfo::hdr_gamma = 0.8f;
 GBuffer* Detail::RenderManagement::m_gBuffer = nullptr;
 glm::mat4 Detail::RenderManagement::m_2DProjectionMatrix;
 
-vector<GeometryRenderInfo> Detail::RenderManagement::m_ObjectsToBeRendered;
-vector<GeometryRenderInfo> Detail::RenderManagement::m_ForegroundObjectsToBeRendered;
 vector<FontRenderInfo> Detail::RenderManagement::m_FontsToBeRendered;
 vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
-vector<GeometryRenderInfo> Detail::RenderManagement::m_ObjectsToBeForwardRendered;
 
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
@@ -284,21 +281,7 @@ void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,flo
 void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth){
     font->renderText(text,pos,color,angle,scl,depth);
 }
-void Detail::RenderManagement::_renderObjects(){
-    for(auto item:m_ObjectsToBeRendered){
-        item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug,RendererInfo::GodRaysInfo::godRays);
-    }
-}
-void Detail::RenderManagement::_renderForegroundObjects(){
-    for(auto item:m_ForegroundObjectsToBeRendered){
-        item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
-    }
-}
-void Detail::RenderManagement::_renderForwardRenderedObjects(){
-    for(auto item:m_ObjectsToBeForwardRendered){
-        item.object->draw(item.shader,RendererInfo::DebugDrawingInfo::debug);
-    }
-}
+
 void Detail::RenderManagement::_renderTextures(){
     bindShaderProgram("Deferred_HUD");
     for(auto item:m_TexturesToBeRendered){
@@ -385,31 +368,35 @@ void Detail::RenderManagement::_passGeometry(){
 
     //RENDER NORMAL OBJECTS HERE
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
-        _bind(shaderProgram);
-        for(auto materialNames:shaderProgram->getMaterials()){
-            Material* material = Resources::getMaterial(*(materialNames.w.lock().get()));
-            _bind(material);
-            for(auto key:material->getObjects()){
-                string renderedItemName = *(key.w.lock().get());
-                RenderedItem* item = Resources::getRenderedItem(renderedItemName);
-                string parentObjectName = item->parent();
-                Object* o = Resources::getObject(parentObjectName);
+		if(shaderProgram->getMaterials().size() > 0){
+			_bind(shaderProgram);
+			for(auto materialNames:shaderProgram->getMaterials()){
+				Material* material = Resources::getMaterial(*(materialNames.w.lock().get()));
+				if(material->getObjects().size() > 0){
+					_bind(material);
+					for(auto key:material->getObjects()){
+						string renderedItemName = *(key.w.lock().get());
+						RenderedItem* item = Resources::getRenderedItem(renderedItemName);
+						string parentObjectName = item->parent();
+						Object* o = Resources::getObject(parentObjectName);
 
-                if(scene->objects().count(parentObjectName)){
-                    o->bind();   //bind object specific data shared between all of its rendered items
-                    item->bind();//the actual mesh drawing occurs here too
-                    item->unbind();
-                    o->unbind();
-                }
-                //protect against any custom changes by restoring to the regular shader and material
-                if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-                    _bind(shaderProgram);
-                    _bind(material);
-                }
-            }
-            _unbind(material);
-        }
-        _unbind(shaderProgram);
+						if(scene->objects().count(parentObjectName)){
+							o->bind();   //bind object specific data shared between all of its rendered items
+							item->bind();//the actual mesh drawing occurs here too
+							item->unbind();
+							o->unbind();
+						}
+						//protect against any custom changes by restoring to the regular shader and material
+						if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+							_bind(shaderProgram);
+							_bind(material);
+						}
+					}
+					_unbind(material);
+				}
+			}
+			_unbind(shaderProgram);
+		}
     }
     Settings::disableDepthTest();
     Settings::disableDepthMask();
@@ -507,12 +494,9 @@ void Detail::RenderManagement::render(){
 
     glEnable(GL_BLEND);
     if(RendererInfo::DebugDrawingInfo::debug){
-        //Physics::Detail::PhysicsManagement::render();
+        Physics::Detail::PhysicsManagement::render();
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    _renderForwardRenderedObjects();
-    _renderForegroundObjects();
 
     Settings::enableAlphaTest();
     glAlphaFunc(GL_GREATER, 0.1f);
@@ -527,9 +511,6 @@ void Detail::RenderManagement::render(){
 
     Settings::disableAlphaTest();
 
-    m_ObjectsToBeRendered.clear();
-    m_ForegroundObjectsToBeRendered.clear();
-    m_ObjectsToBeForwardRendered.clear();
     m_FontsToBeRendered.clear();
     m_TexturesToBeRendered.clear();
 }

@@ -415,14 +415,5 @@
     <None Include="data\Shaders\deferred_rays_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays</Filter>
     </None>
-    <None Include="data\Shaders\deferred_frag_reflect.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_frag_reflect_refract.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_frag_refract.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
   </ItemGroup>
 </Project>

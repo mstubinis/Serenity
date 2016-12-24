@@ -4,8 +4,6 @@
 
 #include "Object.h"
 #include "RenderedItem.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 class Collision;
 class btRigidBody;
@@ -20,10 +18,11 @@ enum COLLISION_GROUPS {
 };
 */
 struct DefaultObjectDynamicBindFunctor;
+struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
-    public: static DefaultObjectDynamicBindFunctor DEFAULT_FUNCTOR;
+    public: static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
+			static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
-        boost::function<void()> m_CustomBindFunctor;
 
         glm::v3 m_Forward, m_Right, m_Up;
         bool m_Visible;
@@ -135,13 +134,7 @@ class ObjectDynamic: public Object{
 
         virtual void update(float);
 
-        virtual void bind();
-        virtual void unbind();
-        virtual void draw(GLuint shader,bool=false,bool=false);
-
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
-
-        template<class T> void setCustomBindFunctor(T& functor);
 };
 #endif

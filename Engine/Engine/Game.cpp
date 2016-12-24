@@ -54,22 +54,6 @@ void Game::initResources(){
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","","Deferred_HUD");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
-
-    //custom cubemap
-    /*
-    std::string front = "data/Textures/Effects/Right.jpg";
-    std::string back = "data/Textures/Effects/Left.jpg";
-    std::string left = "data/Textures/Effects/Top.jpg";
-    std::string right = "data/Textures/Effects/Bottom.jpg";
-    std::string top = "data/Textures/Effects/Front.jpg";
-    std::string bottom = "data/Textures/Effects/Back.jpg";
-    std::string names[6] = {front,back,left,right,top,bottom};
-
-    new Texture(names,"CubemapGold");
-
-    //Resources::getMaterial("Defiant")->addComponentReflection("CubemapGold","data/Textures/defiant_Reflection.png");
-    //Resources::getMaterial("Defiant")->addComponentRefraction("CubemapGold","data/Textures/defiant_Reflection.png",1.0f,1.53f);
-    */
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -82,6 +66,10 @@ void Game::initLogic(){
     
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+
+
+	Resources::getMaterial("Defiant")->addComponentReflection("","data/Textures/defiant_Reflection.png",1.0f);
+	//Resources::getMaterial("Defiant")->addComponentRefraction("","data/Textures/defiant_Reflection.png",0.5f,1.53f);
 
     m_HUD = new HUD();
 }

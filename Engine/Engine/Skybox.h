@@ -27,6 +27,7 @@ class ISkybox{
         virtual ~ISkybox(){}
         virtual void update() = 0;
         virtual void draw(bool godsRays) = 0;
+		virtual Texture* texture() = 0;
 };
 class SkyboxEmpty: public ISkybox{
     protected:
@@ -47,6 +48,8 @@ class Skybox: public SkyboxEmpty{
     public:
         Skybox(std::string name,Scene* = nullptr);
         virtual ~Skybox();
+
+		Texture* texture(){ return m_Texture; }
 
         virtual void update();
         virtual void draw(bool godsRays);

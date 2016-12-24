@@ -243,13 +243,7 @@ void Lagrange::update(float dt){
     _calculateLagrangePosition(m_Type);
     ObjectBasic::update(dt);
 }
-void Lagrange::render(GLuint shader, bool debug){
-    //add to render queue
-    if(shader == 0){
-        shader = Resources::getShaderProgram("Deferred")->program();
-    }
-    Engine::Renderer::Detail::RenderManagement::getForegroundObjectRenderQueue().push_back(GeometryRenderInfo(this,shader));
-}
+/*
 void Lagrange::draw(GLuint shader, bool debug){
     Camera* camera = Resources::getActiveCamera();
     if((m_Visible == false) || (!camera->sphereIntersectTest(this->getPosition(),this->getRadius())) || (camera->getDistance(this) > 1100 * getRadius()))
@@ -299,3 +293,4 @@ void Lagrange::draw(GLuint shader, bool debug){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUseProgram(0);
 }
+*/

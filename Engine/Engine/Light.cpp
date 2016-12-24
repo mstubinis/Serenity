@@ -32,9 +32,6 @@ SunLight::~SunLight(){
 void SunLight::update(float dt){
     ObjectBasic::update(dt);
 }
-void SunLight::draw(GLuint shader, bool debug,bool godsRays){ 
-    ObjectDisplay::draw(shader,debug,godsRays); 
-}
 void SunLight::sendGenericAttributesToShader(){
     Renderer::sendUniform1i("LightType", int(m_Type));
     Renderer::sendUniform3f("LightColor", m_Color.x, m_Color.y, m_Color.z);

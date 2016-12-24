@@ -40,8 +40,6 @@ class Lagrange: public ObjectBasic{
         glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }
 
         void update(float);
-        void render(GLuint=0, bool=false);
-        void draw(GLuint=0,bool=false);
 };
 
 #endif

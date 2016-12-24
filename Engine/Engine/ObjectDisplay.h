@@ -4,14 +4,13 @@
 
 #include "Object.h"
 #include "RenderedItem.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 struct DefaultObjectDisplayBindFunctor;
+struct DefaultObjectDisplayUnbindFunctor;
 class ObjectDisplay: public ObjectBasic{
-    public: static DefaultObjectDisplayBindFunctor DEFAULT_FUNCTOR;
+    public: static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
+			static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
-        boost::function<void()> m_CustomBindFunctor;
         bool m_Shadeless;
         bool m_Visible;
         bool m_PassedRenderCheck;
@@ -31,9 +30,6 @@ class ObjectDisplay: public ObjectBasic{
         virtual ~ObjectDisplay();
 
         virtual void update(float);
-        virtual void bind();
-        virtual void unbind();
-        virtual void draw(GLuint shader,bool=false,bool=false);
 
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
@@ -59,7 +55,5 @@ class ObjectDisplay: public ObjectBasic{
         virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
-
-        template<class T> void setCustomBindFunctor(T& functor);
 };
 #endif

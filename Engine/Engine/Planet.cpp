@@ -184,6 +184,7 @@ void Planet::update(float dt){
     for(auto ring:m_Rings)  ring->update(dt);
     ObjectDisplay::update(dt);
 }
+/*
 void Planet::draw(GLuint shader,bool debug,bool godsRays){
     shader = Resources::getShaderProgram("Deferred")->program();
     glUseProgram(shader);
@@ -196,6 +197,7 @@ void Planet::draw(GLuint shader,bool debug,bool godsRays){
     glDisable(GL_BLEND);
     glUseProgram(0);
 }
+*/
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
     m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
@@ -205,9 +207,6 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, 
     addChild(m_Light);
 }
 Star::~Star(){
-}
-void Star::draw(GLuint shader,bool debug,bool godsRays){
-    ObjectDisplay::draw(shader,debug,godsRays);
 }
 Ring::Ring(std::vector<RingInfo> rings,Planet* parent){
     m_Parent = parent;
