@@ -76,14 +76,14 @@ MaterialComponent::MaterialComponent(uint ty,std::string& t){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
         Renderer::unbindTexture2D(slots.at(i));
@@ -105,15 +105,18 @@ void MaterialComponentReflection::setMixFactor(float factor){
     m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
-    Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+	if(m_Texture == nullptr)
+		Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
+	else
+		Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::unbindTexture2D(slots.at(0));
@@ -129,13 +132,16 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
 void MaterialComponentRefraction::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[(uint)m_ComponentType];
+    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionRatio",m_RefractionRatio);
 
-    Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+	if(m_Texture == nullptr)
+		Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
+	else
+		Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 
@@ -261,12 +267,7 @@ void Material::addComponentReflection(std::string textureFiles[],std::string map
 }
 void Material::addComponentReflection(std::string cubemapName,std::string mapFile,float mixFactor){
     Texture* cubemap = Resources::getTexture(cubemapName); 
-    if(cubemap == nullptr && cubemapName != ""){
-		cubemap = new Texture(cubemapName);
-	}
-	else if(cubemap == nullptr && cubemapName == ""){
-		cubemap = Resources::getCurrentScene()->getSkybox()->texture();
-	}
+    if(cubemap == nullptr && cubemapName != ""){ cubemap = new Texture(cubemapName); }
     Texture* map = Resources::getTexture(mapFile); 
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentReflection(cubemap,map,mixFactor);
