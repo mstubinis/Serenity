@@ -112,28 +112,17 @@ Texture::~Texture(){
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
-void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment,uint multisample){
+void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment){
     m_i->m_Width = w; m_i->m_Height = h;
 
-	if(multisample == 0){
-		glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
-		glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
-		//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	    glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(m_i->m_Type, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
-	}
-	else{
-		m_i->m_Type = GL_TEXTURE_2D_MULTISAMPLE;
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_i->m_TextureAddress);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisample, intern, (GLsizei)(w*scale),(GLsizei)(h*scale),GL_TRUE);
-		glTexParameterf(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, GL_TEXTURE_2D_MULTISAMPLE, m_i->m_TextureAddress, 0);
-	}
+	glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
+	glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
+	//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(m_i->m_Type, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
 }
 void Texture::load(){
     if(!isLoaded()){

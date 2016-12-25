@@ -34,7 +34,7 @@ unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = ba
 bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
-uint Detail::RendererInfo::GeneralInfo::multisample_level = 0;
+uint Detail::RendererInfo::GeneralInfo::multisample_level = 4;
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
 float Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
@@ -447,19 +447,11 @@ void Detail::RenderManagement::_passLighting(){
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::render(){
-
-	bool isMultisampled = false;
-	if(RendererInfo::GeneralInfo::multisample_level > 0) isMultisampled = true;
-
     if(!RendererInfo::GodRaysInfo::godRays)
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,"RGBA",isMultisampled);
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,"RGBA");
     else
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1,"RGBA",isMultisampled);
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1,"RGBA");
     _passGeometry();
-
-	if(isMultisampled){
-		m_gBuffer->blitToIntermediates();
-	}
 
     if(RendererInfo::GodRaysInfo::godRays){
         
@@ -487,13 +479,13 @@ void Detail::RenderManagement::render(){
     }
     glDisable(GL_BLEND);
 
-    m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false,false);
+    m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
     _passSSAO();
 
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
-        m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false,false);
+        m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
         _passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
-        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false,false);
+        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
         _passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
     }
 
@@ -501,8 +493,18 @@ void Detail::RenderManagement::render(){
         m_gBuffer->start(BUFFER_TYPE_MISC);
         _passHDR();
     }
-	m_gBuffer->stop();
-    _passFinal();
+
+	if(RendererInfo::GeneralInfo::multisample_level == 0){
+		m_gBuffer->stop();
+		_passFinal();
+	}
+	else{ //pass AA after this
+		m_gBuffer->start(BUFFER_TYPE_FREE1);
+		_passFinal();
+		m_gBuffer->stop();
+		_passFXAA();
+	}
+
 
     //copy depth over
     glColorMask(0,0,0,0);
@@ -639,6 +641,17 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
 
     bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
+    renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+
+    unbindTexture2D(0);
+    bindShaderProgram(0);
+}
+void Detail::RenderManagement::_passFXAA(){
+    Settings::clear(true,false,false);
+
+    bindShaderProgram("Deferred_FXAA");
+	sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+    bindTexture("sampler0",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);

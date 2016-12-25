@@ -83,10 +83,10 @@ class TextureBuffer final: public Texture{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(std::string name,int,int,int,int,uint,uint,uint multisample,float divisor);
+        TextureBuffer(std::string name,int,int,int,int,uint,uint,float divisor);
         ~TextureBuffer();
 
-		const float sizeScalar() const;
+		const float divisor() const;
         const int attatchment() const;
 };
 
@@ -95,24 +95,22 @@ class GBuffer final{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        GBuffer(uint w,uint h,uint multisample = 0);
+        GBuffer(uint w,uint h);
         ~GBuffer();
 
 		void resize(uint w,uint h);
-		void blitToIntermediates();
 
-        void start(std::vector<uint>&,std::string = "RGBA",bool multisampled = false,bool = true);
-        void start(uint,std::string = "RGBA",bool multisampled = false,bool = true);
-        void start(uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
-        void start(uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
-        void start(uint,uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
-        void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
-        void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(std::vector<uint>&,std::string = "RGBA",bool = true);
+        void start(uint,std::string = "RGBA",bool = true);
+        void start(uint,uint,std::string = "RGBA",bool = true);
+        void start(uint,uint,uint,std::string = "RGBA",bool = true);
+        void start(uint,uint,uint,uint,std::string = "RGBA",bool = true);
+        void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
+        void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
         void stop();
 
 		const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& getBuffers() const;
         Texture* getTexture(uint);
-		Texture* getTextureMultisampled(uint);
 
 		GLuint& getMainFBO();
 		GLuint& getSmallFBO();

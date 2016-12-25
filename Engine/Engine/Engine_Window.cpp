@@ -65,7 +65,7 @@ class Engine_Window::impl{
             Renderer::Settings::cullFace(GL_BACK);
 
             SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
-            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height,Renderer::Detail::RendererInfo::GeneralInfo::multisample_level);
+            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
         }
         void _destroyOpenGLContext(){
             HGLRC hglrc; HDC hdc ; 
@@ -96,10 +96,7 @@ class Engine_Window::impl{
             Renderer::Settings::enableCullFace();
             Renderer::Settings::cullFace(GL_BACK);
 
-            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(
-				Resources::getWindowSize().x,
-				Resources::getWindowSize().y,
-				Renderer::Detail::RendererInfo::GeneralInfo::multisample_level);
+            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
             Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
         }
         void _setStyle(uint style){

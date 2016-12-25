@@ -166,6 +166,7 @@ void Resources::initResources(){
     addShaderProgram("Deferred_SSAO","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_ssao_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Edge","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_edge_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+	addShaderProgram("Deferred_FXAA","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_fxaa.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
     addShaderProgram("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl",SHADER_PIPELINE_STAGE_LIGHTING);

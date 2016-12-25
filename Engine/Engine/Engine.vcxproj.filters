@@ -112,6 +112,9 @@
     <Filter Include="Source Files\Game">
       <UniqueIdentifier>{9abb022b-e50f-4975-b26b-f67845d85b53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\Antialiasing">
+      <UniqueIdentifier>{4e1ddf1d-5be1-4ec8-b794-9a71541c7a16}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -414,6 +417,9 @@
     </None>
     <None Include="data\Shaders\deferred_rays_frag.glsl">
       <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays</Filter>
+    </None>
+    <None Include="data\Shaders\deferred_fxaa.glsl">
+      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\Antialiasing</Filter>
     </None>
   </ItemGroup>
 </Project>

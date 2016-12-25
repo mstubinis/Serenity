@@ -126,6 +126,7 @@ namespace Engine{
                     static void _passEdge(GLuint texture,float radius = 1.0f);
                     static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal();
+					static void _passFXAA();
                 public:
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
