@@ -23,7 +23,6 @@ struct Vertex final{
     glm::vec3 tangent;
     glm::vec3 binormal;
     void clear(){ position = normal = binormal = tangent = glm::vec3(0); uv = glm::vec2(0); }
-    bool operator<(const Vertex that) const{ return memcmp((void*)this, (void*)&that, sizeof(Vertex))>0; };
 };
 struct Triangle final{
     Vertex v1;
@@ -34,7 +33,7 @@ struct MeshData final{
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;
     std::vector<glm::vec3> file_normals;
-    std::vector<Triangle> file_triangles;
+    std::vector<Triangle>  file_triangles;
 
     std::vector<glm::vec3> points;
     std::vector<glm::vec2> uvs;

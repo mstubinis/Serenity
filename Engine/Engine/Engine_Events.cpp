@@ -6,7 +6,7 @@
 using namespace Engine::Events;
 
 //return string dictionaries of keys / mouse buttons
-std::unordered_map<std::string,uint> _getkeymap(){
+std::unordered_map<std::string,uint> _populatekeymap(){
     std::unordered_map<std::string,uint> k;
     k["a"] = sf::Keyboard::A;
     k["add"] = sf::Keyboard::Add;
@@ -225,7 +225,7 @@ std::unordered_map<std::string,uint> _getkeymap(){
     k["z"] = sf::Keyboard::Z;
     return k;
 }
-std::unordered_map<std::string,uint> _getmousemap(){
+std::unordered_map<std::string,uint> _populatemousemap(){
     std::unordered_map<std::string,uint> m;
 
     m["l"] = sf::Mouse::Button::Left;
@@ -249,8 +249,8 @@ std::unordered_map<std::string,uint> _getmousemap(){
 
 //init static values with actual objects
 
-std::unordered_map<std::string,uint> Keyboard::KeyProcessing::m_KeyMap = _getkeymap();
-std::unordered_map<std::string,uint> Mouse::MouseProcessing::m_MouseMap = _getmousemap();
+std::unordered_map<std::string,uint> Keyboard::KeyProcessing::m_KeyMap = _populatekeymap();
+std::unordered_map<std::string,uint> Mouse::MouseProcessing::m_MouseMap = _populatemousemap();
 std::unordered_map<uint,bool> Keyboard::KeyProcessing::m_KeyStatus;
 std::unordered_map<uint,bool> Mouse::MouseProcessing::m_MouseStatus;
 float Mouse::MouseProcessing::m_Delta = 0;

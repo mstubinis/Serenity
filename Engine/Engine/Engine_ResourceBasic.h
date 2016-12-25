@@ -28,7 +28,7 @@ class EngineResource{
 
 
 struct skey final{
-    std::string* s;boost::weak_ptr<std::string> w;bool d;
+    boost::weak_ptr<std::string> w;std::string* s;bool d;
     bool operator==(const skey& o)const{
         if(d){if(o.d){ return *(s) == *(o.s); } else{ return *(s) == *(o.w.lock().get()); }}
         else{if(o.d){ return *(w.lock().get()) == *(o.s); } else{ return *(w.lock().get()) == *(o.w.lock().get()); }}

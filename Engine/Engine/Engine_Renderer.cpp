@@ -32,6 +32,9 @@ ShaderP* Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
 string Detail::RendererInfo::GeneralInfo::current_bound_material = "";
 unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
 bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
+GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
+GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
+uint Detail::RendererInfo::GeneralInfo::multisample_level = 0;
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
 float Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
@@ -73,6 +76,14 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
+void Settings::setMultisamplingLevel(uint level){
+	if(Detail::RendererInfo::GeneralInfo::multisample_level != level){
+		Detail::RendererInfo::GeneralInfo::multisample_level = level;
+		Renderer::Detail::RenderManagement::m_gBuffer->resize(Resources::getWindowSize().x,Resources::getWindowSize().y);
+		if(level == 0){ glDisable(GL_MULTISAMPLE); }
+		else{ glEnable(GL_MULTISAMPLE); }
+	}
+}
 void Settings::enableCullFace(bool b){
     if(b && !Detail::RendererInfo::GeneralInfo::cull_face_enabled){
         glEnable(GL_CULL_FACE);
@@ -200,6 +211,19 @@ void Renderer::bindTextureSafe(const char* l,GLuint address,uint slot,GLuint typ
     glBindTexture(type, address);
     sendUniform1iSafe(l,slot);
 }
+void Renderer::bindReadFBO(GLuint r){
+	if(Detail::RendererInfo::GeneralInfo::current_bound_read_fbo != r){
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, r);
+		Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = r;
+	}
+}
+void Renderer::bindDrawFBO(GLuint d){
+	if(Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo != d){
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d);
+		Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = d;
+	}
+}
+void Renderer::bindFBO(GLuint fbo){Renderer::bindReadFBO(fbo); Renderer::bindDrawFBO(fbo);}
 void Renderer::unbindTexture2D(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -208,8 +232,6 @@ void Renderer::unbindTextureCubemap(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
-
-
 void Detail::RenderManagement::_bind(ShaderP* p){
     Renderer::bindShaderProgram(p);//bind defaults for all shaders,default or custom
     p->bind();                     //bind custom data
@@ -425,29 +447,36 @@ void Detail::RenderManagement::_passLighting(){
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::render(){
+
+	bool isMultisampled = false;
+	if(RendererInfo::GeneralInfo::multisample_level > 0) isMultisampled = true;
+
     if(!RendererInfo::GodRaysInfo::godRays)
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION);
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,"RGBA",isMultisampled);
     else
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1);
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1,"RGBA",isMultisampled);
     _passGeometry();
-    m_gBuffer->stop();
+
+	if(isMultisampled){
+		m_gBuffer->blitToIntermediates();
+	}
 
     if(RendererInfo::GodRaysInfo::godRays){
-        /*
-        m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
-        Object* o = Resources::getObject("Sun");
-        glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
-
-        bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
-        float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
-            glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         
-        alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
-        alpha = glm::clamp(alpha,0.001f,0.999f);
+        //m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
+        //Object* o = Resources::getObject("Sun");
+        //glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
 
-        _passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
-        m_gBuffer->stop();
-        */
+        //bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
+        //float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
+        //    glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+        
+        //alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
+        //alpha = glm::clamp(alpha,0.001f,0.999f);
+
+        //_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
+        //m_gBuffer->stop();
+        
     }
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
@@ -455,28 +484,24 @@ void Detail::RenderManagement::render(){
     if(RendererInfo::LightingInfo::lighting){
         m_gBuffer->start(BUFFER_TYPE_LIGHTING,"RGB");
         _passLighting();
-        m_gBuffer->stop();
     }
     glDisable(GL_BLEND);
 
-    m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
+    m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false,false);
     _passSSAO();
-    m_gBuffer->stop();
 
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
-        m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
+        m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false,false);
         _passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
-        m_gBuffer->stop();
-        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
+        m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false,false);
         _passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
-        m_gBuffer->stop();
     }
 
     if(RendererInfo::HDRInfo::hdr){
         m_gBuffer->start(BUFFER_TYPE_MISC);
         _passHDR();
-        m_gBuffer->stop();
     }
+	m_gBuffer->stop();
     _passFinal();
 
     //copy depth over
@@ -634,12 +659,12 @@ void Detail::RenderManagement::_passFinal(){
     sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
     sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
-    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
-    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
-    bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
-    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
-    bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
+	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
+	bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
+	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
+	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
+	bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 

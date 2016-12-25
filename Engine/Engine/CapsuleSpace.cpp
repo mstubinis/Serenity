@@ -114,7 +114,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_TunnelA->setPosition(0,0,0);
     m_TunnelB->setPosition(0,0,0);
 
-    m_Ribbon->setPosition(0,600,0);
+    m_Ribbon->setPosition(0,300,0);
 
     float step = -10.0f;
     for(uint i = 0; i < 300; i++){

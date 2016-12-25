@@ -37,8 +37,7 @@ class Texture: public EngineResource{
         virtual void load();
         virtual void unload();
 
-        void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
-
+        void _constructAsFramebuffer(uint,uint,float,int,int,int,int,uint multisample);
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
 
 };

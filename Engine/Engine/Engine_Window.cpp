@@ -32,9 +32,15 @@ class Engine_Window::impl{
             sf::ContextSettings settings;
             settings.depthBits = 24;
             settings.stencilBits = 8;
-            settings.antialiasingLevel = 4;
-            settings.majorVersion = 3;
-            settings.minorVersion = 0;
+            settings.antialiasingLevel = 0;
+			settings.majorVersion = 3;
+            settings.minorVersion = 3;
+
+			#ifdef _DEBUG
+			settings.attributeFlags = settings.Debug;
+			#else
+			settings.attributeFlags = settings.Default;
+			#endif
 
             m_VideoMode.width = width;
             m_VideoMode.height = height;
@@ -59,7 +65,7 @@ class Engine_Window::impl{
             Renderer::Settings::cullFace(GL_BACK);
 
             SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
-            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
+            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height,Renderer::Detail::RendererInfo::GeneralInfo::multisample_level);
         }
         void _destroyOpenGLContext(){
             HGLRC hglrc; HDC hdc ; 
@@ -90,7 +96,10 @@ class Engine_Window::impl{
             Renderer::Settings::enableCullFace();
             Renderer::Settings::cullFace(GL_BACK);
 
-            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(
+				Resources::getWindowSize().x,
+				Resources::getWindowSize().y,
+				Renderer::Detail::RendererInfo::GeneralInfo::multisample_level);
             Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
         }
         void _setStyle(uint style){
@@ -126,61 +135,25 @@ Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new im
     m_i->_init(name,width,height);
 }
 Engine_Window::~Engine_Window(){
-    m_i->_destruct();
+	m_i->_destruct();
 }
-sf::Vector2u Engine_Window::getSize(){
-    return m_i->m_SFMLWindow->getSize();
-}
-void Engine_Window::setIcon(Texture* texture){
-    m_i->_setIcon(texture);
-}
-void Engine_Window::setIcon(const char* file){
-    m_i->_setIcon(file);
-}
-const char* Engine_Window::name() const {
-    return m_i->m_WindowName;
-}
-void Engine_Window::setName(const char* name){
-    m_i->_setName(name);
-}
-void Engine_Window::setVerticalSyncEnabled(bool enabled){
-    m_i->m_SFMLWindow->setVerticalSyncEnabled(enabled);
-}
-void Engine_Window::setKeyRepeatEnabled(bool enabled){
-    m_i->m_SFMLWindow->setKeyRepeatEnabled(enabled);
-}
-void Engine_Window::setMouseCursorVisible(bool visible){
-    m_i->m_SFMLWindow->setMouseCursorVisible(visible);
-}
-void Engine_Window::requestFocus(){
-    m_i->m_SFMLWindow->requestFocus();
-}
-void Engine_Window::close(){
-    m_i->m_SFMLWindow->close();
-}
-bool Engine_Window::hasFocus(){
-    return m_i->m_SFMLWindow->hasFocus();
-}
-bool Engine_Window::isOpen(){
-    return m_i->m_SFMLWindow->isOpen();
-}
-void Engine_Window::display(){
-    m_i->m_SFMLWindow->display();
-}
-void Engine_Window::setActive(bool active){ 
-    m_i->m_SFMLWindow->setActive(active); 
-}
-void Engine_Window::setSize(uint w, uint h){
-    m_i->_setSize(w,h);
-}
-void Engine_Window::setStyle(uint style){
-    m_i->_setStyle(style);
-}
-void Engine_Window::setFullScreen(bool fullscreen){
-    m_i->_setFullScreen(fullscreen);
-}
-void Engine_Window::keepMouseInWindow(bool keep){
-    m_i->m_SFMLWindow->setMouseCursorGrabbed(keep);
-}
+sf::Vector2u Engine_Window::getSize(){return m_i->m_SFMLWindow->getSize();}
+void Engine_Window::setIcon(Texture* texture){m_i->_setIcon(texture);}
+void Engine_Window::setIcon(const char* file){m_i->_setIcon(file);}
+const char* Engine_Window::name() const {return m_i->m_WindowName;}
+void Engine_Window::setName(const char* name){m_i->_setName(name);}
+void Engine_Window::setVerticalSyncEnabled(bool enabled){m_i->m_SFMLWindow->setVerticalSyncEnabled(enabled);}
+void Engine_Window::setKeyRepeatEnabled(bool enabled){m_i->m_SFMLWindow->setKeyRepeatEnabled(enabled);}
+void Engine_Window::setMouseCursorVisible(bool visible){m_i->m_SFMLWindow->setMouseCursorVisible(visible);}
+void Engine_Window::requestFocus(){m_i->m_SFMLWindow->requestFocus();}
+void Engine_Window::close(){m_i->m_SFMLWindow->close();}
+bool Engine_Window::hasFocus(){return m_i->m_SFMLWindow->hasFocus();}
+bool Engine_Window::isOpen(){return m_i->m_SFMLWindow->isOpen();}
+void Engine_Window::display(){m_i->m_SFMLWindow->display();}
+void Engine_Window::setActive(bool active){m_i->m_SFMLWindow->setActive(active);}
+void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
+void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
+void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }
+void Engine_Window::keepMouseInWindow(bool keep){ m_i->m_SFMLWindow->setMouseCursorGrabbed(keep); }
 sf::Window* Engine_Window::getSFMLHandle() const { return m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }

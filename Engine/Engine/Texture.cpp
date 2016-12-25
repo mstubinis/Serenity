@@ -19,6 +19,20 @@ class Texture::impl final{
         GLuint m_Type;
         uint m_Width, m_Height;
 
+        void _init(GLuint type,Texture* super,std::string name,sf::Image& img){
+            m_Pixels.clear();
+            m_Width = m_Height = m_TextureAddress = 0;
+            m_Type = type;
+
+            if(img.getSize().x > 0 && img.getSize().y > 0){
+                std::vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
+                m_Pixels = p;
+            }
+
+            super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
+            Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,super->name(),boost::shared_ptr<Texture>(super));
+            super->load();
+        }
         void _load(){
             glGenTextures(1, &m_TextureAddress);
             glBindTexture(m_Type, m_TextureAddress);
@@ -26,10 +40,12 @@ class Texture::impl final{
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
                 sf::Image image; image.loadFromFile(m_Files[0].c_str());
                 _generateFromImage(image);
+				glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
                 sf::Image i; i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
                 _generateFromImage(i);
+				glBindTexture(m_Type,0);
                 _getPixels();
             }
             else if(m_Files.size() > 1){//cubemap
@@ -44,36 +60,23 @@ class Texture::impl final{
                 glTexParameteri(m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
                 glGenerateMipmap(m_Type);
+				glBindTexture(m_Type,0);
             }
             else{//no files
             }
         }
+        void _unload(){
+            glDeleteTextures(1,&m_TextureAddress);
+        }
         void _generateFromImage(sf::Image& image){
             glTexImage2D(m_Type, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-            glTexParameteri(m_Type, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(m_Type, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            //glTexParameteri(m_Type, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            //(m_Type, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glGenerateMipmap(m_Type);
 
             m_Width = image.getSize().x; m_Height = image.getSize().y;
-        }
-        void _unload(){
-            glDeleteTextures(1,&m_TextureAddress);
-        }
-        void _init(GLuint type,Texture* super,std::string name,sf::Image& img){
-            m_Pixels.clear();
-            m_Width = m_Height = m_TextureAddress = 0;
-            m_Type = type;
-
-            if(img.getSize().x > 0 && img.getSize().y > 0){
-                std::vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
-                m_Pixels = p;
-            }
-
-            super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
-            Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,super->name(),boost::shared_ptr<Texture>(super));
-            super->load();
         }
         uchar* _getPixels(){
             if(m_Pixels.size() == 0){
@@ -109,16 +112,28 @@ Texture::~Texture(){
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
-void Texture::_constructAsFramebuffer(uint w,uint h,float scaler,int internalFormat,int format,int type,int attatchment){
+void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment,uint multisample){
     m_i->m_Width = w; m_i->m_Height = h;
-    GLsizei realW = GLsizei(w*scaler);
-    GLsizei realH = GLsizei(h*scaler);
-    glTexImage2D(m_i->m_Type, 0, internalFormat, realW, realH, 0, format, type, 0);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
+
+	if(multisample == 0){
+		glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
+		glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
+		//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	    glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(m_i->m_Type, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
+	}
+	else{
+		m_i->m_Type = GL_TEXTURE_2D_MULTISAMPLE;
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_i->m_TextureAddress);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisample, intern, (GLsizei)(w*scale),(GLsizei)(h*scale),GL_TRUE);
+		glTexParameterf(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, GL_TEXTURE_2D_MULTISAMPLE, m_i->m_TextureAddress, 0);
+	}
 }
 void Texture::load(){
     if(!isLoaded()){

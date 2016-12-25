@@ -2,39 +2,10 @@
 #ifndef ENGINE_GBUFFER_H
 #define ENGINE_GBUFFER_H
 
-#include <memory>
 #include "Texture.h"
-
-#define GL_RGB 0x1907
-#define GL_RGBA 0x1908
-#define GL_RGB8 0x8051
-#define GL_RGB16F 0x881B
-#define GL_RGB32F 0x8815
-#define GL_RGBA8 0x8058
-#define GL_DEPTH_COMPONENT 0x1902
-#define GL_DEPTH_COMPONENT24 0x81A6
-#define GL_DEPTH_COMPONENT16 0x81A5
-
-#define GL_UNSIGNED_BYTE 0x1401
-#define GL_FLOAT 0x1406
-#define GL_DEPTH_ATTACHMENT 0x8D00
-
-#define GL_COLOR_ATTACHMENT0 0x8CE0
-#define GL_COLOR_ATTACHMENT1 0x8CE1
-#define GL_COLOR_ATTACHMENT2 0x8CE2
-#define GL_COLOR_ATTACHMENT3 0x8CE3
-#define GL_COLOR_ATTACHMENT4 0x8CE4
-#define GL_COLOR_ATTACHMENT5 0x8CE5
-#define GL_COLOR_ATTACHMENT6 0x8CE6
-#define GL_COLOR_ATTACHMENT7 0x8CE7
-#define GL_COLOR_ATTACHMENT8 0x8CE8
-#define GL_COLOR_ATTACHMENT9 0x8CE9
-#define GL_COLOR_ATTACHMENT10 0x8CEA
-#define GL_COLOR_ATTACHMENT11 0x8CEB
-#define GL_COLOR_ATTACHMENT12 0x8CEC
-#define GL_COLOR_ATTACHMENT13 0x8CED
-#define GL_COLOR_ATTACHMENT14 0x8CEE
-#define GL_COLOR_ATTACHMENT15 0x8CEF
+#include <GL/glew.h>
+#include <GL/GL.h>
+#include <unordered_map>
 
 typedef unsigned int uint;
 
@@ -112,12 +83,11 @@ class TextureBuffer final: public Texture{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(std::string name,int,int,int,int,uint,uint,float=1.0f);
+        TextureBuffer(std::string name,int,int,int,int,uint,uint,uint multisample,float divisor);
         ~TextureBuffer();
 
-		float sizeScalar() const;
-        void resize(uint,uint);
-        int attatchment() const;
+		const float sizeScalar() const;
+        const int attatchment() const;
 };
 
 class GBuffer final{
@@ -125,22 +95,26 @@ class GBuffer final{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        GBuffer(uint w,uint h);
+        GBuffer(uint w,uint h,uint multisample = 0);
         ~GBuffer();
 
-        void resizeBaseBuffer(uint w,uint h);
-        void resizeBuffer(uint,uint w,uint h);
+		void resize(uint w,uint h);
+		void blitToIntermediates();
 
-        void start(std::vector<uint>&,std::string = "RGBA",bool=true);
-        void start(uint,std::string = "RGBA",bool=true);
-        void start(uint,uint,std::string = "RGBA",bool=true);
-        void start(uint,uint,uint,std::string = "RGBA",bool=true);
-        void start(uint,uint,uint,uint,std::string = "RGBA",bool=true);
-        void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool=true);
-        void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool=true);
+        void start(std::vector<uint>&,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(uint,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(uint,uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
+        void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool multisampled = false,bool = true);
         void stop();
 
 		const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& getBuffers() const;
         Texture* getTexture(uint);
+		Texture* getTextureMultisampled(uint);
+
+		GLuint& getMainFBO();
+		GLuint& getSmallFBO();
 };
 #endif

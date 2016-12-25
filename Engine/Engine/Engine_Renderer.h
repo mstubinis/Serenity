@@ -56,6 +56,9 @@ namespace Engine{
                     static bool depth_test;
                     static ShaderP* current_shader_program;
                     static std::string current_bound_material;
+					static uint multisample_level;
+					static GLuint current_bound_read_fbo;
+					static GLuint current_bound_draw_fbo;
 
                     static bool cull_face_enabled;
                     static unsigned char cull_face_status;
@@ -147,6 +150,8 @@ namespace Engine{
             void disableCullFace();
             void cullFace(uint state);
 
+			void setMultisamplingLevel(uint);
+
             void enableAlphaTest(bool b = true);
             void disableAlphaTest();
             void enableDepthTest(bool b = true);
@@ -226,7 +231,11 @@ namespace Engine{
         };
         inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
         inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
-        void bindShaderProgram(ShaderP*);
+        
+		void bindFBO(GLuint);
+		void bindReadFBO(GLuint);
+		void bindDrawFBO(GLuint);
+		void bindShaderProgram(ShaderP*);
         void bindShaderProgram(std::string);
         void bindTexture(const char* location,Texture*,uint slot);
         void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);

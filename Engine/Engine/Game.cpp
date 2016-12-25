@@ -67,10 +67,6 @@ void Game::initLogic(){
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 
-
-	Resources::getMaterial("Defiant")->addComponentReflection("","data/Textures/defiant_Reflection.png",1.0f);
-	//Resources::getMaterial("Defiant")->addComponentRefraction("","data/Textures/defiant_Reflection.png",0.5f,1.53f);
-
     m_HUD = new HUD();
 }
 void Game::update(float dt){

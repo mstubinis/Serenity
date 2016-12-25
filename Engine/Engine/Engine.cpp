@@ -35,9 +35,7 @@ void Engine::Detail::EngineClass::destruct(){
     Engine::Sound::Detail::SoundManagement::destruct();
 }
 void Engine::Detail::EngineClass::initGame(){
-    const glm::uvec2 halfRes = glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
-    Events::Mouse::setMousePosition(halfRes);
-    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0);
+    Events::Mouse::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
 
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
     Renderer::Detail::RenderManagement::init();
@@ -83,13 +81,8 @@ void Engine::Detail::EngineClass::render(){
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
     for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
-
     glViewport(0,0,w,h);
-    Renderer::Detail::RenderManagement::m_gBuffer->resizeBaseBuffer(w,h);
-    for(uint i = 0; i < BUFFER_TYPE_NUMBER; i++){
-        Renderer::Detail::RenderManagement::m_gBuffer->resizeBuffer(i,w,h);
-    }
-
+    Renderer::Detail::RenderManagement::m_gBuffer->resize(w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
     Game::onResize(w,h);
 }
