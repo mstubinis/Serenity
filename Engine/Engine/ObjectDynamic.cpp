@@ -41,6 +41,7 @@ void ObjectDynamic::setDynamic(bool dynamic){
         m_RigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
         clearAllForces();
         Physics::addRigidBody(this);
+		m_RigidBody->activate();
     }
 }
 void ObjectDynamic::collisionResponse(ObjectDynamic* other){

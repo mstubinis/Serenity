@@ -139,7 +139,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 }
 CapsuleSpace::~CapsuleSpace(){}
 void CapsuleSpace::update(float dt){
-    m_Timer += dt*2;
+    m_Timer += dt;
     SolarSystem::update(dt);
 
     float aRadius = m_TunnelA->getTunnelRadius();
@@ -169,13 +169,14 @@ void CapsuleSpace::update(float dt){
     getPlayer()->setPosition(0,0,0);
     getPlayer()->setOrientation(glm::quat());
 
-    float x = glm::sin(m_Timer)*0.035f;
-    float y = glm::cos(m_Timer)*0.035f;
+    float x = glm::sin(m_Timer*2)*0.035f;
+    float y = glm::cos(m_Timer*2)*0.035f;
 
-    float rot = glm::sin(m_Timer)*13;
+    float roll = glm::sin(m_Timer*2)*13;
+	float pitch = glm::sin(m_Timer*2.6)*2.3f;
 
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));
-        item->setOrientation(0,0,rot);
+        item->setOrientation(pitch,0,roll);
     }
 }

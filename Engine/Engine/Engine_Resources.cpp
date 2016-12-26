@@ -183,18 +183,23 @@ void Resources::cleanupRenderingContexts(){
     for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->cleanupRenderingContext();
     for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->cleanupRenderingContext();
 }
-void Resources::setCurrentScene(Scene* s){ 
-    if(Detail::ResourceManagement::m_CurrentScene == s) return;
-    Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
-    for(auto obj:previousScene->objects()){
-        ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-        if(dynamicObj != NULL){ Physics::removeRigidBody(dynamicObj); }
-    }
-    Detail::ResourceManagement::m_CurrentScene = s;
-    for(auto obj:s->objects()){
-        ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-        if(dynamicObj != NULL){ Physics::addRigidBody(dynamicObj); }
-    }
+void Resources::setCurrentScene(Scene* scene){ 
+    if(Detail::ResourceManagement::m_CurrentScene != scene){
+		Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
+		for(auto obj:previousScene->objects()){
+			ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
+			if(dynamicObj != NULL){
+				Physics::removeRigidBody(dynamicObj);
+			}
+		}
+		Detail::ResourceManagement::m_CurrentScene = scene;
+		for(auto obj:scene->objects()){
+			ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
+			if(dynamicObj != NULL){
+				Physics::addRigidBody(dynamicObj);
+			}
+		}
+	}
 }
 void Resources::setCurrentScene(std::string s){
     Resources::setCurrentScene(static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,s))); 
