@@ -18,7 +18,7 @@ void Wheel::on_setAngularVelocity(float,float,float,bool local){
 
 Vehicle::Vehicle(std::string mesh,std::string mat,glm::v3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
     m_Tuning = new btRaycastVehicle::btVehicleTuning();
-    m_Raycaster = new btDefaultVehicleRaycaster(Physics::Detail::PhysicsManagement::m_dynamicsWorld);
+    m_Raycaster = new btDefaultVehicleRaycaster(Physics::Detail::PhysicsManagement::m_world);
     m_Vehicle = new btRaycastVehicle(*m_Tuning,m_RigidBody,m_Raycaster);
 }
 Vehicle::~Vehicle(){
@@ -91,7 +91,7 @@ void Vehicle::setAngularVelocityZ(float z, bool l){
     Vehicle::setAngularVelocity(v.x(),v.y(),z,l); 
 }
 void Vehicle::update(float dt){
-    m_Vehicle->updateAction(Physics::Detail::PhysicsManagement::m_dynamicsWorld,dt);
+    m_Vehicle->updateAction(Physics::Detail::PhysicsManagement::m_world,dt);
     m_Vehicle->updateFriction(dt);
     m_Vehicle->updateSuspension(dt);
     m_Vehicle->updateVehicle(dt);

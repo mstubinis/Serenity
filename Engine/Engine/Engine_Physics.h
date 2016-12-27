@@ -2,7 +2,6 @@
 #ifndef ENGINE_ENGINE_PHYSICS_H
 #define ENGINE_ENGINE_PHYSICS_H
 
-#include <vector>
 #include "Engine_Math.h"
 
 class Object;
@@ -11,6 +10,7 @@ class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
+class btDynamicsWorld;
 class btDiscreteDynamicsWorld;
 class GLDebugDrawer;
 class btCollisionShape;
@@ -18,6 +18,7 @@ class btRigidBody;
 class btVector3;
 class btTriangleMesh;
 
+typedef float btScalar;
 typedef unsigned int uint;
 
 enum COLLISION_TYPE { 
@@ -52,12 +53,15 @@ namespace Engine{
     namespace Physics{
         namespace Detail{
             class PhysicsManagement final{
+				private:
+					static void _preTicCallback(btDynamicsWorld* world, btScalar timeStep);
+					static void _postTicCallback(btDynamicsWorld* world, btScalar timeStep);
                 public:
                     static btBroadphaseInterface* m_broadphase;
                     static btDefaultCollisionConfiguration* m_collisionConfiguration;
                     static btCollisionDispatcher* m_dispatcher;
                     static btSequentialImpulseConstraintSolver* m_solver;
-                    static btDiscreteDynamicsWorld* m_dynamicsWorld;
+                    static btDiscreteDynamicsWorld* m_world;
 
                     static GLDebugDrawer* m_debugDrawer;
 
@@ -80,7 +84,7 @@ namespace Engine{
         std::vector<glm::v3> rayCast(const glm::v3& start, const glm::v3& end,std::vector<Object*> ignoredObjects);
 
         void setGravity(float,float,float); 
-        void setGravity(glm::vec3);
+        void setGravity(glm::vec3&);
         void addRigidBody(btRigidBody*, short group, short mask);
         void addRigidBody(ObjectDynamic*);
         void addRigidBody(btRigidBody*);

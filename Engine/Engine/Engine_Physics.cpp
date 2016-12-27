@@ -23,34 +23,43 @@
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Engine;
+using namespace Engine::Physics;
 
 btBroadphaseInterface* Physics::Detail::PhysicsManagement::m_broadphase = nullptr;
 btDefaultCollisionConfiguration* Physics::Detail::PhysicsManagement::m_collisionConfiguration = nullptr;
 btCollisionDispatcher* Physics::Detail::PhysicsManagement::m_dispatcher = nullptr;
 btSequentialImpulseConstraintSolver* Physics::Detail::PhysicsManagement::m_solver = nullptr;
-btDiscreteDynamicsWorld* Physics::Detail::PhysicsManagement::m_dynamicsWorld = nullptr;
+btDiscreteDynamicsWorld* Physics::Detail::PhysicsManagement::m_world = nullptr;
 GLDebugDrawer* Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
 std::vector<Collision*> Physics::Detail::PhysicsManagement::m_Collisions;
 
-void Physics::Detail::PhysicsManagement::init(){
+
+void Detail::PhysicsManagement::_preTicCallback(btDynamicsWorld* world, btScalar timeStep){
+}
+void Detail::PhysicsManagement::_postTicCallback(btDynamicsWorld* world, btScalar timeStep){
+}
+
+void Detail::PhysicsManagement::init(){
     m_broadphase = new btDbvtBroadphase();
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
     m_solver = new btSequentialImpulseConstraintSolver;
-    m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);
+    m_world = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);
 
     m_debugDrawer = new GLDebugDrawer();
     m_debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE );
-    m_dynamicsWorld->setDebugDrawer(m_debugDrawer);
-
-    m_dynamicsWorld->setGravity(btVector3(0,0,0));
+    m_world->setDebugDrawer(m_debugDrawer);
+    m_world->setGravity(btVector3(0,0,0));
 
     btGImpactCollisionAlgorithm::registerAlgorithm(m_dispatcher);
+
+	m_world->setInternalTickCallback(Detail::PhysicsManagement::_preTicCallback, static_cast<void*>(m_world),true);
+	m_world->setInternalTickCallback(Detail::PhysicsManagement::_postTicCallback, static_cast<void*>(m_world),false);
 }
-void Physics::Detail::PhysicsManagement::destruct(){
+void Detail::PhysicsManagement::destruct(){
     SAFE_DELETE(m_debugDrawer);
-    SAFE_DELETE(m_dynamicsWorld);
+    SAFE_DELETE(m_world);
     SAFE_DELETE(m_solver);
     SAFE_DELETE(m_dispatcher);
     SAFE_DELETE(m_collisionConfiguration);
@@ -59,31 +68,23 @@ void Physics::Detail::PhysicsManagement::destruct(){
         SAFE_DELETE(collision);
 }
 
-void Physics::setGravity(float x,float y,float z){ Physics::Detail::PhysicsManagement::m_dynamicsWorld->setGravity(btVector3(x,y,z)); }
-void Physics::setGravity(glm::vec3 gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ 
-    Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(rigidBody,group,mask); 
-}
-
+void Physics::setGravity(float x,float y,float z){ Physics::Detail::PhysicsManagement::m_world->setGravity(btVector3(x,y,z)); }
+void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
+void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ Physics::Detail::PhysicsManagement::m_world->addRigidBody(rigidBody,group,mask); }
 void Physics::addRigidBody(ObjectDynamic* obj){ Physics::addRigidBody(obj->getRigidBody()); }
-void Physics::addRigidBody(btRigidBody* body){
-    Physics::Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(body); 
-}
-
-void Physics::removeRigidBody(btRigidBody* body){
-    Physics::Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(body);
-}
+void Physics::addRigidBody(btRigidBody* body){ Physics::Detail::PhysicsManagement::m_world->addRigidBody(body); }
+void Physics::removeRigidBody(btRigidBody* body){ Physics::Detail::PhysicsManagement::m_world->removeRigidBody(body); }
 void Physics::removeRigidBody(ObjectDynamic* obj){ Physics::removeRigidBody(obj->getRigidBody()); }
 
-void Physics::Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){ 
-    m_dynamicsWorld->stepSimulation(dt,maxSteps,other); 
-    uint numManifolds = m_dynamicsWorld->getDispatcher()->getNumManifolds();
+void Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){ 
+    m_world->stepSimulation(dt,maxSteps,other); 
+    uint numManifolds = m_world->getDispatcher()->getNumManifolds();
     for (uint i = 0; i < numManifolds; i++){
-        btPersistentManifold* contactManifold =  m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        btPersistentManifold* contactManifold =  m_world->getDispatcher()->getManifoldByIndexInternal(i);
         btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
         uint numContacts = contactManifold->getNumContacts();
-        for (uint j = 0; j<numContacts; j++){
+        for (uint j = 0; j < numContacts; j++){
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
             if (pt.getDistance() < 0.0f){
                 const btVector3& ptA = pt.getPositionWorldOnA();
@@ -99,26 +100,26 @@ void Physics::Detail::PhysicsManagement::update(float dt,uint maxSteps,float oth
         }
     }
 }
-std::vector<glm::v3> Engine::Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
-    if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(ignored);
+std::vector<glm::v3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
+    if(ignored != nullptr) Detail::PhysicsManagement::m_world->removeRigidBody(ignored);
     std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
-    if(ignored != nullptr) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(ignored);
+    if(ignored != nullptr) Detail::PhysicsManagement::m_world->addRigidBody(ignored);
     return result;
 }
-std::vector<glm::v3> Engine::Physics::rayCast(const btVector3& s, const btVector3& e,std::vector<btRigidBody*> ignored){
-    for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->removeRigidBody(object);
+std::vector<glm::v3> Physics::rayCast(const btVector3& s, const btVector3& e,std::vector<btRigidBody*> ignored){
+    for(auto object:ignored) Detail::PhysicsManagement::m_world->removeRigidBody(object);
     std::vector<glm::v3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
-    for(auto object:ignored) Detail::PhysicsManagement::m_dynamicsWorld->addRigidBody(object);
+    for(auto object:ignored) Detail::PhysicsManagement::m_world->addRigidBody(object);
     return result;
  }
-std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,Object* ignored){
+std::vector<glm::v3> Physics::rayCast(const glm::v3& s, const glm::v3& e,Object* ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
     if(b != NULL) return Physics::rayCast(_s,_e,b->getRigidBody());
     return Physics::rayCast(_s,_e,nullptr);
  }
-std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e,std::vector<Object*> ignored){
+std::vector<glm::v3> Physics::rayCast(const glm::v3& s, const glm::v3& e,std::vector<Object*> ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     std::vector<btRigidBody*> objs;
@@ -128,9 +129,9 @@ std::vector<glm::v3> Engine::Physics::rayCast(const glm::v3& s, const glm::v3& e
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
-std::vector<glm::v3> Engine::Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
+std::vector<glm::v3> Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    Detail::PhysicsManagement::m_dynamicsWorld->rayTest(start, end, RayCallback);
+    Detail::PhysicsManagement::m_world->rayTest(start, end, RayCallback);
     std::vector<glm::v3> result;
     if(RayCallback.hasHit()){
         glm::v3 res1 = glm::v3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
@@ -140,7 +141,7 @@ std::vector<glm::v3> Engine::Physics::Detail::PhysicsManagement::rayCastInternal
     }
     return result;
 }
-void Engine::Physics::Detail::PhysicsManagement::render(){
+void Detail::PhysicsManagement::render(){
     Renderer::bindShaderProgram(0);
 
     glMatrixMode(GL_PROJECTION);
@@ -151,7 +152,7 @@ void Engine::Physics::Detail::PhysicsManagement::render(){
     glPushMatrix();
     glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
 
-    m_dynamicsWorld->debugDrawWorld();
+    m_world->debugDrawWorld();
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -175,7 +176,7 @@ void Collision::_init(COLLISION_TYPE type, float mass){
         m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
     }
     setMass(mass);
-    Physics::Detail::PhysicsManagement::m_Collisions.push_back(this);
+    Detail::PhysicsManagement::m_Collisions.push_back(this);
 }
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);
@@ -366,7 +367,6 @@ void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }
 #include <windows.h>
 #endif
 
-//think different
 #if defined(__APPLE__) && !defined (VMDMESA)
 #include <TargetConditionals.h>
 #if (defined (TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || (defined (TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR)
