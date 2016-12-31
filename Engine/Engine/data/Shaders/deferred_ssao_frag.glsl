@@ -59,7 +59,6 @@ void main(void){
     }
 
     if(doBloom == 1){
-
         float Glow = texture2D(gMiscMap,uv).r;
         vec3 lighting = texture2D(gLightMap,uv).rgb;
         float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));

@@ -484,7 +484,7 @@ void Detail::RenderManagement::render(){
     glDisable(GL_BLEND);
 
     m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-    _passSSAO();
+    _passSSAO(); //ssao AND bloom
 
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
         m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
