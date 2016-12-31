@@ -35,10 +35,13 @@ varying vec3 c1;
 varying vec2 UV;
 
 varying vec3 CameraPosition;
-varying vec3 WorldPosition;
 varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
+
+varying float logz_f;
+varying float FC_2_f;
+uniform float fcoeff;
 
 float scale(float fCos)	{	
     float x = 1.0 - fCos;	
@@ -90,7 +93,6 @@ void main(void){
         c1 = v3Attenuate;
     }
     gl_Position = MVP * vec4(position, 1.0);
-    gl_TexCoord[6] = gl_Position;
 
     UV = uv;
     CameraPosition = v3CameraPos;
@@ -99,5 +101,7 @@ void main(void){
     Tangents = (Model * vec4(tangent,0.0)).xyz;
     Binormals = (Model * vec4(binormal,0.0)).xyz;
 
-    WorldPosition = (Model * vec4(position,1.0)).xyz;
+    logz_f = 1.0 + gl_Position.w;
+    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
+    FC_2_f = fcoeff * 0.5;
 }

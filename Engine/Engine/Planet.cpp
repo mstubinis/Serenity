@@ -113,8 +113,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
 
                 Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
                 Renderer::sendUniformMatrix4f("Model",mod);
-                Renderer::sendUniform1f("far",c->getFar());
-                Renderer::sendUniform1f("C",1.0f);
+				Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
                 Renderer::sendUniform1i("nSamples", 2);
                 Renderer::sendUniform1f("fSamples", 2.0f);

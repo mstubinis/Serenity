@@ -3,10 +3,7 @@
 uniform float g;
 uniform float g2;
 uniform float fExposure;
-uniform float far;
-uniform float C;
 
-varying vec3 WorldPosition;
 varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
@@ -15,6 +12,9 @@ varying float Depth;
 varying float outerRadius;
 varying float cameraHeight;
 varying float planetRadius;
+
+varying float FC_2_f;
+varying float logz_f;
 
 uniform int HasGodsRays;
 
@@ -41,14 +41,13 @@ void main(void){
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
-    gl_FragData[3] = vec4(WorldPosition,1.0);
     if(HasGodsRays == 1){
-        gl_FragData[4] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
+        gl_FragData[3] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
 
-        gl_FragData[4] = pow(gl_FragData[4],vec4(11.0));
+        gl_FragData[3] = pow(gl_FragData[4],vec4(11.0));
 
-        gl_FragData[4] = clamp(gl_FragData[4],0.01,0.99);
-        gl_FragData[4].rgb = max(gl_FragData[4].rgb,vec3(0.125,0.116,0.25)) * 0.7;
+        gl_FragData[3] = clamp(gl_FragData[4],0.01,0.99);
+        gl_FragData[3].rgb = max(gl_FragData[4].rgb,vec3(0.125,0.116,0.25)) * 0.7;
     }
-    gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
+    gl_FragDepth = log2(logz_f) * FC_2_f;
 }

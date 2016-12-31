@@ -430,6 +430,10 @@ void Detail::RenderManagement::_passLighting(){
     bindShaderProgram("Deferred_Light");
 
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+	sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
+
+	sendUniform1f("nearz",Resources::getActiveCamera()->getNear());
+	sendUniform1f("farz",Resources::getActiveCamera()->getFar());
 
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
@@ -439,22 +443,21 @@ void Detail::RenderManagement::_passLighting(){
     sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
-    bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
-    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),3);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),1);
+    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),2);
+	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
 
     for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
     }
-
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     bindShaderProgram(0);
 }
 void Detail::RenderManagement::render(){
     if(!RendererInfo::GodRaysInfo::godRays)
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,"RGBA");
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,"RGBA");
     else
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_POSITION,BUFFER_TYPE_FREE1,"RGBA");
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_FREE1,"RGBA");
     _passGeometry();
 
     if(RendererInfo::GodRaysInfo::godRays){
@@ -554,6 +557,10 @@ void Detail::RenderManagement::_passSSAO(){
     Camera* c = Resources::getActiveCamera();
     glm::vec3 camPos = glm::vec3(c->getPosition());
 
+	sendUniformMatrix4f("invVP",c->getViewProjInverted());
+	sendUniform1f("nearz",c->getNear());
+	sendUniform1f("farz",c->getFar());
+
     sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
     sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
     sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
@@ -564,10 +571,10 @@ void Detail::RenderManagement::_passSSAO(){
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
-    bindTexture("gPositionMap",m_gBuffer->getTexture(BUFFER_TYPE_POSITION),1);
-    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2,GL_TEXTURE_2D);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
-    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
+    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,1,GL_TEXTURE_2D);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),3);
+	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
@@ -663,7 +670,6 @@ void Detail::RenderManagement::_passFXAA(){
 }
 void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);
-
     bindShaderProgram("Deferred_Final");
 
     sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);

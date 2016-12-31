@@ -10,12 +10,11 @@ uniform mat4 VP;
 uniform mat4 Model;
 
 varying vec2 UV;
-varying vec3 WorldPosition;
 
 void main(void){
     mat4 MVP = VP * Model;
     UV = uv;
     gl_Position = MVP * vec4(position, 1.0);
-    gl_TexCoord[6] = gl_Position;
-    WorldPosition = (Model * vec4(position,1.0)).xyz;
+
+	gl_TexCoord[6] = gl_Position;
 }

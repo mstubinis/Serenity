@@ -11,14 +11,34 @@ uniform vec3 LightDirection;
 uniform vec3 LightPosition;
 
 uniform sampler2D gNormalMap;
-uniform sampler2D gPositionMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gDiffuseMap;
+uniform sampler2D gDepthMap;
 uniform vec2 gScreenSize;
 
 uniform vec3 gCameraPosition;
 
 uniform vec4 materials[255];
+
+uniform mat4 invVP;
+uniform float nearz;
+uniform float farz;
+
+float linearize_depth(float depth){
+    float a = farz / (farz - nearz);
+    float b = farz * nearz / (nearz - farz);
+    return (a + b / depth);
+}
+float invertLogDepth(float log_depth){
+    return linearize_depth(pow(farz + 1.0, log_depth) - 1.0);
+}
+vec3 reconstruct_world_pos(vec2 _uv){
+	float depth = texture2D(gDepthMap, _uv).r;
+	vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
+    return wpos.xyz / wpos.w;
+}
+
+
 
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
@@ -74,7 +94,7 @@ void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
     vec2 uv = gl_FragCoord.xy / gScreenSize;
 
-    vec3 PxlPosition = texture2D(gPositionMap,uv).xyz;
+	vec3 PxlPosition = reconstruct_world_pos(uv);
     vec3 PxlNormal = (texture2D(gNormalMap, uv).rgb);
 
     vec4 lightCalculation = vec4(0);

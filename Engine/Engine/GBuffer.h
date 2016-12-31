@@ -13,7 +13,6 @@ typedef unsigned int uint;
 const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
 	                                1.0f, // (normals.rgb)
 								    1.0f, // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
-								    1.0f, // World Position
 								    1.0f, // (lighting.rgb)
 								    0.5f, // bloom, & ssao as alpha
 								    0.5f, // gods rays
@@ -24,18 +23,16 @@ const float GBUFFER_DIVISIBLES[] = {1.0f, // (diffuse.rgb)
 const int GBUFFER_TYPES[] =	           {GL_RGB8,               // (diffuse.rgb)
                                         GL_RGB16F,		       // (normals.rgb)
                                         GL_RGB8,			   // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
-                                        GL_RGB32F,			   // World Position
                                         GL_RGB16F,		       // (lighting.rgb)
                                         GL_RGBA8,              // bloom, & ssao as alpha
                                         GL_RGB8,			   // gods rays
                                         GL_RGBA8,              // free buffer
                                         GL_RGBA8,              // free2 buffer
-                                        GL_DEPTH_COMPONENT24}; // depth
+                                        GL_DEPTH_COMPONENT16}; // depth
 
 const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			       // (diffuse.rgb)
                                         GL_RGB,			       // (normals.rgb)
                                         GL_RGB,			       // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
-                                        GL_RGB,				   // World Position
                                         GL_RGB,			       // (lighting.rgb)
                                         GL_RGBA,			   // bloom, & ssao as alpha
                                         GL_RGB,			       // gods rays
@@ -44,7 +41,6 @@ const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,			       // (diffuse.rgb)
                                         GL_DEPTH_COMPONENT};   // depth
 
 const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,
-                                        GL_UNSIGNED_BYTE,
                                         GL_UNSIGNED_BYTE,
                                         GL_UNSIGNED_BYTE,
                                         GL_FLOAT,
@@ -58,17 +54,15 @@ const int GBUFFER_ATTACHMENT_TYPES[] = {GL_COLOR_ATTACHMENT0,
                                         GL_COLOR_ATTACHMENT1,
                                         GL_COLOR_ATTACHMENT2,
                                         GL_COLOR_ATTACHMENT3,
-                                        GL_COLOR_ATTACHMENT4,
                                         GL_COLOR_ATTACHMENT0,
+                                        GL_COLOR_ATTACHMENT4,
                                         GL_COLOR_ATTACHMENT5,
-                                        GL_COLOR_ATTACHMENT6,
 										GL_COLOR_ATTACHMENT1,
                                         GL_DEPTH_ATTACHMENT};
 
 enum BUFFER_TYPES {BUFFER_TYPE_DIFFUSE,
                    BUFFER_TYPE_NORMAL,
                    BUFFER_TYPE_MISC,
-                   BUFFER_TYPE_POSITION,
                    BUFFER_TYPE_LIGHTING,
                    BUFFER_TYPE_BLOOM,
                    BUFFER_TYPE_GODSRAYS,

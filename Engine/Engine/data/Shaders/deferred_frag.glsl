@@ -14,9 +14,6 @@ uniform float       CubemapMixFactor;
 uniform float       RefractionRatio;
 uniform vec3        CameraPosition;
 
-
-uniform float far;
-uniform float C;
 uniform float BaseGlow;
 uniform float matID;
 
@@ -34,6 +31,9 @@ varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;
 varying vec3 Tangents;
+
+varying float FC_2_f;
+varying float logz_f;
 
 vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){
     vec4 r = vec4(0.0);
@@ -96,9 +96,8 @@ void main(void){
 
     gl_FragData[1].a = Object_Color.a;
     gl_FragData[2].b = matID;
-    gl_FragData[3] = vec4(WorldPosition,1.0);
     if(HasGodsRays == 1){
-        gl_FragData[4] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;
+        gl_FragData[3] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;
     }
-    gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
+	gl_FragDepth = log2(logz_f) * FC_2_f;
 }

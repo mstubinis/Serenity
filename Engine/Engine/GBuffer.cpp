@@ -44,7 +44,6 @@ class GBuffer::impl final{
             _constructFramebuffer("BUFFER_DIFFUSE",BUFFER_TYPE_DIFFUSE,m_Width,m_Height);
             _constructFramebuffer("BUFFER_NORMAL",BUFFER_TYPE_NORMAL,m_Width,m_Height);
             _constructFramebuffer("BUFFER_MISC",BUFFER_TYPE_MISC,m_Width,m_Height);
-            _constructFramebuffer("BUFFER_POSITION",BUFFER_TYPE_POSITION,m_Width,m_Height);
             _constructFramebuffer("BUFFER_LIGHTING",BUFFER_TYPE_LIGHTING,m_Width,m_Height);
             _constructFramebuffer("BUFFER_FREE1",BUFFER_TYPE_FREE1,m_Width,m_Height);
             _constructFramebuffer("BUFFER_DEPTH",BUFFER_TYPE_DEPTH,m_Width,m_Height);

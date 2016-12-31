@@ -4,7 +4,6 @@ uniform sampler2D DiffuseTexture;
 uniform int DiffuseTextureEnabled;
 uniform vec4 Object_Color;
 
-varying vec3 WorldPosition;
 varying vec2 UV;
 
 void main(void){

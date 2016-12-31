@@ -1,8 +1,6 @@
 #version 120
 
 uniform float fExposure;
-uniform float far;
-uniform float C;
 uniform float BaseGlow;
 
 uniform sampler2D DiffuseTexture;
@@ -32,12 +30,14 @@ varying vec3 c1;
 uniform int HasAtmosphere;
 
 varying vec3 CameraPosition;
-varying vec3 WorldPosition;
 varying vec4 Color;
 varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;
 varying vec3 Tangents;
+
+varying float FC_2_f;
+varying float logz_f;
 
 vec3 CalcBumpedNormal(void){
     vec3 t = (texture2D(NormalTexture, UV).xyz * 2.0) - 1.0;
@@ -94,9 +94,8 @@ void main(void){
         }
     }
     gl_FragData[2].b = 0.0;
-    gl_FragData[3] = vec4(WorldPosition,1.0);
     if(HasGodsRays == 1){
-        gl_FragData[4] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);
+        gl_FragData[3] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);
     }
-    gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
+    gl_FragDepth = log2(logz_f) * FC_2_f;
 }

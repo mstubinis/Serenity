@@ -1,10 +1,10 @@
 #version 120
 
 uniform sampler2D gNormalMap;
-uniform sampler2D gPositionMap;
 uniform sampler2D gRandomMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gLightMap;
+uniform sampler2D gDepthMap;
 
 uniform int doSSAO;
 uniform int doBloom;
@@ -19,19 +19,37 @@ uniform int gNoiseTextureSize;
 
 uniform vec2 poisson[32];
 
+uniform mat4 invVP;
+uniform float nearz;
+uniform float farz;
+
+float linearize_depth(float depth){
+    float a = farz / (farz - nearz);
+    float b = farz * nearz / (nearz - farz);
+    return (a + b / depth);
+}
+float invertLogDepth(float log_depth){
+    return linearize_depth(pow(farz + 1.0, log_depth) - 1.0);
+}
+vec3 reconstruct_world_pos(vec2 _uv){
+	float depth = texture2D(gDepthMap, _uv).r;
+	vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
+    return wpos.xyz / wpos.w;
+}
 float l(float a, float b, float w){
     return a + w*(b-a);
 }
 
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
-    vec3 diff = texture2D(gPositionMap,uv+offsetUV).xyz - origin;
+    vec3 diffPosition = reconstruct_world_pos(uv+offsetUV);
+    vec3 diff = diffPosition - origin;
     vec3 vec = normalize(diff);
     float dist = length(diff)/gScale;
     return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;
 }
 void main(void){
     vec2 uv = gl_TexCoord[0].st*2.0;
-    vec3 worldPosition = texture2D(gPositionMap,uv).xyz;
+	vec3 worldPosition = reconstruct_world_pos(uv);
     vec3 normal = texture2D(gNormalMap, uv).xyz;
     vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / gNoiseTextureSize).xy * 2.0 - 1.0);
 

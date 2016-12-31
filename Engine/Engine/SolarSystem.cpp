@@ -22,7 +22,7 @@ using namespace Engine;
 using namespace Engine::Events;
 
 SolarSystem::SolarSystem(std::string n, std::string file):Scene(n){
-    playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,9000000000.0f,this);
+    playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
     Resources::setActiveCamera(playerCamera);
 
     if(file != "NULL"){

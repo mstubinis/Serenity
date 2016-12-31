@@ -33,12 +33,15 @@ varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
 varying vec3 v3LightPosition;
-varying vec3 WorldPosition;
 
 varying float Depth;
 varying float cameraHeight;
 varying float outerRadius;
 varying float planetRadius;
+
+varying float logz_f;
+varying float FC_2_f;
+uniform float fcoeff;
 
 float scale(float fCos){
     float x = 1.0 - fCos;
@@ -79,7 +82,6 @@ void main(void){
         v3SamplePoint += v3SampleRay;
     }
     gl_Position = MVP * vec4(position, 1.0);
-    gl_TexCoord[6] = MVP * vec4(position, 1.0);
 
     v3LightPosition = v3LightDir;
     v3Direction = v3CameraPos - v3Pos;
@@ -91,5 +93,7 @@ void main(void){
     outerRadius = fOuterRadius;
     planetRadius = fInnerRadius;
 
-    WorldPosition = (Model * vec4(position,1.0)).xyz;
+    logz_f = 1.0 + gl_Position.w;
+    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
+    FC_2_f = fcoeff * 0.5;
 }

@@ -3,10 +3,7 @@
 uniform float g;
 uniform float g2;
 uniform float fExposure;
-uniform float far;
-uniform float C;
 
-varying vec3 WorldPosition;
 varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
@@ -14,6 +11,9 @@ varying vec3 v3LightPosition;
 varying float Depth;
 
 uniform int HasGodsRays;
+
+varying float FC_2_f;
+varying float logz_f;
 
 void main(void){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
@@ -32,9 +32,8 @@ void main(void){
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
-    gl_FragData[3] = vec4(WorldPosition,1.0);
     if(HasGodsRays == 1){
-        gl_FragData[4] = vec4(0.0,0.0,0.0,1.0);
+        gl_FragData[3] = vec4(0.0,0.0,0.0,1.0);
     }
-    gl_FragDepth = (log(C * gl_TexCoord[6].z + 1.0) / log(C * far + 1.0));
+    gl_FragDepth = log2(logz_f) * FC_2_f;
 }
