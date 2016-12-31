@@ -430,6 +430,10 @@ void Detail::RenderManagement::_passLighting(){
     bindShaderProgram("Deferred_Light");
 
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+
+    glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
+    Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
+
     sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
 
     sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);

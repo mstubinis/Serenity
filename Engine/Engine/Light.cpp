@@ -44,9 +44,6 @@ void SunLight::lighten(){
 
     Renderer::sendUniform3f("LightPosition",pos.x, pos.y, pos.z);
 
-    glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
-    Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
-
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LIGHT_TYPE_DIRECTIONAL,scene){
@@ -583,23 +580,15 @@ void PointLight::lighten(){
         return;
     sendGenericAttributesToShader();
     Renderer::sendUniform3f("LightPosition",float(pos.x),float(pos.y),float(pos.z));
-
-    glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
-    Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
-
     Renderer::sendUniform3f("LightData",m_Constant,m_Linear,m_Exp);
-
-    //m_Orientation = Resources::getActiveCamera()->getOrientation(); //this isnt really needed
 
     glm::mat4 m(1);
     m = glm::translate(m,glm::vec3(pos));
-    //m *= glm::mat4_cast(m_Orientation); //this isnt really needed
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
-    Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
     Renderer::sendUniformMatrix4f("Model",m);
 
-    if(glm::distance(campos,glm::vec3(pos)) > m_PointLightRadius){ Renderer::Settings::cullFace(GL_BACK); }
+	if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) > m_PointLightRadius){ Renderer::Settings::cullFace(GL_BACK); }
     else{                                                          Renderer::Settings::cullFace(GL_FRONT);}
     Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
 
