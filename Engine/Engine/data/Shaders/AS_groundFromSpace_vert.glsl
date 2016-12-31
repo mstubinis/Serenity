@@ -34,6 +34,7 @@ varying vec3 c1;
 
 varying vec2 UV;
 
+varying vec3 WorldPosition;
 varying vec3 CameraPosition;
 varying vec3 Normals;
 varying vec3 Binormals;
@@ -100,6 +101,8 @@ void main(void){
     Normals = (Model * vec4(normal,0.0)).xyz;
     Tangents = (Model * vec4(tangent,0.0)).xyz;
     Binormals = (Model * vec4(binormal,0.0)).xyz;
+
+	WorldPosition = (Model * vec4(position,1.0)).xyz;
 
     logz_f = 1.0 + gl_Position.w;
     gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;

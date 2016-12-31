@@ -33,6 +33,7 @@ varying vec3 c0;
 varying vec3 c1;
 varying vec3 v3Direction;
 varying vec3 v3LightPosition;
+varying vec3 WorldPosition;
 varying float Depth;
 
 varying float logz_f;
@@ -89,6 +90,8 @@ void main(void){
     v3Direction = v3CameraPos - v3Pos;
     c0 = v3FrontColor * (v3InvWavelength * fKrESun);
     c1 = v3FrontColor * fKmESun;
+
+	WorldPosition = (Model * vec4(position, 1.0)).xyz;
 
     logz_f = 1.0 + gl_Position.w;
     gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;

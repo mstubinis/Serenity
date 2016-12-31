@@ -59,7 +59,7 @@ uint Detail::RendererInfo::SSAOInfo::ssao_samples = 7;
 float Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
 float Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
 float Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
-float Detail::RendererInfo::SSAOInfo::ssao_bias = 0.24f;
+float Detail::RendererInfo::SSAOInfo::ssao_bias = 0.495f;
 float Detail::RendererInfo::SSAOInfo::ssao_radius = 0.215f;
 glm::vec2 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
 GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
@@ -457,24 +457,24 @@ void Detail::RenderManagement::render(){
     if(!RendererInfo::GodRaysInfo::godRays)
         m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,"RGBA");
     else
-        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_FREE1,"RGBA");
+        m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_LIGHTING,"RGBA");
     _passGeometry();
 
     if(RendererInfo::GodRaysInfo::godRays){
         
-        //m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
-        //Object* o = Resources::getObject("Sun");
-        //glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
+        m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
+        Object* o = Resources::getObject("Sun");
+        glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
 
-        //bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
-        //float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
-        //    glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+        bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
+        float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
+            glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         
-        //alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
-        //alpha = glm::clamp(alpha,0.001f,0.999f);
+        alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
+        alpha = glm::clamp(alpha,0.001f,0.999f);
 
-        //_passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
-        //m_gBuffer->stop();
+        _passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
+        m_gBuffer->stop();
         
     }
     glEnable(GL_BLEND);
@@ -506,7 +506,7 @@ void Detail::RenderManagement::render(){
 		_passFinal();
 	}
 	else{ //pass AA after this
-		m_gBuffer->start(BUFFER_TYPE_FREE1);
+		m_gBuffer->start(BUFFER_TYPE_LIGHTING);
 		_passFinal();
 		m_gBuffer->stop();
 		_passFXAA();
@@ -612,7 +612,7 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
     sendUniform1i("behind",int(behind));
     sendUniform1f("alpha",alpha);
 
-    bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
+    bindTexture("firstPass",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
@@ -662,7 +662,7 @@ void Detail::RenderManagement::_passFXAA(){
 
     bindShaderProgram("Deferred_FXAA");
 	sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
-    bindTexture("sampler0",m_gBuffer->getTexture(BUFFER_TYPE_FREE1),0);
+    bindTexture("sampler0",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);

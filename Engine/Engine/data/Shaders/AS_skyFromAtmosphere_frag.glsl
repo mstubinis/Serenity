@@ -12,6 +12,7 @@ varying float Depth;
 varying float outerRadius;
 varying float cameraHeight;
 varying float planetRadius;
+varying vec3 WorldPosition;
 
 varying float FC_2_f;
 varying float logz_f;

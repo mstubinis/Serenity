@@ -41,8 +41,7 @@ float l(float a, float b, float w){
 }
 
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
-    vec3 diffPosition = reconstruct_world_pos(uv+offsetUV);
-    vec3 diff = diffPosition - origin;
+    vec3 diff = (reconstruct_world_pos(uv+offsetUV)) - origin;
     vec3 vec = normalize(diff);
     float dist = length(diff)/gScale;
     return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;

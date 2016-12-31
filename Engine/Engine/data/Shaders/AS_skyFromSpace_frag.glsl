@@ -9,6 +9,7 @@ varying vec3 c1;
 varying vec3 v3Direction;
 varying vec3 v3LightPosition;
 varying float Depth;
+varying vec3 WorldPosition;
 
 uniform int HasGodsRays;
 

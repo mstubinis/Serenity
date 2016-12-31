@@ -29,6 +29,7 @@ varying vec3 c1;
 
 uniform int HasAtmosphere;
 
+varying vec3 WorldPosition;
 varying vec3 CameraPosition;
 varying vec4 Color;
 varying vec2 UV;
