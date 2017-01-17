@@ -33,7 +33,7 @@ class Mesh final: public EngineResource{
         std::vector<glm::vec3> m_Tangents;
 		std::vector<unsigned short> m_Indices;
 
-		void _loadData(ImportedMeshData&,float threshhold = 0.001f);
+		void _loadData(ImportedMeshData&,float threshhold = 0.0005f);
         void _loadFromFile(std::string,COLLISION_TYPE);
         void _loadFromOBJ(std::string,COLLISION_TYPE);
         void _loadFromOBJMemory(std::string,COLLISION_TYPE);

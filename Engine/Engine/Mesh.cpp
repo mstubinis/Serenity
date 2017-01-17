@@ -218,7 +218,6 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
         if(boost::filesystem::exists(colFile)){
 			d.clear();
 			Engine::Resources::MeshLoader::loadObj(d,colFile);
-			_loadData(d);
         }
         m_Collision = new Collision(d,type);
     }
