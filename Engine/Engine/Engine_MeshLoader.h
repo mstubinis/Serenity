@@ -24,12 +24,8 @@ struct Vertex final{
     glm::vec3 binormal;
     void clear(){ position = normal = binormal = tangent = glm::vec3(0); uv = glm::vec2(0); }
 };
-struct Triangle final{
-    Vertex v1;
-    Vertex v2;
-    Vertex v3;
-};
-struct MeshData final{
+struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
+struct ImportedMeshData final{
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;
     std::vector<glm::vec3> file_normals;
@@ -40,6 +36,9 @@ struct MeshData final{
     std::vector<glm::vec3> normals;
     std::vector<glm::vec3> binormals;
     std::vector<glm::vec3> tangents;
+	void clear(){ file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
+	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear();
+	}
 };
 
 typedef unsigned int uint;
@@ -48,18 +47,18 @@ typedef unsigned short ushort;
 namespace Engine{
     namespace Resources{
         namespace MeshLoader{
-            void loadObj(MeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
-            void loadObjFromMemory(MeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
+            void loadObj(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
+            void loadObjFromMemory(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
 
             void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
 
             void _loadObjDataFromLine(std::string& line, std::vector<glm::vec3>& positions, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& normals, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
-            void _loadObjDataIntoTriangles(MeshData& data,std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u,std::vector<glm::vec3>& _n,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
+            void _loadObjDataIntoTriangles(ImportedMeshData&,std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u,std::vector<glm::vec3>& _n,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
 
-            void _calculateTBN(MeshData&);
+            void _calculateTBN(ImportedMeshData&);
 
             bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
-            void _indexVBO(MeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents,float threshold);
+            void _indexVBO(ImportedMeshData&,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents,float threshold);
         };
     };
 };

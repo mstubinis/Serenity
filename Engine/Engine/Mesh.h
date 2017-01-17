@@ -11,7 +11,7 @@
 namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
-struct MeshData;
+struct ImportedMeshData;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 
@@ -20,7 +20,7 @@ const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
 class Mesh final: public EngineResource{
     private:
-        GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - tangent, 4 - binormals
+        GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
 		GLuint m_elementbuffer;
         Collision* m_Collision;
 
@@ -29,11 +29,11 @@ class Mesh final: public EngineResource{
         std::vector<glm::vec3> m_Points;
         std::vector<glm::vec2> m_UVs;
         std::vector<glm::vec3> m_Normals;
-        std::vector<glm::vec3> m_Tangents;
         std::vector<glm::vec3> m_Binormals;
+        std::vector<glm::vec3> m_Tangents;
 		std::vector<unsigned short> m_Indices;
 
-		void _loadData(MeshData&,float threshhold = 0.0001f);
+		void _loadData(ImportedMeshData&,float threshhold = 0.001f);
         void _loadFromFile(std::string,COLLISION_TYPE);
         void _loadFromOBJ(std::string,COLLISION_TYPE);
         void _loadFromOBJMemory(std::string,COLLISION_TYPE);

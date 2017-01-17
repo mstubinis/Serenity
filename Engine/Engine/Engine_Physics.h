@@ -17,6 +17,7 @@ class btCollisionShape;
 class btRigidBody;
 class btVector3;
 class btTriangleMesh;
+struct ImportedMeshData;
 
 typedef float btScalar;
 typedef unsigned int uint;
@@ -36,10 +37,10 @@ class Collision final{
         uint m_CollisionType;
         btCollisionShape* m_CollisionShape;
         void _init(COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
-        void _load(std::string filename, COLLISION_TYPE);
+        void _load(ImportedMeshData&, COLLISION_TYPE);
     public:
         Collision(btCollisionShape* shape = nullptr,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
-        Collision(std::string file,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
+        Collision(ImportedMeshData&,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
         ~Collision();
 
         void setMass(float mass);

@@ -3,8 +3,8 @@
 attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
-attribute vec3 tangent;
 attribute vec3 binormal;
+attribute vec3 tangent;
 
 uniform mat4 VP;
 uniform mat4 Model;

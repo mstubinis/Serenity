@@ -3,8 +3,8 @@
 attribute vec3 position;
 attribute vec2 uv;
 attribute vec3 normal;
-attribute vec3 tangent;
 attribute vec3 binormal;
+attribute vec3 tangent;
 
 uniform int hasAtmosphere;
 
@@ -13,18 +13,18 @@ uniform mat4 Model;
 uniform mat4 Rot;
 
 uniform vec3 v3CameraPos;
-uniform vec3 v3LightDir;		// The direction vector to the light source 
-uniform vec3 v3InvWavelength;	// 1 / pow(wavelength, 4) for the red, green, and blue channels 
-uniform float fCameraHeight2;	// fCameraHeight^2 
-uniform float fOuterRadius;		// The outer (atmosphere) radius 
-uniform float fOuterRadius2;	// fOuterRadius^2 
-uniform float fInnerRadius;		// The inner (planetary) radius 
-uniform float fKrESun;			// Kr * ESun 
-uniform float fKmESun;			// Km * ESun 
-uniform float fKr4PI;			// Kr * 4 * PI 
-uniform float fKm4PI;			// Km * 4 * PI 
-uniform float fScale;			// 1 / (fOuterRadius - fInnerRadius) 
-uniform float fScaleDepth;		// The scale depth (i.e. the altitude at which the atmosphere's average density is found) 
+uniform vec3 v3LightDir;		    // The direction vector to the light source 
+uniform vec3 v3InvWavelength;	    // 1 / pow(wavelength, 4) for the red, green, and blue channels 
+uniform float fCameraHeight2;	    // fCameraHeight^2 
+uniform float fOuterRadius;		    // The outer (atmosphere) radius 
+uniform float fOuterRadius2;	    // fOuterRadius^2 
+uniform float fInnerRadius;		    // The inner (planetary) radius 
+uniform float fKrESun;			    // Kr * ESun 
+uniform float fKmESun;			    // Km * ESun 
+uniform float fKr4PI;			    // Kr * 4 * PI 
+uniform float fKm4PI;			    // Km * 4 * PI 
+uniform float fScale;			    // 1 / (fOuterRadius - fInnerRadius) 
+uniform float fScaleDepth;		    // The scale depth (i.e. the altitude at which the atmosphere's average density is found) 
 uniform float fScaleOverScaleDepth;	// fScale / fScaleDepth
 uniform float fSamples;
 uniform int nSamples;	

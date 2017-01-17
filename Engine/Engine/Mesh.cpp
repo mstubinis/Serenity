@@ -9,7 +9,7 @@
 
 Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield){
     m_Collision = nullptr;
-	MeshData d;
+	ImportedMeshData d;
     uint width = heightfield->getHeightStickWidth();
     uint length = heightfield->getHeightStickLength();
     for(uint i = 0; i < width-1; i++){
@@ -58,7 +58,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield){
 }
 Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length){
     m_Collision = nullptr;
-	MeshData d;
+	ImportedMeshData d;
     for(uint i = 0; i < width-1; i++){
         for(uint j = 0; j < length-1; j++){
 			std::string key1 = boost::lexical_cast<std::string>(i) + "," + boost::lexical_cast<std::string>(j);
@@ -103,7 +103,7 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
 }
 Mesh::Mesh(std::string& name,float x, float y,float width, float height){
     m_Collision = nullptr;
-	MeshData d;
+	ImportedMeshData d;
 	d.points.push_back(glm::vec3(0,0,0));
     d.points.push_back(glm::vec3(width,height,0));
     d.points.push_back(glm::vec3(0,height,0));
@@ -132,26 +132,9 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height){
     d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
     d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-	d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-
-	d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-
-	d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
+	d.normals.resize(6,glm::vec3(1,1,1));
+	d.binormals.resize(6,glm::vec3(1,1,1));
+    d.tangents.resize(6,glm::vec3(1,1,1));
 
 	_loadData(d);
     _calculateMeshRadius();
@@ -159,7 +142,7 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height){
 }
 Mesh::Mesh(std::string& name,float width, float height){
     m_Collision = nullptr;
-	MeshData d;
+	ImportedMeshData d;
 	d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
     d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
     d.points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
@@ -188,26 +171,9 @@ Mesh::Mesh(std::string& name,float width, float height){
     d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
     d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-	d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-    d.normals.push_back(glm::vec3(1,1,1));
-
-	d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-    d.tangents.push_back(glm::vec3(1,1,1));
-
-	d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
-    d.binormals.push_back(glm::vec3(1,1,1));
+	d.normals.resize(6,glm::vec3(1,1,1));
+	d.binormals.resize(6,glm::vec3(1,1,1));
+    d.tangents.resize(6,glm::vec3(1,1,1));
 
 	_loadData(d);
     _calculateMeshRadius();
@@ -225,7 +191,7 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
 Mesh::~Mesh(){
     cleanupRenderingContext();
 }
-void Mesh::_loadData(MeshData& data,float threshold){
+void Mesh::_loadData(ImportedMeshData& data,float threshold){
 	if(data.uvs.size() == 0) data.uvs.resize(data.points.size());
 	if(data.normals.size() == 0) data.normals.resize(data.points.size());
 	if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
@@ -239,6 +205,10 @@ void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
         _loadFromOBJ(file,type);
 }
 void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
+	ImportedMeshData d;
+	Engine::Resources::MeshLoader::loadObj(d,filename);
+	_loadData(d);
+
     if(type == COLLISION_TYPE_NONE){
         m_Collision = new Collision(new btEmptyShape());
     }
@@ -246,23 +216,24 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
         std::string colFile = filename.substr(0,filename.size()-4);
         colFile += "Col.obj";
         if(boost::filesystem::exists(colFile)){
-            m_Collision = new Collision(colFile,type);
+			d.clear();
+			Engine::Resources::MeshLoader::loadObj(d,colFile);
+			_loadData(d);
         }
-        else{
-            m_Collision = new Collision(filename,type);
-        }
+        m_Collision = new Collision(d,type);
     }
-	MeshData d;
-	Engine::Resources::MeshLoader::loadObj(d,filename);
-	_loadData(d);
 }
 void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type){
+	ImportedMeshData d;
+	Engine::Resources::MeshLoader::loadObjFromMemory(d,data);
+	_loadData(d);
+
     if(type == COLLISION_TYPE_NONE){
         m_Collision = new Collision(new btEmptyShape());
     }
-	MeshData d;
-	Engine::Resources::MeshLoader::loadObjFromMemory(d,data);
-	_loadData(d);
+    else{
+        m_Collision = new Collision(d,type);
+    }
 }
 void Mesh::initRenderingContext(){
     glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
@@ -277,10 +248,10 @@ void Mesh::initRenderingContext(){
     glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
 	glGenBuffers(1, &m_elementbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);

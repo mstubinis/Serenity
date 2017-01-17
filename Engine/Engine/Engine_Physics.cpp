@@ -164,8 +164,8 @@ Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type, float mass){
     m_CollisionType = type;
     _init(type,mass);
 }
-Collision::Collision(std::string file,COLLISION_TYPE type, float mass){ 
-    _load(file,type);
+Collision::Collision(ImportedMeshData& data,COLLISION_TYPE type, float mass){ 
+    _load(data,type);
     _init(type,mass);
 }
 void Collision::_init(COLLISION_TYPE type, float mass){
@@ -184,45 +184,34 @@ Collision::~Collision(){
     SAFE_DELETE(m_CollisionShape);
     m_CollisionType = COLLISION_TYPE_NONE;
 }
-void Collision::_load(std::string file, COLLISION_TYPE collisionType){
+void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
-    std::string extention; for(uint i = file.length() - 4; i < file.length(); i++) extention += tolower(file.at(i));
-    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(file);
     switch(collisionType){
         case COLLISION_TYPE_CONVEXHULL:{
             shape = new btConvexHullShape();
-            if(extention == ".obj"){
-                #pragma region OBJ
-                MeshData data;
-                Resources::MeshLoader::loadObj(data,file,LOAD_POINTS);
-                for(auto vertex:data.file_points)
-                    ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
-                #pragma endregion
-            }
+
+            for(auto vertex:data.file_points)
+                ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
+
             m_CollisionShape = shape;
             m_CollisionType = COLLISION_TYPE_CONVEXHULL;
             break;
         }
         case COLLISION_TYPE_TRIANGLESHAPE:{
-           m_InternalMeshData = new btTriangleMesh();
-            if(extention == ".obj"){
-                #pragma region OBJ
-                MeshData data;
-                Resources::MeshLoader::loadObj(data,file, LOAD_POINTS | LOAD_FACES);
-                for(auto triangle:data.file_triangles){
-                    glm::vec3 v1,v2,v3;
+            m_InternalMeshData = new btTriangleMesh();
 
-                    v1 = triangle.v1.position;
-                    v2 = triangle.v2.position;
-                    v3 = triangle.v3.position;
+            for(auto triangle:data.file_triangles){
+                glm::vec3 v1,v2,v3;
 
-                    btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
-                    btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
-                    btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
-                    m_InternalMeshData->addTriangle(bv1, bv2, bv3,true);
-                }
-                #pragma endregion
+                v1 = triangle.v1.position;
+                v2 = triangle.v2.position;
+                v3 = triangle.v3.position;
+
+                btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
+                btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
+                btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
+                m_InternalMeshData->addTriangle(bv1, bv2, bv3,true);
             }
 
             shape = new btGImpactMeshShape(m_InternalMeshData);
@@ -236,24 +225,20 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
         }
         case COLLISION_TYPE_STATIC_TRIANGLESHAPE:{
             m_InternalMeshData = new btTriangleMesh();
-            if(extention == ".obj"){
-                #pragma region OBJ
-                MeshData data;
-                Resources::MeshLoader::loadObj(data,file, LOAD_POINTS | LOAD_FACES);
-                for(auto triangle:data.file_triangles){
-                    glm::vec3 v1Pos,v2Pos,v3Pos;
 
-                    v1Pos = triangle.v1.position;
-                    v2Pos = triangle.v2.position;
-                    v3Pos = triangle.v3.position;
+            for(auto triangle:data.file_triangles){
+                glm::vec3 v1Pos,v2Pos,v3Pos;
 
-                    btVector3 v1 = btVector3(v1Pos.x,v1Pos.y,v1Pos.z);
-                    btVector3 v2 = btVector3(v2Pos.x,v2Pos.y,v2Pos.z);
-                    btVector3 v3 = btVector3(v3Pos.x,v3Pos.y,v3Pos.z);
-                    m_InternalMeshData->addTriangle(v1, v2, v3,true);
-                }
-                #pragma endregion
+                v1Pos = triangle.v1.position;
+                v2Pos = triangle.v2.position;
+                v3Pos = triangle.v3.position;
+
+                btVector3 v1 = btVector3(v1Pos.x,v1Pos.y,v1Pos.z);
+                btVector3 v2 = btVector3(v2Pos.x,v2Pos.y,v2Pos.z);
+                btVector3 v3 = btVector3(v3Pos.x,v3Pos.y,v3Pos.z);
+                m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
+
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
             (shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             (shape)->setMargin(0.001f);
@@ -264,16 +249,12 @@ void Collision::_load(std::string file, COLLISION_TYPE collisionType){
         }
         case COLLISION_TYPE_BOXSHAPE:{
             glm::vec3 max = glm::vec3(0);
-            if(extention == ".obj"){
-                #pragma region OBJ
-                MeshData data;
-                Resources::MeshLoader::loadObj(data,file,LOAD_POINTS);
-                for(auto vertex:data.file_points){
-                    float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
-                    if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
-                }
-                #pragma endregion
-            }
+
+            for(auto vertex:data.file_points){
+                float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
+                if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
+			}
+
             shape = new btBoxShape(btVector3(max.x,max.y,max.z));
             m_CollisionShape = shape;
             m_CollisionType = COLLISION_TYPE_BOXSHAPE;
