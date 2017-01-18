@@ -48,7 +48,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield){
 			d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
 			d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
-			Engine::Resources::MeshLoader::_calculateTBN(d);
+			Engine::Resources::MeshLoader::Detail::_calculateTBN(d);
 
         }
     }
@@ -94,7 +94,7 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
 			d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
 			d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
-			Engine::Resources::MeshLoader::_calculateTBN(d);
+			Engine::Resources::MeshLoader::Detail::_calculateTBN(d);
         }
     }
 	_loadData(d);
@@ -197,7 +197,7 @@ void Mesh::_loadData(ImportedMeshData& data,float threshold){
 	if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
 	if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-	Engine::Resources::MeshLoader::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
+	Engine::Resources::MeshLoader::Detail::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
     std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
