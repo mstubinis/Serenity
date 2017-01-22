@@ -42,15 +42,15 @@ struct ImportedMeshData final{
     std::vector<glm::vec3> normals;
     std::vector<glm::vec3> binormals;
     std::vector<glm::vec3> tangents;
+	std::vector<ushort> indices;
 	void clear(){ file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
-	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear();
+	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
 	}
 };
 
 namespace Engine{
     namespace Resources{
         namespace MeshLoader{
-            void loadObj(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
             void loadObjFromMemory(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
 			void load(ImportedMeshData&,std::string file);
 			namespace Detail{

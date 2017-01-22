@@ -206,7 +206,7 @@ void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
 }
 void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
 	ImportedMeshData d;
-	Engine::Resources::MeshLoader::loadObj(d,filename);
+	Engine::Resources::MeshLoader::load(d,filename);
 	_loadData(d);
 
     if(type == COLLISION_TYPE_NONE){
@@ -217,7 +217,7 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
         colFile += "Col.obj";
         if(boost::filesystem::exists(colFile)){
 			d.clear();
-			Engine::Resources::MeshLoader::loadObj(d,colFile);
+			Engine::Resources::MeshLoader::load(d,colFile);
         }
         m_Collision = new Collision(d,type);
     }

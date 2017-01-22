@@ -14,6 +14,7 @@ class btHeightfieldTerrainShape;
 struct ImportedMeshData;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
+typedef unsigned short ushort;
 
 const uint NUM_VERTEX_DATA = 5;
 const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
@@ -31,7 +32,7 @@ class Mesh final: public EngineResource{
         std::vector<glm::vec3> m_Normals;
         std::vector<glm::vec3> m_Binormals;
         std::vector<glm::vec3> m_Tangents;
-		std::vector<unsigned short> m_Indices;
+		std::vector<ushort> m_Indices;
 
 		void _loadData(ImportedMeshData&,float threshhold = 0.0005f);
         void _loadFromFile(std::string,COLLISION_TYPE);

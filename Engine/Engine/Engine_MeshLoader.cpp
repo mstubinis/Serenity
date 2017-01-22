@@ -18,7 +18,7 @@ bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < thresh
 
 void MeshLoader::load(ImportedMeshData& data, std::string file){	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs); 
+	const aiScene* scene = importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
         return;
     }
@@ -28,7 +28,6 @@ void MeshLoader::Detail::_processNode(ImportedMeshData& data,aiNode* node, const
     for(uint i = 0; i < node->mNumMeshes; i++){
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-		std::vector<uint> indices;
 		for(uint i = 0; i < mesh->mNumVertices; i++){
 			//pos
 			glm::vec3 pos;
@@ -50,25 +49,57 @@ void MeshLoader::Detail::_processNode(ImportedMeshData& data,aiNode* node, const
 
 			//norm
 			glm::vec3 norm;
-			norm.x = mesh->mNormals[i].x;
-			norm.y = mesh->mNormals[i].y;
-			norm.z = mesh->mNormals[i].z;
-			data.normals.push_back(norm);
+			if(mesh->mNormals){
+				norm.x = mesh->mNormals[i].x;
+				norm.y = mesh->mNormals[i].y;
+				norm.z = mesh->mNormals[i].z;
+				data.normals.push_back(norm);
+
+				//binorm
+				glm::vec3 binorm;
+				binorm.x = mesh->mBitangents[i].x;
+				binorm.y = mesh->mBitangents[i].y;
+				binorm.z = mesh->mBitangents[i].z;
+				data.binormals.push_back(binorm);
+
+				//tangent
+				glm::vec3 tangent;
+				tangent.x = mesh->mTangents[i].x;
+				tangent.y = mesh->mTangents[i].y;
+				tangent.z = mesh->mTangents[i].z;
+				data.tangents.push_back(tangent);
+			}
 		}
 		// Process indices
 		for(uint i = 0; i < mesh->mNumFaces; i++){
 			aiFace face = mesh->mFaces[i];
+			Triangle t;
 			for(uint j = 0; j < face.mNumIndices; j++){
-				indices.push_back(face.mIndices[j]);
+				ushort index = (ushort)face.mIndices[j];
+				data.indices.push_back(index);
+				if(j == 0){
+					t.v1.position = data.points.at(index);
+					if(data.uvs.size() > 0) t.v1.uv = data.uvs.at(index);
+					if(data.normals.size() > 0) t.v1.normal = data.normals.at(index);
+				}
+				else if(j == 1){
+					t.v2.position = data.points.at(index);
+					if(data.uvs.size() > 0) t.v2.uv = data.uvs.at(index);
+					if(data.normals.size() > 0) t.v2.normal = data.normals.at(index);
+				}
+				else if(j == 2){
+					t.v3.position = data.points.at(index);
+					if(data.uvs.size() > 0) t.v3.uv = data.uvs.at(index);
+					if(data.normals.size() > 0) t.v3.normal = data.normals.at(index);
+					data.file_triangles.push_back(t);
+				}
 			}
-		}		
+		}
     }
     for(uint i = 0; i < node->mNumChildren; i++){
         MeshLoader::Detail::_processNode(data,node->mChildren[i], scene);
     }
-	MeshLoader::Detail::_calculateTBN(data);
 }
-
 
 void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshData& data, std::vector<uint>& _pi, std::vector<uint>& _ui, std::vector<uint>& _ni, const char _f){
 	if(l[0] == 'o'){
@@ -128,24 +159,6 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshD
     }
 }
 
-void MeshLoader::loadObj(ImportedMeshData& data,std::string filename,unsigned char _flags){
-    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-
-    std::vector<uint> positionIndices;
-    std::vector<uint> uvIndices;
-    std::vector<uint> normalIndices;
-
-    //first read in all data
-    for(std::string line; std::getline(str, line, '\n');){
-        MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,data,positionIndices,uvIndices,normalIndices,_flags);
-    }
-    if(_flags && LOAD_FACES){
-        MeshLoader::Detail::_loadDataIntoTriangles(data,positionIndices,uvIndices,normalIndices,_flags);
-    }
-    if(_flags && LOAD_TBN && data.normals.size() > 0){
-        MeshLoader::Detail::_calculateTBN(data);
-    }
-}
 void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsigned char _flags){
     std::vector<uint> positionIndices;
 	std::vector<uint> uvIndices;
@@ -277,6 +290,7 @@ void MeshLoader::Detail::_indexVBO(ImportedMeshData& data,std::vector<ushort> & 
         out_uvs = data.uvs;
         out_binorm = data.binormals;
         out_tangents = data.tangents;
+		out_indices = data.indices;
         return;
     }   
     for (uint i=0; i < data.points.size(); i++ ){
