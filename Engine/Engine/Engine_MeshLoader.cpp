@@ -7,11 +7,70 @@
 #include <boost/algorithm/string.hpp>
 #include <map>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 using namespace Engine::Resources;
 
 bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
 
-void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l, std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u, std::vector<glm::vec3>& _n, std::vector<uint>& _pi, std::vector<uint>& _ui, std::vector<uint>& _ni, const char _f){
+
+void MeshLoader::load(ImportedMeshData& data, std::string file){	
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs); 
+    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
+        return;
+    }
+	MeshLoader::Detail::_processNode(data,scene->mRootNode, scene);
+}
+void MeshLoader::Detail::_processNode(ImportedMeshData& data,aiNode* node, const aiScene* scene){
+    for(uint i = 0; i < node->mNumMeshes; i++){
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+		std::vector<uint> indices;
+		for(uint i = 0; i < mesh->mNumVertices; i++){
+			//pos
+			glm::vec3 pos;
+			pos.x = mesh->mVertices[i].x;
+			pos.y = mesh->mVertices[i].y;
+			pos.z = mesh->mVertices[i].z;
+			data.points.push_back(pos);
+
+			//uv
+			glm::vec2 uv;
+			if(mesh->mTextureCoords[0]){ // Does the mesh contain texture coordinates?
+				uv.x = mesh->mTextureCoords[0][i].x; 
+				uv.y = mesh->mTextureCoords[0][i].y;
+			}
+			else{
+				uv = glm::vec2(0.0f, 0.0f);
+			}
+			data.uvs.push_back(uv);
+
+			//norm
+			glm::vec3 norm;
+			norm.x = mesh->mNormals[i].x;
+			norm.y = mesh->mNormals[i].y;
+			norm.z = mesh->mNormals[i].z;
+			data.normals.push_back(norm);
+		}
+		// Process indices
+		for(uint i = 0; i < mesh->mNumFaces; i++){
+			aiFace face = mesh->mFaces[i];
+			for(uint j = 0; j < face.mNumIndices; j++){
+				indices.push_back(face.mIndices[j]);
+			}
+		}		
+    }
+    for(uint i = 0; i < node->mNumChildren; i++){
+        MeshLoader::Detail::_processNode(data,node->mChildren[i], scene);
+    }
+	MeshLoader::Detail::_calculateTBN(data);
+}
+
+
+void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshData& data, std::vector<uint>& _pi, std::vector<uint>& _ui, std::vector<uint>& _ni, const char _f){
 	if(l[0] == 'o'){
     }
 	//vertex positions
@@ -19,7 +78,7 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l, std::vector<
         if(_f && LOAD_POINTS){
             glm::vec3 p;
 			sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&p.x,&p.y,&p.z);
-            _p.push_back(p);
+            data.file_points.push_back(p);
         }
     }
 	//vertex uvs
@@ -28,7 +87,7 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l, std::vector<
             glm::vec2 uv;
             sscanf(l.substr(2,l.size()).c_str(),"%f %f",&uv.x,&uv.y);
             uv.y = 1.0f - uv.y;
-            _u.push_back(uv);
+			data.file_uvs.push_back(uv);
         }
     }
 	//vertex normals
@@ -36,7 +95,7 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l, std::vector<
         if(_f && LOAD_NORMALS){
             glm::vec3 n;
             sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&n.x,&n.y,&n.z);
-            _n.push_back(n);
+			data.file_normals.push_back(n);
         }
     }
     //faces
@@ -70,10 +129,6 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l, std::vector<
 }
 
 void MeshLoader::loadObj(ImportedMeshData& data,std::string filename,unsigned char _flags){
-    std::vector<glm::vec3> _p;
-	std::vector<glm::vec2> _u;
-	std::vector<glm::vec3> _n;
-
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
 
     std::vector<uint> positionIndices;
@@ -82,26 +137,16 @@ void MeshLoader::loadObj(ImportedMeshData& data,std::string filename,unsigned ch
 
     //first read in all data
     for(std::string line; std::getline(str, line, '\n');){
-        MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
+        MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,data,positionIndices,uvIndices,normalIndices,_flags);
     }
-    uint max = _p.size(); if(_n.size() > max) max = _n.size(); if(_u.size() > max) max = _u.size();
-    if(_u.size() == 0) _u.resize(max); if(_n.size() == 0) _n.resize(max);
-
-    if(_flags && LOAD_POINTS)  data.file_points = _p;
-    if(_flags && LOAD_UVS)     data.file_uvs = _u;
-    if(_flags && LOAD_NORMALS) data.file_normals = _n;
     if(_flags && LOAD_FACES){
-        MeshLoader::Detail::_loadDataIntoTriangles(data,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
+        MeshLoader::Detail::_loadDataIntoTriangles(data,positionIndices,uvIndices,normalIndices,_flags);
     }
     if(_flags && LOAD_TBN && data.normals.size() > 0){
         MeshLoader::Detail::_calculateTBN(data);
     }
 }
 void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsigned char _flags){
-    std::vector<glm::vec3> _p;
-	std::vector<glm::vec2> _u;
-	std::vector<glm::vec3> _n;
-
     std::vector<uint> positionIndices;
 	std::vector<uint> uvIndices;
 	std::vector<uint> normalIndices;
@@ -111,31 +156,34 @@ void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsi
 
     //first read in all data
     for(std::string line; std::getline(stream, line, '\n');){
-        MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
+        MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,data,positionIndices,uvIndices,normalIndices,_flags);
     }
-    uint max = _p.size(); if(_n.size() > max) max = _n.size(); if(_u.size() > max) max = _u.size();
-    if(_u.size() == 0) _u.resize(max); if(_n.size() == 0) _n.resize(max);
-
-    if(_flags && LOAD_POINTS)  data.file_points = _p;
-    if(_flags && LOAD_UVS)     data.file_uvs = _u;
-    if(_flags && LOAD_NORMALS) data.file_normals = _n;
     if(_flags && LOAD_FACES){
-        MeshLoader::Detail::_loadDataIntoTriangles(data,_p,_u,_n,positionIndices,uvIndices,normalIndices,_flags);
+        MeshLoader::Detail::_loadDataIntoTriangles(data,positionIndices,uvIndices,normalIndices,_flags);
     }
     if(_flags && LOAD_TBN && data.normals.size() > 0){
         MeshLoader::Detail::_calculateTBN(data);
     }
 }
-void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u,std::vector<glm::vec3>& _n,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
+void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
     uint count = 0;
 	Triangle triangle;
     for(uint i=0; i < _pi.size(); i++ ){
-        glm::vec3 pos  = _p[_pi[i]-1];
-        glm::vec2 uv   = _u[_ui[i]-1];
-        glm::vec3 norm = _n[_ni[i]-1];
-        if(_flags && LOAD_POINTS)  data.points .push_back(pos);
-        if(_flags && LOAD_UVS)     data.uvs    .push_back(uv);
-        if(_flags && LOAD_NORMALS) data.normals.push_back(norm);
+        glm::vec3 pos  = glm::vec3(0,0,0);
+		glm::vec2 uv   = glm::vec2(0,0);
+		glm::vec3 norm = glm::vec3(1,1,1);
+		if(_flags && LOAD_POINTS && data.file_points.size() > 0){  
+			pos = data.file_points.at(_pi[i]-1);
+			data.points.push_back(pos);
+		}
+		if(_flags && LOAD_UVS && data.file_uvs.size() > 0){
+			uv  = data.file_uvs.at(_ui[i]-1);
+			data.uvs.push_back(uv);
+		}
+		if(_flags && LOAD_NORMALS && data.file_normals.size() > 0){ 
+			norm = data.file_normals.at(_ni[i]-1);
+			data.normals.push_back(norm);
+		}
         count++;
         if(count == 1){
             triangle.v1.position = pos;
@@ -157,6 +205,7 @@ void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vect
     }
 }
 void MeshLoader::Detail::_calculateTBN(ImportedMeshData& data){
+	if(data.normals.size() == 0) return;
     for(uint i=0; i < data.points.size(); i+=3){
         glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];
         glm::vec3 deltaPos2 = data.points[i + 2] - data.points[i + 0];

@@ -10,6 +10,9 @@
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
+struct aiScene;
+struct aiNode;
+
 enum LoadWhat{
     LOAD_POINTS = 0x01,
     LOAD_UVS = 0x02,
@@ -49,15 +52,16 @@ namespace Engine{
         namespace MeshLoader{
             void loadObj(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
             void loadObjFromMemory(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
-
+			void load(ImportedMeshData&,std::string file);
 			namespace Detail{
+				void _processNode(ImportedMeshData&,aiNode* node, const aiScene* scene);
 				void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
 				void _calculateTBN(ImportedMeshData&);
 				bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
 				void _indexVBO(ImportedMeshData&,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents,float threshold);
-				void _loadDataIntoTriangles(ImportedMeshData&,std::vector<glm::vec3>& _p, std::vector<glm::vec2>& _u,std::vector<glm::vec3>& _n,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
+				void _loadDataIntoTriangles(ImportedMeshData&,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
 				namespace _OBJ{
-					void _loadObjDataFromLine(std::string& line, std::vector<glm::vec3>& positions, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& normals, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
+					void _loadObjDataFromLine(std::string& line,ImportedMeshData&, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
 					
 				};
 				namespace _3DS{
