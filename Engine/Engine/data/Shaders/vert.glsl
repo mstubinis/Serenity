@@ -10,7 +10,7 @@ attribute vec3 tangent;
 
 uniform mat4 VP;
 uniform mat4 Model;
-//uniform mat4 gBones[4];
+//uniform mat4 gBones[200];
 
 varying vec2 UV;
 

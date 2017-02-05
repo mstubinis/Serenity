@@ -18,144 +18,146 @@ bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < thresh
 
 
 void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){	
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
         return;
     }
-	MeshLoader::Detail::_processNode(mesh,data,scene->mRootNode, scene);
-	data.m_aiScene = scene;
+    MeshLoader::Detail::_processNode(mesh,data,scene->mRootNode, scene);
+    data.m_aiScene = scene;
 }
 void MeshLoader::Detail::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
     for(uint i = 0; i < node->mNumMeshes; i++){
         aiMesh* aimesh = scene->mMeshes[node->mMeshes[i]];
+        #pragma region vertices
+        for(uint i = 0; i < aimesh->mNumVertices; i++){
+            //pos
+            glm::vec3 pos;
+            pos.x = aimesh->mVertices[i].x; pos.y = aimesh->mVertices[i].y; pos.z = aimesh->mVertices[i].z;
+            data.points.push_back(pos);
 
-		for(uint i = 0; i < aimesh->mNumVertices; i++){
-			//pos
-			glm::vec3 pos;
-			pos.x = aimesh->mVertices[i].x; pos.y = aimesh->mVertices[i].y; pos.z = aimesh->mVertices[i].z;
-			data.points.push_back(pos);
+            //uv
+            glm::vec2 uv;
+            if(aimesh->mTextureCoords[0]){ uv.x = aimesh->mTextureCoords[0][i].x; uv.y = aimesh->mTextureCoords[0][i].y; }
+            else{ uv = glm::vec2(0.0f, 0.0f); }
+            data.uvs.push_back(uv);
 
-			//uv
-			glm::vec2 uv;
-			if(aimesh->mTextureCoords[0]){ uv.x = aimesh->mTextureCoords[0][i].x; uv.y = aimesh->mTextureCoords[0][i].y; }
-			else{ uv = glm::vec2(0.0f, 0.0f); }
-			data.uvs.push_back(uv);
+            //norm
+            glm::vec3 norm;
+            if(aimesh->mNormals){
+                norm.x = aimesh->mNormals[i].x; norm.y = aimesh->mNormals[i].y; norm.z = aimesh->mNormals[i].z;
+                data.normals.push_back(norm);
 
-			//norm
-			glm::vec3 norm;
-			if(aimesh->mNormals){
-				norm.x = aimesh->mNormals[i].x; norm.y = aimesh->mNormals[i].y; norm.z = aimesh->mNormals[i].z;
-				data.normals.push_back(norm);
+                //binorm
+                glm::vec3 binorm;
+                binorm.x = aimesh->mBitangents[i].x; binorm.y = aimesh->mBitangents[i].y; binorm.z = aimesh->mBitangents[i].z;
+                data.binormals.push_back(binorm);
 
-				//binorm
-				glm::vec3 binorm;
-				binorm.x = aimesh->mBitangents[i].x; binorm.y = aimesh->mBitangents[i].y; binorm.z = aimesh->mBitangents[i].z;
-				data.binormals.push_back(binorm);
+                //tangent
+                glm::vec3 tangent;
+                tangent.x = aimesh->mTangents[i].x; tangent.y = aimesh->mTangents[i].y; tangent.z = aimesh->mTangents[i].z;
+                data.tangents.push_back(tangent);
+            }
+        }
+        #pragma endregion
+        // Process indices
+        #pragma region indices
+        for(uint i = 0; i < aimesh->mNumFaces; i++){
+            aiFace face = aimesh->mFaces[i];
+            Triangle t;
+            for(uint j = 0; j < face.mNumIndices; j++){
+                ushort index = (ushort)face.mIndices[j];
+                data.indices.push_back(index);
+                if(j == 0){
+                    t.v1.position = data.points.at(index);
+                    if(data.uvs.size() > 0) t.v1.uv = data.uvs.at(index);
+                    if(data.normals.size() > 0) t.v1.normal = data.normals.at(index);
+                }
+                else if(j == 1){
+                    t.v2.position = data.points.at(index);
+                    if(data.uvs.size() > 0) t.v2.uv = data.uvs.at(index);
+                    if(data.normals.size() > 0) t.v2.normal = data.normals.at(index);
+                }
+                else if(j == 2){
+                    t.v3.position = data.points.at(index);
+                    if(data.uvs.size() > 0) t.v3.uv = data.uvs.at(index);
+                    if(data.normals.size() > 0) t.v3.normal = data.normals.at(index);
+                    data.file_triangles.push_back(t);
+                }
+            }
+        }
+        #pragma endregion
+        //animation stuff
+        aiMatrix4x4 globalInverse = scene->mRootNode->mTransformation; // node->mTransformation?
+        globalInverse.Inverse();
 
-				//tangent
-				glm::vec3 tangent;
-				tangent.x = aimesh->mTangents[i].x; tangent.y = aimesh->mTangents[i].y; tangent.z = aimesh->mTangents[i].z;
-				data.tangents.push_back(tangent);
-			}
-		}
-		// Process indices
-		for(uint i = 0; i < aimesh->mNumFaces; i++){
-			aiFace face = aimesh->mFaces[i];
-			Triangle t;
-			for(uint j = 0; j < face.mNumIndices; j++){
-				ushort index = (ushort)face.mIndices[j];
-				data.indices.push_back(index);
-				if(j == 0){
-					t.v1.position = data.points.at(index);
-					if(data.uvs.size() > 0) t.v1.uv = data.uvs.at(index);
-					if(data.normals.size() > 0) t.v1.normal = data.normals.at(index);
-				}
-				else if(j == 1){
-					t.v2.position = data.points.at(index);
-					if(data.uvs.size() > 0) t.v2.uv = data.uvs.at(index);
-					if(data.normals.size() > 0) t.v2.normal = data.normals.at(index);
-				}
-				else if(j == 2){
-					t.v3.position = data.points.at(index);
-					if(data.uvs.size() > 0) t.v3.uv = data.uvs.at(index);
-					if(data.normals.size() > 0) t.v3.normal = data.normals.at(index);
-					data.file_triangles.push_back(t);
-				}
-			}
-		}
-		//animation stuff
-		aiMatrix4x4 globalInverse = scene->mRootNode->mTransformation; // node->mTransformation?
-		globalInverse.Inverse();
+        //bones
+        for (uint i = 0; i < aimesh->mNumBones; i++) { 
+            uint BoneIndex = 0; 
+            std::string BoneName(aimesh->mBones[i]->mName.data);
+            if (data.m_BoneMapping.find(BoneName) == data.m_BoneMapping.end()) {
+                BoneIndex = data.m_NumBones;
+                data.m_NumBones++; 
+                BoneInfo bi; 
+                data.m_BoneInfo.push_back(bi);
+            }
+            else{
+                BoneIndex = data.m_BoneMapping[BoneName];
+            }
+            data.m_BoneMapping[BoneName] = BoneIndex;
 
-		//bones
-		for (uint i = 0; i < aimesh->mNumBones; i++) { 
-			uint BoneIndex = 0; 
-			std::string BoneName(aimesh->mBones[i]->mName.data);
-			if (data.m_BoneMapping.find(BoneName) == data.m_BoneMapping.end()) {
-				BoneIndex = data.m_NumBones;
-				data.m_NumBones++; 
-				BoneInfo bi; 
-				data.m_BoneInfo.push_back(bi);
-			}
-			else {
-				BoneIndex = data.m_BoneMapping[BoneName];
-			}
-			data.m_BoneMapping[BoneName] = BoneIndex;
+            aiMatrix4x4 m = aimesh->mBones[i]->mOffsetMatrix;
+            data.m_BoneInfo[BoneIndex].BoneOffset = glm::mat4(m.a1,m.a2,m.a3,m.a4,
+                                                              m.b1,m.b2,m.b3,m.b4,
+                                                              m.c1,m.c2,m.c3,m.c4,
+                                                              m.d1,m.d2,m.d3,m.d4);
 
-			aiMatrix4x4 m = aimesh->mBones[i]->mOffsetMatrix;
-			data.m_BoneInfo[BoneIndex].BoneOffset = glm::mat4(m.a1,m.a2,m.a3,m.a4,
-				                                              m.b1,m.b2,m.b3,m.b4,
-			                                                  m.c1,m.c2,m.c3,m.c4,
-															  m.d1,m.d2,m.d3,m.d4);
-
-			for (uint j = 0 ; j < aimesh->mBones[i]->mNumWeights ; j++) {
-				uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
-				float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
-				data.m_Bones[VertexID].AddBoneData(BoneIndex, Weight);
-			}
-		}
-		if(scene->mAnimations){
-			const aiAnimation* pAnimation = scene->mAnimations[0];
-			for (uint i = 0 ; i < pAnimation->mNumChannels; i++){
-				data.m_NodeAnimMap[pAnimation->mChannels[i]->mNodeName.data] = pAnimation->mChannels[i];
-			}
-		}
+            for (uint j = 0 ; j < aimesh->mBones[i]->mNumWeights ; j++) {
+                uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
+                float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
+                data.m_Bones[VertexID].AddBoneData(BoneIndex, Weight);
+            }
+        }
+        if(scene->mAnimations){
+            for(uint i = 0; i < scene->mNumAnimations; i++){
+                 const aiAnimation* anim = scene->mAnimations[i];
+                 AnimationData* animData = new AnimationData(mesh,i);
+                 std::string key(anim->mName.C_Str());
+                 mesh->animations().emplace(key,animData);
+            }
+        }
     }
-
-
-
     for(uint i = 0; i < node->mNumChildren; i++){
         MeshLoader::Detail::_processNode(mesh,data,node->mChildren[i], scene);
     }
 }
 
 void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshData& data, std::vector<uint>& _pi, std::vector<uint>& _ui, std::vector<uint>& _ni, const char _f){
-	if(l[0] == 'o'){
+    if(l[0] == 'o'){
     }
-	//vertex positions
+    //vertex positions
     else if(l[0] == 'v' && l[1] == ' '){ 
         if(_f && LOAD_POINTS){
             glm::vec3 p;
-			sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&p.x,&p.y,&p.z);
+            sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&p.x,&p.y,&p.z);
             data.file_points.push_back(p);
         }
     }
-	//vertex uvs
+    //vertex uvs
     else if(l[0] == 'v' && l[1] == 't'){
         if(_f && LOAD_UVS){
             glm::vec2 uv;
             sscanf(l.substr(2,l.size()).c_str(),"%f %f",&uv.x,&uv.y);
             uv.y = 1.0f - uv.y;
-			data.file_uvs.push_back(uv);
+            data.file_uvs.push_back(uv);
         }
     }
-	//vertex normals
+    //vertex normals
     else if(l[0] == 'v' && l[1] == 'n'){
         if(_f && LOAD_NORMALS){
             glm::vec3 n;
             sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&n.x,&n.y,&n.z);
-			data.file_normals.push_back(n);
+            data.file_normals.push_back(n);
         }
     }
     //faces
@@ -190,11 +192,11 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshD
 
 void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsigned char _flags){
     std::vector<uint> positionIndices;
-	std::vector<uint> uvIndices;
-	std::vector<uint> normalIndices;
+    std::vector<uint> uvIndices;
+    std::vector<uint> normalIndices;
 
     std::istringstream stream;
-	stream.str(input);
+    stream.str(input);
 
     //first read in all data
     for(std::string line; std::getline(stream, line, '\n');){
@@ -209,23 +211,23 @@ void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsi
 }
 void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
     uint count = 0;
-	Triangle triangle;
+    Triangle triangle;
     for(uint i=0; i < _pi.size(); i++ ){
         glm::vec3 pos  = glm::vec3(0,0,0);
-		glm::vec2 uv   = glm::vec2(0,0);
-		glm::vec3 norm = glm::vec3(1,1,1);
-		if(_flags && LOAD_POINTS && data.file_points.size() > 0){  
-			pos = data.file_points.at(_pi[i]-1);
-			data.points.push_back(pos);
-		}
-		if(_flags && LOAD_UVS && data.file_uvs.size() > 0){
-			uv  = data.file_uvs.at(_ui[i]-1);
-			data.uvs.push_back(uv);
-		}
-		if(_flags && LOAD_NORMALS && data.file_normals.size() > 0){ 
-			norm = data.file_normals.at(_ni[i]-1);
-			data.normals.push_back(norm);
-		}
+        glm::vec2 uv   = glm::vec2(0,0);
+        glm::vec3 norm = glm::vec3(1,1,1);
+        if(_flags && LOAD_POINTS && data.file_points.size() > 0){  
+            pos = data.file_points.at(_pi[i]-1);
+            data.points.push_back(pos);
+        }
+        if(_flags && LOAD_UVS && data.file_uvs.size() > 0){
+            uv  = data.file_uvs.at(_ui[i]-1);
+            data.uvs.push_back(uv);
+        }
+        if(_flags && LOAD_NORMALS && data.file_normals.size() > 0){ 
+            norm = data.file_normals.at(_ni[i]-1);
+            data.normals.push_back(norm);
+        }
         count++;
         if(count == 1){
             triangle.v1.position = pos;
@@ -247,7 +249,7 @@ void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vect
     }
 }
 void MeshLoader::Detail::_calculateTBN(ImportedMeshData& data){
-	if(data.normals.size() == 0) return;
+    if(data.normals.size() == 0) return;
     for(uint i=0; i < data.points.size(); i+=3){
         glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];
         glm::vec3 deltaPos2 = data.points[i + 2] - data.points[i + 0];
@@ -319,7 +321,7 @@ void MeshLoader::Detail::_indexVBO(ImportedMeshData& data,std::vector<ushort> & 
         out_uvs = data.uvs;
         out_binorm = data.binormals;
         out_tangents = data.tangents;
-		out_indices = data.indices;
+        out_indices = data.indices;
         return;
     }   
     for (uint i=0; i < data.points.size(); i++ ){

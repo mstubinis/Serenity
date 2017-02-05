@@ -63,7 +63,6 @@ struct ImportedMeshData final{
     glm::mat4 m_GlobalInverseTransform;
 	std::vector<VertexBoneData> m_Bones;
 	const aiScene* m_aiScene;
-	std::unordered_map<std::string,aiNodeAnim*> m_NodeAnimMap;
 
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;
