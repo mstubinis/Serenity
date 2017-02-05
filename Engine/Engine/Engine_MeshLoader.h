@@ -4,6 +4,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -12,6 +13,10 @@ typedef unsigned short ushort;
 
 struct aiScene;
 struct aiNode;
+struct aiNodeAnim;
+class Mesh;
+
+const uint NUM_BONES_PER_VEREX = 4;
 
 enum LoadWhat{
     LOAD_POINTS = 0x01,
@@ -31,7 +36,35 @@ struct Vertex final{
     void clear(){ position = normal = binormal = tangent = glm::vec3(0); uv = glm::vec2(0); }
 };
 struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
+struct VertexBoneData{
+    uint IDs[NUM_BONES_PER_VEREX];
+    float Weights[NUM_BONES_PER_VEREX];
+	void AddBoneData(uint BoneID, float Weight){
+		uint size = sizeof(IDs) / sizeof(IDs[0]);
+		for (uint i = 0 ; i < size; i++) {
+			if (Weights[i] == 0.0) {
+				IDs[i] = BoneID; Weights[i] = Weight; return;
+			} 
+		}
+	}
+};
+struct BoneInfo{
+    glm::mat4 BoneOffset;
+    glm::mat4 FinalTransformation;        
+    BoneInfo(){
+        BoneOffset = glm::mat4(0);
+        FinalTransformation = glm::mat4(0);   
+    }
+};
 struct ImportedMeshData final{
+    std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
+    uint m_NumBones;
+    std::vector<BoneInfo> m_BoneInfo;
+    glm::mat4 m_GlobalInverseTransform;
+	std::vector<VertexBoneData> m_Bones;
+	const aiScene* m_aiScene;
+	std::unordered_map<std::string,aiNodeAnim*> m_NodeAnimMap;
+
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;
     std::vector<glm::vec3> file_normals;
@@ -43,7 +76,8 @@ struct ImportedMeshData final{
     std::vector<glm::vec3> binormals;
     std::vector<glm::vec3> tangents;
 	std::vector<ushort> indices;
-	void clear(){ file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
+	void clear(){ 
+		file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
 	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
 	}
 };
@@ -52,9 +86,9 @@ namespace Engine{
     namespace Resources{
         namespace MeshLoader{
             void loadObjFromMemory(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
-			void load(ImportedMeshData&,std::string file);
+			void load(Mesh*,ImportedMeshData&,std::string file);
 			namespace Detail{
-				void _processNode(ImportedMeshData&,aiNode* node, const aiScene* scene);
+				void _processNode(Mesh*,ImportedMeshData&,aiNode* node, const aiScene* scene);
 				void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
 				void _calculateTBN(ImportedMeshData&);
 				bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);

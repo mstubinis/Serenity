@@ -1,4 +1,5 @@
 #include "Engine_MeshLoader.h"
+#include "Mesh.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -16,63 +17,51 @@ using namespace Engine::Resources;
 bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
 
 
-void MeshLoader::load(ImportedMeshData& data, std::string file){	
+void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){	
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
         return;
     }
-	MeshLoader::Detail::_processNode(data,scene->mRootNode, scene);
+	MeshLoader::Detail::_processNode(mesh,data,scene->mRootNode, scene);
+	data.m_aiScene = scene;
 }
-void MeshLoader::Detail::_processNode(ImportedMeshData& data,aiNode* node, const aiScene* scene){
+void MeshLoader::Detail::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
     for(uint i = 0; i < node->mNumMeshes; i++){
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        aiMesh* aimesh = scene->mMeshes[node->mMeshes[i]];
 
-		for(uint i = 0; i < mesh->mNumVertices; i++){
+		for(uint i = 0; i < aimesh->mNumVertices; i++){
 			//pos
 			glm::vec3 pos;
-			pos.x = mesh->mVertices[i].x;
-			pos.y = mesh->mVertices[i].y;
-			pos.z = mesh->mVertices[i].z;
+			pos.x = aimesh->mVertices[i].x; pos.y = aimesh->mVertices[i].y; pos.z = aimesh->mVertices[i].z;
 			data.points.push_back(pos);
 
 			//uv
 			glm::vec2 uv;
-			if(mesh->mTextureCoords[0]){ // Does the mesh contain texture coordinates?
-				uv.x = mesh->mTextureCoords[0][i].x; 
-				uv.y = mesh->mTextureCoords[0][i].y;
-			}
-			else{
-				uv = glm::vec2(0.0f, 0.0f);
-			}
+			if(aimesh->mTextureCoords[0]){ uv.x = aimesh->mTextureCoords[0][i].x; uv.y = aimesh->mTextureCoords[0][i].y; }
+			else{ uv = glm::vec2(0.0f, 0.0f); }
 			data.uvs.push_back(uv);
 
 			//norm
 			glm::vec3 norm;
-			if(mesh->mNormals){
-				norm.x = mesh->mNormals[i].x;
-				norm.y = mesh->mNormals[i].y;
-				norm.z = mesh->mNormals[i].z;
+			if(aimesh->mNormals){
+				norm.x = aimesh->mNormals[i].x; norm.y = aimesh->mNormals[i].y; norm.z = aimesh->mNormals[i].z;
 				data.normals.push_back(norm);
 
 				//binorm
 				glm::vec3 binorm;
-				binorm.x = mesh->mBitangents[i].x;
-				binorm.y = mesh->mBitangents[i].y;
-				binorm.z = mesh->mBitangents[i].z;
+				binorm.x = aimesh->mBitangents[i].x; binorm.y = aimesh->mBitangents[i].y; binorm.z = aimesh->mBitangents[i].z;
 				data.binormals.push_back(binorm);
 
 				//tangent
 				glm::vec3 tangent;
-				tangent.x = mesh->mTangents[i].x;
-				tangent.y = mesh->mTangents[i].y;
-				tangent.z = mesh->mTangents[i].z;
+				tangent.x = aimesh->mTangents[i].x; tangent.y = aimesh->mTangents[i].y; tangent.z = aimesh->mTangents[i].z;
 				data.tangents.push_back(tangent);
 			}
 		}
 		// Process indices
-		for(uint i = 0; i < mesh->mNumFaces; i++){
-			aiFace face = mesh->mFaces[i];
+		for(uint i = 0; i < aimesh->mNumFaces; i++){
+			aiFace face = aimesh->mFaces[i];
 			Triangle t;
 			for(uint j = 0; j < face.mNumIndices; j++){
 				ushort index = (ushort)face.mIndices[j];
@@ -95,9 +84,49 @@ void MeshLoader::Detail::_processNode(ImportedMeshData& data,aiNode* node, const
 				}
 			}
 		}
+		//animation stuff
+		aiMatrix4x4 globalInverse = scene->mRootNode->mTransformation; // node->mTransformation?
+		globalInverse.Inverse();
+
+		//bones
+		for (uint i = 0; i < aimesh->mNumBones; i++) { 
+			uint BoneIndex = 0; 
+			std::string BoneName(aimesh->mBones[i]->mName.data);
+			if (data.m_BoneMapping.find(BoneName) == data.m_BoneMapping.end()) {
+				BoneIndex = data.m_NumBones;
+				data.m_NumBones++; 
+				BoneInfo bi; 
+				data.m_BoneInfo.push_back(bi);
+			}
+			else {
+				BoneIndex = data.m_BoneMapping[BoneName];
+			}
+			data.m_BoneMapping[BoneName] = BoneIndex;
+
+			aiMatrix4x4 m = aimesh->mBones[i]->mOffsetMatrix;
+			data.m_BoneInfo[BoneIndex].BoneOffset = glm::mat4(m.a1,m.a2,m.a3,m.a4,
+				                                              m.b1,m.b2,m.b3,m.b4,
+			                                                  m.c1,m.c2,m.c3,m.c4,
+															  m.d1,m.d2,m.d3,m.d4);
+
+			for (uint j = 0 ; j < aimesh->mBones[i]->mNumWeights ; j++) {
+				uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
+				float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
+				data.m_Bones[VertexID].AddBoneData(BoneIndex, Weight);
+			}
+		}
+		if(scene->mAnimations){
+			const aiAnimation* pAnimation = scene->mAnimations[0];
+			for (uint i = 0 ; i < pAnimation->mNumChannels; i++){
+				data.m_NodeAnimMap[pAnimation->mChannels[i]->mNodeName.data] = pAnimation->mChannels[i];
+			}
+		}
     }
+
+
+
     for(uint i = 0; i < node->mNumChildren; i++){
-        MeshLoader::Detail::_processNode(data,node->mChildren[i], scene);
+        MeshLoader::Detail::_processNode(mesh,data,node->mChildren[i], scene);
     }
 }
 

@@ -7,11 +7,14 @@
 #include "Engine_ResourceBasic.h"
 #include "Engine_Physics.h"
 #include <unordered_map>
+#include <assimp/scene.h>
 
 namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
 struct ImportedMeshData;
+struct BoneInfo;
+struct VertexBoneData;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -25,6 +28,15 @@ class Mesh final: public EngineResource{
 		GLuint m_elementbuffer;
         Collision* m_Collision;
 
+		//animation data
+		std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
+		uint m_NumBones;
+		std::vector<BoneInfo> m_BoneInfo;
+		glm::mat4 m_GlobalInverseTransform;
+		std::vector<VertexBoneData> m_Bones;
+		const aiScene* m_aiScene;
+		std::unordered_map<std::string,aiNodeAnim*> m_NodeAnimMap;
+
         glm::vec3 m_radiusBox;
         float m_radius;
         std::vector<glm::vec3> m_Points;
@@ -34,6 +46,15 @@ class Mesh final: public EngineResource{
         std::vector<glm::vec3> m_Tangents;
 		std::vector<ushort> m_Indices;
 
+		uint _FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint _FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint _FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		void _CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+		void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+		void _CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node);
+		const aiNodeAnim* _FindNodeAnim(const aiAnimation* pAnimation, const std::string NodeName);
+		void _ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
+		void _boneTransform(float TimeInSeconds,std::vector<glm::mat4>& Transforms);
 		void _loadData(ImportedMeshData&,float threshhold = 0.0005f);
         void _loadFromFile(std::string,COLLISION_TYPE);
         void _loadFromOBJ(std::string,COLLISION_TYPE);
