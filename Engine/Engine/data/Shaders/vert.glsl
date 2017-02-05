@@ -5,9 +5,12 @@ attribute vec2 uv;
 attribute vec3 normal;
 attribute vec3 binormal;
 attribute vec3 tangent;
+//attribute ivec4 BoneIDs;
+//attribute vec4 Weights;
 
 uniform mat4 VP;
 uniform mat4 Model;
+//uniform mat4 gBones[4];
 
 varying vec2 UV;
 
