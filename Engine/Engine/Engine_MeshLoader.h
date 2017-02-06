@@ -39,9 +39,17 @@ struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
 struct VertexBoneData{
     uint IDs[NUM_BONES_PER_VEREX];
     float Weights[NUM_BONES_PER_VEREX];
+
+
+	VertexBoneData(){
+		memset(&IDs,0,sizeof(IDs));
+        memset(&Weights,0,sizeof(Weights));  
+	}
+	~VertexBoneData(){
+	}
 	void AddBoneData(uint BoneID, float Weight){
 		uint size = sizeof(IDs) / sizeof(IDs[0]);
-		for (uint i = 0 ; i < size; i++) {
+		for (uint i = 0; i < size; i++) {
 			if (Weights[i] == 0.0) {
 				IDs[i] = BoneID; Weights[i] = Weight; return;
 			} 
@@ -61,7 +69,7 @@ struct ImportedMeshData final{
     uint m_NumBones;
     std::vector<BoneInfo> m_BoneInfo;
     glm::mat4 m_GlobalInverseTransform;
-	std::vector<VertexBoneData> m_Bones;
+	std::map<uint,VertexBoneData> m_Bones;
 	const aiScene* m_aiScene;
 
     std::vector<glm::vec3> file_points;

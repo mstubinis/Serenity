@@ -41,7 +41,7 @@ class AnimationData{
 		uint _FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
 
 	public:
-		AnimationData(Mesh*,uint animationIndex);
+		AnimationData(Mesh*,ImportedMeshData&,uint animationIndex);
 		~AnimationData();
 
 		void play(float time);

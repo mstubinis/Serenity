@@ -23,8 +23,8 @@ void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
         return;
     }
+	data.m_aiScene = scene;
     MeshLoader::Detail::_processNode(mesh,data,scene->mRootNode, scene);
-    data.m_aiScene = scene;
 }
 void MeshLoader::Detail::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
     for(uint i = 0; i < node->mNumMeshes; i++){
@@ -88,40 +88,46 @@ void MeshLoader::Detail::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* 
         }
         #pragma endregion
         //animation stuff
-        aiMatrix4x4 globalInverse = scene->mRootNode->mTransformation; // node->mTransformation?
-        globalInverse.Inverse();
+        aiMatrix4x4 m = scene->mRootNode->mTransformation; // node->mTransformation?
+        m.Inverse();
+		data.m_NumBones = 0;
+		data.m_GlobalInverseTransform = glm::mat4(m.a1,m.a2,m.a3,m.a4,
+                                                  m.b1,m.b2,m.b3,m.b4,
+                                                  m.c1,m.c2,m.c3,m.c4,
+                                                  m.d1,m.d2,m.d3,m.d4);
 
         //bones
-        for (uint i = 0; i < aimesh->mNumBones; i++) { 
-            uint BoneIndex = 0; 
-            std::string BoneName(aimesh->mBones[i]->mName.data);
-            if (data.m_BoneMapping.find(BoneName) == data.m_BoneMapping.end()) {
-                BoneIndex = data.m_NumBones;
-                data.m_NumBones++; 
-                BoneInfo bi; 
-                data.m_BoneInfo.push_back(bi);
-            }
-            else{
-                BoneIndex = data.m_BoneMapping[BoneName];
-            }
-            data.m_BoneMapping[BoneName] = BoneIndex;
+		if(aimesh->mNumBones > 0){
+			for (uint i = 0; i < aimesh->mNumBones; i++) { 
+				uint BoneIndex = 0; 
+				std::string BoneName(aimesh->mBones[i]->mName.data);
+				if (data.m_BoneMapping.find(BoneName) == data.m_BoneMapping.end()) {
+					BoneIndex = data.m_NumBones;
+					data.m_NumBones++; 
+					BoneInfo bi;
+					data.m_BoneInfo.push_back(bi);
+				}
+				else{
+					BoneIndex = data.m_BoneMapping[BoneName];
+				}
+				data.m_BoneMapping[BoneName] = BoneIndex;
 
-            aiMatrix4x4 m = aimesh->mBones[i]->mOffsetMatrix;
-            data.m_BoneInfo[BoneIndex].BoneOffset = glm::mat4(m.a1,m.a2,m.a3,m.a4,
-                                                              m.b1,m.b2,m.b3,m.b4,
-                                                              m.c1,m.c2,m.c3,m.c4,
-                                                              m.d1,m.d2,m.d3,m.d4);
+				aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
+				data.m_BoneInfo[BoneIndex].BoneOffset = glm::mat4(n.a1,n.a2,n.a3,n.a4,n.b1,n.b2,n.b3,n.b4,n.c1,n.c2,n.c3,n.c4,n.d1,n.d2,n.d3,n.d4);
 
-            for (uint j = 0 ; j < aimesh->mBones[i]->mNumWeights ; j++) {
-                uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
-                float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
-                data.m_Bones[VertexID].AddBoneData(BoneIndex, Weight);
-            }
-        }
+				for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
+					uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
+					float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
+					VertexBoneData d;
+					d.AddBoneData(BoneIndex, Weight);
+					data.m_Bones[VertexID] = d;
+				}
+			}
+		}
         if(scene->mAnimations){
             for(uint i = 0; i < scene->mNumAnimations; i++){
                  const aiAnimation* anim = scene->mAnimations[i];
-                 AnimationData* animData = new AnimationData(mesh,i);
+                 AnimationData* animData = new AnimationData(mesh,data,i);
                  std::string key(anim->mName.C_Str());
                  mesh->animations().emplace(key,animData);
             }

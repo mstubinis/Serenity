@@ -205,7 +205,7 @@ void Mesh::_loadData(ImportedMeshData& data,float threshold){
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
     std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
-    if(extention == ".obj")
+    //if(extention == ".obj")
         _loadFromOBJ(file,type);
 }
 void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
@@ -230,7 +230,11 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
     m_NumBones = d.m_NumBones;
     m_BoneInfo = d.m_BoneInfo;
     m_GlobalInverseTransform = d.m_GlobalInverseTransform;
-    m_Bones = d.m_Bones;
+
+	std::vector<VertexBoneData> bones;
+	for(auto bone:d.m_Bones)
+		bones.push_back(bone.second);
+    m_Bones = bones;
 }
 void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type){
     ImportedMeshData d;
@@ -247,7 +251,7 @@ void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type){
 void Mesh::initRenderingContext(){
     glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0] );
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
     glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
@@ -297,9 +301,10 @@ void Mesh::playAnimation(std::string animationName,float time){
     m_Animations[animationName]->play(time);
 }
 
-AnimationData::AnimationData(Mesh* mesh,uint index){
+AnimationData::AnimationData(Mesh* mesh,ImportedMeshData& data,uint index){
     m_Mesh = mesh;
-    m_Animation = m_Mesh->m_aiScene->mAnimations[index];
+    m_Animation = data.m_aiScene->mAnimations[index];
+	m_Mesh->m_aiScene = data.m_aiScene;
     for(uint i = 0; i < m_Animation->mNumChannels; i++){
         m_NodeAnimMap[m_Animation->mChannels[i]->mNodeName.data] = m_Animation->mChannels[i];
     }
