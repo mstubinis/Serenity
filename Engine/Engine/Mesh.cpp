@@ -229,9 +229,9 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
     m_BoneInfo = d.m_BoneInfo;
     m_GlobalInverseTransform = d.m_GlobalInverseTransform;
 
-	std::vector<VertexBoneData> bones;
-	for(auto bone:d.m_Bones)
-		bones.push_back(bone.second);
+    std::vector<VertexBoneData> bones;
+    for(auto bone:d.m_Bones)
+        bones.push_back(bone.second);
     m_Bones = bones;
 }
 void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type){
@@ -264,13 +264,14 @@ void Mesh::initRenderingContext(){
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
     glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
-
-   	//glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(m_Bones[0]) * m_Bones.size(), &m_Bones[0], GL_STATIC_DRAW);
-    //glEnableVertexAttribArray(5);
-    //glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
-    //glEnableVertexAttribArray(6);    
-    //glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+    if(m_Bones.size() > 0){
+        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m_Bones[0]) * m_Bones.size(), &m_Bones[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(5);
+        glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+        glEnableVertexAttribArray(6);    
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+    }
 
 
     glGenBuffers(1, &m_elementbuffer);
@@ -281,7 +282,7 @@ void Mesh::cleanupRenderingContext(){
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){
         glDeleteBuffers(1, &m_buffers[i]);
     }
-	glDeleteBuffers(1, &m_buffers[5]);
+    glDeleteBuffers(1, &m_buffers[5]);
 
     glDeleteBuffers(1,&m_elementbuffer);
 }
@@ -300,20 +301,23 @@ void Mesh::render(GLuint mode){
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
     }
-   	//glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
-    //glEnableVertexAttribArray(5);
-    //glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
-    //glEnableVertexAttribArray(6);    
-    //glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
-
-
+    if(m_Bones.size() > 0){
+        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
+        glEnableVertexAttribArray(5);
+        glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+        glEnableVertexAttribArray(6);    
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+    }
     //glDrawArrays(mode, 0, m_Points.size());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
-    for(uint i = 0; i < NUM_VERTEX_DATA; i++)
+    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
         glDisableVertexAttribArray(i);
-	//glDisableVertexAttribArray(5);
-	//glDisableVertexAttribArray(6);
+	}
+    if(m_Bones.size() > 0){
+        glDisableVertexAttribArray(5);
+        glDisableVertexAttribArray(6);
+    }
 }
 void Mesh::playAnimation(std::string animationName,float time){
     m_Animations[animationName]->play(time);
@@ -323,8 +327,8 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
     m_Animation = anim;
     for(uint i = 0; i < m_Animation->mNumChannels; i++){
-		std::string key = (m_Animation->mChannels[i]->mNodeName.data);
-		m_NodeAnimMap.emplace(key,m_Animation->mChannels[i]);
+        std::string key = (m_Animation->mChannels[i]->mNodeName.data);
+        m_NodeAnimMap.emplace(key,m_Animation->mChannels[i]);
     }
 }
 AnimationData::~AnimationData(){
