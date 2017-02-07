@@ -5,8 +5,8 @@ attribute vec2 uv;
 attribute vec3 normal;
 attribute vec3 binormal;
 attribute vec3 tangent;
-//attribute ivec4 BoneIDs;
-//attribute vec4 Weights;
+attribute vec4 BoneIDs;
+attribute vec4 Weights;
 
 uniform mat4 VP;
 uniform mat4 Model;
@@ -24,17 +24,28 @@ varying float FC_2_f;
 uniform float fcoeff;
 
 void main(void){
+    mat4 BoneTransform = mat4(1.0);
+    //BoneTransform = gBones[int(BoneIDs[0])] * Weights[0];
+    //BoneTransform += gBones[int(BoneIDs[1])] * Weights[1];
+    //BoneTransform += gBones[int(BoneIDs[2])] * Weights[2];
+    //BoneTransform += gBones[int(BoneIDs[3])] * Weights[3];
+
+	vec4 PosL = BoneTransform * vec4(position, 1.0);
+	vec4 NormalL = BoneTransform * vec4(normal, 0.0);
+	vec4 BinormalL = BoneTransform * vec4(binormal, 0.0);
+	vec4 TangentL = BoneTransform * vec4(tangent, 0.0);
+
     mat4 MVP = VP * Model;
-    gl_Position = MVP * vec4(position, 1.0);
+
+    gl_Position = MVP * PosL;
     
-    UV = uv;
+    Normals = (Model * NormalL).xyz; 
+    Binormals = (Model * BinormalL).xyz;
+    Tangents = (Model * TangentL).xyz;
 
-    Normals = (Model * vec4(normal,0.0)).xyz; 
-    Binormals = (Model * vec4(binormal,0.0)).xyz;
-    Tangents = (Model * vec4(tangent,0.0)).xyz;
+	WorldPosition = (Model * PosL).xyz;
 
-	WorldPosition = (Model * vec4(position, 1.0)).xyz;
-
+	UV = uv;
     logz_f = 1.0 + gl_Position.w;
 	gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
     FC_2_f = fcoeff * 0.5;

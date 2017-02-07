@@ -474,5 +474,6 @@ void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& 
     }
 }
 void AnimationData::_SetBoneTransform(uint Index, glm::mat4& Transform){
-    Engine::Renderer::sendUniformMatrix4f(("gBones[" + boost::lexical_cast<std::string>(Index) + "]").c_str(),Transform);
+	std::string location = ("gBones[" + boost::lexical_cast<std::string>(Index) + "]");
+	Engine::Renderer::sendUniformMatrix4f(location.c_str(),Transform);
 }
