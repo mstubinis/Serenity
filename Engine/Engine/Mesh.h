@@ -5,8 +5,10 @@
 #define GL_TRIANGLES 0x0004
 
 #include "Engine_ResourceBasic.h"
+#include "Engine_MeshLoader.h"
 #include "Engine_Physics.h"
 #include <unordered_map>
+#include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
 namespace sf{ class Image; };
@@ -25,6 +27,7 @@ const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
 
 class AnimationData{
 	friend class Mesh;
+	friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
 	private:
 		Mesh* m_Mesh;
 		aiAnimation* m_Animation;
@@ -41,15 +44,15 @@ class AnimationData{
 		uint _FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
 
 	public:
-		AnimationData(Mesh*,ImportedMeshData&,uint animationIndex);
+		AnimationData(Mesh*,aiAnimation*);
 		~AnimationData();
 
-		void play(float time);
-		
+		void play(float time);	
 };
 
 class Mesh final: public EngineResource{
 	friend class AnimationData;
+	friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
         GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
 		GLuint m_elementbuffer;
@@ -62,6 +65,7 @@ class Mesh final: public EngineResource{
 		glm::mat4 m_GlobalInverseTransform;
 		std::vector<VertexBoneData> m_Bones;
 		const aiScene* m_aiScene;
+		Assimp::Importer m_Importer;
 		std::unordered_map<std::string,AnimationData*> m_Animations;
 
         glm::vec3 m_radiusBox;

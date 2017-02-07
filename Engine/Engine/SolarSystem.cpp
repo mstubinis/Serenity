@@ -252,14 +252,15 @@ void SolarSystem::_loadFromFile(std::string filename){
     glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
     glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
 
-    new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
-    new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
-    new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
-    new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
-    new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
-    new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
+	new Ship("Test","Defiant",false,"TEST",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),nullptr,this);
+    //new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
+    //new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
+    //new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
+    //new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
+    //new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
+    //new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
 
-    new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
+    //new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
     player->translate(0,0,11);
 }

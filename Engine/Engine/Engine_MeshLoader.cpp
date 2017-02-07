@@ -18,15 +18,17 @@ bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < thresh
 
 
 void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){	
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
+	MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
+}
+void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data, std::string file){	
+	mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | 
+		aiProcess_Triangulate); 
+    if(!mesh->m_aiScene || mesh->m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !mesh->m_aiScene->mRootNode){
         return;
     }
-	data.m_aiScene = scene;
-    MeshLoader::Detail::_processNode(mesh,data,scene->mRootNode, scene);
+    MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,mesh->m_aiScene->mRootNode, mesh->m_aiScene);
 }
-void MeshLoader::Detail::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
+void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
     for(uint i = 0; i < node->mNumMeshes; i++){
         aiMesh* aimesh = scene->mMeshes[node->mMeshes[i]];
         #pragma region vertices
@@ -124,17 +126,20 @@ void MeshLoader::Detail::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* 
 				}
 			}
 		}
-        if(scene->mAnimations){
+		if(scene->mAnimations && scene->mNumAnimations > 0){
             for(uint i = 0; i < scene->mNumAnimations; i++){
-                 const aiAnimation* anim = scene->mAnimations[i];
-                 AnimationData* animData = new AnimationData(mesh,data,i);
+                 aiAnimation* anim = scene->mAnimations[i];
+                 AnimationData* animData = new AnimationData(mesh,anim);
                  std::string key(anim->mName.C_Str());
+				 if(key == ""){
+					 key = "Animation " + boost::lexical_cast<std::string>(mesh->animations().size());
+				 }
                  mesh->animations().emplace(key,animData);
             }
         }
     }
     for(uint i = 0; i < node->mNumChildren; i++){
-        MeshLoader::Detail::_processNode(mesh,data,node->mChildren[i], scene);
+        MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,node->mChildren[i], scene);
     }
 }
 
@@ -209,13 +214,13 @@ void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsi
         MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,data,positionIndices,uvIndices,normalIndices,_flags);
     }
     if(_flags && LOAD_FACES){
-        MeshLoader::Detail::_loadDataIntoTriangles(data,positionIndices,uvIndices,normalIndices,_flags);
+        MeshLoader::Detail::MeshLoadingManagement::_loadDataIntoTriangles(data,positionIndices,uvIndices,normalIndices,_flags);
     }
     if(_flags && LOAD_TBN && data.normals.size() > 0){
-        MeshLoader::Detail::_calculateTBN(data);
+        MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(data);
     }
 }
-void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
+void MeshLoader::Detail::MeshLoadingManagement::_loadDataIntoTriangles(ImportedMeshData& data,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
     uint count = 0;
     Triangle triangle;
     for(uint i=0; i < _pi.size(); i++ ){
@@ -254,7 +259,7 @@ void MeshLoader::Detail::_loadDataIntoTriangles(ImportedMeshData& data,std::vect
         }
     }
 }
-void MeshLoader::Detail::_calculateTBN(ImportedMeshData& data){
+void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& data){
     if(data.normals.size() == 0) return;
     for(uint i=0; i < data.points.size(); i+=3){
         glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];
@@ -278,10 +283,10 @@ void MeshLoader::Detail::_calculateTBN(ImportedMeshData& data){
         data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
         data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
     }
-    MeshLoader::Detail::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
+    MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 
-bool MeshLoader::Detail::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result, float threshold){
+bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result, float threshold){
     for (uint i=0; i < out_vertices.size(); i++ ){
         if (is_near( in_pos.x , out_vertices[i].x ,threshold) &&
             is_near( in_pos.y , out_vertices[i].y ,threshold) &&
@@ -298,7 +303,7 @@ bool MeshLoader::Detail::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in
     }
     return false;
 }
-void MeshLoader::Detail::_calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents){
+void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents){
     //this does something funky with mirrored uvs.
     for(uint i=0; i < points.size(); i++){
         glm::vec3& n = normals[i];
@@ -320,7 +325,7 @@ void MeshLoader::Detail::_calculateGramSchmidt(std::vector<glm::vec3>& points,st
     }
     */
 }
-void MeshLoader::Detail::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents, float threshold){
+void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
         out_norm = data.normals;

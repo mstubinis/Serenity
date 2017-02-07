@@ -1,5 +1,4 @@
 #include "Engine_Resources.h"
-#include "Engine_MeshLoader.h"
 #include "Engine_Renderer.h"
 #include "Mesh.h"
 
@@ -50,7 +49,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield){
             d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
             d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
-            Engine::Resources::MeshLoader::Detail::_calculateTBN(d);
+            Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(d);
 
         }
     }
@@ -96,7 +95,7 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
             d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
             d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
-            Engine::Resources::MeshLoader::Detail::_calculateTBN(d);
+            Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(d);
         }
     }
     _loadData(d);
@@ -201,7 +200,7 @@ void Mesh::_loadData(ImportedMeshData& data,float threshold){
     if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
     if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-    Engine::Resources::MeshLoader::Detail::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
+    Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type){
     std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
@@ -225,7 +224,6 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type){
         }
         m_Collision = new Collision(d,type);
     }
-    m_aiScene = d.m_aiScene;
     m_BoneMapping = d.m_BoneMapping;
     m_NumBones = d.m_NumBones;
     m_BoneInfo = d.m_BoneInfo;
@@ -266,6 +264,15 @@ void Mesh::initRenderingContext(){
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
     glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
+
+   	//glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(m_Bones[0]) * m_Bones.size(), &m_Bones[0], GL_STATIC_DRAW);
+    //glEnableVertexAttribArray(5);
+    //glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+    //glEnableVertexAttribArray(6);    
+    //glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+
+
     glGenBuffers(1, &m_elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
@@ -274,6 +281,8 @@ void Mesh::cleanupRenderingContext(){
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){
         glDeleteBuffers(1, &m_buffers[i]);
     }
+	glDeleteBuffers(1, &m_buffers[5]);
+
     glDeleteBuffers(1,&m_elementbuffer);
 }
 void Mesh::_calculateMeshRadius(){
@@ -291,22 +300,31 @@ void Mesh::render(GLuint mode){
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
     }
+   	//glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
+    //glEnableVertexAttribArray(5);
+    //glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+    //glEnableVertexAttribArray(6);    
+    //glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+
+
     //glDrawArrays(mode, 0, m_Points.size());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
     for(uint i = 0; i < NUM_VERTEX_DATA; i++)
         glDisableVertexAttribArray(i);
+	//glDisableVertexAttribArray(5);
+	//glDisableVertexAttribArray(6);
 }
 void Mesh::playAnimation(std::string animationName,float time){
     m_Animations[animationName]->play(time);
 }
 
-AnimationData::AnimationData(Mesh* mesh,ImportedMeshData& data,uint index){
+AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
-    m_Animation = data.m_aiScene->mAnimations[index];
-	m_Mesh->m_aiScene = data.m_aiScene;
+    m_Animation = anim;
     for(uint i = 0; i < m_Animation->mNumChannels; i++){
-        m_NodeAnimMap[m_Animation->mChannels[i]->mNodeName.data] = m_Animation->mChannels[i];
+		std::string key = (m_Animation->mChannels[i]->mNodeName.data);
+		m_NodeAnimMap.emplace(key,m_Animation->mChannels[i]);
     }
 }
 AnimationData::~AnimationData(){
@@ -442,9 +460,9 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
 }
 void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms){
     glm::mat4 Identity = glm::mat4(1);
-    float TicksPerSecond = m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f;
+    float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
     float TimeInTicks = TimeInSeconds * TicksPerSecond;
-    float AnimationTime = fmod(TimeInTicks, m_Animation->mDuration);
+    float AnimationTime = float(fmod(TimeInTicks, m_Animation->mDuration));
     _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity);
     Transforms.resize(m_Mesh->m_NumBones);
     for (uint i = 0; i < m_Mesh->m_NumBones; i++) {

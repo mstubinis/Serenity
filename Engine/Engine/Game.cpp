@@ -33,12 +33,12 @@ void Game::initResources(){
 
 	Resources::addMesh("Test","data/Models/test.md5mesh");
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
-    Resources::addMesh("Defiant","data/Models/defiant.obj");
+    //Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
 	Resources::addMesh("Miranda","data/Models/miranda.obj");
-    Resources::addMesh("Intrepid","data/Models/intrepid.obj");
-    Resources::addMesh("Norway","data/Models/norway.obj");
-    Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
+    //Resources::addMesh("Intrepid","data/Models/intrepid.obj");
+    //Resources::addMesh("Norway","data/Models/norway.obj");
+    //Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
     Resources::addMesh("Ring","data/Models/ring.obj",COLLISION_TYPE_NONE);
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
 
