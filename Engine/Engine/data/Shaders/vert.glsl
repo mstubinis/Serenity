@@ -25,10 +25,10 @@ uniform float fcoeff;
 
 void main(void){
     mat4 BoneTransform = mat4(1.0);
-    //BoneTransform = gBones[int(BoneIDs[0])] * Weights[0];
-    //BoneTransform += gBones[int(BoneIDs[1])] * Weights[1];
-    //BoneTransform += gBones[int(BoneIDs[2])] * Weights[2];
-    //BoneTransform += gBones[int(BoneIDs[3])] * Weights[3];
+    //BoneTransform =  gBones[int(BoneIDs.x)] * Weights.x;
+    //BoneTransform += gBones[int(BoneIDs.y)] * Weights.y;
+    //BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;
+    //BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;
 
 	vec4 PosL = BoneTransform * vec4(position, 1.0);
 	vec4 NormalL = BoneTransform * vec4(normal, 0.0);
