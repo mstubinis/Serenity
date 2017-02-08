@@ -10,7 +10,7 @@ attribute vec4 Weights;
 
 uniform mat4 VP;
 uniform mat4 Model;
-uniform int hasBones;
+uniform int AnimationPlaying;
 uniform mat4 gBones[200];
 
 varying vec2 UV;
@@ -26,7 +26,7 @@ uniform float fcoeff;
 
 void main(void){
     mat4 BoneTransform = mat4(1.0);
-	if(hasBones == 1.0){
+	if(AnimationPlaying == 1.0){
 		BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;
 		BoneTransform += gBones[int(BoneIDs.y)] * Weights.y;
 		BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;

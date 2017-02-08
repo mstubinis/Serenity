@@ -87,7 +87,7 @@ void Resources::addMesh(std::string n,float x,float y,float w,float h,float thre
 void Resources::addMesh(std::string n,float w,float h,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,w,h,threshhold));
 }
-void Resources::addMesh(std::string f, COLLISION_TYPE t,float threshhold){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,threshhold);}
+void Resources::addMesh(std::string f, COLLISION_TYPE t,float threshhold){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,true,threshhold);}
 void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g, uint w, uint l,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,g,w,l,threshhold));
 }
