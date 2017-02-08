@@ -24,6 +24,7 @@ using namespace Engine;
 using namespace Engine::Resources;
 
 float Detail::ResourceManagement::m_DeltaTime = 1;
+float Detail::ResourceManagement::m_ApplicationTime = 0;
 Engine_Window* Detail::ResourceManagement::m_Window;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;

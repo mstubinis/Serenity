@@ -67,6 +67,7 @@ namespace Engine{
                     static Scene* m_CurrentScene;
 
                     static float m_DeltaTime;
+					static float m_ApplicationTime;
 
                     static boost::weak_ptr<Camera> m_ActiveCamera;
 
@@ -93,6 +94,7 @@ namespace Engine{
 
         static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
+		static float applicationTime(){ return Detail::ResourceManagement::m_ApplicationTime; }
 
         Engine_Window* getWindow();
         sf::Vector2u getWindowSize();

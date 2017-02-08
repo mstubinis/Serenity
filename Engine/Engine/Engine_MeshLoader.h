@@ -82,7 +82,12 @@ struct ImportedMeshData final{
     std::vector<glm::vec3> binormals;
     std::vector<glm::vec3> tangents;
 	std::vector<ushort> indices;
+
+	ImportedMeshData(){ clear(); }
+	~ImportedMeshData(){}
+
 	void clear(){ 
+		m_NumBones = 0; m_GlobalInverseTransform = glm::mat4(1);
 		file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
 	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
 	}

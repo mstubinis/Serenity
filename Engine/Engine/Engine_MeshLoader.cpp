@@ -26,6 +26,13 @@ void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshDat
     if(!mesh->m_aiScene || mesh->m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !mesh->m_aiScene->mRootNode){
         return;
     }
+    //animation stuff
+    aiMatrix4x4 m = mesh->m_aiScene->mRootNode->mTransformation; // node->mTransformation?
+    m.Inverse();
+	data.m_GlobalInverseTransform = glm::mat4(m.a1,m.a2,m.a3,m.a4,
+                                              m.b1,m.b2,m.b3,m.b4,
+                                              m.c1,m.c2,m.c3,m.c4,
+                                              m.d1,m.d2,m.d3,m.d4);
     MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,mesh->m_aiScene->mRootNode, mesh->m_aiScene);
 }
 void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
@@ -89,14 +96,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             }
         }
         #pragma endregion
-        //animation stuff
-        aiMatrix4x4 m = scene->mRootNode->mTransformation; // node->mTransformation?
-        m.Inverse();
-		data.m_NumBones = 0;
-		data.m_GlobalInverseTransform = glm::mat4(m.a1,m.a2,m.a3,m.a4,
-                                                  m.b1,m.b2,m.b3,m.b4,
-                                                  m.c1,m.c2,m.c3,m.c4,
-                                                  m.d1,m.d2,m.d3,m.d4);
 
         //bones
 		if(aimesh->mNumBones > 0){

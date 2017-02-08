@@ -31,7 +31,7 @@ void Game::initResources(){
     Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
     Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
 
-	Resources::addMesh("Test","data/Models/test.md5mesh");
+	Resources::addMesh("Test","data/Models/1911.fbx");
     Resources::addMesh("Planet","data/Models/planet.obj",COLLISION_TYPE_NONE);
     //Resources::addMesh("Defiant","data/Models/defiant.obj");
     Resources::addMesh("Akira","data/Models/akira.obj");
