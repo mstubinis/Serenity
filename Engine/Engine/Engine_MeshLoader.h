@@ -38,7 +38,7 @@ struct Vertex final{
 };
 struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
 struct VertexBoneData{
-    uint IDs[NUM_BONES_PER_VEREX];
+    float IDs[NUM_BONES_PER_VEREX];
     float Weights[NUM_BONES_PER_VEREX];
 
 	VertexBoneData(){
@@ -51,7 +51,7 @@ struct VertexBoneData{
 		uint size = sizeof(IDs) / sizeof(IDs[0]);
 		for (uint i = 0; i < size; i++) {
 			if (Weights[i] == 0.0) {
-				IDs[i] = BoneID; Weights[i] = Weight; return;
+				IDs[i] = float(BoneID); Weights[i] = Weight; return;
 			} 
 		}
 	}

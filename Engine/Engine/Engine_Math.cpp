@@ -10,6 +10,17 @@
 
 using namespace Engine;
 
+glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4& n){
+	glm::mat4 ret = glm::mat4(n.a1,n.a2,n.a3,n.a4,n.b1,n.b2,n.b3,n.b4,n.c1,n.c2,n.c3,n.c4,n.d1,n.d2,n.d3,n.d4);
+	ret = glm::transpose(ret);
+	return ret;
+}
+glm::mat3 Math::assimpToGLMMat3(aiMatrix3x3& n){
+	glm::mat3 ret = glm::mat3(n.a1,n.a2,n.a3,n.b1,n.b2,n.b3,n.c1,n.c2,n.c3);
+	ret = glm::transpose(ret);
+	return ret;
+}
+
 float Math::toRadians(float degrees){ return degrees * 0.0174533f; }
 float Math::toDegrees(float radians){ return radians * 57.2958f; }
 float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }

@@ -7,6 +7,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <vector>
 
+#include <assimp/Importer.hpp>
+
 class btRigidBody;
 typedef unsigned int uint;
 
@@ -40,6 +42,10 @@ namespace glm{
 
 namespace Engine{
     namespace Math{
+
+		glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
+		glm::mat3 assimpToGLMMat3(aiMatrix3x3&);
+
         glm::vec3 getScreenCoordinates(glm::vec3&,bool clampToEdge = true);
 
         glm::vec3 midpoint(glm::v3&,glm::v3&);

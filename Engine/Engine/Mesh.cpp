@@ -268,7 +268,7 @@ void Mesh::initRenderingContext(){
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(m_Bones[0]) * m_Bones.size(), &m_Bones[0], GL_STATIC_DRAW);
         glEnableVertexAttribArray(5);
-        glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
         glEnableVertexAttribArray(6);    
         glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
     }
@@ -306,11 +306,14 @@ void Mesh::render(GLuint mode){
 
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
         glEnableVertexAttribArray(5);
-		glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexBoneData),(void*)0);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData),(void*)0);
         glEnableVertexAttribArray(6);
         glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData),(const GLvoid*)16);
 
-		this->m_Animations["Skeleton|SkeletonAction"]->play(Engine::Resources::applicationTime());
+		this->m_Animations["Skeleton|SkeletonAction"]->play(Engine::Resources::applicationTime()*0.4f);
+		if(Engine::Resources::applicationTime() > 9.0f){
+			Engine::Resources::Detail::ResourceManagement::m_ApplicationTime = 0.0f;
+		}
     }
 	else{
 		Engine::Renderer::sendUniform1iSafe("hasBones",0);
@@ -433,11 +436,7 @@ void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime
 void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, const glm::mat4& ParentTransform){    
     std::string NodeName(node->mName.data);    
     aiMatrix4x4 m = node->mTransformation;
-    glm::mat4 NodeTransformation = glm::mat4(m.a1,m.a2,m.a3,m.a4,
-                                             m.b1,m.b2,m.b3,m.b4,
-                                             m.c1,m.c2,m.c3,m.c4,
-                                             m.d1,m.d2,m.d3,m.d4);
-
+	glm::mat4 NodeTransformation = Engine::Math::assimpToGLMMat4(m);
     const aiNodeAnim* nodeAnim = m_NodeAnimMap[NodeName]; 
     if (nodeAnim){
         // Interpolate scaling and generate scaling transformation matrix
@@ -450,9 +449,7 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
         aiQuaternion quat;
         _CalcInterpolatedRotation(quat, AnimationTime, nodeAnim);
         aiMatrix3x3 m = quat.GetMatrix();
-        glm::mat3 matr = glm::mat3(m.a1,m.a2,m.a3,
-                                   m.b1,m.b2,m.b3,
-                                   m.c1,m.c2,m.c3);
+		glm::mat3 matr = Engine::Math::assimpToGLMMat3(m);
         glm::mat4 rotationMatrix = glm::mat4(matr);
 
         // Interpolate translation and generate translation transformation matrix

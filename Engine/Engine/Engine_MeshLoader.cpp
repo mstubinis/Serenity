@@ -29,10 +29,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshDat
     //animation stuff
     aiMatrix4x4 m = mesh->m_aiScene->mRootNode->mTransformation; // node->mTransformation?
     m.Inverse();
-	data.m_GlobalInverseTransform = glm::mat4(m.a1,m.a2,m.a3,m.a4,
-                                              m.b1,m.b2,m.b3,m.b4,
-                                              m.c1,m.c2,m.c3,m.c4,
-                                              m.d1,m.d2,m.d3,m.d4);
+	data.m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
     MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,mesh->m_aiScene->mRootNode, mesh->m_aiScene);
 }
 void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
@@ -114,8 +111,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
 				data.m_BoneMapping[BoneName] = BoneIndex;
 
 				aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
-				data.m_BoneInfo[BoneIndex].BoneOffset = glm::mat4(n.a1,n.a2,n.a3,n.a4,n.b1,n.b2,n.b3,n.b4,n.c1,n.c2,n.c3,n.c4,n.d1,n.d2,n.d3,n.d4);
-
+				data.m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
 				for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
 					uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
 					float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
