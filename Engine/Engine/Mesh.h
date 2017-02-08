@@ -22,8 +22,8 @@ typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-const uint NUM_VERTEX_DATA = 5;
-const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3};
+const uint NUM_VERTEX_DATA = 7;
+const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3,4,4};
 
 class AnimationData{
 	friend class Mesh;
@@ -63,7 +63,10 @@ class Mesh final: public EngineResource{
 		uint m_NumBones;
 		std::vector<BoneInfo> m_BoneInfo;
 		glm::mat4 m_GlobalInverseTransform;
-		std::vector<VertexBoneData> m_Bones;
+
+		std::vector<glm::vec4> m_BoneIDs;
+		std::vector<glm::vec4> m_BoneWeights;
+
 		const aiScene* m_aiScene;
 		Assimp::Importer m_Importer;
 		std::unordered_map<std::string,AnimationData*> m_Animations;
@@ -77,17 +80,17 @@ class Mesh final: public EngineResource{
         std::vector<glm::vec3> m_Tangents;
 		std::vector<ushort> m_Indices;
 
-		void _loadData(ImportedMeshData&,float threshhold = 0.0005f);
-        void _loadFromFile(std::string,COLLISION_TYPE);
-        void _loadFromOBJ(std::string,COLLISION_TYPE);
-        void _loadFromOBJMemory(std::string,COLLISION_TYPE);
+		void _loadData(ImportedMeshData&,float threshhold);
+        void _loadFromFile(std::string,COLLISION_TYPE,float threshold);
+        void _loadFromOBJ(std::string,COLLISION_TYPE,float threshold);
+        void _loadFromOBJMemory(std::string,COLLISION_TYPE,float threshold);
         void _calculateMeshRadius();
     public:
-        Mesh(std::string& name,btHeightfieldTerrainShape*);
-		Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length);
-        Mesh(std::string& name,float width, float height);
-        Mesh(std::string& name,float x, float y, float width, float height);
-        Mesh(std::string& name,std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true);
+        Mesh(std::string& name,btHeightfieldTerrainShape*,float threshhold);
+		Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
+        Mesh(std::string& name,float width, float height,float threshhold);
+        Mesh(std::string& name,float x, float y, float width, float height,float threshhold);
+        Mesh(std::string& name,std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true,float threshhold = 0.0005f);
         ~Mesh();
 
         void initRenderingContext();

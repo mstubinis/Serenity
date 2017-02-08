@@ -123,11 +123,11 @@ namespace Engine{
         ShaderP* getShaderProgram(std::string n);
         RenderedItem* getRenderedItem(std::string n);
 
-        void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL,bool fromFile = true);
-        void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL);
-        void addMesh(std::string name, float x, float y, float w, float h);
-        void addMesh(std::string name, float w, float h);
-        void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length);
+        void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL,bool fromFile = true,float threshhold = 0.0005f);
+        void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL,float threshhold = 0.0005f);
+        void addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
+        void addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
+        void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
         void removeMesh(std::string name);
 
         void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",std::string shader = "");
