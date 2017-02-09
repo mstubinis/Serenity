@@ -8,6 +8,20 @@
 class Mesh;
 class Material;
 
+struct RenderedItemAnimation{
+	uint loops;
+	float time;
+	std::string animName;
+	Mesh* mesh;
+	RenderedItemAnimation(Mesh* _mesh,std::string _animName,float _startTime){
+		animName = _animName;
+		time = _startTime;
+		mesh = _mesh;
+		loops = 0;
+	}
+	~RenderedItemAnimation(){}
+};
+
 class RenderedItem final: public BindableResource{
     private:
         class impl;
@@ -25,6 +39,11 @@ class RenderedItem final: public BindableResource{
         glm::vec3& getScale();
         std::string& parent();
         boost::weak_ptr<std::string>& parentPtr();
+
+
+		std::vector<RenderedItemAnimation>& animationQueue();
+		void playAnimation(const std::string& animName,float startTime);
+		void _processAnimation(uint index);
 
         void setOrientation(glm::quat&);
         void setOrientation(float x,float y,float z);

@@ -47,7 +47,7 @@ class AnimationData{
 		AnimationData(Mesh*,aiAnimation*);
 		~AnimationData();
 
-		void play(float time);	
+		float duration();
 };
 
 class Mesh final: public EngineResource{
@@ -69,7 +69,7 @@ class Mesh final: public EngineResource{
 
 		const aiScene* m_aiScene;
 		Assimp::Importer m_Importer;
-		std::unordered_map<std::string,AnimationData*> m_Animations;
+		std::unordered_map<std::string,AnimationData*> m_AnimationData;
 
         glm::vec3 m_radiusBox;
         float m_radius;
@@ -97,11 +97,11 @@ class Mesh final: public EngineResource{
         void cleanupRenderingContext();
 
         Collision* getCollision() const { return m_Collision; }
-		std::unordered_map<std::string,AnimationData*>& animations(){ return m_Animations; }
+		std::unordered_map<std::string,AnimationData*>& animationData(){ return m_AnimationData; }
         const glm::vec3& getRadiusBox() const { return m_radiusBox; }
         const float getRadius() const { return m_radius; }
 
         void render(GLuint mode = GL_TRIANGLES);
-		void playAnimation(std::string animationName,float time);
+		std::vector<glm::mat4> playAnimation(const std::string& animationName,float time);
 };
 #endif

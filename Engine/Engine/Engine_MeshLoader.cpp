@@ -127,9 +127,9 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                  AnimationData* animData = new AnimationData(mesh,anim);
                  std::string key(anim->mName.C_Str());
 				 if(key == ""){
-					 key = "Animation " + boost::lexical_cast<std::string>(mesh->animations().size());
+					 key = "Animation " + boost::lexical_cast<std::string>(mesh->m_AnimationData.size());
 				 }
-                 mesh->animations().emplace(key,animData);
+                 mesh->m_AnimationData.emplace(key,animData);
             }
         }
     }

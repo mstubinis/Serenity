@@ -191,7 +191,7 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
 }
 Mesh::~Mesh(){
     cleanupRenderingContext();
-    for(auto anim:m_Animations)
+    for(auto anim:m_AnimationData)
         delete anim.second;
 }
 void Mesh::_loadData(ImportedMeshData& data,float threshold){
@@ -292,7 +292,6 @@ void Mesh::_calculateMeshRadius(){
     m_radius = Engine::Math::Max(m_radiusBox);
 }
 void Mesh::render(GLuint mode){
-	Engine::Renderer::sendUniform1iSafe("AnimationPlaying",0); //move this over to a per object basis
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){
 		if(i <= 4 || (i >= 5 && m_BoneIDs.size() > 0)){
 			glBindBuffer(GL_ARRAY_BUFFER, m_buffers[i]);
@@ -308,8 +307,10 @@ void Mesh::render(GLuint mode){
         glDisableVertexAttribArray(i);
 	}
 }
-void Mesh::playAnimation(std::string animationName,float time){
-    m_Animations[animationName]->play(time);
+std::vector<glm::mat4> Mesh::playAnimation(const std::string& animationName,float time){
+    std::vector<glm::mat4> Transforms;
+    m_AnimationData[animationName]->_BoneTransform(time, Transforms);
+	return Transforms;
 }
 
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
@@ -323,17 +324,6 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
 AnimationData::~AnimationData(){
     for(auto node:m_NodeAnimMap){
     }
-}
-
-void AnimationData::play(float time){
-    std::vector<glm::mat4> Transforms;      
-    _BoneTransform(time, Transforms);
-	Engine::Renderer::sendUniform1iSafe("AnimationPlaying",1); //move this over to a per object basis
-	Engine::Renderer::sendUniformMatrix4fvSafe("gBones[0]",Transforms,Transforms.size());
-
-    //for (uint i = 0; i < Transforms.size(); i++){
-    //    _SetBoneTransform(i, Transforms.at(i));
-    //}
 }
 uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    
     for (uint i = 0 ; i < node->mNumPositionKeys - 1 ; i++) {
@@ -448,11 +438,12 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
         _ReadNodeHeirarchy(AnimationTime, node->mChildren[i], GlobalTransformation);
     }
 }
-void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms){
-    glm::mat4 Identity = glm::mat4(1);
+void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms){   
     float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
     float TimeInTicks = TimeInSeconds * TicksPerSecond;
     float AnimationTime = float(fmod(TimeInTicks, m_Animation->mDuration));
+
+	glm::mat4 Identity = glm::mat4(1);
     _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity);
     Transforms.resize(m_Mesh->m_NumBones,glm::mat4(1));
     for (uint i = 0; i < m_Mesh->m_NumBones; i++) {
@@ -462,4 +453,8 @@ void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& 
 void AnimationData::_SetBoneTransform(uint Index, glm::mat4& Transform){
 	std::string location = ("gBones[" + boost::lexical_cast<std::string>(Index) + "]");
 	Engine::Renderer::sendUniformMatrix4f(location.c_str(),Transform);
+}
+float AnimationData::duration(){
+	float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
+	return (float(m_Animation->mDuration) / TicksPerSecond);
 }

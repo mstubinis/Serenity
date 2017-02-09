@@ -96,3 +96,10 @@ bool ObjectDisplay::rayIntersectSphere(Camera* c){
 bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
+void ObjectDisplay::playAnimation(const std::string& animName,float startTime){
+	for(auto renderedItem:m_DisplayItems){
+		if(renderedItem->mesh()->animationData().count(animName)){
+			renderedItem->playAnimation(animName,startTime);
+		}
+	}
+}

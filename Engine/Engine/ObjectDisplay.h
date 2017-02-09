@@ -55,5 +55,7 @@ class ObjectDisplay: public ObjectBasic{
         virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
+
+		void playAnimation(const std::string& animName,float startTime = 0.0f);
 };
 #endif

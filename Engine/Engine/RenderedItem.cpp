@@ -19,9 +19,19 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
     if(exists(o)){
         Object* obj = o.lock().get();
-        Camera* c = Resources::getActiveCamera();
+
+
+		//optimize this search
+		Renderer::sendUniform1iSafe("AnimationPlaying",0);
+		for(uint j = 0; j < i->animationQueue().size(); j++){
+			//if(anim.mesh == i->mesh()){
+				i->_processAnimation(j);
+			//}
+			//cleanup the animation queue here
+		}
+
         if(obj->passedRenderCheck()){
-            Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());
+            Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());	
             i->mesh()->render();
         }
     }
@@ -34,6 +44,8 @@ class RenderedItem::impl{
     public:
         static DefaultRenderedItemUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
         static DefaultRenderedItemBindFunctor DEFAULT_BIND_FUNCTOR;
+
+		std::vector<RenderedItemAnimation> m_AnimationQueue;
 
         Mesh* m_Mesh;
         Material* m_Material;
@@ -119,18 +131,10 @@ glm::quat& RenderedItem::orientation(){ return m_i->m_Orientation; }
 Mesh* RenderedItem::mesh(){ return m_i->m_Mesh; }
 Material* RenderedItem::material(){ return m_i->m_Material; }
 
-void RenderedItem::setMesh(std::string n){
-    m_i->m_Mesh = Resources::getMesh(n);
-}
-void RenderedItem::setMesh(Mesh* m){
-    m_i->m_Mesh = m;
-}
-void RenderedItem::setMaterial(std::string n){
-    m_i->m_Material = Resources::getMaterial(n);
-}
-void RenderedItem::setMaterial(Material* m){
-    m_i->m_Material = m;
-}
+void RenderedItem::setMesh(std::string n){ m_i->m_Mesh = Resources::getMesh(n); }
+void RenderedItem::setMesh(Mesh* m){ m_i->m_Mesh = m; }
+void RenderedItem::setMaterial(std::string n){ m_i->m_Material = Resources::getMaterial(n); }
+void RenderedItem::setMaterial(Material* m){ m_i->m_Material = m; }
 void RenderedItem::setOrientation(glm::quat& o){ m_i->m_Orientation = o; }
 void RenderedItem::setOrientation(float x,float y,float z){ 
     float threshold = 0;
@@ -145,3 +149,21 @@ boost::weak_ptr<std::string>& RenderedItem::parentPtr(){ return m_i->m_ParentPtr
 void RenderedItem::update(float dt){
     m_i->_updateModelMatrix();
 }
+void RenderedItem::playAnimation(const std::string& animName,float startTime){
+	RenderedItemAnimation anim(mesh(),animName,startTime);
+	m_i->m_AnimationQueue.push_back(anim);
+}
+void RenderedItem::_processAnimation(uint index){
+	RenderedItemAnimation& anim = m_i->m_AnimationQueue.at(index);
+	anim.time += Resources::dt();
+
+	std::vector<glm::mat4> transforms = anim.mesh->playAnimation(anim.animName,anim.time);
+	Renderer::sendUniform1iSafe("AnimationPlaying",1);
+	Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+	
+	if(anim.time >= anim.mesh->animationData().at(anim.animName)->duration()){
+		anim.time = 0;
+		anim.loops++;
+	}
+}
+std::vector<RenderedItemAnimation>& RenderedItem::animationQueue(){ return m_i->m_AnimationQueue; }
