@@ -292,7 +292,7 @@ void Mesh::_calculateMeshRadius(){
     m_radius = Engine::Math::Max(m_radiusBox);
 }
 void Mesh::render(GLuint mode){
-	Engine::Renderer::sendUniform1iSafe("AnimationPlaying",0);
+	Engine::Renderer::sendUniform1iSafe("AnimationPlaying",0); //move this over to a per object basis
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){
 		if(i <= 4 || (i >= 5 && m_BoneIDs.size() > 0)){
 			glBindBuffer(GL_ARRAY_BUFFER, m_buffers[i]);
@@ -328,7 +328,7 @@ AnimationData::~AnimationData(){
 void AnimationData::play(float time){
     std::vector<glm::mat4> Transforms;      
     _BoneTransform(time, Transforms);
-	Engine::Renderer::sendUniform1iSafe("AnimationPlaying",1);
+	Engine::Renderer::sendUniform1iSafe("AnimationPlaying",1); //move this over to a per object basis
 	Engine::Renderer::sendUniformMatrix4fvSafe("gBones[0]",Transforms,Transforms.size());
 
     //for (uint i = 0; i < Transforms.size(); i++){
