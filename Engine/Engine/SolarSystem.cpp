@@ -253,8 +253,7 @@ void SolarSystem::_loadFromFile(std::string filename){
     glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
 
 	ObjectDisplay* _s = new ObjectDisplay("Test","Defiant",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
-	_s->playAnimation("Skeleton|reload_Full");
-
+	_s->playAnimation("Skeleton|fire");
     //new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
     //new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
     //new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
