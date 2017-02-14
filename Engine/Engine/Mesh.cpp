@@ -393,30 +393,33 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
     std::string NodeName(node->mName.data);    
     aiMatrix4x4 m = node->mTransformation;
 	glm::mat4 NodeTransformation = Engine::Math::assimpToGLMMat4(m);
-    const aiNodeAnim* nodeAnim = m_NodeAnimMap[NodeName];
-    if(nodeAnim){
-        // Interpolate scaling and generate scaling transformation matrix
-        glm::vec3 scl;
-        _CalcInterpolatedScaling(scl, AnimationTime, nodeAnim);
-        glm::mat4 scaleMatrix = glm::mat4(1.0f);
-        scaleMatrix = glm::scale(scaleMatrix,scl);
-        
-        // Interpolate rotation and generate rotation transformation matrix
-        aiQuaternion quat;
-        _CalcInterpolatedRotation(quat, AnimationTime, nodeAnim);
-        aiMatrix3x3 m = quat.GetMatrix();
-		glm::mat3 matr = Engine::Math::assimpToGLMMat3(m);
-        glm::mat4 rotationMatrix = glm::mat4(matr);
 
-        // Interpolate translation and generate translation transformation matrix
-        glm::vec3 translation;
-        _CalcInterpolatedPosition(translation, AnimationTime, nodeAnim);
-        glm::mat4 translationMatrix = glm::mat4(1.0f);
-        translationMatrix = glm::translate(translationMatrix,translation);
+	if(m_NodeAnimMap.count(NodeName)){
+		const aiNodeAnim* nodeAnim = m_NodeAnimMap.at(NodeName);
+		if(nodeAnim){
+			// Interpolate scaling and generate scaling transformation matrix
+			glm::vec3 scl;
+			_CalcInterpolatedScaling(scl, AnimationTime, nodeAnim);
+			glm::mat4 scaleMatrix = glm::mat4(1.0f);
+			scaleMatrix = glm::scale(scaleMatrix,scl);
         
-        // Combine the above transformations
-        NodeTransformation = translationMatrix * rotationMatrix * scaleMatrix;
-    }    
+			// Interpolate rotation and generate rotation transformation matrix
+			aiQuaternion quat;
+			_CalcInterpolatedRotation(quat, AnimationTime, nodeAnim);
+			aiMatrix3x3 m = quat.GetMatrix();
+			glm::mat3 matr = Engine::Math::assimpToGLMMat3(m);
+			glm::mat4 rotationMatrix = glm::mat4(matr);
+
+			// Interpolate translation and generate translation transformation matrix
+			glm::vec3 translation;
+			_CalcInterpolatedPosition(translation, AnimationTime, nodeAnim);
+			glm::mat4 translationMatrix = glm::mat4(1.0f);
+			translationMatrix = glm::translate(translationMatrix,translation);
+        
+			// Combine the above transformations
+			NodeTransformation = translationMatrix * rotationMatrix * scaleMatrix;
+		}    
+	}
     glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;  
     if(m_Mesh->m_Skeleton->m_BoneMapping.count(NodeName)){
         uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping[NodeName];

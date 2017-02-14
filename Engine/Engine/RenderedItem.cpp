@@ -19,10 +19,7 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
     if(exists(o)){
         Object* obj = o.lock().get();
-
-
 		//optimize this search
-		Renderer::sendUniform1iSafe("AnimationPlaying",0);
 		if(i->animationQueue().size() > 0){
 			std::vector<glm::mat4> transforms;
 			glm::mat4 parentMatrix = glm::mat4(1);
@@ -35,14 +32,17 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
 			Renderer::sendUniform1iSafe("AnimationPlaying",1);
 			Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
 		}
+		else{
+			Renderer::sendUniform1iSafe("AnimationPlaying",0);
+		}
         if(obj->passedRenderCheck()){
             Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());	
             i->mesh()->render();
         }
+		Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
     }
 }};
 struct DefaultRenderedItemUnbindFunctor{void operator()(EngineResource* r) const {
-    //RenderedItem* i = static_cast<RenderedItem*>(r);
 }};
 
 class RenderedItem::impl{

@@ -99,16 +99,16 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
 			for (uint i = 0; i < aimesh->mNumBones; i++) { 
 				uint BoneIndex = 0; 
 				std::string BoneName(aimesh->mBones[i]->mName.data);
-				if (data.m_BoneMapping.find(BoneName) == data.m_BoneMapping.end()) {
+				if(!data.m_BoneMapping.count(BoneName)) {
 					BoneIndex = data.m_NumBones;
 					data.m_NumBones++; 
 					BoneInfo bi;
 					data.m_BoneInfo.push_back(bi);
 				}
 				else{
-					BoneIndex = data.m_BoneMapping[BoneName];
+					BoneIndex = data.m_BoneMapping.at(BoneName);
 				}
-				data.m_BoneMapping[BoneName] = BoneIndex;
+				data.m_BoneMapping.emplace(BoneName,BoneIndex);
 
 				aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
 				data.m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
@@ -117,7 +117,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
 					float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
 					VertexBoneData d;
 					d.AddBoneData(BoneIndex, Weight);
-					data.m_Bones[VertexID] = d;
+					data.m_Bones.emplace(VertexID,d);
 				}
 			}
 		}
@@ -333,8 +333,8 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
     for (uint i=0; i < data.points.size(); i++ ){
         ushort index;
         bool found = _getSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i],out_pos, out_uvs, out_norm, index,threshold);
-        if ( found ){
-            out_indices.push_back( index );
+        if (found){
+            out_indices.push_back(index);
 
             //average out TBN. I think this does more harm than good though
             out_tangents[index] += data.tangents[i];
@@ -342,12 +342,12 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         }
         else{
             out_pos.push_back( data.points[i]);
-            out_uvs     .push_back(data.uvs[i]);
+            out_uvs.push_back(data.uvs[i]);
             out_norm .push_back(data.normals[i]);
-            out_tangents .push_back(data.tangents[i]);
-            out_binorm .push_back(data.binormals[i]);
+            out_tangents.push_back(data.tangents[i]);
+            out_binorm.push_back(data.binormals[i]);
             ushort newindex = (ushort)out_pos.size() - 1;
-            out_indices .push_back(newindex);
+            out_indices.push_back(newindex);
         }
     }
 }
