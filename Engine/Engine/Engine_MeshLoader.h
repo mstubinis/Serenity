@@ -37,7 +37,7 @@ struct Vertex final{
     void clear(){ position = normal = binormal = tangent = glm::vec3(0); uv = glm::vec2(0); }
 };
 struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
-struct VertexBoneData{
+struct VertexBoneData final{
     float IDs[NUM_BONES_PER_VEREX];
     float Weights[NUM_BONES_PER_VEREX];
 
@@ -56,7 +56,7 @@ struct VertexBoneData{
 		}
 	}
 };
-struct BoneInfo{
+struct BoneInfo final{
     glm::mat4 BoneOffset;
     glm::mat4 FinalTransformation;        
     BoneInfo(){
@@ -70,6 +70,7 @@ struct ImportedMeshData final{
     std::vector<BoneInfo> m_BoneInfo;
     glm::mat4 m_GlobalInverseTransform;
 	std::map<uint,VertexBoneData> m_Bones;
+	std::unordered_map<std::string,AnimationData*> m_AnimationData;
 
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;

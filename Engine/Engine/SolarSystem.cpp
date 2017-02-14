@@ -54,7 +54,6 @@ void SolarSystem::_loadFromFile(std::string filename){
             }
             else if(count == 3){//this line has the system's skybox's number of flares
                 new GameSkybox(skybox,boost::lexical_cast<uint>(line),this);
-                //new Atmosphere();
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;
@@ -156,6 +155,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                     m_Stars.emplace(NAME,star);
                 }
                 else if(line[0] == 'P'){//Planet
+					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
@@ -175,8 +175,10 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                     }
                     m_Planets.emplace(NAME,planetoid);
+					*/
                 }
                 else if(line[0] == 'M'){//Moon
+					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
@@ -196,13 +198,14 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                     }
                     m_Moons.emplace(NAME,planetoid);
+					*/
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
-                        glm::num parentX = objects().at(PARENT)->getPosition().x;
-                        glm::num parentZ = objects().at(PARENT)->getPosition().z;
-                        xPos += parentX;
-                        zPos += parentZ;
+                        //glm::num parentX = objects().at(PARENT)->getPosition().x;
+                        //glm::num parentZ = objects().at(PARENT)->getPosition().z;
+                        //xPos += parentX;
+                        //zPos += parentZ;
                     }
                     setPlayer(new Ship("Miranda","Miranda",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
@@ -211,12 +214,12 @@ void SolarSystem::_loadFromFile(std::string filename){
                 }
                 else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
-                        glm::num parentX = objects().at(PARENT)->getPosition().x;
-                        glm::num parentZ = objects().at(PARENT)->getPosition().z;
-                        xPos += parentX;
-                        zPos += parentZ;
+                        //glm::num parentX = objects().at(PARENT)->getPosition().x;
+                        //glm::num parentZ = objects().at(PARENT)->getPosition().z;
+                        //xPos += parentX;
+                        //zPos += parentZ;
                     }
-                    new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
+                    //new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
                     /*
@@ -249,11 +252,13 @@ void SolarSystem::_loadFromFile(std::string filename){
 
     centerSceneToObject(player);
 
+	new Ship("Akira","Akira",false,"Valiant",glm::v3(2,0,2),glm::vec3(1),nullptr,this);
+
     glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
     glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
 
-	ObjectDisplay* _s = new ObjectDisplay("Test","Defiant",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
-	_s->playAnimation("Skeleton|fire");
+	ObjectDisplay* _s = new ObjectDisplay("Test","Miranda",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
+	_s->playAnimation("Skeleton|fire_top");
     //new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
     //new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
     //new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);

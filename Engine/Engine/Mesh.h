@@ -34,42 +34,53 @@ class AnimationData{
 		std::unordered_map<std::string,aiNodeAnim*> m_NodeAnimMap;
 
 		void _ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
-		void _BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
-		void _SetBoneTransform(uint Index, glm::mat4& Transform);
+		void _BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms,glm::mat4& parentMatrix);
 		void _CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 		void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 		void _CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node);
 		uint _FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 		uint _FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
 		uint _FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
-
 	public:
 		AnimationData(Mesh*,aiAnimation*);
 		~AnimationData();
 
 		float duration();
 };
+class MeshSkeleton final{
+	friend class AnimationData;
+	friend class RenderedItem;
+	friend class Mesh;
+	private:
+		//animation data
+		std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
+		uint m_NumBones;
+		std::vector<BoneInfo> m_BoneInfo;
+		glm::mat4 m_GlobalInverseTransform;
+		std::unordered_map<std::string,AnimationData*> m_AnimationData;
 
+		std::vector<glm::vec4> m_BoneIDs;
+		std::vector<glm::vec4> m_BoneWeights;
+
+	public:
+		MeshSkeleton(ImportedMeshData&);
+		~MeshSkeleton();
+
+};
 class Mesh final: public EngineResource{
 	friend class AnimationData;
+	friend class MeshSkeleton;
+	friend class RenderedItem;
 	friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
         GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
 		GLuint m_elementbuffer;
         Collision* m_Collision;
 
-		//animation data
-		std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
-		uint m_NumBones;
-		std::vector<BoneInfo> m_BoneInfo;
-		glm::mat4 m_GlobalInverseTransform;
-
-		std::vector<glm::vec4> m_BoneIDs;
-		std::vector<glm::vec4> m_BoneWeights;
+		MeshSkeleton* m_Skeleton;
 
 		const aiScene* m_aiScene;
 		Assimp::Importer m_Importer;
-		std::unordered_map<std::string,AnimationData*> m_AnimationData;
 
         glm::vec3 m_radiusBox;
         float m_radius;
@@ -82,7 +93,6 @@ class Mesh final: public EngineResource{
 
 		void _loadData(ImportedMeshData&,float threshhold);
         void _loadFromFile(std::string,COLLISION_TYPE,float threshold);
-        void _loadFromOBJ(std::string,COLLISION_TYPE,float threshold);
         void _loadFromOBJMemory(std::string,COLLISION_TYPE,float threshold);
         void _calculateMeshRadius();
     public:
@@ -97,11 +107,11 @@ class Mesh final: public EngineResource{
         void cleanupRenderingContext();
 
         Collision* getCollision() const { return m_Collision; }
-		std::unordered_map<std::string,AnimationData*>& animationData(){ return m_AnimationData; }
+		std::unordered_map<std::string,AnimationData*>& animationData(){ return m_Skeleton->m_AnimationData; }
         const glm::vec3& getRadiusBox() const { return m_radiusBox; }
         const float getRadius() const { return m_radius; }
 
         void render(GLuint mode = GL_TRIANGLES);
-		std::vector<glm::mat4> playAnimation(const std::string& animationName,float time);
+		void playAnimation(std::vector<glm::mat4>&,glm::mat4& parentMatrix,const std::string& animationName,float time);
 };
 #endif

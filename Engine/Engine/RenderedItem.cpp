@@ -23,13 +23,18 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
 
 		//optimize this search
 		Renderer::sendUniform1iSafe("AnimationPlaying",0);
-		for(uint j = 0; j < i->animationQueue().size(); j++){
-			//if(anim.mesh == i->mesh()){
-				i->_processAnimation(j);
-			//}
-			//cleanup the animation queue here
+		if(i->animationQueue().size() > 0){
+			std::vector<glm::mat4> transforms;
+			glm::mat4 parentMatrix = glm::mat4(1);
+			for(uint j = 0; j < i->animationQueue().size(); j++){
+				if(i->animationQueue().at(j).mesh == i->mesh()){
+					i->_processAnimation(transforms,parentMatrix,j);
+				}
+				//cleanup the animation queue here
+			}
+			Renderer::sendUniform1iSafe("AnimationPlaying",1);
+			Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
 		}
-
         if(obj->passedRenderCheck()){
             Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());	
             i->mesh()->render();
@@ -153,13 +158,14 @@ void RenderedItem::playAnimation(const std::string& animName,float startTime){
 	RenderedItemAnimation anim(mesh(),animName,startTime);
 	m_i->m_AnimationQueue.push_back(anim);
 }
-void RenderedItem::_processAnimation(uint index){
+void RenderedItem::_processAnimation(std::vector<glm::mat4>& transforms,glm::mat4& parentMatrix,uint index){
 	RenderedItemAnimation& anim = m_i->m_AnimationQueue.at(index);
 	anim.time += Resources::dt();
 
-	std::vector<glm::mat4> transforms = anim.mesh->playAnimation(anim.animName,anim.time);
-	Renderer::sendUniform1iSafe("AnimationPlaying",1);
-	Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+	if(transforms.size() == 0){
+		transforms.resize(anim.mesh->m_Skeleton->m_NumBones,glm::mat4(1));
+	}
+	anim.mesh->playAnimation(transforms,parentMatrix,anim.animName,anim.time);
 	
 	if(anim.time >= anim.mesh->animationData().at(anim.animName)->duration()){
 		anim.time = 0;

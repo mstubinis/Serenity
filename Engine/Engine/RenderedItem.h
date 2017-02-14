@@ -43,7 +43,7 @@ class RenderedItem final: public BindableResource{
 
 		std::vector<RenderedItemAnimation>& animationQueue();
 		void playAnimation(const std::string& animName,float startTime);
-		void _processAnimation(uint index);
+		void _processAnimation(std::vector<glm::mat4>&,glm::mat4& parentMatrix,uint index);
 
         void setOrientation(glm::quat&);
         void setOrientation(float x,float y,float z);

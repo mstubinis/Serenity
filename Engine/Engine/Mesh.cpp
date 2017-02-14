@@ -10,6 +10,7 @@
 
 Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold){
     m_Collision = nullptr;
+	m_Skeleton = nullptr;
     ImportedMeshData d;
     uint width = heightfield->getHeightStickWidth();
     uint length = heightfield->getHeightStickLength();
@@ -59,6 +60,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
 }
 Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold){
     m_Collision = nullptr;
+	m_Skeleton = nullptr;
     ImportedMeshData d;
     for(uint i = 0; i < width-1; i++){
         for(uint j = 0; j < length-1; j++){
@@ -104,6 +106,7 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
 }
 Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold){
     m_Collision = nullptr;
+	m_Skeleton = nullptr;
     ImportedMeshData d;
     d.points.push_back(glm::vec3(0,0,0));
     d.points.push_back(glm::vec3(width,height,0));
@@ -143,6 +146,7 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height,float th
 }
 Mesh::Mesh(std::string& name,float width, float height,float threshold){
     m_Collision = nullptr;
+	m_Skeleton = nullptr;
     ImportedMeshData d;
     d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
     d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
@@ -182,6 +186,7 @@ Mesh::Mesh(std::string& name,float width, float height,float threshold){
 }
 Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold){
     m_Collision = nullptr;
+	m_Skeleton = nullptr;
     if(notMemory)
         _loadFromFile(filename, type,threshold);
     else
@@ -191,8 +196,8 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
 }
 Mesh::~Mesh(){
     cleanupRenderingContext();
-    for(auto anim:m_AnimationData)
-        delete anim.second;
+	if(m_Skeleton != nullptr)
+		delete m_Skeleton;
 }
 void Mesh::_loadData(ImportedMeshData& data,float threshold){
     if(data.uvs.size() == 0) data.uvs.resize(data.points.size());
@@ -203,20 +208,17 @@ void Mesh::_loadData(ImportedMeshData& data,float threshold){
     Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type,float threshold){
-    std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
-    //if(extention == ".obj")
-        _loadFromOBJ(file,type,threshold);
-}
-void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type,float threshold){
+	std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
+
     ImportedMeshData d;
-    Engine::Resources::MeshLoader::load(this,d,filename);
+    Engine::Resources::MeshLoader::load(this,d,file);
     _loadData(d,threshold);
 
     if(type == COLLISION_TYPE_NONE){
         m_Collision = new Collision(new btEmptyShape());
     }
     else{
-        std::string colFile = filename.substr(0,filename.size()-4);
+        std::string colFile = file.substr(0,file.size()-4);
         colFile += "Col.obj";
         if(boost::filesystem::exists(colFile)){
             d.clear();
@@ -224,15 +226,8 @@ void Mesh::_loadFromOBJ(std::string filename,COLLISION_TYPE type,float threshold
         }
         m_Collision = new Collision(d,type);
     }
-    m_BoneMapping = d.m_BoneMapping;
-    m_NumBones = d.m_NumBones;
-    m_BoneInfo = d.m_BoneInfo;
-    m_GlobalInverseTransform = d.m_GlobalInverseTransform;
-
-    for(auto bone:d.m_Bones){
-		VertexBoneData& b = bone.second;
-		m_BoneIDs.push_back(glm::vec4(b.IDs[0],b.IDs[1],b.IDs[2],b.IDs[3]));
-		m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
+	if(d.m_BoneInfo.size() > 0){
+		m_Skeleton = new MeshSkeleton(d);
 	}
 }
 void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type,float threshold){
@@ -265,12 +260,12 @@ void Mesh::initRenderingContext(){
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
     glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
 
-    if(m_BoneIDs.size() > 0){
+    if(m_Skeleton != nullptr){
 		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
-		glBufferData(GL_ARRAY_BUFFER, m_BoneIDs.size() * sizeof(glm::vec4), &m_BoneIDs[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, m_Skeleton->m_BoneIDs.size() * sizeof(glm::vec4), &m_Skeleton->m_BoneIDs[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_buffers[6]);
-		glBufferData(GL_ARRAY_BUFFER, m_BoneWeights.size() * sizeof(glm::vec4), &m_BoneWeights[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, m_Skeleton->m_BoneWeights.size() * sizeof(glm::vec4), &m_Skeleton->m_BoneWeights[0], GL_STATIC_DRAW);
     }
     glGenBuffers(1, &m_elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
@@ -293,7 +288,7 @@ void Mesh::_calculateMeshRadius(){
 }
 void Mesh::render(GLuint mode){
     for(uint i = 0; i < NUM_VERTEX_DATA; i++){
-		if(i <= 4 || (i >= 5 && m_BoneIDs.size() > 0)){
+		if(i <= 4 || (m_Skeleton != nullptr && (i >= 5 && m_Skeleton->m_BoneIDs.size() > 0))){
 			glBindBuffer(GL_ARRAY_BUFFER, m_buffers[i]);
 			glEnableVertexAttribArray(i);
 			glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
@@ -307,10 +302,8 @@ void Mesh::render(GLuint mode){
         glDisableVertexAttribArray(i);
 	}
 }
-std::vector<glm::mat4> Mesh::playAnimation(const std::string& animationName,float time){
-    std::vector<glm::mat4> Transforms;
-    m_AnimationData[animationName]->_BoneTransform(time, Transforms);
-	return Transforms;
+void Mesh::playAnimation(std::vector<glm::mat4>& transforms,glm::mat4& parentMatrix,const std::string& animationName,float time){
+    m_Skeleton->m_AnimationData[animationName]->_BoneTransform(time, transforms,parentMatrix);
 }
 
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
@@ -329,23 +322,18 @@ uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){
     for (uint i = 0 ; i < node->mNumPositionKeys - 1 ; i++) {
         if (AnimationTime < (float)node->mPositionKeys[i + 1].mTime) { return i; }
     }  
-    assert(0);
     return 0;
 }
 uint AnimationData::_FindRotation(float AnimationTime, const aiNodeAnim* node){
-    assert(node->mNumRotationKeys > 0);
     for (uint i = 0 ; i < node->mNumRotationKeys - 1 ; i++) {
         if (AnimationTime < (float)node->mRotationKeys[i + 1].mTime) { return i; }
     }   
-    assert(0);
     return 0;
 }
-uint AnimationData::_FindScaling(float AnimationTime, const aiNodeAnim* node){
-    assert(node->mNumScalingKeys > 0);  
+uint AnimationData::_FindScaling(float AnimationTime, const aiNodeAnim* node){  
     for (uint i = 0 ; i < node->mNumScalingKeys - 1 ; i++) {
         if (AnimationTime < (float)node->mScalingKeys[i + 1].mTime) { return i; }
     }
-    assert(0);
     return 0;
 }
 void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
@@ -405,8 +393,8 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
     std::string NodeName(node->mName.data);    
     aiMatrix4x4 m = node->mTransformation;
 	glm::mat4 NodeTransformation = Engine::Math::assimpToGLMMat4(m);
-    const aiNodeAnim* nodeAnim = m_NodeAnimMap[NodeName]; 
-    if (nodeAnim){
+    const aiNodeAnim* nodeAnim = m_NodeAnimMap[NodeName];
+    if(nodeAnim){
         // Interpolate scaling and generate scaling transformation matrix
         glm::vec3 scl;
         _CalcInterpolatedScaling(scl, AnimationTime, nodeAnim);
@@ -430,31 +418,42 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
         NodeTransformation = translationMatrix * rotationMatrix * scaleMatrix;
     }    
     glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;  
-    if (m_Mesh->m_BoneMapping.find(NodeName) != m_Mesh->m_BoneMapping.end()){
-        uint BoneIndex = m_Mesh->m_BoneMapping[NodeName];
-        m_Mesh->m_BoneInfo[BoneIndex].FinalTransformation = m_Mesh->m_GlobalInverseTransform * GlobalTransformation * m_Mesh->m_BoneInfo[BoneIndex].BoneOffset;
+    if(m_Mesh->m_Skeleton->m_BoneMapping.count(NodeName)){
+        uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping[NodeName];
+        m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].FinalTransformation = m_Mesh->m_Skeleton->m_GlobalInverseTransform * GlobalTransformation * m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset;
     } 
-    for (uint i = 0; i < node->mNumChildren; i++){
+    for(uint i = 0; i < node->mNumChildren; i++){
         _ReadNodeHeirarchy(AnimationTime, node->mChildren[i], GlobalTransformation);
     }
 }
-void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms){   
+void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms,glm::mat4& parentMatrix){   
     float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
     float TimeInTicks = TimeInSeconds * TicksPerSecond;
     float AnimationTime = float(fmod(TimeInTicks, m_Animation->mDuration));
 
-	glm::mat4 Identity = glm::mat4(1);
-    _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity);
-    Transforms.resize(m_Mesh->m_NumBones,glm::mat4(1));
-    for (uint i = 0; i < m_Mesh->m_NumBones; i++) {
-        Transforms[i] = m_Mesh->m_BoneInfo[i].FinalTransformation;
+    _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, parentMatrix);
+    for (uint i = 0; i < m_Mesh->m_Skeleton->m_NumBones; i++){
+        Transforms[i] = m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransformation;
     }
-}
-void AnimationData::_SetBoneTransform(uint Index, glm::mat4& Transform){
-	std::string location = ("gBones[" + boost::lexical_cast<std::string>(Index) + "]");
-	Engine::Renderer::sendUniformMatrix4f(location.c_str(),Transform);
 }
 float AnimationData::duration(){
 	float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
 	return (float(m_Animation->mDuration) / TicksPerSecond);
+}
+
+MeshSkeleton::MeshSkeleton(ImportedMeshData& data){
+	m_AnimationData = data.m_AnimationData;
+    m_BoneMapping = data.m_BoneMapping;
+    m_NumBones = data.m_NumBones;
+    m_BoneInfo = data.m_BoneInfo;
+    m_GlobalInverseTransform = data.m_GlobalInverseTransform;
+    for(auto bone:data.m_Bones){
+		VertexBoneData& b = bone.second;
+		m_BoneIDs.push_back(glm::vec4(b.IDs[0],b.IDs[1],b.IDs[2],b.IDs[3]));
+		m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
+	}
+}
+MeshSkeleton::~MeshSkeleton(){
+    for(auto anim:m_AnimationData)
+        delete anim.second;
 }
