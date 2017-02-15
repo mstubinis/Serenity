@@ -303,7 +303,7 @@ void Mesh::render(GLuint mode){
 	}
 }
 void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& animationName,float time){
-    m_Skeleton->m_AnimationData[animationName]->_BoneTransform(time, transforms);
+    m_Skeleton->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
 }
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
@@ -388,8 +388,8 @@ void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime
     glm::vec3 Delta = End - Start;
     Out = Start + Factor * Delta;
 }
-void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, glm::mat4& ParentTransform){    
-    std::string NodeName(node->mName.data);    
+void AnimationData::_ReadNodeHeirarchy(const std::string& animationName,float AnimationTime, const aiNode* node, glm::mat4& ParentTransform){    
+    std::string NodeName(node->mName.data);
 	glm::mat4 NodeTransform = Engine::Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node->mTransformation));
 	if(m_NodeAnimMap.count(NodeName)){
 		const aiNodeAnim* nodeAnim = m_NodeAnimMap.at(NodeName);
@@ -412,23 +412,23 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
 			translationMatrix = glm::translate(translationMatrix,translation);
 
 			NodeTransform = translationMatrix * rotationMatrix * scaleMatrix; // Combine the above transformations
-		}    
+		}
 	}
-    glm::mat4 GlobalTransform = ParentTransform * NodeTransform;  
+    glm::mat4 GlobalTransform = ParentTransform * NodeTransform;
     if(m_Mesh->m_Skeleton->m_BoneMapping.count(NodeName)){
-        uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping[NodeName];
-        m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].FinalTransform = m_Mesh->m_Skeleton->m_GlobalInverseTransform * GlobalTransform * m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset;
+		uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping.at(NodeName);
+		m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform = m_Mesh->m_Skeleton->m_GlobalInverseTransform * GlobalTransform * m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).BoneOffset;
     } 
     for(uint i = 0; i < node->mNumChildren; i++){
-        _ReadNodeHeirarchy(AnimationTime, node->mChildren[i], GlobalTransform);
+        _ReadNodeHeirarchy(animationName,AnimationTime, node->mChildren[i], GlobalTransform);
     }
 }
-void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms){   
+void AnimationData::_BoneTransform(const std::string& animationName,float TimeInSeconds, std::vector<glm::mat4>& Transforms){   
     float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
     float TimeInTicks = TimeInSeconds * TicksPerSecond;
     float AnimationTime = float(fmod(TimeInTicks, m_Animation->mDuration));
 	glm::mat4 Identity = glm::mat4(1.0f);
-    _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity);
+    _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity);
 
     for (uint i = 0; i < m_Mesh->m_Skeleton->m_NumBones; i++){
         Transforms[i] *= m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransform; // the *= allows for animations to combine. Currently does not work real well. Needs fixing
