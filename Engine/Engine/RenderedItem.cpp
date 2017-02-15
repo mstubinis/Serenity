@@ -22,10 +22,9 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
 		//optimize this search
 		if(i->animationQueue().size() > 0){
 			std::vector<glm::mat4> transforms;
-			glm::mat4 parentMatrix = glm::mat4(1);
 			for(uint j = 0; j < i->animationQueue().size(); j++){
 				if(i->animationQueue().at(j).mesh == i->mesh()){
-					i->_processAnimation(transforms,parentMatrix,j);
+					i->_processAnimation(transforms,j);
 				}
 				//cleanup the animation queue here
 			}
@@ -158,14 +157,14 @@ void RenderedItem::playAnimation(const std::string& animName,float startTime){
 	RenderedItemAnimation anim(mesh(),animName,startTime);
 	m_i->m_AnimationQueue.push_back(anim);
 }
-void RenderedItem::_processAnimation(std::vector<glm::mat4>& transforms,glm::mat4& parentMatrix,uint index){
+void RenderedItem::_processAnimation(std::vector<glm::mat4>& transforms,uint index){
 	RenderedItemAnimation& anim = m_i->m_AnimationQueue.at(index);
 	anim.time += Resources::dt();
 
 	if(transforms.size() == 0){
 		transforms.resize(anim.mesh->m_Skeleton->m_NumBones,glm::mat4(1));
 	}
-	anim.mesh->playAnimation(transforms,parentMatrix,anim.animName,anim.time);
+	anim.mesh->playAnimation(transforms,anim.animName,anim.time);
 	
 	if(anim.time >= anim.mesh->animationData().at(anim.animName)->duration()){
 		anim.time = 0;

@@ -33,14 +33,14 @@ class AnimationData{
 		aiAnimation* m_Animation;
 		std::unordered_map<std::string,aiNodeAnim*> m_NodeAnimMap;
 
-		void _ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
-		void _BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms,glm::mat4& parentMatrix);
-		void _CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
-		void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+		void _ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode,glm::mat4& ParentTransform);
+		void _BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
+		void _CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node);
+		void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* node);
 		void _CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node);
-		uint _FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
-		uint _FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
-		uint _FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint _FindPosition(float AnimationTime, const aiNodeAnim* node);
+		uint _FindRotation(float AnimationTime, const aiNodeAnim* node);
+		uint _FindScaling(float AnimationTime, const aiNodeAnim* node);
 	public:
 		AnimationData(Mesh*,aiAnimation*);
 		~AnimationData();
@@ -112,6 +112,6 @@ class Mesh final: public EngineResource{
         const float getRadius() const { return m_radius; }
 
         void render(GLuint mode = GL_TRIANGLES);
-		void playAnimation(std::vector<glm::mat4>&,glm::mat4& parentMatrix,const std::string& animationName,float time);
+		void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
 #endif

@@ -302,10 +302,9 @@ void Mesh::render(GLuint mode){
         glDisableVertexAttribArray(i);
 	}
 }
-void Mesh::playAnimation(std::vector<glm::mat4>& transforms,glm::mat4& parentMatrix,const std::string& animationName,float time){
-    m_Skeleton->m_AnimationData[animationName]->_BoneTransform(time, transforms,parentMatrix);
+void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& animationName,float time){
+    m_Skeleton->m_AnimationData[animationName]->_BoneTransform(time, transforms);
 }
-
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
     m_Animation = anim;
@@ -345,10 +344,10 @@ void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTim
     }           
     uint PositionIndex = _FindPosition(AnimationTime,node);
     uint NextPositionIndex = (PositionIndex + 1);
-    assert(NextPositionIndex < node->mNumPositionKeys);
+    //assert(NextPositionIndex < node->mNumPositionKeys);
     float DeltaTime = (float)(node->mPositionKeys[NextPositionIndex].mTime - node->mPositionKeys[PositionIndex].mTime);
     float Factor = (AnimationTime - (float)node->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-    assert(Factor >= 0.0f && Factor <= 1.0f);
+    //assert(Factor >= 0.0f && Factor <= 1.0f);
     glm::vec3 Start = glm::vec3(node->mPositionKeys[PositionIndex].mValue.x,node->mPositionKeys[PositionIndex].mValue.y,node->mPositionKeys[PositionIndex].mValue.z);
     glm::vec3 End = glm::vec3(node->mPositionKeys[NextPositionIndex].mValue.x,node->mPositionKeys[NextPositionIndex].mValue.y,node->mPositionKeys[NextPositionIndex].mValue.z);
     glm::vec3 Delta = End - Start;
@@ -362,10 +361,10 @@ void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float Animation
     }
     uint RotationIndex = _FindRotation(AnimationTime, node);
     uint NextRotationIndex = (RotationIndex + 1);
-    assert(NextRotationIndex < node->mNumRotationKeys);
+    //assert(NextRotationIndex < node->mNumRotationKeys);
     float DeltaTime = (float)(node->mRotationKeys[NextRotationIndex].mTime - node->mRotationKeys[RotationIndex].mTime);
     float Factor = (AnimationTime - (float)node->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-    assert(Factor >= 0.0f && Factor <= 1.0f);
+    //assert(Factor >= 0.0f && Factor <= 1.0f);
     const aiQuaternion& StartRotationQ = node->mRotationKeys[RotationIndex].mValue;
     const aiQuaternion& EndRotationQ   = node->mRotationKeys[NextRotationIndex].mValue;    
     aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
@@ -380,20 +379,18 @@ void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime
     }
     uint ScalingIndex = _FindScaling(AnimationTime, node);
     uint NextScalingIndex = (ScalingIndex + 1);
-    assert(NextScalingIndex < node->mNumScalingKeys);
+    //assert(NextScalingIndex < node->mNumScalingKeys);
     float DeltaTime = (float)(node->mScalingKeys[NextScalingIndex].mTime - node->mScalingKeys[ScalingIndex].mTime);
     float Factor = (AnimationTime - (float)node->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
-    assert(Factor >= 0.0f && Factor <= 1.0f);
+    //assert(Factor >= 0.0f && Factor <= 1.0f);
     glm::vec3 Start = glm::vec3(node->mScalingKeys[ScalingIndex].mValue.x,node->mScalingKeys[ScalingIndex].mValue.y,node->mScalingKeys[ScalingIndex].mValue.z);
     glm::vec3 End   = glm::vec3(node->mScalingKeys[NextScalingIndex].mValue.x,node->mScalingKeys[NextScalingIndex].mValue.y,node->mScalingKeys[NextScalingIndex].mValue.z);
     glm::vec3 Delta = End - Start;
     Out = Start + Factor * Delta;
 }
-void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, const glm::mat4& ParentTransform){    
+void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, glm::mat4& ParentTransform){    
     std::string NodeName(node->mName.data);    
-    aiMatrix4x4 m = node->mTransformation;
-	glm::mat4 NodeTransformation = Engine::Math::assimpToGLMMat4(m);
-
+	glm::mat4 NodeTransform = Engine::Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node->mTransformation));
 	if(m_NodeAnimMap.count(NodeName)){
 		const aiNodeAnim* nodeAnim = m_NodeAnimMap.at(NodeName);
 		if(nodeAnim){
@@ -406,37 +403,36 @@ void AnimationData::_ReadNodeHeirarchy(float AnimationTime, const aiNode* node, 
 			// Interpolate rotation and generate rotation transformation matrix
 			aiQuaternion quat;
 			_CalcInterpolatedRotation(quat, AnimationTime, nodeAnim);
-			aiMatrix3x3 m = quat.GetMatrix();
-			glm::mat3 matr = Engine::Math::assimpToGLMMat3(m);
-			glm::mat4 rotationMatrix = glm::mat4(matr);
+			glm::mat4 rotationMatrix = glm::mat4(Engine::Math::assimpToGLMMat3(quat.GetMatrix()));
 
 			// Interpolate translation and generate translation transformation matrix
 			glm::vec3 translation;
 			_CalcInterpolatedPosition(translation, AnimationTime, nodeAnim);
 			glm::mat4 translationMatrix = glm::mat4(1.0f);
 			translationMatrix = glm::translate(translationMatrix,translation);
-        
-			// Combine the above transformations
-			NodeTransformation = translationMatrix * rotationMatrix * scaleMatrix;
+
+			NodeTransform = translationMatrix * rotationMatrix * scaleMatrix; // Combine the above transformations
 		}    
 	}
-    glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;  
+    glm::mat4 GlobalTransform = ParentTransform * NodeTransform;  
     if(m_Mesh->m_Skeleton->m_BoneMapping.count(NodeName)){
         uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping[NodeName];
-        m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].FinalTransformation = m_Mesh->m_Skeleton->m_GlobalInverseTransform * GlobalTransformation * m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset;
+        m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].FinalTransform = m_Mesh->m_Skeleton->m_GlobalInverseTransform * GlobalTransform * m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset;
     } 
     for(uint i = 0; i < node->mNumChildren; i++){
-        _ReadNodeHeirarchy(AnimationTime, node->mChildren[i], GlobalTransformation);
+        _ReadNodeHeirarchy(AnimationTime, node->mChildren[i], GlobalTransform);
     }
 }
-void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms,glm::mat4& parentMatrix){   
+void AnimationData::_BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms){   
     float TicksPerSecond = float(m_Animation->mTicksPerSecond != 0 ? m_Animation->mTicksPerSecond : 25.0f);
     float TimeInTicks = TimeInSeconds * TicksPerSecond;
     float AnimationTime = float(fmod(TimeInTicks, m_Animation->mDuration));
+	glm::mat4 Identity = glm::mat4(1.0f);
+    _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity);
 
-    _ReadNodeHeirarchy(AnimationTime, m_Mesh->m_aiScene->mRootNode, parentMatrix);
     for (uint i = 0; i < m_Mesh->m_Skeleton->m_NumBones; i++){
-        Transforms[i] = m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransformation;
+        Transforms[i] *= m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransform; // the *= allows for animations to combine. Currently does not work real well. Needs fixing
+		//Transforms[i] = m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransform;
     }
 }
 float AnimationData::duration(){

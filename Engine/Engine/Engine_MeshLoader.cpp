@@ -330,22 +330,22 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         out_indices = data.indices;
         return;
     }   
-    for (uint i=0; i < data.points.size(); i++ ){
+    for (uint i=0; i < data.points.size(); i++){
         ushort index;
-        bool found = _getSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i],out_pos, out_uvs, out_norm, index,threshold);
+        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, out_norm, index,threshold);
         if (found){
             out_indices.push_back(index);
 
             //average out TBN. I think this does more harm than good though
-            out_tangents[index] += data.tangents[i];
-            out_binorm[index] += data.binormals[i];
+            out_tangents.at(index) += data.tangents.at(i);
+            out_binorm.at(index) += data.binormals.at(i);
         }
         else{
-            out_pos.push_back( data.points[i]);
-            out_uvs.push_back(data.uvs[i]);
-            out_norm .push_back(data.normals[i]);
-            out_tangents.push_back(data.tangents[i]);
-            out_binorm.push_back(data.binormals[i]);
+            out_pos.push_back( data.points.at(i));
+            out_uvs.push_back(data.uvs.at(i));
+            out_norm .push_back(data.normals.at(i));
+            out_tangents.push_back(data.tangents.at(i));
+            out_binorm.push_back(data.binormals.at(i));
             ushort newindex = (ushort)out_pos.size() - 1;
             out_indices.push_back(newindex);
         }
