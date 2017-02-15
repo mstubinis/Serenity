@@ -10,6 +10,10 @@
 
 using namespace Engine;
 
+glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){
+	glm::vec3 ret = glm::vec3(n.x,n.y,n.z);
+	return ret;
+}
 glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4& n){
 	glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4);
 	return ret;

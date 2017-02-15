@@ -43,6 +43,7 @@ namespace glm{
 namespace Engine{
     namespace Math{
 
+		glm::vec3 assimpToGLMVec3(aiVector3D&);
 		glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
 		glm::mat3 assimpToGLMMat3(aiMatrix3x3&);
 

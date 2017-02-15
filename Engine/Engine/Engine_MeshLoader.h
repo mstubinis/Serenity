@@ -60,8 +60,8 @@ struct BoneInfo final{
     glm::mat4 BoneOffset;
     glm::mat4 FinalTransform;        
     BoneInfo(){
-        BoneOffset = glm::mat4(0);
-        FinalTransform = glm::mat4(0);   
+        BoneOffset = glm::mat4(0.0f);
+        FinalTransform = glm::mat4(1.0f);   
     }
 };
 struct ImportedMeshData final{
