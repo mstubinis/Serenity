@@ -30,8 +30,9 @@ class AnimationData{
 	friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
 	private:
 		Mesh* m_Mesh;
-		aiAnimation* m_Animation;
-		std::unordered_map<std::string,aiNodeAnim*> m_NodeAnimMap;
+		double m_TicksPerSecond;
+		double m_DurationInTicks;
+		std::unordered_map<std::string,aiNodeAnim*> m_KeyframeData;
 
 		void _ReadNodeHeirarchy(const std::string& animationName,float AnimationTime, const aiNode* node,glm::mat4& ParentTransform);
 		void _BoneTransform(const std::string& animationName,float TimeInSeconds, std::vector<glm::mat4>& Transforms);
