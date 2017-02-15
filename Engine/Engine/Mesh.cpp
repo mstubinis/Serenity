@@ -407,13 +407,14 @@ void AnimationData::_ReadNodeHeirarchy(const std::string& animationName,float ti
     glm::mat4 Transform = ParentTransform * NodeTransform;
     if(m_Mesh->m_Skeleton->m_BoneMapping.count(BoneName)){
 		uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping.at(BoneName);
-		m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform = m_Mesh->m_Skeleton->m_GlobalInverseTransform * Transform * m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).BoneOffset;
+		glm::mat4& Final = m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform;
+		Final = m_Mesh->m_Skeleton->m_GlobalInverseTransform * Transform * m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).BoneOffset;
 
-		//this line allows for animation combinations. needs some fixing
-		m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform = Transforms.at(BoneIndex) * m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform;
+		//this line allows for animation combinations. only works when additional animations start off in their resting places...
+		Final = Transforms.at(BoneIndex) * Final;
     }
     for(uint i = 0; i < n->mNumChildren; i++){
-        _ReadNodeHeirarchy(animationName,time, n->mChildren[i], Transform,Transforms);
+        _ReadNodeHeirarchy(animationName,time,n->mChildren[i],Transform,Transforms);
     }
 }
 void AnimationData::_BoneTransform(const std::string& animationName,float TimeInSeconds, std::vector<glm::mat4>& Transforms){   

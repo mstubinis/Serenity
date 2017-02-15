@@ -26,7 +26,7 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
 				if(i->animationQueue().at(j).mesh == i->mesh()){
 					i->_processAnimation(transforms,j);
 				}
-				//cleanup the animation queue here
+				
 			}
 			Renderer::sendUniform1iSafe("AnimationPlaying",1);
 			Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
