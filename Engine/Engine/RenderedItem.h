@@ -8,18 +8,20 @@
 class Mesh;
 class Material;
 
-struct RenderedItemAnimation{
-	uint loops;
-	float time;
-	std::string animName;
-	Mesh* mesh;
-	RenderedItemAnimation(Mesh* _mesh,std::string _animName,float _startTime){
-		animName = _animName;
-		time = _startTime;
-		mesh = _mesh;
-		loops = 0;
-	}
-	~RenderedItemAnimation(){}
+class RenderedItemAnimation{
+	friend class AnimationProcessor;
+	private:
+		uint currentLoops;
+		uint requestedLoops;
+		float currentTime;
+		float startTime;
+		float endTime;
+		std::string animName;
+		Mesh* mesh;
+	public:
+		RenderedItemAnimation(Mesh*,std::string _animName,float _startTime,float _duration);
+		RenderedItemAnimation(Mesh*,std::string _animName,float _startTime,float _endTime,uint requestedLoops);
+		~RenderedItemAnimation();
 };
 
 class RenderedItem final: public BindableResource{
@@ -43,7 +45,7 @@ class RenderedItem final: public BindableResource{
 
 		std::vector<RenderedItemAnimation>& animationQueue();
 		void playAnimation(const std::string& animName,float startTime);
-		void _processAnimation(std::vector<glm::mat4>&,uint index);
+		void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 
         void setOrientation(glm::quat&);
         void setOrientation(float x,float y,float z);

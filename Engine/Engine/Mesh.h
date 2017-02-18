@@ -50,7 +50,7 @@ class AnimationData{
 };
 class MeshSkeleton final{
 	friend class AnimationData;
-	friend class RenderedItem;
+	friend class AnimationProcessor;
 	friend class Mesh;
 	private:
 		//animation data
@@ -71,7 +71,7 @@ class MeshSkeleton final{
 class Mesh final: public EngineResource{
 	friend class AnimationData;
 	friend class MeshSkeleton;
-	friend class RenderedItem;
+	friend class AnimationProcessor;
 	friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
         GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents

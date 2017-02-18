@@ -237,6 +237,9 @@
     <ClCompile Include="BindableResource.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_AnimationProcessor.cpp">
+      <Filter>Source Files\Engine\Engine_Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -352,6 +355,9 @@
     </ClInclude>
     <ClInclude Include="BindableResource.h">
       <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_AnimationProcessor.h">
+      <Filter>Header Files\Engine\Engine_Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

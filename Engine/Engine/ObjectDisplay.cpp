@@ -103,3 +103,13 @@ void ObjectDisplay::playAnimation(const std::string& animName,float startTime){
 		}
 	}
 }
+void ObjectDisplay::playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops){
+	for(auto renderedItem:m_DisplayItems){
+		if(renderedItem->mesh()->animationData().count(animName)){
+			if(endTime < 0){
+				endTime = renderedItem->mesh()->animationData().at(animName)->duration();
+			}
+			renderedItem->playAnimation(animName,startTime,endTime,requestedLoops);
+		}
+	}
+}

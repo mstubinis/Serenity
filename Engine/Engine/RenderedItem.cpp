@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "Object.h"
 #include "Camera.h"
+#include "Engine_AnimationProcessor.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,17 +20,12 @@ struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
     if(exists(o)){
         Object* obj = o.lock().get();
-		//optimize this search
-		if(i->animationQueue().size() > 0){
+
+		std::vector<RenderedItemAnimation>& q = i->animationQueue();
+		if(q.size() > 0){
 			std::vector<glm::mat4> transforms;
-			for(uint j = 0; j < i->animationQueue().size(); j++){
-				if(i->animationQueue().at(j).mesh == i->mesh()){
-					i->_processAnimation(transforms,j);
-				}
-				
-			}
-			Renderer::sendUniform1iSafe("AnimationPlaying",1);
-			Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+			AnimationProcessor processor = AnimationProcessor();
+			processor.process(i,q,transforms);
 		}
 		else{
 			Renderer::sendUniform1iSafe("AnimationPlaying",0);
@@ -154,21 +150,32 @@ void RenderedItem::update(float dt){
     m_i->_updateModelMatrix();
 }
 void RenderedItem::playAnimation(const std::string& animName,float startTime){
-	RenderedItemAnimation anim(mesh(),animName,startTime);
+	RenderedItemAnimation anim(mesh(),animName,startTime,mesh()->animationData().at(animName)->duration());
 	m_i->m_AnimationQueue.push_back(anim);
 }
-void RenderedItem::_processAnimation(std::vector<glm::mat4>& transforms,uint index){
-	RenderedItemAnimation& anim = m_i->m_AnimationQueue.at(index);
-	anim.time += Resources::dt();
-
-	if(transforms.size() == 0){
-		transforms.resize(anim.mesh->m_Skeleton->m_NumBones,glm::mat4(1));
-	}
-	anim.mesh->playAnimation(transforms,anim.animName,anim.time);
-	
-	if(anim.time >= anim.mesh->animationData().at(anim.animName)->duration()){
-		anim.time = 0;
-		anim.loops++;
-	}
+void RenderedItem::playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops){
+	RenderedItemAnimation anim(mesh(),animName,startTime,endTime,requestedLoops);
+	m_i->m_AnimationQueue.push_back(anim);
 }
 std::vector<RenderedItemAnimation>& RenderedItem::animationQueue(){ return m_i->m_AnimationQueue; }
+
+RenderedItemAnimation::RenderedItemAnimation(Mesh* _mesh,std::string _animName,float _startTime,float _duration){
+	animName = _animName;
+	startTime = _startTime;
+	endTime = _duration;
+	mesh = _mesh;
+	currentLoops = 0;
+	currentTime = 0;
+	requestedLoops = 1;
+}
+RenderedItemAnimation::RenderedItemAnimation(Mesh* _mesh,std::string _animName,float _startTime,float _endTime,uint _requestedLoops){
+	animName = _animName;
+	startTime = _startTime;
+	endTime = _endTime;
+	mesh = _mesh;
+	currentLoops = 0;
+	currentTime = 0;
+	requestedLoops = _requestedLoops;
+}
+RenderedItemAnimation::~RenderedItemAnimation(){
+}

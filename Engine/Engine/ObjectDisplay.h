@@ -57,5 +57,9 @@ class ObjectDisplay: public ObjectBasic{
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 
 		void playAnimation(const std::string& animName,float startTime = 0.0f);
+
+		//plays the animation from a specified starting time to the specified ending time, looping through until the amount of requested
+		//loops are made. if endTime is less than 0 (which it is by default), the ending time will be the animation's default duration.
+		void playAnimation(const std::string& animName,float startTime,float endTime = -1.0f ,uint requestedLoops = 1);
 };
 #endif
