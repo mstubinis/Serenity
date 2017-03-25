@@ -41,7 +41,7 @@ void Game::initResources(){
     //Resources::addMesh("Norway","data/Models/norway.obj");
     //Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
     //Resources::addMesh("Ring","data/Models/ring.obj");
-    Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj");
+    Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",COLLISION_TYPE_CONVEXHULL);
 
     //Resources::addMaterial("Starbase","data/Textures/starbase.png","","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg");
