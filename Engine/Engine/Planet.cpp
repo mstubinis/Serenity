@@ -17,9 +17,8 @@ using namespace Engine;
 
 struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     RenderedItem* i = static_cast<RenderedItem*>(r);
-    ShaderP* firstProgram = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
 
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent());
     if(exists(o)){
         Planet* obj = static_cast<Planet*>(o.lock().get());
         Camera* c = Resources::getActiveCamera();

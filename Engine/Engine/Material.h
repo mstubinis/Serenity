@@ -148,6 +148,6 @@ class Material final: public BindableResource{
 
         void addObject(std::string objectName);
         void removeObject(std::string objectName);
-        std::vector<skey>& getObjects();
+        std::vector<std::string>& getObjects();
 };
 #endif

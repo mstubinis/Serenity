@@ -8,7 +8,7 @@
 
 #include <boost/filesystem.hpp>
 
-Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold){
+Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):EngineResource(name){
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -56,9 +56,8 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
     }
     _loadData(d,threshold);
     _calculateMeshRadius();
-    this->setName(name);
 }
-Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold){
+Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold):EngineResource(name){
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -102,9 +101,8 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
     }
 	_loadData(d,threshold);
     _calculateMeshRadius();
-    this->setName(name);
 }
-Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold){
+Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold):EngineResource(name){
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -142,9 +140,8 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height,float th
 
     _loadData(d,threshold);
     _calculateMeshRadius();
-    this->setName(name);
 }
-Mesh::Mesh(std::string& name,float width, float height,float threshold){
+Mesh::Mesh(std::string& name,float width, float height,float threshold):EngineResource(name){
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -182,9 +179,8 @@ Mesh::Mesh(std::string& name,float width, float height,float threshold){
 
     _loadData(d,threshold);
     _calculateMeshRadius();
-    this->setName(name);
 }
-Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold){
+Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold):EngineResource(name){
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     if(notMemory)
@@ -192,7 +188,6 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
     else
         _loadFromOBJMemory(filename,type,threshold);
     _calculateMeshRadius();
-    this->setName(name);
 }
 Mesh::~Mesh(){
     cleanupRenderingContext();

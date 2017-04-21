@@ -151,7 +151,7 @@ class Material::impl final{
         static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
         std::unordered_map<uint,MaterialComponent*> m_Components;
-        std::vector<skey> m_Objects;
+        std::vector<std::string> m_Objects;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
@@ -167,7 +167,7 @@ class Material::impl final{
             m_SpecularityPower = 50.0f;
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
             _addToMaterialPool();
-            super->setName(name);
+
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
@@ -223,10 +223,10 @@ class Material::impl final{
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
-Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()){
+Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl()),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
-Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()){
+Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl()),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){
@@ -309,15 +309,14 @@ void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 void Material::addObject(std::string objectName){
     RenderedItem* o = Resources::getRenderedItem(objectName);
     if(o != nullptr){
-        skey k(o);
-        m_i->m_Objects.push_back(k);
-        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),sksortlessthan());
+		m_i->m_Objects.push_back(o->name());
+        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
     }
 }
 void Material::removeObject(std::string objectName){
     auto result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
     if (result == m_i->m_Objects.end()) return;
     m_i->m_Objects.erase(result);
-    std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),sksortlessthan());
+    std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
 }
-std::vector<skey>& Material::getObjects(){ return m_i->m_Objects; }
+std::vector<std::string>& Material::getObjects(){ return m_i->m_Objects; }

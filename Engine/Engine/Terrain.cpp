@@ -42,7 +42,7 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
 	);
 
     if(material != ""){
-        RenderedItem* item = new RenderedItem(namePtr(),name(),material);
+        RenderedItem* item = new RenderedItem(name(),name(),material);
         m_DisplayItems.push_back(item);
     }
 

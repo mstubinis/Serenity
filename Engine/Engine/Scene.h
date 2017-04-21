@@ -16,8 +16,8 @@ class Scene: public EngineResource{
     private:
         SkyboxEmpty* m_Skybox;
     protected:
-        std::unordered_map<skey,Object*,skh,skef> m_Objects;
-        std::unordered_map<skey,SunLight*,skh,skef> m_Lights;
+        std::unordered_map<std::string,Object*> m_Objects;
+        std::unordered_map<std::string,SunLight*> m_Lights;
 
         glm::vec3 m_AmbientLighting;
         glm::vec3 m_BackgroundColor;
@@ -27,8 +27,8 @@ class Scene: public EngineResource{
 
 		virtual void update(float);
 
-        std::unordered_map<skey,Object*,skh,skef>& objects();
-        std::unordered_map<skey,SunLight*,skh,skef>& lights();
+        std::unordered_map<std::string,Object*>& objects();
+        std::unordered_map<std::string,SunLight*>& lights();
 
         Object* getObject(std::string);
         SunLight* getLight(std::string);

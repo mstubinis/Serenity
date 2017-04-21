@@ -17,7 +17,7 @@ using namespace Engine;
 struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     RenderedItem* i = static_cast<RenderedItem*>(r);
 
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(*i->parentPtr().lock().get());
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent());
     if(exists(o)){
         Object* obj = o.lock().get();
 
@@ -54,8 +54,8 @@ class RenderedItem::impl{
         glm::vec3 m_Scale;
         glm::mat4 m_Model;
         bool m_NeedsUpdate;
-        boost::weak_ptr<std::string> m_ParentPtr;
-        void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,RenderedItem* super,boost::shared_ptr<std::string>& parentNamePtr){
+        std::string m_Parent;
+        void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,RenderedItem* super,std::string& parentName){
             m_Mesh = mesh;
             m_Material = mat;
             m_Position = pos;
@@ -66,7 +66,7 @@ class RenderedItem::impl{
 
             std::string n = m_Mesh->name() + "_" + m_Material->name();
             n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);
-            m_ParentPtr = boost::dynamic_pointer_cast<std::string>(parentNamePtr);
+            m_Parent = parentName;
 
             super->setName(n);
             super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_BIND_FUNCTOR);
@@ -98,15 +98,15 @@ class RenderedItem::impl{
 DefaultRenderedItemBindFunctor RenderedItem::impl::DEFAULT_BIND_FUNCTOR;
 DefaultRenderedItemUnbindFunctor RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR;
 
-RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
-    m_i->_init(mesh,mat,pos,rot,scl,this,parentNamePtr);
+RenderedItem::RenderedItem(std::string& parentName, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
+    m_i->_init(mesh,mat,pos,rot,scl,this,parentName);
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<RenderedItem>(this));
     mat->addObject(name());
 }
-RenderedItem::RenderedItem(boost::shared_ptr<std::string>& parentNamePtr,std::string mesh,std::string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
+RenderedItem::RenderedItem(std::string& parentName,std::string mesh,std::string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl()){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
-    m_i->_init(_mesh,_mat,pos,rot,scl,this,parentNamePtr);
+    m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<RenderedItem>(this));
     _mat->addObject(name());
 }
@@ -143,8 +143,7 @@ void RenderedItem::setOrientation(float x,float y,float z){
     if(abs(z) > threshold) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
     m_i->_updateModelMatrix();
 }
-std::string& RenderedItem::parent(){ return *(m_i->m_ParentPtr.lock().get()); }
-boost::weak_ptr<std::string>& RenderedItem::parentPtr(){ return m_i->m_ParentPtr; }
+std::string& RenderedItem::parent(){ return m_i->m_Parent; }
 
 void RenderedItem::update(float dt){
     m_i->_updateModelMatrix();

@@ -63,10 +63,8 @@ void FontData::_loadTextFile(std::string& filename){
     m_FontGlyphs = _Font_Chars;
 }
 
-Font::Font(std::string filename){
+Font::Font(std::string filename):EngineResource(filename){
     m_FontData = new FontData(filename);
-	std::string n = filename.substr(0,filename.size()-4);
-    setName(n);
 
 	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Fonts,name(),boost::shared_ptr<Font>(this));
 }

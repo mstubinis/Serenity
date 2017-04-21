@@ -2,9 +2,11 @@
 
 struct emptyFunctor{template<class T> void operator()(T* r) const {}};
 
-BindableResource::BindableResource(){
-    emptyFunctor a; emptyFunctor b;
-    setCustomBindFunctor(a); setCustomUnbindFunctor(b);
+BindableResource::BindableResource(std::string name):EngineResource(name){
+    emptyFunctor a; 
+	emptyFunctor b;
+    setCustomBindFunctor(a); 
+	setCustomUnbindFunctor(b);
 }
 BindableResource::~BindableResource(){
 }

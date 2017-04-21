@@ -24,8 +24,7 @@ SunLight::SunLight(glm::v3 pos,std::string n,unsigned int type,Scene* scene):Obj
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
     }
-    skey k(this);
-    scene->lights().emplace(k,this);
+    scene->lights().emplace(name(),this);
 }
 SunLight::~SunLight(){
 }

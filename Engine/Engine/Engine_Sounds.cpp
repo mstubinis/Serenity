@@ -21,9 +21,8 @@ bool Sound::Detail::SoundManagement::isPaused(sf::SoundSource::Status status){
     if(status == sf::SoundSource::Status::Paused) return true; return false;
 }
 
-SoundEffectBasic::SoundEffectBasic(std::string& name,std::string file){ 
+SoundEffectBasic::SoundEffectBasic(std::string& name,std::string file):EngineResource(name){ 
     s = nullptr;
-    this->setName(name); 
 }
 SoundEffectBasic::~SoundEffectBasic(){
     SAFE_DELETE(s);
@@ -60,8 +59,6 @@ bool SoundEffect::isStopped(){ return Sound::Detail::SoundManagement::isStopped(
 bool SoundEffect::isPlaying(){ return Sound::Detail::SoundManagement::isPlaying(this->getStatus()); }
 bool SoundEffect::isPaused(){ return Sound::Detail::SoundManagement::isPaused(this->getStatus()); }
 bool SoundEffect::isLooping(){ return static_cast<sf::Sound*>(s)->getLoop(); }
-
-
 
 SoundMusic::SoundMusic(std::string& name, std::string file, bool loop):SoundEffectBasic(name,file){
     s = new sf::Music();

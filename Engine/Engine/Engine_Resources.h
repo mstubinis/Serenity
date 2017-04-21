@@ -40,28 +40,28 @@ namespace Engine{
         namespace Detail{
             class ResourceManagement final{
                 public:
-                    template<class K,class V,class H,class F,class S> static S _incrementName(std::unordered_map<K,V,H,F>& m,const S n){
+                    template<class V,class S> static S _incrementName(std::unordered_map<S,V>& m,const S n){
                         S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
                     }
-                    template<class K,class V,class H,class F,class S> static S _incrementName(std::map<K,V,H,F>& m,const S n){
+                    template<class V,class S> static S _incrementName(std::map<S,V>& m,const S n){
                         S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
                     }
-                    template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::map<K,V,H,F>& m,const S& n,O& o){
-                        K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
+                    template<class V, class O,class S> static void _addToContainer(std::map<S,V>& m,const S& n,O& o){
+						if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
                     }
-                    template<class K,class V, class O,class H,class F,class S> static void _addToContainer(std::unordered_map<K,V,H,F>& m,const S& n,O& o){
-                        K k(o.get());if(m.size() > 0 && m.count(k)){o.reset();return;}m.emplace(k,o);
+                    template<class V, class O,class S> static void _addToContainer(std::unordered_map<S,V>& m,const S& n,O& o){
+						if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
                     }
-                    template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::map<K,V,H,F>& m,const S& n){
+                    template<class V,class S> static void* _getFromContainer(std::map<S,V>& m,const S& n){
                         if(!m.count(n))return nullptr; return m.at(n).get();
                     }
-                    template<class K,class V,class H,class F,class S> static void* _getFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
+                    template<class V,class S> static void* _getFromContainer(std::unordered_map<S,V>& m,const S& n){
                         if(!m.count(n)) return nullptr; return m.at(n).get();
                     }
-                    template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::map<K,V,H,F>& m,const S& n){
+                    template<class V,class S> static void _removeFromContainer(std::map<S,V>& m,const S& n){
                         if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
                     }
-                    template<class K,class V,class H,class F,class S> static void _removeFromContainer(std::unordered_map<K,V,H,F>& m,const S& n){
+                    template<class V,class S> static void _removeFromContainer(std::unordered_map<S,V>& m,const S& n){
                         if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
                     }
                     static Scene* m_CurrentScene;
@@ -73,17 +73,17 @@ namespace Engine{
 
                     static Engine_Window* m_Window;
 
-                    static std::unordered_map<skey,boost::shared_ptr<RenderedItem>,skh,skef> m_RenderedItems;
-                    static std::unordered_map<skey,boost::shared_ptr<Scene>,skh,skef> m_Scenes;
-                    static std::unordered_map<skey,boost::shared_ptr<SoundEffectBasic>,skh,skef> m_Sounds;
-                    static std::unordered_map<skey,boost::shared_ptr<Object>,skh,skef> m_Objects;
-                    static std::unordered_map<skey,boost::shared_ptr<Camera>,skh,skef> m_Cameras;
-                    static std::unordered_map<skey,boost::shared_ptr<Font>,skh,skef> m_Fonts;
-                    static std::unordered_map<skey,boost::shared_ptr<Mesh>,skh,skef> m_Meshes;
-                    static std::unordered_map<skey,boost::shared_ptr<Texture>,skh,skef> m_Textures;
-                    static std::unordered_map<skey,boost::shared_ptr<Material>,skh,skef> m_Materials;
-                    static std::unordered_map<skey,boost::shared_ptr<Shader>,skh,skef> m_Shaders;
-                    static std::unordered_map<skey,boost::shared_ptr<ShaderP>,skh,skef> m_ShaderPrograms;
+                    static std::unordered_map<std::string,boost::shared_ptr<RenderedItem>> m_RenderedItems;
+                    static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
+                    static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
+                    static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
+                    static std::unordered_map<std::string,boost::shared_ptr<Camera>> m_Cameras;
+                    static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
+                    static std::unordered_map<std::string,boost::shared_ptr<Mesh>> m_Meshes;
+                    static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
+                    static std::unordered_map<std::string,boost::shared_ptr<Material>> m_Materials;
+                    static std::unordered_map<std::string,boost::shared_ptr<Shader>> m_Shaders;
+                    static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_ShaderPrograms;
 
                     static void destruct();
             };

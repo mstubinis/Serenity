@@ -29,8 +29,8 @@ class RenderedItem final: public BindableResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        RenderedItem(boost::shared_ptr<std::string>& parentNamePtr,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        RenderedItem(boost::shared_ptr<std::string>& parentNamePtr,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        RenderedItem(std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        RenderedItem(std::string& parentName,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         ~RenderedItem();
 
         Mesh* mesh();
@@ -40,8 +40,6 @@ class RenderedItem final: public BindableResource{
         glm::quat& orientation();
         glm::vec3& getScale();
         std::string& parent();
-        boost::weak_ptr<std::string>& parentPtr();
-
 
 		std::vector<RenderedItemAnimation>& animationQueue();
 		void playAnimation(const std::string& animName,float startTime);

@@ -57,7 +57,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0);
     if(mesh != "" && mat != ""){
-        RenderedItem* item = new RenderedItem(namePtr(),mesh,mat);
+        RenderedItem* item = new RenderedItem(name(),mesh,mat);
         m_DisplayItems.push_back(item);
     }
     m_Color = glm::vec4(1);

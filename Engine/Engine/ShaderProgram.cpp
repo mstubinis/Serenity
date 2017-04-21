@@ -58,7 +58,7 @@ class ShaderP::impl final{
 
         SHADER_PIPELINE_STAGE m_Stage;
         GLuint m_ShaderProgram;
-        std::vector<skey> m_Materials;
+        std::vector<std::string> m_Materials;
         std::unordered_map<std::string,GLint> m_UniformLocations;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
@@ -235,7 +235,7 @@ GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }
 Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
 SHADER_PIPELINE_STAGE ShaderP::stage(){ return m_i->m_Stage; }
-std::vector<skey>& ShaderP::getMaterials(){ return m_i->m_Materials; }
+std::vector<std::string>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::addMaterial(std::string m){
     if(m == "" || !Resources::Detail::ResourceManagement::m_Materials.count(m)){
@@ -243,8 +243,7 @@ void ShaderP::addMaterial(std::string m){
         return;
     }
     Material* mat = Resources::getMaterial(m);
-    skey k(mat);
-    m_i->m_Materials.push_back(k);
-    std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),sksortlessthan());
+    m_i->m_Materials.push_back(mat->name());
+    std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end());
 }
 const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }

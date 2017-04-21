@@ -70,8 +70,8 @@ void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->draw(
 glm::vec3 Scene::getAmbientLightColor(){ return m_AmbientLighting; }
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 
-std::unordered_map<skey,Object*,skh,skef>& Scene::objects() { return m_Objects; }
-std::unordered_map<skey,SunLight*,skh,skef>& Scene::lights() { return m_Lights; }
+std::unordered_map<std::string,Object*>& Scene::objects() { return m_Objects; }
+std::unordered_map<std::string,SunLight*>& Scene::lights() { return m_Lights; }
 
 Object* Scene::getObject(std::string name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
 SunLight* Scene::getLight(std::string name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()

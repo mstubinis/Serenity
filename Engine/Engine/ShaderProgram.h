@@ -51,7 +51,7 @@ class ShaderP final: public BindableResource{
         SHADER_PIPELINE_STAGE stage();
         Shader* vertexShader();
         Shader* fragmentShader();
-        std::vector<skey>& getMaterials();
+        std::vector<std::string>& getMaterials();
 
         void addMaterial(std::string);
         const std::unordered_map<std::string,GLint>& uniforms() const;

@@ -392,13 +392,12 @@ void Detail::RenderManagement::_passGeometry(){
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		if(shaderProgram->getMaterials().size() > 0){
 			_bind(shaderProgram);
-			for(auto materialNames:shaderProgram->getMaterials()){
-				Material* material = Resources::getMaterial(*(materialNames.w.lock().get()));
+			for(auto materialName:shaderProgram->getMaterials()){
+				Material* material = Resources::getMaterial(materialName);
 				if(material->getObjects().size() > 0){
 					_bind(material);
 					for(auto key:material->getObjects()){
-						string renderedItemName = *(key.w.lock().get());
-						RenderedItem* item = Resources::getRenderedItem(renderedItemName);
+						RenderedItem* item = Resources::getRenderedItem(key);
 						string parentObjectName = item->parent();
 						Object* o = Resources::getObject(parentObjectName);
 
