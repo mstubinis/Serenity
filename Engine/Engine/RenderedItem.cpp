@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "Camera.h"
 #include "Engine_AnimationProcessor.h"
+#include "Object.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -54,7 +55,7 @@ class RenderedItem::impl{
         glm::vec3 m_Scale;
         glm::mat4 m_Model;
         bool m_NeedsUpdate;
-        std::string m_Parent;
+        Object* m_Parent;
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,RenderedItem* super,std::string& parentName){
             m_Mesh = mesh;
             m_Material = mat;
@@ -66,7 +67,7 @@ class RenderedItem::impl{
 
             std::string n = m_Mesh->name() + "_" + m_Material->name();
             n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);
-            m_Parent = parentName;
+			m_Parent = Resources::getObject(parentName);
 
             super->setName(n);
             super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_BIND_FUNCTOR);
@@ -143,7 +144,7 @@ void RenderedItem::setOrientation(float x,float y,float z){
     if(abs(z) > threshold) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
     m_i->_updateModelMatrix();
 }
-std::string& RenderedItem::parent(){ return m_i->m_Parent; }
+std::string& RenderedItem::parent(){ return m_i->m_Parent->name(); }
 
 void RenderedItem::update(float dt){
     m_i->_updateModelMatrix();
