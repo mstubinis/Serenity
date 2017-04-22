@@ -1,5 +1,6 @@
 #include "ObjectDynamic.h"
 #include "ObjectDisplay.h"
+#include "RenderedItem.h"
 #include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
@@ -14,6 +15,7 @@
 using namespace Engine;
 
 std::vector<glm::vec4> Material::m_MaterialProperities;
+
 
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* m = static_cast<Material*>(r);
@@ -151,7 +153,7 @@ class Material::impl final{
         static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
         std::unordered_map<uint,MaterialComponent*> m_Components;
-        std::vector<std::string> m_Objects;
+        std::vector<RenderedItem*> m_Objects;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
@@ -306,17 +308,32 @@ void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
 void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 
+struct less_than_key{
+    inline bool operator() ( RenderedItem* struct1,  RenderedItem* struct2){
+        return (struct1->name() < struct2->name());
+    }
+};
+
 void Material::addObject(std::string objectName){
     RenderedItem* o = Resources::getRenderedItem(objectName);
     if(o != nullptr){
-		m_i->m_Objects.push_back(o->name());
-        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
+		m_i->m_Objects.push_back(o);
+		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
     }
 }
 void Material::removeObject(std::string objectName){
-    auto result = std::find(m_i->m_Objects.begin(), m_i->m_Objects.end(), objectName);
-    if (result == m_i->m_Objects.end()) return;
-    m_i->m_Objects.erase(result);
-    std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end());
+	bool did = false;
+	for (auto it = m_i->m_Objects.cbegin(); it != m_i->m_Objects.cend();){
+		if( (*it)->name() == objectName){
+			m_i->m_Objects.erase(it++);
+			did = true;
+		}
+		else{
+			++it;
+		}
+	}
+	if(did == true){
+		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
+	}
 }
-std::vector<std::string>& Material::getObjects(){ return m_i->m_Objects; }
+std::vector<RenderedItem*>& Material::getObjects(){ return m_i->m_Objects; }

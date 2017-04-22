@@ -8,6 +8,7 @@
 
 class Texture;
 class ShaderP;
+class RenderedItem;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef char GLchar;
@@ -148,6 +149,6 @@ class Material final: public BindableResource{
 
         void addObject(std::string objectName);
         void removeObject(std::string objectName);
-        std::vector<std::string>& getObjects();
+        std::vector<RenderedItem*>& getObjects();
 };
 #endif

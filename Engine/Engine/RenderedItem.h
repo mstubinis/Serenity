@@ -7,6 +7,7 @@
 
 class Mesh;
 class Material;
+class Object;
 
 class RenderedItemAnimation{
 	friend class AnimationProcessor;
@@ -39,7 +40,7 @@ class RenderedItem final: public BindableResource{
         glm::vec3& position();
         glm::quat& orientation();
         glm::vec3& getScale();
-        std::string& parent();
+        Object* parent();
 
 		std::vector<RenderedItemAnimation>& animationQueue();
 		void playAnimation(const std::string& animName,float startTime);

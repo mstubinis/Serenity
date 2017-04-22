@@ -392,16 +392,12 @@ void Detail::RenderManagement::_passGeometry(){
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		if(shaderProgram->getMaterials().size() > 0){
 			_bind(shaderProgram);
-			for(auto materialName:shaderProgram->getMaterials()){
-				Material* material = Resources::getMaterial(materialName);
+			for(auto material:shaderProgram->getMaterials()){
 				if(material->getObjects().size() > 0){
 					_bind(material);
-					for(auto key:material->getObjects()){
-						RenderedItem* item = Resources::getRenderedItem(key);
-						string parentObjectName = item->parent();
-						Object* o = Resources::getObject(parentObjectName);
-
-						if(scene->objects().count(parentObjectName)){
+					for(auto item:material->getObjects()){
+						Object* o = item->parent();
+						if(scene->objects().count(o->name())){
 							o->bind();   //bind object specific data shared between all of its rendered items
 							item->bind();//the actual mesh drawing occurs here too
 							item->unbind();

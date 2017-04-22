@@ -18,7 +18,7 @@ using namespace Engine;
 struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     RenderedItem* i = static_cast<RenderedItem*>(r);
 
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent());
+	boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
     if(exists(o)){
         Object* obj = o.lock().get();
 
@@ -144,7 +144,7 @@ void RenderedItem::setOrientation(float x,float y,float z){
     if(abs(z) > threshold) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
     m_i->_updateModelMatrix();
 }
-std::string& RenderedItem::parent(){ return m_i->m_Parent->name(); }
+Object* RenderedItem::parent(){ return m_i->m_Parent; }
 
 void RenderedItem::update(float dt){
     m_i->_updateModelMatrix();

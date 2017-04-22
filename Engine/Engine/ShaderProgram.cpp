@@ -58,7 +58,7 @@ class ShaderP::impl final{
 
         SHADER_PIPELINE_STAGE m_Stage;
         GLuint m_ShaderProgram;
-        std::vector<std::string> m_Materials;
+        std::vector<Material*> m_Materials;
         std::unordered_map<std::string,GLint> m_UniformLocations;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
@@ -235,15 +235,22 @@ GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }
 Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
 SHADER_PIPELINE_STAGE ShaderP::stage(){ return m_i->m_Stage; }
-std::vector<std::string>& ShaderP::getMaterials(){ return m_i->m_Materials; }
+std::vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
-void ShaderP::addMaterial(std::string m){
-    if(m == "" || !Resources::Detail::ResourceManagement::m_Materials.count(m)){
-        std::cout << "Material : '" << m << "' does not exist (ShaderP::addMaterial()) Returning..." << std::endl;
+
+struct less_than_key{
+    inline bool operator() ( Material* struct1,  Material* struct2){
+        return (struct1->name() < struct2->name());
+    }
+};
+
+void ShaderP::addMaterial(std::string materialName){
+    if(materialName == "" || !Resources::Detail::ResourceManagement::m_Materials.count(materialName)){
+        std::cout << "Material : '" << materialName << "' does not exist (ShaderP::addMaterial()) Returning..." << std::endl;
         return;
     }
-    Material* mat = Resources::getMaterial(m);
-    m_i->m_Materials.push_back(mat->name());
-    std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end());
+    Material* mat = Resources::getMaterial(materialName);
+    m_i->m_Materials.push_back(mat);
+	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),less_than_key());
 }
 const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
