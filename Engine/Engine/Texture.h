@@ -2,15 +2,13 @@
 #ifndef ENGINE_TEXTURE_H
 #define ENGINE_TEXTURE_H
 
-#define GL_TEXTURE_2D 0x0DE1
-#define GL_TEXTURE_CUBE_MAP 0x8513
-
 #include "Engine_ResourceBasic.h"
 
-#include <string>
-#include <vector>
 #include <glm/glm.hpp>
 #include <memory>
+
+#include <GL/glew.h>
+#include <GL/GL.h>
 
 typedef unsigned int GLuint;
 typedef unsigned int uint;

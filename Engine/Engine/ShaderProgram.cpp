@@ -237,7 +237,6 @@ Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
 SHADER_PIPELINE_STAGE ShaderP::stage(){ return m_i->m_Stage; }
 std::vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
-
 struct less_than_key{
     inline bool operator() ( Material* struct1,  Material* struct2){return (struct1->name() < struct2->name());}
 };

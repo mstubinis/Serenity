@@ -4,6 +4,10 @@
 
 #include "BindableResource.h"
 #include <unordered_map>
+
+class Material;
+typedef int GLint;
+typedef unsigned int GLuint;
 typedef unsigned int uint;
 
 enum SHADER_PIPELINE_STAGE{
@@ -18,9 +22,6 @@ enum SHADER_TYPE{
     SHADER_TYPE_GEOMETRY
 };
 
-class Material;
-typedef int GLint;
-typedef unsigned int GLuint;
 class Shader final: public EngineResource{
     private:
         class impl;
@@ -33,8 +34,6 @@ class Shader final: public EngineResource{
         std::string data();
         bool fromFile();
 };
-
-
 class ShaderP final: public BindableResource{
     private:
         class impl;

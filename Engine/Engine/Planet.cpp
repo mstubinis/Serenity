@@ -86,19 +86,16 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 i->mesh()->render();
                 Engine::Renderer::bindShaderProgram(0);
 
-                //now for actual atmosphere
-                ShaderP* program;
+                ShaderP* program; //now for actual atmosphere
                 if(camHeight > outerRadius){ 
                     program = Resources::getShaderProgram("AS_SkyFromSpace"); 
                     glBlendFunc(GL_ONE, GL_ONE);
-                    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 }
                 else{
                     program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
-                    //glBlendFunc(GL_ONE, GL_ONE);
                     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
                 }
-                Engine::Renderer::bindShaderProgram(program);
+				Engine::Renderer::bindShaderProgram(program);
 
                 if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
                 else                                                             Renderer::sendUniform1i("HasGodsRays",0);

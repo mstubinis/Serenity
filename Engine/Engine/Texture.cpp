@@ -70,8 +70,6 @@ class Texture::impl final{
         }
         void _generateFromImage(sf::Image& image){
             glTexImage2D(m_Type, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
-            //glTexParameteri(m_Type, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            //(m_Type, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glGenerateMipmap(m_Type);
@@ -114,7 +112,6 @@ void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& sc
 }
 void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment){
     m_i->m_Width = w; m_i->m_Height = h;
-
 	glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
 	glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
 	glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
