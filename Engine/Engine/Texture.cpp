@@ -117,8 +117,6 @@ void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int f
 
 	glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
 	glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
-	//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(m_i->m_Type, 0);

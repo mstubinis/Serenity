@@ -155,7 +155,6 @@ void SolarSystem::_loadFromFile(std::string filename){
                     m_Stars.emplace(NAME,star);
                 }
                 else if(line[0] == 'P'){//Planet
-					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
@@ -175,10 +174,8 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                     }
                     m_Planets.emplace(NAME,planetoid);
-					*/
                 }
                 else if(line[0] == 'M'){//Moon
-					/*
                     PlanetType PLANET_TYPE;
                     if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
                     else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
@@ -198,14 +195,13 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                     }
                     m_Moons.emplace(NAME,planetoid);
-					*/
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
-                        //glm::num parentX = objects().at(PARENT)->getPosition().x;
-                        //glm::num parentZ = objects().at(PARENT)->getPosition().z;
-                        //xPos += parentX;
-                        //zPos += parentZ;
+                        glm::num parentX = objects().at(PARENT)->getPosition().x;
+                        glm::num parentZ = objects().at(PARENT)->getPosition().z;
+                        xPos += parentX;
+                        zPos += parentZ;
                     }
                     setPlayer(new Ship("Miranda","Miranda",true,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
@@ -214,15 +210,14 @@ void SolarSystem::_loadFromFile(std::string filename){
                 }
                 else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
-                        //glm::num parentX = objects().at(PARENT)->getPosition().x;
-                        //glm::num parentZ = objects().at(PARENT)->getPosition().z;
-                        //xPos += parentX;
-                        //zPos += parentZ;
+                        glm::num parentX = objects().at(PARENT)->getPosition().x;
+                        glm::num parentZ = objects().at(PARENT)->getPosition().z;
+                        xPos += parentX;
+                        zPos += parentZ;
                     }
-                    //new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
+                    new Ship("Akira","Akira",false,NAME,glm::v3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
-                    /*
                     if(PARENT != ""){
                         if(!planetRings.count(PARENT)){
                             std::vector<RingInfo> rings;
@@ -230,13 +225,9 @@ void SolarSystem::_loadFromFile(std::string filename){
                         }
                         planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
                     }
-                    */
                 }
                 else if(line[0] == 'L'){//Lagrange Point
-                    //m_LagrangePoints.emplace(NAME,new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this));
-                }
-                else if(line[0] == 's'){//Station
-                    //m_Stations.emplace(NAME,new Station("","",glm::v3(xPos,0,zPos),glm::vec3(1),NAME,nullptr,this));
+                    m_LagrangePoints.emplace(NAME,new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this));
                 }
             }
         }
@@ -244,15 +235,11 @@ void SolarSystem::_loadFromFile(std::string filename){
     }
 
     //add planetary rings
-    /*
     for(auto rings:planetRings){
         new Ring(rings.second,static_cast<Planet*>(m_Objects.at(rings.first)));
     }
-    */
 
     centerSceneToObject(player);
-
-	new Ship("Akira","Akira",false,"Valiant",glm::v3(2,0,2),glm::vec3(1),nullptr,this);
 
     glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
     glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
@@ -261,14 +248,14 @@ void SolarSystem::_loadFromFile(std::string filename){
 	_s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
 	_s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
 	_s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
-    //new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
-    //new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
-    //new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
-    //new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
-    //new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
-    //new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
+    new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
+    new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
+    new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
+    new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::v3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
+    new Ship("Norway","Norway",false,"Norway 5",glm::v3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
+    new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
 
-    //new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
+    new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
     player->translate(0,0,11);
 }

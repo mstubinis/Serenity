@@ -239,9 +239,7 @@ std::vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 
 struct less_than_key{
-    inline bool operator() ( Material* struct1,  Material* struct2){
-        return (struct1->name() < struct2->name());
-    }
+    inline bool operator() ( Material* struct1,  Material* struct2){return (struct1->name() < struct2->name());}
 };
 
 void ShaderP::addMaterial(std::string materialName){
