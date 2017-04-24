@@ -175,7 +175,7 @@ GBuffer::~GBuffer(){
     m_i->_destruct();
 }
 void GBuffer::resize(uint width, uint height){
-	stop();
+	m_i->_stop();
 	m_i->_init(width,height);
 }
 void GBuffer::start(std::vector<uint>& types,std::string channels,bool first_fbo){m_i->_start(types,channels,first_fbo);}

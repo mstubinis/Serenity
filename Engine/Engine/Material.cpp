@@ -18,13 +18,14 @@ std::vector<glm::vec4> Material::m_MaterialProperities;
 
 
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-    Material* m = static_cast<Material*>(r);
-    glm::vec3 first(0); glm::vec3 second(0);
+    Material* material = static_cast<Material*>(r);
+    glm::vec3 first(0);
+	glm::vec3 second(0);
     for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
         MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-        if(m->getComponents().count(type)){
-            MaterialComponent* c = m->getComponents().at(type);
-            if(c->texture() != nullptr && c->texture()->address() != 0){
+        if(material->getComponents().count(type)){
+            MaterialComponent* component = material->getComponents().at(type);
+            if(component->texture() != nullptr && component->texture()->address() != 0){
                 //enable
                 if     (i == 0){ first.x = 1.0f; }
                 else if(i == 1){ first.y = 1.0f; }
@@ -32,14 +33,17 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
                 else if(i == 3){ second.x = 1.0f; }
                 else if(i == 4){ second.y = 1.0f; }
                 else if(i == 5){ second.z = 1.0f; }
-                c->bind();
+                component->bind();
             }
-            else{ c->unbind(); }
+            else{ 
+				//disable
+				component->unbind(); 
+			}
         }
     }
-    Renderer::sendUniform1iSafe("Shadeless",int(m->shadeless()));
-    Renderer::sendUniform1fSafe("BaseGlow",m->glow());
-    Renderer::sendUniform1fSafe("matID",float(float(m->id())/255.0f));
+    Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
+    Renderer::sendUniform1fSafe("BaseGlow",material->glow());
+    Renderer::sendUniform1fSafe("matID",float(float(material->id())/255.0f));
     Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
     Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
 }};
