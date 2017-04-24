@@ -84,9 +84,10 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
                 Renderer::sendUniform1f("fExposure", 2.0f);
                 i->mesh()->render();
-                Engine::Renderer::bindShaderProgram(0);
 
-                ShaderP* program; //now for actual atmosphere
+				ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
+				program->unbind();
+
                 if(camHeight > outerRadius){ 
                     program = Resources::getShaderProgram("AS_SkyFromSpace"); 
                     glBlendFunc(GL_ONE, GL_ONE);
@@ -95,7 +96,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                     program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
                     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
                 }
-				Engine::Renderer::bindShaderProgram(program);
+				program->bind();
 
                 if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
                 else                                                             Renderer::sendUniform1i("HasGodsRays",0);
@@ -295,10 +296,10 @@ void Ring::draw(GLuint shader){
     Mesh* mesh = Resources::getMesh("Ring");
     float radius = mesh->getRadius() * m_Parent->getScale().x;
 
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
     glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
     glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "Model" ), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
     glm::vec4 color = m_Parent->getColor();
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
     glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(material->shadeless()));

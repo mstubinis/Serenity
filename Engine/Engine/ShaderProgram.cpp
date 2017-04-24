@@ -48,7 +48,6 @@ struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
 }};
 struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
-    //ShaderP* program = static_cast<ShaderP*>(r);
 }};
 
 class ShaderP::impl final{
@@ -237,10 +236,25 @@ Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
 SHADER_PIPELINE_STAGE ShaderP::stage(){ return m_i->m_Stage; }
 std::vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
+
 struct less_than_key{
     inline bool operator() ( Material* struct1,  Material* struct2){return (struct1->name() < struct2->name());}
 };
-
+void ShaderP::bind(){
+    if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != this){
+        GLuint p = this->program();
+        glUseProgram(p);
+        Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = this;
+    }
+   	BindableResource::bind();
+}
+void ShaderP::unbind(){
+	BindableResource::unbind();
+    if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
+        glUseProgram(0);
+        Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
+    }
+}
 void ShaderP::addMaterial(std::string materialName){
     if(materialName == "" || !Resources::Detail::ResourceManagement::m_Materials.count(materialName)){
         std::cout << "Material : '" << materialName << "' does not exist (ShaderP::addMaterial()) Returning..." << std::endl;

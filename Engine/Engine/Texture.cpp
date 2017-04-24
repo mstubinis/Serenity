@@ -67,6 +67,7 @@ class Texture::impl final{
         }
         void _unload(){
             glDeleteTextures(1,&m_TextureAddress);
+			glBindTexture(m_Type,0);
         }
         void _generateFromImage(sf::Image& image){
             glTexImage2D(m_Type, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
@@ -78,7 +79,9 @@ class Texture::impl final{
         }
         uchar* _getPixels(){
             if(m_Pixels.size() == 0){
-                m_Pixels.resize(m_Width*m_Height*4);glBindTexture(m_Type,m_TextureAddress);glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                m_Pixels.resize(m_Width*m_Height*4);
+				glBindTexture(m_Type,m_TextureAddress);
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                 glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
             }
             return &m_Pixels[0];

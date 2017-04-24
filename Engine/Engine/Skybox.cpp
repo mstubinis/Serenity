@@ -97,7 +97,8 @@ void Skybox::update(){
     m_Model[3][2] = p.z;
 }
 void Skybox::draw(bool godsRays){
-	Renderer::bindShaderProgram("Deferred_Skybox");
+	ShaderP* p = Resources::getShaderProgram("Deferred_Skybox");
+	p->bind();
 
 	Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
 	Renderer::sendUniformMatrix4f("Model",m_Model);
@@ -117,5 +118,5 @@ void Skybox::draw(bool godsRays){
     glDisableVertexAttribArray(0);
 
 	Renderer::unbindTextureCubemap(0);
-	Renderer::bindShaderProgram(0);
+	p->unbind();
 }

@@ -46,6 +46,9 @@ class ShaderP final: public BindableResource{
         void initRenderingContext();
         void cleanupRenderingContext();
 
+		void bind();
+		void unbind();
+
         GLuint program();
         SHADER_PIPELINE_STAGE stage();
         Shader* vertexShader();

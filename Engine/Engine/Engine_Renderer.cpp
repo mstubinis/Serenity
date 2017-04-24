@@ -183,22 +183,7 @@ void Settings::disableDepthMask(){
         Detail::RendererInfo::GeneralInfo::depth_mask = false;
     }
 }
-void Renderer::bindShaderProgram(ShaderP* program){
-    if(program != 0){
-        if(Detail::RendererInfo::GeneralInfo::current_shader_program != program){
-            GLuint p = program->program();
-            glUseProgram(p);
-            Detail::RendererInfo::GeneralInfo::current_shader_program = program;
-        }
-    }
-    else{
-        if(Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
-            glUseProgram(0);
-            Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
-        }
-    }
-}
-void Renderer::bindShaderProgram(string programName){Renderer::bindShaderProgram(Resources::getShaderProgram(programName));}
+
 void Renderer::bindTexture(const char* l,Texture* t,uint slot){Renderer::bindTexture(l,t->address(),slot,t->type());}
 void Renderer::bindTexture(const char* l,GLuint address,uint slot,GLuint type){
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -231,26 +216,6 @@ void Renderer::unbindTexture2D(uint slot){
 void Renderer::unbindTextureCubemap(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-}
-void Detail::RenderManagement::_bind(ShaderP* p){
-    Renderer::bindShaderProgram(p);//bind defaults for all shaders,default or custom
-    p->bind();                     //bind custom data
-}
-void Detail::RenderManagement::_bind(Material* m){
-    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != m->name()){
-        m->bind(); //bind custom data
-        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = m->name();
-    }
-}
-void Detail::RenderManagement::_unbind(ShaderP* p){
-    p->unbind();                   //unbind custom data
-    Renderer::bindShaderProgram(0);//unbind shader program                 
-}
-void Detail::RenderManagement::_unbind(Material* m){
-    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
-        m->unbind();
-        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
-    }
 }
 
 void Detail::RenderManagement::init(){
@@ -305,7 +270,8 @@ void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& col
 }
 
 void Detail::RenderManagement::_renderTextures(){
-    bindShaderProgram("Deferred_HUD");
+	ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
+	p->bind();
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
@@ -333,10 +299,11 @@ void Detail::RenderManagement::_renderTextures(){
 
         Resources::getMesh("Plane")->render();
     }
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_renderText(){
-    bindShaderProgram("Deferred_HUD");
+	ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
+	p->bind();
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
@@ -367,7 +334,7 @@ void Detail::RenderManagement::_renderText(){
             }
         }
     }
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passGeometry(){
     Settings::clear();
@@ -391,28 +358,28 @@ void Detail::RenderManagement::_passGeometry(){
     //RENDER NORMAL OBJECTS HERE
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
 		if(shaderProgram->getMaterials().size() > 0){
-			_bind(shaderProgram);
+			shaderProgram->bind();
 			for(auto material:shaderProgram->getMaterials()){
 				if(material->getObjects().size() > 0){
-					_bind(material);
+					material->bind();
 					for(auto item:material->getObjects()){
-						Object* o = item->parent();
-						if(scene->objects().count(o->name())){
-							o->bind();   //bind object specific data shared between all of its rendered items
-							item->bind();//the actual mesh drawing occurs here too
+						Object* object = item->parent();
+						if(scene->objects().count(object->name())){
+							object->bind();   //bind object specific data shared between all of its rendered items
+							item->bind();     //the actual mesh drawing occurs here too
 							item->unbind();
-							o->unbind();
+							object->unbind();
 						}
 						//protect against any custom changes by restoring to the regular shader and material
 						if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-							_bind(shaderProgram);
-							_bind(material);
+							shaderProgram->bind();
+							material->bind();
 						}
 					}
-					_unbind(material);
+					material->unbind();
 				}
 			}
-			_unbind(shaderProgram);
+			shaderProgram->unbind();
 		}
     }
     Settings::disableDepthTest();
@@ -422,7 +389,8 @@ void Detail::RenderManagement::_passGeometry(){
 }
 void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-    bindShaderProgram("Deferred_Light");
+	ShaderP* p = Resources::getShaderProgram("Deferred_Light");
+	p->bind();
 
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
 	sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
@@ -446,7 +414,7 @@ void Detail::RenderManagement::_passLighting(){
         light.second->lighten();
     }
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::render(){
     if(!RendererInfo::GodRaysInfo::godRays)
@@ -510,14 +478,15 @@ void Detail::RenderManagement::render(){
 
     //copy depth over
     glColorMask(0,0,0,0);
-    bindShaderProgram("Copy_Depth");
+	ShaderP* p = Resources::getShaderProgram("Copy_Depth");
+	p->bind();
 
     bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-    bindShaderProgram(0);
+	p->unbind();
     glColorMask(1,1,1,1);
     /////////////
 
@@ -544,7 +513,9 @@ void Detail::RenderManagement::render(){
     m_TexturesToBeRendered.clear();
 }
 void Detail::RenderManagement::_passSSAO(){
-    bindShaderProgram("Deferred_SSAO");
+	ShaderP* p = Resources::getShaderProgram("Deferred_SSAO");
+	p->bind();
+
 
     sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
@@ -574,12 +545,14 @@ void Detail::RenderManagement::_passSSAO(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     Settings::clear(true,false,false);
 
-    bindShaderProgram("Deferred_Edge");
+	ShaderP* p = Resources::getShaderProgram("Deferred_Edge");
+	p->bind();
+
     sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     sendUniform1f("radius", radius);
 
@@ -588,12 +561,14 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     Settings::clear(true,false,false);
 
-    bindShaderProgram("Deferred_GodsRays");
+	ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays");
+	p->bind();
+
     sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
     sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
     sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
@@ -612,12 +587,14 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
-    bindShaderProgram("Deferred_HDR");
+	ShaderP* p = Resources::getShaderProgram("Deferred_HDR");
+	p->bind();
+
     sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
     sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
 
@@ -625,10 +602,11 @@ void Detail::RenderManagement::_passHDR(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
-    bindShaderProgram("Deferred_Blur");
+	ShaderP* p = Resources::getShaderProgram("Deferred_Blur");
+	p->bind();
 
     sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
     sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
@@ -650,22 +628,26 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passFXAA(){
     Settings::clear(true,false,false);
 
-    bindShaderProgram("Deferred_FXAA");
+	ShaderP* p = Resources::getShaderProgram("Deferred_FXAA");
+	p->bind();
+
 	sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
     bindTexture("sampler0",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);
-    bindShaderProgram("Deferred_Final");
+
+	ShaderP* p = Resources::getShaderProgram("Deferred_Final");
+	p->bind();
 
     sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
@@ -687,7 +669,7 @@ void Detail::RenderManagement::_passFinal(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
-    bindShaderProgram(0);
+	p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);

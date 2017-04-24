@@ -147,6 +147,9 @@ class Material final: public BindableResource{
         void setSpecularity(float s);
         void setLightingMode(uint m);
 
+		void bind();
+		void unbind();
+
         void addObject(std::string objectName);
         void removeObject(std::string objectName);
         std::vector<RenderedItem*>& getObjects();

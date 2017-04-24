@@ -111,11 +111,6 @@ namespace Engine{
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
 
-                    static void _bind(ShaderP*);
-                    static void _bind(Material*);
-                    static void _unbind(ShaderP*);
-                    static void _unbind(Material*);
-
                     static void _renderText();
                     static void _renderTextures();
                     static void _passGodsRays(glm::vec2,bool,float);
@@ -236,8 +231,6 @@ namespace Engine{
 		void bindFBO(GLuint);
 		void bindReadFBO(GLuint);
 		void bindDrawFBO(GLuint);
-		void bindShaderProgram(ShaderP*);
-        void bindShaderProgram(std::string);
         void bindTexture(const char* location,Texture*,uint slot);
         void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
         void bindTextureSafe(const char* location,Texture*,uint slot);

@@ -337,3 +337,17 @@ void Material::removeObject(std::string objectName){
 	}
 }
 std::vector<RenderedItem*>& Material::getObjects(){ return m_i->m_Objects; }
+
+void Material::bind(){
+	std::string _name = name();
+    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
+		BindableResource::bind(); //bind custom data
+        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = _name;
+    }
+}
+void Material::unbind(){
+    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
+        BindableResource::unbind();
+        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
+    }
+}
