@@ -244,10 +244,10 @@ void SolarSystem::_loadFromFile(std::string filename){
     glm::num xPos = Resources::getObject("Valiant")->getPosition().x;
     glm::num zPos = Resources::getObject("Valiant")->getPosition().z;
 
-	ObjectDisplay* _s = new ObjectDisplay("Test","Miranda",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
-	_s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
-	_s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
-	_s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
+	//ObjectDisplay* _s = new ObjectDisplay("Test","Miranda",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
+	//_s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
+	//_s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
+	//_s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
     new Ship("Defiant","Defiant",false,"Defiant 1",glm::v3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
     new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::v3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
     new Ship("Defiant","Defiant",false,"Defiant 3",glm::v3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
@@ -256,6 +256,8 @@ void SolarSystem::_loadFromFile(std::string filename){
     new Ship("Norway","Norway",false,"Norway 6",glm::v3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
 
     new Ship("Starbase","Starbase",false,"Starfleet Command",glm::v3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
+
+	new ObjectDisplay("Miranda","Miranda",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
 
     player->translate(0,0,11);
 }

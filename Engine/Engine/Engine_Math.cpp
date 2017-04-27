@@ -10,6 +10,13 @@
 
 using namespace Engine;
 
+glm::quat Math::btToGLMQuat(btQuaternion& q){
+	return glm::quat(q.x(),q.y(),q.z(),q.w());
+}
+btQuaternion Math::glmToBTQuat(glm::quat& q){
+	return btQuaternion(q.x,q.y,q.z,q.w); 
+}
+
 glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){
 	glm::vec3 ret = glm::vec3(n.x,n.y,n.z);
 	return ret;

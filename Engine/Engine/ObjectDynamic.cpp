@@ -341,9 +341,9 @@ void ObjectDynamic::setMass(float mass){
 void ObjectDynamic::alignTo(glm::v3 direction, float time,bool overTime){
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
-    glm::quat q(btQ.x(),btQ.y(),btQ.z(),btQ.w());
+	glm::quat q = Engine::Math::btToGLMQuat(btQ);
     Engine::Math::alignTo(q,glm::vec3(direction), time, overTime);
-    btQ.setX(q.w); btQ.setY(q.x); btQ.setZ(q.y); btQ.setW(q.z);
+	btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
 void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
@@ -411,7 +411,7 @@ bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 }
 glm::quat& ObjectDynamic::getOrientation(){
     btQuaternion q = m_RigidBody->getOrientation();
-    return glm::quat(q.w(),q.x(),q.y(),q.z());
+	return Engine::Math::btToGLMQuat(q);
 }
 glm::vec3 ObjectDynamic::getScale(){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();

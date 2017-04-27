@@ -10,6 +10,7 @@
 #include <assimp/Importer.hpp>
 
 class btRigidBody;
+class btQuaternion;
 typedef unsigned int uint;
 
 namespace glm{
@@ -42,6 +43,9 @@ namespace glm{
 
 namespace Engine{
     namespace Math{
+
+		glm::quat btToGLMQuat(btQuaternion& q);
+		btQuaternion glmToBTQuat(glm::quat& q);
 
 		glm::vec3 assimpToGLMVec3(aiVector3D&);
 		glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
