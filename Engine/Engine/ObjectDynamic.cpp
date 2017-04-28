@@ -346,6 +346,10 @@ void ObjectDynamic::alignTo(glm::v3 direction, float time,bool overTime){
 	btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
+void ObjectDynamic::alignTo(Object* other, float time,bool overTime){
+	glm::v3 direction = getPosition() - other->getPosition();
+    ObjectDynamic::alignTo(direction,time,overTime);
+}
 void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
     ObjectDynamic::clearAngularForces();
     if(overTime){

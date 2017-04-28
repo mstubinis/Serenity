@@ -83,6 +83,10 @@ void ObjectBasic::setPosition(glm::v3 position){ ObjectBasic::setPosition(positi
 void ObjectBasic::alignTo(glm::v3 direction, float time, bool overTime){
     Engine::Math::alignTo(m_Orientation,glm::vec3(direction),time,overTime);
 }
+void ObjectBasic::alignTo(Object* other, float time, bool overTime){
+	glm::vec3 direction = glm::vec3(getPosition() - other->getPosition());
+    Engine::Math::alignTo(m_Orientation,direction,time,overTime);
+}
 void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     if(overTime){
         x *= Resources::dt(); y *= Resources::dt(); z *= Resources::dt();
