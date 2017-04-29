@@ -68,7 +68,7 @@ namespace Engine{
         glm::v3 getUp(const btRigidBody* b);
 
         float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
-        void alignTo(glm::quat& o, glm::vec3& direction,float speed=0, bool overTime=false);
+        void alignTo(glm::quat& o, glm::vec3& direction,float speed=0);
 
         void setColor(glm::vec3& color,float r,float g,float b);
         void setColor(glm::vec4& color,float r,float g,float b,float a);

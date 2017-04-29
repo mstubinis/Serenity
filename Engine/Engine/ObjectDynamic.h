@@ -63,8 +63,8 @@ class ObjectDynamic: public Object{
         virtual void setColor(float,float,float,float);
         virtual void setColor(glm::vec4);
 
-        virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
-		virtual void alignTo(Object*,float speed=0,bool overTime=false);
+        virtual void alignTo(glm::v3,float speed=0);
+		virtual void alignTo(Object*,float speed=0);
 
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);

@@ -80,12 +80,12 @@ void ObjectBasic::setPosition(glm::num x, glm::num y, glm::num z){
     m_Model[3][2] = parentPos.z + z;
 }
 void ObjectBasic::setPosition(glm::v3 position){ ObjectBasic::setPosition(position.x,position.y,position.z); }
-void ObjectBasic::alignTo(glm::v3 direction, float time, bool overTime){
-    Engine::Math::alignTo(m_Orientation,glm::vec3(direction),time,overTime);
+void ObjectBasic::alignTo(glm::v3 direction, float time){
+    Engine::Math::alignTo(m_Orientation,glm::vec3(direction),time);
 }
-void ObjectBasic::alignTo(Object* other, float time, bool overTime){
+void ObjectBasic::alignTo(Object* other, float time){
 	glm::vec3 direction = glm::vec3(getPosition() - other->getPosition());
-    Engine::Math::alignTo(m_Orientation,direction,time,overTime);
+    Engine::Math::alignTo(m_Orientation,direction,time);
 }
 void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     if(overTime){

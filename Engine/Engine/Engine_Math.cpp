@@ -11,10 +11,12 @@
 using namespace Engine;
 
 glm::quat Math::btToGLMQuat(btQuaternion& q){
-	return glm::quat(q.x(),q.y(),q.z(),q.w());
+	glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ());
+	return glmQuat;
 }
 btQuaternion Math::glmToBTQuat(glm::quat& q){
-	return btQuaternion(q.x,q.y,q.z,q.w); 
+	btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w);
+	return btQuat; 
 }
 
 glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){
@@ -121,13 +123,15 @@ float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     return angle;
 }
 
-void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed, bool overTime){
-    glm::quat original(o);
+void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed){
+    glm::quat original = glm::quat(o);
 
     direction = glm::normalize(direction);
 
     glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0,1,0), direction));
     glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
+    //glm::vec3 xaxis = glm::normalize(glm::vec3(getRight(original)));
+    //glm::vec3 yaxis = glm::normalize(glm::vec3(getUp(original)));
 
     glm::mat3 rot;
     rot[0][0] = float(xaxis.x);
@@ -140,15 +144,14 @@ void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed, bool overTime
     rot[1][2] = float(yaxis.z);
     rot[2][2] = float(direction.z);
     o = glm::quat_cast(rot);
+
     if(speed != 0){
+		float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
+		speed *= 1.0f/angle;
         speed *= Resources::dt();
-        if(overTime){
-            o = glm::lerp(original,o,speed*2.5f);
-        }
-        else{
-            o = glm::lerp(original,o,speed);
-        }
+		o = glm::lerp(original,o,speed*5);
     }
+	o = glm::normalize(o);
 }
 void Math::setColor(glm::vec3& c,float r, float g, float b){
     if(r > 1) r = r / 255.0f;

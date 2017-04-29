@@ -66,8 +66,8 @@ class Object: public IObject{
 
         virtual glm::vec3 getScreenCoordinates();
 
-        virtual void alignTo(glm::v3,float speed=0,bool overTime=false){}
-		virtual void alignTo(Object*,float speed=0,bool overTime=false){}
+        virtual void alignTo(glm::v3,float speed=0){}
+		virtual void alignTo(Object*,float speed=0){}
 
         virtual void addChild(Object*);
 
@@ -125,7 +125,7 @@ class ObjectBasic: public Object{
         virtual void setOrientation(glm::quat q){ m_Orientation = q; }
         virtual glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
 
-        virtual void alignTo(glm::v3,float speed=0,bool overTime=false);
-		virtual void alignTo(Object*,float speed=0,bool overTime=false);
+        virtual void alignTo(glm::v3,float speed=0);
+		virtual void alignTo(Object*,float speed=0);
 };
 #endif

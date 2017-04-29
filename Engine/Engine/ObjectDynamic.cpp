@@ -338,17 +338,17 @@ void ObjectDynamic::setMass(float mass){
     if(m_RigidBody != nullptr)
         m_RigidBody->setMassProps(m_Mass,*(m_Collision->getInertia()));
 }
-void ObjectDynamic::alignTo(glm::v3 direction, float time,bool overTime){
+void ObjectDynamic::alignTo(glm::v3 direction, float speed){
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
 	glm::quat q = Engine::Math::btToGLMQuat(btQ);
-    Engine::Math::alignTo(q,glm::vec3(direction), time, overTime);
+    Engine::Math::alignTo(q,glm::vec3(direction), speed);
 	btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
-void ObjectDynamic::alignTo(Object* other, float time,bool overTime){
+void ObjectDynamic::alignTo(Object* other, float speed){
 	glm::v3 direction = getPosition() - other->getPosition();
-    ObjectDynamic::alignTo(direction,time,overTime);
+    ObjectDynamic::alignTo(direction,speed);
 }
 void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
     ObjectDynamic::clearAngularForces();

@@ -91,7 +91,9 @@ void Game::update(float dt){
         Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
     if(Events::Keyboard::isKeyDown("f12")){
-		s->getPlayer()->alignTo(Resources::getObject("TestObject"),25.5f,true);
+		Object* test = Resources::getObject("TestObject");
+
+		s->getPlayer()->alignTo(test,10.0f);
     }
     m_HUD->update(dt);
 }
