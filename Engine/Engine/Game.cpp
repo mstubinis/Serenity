@@ -34,11 +34,11 @@ void Game::initResources(){
 	Resources::addMesh("Test","data/Models/1911.fbx",COLLISION_TYPE_NONE,true,0.0f);
 
     Resources::addMesh("Planet","data/Models/planet.obj");
-    Resources::addMesh("Defiant","data/Models/defiant.obj");
-    Resources::addMesh("Akira","data/Models/akira.obj");
+    Resources::addMesh("Defiant","data/Models/defiant.obj",COLLISION_TYPE_CONVEXHULL);
+    Resources::addMesh("Akira","data/Models/akira.obj",COLLISION_TYPE_CONVEXHULL);
 	Resources::addMesh("Miranda","data/Models/miranda.obj",COLLISION_TYPE_CONVEXHULL);
-    Resources::addMesh("Intrepid","data/Models/intrepid.obj");
-    Resources::addMesh("Norway","data/Models/norway.obj");
+    Resources::addMesh("Intrepid","data/Models/intrepid.obj",COLLISION_TYPE_CONVEXHULL);
+    Resources::addMesh("Norway","data/Models/norway.obj",COLLISION_TYPE_CONVEXHULL);
     Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
     Resources::addMesh("Ring","data/Models/ring.obj");
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",COLLISION_TYPE_CONVEXHULL);
@@ -91,9 +91,7 @@ void Game::update(float dt){
         Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
     if(Events::Keyboard::isKeyDown("f12")){
-		Object* test = Resources::getObject("TestObject");
-
-		s->getPlayer()->alignTo(test,10.0f);
+		//s->getPlayer()->alignTo(s->getPlayer()->getTarget(),10.0f);
     }
     m_HUD->update(dt);
 }

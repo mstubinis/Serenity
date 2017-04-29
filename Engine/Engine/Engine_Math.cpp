@@ -124,7 +124,7 @@ float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
 }
 
 void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed){
-    glm::quat original = glm::quat(o);
+    glm::quat original(o);
 
     direction = glm::normalize(direction);
 
