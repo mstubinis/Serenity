@@ -123,16 +123,11 @@ float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     return angle;
 }
 
-void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed){
+void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed){
     glm::quat original(o);
-
     direction = glm::normalize(direction);
-
     glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0,1,0), direction));
     glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
-    //glm::vec3 xaxis = glm::normalize(glm::vec3(getRight(original)));
-    //glm::vec3 yaxis = glm::normalize(glm::vec3(getUp(original)));
-
     glm::mat3 rot;
     rot[0][0] = float(xaxis.x);
     rot[1][0] = float(yaxis.x);
@@ -144,7 +139,6 @@ void Math::alignTo(glm::quat& o, glm::vec3& direction,float speed){
     rot[1][2] = float(yaxis.z);
     rot[2][2] = float(direction.z);
     o = glm::quat_cast(rot);
-
     if(speed != 0){
 		float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
 		speed *= 1.0f/angle;

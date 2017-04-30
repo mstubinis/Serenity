@@ -342,7 +342,7 @@ void ObjectDynamic::alignTo(glm::v3 direction, float speed){
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
 	glm::quat q = Engine::Math::btToGLMQuat(btQ);
-    Engine::Math::alignTo(q,glm::vec3(direction), speed);
+    Engine::Math::alignTo(q,this,glm::vec3(direction), speed);
 	btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }

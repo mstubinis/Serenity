@@ -44,7 +44,7 @@ void Game::initResources(){
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",COLLISION_TYPE_CONVEXHULL);
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","","data/Textures/starbase_Glow.png");
-    Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg");
+    Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
     Resources::getMaterial("Star")->setShadeless(true);
     Resources::getMaterial("Star")->setGlow(0.21f);
     Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","","AS_GroundFromSpace");
@@ -91,7 +91,7 @@ void Game::update(float dt){
         Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
     if(Events::Keyboard::isKeyDown("f12")){
-		//s->getPlayer()->alignTo(s->getPlayer()->getTarget(),10.0f);
+		s->getPlayer()->alignTo(s->getPlayer()->getTarget(),10.0f);
     }
     m_HUD->update(dt);
 }

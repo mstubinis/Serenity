@@ -144,7 +144,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                         glowFile = gloFile;
                     }
                     if(Resources::getMaterial(MATERIAL_NAME) == nullptr){
-                        Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile);
+                        Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"","AS_GroundFromSpace");
                     }
                 }
                 if(line[0] == 'S'){//Sun
