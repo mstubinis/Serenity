@@ -123,27 +123,30 @@ float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     return angle;
 }
 
+void Math::alignToX(glm::quat& o,Object* origin, Object* target,float speed){
+
+}
+void Math::alignToY(glm::quat& o,Object* origin, Object* target,float speed){
+
+}
+void Math::alignToZ(glm::quat& o,Object* origin, Object* target,float speed){
+
+}
 void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed){
     glm::quat original(o);
     direction = glm::normalize(direction);
     glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0,1,0), direction));
     glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
     glm::mat3 rot;
-    rot[0][0] = float(xaxis.x);
-    rot[1][0] = float(yaxis.x);
-    rot[2][0] = float(direction.x);
-    rot[0][1] = float(xaxis.y);
-    rot[1][1] = float(yaxis.y);
-    rot[2][1] = float(direction.y);
-    rot[0][2] = float(xaxis.z);
-    rot[1][2] = float(yaxis.z);
-    rot[2][2] = float(direction.z);
+    rot[0][0] = float(xaxis.x);     rot[0][1] = float(xaxis.y);     rot[0][2] = float(xaxis.z);
+    rot[1][0] = float(yaxis.x);     rot[1][1] = float(yaxis.y);     rot[1][2] = float(yaxis.z);
+    rot[2][0] = float(direction.x); rot[2][1] = float(direction.y); rot[2][2] = float(direction.z);
     o = glm::quat_cast(rot);
     if(speed != 0){
 		float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
 		speed *= 1.0f/angle;
         speed *= Resources::dt();
-		o = glm::lerp(original,o,speed*5);
+		o = glm::mix(original,o,speed*5);
     }
 	o = glm::normalize(o);
 }

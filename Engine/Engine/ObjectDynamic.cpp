@@ -350,6 +350,33 @@ void ObjectDynamic::alignTo(Object* other, float speed){
 	glm::v3 direction = getPosition() - other->getPosition();
     ObjectDynamic::alignTo(direction,speed);
 }
+void ObjectDynamic::alignToX(Object* other, float speed){
+	glm::v3 direction = getPosition() - other->getPosition();
+    ObjectDynamic::clearAngularForces();
+    btQuaternion btQ = m_RigidBody->getOrientation();
+	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    Engine::Math::alignToX(q,this,other, speed);
+	btQ = Engine::Math::glmToBTQuat(q);
+    m_RigidBody->getWorldTransform().setRotation(btQ);
+}
+void ObjectDynamic::alignToY(Object* other, float speed){
+	glm::v3 direction = getPosition() - other->getPosition();
+    ObjectDynamic::clearAngularForces();
+    btQuaternion btQ = m_RigidBody->getOrientation();
+	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    Engine::Math::alignToY(q,this,other, speed);
+	btQ = Engine::Math::glmToBTQuat(q);
+    m_RigidBody->getWorldTransform().setRotation(btQ);
+}
+void ObjectDynamic::alignToZ(Object* other, float speed){
+	glm::v3 direction = getPosition() - other->getPosition();
+    ObjectDynamic::clearAngularForces();
+    btQuaternion btQ = m_RigidBody->getOrientation();
+	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    Engine::Math::alignToZ(q,this,other, speed);
+	btQ = Engine::Math::glmToBTQuat(q);
+    m_RigidBody->getWorldTransform().setRotation(btQ);
+}
 void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
     ObjectDynamic::clearAngularForces();
     if(overTime){

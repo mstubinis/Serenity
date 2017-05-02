@@ -70,6 +70,9 @@ namespace Engine{
 
         float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
         void alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed=0);
+		void alignToX(glm::quat& o,Object* origin,Object* target,float speed=0);
+		void alignToY(glm::quat& o,Object* origin,Object* target,float speed=0);
+		void alignToZ(glm::quat& o,Object* origin,Object* target,float speed=0);
 
         void setColor(glm::vec3& color,float r,float g,float b);
         void setColor(glm::vec4& color,float r,float g,float b,float a);

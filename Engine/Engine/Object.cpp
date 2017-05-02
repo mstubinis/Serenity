@@ -87,6 +87,15 @@ void ObjectBasic::alignTo(Object* other, float time){
 	glm::vec3 direction = glm::vec3(getPosition() - other->getPosition());
     Engine::Math::alignTo(m_Orientation,this,direction,time);
 }
+void ObjectBasic::alignToX(Object* other, float time){
+    Engine::Math::alignToX(m_Orientation,this,other,time);
+}
+void ObjectBasic::alignToY(Object* other, float time){
+    Engine::Math::alignToY(m_Orientation,this,other,time);
+}
+void ObjectBasic::alignToZ(Object* other, float time){
+    Engine::Math::alignToZ(m_Orientation,this,other,time);
+}
 void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     if(overTime){
         x *= Resources::dt(); y *= Resources::dt(); z *= Resources::dt();

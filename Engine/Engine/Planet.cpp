@@ -181,9 +181,9 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 Renderer::sendUniform3f("v3LightDir", lightDir);
 
                 glm::vec3 v3InvWaveLength = glm::vec3(
-					1.0f / glm::pow(0.31f, 4.0f),
-					1.0f / glm::pow(0.31f, 4.0f),
-					1.0f / glm::pow(0.31f, 4.0f)
+					1.0f / glm::pow(0.29f, 4.0f),
+					1.0f / glm::pow(0.29f, 4.0f),
+					1.0f / glm::pow(0.29f, 4.0f)
 				);
                 Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
