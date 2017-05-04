@@ -25,7 +25,7 @@ class Shader::impl final{
             super->setName(name);
         }
 };
-Shader::Shader(std::string& name, std::string& shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl()){
+Shader::Shader(std::string& name, std::string& shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl){
     m_i->_construct(name,shaderFileOrData,shaderType,fromFile,this);
 }
 Shader::~Shader(){
@@ -215,10 +215,10 @@ class ShaderP::impl final{
 DefaultShaderBindFunctor ShaderP::impl::DEFAULT_BIND_FUNCTOR;
 DefaultShaderUnbindFunctor ShaderP::impl::DEFAULT_UNBIND_FUNCTOR;
 
-ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
+ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl()){
+ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
 ShaderP::~ShaderP(){

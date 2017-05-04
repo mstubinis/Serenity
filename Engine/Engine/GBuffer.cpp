@@ -161,14 +161,14 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(std::string name,int internalformat, int format, int type, int attatchment,uint width,uint height,float divisor):Texture(name,width,height),m_i(new impl()){
+TextureBuffer::TextureBuffer(std::string name,int internalformat, int format, int type, int attatchment,uint width,uint height,float divisor):Texture(name,width,height),m_i(new impl){
     m_i->_init(internalformat,format,type,attatchment,width,height,divisor,this);
 }
 TextureBuffer::~TextureBuffer(){
 }
 const float TextureBuffer::divisor() const{ return m_i->m_Divisor; }
 const int TextureBuffer::attatchment() const{ return m_i->m_BufferAttatchment; }
-GBuffer::GBuffer(uint width,uint height):m_i(new impl()){	
+GBuffer::GBuffer(uint width,uint height):m_i(new impl){	
     m_i->_init(width,height);
 }
 GBuffer::~GBuffer(){

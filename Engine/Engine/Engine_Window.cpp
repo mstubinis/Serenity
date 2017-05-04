@@ -128,7 +128,7 @@ class Engine_Window::impl{
         }
 };
 
-Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl()){
+Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
     m_i->_init(name,width,height);
 }
 Engine_Window::~Engine_Window(){

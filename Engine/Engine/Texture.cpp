@@ -87,22 +87,22 @@ class Texture::impl final{
             return &m_Pixels[0];
         }
 };
-Texture::Texture(std::string _name,uint w, uint h,GLuint type):m_i(new impl()){
+Texture::Texture(std::string _name,uint w, uint h,GLuint type):m_i(new impl){
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
     m_i->_init(type,this,_name,i);
 }
-Texture::Texture(sf::Image& img,std::string _name,GLuint type):m_i(new impl()){
+Texture::Texture(sf::Image& img,std::string _name,GLuint type):m_i(new impl){
     m_i->m_Files.push_back("PIXELS");
     m_i->_init(type,this,_name,img);
 }
-Texture::Texture(std::string file,std::string _name,GLuint type):m_i(new impl()){
+Texture::Texture(std::string file,std::string _name,GLuint type):m_i(new impl){
     m_i->m_Files.push_back(file);
     sf::Image i;
     if(_name == "") _name = file;
     m_i->_init(type,this,_name,i);
 }
-Texture::Texture(std::string files[],std::string _name,GLuint type):m_i(new impl()){
+Texture::Texture(std::string files[],std::string _name,GLuint type):m_i(new impl){
     for(uint i = 0; i < 6; i++){ m_i->m_Files.push_back(files[i]); }
     sf::Image i;
     m_i->_init(type,this,_name,i);
