@@ -113,3 +113,31 @@ void ObjectDisplay::playAnimation(const std::string& animName,float startTime,fl
 		}
 	}
 }
+void ObjectDisplay::suspend(){
+	for(auto renderedItem:this->m_DisplayItems){
+		if(renderedItem->mesh() != nullptr){
+			renderedItem->mesh()->decrementUseCount();
+			if(renderedItem->mesh()->useCount() == 0){
+				renderedItem->mesh()->unload();
+			}
+		}
+		if(renderedItem->material() != nullptr){
+			renderedItem->material()->decrementUseCount();
+			if(renderedItem->material()->useCount() == 0){
+				renderedItem->material()->unload();
+			}
+		}
+	}
+}
+void ObjectDisplay::resume(){
+	for(auto renderedItem:this->m_DisplayItems){
+		if(renderedItem->mesh() != nullptr){
+			renderedItem->mesh()->incrementUseCount();
+			renderedItem->mesh()->load();
+		}
+		if(renderedItem->material() != nullptr){
+			renderedItem->material()->incrementUseCount();
+			renderedItem->material()->load();
+		}
+	}
+}

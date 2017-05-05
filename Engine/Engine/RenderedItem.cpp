@@ -57,8 +57,9 @@ class RenderedItem::impl{
         bool m_NeedsUpdate;
         Object* m_Parent;
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,RenderedItem* super,std::string& parentName){
-            m_Mesh = mesh;
-            m_Material = mat;
+			_setMesh(mesh);
+			_setMaterial(mat);
+
             m_Position = pos;
             m_Orientation = rot;
             m_Scale = scl;
@@ -73,6 +74,14 @@ class RenderedItem::impl{
             super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR);
         }
+		void _setMesh(Mesh* mesh){
+			m_Mesh = mesh;
+			m_Mesh->incrementUseCount();
+		}
+		void _setMaterial(Material* mat){
+			m_Material = mat;
+			m_Material->incrementUseCount();
+		}
         void _destruct(){
         }
         void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; m_NeedsUpdate = true; }

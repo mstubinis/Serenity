@@ -31,6 +31,9 @@ class ObjectDisplay: public ObjectBasic{
 
         virtual void update(float);
 
+		virtual void suspend();
+		virtual void resume();
+
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
 

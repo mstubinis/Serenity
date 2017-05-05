@@ -3,6 +3,7 @@
 EngineResource::EngineResource(std::string name){
     m_Name = name;
     m_IsLoaded = false;
+	m_UsageCount = 0;
 }
 EngineResource::~EngineResource(){
 }
@@ -13,9 +14,14 @@ std::string& EngineResource::name(){
     return m_Name;
 }
 void EngineResource::load(){
-    m_IsLoaded = true;
+	if(!m_IsLoaded){
+		m_IsLoaded = true;
+	}
 }
 void EngineResource::unload(){
-    m_IsLoaded = false;
+	if(m_IsLoaded && m_UsageCount == 0){
+		m_IsLoaded = false;
+	}
 }
 bool EngineResource::isLoaded(){ return m_IsLoaded; }
+uint EngineResource::useCount(){ return m_UsageCount; }

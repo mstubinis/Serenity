@@ -189,6 +189,10 @@ class Material::impl final{
             if(specularT == nullptr && specular != "")    specularT = new Texture(specular);
             _init(name,diffuseT,normalT,glowT,specularT,super);
         }
+		void _load(){
+		}
+		void _unload(){
+		}
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
             Material::m_MaterialProperities.push_back(glm::vec4(m_BaseGlow,m_SpecularityPower,m_LightingMode,m_Shadeless));
@@ -208,18 +212,23 @@ class Material::impl final{
             if((m_Components.count(type) && m_Components[type] != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(type,new MaterialComponent(type,texture));
+			texture->incrementUseCount();
         }
         void _addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
             uint type = (uint)MATERIAL_COMPONENT_TYPE_REFLECTION;
             if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentReflection(type,cubemap,map,mixFactor));
+			map->incrementUseCount();
+			cubemap->incrementUseCount();
         }
         void _addComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio){
             uint type = (uint)MATERIAL_COMPONENT_TYPE_REFRACTION;
             if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentRefraction(type,cubemap,map,mixFactor,ratio));
+			map->incrementUseCount();
+			cubemap->incrementUseCount();
         }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
@@ -353,5 +362,17 @@ void Material::unbind(){
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
         BindableResource::unbind();
         Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
+    }
+}
+void Material::load(){
+    if(!isLoaded()){
+        m_i->_load();
+        EngineResource::load();
+    }
+}
+void Material::unload(){
+	if(isLoaded() && useCount() == 0){
+        m_i->_unload();
+        EngineResource::unload();
     }
 }

@@ -186,19 +186,35 @@ void Resources::cleanupRenderingContexts(){
 }
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){
-		Scene* previousScene = Detail::ResourceManagement::m_CurrentScene;
-		for(auto obj:previousScene->objects()){
+
+		//previous scene: suspend physics
+		for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
 			ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-			if(dynamicObj != NULL){
-				Physics::removeRigidBody(dynamicObj);
-			}
+			if(dynamicObj != NULL){ Physics::removeRigidBody(dynamicObj); }
 		}
+		//mark game object resources to minus use count
+		for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
+			obj.second->suspend();
+		}
+		for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){
+			obj.second->suspend();
+		}
+
+
 		Detail::ResourceManagement::m_CurrentScene = scene;
+
+
+		//current scene: resume physics
 		for(auto obj:scene->objects()){
 			ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-			if(dynamicObj != NULL){
-				Physics::addRigidBody(dynamicObj);
-			}
+			if(dynamicObj != NULL){ Physics::addRigidBody(dynamicObj); }
+		}
+		//mark game object resources to add use count
+		for(auto obj:scene->objects()){
+			obj.second->resume();
+		}
+		for(auto obj:scene->lights()){
+			obj.second->resume();
 		}
 	}
 }

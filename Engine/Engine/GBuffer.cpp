@@ -41,11 +41,11 @@ class GBuffer::impl final{
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
 
-            _constructFramebuffer("BUFFER_DIFFUSE",BUFFER_TYPE_DIFFUSE,m_Width,m_Height);
-            _constructFramebuffer("BUFFER_NORMAL",BUFFER_TYPE_NORMAL,m_Width,m_Height);
-            _constructFramebuffer("BUFFER_MISC",BUFFER_TYPE_MISC,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_DIFFUSE", BUFFER_TYPE_DIFFUSE, m_Width,m_Height);
+            _constructFramebuffer("BUFFER_NORMAL",  BUFFER_TYPE_NORMAL,  m_Width,m_Height);
+            _constructFramebuffer("BUFFER_MISC",    BUFFER_TYPE_MISC,    m_Width,m_Height);
             _constructFramebuffer("BUFFER_LIGHTING",BUFFER_TYPE_LIGHTING,m_Width,m_Height);
-            _constructFramebuffer("BUFFER_DEPTH",BUFFER_TYPE_DEPTH,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_DEPTH",   BUFFER_TYPE_DEPTH,   m_Width,m_Height);
 
 			if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
 			}
@@ -60,8 +60,8 @@ class GBuffer::impl final{
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_fake);
 
-            _constructFramebuffer("BUFFER_BLOOM",BUFFER_TYPE_BLOOM,m_Width,m_Height);
-            _constructFramebuffer("BUFFER_FREE2",BUFFER_TYPE_FREE2,m_Width,m_Height);
+            _constructFramebuffer("BUFFER_BLOOM",   BUFFER_TYPE_BLOOM,   m_Width,m_Height);
+            _constructFramebuffer("BUFFER_FREE2",   BUFFER_TYPE_FREE2,   m_Width,m_Height);
             _constructFramebuffer("BUFFER_GODSRAYS",BUFFER_TYPE_GODSRAYS,m_Width,m_Height);
 
 			if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
@@ -155,7 +155,6 @@ class GBuffer::impl final{
             _start(t,c,f);
         }
         void _stop(){
-            //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			Renderer::bindFBO(0);
             glColorMask(1,1,1,1);
             glClear(GL_COLOR_BUFFER_BIT);

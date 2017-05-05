@@ -150,6 +150,9 @@ class Material final: public BindableResource{
 		void bind();
 		void unbind();
 
+		void load();
+		void unload();
+
         void addObject(std::string objectName);
         void removeObject(std::string objectName);
         std::vector<RenderedItem*>& getObjects();

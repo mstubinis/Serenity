@@ -300,6 +300,20 @@ void Mesh::render(GLuint mode){
 void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& animationName,float time){
     m_Skeleton->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
 }
+void Mesh::load(){
+    if(!isLoaded()){
+        //loading code here
+        EngineResource::load();
+    }
+}
+void Mesh::unload(){
+	if(isLoaded() && useCount() == 0){
+        //unloading code here
+        EngineResource::unload();
+    }
+}
+
+
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
 	m_TicksPerSecond = anim->mTicksPerSecond;

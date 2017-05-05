@@ -75,7 +75,8 @@ class Texture::impl final{
             glTexParameteri(m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glGenerateMipmap(m_Type);
 
-            m_Width = image.getSize().x; m_Height = image.getSize().y;
+            m_Width = image.getSize().x;
+			m_Height = image.getSize().y;
         }
         uchar* _getPixels(){
             if(m_Pixels.size() == 0){
@@ -129,7 +130,7 @@ void Texture::load(){
     }
 }
 void Texture::unload(){
-    if(isLoaded()){
+	if(isLoaded() && useCount() == 0){
         m_i->_unload();
         EngineResource::unload();
     }

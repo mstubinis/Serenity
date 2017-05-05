@@ -112,6 +112,9 @@ class Mesh final: public EngineResource{
         const glm::vec3& getRadiusBox() const { return m_radiusBox; }
         const float getRadius() const { return m_radius; }
 
+		void load();
+		void unload();
+
         void render(GLuint mode = GL_TRIANGLES);
 		void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
