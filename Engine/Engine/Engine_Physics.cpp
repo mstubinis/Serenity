@@ -142,8 +142,6 @@ std::vector<glm::v3> Physics::Detail::PhysicsManagement::rayCastInternal(const b
     return result;
 }
 void Detail::PhysicsManagement::render(){
-    Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program->unbind();
-
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));

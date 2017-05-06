@@ -82,9 +82,11 @@ class Mesh final: public EngineResource{
 
 		const aiScene* m_aiScene;
 		Assimp::Importer m_Importer;
+		std::string m_File;
 
         glm::vec3 m_radiusBox;
         float m_radius;
+		float m_threshold;
         std::vector<glm::vec3> m_Points;
         std::vector<glm::vec2> m_UVs;
         std::vector<glm::vec3> m_Normals;
@@ -93,6 +95,7 @@ class Mesh final: public EngineResource{
 		std::vector<ushort> m_Indices;
 
 		void _loadData(ImportedMeshData&,float threshhold);
+		void _clearData();
         void _loadFromFile(std::string,COLLISION_TYPE,float threshold);
         void _loadFromOBJMemory(std::string,COLLISION_TYPE,float threshold);
         void _calculateMeshRadius();

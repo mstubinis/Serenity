@@ -11,6 +11,7 @@
 #include <iostream>
 
 Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):EngineResource(name){
+	m_File = "";
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -57,9 +58,10 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
         }
     }
     _loadData(d,threshold);
-    _calculateMeshRadius();
+	this->load();
 }
 Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold):EngineResource(name){
+	m_File = "";
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -102,9 +104,10 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
         }
     }
 	_loadData(d,threshold);
-    _calculateMeshRadius();
+	this->load();
 }
 Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold):EngineResource(name){
+	m_File = "";
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -141,9 +144,10 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height,float th
     d.tangents.resize(6,glm::vec3(1,1,1));
 
     _loadData(d,threshold);
-    _calculateMeshRadius();
+	this->load();
 }
 Mesh::Mesh(std::string& name,float width, float height,float threshold):EngineResource(name){
+	m_File = "";
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -180,52 +184,67 @@ Mesh::Mesh(std::string& name,float width, float height,float threshold):EngineRe
     d.tangents.resize(6,glm::vec3(1,1,1));
 
     _loadData(d,threshold);
-    _calculateMeshRadius();
+	this->load();
 }
 Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold):EngineResource(name){
+	m_File = "";
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
-    if(notMemory)
+    if(notMemory){
+		m_File = filename;
         _loadFromFile(filename, type,threshold);
-    else
+	}
+	else{
         _loadFromOBJMemory(filename,type,threshold);
-    _calculateMeshRadius();
+	}
+	this->load();
 }
 Mesh::~Mesh(){
-    cleanupRenderingContext();
-	if(m_Skeleton != nullptr)
+	this->unload();
+	if(m_Skeleton != nullptr){
 		delete m_Skeleton;
+		m_Skeleton = nullptr;
+	}
 }
 void Mesh::_loadData(ImportedMeshData& data,float threshold){
+	m_threshold = threshold;
+
     if(data.uvs.size() == 0) data.uvs.resize(data.points.size());
     if(data.normals.size() == 0) data.normals.resize(data.points.size());
     if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
     if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-    Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,threshold);
+    Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,m_threshold);
+}
+void Mesh::_clearData(){
+	m_Indices.clear();
+	m_Points.clear();
+	m_UVs.clear();
+	m_Normals.clear();
+	m_Binormals.clear();
+	m_Tangents.clear();
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type,float threshold){
-	std::string extention; for(uint i = file.length() - 4; i < file.length(); i++)extention += tolower(file.at(i));
-
     ImportedMeshData d;
-    Engine::Resources::MeshLoader::load(this,d,file);
-    _loadData(d,threshold);
+	Engine::Resources::MeshLoader::load(this,d,m_File);
+	m_threshold = threshold; //this is needed
+
+	if(d.m_BoneInfo.size() > 0){
+		m_Skeleton = new MeshSkeleton(d);
+	}
 
     if(type == COLLISION_TYPE_NONE){
         m_Collision = new Collision(new btEmptyShape());
     }
     else{
-        std::string colFile = file.substr(0,file.size()-4);
+        std::string colFile = m_File.substr(0,m_File.size()-4);
         colFile += "Col.obj";
         if(boost::filesystem::exists(colFile)){
-            d.clear();
+			d.clear();
             Engine::Resources::MeshLoader::load(this,d,colFile);
         }
         m_Collision = new Collision(d,type);
     }
-	if(d.m_BoneInfo.size() > 0){
-		m_Skeleton = new MeshSkeleton(d);
-	}
 }
 void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type,float threshold){
     ImportedMeshData d;
@@ -304,14 +323,26 @@ void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& a
 }
 void Mesh::load(){
     if(!isLoaded()){
-        //loading code here
+		if(m_File != ""){
+			//loading code here
+			std::string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
+			ImportedMeshData d;
+			Engine::Resources::MeshLoader::load(this,d,m_File);
+			_loadData(d,m_threshold);
+		}
+		_calculateMeshRadius();
+		initRenderingContext();
 		std::cout << "(Mesh) ";
         EngineResource::load();
     }
 }
 void Mesh::unload(){
 	if(isLoaded() && useCount() == 0){
-        //unloading code here
+		if(m_File != ""){
+			//unloading code here
+			_clearData();
+		}
+		cleanupRenderingContext();
 		std::cout << "(Mesh) ";
         EngineResource::unload();
     }
@@ -329,6 +360,7 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
 }
 AnimationData::~AnimationData(){
     for(auto node:m_KeyframeData){
+		//delete node.second;
     }
 }
 uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    

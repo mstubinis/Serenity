@@ -178,11 +178,9 @@ void Resources::initResources(){
     addMesh("Plane",1.0f,1.0f);
 }
 void Resources::initRenderingContexts(){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->initRenderingContext();
     for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->initRenderingContext();
 }
 void Resources::cleanupRenderingContexts(){
-    for(auto mesh:Detail::ResourceManagement::m_Meshes)                  mesh.second.get()->cleanupRenderingContext();
     for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->cleanupRenderingContext();
 }
 void Resources::setCurrentScene(Scene* scene){ 

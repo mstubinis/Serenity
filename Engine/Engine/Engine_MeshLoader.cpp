@@ -20,9 +20,8 @@ bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < thresh
 void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){	
 	MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
 }
-void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data, std::string file){	
-	mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | 
-		aiProcess_Triangulate); 
+void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data, std::string file){
+	mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
     if(!mesh->m_aiScene || mesh->m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !mesh->m_aiScene->mRootNode){
         return;
     }
@@ -124,12 +123,14 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
 		if(scene->mAnimations && scene->mNumAnimations > 0){
             for(uint i = 0; i < scene->mNumAnimations; i++){
                  aiAnimation* anim = scene->mAnimations[i];
-                 AnimationData* animData = new AnimationData(mesh,anim);
                  std::string key(anim->mName.C_Str());
 				 if(key == ""){
 					 key = "Animation " + boost::lexical_cast<std::string>(data.m_AnimationData.size());
 				 }
-                 data.m_AnimationData.emplace(key,animData);
+				 if(!data.m_AnimationData.count(key) && mesh->m_Skeleton == nullptr){
+					AnimationData* animData = new AnimationData(mesh,anim);
+					data.m_AnimationData.emplace(key,animData);
+				 }
             }
         }
     }

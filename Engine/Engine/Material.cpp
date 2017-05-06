@@ -177,6 +177,8 @@ class Material::impl final{
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
+
+			super->load();
         }
         void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* super){
             Texture* diffuseT = Resources::getTexture(diffuse); 
