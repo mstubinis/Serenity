@@ -18,7 +18,7 @@ int main(){
         }
         freopen("CONIN$", "r", stdin);freopen("CONOUT$", "w", stdout);freopen("CONOUT$", "w", stderr);
         #ifndef _DEBUG
-            ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
+            //ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
         #endif
     #endif
     Detail::EngineClass::init("Engine",1024,768);

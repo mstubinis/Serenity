@@ -19,6 +19,7 @@
 #include <boost/make_shared.hpp>
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 using namespace Engine;
 using namespace Engine::Resources;
@@ -186,12 +187,7 @@ void Resources::cleanupRenderingContexts(){
 }
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){
-
-		//previous scene: suspend physics
-		for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
-			ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-			if(dynamicObj != NULL){ Physics::removeRigidBody(dynamicObj); }
-		}
+		std::cout << "---- Scene Change activated (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
 		//mark game object resources to minus use count
 		for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
 			obj.second->suspend();
@@ -204,11 +200,6 @@ void Resources::setCurrentScene(Scene* scene){
 		Detail::ResourceManagement::m_CurrentScene = scene;
 
 
-		//current scene: resume physics
-		for(auto obj:scene->objects()){
-			ObjectDynamic* dynamicObj = dynamic_cast<ObjectDynamic*>(obj.second);
-			if(dynamicObj != NULL){ Physics::addRigidBody(dynamicObj); }
-		}
 		//mark game object resources to add use count
 		for(auto obj:scene->objects()){
 			obj.second->resume();
@@ -216,6 +207,7 @@ void Resources::setCurrentScene(Scene* scene){
 		for(auto obj:scene->lights()){
 			obj.second->resume();
 		}
+		std::cout << "-------- Scene Change ended --------" << std::endl;
 	}
 }
 void Resources::setCurrentScene(std::string s){

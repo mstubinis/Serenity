@@ -11,6 +11,7 @@
 
 #include <unordered_map>
 #include <algorithm>
+#include <iostream>
 
 using namespace Engine;
 
@@ -174,7 +175,6 @@ class Material::impl final{
             m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
             _addToMaterialPool();
 
-
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
         }
@@ -190,8 +190,22 @@ class Material::impl final{
             _init(name,diffuseT,normalT,glowT,specularT,super);
         }
 		void _load(){
+			for(auto component:m_Components){
+				if(component.second != nullptr){
+					component.second->texture()->incrementUseCount();
+					component.second->texture()->load();
+				}
+			}
 		}
 		void _unload(){
+			for(auto component:m_Components){
+				if(component.second != nullptr){
+					component.second->texture()->decrementUseCount();
+					if(component.second->texture()->useCount() == 0){
+						component.second->texture()->unload();
+					}
+				}
+			}
 		}
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
@@ -212,23 +226,18 @@ class Material::impl final{
             if((m_Components.count(type) && m_Components[type] != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(type,new MaterialComponent(type,texture));
-			texture->incrementUseCount();
         }
         void _addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
             uint type = (uint)MATERIAL_COMPONENT_TYPE_REFLECTION;
             if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentReflection(type,cubemap,map,mixFactor));
-			map->incrementUseCount();
-			cubemap->incrementUseCount();
         }
         void _addComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio){
             uint type = (uint)MATERIAL_COMPONENT_TYPE_REFRACTION;
             if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentRefraction(type,cubemap,map,mixFactor,ratio));
-			map->incrementUseCount();
-			cubemap->incrementUseCount();
         }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
@@ -367,12 +376,14 @@ void Material::unbind(){
 void Material::load(){
     if(!isLoaded()){
         m_i->_load();
+		std::cout << "(Material) ";
         EngineResource::load();
     }
 }
 void Material::unload(){
 	if(isLoaded() && useCount() == 0){
         m_i->_unload();
+		std::cout << "(Material) ";
         EngineResource::unload();
     }
 }

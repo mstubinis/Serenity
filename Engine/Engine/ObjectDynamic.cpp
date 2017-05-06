@@ -449,3 +449,34 @@ glm::vec3 ObjectDynamic::getScale(){
     return glm::vec3(localScale.x(),localScale.y(),localScale.z());
 }
 glm::m4& ObjectDynamic::getModel(){ return m_Model; }
+
+void ObjectDynamic::suspend(){
+	Physics::removeRigidBody(this);
+	for(auto renderedItem:this->m_DisplayItems){
+		if(renderedItem->mesh() != nullptr){
+			renderedItem->mesh()->decrementUseCount();
+			if(renderedItem->mesh()->useCount() == 0){
+				renderedItem->mesh()->unload();
+			}
+		}
+		if(renderedItem->material() != nullptr){
+			renderedItem->material()->decrementUseCount();
+			if(renderedItem->material()->useCount() == 0){
+				renderedItem->material()->unload();
+			}
+		}
+	}
+}
+void ObjectDynamic::resume(){
+	Physics::addRigidBody(this);
+	for(auto renderedItem:this->m_DisplayItems){
+		if(renderedItem->mesh() != nullptr){
+			renderedItem->mesh()->incrementUseCount();
+			renderedItem->mesh()->load();
+		}
+		if(renderedItem->material() != nullptr){
+			renderedItem->material()->incrementUseCount();
+			renderedItem->material()->load();
+		}
+	}
+}

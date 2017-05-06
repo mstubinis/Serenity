@@ -54,6 +54,9 @@ class ObjectDynamic: public Object{
 
         virtual void setDynamic(bool=true);
 
+		virtual void suspend();
+		virtual void resume();
+
         std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setPosition(glm::num,glm::num,glm::num); 

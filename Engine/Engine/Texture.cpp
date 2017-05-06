@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <iostream>
 
 using namespace Engine;
 
@@ -126,12 +127,14 @@ void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int f
 void Texture::load(){
     if(!isLoaded()){
         m_i->_load();
+		std::cout << "(Texture) ";
         EngineResource::load();
     }
 }
 void Texture::unload(){
 	if(isLoaded() && useCount() == 0){
         m_i->_unload();
+		std::cout << "(Texture) ";
         EngineResource::unload();
     }
 }

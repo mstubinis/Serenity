@@ -8,6 +8,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <iostream>
+
 Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):EngineResource(name){
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
@@ -303,12 +305,14 @@ void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& a
 void Mesh::load(){
     if(!isLoaded()){
         //loading code here
+		std::cout << "(Mesh) ";
         EngineResource::load();
     }
 }
 void Mesh::unload(){
 	if(isLoaded() && useCount() == 0){
         //unloading code here
+		std::cout << "(Mesh) ";
         EngineResource::unload();
     }
 }
