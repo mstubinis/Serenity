@@ -86,8 +86,20 @@ namespace Engine{
                     static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_ShaderPrograms;
 
                     static void destruct();
+
+					static bool m_DynamicMemory;
             };
         };
+
+		namespace Settings{
+			static void enableDynamicMemory(bool b = true){
+				Resources::Detail::ResourceManagement::m_DynamicMemory = b;
+			}
+			static void disableDynamicMemory(){
+				Resources::Detail::ResourceManagement::m_DynamicMemory = false;
+			}
+		}
+
         static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);

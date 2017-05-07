@@ -64,6 +64,8 @@ void Game::initLogic(){
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
 
+	Resources::Settings::disableDynamicMemory();
+
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
     new CapsuleSpace();

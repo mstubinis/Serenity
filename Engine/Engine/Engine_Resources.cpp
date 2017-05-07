@@ -29,6 +29,7 @@ float Detail::ResourceManagement::m_ApplicationTime = 0;
 Engine_Window* Detail::ResourceManagement::m_Window;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
+bool Detail::ResourceManagement::m_DynamicMemory = false;
 
 std::unordered_map<std::string,boost::shared_ptr<RenderedItem>> Detail::ResourceManagement::m_RenderedItems;
 std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
@@ -186,24 +187,24 @@ void Resources::cleanupRenderingContexts(){
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){
 		std::cout << "---- Scene Change activated (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
-		//mark game object resources to minus use count
-		for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
-			obj.second->suspend();
+		if(Resources::Detail::ResourceManagement::m_DynamicMemory){
+			//mark game object resources to minus use count
+			for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
+				obj.second->suspend();
+			}
+			for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){
+				obj.second->suspend();
+			}
 		}
-		for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){
-			obj.second->suspend();
-		}
-
-
 		Detail::ResourceManagement::m_CurrentScene = scene;
-
-
-		//mark game object resources to add use count
-		for(auto obj:scene->objects()){
-			obj.second->resume();
-		}
-		for(auto obj:scene->lights()){
-			obj.second->resume();
+		if(Resources::Detail::ResourceManagement::m_DynamicMemory){
+			//mark game object resources to add use count
+			for(auto obj:scene->objects()){
+				obj.second->resume();
+			}
+			for(auto obj:scene->lights()){
+				obj.second->resume();
+			}
 		}
 		std::cout << "-------- Scene Change ended --------" << std::endl;
 	}
