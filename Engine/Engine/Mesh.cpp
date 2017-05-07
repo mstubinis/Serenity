@@ -12,6 +12,7 @@
 
 Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):EngineResource(name){
 	m_File = "";
+	m_threshold = threshold;
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -62,6 +63,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
 }
 Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold):EngineResource(name){
 	m_File = "";
+	m_threshold = threshold;
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -108,6 +110,7 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
 }
 Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold):EngineResource(name){
 	m_File = "";
+	m_threshold = threshold;
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -148,6 +151,7 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height,float th
 }
 Mesh::Mesh(std::string& name,float width, float height,float threshold):EngineResource(name){
 	m_File = "";
+	m_threshold = threshold;
     m_Collision = nullptr;
 	m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -192,7 +196,8 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
 	m_Skeleton = nullptr;
     if(notMemory){
 		m_File = filename;
-        _loadFromFile(filename, type,threshold);
+		m_Type = type;
+		m_threshold = threshold;
 	}
 	else{
         _loadFromOBJMemory(filename,type,threshold);
@@ -201,10 +206,7 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
 }
 Mesh::~Mesh(){
 	this->unload();
-	if(m_Skeleton != nullptr){
-		delete m_Skeleton;
-		m_Skeleton = nullptr;
-	}
+	_clearData(); //does this need to be called twice?
 }
 void Mesh::_loadData(ImportedMeshData& data,float threshold){
 	m_threshold = threshold;
@@ -223,15 +225,17 @@ void Mesh::_clearData(){
 	m_Normals.clear();
 	m_Binormals.clear();
 	m_Tangents.clear();
+	if(m_Skeleton != nullptr){
+		delete m_Skeleton;
+		m_Skeleton = nullptr;
+	}
 }
 void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type,float threshold){
-    ImportedMeshData d;
+	std::string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
+	ImportedMeshData d;
 	Engine::Resources::MeshLoader::load(this,d,m_File);
 	m_threshold = threshold; //this is needed
-
-	if(d.m_BoneInfo.size() > 0){
-		m_Skeleton = new MeshSkeleton(d);
-	}
+	_loadData(d,m_threshold);
 
     if(type == COLLISION_TYPE_NONE){
         m_Collision = new Collision(new btEmptyShape());
@@ -324,11 +328,7 @@ void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& a
 void Mesh::load(){
     if(!isLoaded()){
 		if(m_File != ""){
-			//loading code here
-			std::string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
-			ImportedMeshData d;
-			Engine::Resources::MeshLoader::load(this,d,m_File);
-			_loadData(d,m_threshold);
+			_loadFromFile(m_File,m_Type,m_threshold);
 		}
 		_calculateMeshRadius();
 		initRenderingContext();
@@ -339,7 +339,6 @@ void Mesh::load(){
 void Mesh::unload(){
 	if(isLoaded() && useCount() == 0){
 		if(m_File != ""){
-			//unloading code here
 			_clearData();
 		}
 		cleanupRenderingContext();
@@ -347,8 +346,6 @@ void Mesh::unload(){
         EngineResource::unload();
     }
 }
-
-
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
 	m_TicksPerSecond = anim->mTicksPerSecond;
@@ -359,9 +356,7 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     }
 }
 AnimationData::~AnimationData(){
-    for(auto node:m_KeyframeData){
-		//delete node.second;
-    }
+	
 }
 uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    
     for (uint i = 0 ; i < node->mNumPositionKeys - 1 ; i++) {
@@ -477,20 +472,30 @@ float AnimationData::duration(){
 	float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
 	return float(float(m_DurationInTicks) / TicksPerSecond);
 }
-
+MeshSkeleton::MeshSkeleton(){
+	clear();
+}
 MeshSkeleton::MeshSkeleton(ImportedMeshData& data){
-	m_AnimationData = data.m_AnimationData;
-    m_BoneMapping = data.m_BoneMapping;
-    m_NumBones = data.m_NumBones;
-    m_BoneInfo = data.m_BoneInfo;
-    m_GlobalInverseTransform = data.m_GlobalInverseTransform;
+	fill(data);
+}
+void MeshSkeleton::fill(ImportedMeshData& data){
     for(auto bone:data.m_Bones){
 		VertexBoneData& b = bone.second;
-		m_BoneIDs.push_back(glm::vec4(b.IDs[0],b.IDs[1],b.IDs[2],b.IDs[3]));
+		m_BoneIDs    .push_back(glm::vec4(b.IDs[0],    b.IDs[1],    b.IDs[2],    b.IDs[3]));
 		m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
 	}
 }
+void MeshSkeleton::clear(){
+    for(auto animationData : m_AnimationData){
+        delete animationData.second;
+	}
+	m_AnimationData.clear();
+	m_NumBones = 0;
+	m_BoneMapping.clear();
+	m_BoneInfo.clear();
+	m_BoneIDs.clear();
+	m_BoneWeights.clear();
+}
 MeshSkeleton::~MeshSkeleton(){
-    for(auto anim:m_AnimationData)
-        delete anim.second;
+	clear();
 }

@@ -52,6 +52,7 @@ class MeshSkeleton final{
 	friend class AnimationData;
 	friend class AnimationProcessor;
 	friend class Mesh;
+	friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
 	private:
 		//animation data
 		std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
@@ -64,7 +65,10 @@ class MeshSkeleton final{
 		std::vector<glm::vec4> m_BoneWeights;
 
 	public:
+		MeshSkeleton();
 		MeshSkeleton(ImportedMeshData&);
+		void fill(ImportedMeshData&);
+		void clear();
 		~MeshSkeleton();
 
 };
@@ -87,6 +91,7 @@ class Mesh final: public EngineResource{
         glm::vec3 m_radiusBox;
         float m_radius;
 		float m_threshold;
+		COLLISION_TYPE m_Type;
         std::vector<glm::vec3> m_Points;
         std::vector<glm::vec2> m_UVs;
         std::vector<glm::vec3> m_Normals;

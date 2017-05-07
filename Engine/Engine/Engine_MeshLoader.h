@@ -65,12 +65,7 @@ struct BoneInfo final{
     }
 };
 struct ImportedMeshData final{
-    std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
-    uint m_NumBones;
-    std::vector<BoneInfo> m_BoneInfo;
-    glm::mat4 m_GlobalInverseTransform;
 	std::map<uint,VertexBoneData> m_Bones;
-	std::unordered_map<std::string,AnimationData*> m_AnimationData;
 
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;
@@ -88,7 +83,6 @@ struct ImportedMeshData final{
 	~ImportedMeshData(){}
 
 	void clear(){ 
-		m_NumBones = 0; m_GlobalInverseTransform = glm::mat4(1);
 		file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
 	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
 	}

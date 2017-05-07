@@ -28,8 +28,17 @@ void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshDat
     //animation stuff
     aiMatrix4x4 m = mesh->m_aiScene->mRootNode->mTransformation; // node->mTransformation?
     m.Inverse();
-	data.m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
+	bool doOther = false;
+	if(mesh->m_aiScene->mAnimations && mesh->m_aiScene->mNumAnimations > 0 && mesh->m_Skeleton == nullptr){
+		mesh->m_Skeleton = new MeshSkeleton();
+		mesh->m_Skeleton->m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
+		doOther = true;
+	}
     MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,mesh->m_aiScene->mRootNode, mesh->m_aiScene);
+
+	if(doOther == true){
+		mesh->m_Skeleton->fill(data);
+	}
 }
 void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
     for(uint i = 0; i < node->mNumMeshes; i++){
@@ -98,19 +107,19 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
 			for (uint i = 0; i < aimesh->mNumBones; i++) { 
 				uint BoneIndex = 0; 
 				std::string BoneName(aimesh->mBones[i]->mName.data);
-				if(!data.m_BoneMapping.count(BoneName)) {
-					BoneIndex = data.m_NumBones;
-					data.m_NumBones++; 
+				if(!mesh->m_Skeleton->m_BoneMapping.count(BoneName)) {
+					BoneIndex = mesh->m_Skeleton->m_NumBones;
+					mesh->m_Skeleton->m_NumBones++; 
 					BoneInfo bi;
-					data.m_BoneInfo.push_back(bi);
+					mesh->m_Skeleton->m_BoneInfo.push_back(bi);
 				}
 				else{
-					BoneIndex = data.m_BoneMapping.at(BoneName);
+					BoneIndex = mesh->m_Skeleton->m_BoneMapping.at(BoneName);
 				}
-				data.m_BoneMapping.emplace(BoneName,BoneIndex);
+				mesh->m_Skeleton->m_BoneMapping.emplace(BoneName,BoneIndex);
 
 				aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
-				data.m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
+				mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
 				for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
 					uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
 					float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
@@ -125,11 +134,11 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                  aiAnimation* anim = scene->mAnimations[i];
                  std::string key(anim->mName.C_Str());
 				 if(key == ""){
-					 key = "Animation " + boost::lexical_cast<std::string>(data.m_AnimationData.size());
+					 key = "Animation " + boost::lexical_cast<std::string>(mesh->m_Skeleton->m_AnimationData.size());
 				 }
-				 if(!data.m_AnimationData.count(key) && mesh->m_Skeleton == nullptr){
+				 if(!mesh->m_Skeleton->m_AnimationData.count(key)){
 					AnimationData* animData = new AnimationData(mesh,anim);
-					data.m_AnimationData.emplace(key,animData);
+					mesh->m_Skeleton->m_AnimationData.emplace(key,animData);
 				 }
             }
         }
