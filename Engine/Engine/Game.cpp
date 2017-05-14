@@ -5,6 +5,7 @@
 #include "Engine_Resources.h"
 #include "Engine_Window.h"
 #include "Engine_Noise.h"
+#include "Engine_Networking.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"

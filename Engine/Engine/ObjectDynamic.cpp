@@ -411,7 +411,7 @@ void ObjectDynamic::clearAllForces(){
 
 bool ObjectDynamic::rayIntersectSphere(Camera* c){
     if(c == nullptr) c = Resources::getActiveCamera();
-    return c->rayIntersectSphere(this); 
+    return c->rayIntersectSphere(this);
 }
 void ObjectDynamic::calculateRadius(){
     if(m_DisplayItems.size() == 0){

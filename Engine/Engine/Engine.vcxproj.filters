@@ -115,6 +115,12 @@
     <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\Antialiasing">
       <UniqueIdentifier>{4e1ddf1d-5be1-4ec8-b794-9a71541c7a16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Engine_Networking">
+      <UniqueIdentifier>{41cf311b-9a48-4508-bbfd-4a908fc6ed7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Engine_Networking">
+      <UniqueIdentifier>{3a0af9fb-1f3d-4fd1-8b53-94401a2059f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -240,6 +246,12 @@
     <ClCompile Include="Engine_AnimationProcessor.cpp">
       <Filter>Source Files\Engine\Engine_Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Constraint.cpp">
+      <Filter>Source Files\Engine\Engine_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Networking.cpp">
+      <Filter>Source Files\Engine\Engine_Networking</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -358,6 +370,12 @@
     </ClInclude>
     <ClInclude Include="Engine_AnimationProcessor.h">
       <Filter>Header Files\Engine\Engine_Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Constraint.h">
+      <Filter>Header Files\Engine\Engine_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Networking.h">
+      <Filter>Header Files\Engine\Engine_Networking</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
