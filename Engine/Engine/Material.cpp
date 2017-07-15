@@ -17,15 +17,13 @@ using namespace Engine;
 
 std::vector<glm::vec4> Material::m_MaterialProperities;
 
-
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0);
-	glm::vec3 second(0);
-    for(uint i = 0; i < MATERIAL_COMPONENT_TYPE_NUMBER; i++){
-        MATERIAL_COMPONENT_TYPE type = (MATERIAL_COMPONENT_TYPE)i;
-        if(material->getComponents().count(type)){
-            MaterialComponent* component = material->getComponents().at(type);
+    glm::vec3 second(0);
+    for(uint i = 0; i < MaterialComponentType::NUMBER; i++){
+        if(material->getComponents().count(i)){
+            MaterialComponent* component = material->getComponents().at(i);
             if(component->texture() != nullptr && component->texture()->address() != 0){
                 //enable
                 if     (i == 0){ first.x = 1.0f; }
@@ -37,9 +35,9 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
                 component->bind();
             }
             else{ 
-				//disable
-				component->unbind(); 
-			}
+                //disable
+                component->unbind(); 
+            }
         }
     }
     Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
@@ -54,29 +52,29 @@ struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
 
 
 std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
-    std::unordered_map<uint,std::vector<uint>> map;
+    std::unordered_map<uint,std::vector<uint>> texture_slot_map;
 
-    map[MATERIAL_COMPONENT_TYPE_DIFFUSE].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_DIFFUSE);
-    map[MATERIAL_COMPONENT_TYPE_NORMAL].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_NORMAL);
-    map[MATERIAL_COMPONENT_TYPE_GLOW].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_GLOW);
-    map[MATERIAL_COMPONENT_TYPE_SPECULAR].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_SPECULAR);
+    texture_slot_map[MaterialComponentType::DIFFUSE].push_back(MaterialComponentTextureSlot::DIFFUSE);
+    texture_slot_map[MaterialComponentType::NORMAL].push_back(MaterialComponentTextureSlot::NORMAL);
+    texture_slot_map[MaterialComponentType::GLOW].push_back(MaterialComponentTextureSlot::GLOW);
+    texture_slot_map[MaterialComponentType::SPECULAR].push_back(MaterialComponentTextureSlot::SPECULAR);
 
-    map[MATERIAL_COMPONENT_TYPE_REFLECTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP);
-    map[MATERIAL_COMPONENT_TYPE_REFLECTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP_MAP);
+    texture_slot_map[MaterialComponentType::REFLECTION].push_back(MaterialComponentTextureSlot::REFLECTION_CUBEMAP);
+    texture_slot_map[MaterialComponentType::REFLECTION].push_back(MaterialComponentTextureSlot::REFLECTION_CUBEMAP_MAP);
 
-    map[MATERIAL_COMPONENT_TYPE_REFRACTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP);
-    map[MATERIAL_COMPONENT_TYPE_REFRACTION].push_back((uint)MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP_MAP);
+    texture_slot_map[MaterialComponentType::REFRACTION].push_back(MaterialComponentTextureSlot::REFRACTION_CUBEMAP);
+    texture_slot_map[MaterialComponentType::REFRACTION].push_back(MaterialComponentTextureSlot::REFRACTION_CUBEMAP_MAP);
 
-    return map;
+    return texture_slot_map;
 }
 std::unordered_map<uint,std::vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 
-MaterialComponent::MaterialComponent(uint ty,Texture* t){
-    m_ComponentType = (MATERIAL_COMPONENT_TYPE)ty;
+MaterialComponent::MaterialComponent(uint type,Texture* t){
+    m_ComponentType = (MaterialComponentType::Type)type;
     m_Texture = t;
 }
-MaterialComponent::MaterialComponent(uint ty,std::string& t){
-    m_ComponentType = (MATERIAL_COMPONENT_TYPE)ty;
+MaterialComponent::MaterialComponent(uint type,std::string& t){
+    m_ComponentType = (MaterialComponentType::Type)type;
     m_Texture = Resources::getTexture(t); 
     if(m_Texture == nullptr && t != "") m_Texture = new Texture(t);
 }
@@ -116,10 +114,10 @@ void MaterialComponentReflection::bind(){
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
-	if(m_Texture == nullptr)
-		Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
-	else
-		Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+    if(m_Texture == nullptr)
+        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
+    else
+        Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
@@ -145,10 +143,10 @@ void MaterialComponentRefraction::bind(){
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionRatio",m_RefractionRatio);
 
-	if(m_Texture == nullptr)
-		Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
-	else
-		Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+    if(m_Texture == nullptr)
+        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
+    else
+        Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 
@@ -165,20 +163,20 @@ class Material::impl final{
         float m_SpecularityPower;
         uint m_ID;
         void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
-            _addComponent(MATERIAL_COMPONENT_TYPE_DIFFUSE,diffuse);
-            _addComponent(MATERIAL_COMPONENT_TYPE_NORMAL,normal);
-            _addComponent(MATERIAL_COMPONENT_TYPE_GLOW,glow);
-            _addComponent(MATERIAL_COMPONENT_TYPE_SPECULAR,specular);
+            _addComponent(MaterialComponentType::DIFFUSE,diffuse);
+            _addComponent(MaterialComponentType::NORMAL,normal);
+            _addComponent(MaterialComponentType::GLOW,glow);
+            _addComponent(MaterialComponentType::SPECULAR,specular);
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
             m_SpecularityPower = 50.0f;
-            m_LightingMode = MATERIAL_LIGHTING_MODE_BLINNPHONG;
+            m_LightingMode = Material::LightingMode::BLINNPHONG;
             _addToMaterialPool();
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
 
-			super->load();
+            super->load();
         }
         void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* super){
             Texture* diffuseT = Resources::getTexture(diffuse); 
@@ -191,24 +189,24 @@ class Material::impl final{
             if(specularT == nullptr && specular != "")    specularT = new Texture(specular);
             _init(name,diffuseT,normalT,glowT,specularT,super);
         }
-		void _load(){
-			for(auto component:m_Components){
-				if(component.second != nullptr){
-					component.second->texture()->incrementUseCount();
-					component.second->texture()->load();
-				}
-			}
-		}
-		void _unload(){
-			for(auto component:m_Components){
-				if(component.second != nullptr){
-					component.second->texture()->decrementUseCount();
-					if(component.second->texture()->useCount() == 0){
-						component.second->texture()->unload();
-					}
-				}
-			}
-		}
+        void _load(){
+            for(auto component:m_Components){
+                if(component.second != nullptr){
+                    component.second->texture()->incrementUseCount();
+                    component.second->texture()->load();
+                }
+            }
+        }
+        void _unload(){
+            for(auto component:m_Components){
+                if(component.second != nullptr){
+                    component.second->texture()->decrementUseCount();
+                    if(component.second->texture()->useCount() == 0){
+                        component.second->texture()->unload();
+                    }
+                }
+            }
+        }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
             Material::m_MaterialProperities.push_back(glm::vec4(m_BaseGlow,m_SpecularityPower,m_LightingMode,m_Shadeless));
@@ -230,13 +228,13 @@ class Material::impl final{
             m_Components.emplace(type,new MaterialComponent(type,texture));
         }
         void _addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
-            uint type = (uint)MATERIAL_COMPONENT_TYPE_REFLECTION;
+            uint type = MaterialComponentType::REFLECTION;
             if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentReflection(type,cubemap,map,mixFactor));
         }
         void _addComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio){
-            uint type = (uint)MATERIAL_COMPONENT_TYPE_REFRACTION;
+            uint type = MaterialComponentType::REFRACTION;
             if((m_Components.count(type) && m_Components[type] != nullptr) || (cubemap == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentRefraction(type,cubemap,map,mixFactor,ratio));
@@ -259,30 +257,30 @@ Material::~Material(){
     m_i->_destruct();
 }
 void Material::addComponent(uint type, Texture* texture){m_i->_addComponent(type,texture);}
-void Material::addComponentDiffuse(Texture* texture){m_i->_addComponent(MATERIAL_COMPONENT_TYPE_DIFFUSE,texture);}
+void Material::addComponentDiffuse(Texture* texture){m_i->_addComponent(MaterialComponentType::DIFFUSE,texture);}
 void Material::addComponentDiffuse(std::string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
-    m_i->_addComponent(MATERIAL_COMPONENT_TYPE_DIFFUSE,texture);
+    m_i->_addComponent(MaterialComponentType::DIFFUSE,texture);
 }
 void Material::addComponentNormal(Texture* texture){
-    m_i->_addComponent(MATERIAL_COMPONENT_TYPE_NORMAL,texture);
+    m_i->_addComponent(MaterialComponentType::NORMAL,texture);
 }
 void Material::addComponentNormal(std::string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
-    m_i->_addComponent(MATERIAL_COMPONENT_TYPE_NORMAL,texture);
+    m_i->_addComponent(MaterialComponentType::NORMAL,texture);
 }
 void Material::addComponentSpecular(Texture* texture){
-    m_i->_addComponent(MATERIAL_COMPONENT_TYPE_SPECULAR,texture);
+    m_i->_addComponent(MaterialComponentType::SPECULAR,texture);
 }
 void Material::addComponentSpecular(std::string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
-    m_i->_addComponent(MATERIAL_COMPONENT_TYPE_SPECULAR,texture);
+    m_i->_addComponent(MaterialComponentType::SPECULAR,texture);
 }
 void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
-	if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->getSkybox()->texture();
+    if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->getSkybox()->texture();
     m_i->_addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentReflection(std::string textureFiles[],std::string mapFile,float mixFactor){
@@ -319,8 +317,8 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
 
 const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
-const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at((uint)MATERIAL_COMPONENT_TYPE_REFLECTION)); }
-const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at((uint)MATERIAL_COMPONENT_TYPE_REFRACTION)); }
+const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at(MaterialComponentType::REFLECTION)); }
+const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::REFRACTION)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const float Material::specularity() const { return m_i->m_SpecularityPower; }
@@ -341,31 +339,31 @@ struct less_than_key{
 void Material::addObject(std::string objectName){
     RenderedItem* o = Resources::getRenderedItem(objectName);
     if(o != nullptr){
-		m_i->m_Objects.push_back(o);
-		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
+        m_i->m_Objects.push_back(o);
+        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
     }
 }
 void Material::removeObject(std::string objectName){
-	bool did = false;
-	for (auto it = m_i->m_Objects.cbegin(); it != m_i->m_Objects.cend();){
-		if( (*it)->name() == objectName){
-			m_i->m_Objects.erase(it++);
-			did = true;
-		}
-		else{
-			++it;
-		}
-	}
-	if(did == true){
-		std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
-	}
+    bool did = false;
+    for (auto it = m_i->m_Objects.cbegin(); it != m_i->m_Objects.cend();){
+        if( (*it)->name() == objectName){
+            m_i->m_Objects.erase(it++);
+            did = true;
+        }
+        else{
+            ++it;
+        }
+    }
+    if(did == true){
+        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
+    }
 }
 std::vector<RenderedItem*>& Material::getObjects(){ return m_i->m_Objects; }
 
 void Material::bind(){
-	std::string _name = name();
+    std::string _name = name();
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
-		BindableResource::bind(); //bind custom data
+        BindableResource::bind(); //bind custom data
         Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = _name;
     }
 }
@@ -378,14 +376,14 @@ void Material::unbind(){
 void Material::load(){
     if(!isLoaded()){
         m_i->_load();
-		std::cout << "(Material) ";
+        std::cout << "(Material) ";
         EngineResource::load();
     }
 }
 void Material::unload(){
-	if(isLoaded() && useCount() == 0){
+    if(isLoaded() && useCount() == 0){
         m_i->_unload();
-		std::cout << "(Material) ";
+        std::cout << "(Material) ";
         EngineResource::unload();
     }
 }

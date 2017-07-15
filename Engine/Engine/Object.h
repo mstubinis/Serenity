@@ -33,8 +33,8 @@ class IObject: public BindableResource{
         virtual void scale(float,float,float) = 0;
         virtual void scale(glm::vec3) = 0;
 
-		virtual void suspend() = 0;
-		virtual void resume() = 0;
+        virtual void suspend() = 0;
+        virtual void resume() = 0;
 
         virtual glm::quat& getOrientation() = 0;
         virtual glm::v3 getPosition() = 0;
@@ -70,13 +70,13 @@ class Object: public IObject{
         virtual glm::vec3 getScreenCoordinates();
 
         virtual void alignTo(glm::v3,float speed=0){}
-		virtual void alignTo(Object*,float speed=0){}
-		virtual void alignToX(Object*,float speed=0){}
-		virtual void alignToY(Object*,float speed=0){}
-		virtual void alignToZ(Object*,float speed=0){}
+        virtual void alignTo(Object*,float speed=0){}
+        virtual void alignToX(Object*,float speed=0){}
+        virtual void alignToY(Object*,float speed=0){}
+        virtual void alignToZ(Object*,float speed=0){}
 
-		virtual void suspend(){}
-		virtual void resume(){}
+        virtual void suspend(){}
+        virtual void resume(){}
 
         virtual void addChild(Object*);
 
@@ -135,9 +135,9 @@ class ObjectBasic: public Object{
         virtual glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
 
         virtual void alignTo(glm::v3,float speed=0);
-		virtual void alignTo(Object*,float speed=0);
-		virtual void alignToX(Object*,float speed=0);
-		virtual void alignToY(Object*,float speed=0);
-		virtual void alignToZ(Object*,float speed=0);
+        virtual void alignTo(Object*,float speed=0);
+        virtual void alignToX(Object*,float speed=0);
+        virtual void alignToY(Object*,float speed=0);
+        virtual void alignToZ(Object*,float speed=0);
 };
 #endif

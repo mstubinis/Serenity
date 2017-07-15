@@ -587,7 +587,7 @@ void PointLight::lighten(){
 
     Renderer::sendUniformMatrix4f("Model",m);
 
-	if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) > m_PointLightRadius){ Renderer::Settings::cullFace(GL_BACK); }
+    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) > m_PointLightRadius){ Renderer::Settings::cullFace(GL_BACK); }
     else{                                                          Renderer::Settings::cullFace(GL_FRONT);}
     Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
 

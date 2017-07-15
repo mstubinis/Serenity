@@ -97,19 +97,19 @@ void Skybox::update(){
     m_Model[3][2] = p.z;
 }
 void Skybox::draw(bool godsRays){
-	ShaderP* p = Resources::getShaderProgram("Deferred_Skybox");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Skybox");
+    p->bind();
 
-	Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-	Renderer::sendUniformMatrix4f("Model",m_Model);
+    Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
+    Renderer::sendUniformMatrix4f("Model",m_Model);
 
-	Renderer::bindTexture("Texture",m_Texture,0);
+    Renderer::bindTexture("Texture",m_Texture,0);
 
-	Renderer::sendUniform1i("HasGodsRays",1);
-	Renderer::sendUniform1i("HasGodsRays",0);
+    Renderer::sendUniform1i("HasGodsRays",1);
+    Renderer::sendUniform1i("HasGodsRays",0);
 
-	if(godsRays){ Renderer::sendUniform1i("HasGodsRays",1); }
-	else{         Renderer::sendUniform1i("HasGodsRays",0); }
+    if(godsRays){ Renderer::sendUniform1i("HasGodsRays",1); }
+    else{         Renderer::sendUniform1i("HasGodsRays",0); }
 
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
     glEnableVertexAttribArray(0);
@@ -117,6 +117,6 @@ void Skybox::draw(bool godsRays){
     glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
     glDisableVertexAttribArray(0);
 
-	Renderer::unbindTextureCubemap(0);
-	p->unbind();
+    Renderer::unbindTextureCubemap(0);
+    p->unbind();
 }

@@ -61,7 +61,7 @@ void CapsuleRibbon::bind(){
     BindableResource::bind();
 }
 void CapsuleRibbon::unbind(){
-	BindableResource::unbind();
+    BindableResource::unbind();
     Renderer::Settings::enableDepthTest();
     Renderer::Settings::enableDepthMask();
 }
@@ -173,7 +173,7 @@ void CapsuleSpace::update(float dt){
     float y = glm::cos(m_Timer*2.0f)*0.035f;
 
     float roll = glm::sin(m_Timer*2.0f)*13.0f;
-	float pitch = glm::sin(m_Timer*2.6f)*2.3f;
+    float pitch = glm::sin(m_Timer*2.6f)*2.3f;
 
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));

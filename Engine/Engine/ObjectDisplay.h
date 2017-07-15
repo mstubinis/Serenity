@@ -9,7 +9,7 @@ struct DefaultObjectDisplayBindFunctor;
 struct DefaultObjectDisplayUnbindFunctor;
 class ObjectDisplay: public ObjectBasic{
     public: static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
-			static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+            static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
         bool m_Shadeless;
         bool m_Visible;
@@ -31,8 +31,8 @@ class ObjectDisplay: public ObjectBasic{
 
         virtual void update(float);
 
-		virtual void suspend();
-		virtual void resume();
+        virtual void suspend();
+        virtual void resume();
 
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
@@ -59,10 +59,10 @@ class ObjectDisplay: public ObjectBasic{
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
 
-		void playAnimation(const std::string& animName,float startTime = 0.0f);
+        void playAnimation(const std::string& animName,float startTime = 0.0f);
 
-		//plays the animation from a specified starting time to the specified ending time, looping through until the amount of requested
-		//loops are made. if endTime is less than 0 (which it is by default), the ending time will be the animation's default duration.
-		void playAnimation(const std::string& animName,float startTime,float endTime = -1.0f ,uint requestedLoops = 1);
+        //plays the animation from a specified starting time to the specified ending time, looping through until the amount of requested
+        //loops are made. if endTime is less than 0 (which it is by default), the ending time will be the animation's default duration.
+        void playAnimation(const std::string& animName,float startTime,float endTime = -1.0f ,uint requestedLoops = 1);
 };
 #endif

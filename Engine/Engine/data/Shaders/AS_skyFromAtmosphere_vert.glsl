@@ -94,7 +94,7 @@ void main(void){
     outerRadius = fOuterRadius;
     planetRadius = fInnerRadius;
 
-	WorldPosition = (Model * vec4(position, 1.0)).xyz;
+    WorldPosition = (Model * vec4(position, 1.0)).xyz;
 
     logz_f = 1.0 + gl_Position.w;
     gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;

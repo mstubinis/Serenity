@@ -11,10 +11,10 @@
 typedef unsigned int uint;
 
 class EngineResource{
-	private:
-		bool m_IsLoaded;
+    private:
+        bool m_IsLoaded;
         std::string m_Name;
-		uint m_UsageCount;
+        uint m_UsageCount;
     public:
         EngineResource(std::string = "");
         virtual ~EngineResource();
@@ -23,10 +23,10 @@ class EngineResource{
         void setName(std::string);
 
         bool isLoaded();
-		uint useCount();
+        uint useCount();
 
-		void incrementUseCount(){ m_UsageCount++; }
-		void decrementUseCount(){ if(m_UsageCount > 0) m_UsageCount--; }
+        void incrementUseCount(){ m_UsageCount++; }
+        void decrementUseCount(){ if(m_UsageCount > 0) m_UsageCount--; }
 
         virtual void load();
         virtual void unload();

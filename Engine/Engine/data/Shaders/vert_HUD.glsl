@@ -17,5 +17,5 @@ void main(void){
     UV = uv;
     gl_Position = MVP * vec4(position, 1.0);
 
-	gl_TexCoord[6] = gl_Position;
+    gl_TexCoord[6] = gl_Position;
 }

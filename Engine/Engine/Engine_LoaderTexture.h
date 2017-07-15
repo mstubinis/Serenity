@@ -5,20 +5,20 @@
 class Texture;
 
 namespace Engine{
-	namespace Resources{
-		namespace Load{
+    namespace Resources{
+        namespace Load{
 
-			void load(Texture*);
-			void unload(Texture*);
+            void load(Texture*);
+            void unload(Texture*);
 
-			class LoaderTexture{
-				friend class ::Texture;
-				public:
-					static void load(Texture*);
-					static void unload(Texture*);
-			};
-		};
-	};
+            class LoaderTexture{
+                friend class ::Texture;
+                public:
+                    static void load(Texture*);
+                    static void unload(Texture*);
+            };
+        };
+    };
 };
 
 #endif

@@ -247,7 +247,7 @@ void Lagrange::update(float dt){
 void Lagrange::draw(GLuint shader, bool debug){
     Camera* camera = Resources::getActiveCamera();
     if((m_Visible == false) || (!camera->sphereIntersectTest(this->getPosition(),this->getRadius())) || (camera->getDistance(this) > 1100 * getRadius()))
-        return;	
+        return; 
     glUseProgram(shader);
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP" ), 1, GL_FALSE, glm::value_ptr(camera->getViewProjection()));

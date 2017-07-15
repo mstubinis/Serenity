@@ -41,12 +41,12 @@ class Texture::impl final{
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
                 sf::Image image; image.loadFromFile(m_Files[0].c_str());
                 _generateFromImage(image);
-				glBindTexture(m_Type,0);
+                glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
                 sf::Image i; i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
                 _generateFromImage(i);
-				glBindTexture(m_Type,0);
+                glBindTexture(m_Type,0);
                 _getPixels();
             }
             else if(m_Files.size() > 1){//cubemap
@@ -61,14 +61,14 @@ class Texture::impl final{
                 glTexParameteri(m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
                 glGenerateMipmap(m_Type);
-				glBindTexture(m_Type,0);
+                glBindTexture(m_Type,0);
             }
             else{//no files
             }
         }
         void _unload(){
             glDeleteTextures(1,&m_TextureAddress);
-			glBindTexture(m_Type,0);
+            glBindTexture(m_Type,0);
         }
         void _generateFromImage(sf::Image& image){
             glTexImage2D(m_Type, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
@@ -77,13 +77,13 @@ class Texture::impl final{
             glGenerateMipmap(m_Type);
 
             m_Width = image.getSize().x;
-			m_Height = image.getSize().y;
+            m_Height = image.getSize().y;
         }
         uchar* _getPixels(){
             if(m_Pixels.size() == 0){
                 m_Pixels.resize(m_Width*m_Height*4);
-				glBindTexture(m_Type,m_TextureAddress);
-				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                glBindTexture(m_Type,m_TextureAddress);
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                 glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
             }
             return &m_Pixels[0];
@@ -117,24 +117,24 @@ void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& sc
 }
 void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment){
     m_i->m_Width = w; m_i->m_Height = h;
-	glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
-	glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
-	glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(m_i->m_Type, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
+    glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
+    glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
+    glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(m_i->m_Type, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
 }
 void Texture::load(){
     if(!isLoaded()){
         m_i->_load();
-		std::cout << "(Texture) ";
+        std::cout << "(Texture) ";
         EngineResource::load();
     }
 }
 void Texture::unload(){
-	if(isLoaded() && useCount() == 0){
+    if(isLoaded() && useCount() == 0){
         m_i->_unload();
-		std::cout << "(Texture) ";
+        std::cout << "(Texture) ";
         EngineResource::unload();
     }
 }

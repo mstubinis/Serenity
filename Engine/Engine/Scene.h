@@ -25,7 +25,7 @@ class Scene: public EngineResource{
         Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
         virtual ~Scene();
 
-		virtual void update(float);
+        virtual void update(float);
 
         std::unordered_map<std::string,Object*>& objects();
         std::unordered_map<std::string,SunLight*>& lights();

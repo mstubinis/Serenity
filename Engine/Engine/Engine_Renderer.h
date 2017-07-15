@@ -56,9 +56,9 @@ namespace Engine{
                     static bool depth_test;
                     static ShaderP* current_shader_program;
                     static std::string current_bound_material;
-					static uint multisample_level;
-					static GLuint current_bound_read_fbo;
-					static GLuint current_bound_draw_fbo;
+                    static uint multisample_level;
+                    static GLuint current_bound_read_fbo;
+                    static GLuint current_bound_draw_fbo;
 
                     static bool cull_face_enabled;
                     static unsigned char cull_face_status;
@@ -121,7 +121,7 @@ namespace Engine{
                     static void _passEdge(GLuint texture,float radius = 1.0f);
                     static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal();
-					static void _passFXAA();
+                    static void _passFXAA();
                 public:
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
@@ -146,7 +146,7 @@ namespace Engine{
             void disableCullFace();
             void cullFace(uint state);
 
-			void setMultisamplingLevel(uint);
+            void setMultisamplingLevel(uint);
 
             void enableAlphaTest(bool b = true);
             void disableAlphaTest();
@@ -228,9 +228,9 @@ namespace Engine{
         inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
         inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
         
-		void bindFBO(GLuint);
-		void bindReadFBO(GLuint);
-		void bindDrawFBO(GLuint);
+        void bindFBO(GLuint);
+        void bindReadFBO(GLuint);
+        void bindDrawFBO(GLuint);
         void bindTexture(const char* location,Texture*,uint slot);
         void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
         void bindTextureSafe(const char* location,Texture*,uint slot);
@@ -260,9 +260,9 @@ namespace Engine{
         inline void sendUniform4iSafe(const char* l,glm::ivec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4i(o,v.x,v.y,v.z,v.w); }
         inline void sendUniform4fSafe(const char* l,glm::vec4& v){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4f(o,v.x,v.y,v.z,v.w); }
         inline void sendUniformMatrix4fSafe(const char* l,glm::mat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4fv(o,1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4fvSafe(const char* l,std::vector<glm::mat4>& m, uint count){ const GLint& o=getUniformLocation(l);if(o==-1)return;std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(o,count,0,&d[0]); }
+        inline void sendUniformMatrix4fvSafe(const char* l,std::vector<glm::mat4>& m, uint count){ const GLint& o=getUniformLocation(l);if(o==-1)return;std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(o,count,0,&d[0]); }
         inline void sendUniformMatrix4dSafe(const char* l,glm::dmat4& m){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniformMatrix4dv(o,1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4dvSafe(const char* l,std::vector<glm::dmat4>& m,uint count){ const GLint& o=getUniformLocation(l);if(o==-1)return;std::vector<glm::highp_float> d;for(auto ma:m){glm::highp_float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(o,count,0,&d[0]); }
+        inline void sendUniformMatrix4dvSafe(const char* l,std::vector<glm::dmat4>& m,uint count){ const GLint& o=getUniformLocation(l);if(o==-1)return;std::vector<glm::highp_float> d;for(auto ma:m){glm::highp_float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(o,count,0,&d[0]); }
         inline void sendUniform2fvSafe(const char* l,std::vector<glm::vec2>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
         inline void sendUniform3fvSafe(const char* l,std::vector<glm::vec3>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3fv(o,i,glm::value_ptr(d[0])); }
         inline void sendUniform4fvSafe(const char* l,std::vector<glm::vec4>& d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform4fv(o,i,glm::value_ptr(d[0])); }
@@ -292,9 +292,9 @@ namespace Engine{
         inline void sendUniform4i(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
         inline void sendUniform4f(const char* l,glm::vec4& v){ glUniform4f(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
         inline void sendUniformMatrix4f(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4fv(const char* l,std::vector<glm::mat4>& m,uint count){ std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(getUniformLocationUnsafe(l),count,0,&d[0]); }
+        inline void sendUniformMatrix4fv(const char* l,std::vector<glm::mat4>& m,uint count){ std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(getUniformLocationUnsafe(l),count,0,&d[0]); }
         inline void sendUniformMatrix4d(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4dv(const char* l,std::vector<glm::dmat4>& m,uint count){ std::vector<glm::highp_float> d;for(auto ma:m){glm::highp_float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(getUniformLocationUnsafe(l),count,0,&d[0]); }
+        inline void sendUniformMatrix4dv(const char* l,std::vector<glm::dmat4>& m,uint count){ std::vector<glm::highp_float> d;for(auto ma:m){glm::highp_float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(getUniformLocationUnsafe(l),count,0,&d[0]); }
         inline void sendUniform2fv(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform3fv(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform4fv(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
@@ -324,9 +324,9 @@ namespace Engine{
         inline void sendUniform4iForce(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocation(l),v.x,v.y,v.z,v.w); }
         inline void sendUniform4fForce(const char* l,glm::vec4& v){ glUniform4f(getUniformLocation(l),v.x,v.y,v.z,v.w); }
         inline void sendUniformMatrix4fForce(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4fvForce(const char* l,std::vector<glm::mat4>& m,uint count){ std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(getUniformLocation(l),count,0,&d[0]); }
+        inline void sendUniformMatrix4fvForce(const char* l,std::vector<glm::mat4>& m,uint count){ std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(getUniformLocation(l),count,0,&d[0]); }
         inline void sendUniformMatrix4dForce(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
-		inline void sendUniformMatrix4dvForce(const char* l,std::vector<glm::dmat4>& m,uint count){ std::vector<glm::highp_float> d;for(auto ma:m){glm::highp_float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(getUniformLocation(l),count,0,&d[0]); }
+        inline void sendUniformMatrix4dvForce(const char* l,std::vector<glm::dmat4>& m,uint count){ std::vector<glm::highp_float> d;for(auto ma:m){glm::highp_float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(getUniformLocation(l),count,0,&d[0]); }
         inline void sendUniform2fvForce(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform3fvForce(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform4fvForce(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocation(l),i,glm::value_ptr(d[0])); }

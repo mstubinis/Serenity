@@ -32,12 +32,12 @@ void Game::initResources(){
     Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
     Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
 
-	Resources::addMesh("Test","data/Models/1911.fbx",COLLISION_TYPE_NONE,true,0.0f);
+    Resources::addMesh("Test","data/Models/1911.fbx",COLLISION_TYPE_NONE,true,0.0f);
 
     Resources::addMesh("Planet","data/Models/planet.obj");
     Resources::addMesh("Defiant","data/Models/defiant.obj",COLLISION_TYPE_CONVEXHULL);
     Resources::addMesh("Akira","data/Models/akira.obj",COLLISION_TYPE_CONVEXHULL);
-	Resources::addMesh("Miranda","data/Models/miranda.obj",COLLISION_TYPE_CONVEXHULL);
+    Resources::addMesh("Miranda","data/Models/miranda.obj",COLLISION_TYPE_CONVEXHULL);
     Resources::addMesh("Intrepid","data/Models/intrepid.obj",COLLISION_TYPE_CONVEXHULL);
     Resources::addMesh("Norway","data/Models/norway.obj",COLLISION_TYPE_CONVEXHULL);
     Resources::addMesh("Starbase","data/Models/starbase.obj",COLLISION_TYPE_STATIC_TRIANGLESHAPE);
@@ -52,7 +52,7 @@ void Game::initResources(){
     Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
-	Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
+    Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png","data/Textures/norway_Specular.png");
     Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","","Deferred_HUD");
@@ -65,7 +65,7 @@ void Game::initLogic(){
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
 
-	Resources::Settings::disableDynamicMemory();
+    Resources::Settings::disableDynamicMemory();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -94,7 +94,7 @@ void Game::update(float dt){
         Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
     }
     if(Events::Keyboard::isKeyDown("f12")){
-		//s->getPlayer()->alignTo(s->getPlayer()->getTarget(),10.0f);
+        //s->getPlayer()->alignTo(s->getPlayer()->getTarget(),10.0f);
 
     }
     m_HUD->update(dt);

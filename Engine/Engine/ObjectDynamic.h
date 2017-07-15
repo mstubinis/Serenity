@@ -21,7 +21,7 @@ struct DefaultObjectDynamicBindFunctor;
 struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
     public: static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
-			static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+            static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
 
         glm::v3 m_Forward, m_Right, m_Up;
@@ -54,8 +54,8 @@ class ObjectDynamic: public Object{
 
         virtual void setDynamic(bool=true);
 
-		virtual void suspend();
-		virtual void resume();
+        virtual void suspend();
+        virtual void resume();
 
         std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
 
@@ -67,10 +67,10 @@ class ObjectDynamic: public Object{
         virtual void setColor(glm::vec4);
 
         virtual void alignTo(glm::v3,float speed=0);
-		virtual void alignTo(Object*,float speed=0);
-		virtual void alignToX(Object*,float speed=0);
-		virtual void alignToY(Object*,float speed=0);
-		virtual void alignToZ(Object*,float speed=0);
+        virtual void alignTo(Object*,float speed=0);
+        virtual void alignToX(Object*,float speed=0);
+        virtual void alignToY(Object*,float speed=0);
+        virtual void alignToZ(Object*,float speed=0);
 
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);

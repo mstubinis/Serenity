@@ -14,7 +14,7 @@ class GameCamera: public Camera{
         Object* m_Player;
         float m_OrbitRadius;
     public:
-        GameCamera(std::string name, float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);				      // Perspective camera Constructor
+        GameCamera(std::string name, float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                    // Perspective camera Constructor
         GameCamera(std::string name, float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
         virtual ~GameCamera();
 

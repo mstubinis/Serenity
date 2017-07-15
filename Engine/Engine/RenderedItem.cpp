@@ -18,24 +18,24 @@ using namespace Engine;
 struct DefaultRenderedItemBindFunctor{void operator()(EngineResource* r) const {
     RenderedItem* i = static_cast<RenderedItem*>(r);
 
-	boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
     if(exists(o)){
         Object* obj = o.lock().get();
 
-		std::vector<RenderedItemAnimation>& q = i->animationQueue();
-		if(q.size() > 0){
-			std::vector<glm::mat4> transforms;
-			AnimationProcessor processor = AnimationProcessor();
-			processor.process(i,q,transforms);
-		}
-		else{
-			Renderer::sendUniform1iSafe("AnimationPlaying",0);
-		}
+        std::vector<RenderedItemAnimation>& q = i->animationQueue();
+        if(q.size() > 0){
+            std::vector<glm::mat4> transforms;
+            AnimationProcessor processor = AnimationProcessor();
+            processor.process(i,q,transforms);
+        }
+        else{
+            Renderer::sendUniform1iSafe("AnimationPlaying",0);
+        }
         if(obj->passedRenderCheck()){
-            Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());	
+            Renderer::sendUniformMatrix4f("Model",glm::mat4(o.lock().get()->getModel()) * i->model());  
             i->mesh()->render();
         }
-		Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
+        Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
     }
 }};
 struct DefaultRenderedItemUnbindFunctor{void operator()(EngineResource* r) const {
@@ -46,7 +46,7 @@ class RenderedItem::impl{
         static DefaultRenderedItemUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
         static DefaultRenderedItemBindFunctor DEFAULT_BIND_FUNCTOR;
 
-		std::vector<RenderedItemAnimation> m_AnimationQueue;
+        std::vector<RenderedItemAnimation> m_AnimationQueue;
 
         Mesh* m_Mesh;
         Material* m_Material;
@@ -57,8 +57,8 @@ class RenderedItem::impl{
         bool m_NeedsUpdate;
         Object* m_Parent;
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,RenderedItem* super,std::string& parentName){
-			_setMesh(mesh);
-			_setMaterial(mat);
+            _setMesh(mesh);
+            _setMaterial(mat);
 
             m_Position = pos;
             m_Orientation = rot;
@@ -68,20 +68,20 @@ class RenderedItem::impl{
 
             std::string n = m_Mesh->name() + "_" + m_Material->name();
             n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);
-			m_Parent = Resources::getObject(parentName);
+            m_Parent = Resources::getObject(parentName);
 
             super->setName(n);
             super->setCustomBindFunctor(RenderedItem::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(RenderedItem::impl::DEFAULT_UNBIND_FUNCTOR);
         }
-		void _setMesh(Mesh* mesh){
-			m_Mesh = mesh;
-			m_Mesh->incrementUseCount();
-		}
-		void _setMaterial(Material* mat){
-			m_Material = mat;
-			m_Material->incrementUseCount();
-		}
+        void _setMesh(Mesh* mesh){
+            m_Mesh = mesh;
+            m_Mesh->incrementUseCount();
+        }
+        void _setMaterial(Material* mat){
+            m_Material = mat;
+            m_Material->incrementUseCount();
+        }
         void _destruct(){
         }
         void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; m_NeedsUpdate = true; }
@@ -159,32 +159,32 @@ void RenderedItem::update(float dt){
     m_i->_updateModelMatrix();
 }
 void RenderedItem::playAnimation(const std::string& animName,float startTime){
-	RenderedItemAnimation anim(mesh(),animName,startTime,mesh()->animationData().at(animName)->duration());
-	m_i->m_AnimationQueue.push_back(anim);
+    RenderedItemAnimation anim(mesh(),animName,startTime,mesh()->animationData().at(animName)->duration());
+    m_i->m_AnimationQueue.push_back(anim);
 }
 void RenderedItem::playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops){
-	RenderedItemAnimation anim(mesh(),animName,startTime,endTime,requestedLoops);
-	m_i->m_AnimationQueue.push_back(anim);
+    RenderedItemAnimation anim(mesh(),animName,startTime,endTime,requestedLoops);
+    m_i->m_AnimationQueue.push_back(anim);
 }
 std::vector<RenderedItemAnimation>& RenderedItem::animationQueue(){ return m_i->m_AnimationQueue; }
 
 RenderedItemAnimation::RenderedItemAnimation(Mesh* _mesh,std::string _animName,float _startTime,float _duration){
-	animName = _animName;
-	startTime = _startTime;
-	endTime = _duration;
-	mesh = _mesh;
-	currentLoops = 0;
-	currentTime = 0;
-	requestedLoops = 1;
+    animName = _animName;
+    startTime = _startTime;
+    endTime = _duration;
+    mesh = _mesh;
+    currentLoops = 0;
+    currentTime = 0;
+    requestedLoops = 1;
 }
 RenderedItemAnimation::RenderedItemAnimation(Mesh* _mesh,std::string _animName,float _startTime,float _endTime,uint _requestedLoops){
-	animName = _animName;
-	startTime = _startTime;
-	endTime = _endTime;
-	mesh = _mesh;
-	currentLoops = 0;
-	currentTime = 0;
-	requestedLoops = _requestedLoops;
+    animName = _animName;
+    startTime = _startTime;
+    endTime = _endTime;
+    mesh = _mesh;
+    currentLoops = 0;
+    currentTime = 0;
+    requestedLoops = _requestedLoops;
 }
 RenderedItemAnimation::~RenderedItemAnimation(){
 }

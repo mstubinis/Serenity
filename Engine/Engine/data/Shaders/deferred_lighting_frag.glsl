@@ -33,8 +33,8 @@ float invertLogDepth(float log_depth){
     return linearize_depth(pow(farz + 1.0, log_depth) - 1.0);
 }
 vec3 reconstruct_world_pos(vec2 _uv){
-	float depth = texture2D(gDepthMap, _uv).r;
-	vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
+    float depth = texture2D(gDepthMap, _uv).r;
+    vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
 
@@ -94,7 +94,7 @@ void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
     vec2 uv = gl_FragCoord.xy / gScreenSize;
 
-	vec3 PxlPosition = reconstruct_world_pos(uv);
+    vec3 PxlPosition = reconstruct_world_pos(uv);
     vec3 PxlNormal = (texture2D(gNormalMap, uv).rgb);
 
     vec4 lightCalculation = vec4(0);

@@ -21,7 +21,7 @@ void main(void){
         for(int i=0; i < samples; i++){
             uv -= deltaUV/2.0;
 
-            vec4 sample = texture2D(firstPass,uv);	
+            vec4 sample = texture2D(firstPass,uv);  
             sample *= illuminationDecay * weight;
             gl_FragColor += (sample * alpha);
             illuminationDecay *= decay;

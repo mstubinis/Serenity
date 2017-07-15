@@ -13,7 +13,7 @@
 using namespace Engine;
 
 struct DefaultObjectDisplayBindFunctor{void operator()(BindableResource* r) const {
-	ObjectDisplay* o = static_cast<ObjectDisplay*>(r);
+    ObjectDisplay* o = static_cast<ObjectDisplay*>(r);
 
     Renderer::sendUniform4fSafe("Object_Color",o->getColor());
     Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
@@ -37,7 +37,7 @@ ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm
     calculateRadius();
 
     setCustomBindFunctor(ObjectDisplay::DEFAULT_BIND_FUNCTOR);
-	setCustomUnbindFunctor(ObjectDisplay::DEFAULT_UNBIND_FUNCTOR);
+    setCustomUnbindFunctor(ObjectDisplay::DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDisplay::~ObjectDisplay(){
 }
@@ -97,47 +97,47 @@ bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
 void ObjectDisplay::playAnimation(const std::string& animName,float startTime){
-	for(auto renderedItem:m_DisplayItems){
-		if(renderedItem->mesh()->animationData().count(animName)){
-			renderedItem->playAnimation(animName,startTime);
-		}
-	}
+    for(auto renderedItem:m_DisplayItems){
+        if(renderedItem->mesh()->animationData().count(animName)){
+            renderedItem->playAnimation(animName,startTime);
+        }
+    }
 }
 void ObjectDisplay::playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops){
-	for(auto renderedItem:m_DisplayItems){
-		if(renderedItem->mesh()->animationData().count(animName)){
-			if(endTime < 0){
-				endTime = renderedItem->mesh()->animationData().at(animName)->duration();
-			}
-			renderedItem->playAnimation(animName,startTime,endTime,requestedLoops);
-		}
-	}
+    for(auto renderedItem:m_DisplayItems){
+        if(renderedItem->mesh()->animationData().count(animName)){
+            if(endTime < 0){
+                endTime = renderedItem->mesh()->animationData().at(animName)->duration();
+            }
+            renderedItem->playAnimation(animName,startTime,endTime,requestedLoops);
+        }
+    }
 }
 void ObjectDisplay::suspend(){
-	for(auto renderedItem:this->m_DisplayItems){
-		if(renderedItem->mesh() != nullptr){
-			renderedItem->mesh()->decrementUseCount();
-			if(renderedItem->mesh()->useCount() == 0){
-				renderedItem->mesh()->unload();
-			}
-		}
-		if(renderedItem->material() != nullptr){
-			renderedItem->material()->decrementUseCount();
-			if(renderedItem->material()->useCount() == 0){
-				renderedItem->material()->unload();
-			}
-		}
-	}
+    for(auto renderedItem:this->m_DisplayItems){
+        if(renderedItem->mesh() != nullptr){
+            renderedItem->mesh()->decrementUseCount();
+            if(renderedItem->mesh()->useCount() == 0){
+                renderedItem->mesh()->unload();
+            }
+        }
+        if(renderedItem->material() != nullptr){
+            renderedItem->material()->decrementUseCount();
+            if(renderedItem->material()->useCount() == 0){
+                renderedItem->material()->unload();
+            }
+        }
+    }
 }
 void ObjectDisplay::resume(){
-	for(auto renderedItem:this->m_DisplayItems){
-		if(renderedItem->mesh() != nullptr){
-			renderedItem->mesh()->incrementUseCount();
-			renderedItem->mesh()->load();
-		}
-		if(renderedItem->material() != nullptr){
-			renderedItem->material()->incrementUseCount();
-			renderedItem->material()->load();
-		}
-	}
+    for(auto renderedItem:this->m_DisplayItems){
+        if(renderedItem->mesh() != nullptr){
+            renderedItem->mesh()->incrementUseCount();
+            renderedItem->mesh()->load();
+        }
+        if(renderedItem->material() != nullptr){
+            renderedItem->material()->incrementUseCount();
+            renderedItem->material()->load();
+        }
+    }
 }

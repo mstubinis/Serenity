@@ -104,11 +104,11 @@ void Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long seed){
 double Noise::extrapolate(int xsb, int ysb, double dx, double dy){
     int index = Noise::Detail::MathNoiseManagement::perm[(Noise::Detail::MathNoiseManagement::perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
     return Detail::MathNoiseManagement::grad2[index].x * dx + Detail::MathNoiseManagement::grad2[index].y * dy;
-}	
+}   
 double Noise::extrapolate(int xsb, int ysb, int zsb, double dx, double dy, double dz){
     int index = Noise::Detail::MathNoiseManagement::permGradIndex3D[(Noise::Detail::MathNoiseManagement::perm[(Noise::Detail::MathNoiseManagement::perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF];
     return Detail::MathNoiseManagement::grad3[index].x * dx + Detail::MathNoiseManagement::grad3[index].y * dy + Detail::MathNoiseManagement::grad3[index].z * dz;
-}	
+}   
 double Noise::extrapolate(int xsb, int ysb, int zsb, int wsb, double dx, double dy, double dz, double dw){
     int index = Noise::Detail::MathNoiseManagement::perm[(Noise::Detail::MathNoiseManagement::perm[(Noise::Detail::MathNoiseManagement::perm[(Noise::Detail::MathNoiseManagement::perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
     return Detail::MathNoiseManagement::grad4[index].x * dx + Detail::MathNoiseManagement::grad4[index].y * dy + Detail::MathNoiseManagement::grad4[index].z * dz + Detail::MathNoiseManagement::grad4[index].w * dw;
@@ -777,7 +777,7 @@ double Noise::_3D::noiseOpenSimplex3D(double x, double y, double z){
     if (attn_ext1 > 0){
         attn_ext1 *= attn_ext1;
         value += attn_ext1 * attn_ext1 * extrapolate(xsv_ext1, ysv_ext1, zsv_ext1, dx_ext1, dy_ext1, dz_ext1);
-    }	
+    }   
     return value / Detail::MathNoiseManagement::NORM_CONSTANT_3D;
 }
 double Noise::_4D::noiseOpenSimplex4D(double x, double y, double z, double w){

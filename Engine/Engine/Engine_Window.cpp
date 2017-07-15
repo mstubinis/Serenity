@@ -33,14 +33,14 @@ class Engine_Window::impl{
             settings.depthBits = 24;
             settings.stencilBits = 8;
             settings.antialiasingLevel = 0;
-			settings.majorVersion = 3;
+            settings.majorVersion = 3;
             settings.minorVersion = 3;
 
-			#ifdef _DEBUG
-			settings.attributeFlags = settings.Debug;
-			#else
-			settings.attributeFlags = settings.Default;
-			#endif
+            #ifdef _DEBUG
+            settings.attributeFlags = settings.Debug;
+            #else
+            settings.attributeFlags = settings.Default;
+            #endif
 
             m_VideoMode.width = width;
             m_VideoMode.height = height;
@@ -132,7 +132,7 @@ Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new im
     m_i->_init(name,width,height);
 }
 Engine_Window::~Engine_Window(){
-	m_i->_destruct();
+    m_i->_destruct();
 }
 sf::Vector2u Engine_Window::getSize(){return m_i->m_SFMLWindow->getSize();}
 void Engine_Window::setIcon(Texture* texture){m_i->_setIcon(texture);}

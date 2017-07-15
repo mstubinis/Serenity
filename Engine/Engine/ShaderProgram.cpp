@@ -39,7 +39,7 @@ bool Shader::fromFile(){ return m_i->m_FromFile; }
 struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     Camera* c = Resources::getActiveCamera();
     Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
-	Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+    Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
     glm::vec3 camPos = glm::vec3(c->getPosition());
     Renderer::sendUniform3fSafe("CameraPosition",camPos);
@@ -246,10 +246,10 @@ void ShaderP::bind(){
         glUseProgram(p);
         Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = this;
     }
-   	BindableResource::bind();
+    BindableResource::bind();
 }
 void ShaderP::unbind(){
-	BindableResource::unbind();
+    BindableResource::unbind();
     if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
         glUseProgram(0);
         Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
@@ -262,6 +262,6 @@ void ShaderP::addMaterial(std::string materialName){
     }
     Material* mat = Resources::getMaterial(materialName);
     m_i->m_Materials.push_back(mat);
-	std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),less_than_key());
+    std::sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),less_than_key());
 }
 const std::unordered_map<std::string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }

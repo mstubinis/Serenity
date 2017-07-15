@@ -41,20 +41,20 @@ struct VertexBoneData final{
     float IDs[NUM_BONES_PER_VEREX];
     float Weights[NUM_BONES_PER_VEREX];
 
-	VertexBoneData(){
-		memset(&IDs,0,sizeof(IDs));
+    VertexBoneData(){
+        memset(&IDs,0,sizeof(IDs));
         memset(&Weights,0,sizeof(Weights));  
-	}
-	~VertexBoneData(){
-	}
-	void AddBoneData(uint BoneID, float Weight){
-		uint size = sizeof(IDs) / sizeof(IDs[0]);
-		for (uint i = 0; i < size; i++) {
-			if (Weights[i] == 0.0) {
-				IDs[i] = float(BoneID); Weights[i] = Weight; return;
-			} 
-		}
-	}
+    }
+    ~VertexBoneData(){
+    }
+    void AddBoneData(uint BoneID, float Weight){
+        uint size = sizeof(IDs) / sizeof(IDs[0]);
+        for (uint i = 0; i < size; i++) {
+            if (Weights[i] == 0.0) {
+                IDs[i] = float(BoneID); Weights[i] = Weight; return;
+            } 
+        }
+    }
 };
 struct BoneInfo final{
     glm::mat4 BoneOffset;
@@ -65,7 +65,7 @@ struct BoneInfo final{
     }
 };
 struct ImportedMeshData final{
-	std::map<uint,VertexBoneData> m_Bones;
+    std::map<uint,VertexBoneData> m_Bones;
 
     std::vector<glm::vec3> file_points;
     std::vector<glm::vec2> file_uvs;
@@ -77,44 +77,44 @@ struct ImportedMeshData final{
     std::vector<glm::vec3> normals;
     std::vector<glm::vec3> binormals;
     std::vector<glm::vec3> tangents;
-	std::vector<ushort> indices;
+    std::vector<ushort> indices;
 
-	ImportedMeshData(){ clear(); }
-	~ImportedMeshData(){}
+    ImportedMeshData(){ clear(); }
+    ~ImportedMeshData(){}
 
-	void clear(){ 
-		file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
-	    points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
-	}
+    void clear(){ 
+        file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
+        points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
+    }
 };
 
 namespace Engine{
     namespace Resources{
         namespace MeshLoader{
             void loadObjFromMemory(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
-			void load(Mesh*,ImportedMeshData&,std::string file);
-			namespace Detail{
+            void load(Mesh*,ImportedMeshData&,std::string file);
+            namespace Detail{
 
-				class MeshLoadingManagement{
-					friend class ::Mesh;
-					friend class ::AnimationData;
-					public:
-						static void _load(Mesh*,ImportedMeshData&,std::string file);
-						static void _processNode(Mesh*,ImportedMeshData&,aiNode* node, const aiScene* scene);
-						static void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
-						static void _calculateTBN(ImportedMeshData&);
-						static bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
-						static void _indexVBO(ImportedMeshData&,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents,float threshold);
-						static void _loadDataIntoTriangles(ImportedMeshData&,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
-				};
+                class MeshLoadingManagement{
+                    friend class ::Mesh;
+                    friend class ::AnimationData;
+                    public:
+                        static void _load(Mesh*,ImportedMeshData&,std::string file);
+                        static void _processNode(Mesh*,ImportedMeshData&,aiNode* node, const aiScene* scene);
+                        static void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
+                        static void _calculateTBN(ImportedMeshData&);
+                        static bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
+                        static void _indexVBO(ImportedMeshData&,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents,float threshold);
+                        static void _loadDataIntoTriangles(ImportedMeshData&,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
+                };
 
-				namespace _OBJ{
-					void _loadObjDataFromLine(std::string& line,ImportedMeshData&, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
-					
-				};
-				namespace _3DS{
-				};
-			};
+                namespace _OBJ{
+                    void _loadObjDataFromLine(std::string& line,ImportedMeshData&, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
+                    
+                };
+                namespace _3DS{
+                };
+            };
         };
     };
 };

@@ -13,35 +13,31 @@ typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef char GLchar;
 
-enum MATERIAL_COMPONENT_TYPE{
-    MATERIAL_COMPONENT_TYPE_DIFFUSE,
-    MATERIAL_COMPONENT_TYPE_NORMAL,
-    MATERIAL_COMPONENT_TYPE_GLOW,
-    MATERIAL_COMPONENT_TYPE_SPECULAR,
-    MATERIAL_COMPONENT_TYPE_REFLECTION,
-    MATERIAL_COMPONENT_TYPE_REFRACTION,
-    MATERIAL_COMPONENT_TYPE_NUMBER
+class MaterialComponentType{
+    public: enum Type{
+        DIFFUSE,
+        NORMAL,
+        GLOW,
+        SPECULAR,
+        REFLECTION,
+        REFRACTION,
+        NUMBER
+    };
 };
-enum MATERIAL_COMPONENT_TYPE_TEXTURE_SLOTS{
-    MATERIAL_COMPONENT_TEXTURE_SLOT_DIFFUSE,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_NORMAL,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_GLOW,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_SPECULAR,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_REFLECTION_CUBEMAP_MAP,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP,
-    MATERIAL_COMPONENT_TEXTURE_SLOT_REFRACTION_CUBEMAP_MAP,
-};
-
-enum MATERIAL_LIGHTING_MODE{
-    MATERIAL_LIGHTING_MODE_BLINNPHONG,
-    MATERIAL_LIGHTING_MODE_BLINN,
-    MATERIAL_LIGHTING_MODE_PHONG,
-    MATERIAL_LIGHTING_MODE_TANGENT,
-    MATERIAL_LIGHTING_MODE_NUMBER
+class MaterialComponentTextureSlot{
+    public: enum Slot{
+        DIFFUSE,
+        NORMAL,
+        GLOW,
+        SPECULAR,
+        REFLECTION_CUBEMAP,
+        REFLECTION_CUBEMAP_MAP,
+        REFRACTION_CUBEMAP,
+        REFRACTION_CUBEMAP_MAP,
+    };
 };
 
-static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_NUMBER] = {
+static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::NUMBER] = {
     "DiffuseTexture",
     "NormalTexture",
     "GlowTexture",
@@ -51,11 +47,10 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MATERIAL_COMPONENT_TYPE_N
 };
 static const uint MATERIAL_COUNT_LIMIT = 255;
 
-
 class MaterialComponent{
     protected:
         Texture* m_Texture;
-        MATERIAL_COMPONENT_TYPE m_ComponentType;
+        MaterialComponentType::Type m_ComponentType;
     public:
         MaterialComponent(uint type,Texture*);
         MaterialComponent(uint type,std::string& texture);
@@ -65,7 +60,7 @@ class MaterialComponent{
         virtual void unbind();
 
         Texture* texture() const { return m_Texture; }
-        const MATERIAL_COMPONENT_TYPE type() const { return static_cast<MATERIAL_COMPONENT_TYPE>(m_ComponentType); }
+        const MaterialComponentType::Type type() const { return static_cast<MaterialComponentType::Type>(m_ComponentType); }
 };
 class MaterialComponentReflection: public MaterialComponent{
     protected:
@@ -98,6 +93,15 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 };
 
 class Material final: public BindableResource{
+    public: enum LightingMode{
+        BLINNPHONG,
+        BLINN,
+        PHONG,
+        TANGENT,
+        NUMBER
+    };
+
+
     public:
         //this is very important here
         //vec4:  (  glow,  specularity, lightingMode, shadeless  )
@@ -147,11 +151,11 @@ class Material final: public BindableResource{
         void setSpecularity(float s);
         void setLightingMode(uint m);
 
-		void bind();
-		void unbind();
+        void bind();
+        void unbind();
 
-		void load();
-		void unload();
+        void load();
+        void unload();
 
         void addObject(std::string objectName);
         void removeObject(std::string objectName);

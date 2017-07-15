@@ -169,7 +169,7 @@ void Resources::initResources(){
     addShaderProgram("Deferred_SSAO","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_ssao_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Edge","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_edge_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Final","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_final_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
-	addShaderProgram("Deferred_FXAA","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_fxaa.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
+    addShaderProgram("Deferred_FXAA","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_fxaa.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Skybox","data/Shaders/vert_skybox.glsl","data/Shaders/deferred_frag_skybox.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
     addShaderProgram("Copy_Depth","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/copy_depth_frag.glsl",SHADER_PIPELINE_STAGE_POSTPROCESSING);
     addShaderProgram("Deferred_Light","data/Shaders/vert_fullscreenQuad.glsl","data/Shaders/deferred_lighting_frag.glsl",SHADER_PIPELINE_STAGE_LIGHTING);
@@ -186,28 +186,28 @@ void Resources::cleanupRenderingContexts(){
 }
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){
-		std::cout << "---- Scene Change activated (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
-		if(Resources::Detail::ResourceManagement::m_DynamicMemory){
-			//mark game object resources to minus use count
-			for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
-				obj.second->suspend();
-			}
-			for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){
-				obj.second->suspend();
-			}
-		}
-		Detail::ResourceManagement::m_CurrentScene = scene;
-		if(Resources::Detail::ResourceManagement::m_DynamicMemory){
-			//mark game object resources to add use count
-			for(auto obj:scene->objects()){
-				obj.second->resume();
-			}
-			for(auto obj:scene->lights()){
-				obj.second->resume();
-			}
-		}
-		std::cout << "-------- Scene Change ended --------" << std::endl;
-	}
+        std::cout << "---- Scene Change activated (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
+        if(Resources::Detail::ResourceManagement::m_DynamicMemory){
+            //mark game object resources to minus use count
+            for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
+                obj.second->suspend();
+            }
+            for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){
+                obj.second->suspend();
+            }
+        }
+        Detail::ResourceManagement::m_CurrentScene = scene;
+        if(Resources::Detail::ResourceManagement::m_DynamicMemory){
+            //mark game object resources to add use count
+            for(auto obj:scene->objects()){
+                obj.second->resume();
+            }
+            for(auto obj:scene->lights()){
+                obj.second->resume();
+            }
+        }
+        std::cout << "-------- Scene Change ended --------" << std::endl;
+    }
 }
 void Resources::setCurrentScene(std::string s){
     Resources::setCurrentScene(static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,s))); 

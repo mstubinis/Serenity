@@ -19,21 +19,21 @@ class btTriangleMesh;
 #include <glm/glm.hpp>
 
 enum ConstraintType{
-	CONSTRAINT_TYPE_FIXED,
-	CONSTRAINT_TYPE_HINGE,
+    CONSTRAINT_TYPE_FIXED,
+    CONSTRAINT_TYPE_HINGE,
 };
 
 class Constraint{
-	private:
-		btRigidBody* m_RigidBodyA;
-		btRigidBody* m_RigidBodyB;
-		ConstraintType m_ConstraintType;
-		btTypedConstraint* m_Constraint;
-	public:
-		Constraint(btRigidBody* a, btRigidBody* b);
-		~Constraint();
+    private:
+        btRigidBody* m_RigidBodyA;
+        btRigidBody* m_RigidBodyB;
+        ConstraintType m_ConstraintType;
+        btTypedConstraint* m_Constraint;
+    public:
+        Constraint(btRigidBody* a, btRigidBody* b);
+        ~Constraint();
 
-		void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3& locationA = glm::vec3(0),glm::vec3& locationB = glm::vec3(0));
+        void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3& locationA = glm::vec3(0),glm::vec3& locationB = glm::vec3(0));
 };
 
 #endif

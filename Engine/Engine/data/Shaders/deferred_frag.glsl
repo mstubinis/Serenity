@@ -76,28 +76,28 @@ void main(void){
     if(SecondConditionals.y > 0.5){
         gl_FragData[0] = Reflection(gl_FragData[0],CameraPosition,gl_FragData[1].rgb,WorldPosition);
     }
-	
+    
     if(SecondConditionals.z > 0.5){
         gl_FragData[0] = Refraction(gl_FragData[0],CameraPosition,gl_FragData[1].rgb,WorldPosition);
     }
-	
+    
 
     if(Shadeless == 0){
         if(FirstConditionals.z > 0.5){ 
-			gl_FragData[2].r += texture2D(GlowTexture, UV).r; 
-		}
+            gl_FragData[2].r += texture2D(GlowTexture, UV).r; 
+        }
         if(SecondConditionals.x > 0.5){ 
-			gl_FragData[2].g = texture2D(SpecularTexture, UV).r; 
-		}
+            gl_FragData[2].g = texture2D(SpecularTexture, UV).r; 
+        }
     }
     else{ 
-		gl_FragData[1].rgb = vec3(1.0); 
-	}
+        gl_FragData[1].rgb = vec3(1.0); 
+    }
 
     gl_FragData[1].a = Object_Color.a;
     gl_FragData[2].b = matID;
     if(HasGodsRays == 1){
         gl_FragData[3] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;
     }
-	gl_FragDepth = log2(logz_f) * FC_2_f;
+    gl_FragDepth = log2(logz_f) * FC_2_f;
 }

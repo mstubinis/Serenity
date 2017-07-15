@@ -45,12 +45,12 @@ namespace glm{
 namespace Engine{
     namespace Math{
 
-		glm::quat btToGLMQuat(btQuaternion& q);
-		btQuaternion glmToBTQuat(glm::quat& q);
+        glm::quat btToGLMQuat(btQuaternion& q);
+        btQuaternion glmToBTQuat(glm::quat& q);
 
-		glm::vec3 assimpToGLMVec3(aiVector3D&);
-		glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
-		glm::mat3 assimpToGLMMat3(aiMatrix3x3&);
+        glm::vec3 assimpToGLMVec3(aiVector3D&);
+        glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
+        glm::mat3 assimpToGLMMat3(aiMatrix3x3&);
 
         glm::vec3 getScreenCoordinates(glm::vec3&,bool clampToEdge = true);
 
@@ -70,9 +70,9 @@ namespace Engine{
 
         float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
         void alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed=0);
-		void alignToX(glm::quat& o,Object* origin,Object* target,float speed=0);
-		void alignToY(glm::quat& o,Object* origin,Object* target,float speed=0);
-		void alignToZ(glm::quat& o,Object* origin,Object* target,float speed=0);
+        void alignToX(glm::quat& o,Object* origin,Object* target,float speed=0);
+        void alignToY(glm::quat& o,Object* origin,Object* target,float speed=0);
+        void alignToZ(glm::quat& o,Object* origin,Object* target,float speed=0);
 
         void setColor(glm::vec3& color,float r,float g,float b);
         void setColor(glm::vec4& color,float r,float g,float b,float a);

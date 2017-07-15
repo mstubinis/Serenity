@@ -26,7 +26,7 @@ Object::Object(std::string n,Scene* scene, bool isNotCamera){
         setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, name()));
         Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
 
-		scene->objects().emplace(name(),this);
+        scene->objects().emplace(name(),this);
     }
 }
 Object::~Object()
@@ -84,7 +84,7 @@ void ObjectBasic::alignTo(glm::v3 direction, float time){
     Engine::Math::alignTo(m_Orientation,this,glm::vec3(direction),time);
 }
 void ObjectBasic::alignTo(Object* other, float time){
-	glm::vec3 direction = glm::vec3(getPosition() - other->getPosition());
+    glm::vec3 direction = glm::vec3(getPosition() - other->getPosition());
     Engine::Math::alignTo(m_Orientation,this,direction,time);
 }
 void ObjectBasic::alignToX(Object* other, float time){

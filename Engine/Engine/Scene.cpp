@@ -21,12 +21,12 @@ Scene::Scene(std::string name,glm::vec3 ambientLightColor){
         new Camera("Default_" + name,45.0f,1.0f,0.1f,100.0f,this);
         Resources::setActiveCamera("Default_" + name);
     }
-	setName(name);
-	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Scenes,name,boost::shared_ptr<Scene>(this));
+    setName(name);
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Scenes,name,boost::shared_ptr<Scene>(this));
 }
 void Scene::centerSceneToObject(Object* center){
     glm::v3 offset = -(center->getPosition());
-	for(auto object:m_Objects){
+    for(auto object:m_Objects){
         Object* obj = object.second;
         if(obj != center && obj->getParent() == nullptr){
             obj->setPosition(obj->getPosition() + offset);
@@ -41,7 +41,7 @@ Scene::~Scene(){
 void Scene::update(float dt){
     for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
         if (it->second->isDestroyed()){
-			Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Objects,it->second->name());
+            Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Objects,it->second->name());
             m_Objects.erase(it++);
         }
         else{
@@ -51,7 +51,7 @@ void Scene::update(float dt){
     }
     for (auto it = Resources::Detail::ResourceManagement::m_Cameras.cbegin(); it != Resources::Detail::ResourceManagement::m_Cameras.cend();){
         if (it->second->isDestroyed()){
-			Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Cameras,it->second->name());
+            Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Cameras,it->second->name());
         }
         else{
             if(it->second->getScene() == this){

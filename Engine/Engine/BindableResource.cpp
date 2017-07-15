@@ -4,9 +4,9 @@ struct emptyFunctor{template<class T> void operator()(T* r) const {}};
 
 BindableResource::BindableResource(std::string name):EngineResource(name){
     emptyFunctor a; 
-	emptyFunctor b;
+    emptyFunctor b;
     setCustomBindFunctor(a); 
-	setCustomUnbindFunctor(b);
+    setCustomUnbindFunctor(b);
 }
 BindableResource::~BindableResource(){
 }

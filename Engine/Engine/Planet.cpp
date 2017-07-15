@@ -24,7 +24,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
         Camera* c = Resources::getActiveCamera();
         if(obj->passedRenderCheck()){
             float atmosphereHeight = obj->getAtmosphereHeight();
-			ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
+            ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
             if(atmosphereHeight > 0){
                 //GroundFromAtmosphere should be currently binded
 
@@ -86,7 +86,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 Renderer::sendUniform1f("fExposure", 2.0f);
                 i->mesh()->render();
 
-				program->unbind();
+                program->unbind();
 
                 if(camHeight > outerRadius){ 
                     program = Resources::getShaderProgram("AS_SkyFromSpace"); 
@@ -96,7 +96,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                     program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
                     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
                 }
-				program->bind();
+                program->bind();
 
                 if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
                 else                                                             Renderer::sendUniform1i("HasGodsRays",0);
@@ -110,7 +110,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
 
                 Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
                 Renderer::sendUniformMatrix4f("Model",mod);
-				Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+                Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
                 Renderer::sendUniform1i("nSamples", 2);
                 Renderer::sendUniform1f("fSamples", 2.0f);
@@ -146,7 +146,7 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
             }
             else{
                 //GroundFromAtmosphere should be currently binded
-				atmosphereHeight = 0.025f;
+                atmosphereHeight = 0.025f;
                 float innerRadius = obj->getDefaultRadius();
                 float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
 
@@ -181,10 +181,10 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 Renderer::sendUniform3f("v3LightDir", lightDir);
 
                 glm::vec3 v3InvWaveLength = glm::vec3(
-					1.0f / glm::pow(0.29f, 4.0f),
-					1.0f / glm::pow(0.29f, 4.0f),
-					1.0f / glm::pow(0.29f, 4.0f)
-				);
+                    1.0f / glm::pow(0.29f, 4.0f),
+                    1.0f / glm::pow(0.29f, 4.0f),
+                    1.0f / glm::pow(0.29f, 4.0f)
+                );
                 Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
                 float Km = 0.0025f;
@@ -208,20 +208,20 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
                 Renderer::sendUniform1f("fExposure", 2.0f);
                 i->mesh()->render();
-				program->unbind();
+                program->unbind();
             }
-			/*
-			shader = Resources::getShaderProgram("Deferred")->program();
-			glUseProgram(shader);
-			glEnable(GL_BLEND);
-			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			for(auto ring:m_Rings)
-				ring->draw(shader);
+            /*
+            shader = Resources::getShaderProgram("Deferred")->program();
+            glUseProgram(shader);
+            glEnable(GL_BLEND);
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            for(auto ring:m_Rings)
+                ring->draw(shader);
 
-			glDisable(GL_BLEND);
-			glUseProgram(0);
-			*/
+            glDisable(GL_BLEND);
+            glUseProgram(0);
+            */
         }
     }
 }};
@@ -231,10 +231,10 @@ Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::
     m_Type = type;
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
-	if(type != PLANET_TYPE_STAR){
-		AtmosphericScatteringRenderedItemBindFunctor f;
-		m_DisplayItems.at(0)->setCustomBindFunctor(f);
-	}
+    if(type != PLANET_TYPE_STAR){
+        AtmosphericScatteringRenderedItemBindFunctor f;
+        m_DisplayItems.at(0)->setCustomBindFunctor(f);
+    }
 }
 Planet::~Planet(){
     for(auto ring:m_Rings)    

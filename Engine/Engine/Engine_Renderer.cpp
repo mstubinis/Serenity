@@ -77,12 +77,12 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 
 void Settings::setMultisamplingLevel(uint level){
-	if(Detail::RendererInfo::GeneralInfo::multisample_level != level){
-		Detail::RendererInfo::GeneralInfo::multisample_level = level;
-		Renderer::Detail::RenderManagement::m_gBuffer->resize(Resources::getWindowSize().x,Resources::getWindowSize().y);
-		if(level == 0){ glDisable(GL_MULTISAMPLE); }
-		else{ glEnable(GL_MULTISAMPLE); }
-	}
+    if(Detail::RendererInfo::GeneralInfo::multisample_level != level){
+        Detail::RendererInfo::GeneralInfo::multisample_level = level;
+        Renderer::Detail::RenderManagement::m_gBuffer->resize(Resources::getWindowSize().x,Resources::getWindowSize().y);
+        if(level == 0){ glDisable(GL_MULTISAMPLE); }
+        else{ glEnable(GL_MULTISAMPLE); }
+    }
 }
 void Settings::enableCullFace(bool b){
     if(b && !Detail::RendererInfo::GeneralInfo::cull_face_enabled){
@@ -197,16 +197,16 @@ void Renderer::bindTextureSafe(const char* l,GLuint address,uint slot,GLuint typ
     sendUniform1iSafe(l,slot);
 }
 void Renderer::bindReadFBO(GLuint r){
-	if(Detail::RendererInfo::GeneralInfo::current_bound_read_fbo != r){
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, r);
-		Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = r;
-	}
+    if(Detail::RendererInfo::GeneralInfo::current_bound_read_fbo != r){
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, r);
+        Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = r;
+    }
 }
 void Renderer::bindDrawFBO(GLuint d){
-	if(Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo != d){
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d);
-		Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = d;
-	}
+    if(Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo != d){
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d);
+        Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = d;
+    }
 }
 void Renderer::bindFBO(GLuint fbo){Renderer::bindReadFBO(fbo); Renderer::bindDrawFBO(fbo);}
 void Renderer::unbindTexture2D(uint slot){
@@ -270,8 +270,8 @@ void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& col
 }
 
 void Detail::RenderManagement::_renderTextures(){
-	ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
+    p->bind();
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
@@ -299,11 +299,11 @@ void Detail::RenderManagement::_renderTextures(){
 
         Resources::getMesh("Plane")->render();
     }
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_renderText(){
-	ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
+    p->bind();
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
@@ -334,7 +334,7 @@ void Detail::RenderManagement::_renderText(){
             }
         }
     }
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passGeometry(){
     Settings::clear();
@@ -357,30 +357,30 @@ void Detail::RenderManagement::_passGeometry(){
 
     //RENDER NORMAL OBJECTS HERE
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
-		if(shaderProgram->getMaterials().size() > 0){
-			shaderProgram->bind();
-			for(auto material:shaderProgram->getMaterials()){
-				if(material->getObjects().size() > 0){
-					material->bind();
-					for(auto item:material->getObjects()){
-						Object* object = item->parent();
-						if(scene->objects().count(object->name())){
-							object->bind();   //bind object specific data shared between all of its rendered items
-							item->bind();     //the actual mesh drawing occurs here too
-							item->unbind();
-							object->unbind();
-						}
-						//protect against any custom changes by restoring to the regular shader and material
-						if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-							shaderProgram->bind();
-							material->bind();
-						}
-					}
-					material->unbind();
-				}
-			}
-			shaderProgram->unbind();
-		}
+        if(shaderProgram->getMaterials().size() > 0){
+            shaderProgram->bind();
+            for(auto material:shaderProgram->getMaterials()){
+                if(material->getObjects().size() > 0){
+                    material->bind();
+                    for(auto item:material->getObjects()){
+                        Object* object = item->parent();
+                        if(scene->objects().count(object->name())){
+                            object->bind();   //bind object specific data shared between all of its rendered items
+                            item->bind();     //the actual mesh drawing occurs here too
+                            item->unbind();
+                            object->unbind();
+                        }
+                        //protect against any custom changes by restoring to the regular shader and material
+                        if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+                            shaderProgram->bind();
+                            material->bind();
+                        }
+                    }
+                    material->unbind();
+                }
+            }
+            shaderProgram->unbind();
+        }
     }
     Settings::disableDepthTest();
     Settings::disableDepthMask();
@@ -389,14 +389,14 @@ void Detail::RenderManagement::_passGeometry(){
 }
 void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-	ShaderP* p = Resources::getShaderProgram("Deferred_Light");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Light");
+    p->bind();
 
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-	sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
+    sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
 
-	sendUniform1f("nearz",Resources::getActiveCamera()->getNear());
-	sendUniform1f("farz",Resources::getActiveCamera()->getFar());
+    sendUniform1f("nearz",Resources::getActiveCamera()->getNear());
+    sendUniform1f("farz",Resources::getActiveCamera()->getFar());
 
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
@@ -408,13 +408,13 @@ void Detail::RenderManagement::_passLighting(){
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
     bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),1);
     bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),2);
-	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
 
     for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
     }
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::render(){
     if(!RendererInfo::GodRaysInfo::godRays)
@@ -464,29 +464,29 @@ void Detail::RenderManagement::render(){
         _passHDR();
     }
 
-	if(RendererInfo::GeneralInfo::multisample_level == 0){
-		m_gBuffer->stop();
-		_passFinal();
-	}
-	else{ //pass AA after this
-		m_gBuffer->start(BUFFER_TYPE_LIGHTING);
-		_passFinal();
-		m_gBuffer->stop();
-		_passFXAA();
-	}
+    if(RendererInfo::GeneralInfo::multisample_level == 0){
+        m_gBuffer->stop();
+        _passFinal();
+    }
+    else{ //pass AA after this
+        m_gBuffer->start(BUFFER_TYPE_LIGHTING);
+        _passFinal();
+        m_gBuffer->stop();
+        _passFXAA();
+    }
 
 
     //copy depth over
     glColorMask(0,0,0,0);
-	ShaderP* p = Resources::getShaderProgram("Copy_Depth");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Copy_Depth");
+    p->bind();
 
     bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-	p->unbind();
+    p->unbind();
     glColorMask(1,1,1,1);
     /////////////
 
@@ -513,8 +513,8 @@ void Detail::RenderManagement::render(){
     m_TexturesToBeRendered.clear();
 }
 void Detail::RenderManagement::_passSSAO(){
-	ShaderP* p = Resources::getShaderProgram("Deferred_SSAO");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_SSAO");
+    p->bind();
 
 
     sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
@@ -523,9 +523,9 @@ void Detail::RenderManagement::_passSSAO(){
     Camera* c = Resources::getActiveCamera();
     glm::vec3 camPos = glm::vec3(c->getPosition());
 
-	sendUniformMatrix4f("invVP",c->getViewProjInverted());
-	sendUniform1f("nearz",c->getNear());
-	sendUniform1f("farz",c->getFar());
+    sendUniformMatrix4f("invVP",c->getViewProjInverted());
+    sendUniform1f("nearz",c->getNear());
+    sendUniform1f("farz",c->getFar());
 
     sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
     sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
@@ -540,18 +540,18 @@ void Detail::RenderManagement::_passSSAO(){
     bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,1,GL_TEXTURE_2D);
     bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
     bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),3);
-	bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),4);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     Settings::clear(true,false,false);
 
-	ShaderP* p = Resources::getShaderProgram("Deferred_Edge");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Edge");
+    p->bind();
 
     sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     sendUniform1f("radius", radius);
@@ -561,13 +561,13 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     Settings::clear(true,false,false);
 
-	ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays");
+    p->bind();
 
     sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
     sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
@@ -587,13 +587,13 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
-	ShaderP* p = Resources::getShaderProgram("Deferred_HDR");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_HDR");
+    p->bind();
 
     sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
     sendUniform1f("exposure",RendererInfo::HDRInfo::hdr_exposure);
@@ -602,11 +602,11 @@ void Detail::RenderManagement::_passHDR(){
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
-	ShaderP* p = Resources::getShaderProgram("Deferred_Blur");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Blur");
+    p->bind();
 
     sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
     sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
@@ -628,26 +628,26 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passFXAA(){
     Settings::clear(true,false,false);
 
-	ShaderP* p = Resources::getShaderProgram("Deferred_FXAA");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_FXAA");
+    p->bind();
 
-	sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+    sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
     bindTexture("sampler0",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     unbindTexture2D(0);
-	p->unbind();
+    p->unbind();
 }
 void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);
 
-	ShaderP* p = Resources::getShaderProgram("Deferred_Final");
-	p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Final");
+    p->bind();
 
     sendUniform1f("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
@@ -659,17 +659,17 @@ void Detail::RenderManagement::_passFinal(){
     sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
     sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
-	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
-	bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
-	bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
-	bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
-	bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
-	bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
+    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
+    bindTexture("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
+    bindTexture("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
     for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
-	p->unbind();
+    p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1);

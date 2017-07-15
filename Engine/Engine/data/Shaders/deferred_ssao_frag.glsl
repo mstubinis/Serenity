@@ -32,8 +32,8 @@ float invertLogDepth(float log_depth){
     return linearize_depth(pow(farz + 1.0, log_depth) - 1.0);
 }
 vec3 reconstruct_world_pos(vec2 _uv){
-	float depth = texture2D(gDepthMap, _uv).r;
-	vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
+    float depth = texture2D(gDepthMap, _uv).r;
+    vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
 float l(float a, float b, float w){
@@ -48,7 +48,7 @@ float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
 }
 void main(void){
     vec2 uv = gl_TexCoord[0].st*2.0;
-	vec3 worldPosition = reconstruct_world_pos(uv);
+    vec3 worldPosition = reconstruct_world_pos(uv);
     vec3 normal = texture2D(gNormalMap, uv).xyz;
     vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / gNoiseTextureSize).xy * 2.0 - 1.0);
 
@@ -81,7 +81,7 @@ void main(void){
         float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
         if(brightness > 2.4 || Glow > 0.01f){
             float brightScale = log(brightness) * 0.7;
-			float glowScale = Glow * 0.73;
+            float glowScale = Glow * 0.73;
             gl_FragColor.rgb = vec3(lighting * max(glowScale, brightScale)) * max(glowScale, brightScale);
         }
     }

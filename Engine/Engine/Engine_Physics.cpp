@@ -54,8 +54,8 @@ void Detail::PhysicsManagement::init(){
 
     btGImpactCollisionAlgorithm::registerAlgorithm(m_dispatcher);
 
-	m_world->setInternalTickCallback(Detail::PhysicsManagement::_preTicCallback, static_cast<void*>(m_world),true);
-	m_world->setInternalTickCallback(Detail::PhysicsManagement::_postTicCallback, static_cast<void*>(m_world),false);
+    m_world->setInternalTickCallback(Detail::PhysicsManagement::_preTicCallback, static_cast<void*>(m_world),true);
+    m_world->setInternalTickCallback(Detail::PhysicsManagement::_postTicCallback, static_cast<void*>(m_world),false);
 }
 void Detail::PhysicsManagement::destruct(){
     SAFE_DELETE(m_debugDrawer);
@@ -189,9 +189,9 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
         case COLLISION_TYPE_CONVEXHULL:{
             shape = new btConvexHullShape();
 
-			for(auto vertex:data.points){
+            for(auto vertex:data.points){
                 ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
-			}
+            }
 
             m_CollisionShape = shape;
             m_CollisionType = COLLISION_TYPE_CONVEXHULL;
@@ -252,7 +252,7 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
             for(auto vertex:data.file_points){
                 float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
                 if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
-			}
+            }
 
             shape = new btBoxShape(btVector3(max.x,max.y,max.z));
             m_CollisionShape = shape;
@@ -319,8 +319,8 @@ void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVec
     glPopMatrix();
 }
 void GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btVector3& c,const btVector3& color,btScalar alpha){
-    const btVector3	n=btCross(b-a,c-a).normalized();
-    glBegin(GL_TRIANGLES);		
+    const btVector3 n=btCross(b-a,c-a).normalized();
+    glBegin(GL_TRIANGLES);      
         glColor4f(color.getX(), color.getY(), color.getZ(),alpha);
         glNormal3d(n.getX(),n.getY(),n.getZ());
         glVertex3d(a.getX(),a.getY(),a.getZ());

@@ -45,9 +45,9 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
         case COLLISION_TYPE_CONVEXHULL:{
             shape = new btConvexHullShape();
 
-			for(auto vertex:data.points){
+            for(auto vertex:data.points){
                 ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
-			}
+            }
 
             m_CollisionShape = shape;
             m_CollisionType = COLLISION_TYPE_CONVEXHULL;
@@ -108,7 +108,7 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
             for(auto vertex:data.file_points){
                 float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
                 if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
-			}
+            }
 
             shape = new btBoxShape(btVector3(max.x,max.y,max.z));
             m_CollisionShape = shape;

@@ -38,8 +38,8 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
     m_RigidBody = new btRigidBody(rigidBodyCI);
 
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Meshes,name(),
-		boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()),0.0005f)
-	);
+        boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()),0.0005f)
+    );
 
     if(material != ""){
         RenderedItem* item = new RenderedItem(name(),name(),material);

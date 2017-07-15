@@ -66,7 +66,7 @@ void FontData::_loadTextFile(std::string& filename){
 Font::Font(std::string filename):EngineResource(filename){
     m_FontData = new FontData(filename);
 
-	Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Fonts,name(),boost::shared_ptr<Font>(this));
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Fonts,name(),boost::shared_ptr<Font>(this));
 }
 Font::~Font(){
     SAFE_DELETE(m_FontData);

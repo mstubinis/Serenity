@@ -11,25 +11,25 @@
 using namespace Engine;
 
 glm::quat Math::btToGLMQuat(btQuaternion& q){
-	glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ());
-	return glmQuat;
+    glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ());
+    return glmQuat;
 }
 btQuaternion Math::glmToBTQuat(glm::quat& q){
-	btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w);
-	return btQuat; 
+    btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w);
+    return btQuat; 
 }
 
 glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){
-	glm::vec3 ret = glm::vec3(n.x,n.y,n.z);
-	return ret;
+    glm::vec3 ret = glm::vec3(n.x,n.y,n.z);
+    return ret;
 }
 glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4& n){
-	glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4);
-	return ret;
+    glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4);
+    return ret;
 }
 glm::mat3 Math::assimpToGLMMat3(aiMatrix3x3& n){
-	glm::mat3 ret = glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3);
-	return ret;
+    glm::mat3 ret = glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3);
+    return ret;
 }
 
 float Math::toRadians(float degrees){ return degrees * 0.0174533f; }
@@ -143,12 +143,12 @@ void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed
     rot[2][0] = float(direction.x); rot[2][1] = float(direction.y); rot[2][2] = float(direction.z);
     o = glm::quat_cast(rot);
     if(speed != 0){
-		float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
-		speed *= 1.0f/angle;
+        float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
+        speed *= 1.0f/angle;
         speed *= Resources::dt();
-		o = glm::mix(original,o,speed*5);
+        o = glm::mix(original,o,speed*5);
     }
-	o = glm::normalize(o);
+    o = glm::normalize(o);
 }
 void Math::setColor(glm::vec3& c,float r, float g, float b){
     if(r > 1) r = r / 255.0f;

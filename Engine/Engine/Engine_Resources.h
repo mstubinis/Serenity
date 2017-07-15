@@ -47,10 +47,10 @@ namespace Engine{
                         S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
                     }
                     template<class V, class O,class S> static void _addToContainer(std::map<S,V>& m,const S& n,O& o){
-						if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
+                        if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
                     }
                     template<class V, class O,class S> static void _addToContainer(std::unordered_map<S,V>& m,const S& n,O& o){
-						if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
+                        if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
                     }
                     template<class V,class S> static void* _getFromContainer(std::map<S,V>& m,const S& n){
                         if(!m.count(n))return nullptr; return m.at(n).get();
@@ -67,7 +67,7 @@ namespace Engine{
                     static Scene* m_CurrentScene;
 
                     static float m_DeltaTime;
-					static float m_ApplicationTime;
+                    static float m_ApplicationTime;
 
                     static boost::weak_ptr<Camera> m_ActiveCamera;
 
@@ -87,18 +87,18 @@ namespace Engine{
 
                     static void destruct();
 
-					static bool m_DynamicMemory;
+                    static bool m_DynamicMemory;
             };
         };
 
-		namespace Settings{
-			static void enableDynamicMemory(bool b = true){
-				Resources::Detail::ResourceManagement::m_DynamicMemory = b;
-			}
-			static void disableDynamicMemory(){
-				Resources::Detail::ResourceManagement::m_DynamicMemory = false;
-			}
-		}
+        namespace Settings{
+            static void enableDynamicMemory(bool b = true){
+                Resources::Detail::ResourceManagement::m_DynamicMemory = b;
+            }
+            static void disableDynamicMemory(){
+                Resources::Detail::ResourceManagement::m_DynamicMemory = false;
+            }
+        }
 
         static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
         void setCurrentScene(Scene* s);
@@ -106,7 +106,7 @@ namespace Engine{
 
         static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
         static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
-		static float applicationTime(){ return Detail::ResourceManagement::m_ApplicationTime; }
+        static float applicationTime(){ return Detail::ResourceManagement::m_ApplicationTime; }
 
         Engine_Window* getWindow();
         sf::Vector2u getWindowSize();

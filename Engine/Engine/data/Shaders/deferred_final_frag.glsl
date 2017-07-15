@@ -26,19 +26,19 @@ void main(void){
     vec4 lighting = max(vec4(gAmbientColor,1.0),texture2D(gLightMap, uv));
 
     if(HasLighting == 0){ 
-	    lighting = diffuse; 
-	}
+        lighting = diffuse; 
+    }
     if(HasHDR == 1){ 
-	    lighting = hdr; 
+        lighting = hdr; 
     }
     if(HasSSAO == 1){ 
         float brightness = dot(lighting.xyz, vec3(0.2126, 0.7152, 0.0722));
-		float ssao = texture2D(gBloomMap,uv).a;
+        float ssao = texture2D(gBloomMap,uv).a;
         lighting *= min(1.0,ssao*(brightness+0.65)); //this minimizes the ssao effect on very brightly light areas
     }
     if(HasBloom == 1){
-	    lighting += (vec4(bloom,0.0) / gamma); 
-	}
+        lighting += (vec4(bloom,0.0) / gamma); 
+    }
     if(normals.r > 0.999 && normals.g > 0.999 && normals.b > 0.999){
         gl_FragColor = diffuse;
     }

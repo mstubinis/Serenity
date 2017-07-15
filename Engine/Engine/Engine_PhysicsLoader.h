@@ -7,10 +7,10 @@ class Collision;
 namespace Engine{
     namespace Resources{
         namespace Load{
-			namespace Physics{
-				void load(const Collision*);
-				void unload(const Collision*);
-			};
+            namespace Physics{
+                void load(const Collision*);
+                void unload(const Collision*);
+            };
         };
     };
 };

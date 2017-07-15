@@ -18,7 +18,7 @@ using namespace Engine;
 
 
 struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) const {
-	ObjectDynamic* o = static_cast<ObjectDynamic*>(r);
+    ObjectDynamic* o = static_cast<ObjectDynamic*>(r);
 
     Renderer::sendUniform4f("Object_Color",o->getColor());
     Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
@@ -41,7 +41,7 @@ void ObjectDynamic::setDynamic(bool dynamic){
         m_RigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
         clearAllForces();
         Physics::addRigidBody(this);
-		m_RigidBody->activate();
+        m_RigidBody->activate();
     }
 }
 void ObjectDynamic::collisionResponse(ObjectDynamic* other){
@@ -112,7 +112,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_RigidBody->setUserPointer(this);
 
     setCustomBindFunctor(ObjectDynamic::DEFAULT_BIND_FUNCTOR);
-	setCustomUnbindFunctor(ObjectDynamic::DEFAULT_UNBIND_FUNCTOR);
+    setCustomUnbindFunctor(ObjectDynamic::DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
@@ -341,40 +341,40 @@ void ObjectDynamic::setMass(float mass){
 void ObjectDynamic::alignTo(glm::v3 direction, float speed){
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
-	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    glm::quat q = Engine::Math::btToGLMQuat(btQ);
     Engine::Math::alignTo(q,this,glm::vec3(direction), speed);
-	btQ = Engine::Math::glmToBTQuat(q);
+    btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
 void ObjectDynamic::alignTo(Object* other, float speed){
-	glm::v3 direction = getPosition() - other->getPosition();
+    glm::v3 direction = getPosition() - other->getPosition();
     ObjectDynamic::alignTo(direction,speed);
 }
 void ObjectDynamic::alignToX(Object* other, float speed){
-	glm::v3 direction = getPosition() - other->getPosition();
+    glm::v3 direction = getPosition() - other->getPosition();
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
-	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    glm::quat q = Engine::Math::btToGLMQuat(btQ);
     Engine::Math::alignToX(q,this,other, speed);
-	btQ = Engine::Math::glmToBTQuat(q);
+    btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
 void ObjectDynamic::alignToY(Object* other, float speed){
-	glm::v3 direction = getPosition() - other->getPosition();
+    glm::v3 direction = getPosition() - other->getPosition();
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
-	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    glm::quat q = Engine::Math::btToGLMQuat(btQ);
     Engine::Math::alignToY(q,this,other, speed);
-	btQ = Engine::Math::glmToBTQuat(q);
+    btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
 void ObjectDynamic::alignToZ(Object* other, float speed){
-	glm::v3 direction = getPosition() - other->getPosition();
+    glm::v3 direction = getPosition() - other->getPosition();
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
-	glm::quat q = Engine::Math::btToGLMQuat(btQ);
+    glm::quat q = Engine::Math::btToGLMQuat(btQ);
     Engine::Math::alignToZ(q,this,other, speed);
-	btQ = Engine::Math::glmToBTQuat(q);
+    btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 }
 void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
@@ -442,7 +442,7 @@ bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 }
 glm::quat& ObjectDynamic::getOrientation(){
     btQuaternion q = m_RigidBody->getOrientation();
-	return Engine::Math::btToGLMQuat(q);
+    return Engine::Math::btToGLMQuat(q);
 }
 glm::vec3 ObjectDynamic::getScale(){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
@@ -451,32 +451,32 @@ glm::vec3 ObjectDynamic::getScale(){
 glm::m4& ObjectDynamic::getModel(){ return m_Model; }
 
 void ObjectDynamic::suspend(){
-	Physics::removeRigidBody(this);
-	for(auto renderedItem:this->m_DisplayItems){
-		if(renderedItem->mesh() != nullptr){
-			renderedItem->mesh()->decrementUseCount();
-			if(renderedItem->mesh()->useCount() == 0){
-				renderedItem->mesh()->unload();
-			}
-		}
-		if(renderedItem->material() != nullptr){
-			renderedItem->material()->decrementUseCount();
-			if(renderedItem->material()->useCount() == 0){
-				renderedItem->material()->unload();
-			}
-		}
-	}
+    Physics::removeRigidBody(this);
+    for(auto renderedItem:this->m_DisplayItems){
+        if(renderedItem->mesh() != nullptr){
+            renderedItem->mesh()->decrementUseCount();
+            if(renderedItem->mesh()->useCount() == 0){
+                renderedItem->mesh()->unload();
+            }
+        }
+        if(renderedItem->material() != nullptr){
+            renderedItem->material()->decrementUseCount();
+            if(renderedItem->material()->useCount() == 0){
+                renderedItem->material()->unload();
+            }
+        }
+    }
 }
 void ObjectDynamic::resume(){
-	Physics::addRigidBody(this);
-	for(auto renderedItem:this->m_DisplayItems){
-		if(renderedItem->mesh() != nullptr){
-			renderedItem->mesh()->incrementUseCount();
-			renderedItem->mesh()->load();
-		}
-		if(renderedItem->material() != nullptr){
-			renderedItem->material()->incrementUseCount();
-			renderedItem->material()->load();
-		}
-	}
+    Physics::addRigidBody(this);
+    for(auto renderedItem:this->m_DisplayItems){
+        if(renderedItem->mesh() != nullptr){
+            renderedItem->mesh()->incrementUseCount();
+            renderedItem->mesh()->load();
+        }
+        if(renderedItem->material() != nullptr){
+            renderedItem->material()->incrementUseCount();
+            renderedItem->material()->load();
+        }
+    }
 }

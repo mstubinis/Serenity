@@ -167,7 +167,7 @@ void Engine::Detail::EngineClass::run(){
     while(Resources::getWindow()->isOpen()){
         sf::Event e;
         Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-		Resources::Detail::ResourceManagement::m_ApplicationTime += Resources::Detail::ResourceManagement::m_DeltaTime;
+        Resources::Detail::ResourceManagement::m_ApplicationTime += Resources::Detail::ResourceManagement::m_DeltaTime;
         while(Resources::getWindow()->getSFMLHandle()->pollEvent(e)){
             switch (e.type){
                 case sf::Event::Closed:               EVENT_CLOSE();break;

@@ -50,7 +50,7 @@ void GameSkybox::draw(bool godsRays){
             glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position,false);
             glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
             glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
-			texture->render(glm::vec2(pos.x,pos.y),col,0,scl,0.5f);
+            texture->render(glm::vec2(pos.x,pos.y),col,0,scl,0.5f);
         }
     }
 }

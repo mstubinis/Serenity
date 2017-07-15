@@ -101,7 +101,7 @@ class Star: public Planet{
                 glm::vec3 = glm::vec3(1,1,0),   //Star Color
                 glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
                 glm::v3 = glm::v3(0),           //Position
-                glm::num = 1,					//Scale
+                glm::num = 1,                   //Scale
                 std::string = "Star",           //Name
                 Scene* = nullptr
             );

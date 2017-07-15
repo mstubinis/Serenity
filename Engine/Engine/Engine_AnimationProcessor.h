@@ -9,12 +9,12 @@ class RenderedItemAnimation;
 class RenderedItem;
 
 class AnimationProcessor final{
-	private:
-		void _cleanupQueue(std::vector<RenderedItemAnimation>& queue);
-	public:
-		AnimationProcessor();
-		~AnimationProcessor();
+    private:
+        void _cleanupQueue(std::vector<RenderedItemAnimation>& queue);
+    public:
+        AnimationProcessor();
+        ~AnimationProcessor();
 
-		void process(RenderedItem*,std::vector<RenderedItemAnimation>&,std::vector<glm::mat4>& transforms);
+        void process(RenderedItem*,std::vector<RenderedItemAnimation>&,std::vector<glm::mat4>& transforms);
 };
 #endif
