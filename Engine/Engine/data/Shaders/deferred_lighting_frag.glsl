@@ -1,11 +1,12 @@
 #version 120
+#define MATERIAL_COUNT_LIMIT 255
 
 uniform int LightType;
 
 uniform vec3 LightColor;
 
 uniform vec3 LightIntensities; //x = ambient, y = diffuse, z = specular
-uniform vec3 LightData; //x = constant, y = linear z = exponent
+uniform vec3 LightData;        //x = constant, y = linear z = exponent
 
 uniform vec3 LightDirection;
 uniform vec3 LightPosition;
@@ -18,7 +19,7 @@ uniform vec2 gScreenSize;
 
 uniform vec3 gCameraPosition;
 
-uniform vec4 materials[255];
+uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
 uniform mat4 invVP;
 uniform float nearz;
@@ -38,8 +39,6 @@ vec3 reconstruct_world_pos(vec2 _uv){
     return wpos.xyz / wpos.w;
 }
 
-
-
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
         return vec4(0);
@@ -58,17 +57,22 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         DiffuseColor = vec4(LightColor, 1.0) * LightIntensities.y * (pow(Lambertian,0.75) * 1.2); //this modification to Lambertian makes lighting look more realistic
         vec3 ViewVector = normalize(-PxlWorldPos + gCameraPosition);
 
-        // this is blinn phong
-        vec3 halfDir = normalize(LightDir + ViewVector);
-        float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
-        highp int index = int(texture2D(gMiscMap,uv).b * 255.0);
-        float materialSpecularity = materials[index].g;
-        SpecularAngle = pow(SpecularAngle, materialSpecularity);
+		highp int index = int(texture2D(gMiscMap,uv).b * float(MATERIAL_COUNT_LIMIT));
 
-        if (SpecularAngle > 0.0 && LightIntensities.z > 0.001) {
-            SpecularColor = (vec4(LightColor, 1.0) * LightIntensities.z * SpecularAngle) * SpecularMap;
-        }
-        lightWithoutSpecular = max(AmbientColor, (AmbientColor + DiffuseColor) * diffuseMapColor);
+        // this is blinn phong
+		if(materials[index].b == 0.0){
+			vec3 halfDir = normalize(LightDir + ViewVector);
+			float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
+			float materialSpecularity = materials[index].g;
+			SpecularAngle = pow(SpecularAngle, materialSpecularity);
+			if (SpecularAngle > 0.0 && LightIntensities.z > 0.001) {
+				SpecularColor = (vec4(LightColor, 1.0) * LightIntensities.z * SpecularAngle) * SpecularMap;
+			}
+			lightWithoutSpecular = max(AmbientColor, (AmbientColor + DiffuseColor) * diffuseMapColor);
+		}
+		//this is PBR
+		else if(materials[index].b == 4.0){
+		}
     }
     else{
         lightWithoutSpecular = AmbientColor;

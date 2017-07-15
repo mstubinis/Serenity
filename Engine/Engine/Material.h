@@ -2,6 +2,8 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
+#define MATERIAL_COUNT_LIMIT 255.0
+
 #include "BindableResource.h"
 #include <glm/glm.hpp>
 #include <unordered_map>
@@ -21,6 +23,11 @@ class MaterialComponentType{
         SPECULAR,
         REFLECTION,
         REFRACTION,
+
+		AO,
+		METALNESS,
+		ROUGHNESS,
+
         NUMBER
     };
 };
@@ -30,8 +37,14 @@ class MaterialComponentTextureSlot{
         NORMAL,
         GLOW,
         SPECULAR,
+
+		AO,
+		METALNESS,
+		ROUGHNESS,
+
         REFLECTION_CUBEMAP,
         REFLECTION_CUBEMAP_MAP,
+
         REFRACTION_CUBEMAP,
         REFRACTION_CUBEMAP_MAP,
     };
@@ -42,10 +55,12 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Ty
     "NormalTexture",
     "GlowTexture",
     "SpecularTexture",
+	"AOTexture",
+	"MetalnessTexture",
+	"RoughnessTexture",
     "ReflectionTexture",
     "RefractionTexture"
 };
-static const uint MATERIAL_COUNT_LIMIT = 255;
 
 class MaterialComponent{
     protected:
@@ -62,13 +77,61 @@ class MaterialComponent{
         Texture* texture() const { return m_Texture; }
         const MaterialComponentType::Type type() const { return static_cast<MaterialComponentType::Type>(m_ComponentType); }
 };
+class MaterialComponentAO: public MaterialComponent{
+    protected:
+        Texture* m_Map; //the texture that maps the reflection cubemap to the object
+        float m_AOBaseValue;
+    public:
+        MaterialComponentAO(Texture* texture,float aoBaseValue);
+        MaterialComponentAO(std::string& texture,float aoBaseValue);
+        ~MaterialComponentAO();
+
+        virtual void bind();
+        void unbind();
+        void setAOBaseValue(float);
+
+        const float aoBaseValue() const { return m_AOBaseValue; }
+        const Texture* map() const { return m_Map; }
+};
+class MaterialComponentMetalness: public MaterialComponent{
+    protected:
+        Texture* m_Map; //the texture that maps the reflection cubemap to the object
+        float m_MetalnessBaseValue;
+    public:
+        MaterialComponentMetalness(Texture* texture,float metalnessBaseValue);
+        MaterialComponentMetalness(std::string& texture,float metalnessBaseValue);
+        ~MaterialComponentMetalness();
+
+        virtual void bind();
+        void unbind();
+        void setMetalnessBaseValue(float);
+
+        const float metalnessBaseValue() const { return m_MetalnessBaseValue; }
+        const Texture* map() const { return m_Map; }
+};
+class MaterialComponentRoughness: public MaterialComponent{
+    protected:
+        Texture* m_Map; //the texture that maps the reflection cubemap to the object
+        float m_RoughnessBaseValue;
+    public:
+        MaterialComponentRoughness(Texture* texture,float roughnessBaseValue);
+        MaterialComponentRoughness(std::string& texture,float roughnessBaseValue);
+        ~MaterialComponentRoughness();
+
+        virtual void bind();
+        void unbind();
+        void setRoughnessBaseValue(float);
+
+        const float roughnessBaseValue() const { return m_RoughnessBaseValue; }
+        const Texture* map() const { return m_Map; }
+};
 class MaterialComponentReflection: public MaterialComponent{
     protected:
         Texture* m_Map; //the texture that maps the reflection cubemap to the object
         float m_MixFactor;
     public:
-        MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor = 0.5f);
-        MaterialComponentReflection(uint type,std::string& cubemap,std::string& map,float mixFactor = 0.5f);
+        MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor);
+        MaterialComponentReflection(uint type,std::string& cubemap,std::string& map,float mixFactor);
         ~MaterialComponentReflection();
 
         virtual void bind();
@@ -82,8 +145,8 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
     private:
         float m_RefractionRatio;
     public:
-        MaterialComponentRefraction(uint type,Texture* cubemap,Texture* map,float mixFactor = 0.5f,float ratio = 1.0f);
-        MaterialComponentRefraction(uint type,std::string& cubemap,std::string& map,float mixFactor = 0.5f,float ratio = 1.0f);
+        MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio);
+        MaterialComponentRefraction(std::string& cubemap,std::string& map,float mixFactor,float ratio);
         ~MaterialComponentRefraction();
 
         void bind();
@@ -98,6 +161,7 @@ class Material final: public BindableResource{
         BLINN,
         PHONG,
         TANGENT,
+		PBR,
         NUMBER
     };
 
@@ -132,6 +196,15 @@ class Material final: public BindableResource{
 
         void addComponentSpecular(Texture* texture);
         void addComponentSpecular(std::string& textureFile);
+
+        void addComponentAO(Texture* texture,float baseValue = 1.0f);
+        void addComponentAO(std::string& textureFile,float baseValue = 1.0f);
+
+		void addComponentMetalness(Texture* texture,float baseValue = 1.0f);
+        void addComponentMetalness(std::string& textureFile,float baseValue = 1.0f);
+
+		void addComponentRoughness(Texture* texture,float baseValue = 1.0f);
+        void addComponentRoughness(std::string& textureFile,float baseValue = 1.0f);
 
         void addComponentReflection(Texture* cubeMap,Texture* map,float mixFactor = 1.0f);
         void addComponentReflection(std::string cubeMapName,std::string mapFile,float mixFactor = 1.0f);

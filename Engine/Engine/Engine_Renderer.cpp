@@ -401,7 +401,8 @@ void Detail::RenderManagement::_passLighting(){
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
 
-    sendUniform4fv("materials[0]",Material::m_MaterialProperities,MATERIAL_COUNT_LIMIT);
+	uint limit = (uint)MATERIAL_COUNT_LIMIT;
+    sendUniform4fv("materials[0]",Material::m_MaterialProperities,limit);
 
     sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 

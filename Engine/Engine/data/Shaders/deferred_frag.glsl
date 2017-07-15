@@ -5,6 +5,13 @@ uniform sampler2D NormalTexture;
 uniform sampler2D GlowTexture;
 uniform sampler2D SpecularTexture;
 
+uniform sampler2D AOTexture;
+uniform sampler2D MetalnessTexture;
+uniform sampler2D RoughnessTexture;
+uniform float AOBaseValue;
+uniform float MetalnessBaseValue;
+uniform float RoughnessBaseValue;
+
 uniform samplerCube ReflectionTexture;
 uniform sampler2D   ReflectionTextureMap;
 uniform samplerCube RefractionTexture;
@@ -22,6 +29,7 @@ uniform int HasGodsRays;
 
 uniform vec3 FirstConditionals;  //x = diffuse  y = normals    z = glow
 uniform vec3 SecondConditionals; //x = specular y = reflection z = refraction
+uniform vec3 ThirdConditionals; //x = ao y = metalness z = roughness
 
 uniform vec4 Object_Color;
 uniform vec3 Gods_Rays_Color;
@@ -37,11 +45,11 @@ varying float logz_f;
 
 vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){
     vec4 r = vec4(0.0);
-    float Alp = paint.a + canvas.a * (1.0 - paint.a);
-    r.r = (paint.r * paint.a + canvas.r * canvas.a * (1.0-paint.a)) / Alp;
-    r.g = (paint.g * paint.a + canvas.g * canvas.a * (1.0-paint.a)) / Alp;
-    r.b = (paint.b * paint.a + canvas.b * canvas.a * (1.0-paint.a)) / Alp;
-    r.a = Alp;
+    float Alpha = paint.a + canvas.a * (1.0 - paint.a);
+    r.r = (paint.r * paint.a + canvas.r * canvas.a * (1.0-paint.a)) / Alpha;
+    r.g = (paint.g * paint.a + canvas.g * canvas.a * (1.0-paint.a)) / Alpha;
+    r.b = (paint.b * paint.a + canvas.b * canvas.a * (1.0-paint.a)) / Alpha;
+    r.a = Alpha;
     return r;
 }
 vec4 Reflection(vec4 d, vec3 cpos, vec3 n, vec3 wpos){
