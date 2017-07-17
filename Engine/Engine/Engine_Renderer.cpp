@@ -66,7 +66,7 @@ GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
 bool Detail::RendererInfo::HDRInfo::hdr = true;
 float Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
-float Detail::RendererInfo::HDRInfo::hdr_gamma = 0.8f;
+float Detail::RendererInfo::HDRInfo::hdr_gamma = 2.2f;
 
 GBuffer* Detail::RenderManagement::m_gBuffer = nullptr;
 glm::mat4 Detail::RenderManagement::m_2DProjectionMatrix;
