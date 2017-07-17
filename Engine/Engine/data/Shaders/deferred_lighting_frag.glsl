@@ -59,7 +59,7 @@ vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 
 		highp int index = int(texture2D(gMiscMap,uv).b * float(MATERIAL_COUNT_LIMIT));
 
-        // this is blinn phong
+                // this is blinn phong
 		if(materials[index].b == 0.0){
 			vec3 halfDir = normalize(LightDir + ViewVector);
 			float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
