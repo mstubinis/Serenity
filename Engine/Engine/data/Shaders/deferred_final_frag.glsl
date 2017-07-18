@@ -3,7 +3,6 @@
 uniform sampler2D gDiffuseMap;
 uniform sampler2D gLightMap;
 uniform sampler2D gBloomMap;
-uniform sampler2D gNormalMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gGodsRaysMap;
 
@@ -17,7 +16,6 @@ uniform vec3 gAmbientColor;
 void main(void){
     vec2 uv = gl_TexCoord[0].st;
     vec4 diffuse = texture2D(gDiffuseMap, uv);
-    vec3 normals = texture2D(gNormalMap,uv).rgb;
     vec4 bloom = texture2D(gBloomMap,uv);
     vec3 rays = texture2D(gGodsRaysMap,uv).rgb;
     vec4 hdr = max(vec4(gAmbientColor,1.0),texture2D(gMiscMap,uv));
