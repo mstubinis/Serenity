@@ -598,6 +598,7 @@ void Detail::RenderManagement::_passHDR(){
 
     sendUniform1fSafe("exposure",RendererInfo::HDRInfo::hdr_exposure);
 	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
+	sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
 	sendUniform1i("HDRAlgorithm",int(RendererInfo::HDRInfo::hdr_algorithm));
 	sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
