@@ -84,7 +84,7 @@ M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphe
 #M name=Autonoe parent=Jupiter
 #M name=Megaclite parent=Jupiter
 #M name=S/2003-J-2 parent=Jupiter
- ti
+
 P name=Saturn parent=Sun radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.jpg eccentricity=0.05555 tilt=26.73 period=10759.22 majorAxis=1429394041.1 days=0.593055555
 R parent=Saturn position=535 radius=279 r=78 g=68 b=56 break=269
 R parent=Saturn position=852 radius=130 r=154 g=138 b=115 break=120
