@@ -22,7 +22,7 @@ void main(void){
 		else if(HDRAlgorithm == 2.0){
 		    lighting = vec3(1.0) - exp(-lighting * exposure); // Exposure tone mapping
 		}
-		lighting = pow(lighting, vec3(gamma));
+		lighting = pow(lighting, vec3(1.0 / gamma));
 	}
 
     gl_FragColor = vec4(lighting, 1.0);
