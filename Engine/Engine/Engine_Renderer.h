@@ -46,6 +46,14 @@ struct FontRenderInfo final: public TextureRenderInfo{
     }
 };
 
+class HDRToneMapAlgorithm{
+	public: enum Algorithm{
+	    REINHARD,
+		FILMIC,
+		EXPOSURE
+	};
+};
+
 namespace Engine{
     namespace Renderer{
         namespace Detail{
@@ -78,6 +86,7 @@ namespace Engine{
                     static bool hdr;
                     static float hdr_exposure;
                     static float hdr_gamma;
+					static HDRToneMapAlgorithm::Algorithm hdr_algorithm;
                 };
                 struct GodRaysInfo final{
                     static bool godRays;
@@ -163,6 +172,8 @@ namespace Engine{
                 static float getGamma(){ return Detail::RendererInfo::HDRInfo::hdr_gamma; }
                 static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
                 static void setGamma(float g){ Detail::RendererInfo::HDRInfo::hdr_gamma = g; }
+
+				static void setAlgorithm(HDRToneMapAlgorithm::Algorithm a){ Detail::RendererInfo::HDRInfo::hdr_algorithm = a; }
             };
             namespace Bloom{
                 static void enable(bool b = true){ Detail::RendererInfo::BloomInfo::bloom = b; }

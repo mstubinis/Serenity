@@ -3,6 +3,8 @@
 
 uniform int LightType;
 
+uniform float gamma;
+
 uniform vec3 LightColor;
 
 uniform vec3 LightIntensities; //x = ambient, y = diffuse, z = specular
@@ -38,48 +40,42 @@ vec3 reconstruct_world_pos(vec2 _uv){
     vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
-
 vec4 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
-    if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){
-        return vec4(0);
+    vec4 DiffuseMap = vec4(texture2D(gDiffuseMap,uv).rgb, 1.0);
+	float Glow = texture2D(gMiscMap,uv).r;
+    if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999) || Glow > 0.99 ){
+        return DiffuseMap;
     }
-    vec4 AmbientColor = vec4(LightColor, 1.0) * LightIntensities.x;
-    float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
-    float Glow = texture2D(gMiscMap,uv).r;
-    float SpecularMap = texture2D(gMiscMap,uv).g;
-
-    vec4 diffuseMapColor = vec4(texture2D(gDiffuseMap,uv).rgb, 1.0);
-
+    vec4 AmbientColor  = vec4(LightColor, 1.0) * LightIntensities.x;
     vec4 DiffuseColor  = vec4(0.0);
     vec4 SpecularColor = vec4(0.0);
-    vec4 lightWithoutSpecular = vec4(0.0);
+	vec4 TotalLight    = vec4(0.0);
+
+    float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
+
     if (Lambertian > 0.0) {
-        DiffuseColor = vec4(LightColor, 1.0) * LightIntensities.y * (pow(Lambertian,0.75) * 1.2); //this modification to Lambertian makes lighting look more realistic
+        DiffuseColor = vec4(LightColor, 1.0) * LightIntensities.y * Lambertian;
         vec3 ViewVector = normalize(-PxlWorldPos + gCameraPosition);
 
 		highp int index = int(texture2D(gMiscMap,uv).b * float(MATERIAL_COUNT_LIMIT));
 
-                // this is blinn phong
+        // this is blinn phong
 		if(materials[index].b == 0.0){
-			vec3 halfDir = normalize(LightDir + ViewVector);
-			float SpecularAngle = max(dot(halfDir, PxlNormal), 0.0);
-			float materialSpecularity = materials[index].g;
-			SpecularAngle = pow(SpecularAngle, materialSpecularity);
+			vec3 Half = normalize(LightDir + ViewVector);
+			float SpecularAngle = max(dot(Half, PxlNormal), 0.0);
+			SpecularAngle = pow(SpecularAngle, materials[index].g); //materials[index].g is specularity
 			if (SpecularAngle > 0.0 && LightIntensities.z > 0.001) {
-				SpecularColor = (vec4(LightColor, 1.0) * LightIntensities.z * SpecularAngle) * SpecularMap;
+				SpecularColor = (vec4(LightColor, 1.0) * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 			}
-			lightWithoutSpecular = max(AmbientColor, (AmbientColor + DiffuseColor) * diffuseMapColor);
 		}
 		//this is PBR
 		else if(materials[index].b == 4.0){
 		}
-    }
-    else{
-        lightWithoutSpecular = AmbientColor;
-    }
 
-    if(Glow > 0.99){ return diffuseMapColor; }
-    return max(Glow*diffuseMapColor,lightWithoutSpecular + SpecularColor);
+		TotalLight = AmbientColor + DiffuseColor + SpecularColor;
+		TotalLight *= DiffuseMap;
+    }
+    return max( Glow * DiffuseMap, TotalLight);
 }
 vec4 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = LightPosition - PxlWorldPos;

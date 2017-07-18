@@ -8,7 +8,7 @@ uniform vec2 resolution;
 void main(void){
    vec2 uv = gl_TexCoord[0].st;
 
-   vec2 inverse_resolution=vec2(1.0/resolution.x,1.0/resolution.y);
+   vec2 inverse_resolution = vec2(1.0/resolution.x, 1.0/resolution.y);
    vec3 rgbNW = texture2D(sampler0, uv + (vec2(-1.0,-1.0)) * inverse_resolution).xyz;
    vec3 rgbNE = texture2D(sampler0, uv + (vec2(1.0,-1.0)) * inverse_resolution).xyz;
    vec3 rgbSW = texture2D(sampler0, uv + (vec2(-1.0,1.0)) * inverse_resolution).xyz;
@@ -31,9 +31,11 @@ void main(void){
    vec3 rgbA = 0.5 * (texture2D(sampler0, uv   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(sampler0, uv   + dir * (2.0/3.0 - 0.5)).xyz);
    vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(sampler0,  uv   + dir *  - 0.5).xyz + texture2D(sampler0,  uv   + dir * 0.5).xyz);
    float lumaB = dot(rgbB, luma);
+
    if((lumaB < lumaMin) || (lumaB > lumaMax)) {
-      gl_FragColor = vec4(rgbA,1.0);
-   } else {
-      gl_FragColor = vec4(rgbB,1.0);
+       gl_FragColor = vec4(rgbA,1.0);
+   }
+   else{
+       gl_FragColor = vec4(rgbB,1.0);
    }
 }

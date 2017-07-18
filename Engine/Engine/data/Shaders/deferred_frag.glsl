@@ -68,7 +68,8 @@ vec4 Refraction(vec4 d, vec3 cpos, vec3 n, vec3 wpos){
 }
 
 vec3 CalcBumpedNormal(void){
-    vec3 t = (texture2D(NormalTexture, UV).xyz * 2.0) - 1.0;
+    vec3 normTexture = texture2D(NormalTexture, UV).xyz;
+    vec3 t = (normTexture * 2.0) - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
     return normalize(TBN * t);
 }

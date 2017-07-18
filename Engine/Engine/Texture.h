@@ -20,10 +20,10 @@ class Texture: public EngineResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D);
-        Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D);
-        Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D);
-        Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP);
+        Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D,uint format = GL_SRGB8_ALPHA8);
+        Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D,uint format = GL_SRGB8_ALPHA8);
+        Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D,uint format = GL_SRGB8_ALPHA8);
+        Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP,uint format = GL_SRGB8_ALPHA8);
         virtual ~Texture();
 
         uchar* pixels();

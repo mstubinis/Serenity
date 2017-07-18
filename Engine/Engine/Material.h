@@ -79,7 +79,6 @@ class MaterialComponent{
 };
 class MaterialComponentAO: public MaterialComponent{
     protected:
-        Texture* m_Map; //the texture that maps the reflection cubemap to the object
         float m_AOBaseValue;
     public:
         MaterialComponentAO(Texture* texture,float aoBaseValue);
@@ -91,11 +90,9 @@ class MaterialComponentAO: public MaterialComponent{
         void setAOBaseValue(float);
 
         const float aoBaseValue() const { return m_AOBaseValue; }
-        const Texture* map() const { return m_Map; }
 };
 class MaterialComponentMetalness: public MaterialComponent{
     protected:
-        Texture* m_Map; //the texture that maps the reflection cubemap to the object
         float m_MetalnessBaseValue;
     public:
         MaterialComponentMetalness(Texture* texture,float metalnessBaseValue);
@@ -107,11 +104,9 @@ class MaterialComponentMetalness: public MaterialComponent{
         void setMetalnessBaseValue(float);
 
         const float metalnessBaseValue() const { return m_MetalnessBaseValue; }
-        const Texture* map() const { return m_Map; }
 };
 class MaterialComponentRoughness: public MaterialComponent{
     protected:
-        Texture* m_Map; //the texture that maps the reflection cubemap to the object
         float m_RoughnessBaseValue;
     public:
         MaterialComponentRoughness(Texture* texture,float roughnessBaseValue);
@@ -123,7 +118,6 @@ class MaterialComponentRoughness: public MaterialComponent{
         void setRoughnessBaseValue(float);
 
         const float roughnessBaseValue() const { return m_RoughnessBaseValue; }
-        const Texture* map() const { return m_Map; }
 };
 class MaterialComponentReflection: public MaterialComponent{
     protected:
@@ -193,6 +187,9 @@ class Material final: public BindableResource{
 
         void addComponentNormal(Texture* texture);
         void addComponentNormal(std::string& textureFile);
+
+        void addComponentGlow(Texture* texture);
+        void addComponentGlow(std::string& textureFile);
 
         void addComponentSpecular(Texture* texture);
         void addComponentSpecular(std::string& textureFile);

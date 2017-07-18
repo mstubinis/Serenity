@@ -22,7 +22,7 @@ class Scene: public EngineResource{
         glm::vec3 m_AmbientLighting;
         glm::vec3 m_BackgroundColor;
     public:
-        Scene(std::string name,glm::vec3 = glm::vec3(0.025f,0.025f,0.025f));
+        Scene(std::string name,glm::vec3 = glm::vec3(0,0,0));
         virtual ~Scene();
 
         virtual void update(float);

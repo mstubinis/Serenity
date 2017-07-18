@@ -83,19 +83,19 @@ void Game::update(float dt){
     }
 
     if(Events::Keyboard::isKeyDownOnce("f9")){
-        Resources::setCurrentScene("CapsuleSpace");
-        Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+		Renderer::Settings::HDR::disable();
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
-        Resources::setCurrentScene("Sol");
-        Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+		Renderer::Settings::HDR::enable();
+		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD);
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-        Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
+		Renderer::Settings::HDR::enable();
+		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE);
     }
     if(Events::Keyboard::isKeyDown("f12")){
-        //s->getPlayer()->alignTo(s->getPlayer()->getTarget(),10.0f);
-
+		Renderer::Settings::HDR::enable();
+		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC);
     }
     m_HUD->update(dt);
 }
