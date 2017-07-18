@@ -38,7 +38,7 @@ const int GBUFFER_PIXEL_TYPES[] =      {GL_RGB,                // (diffuse.rgb)
                                         GL_DEPTH_COMPONENT};   // depth
 
 const int GBUFFER_FLOAT_TYPES[] =      {GL_UNSIGNED_BYTE,
-                                        GL_UNSIGNED_BYTE,
+                                        GL_FLOAT,
                                         GL_UNSIGNED_BYTE,
                                         GL_FLOAT,
                                         GL_UNSIGNED_BYTE,
