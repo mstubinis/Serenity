@@ -602,9 +602,10 @@ void Detail::RenderManagement::_passHDR(){
 	sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
+    bindTexture("bloomBuffer",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),1);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    unbindTexture2D(0);
+    for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
