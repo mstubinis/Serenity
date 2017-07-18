@@ -658,18 +658,16 @@ void Detail::RenderManagement::_passFinal(){
 
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
-    sendUniform1iSafe("HasBloom",int(RendererInfo::BloomInfo::bloom));
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
     bindTextureSafe("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
-    bindTextureSafe("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
-    bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
-    bindTextureSafe("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),4);
+    bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+    bindTextureSafe("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),3);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
