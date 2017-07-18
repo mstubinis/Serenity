@@ -152,9 +152,7 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 class Material final: public BindableResource{
     public: enum LightingMode{
         BLINNPHONG,
-        BLINN,
         PHONG,
-        TANGENT,
 		PBR,
         NUMBER
     };

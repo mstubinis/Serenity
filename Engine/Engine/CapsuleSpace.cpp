@@ -68,7 +68,6 @@ void CapsuleRibbon::unbind(){
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setSkybox(nullptr);
-    setAmbientLightColor(20.0f,12.0f,0);
     setBackgroundColor(255.0f,0,0);
 
     PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);

@@ -9,14 +9,12 @@
 
 using namespace Engine;
 
-Scene::Scene(std::string name,glm::vec3 ambientLightColor){
+Scene::Scene(std::string name){
     m_Skybox = nullptr;
     if(Resources::getCurrentScene() == nullptr){
         Resources::Detail::ResourceManagement::m_CurrentScene = this;
     }
-    m_AmbientLighting = ambientLightColor;
     m_BackgroundColor = glm::vec3(0,0,0);
-
     if(!exists(Resources::getActiveCameraPtr())){
         new Camera("Default_" + name,45.0f,1.0f,0.1f,100.0f,this);
         Resources::setActiveCamera("Default_" + name);
@@ -62,19 +60,16 @@ void Scene::update(float dt){
     }
     if(m_Skybox != nullptr) m_Skybox->update();
 }
-void Scene::setAmbientLightColor(glm::vec3& c){ setAmbientLightColor(c.r,c.g,c.b); }
-void Scene::setAmbientLightColor(float r,float g,float b){ Engine::Math::setColor(m_AmbientLighting,r,g,b); }
 void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
 void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->draw(godsRays); }
 
-glm::vec3 Scene::getAmbientLightColor(){ return m_AmbientLighting; }
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 
 std::unordered_map<std::string,Object*>& Scene::objects() { return m_Objects; }
 std::unordered_map<std::string,SunLight*>& Scene::lights() { return m_Lights; }
 
-Object* Scene::getObject(std::string name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
-SunLight* Scene::getLight(std::string name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()
+Object* Scene::getObject(std::string& name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
+SunLight* Scene::getLight(std::string& name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()
 
 SkyboxEmpty* Scene::getSkybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

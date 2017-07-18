@@ -54,9 +54,6 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
                 glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
                 Renderer::sendUniform3f("v3CameraPos", camPos);
 
-                glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-                Renderer::sendUniform3f("gAmbientColor",ambient);
-
                 glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
                 lightDir = glm::normalize(lightDir);
                 Renderer::sendUniform3f("v3LightDir", lightDir);
@@ -172,9 +169,6 @@ struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResour
 
                 glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
                 Renderer::sendUniform3f("v3CameraPos", camPos);
-
-                glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-                Renderer::sendUniform3f("gAmbientColor",ambient);
 
                 glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
                 lightDir = glm::normalize(lightDir);

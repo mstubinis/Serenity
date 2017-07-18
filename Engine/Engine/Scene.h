@@ -19,10 +19,9 @@ class Scene: public EngineResource{
         std::unordered_map<std::string,Object*> m_Objects;
         std::unordered_map<std::string,SunLight*> m_Lights;
 
-        glm::vec3 m_AmbientLighting;
         glm::vec3 m_BackgroundColor;
     public:
-        Scene(std::string name,glm::vec3 = glm::vec3(0,0,0));
+        Scene(std::string name);
         virtual ~Scene();
 
         virtual void update(float);
@@ -30,13 +29,10 @@ class Scene: public EngineResource{
         std::unordered_map<std::string,Object*>& objects();
         std::unordered_map<std::string,SunLight*>& lights();
 
-        Object* getObject(std::string);
-        SunLight* getLight(std::string);
+        Object* getObject(std::string&);
+        SunLight* getLight(std::string&);
 
-        glm::vec3 getAmbientLightColor();
         glm::vec3 getBackgroundColor();
-        void setAmbientLightColor(glm::vec3&);
-        void setAmbientLightColor(float,float,float);
         void setBackgroundColor(float,float,float);
 
         SkyboxEmpty* getSkybox() const;

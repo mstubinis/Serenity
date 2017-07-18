@@ -235,7 +235,7 @@ class Material::impl final{
             _addComponentSpecular(specular);
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-            m_SpecularityPower = 50.0f;
+            m_SpecularityPower = 8.0f;
             m_LightingMode = Material::LightingMode::BLINNPHONG;
             _addToMaterialPool();
 

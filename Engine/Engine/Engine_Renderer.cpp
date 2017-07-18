@@ -65,7 +65,7 @@ glm::vec2 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::Rendere
 GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
 bool Detail::RendererInfo::HDRInfo::hdr = true;
-float Detail::RendererInfo::HDRInfo::hdr_exposure = 1.2f;
+float Detail::RendererInfo::HDRInfo::hdr_exposure = 3.2f;
 float Detail::RendererInfo::HDRInfo::hdr_gamma = 2.2f;
 HDRToneMapAlgorithm::Algorithm Detail::RendererInfo::HDRInfo::hdr_algorithm = HDRToneMapAlgorithm::EXPOSURE;
 
@@ -654,21 +654,20 @@ void Detail::RenderManagement::_passFinal(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final");
     p->bind();
 
-    glm::vec3 ambient = Resources::getCurrentScene()->getAmbientLightColor();
-    sendUniform3fSafe("gAmbientColor",ambient.x,ambient.y,ambient.z);
-
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
+	sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
     bindTextureSafe("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
     bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
     bindTextureSafe("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),3);
+	bindTextureSafe("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
