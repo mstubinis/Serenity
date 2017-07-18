@@ -663,13 +663,12 @@ void Detail::RenderManagement::_passFinal(){
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
     bindTextureSafe("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);
     bindTextureSafe("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),2);
-    bindTextureSafe("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
-    bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),4);
-    bindTextureSafe("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),5);
+    bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
+    bindTextureSafe("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
