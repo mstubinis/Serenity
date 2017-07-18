@@ -105,9 +105,6 @@ void Skybox::draw(bool godsRays){
 
     Renderer::bindTexture("Texture",m_Texture,0);
 
-    Renderer::sendUniform1i("HasGodsRays",1);
-    Renderer::sendUniform1i("HasGodsRays",0);
-
     if(godsRays){ Renderer::sendUniform1i("HasGodsRays",1); }
     else{         Renderer::sendUniform1i("HasGodsRays",0); }
 
