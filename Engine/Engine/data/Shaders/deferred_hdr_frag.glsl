@@ -3,6 +3,7 @@
 uniform float exposure;
 
 uniform sampler2D lightingBuffer;
+uniform sampler2D bloomBuffer;
 uniform int HasHDR;
 uniform int HDRAlgorithm;
 uniform float gamma;
@@ -10,7 +11,8 @@ uniform float gamma;
 void main(void){
     vec2 uv = gl_TexCoord[0].st;
     vec3 lighting = texture2D(lightingBuffer, uv).rgb;
-
+    vec3 bloom = texture2D(bloomBuffer, uv).rgb;
+    lighting += bloom;
 	if(HasHDR == 1.0){
 	    if(HDRAlgorithm == 0.0){
 		    lighting = lighting / (lighting + vec3(1.0)); // Reinhard tone mapping
