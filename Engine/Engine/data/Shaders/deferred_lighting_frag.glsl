@@ -85,8 +85,8 @@ vec3 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 
     vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
-    float a =  max(1.0 , LightData.x + (LightData.y * Distance) + (LightData.z * Distance * Distance));
-    return c / a;
+    float attenuation =  1.0 / (max(1.0 , LightData.x + (LightData.y * Distance) + (LightData.z * Distance * Distance)));
+    return c * attenuation;
 }
 vec3 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     return vec3(0);
