@@ -60,7 +60,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec3 ViewDir = normalize(gCameraPosition - PxlWorldPos);
     float SpecularAngle = 0.0;
 
-    float kPi = 3.14159265;
+    float kPi = 3.141592653589793;
 
     if(materials[index].b == 0.0){ // this is blinn phong
         float kEnergyConservation = ( 8.0 + materials[index].g ) / ( 8.0 * kPi );
