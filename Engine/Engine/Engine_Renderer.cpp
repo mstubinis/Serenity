@@ -270,6 +270,7 @@ void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& col
 void Detail::RenderManagement::_renderTextures(){
     ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
     p->bind();
+	Resources::getMesh("Plane")->bind();
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
@@ -297,6 +298,7 @@ void Detail::RenderManagement::_renderTextures(){
 
         Resources::getMesh("Plane")->render();
     }
+	Resources::getMesh("Plane")->unbind();
     p->unbind();
 }
 void Detail::RenderManagement::_renderText(){
@@ -326,8 +328,9 @@ void Detail::RenderManagement::_renderText(){
 
                 sendUniformMatrix4f("VP",m_2DProjectionMatrix);
                 sendUniformMatrix4f("Model",glyph->m_Model);
-
+				glyph->char_mesh->bind();
                 glyph->char_mesh->render();
+				glyph->char_mesh->unbind();
                 x += (glyph->xadvance) * item.scl.x;
             }
         }
