@@ -10,7 +10,7 @@ uniform int HDRAlgorithm;
 uniform float gamma;
 
 vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f,float w){
-    return ((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f;
+    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);
 }
 
 void main(void){
