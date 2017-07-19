@@ -17,7 +17,7 @@ using namespace Engine;
 SunLight::SunLight(glm::v3 pos,std::string n,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),n,scene){
     m_Type = type;
     m_Active = true;
-    m_AmbientIntensity = 0.05f;
+    m_AmbientIntensity = 0.005f;
     m_DiffuseIntensity = 1.0f;
     m_SpecularIntensity = 1.0f;
 
