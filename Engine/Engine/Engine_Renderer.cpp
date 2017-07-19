@@ -388,7 +388,7 @@ void Detail::RenderManagement::_passGeometry(){
 						}
 
 
-						/*
+                        /*
                         Object* object = mesh->parent();
                         if(scene->objects().count(object->name())){
                             object->bind();   //bind object specific data shared between all of its rendered items
@@ -401,9 +401,9 @@ void Detail::RenderManagement::_passGeometry(){
                             shaderProgram->bind();
                             material->bind();
                         }
-						*/
+                        */
 
-						meshEntry->mesh()->unbind();
+                        meshEntry->mesh()->unbind();
                     }
                     material->unbind();
                 }
@@ -421,7 +421,7 @@ void Detail::RenderManagement::_passLighting(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Light");
     p->bind();
 
-	sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
+    sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
     sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
@@ -432,7 +432,7 @@ void Detail::RenderManagement::_passLighting(){
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
 
-	uint limit = (uint)MATERIAL_COUNT_LIMIT;
+    uint limit = (uint)MATERIAL_COUNT_LIMIT;
     sendUniform4fv("materials[0]",Material::m_MaterialProperities,limit);
 
     sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
@@ -487,16 +487,15 @@ void Detail::RenderManagement::render(){
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
 
         m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
-		_passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
+        _passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
 
         m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-		_passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
+        _passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
     }
 
     m_gBuffer->start(BUFFER_TYPE_MISC);
     _passHDR();
 
-	m_gBuffer->stop();
     if(RendererInfo::GeneralInfo::multisample_level == 0){
         m_gBuffer->stop();
         _passFinal();
