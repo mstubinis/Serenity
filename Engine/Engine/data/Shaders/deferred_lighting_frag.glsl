@@ -72,7 +72,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         vec3 Reflect = reflect(-LightDir, PxlNormal);
         SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), materials[index].g);
     }
-    else if(materials[index].b == 2.0){ //this is GXX
+    else if(materials[index].b == 2.0){ //this is GGX
         float alpha = materials[index].g * materials[index].g;
         vec3 H = normalize(LightDir - ViewDir);
         float dotLH = max(0.0, dot(LightDir,H));
