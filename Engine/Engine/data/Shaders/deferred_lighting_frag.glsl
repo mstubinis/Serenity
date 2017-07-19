@@ -71,8 +71,22 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         float kEnergyConservation = ( 2.0 + materials[index].g ) / ( 2.0 * kPi );
         vec3 Reflect = reflect(-LightDir, PxlNormal);
         SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), materials[index].g);
-    }	
-    else if(materials[index].b == 2.0){ //this is PBR
+    }
+    else if(materials[index].b == 2.0){ //this is GXX
+        float alpha = materials[index].g * materials[index].g;
+        vec3 H = normalize(LightDir - ViewDir);
+        float dotLH = max(0.0, dot(LightDir,H));
+        float dotNH = max(0.0, dot(PxlNormal,H));
+        float dotNL = max(0.0, dot(PxlNormal,LightDir));
+        float alphaSqr = alpha * alpha;
+        float denom = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
+        float D = alphaSqr / (3.141592653589793 * denom * denom);
+        float F = F0 + (1.0 - F0) * pow(1.0 - dotLH, 5.0);
+        float k = 0.5 * alpha;
+        float k2 = k * k;
+        SpecularAngle = max(0.0, (dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2)) );
+    }
+    else if(materials[index].b == 3.0){ //this is PBR
     }
     SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
