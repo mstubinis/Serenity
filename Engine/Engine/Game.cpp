@@ -84,8 +84,12 @@ void Game::update(float dt){
         Engine::stop();
     }
 
-    if(Events::Keyboard::isKeyDownOnce("f9")){
+    if(Events::Keyboard::isKeyDownOnce("f8")){
 		Renderer::Settings::HDR::disable();
+    }
+    if(Events::Keyboard::isKeyDownOnce("f9")){
+		Renderer::Settings::HDR::enable();
+	        Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
 		Renderer::Settings::HDR::enable();
