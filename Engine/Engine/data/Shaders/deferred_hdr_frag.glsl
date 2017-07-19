@@ -9,7 +9,7 @@ uniform int HasBloom;
 uniform int HDRAlgorithm;
 uniform float gamma;
 
-vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f,float w){
+vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){
     return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);
 }
 
@@ -33,8 +33,8 @@ void main(void){
         }
         else if(HDRAlgorithm == 3.0){ // Uncharted tone mapping
             float A = 0.15; float B = 0.5; float C = 0.1; float D = 0.2; float E = 0.02; float F = 0.3; float W = 11.2;
-	    lighting = exposure * uncharted(lighting);
-	    vec3 white = 1.0 / uncharted( vec3(W) );
+	    lighting = exposure * uncharted(lighting,A,B,C,D,E,F);
+	    vec3 white = 1.0 / uncharted( vec3(W),A,B,C,D,E,F );
 	    lighting *= white;
         }
     }
