@@ -42,43 +42,41 @@ vec3 reconstruct_world_pos(vec2 _uv){
 }
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec3 DiffuseMap = texture2D(gDiffuseMap,uv).rgb;
-	float Glow = texture2D(gMiscMap,uv).r;
+    float Glow = texture2D(gMiscMap,uv).r;
     if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999) || Glow > 0.99 ){
         return DiffuseMap;
     }
     vec3 AmbientColor  = LightColor * LightIntensities.x;
     vec3 DiffuseColor  = vec3(0.0);
     vec3 SpecularColor = vec3(0.0);
-	vec3 TotalLight    = vec3(0.0);
+    vec3 TotalLight    = vec3(0.0);
 
-	highp int index = int(texture2D(gMiscMap,uv).b * float(MATERIAL_COUNT_LIMIT));
+    highp int index = int(texture2D(gMiscMap,uv).b * float(MATERIAL_COUNT_LIMIT));
 
-	float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
+    float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
 
-	DiffuseColor = DiffuseMap * ((Lambertian * LightColor) * LightIntensities.y);
+    DiffuseColor = DiffuseMap * ((Lambertian * LightColor) * LightIntensities.y);
 
-	vec3 ViewDir = normalize(gCameraPosition - PxlWorldPos);
-	float SpecularAngle = 0.0;
+    vec3 ViewDir = normalize(gCameraPosition - PxlWorldPos);
+    float SpecularAngle = 0.0;
 
-	float kPi = 3.14159265;
+    float kPi = 3.14159265;
 
-	if(materials[index].b == 0.0){ // this is blinn phong
-		float kEnergyConservation = ( 8.0 + materials[index].g ) / ( 8.0 * kPi );
-		vec3 Half = normalize(LightDir + ViewDir);
-		SpecularAngle = kEnergyConservation * pow(max(dot(PxlNormal, Half), 0.0), materials[index].g);
+    if(materials[index].b == 0.0){ // this is blinn phong
+        float kEnergyConservation = ( 8.0 + materials[index].g ) / ( 8.0 * kPi );
+        vec3 Half = normalize(LightDir + ViewDir);
+        SpecularAngle = kEnergyConservation * pow(max(dot(PxlNormal, Half), 0.0), materials[index].g);
     }		
-	else if(materials[index].b == 1.0){ //this is phong
-		float kEnergyConservation = ( 2.0 + materials[index].g ) / ( 2.0 * kPi );
-		vec3 Reflect = reflect(-LightDir, PxlNormal);
-		SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), materials[index].g);
-	}	
-	else if(materials[index].b == 2.0){ //this is PBR
-	}
-	SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
+    else if(materials[index].b == 1.0){ //this is phong
+        float kEnergyConservation = ( 2.0 + materials[index].g ) / ( 2.0 * kPi );
+        vec3 Reflect = reflect(-LightDir, PxlNormal);
+        SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), materials[index].g);
+    }	
+    else if(materials[index].b == 2.0){ //this is PBR
+    }
+    SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
- 
-	TotalLight = AmbientColor + DiffuseColor + SpecularColor;
-
+    TotalLight = AmbientColor + DiffuseColor + SpecularColor;
     return max( Glow * DiffuseMap, TotalLight);
 }
 vec3 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
@@ -104,15 +102,15 @@ void main(void){
 
     if(LightType == 0){
         lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);
-	}
+    }
     else if(LightType == 1){
         lightCalculation = CalcPointLight(PxlPosition,PxlNormal,uv);
-	}
+    }
     else if(LightType == 2){
         lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);
-	}
+    }
     else if(LightType == 3){
         lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
-	}
+    }
     gl_FragData[0].rgb = lightCalculation;
 }
