@@ -358,10 +358,35 @@ void Detail::RenderManagement::_passGeometry(){
         if(shaderProgram->getMaterials().size() > 0){
             shaderProgram->bind();
             for(auto material:shaderProgram->getMaterials()){
-                if(material->getObjects().size() > 0){
+                if(material->getMeshes().size() > 0){
                     material->bind();
-                    for(auto item:material->getObjects()){
-                        Object* object = item->parent();
+                    for(auto meshEntry:material->getMeshes()){
+						meshEntry->mesh()->bind();
+						for(auto instance:meshEntry->meshInstances()){
+							boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
+							Object* object = o.lock().get();
+							if(exists(o)){
+								if(scene->objects().count(object->name())){
+									if(object->passedRenderCheck()){
+										object->bind();
+										for(auto meshInstance:instance.second){
+											meshInstance->bind(); //render also
+											meshInstance->unbind();
+										}
+										object->unbind();
+									}
+								}
+								//protect against any custom changes by restoring to the regular shader and material
+								if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+									shaderProgram->bind();
+									material->bind();
+								}
+							}
+						}
+
+
+						/*
+                        Object* object = mesh->parent();
                         if(scene->objects().count(object->name())){
                             object->bind();   //bind object specific data shared between all of its rendered items
                             item->bind();     //the actual mesh drawing occurs here too
@@ -373,6 +398,9 @@ void Detail::RenderManagement::_passGeometry(){
                             shaderProgram->bind();
                             material->bind();
                         }
+						*/
+
+						meshEntry->mesh()->unbind();
                     }
                     material->unbind();
                 }

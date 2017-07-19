@@ -260,6 +260,13 @@ void SolarSystem::_loadFromFile(std::string filename){
     new ObjectDisplay("Miranda","Miranda",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
 
     player->translate(0,0,11);
+
+	for(uint i = 0; i < 300; i++){
+		new ObjectDisplay("Defiant","Defiant",glm::v3(i*2,4,0),glm::vec3(1),"Defiant Fleet " + boost::lexical_cast<std::string>(i),nullptr);
+	}
+	for(uint i = 0; i < 300; i++){
+		new ObjectDisplay("Intrepid","Intrepid",glm::v3(i*2,0,0),glm::vec3(1),"Intrepid Fleet " + boost::lexical_cast<std::string>(i),nullptr);
+	}
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox

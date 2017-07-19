@@ -1,7 +1,7 @@
 #include "Engine_AnimationProcessor.h"
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
-#include "RenderedItem.h"
+#include "MeshInstance.h"
 #include "Mesh.h"
 
 using namespace Engine;
@@ -10,9 +10,9 @@ AnimationProcessor::AnimationProcessor(){
 }
 AnimationProcessor::~AnimationProcessor(){
 }
-void AnimationProcessor::process(RenderedItem* renderedItem,std::vector<RenderedItemAnimation>& queue,std::vector<glm::mat4>& transforms){
+void AnimationProcessor::process(MeshInstance* renderedItem,std::vector<MeshInstanceAnimation>& queue,std::vector<glm::mat4>& transforms){
     for(uint j = 0; j < queue.size(); j++){
-        RenderedItemAnimation& a = queue.at(j);
+        MeshInstanceAnimation& a = queue.at(j);
         if(a.mesh == renderedItem->mesh()){
             a.currentTime += Resources::dt();
             if(transforms.size() == 0){
@@ -30,7 +30,7 @@ void AnimationProcessor::process(RenderedItem* renderedItem,std::vector<Rendered
 
     _cleanupQueue(queue);
 }
-void AnimationProcessor::_cleanupQueue(std::vector<RenderedItemAnimation>& queue){
+void AnimationProcessor::_cleanupQueue(std::vector<MeshInstanceAnimation>& queue){
     for (auto it = queue.cbegin(); it != queue.cend();){ //replace with remove/erase eventaully...
         if (it->requestedLoops > 0 && (it->currentLoops >= it->requestedLoops)){
             it = queue.erase(it);

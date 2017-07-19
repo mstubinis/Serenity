@@ -3,7 +3,7 @@
 #define ENGINE_OBJECTDYNAMIC_H
 
 #include "Object.h"
-#include "RenderedItem.h"
+#include "MeshInstance.h"
 
 class Collision;
 class btRigidBody;
@@ -27,7 +27,7 @@ class ObjectDynamic: public Object{
         glm::v3 m_Forward, m_Right, m_Up;
         bool m_Visible;
         bool m_PassedRenderCheck;
-        std::vector<RenderedItem*> m_DisplayItems;
+        std::vector<MeshInstance*> m_DisplayItems;
         glm::vec4 m_Color;
         glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
@@ -57,7 +57,7 @@ class ObjectDynamic: public Object{
         virtual void suspend();
         virtual void resume();
 
-        std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
+        std::vector<MeshInstance*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setPosition(glm::num,glm::num,glm::num); 
         virtual void setPosition(glm::v3);

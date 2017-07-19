@@ -31,7 +31,7 @@ Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 bool Detail::ResourceManagement::m_DynamicMemory = false;
 
-std::unordered_map<std::string,boost::shared_ptr<RenderedItem>> Detail::ResourceManagement::m_RenderedItems;
+std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_RenderedItems;
 std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
 std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 std::unordered_map<std::string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
@@ -78,7 +78,7 @@ Mesh* Resources::getMesh(std::string n){return static_cast<Mesh*>(Detail::Resour
 Material* Resources::getMaterial(std::string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
 Shader* Resources::getShader(std::string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
 ShaderP* Resources::getShaderProgram(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
-RenderedItem* Resources::getRenderedItem(std::string n){return static_cast<RenderedItem*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
+MeshInstance* Resources::getRenderedItem(std::string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
 
 void Resources::addMesh(std::string n,std::string f, COLLISION_TYPE t, bool b,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
@@ -96,12 +96,14 @@ void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g,
 
 void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s,std::string program){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
-    if(program == "") program = "Deferred";
+    if(program == "") 
+		program = "Deferred";
     Resources::getShaderProgram(program)->addMaterial(n);
 }
 void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* program){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
-    if(program == nullptr) program = Resources::getShaderProgram("Deferred");
+    if(program == nullptr) 
+		program = Resources::getShaderProgram("Deferred");
     program->addMaterial(n);
 }
 

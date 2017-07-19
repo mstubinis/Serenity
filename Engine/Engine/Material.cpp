@@ -1,6 +1,6 @@
 #include "ObjectDynamic.h"
 #include "ObjectDisplay.h"
-#include "RenderedItem.h"
+#include "Mesh.h"
 #include "Material.h"
 #include "Texture.h"
 #include "Engine_Resources.h"
@@ -222,7 +222,7 @@ class Material::impl final{
         static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
         std::unordered_map<uint,MaterialComponent*> m_Components;
-        std::vector<RenderedItem*> m_Objects;
+        std::vector<MaterialMeshEntry*> m_Meshes;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
@@ -351,6 +351,11 @@ Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* gl
 }
 Material::~Material(){
     m_i->_destruct();
+	for(auto entry:m_i->m_Meshes){
+		delete entry;
+		entry = nullptr;
+	}
+	m_i->m_Meshes.clear();
 }
 
 void Material::addComponentDiffuse(Texture* texture){
@@ -470,23 +475,24 @@ void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
 void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 
 struct less_than_key{
-    inline bool operator() ( RenderedItem* struct1,  RenderedItem* struct2){
-        return (struct1->name() < struct2->name());
+    inline bool operator() ( MaterialMeshEntry* struct1,  MaterialMeshEntry* struct2){
+        return (struct1->mesh()->name() < struct2->mesh()->name());
     }
 };
 
-void Material::addObject(std::string objectName){
-    RenderedItem* o = Resources::getRenderedItem(objectName);
-    if(o != nullptr){
-        m_i->m_Objects.push_back(o);
-        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
-    }
+void Material::addMesh(std::string objectName){
+	for(auto mesh:m_i->m_Meshes){
+		if(mesh->mesh() == Resources::getMesh(objectName)){ return; }
+	}
+    m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
+    std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
 }
-void Material::removeObject(std::string objectName){
+void Material::removeMesh(std::string objectName){
     bool did = false;
-    for (auto it = m_i->m_Objects.cbegin(); it != m_i->m_Objects.cend();){
-        if( (*it)->name() == objectName){
-            m_i->m_Objects.erase(it++);
+    for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
+        if( (*it)->mesh()->name() == objectName){
+			delete (*it);
+            m_i->m_Meshes.erase(it++);
             did = true;
         }
         else{
@@ -494,10 +500,10 @@ void Material::removeObject(std::string objectName){
         }
     }
     if(did == true){
-        std::sort(m_i->m_Objects.begin(),m_i->m_Objects.end(),less_than_key());
+        std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
     }
 }
-std::vector<RenderedItem*>& Material::getObjects(){ return m_i->m_Objects; }
+std::vector<MaterialMeshEntry*>& Material::getMeshes(){ return m_i->m_Meshes; }
 
 void Material::bind(){
     std::string _name = name();
@@ -525,4 +531,34 @@ void Material::unload(){
         std::cout << "(Material) ";
         EngineResource::unload();
     }
+}
+
+
+MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh){
+	m_Mesh = mesh;
+}
+MaterialMeshEntry::~MaterialMeshEntry(){
+}
+void MaterialMeshEntry::addMeshInstance(std::string& objectName,MeshInstance* meshInstance){
+	if(!m_MeshInstances.count(objectName)){
+		std::vector<MeshInstance*> vector;
+		vector.push_back(meshInstance);
+		m_MeshInstances.emplace(objectName,vector);
+	}
+	else{
+		m_MeshInstances.at(objectName).push_back(meshInstance);
+	}
+}
+void MaterialMeshEntry::removeMeshInstance(std::string& objectName,MeshInstance* meshInstance){
+	if(m_MeshInstances.count(objectName)){
+		std::vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
+		std::vector<MeshInstance*>::iterator it = vector.begin();
+		while(it != vector.end()) {
+			MeshInstance* instance = static_cast<MeshInstance*>((*it));
+			if(instance ==  meshInstance) {
+				it = vector.erase(it);
+			}
+			else ++it;
+		}
+	}
 }

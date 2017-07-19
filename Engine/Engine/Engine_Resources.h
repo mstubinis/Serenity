@@ -30,7 +30,7 @@ class SunLight;
 class SoundEffectBasic;
 class SoundEffect;
 class SoundMusic;
-class RenderedItem;
+class MeshInstance;
 
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 #define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
@@ -73,7 +73,7 @@ namespace Engine{
 
                     static Engine_Window* m_Window;
 
-                    static std::unordered_map<std::string,boost::shared_ptr<RenderedItem>> m_RenderedItems;
+                    static std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> m_RenderedItems;
                     static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
                     static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
                     static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
@@ -133,7 +133,7 @@ namespace Engine{
         Material* getMaterial(std::string n);
         Shader* getShader(std::string n);
         ShaderP* getShaderProgram(std::string n);
-        RenderedItem* getRenderedItem(std::string n);
+        MeshInstance* getRenderedItem(std::string n);
 
         void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_NONE,bool fromFile = true,float threshhold = 0.0005f);
         void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_NONE,float threshhold = 0.0005f);

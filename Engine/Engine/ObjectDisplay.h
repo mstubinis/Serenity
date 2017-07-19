@@ -3,7 +3,7 @@
 #define ENGINE_OBJECTDISPLAY_H
 
 #include "Object.h"
-#include "RenderedItem.h"
+#include "MeshInstance.h"
 
 struct DefaultObjectDisplayBindFunctor;
 struct DefaultObjectDisplayUnbindFunctor;
@@ -14,7 +14,7 @@ class ObjectDisplay: public ObjectBasic{
         bool m_Shadeless;
         bool m_Visible;
         bool m_PassedRenderCheck;
-        std::vector<RenderedItem*> m_DisplayItems;
+        std::vector<MeshInstance*> m_DisplayItems;
         glm::vec4 m_Color;
         glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
@@ -50,7 +50,7 @@ class ObjectDisplay: public ObjectBasic{
 
         glm::vec4& getColor(){ return m_Color; }
         glm::vec3& getGodsRaysColor(){ return m_GodsRaysColor; }
-        std::vector<RenderedItem*>&  getDisplayItems(){ return m_DisplayItems; }
+        std::vector<MeshInstance*>&  getDisplayItems(){ return m_DisplayItems; }
 
         virtual void setVisible(bool b);
 

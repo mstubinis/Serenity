@@ -1,6 +1,7 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Mesh.h"
+#include "MeshInstance.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -10,7 +11,28 @@
 
 #include <iostream>
 
-Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):EngineResource(name){
+struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
+    Mesh* mesh = static_cast<Mesh*>(r);
+    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
+        if(i <= 4 || (mesh->m_Skeleton != nullptr && (i >= 5 && mesh->m_Skeleton->m_BoneIDs.size() > 0))){
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
+            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
+        }
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
+}};
+struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
+    Mesh* mesh = static_cast<Mesh*>(r);
+    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
+        glDisableVertexAttribArray(i);
+    }
+}};
+
+DefaultMeshBindFunctor Mesh::DEFAULT_BIND_FUNCTOR;
+DefaultMeshUnbindFunctor Mesh::DEFAULT_UNBIND_FUNCTOR;
+
+Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -59,9 +81,11 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
         }
     }
     _loadData(d,threshold);
+    this->setCustomBindFunctor(Mesh::DEFAULT_BIND_FUNCTOR);
+    this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold):EngineResource(name){
+Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -106,9 +130,11 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
         }
     }
     _loadData(d,threshold);
+    this->setCustomBindFunctor(Mesh::DEFAULT_BIND_FUNCTOR);
+    this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold):EngineResource(name){
+Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -147,9 +173,11 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height,float th
     d.tangents.resize(6,glm::vec3(1,1,1));
 
     _loadData(d,threshold);
+    this->setCustomBindFunctor(Mesh::DEFAULT_BIND_FUNCTOR);
+    this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,float width, float height,float threshold):EngineResource(name){
+Mesh::Mesh(std::string& name,float width, float height,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -188,9 +216,11 @@ Mesh::Mesh(std::string& name,float width, float height,float threshold):EngineRe
     d.tangents.resize(6,glm::vec3(1,1,1));
 
     _loadData(d,threshold);
+    this->setCustomBindFunctor(Mesh::DEFAULT_BIND_FUNCTOR);
+    this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold):EngineResource(name){
+Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold):BindableResource(name){
     m_File = "";
     m_Collision = nullptr;
     m_Skeleton = nullptr;
@@ -202,6 +232,8 @@ Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMe
     else{
         _loadFromOBJMemory(filename,type,threshold);
     }
+    this->setCustomBindFunctor(Mesh::DEFAULT_BIND_FUNCTOR);
+    this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
 Mesh::~Mesh(){
@@ -307,21 +339,9 @@ void Mesh::_calculateMeshRadius(){
     m_radius = Engine::Math::Max(m_radiusBox);
 }
 void Mesh::render(GLuint mode){
-    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
-        if(i <= 4 || (m_Skeleton != nullptr && (i >= 5 && m_Skeleton->m_BoneIDs.size() > 0))){
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers[i]);
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
-        }
-    }
-
-    //glDrawArrays(mode, 0, m_Points.size());
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
-    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
-        glDisableVertexAttribArray(i);
-    }
 }
+
 void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& animationName,float time){
     m_Skeleton->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
 }
@@ -346,6 +366,7 @@ void Mesh::unload(){
         EngineResource::unload();
     }
 }
+
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
     m_TicksPerSecond = anim->mTicksPerSecond;

@@ -237,9 +237,6 @@
     <ClCompile Include="Engine_ResourceBasic.cpp">
       <Filter>Source Files\Engine\Engine_Resources</Filter>
     </ClCompile>
-    <ClCompile Include="RenderedItem.cpp">
-      <Filter>Source Files\Engine\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="BindableResource.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
@@ -251,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="Engine_Networking.cpp">
       <Filter>Source Files\Engine\Engine_Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshInstance.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -362,9 +362,6 @@
     <ClInclude Include="Engine_ResourceBasic.h">
       <Filter>Header Files\Engine\Engine_Resources</Filter>
     </ClInclude>
-    <ClInclude Include="RenderedItem.h">
-      <Filter>Header Files\Engine\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="BindableResource.h">
       <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
@@ -376,6 +373,9 @@
     </ClInclude>
     <ClInclude Include="Engine_Networking.h">
       <Filter>Header Files\Engine\Engine_Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshInstance.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

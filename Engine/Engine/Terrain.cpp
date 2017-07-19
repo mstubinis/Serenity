@@ -4,7 +4,7 @@
 #include "Engine_Physics.h"
 #include "Engine_Events.h"
 #include "ObjectDisplay.h"
-#include "RenderedItem.h"
+#include "MeshInstance.h"
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletDynamicsCommon.h>
@@ -42,7 +42,7 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
     );
 
     if(material != ""){
-        RenderedItem* item = new RenderedItem(name(),name(),material);
+        MeshInstance* item = new MeshInstance(name(),name(),material);
         m_DisplayItems.push_back(item);
     }
 

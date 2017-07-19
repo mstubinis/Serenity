@@ -8,9 +8,10 @@
 #include <glm/glm.hpp>
 #include <unordered_map>
 
+class MeshInstance;
 class Texture;
 class ShaderP;
-class RenderedItem;
+class Mesh;
 typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef char GLchar;
@@ -149,6 +150,21 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
         const float refractionRatio() const { return m_RefractionRatio; }
 };
 
+class MaterialMeshEntry{
+	private:
+		Mesh* m_Mesh;
+		std::unordered_map<std::string,std::vector<MeshInstance*>> m_MeshInstances;
+	public:
+		MaterialMeshEntry(Mesh*);
+		~MaterialMeshEntry();
+
+		Mesh* mesh(){ return m_Mesh; }
+		std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances(){ return m_MeshInstances; }
+
+		void addMeshInstance(std::string& objectName,MeshInstance*);
+		void removeMeshInstance(std::string& objectName,MeshInstance*);
+};
+
 class Material final: public BindableResource{
     public: enum LightingMode{
         BLINNPHONG,
@@ -225,8 +241,8 @@ class Material final: public BindableResource{
         void load();
         void unload();
 
-        void addObject(std::string objectName);
-        void removeObject(std::string objectName);
-        std::vector<RenderedItem*>& getObjects();
+        void addMesh(std::string meshName);
+        void removeMesh(std::string meshName);
+        std::vector<MaterialMeshEntry*>& getMeshes();
 };
 #endif

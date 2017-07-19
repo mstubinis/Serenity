@@ -1,6 +1,6 @@
 #pragma once
-#ifndef RENDERED_ITEM_H
-#define RENDERED_ITEM_H
+#ifndef MESH_INSTANCE_H
+#define MESH_INSTANCE_H
 
 #include "Engine_Math.h"
 #include "BindableResource.h"
@@ -9,7 +9,7 @@ class Mesh;
 class Material;
 class Object;
 
-class RenderedItemAnimation{
+class MeshInstanceAnimation{
     friend class AnimationProcessor;
     private:
         uint currentLoops;
@@ -20,19 +20,19 @@ class RenderedItemAnimation{
         std::string animName;
         Mesh* mesh;
     public:
-        RenderedItemAnimation(Mesh*,std::string _animName,float _startTime,float _duration);
-        RenderedItemAnimation(Mesh*,std::string _animName,float _startTime,float _endTime,uint requestedLoops);
-        ~RenderedItemAnimation();
+        MeshInstanceAnimation(Mesh*,std::string _animName,float _startTime,float _duration);
+        MeshInstanceAnimation(Mesh*,std::string _animName,float _startTime,float _endTime,uint requestedLoops);
+        ~MeshInstanceAnimation();
 };
 
-class RenderedItem final: public BindableResource{
+class MeshInstance final: public BindableResource{
     private:
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        RenderedItem(std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        RenderedItem(std::string& parentName,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        ~RenderedItem();
+        MeshInstance(std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(std::string& parentName,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        ~MeshInstance();
 
         Mesh* mesh();
         Material* material();
@@ -42,7 +42,7 @@ class RenderedItem final: public BindableResource{
         glm::vec3& getScale();
         Object* parent();
 
-        std::vector<RenderedItemAnimation>& animationQueue();
+        std::vector<MeshInstanceAnimation>& animationQueue();
         void playAnimation(const std::string& animName,float startTime);
         void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 
@@ -68,5 +68,6 @@ class RenderedItem final: public BindableResource{
         void scale(glm::vec3&);
 
         void update(float dt);
+		void render();
 };
 #endif

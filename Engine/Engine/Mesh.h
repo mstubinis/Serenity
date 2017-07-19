@@ -4,7 +4,7 @@
 
 #define GL_TRIANGLES 0x0004
 
-#include "Engine_ResourceBasic.h"
+#include "BindableResource.h"
 #include "Engine_MeshLoader.h"
 #include "Engine_Physics.h"
 #include <unordered_map>
@@ -14,6 +14,7 @@
 namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
+class MeshInstance;
 struct ImportedMeshData;
 struct BoneInfo;
 struct VertexBoneData;
@@ -52,6 +53,8 @@ class MeshSkeleton final{
     friend class AnimationData;
     friend class AnimationProcessor;
     friend class Mesh;
+	friend struct DefaultMeshBindFunctor;
+	friend struct DefaultMeshUnbindFunctor;
     friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
         //animation data
@@ -72,12 +75,19 @@ class MeshSkeleton final{
         ~MeshSkeleton();
 
 };
-class Mesh final: public EngineResource{
+struct DefaultMeshBindFunctor;
+struct DefaultMeshUnbindFunctor;
+class Mesh final: public BindableResource{
+	friend struct DefaultMeshBindFunctor;
+	friend struct DefaultMeshUnbindFunctor;
     friend class AnimationData;
     friend class MeshSkeleton;
     friend class AnimationProcessor;
     friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
+        static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
+        static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+
         GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
         GLuint m_elementbuffer;
         Collision* m_Collision;

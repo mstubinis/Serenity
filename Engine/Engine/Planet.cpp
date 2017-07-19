@@ -15,209 +15,207 @@
 
 using namespace Engine;
 
-struct AtmosphericScatteringRenderedItemBindFunctor{void operator()(EngineResource* r) const {
-    RenderedItem* i = static_cast<RenderedItem*>(r);
+struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance* i = static_cast<MeshInstance*>(r);
 
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
-    if(exists(o)){
-        Planet* obj = static_cast<Planet*>(o.lock().get());
-        Camera* c = Resources::getActiveCamera();
-        if(obj->passedRenderCheck()){
-            float atmosphereHeight = obj->getAtmosphereHeight();
-            ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
-            if(atmosphereHeight > 0){
-                //GroundFromAtmosphere should be currently binded
 
-                float innerRadius = obj->getDefaultRadius();
-                float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
+    Planet* obj = static_cast<Planet*>(o.lock().get());
+    Camera* c = Resources::getActiveCamera();
 
-                glm::vec3& pos = glm::vec3(obj->getPosition());
-                glm::quat& orientation = obj->getOrientation();
+    float atmosphereHeight = obj->getAtmosphereHeight();
+    ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
+    if(atmosphereHeight > 0){
+        //GroundFromAtmosphere should be currently binded
 
-                glm::mat4 mod = glm::mat4(1);
-                mod = glm::translate(mod,pos);
-                mod *= glm::mat4_cast(orientation);
-                mod = glm::scale(mod,obj->getScale());
+        float innerRadius = obj->getDefaultRadius();
+        float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
 
-                glm::mat4 rot = glm::mat4(1);
-                rot *= glm::mat4_cast(orientation);
+        glm::vec3& pos = glm::vec3(obj->getPosition());
+        glm::quat& orientation = obj->getOrientation();
 
-                Renderer::sendUniformMatrix4f("Model",mod);
-                Renderer::sendUniformMatrix4f("Rot",rot);
+        glm::mat4 mod = glm::mat4(1);
+        mod = glm::translate(mod,pos);
+        mod *= glm::mat4_cast(orientation);
+        mod = glm::scale(mod,obj->getScale());
 
-                Renderer::sendUniform1i("hasAtmosphere",1);
-                Renderer::sendUniform1i("HasAtmosphere",1);
+        glm::mat4 rot = glm::mat4(1);
+        rot *= glm::mat4_cast(orientation);
 
-                Renderer::sendUniform1i("nSamples", 2);
-                Renderer::sendUniform1f("fSamples", 2.0f);
+        Renderer::sendUniformMatrix4f("Model",mod);
+        Renderer::sendUniformMatrix4f("Rot",rot);
 
-                glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
-                Renderer::sendUniform3f("v3CameraPos", camPos);
+        Renderer::sendUniform1i("hasAtmosphere",1);
+        Renderer::sendUniform1i("HasAtmosphere",1);
 
-                glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
-                lightDir = glm::normalize(lightDir);
-                Renderer::sendUniform3f("v3LightDir", lightDir);
+        Renderer::sendUniform1i("nSamples", 2);
+        Renderer::sendUniform1f("fSamples", 2.0f);
 
-                glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),1.0f / glm::pow(0.57f, 4.0f),1.0f / glm::pow(0.475f, 4.0f));
-                Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+        glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
+        Renderer::sendUniform3f("v3CameraPos", camPos);
 
-                float Km = 0.0025f;
-                float Kr = 0.0015f;
-                float ESun = 20.0f;
-                float camHeight = glm::length(camPos);
-                float camHeight2 = camHeight*camHeight;
-                float fScaledepth = 0.25f;
-                float fScale = 1.0f / (outerRadius - innerRadius);
+        glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
+        lightDir = glm::normalize(lightDir);
+        Renderer::sendUniform3f("v3LightDir", lightDir);
 
-                Renderer::sendUniform1f("fCameraHeight2", camHeight2);
-                Renderer::sendUniform1f("fOuterRadius", outerRadius);
-                Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
-                Renderer::sendUniform1f("fInnerRadius", innerRadius);
-                Renderer::sendUniform1f("fKrESun", Kr * ESun);
-                Renderer::sendUniform1f("fKmESun", Km * ESun);
-                Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-                Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
-                Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-                Renderer::sendUniform1f("fScale",fScale);
-                Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
-                Renderer::sendUniform1f("fExposure", 2.0f);
-                i->mesh()->render();
+        glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),1.0f / glm::pow(0.57f, 4.0f),1.0f / glm::pow(0.475f, 4.0f));
+        Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
-                program->unbind();
+        float Km = 0.0025f;
+        float Kr = 0.0015f;
+        float ESun = 20.0f;
+        float camHeight = glm::length(camPos);
+        float camHeight2 = camHeight*camHeight;
+        float fScaledepth = 0.25f;
+        float fScale = 1.0f / (outerRadius - innerRadius);
 
-                if(camHeight > outerRadius){ 
-                    program = Resources::getShaderProgram("AS_SkyFromSpace"); 
-                    glBlendFunc(GL_ONE, GL_ONE);
-                }
-                else{
-                    program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
-                    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-                }
-                program->bind();
+        Renderer::sendUniform1f("fCameraHeight2", camHeight2);
+        Renderer::sendUniform1f("fOuterRadius", outerRadius);
+        Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
+        Renderer::sendUniform1f("fInnerRadius", innerRadius);
+        Renderer::sendUniform1f("fKrESun", Kr * ESun);
+        Renderer::sendUniform1f("fKmESun", Km * ESun);
+        Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
+        Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+        Renderer::sendUniform1f("fScaleDepth",fScaledepth);
+        Renderer::sendUniform1f("fScale",fScale);
+        Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+        Renderer::sendUniform1f("fExposure", 2.0f);
+        i->mesh()->render();
 
-                if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
-                else                                                             Renderer::sendUniform1i("HasGodsRays",0);
+        program->unbind();
 
-                Renderer::Settings::cullFace(GL_FRONT);
-                glEnable(GL_BLEND);
-                mod = glm::mat4(1);
-                mod = glm::translate(mod,pos);
-                mod = glm::scale(mod,obj->getScale());
-                mod = glm::scale(mod,glm::vec3(1 + atmosphereHeight));
-
-                Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
-                Renderer::sendUniformMatrix4f("Model",mod);
-                Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
-
-                Renderer::sendUniform1i("nSamples", 2);
-                Renderer::sendUniform1f("fSamples", 2.0f);
-                Renderer::sendUniform3f("v3CameraPos", camPos);
-                Renderer::sendUniform3f("v3LightDir", lightDir);
-                Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
-
-                Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
-                Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
-
-                Renderer::sendUniform1f("fOuterRadius", outerRadius);
-                Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
-                Renderer::sendUniform1f("fInnerRadius", innerRadius);
-                Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
-
-                Renderer::sendUniform1f("fKrESun", Kr * ESun);
-                Renderer::sendUniform1f("fKmESun", Km * ESun);
-                Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-                Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
-
-                Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-                Renderer::sendUniform1f("fScale",fScale);
-                Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
-
-                // Gravity
-                float g = -0.98f;
-                Renderer::sendUniform1f("g",g);
-                Renderer::sendUniform1f("g2", g*g);
-                Renderer::sendUniform1f("fExposure",2.0f);
-                i->mesh()->render();
-                Renderer::Settings::cullFace(GL_BACK);
-                glDisable(GL_BLEND);
-            }
-            else{
-                //GroundFromAtmosphere should be currently binded
-                atmosphereHeight = 0.025f;
-                float innerRadius = obj->getDefaultRadius();
-                float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
-
-                glm::vec3& pos = glm::vec3(obj->getPosition());
-                glm::quat& orientation = obj->getOrientation();
-
-                glm::mat4 mod = glm::mat4(1);
-                mod = glm::translate(mod,pos);
-                mod *= glm::mat4_cast(orientation);
-                mod = glm::scale(mod,obj->getScale());
-
-                glm::mat4 rot = glm::mat4(1);
-                rot *= glm::mat4_cast(orientation);
-
-                Renderer::sendUniformMatrix4f("Model",mod);
-                Renderer::sendUniformMatrix4f("Rot",rot);
-
-                Renderer::sendUniform1i("hasAtmosphere",1);
-                Renderer::sendUniform1i("HasAtmosphere",1);
-
-                Renderer::sendUniform1i("nSamples", 2);
-                Renderer::sendUniform1f("fSamples", 2.0f);
-
-                glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
-                Renderer::sendUniform3f("v3CameraPos", camPos);
-
-                glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
-                lightDir = glm::normalize(lightDir);
-                Renderer::sendUniform3f("v3LightDir", lightDir);
-
-                glm::vec3 v3InvWaveLength = glm::vec3(
-                    1.0f / glm::pow(0.29f, 4.0f),
-                    1.0f / glm::pow(0.29f, 4.0f),
-                    1.0f / glm::pow(0.29f, 4.0f)
-                );
-                Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
-
-                float Km = 0.0025f;
-                float Kr = 0.0015f;
-                float ESun = 20.0f;
-                float camHeight = glm::length(camPos);
-                float camHeight2 = camHeight*camHeight;
-                float fScaledepth = 0.25f;
-                float fScale = 1.0f / (outerRadius - innerRadius);
-
-                Renderer::sendUniform1f("fCameraHeight2", camHeight2);
-                Renderer::sendUniform1f("fOuterRadius", outerRadius);
-                Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
-                Renderer::sendUniform1f("fInnerRadius", innerRadius);
-                Renderer::sendUniform1f("fKrESun", Kr * ESun);
-                Renderer::sendUniform1f("fKmESun", Km * ESun);
-                Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-                Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
-                Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-                Renderer::sendUniform1f("fScale",fScale);
-                Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
-                Renderer::sendUniform1f("fExposure", 2.0f);
-                i->mesh()->render();
-                program->unbind();
-            }
-            /*
-            shader = Resources::getShaderProgram("Deferred")->program();
-            glUseProgram(shader);
-            glEnable(GL_BLEND);
-            glBlendEquation(GL_FUNC_ADD);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            for(auto ring:m_Rings)
-                ring->draw(shader);
-
-            glDisable(GL_BLEND);
-            glUseProgram(0);
-            */
+        if(camHeight > outerRadius){ 
+            program = Resources::getShaderProgram("AS_SkyFromSpace"); 
+            glBlendFunc(GL_ONE, GL_ONE);
         }
+        else{
+            program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        program->bind();
+
+        if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
+        else                                                             Renderer::sendUniform1i("HasGodsRays",0);
+
+        Renderer::Settings::cullFace(GL_FRONT);
+        glEnable(GL_BLEND);
+        mod = glm::mat4(1);
+        mod = glm::translate(mod,pos);
+        mod = glm::scale(mod,obj->getScale());
+        mod = glm::scale(mod,glm::vec3(1 + atmosphereHeight));
+
+        Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+        Renderer::sendUniformMatrix4f("Model",mod);
+        Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+
+        Renderer::sendUniform1i("nSamples", 2);
+        Renderer::sendUniform1f("fSamples", 2.0f);
+        Renderer::sendUniform3f("v3CameraPos", camPos);
+        Renderer::sendUniform3f("v3LightDir", lightDir);
+        Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+
+        Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
+        Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
+
+        Renderer::sendUniform1f("fOuterRadius", outerRadius);
+        Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
+        Renderer::sendUniform1f("fInnerRadius", innerRadius);
+        Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
+
+        Renderer::sendUniform1f("fKrESun", Kr * ESun);
+        Renderer::sendUniform1f("fKmESun", Km * ESun);
+        Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
+        Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+
+        Renderer::sendUniform1f("fScaleDepth",fScaledepth);
+        Renderer::sendUniform1f("fScale",fScale);
+        Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+
+        // Gravity
+        float g = -0.98f;
+        Renderer::sendUniform1f("g",g);
+        Renderer::sendUniform1f("g2", g*g);
+        Renderer::sendUniform1f("fExposure",2.0f);
+        i->mesh()->render();
+        Renderer::Settings::cullFace(GL_BACK);
+        glDisable(GL_BLEND);
     }
+    else{
+        //GroundFromAtmosphere should be currently binded
+        atmosphereHeight = 0.025f;
+        float innerRadius = obj->getDefaultRadius();
+        float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
+
+        glm::vec3& pos = glm::vec3(obj->getPosition());
+        glm::quat& orientation = obj->getOrientation();
+
+        glm::mat4 mod = glm::mat4(1);
+        mod = glm::translate(mod,pos);
+        mod *= glm::mat4_cast(orientation);
+        mod = glm::scale(mod,obj->getScale());
+
+        glm::mat4 rot = glm::mat4(1);
+        rot *= glm::mat4_cast(orientation);
+
+        Renderer::sendUniformMatrix4f("Model",mod);
+        Renderer::sendUniformMatrix4f("Rot",rot);
+
+        Renderer::sendUniform1i("hasAtmosphere",1);
+        Renderer::sendUniform1i("HasAtmosphere",1);
+
+        Renderer::sendUniform1i("nSamples", 2);
+        Renderer::sendUniform1f("fSamples", 2.0f);
+
+        glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
+        Renderer::sendUniform3f("v3CameraPos", camPos);
+
+        glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
+        lightDir = glm::normalize(lightDir);
+        Renderer::sendUniform3f("v3LightDir", lightDir);
+
+        glm::vec3 v3InvWaveLength = glm::vec3(
+            1.0f / glm::pow(0.29f, 4.0f),
+            1.0f / glm::pow(0.29f, 4.0f),
+            1.0f / glm::pow(0.29f, 4.0f)
+        );
+        Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+
+        float Km = 0.0025f;
+        float Kr = 0.0015f;
+        float ESun = 20.0f;
+        float camHeight = glm::length(camPos);
+        float camHeight2 = camHeight*camHeight;
+        float fScaledepth = 0.25f;
+        float fScale = 1.0f / (outerRadius - innerRadius);
+
+        Renderer::sendUniform1f("fCameraHeight2", camHeight2);
+        Renderer::sendUniform1f("fOuterRadius", outerRadius);
+        Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
+        Renderer::sendUniform1f("fInnerRadius", innerRadius);
+        Renderer::sendUniform1f("fKrESun", Kr * ESun);
+        Renderer::sendUniform1f("fKmESun", Km * ESun);
+        Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
+        Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+        Renderer::sendUniform1f("fScaleDepth",fScaledepth);
+        Renderer::sendUniform1f("fScale",fScale);
+        Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+        Renderer::sendUniform1f("fExposure", 2.0f);
+        i->mesh()->render();
+        program->unbind();
+    }
+    /*
+    shader = Resources::getShaderProgram("Deferred")->program();
+    glUseProgram(shader);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for(auto ring:m_Rings)
+        ring->draw(shader);
+
+    glDisable(GL_BLEND);
+    glUseProgram(0);
+    */
 }};
 
 Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl),name,scene){
@@ -226,7 +224,7 @@ Planet::Planet(std::string mat, PlanetType type, glm::v3 pos,glm::num scl, std::
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
     if(type != PLANET_TYPE_STAR){
-        AtmosphericScatteringRenderedItemBindFunctor f;
+        AtmosphericScatteringMeshInstanceBindFunctor f;
         m_DisplayItems.at(0)->setCustomBindFunctor(f);
     }
 }
