@@ -76,7 +76,7 @@ void Game::initLogic(){
 
     m_HUD = new HUD();
 
-	Renderer::Settings::HDR::disable();
+    Renderer::Settings::HDR::disable();
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -85,23 +85,19 @@ void Game::update(float dt){
     }
 
     if(Events::Keyboard::isKeyDownOnce("f8")){
-		Renderer::Settings::HDR::disable();
+		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
     }
     if(Events::Keyboard::isKeyDownOnce("f9")){
-		Renderer::Settings::HDR::enable();
-	        Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED);
+		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PHONG);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
-		Renderer::Settings::HDR::enable();
-		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD);
+		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GXX);
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-		Renderer::Settings::HDR::enable();
-		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE);
+		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::COOKTORRANCE);
     }
     if(Events::Keyboard::isKeyDownOnce("f12")){
-		Renderer::Settings::HDR::enable();
-		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC);
+
     }
     m_HUD->update(dt);
 }

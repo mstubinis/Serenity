@@ -379,30 +379,13 @@ void Detail::RenderManagement::_passGeometry(){
 										object->unbind();
 									}
 								}
-								//protect against any custom changes by restoring to the regular shader and material
-								if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-									shaderProgram->bind();
-									material->bind();
-								}
+							}
+							//protect against any custom changes by restoring to the regular shader and material
+							if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+								shaderProgram->bind();
+								material->bind();
 							}
 						}
-
-
-                        /*
-                        Object* object = mesh->parent();
-                        if(scene->objects().count(object->name())){
-                            object->bind();   //bind object specific data shared between all of its rendered items
-                            item->bind();     //the actual mesh drawing occurs here too
-                            item->unbind();
-                            object->unbind();
-                        }
-                        //protect against any custom changes by restoring to the regular shader and material
-                        if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-                            shaderProgram->bind();
-                            material->bind();
-                        }
-                        */
-
                         meshEntry->mesh()->unbind();
                     }
                     material->unbind();
@@ -439,13 +422,12 @@ void Detail::RenderManagement::_passLighting(){
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
     bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),1);
-    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),2);
-    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),2);
 
     for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
     }
-    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::render(){
@@ -634,9 +616,10 @@ void Detail::RenderManagement::_passHDR(){
 
     bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     bindTexture("bloomBuffer",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),1);
+	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),2);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){

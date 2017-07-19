@@ -15,7 +15,6 @@ uniform vec3 LightPosition;
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gMiscMap;
-uniform sampler2D gDiffuseMap;
 uniform sampler2D gDepthMap;
 uniform vec2 gScreenSize;
 
@@ -41,10 +40,9 @@ vec3 reconstruct_world_pos(vec2 _uv){
     return wpos.xyz / wpos.w;
 }
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
-    vec3 DiffuseMap = texture2D(gDiffuseMap,uv).rgb;
     float Glow = texture2D(gMiscMap,uv).r;
     if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999) || Glow > 0.99 ){
-        return DiffuseMap;
+        return vec3(1.0);
     }
     vec3 AmbientColor  = LightColor * LightIntensities.x;
     vec3 DiffuseColor  = vec3(0.0);
@@ -55,12 +53,12 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 
     float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
 
-    DiffuseColor = DiffuseMap * ((Lambertian * LightColor) * LightIntensities.y);
+    DiffuseColor = (Lambertian * LightColor) * LightIntensities.y;
 
     vec3 ViewDir = normalize(gCameraPosition - PxlWorldPos);
     float SpecularAngle = 0.0;
 
-    float kPi = 3.141592653589793;
+    float kPi = 3.1415926535898;
 
     if(materials[index].b == 0.0){ // this is blinn phong
         float kEnergyConservation = ( 8.0 + materials[index].g ) / ( 8.0 * kPi );
@@ -73,6 +71,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), materials[index].g);
     }
     else if(materials[index].b == 2.0){ //this is GGX
+	    float F0 = 0.8;
         float alpha = materials[index].g * materials[index].g;
         vec3 H = normalize(LightDir - ViewDir);
         float dotLH = max(0.0, dot(LightDir,H));
@@ -87,45 +86,39 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularAngle = max(0.0, (dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2)) );
     }
     else if(materials[index].b == 3.0){ //this is Cook-Torrance
-        float F0 = 0.8;                        // fresnel reflectance at normal incidence
-        float k = 0.2;                         // fraction of diffuse reflection (specular reflection = 1 - k)
-
-        // do the lighting calculation for each fragment.
+        float F0 = 0.8;                    
+        float k = 0.2;
         float NdotL = max(dot(PxlNormal, LightDir), 0.0);
         if(NdotL > 0.0){
-            // calculate intermediary values
             vec3 Half = normalize(LightDir + ViewDir);
             float NdotH = max(dot(PxlNormal, Half), 0.0); 
-            float NdotV = max(dot(PxlNormal, ViewDir), 0.0); // note: this could also be NdotL, which is the same value
+            float NdotV = max(dot(PxlNormal, ViewDir), 0.0);
             float VdotH = max(dot(ViewDir, Half), 0.0);
-            float mSquared = materials[index].g * materials[index].g; // 0 : smooth, 1: rough
+            float mSquared = materials[index].g * materials[index].g; // 0 smooth, 1 rough
 
-            // geometric attenuation
             float NH2 = 2.0 * NdotH;
             float g1 = (NH2 * NdotV) / VdotH;
             float g2 = (NH2 * NdotL) / VdotH;
             float geoAtt = min(1.0, min(g1, g2));
 
-            // roughness (or: microfacet distribution function). beckmann distribution function
             float r1 = 1.0 / ( 4.0 * mSquared * pow(NdotH, 4.0));
             float r2 = (NdotH * NdotH - 1.0) / (mSquared * NdotH * NdotH);
             float roughness = r1 * exp(r2);
 
-            // fresnel Schlick approximation
             float fresnel = pow(1.0 - VdotH, 5.0);
             fresnel *= (1.0 - F0);
             fresnel += F0;
 
             SpecularAngle = (fresnel * geoAtt * materials[index].g) / (NdotV * NdotL * kPi);
         }
-        SpecularAngle = NdotL * (k + SpecularAngle * (1.0 - k);
+        SpecularAngle = NdotL * (k + SpecularAngle * (1.0 - k));
     }
     else if(materials[index].b == 4.0){ //this is PBR
     }
     SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
     TotalLight = AmbientColor + DiffuseColor + SpecularColor;
-    return max( Glow * DiffuseMap, TotalLight);
+    return max( vec3(Glow), TotalLight);
 }
 vec3 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPosition - PxlWorldPos);
