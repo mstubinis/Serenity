@@ -25,9 +25,9 @@ class MaterialComponentType{
         REFLECTION,
         REFRACTION,
 
-		AO,
-		METALNESS,
-		ROUGHNESS,
+        AO,
+        METALNESS,
+        ROUGHNESS,
 
         NUMBER
     };
@@ -39,9 +39,9 @@ class MaterialComponentTextureSlot{
         GLOW,
         SPECULAR,
 
-		AO,
-		METALNESS,
-		ROUGHNESS,
+        AO,
+        METALNESS,
+        ROUGHNESS,
 
         REFLECTION_CUBEMAP,
         REFLECTION_CUBEMAP_MAP,
@@ -56,9 +56,9 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Ty
     "NormalTexture",
     "GlowTexture",
     "SpecularTexture",
-	"AOTexture",
-	"MetalnessTexture",
-	"RoughnessTexture",
+    "AOTexture",
+    "MetalnessTexture",
+    "RoughnessTexture",
     "ReflectionTexture",
     "RefractionTexture"
 };
@@ -151,25 +151,26 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 };
 
 class MaterialMeshEntry{
-	private:
-		Mesh* m_Mesh;
-		std::unordered_map<std::string,std::vector<MeshInstance*>> m_MeshInstances;
-	public:
-		MaterialMeshEntry(Mesh*);
-		~MaterialMeshEntry();
+    private:
+        Mesh* m_Mesh;
+        std::unordered_map<std::string,std::vector<MeshInstance*>> m_MeshInstances;
+        public:
+        MaterialMeshEntry(Mesh*);
+        ~MaterialMeshEntry();
 
-		Mesh* mesh(){ return m_Mesh; }
-		std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances(){ return m_MeshInstances; }
+        Mesh* mesh(){ return m_Mesh; }
+        std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances(){ return m_MeshInstances; }
 
-		void addMeshInstance(std::string& objectName,MeshInstance*);
-		void removeMeshInstance(std::string& objectName,MeshInstance*);
+        void addMeshInstance(std::string& objectName,MeshInstance*);
+        void removeMeshInstance(std::string& objectName,MeshInstance*);
 };
 
 class Material final: public BindableResource{
     public: enum LightingMode{
         BLINNPHONG,
         PHONG,
-		PBR,
+	GXX,
+        PBR,
         NUMBER
     };
 
@@ -211,10 +212,10 @@ class Material final: public BindableResource{
         void addComponentAO(Texture* texture,float baseValue = 1.0f);
         void addComponentAO(std::string& textureFile,float baseValue = 1.0f);
 
-		void addComponentMetalness(Texture* texture,float baseValue = 1.0f);
+        void addComponentMetalness(Texture* texture,float baseValue = 1.0f);
         void addComponentMetalness(std::string& textureFile,float baseValue = 1.0f);
 
-		void addComponentRoughness(Texture* texture,float baseValue = 1.0f);
+        void addComponentRoughness(Texture* texture,float baseValue = 1.0f);
         void addComponentRoughness(std::string& textureFile,float baseValue = 1.0f);
 
         void addComponentReflection(Texture* cubeMap,Texture* map,float mixFactor = 1.0f);
