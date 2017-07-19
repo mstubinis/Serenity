@@ -19,13 +19,13 @@ class Texture::impl final{
         GLuint m_TextureAddress;
         GLuint m_Type;
         uint m_Width, m_Height;
-		uint m_Format;
+	uint m_Format;
 
         void _init(GLuint type,Texture* super,std::string name,sf::Image& img,uint format){
             m_Pixels.clear();
             m_Width = m_Height = m_TextureAddress = 0;
             m_Type = type;
-			m_Format = format;
+            m_Format = format;
             if(img.getSize().x > 0 && img.getSize().y > 0){
                 std::vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
                 m_Pixels = p;
@@ -72,7 +72,12 @@ class Texture::impl final{
             glBindTexture(m_Type,0);
         }
         void _generateFromImage(sf::Image& image){
-            glTexImage2D(m_Type, 0, m_Format, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+	    if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
+                glTexImage2D(m_Type, 0, m_Format, image.getSize().x, image.getSize().y, 0, GL_RGBA,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+	    }
+            else if(m_Format == GL_RGB8 || m_Format == GL_SRGB8){
+                glTexImage2D(m_Type, 0, m_Format, image.getSize().x, image.getSize().y, 0, GL_RGB,GL_UNSIGNED_BYTE, image.getPixelsPtr());
+	    }
             glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glGenerateMipmap(m_Type);
@@ -90,25 +95,25 @@ class Texture::impl final{
             return &m_Pixels[0];
         }
 };
-Texture::Texture(std::string _name,uint w, uint h,GLuint type,uint format):m_i(new impl){
+Texture::Texture(std::string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(type,this,_name,i,format);
+    m_i->_init(t,this,n,i,format);
 }
-Texture::Texture(sf::Image& img,std::string _name,GLuint type,uint format):m_i(new impl){
+Texture::Texture(sf::Image& img,std::string n,GLuint t,uint format):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
-    m_i->_init(type,this,_name,img,format);
+    m_i->_init(t,this,n,img,format);
 }
-Texture::Texture(std::string file,std::string _name,GLuint type,uint format):m_i(new impl){
+Texture::Texture(std::string file,std::string n,GLuint t,uint format):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
     sf::Image i;
-    if(_name == "") _name = file;
-    m_i->_init(type,this,_name,i,format);
+    if(n == "") n = file;
+    m_i->_init(t,this,n,i,format);
 }
-Texture::Texture(std::string files[],std::string _name,GLuint type,uint format):m_i(new impl){
-    for(uint i = 0; i < 6; i++){ m_i->m_Files.push_back(files[i]); }
+Texture::Texture(std::string files[],std::string n,GLuint t,uint format):m_i(new impl){ //cubemap images
+    for(uint q = 0; q < 6; q++){ m_i->m_Files.push_back(files[q]); }
     sf::Image i;
-    m_i->_init(type,this,_name,i,format);
+    m_i->_init(t,this,n,i,format);
 }
 Texture::~Texture(){
     unload();
