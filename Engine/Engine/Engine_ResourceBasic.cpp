@@ -17,13 +17,13 @@ std::string& EngineResource::name(){
 void EngineResource::load(){
     if(!m_IsLoaded){
         m_IsLoaded = true;
-        std::cout << "Resource: " << m_Name << " has been loaded." << std::endl;
+        std::cout << ": " << m_Name << " has been loaded." << std::endl;
     }
 }
 void EngineResource::unload(){
     if(m_IsLoaded && m_UsageCount == 0){
         m_IsLoaded = false;
-        std::cout << "Resource: " << m_Name << " has been unloaded." << std::endl;
+        std::cout << ": " << m_Name << " has been unloaded." << std::endl;
     }
 }
 bool EngineResource::isLoaded(){ return m_IsLoaded; }
