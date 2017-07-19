@@ -170,6 +170,7 @@ class Material final: public BindableResource{
         BLINNPHONG,
         PHONG,
 	GXX,
+	COOKTORRANCE,
         PBR,
         NUMBER
     };
