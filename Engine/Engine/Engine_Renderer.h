@@ -48,9 +48,10 @@ struct FontRenderInfo final: public TextureRenderInfo{
 
 class HDRToneMapAlgorithm{
 	public: enum Algorithm{
-	    REINHARD,
-		FILMIC,
-		EXPOSURE
+            REINHARD,
+            FILMIC,
+            EXPOSURE,
+            UNCHARTED
 	};
 };
 
@@ -86,7 +87,7 @@ namespace Engine{
                     static bool hdr;
                     static float hdr_exposure;
                     static float hdr_gamma;
-					static HDRToneMapAlgorithm::Algorithm hdr_algorithm;
+                    static HDRToneMapAlgorithm::Algorithm hdr_algorithm;
                 };
                 struct GodRaysInfo final{
                     static bool godRays;
