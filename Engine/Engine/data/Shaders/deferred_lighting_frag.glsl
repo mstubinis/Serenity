@@ -86,7 +86,9 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         float k2 = k * k;
         SpecularAngle = max(0.0, (dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2)) );
     }
-    else if(materials[index].b == 3.0){ //this is PBR
+    else if(materials[index].b == 3.0){ //this is Cook-Torrance
+    }
+    else if(materials[index].b == 4.0){ //this is PBR
     }
     SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
