@@ -546,9 +546,9 @@ PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos
         Resources::addMesh("PointLightBounds",data,COLLISION_TYPE_NONE,false);
     }
 
-    m_Constant = 0.3f;
-    m_Linear = 0.2f;
-    m_Exp = 0.3f;
+    m_Constant = 0.0f;
+    m_Linear = 0.0f;
+    m_Exp = 1.0f;
     m_PointLightRadius = calculatePointLightRadius();
 }
 PointLight::~PointLight(){
@@ -587,8 +587,12 @@ void PointLight::lighten(){
 
     Renderer::sendUniformMatrix4f("Model",m);
 
-    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) > m_PointLightRadius){ Renderer::Settings::cullFace(GL_BACK); }
-    else{                                                          Renderer::Settings::cullFace(GL_FRONT);}
+    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) > m_PointLightRadius){ 
+        Renderer::Settings::cullFace(GL_BACK); 
+    }
+    else{                                                          
+        Renderer::Settings::cullFace(GL_FRONT);
+    }
     Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
 
     Renderer::Settings::cullFace(GL_BACK);
