@@ -99,7 +99,7 @@ void Game::update(float dt){
 		Renderer::Settings::HDR::enable();
 		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE);
     }
-    if(Events::Keyboard::isKeyDown("f12")){
+    if(Events::Keyboard::isKeyDownOnce("f12")){
 		Renderer::Settings::HDR::enable();
 		Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC);
     }
