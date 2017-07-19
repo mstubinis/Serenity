@@ -105,8 +105,11 @@ void Skybox::draw(bool godsRays){
 
     Renderer::bindTexture("Texture",m_Texture,0);
 
-    if(godsRays){ Renderer::sendUniform1i("HasGodsRays",1); }
-    else{         Renderer::sendUniform1i("HasGodsRays",0); }
+    if(godsRays){ 
+        Renderer::sendUniform1i("HasGodsRays",1); 
+    }else{         
+        Renderer::sendUniform1i("HasGodsRays",0); 
+    }
 
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
     glEnableVertexAttribArray(0);
