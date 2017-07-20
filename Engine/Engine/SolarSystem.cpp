@@ -261,10 +261,10 @@ void SolarSystem::_loadFromFile(std::string filename){
 
     player->translate(0,0,11);
 
-	for(uint i = 0; i < 300; i++){
+	for(uint i = 0; i < 15; i++){
 		new ObjectDisplay("Defiant","Defiant",glm::v3(i*2,4,0),glm::vec3(1),"Defiant Fleet " + boost::lexical_cast<std::string>(i),nullptr);
 	}
-	for(uint i = 0; i < 300; i++){
+	for(uint i = 0; i < 15; i++){
 		new ObjectDisplay("Intrepid","Intrepid",glm::v3(i*2,0,0),glm::vec3(1),"Intrepid Fleet " + boost::lexical_cast<std::string>(i),nullptr);
 	}
 }

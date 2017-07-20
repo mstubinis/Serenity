@@ -37,8 +37,8 @@ GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 uint Detail::RendererInfo::GeneralInfo::multisample_level = 4;
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
-float Detail::RendererInfo::BloomInfo::bloom_radius = 0.62f;
-float Detail::RendererInfo::BloomInfo::bloom_strength = 2.25f;
+float Detail::RendererInfo::BloomInfo::bloom_radius = 0.92f;
+float Detail::RendererInfo::BloomInfo::bloom_strength = 2.7f;
 
 bool Detail::RendererInfo::LightingInfo::lighting = true;
 
@@ -549,15 +549,16 @@ void Detail::RenderManagement::_passSSAO(){
     sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
-    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
-    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,1,GL_TEXTURE_2D);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
-    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),3);
-    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),4);
+	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),1);
+    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2,GL_TEXTURE_2D);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
+    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),5);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){

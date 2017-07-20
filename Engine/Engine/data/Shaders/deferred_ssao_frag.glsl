@@ -1,5 +1,6 @@
 #version 120
 
+uniform sampler2D gDiffuseMap;
 uniform sampler2D gNormalMap;
 uniform sampler2D gRandomMap;
 uniform sampler2D gMiscMap;
@@ -76,13 +77,14 @@ void main(void){
     }
 
     if(doBloom == 1){
+	    vec3 diffuse = texture2D(gDiffuseMap,uv).rgb;
         float Glow = texture2D(gMiscMap,uv).r;
         vec3 lighting = texture2D(gLightMap,uv).rgb;
         float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
         if(brightness > 1.5 || Glow > 0.01f){
             float brightScale = log(brightness) * 0.7;
             float glowScale = Glow * 0.73;
-            gl_FragColor.rgb = vec3(lighting * max(glowScale, brightScale)) * max(glowScale, brightScale);
+            gl_FragColor.rgb = diffuse * (vec3(lighting * max(glowScale, brightScale)) * max(glowScale, brightScale));
         }
     }
     else{
