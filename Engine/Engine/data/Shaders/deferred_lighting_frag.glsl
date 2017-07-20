@@ -104,10 +104,8 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             float r1 = 1.0 / ( 4.0 * mSquared * pow(NdotH, 4.0));
             float r2 = (NdotH * NdotH - 1.0) / (mSquared * NdotH * NdotH);
             float roughness = r1 * exp(r2);
-
-            float fresnel = pow(1.0 - VdotH, 5.0);
-            fresnel *= (1.0 - F0);
-            fresnel += F0;
+    
+            float fresnel = F0 + (1-F0) * pow( 1.0 - VdotH, 5.0);
 
             SpecularAngle = (fresnel * geoAtt * roughness) / (NdotV * NdotL * kPi);
         }
