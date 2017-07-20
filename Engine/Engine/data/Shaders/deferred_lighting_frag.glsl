@@ -69,10 +69,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     vec3 TotalLight    = vec3(0.0);
 
     highp int index = int(texture2D(gMiscMap,uv).b * float(MATERIAL_COUNT_LIMIT));
-    float Lambertian = max(dot(LightDir,PxlNormal), 0.0);
-    DiffuseColor = (Lambertian * LightColor) * LightIntensities.y;
-    vec3 ViewDir = normalize(gCameraPosition - PxlWorldPos);
-    
+
     float SpecularAngle = 0.0;
 
     float kPi = 3.1415926535898;
@@ -80,10 +77,13 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float roughness = 1.0 - smoothness; //only valid for physical lighting models
     float alpha = roughness * roughness;
     
+    vec3 ViewDir = normalize(gCameraPosition - PxlWorldPos);
     vec3 Half = normalize(LightDir + ViewDir);
-    float NdotH = max(dot(PxlNormal, Half), 0.0);
     float NdotL = max(dot(PxlNormal, LightDir), 0.0);
+    float NdotH = max(dot(PxlNormal, Half), 0.0);
     
+    DiffuseColor = (NdotL * LightColor) * LightIntensities.y;
+
     if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
 
         float conserv = (8.0 + smoothness ) / (8.0 * kPi);
