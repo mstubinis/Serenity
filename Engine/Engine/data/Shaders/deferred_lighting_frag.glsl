@@ -110,24 +110,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             float b = (2.0 * (NdotH) * (LdotN)) / (VdotH);
             float G = min(1.0,min(a,b));
             
-            SpecularAngle = (Beck * Frensel * G) / (4.0 * (NdotV) * (LdotN));
-            
-            /*
-            float F0 = 0.8; //fresnel term, 0 to 1                  
-            float k = 0.2;
-            float NdotV = max(dot(PxlNormal, ViewDir), 0.0);
-            float VdotH = max(dot(ViewDir, Half), 0.0);
-            float NH2 = 2.0 * NdotH;
-            float g1 = (NH2 * NdotV) / VdotH;
-            float g2 = (NH2 * NdotL) / VdotH;
-            float geoAtt = min(1.0, min(g1, g2));
-            float r1 = 1.0 / ( 4.0 * alpha * pow(NdotH, 4.0));
-            float r2 = (NdotH * NdotH - 1.0) / (alpha * NdotH * NdotH);
-            float roughness = r1 * exp(r2);
-            float Fresnel = SchlickFrensel(F0,VdotH);
-            SpecularAngle = (Fresnel * geoAtt * roughness) / (NdotV * NdotL * kPi);
-            SpecularAngle = NdotL * (k + SpecularAngle * (1.0 - k));
-            */
+            SpecularAngle = (Beck * Frensel * G) / max((4.0 * NdotV * LdotN),0.0);
         }
         else if(materials[index].b == 4.0){ //this is gaussian (physical)
         
