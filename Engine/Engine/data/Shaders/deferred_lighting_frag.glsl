@@ -111,7 +111,11 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         }
         SpecularAngle = NdotL * (k + SpecularAngle * (1.0 - k));
     }
-    else if(materials[index].b == 4.0){ //this is PBR
+    else if(materials[index].b == 4.0){ //this is gaussian
+    }
+    else if(materials[index].b == 5.0){ //this is beckmann
+    }
+    else if(materials[index].b == 6.0){ //this is PBR
     }
     SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
