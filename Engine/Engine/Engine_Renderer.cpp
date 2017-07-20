@@ -404,21 +404,17 @@ void Detail::RenderManagement::_passLighting(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Light");
     p->bind();
 
-    sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
-
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
     sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
 
-    sendUniform1f("nearz",Resources::getActiveCamera()->getNear());
-    sendUniform1f("farz",Resources::getActiveCamera()->getFar());
-
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
-    Renderer::sendUniform3f("gCameraPosition",campos.x, campos.y, campos.z);
+    Renderer::sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::HDRInfo::hdr_gamma);
 
     uint limit = (uint)MATERIAL_COUNT_LIMIT;
     sendUniform4fv("materials[0]",Material::m_MaterialProperities,limit);
 
-    sendUniform2f("gScreenSize",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+    sendUniform4f("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
+		(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
     bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),1);

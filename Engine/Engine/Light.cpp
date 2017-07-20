@@ -32,16 +32,15 @@ void SunLight::update(float dt){
     ObjectBasic::update(dt);
 }
 void SunLight::sendGenericAttributesToShader(){
-    Renderer::sendUniform1i("LightType", int(m_Type));
-    Renderer::sendUniform3f("LightColor", m_Color.x, m_Color.y, m_Color.z);
-    Renderer::sendUniform3f("LightIntensities", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity);
+	Renderer::sendUniform4f("LightDataD",m_Color.x, m_Color.y, m_Color.z,float(m_Type));
 }
 void SunLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
     glm::vec3 pos = glm::vec3(getPosition());
 
-    Renderer::sendUniform3f("LightPosition",pos.x, pos.y, pos.z);
+	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
+    Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
 
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
@@ -53,7 +52,9 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
-    Renderer::sendUniform3f("LightDirection", m_Direction.x, m_Direction.y,m_Direction.z);
+	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
+    Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Direction.x, m_Direction.y);
+	Renderer::sendUniform4f("LightDataC", m_Direction.z,0.0f,0.0f,0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
@@ -578,8 +579,10 @@ void PointLight::lighten(){
     if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
         return;
     sendGenericAttributesToShader();
-    Renderer::sendUniform3f("LightPosition",float(pos.x),float(pos.y),float(pos.z));
-    Renderer::sendUniform3f("LightData",m_Constant,m_Linear,m_Exp);
+
+	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Constant);
+	Renderer::sendUniform4f("LightDataB", m_Linear,m_Exp,0.0f,0.0f);
+	Renderer::sendUniform4f("LightDataC", 0.0f,float(pos.x),float(pos.y),float(pos.z));
 
     glm::mat4 m(1);
     m = glm::translate(m,glm::vec3(pos));
@@ -606,4 +609,5 @@ SpotLight::~SpotLight(){
 void SpotLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
+
 }

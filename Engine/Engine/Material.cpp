@@ -16,7 +16,6 @@
 using namespace Engine;
 
 std::vector<glm::vec4> Material::m_MaterialProperities;
-
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0);
@@ -227,16 +226,21 @@ class Material::impl final{
         bool m_Shadeless;
         float m_BaseGlow;
         float m_SpecularityPower;
+		float m_Frensel;
         uint m_ID;
         void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
             _addComponentDiffuse(diffuse);
             _addComponentNormal(normal);
             _addComponentGlow(glow);
             _addComponentSpecular(specular);
+
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
             m_SpecularityPower = 8.0f;
             m_LightingMode = Material::LightingMode::BLINNPHONG;
+			m_Frensel = 0.5f;
+
+
             _addToMaterialPool();
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
@@ -275,17 +279,19 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-            Material::m_MaterialProperities.push_back(glm::vec4(m_BaseGlow,m_SpecularityPower,m_LightingMode,m_Shadeless));
+			glm::vec4 data(m_Frensel,m_SpecularityPower,m_LightingMode,m_Shadeless);
+            Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
-            glm::vec4& ref = Material::m_MaterialProperities.at(m_ID);
-            ref.r = m_BaseGlow;
-            ref.g = m_SpecularityPower;
+            glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
+
+			data.r = m_Frensel;
+			data.g = m_SpecularityPower;
 			if(m_LightingMode != Material::LightingMode::BLINNPHONG && m_LightingMode != Material::LightingMode::PHONG){
-				ref.g = glm::clamp(ref.g,0.0f,1.0f);
+				data.g = glm::clamp(data.g,0.01f,0.99f);
 			}
-            ref.b = float(m_LightingMode);
-            ref.a = m_Shadeless;
+			data.b = float(m_LightingMode);
+			data.a = m_Shadeless;
         }
         void _destruct(){
             for(auto component:m_Components)
@@ -338,6 +344,7 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::REFRACTION,new MaterialComponentRefraction(text,map,mixFactor,ratio));
         }
+		void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.0001f,0.9999f); }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
@@ -468,12 +475,14 @@ const MaterialComponentReflection* Material::getComponentReflection() const { re
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::REFRACTION)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
+const float Material::frensel() const { return m_i->m_Frensel; }
 const float Material::specularity() const { return m_i->m_SpecularityPower; }
 const uint Material::lightingMode() const { return m_i->m_LightingMode; }
 const uint Material::id() const { return m_i->m_ID; }
 
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
+void Material::setFrensel(float f){ m_i->_setFrensel(f); }
 void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
 void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
 

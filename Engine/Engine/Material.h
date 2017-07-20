@@ -169,18 +169,16 @@ class Material final: public BindableResource{
     public: enum LightingMode{
         BLINNPHONG,
         PHONG,
-	GXX,
-	COOKTORRANCE,
-	GAUSSIAN,
-	BECKMANN,
+        GXX,
+        COOKTORRANCE,
+        GAUSSIAN,
+        BECKMANN,
         PBR,
         NUMBER
     };
 
 
     public:
-        //this is very important here
-        //vec4:  (  glow,  specularity, lightingMode, shadeless  )
         static std::vector<glm::vec4> m_MaterialProperities;
 
         static std::unordered_map<uint,std::vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP;
@@ -231,9 +229,11 @@ class Material final: public BindableResource{
 
         const bool shadeless() const;
         const float glow() const;
+		const float frensel() const;
         const float specularity() const;
         const uint lightingMode() const;
         const uint id() const;
+		void setFrensel(float f);
         void setShadeless(bool b);
         void setGlow(float f);
         void setSpecularity(float s);
