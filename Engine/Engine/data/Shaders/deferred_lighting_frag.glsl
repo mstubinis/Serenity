@@ -71,8 +71,8 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), materials[index].g);
     }
     else if(materials[index].b == 2.0){ //this is GGX
-	    float F0 = 0.8;
-        float alpha = materials[index].g * materials[index].g;
+        float F0 = 0.8; //fresnel term, 0 to 1
+        float alpha = materials[index].g * materials[index].g; //materials[index].g - smooth (0) to rough (1)
         vec3 H = normalize(LightDir - ViewDir);
         float dotLH = max(0.0, dot(LightDir,H));
         float dotNH = max(0.0, dot(PxlNormal,H));
@@ -86,7 +86,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularAngle = max(0.0, (dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2)) );
     }
     else if(materials[index].b == 3.0){ //this is Cook-Torrance
-        float F0 = 0.8;                    
+        float F0 = 0.8; //fresnel term, 0 to 1                  
         float k = 0.2;
         float NdotL = max(dot(PxlNormal, LightDir), 0.0);
         if(NdotL > 0.0){
@@ -94,7 +94,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             float NdotH = max(dot(PxlNormal, Half), 0.0); 
             float NdotV = max(dot(PxlNormal, ViewDir), 0.0);
             float VdotH = max(dot(ViewDir, Half), 0.0);
-            float mSquared = materials[index].g * materials[index].g; // 0 smooth, 1 rough
+            float mSquared = materials[index].g * materials[index].g; //materials[index].g - smooth (0) to rough (1)
 
             float NH2 = 2.0 * NdotH;
             float g1 = (NH2 * NdotV) / VdotH;
@@ -109,7 +109,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             fresnel *= (1.0 - F0);
             fresnel += F0;
 
-            SpecularAngle = (fresnel * geoAtt * materials[index].g) / (NdotV * NdotL * kPi);
+            SpecularAngle = (fresnel * geoAtt * roughness) / (NdotV * NdotL * kPi);
         }
         SpecularAngle = NdotL * (k + SpecularAngle * (1.0 - k));
     }
