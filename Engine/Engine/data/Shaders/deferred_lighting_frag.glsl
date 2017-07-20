@@ -65,8 +65,8 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float SpecularAngle = 0.0;
 
     float kPi = 3.1415926535898;
-    float smoothness = materials[index].g;
-    float roughness = 1.0 - smoothness; //only valid for non phong models
+    float smoothness = materials[index].g; //note: this value is automatically clamped 0 to 1 with the phyiscally based models below
+    float roughness = 1.0 - smoothness; //only valid for physical lighting models
     float alpha = roughness * roughness;
     
     vec3 Half = normalize(LightDir + ViewDir);
@@ -74,16 +74,19 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float NdotL = max(dot(PxlNormal, LightDir), 0.0);
     
     if(NdotL > 0.0){
-        if(materials[index].b == 0.0){ // this is blinn phong
-            float kEnergyConservation = ( 8.0 + smoothness ) / ( 8.0 * kPi );
-            SpecularAngle = kEnergyConservation * pow(NdotH), smoothness);
+        if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
+        
+            float conserv = (8.0 + smoothness ) / (8.0 * kPi);
+            SpecularAngle = conserv * pow(NdotH), smoothness);
         }		
-        else if(materials[index].b == 1.0){ //this is phong
-            float kEnergyConservation = ( 2.0 + smoothness ) / ( 2.0 * kPi );
+        else if(materials[index].b == 1.0){ //this is phong (non-physical)
+        
+            float conserv = (2.0 + smoothness ) / (2.0 * kPi);
             vec3 Reflect = reflect(-LightDir, PxlNormal);
-            SpecularAngle = kEnergyConservation * pow(max(dot(ViewDir, Reflect), 0.0), smoothness);
+            SpecularAngle = conserv * pow(max(dot(ViewDir, Reflect), 0.0), smoothness);
         }
-        else if(materials[index].b == 2.0){ //this is GGX
+        else if(materials[index].b == 2.0){ //this is GGX (physical)
+        
             float F0 = 0.8; //fresnel term, 0 to 1
             float LdotH = max(0.0, dot(LightDir,Half));
             float alphaSqr = alpha * alpha;
@@ -94,7 +97,8 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             float k2 = k * k;
             SpecularAngle = max(0.0, (NdotL * D * Fresnel / (LdotH*LdotH*(1.0-k2)+k2)) );
         }
-        else if(materials[index].b == 3.0){ //this is Cook-Torrance
+        else if(materials[index].b == 3.0){ //this is Cook-Torrance (physical)
+        
             float VdotH = max(dot(ViewDir, Half), 0.0);
             float NdotV = max(dot(PxlNormal, ViewDir), 0.0);
             vec3 LdotN = max(dot(LightDir, PxlNormal), 0.0);
@@ -125,16 +129,18 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             SpecularAngle = NdotL * (k + SpecularAngle * (1.0 - k));
             */
         }
-        else if(materials[index].b == 4.0){ //this is gaussian
+        else if(materials[index].b == 4.0){ //this is gaussian (physical)
+        
             float b = acos(NdotH); //this might also be cos. find out
             float fin = b / smoothness;
             SpecularAngle = exp(-fin*fin);
         }
-        else if(materials[index].b == 5.0){ //this is beckmann
-            //note, m is the rms slope of the surface microfacets (the roughness of the material). m doesnt have to be 0 to 1 i guess?
+        else if(materials[index].b == 5.0){ //this is beckmann (physical)
+        
             SpecularAngle = BeckmannDist(NdotH,alpha,kPi);
         }
-        else if(materials[index].b == 6.0){ //this is PBR
+        else if(materials[index].b == 6.0){ //this is PBR (physical)
+        
         }
     }
     SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
