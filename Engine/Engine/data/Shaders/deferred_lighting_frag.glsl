@@ -128,10 +128,10 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         else if(materials[index].b == 4.0){ //this is gaussian
             float b = cos(NdotH); //this might also be acos. find out
             float fin = b / smoothness;
-            float fin1 = -(fin * fin);
-            SpecularAngle = exp(fin1);
+            SpecularAngle = exp(-fin*fin);
         }
         else if(materials[index].b == 5.0){ //this is beckmann
+            //note, m is the rms slope of the surface microfacets (the roughness of the material). m doesnt have to be 0 to 1 i guess?
             SpecularAngle = BeckmannDist(NdotH,alpha,kPi);
         }
         else if(materials[index].b == 6.0){ //this is PBR
