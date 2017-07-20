@@ -110,7 +110,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             float b = (2.0 * (NdotH) * (LdotN)) / (VdotH);
             float G = min(1.0,min(a,b));
             
-            SpecularAngle = (Beck * Frensel * G) / max((4.0 * NdotV * LdotN),0.0);
+            SpecularAngle = (Beck * Frensel * G) / (max((4.0 * NdotV * LdotN),0.0) + 0.0001);
         }
         else if(materials[index].b == 4.0){ //this is gaussian (physical)
         
