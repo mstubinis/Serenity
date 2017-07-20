@@ -126,7 +126,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             */
         }
         else if(materials[index].b == 4.0){ //this is gaussian
-            float b = acos(NdotH);
+            float b = cos(NdotH); //this might also be acos. find out
             float fin = b / smoothness;
             float fin1 = -(fin * fin);
             SpecularAngle = exp(fin1);
