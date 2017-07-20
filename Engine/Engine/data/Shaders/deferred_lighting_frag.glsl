@@ -170,7 +170,7 @@ vec3 CalcPointLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     return c * attenuation;
 }
 vec3 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
-    return vec3(0);
+    return vec3(0.0);
 }
 void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
