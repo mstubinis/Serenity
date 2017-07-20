@@ -47,6 +47,17 @@ float BeckmannDist(float theta, float roughness, float pi){
 float SchlickFrensel(float f0, float theta){
     return f0 + (1.0-f0) * pow( 1.0 - theta, 5.0);
 }
+vec3 CookTorr(float frensel,float vdoth, float vdotn, float ldotn, float ndoth,float _alpha, float pi){
+    float Beck = BeckmannDist(ndoth,_alpha,pi);
+
+    float a = (2.0 * (ndoth) * (vdotn)) / (vdoth);
+    float b = (2.0 * (ndoth) * (ldotn)) / (vdoth);
+    float G = min(1.0,min(a,b));
+
+    float fin = (Beck * frensel * G) / (max((4.0 * vdotn * ldotn),0.0) + 0.0001);
+
+    return vec3(fin);
+}
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float Glow = texture2D(gMiscMap,uv).r;
     if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999) || Glow > 0.99 ){
@@ -73,59 +84,78 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float NdotH = max(dot(PxlNormal, Half), 0.0);
     float NdotL = max(dot(PxlNormal, LightDir), 0.0);
     
-    if(NdotL > 0.0){
-        if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
-        
-            float conserv = (8.0 + smoothness ) / (8.0 * kPi);
-            SpecularAngle = conserv * pow(NdotH), smoothness);
-        }		
-        else if(materials[index].b == 1.0){ //this is phong (non-physical)
-        
-            float conserv = (2.0 + smoothness ) / (2.0 * kPi);
-            vec3 Reflect = reflect(-LightDir, PxlNormal);
-            SpecularAngle = conserv * pow(max(dot(ViewDir, Reflect), 0.0), smoothness);
-        }
-        else if(materials[index].b == 2.0){ //this is GGX (physical)
-        
-            float F0 = 0.8; //fresnel term, 0 to 1
-            float LdotH = max(0.0, dot(LightDir,Half));
-            float alphaSqr = alpha * alpha;
-            float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;
-            float D = alphaSqr / (kPi * denom * denom);
-            float Fresnel = SchlickFrensel(F0,LdotH);
-            float k = 0.5 * alpha;
-            float k2 = k * k;
-            SpecularAngle = max(0.0, (NdotL * D * Fresnel / (LdotH*LdotH*(1.0-k2)+k2)) );
-        }
-        else if(materials[index].b == 3.0){ //this is Cook-Torrance (physical)
-        
-            float VdotH = max(dot(ViewDir, Half), 0.0);
-            float NdotV = max(dot(PxlNormal, ViewDir), 0.0);
-            vec3 LdotN = max(dot(LightDir, PxlNormal), 0.0);
-            
-            float Beck = BeckmannDist(NdotH,alpha,kPi);
-            float Frensel = SchlickFrensel(F0,VdotH);
-            
-            float a = (2.0 * (NdotH) * (NdotV)) / (VdotH);
-            float b = (2.0 * (NdotH) * (LdotN)) / (VdotH);
-            float G = min(1.0,min(a,b));
-            
-            SpecularAngle = (Beck * Frensel * G) / (max((4.0 * NdotV * LdotN),0.0) + 0.0001);
-        }
-        else if(materials[index].b == 4.0){ //this is gaussian (physical)
-        
-            float b = acos(NdotH); //this might also be cos. find out
-            float fin = b / smoothness;
-            SpecularAngle = exp(-fin*fin);
-        }
-        else if(materials[index].b == 5.0){ //this is beckmann (physical)
-        
-            SpecularAngle = BeckmannDist(NdotH,alpha,kPi);
-        }
-        else if(materials[index].b == 6.0){ //this is PBR (physical)
-        
-        }
+    if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
+
+        float conserv = (8.0 + smoothness ) / (8.0 * kPi);
+        SpecularAngle = conserv * pow(NdotH), smoothness);
+    }		
+    else if(materials[index].b == 1.0){ //this is phong (non-physical)
+
+        float conserv = (2.0 + smoothness ) / (2.0 * kPi);
+        vec3 Reflect = reflect(-LightDir, PxlNormal);
+        SpecularAngle = conserv * pow(max(dot(ViewDir, Reflect), 0.0), smoothness);
     }
+    else if(materials[index].b == 2.0){ //this is GGX (physical)
+
+        float F0 = 0.8; //fresnel term, 0 to 1
+        float LdotH = max(0.0, dot(LightDir,Half));
+        float alphaSqr = alpha * alpha;
+        float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;
+        float D = alphaSqr / (kPi * denom * denom);
+        float Fresnel = SchlickFrensel(F0,LdotH);
+        float k = 0.5 * alpha;
+        float k2 = k * k;
+        SpecularAngle = max(0.0, (NdotL * D * Fresnel / (LdotH*LdotH*(1.0-k2)+k2)) );
+    }
+    else if(materials[index].b == 3.0){ //this is Cook-Torrance (physical)
+        float F0 = 0.8; //fresnel term, 0 to 1
+        float VdotH = max(0.0, dot(ViewDir,Half));
+        float VdotN = max(0.0, dot(ViewDir,PxlNormal));
+        float Frensel = SchlickFrensel(F0,VdotH).r;
+        SpecularAngle = CookTorr(Frensel,VdotH,VdotN,NdotL,NdotH,alpha,kPi).r;
+    }
+    else if(materials[index].b == 4.0){ //this is gaussian (physical)
+
+        float b = acos(NdotH); //this might also be cos. find out
+        float fin = b / smoothness;
+        SpecularAngle = exp(-fin*fin);
+    }
+    else if(materials[index].b == 5.0){ //this is beckmann (physical)
+
+        SpecularAngle = BeckmannDist(NdotH,alpha,kPi);
+    }
+    else if(materials[index].b == 6.0){ //this is PBR (physical)
+        /*
+
+        vec3 F0 = vec3(0.04); 
+        F0 = mix(F0, albedo, metallic);
+
+        vec3 Lo = vec3(0.0);
+        for(int i = 0; i < 4; ++i) {
+            // calculate per-light radiance
+            vec3 radiance = LightColor * attenuation;        
+
+            vec3 Frensel = vec3(SchlickFrensel(F0,vdoth));
+            vec3 kD = (vec3(1.0) - Frensel) * (1.0 - metallic);
+
+            vec3 nominator    =  CookTorr(Frensel.r,VdotH,VdotN,LdotN,NdotH,alpha,kPi);
+            float denominator = 4.0 * max(dot(PxlNormal, ViewDir), 0.0) * NdotL + 0.001; 
+            vec3 specular     = nominator / denominator;
+
+            // add to outgoing radiance Lo           
+            Lo += (kD * albedo / kPi + specular) * radiance * NdotL; 
+        }   
+
+        vec3 ambient = vec3(0.03) * albedo * ao;
+        vec3 color = ambient + Lo;
+
+        color = color / (color + vec3(1.0));
+        color = pow(color, vec3(1.0/2.2));  
+
+        FragColor = vec4(color, 1.0);
+        */
+    }
+
     SpecularColor = (LightColor * LightIntensities.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
     TotalLight = AmbientColor + DiffuseColor + SpecularColor;
