@@ -171,6 +171,8 @@ class Material final: public BindableResource{
         PHONG,
 	GXX,
 	COOKTORRANCE,
+	GAUSSIAN,
+	BECKMANN,
         PBR,
         NUMBER
     };
