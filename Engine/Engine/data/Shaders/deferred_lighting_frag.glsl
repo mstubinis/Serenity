@@ -127,6 +127,8 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     else if(materials[index].b == 6.0){ //this is PBR (physical)
         /*
         vec3 F0 = mix(vec3(0.04), albedo, metallic);
+        float VdotH = max(0.0, dot(ViewDir,Half));
+        float VdotN = max(0.0, dot(ViewDir,PxlNormal));  
         vec3 Lo = vec3(0.0);
         float attenuation = 1.0;
         float Distance = length(LightDir);
