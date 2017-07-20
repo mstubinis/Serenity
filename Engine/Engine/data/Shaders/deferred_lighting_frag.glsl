@@ -146,14 +146,13 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         
         Lo += (kD * albedo / vec3(kPi) + (n / vec3(d))) * radiance * NdotL; 
 
-        //vec3 ambient = AmbientColor * albedo * ao;
-        vec3 ambient = AmbientColor * ao;
-        vec3 color = ambient + Lo;
+        // move this to the hdr pass. over there, Lo will be the lighting buffer. (will have to pass ao and albedo buffers in)
+        //vec3 ambient = AmbientColor * albedo * ao; //should just ignore ambient for now
+        vec3 color = (albedo * ao) + Lo;
         
         //here he tone mapped and gammad, but prob can skip this to HDR pass
         
-        TotalLight = vec4(color, 1.0);
-        return max( vec3(Glow), TotalLight);
+        return max( vec3(Glow), Lo);
         */
     }
 
