@@ -179,7 +179,7 @@ void main(void){
     vec2 uv = gl_FragCoord.xy / gScreenSize;
 
     vec3 PxlPosition = reconstruct_world_pos(uv);
-    vec3 PxlNormal = texture2D(gNormalMap, uv).rgb;
+    vec3 PxlNormal = normalize(texture2D(gNormalMap, uv).rgb);
 
     vec3 lightCalculation = vec3(0.0);
 
