@@ -39,13 +39,13 @@ vec3 reconstruct_world_pos(vec2 _uv){
     vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
-float BeckmannDist(float ndoth, float _alpha, float _pi){
-    float cos2a = ndoth * ndoth;
-    float b = (1.0 - cos2a) / (cos2a * _alpha);
-    return exp(-b) / (_pi * _alpha * (cos2a * cos2a));
+float BeckmannDist(float theta, float roughness, float pi){
+    float cos2a = theta * theta;
+    float b = (1.0 - cos2a) / (cos2a * roughness);
+    return exp(-b) / (pi * roughness * (cos2a * cos2a));
 }
-float SchlickFrensel(float f0, float vdoth){
-    return f0 + (1.0-f0) * pow( 1.0 - vdoth, 5.0);
+float SchlickFrensel(float f0, float theta){
+    return f0 + (1.0-f0) * pow( 1.0 - theta, 5.0);
 }
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float Glow = texture2D(gMiscMap,uv).r;
