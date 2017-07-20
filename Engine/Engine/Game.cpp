@@ -83,21 +83,26 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
     }
-
-    if(Events::Keyboard::isKeyDownOnce("f8")){
+    if(Events::Keyboard::isKeyDownOnce("f6")){
 		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
     }
-    if(Events::Keyboard::isKeyDownOnce("f9")){
+    if(Events::Keyboard::isKeyDownOnce("f7")){
 		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PHONG);
     }
-    if(Events::Keyboard::isKeyDownOnce("f10")){
+    if(Events::Keyboard::isKeyDownOnce("f8")){
 		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GXX);
     }
-    if(Events::Keyboard::isKeyDownOnce("f11")){
+    if(Events::Keyboard::isKeyDownOnce("f9")){
 		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::COOKTORRANCE);
     }
+    if(Events::Keyboard::isKeyDownOnce("f10")){
+		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GAUSSIAN);
+    }
+    if(Events::Keyboard::isKeyDownOnce("f11")){
+		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BECKMANN);
+    }
     if(Events::Keyboard::isKeyDownOnce("f12")){
-
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PBR);
     }
     m_HUD->update(dt);
 }
