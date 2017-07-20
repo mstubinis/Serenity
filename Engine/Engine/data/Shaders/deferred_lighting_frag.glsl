@@ -85,14 +85,14 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         }
         else if(materials[index].b == 2.0){ //this is GGX
             float F0 = 0.8; //fresnel term, 0 to 1
-            float dotLH = max(0.0, dot(LightDir,Half));
+            float LdotH = max(0.0, dot(LightDir,Half));
             float alphaSqr = alpha * alpha;
             float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;
             float D = alphaSqr / (kPi * denom * denom);
-            float Fresnel = SchlickFrensel(F0,dotLH);
+            float Fresnel = SchlickFrensel(F0,LdotH);
             float k = 0.5 * alpha;
             float k2 = k * k;
-            SpecularAngle = max(0.0, (NdotL * D * Fresnel / (dotLH*dotLH*(1.0-k2)+k2)) );
+            SpecularAngle = max(0.0, (NdotL * D * Fresnel / (LdotH*LdotH*(1.0-k2)+k2)) );
         }
         else if(materials[index].b == 3.0){ //this is Cook-Torrance
             float VdotH = max(dot(ViewDir, Half), 0.0);
