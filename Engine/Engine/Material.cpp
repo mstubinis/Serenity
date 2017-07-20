@@ -21,7 +21,7 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0);
     glm::vec3 second(0);
-	glm::vec3 third(0);
+    glm::vec3 third(0);
     for(uint i = 0; i < MaterialComponentType::NUMBER; i++){
         if(material->getComponents().count(i)){
             MaterialComponent* component = material->getComponents().at(i);
@@ -33,9 +33,9 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
                 else if(i == 3){ second.x = 1.0f; }
                 else if(i == 4){ second.y = 1.0f; }
                 else if(i == 5){ second.z = 1.0f; }
-				else if(i == 6){ third.x = 1.0f; }
-				else if(i == 7){ third.y = 1.0f; }
-				else if(i == 8){ third.z = 1.0f; }
+                else if(i == 6){ third.x = 1.0f; }
+                else if(i == 7){ third.y = 1.0f; }
+                else if(i == 8){ third.z = 1.0f; }
                 component->bind();
             }
             else{ 
@@ -46,11 +46,11 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     }
     Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
     Renderer::sendUniform1fSafe("BaseGlow",material->glow());
-	float id = float(material->id()) / (float)MATERIAL_COUNT_LIMIT;
+    float id = float(material->id()) / (float)MATERIAL_COUNT_LIMIT;
     Renderer::sendUniform1fSafe("matID",id);
     Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
     Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
-	Renderer::sendUniform3fSafe("ThirdConditionals",third.x,third.y,third.z);
+    Renderer::sendUniform3fSafe("ThirdConditionals",third.x,third.y,third.z);
 }};
 struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
     //Material* m = static_cast<Material*>(r);
