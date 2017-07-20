@@ -141,8 +141,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 
         vec3 n  =  CookTorr(Frensel.r,VdotH,VdotN,LdotN,NdotH,alpha,kPi);
         float d = 4.0 * max(dot(PxlNormal, ViewDir), 0.0) * NdotL + 0.001; 
-
-        // add to outgoing radiance Lo           
+        
         Lo += (kD * albedo / vec3(kPi) + (n / vec3(d))) * radiance * NdotL; 
 
         //vec3 ambient = AmbientColor * albedo * ao;
@@ -150,7 +149,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         vec3 color = ambient + Lo;
         
         //here he tone mapped and gammad, but prob can skip this to HDR pass
-
+        
         TotalLight = vec4(color, 1.0);
         return max( vec3(Glow), TotalLight);
         */
