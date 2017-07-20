@@ -281,6 +281,9 @@ class Material::impl final{
             glm::vec4& ref = Material::m_MaterialProperities.at(m_ID);
             ref.r = m_BaseGlow;
             ref.g = m_SpecularityPower;
+			if(m_LightingMode != Material::LightingMode::BLINNPHONG && m_LightingMode != Material::LightingMode::PHONG){
+				ref.g = glm::clamp(ref.g,0.0f,1.0f);
+			}
             ref.b = float(m_LightingMode);
             ref.a = m_Shadeless;
         }
