@@ -126,33 +126,33 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     }
     else if(materials[index].b == 6.0){ //this is PBR (physical)
         /*
-
-        vec3 F0 = vec3(0.04); 
-        F0 = mix(F0, albedo, metallic);
-
+        vec3 F0 = mix(vec3(0.04), albedo, metallic);
         vec3 Lo = vec3(0.0);
-        for(int i = 0; i < 4; ++i) {
-            // calculate per-light radiance
-            vec3 radiance = LightColor * attenuation;        
+        float attenuation = 1.0;
+        float Distance = length(LightDir);
+        if(LightType != 0 && LightType != 2){
+            attenuation = 1.0 / (max(1.0 , LightData.x + (LightData.y * Distance) + (LightData.z * Distance * Distance)));
+        }
+        
+        vec3 radiance = LightColor * attenuation; // calculate per-light radiance 
 
-            vec3 Frensel = vec3(SchlickFrensel(F0,vdoth));
-            vec3 kD = (vec3(1.0) - Frensel) * (1.0 - metallic);
+        vec3 Frensel = vec3(SchlickFrensel(F0,vdoth));
+        vec3 kD = (vec3(1.0) - Frensel) * (1.0 - metallic);
 
-            vec3 nominator    =  CookTorr(Frensel.r,VdotH,VdotN,LdotN,NdotH,alpha,kPi);
-            float denominator = 4.0 * max(dot(PxlNormal, ViewDir), 0.0) * NdotL + 0.001; 
-            vec3 specular     = nominator / denominator;
+        vec3 n  =  CookTorr(Frensel.r,VdotH,VdotN,LdotN,NdotH,alpha,kPi);
+        float d = 4.0 * max(dot(PxlNormal, ViewDir), 0.0) * NdotL + 0.001; 
 
-            // add to outgoing radiance Lo           
-            Lo += (kD * albedo / kPi + specular) * radiance * NdotL; 
-        }   
+        // add to outgoing radiance Lo           
+        Lo += (kD * albedo / vec3(kPi) + (n / vec3(d))) * radiance * NdotL; 
 
-        vec3 ambient = vec3(0.03) * albedo * ao;
+        //vec3 ambient = AmbientColor * albedo * ao;
+        vec3 ambient = AmbientColor * ao;
         vec3 color = ambient + Lo;
+        
+        //here he tone mapped and gammad, but prob can skip this to HDR pass
 
-        color = color / (color + vec3(1.0));
-        color = pow(color, vec3(1.0/2.2));  
-
-        FragColor = vec4(color, 1.0);
+        TotalLight = vec4(color, 1.0);
+        return max( vec3(Glow), TotalLight);
         */
     }
 
