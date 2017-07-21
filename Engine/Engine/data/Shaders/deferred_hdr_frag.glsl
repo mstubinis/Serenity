@@ -27,13 +27,10 @@ void main(void){
         lighting = diffuse;
     }
     else{
-        vec3 lightedDiffuse = lighting * diffuse;    
-        lighting = mix(lightedDiffuse, lightedDiffuse + bloom, (HasBloom == 1.0)); //bloom?
-    
-        //lighting *= diffuse;
-        //if(HasBloom == 1.0){
-            //lighting += bloom;
-        //}
+        lighting *= diffuse;
+        if(HasBloom == 1.0){
+            lighting += bloom;
+        }
     }
 
     if(HasHDR == 1.0){

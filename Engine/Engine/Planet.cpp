@@ -249,7 +249,7 @@ void Planet::update(float dt){
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
-    m_Light = new SunLight(glm::v3(0),name + " Light",LIGHT_TYPE_SUN,scene);
+    m_Light = new SunLight(glm::v3(0),name + " Light",LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     setColor(starColor.x,starColor.y,starColor.z,1);
     setGodsRaysColor(starColor.x,starColor.y,starColor.z);

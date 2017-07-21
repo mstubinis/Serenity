@@ -14,6 +14,28 @@
 
 using namespace Engine;
 
+std::unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
+	std::unordered_map<uint,boost::tuple<float,float,float>> m;
+
+	m[LightRange::_7] = boost::make_tuple(1.0f, 0.7f, 1.8f);
+	m[LightRange::_13] = boost::make_tuple(1.0f, 0.35f, 0.44f);
+	m[LightRange::_20] = boost::make_tuple(1.0f, 0.22f, 0.20f);
+	m[LightRange::_32] = boost::make_tuple(1.0f, 0.14f, 0.07f);
+	m[LightRange::_50] = boost::make_tuple(1.0f, 0.09f, 0.032f);
+	m[LightRange::_65] = boost::make_tuple(1.0f, 0.07f, 0.017f);
+	m[LightRange::_100] = boost::make_tuple(1.0f, 0.045f, 0.0075f);
+	m[LightRange::_160] = boost::make_tuple(1.0f, 0.027f, 0.0028f);
+	m[LightRange::_200] = boost::make_tuple(1.0f, 0.022f, 0.0019f);
+	m[LightRange::_325] = boost::make_tuple(1.0f, 0.014f, 0.0007f);
+	m[LightRange::_600] = boost::make_tuple(1.0f, 0.007f, 0.0002f);
+	m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
+
+	return m;
+}
+
+std::unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = _populateLightRanges();
+
+
 SunLight::SunLight(glm::v3 pos,std::string n,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),n,scene){
     m_Type = type;
     m_Active = true;
@@ -44,7 +66,7 @@ void SunLight::lighten(){
 
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
-DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LIGHT_TYPE_DIRECTIONAL,scene){
+DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
     m_Direction = glm::normalize(dir);
 }
 DirectionalLight::~DirectionalLight(){
@@ -57,7 +79,7 @@ void DirectionalLight::lighten(){
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
-PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_POINT,scene){
+PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LightType::Point,scene){
     if(Resources::getMesh("PointLightBounds") == nullptr){
         #pragma region MeshData
         std::string data =  "v 0.000000 -0.138668 0.000000\n"
@@ -557,11 +579,16 @@ float PointLight::calculatePointLightRadius(){
     float MaxChannel = glm::max(glm::max(m_Color.x, m_Color.y), m_Color.z);
     float ret = (-m_Linear + glm::sqrt(m_Linear * m_Linear -
         4 * m_Exp * (m_Exp - 256 * MaxChannel * m_DiffuseIntensity))) / (2 * m_Exp);
-    return ret;
+    return ret * 1.2f; //the 1.2f is there because i accidently made the mesh a little too small, and the mesh is hard coded.
 }
 void PointLight::setConstant(float c){ m_Constant = c; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setLinear(float l){ m_Linear = l; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setExponent(float e){ m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
+void PointLight::setAttenuation(float c,float l, float e){ m_Constant = c; m_Linear = l; m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
+void PointLight::setAttenuation(LightRange range){
+	boost::tuple<float,float,float>& data = LIGHT_RANGES[uint(range)];
+	m_Constant = data.get<0>(); m_Linear = data.get<1>(); m_Exp = data.get<2>();
+}
 void PointLight::lighten(){
     if(!m_Active) return;
     Camera* camera = Resources::getActiveCamera();
@@ -572,7 +599,7 @@ void PointLight::lighten(){
 
 	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
 	Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Constant,m_Linear);
-	Renderer::sendUniform4f("LightDataC", m_Exp,pos.x,pos.y,pos.z);
+	Renderer::sendUniform4f("LightDataC", m_Exp,float(pos.x),float(pos.y),float(pos.z));
 
     glm::mat4 m(1);
     m = glm::translate(m,glm::vec3(pos));
@@ -580,10 +607,7 @@ void PointLight::lighten(){
 
     Renderer::sendUniformMatrix4f("Model",m);
 
-    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) > m_PointLightRadius){ 
-        Renderer::Settings::cullFace(GL_BACK); 
-    }
-    else{                                                          
+    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) <= m_PointLightRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
 	Resources::getMesh("PointLightBounds")->bind();
@@ -591,7 +615,7 @@ void PointLight::lighten(){
 	Resources::getMesh("PointLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 }
-SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_SPOT){
+SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LightType::Spot){
     m_Direction = glm::vec3(0,0,-1);
     m_Cutoff = 0;
 }

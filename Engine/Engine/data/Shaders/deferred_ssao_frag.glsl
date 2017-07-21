@@ -81,7 +81,7 @@ void main(void){
         float Glow = texture2D(gMiscMap,uv).r;
         vec3 lighting = texture2D(gLightMap,uv).rgb;
         float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
-        if(brightness > 4.9 || Glow > 0.01f){
+        if(brightness > 1.3 || Glow > 0.01f){
             float brightScale = log(brightness) * 0.7;
             float glowScale = Glow * 0.73;
 			float scale = max(glowScale, brightScale);

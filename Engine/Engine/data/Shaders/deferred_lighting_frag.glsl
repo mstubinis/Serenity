@@ -53,8 +53,8 @@ vec3 CookTorr(float frensel,float vdoth, float vdotn, float ldotn, float ndoth,f
 }
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float Glow = texture2D(gMiscMap,uv).r;
-    if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999) || Glow > 0.99 ){
-        return vec3(1.0);
+    if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999)){
+        return vec3(0.0);
     }
     vec3 AmbientColor  = LightDataD.xyz * LightDataA.x;
     vec3 DiffuseColor  = vec3(0.0);

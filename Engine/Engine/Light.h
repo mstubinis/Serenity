@@ -2,13 +2,31 @@
 #ifndef ENGINE_LIGHT_H
 #define ENGINE_LIGHT_H
 #include "ObjectDisplay.h"
+#include <boost/tuple/tuple.hpp>
+#include <unordered_map>
 
-enum LIGHT_TYPE {
-    LIGHT_TYPE_SUN,
-    LIGHT_TYPE_POINT,
-    LIGHT_TYPE_DIRECTIONAL,
-    LIGHT_TYPE_SPOT
+enum LightType {
+    Sun,
+    Point,
+    Directional,
+    Spot
 };
+
+enum LightRange{
+	_7,
+	_13,
+	_20,
+	_32,
+	_50,
+	_65,
+	_100,
+	_160,
+	_200,
+	_325,
+	_600,
+	_3250
+};
+
 class Scene;
 class SunLight: public ObjectDisplay{
     protected:
@@ -17,7 +35,7 @@ class SunLight: public ObjectDisplay{
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
         void sendGenericAttributesToShader();
     public:
-        SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",unsigned int=LIGHT_TYPE_SUN,Scene* = nullptr);
+        SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",uint=LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
 
         void update(float);
@@ -53,9 +71,11 @@ class PointLight: public SunLight{
         PointLight(std::string = "Point Light",glm::v3 = glm::v3(0), Scene* = nullptr);
         virtual ~PointLight();
 
-        virtual void setConstant(float c);
-        virtual void setLinear(float l);
-        virtual void setExponent(float e);
+        void setConstant(float c);
+        void setLinear(float l);
+        void setExponent(float e);
+		void setAttenuation(float c,float l, float e);
+		void setAttenuation(LightRange);
 
         float& getLightRadius(){ return m_PointLightRadius; }
 
