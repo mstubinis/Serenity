@@ -72,12 +72,12 @@ class Texture::impl final{
             glBindTexture(m_Type,0);
         }
         void _generateFromImage(sf::Image& img){
-	    if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
+            if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
                 glTexImage2D(m_Type,0,m_Format,img.getSize().x,img.getSize().y,0,GL_RGBA,GL_UNSIGNED_BYTE,img.getPixelsPtr());
-	    }
+            }
             else if(m_Format == GL_RGB8 || m_Format == GL_SRGB8){
                 glTexImage2D(m_Type,0,m_Format,img.getSize().x,img.getSize().y,0,GL_RGB,GL_UNSIGNED_BYTE,img.getPixelsPtr());
-	    }
+            }
             glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glGenerateMipmap(m_Type);
@@ -90,7 +90,12 @@ class Texture::impl final{
                 m_Pixels.resize(m_Width*m_Height*4);
                 glBindTexture(m_Type,m_TextureAddress);
                 glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-                glGetTexImage(m_Type,0,m_Format,GL_UNSIGNED_BYTE,&m_Pixels[0]);
+                if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
+                    glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
+                }
+                else{
+                    glGetTexImage(m_Type,0,GL_RGB,GL_UNSIGNED_BYTE,&m_Pixels[0]);
+                }
             }
             return &m_Pixels[0];
         }
