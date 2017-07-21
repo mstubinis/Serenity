@@ -76,8 +76,8 @@ vec3 CalcBumpedNormal(void){
 void main(void){
     //gl_FragData[0] = Object_Color;
     //gl_FragData[1].rgb = normalize(Normals);
-    gl_FragData[2].r = BaseGlow;
-    gl_FragData[2].g = 1.0;
+    //gl_FragData[2].r = BaseGlow;
+    //gl_FragData[2].g = 1.0;
 
     gl_FragData[0] = mix(Object_Color, Object_Color * texture2D(DiffuseTexture, UV), (FirstConditionals.x > 0.5)); //object color or diffuse texture
     gl_FragData[1].rgb = mix(normalize(Normals), CalcBumpedNormal(), (FirstConditionals.y > 0.5)); //regular normals or normal map
