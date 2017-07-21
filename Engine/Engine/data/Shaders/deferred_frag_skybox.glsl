@@ -12,8 +12,11 @@ void main(void){
     gl_FragData[1] = vec4(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
-    if(HasGodsRays == 1){
-        gl_FragData[3] = vec4(0.0259,0.0224,0.0290,1.0);
-    }
+    
+    //if(HasGodsRays == 1){
+        //gl_FragData[3] = vec4(0.0259,0.0224,0.0290,1.0);
+    //} 
+    gl_FragData[3] = mix(vec4(0.0), vec4(0.0259,0.0224,0.0290,1.0), (HasGodsRays == 1));
+    
     gl_FragDepth = 0.99999;
 }
