@@ -192,11 +192,11 @@ void MaterialComponentReflection::unbind(){
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
 }
-MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mixFactor){
-    m_RefractionRatio = ratio;
+MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float index):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mixFactor){
+    m_RefractionIndex = index;
 }
-MaterialComponentRefraction::MaterialComponentRefraction(std::string& cubemap,std::string& map,float mixFactor,float ratio):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mixFactor){
-    m_RefractionRatio = ratio;
+MaterialComponentRefraction::MaterialComponentRefraction(std::string& cubemap,std::string& map,float mixFactor,float index):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mixFactor){
+    m_RefractionIndex = index;
 }
 MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
@@ -206,7 +206,7 @@ void MaterialComponentRefraction::bind(){
     std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
-    Renderer::sendUniform1fSafe("RefractionRatio",m_RefractionRatio);
+    Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
 
     if(m_Texture == nullptr)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
