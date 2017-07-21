@@ -253,6 +253,8 @@ void Detail::RenderManagement::init(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
 
     RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,float(Resources::getWindowSize().x),0.0f,float(Resources::getWindowSize().y),0.005f,1000.0f);
+	
+    glDepthFunc(GL_LEQUAL);
 }
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
