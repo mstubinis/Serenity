@@ -18,7 +18,7 @@ uniform samplerCube RefractionTexture;
 uniform sampler2D   RefractionTextureMap;
 
 uniform float       CubemapMixFactor;
-uniform float       RefractionRatio;
+uniform float       RefractiveIndex;
 uniform vec3        CameraPosition;
 
 uniform float BaseGlow;
@@ -54,14 +54,14 @@ vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){
 }
 vec4 Reflection(vec4 d, vec3 cpos, vec3 n, vec3 wpos){
     vec4 r = vec4(0.0);
-    r = textureCube(ReflectionTexture,reflect(n,cpos - wpos)) * texture2D(ReflectionTextureMap,UV).r;
+    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,UV).r;
     r.a *= CubemapMixFactor;
     r = PaintersAlgorithm(r,d);
     return r;
 }
 vec4 Refraction(vec4 d, vec3 cpos, vec3 n, vec3 wpos){
     vec4 r = vec4(0.0);
-    r = textureCube(RefractionTexture,refract(n,cpos - wpos,RefractionRatio)) * texture2D(RefractionTextureMap,UV).r;
+    r = textureCube(RefractionTexture,refract(n,normalize(cpos - wpos),1.0 / RefractiveIndex)) * texture2D(RefractionTextureMap,UV).r;
     r.a *= CubemapMixFactor;
     r = PaintersAlgorithm(r,d);
     return r;
