@@ -1,10 +1,12 @@
 #version 120
 #define MATERIAL_COUNT_LIMIT 255
 
-uniform vec4 LightDataA; //x = ambient, y = diffuse, z = specular, w = constant
-uniform vec4 LightDataB; //x = linear, y = exponent, z = LightDirection.x, w = LightDirection.y
-uniform vec4 LightDataC; //x = LightDirection.z, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
+
+uniform vec4 LightDataA; //x = ambient, y = diffuse, z = specular, w = LightDirection.x
+uniform vec4 LightDataB; //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
+uniform vec4 LightDataC; //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
 uniform vec4 LightDataD; //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+
 
 uniform sampler2D gNormalMap;
 uniform sampler2D gMiscMap;
@@ -121,7 +123,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         float attenuation = 1.0;
         float Distance = length(LightDir);
         if(LightDataD.w != 0 && LightDataD.w != 2){
-            attenuation = 1.0 / (max(1.0 , LightDataA.w + (LightDataB.x * Distance) + (LightDataB.y * Distance * Distance)));
+            attenuation = 1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
         }
         
         vec3 radiance = LightDataD.xyz * attenuation; // calculate per-light radiance 
@@ -155,7 +157,7 @@ vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 
     vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
-    float attenuation =  1.0 / (max(1.0 , LightDataA.w + (LightDataB.x * Distance) + (LightDataB.y * Distance * Distance)));
+    float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
     return c * attenuation;
 }
 vec3 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
@@ -170,7 +172,7 @@ void main(void){
 
     vec3 lightCalculation = vec3(0.0);
 	vec3 LightPosition = vec3(LightDataC.yzw);
-	vec3 LightDirection = vec3(LightDataB.z,LightDataB.w,LightDataC.x);
+	vec3 LightDirection = vec3(LightDataA.w,LightDataB.x,LightDataB.y);
 
     if(LightDataD.w == 0){
         lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);

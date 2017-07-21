@@ -52,9 +52,8 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
-	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
-    Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Direction.x, m_Direction.y);
-	Renderer::sendUniform4f("LightDataC", m_Direction.z,0.0f,0.0f,0.0f);
+	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Direction.x);
+    Renderer::sendUniform4f("LightDataB", m_Direction.y,m_Direction.z,0.0f, 0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
@@ -560,18 +559,9 @@ float PointLight::calculatePointLightRadius(){
         4 * m_Exp * (m_Exp - 256 * MaxChannel * m_DiffuseIntensity))) / (2 * m_Exp);
     return ret;
 }
-void PointLight::setConstant(float c){ 
-    m_Constant = c;
-    m_PointLightRadius = calculatePointLightRadius();
-}
-void PointLight::setLinear(float l){ 
-    m_Linear = l;
-    m_PointLightRadius = calculatePointLightRadius();
-}
-void PointLight::setExponent(float e){ 
-    m_Exp = e;
-    m_PointLightRadius = calculatePointLightRadius();
-}
+void PointLight::setConstant(float c){ m_Constant = c; m_PointLightRadius = calculatePointLightRadius(); }
+void PointLight::setLinear(float l){ m_Linear = l; m_PointLightRadius = calculatePointLightRadius(); }
+void PointLight::setExponent(float e){ m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::lighten(){
     if(!m_Active) return;
     Camera* camera = Resources::getActiveCamera();
@@ -580,9 +570,9 @@ void PointLight::lighten(){
         return;
     sendGenericAttributesToShader();
 
-	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Constant);
-	Renderer::sendUniform4f("LightDataB", m_Linear,m_Exp,0.0f,0.0f);
-	Renderer::sendUniform4f("LightDataC", 0.0f,float(pos.x),float(pos.y),float(pos.z));
+	Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
+	Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Constant,m_Linear);
+	Renderer::sendUniform4f("LightDataC", m_Exp,pos.x,pos.y,pos.z);
 
     glm::mat4 m(1);
     m = glm::translate(m,glm::vec3(pos));
@@ -596,8 +586,9 @@ void PointLight::lighten(){
     else{                                                          
         Renderer::Settings::cullFace(GL_FRONT);
     }
+	Resources::getMesh("PointLightBounds")->bind();
     Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
-
+	Resources::getMesh("PointLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 }
 SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LIGHT_TYPE_SPOT){

@@ -37,8 +37,8 @@ GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 uint Detail::RendererInfo::GeneralInfo::multisample_level = 4;
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
-float Detail::RendererInfo::BloomInfo::bloom_radius = 0.92f;
-float Detail::RendererInfo::BloomInfo::bloom_strength = 2.7f;
+float Detail::RendererInfo::BloomInfo::bloom_radius = 0.84f;
+float Detail::RendererInfo::BloomInfo::bloom_strength = 2.5f;
 
 bool Detail::RendererInfo::LightingInfo::lighting = true;
 
@@ -66,7 +66,7 @@ GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
 bool Detail::RendererInfo::HDRInfo::hdr = true;
 float Detail::RendererInfo::HDRInfo::hdr_exposure = 3.2f;
-float Detail::RendererInfo::HDRInfo::hdr_gamma = 2.2f;
+float Detail::RendererInfo::HDRInfo::hdr_gamma = 1.3f;
 HDRToneMapAlgorithm::Algorithm Detail::RendererInfo::HDRInfo::hdr_algorithm = HDRToneMapAlgorithm::EXPOSURE;
 
 GBuffer* Detail::RenderManagement::m_gBuffer = nullptr;
@@ -450,6 +450,7 @@ void Detail::RenderManagement::render(){
         m_gBuffer->stop();
         
     }
+
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
@@ -606,17 +607,18 @@ void Detail::RenderManagement::_passHDR(){
     p->bind();
 
     sendUniform1fSafe("exposure",RendererInfo::HDRInfo::hdr_exposure);
-	sendUniform1i("HasHDR",int(RendererInfo::HDRInfo::hdr));
-	sendUniform1i("HasBloom",int(RendererInfo::BloomInfo::bloom));
-	sendUniform1i("HDRAlgorithm",int(RendererInfo::HDRInfo::hdr_algorithm));
+	sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
+	sendUniform1iSafe("HasBloom",int(RendererInfo::BloomInfo::bloom));
+	sendUniform1iSafe("HDRAlgorithm",int(RendererInfo::HDRInfo::hdr_algorithm));
 	sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
-    bindTexture("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
-    bindTexture("bloomBuffer",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),1);
-	bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),2);
+    bindTextureSafe("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
+    bindTextureSafe("bloomBuffer",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),1);
+	bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),2);
+	bindTextureSafe("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),3);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){

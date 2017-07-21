@@ -21,7 +21,9 @@ CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,b
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/glm::num(100),scene);
         m_Light->setConstant(0.1f);m_Light->setLinear(0.1f);m_Light->setExponent(0.1f);m_Light->setColor(255,124,27,255);
-        m_Light->setSpecularPower(2.0f);
+        m_Light->setSpecularIntensity(1.0f);
+		m_Light->setDiffuseIntensity(0.8f);
+		m_Light->setSpecularIntensity(0.5f);
     }
     setColor(255,235,206,255);
     this->m_Shadeless = true;
@@ -71,8 +73,9 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setBackgroundColor(255.0f,0,0);
 
     PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
+
     l->setColor(255,225,235,255);
-    l->setSpecularPower(0.0f);
+    l->setSpecularIntensity(0.0f);
 
     if(!Resources::getMaterial("CapsuleTunnel")){
         Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",COLLISION_TYPE_NONE);
@@ -91,7 +94,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     if(!Resources::getMaterial("Capsule_C")){
         Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
         Resources::getMaterial("Capsule_C")->setShadeless(true);
-        Resources::getMaterial("Capsule_C")->setGlow(1.0f);
+        Resources::getMaterial("Capsule_C")->setGlow(0.01f);
     }
     if(!Resources::getMaterial("Capsule_D")){
         Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");

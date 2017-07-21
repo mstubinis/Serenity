@@ -31,6 +31,6 @@ void main(void){
         lighting *= min(1.0,ssao*(brightness+0.65)); //this minimizes the ssao effect on very brightly light areas
     }
 	lighting += rays;
-	//lighting = pow(lighting, vec3(1.0 / gamma)); //how the hell does gamma work...
+	//lighting = pow(lighting, vec3(1.0 / gamma));
     gl_FragColor = vec4(lighting,1.0);
 }

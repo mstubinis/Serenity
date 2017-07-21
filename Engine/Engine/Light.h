@@ -23,8 +23,12 @@ class SunLight: public ObjectDisplay{
         void update(float);
 
         virtual void lighten();
-        float getSpecularPower(){ return m_SpecularIntensity; }
-        void setSpecularPower(float s){ m_SpecularIntensity = s; }
+        float getAmbientIntensity(){ return m_AmbientIntensity; }
+        void setAmbientIntensity(float a){ m_AmbientIntensity = a; }
+        float getDiffuseIntensity(){ return m_DiffuseIntensity; }
+        void setDiffuseIntensity(float d){ m_DiffuseIntensity = d; }
+        float getSpecularIntensity(){ return m_SpecularIntensity; }
+        void setSpecularIntensity(float s){ m_SpecularIntensity = s; }
 
         void activate(){ m_Active = true; }
         void deactivate(){ m_Active = false; }

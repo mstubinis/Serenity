@@ -77,32 +77,38 @@ void Game::initLogic(){
     m_HUD = new HUD();
 
     Renderer::Settings::HDR::disable();
+
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
     }
-    if(Events::Keyboard::isKeyDownOnce("f6")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
+    if(Events::Keyboard::isKeyDownOnce("f4")){
+		Resources::setCurrentScene("Sol");
+		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+    }
+    if(Events::Keyboard::isKeyDownOnce("f5")){
+		Resources::setCurrentScene("CapsuleSpace");
+		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f7")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PHONG);
+		Resources::getMaterial("Dreadnaught")->setLightingMode(Material::LightingMode::PHONG);
     }
     if(Events::Keyboard::isKeyDownOnce("f8")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GXX);
+		Resources::getMaterial("Dreadnaught")->setLightingMode(Material::LightingMode::GXX);
     }
     if(Events::Keyboard::isKeyDownOnce("f9")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::COOKTORRANCE);
+		Resources::getMaterial("Dreadnaught")->setLightingMode(Material::LightingMode::COOKTORRANCE);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GAUSSIAN);
+		Resources::getMaterial("Dreadnaught")->setLightingMode(Material::LightingMode::GAUSSIAN);
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BECKMANN);
+		Resources::getMaterial("Dreadnaught")->setLightingMode(Material::LightingMode::BECKMANN);
     }
     if(Events::Keyboard::isKeyDownOnce("f12")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PBR);
+        Resources::getMaterial("Dreadnaught")->setLightingMode(Material::LightingMode::PBR);
     }
     m_HUD->update(dt);
 }

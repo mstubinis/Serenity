@@ -5,6 +5,8 @@ uniform float exposure;
 uniform sampler2D lightingBuffer;
 uniform sampler2D bloomBuffer;
 uniform sampler2D gDiffuseMap;
+uniform sampler2D gNormalMap;
+
 uniform int HasHDR;
 uniform int HasBloom;
 uniform int HDRAlgorithm;
@@ -19,12 +21,18 @@ void main(void){
 	vec3 diffuse = texture2D(gDiffuseMap,uv).rgb;
     vec3 lighting = texture2D(lightingBuffer, uv).rgb;
     vec3 bloom = texture2D(bloomBuffer, uv).rgb;
+	vec3 normals = texture2D(gNormalMap,uv).rgb;
 
-	lighting *= diffuse;
+	if(normals.r > 0.999 && normals.g > 0.999 && normals.b > 0.999){
+	    lighting = diffuse;
+	}
+	else{
+	    lighting *= diffuse;
+		if(HasBloom == 1.0){
+			lighting += bloom;
+		}
+	}
 
-    if(HasBloom == 1.0){
-        lighting += bloom;
-    }
     if(HasHDR == 1.0){
         if(HDRAlgorithm == 0.0){ // Reinhard tone mapping
             lighting = lighting / (lighting + vec3(1.0));
@@ -44,5 +52,4 @@ void main(void){
         }
     }
     gl_FragColor = vec4(lighting, 1.0);
-	
 }
