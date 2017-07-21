@@ -138,7 +138,7 @@ class MaterialComponentReflection: public MaterialComponent{
 };
 class MaterialComponentRefraction: public MaterialComponentReflection{
     private:
-        float m_RefractionRatio;
+        float m_RefractionIndex;
     public:
         MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio);
         MaterialComponentRefraction(std::string& cubemap,std::string& map,float mixFactor,float ratio);
@@ -146,8 +146,8 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 
         void bind();
 
-        void setRefractionRatio(float);
-        const float refractionRatio() const { return m_RefractionRatio; }
+        void setRefractionIndex(float);
+        const float refractionIndex() const { return m_RefractionIndex; }
 };
 
 class MaterialMeshEntry{
