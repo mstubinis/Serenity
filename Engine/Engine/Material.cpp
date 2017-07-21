@@ -192,11 +192,11 @@ void MaterialComponentReflection::unbind(){
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
 }
-MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float index):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mixFactor){
-    m_RefractionIndex = index;
+MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mix){
+    m_RefractionIndex = i;
 }
-MaterialComponentRefraction::MaterialComponentRefraction(std::string& cubemap,std::string& map,float mixFactor,float index):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mixFactor){
-    m_RefractionIndex = index;
+MaterialComponentRefraction::MaterialComponentRefraction(std::string& cubemap,std::string& map,float i,float mix):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mix){
+    m_RefractionIndex = i;
 }
 MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
@@ -284,13 +284,13 @@ class Material::impl final{
         void _updateGlobalMaterialPool(){
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
 
-			data.r = m_Frensel;
-			data.g = m_SpecularityPower;
-			if(m_LightingMode != Material::LightingMode::BLINNPHONG && m_LightingMode != Material::LightingMode::PHONG){
-				data.g = glm::clamp(data.g,0.01f,0.99f);
-			}
-			data.b = float(m_LightingMode);
-			data.a = m_Shadeless;
+            data.r = m_Frensel;
+            data.g = m_SpecularityPower;
+            if(m_LightingMode != Material::LightingMode::BLINNPHONG && m_LightingMode != Material::LightingMode::PHONG){
+                data.g = glm::clamp(data.g,0.01f,0.99f);
+            }
+            data.b = float(m_LightingMode);
+            data.a = m_Shadeless;
         }
         void _destruct(){
             for(auto component:m_Components)
@@ -336,12 +336,12 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::REFLECTION,new MaterialComponentReflection(MaterialComponentType::REFLECTION,text,map,mixFactor));
         }
-        void _addComponentRefraction(Texture* text,Texture* map,float mixFactor,float ratio){
+        void _addComponentRefraction(Texture* text,Texture* map,float refractiveIndex,float mixFactor){
             if((m_Components.count(MaterialComponentType::REFRACTION) && m_Components[MaterialComponentType::REFRACTION] != nullptr) || (text == nullptr || map == nullptr))
                 return;
-            m_Components.emplace(MaterialComponentType::REFRACTION,new MaterialComponentRefraction(text,map,mixFactor,ratio));
+            m_Components.emplace(MaterialComponentType::REFRACTION,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
-		void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.0001f,0.9999f); }
+        void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.0001f,0.9999f); }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
@@ -438,21 +438,21 @@ void Material::addComponentReflection(std::string cubemapName,std::string mapFil
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
-void Material::addComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio){
-    m_i->_addComponentRefraction(cubemap,map,mixFactor,ratio);
+void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refractiveIndex,float mixFactor){
+    m_i->_addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
-void Material::addComponentRefraction(std::string textureFiles[],std::string mapFile,float mixFactor,float ratio){
+void Material::addComponentRefraction(std::string textureFiles[],std::string mapFile,float refractiveIndex,float mixFactor){
     Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
     Texture* map = Resources::getTexture(mapFile); 
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
-    Material::addComponentRefraction(cubemap,map,mixFactor,ratio);
+    Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
-void Material::addComponentRefraction(std::string cubemapName,std::string mapFile,float mixFactor,float ratio){
+void Material::addComponentRefraction(std::string cubemapName,std::string mapFile,float refractiveIndex,float mixFactor){
     Texture* cubemap = Resources::getTexture(cubemapName); 
     if(cubemap == nullptr && cubemapName != "") cubemap = new Texture(cubemapName);
     Texture* map = Resources::getTexture(mapFile); 
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
-    Material::addComponentRefraction(cubemap,map,mixFactor,ratio);
+    Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
 
 const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
