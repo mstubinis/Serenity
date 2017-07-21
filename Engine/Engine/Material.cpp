@@ -226,7 +226,7 @@ class Material::impl final{
         bool m_Shadeless;
         float m_BaseGlow;
         float m_SpecularityPower;
-		float m_Frensel;
+        float m_Frensel;
         uint m_ID;
         void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
             _addComponentDiffuse(diffuse);
@@ -238,8 +238,7 @@ class Material::impl final{
             m_BaseGlow = 0.0f;
             m_SpecularityPower = 8.0f;
             m_LightingMode = Material::LightingMode::BLINNPHONG;
-			m_Frensel = 0.5f;
-
+            m_Frensel = 0.5f;
 
             _addToMaterialPool();
 
@@ -332,8 +331,6 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::ROUGHNESS,new MaterialComponentRoughness(map,roughnessBaseValue));
         }
-
-
         void _addComponentReflection(Texture* text,Texture* map,float mixFactor){
             if((m_Components.count(MaterialComponentType::REFLECTION) && m_Components[MaterialComponentType::REFLECTION] != nullptr) || (text == nullptr || map == nullptr))
                 return;
@@ -367,7 +364,6 @@ Material::~Material(){
 	}
 	m_i->m_Meshes.clear();
 }
-
 void Material::addComponentDiffuse(Texture* texture){
 	m_i->_addComponentDiffuse(texture);
 }
@@ -376,7 +372,6 @@ void Material::addComponentDiffuse(std::string& textureFile){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
     m_i->_addComponentDiffuse(texture);
 }
-
 void Material::addComponentNormal(Texture* texture){
     m_i->_addComponentNormal(texture);
 }
@@ -385,7 +380,6 @@ void Material::addComponentNormal(std::string& textureFile){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentNormal(texture);
 }
-
 void Material::addComponentGlow(Texture* texture){
     m_i->_addComponentGlow(texture);
 }
@@ -394,7 +388,6 @@ void Material::addComponentGlow(std::string& textureFile){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentGlow(texture);
 }
-
 void Material::addComponentSpecular(Texture* texture){
     m_i->_addComponentSpecular(texture);
 }
@@ -412,7 +405,6 @@ void Material::addComponentAO(std::string& textureFile,float baseValue){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentAO(texture,baseValue);
 }
-
 void Material::addComponentMetalness(Texture* texture,float baseValue){
     m_i->_addComponentMetalness(texture,baseValue);
 }
@@ -421,7 +413,6 @@ void Material::addComponentMetalness(std::string& textureFile,float baseValue){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentMetalness(texture,baseValue);
 }
-
 void Material::addComponentRoughness(Texture* texture,float baseValue){
     m_i->_addComponentRoughness(texture,baseValue);
 }
@@ -430,8 +421,6 @@ void Material::addComponentRoughness(std::string& textureFile,float baseValue){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentRoughness(texture,baseValue);
 }
-
-
 void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
     if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->getSkybox()->texture();
     m_i->_addComponentReflection(cubemap,map,mixFactor);
@@ -442,7 +431,6 @@ void Material::addComponentReflection(std::string textureFiles[],std::string map
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
-
 void Material::addComponentReflection(std::string cubemapName,std::string mapFile,float mixFactor){
     Texture* cubemap = Resources::getTexture(cubemapName); 
     if(cubemap == nullptr && cubemapName != ""){ cubemap = new Texture(cubemapName); }
@@ -450,8 +438,6 @@ void Material::addComponentReflection(std::string cubemapName,std::string mapFil
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
-
-
 void Material::addComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio){
     m_i->_addComponentRefraction(cubemap,map,mixFactor,ratio);
 }
@@ -544,8 +530,6 @@ void Material::unload(){
         EngineResource::unload();
     }
 }
-
-
 MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh){
 	m_Mesh = mesh;
 }
