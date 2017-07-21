@@ -18,20 +18,23 @@ vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){
 
 void main(void){
     vec2 uv = gl_TexCoord[0].st;
-	vec3 diffuse = texture2D(gDiffuseMap,uv).rgb;
+    vec3 diffuse = texture2D(gDiffuseMap,uv).rgb;
     vec3 lighting = texture2D(lightingBuffer, uv).rgb;
     vec3 bloom = texture2D(bloomBuffer, uv).rgb;
-	vec3 normals = texture2D(gNormalMap,uv).rgb;
-
-	if(normals.r > 0.999 && normals.g > 0.999 && normals.b > 0.999){
-	    lighting = diffuse;
-	}
-	else{
-	    lighting *= diffuse;
-		if(HasBloom == 1.0){
-			lighting += bloom;
-		}
-	}
+    vec3 normals = texture2D(gNormalMap,uv).rgb;
+    
+    if(normals.r > 0.999 && normals.g > 0.999 && normals.b > 0.999){
+        lighting = diffuse;
+    }
+    else{
+        vec3 lightedDiffuse = lighting * diffuse;    
+        lighting = mix(lightedDiffuse, lightedDiffuse + bloom, (HasBloom == 1.0)); //bloom?
+    
+        //lighting *= diffuse;
+        //if(HasBloom == 1.0){
+            //lighting += bloom;
+        //}
+    }
 
     if(HasHDR == 1.0){
         if(HDRAlgorithm == 0.0){ // Reinhard tone mapping
@@ -46,9 +49,9 @@ void main(void){
         }
         else if(HDRAlgorithm == 3.0){ // Uncharted tone mapping
             float A = 0.15; float B = 0.5; float C = 0.1; float D = 0.2; float E = 0.02; float F = 0.3; float W = 11.2;
-	        lighting = exposure * uncharted(lighting,A,B,C,D,E,F);
-	        vec3 white = 1.0 / uncharted( vec3(W),A,B,C,D,E,F );
-	        lighting *= white;
+            lighting = exposure * uncharted(lighting,A,B,C,D,E,F);
+            vec3 white = 1.0 / uncharted( vec3(W),A,B,C,D,E,F );
+            lighting *= white;
         }
     }
     gl_FragColor = vec4(lighting, 1.0);
