@@ -223,17 +223,17 @@ class Material final: public BindableResource{
         void addComponentReflection(std::string cubeMapName,std::string mapFile,float mixFactor = 1.0f);
         void addComponentReflection(std::string cubeMapTextureFiles[],std::string mapFile,float mixFactor = 1.0f);
 
-        void addComponentRefraction(Texture* cubeMap,Texture* map,float mixFactor = 1.0f,float ratio = 1.0f);
-        void addComponentRefraction(std::string cubeMapName,std::string mapFile,float mixFactor = 1.0f, float ratio = 1.0f);
-        void addComponentRefraction(std::string cubeMapTextureFiles[],std::string mapFile,float mixFactor = 1.0f,float ratio = 1.0f);
+        void addComponentRefraction(Texture* cubeMap,Texture* map,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
+        void addComponentRefraction(std::string cubeMapName,std::string mapFile,float refractiveIndex = 1.0f, float mixFactor = 1.0f);
+        void addComponentRefraction(std::string cubeMapTextureFiles[],std::string mapFile,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
 
         const bool shadeless() const;
         const float glow() const;
-		const float frensel() const;
+        const float frensel() const;
         const float specularity() const;
         const uint lightingMode() const;
         const uint id() const;
-		void setFrensel(float f);
+        void setFrensel(float f);
         void setShadeless(bool b);
         void setGlow(float f);
         void setSpecularity(float s);
