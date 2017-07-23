@@ -13,17 +13,19 @@ using namespace Engine;
 int main(){
     srand((unsigned)time(0));
     #ifdef _WIN32
-        if(GetConsoleWindow() == NULL){ 
-            AllocConsole();
-        }
+        if(GetConsoleWindow() == NULL){ AllocConsole(); }
         freopen("CONIN$", "r", stdin);freopen("CONOUT$", "w", stdout);freopen("CONOUT$", "w", stderr);
         #ifndef _DEBUG
             //ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window if in release mode
         #endif
     #endif
+
     Detail::EngineClass::init("Engine",1024,768);
     Detail::EngineClass::run();
     Detail::EngineClass::destruct();
-    FreeConsole();
+
+    #ifdef _WIN32
+        FreeConsole();
+    #endif
     return 0;
 }

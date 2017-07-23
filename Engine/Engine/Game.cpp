@@ -65,7 +65,7 @@ void Game::initLogic(){
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
 
-    Resources::Settings::disableDynamicMemory();
+    Resources::Settings::enableDynamicMemory();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -85,44 +85,34 @@ void Game::update(float dt){
         Engine::stop();
     }
     if(Events::Keyboard::isKeyDownOnce("f4")){
-		Resources::setCurrentScene("Sol");
-		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+        Resources::setCurrentScene("Sol");
+        Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f5")){
-		Resources::setCurrentScene("CapsuleSpace");
-		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+        Resources::setCurrentScene("CapsuleSpace");
+        Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-	if(Events::Keyboard::isKeyDownOnce("f6")){
-		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMesh("Akira");
-		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMaterial("Akira");
-	}
-	if(Events::Keyboard::isKeyDownOnce("f7")){
-		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMesh("Defiant");
-		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMaterial("Defiant");
-	}
-	/*
     if(Events::Keyboard::isKeyDownOnce("f6")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
     }
     if(Events::Keyboard::isKeyDownOnce("f7")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PHONG);
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PHONG);
     }
     if(Events::Keyboard::isKeyDownOnce("f8")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GXX);
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GXX);
     }
     if(Events::Keyboard::isKeyDownOnce("f9")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::COOKTORRANCE);
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::COOKTORRANCE);
     }
     if(Events::Keyboard::isKeyDownOnce("f10")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GAUSSIAN);
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GAUSSIAN);
     }
     if(Events::Keyboard::isKeyDownOnce("f11")){
-		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BECKMANN);
+        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BECKMANN);
     }
     if(Events::Keyboard::isKeyDownOnce("f12")){
         Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PBR);
     }
-	*/
     m_HUD->update(dt);
 }
 void Game::render(){

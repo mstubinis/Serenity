@@ -188,7 +188,7 @@ void Resources::cleanupRenderingContexts(){
 }
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){
-        std::cout << "---- Scene Change activated (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
+        std::cout << "---- Scene Change started (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
         if(Resources::Detail::ResourceManagement::m_DynamicMemory){
             //mark game object resources to minus use count
             for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){

@@ -68,6 +68,6 @@ class MeshInstance final: public BindableResource{
         void scale(glm::vec3&);
 
         void update(float dt);
-		void render();
+        void render();
 };
 #endif

@@ -154,7 +154,7 @@ class MaterialMeshEntry{
     private:
         Mesh* m_Mesh;
         std::unordered_map<std::string,std::vector<MeshInstance*>> m_MeshInstances;
-        public:
+    public:
         MaterialMeshEntry(Mesh*);
         ~MaterialMeshEntry();
 
@@ -166,21 +166,18 @@ class MaterialMeshEntry{
 };
 
 class Material final: public BindableResource{
-    public: enum LightingMode{
-        BLINNPHONG,
-        PHONG,
-        GXX,
-        COOKTORRANCE,
-        GAUSSIAN,
-        BECKMANN,
-        PBR,
-        NUMBER
-    };
-
-
-    public:
+    public: 
+        enum LightingMode{
+            BLINNPHONG,
+            PHONG,
+            GXX,
+            COOKTORRANCE,
+            GAUSSIAN,
+            BECKMANN,
+            PBR,
+            NUMBER
+        };
         static std::vector<glm::vec4> m_MaterialProperities;
-
         static std::unordered_map<uint,std::vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP;
     private:
         class impl;
@@ -245,8 +242,8 @@ class Material final: public BindableResource{
         void load();
         void unload();
 
-        void addMesh(std::string meshName);
-        void removeMesh(std::string meshName);
-        std::vector<MaterialMeshEntry*>& getMeshes();
+        void addMeshEntry(std::string meshName);
+        void removeMeshEntry(std::string meshName);
+        std::vector<MaterialMeshEntry*>& getMeshEntries();
 };
 #endif

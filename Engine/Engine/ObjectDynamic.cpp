@@ -331,7 +331,7 @@ void ObjectDynamic::setMass(float mass){
     m_Collision->setMass(m_Mass);
     if(m_RigidBody != nullptr){
         m_RigidBody->setMassProps(m_Mass,*(m_Collision->getInertia()));
-	}
+    }
 }
 void ObjectDynamic::alignTo(glm::v3 direction, float speed){
     ObjectDynamic::clearAngularForces();
@@ -477,54 +477,54 @@ void ObjectDynamic::resume(){
 }
 
 void ObjectDynamic::setMesh(Mesh* mesh){
-	Physics::removeRigidBody(this);
-	for(auto entry:this->getDisplayItems()){ 
-	    entry->setMesh(mesh); 
+    Physics::removeRigidBody(this);
+    for(auto entry:this->getDisplayItems()){ 
+        entry->setMesh(mesh); 
     } 
     if(m_DisplayItems.size() > 0){
-		if(m_Collision != nullptr){
-			std::vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
-			collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
-			SAFE_DELETE(m_Collision);
-		}
+        if(m_Collision != nullptr){
+            std::vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
+            collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
+            SAFE_DELETE(m_Collision);
+        }
         btCompoundShape* shape = new btCompoundShape();
         for(auto item:m_DisplayItems){
             btTransform t;
             t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
             shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
         }
-		calculateRadius();
-		m_Mass = 0.5f * m_Radius;
+        calculateRadius();
+        m_Mass = 0.5f * m_Radius;
         m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
-		m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
-		setMass(m_Mass);
+        m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
+        setMass(m_Mass);
     }
-	Physics::addRigidBody(this);
+    Physics::addRigidBody(this);
 }
 void ObjectDynamic::setMesh(const std::string& mesh){ 
-	Physics::removeRigidBody(this);
-	for(auto entry:this->getDisplayItems()){ 
-		entry->setMesh(Resources::getMesh(mesh)); 
-	}
+    Physics::removeRigidBody(this);
+    for(auto entry:this->getDisplayItems()){ 
+        entry->setMesh(Resources::getMesh(mesh)); 
+    }
     if(m_DisplayItems.size() > 0){
-		if(m_Collision != nullptr){
-			std::vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
-			collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
-			SAFE_DELETE(m_Collision);
-		}
+        if(m_Collision != nullptr){
+            std::vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
+            collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
+            SAFE_DELETE(m_Collision);
+        }
         btCompoundShape* shape = new btCompoundShape();
         for(auto item:m_DisplayItems){
             btTransform t;
             t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
             shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
         }
-		calculateRadius();
-		m_Mass = 0.5f * m_Radius;
+        calculateRadius();
+        m_Mass = 0.5f * m_Radius;
         m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
-		m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
-		setMass(m_Mass);
+        m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
+        setMass(m_Mass);
     }
-	Physics::addRigidBody(this);
+    Physics::addRigidBody(this);
 }
 void ObjectDynamic::setMaterial(Material* material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(material); } }
 void ObjectDynamic::setMaterial(const std::string& material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(Resources::getMaterial(material)); } }

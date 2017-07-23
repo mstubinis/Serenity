@@ -14,8 +14,9 @@
 #include <iostream>
 
 using namespace Engine;
+using namespace std;
 
-std::vector<glm::vec4> Material::m_MaterialProperities;
+vector<glm::vec4> Material::m_MaterialProperities;
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0);
@@ -56,8 +57,8 @@ struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
 }};
 
 
-std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
-    std::unordered_map<uint,std::vector<uint>> texture_slot_map;
+unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
+    unordered_map<uint,vector<uint>> texture_slot_map;
 
     texture_slot_map[MaterialComponentType::DIFFUSE].push_back(MaterialComponentTextureSlot::DIFFUSE);
     texture_slot_map[MaterialComponentType::NORMAL].push_back(MaterialComponentTextureSlot::NORMAL);
@@ -77,13 +78,13 @@ std::unordered_map<uint,std::vector<uint>> _populateTextureSlotMap(){
 
     return texture_slot_map;
 }
-std::unordered_map<uint,std::vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
+unordered_map<uint,vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (MaterialComponentType::Type)type;
     m_Texture = t;
 }
-MaterialComponent::MaterialComponent(uint type,std::string& t){
+MaterialComponent::MaterialComponent(uint type,string& t){
     m_ComponentType = (MaterialComponentType::Type)type;
     m_Texture = Resources::getTexture(t); 
     if(m_Texture == nullptr && t != "") m_Texture = new Texture(t);
@@ -91,14 +92,14 @@ MaterialComponent::MaterialComponent(uint type,std::string& t){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::unbindTexture2D(slots.at(i));
     }
@@ -106,65 +107,65 @@ void MaterialComponent::unbind(){
 MaterialComponentAO::MaterialComponentAO(Texture* map,float aoBaseValue):MaterialComponent(MaterialComponentType::AO,map){
     m_AOBaseValue = aoBaseValue;
 }
-MaterialComponentAO::MaterialComponentAO(std::string& map,float aoBaseValue):MaterialComponent(MaterialComponentType::AO,map){
+MaterialComponentAO::MaterialComponentAO(string& map,float aoBaseValue):MaterialComponent(MaterialComponentType::AO,map){
     m_AOBaseValue = aoBaseValue;
 }
 MaterialComponentAO::~MaterialComponentAO(){ MaterialComponent::~MaterialComponent(); }
 void MaterialComponentAO::setAOBaseValue(float factor){ m_AOBaseValue = glm::clamp(factor,0.0f,1.0f); }
 void MaterialComponentAO::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("AOBaseValue",m_AOBaseValue);
     Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
 }
 void MaterialComponentAO::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     Renderer::unbindTexture2D(slots.at(0));
 }
 MaterialComponentMetalness::MaterialComponentMetalness(Texture* map,float metalnessBaseValue):MaterialComponent(MaterialComponentType::METALNESS,map){
     m_MetalnessBaseValue = metalnessBaseValue;
 }
-MaterialComponentMetalness::MaterialComponentMetalness(std::string& map,float metalnessBaseValue):MaterialComponent(MaterialComponentType::METALNESS,map){
+MaterialComponentMetalness::MaterialComponentMetalness(string& map,float metalnessBaseValue):MaterialComponent(MaterialComponentType::METALNESS,map){
     m_MetalnessBaseValue = metalnessBaseValue;
 }
 MaterialComponentMetalness::~MaterialComponentMetalness(){ MaterialComponent::~MaterialComponent(); }
 void MaterialComponentMetalness::setMetalnessBaseValue(float factor){ m_MetalnessBaseValue = glm::clamp(factor,0.0f,1.0f); }
 void MaterialComponentMetalness::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("MetalnessBaseValue",m_MetalnessBaseValue);
     Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
 }
 void MaterialComponentMetalness::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     Renderer::unbindTexture2D(slots.at(0));
 }
 MaterialComponentRoughness::MaterialComponentRoughness(Texture* map,float roughnessBaseValue):MaterialComponent(MaterialComponentType::ROUGHNESS,map){
     m_RoughnessBaseValue = roughnessBaseValue;
 }
-MaterialComponentRoughness::MaterialComponentRoughness(std::string& map,float roughnessBaseValue):MaterialComponent(MaterialComponentType::ROUGHNESS,map){
+MaterialComponentRoughness::MaterialComponentRoughness(string& map,float roughnessBaseValue):MaterialComponent(MaterialComponentType::ROUGHNESS,map){
     m_RoughnessBaseValue = roughnessBaseValue;
 }
 MaterialComponentRoughness::~MaterialComponentRoughness(){ MaterialComponent::~MaterialComponent(); }
 void MaterialComponentRoughness::setRoughnessBaseValue(float factor){ m_RoughnessBaseValue = glm::clamp(factor,0.0f,1.0f); }
 void MaterialComponentRoughness::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("RoughnessBaseValue",m_RoughnessBaseValue);
     Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
 }
 void MaterialComponentRoughness::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     Renderer::unbindTexture2D(slots.at(0));
 }
 MaterialComponentReflection::MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor):MaterialComponent(type,cubemap){
     m_MixFactor = mixFactor;
     m_Map = map;
 }
-MaterialComponentReflection::MaterialComponentReflection(uint type,std::string& cubemap,std::string& map,float mixFactor):MaterialComponent(type,cubemap){
+MaterialComponentReflection::MaterialComponentReflection(uint type,string& cubemap,string& map,float mixFactor):MaterialComponent(type,cubemap){
     m_MixFactor = mixFactor;
     m_Map = Resources::getTexture(map); 
     if(m_Map == nullptr && map != "") m_Map = new Texture(map);
@@ -176,8 +177,8 @@ void MaterialComponentReflection::setMixFactor(float factor){
     m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     if(m_Texture == nullptr)
@@ -187,7 +188,7 @@ void MaterialComponentReflection::bind(){
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
 
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
@@ -195,15 +196,15 @@ void MaterialComponentReflection::unbind(){
 MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mix){
     m_RefractionIndex = i;
 }
-MaterialComponentRefraction::MaterialComponentRefraction(std::string& cubemap,std::string& map,float i,float mix):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mix){
+MaterialComponentRefraction::MaterialComponentRefraction(string& cubemap,string& map,float i,float mix):MaterialComponentReflection(MaterialComponentType::REFRACTION,cubemap,map,mix){
     m_RefractionIndex = i;
 }
 MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
 void MaterialComponentRefraction::bind(){
-    std::vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    std::string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
@@ -220,15 +221,15 @@ class Material::impl final{
         static DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-        std::unordered_map<uint,MaterialComponent*> m_Components;
-        std::vector<MaterialMeshEntry*> m_Meshes;
+        unordered_map<uint,MaterialComponent*> m_Components;
+        vector<MaterialMeshEntry*> m_Meshes;
         uint m_LightingMode;
         bool m_Shadeless;
         float m_BaseGlow;
         float m_SpecularityPower;
         float m_Frensel;
         uint m_ID;
-        void _init(std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
+        void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
             _addComponentDiffuse(diffuse);
             _addComponentNormal(normal);
             _addComponentGlow(glow);
@@ -247,7 +248,7 @@ class Material::impl final{
 
             super->load();
         }
-        void _init(std::string& name, std::string& diffuse, std::string& normal, std::string& glow, std::string& specular,Material* super){
+        void _init(string& name,string& diffuse,string& normal,string& glow,string& specular,Material* super){
             Texture* diffuseT = Resources::getTexture(diffuse); 
             Texture* normalT = Resources::getTexture(normal); 
             Texture* glowT = Resources::getTexture(glow);
@@ -278,7 +279,7 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-			glm::vec4 data(m_Frensel,m_SpecularityPower,m_LightingMode,m_Shadeless);
+            glm::vec4 data(m_Frensel,m_SpecularityPower,m_LightingMode,m_Shadeless);
             Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
@@ -350,24 +351,24 @@ class Material::impl final{
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
-Material::Material(std::string name,std::string diffuse, std::string normal, std::string glow,std::string specular,std::string program):m_i(new impl),BindableResource(name){
+Material::Material(string name,string diffuse,string normal,string glow,string specular,string program):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
-Material::Material(std::string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl),BindableResource(name){
+Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){
     m_i->_destruct();
-	for(auto entry:m_i->m_Meshes){
-		delete entry;
-		entry = nullptr;
-	}
-	m_i->m_Meshes.clear();
+    for(auto entry:m_i->m_Meshes){
+        delete entry;
+        entry = nullptr;
+    }
+    m_i->m_Meshes.clear();
 }
 void Material::addComponentDiffuse(Texture* texture){
-	m_i->_addComponentDiffuse(texture);
+    m_i->_addComponentDiffuse(texture);
 }
-void Material::addComponentDiffuse(std::string& textureFile){
+void Material::addComponentDiffuse(string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
     m_i->_addComponentDiffuse(texture);
@@ -375,7 +376,7 @@ void Material::addComponentDiffuse(std::string& textureFile){
 void Material::addComponentNormal(Texture* texture){
     m_i->_addComponentNormal(texture);
 }
-void Material::addComponentNormal(std::string& textureFile){
+void Material::addComponentNormal(string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentNormal(texture);
@@ -383,7 +384,7 @@ void Material::addComponentNormal(std::string& textureFile){
 void Material::addComponentGlow(Texture* texture){
     m_i->_addComponentGlow(texture);
 }
-void Material::addComponentGlow(std::string& textureFile){
+void Material::addComponentGlow(string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentGlow(texture);
@@ -391,7 +392,7 @@ void Material::addComponentGlow(std::string& textureFile){
 void Material::addComponentSpecular(Texture* texture){
     m_i->_addComponentSpecular(texture);
 }
-void Material::addComponentSpecular(std::string& textureFile){
+void Material::addComponentSpecular(string& textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentSpecular(texture);
@@ -400,7 +401,7 @@ void Material::addComponentSpecular(std::string& textureFile){
 void Material::addComponentAO(Texture* texture,float baseValue){
     m_i->_addComponentAO(texture,baseValue);
 }
-void Material::addComponentAO(std::string& textureFile,float baseValue){
+void Material::addComponentAO(string& textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentAO(texture,baseValue);
@@ -408,7 +409,7 @@ void Material::addComponentAO(std::string& textureFile,float baseValue){
 void Material::addComponentMetalness(Texture* texture,float baseValue){
     m_i->_addComponentMetalness(texture,baseValue);
 }
-void Material::addComponentMetalness(std::string& textureFile,float baseValue){
+void Material::addComponentMetalness(string& textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentMetalness(texture,baseValue);
@@ -416,7 +417,7 @@ void Material::addComponentMetalness(std::string& textureFile,float baseValue){
 void Material::addComponentRoughness(Texture* texture,float baseValue){
     m_i->_addComponentRoughness(texture,baseValue);
 }
-void Material::addComponentRoughness(std::string& textureFile,float baseValue){
+void Material::addComponentRoughness(string& textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentRoughness(texture,baseValue);
@@ -425,13 +426,13 @@ void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFac
     if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->getSkybox()->texture();
     m_i->_addComponentReflection(cubemap,map,mixFactor);
 }
-void Material::addComponentReflection(std::string textureFiles[],std::string mapFile,float mixFactor){
+void Material::addComponentReflection(string textureFiles[],string mapFile,float mixFactor){
     Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
     Texture* map = Resources::getTexture(mapFile); 
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
-void Material::addComponentReflection(std::string cubemapName,std::string mapFile,float mixFactor){
+void Material::addComponentReflection(string cubemapName,string mapFile,float mixFactor){
     Texture* cubemap = Resources::getTexture(cubemapName); 
     if(cubemap == nullptr && cubemapName != ""){ cubemap = new Texture(cubemapName); }
     Texture* map = Resources::getTexture(mapFile); 
@@ -441,13 +442,13 @@ void Material::addComponentReflection(std::string cubemapName,std::string mapFil
 void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refractiveIndex,float mixFactor){
     m_i->_addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
-void Material::addComponentRefraction(std::string textureFiles[],std::string mapFile,float refractiveIndex,float mixFactor){
+void Material::addComponentRefraction(string textureFiles[],string mapFile,float refractiveIndex,float mixFactor){
     Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
     Texture* map = Resources::getTexture(mapFile); 
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
-void Material::addComponentRefraction(std::string cubemapName,std::string mapFile,float refractiveIndex,float mixFactor){
+void Material::addComponentRefraction(string cubemapName,string mapFile,float refractiveIndex,float mixFactor){
     Texture* cubemap = Resources::getTexture(cubemapName); 
     if(cubemap == nullptr && cubemapName != "") cubemap = new Texture(cubemapName);
     Texture* map = Resources::getTexture(mapFile); 
@@ -455,7 +456,7 @@ void Material::addComponentRefraction(std::string cubemapName,std::string mapFil
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
 
-const std::unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
+const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
 const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at(MaterialComponentType::REFLECTION)); }
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::REFRACTION)); }
@@ -478,18 +479,18 @@ struct less_than_key{
     }
 };
 
-void Material::addMesh(std::string objectName){
-	for(auto entry:m_i->m_Meshes){
-		if(entry->mesh() == Resources::getMesh(objectName)){ return; }
-	}
+void Material::addMeshEntry(string objectName){
+    for(auto entry:m_i->m_Meshes){
+        if(entry->mesh() == Resources::getMesh(objectName)){ return; }
+    }
     m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
     std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
 }
-void Material::removeMesh(std::string objectName){
+void Material::removeMeshEntry(string objectName){
     bool did = false;
     for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
         if( (*it)->mesh()->name() == objectName){
-			delete (*it);
+            delete (*it);
             m_i->m_Meshes.erase(it++);
             did = true;
         }
@@ -497,14 +498,14 @@ void Material::removeMesh(std::string objectName){
             ++it;
         }
     }
-    if(did == true){
+    if(did){
         std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
     }
 }
-std::vector<MaterialMeshEntry*>& Material::getMeshes(){ return m_i->m_Meshes; }
+vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
 
 void Material::bind(){
-    std::string _name = name();
+    string _name = name();
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
         BindableResource::bind(); //bind custom data
         Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = _name;
@@ -531,30 +532,30 @@ void Material::unload(){
     }
 }
 MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh){
-	m_Mesh = mesh;
+    m_Mesh = mesh;
 }
 MaterialMeshEntry::~MaterialMeshEntry(){
 }
-void MaterialMeshEntry::addMeshInstance(const std::string objectName,MeshInstance* meshInstance){
-	if(!m_MeshInstances.count(objectName)){
-		std::vector<MeshInstance*> vector;
-		vector.push_back(meshInstance);
-		m_MeshInstances.emplace(objectName,vector);
-	}
-	else{
-		m_MeshInstances.at(objectName).push_back(meshInstance);
-	}
+void MaterialMeshEntry::addMeshInstance(const string objectName,MeshInstance* meshInstance){
+    if(!m_MeshInstances.count(objectName)){
+        vector<MeshInstance*> vector;
+        vector.push_back(meshInstance);
+        m_MeshInstances.emplace(objectName,vector);
+    }
+    else{
+        m_MeshInstances.at(objectName).push_back(meshInstance);
+    }
 }
-void MaterialMeshEntry::removeMeshInstance(const std::string objectName,MeshInstance* meshInstance){
-	if(m_MeshInstances.count(objectName)){
-		std::vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
-		std::vector<MeshInstance*>::iterator it = vector.begin();
-		while(it != vector.end()) {
-			MeshInstance* instance = static_cast<MeshInstance*>((*it));
-			if(instance ==  meshInstance) {
-				it = vector.erase(it);
-			}
-			else ++it;
-		}
-	}
+void MaterialMeshEntry::removeMeshInstance(const string objectName,MeshInstance* meshInstance){
+    if(m_MeshInstances.count(objectName)){
+        vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
+        std::vector<MeshInstance*>::iterator it = vector.begin();
+        while(it != vector.end()) {
+            MeshInstance* instance = static_cast<MeshInstance*>((*it));
+            if(instance ==  meshInstance) {
+                it = vector.erase(it);
+            }
+            else ++it;
+        }
+    }
 }
