@@ -72,6 +72,12 @@ void ObjectDisplay::calculateRadius(){
     m_BoundingBoxRadius = maxLength * m_Scale;
     m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
 }
+
+void ObjectDisplay::setMesh(Mesh* mesh){ for(auto entry:this->getDisplayItems()){ entry->setMesh(mesh); } }
+void ObjectDisplay::setMesh(const std::string& mesh){ for(auto entry:this->getDisplayItems()){ entry->setMesh(Resources::getMesh(mesh)); } }
+void ObjectDisplay::setMaterial(Material* material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(material); } }
+void ObjectDisplay::setMaterial(const std::string& material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(Resources::getMaterial(material)); } }
+
 void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
 void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }
 void ObjectDisplay::setGodsRaysColor(float r, float g, float b){ Engine::Math::setColor(m_GodsRaysColor,r,g,b); }

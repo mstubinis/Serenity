@@ -92,6 +92,15 @@ void Game::update(float dt){
 		Resources::setCurrentScene("CapsuleSpace");
 		Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
+	if(Events::Keyboard::isKeyDownOnce("f6")){
+		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMesh("Akira");
+		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMaterial("Akira");
+	}
+	if(Events::Keyboard::isKeyDownOnce("f7")){
+		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMesh("Defiant");
+		static_cast<ObjectDynamic*>(Resources::getObject("Player"))->setMaterial("Defiant");
+	}
+	/*
     if(Events::Keyboard::isKeyDownOnce("f6")){
 		Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
     }
@@ -113,6 +122,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f12")){
         Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PBR);
     }
+	*/
     m_HUD->update(dt);
 }
 void Game::render(){

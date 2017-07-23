@@ -161,8 +161,8 @@ class MaterialMeshEntry{
         Mesh* mesh(){ return m_Mesh; }
         std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances(){ return m_MeshInstances; }
 
-        void addMeshInstance(std::string& objectName,MeshInstance*);
-        void removeMeshInstance(std::string& objectName,MeshInstance*);
+        void addMeshInstance(const std::string objectName,MeshInstance*);
+        void removeMeshInstance(const std::string objectName,MeshInstance*);
 };
 
 class Material final: public BindableResource{

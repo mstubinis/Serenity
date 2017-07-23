@@ -34,7 +34,6 @@ GLDebugDrawer* Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
 std::vector<Collision*> Physics::Detail::PhysicsManagement::m_Collisions;
 
-
 void Detail::PhysicsManagement::_preTicCallback(btDynamicsWorld* world, btScalar timeStep){
 }
 void Detail::PhysicsManagement::_postTicCallback(btDynamicsWorld* world, btScalar timeStep){

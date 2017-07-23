@@ -46,6 +46,12 @@ class ObjectDisplay: public ObjectBasic{
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);
 
+		void setMesh(Mesh*);
+		void setMesh(const std::string& mesh);
+
+		void setMaterial(Material*);
+		void setMaterial(const std::string& material);
+
         virtual glm::vec3& getRadiusBox(){ return m_BoundingBoxRadius; }
 
         glm::vec4& getColor(){ return m_Color; }

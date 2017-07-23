@@ -44,7 +44,7 @@ class MeshInstance::impl{
         std::vector<MeshInstanceAnimation> m_AnimationQueue;
 
         Mesh* m_Mesh;
-		Material* m_Material;
+        Material* m_Material;
         glm::vec3 m_Position;
         glm::quat m_Orientation;
         glm::vec3 m_Scale;
@@ -52,9 +52,10 @@ class MeshInstance::impl{
         bool m_NeedsUpdate;
         Object* m_Parent;
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,std::string& parentName){
-            _setMesh(mesh);
-            _setMaterial(mat);
-
+            m_Parent = Resources::getObject(parentName);
+            _setMaterial(mat,super);
+            _setMesh(mesh,super);
+            
             m_Position = pos;
             m_Orientation = rot;
             m_Scale = scl;
@@ -62,28 +63,92 @@ class MeshInstance::impl{
             m_NeedsUpdate = false;
 
             std::string n = m_Mesh->name() + "_" + m_Material->name();
-            n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);
-            m_Parent = Resources::getObject(parentName);
+            n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);      
 
             super->setName(n);
             super->setCustomBindFunctor(MeshInstance::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR);
         }
-        void _setMesh(Mesh* mesh){
+        void _setMesh(Mesh* mesh,MeshInstance* super){
+			_removeMesh(super);
             m_Mesh = mesh;
-            m_Mesh->incrementUseCount();
+            if(mesh != nullptr){
+                m_Mesh->incrementUseCount();
+                m_Material->addMesh(m_Mesh->name());
+                for(auto meshEntry:m_Material->getMeshes()){
+                    if(meshEntry->mesh() == m_Mesh){
+                        meshEntry->addMeshInstance(m_Parent->name(),super);
+                        break;
+                    }
+                }
+            }
         }
-        void _setMaterial(Material* mat){
-			m_Material = mat;
-            m_Material->incrementUseCount();
-        }
-        void _destruct(MeshInstance* super){
-			for(auto meshInstance:m_Material->getMeshes()){
-				if(meshInstance->mesh() == m_Mesh){
-					meshInstance->removeMeshInstance(m_Parent->name(),super);
-					break;
+        void _setMaterial(Material* mat,MeshInstance* super){
+            if(m_Material != nullptr){
+                m_Material->decrementUseCount();
+				for(auto entry:m_Material->getMeshes()){
+					for(auto object:entry->meshInstances()){
+						if(object.first == this->m_Parent->name()){
+							for(auto instance:object.second){
+								if(instance == super){
+									entry->removeMeshInstance(object.first,super);
+								}
+							}
+						}
+					}
 				}
-			}
+                m_Material = nullptr;
+            }
+            m_Material = mat;
+            if(mat != nullptr){
+                mat->incrementUseCount();
+				if(m_Mesh != nullptr){
+					mat->addMesh(m_Mesh->name());
+					for(auto entry:mat->getMeshes()){
+						if(entry->mesh() == m_Mesh){
+							bool add = true;
+							for(auto object:entry->meshInstances()){
+								if(object.first == this->m_Parent->name()){
+									for(auto instance:object.second){
+										if(instance == super){
+											add = false;
+											break;
+										}
+									}
+								}
+							}
+							if(add){
+								entry->addMeshInstance(this->m_Parent->name(),super);
+							}
+						}
+					}
+				}
+            }
+        }
+		void _removeMesh(MeshInstance* super){
+            if(m_Mesh != nullptr){	
+                for(auto meshEntry:m_Material->getMeshes()){
+                    if(meshEntry->mesh() == m_Mesh){
+                        meshEntry->removeMeshInstance(m_Parent->name(),super);
+                        break;
+                    }
+                }
+				uint count = 0;
+				for(auto entry:m_Material->getMeshes()){
+					if(entry->mesh() == m_Mesh){
+						count++;
+					}
+				}
+				if(count == 0){
+					m_Material->removeMesh(m_Mesh->name());
+				}
+
+                m_Mesh->decrementUseCount();
+                m_Mesh = nullptr;
+            }
+		}
+        void _destruct(MeshInstance* super){
+			_removeMesh(super);
         }
         void _setPosition(float x, float y, float z){ m_Position.x = x; m_Position.y = y; m_Position.z = z; m_NeedsUpdate = true; }
         void _setScale(float x, float y,float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; m_NeedsUpdate = true; }
@@ -112,27 +177,12 @@ DefaultMeshInstanceUnbindFunctor MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR;
 MeshInstance::MeshInstance(std::string& parentName, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,parentName);
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<MeshInstance>(this));
-	
-	mat->addMesh(mesh->name());
-	for(auto meshEntry:mat->getMeshes()){
-		if(meshEntry->mesh() == mesh){
-			meshEntry->addMeshInstance(parentName,this);
-		}
-	}
 }
 MeshInstance::MeshInstance(std::string& parentName,std::string mesh,std::string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<MeshInstance>(this));
-	
-	_mat->addMesh(_mesh->name());
-	for(auto meshEntry:_mat->getMeshes()){
-		if(meshEntry->mesh() == _mesh){
-			meshEntry->addMeshInstance(parentName,this);
-			break;
-		}
-	}
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
 
@@ -155,10 +205,10 @@ glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
 
-void MeshInstance::setMesh(std::string n){ m_i->m_Mesh = Resources::getMesh(n); }
-void MeshInstance::setMesh(Mesh* m){ m_i->m_Mesh = m; }
-void MeshInstance::setMaterial(std::string n){ m_i->m_Material = Resources::getMaterial(n); }
-void MeshInstance::setMaterial(Material* m){ m_i->m_Material = m; }
+void MeshInstance::setMesh(std::string n){ m_i->_setMesh(Resources::getMesh(n),this); }
+void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
+void MeshInstance::setMaterial(std::string n){ m_i->_setMaterial(Resources::getMaterial(n),this); }
+void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
 void MeshInstance::setOrientation(glm::quat& o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
     float threshold = 0;
@@ -169,12 +219,8 @@ void MeshInstance::setOrientation(float x,float y,float z){
 }
 Object* MeshInstance::parent(){ return m_i->m_Parent; }
 
-void MeshInstance::update(float dt){
-    m_i->_updateModelMatrix();
-}
-void MeshInstance::render(){
-	m_i->m_Mesh->render();
-}
+void MeshInstance::update(float dt){ m_i->_updateModelMatrix(); }
+void MeshInstance::render(){ m_i->m_Mesh->render(); }
 void MeshInstance::playAnimation(const std::string& animName,float startTime){
     MeshInstanceAnimation anim(mesh(),animName,startTime,mesh()->animationData().at(animName)->duration());
     m_i->m_AnimationQueue.push_back(anim);

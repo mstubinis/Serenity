@@ -479,8 +479,8 @@ struct less_than_key{
 };
 
 void Material::addMesh(std::string objectName){
-	for(auto mesh:m_i->m_Meshes){
-		if(mesh->mesh() == Resources::getMesh(objectName)){ return; }
+	for(auto entry:m_i->m_Meshes){
+		if(entry->mesh() == Resources::getMesh(objectName)){ return; }
 	}
     m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
     std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
@@ -535,7 +535,7 @@ MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh){
 }
 MaterialMeshEntry::~MaterialMeshEntry(){
 }
-void MaterialMeshEntry::addMeshInstance(std::string& objectName,MeshInstance* meshInstance){
+void MaterialMeshEntry::addMeshInstance(const std::string objectName,MeshInstance* meshInstance){
 	if(!m_MeshInstances.count(objectName)){
 		std::vector<MeshInstance*> vector;
 		vector.push_back(meshInstance);
@@ -545,7 +545,7 @@ void MaterialMeshEntry::addMeshInstance(std::string& objectName,MeshInstance* me
 		m_MeshInstances.at(objectName).push_back(meshInstance);
 	}
 }
-void MaterialMeshEntry::removeMeshInstance(std::string& objectName,MeshInstance* meshInstance){
+void MaterialMeshEntry::removeMeshInstance(const std::string objectName,MeshInstance* meshInstance){
 	if(m_MeshInstances.count(objectName)){
 		std::vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
 		std::vector<MeshInstance*>::iterator it = vector.begin();

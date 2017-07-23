@@ -139,6 +139,12 @@ class ObjectDynamic: public Object{
         virtual void clearAngularForces();
         virtual void clearAllForces();
 
+		void setMesh(Mesh*);
+		void setMesh(const std::string& mesh);
+
+		void setMaterial(Material*);
+		void setMaterial(const std::string& material);
+
         virtual void update(float);
 
         virtual bool rayIntersectSphere(Camera* = nullptr);
