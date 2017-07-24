@@ -59,6 +59,10 @@ namespace Engine{
 
         glm::vec3 direction(glm::v3& eye,glm::v3& target);
         glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
+        
+        float pack3FloatsInto1(float,float,float);
+        float pack3FloatsInto1(glm::vec3&);
+        glm::vec3 unpackFloatInto3(float);
 
         glm::v3 getForward(glm::quat& q);
         glm::v3 getRight(glm::quat& q);
