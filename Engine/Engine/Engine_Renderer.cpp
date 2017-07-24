@@ -55,7 +55,7 @@ float Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
 bool Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
-uint Detail::RendererInfo::SSAOInfo::ssao_samples = 7;
+uint Detail::RendererInfo::SSAOInfo::ssao_samples = 16;
 float Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
 float Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
 float Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
@@ -99,9 +99,7 @@ void Settings::disableCullFace(){
     }
 }
 void Settings::cullFace(uint s){
-    //0 = back 
-    //1 = front 
-    //2 = front and back
+    //0 = back | 1 = front | 2 = front and back
     if(s == GL_BACK){
         if(Detail::RendererInfo::GeneralInfo::cull_face_status != 0){
             glCullFace(GL_BACK);
@@ -476,16 +474,12 @@ void Detail::RenderManagement::render(){
 
     m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
     _passSSAO(); //ssao AND bloom
-
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
-
         m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
         _passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
-
         m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
         _passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
     }
-
     m_gBuffer->start(BUFFER_TYPE_MISC);
     _passHDR();
 
@@ -527,7 +521,6 @@ void Detail::RenderManagement::_passSSAO(){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO");
     p->bind();
 
-
     sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
 
@@ -538,13 +531,13 @@ void Detail::RenderManagement::_passSSAO(){
     sendUniform1f("nearz",c->getNear());
     sendUniform1f("farz",c->getFar());
 
-    sendUniform3f("gCameraPosition",camPos.x,camPos.y,camPos.z);
-    sendUniform1f("gIntensity",RendererInfo::SSAOInfo::ssao_intensity);
-    sendUniform1f("gBias",RendererInfo::SSAOInfo::ssao_bias);
-    sendUniform1f("gRadius",RendererInfo::SSAOInfo::ssao_radius);
-    sendUniform1f("gScale",RendererInfo::SSAOInfo::ssao_scale);
-    sendUniform1i("gSampleCount",RendererInfo::SSAOInfo::ssao_samples);
-    sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+    sendUniform3fSafe("CameraPosition",camPos.x,camPos.y,camPos.z);
+    sendUniform1f("Intensity",RendererInfo::SSAOInfo::ssao_intensity);
+    sendUniform1f("Bias",RendererInfo::SSAOInfo::ssao_bias);
+    sendUniform1f("Radius",RendererInfo::SSAOInfo::ssao_radius);
+    sendUniform1f("Scale",RendererInfo::SSAOInfo::ssao_scale);
+    sendUniform1i("Samples",RendererInfo::SSAOInfo::ssao_samples);
+    sendUniform1i("NoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);

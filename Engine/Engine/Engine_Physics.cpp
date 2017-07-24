@@ -156,16 +156,16 @@ void Detail::PhysicsManagement::render(){
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 }
-Collision::Collision(btCollisionShape* shape,COLLISION_TYPE type, float mass){
+Collision::Collision(btCollisionShape* shape,CollisionType type, float mass){
     m_CollisionShape = shape;
     m_CollisionType = type;
     _init(type,mass);
 }
-Collision::Collision(ImportedMeshData& data,COLLISION_TYPE type, float mass){ 
+Collision::Collision(ImportedMeshData& data,CollisionType type, float mass){ 
     _load(data,type);
     _init(type,mass);
 }
-void Collision::_init(COLLISION_TYPE type, float mass){
+void Collision::_init(CollisionType type, float mass){
     if(m_Inertia == nullptr){
         m_Inertia = new btVector3(0,0,0);
     }
@@ -179,24 +179,24 @@ Collision::~Collision(){
     SAFE_DELETE(m_Inertia);
     SAFE_DELETE(m_InternalMeshData);
     SAFE_DELETE(m_CollisionShape);
-    m_CollisionType = COLLISION_TYPE_NONE;
+	m_CollisionType = CollisionType::None;
 }
-void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
+void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
     switch(collisionType){
-        case COLLISION_TYPE_CONVEXHULL:{
+		m_CollisionType = collisionType;
+	    case CollisionType::ConvexHull:{
             shape = new btConvexHullShape();
 
             for(auto vertex:data.points){
                 ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
             }
 
-            m_CollisionShape = shape;
-            m_CollisionType = COLLISION_TYPE_CONVEXHULL;
+            m_CollisionShape = shape;	
             break;
         }
-        case COLLISION_TYPE_TRIANGLESHAPE:{
+		case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
 
             for(auto triangle:data.file_triangles){
@@ -218,10 +218,9 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
             ((btGImpactMeshShape*)shape)->updateBound();
 
             m_CollisionShape = shape;
-            m_CollisionType = COLLISION_TYPE_TRIANGLESHAPE;
             break;
         }
-        case COLLISION_TYPE_STATIC_TRIANGLESHAPE:{
+		case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
 
             for(auto triangle:data.file_triangles){
@@ -242,10 +241,9 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
             (shape)->setMargin(0.001f);
 
             m_CollisionShape = shape;
-            m_CollisionType = COLLISION_TYPE_STATIC_TRIANGLESHAPE;
             break;
         }
-        case COLLISION_TYPE_BOXSHAPE:{
+		case CollisionType::Box:{
             glm::vec3 max = glm::vec3(0);
 
             for(auto vertex:data.file_points){
@@ -255,15 +253,14 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
 
             shape = new btBoxShape(btVector3(max.x,max.y,max.z));
             m_CollisionShape = shape;
-            m_CollisionType = COLLISION_TYPE_BOXSHAPE;
             break;
         }
     }
 }
 void Collision::setMass(float mass){
-    if(m_CollisionShape == nullptr || m_CollisionType == COLLISION_TYPE_STATIC_TRIANGLESHAPE || m_CollisionType == COLLISION_TYPE_NONE) return;
+	if(m_CollisionShape == nullptr || m_CollisionType == CollisionType::TriangleShapeStatic || m_CollisionType == CollisionType::None) return;
 
-    if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
+	if(m_CollisionType != CollisionType::TriangleShape){
         m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
     }
     else{

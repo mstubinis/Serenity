@@ -1943,7 +1943,7 @@ Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEm
 								"f 642 26 27\n"
 								"f 26 2 27\n";
         #pragma endregion
-		Resources::addMesh("Atmosphere",data,COLLISION_TYPE_NONE,false);
+		Resources::addMesh("Atmosphere",data,CollisionType::None,false);
     }
 
     m_Mesh = Resources::getMesh("Atmosphere");
@@ -2027,7 +2027,9 @@ void Atmosphere::render(bool godsRays){
     glDisable(GL_DEPTH_TEST);
     glCullFace(GL_FRONT);
 
+	m_Mesh->bind();
     m_Mesh->render();
+	m_Mesh->unbind();
 
     glCullFace(GL_BACK);
     glDisable(GL_BLEND);

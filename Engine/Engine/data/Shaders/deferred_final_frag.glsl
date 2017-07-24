@@ -27,8 +27,9 @@ void main(void){
 	}
     if(HasSSAO == 1){ 
         float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
-        float ssao = texture2D(gBloomMap,uv).a;
-        lighting *= min(1.0,ssao*(brightness+0.65)); //this minimizes the ssao effect on very brightly light areas
+        float ssao = texture2D(gBloomMap,uv).a + 0.0001;
+		brightness = min(1.0,pow(brightness,0.125));
+        lighting *= max(brightness, ssao);
     }
 	lighting += rays;
 	//lighting = pow(lighting, vec3(1.0 / gamma));

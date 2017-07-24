@@ -70,7 +70,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
                 t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
                 shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
             }
-            m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
+			m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
         }
     }
 
@@ -91,7 +91,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
         m_RigidBody = new btRigidBody(rigidBodyCI);
     }
     else{
-        m_Collision = new Collision(new btEmptyShape(),COLLISION_TYPE_NONE,0.0f);
+		m_Collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
         btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
         m_RigidBody = new btRigidBody(rigidBodyCI);
     }
@@ -182,12 +182,12 @@ void ObjectDynamic::setPosition(glm::num x, glm::num y, glm::num z){
     tr.setOrigin(btVector3(btScalar(x),btScalar(y),btScalar(z)));
     tr.setRotation(m_RigidBody->getOrientation());
     
-    if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
+	if(m_Collision->getCollisionType() == CollisionType::TriangleShapeStatic){
         Physics::removeRigidBody(m_RigidBody);
         SAFE_DELETE(m_RigidBody);
     }
     m_MotionState->setWorldTransform(tr);
-    if(m_Collision->getCollisionType() == COLLISION_TYPE_STATIC_TRIANGLESHAPE){
+	if(m_Collision->getCollisionType() == CollisionType::TriangleShapeStatic){
         btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
         m_RigidBody = new btRigidBody(ci);
         m_RigidBody->setUserPointer(this);
@@ -495,7 +495,7 @@ void ObjectDynamic::setMesh(Mesh* mesh){
         }
         calculateRadius();
         m_Mass = 0.5f * m_Radius;
-        m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
+        m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
         m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
         setMass(m_Mass);
     }
@@ -520,7 +520,7 @@ void ObjectDynamic::setMesh(const std::string& mesh){
         }
         calculateRadius();
         m_Mass = 0.5f * m_Radius;
-        m_Collision = new Collision(shape,COLLISION_TYPE_COMPOUND, m_Mass);
+        m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
         m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
         setMass(m_Mass);
     }

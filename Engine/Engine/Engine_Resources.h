@@ -135,8 +135,8 @@ namespace Engine{
         ShaderP* getShaderProgram(std::string n);
         MeshInstance* getRenderedItem(std::string n);
 
-        void addMesh(std::string name,std::string file, COLLISION_TYPE = COLLISION_TYPE_NONE,bool fromFile = true,float threshhold = 0.0005f);
-        void addMesh(std::string file, COLLISION_TYPE = COLLISION_TYPE_NONE,float threshhold = 0.0005f);
+        void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
+        void addMesh(std::string file, CollisionType = CollisionType::None,float threshhold = 0.0005f);
         void addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
         void addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
         void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);

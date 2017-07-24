@@ -101,7 +101,7 @@ class Mesh final: public BindableResource{
         glm::vec3 m_radiusBox;
         float m_radius;
         float m_threshold;
-        COLLISION_TYPE m_Type;
+        CollisionType m_Type;
         std::vector<glm::vec3> m_Points;
         std::vector<glm::vec2> m_UVs;
         std::vector<glm::vec3> m_Normals;
@@ -111,15 +111,15 @@ class Mesh final: public BindableResource{
 
         void _loadData(ImportedMeshData&,float threshhold);
         void _clearData();
-        void _loadFromFile(std::string,COLLISION_TYPE,float threshold);
-        void _loadFromOBJMemory(std::string,COLLISION_TYPE,float threshold);
+        void _loadFromFile(std::string,CollisionType,float threshold);
+        void _loadFromOBJMemory(std::string,CollisionType,float threshold);
         void _calculateMeshRadius();
     public:
         Mesh(std::string& name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string& name,float width, float height,float threshhold);
         Mesh(std::string& name,float x, float y, float width, float height,float threshhold);
-        Mesh(std::string& name,std::string = "",COLLISION_TYPE = COLLISION_TYPE_CONVEXHULL, bool notMemory = true,float threshhold = 0.0005f);
+		Mesh(std::string& name,std::string = "",CollisionType = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f);
         ~Mesh();
 
         void initRenderingContext();

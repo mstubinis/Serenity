@@ -19,15 +19,19 @@ uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = frensel, g = specPower, b = 
 uniform mat4 VP;
 uniform mat4 invVP;
 
-float invertLogDepth(float log_depth){
-    float log_d = pow(ScreenData.y + 1.0, log_depth) - 1.0;
-    float a = ScreenData.y / (ScreenData.y - ScreenData.x);
-    float b = ScreenData.y * ScreenData.x / (ScreenData.x - ScreenData.y);
-    return (a + b / log_d);
-}
 vec3 reconstruct_world_pos(vec2 _uv){
     float log_depth = texture2D(gDepthMap, _uv).r;
-    vec4 wpos = invVP * (vec4(_uv, invertLogDepth(log_depth), 1.0) * 2.0 - 1.0);
+
+	//log to regular depth
+    float regularDepth = pow(ScreenData.y + 1.0, log_depth) - 1.0;
+
+	//linearize regular depth
+    float a = ScreenData.y / (ScreenData.y - ScreenData.x);
+    float b = ScreenData.y * ScreenData.x / (ScreenData.x - ScreenData.y);
+    float depth = (a + b / regularDepth);
+
+	//world space it!
+    vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
 float BeckmannDist(float theta, float _alpha, float pi){

@@ -220,7 +220,7 @@ Mesh::Mesh(std::string& name,float width, float height,float threshold):Bindable
     this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,std::string filename,COLLISION_TYPE type,bool notMemory,float threshold):BindableResource(name){
+Mesh::Mesh(std::string& name,std::string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name){
     m_File = "";
     m_Collision = nullptr;
     m_Skeleton = nullptr;
@@ -262,14 +262,14 @@ void Mesh::_clearData(){
         m_Skeleton = nullptr;
     }
 }
-void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type,float threshold){
+void Mesh::_loadFromFile(std::string file,CollisionType type,float threshold){
     std::string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
     ImportedMeshData d;
     Engine::Resources::MeshLoader::load(this,d,m_File);
     m_threshold = threshold; //this is needed
     _loadData(d,m_threshold);
 
-    if(type == COLLISION_TYPE_NONE){
+    if(type == CollisionType::None){
         m_Collision = new Collision(new btEmptyShape());
     }
     else{
@@ -282,12 +282,12 @@ void Mesh::_loadFromFile(std::string file,COLLISION_TYPE type,float threshold){
         m_Collision = new Collision(d,type);
     }
 }
-void Mesh::_loadFromOBJMemory(std::string data,COLLISION_TYPE type,float threshold){
+void Mesh::_loadFromOBJMemory(std::string data,CollisionType type,float threshold){
     ImportedMeshData d;
     Engine::Resources::MeshLoader::loadObjFromMemory(d,data);
     _loadData(d,threshold);
 
-    if(type == COLLISION_TYPE_NONE){
+    if(type == CollisionType::None){
         m_Collision = new Collision(new btEmptyShape());
     }
     else{

@@ -565,7 +565,7 @@ PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos
                             "f 162 136 39\n"
                             "f 136 37 39\n";
         #pragma endregion
-        Resources::addMesh("PointLightBounds",data,COLLISION_TYPE_NONE,false);
+        Resources::addMesh("PointLightBounds",data,CollisionType::None,false);
     }
 
     m_Constant = 0.0f;

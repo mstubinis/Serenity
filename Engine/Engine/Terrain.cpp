@@ -24,7 +24,7 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
     float minH = 0.0f;
     float maxH = 1.0f;
     m_Collision = new Collision(new btHeightfieldTerrainShape(image.getSize().x,image.getSize().y,&m_Pixels[0],1.0f,minH,maxH,1,PHY_FLOAT,false),
-                                COLLISION_TYPE_TRIANGLESHAPE,
+		                        CollisionType::TriangleShape,
                                 0.0f);
     SAFE_DELETE(m_RigidBody);
     SAFE_DELETE(m_MotionState);

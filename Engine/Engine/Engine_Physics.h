@@ -22,13 +22,13 @@ struct ImportedMeshData;
 typedef float btScalar;
 typedef unsigned int uint;
 
-enum COLLISION_TYPE { 
-    COLLISION_TYPE_CONVEXHULL, 
-    COLLISION_TYPE_TRIANGLESHAPE,
-    COLLISION_TYPE_STATIC_TRIANGLESHAPE,
-    COLLISION_TYPE_COMPOUND,
-    COLLISION_TYPE_BOXSHAPE,
-    COLLISION_TYPE_NONE
+enum CollisionType { 
+    ConvexHull, 
+    TriangleShape,
+    TriangleShapeStatic,
+    Compund,
+    Box,
+    None
 };
 class Collision final{
     private:
@@ -36,11 +36,11 @@ class Collision final{
         btVector3* m_Inertia;
         uint m_CollisionType;
         btCollisionShape* m_CollisionShape;
-        void _init(COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
-        void _load(ImportedMeshData&, COLLISION_TYPE);
+		void _init(CollisionType = CollisionType::None, float mass = 0);
+        void _load(ImportedMeshData&, CollisionType);
     public:
-        Collision(btCollisionShape* shape = nullptr,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
-        Collision(ImportedMeshData&,COLLISION_TYPE = COLLISION_TYPE_NONE, float mass = 0);
+		Collision(btCollisionShape* shape = nullptr,CollisionType = CollisionType::None, float mass = 0);
+		Collision(ImportedMeshData&,CollisionType = CollisionType::None, float mass = 0);
         ~Collision();
 
         void setMass(float mass);

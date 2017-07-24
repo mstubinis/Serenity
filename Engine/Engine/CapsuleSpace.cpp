@@ -78,10 +78,10 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     l->setSpecularIntensity(0.0f);
 
     if(!Resources::getMaterial("CapsuleTunnel")){
-        Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",COLLISION_TYPE_NONE);
+		Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
     }
     if(!Resources::getMaterial("CapsuleRibbon")){
-        Resources::addMesh("CapsuleRibbon","data/Models/capsuleRibbon.obj",COLLISION_TYPE_NONE);
+        Resources::addMesh("CapsuleRibbon","data/Models/capsuleRibbon.obj",CollisionType::None);
     }
     if(!Resources::getMaterial("Capsule_A")){
         Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");

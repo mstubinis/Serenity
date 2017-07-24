@@ -9,13 +9,13 @@ uniform sampler2D gDepthMap;
 uniform int doSSAO;
 uniform int doBloom;
 
-uniform vec3 gCameraPosition;
-uniform float gRadius;
-uniform float gIntensity;
-uniform float gBias;
-uniform float gScale;
-uniform int gSampleCount;
-uniform int gNoiseTextureSize;
+uniform vec3 CameraPosition;
+uniform float Radius;
+uniform float Intensity;
+uniform float Bias;
+uniform float Scale;
+uniform int Samples;
+uniform int NoiseTextureSize;
 
 uniform vec2 poisson[32];
 
@@ -23,41 +23,42 @@ uniform mat4 invVP;
 uniform float nearz;
 uniform float farz;
 
-float invertLogDepth(float log_depth){
-    float log_d = pow(farz + 1.0, log_depth) - 1.0;
-    float a = farz / (farz - nearz);
-    float b = farz * nearz / (nearz - farz);
-    return (a + b / log_d);
-}
 vec3 reconstruct_world_pos(vec2 _uv){
     float log_depth = texture2D(gDepthMap, _uv).r;
-    vec4 wpos = invVP * (vec4(_uv, invertLogDepth(log_depth), 1.0) * 2.0 - 1.0);
+
+	//log to regular depth
+    float regularDepth = pow(farz + 1.0, log_depth) - 1.0;
+
+	//linearize regular depth
+    float a = farz / (farz - nearz);
+    float b = farz * nearz / (nearz - farz);
+    float depth = (a + b / regularDepth);
+
+	//world space it!
+    vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
-float l(float a, float b, float w){
-    return a + w*(b-a);
-}
-
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
-    vec3 diff = (reconstruct_world_pos(uv+offsetUV)) - origin;
+    vec3 diff = (reconstruct_world_pos(uv + offsetUV)) - origin;
     vec3 vec = normalize(diff);
-    float dist = length(diff)/gScale;
-    return max(0.0,dot(normal,vec)-gBias)*(1.0/(1.0+dist))*gIntensity;
+    float dist = length(diff) * Scale;
+    return max(0.0, dot(normal,vec) - Bias) * (1.0 / (1.0 + dist)) * Intensity;
 }
 void main(void){
-    vec2 uv = gl_TexCoord[0].st*2.0;
+    vec2 uv = gl_TexCoord[0].st * 2.0;
     vec3 worldPosition = reconstruct_world_pos(uv);
     vec3 normal = texture2D(gNormalMap, uv).xyz;
-    vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / gNoiseTextureSize).xy * 2.0 - 1.0);
+    vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xy * 2.0 - 1.0);
 
-    float camDist = distance(worldPosition,gCameraPosition);
-    float rad = gRadius / camDist;
+	float dist = distance(worldPosition, CameraPosition) + 0.0001; //cuz we dont like divide by zeros ;)
+	float rad = max(0.35,Radius / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out
+	//float rad = Radius;
 
     if(doSSAO == 1){
         if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }
         else{
             float occlusion = 0.0;
-            for (int i = 0; i < gSampleCount; ++i) {
+            for (int i = 0; i < Samples; ++i) {
                 vec2 coord1 = reflect(poisson[i], randomVector)*rad;
                 vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
                 occlusion += occlude(uv, coord1 * 0.25, worldPosition, normal);
@@ -65,7 +66,7 @@ void main(void){
                 occlusion += occlude(uv, coord1 * 0.75, worldPosition, normal);
                 occlusion += occlude(uv, coord2, worldPosition, normal);
             }
-            occlusion /= (gSampleCount*4.0);
+            occlusion /= (Samples*4.0);
             gl_FragColor.a = 1.0-occlusion;
         }
     }

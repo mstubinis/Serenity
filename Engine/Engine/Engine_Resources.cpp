@@ -80,7 +80,7 @@ Shader* Resources::getShader(std::string n){return static_cast<Shader*>(Detail::
 ShaderP* Resources::getShaderProgram(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
 MeshInstance* Resources::getRenderedItem(std::string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
 
-void Resources::addMesh(std::string n,std::string f, COLLISION_TYPE t, bool b,float threshhold){
+void Resources::addMesh(std::string n,std::string f, CollisionType t, bool b,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
 }
 void Resources::addMesh(std::string n,float x,float y,float w,float h,float threshhold){
@@ -89,7 +89,7 @@ void Resources::addMesh(std::string n,float x,float y,float w,float h,float thre
 void Resources::addMesh(std::string n,float w,float h,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,w,h,threshhold));
 }
-void Resources::addMesh(std::string f, COLLISION_TYPE t,float threshhold){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,true,threshhold);}
+void Resources::addMesh(std::string f, CollisionType t,float threshhold){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,true,threshhold);}
 void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g, uint w, uint l,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,g,w,l,threshhold));
 }

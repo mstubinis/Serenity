@@ -100,7 +100,7 @@ float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(
 
 
 
-float Math::pack3FloatsInto1(float x,float y,float c){
+float Math::pack3FloatsInto1(float x,float y,float z){
     //Scale and bias
     x = (x + 1.0f) * 0.5f;
     unsigned char _x = (unsigned char)(x*255.0f);    
