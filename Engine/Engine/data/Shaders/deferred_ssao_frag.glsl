@@ -23,17 +23,15 @@ uniform mat4 invVP;
 uniform float nearz;
 uniform float farz;
 
-float linearize_depth(float depth){
+float invertLogDepth(float log_depth){
+    float log_d = pow(farz + 1.0, log_depth) - 1.0;
     float a = farz / (farz - nearz);
     float b = farz * nearz / (nearz - farz);
-    return (a + b / depth);
-}
-float invertLogDepth(float log_depth){
-    return linearize_depth(pow(farz + 1.0, log_depth) - 1.0);
+    return (a + b / log_d);
 }
 vec3 reconstruct_world_pos(vec2 _uv){
-    float depth = texture2D(gDepthMap, _uv).r;
-    vec4 wpos = invVP * (vec4(_uv, invertLogDepth(depth), 1.0) * 2.0 - 1.0);
+    float log_depth = texture2D(gDepthMap, _uv).r;
+    vec4 wpos = invVP * (vec4(_uv, invertLogDepth(log_depth), 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
 float l(float a, float b, float w){
