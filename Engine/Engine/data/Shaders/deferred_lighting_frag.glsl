@@ -7,7 +7,6 @@ uniform vec4 LightDataB; //x = LightDirection.y, y = LightDirection.z, z = const
 uniform vec4 LightDataC; //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
 uniform vec4 LightDataD; //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
 
-
 uniform sampler2D gNormalMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gDepthMap;
@@ -123,15 +122,15 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
             attenuation = 1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
         }
         
-        vec3 radiance = LightDataD.xyz * attenuation; // calculate per-light radiance 
+        DiffuseColor = LightDataD.xyz * attenuation; // calculate per-light radiance 
 
         vec3 Frensel = SchlickFrensel(f0,vdoth);
         vec3 kD = (vec3(1.0) - Frensel) * (1.0 - metallic);
 
         vec3 n  = CookTorr(Frensel,VdotH,VdotN,LdotN,NdotH,alpha,kPi);
-        float d = 4.0 * max(dot(PxlNormal, ViewDir), 0.0) * NdotL + 0.001; 
+        float d = (4.0 * VdotN * NdotL) + 0.0001; 
         
-        Lo += (kD * albedo / vec3(kPi) + (n / vec3(d))) * radiance * NdotL; 
+        Lo = (kD * albedo / vec3(kPi) + (n / vec3(d))) * DiffuseColor * NdotL; 
 
         // move this to the hdr pass. over there, Lo will be the lighting buffer. (will have to pass ao and albedo buffers in)
         //vec3 ambient = AmbientColor * albedo * ao; //should just ignore ambient for now
@@ -139,7 +138,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         
         //here he tone mapped and gammad, but prob can skip this to HDR pass
         
-        return max( vec3(Glow), Lo);
+        return max( vec3(Glow)*Lo, Lo);
         */
     }
 
