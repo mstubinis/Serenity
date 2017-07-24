@@ -7,6 +7,7 @@ uniform vec4 LightDataB; //x = LightDirection.y, y = LightDirection.z, z = const
 uniform vec4 LightDataC; //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
 uniform vec4 LightDataD; //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
 
+uniform sampler2D gDiffuseMap;
 uniform sampler2D gNormalMap;
 uniform sampler2D gMiscMap;
 uniform sampler2D gDepthMap;
@@ -53,6 +54,7 @@ vec3 CookTorr(vec3 frensel,float vdoth, float vdotn, float ldotn, float ndoth,fl
 }
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float Glow = texture2D(gMiscMap,uv).r;
+    vec3 DiffuseTexture = texture2D(gDiffuseMap,uv).rgb;
     if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999)){
         return vec3(0.0);
     }
@@ -145,7 +147,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     SpecularColor = (LightDataD.xyz * LightDataA.z * SpecularAngle) * texture2D(gMiscMap,uv).g; //texture2D is specular map
 
     TotalLight = AmbientColor + DiffuseColor + SpecularColor;
-    return max( vec3(Glow), TotalLight);
+    return max( vec3(Glow)*DiffuseTexture, TotalLight*DiffuseTexture);
 }
 vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
