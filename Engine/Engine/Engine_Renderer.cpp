@@ -429,14 +429,15 @@ void Detail::RenderManagement::_passLighting(){
     sendUniform4f("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
         (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
-    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),1);
-    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),2);
+    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),1);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
 
     for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
     }
-    for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::render(){
@@ -546,16 +547,15 @@ void Detail::RenderManagement::_passSSAO(){
     sendUniform1i("gNoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
-    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
-    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),1);
-    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,2,GL_TEXTURE_2D);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),3);
-    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),4);
-    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),5);
+    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
+    bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,1,GL_TEXTURE_2D);
+    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+    bindTexture("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),3);
+    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),4);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
