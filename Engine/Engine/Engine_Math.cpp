@@ -98,6 +98,36 @@ float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
+
+
+float Math::pack3FloatsInto1(float x,float y,float c){
+    //Scale and bias
+    x = (x + 1.0f) * 0.5f;
+    unsigned char _x = (unsigned char)(x*255.0f);    
+    y = (y + 1.0f) * 0.5f;
+    unsigned char _y = (unsigned char)(y*255.0f);        
+    z = (z + 1.0f) * 0.5f;
+    unsigned char _z = (unsigned char)(z*255.0f);       
+     
+    unsigned int packedColor = (x << 16) | (y << 8) | z;
+    float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );  
+    return packedFloat;
+}
+float Math::pack3FloatsInto1(glm::vec3& v){ return Math::pack3FloatsInto1(v.x,v.y,v.z); }
+glm::vec3 Math::unpackFloatInto3(float f){
+    float r = (float)fmod(f, 1.0f);
+    float g = (float)fmod(f, 1.0f);
+    float b = (float)fmod(f, 1.0f);
+
+    //Unpack to the -1..1 range
+    r = (r * 2.0f) - 1.0f;
+    g = (g * 2.0f) - 1.0f;
+    b = (b * 2.0f) - 1.0f;
+    
+    return glm::vec3(r,g,b);
+}
+
+
 glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
 glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); }
 glm::vec3 Math::direction(glm::v3& eye,glm::v3& target){ return glm::normalize(glm::vec3(eye)-glm::vec3(target)); }
