@@ -109,7 +109,7 @@ float Math::pack3FloatsInto1(float x,float y,float c){
     z = (z + 1.0f) * 0.5f;
     unsigned char _z = (unsigned char)(z*255.0f);       
      
-    unsigned int packedColor = (x << 16) | (y << 8) | z;
+    unsigned int packedColor = (_x << 16) | (_y << 8) | _z;
     float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );  
     return packedFloat;
 }
