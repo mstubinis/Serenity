@@ -27,7 +27,7 @@ void main(void){
         lighting = diffuse;
     }
     else{
-        lighting *= diffuse;
+        //lighting *= diffuse;
         if(HasBloom == 1.0){
             lighting += bloom;
         }
