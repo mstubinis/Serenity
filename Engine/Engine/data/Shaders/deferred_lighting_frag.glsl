@@ -70,7 +70,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float SpecularAngle = 0.0;
 
     float kPi = 3.1415926535898;
-    float smoothness = materials[index].g; //note: this value is automatically clamped 0 to 1 with the phyiscally based models below
+    float smoothness = materials[index].g; //note: this value is automatically clamped 0 to 1
     float F0 = materials[index].r;
     float roughness = 1.0 - smoothness; //only valid for physical lighting models
     float alpha = roughness * roughness;
@@ -104,10 +104,12 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     */
 
     if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
+        smoothness *= 32;
         float conserv = (8.0 + smoothness ) / (8.0 * kPi);
         SpecularAngle = conserv * pow(NdotH, smoothness);
     }		
     else if(materials[index].b == 1.0){ //this is phong (non-physical)
+        smoothness *= 32;
         float conserv = (2.0 + smoothness ) / (2.0 * kPi);
         vec3 Reflect = reflect(-LightDir, PxlNormal);
 	float VdotR = max(0.0, dot(ViewDir,Reflect));
