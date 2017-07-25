@@ -77,8 +77,8 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     
     vec3 ViewDir = normalize(CamPosGamma.xyz - PxlWorldPos);
     vec3 Half = normalize(LightDir + ViewDir);
-    float NdotL = max(dot(PxlNormal, LightDir), 0.0);
-    float NdotH = max(dot(PxlNormal, Half), 0.0);
+    float NdotL = max(0.0, dot(PxlNormal, LightDir));
+    float NdotH = max(0.0, dot(PxlNormal, Half));
     float VdotN = max(0.0, dot(ViewDir,PxlNormal));
     float VdotH = max(0.0, dot(ViewDir,Half));
     
