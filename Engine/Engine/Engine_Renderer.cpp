@@ -494,6 +494,8 @@ void Detail::RenderManagement::render(){
         _passFXAA();
     }
     _passCopyDepth();
+    
+    _passForwardRendering();
 
     glEnable(GL_BLEND);
     if(RendererInfo::DebugDrawingInfo::debug){
