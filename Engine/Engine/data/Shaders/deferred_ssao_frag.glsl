@@ -34,8 +34,11 @@ vec3 reconstruct_world_pos(vec2 _uv){
     float b = farz * nearz / (nearz - farz);
     float depth = (a + b / regularDepth);
 
+    vec4 screenSpace = vec4(_uv * 2.0 - 1.0,depth,1.0);
+
     //world space it!
-    vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
+    //vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
+    vec4 wpos = invVP * screenSpace;
     return wpos.xyz / wpos.w;
 }
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
