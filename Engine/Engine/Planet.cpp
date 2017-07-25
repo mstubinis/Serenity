@@ -338,8 +338,8 @@ void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
             }
         }
         count++;
-    }
-    Texture* diffuse = new Texture(ringImage,parent->name() + "RingsDiffuse");
+    }    
+    Texture* diffuse = new Texture(ringImage,parent->name() + "RingsDiffuse",GL_TEXTURE_2D,GL_SRGB8_ALPHA8);
     Resources::addMaterial(parent->name() + "Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
     this->material = Resources::getMaterial(parent->name() + "Rings");
 }
@@ -350,10 +350,8 @@ void Ring::draw(GLuint shader){
     glm::m4 model = m_Parent->getModel();
     Mesh* mesh = Resources::getMesh("Ring");
     float radius = mesh->getRadius() * m_Parent->getScale().x;
-
+    
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-    glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
-    glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(model)));
     glm::vec4 color = m_Parent->getColor();
     glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
