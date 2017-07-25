@@ -397,6 +397,8 @@ void Detail::RenderManagement::_passGeometry(){
 
     //RENDER FOREGROUND OBJECTS HERE
 }
+void Detail::RenderManagement::_passForwardRendering(){
+}
 void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(0,0,0,0);
     ShaderP* p = Resources::getShaderProgram("Copy_Depth");
