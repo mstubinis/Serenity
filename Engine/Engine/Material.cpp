@@ -56,7 +56,6 @@ struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
     //Material* m = static_cast<Material*>(r);
 }};
 
-
 unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
     unordered_map<uint,vector<uint>> texture_slot_map;
 
@@ -229,7 +228,7 @@ class Material::impl final{
   
         bool m_Shadeless;
         float m_BaseGlow;
-        float m_SpecularityPower;
+        float m_Smoothness;
         float m_Frensel;
         uint m_ID;
         void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
@@ -240,7 +239,7 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-            m_SpecularityPower = 0.25f;
+            m_Smoothness = 0.25f;
             m_SpecularModel = Material::SpecularModel::BLINNPHONG;
             m_DiffuseModel = Material::DiffuseModel::LAMBERT;
             m_Frensel = 0.5f;
@@ -258,9 +257,9 @@ class Material::impl final{
             Texture* glowT = Resources::getTexture(glow);
             Texture* specularT = Resources::getTexture(specular);
             if(diffuseT == nullptr && diffuse != "") diffuseT = new Texture(diffuse);
-            if(normalT == nullptr && normal != "")  normalT = new Texture(normal,"",GL_TEXTURE_2D,GL_RGBA8);
-            if(glowT == nullptr && glow != "")    glowT = new Texture(glow,"",GL_TEXTURE_2D,GL_RGBA8);
-            if(specularT == nullptr && specular != "")    specularT = new Texture(specular,"",GL_TEXTURE_2D,GL_RGBA8);
+            if(normalT == nullptr && normal != "") normalT = new Texture(normal,"",GL_TEXTURE_2D,GL_RGBA8);
+            if(glowT == nullptr && glow != "") glowT = new Texture(glow,"",GL_TEXTURE_2D,GL_RGBA8);
+            if(specularT == nullptr && specular != "") specularT = new Texture(specular,"",GL_TEXTURE_2D,GL_RGBA8);
             _init(name,diffuseT,normalT,glowT,specularT,super);
         }
         void _load(){
@@ -283,14 +282,14 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-            glm::vec4 data(m_Frensel,m_SpecularityPower,m_SpecularModel,m_DiffuseModel);
+            glm::vec4 data(m_Frensel, m_Smoothness, m_SpecularModel, m_DiffuseModel);
             Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
 
             data.r = m_Frensel;
-            data.g = m_SpecularityPower;         
+            data.g = m_Smoothness;         
             
             if(data.g > 1.0){
                 data.g *= 0.03125f; // 1 / 32
@@ -351,7 +350,7 @@ class Material::impl final{
         void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.0001f,0.9999f); }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
-        void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
+        void _setSmoothness(float& s){ m_Smoothness = s; _updateGlobalMaterialPool(); }
         void _setSpecularModel(uint& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
         void _setDiffuseModel(uint& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
 };
@@ -470,7 +469,7 @@ const MaterialComponentRefraction* Material::getComponentRefraction() const { re
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const float Material::frensel() const { return m_i->m_Frensel; }
-const float Material::specularity() const { return m_i->m_SpecularityPower; }
+const float Material::smoothness() const { return m_i->m_SpecularityPower; }
 const uint Material::specularModel() const { return m_i->m_SpecularModel; }
 const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
 const uint Material::id() const { return m_i->m_ID; }
@@ -478,7 +477,7 @@ const uint Material::id() const { return m_i->m_ID; }
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setFrensel(float f){ m_i->_setFrensel(f); }
-void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
+void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(uint m){ m_i->_setSpecularModel(m); }
 void Material::setDiffuseModel(uint m){ m_i->_setDiffuseModel(m); }
 
