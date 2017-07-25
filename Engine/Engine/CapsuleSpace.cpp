@@ -20,10 +20,10 @@ CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,b
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/glm::num(100),scene);
-        m_Light->setConstant(0.1f);m_Light->setLinear(0.1f);m_Light->setExponent(0.1f);m_Light->setColor(255,124,27,255);
-        m_Light->setSpecularIntensity(1.0f);
-		m_Light->setDiffuseIntensity(0.8f);
-		m_Light->setSpecularIntensity(0.5f);
+        m_Light->setAttenuation(0.1f,0.1f,0.1f);
+        m_Light->setColor(255,124,27,255);
+        m_Light->setDiffuseIntensity(0.8f);
+        m_Light->setSpecularIntensity(0.5f);
     }
     setColor(255,235,206,255);
     this->m_Shadeless = true;
@@ -78,7 +78,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     l->setSpecularIntensity(0.0f);
 
     if(!Resources::getMaterial("CapsuleTunnel")){
-		Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
+        Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
     }
     if(!Resources::getMaterial("CapsuleRibbon")){
         Resources::addMesh("CapsuleRibbon","data/Models/capsuleRibbon.obj",CollisionType::None);
@@ -132,7 +132,6 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         m_CapsuleStars.push_back(new CapsuleStar(50,pos,"AAAF_Star_" + boost::lexical_cast<std::string>(i),this,spawnLight));
         step -= 6.0f;
     }
-
     //this to just test. should set player / camera dynamically
     setPlayer(new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::v3(0),glm::vec3(1),nullptr,this));
     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
