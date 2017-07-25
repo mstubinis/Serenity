@@ -11,26 +11,26 @@
 #include <iostream>
 
 using namespace Engine;
+using namespace std;
 
 class Texture::impl final{
     public:
-        std::vector<uchar> m_Pixels;
-        std::vector<std::string> m_Files; //if non cubemap, this is only 1 file and a length of 1
+        vector<uchar> m_Pixels;
+        vector<string> m_Files; //if non cubemap, this is only 1 file and a length of 1
         GLuint m_TextureAddress;
         GLuint m_Type;
         uint m_Width, m_Height;
 	uint m_Format;
 
-        void _init(GLuint type,Texture* super,std::string name,sf::Image& img,uint format){
+        void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format){
             m_Pixels.clear();
             m_Width = m_Height = m_TextureAddress = 0;
             m_Type = type;
             m_Format = format;
             if(img.getSize().x > 0 && img.getSize().y > 0){
-                std::vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
+                vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
                 m_Pixels = p;
             }
-
             super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
             Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,super->name(),boost::shared_ptr<Texture>(super));
             super->load();
@@ -40,19 +40,22 @@ class Texture::impl final{
             glBindTexture(m_Type, m_TextureAddress);
 
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
-                sf::Image image; image.loadFromFile(m_Files[0].c_str());
+                sf::Image image; 
+		image.loadFromFile(m_Files[0].c_str());
                 _generateFromImage(image);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
-                sf::Image i; i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
+                sf::Image i;
+		i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
                 _generateFromImage(i);
                 glBindTexture(m_Type,0);
                 _getPixels();
             }
             else if(m_Files.size() > 1){//cubemap
                 for(uint i = 0; i < m_Files.size(); i++){
-                    sf::Image image; image.loadFromFile(m_Files[i].c_str());
+                    sf::Image image;
+	            image.loadFromFile(m_Files[i].c_str());
                     _generateFromImage(image);
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, m_Format ,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
                 }
@@ -100,23 +103,25 @@ class Texture::impl final{
             return &m_Pixels[0];
         }
 };
-Texture::Texture(std::string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
+Texture::Texture(string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
     m_i->_init(t,this,n,i,format);
 }
-Texture::Texture(sf::Image& img,std::string n,GLuint t,uint format):m_i(new impl){ //pixels
+Texture::Texture(sf::Image& img,string n,GLuint t,uint format):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
     m_i->_init(t,this,n,img,format);
 }
-Texture::Texture(std::string file,std::string n,GLuint t,uint format):m_i(new impl){ //image file
+Texture::Texture(string file,string n,GLuint t,uint format):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
     sf::Image i;
     if(n == "") n = file;
     m_i->_init(t,this,n,i,format);
 }
-Texture::Texture(std::string files[],std::string n,GLuint t,uint format):m_i(new impl){ //cubemap images
-    for(uint q = 0; q < 6; q++){ m_i->m_Files.push_back(files[q]); }
+Texture::Texture(string files[],string n,GLuint t,uint format):m_i(new impl){ //cubemap images
+    for(uint q = 0; q < 6; q++){ 
+	m_i->m_Files.push_back(files[q]); 
+    }
     sf::Image i;
     m_i->_init(t,this,n,i,format);
 }
