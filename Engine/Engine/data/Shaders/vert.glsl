@@ -10,6 +10,7 @@ attribute vec4 Weights;
 
 uniform mat4 VP;
 uniform mat4 Model;
+uniform mat3 NormalMatrix;
 uniform int AnimationPlaying;
 uniform mat4 gBones[200];
 
@@ -41,10 +42,10 @@ void main(void){
 
     gl_Position = MVP * PosL;
     
-    Normals = (Model * NormalL).xyz; 
-    Binormals = (Model * BinormalL).xyz;
-    Tangents = (Model * TangentL).xyz;
-
+    Normals = (NormalMatrix * NormalL).xyz;
+    Binormals = (NormalMatrix * BinormalL).xyz;
+    Tangents = (NormalMatrix * TangentL).xyz;
+    
     WorldPosition = (Model * PosL).xyz;
 
     UV = uv;
