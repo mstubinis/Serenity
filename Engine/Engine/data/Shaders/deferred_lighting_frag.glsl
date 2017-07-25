@@ -22,15 +22,15 @@ uniform mat4 invVP;
 vec3 reconstruct_world_pos(vec2 _uv){
     float log_depth = texture2D(gDepthMap, _uv).r;
 
-	//log to regular depth
+    //log to regular depth
     float regularDepth = pow(ScreenData.y + 1.0, log_depth) - 1.0;
 
-	//linearize regular depth
+    //linearize regular depth
     float a = ScreenData.y / (ScreenData.y - ScreenData.x);
     float b = ScreenData.y * ScreenData.x / (ScreenData.x - ScreenData.y);
     float depth = (a + b / regularDepth);
 
-	//world space it!
+    //world space it!
     vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
@@ -81,7 +81,27 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float NdotH = max(dot(PxlNormal, Half), 0.0);
     float VdotN = max(0.0, dot(ViewDir,PxlNormal));
     float VdotH = max(0.0, dot(ViewDir,Half));
+    
+    //this is lambert
     DiffuseColor = (NdotL * LightDataD.xyz) * LightDataA.y;
+    
+    /*
+    this is oren-nayar
+    
+    float thetaR = acos(VdotN);
+    float thetaI = acos(NdotL);
+    
+    float A = 1.0 - 0.5 * (alpha / (alpha + 0.33));
+    float B = 0.45 * (alpha / (alpha + 0.09));
+    
+    float a = max(thetaI,thetaR);
+    float b = min(thetaI,thetaR);
+    
+    float gamma = dot(ViewDir - PxlNormal * VdotN, LightDir - PxlNormal * NdotL);
+    
+    DiffuseColor = (LightDataD.xyz / kPi) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b))) * LightDataA.y;
+    
+    */
 
     if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
         float conserv = (8.0 + smoothness ) / (8.0 * kPi);
@@ -172,7 +192,7 @@ void main(void){
 
     vec3 lightCalculation = vec3(0.0);
     vec3 LightPosition = vec3(LightDataC.yzw);
-    vec3 LightDirection = vec3(LightDataA.w,LightDataB.x,LightDataB.y);
+    vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));
 
     if(LightDataD.w == 0){
         lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);
