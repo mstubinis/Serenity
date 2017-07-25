@@ -52,8 +52,7 @@ void main(void){
 
     float dist = distance(worldPosition, CameraPosition) + 0.0001; //cuz we dont like divide by zeros ;)
     float rad = max(0.35,Radius / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out
-    //float rad = Radius;
-
+    
     if(doSSAO == 1){
         if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }
         else{
@@ -73,7 +72,6 @@ void main(void){
     else{
         gl_FragColor.a = 1.0;
     }
-
     if(doBloom == 1){
         float Glow = texture2D(gMiscMap,uv).r;
         vec3 lighting = texture2D(gLightMap,uv).rgb;
