@@ -144,6 +144,8 @@ namespace Engine{
                     static void destruct();
 
                     static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
+                    static std::vector<ShaderP*> m_ForwardPassShaderPrograms;
+                
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
             };
