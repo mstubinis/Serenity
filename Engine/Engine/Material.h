@@ -167,15 +167,19 @@ class MaterialMeshEntry{
 
 class Material final: public BindableResource{
     public: 
-        enum LightingMode{
+        enum DiffuseModel{
+            LAMBERT,
+            OREN-NAYAR,
+            MINNAERT
+        };
+        enum SpecularModel{
             BLINNPHONG,
             PHONG,
             GXX,
             COOKTORRANCE,
             GAUSSIAN,
             BECKMANN,
-            PBR,
-            NUMBER
+            PBR
         };
         static std::vector<glm::vec4> m_MaterialProperities;
         static std::unordered_map<uint,std::vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP;
@@ -228,13 +232,13 @@ class Material final: public BindableResource{
         const float glow() const;
         const float frensel() const;
         const float specularity() const;
-        const uint lightingMode() const;
+        const uint specularModel() const;
         const uint id() const;
         void setFrensel(float f);
         void setShadeless(bool b);
         void setGlow(float f);
         void setSpecularity(float s);
-        void setLightingMode(uint m);
+        void setSpecularModel(uint m);
 
         void bind();
         void unbind();
