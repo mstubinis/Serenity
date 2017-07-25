@@ -10,10 +10,9 @@ uniform int doSSAO;
 uniform int doBloom;
 
 uniform vec3 CameraPosition;
-uniform float Radius;
-uniform float Intensity;
-uniform float Bias;
-uniform float Scale;
+
+uniform vec4 SSAOInfo; //x - radius | y - intensity | z - bias | w - scale
+
 uniform int Samples;
 uniform int NoiseTextureSize;
 
@@ -44,8 +43,8 @@ vec3 reconstruct_world_pos(vec2 _uv){
 float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){
     vec3 diff = (reconstruct_world_pos(uv + offsetUV)) - origin;
     vec3 vec = normalize(diff);
-    float dist = length(diff) * Scale;
-    return max(0.0, dot(normal,vec) - Bias) * (1.0 / (1.0 + dist)) * Intensity;
+    float dist = length(diff) * SSAOInfo.w;
+    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;
 }
 void main(void){
     vec2 uv = gl_TexCoord[0].st * 2.0;
@@ -54,7 +53,7 @@ void main(void){
     vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xy * 2.0 - 1.0);
 
     float dist = distance(worldPosition, CameraPosition) + 0.0001; //cuz we dont like divide by zeros ;)
-    float rad = max(0.35,Radius / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out
+    float rad = max(0.35,SSAOInfo.x / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out
     
     if(doSSAO == 1){
         if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }
