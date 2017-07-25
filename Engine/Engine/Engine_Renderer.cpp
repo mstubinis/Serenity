@@ -76,6 +76,7 @@ vector<FontRenderInfo> Detail::RenderManagement::m_FontsToBeRendered;
 vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
+vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
 void Settings::setMultisamplingLevel(uint level){
     if(Detail::RendererInfo::GeneralInfo::multisample_level != level){
@@ -398,6 +399,41 @@ void Detail::RenderManagement::_passGeometry(){
     //RENDER FOREGROUND OBJECTS HERE
 }
 void Detail::RenderManagement::_passForwardRendering(){
+    for(auto shaderProgram:Detail::RenderManagement::m_ForwardPassShaderPrograms){
+        vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
+        shaderProgram->bind();   
+        for(auto material:shaderMaterials){
+            vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); if(materialMeshes.size() > 0){
+            material->bind();
+            for(auto meshEntry:materialMeshes){
+                meshEntry->mesh()->bind();
+                for(auto instance:meshEntry->meshInstances()){
+                    boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
+                    Object* object = o.lock().get();
+                    if(exists(o)){
+                        if(scene->objects().count(object->name())){
+                            if(object->passedRenderCheck()){
+                                object->bind();
+                                for(auto meshInstance:instance.second){
+                                    meshInstance->bind(); //render also
+                                    meshInstance->unbind();
+                                }
+                                object->unbind();
+                            }
+                        }
+                    }
+                    //protect against any custom changes by restoring to the regular shader and material
+                    if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+                        shaderProgram->bind();
+                        material->bind();
+                    }
+                }
+                meshEntry->mesh()->unbind();
+            }
+            material->unbind();}
+        }
+        shaderProgram->unbind();}
+    }
 }
 void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(0,0,0,0);
