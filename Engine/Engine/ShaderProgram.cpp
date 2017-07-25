@@ -70,6 +70,9 @@ class ShaderP::impl final{
             if(stage == SHADER_PIPELINE_STAGE_GEOMETRY){
                 Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms.push_back(super);
             }
+            else if(stage == SHADER_PIPELINE_STAGE_FORWARD){
+                Renderer::Detail::RenderManagement::m_ForwardPassShaderPrograms.push_back(super);
+            }
             else if(stage == SHADER_PIPELINE_STAGE_LIGHTING){
             }
             else if(stage == SHADER_PIPELINE_STAGE_POSTPROCESSING){
