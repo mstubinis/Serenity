@@ -572,10 +572,10 @@ void Detail::RenderManagement::_passSSAO(){
     sendUniform1f("farz",c->getFar());
 
     sendUniform3fSafe("CameraPosition",camPos.x,camPos.y,camPos.z);
-    sendUniform1f("Intensity",RendererInfo::SSAOInfo::ssao_intensity);
-    sendUniform1f("Bias",RendererInfo::SSAOInfo::ssao_bias);
-    sendUniform1f("Radius",RendererInfo::SSAOInfo::ssao_radius);
-    sendUniform1f("Scale",RendererInfo::SSAOInfo::ssao_scale);
+    
+    sendUniform4f("SSAOInfo",RendererInfo::SSAOInfo::ssao_radius,RendererInfo::SSAOInfo::ssao_intensity,
+        RendererInfo::SSAOInfo::ssao_bias,RendererInfo::SSAOInfo::ssao_scale);
+    
     sendUniform1i("Samples",RendererInfo::SSAOInfo::ssao_samples);
     sendUniform1i("NoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
