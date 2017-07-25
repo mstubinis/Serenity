@@ -223,7 +223,10 @@ class Material::impl final{
 
         unordered_map<uint,MaterialComponent*> m_Components;
         vector<MaterialMeshEntry*> m_Meshes;
-        uint m_LightingMode;
+    
+        uint m_DiffuseModel;
+        uint m_SpecularModel;
+  
         bool m_Shadeless;
         float m_BaseGlow;
         float m_SpecularityPower;
@@ -238,7 +241,8 @@ class Material::impl final{
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
             m_SpecularityPower = 0.25f;
-            m_LightingMode = Material::LightingMode::BLINNPHONG;
+            m_SpecularModel = Material::SpecularModel::BLINNPHONG;
+            m_DiffuseModel = Material::DiffuseModel::LAMBERT;
             m_Frensel = 0.5f;
 
             _addToMaterialPool();
@@ -279,7 +283,7 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-            glm::vec4 data(m_Frensel,m_SpecularityPower,m_LightingMode,m_Shadeless);
+            glm::vec4 data(m_Frensel,m_SpecularityPower,m_SpecularModel,m_DiffuseModel);
             Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
@@ -292,8 +296,8 @@ class Material::impl final{
                 data.g *= 0.03125f; // 1 / 32
             }
             
-            data.b = float(m_LightingMode);
-            data.a = m_Shadeless;
+            data.b = float(m_SpecularModel);
+            data.a = float(m_DiffuseModel);
         }
         void _destruct(){
             for(auto component:m_Components)
@@ -348,7 +352,8 @@ class Material::impl final{
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSpecularity(float& s){ m_SpecularityPower = s; _updateGlobalMaterialPool(); }
-        void _setLightingMode(uint& m){ m_LightingMode = m; _updateGlobalMaterialPool(); }
+        void _setSpecularModel(uint& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
+        void _setDiffuseModel(uint& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
 };
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
@@ -466,14 +471,16 @@ const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const float Material::frensel() const { return m_i->m_Frensel; }
 const float Material::specularity() const { return m_i->m_SpecularityPower; }
-const uint Material::lightingMode() const { return m_i->m_LightingMode; }
+const uint Material::specularModel() const { return m_i->m_SpecularModel; }
+const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
 const uint Material::id() const { return m_i->m_ID; }
 
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setFrensel(float f){ m_i->_setFrensel(f); }
 void Material::setSpecularity(float s){ m_i->_setSpecularity(s); }
-void Material::setLightingMode(uint m){ m_i->_setLightingMode(m); }
+void Material::setSpecularModel(uint m){ m_i->_setSpecularModel(m); }
+void Material::setDiffuseModel(uint m){ m_i->_setDiffuseModel(m); }
 
 struct less_than_key{
     inline bool operator() ( MaterialMeshEntry* struct1,  MaterialMeshEntry* struct2){
