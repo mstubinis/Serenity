@@ -126,6 +126,7 @@ namespace Engine{
                     static void _passGodsRays(glm::vec2,bool,float);
                     static void _passHDR();
                     static void _passGeometry();
+                    static void _passForwardRendering();
                     static void _passLighting();
                     static void _passSSAO();
                     static void _passEdge(GLuint texture,float radius = 1.0f);
