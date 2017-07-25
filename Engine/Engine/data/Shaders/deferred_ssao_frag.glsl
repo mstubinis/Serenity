@@ -26,15 +26,15 @@ uniform float farz;
 vec3 reconstruct_world_pos(vec2 _uv){
     float log_depth = texture2D(gDepthMap, _uv).r;
 
-	//log to regular depth
+    //log to regular depth
     float regularDepth = pow(farz + 1.0, log_depth) - 1.0;
 
-	//linearize regular depth
+    //linearize regular depth
     float a = farz / (farz - nearz);
     float b = farz * nearz / (nearz - farz);
     float depth = (a + b / regularDepth);
 
-	//world space it!
+    //world space it!
     vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
     return wpos.xyz / wpos.w;
 }
@@ -50,9 +50,9 @@ void main(void){
     vec3 normal = texture2D(gNormalMap, uv).xyz;
     vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xy * 2.0 - 1.0);
 
-	float dist = distance(worldPosition, CameraPosition) + 0.0001; //cuz we dont like divide by zeros ;)
-	float rad = max(0.35,Radius / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out
-	//float rad = Radius;
+    float dist = distance(worldPosition, CameraPosition) + 0.0001; //cuz we dont like divide by zeros ;)
+    float rad = max(0.35,Radius / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out
+    //float rad = Radius;
 
     if(doSSAO == 1){
         if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }
