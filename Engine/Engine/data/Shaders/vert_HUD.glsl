@@ -6,7 +6,6 @@ attribute vec3 normal;
 attribute vec3 binormal;
 attribute vec3 tangent;
 
-
 uniform mat4 VP;
 uniform mat4 Model;
 
