@@ -237,7 +237,7 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-            m_SpecularityPower = 8.0f;
+            m_SpecularityPower = 0.25f;
             m_LightingMode = Material::LightingMode::BLINNPHONG;
             m_Frensel = 0.5f;
 
@@ -286,10 +286,12 @@ class Material::impl final{
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
 
             data.r = m_Frensel;
-            data.g = m_SpecularityPower;
-            if(m_LightingMode != Material::LightingMode::BLINNPHONG && m_LightingMode != Material::LightingMode::PHONG){
-                data.g = glm::clamp(data.g,0.01f,0.99f);
+            data.g = m_SpecularityPower;         
+            
+            if(data.g > 1.0){
+                data.g *= 0.03125f; // 1 / 32
             }
+            
             data.b = float(m_LightingMode);
             data.a = m_Shadeless;
         }
