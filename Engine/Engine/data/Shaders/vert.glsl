@@ -33,20 +33,20 @@ void main(void){
         BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;
         BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;
     }
-    vec4 PosL = BoneTransform * vec4(position, 1.0);
-    vec4 NormalL = BoneTransform * vec4(normal, 0.0);
-    vec4 BinormalL = BoneTransform * vec4(binormal, 0.0);
-    vec4 TangentL = BoneTransform * vec4(tangent, 0.0);
+    vec4 PosTransformed = BoneTransform * vec4(position, 1.0);
+    vec4 NormalTransformed = BoneTransform * vec4(normal, 0.0);
+    vec4 BinormalTransformed = BoneTransform * vec4(binormal, 0.0);
+    vec4 TangentTransformed = BoneTransform * vec4(tangent, 0.0);
 
     mat4 MVP = VP * Model;
 
-    gl_Position = MVP * PosL;
+    gl_Position = MVP * PosTransformed;
     
-    Normals = (NormalMatrix * NormalL).xyz;
-    Binormals = (NormalMatrix * BinormalL).xyz;
-    Tangents = (NormalMatrix * TangentL).xyz;
+    Normals = NormalMatrix * NormalTransformed.xyz;
+    Binormals = NormalMatrix * BinormalTransformed.xyz;
+    Tangents = NormalMatrix * TangentTransformed.xyz;
     
-    WorldPosition = (Model * PosL).xyz;
+    WorldPosition = (Model * PosTransformed).xyz;
 
     UV = uv;
     logz_f = 1.0 + gl_Position.w;
