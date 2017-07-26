@@ -67,8 +67,8 @@ void SunLight::lighten(){
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
-    this->setRotation(dir);
-    m_Forward = glm::normalize(m_Forward);
+    alignTo(dir,0);
+    ObjectBasic::update(0);
 }
 DirectionalLight::~DirectionalLight(){
 }
@@ -615,8 +615,9 @@ void PointLight::lighten(){
     Resources::getMesh("PointLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 }
-SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LightType::Spot){
-    m_Forward = glm::normalize(m_Forward);
+SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, Scene* scene): PointLight(pos,name,scene){
+    alignTo(direction,0);
+    ObjectBasic::update(0);
     m_Cutoff = 0;
 }
 SpotLight::~SpotLight(){
