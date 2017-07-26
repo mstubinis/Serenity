@@ -38,7 +38,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshDat
 
     if(doOther == true){
         mesh->m_Skeleton->fill(data);
-	}
+    }
 }
 void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
     for(uint i = 0; i < node->mNumMeshes; i++){
