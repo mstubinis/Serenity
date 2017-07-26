@@ -617,10 +617,16 @@ void PointLight::lighten(){
 SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,name,scene){
     alignTo(direction,0);
     ObjectBasic::update(0);
-    m_Cutoff = cutoff;
-    m_OuterCutoff = outerCutoff;
+    setCutoff(cutoff);
+    setCutoffOuter(outerCutoff);
 }
 SpotLight::~SpotLight(){
+}
+void SpotLight::setCutoff(float cutoff){
+    m_Cutoff = glm::cos(cutoff * 0.0174533f));
+}
+void SpotLight::setCutoffOuter(float outerCutoff){
+    m_OuterCutoff = glm::cos(outerCutoff * 0.0174533f));
 }
 void SpotLight::lighten(){
     if(!m_Active) return;
