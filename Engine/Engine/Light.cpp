@@ -67,15 +67,16 @@ void SunLight::lighten(){
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
-    m_Direction = glm::normalize(dir);
+    this->setRotation(dir);
+    m_Forward = glm::normalize(m_Forward);
 }
 DirectionalLight::~DirectionalLight(){
 }
 void DirectionalLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
-    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Direction.x);
-    Renderer::sendUniform4f("LightDataB", m_Direction.y,m_Direction.z,0.0f, 0.0f);
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
+    Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,0.0f, 0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
@@ -615,7 +616,7 @@ void PointLight::lighten(){
     Renderer::Settings::cullFace(GL_BACK);
 }
 SpotLight::SpotLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LightType::Spot){
-    m_Direction = glm::vec3(0,0,-1);
+    m_Forward = glm::normalize(m_Forward);
     m_Cutoff = 0;
 }
 SpotLight::~SpotLight(){
