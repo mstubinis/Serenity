@@ -11,20 +11,19 @@ enum LightType {
     Directional,
     Spot
 };
-
 enum LightRange{
-	_7,
-	_13,
-	_20,
-	_32,
-	_50,
-	_65,
-	_100,
-	_160,
-	_200,
-	_325,
-	_600,
-	_3250
+    _7,
+    _13,
+    _20,
+    _32,
+    _50,
+    _65,
+    _100,
+    _160,
+    _200,
+    _325,
+    _600,
+    _3250
 };
 
 class Scene;
@@ -53,8 +52,6 @@ class SunLight: public ObjectDisplay{
         bool isActive(){ return m_Active; }
 };
 class DirectionalLight: public SunLight{
-    private:
-        glm::vec3 m_Direction;
     public:
         DirectionalLight(std::string = "Directional Light",glm::vec3 = glm::vec3(0,0,-1), Scene* = nullptr);
         virtual ~DirectionalLight();
@@ -74,8 +71,8 @@ class PointLight: public SunLight{
         void setConstant(float c);
         void setLinear(float l);
         void setExponent(float e);
-		void setAttenuation(float c,float l, float e);
-		void setAttenuation(LightRange);
+        void setAttenuation(float c,float l, float e);
+        void setAttenuation(LightRange);
 
         float& getLightRadius(){ return m_PointLightRadius; }
 
@@ -88,7 +85,6 @@ class PointLight: public SunLight{
 };
 class SpotLight: public SunLight{
     private:
-        glm::vec3 m_Direction;
         float m_Cutoff;
 
     public:
