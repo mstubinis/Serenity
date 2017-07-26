@@ -92,5 +92,7 @@ class SpotLight: public PointLight{
         virtual ~SpotLight();
 
         virtual void lighten();
+        void setCutoff(float);
+        void setCutoffOuter(float);
 };
 #endif
