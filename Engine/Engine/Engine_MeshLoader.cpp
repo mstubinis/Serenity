@@ -18,26 +18,26 @@ bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < thresh
 
 
 void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){	
-	MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
+    MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
 }
 void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data, std::string file){
-	mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
+    mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
     if(!mesh->m_aiScene || mesh->m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !mesh->m_aiScene->mRootNode){
         return;
     }
     //animation stuff
     aiMatrix4x4 m = mesh->m_aiScene->mRootNode->mTransformation; // node->mTransformation?
     m.Inverse();
-	bool doOther = false;
-	if(mesh->m_aiScene->mAnimations && mesh->m_aiScene->mNumAnimations > 0 && mesh->m_Skeleton == nullptr){
-		mesh->m_Skeleton = new MeshSkeleton();
-		mesh->m_Skeleton->m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
-		doOther = true;
-	}
+    bool doOther = false;
+    if(mesh->m_aiScene->mAnimations && mesh->m_aiScene->mNumAnimations > 0 && mesh->m_Skeleton == nullptr){
+        mesh->m_Skeleton = new MeshSkeleton();
+        mesh->m_Skeleton->m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
+        doOther = true;
+    }
     MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,mesh->m_aiScene->mRootNode, mesh->m_aiScene);
 
-	if(doOther == true){
-		mesh->m_Skeleton->fill(data);
+    if(doOther == true){
+        mesh->m_Skeleton->fill(data);
 	}
 }
 void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
@@ -46,8 +46,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
         #pragma region vertices
         for(uint i = 0; i < aimesh->mNumVertices; i++){
             //pos
-            glm::vec3 pos;
-            pos.x = aimesh->mVertices[i].x; pos.y = aimesh->mVertices[i].y; pos.z = aimesh->mVertices[i].z;
+            glm::vec3 pos(aimesh->mVertices[i].x,aimesh->mVertices[i].y,aimesh->mVertices[i].z);
             data.points.push_back(pos);
 
             //uv
@@ -57,19 +56,16 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             data.uvs.push_back(uv);
 
             //norm
-            glm::vec3 norm;
             if(aimesh->mNormals){
-                norm.x = aimesh->mNormals[i].x; norm.y = aimesh->mNormals[i].y; norm.z = aimesh->mNormals[i].z;
+                glm::vec3 norm(aimesh->mNormals[i].x, aimesh->mNormals[i].y, aimesh->mNormals[i].z);
                 data.normals.push_back(norm);
 
                 //binorm
-                glm::vec3 binorm;
-                binorm.x = aimesh->mBitangents[i].x; binorm.y = aimesh->mBitangents[i].y; binorm.z = aimesh->mBitangents[i].z;
+                glm::vec3 binorm(aimesh->mBitangents[i].x,aimesh->mBitangents[i].y,aimesh->mBitangents[i].z);
                 data.binormals.push_back(binorm);
 
                 //tangent
-                glm::vec3 tangent;
-                tangent.x = aimesh->mTangents[i].x; tangent.y = aimesh->mTangents[i].y; tangent.z = aimesh->mTangents[i].z;
+                glm::vec3 tangent(aimesh->mTangents[i].x,aimesh->mTangents[i].y,aimesh->mTangents[i].z);
                 data.tangents.push_back(tangent);
             }
         }
