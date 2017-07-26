@@ -20,8 +20,9 @@ enum COLLISION_GROUPS {
 struct DefaultObjectDynamicBindFunctor;
 struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
-    public: static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
-            static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+    public: 
+		static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
+        static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
 
         glm::v3 m_Forward, m_Right, m_Up;
@@ -126,7 +127,7 @@ class ObjectDynamic: public Object{
         virtual float getMass(){ return m_Mass; }
         virtual btRigidBody* getRigidBody(){ return m_RigidBody; }
         virtual glm::quat& getOrientation();
-        virtual void setOrientation(glm::quat);
+        virtual void setOrientation(glm::quat q);
         virtual glm::vec3 getScale();
         virtual glm::m4& getModel();
         virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }

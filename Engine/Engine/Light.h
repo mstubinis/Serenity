@@ -59,10 +59,9 @@ class DirectionalLight: public SunLight{
         virtual void lighten();
 };
 class PointLight: public SunLight{
-    private:
+    protected:
         float m_Constant, m_Linear, m_Exp;
         float m_PointLightRadius;
-    protected:
         float calculatePointLightRadius();
     public:
         PointLight(std::string = "Point Light",glm::v3 = glm::v3(0), Scene* = nullptr);
@@ -88,10 +87,10 @@ class SpotLight: public PointLight{
         float m_Cutoff;
         float m_OuterCutoff;
     public:
-        SpotLight(std::string = "Spot Light",glm::v3 = glm::v3(0), glm::vec3 = glm::vec3(0,0,-1), float = 15.0f, float = 20.0f,Scene* = nullptr);
+        SpotLight(std::string = "Spot Light",glm::v3 = glm::v3(0), glm::vec3 = glm::vec3(0,0,-1), float = 45.0f, float = 55.0f,Scene* = nullptr);
         virtual ~SpotLight();
 
-        virtual void lighten();
+        void lighten();
         void setCutoff(float);
         void setCutoffOuter(float);
 };

@@ -169,14 +169,14 @@ class Material final: public BindableResource{
     public: 
         enum DiffuseModel{
             LAMBERT,
-            OREN-NAYAR,
+            OREN_NAYAR,
             MINNAERT
         };
         enum SpecularModel{
-            BLINNPHONG,
+            BLINN_PHONG,
             PHONG,
             GXX,
-            COOKTORRANCE,
+            COOK_TORRANCE,
             GAUSSIAN,
             BECKMANN,
             PBR
@@ -241,9 +241,9 @@ class Material final: public BindableResource{
         void setSmoothness(float s);
     
         const uint specularModel() const;
-        void setSpecularModel(uint m);
+		void setSpecularModel(Material::SpecularModel m);
         const uint diffuseModel() const;    
-        void setDiffuseModel(uint m);
+        void setDiffuseModel(Material::DiffuseModel m);
 
         void bind();
         void unbind();

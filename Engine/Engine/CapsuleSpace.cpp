@@ -39,8 +39,12 @@ void CapsuleStar::update(float dt){
     }
     if(m_Light != nullptr){
         m_Light->setPosition(pos/glm::num(75));
-        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){m_Light->deactivate();}
-        else{m_Light->activate();}
+        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
+			m_Light->deactivate();
+		}
+        else{
+			m_Light->activate();
+		}
     }
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
     ObjectDisplay::update(dt);

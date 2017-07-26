@@ -207,6 +207,10 @@ void ObjectDynamic::setOrientation(glm::quat q){
     m_RigidBody->setCenterOfMassTransform(t);
     m_MotionState->setWorldTransform(t);
 
+    m_Forward = Engine::Math::getForward(m_RigidBody);
+    m_Right = Engine::Math::getRight(m_RigidBody);
+    m_Up = Engine::Math::getUp(m_RigidBody);
+
     clearAngularForces();
 }
 void ObjectDynamic::setPosition(glm::v3 p){ ObjectDynamic::setPosition(p.x,p.y,p.z); }

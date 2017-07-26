@@ -21,7 +21,6 @@
 using namespace Engine;
 
 HUD* m_HUD;
-
 void Game::cleanup(){
     delete m_HUD;
 }
@@ -77,10 +76,10 @@ void Game::initLogic(){
     m_HUD = new HUD();
 
     Renderer::Settings::HDR::disable();
-
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
+
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
     }
@@ -93,30 +92,14 @@ void Game::update(float dt){
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f6")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BLINNPHONG);
+		Resources::getMaterial("Defiant")->setDiffuseModel(Material::DiffuseModel::LAMBERT);
     }
     if(Events::Keyboard::isKeyDownOnce("f7")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PHONG);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f8")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GXX);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f9")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::COOKTORRANCE);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f10")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::GAUSSIAN);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f11")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::BECKMANN);
-    }
-    if(Events::Keyboard::isKeyDownOnce("f12")){
-        Resources::getMaterial("Defiant")->setLightingMode(Material::LightingMode::PBR);
-    }
-    if(Events::Keyboard::isKeyDownOnce("t")){
-		Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao);
+		Resources::getMaterial("Defiant")->setDiffuseModel(Material::DiffuseModel::MINNAERT);
     }
     m_HUD->update(dt);
+
+	Resources::getObject("TestObject")->setPosition(Resources::getObject("SpotLightPlayer")->getPosition());
 }
 void Game::render(){
     m_HUD->render(Renderer::Detail::RendererInfo::DebugDrawingInfo::debug);

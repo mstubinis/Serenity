@@ -239,8 +239,8 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-            m_Smoothness = 0.25f;
-            m_SpecularModel = Material::SpecularModel::BLINNPHONG;
+            m_Smoothness = 0.999f;
+            m_SpecularModel = Material::SpecularModel::BLINN_PHONG;
             m_DiffuseModel = Material::DiffuseModel::LAMBERT;
             m_Frensel = 0.5f;
 
@@ -351,8 +351,8 @@ class Material::impl final{
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSmoothness(float& s){ m_Smoothness = s; _updateGlobalMaterialPool(); }
-        void _setSpecularModel(uint& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
-        void _setDiffuseModel(uint& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
+        void _setSpecularModel(Material::SpecularModel& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
+        void _setDiffuseModel(Material::DiffuseModel& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
 };
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
@@ -469,7 +469,7 @@ const MaterialComponentRefraction* Material::getComponentRefraction() const { re
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const float Material::frensel() const { return m_i->m_Frensel; }
-const float Material::smoothness() const { return m_i->m_SpecularityPower; }
+const float Material::smoothness() const { return m_i->m_Smoothness; }
 const uint Material::specularModel() const { return m_i->m_SpecularModel; }
 const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
 const uint Material::id() const { return m_i->m_ID; }
@@ -478,8 +478,8 @@ void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setFrensel(float f){ m_i->_setFrensel(f); }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
-void Material::setSpecularModel(uint m){ m_i->_setSpecularModel(m); }
-void Material::setDiffuseModel(uint m){ m_i->_setDiffuseModel(m); }
+void Material::setSpecularModel(Material::SpecularModel m){ m_i->_setSpecularModel(m); }
+void Material::setDiffuseModel(Material::DiffuseModel m){ m_i->_setDiffuseModel(m); }
 
 struct less_than_key{
     inline bool operator() ( MaterialMeshEntry* struct1,  MaterialMeshEntry* struct2){

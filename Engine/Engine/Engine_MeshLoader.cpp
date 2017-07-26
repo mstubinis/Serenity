@@ -46,7 +46,10 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
         #pragma region vertices
         for(uint i = 0; i < aimesh->mNumVertices; i++){
             //pos
-            glm::vec3 pos(aimesh->mVertices[i].x,aimesh->mVertices[i].y,aimesh->mVertices[i].z);
+            glm::vec3 pos;
+            pos.x = aimesh->mVertices[i].x;
+            pos.y = aimesh->mVertices[i].y;
+            pos.z = aimesh->mVertices[i].z;
             data.points.push_back(pos);
 
             //uv
@@ -56,16 +59,25 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             data.uvs.push_back(uv);
 
             //norm
+            glm::vec3 norm;
             if(aimesh->mNormals){
-                glm::vec3 norm(aimesh->mNormals[i].x, aimesh->mNormals[i].y, aimesh->mNormals[i].z);
+                norm.x = aimesh->mNormals[i].x;
+                norm.y = aimesh->mNormals[i].y;
+                norm.z = aimesh->mNormals[i].z;
                 data.normals.push_back(norm);
 
                 //binorm
-                glm::vec3 binorm(aimesh->mBitangents[i].x,aimesh->mBitangents[i].y,aimesh->mBitangents[i].z);
+                glm::vec3 binorm;
+                binorm.x = aimesh->mBitangents[i].x;
+                binorm.y = aimesh->mBitangents[i].y;
+                binorm.z = aimesh->mBitangents[i].z;
                 data.binormals.push_back(binorm);
 
                 //tangent
-                glm::vec3 tangent(aimesh->mTangents[i].x,aimesh->mTangents[i].y,aimesh->mTangents[i].z);
+                glm::vec3 tangent;
+                tangent.x = aimesh->mTangents[i].x;
+                tangent.y = aimesh->mTangents[i].y;
+                tangent.z = aimesh->mTangents[i].z;
                 data.tangents.push_back(tangent);
             }
         }
@@ -99,43 +111,43 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
         #pragma endregion
 
         //bones
-		if(aimesh->mNumBones > 0){
-			for (uint i = 0; i < aimesh->mNumBones; i++) { 
-				uint BoneIndex = 0; 
-				std::string BoneName(aimesh->mBones[i]->mName.data);
-				if(!mesh->m_Skeleton->m_BoneMapping.count(BoneName)) {
-					BoneIndex = mesh->m_Skeleton->m_NumBones;
-					mesh->m_Skeleton->m_NumBones++; 
-					BoneInfo bi;
-					mesh->m_Skeleton->m_BoneInfo.push_back(bi);
-				}
-				else{
-					BoneIndex = mesh->m_Skeleton->m_BoneMapping.at(BoneName);
-				}
-				mesh->m_Skeleton->m_BoneMapping.emplace(BoneName,BoneIndex);
+        if(aimesh->mNumBones > 0){
+            for (uint i = 0; i < aimesh->mNumBones; i++) { 
+                uint BoneIndex = 0; 
+                std::string BoneName(aimesh->mBones[i]->mName.data);
+                if(!mesh->m_Skeleton->m_BoneMapping.count(BoneName)) {
+                    BoneIndex = mesh->m_Skeleton->m_NumBones;
+                    mesh->m_Skeleton->m_NumBones++; 
+                    BoneInfo bi;
+                    mesh->m_Skeleton->m_BoneInfo.push_back(bi);
+                }
+                else{
+                    BoneIndex = mesh->m_Skeleton->m_BoneMapping.at(BoneName);
+                }
+                mesh->m_Skeleton->m_BoneMapping.emplace(BoneName,BoneIndex);
 
-				aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
-				mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
-				for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
-					uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
-					float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
-					VertexBoneData d;
-					d.AddBoneData(BoneIndex, Weight);
-					data.m_Bones.emplace(VertexID,d);
-				}
-			}
-		}
-		if(scene->mAnimations && scene->mNumAnimations > 0){
+                aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
+                mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
+                for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
+                    uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
+                    float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
+                    VertexBoneData d;
+                    d.AddBoneData(BoneIndex, Weight);
+                    data.m_Bones.emplace(VertexID,d);
+                }
+            }
+        }
+        if(scene->mAnimations && scene->mNumAnimations > 0){
             for(uint i = 0; i < scene->mNumAnimations; i++){
                  aiAnimation* anim = scene->mAnimations[i];
                  std::string key(anim->mName.C_Str());
-				 if(key == ""){
-					 key = "Animation " + boost::lexical_cast<std::string>(mesh->m_Skeleton->m_AnimationData.size());
-				 }
-				 if(!mesh->m_Skeleton->m_AnimationData.count(key)){
-					AnimationData* animData = new AnimationData(mesh,anim);
-					mesh->m_Skeleton->m_AnimationData.emplace(key,animData);
-				 }
+                 if(key == ""){
+                     key = "Animation " + boost::lexical_cast<std::string>(mesh->m_Skeleton->m_AnimationData.size());
+                 }
+                 if(!mesh->m_Skeleton->m_AnimationData.count(key)){
+                    AnimationData* animData = new AnimationData(mesh,anim);
+                    mesh->m_Skeleton->m_AnimationData.emplace(key,animData);
+                 }
             }
         }
     }

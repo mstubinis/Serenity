@@ -51,7 +51,6 @@ ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene
     m_Orientation = glm::quat();
     ObjectBasic::setScale(scl);
     ObjectBasic::setPosition(pos);
-    _prevPosition = pos;
 }
 ObjectBasic::~ObjectBasic(){
 }
@@ -80,6 +79,12 @@ void ObjectBasic::setPosition(glm::num x, glm::num y, glm::num z){
     m_Model[3][2] = parentPos.z + z;
 }
 void ObjectBasic::setPosition(glm::v3 position){ ObjectBasic::setPosition(position.x,position.y,position.z); }
+void ObjectBasic::setOrientation(glm::quat q){ 
+	m_Orientation = q;
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
+}
 void ObjectBasic::alignTo(glm::v3 direction, float time){
     Engine::Math::alignTo(m_Orientation,this,glm::vec3(direction),time);
 }

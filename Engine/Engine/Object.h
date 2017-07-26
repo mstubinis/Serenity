@@ -26,6 +26,8 @@ class IObject: public BindableResource{
         virtual void setScale(float,float,float) = 0;
         virtual void setScale(glm::vec3) = 0;
 
+		virtual void setOrientation(glm::quat) = 0;
+
         virtual void translate(glm::num,glm::num,glm::num,bool local=true) = 0;
         virtual void translate(glm::v3,bool local=true) = 0;
         virtual void rotate(float,float,float,bool overTime = true) = 0;
@@ -43,7 +45,6 @@ class IObject: public BindableResource{
         virtual glm::v3& getRight() = 0;
         virtual glm::v3& getUp() = 0;
         virtual glm::m4& getModel() = 0;
-        virtual glm::v3 getMotionVector() = 0;
 };
 
 class Object: public IObject{
@@ -99,7 +100,6 @@ class ObjectBasic: public Object{
         glm::v3 m_Position;
         glm::m4 m_Model;
         glm::quat m_Orientation;
-        glm::v3 _prevPosition;
     public:
         ObjectBasic(
                 glm::v3 = glm::v3(0),         //Position
@@ -131,8 +131,7 @@ class ObjectBasic: public Object{
         virtual glm::vec3 getScale(){ return m_Scale; }
         virtual glm::m4& getModel(){ return m_Model; }
         virtual glm::quat& getOrientation(){ return m_Orientation; }
-        virtual void setOrientation(glm::quat q){ m_Orientation = q; }
-        virtual glm::v3 getMotionVector() { return getPosition() - _prevPosition; }
+        virtual void setOrientation(glm::quat);
 
         virtual void alignTo(glm::v3,float speed=0);
         virtual void alignTo(Object*,float speed=0);

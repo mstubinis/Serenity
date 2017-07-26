@@ -399,6 +399,7 @@ void Detail::RenderManagement::_passGeometry(){
     //RENDER FOREGROUND OBJECTS HERE
 }
 void Detail::RenderManagement::_passForwardRendering(){
+    Scene* scene = Resources::getCurrentScene();
     for(auto shaderProgram:Detail::RenderManagement::m_ForwardPassShaderPrograms){
         vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
         shaderProgram->bind();   

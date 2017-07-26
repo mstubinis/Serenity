@@ -6,6 +6,7 @@ uniform vec4 LightDataA; //x = ambient, y = diffuse, z = specular, w = LightDire
 uniform vec4 LightDataB; //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
 uniform vec4 LightDataC; //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
 uniform vec4 LightDataD; //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+uniform vec4 LightDataE; //x = cutoff, y = outerCutoff, z = UNUSED, w = UNUSED
 
 uniform sampler2D gDiffuseMap;
 uniform sampler2D gNormalMap;
@@ -14,7 +15,7 @@ uniform sampler2D gDepthMap;
 
 uniform vec4 ScreenData; //x = near, y = far, z = winSize.x, w = winSize.y
 uniform vec4 CamPosGamma; //x = camX, y = camY, z = camZ, w = monitorGamma
-uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = frensel, g = specPower, b = lightingMode, a = shadeless 
+uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = frensel, g = specPower, b = specularModel, a = diffuseModel 
 
 uniform mat4 VP;
 uniform mat4 invVP;
@@ -85,26 +86,28 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float VdotN = max(0.0, dot(ViewDir,PxlNormal));
     float VdotH = max(0.0, dot(ViewDir,Half));
     
-    //this is lambert
-    DiffuseColor = (NdotL * LightDataD.xyz) * LightDataA.y;
+    if(materials[index].a == 0.0){//this is lambert
+        DiffuseColor = (NdotL * LightDataD.xyz) * LightDataA.y;
+    }
+    else if(materials[index].a == 1.0){//this is oren-nayar
+        float thetaR = acos(VdotN);
+        float thetaI = acos(NdotL);
     
-    /*
-    this is oren-nayar
+        float A = 1.0 - 0.5 * (alpha / (alpha + 0.33));
+        float B = 0.45 * (alpha / (alpha + 0.09));
     
-    float thetaR = acos(VdotN);
-    float thetaI = acos(NdotL);
+        float a = max(thetaI,thetaR);
+        float b = min(thetaI,thetaR);
     
-    float A = 1.0 - 0.5 * (alpha / (alpha + 0.33));
-    float B = 0.45 * (alpha / (alpha + 0.09));
+        float gamma = dot(ViewDir - PxlNormal * VdotN, LightDir - PxlNormal * NdotL);
     
-    float a = max(thetaI,thetaR);
-    float b = min(thetaI,thetaR);
+        DiffuseColor = (LightDataD.xyz / kPi) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b))) * LightDataA.y;
     
-    float gamma = dot(ViewDir - PxlNormal * VdotN, LightDir - PxlNormal * NdotL);
-    
-    DiffuseColor = (LightDataD.xyz / kPi) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b))) * LightDataA.y;
-    
-    */
+    }
+    else if(materials[index].a == 2.0){//this is minneart
+        DiffuseColor = kPi * LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
+    }
+
 
     if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
         smoothness *= 32;
@@ -115,7 +118,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         smoothness *= 32;
         float conserv = (2.0 + smoothness ) / (2.0 * kPi);
         vec3 Reflect = reflect(-LightDir, PxlNormal);
-	float VdotR = max(0.0, dot(ViewDir,Reflect));
+        float VdotR = max(0.0, dot(ViewDir,Reflect));
         SpecularAngle = conserv * pow(VdotR, smoothness);
     }
     else if(materials[index].b == 2.0){ //this is GGX (physical)
@@ -147,7 +150,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         vec3 Lo = vec3(0.0);
         float attenuation = 1.0;  
         if(LightDataD.w != 0 && LightDataD.w != 2){
-	    float Distance = length(LightDir);
+        float Distance = length(LightDir);
             attenuation = 1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
         }
         
@@ -185,8 +188,19 @@ vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
     return c * attenuation;
 }
-vec3 CalcSpotLight(vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
-    return vec3(0.0);
+vec3 CalcSpotLight(vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
+    vec3 LightDir = normalize(LightPos - PxlWorldPos);
+	float Distance = length(LightDir);
+
+    float theta = dot(LightDir, normalize(-SpotLightDir));
+    
+    vec3 c = vec3(0.0);
+    if(theta > LightDataE.x){       
+        c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
+		return vec3(1.0);
+    }
+    //float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
+    //return c * attenuation;
 }
 void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
@@ -199,17 +213,17 @@ void main(void){
     vec3 LightPosition = vec3(LightDataC.yzw);
     vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));
 
-    if(LightDataD.w == 0){
+    if(LightDataD.w == 0.0){
         lightCalculation = CalcLightInternal(normalize(LightPosition - PxlPosition),PxlPosition,PxlNormal,uv);
     }
-    else if(LightDataD.w == 1){
+    else if(LightDataD.w == 1.0){
         lightCalculation = CalcPointLight(LightPosition,PxlPosition,PxlNormal,uv);
     }
-    else if(LightDataD.w == 2){
+    else if(LightDataD.w == 2.0){
         lightCalculation = CalcLightInternal(LightDirection,PxlPosition,PxlNormal,uv);
     }
-    else if(LightDataD.w == 3){
-        lightCalculation = CalcSpotLight(PxlPosition,PxlNormal,uv);
+    else if(LightDataD.w == 3.0){
+        lightCalculation = CalcSpotLight(LightDirection,LightPosition,PxlPosition,PxlNormal,uv);
     }
     gl_FragData[0].rgb = lightCalculation;
 }

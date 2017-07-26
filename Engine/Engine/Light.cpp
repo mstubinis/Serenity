@@ -66,7 +66,7 @@ void SunLight::lighten(){
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
-    alignTo(dir,0);
+    alignTo(glm::v3(dir),0);
     ObjectBasic::update(0);
 }
 DirectionalLight::~DirectionalLight(){
@@ -74,8 +74,8 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
-    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
-    Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,0.0f, 0.0f);
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
+    Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),0.0f, 0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
@@ -567,9 +567,9 @@ PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos
         #pragma endregion
         Resources::addMesh("PointLightBounds",data,CollisionType::None,false);
     }
-    m_Constant = 0.0f;
-    m_Linear = 0.0f;
-    m_Exp = 1.0f;
+    m_Constant = 0.1f;
+    m_Linear = 0.1f;
+    m_Exp = 0.1f;
     m_PointLightRadius = calculatePointLightRadius();
 }
 PointLight::~PointLight(){
@@ -614,19 +614,19 @@ void PointLight::lighten(){
     Resources::getMesh("PointLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 }
-SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,name,scene){
-    alignTo(direction,0);
-    ObjectBasic::update(0);
+SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(name,pos,scene){
+    //alignTo(glm::v3(direction),0);
+    //ObjectBasic::update(0);
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
 }
 SpotLight::~SpotLight(){
 }
 void SpotLight::setCutoff(float cutoff){
-    m_Cutoff = glm::cos(cutoff * 0.0174533f));
+	m_Cutoff = glm::cos(glm::radians(cutoff));
 }
 void SpotLight::setCutoffOuter(float outerCutoff){
-    m_OuterCutoff = glm::cos(outerCutoff * 0.0174533f));
+	m_OuterCutoff = glm::cos(glm::radians(outerCutoff));
 }
 void SpotLight::lighten(){
     if(!m_Active) return;
@@ -636,13 +636,14 @@ void SpotLight::lighten(){
         return;
     sendGenericAttributesToShader();
 
-    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
-    Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,m_Constant,m_Linear);
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
+    Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),m_Constant,m_Linear);
     Renderer::sendUniform4f("LightDataC", m_Exp,float(pos.x),float(pos.y),float(pos.z));
-    Renderer::sendUniform4f("LightDataE", m_Cutoff, m_OuterCutoff, 0.0f,0.0f);
-	
-    glm::mat4 m(1);
+    Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, 0.0f,0.0f);
+    
+    glm::mat4 m(1.0f);
     m = glm::translate(m,glm::vec3(pos));
+    //m *= glm::mat4_cast(m_Orientation);
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     Renderer::sendUniformMatrix4f("Model",m);

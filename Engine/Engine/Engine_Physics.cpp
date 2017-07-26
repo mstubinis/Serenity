@@ -179,14 +179,14 @@ Collision::~Collision(){
     SAFE_DELETE(m_Inertia);
     SAFE_DELETE(m_InternalMeshData);
     SAFE_DELETE(m_CollisionShape);
-	m_CollisionType = CollisionType::None;
+    m_CollisionType = CollisionType::None;
 }
 void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
+    m_CollisionType = collisionType;
     switch(collisionType){
-		m_CollisionType = collisionType;
-	    case CollisionType::ConvexHull:{
+        case CollisionType::ConvexHull:{
             shape = new btConvexHullShape();
 
             for(auto vertex:data.points){
@@ -196,7 +196,7 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
             m_CollisionShape = shape;	
             break;
         }
-		case CollisionType::TriangleShape:{
+        case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
 
             for(auto triangle:data.file_triangles){
@@ -220,7 +220,7 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
             m_CollisionShape = shape;
             break;
         }
-		case CollisionType::TriangleShapeStatic:{
+        case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
 
             for(auto triangle:data.file_triangles){
@@ -243,7 +243,7 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
             m_CollisionShape = shape;
             break;
         }
-		case CollisionType::Box:{
+        case CollisionType::Box:{
             glm::vec3 max = glm::vec3(0);
 
             for(auto vertex:data.file_points){
@@ -255,12 +255,15 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
             m_CollisionShape = shape;
             break;
         }
+        default:{
+            break;
+        }
     }
 }
 void Collision::setMass(float mass){
-	if(m_CollisionShape == nullptr || m_CollisionType == CollisionType::TriangleShapeStatic || m_CollisionType == CollisionType::None) return;
+    if(m_CollisionShape == nullptr || m_CollisionType == CollisionType::TriangleShapeStatic || m_CollisionType == CollisionType::None) return;
 
-	if(m_CollisionType != CollisionType::TriangleShape){
+    if(m_CollisionType != CollisionType::TriangleShape){
         m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
     }
     else{

@@ -260,6 +260,8 @@ void SolarSystem::_loadFromFile(std::string filename){
     new ObjectDisplay("Miranda","Miranda",glm::v3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
 
     player->translate(0,0,11);
+
+	new SpotLight("SpotLightPlayer");
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox

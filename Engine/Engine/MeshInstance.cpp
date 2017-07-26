@@ -31,9 +31,9 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     }
     
     glm::mat4 objModel = glm::mat4(obj->getModel()) * i->model();
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(objModel));
+	glm::mat4 normalMatrix = glm::transpose(glm::inverse(objModel));
     
-    Renderer::sendUniformMatrix3f("NormalMatrix,normalMatrix);
+    Renderer::sendUniformMatrix3f("NormalMatrix",glm::mat3(normalMatrix));
     Renderer::sendUniformMatrix4f("Model",objModel);
     i->render();
     Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
