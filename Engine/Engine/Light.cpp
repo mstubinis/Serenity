@@ -15,24 +15,23 @@
 using namespace Engine;
 
 std::unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
-	std::unordered_map<uint,boost::tuple<float,float,float>> m;
+    std::unordered_map<uint,boost::tuple<float,float,float>> m;
 
-	m[LightRange::_7] = boost::make_tuple(1.0f, 0.7f, 1.8f);
-	m[LightRange::_13] = boost::make_tuple(1.0f, 0.35f, 0.44f);
-	m[LightRange::_20] = boost::make_tuple(1.0f, 0.22f, 0.20f);
-	m[LightRange::_32] = boost::make_tuple(1.0f, 0.14f, 0.07f);
-	m[LightRange::_50] = boost::make_tuple(1.0f, 0.09f, 0.032f);
-	m[LightRange::_65] = boost::make_tuple(1.0f, 0.07f, 0.017f);
-	m[LightRange::_100] = boost::make_tuple(1.0f, 0.045f, 0.0075f);
-	m[LightRange::_160] = boost::make_tuple(1.0f, 0.027f, 0.0028f);
-	m[LightRange::_200] = boost::make_tuple(1.0f, 0.022f, 0.0019f);
-	m[LightRange::_325] = boost::make_tuple(1.0f, 0.014f, 0.0007f);
-	m[LightRange::_600] = boost::make_tuple(1.0f, 0.007f, 0.0002f);
-	m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
+    m[LightRange::_7] = boost::make_tuple(1.0f, 0.7f, 1.8f);
+    m[LightRange::_13] = boost::make_tuple(1.0f, 0.35f, 0.44f);
+    m[LightRange::_20] = boost::make_tuple(1.0f, 0.22f, 0.20f);
+    m[LightRange::_32] = boost::make_tuple(1.0f, 0.14f, 0.07f);
+    m[LightRange::_50] = boost::make_tuple(1.0f, 0.09f, 0.032f);
+    m[LightRange::_65] = boost::make_tuple(1.0f, 0.07f, 0.017f);
+    m[LightRange::_100] = boost::make_tuple(1.0f, 0.045f, 0.0075f);
+    m[LightRange::_160] = boost::make_tuple(1.0f, 0.027f, 0.0028f);
+    m[LightRange::_200] = boost::make_tuple(1.0f, 0.022f, 0.0019f);
+    m[LightRange::_325] = boost::make_tuple(1.0f, 0.014f, 0.0007f);
+    m[LightRange::_600] = boost::make_tuple(1.0f, 0.007f, 0.0002f);
+    m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
 
-	return m;
+    return m;
 }
-
 std::unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = _populateLightRanges();
 
 
@@ -615,15 +614,38 @@ void PointLight::lighten(){
     Resources::getMesh("PointLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 }
-SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, Scene* scene): PointLight(pos,name,scene){
+SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,name,scene){
     alignTo(direction,0);
     ObjectBasic::update(0);
-    m_Cutoff = 0;
+    m_Cutoff = cutoff;
+    m_OuterCutoff = outerCutoff;
 }
 SpotLight::~SpotLight(){
 }
 void SpotLight::lighten(){
     if(!m_Active) return;
+    Camera* camera = Resources::getActiveCamera();
+    glm::v3 pos = getPosition();
+    if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
+        return;
     sendGenericAttributesToShader();
 
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
+    Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,m_Constant,m_Linear);
+    Renderer::sendUniform4f("LightDataC", m_Exp,float(pos.x),float(pos.y),float(pos.z));
+    Renderer::sendUniform4f("LightDataE", m_Cutoff, m_OuterCutoff, 0.0f,0.0f);
+	
+    glm::mat4 m(1);
+    m = glm::translate(m,glm::vec3(pos));
+    m = glm::scale(m,glm::vec3(m_PointLightRadius));
+
+    Renderer::sendUniformMatrix4f("Model",m);
+
+    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) <= m_PointLightRadius){                                                  
+        Renderer::Settings::cullFace(GL_FRONT);
+    }
+    Resources::getMesh("PointLightBounds")->bind();
+    Resources::getMesh("PointLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
+    Resources::getMesh("PointLightBounds")->unbind();
+    Renderer::Settings::cullFace(GL_BACK);
 }
