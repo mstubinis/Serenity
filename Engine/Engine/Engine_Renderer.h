@@ -54,6 +54,10 @@ class HDRToneMapAlgorithm{
         UNCHARTED
     };
 };
+enum AntiAliasingAlgorithm{
+    FXAA,
+    SMAA
+};
 
 namespace Engine{
     namespace Renderer{
@@ -65,9 +69,9 @@ namespace Engine{
                     static bool depth_test;
                     static ShaderP* current_shader_program;
                     static std::string current_bound_material;
-                    static uint multisample_level;
                     static GLuint current_bound_read_fbo;
                     static GLuint current_bound_draw_fbo;
+                    static AntiAliasingAlgorithm aa_algorithm;
 
                     static bool cull_face_enabled;
                     static unsigned char cull_face_status;
@@ -160,7 +164,7 @@ namespace Engine{
             void disableCullFace();
             void cullFace(uint state);
 
-            void setMultisamplingLevel(uint);
+            void setAntiAliasingAlgorithm(AntiAliasingAlgorithm);
 
             void enableAlphaTest(bool b = true);
             void disableAlphaTest();
