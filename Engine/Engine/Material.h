@@ -179,6 +179,7 @@ class Material final: public BindableResource{
             COOK_TORRANCE,
             GAUSSIAN,
             BECKMANN,
+	    ASHIKHMIN_SHIRLEY,
             PBR
         };
         static std::vector<glm::vec4> m_MaterialProperities;
@@ -241,7 +242,7 @@ class Material final: public BindableResource{
         void setSmoothness(float s);
     
         const uint specularModel() const;
-		void setSpecularModel(Material::SpecularModel m);
+        void setSpecularModel(Material::SpecularModel m);
         const uint diffuseModel() const;    
         void setDiffuseModel(Material::DiffuseModel m);
 
