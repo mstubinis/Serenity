@@ -148,7 +148,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         vec3 Lo = vec3(0.0);
         float attenuation = 1.0;  
         if(LightDataD.w != 0 && LightDataD.w != 2){
-        float Distance = length(LightDir);
+            float Distance = length(LightDir);
             attenuation = 1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
         }
         
