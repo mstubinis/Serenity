@@ -181,25 +181,19 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 }
 vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
-    float Distance = length(LightPos - PxlWorldPos);
+    float Dist = length(LightPos - PxlWorldPos);
 
     vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
-    float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
+    float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Dist) + (LightDataC.x * Dist * Dist)));
     return c * attenuation;
 }
 vec3 CalcSpotLight(vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
-	float Distance = length(LightPos - PxlWorldPos);
-
-    float theta = dot(LightDir, SpotLightDir);
-    
-    vec3 c = vec3(0.0);
-    if(theta > LightDataE.x){       
-        c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
-    }
-    float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
-    return c * attenuation;
+    vec3 c = CalcPointLight(LightPos, PxlWorldPos, PxlNormal, uv);
+    float cosAngle = dot(LightDir, SpotLightDir);
+    float spotEffect = smoothstep(LightDataE.y, LightDataE.x, cosAngle);   
+    return c * spotEffect;
 }
 void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
