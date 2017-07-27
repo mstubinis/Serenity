@@ -269,8 +269,7 @@ void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& col
 }
 
 void Detail::RenderManagement::_renderTextures(){
-    ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_HUD"); p->bind();
     Resources::getMesh("Plane")->bind();
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
@@ -303,8 +302,7 @@ void Detail::RenderManagement::_renderTextures(){
     p->unbind();
 }
 void Detail::RenderManagement::_renderText(){
-    ShaderP* p = Resources::getShaderProgram("Deferred_HUD");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_HUD"); p->bind();
     for(auto item:m_FontsToBeRendered){
         Font* font = Resources::Detail::ResourceManagement::m_Fonts[item.texture].get();
 
@@ -438,8 +436,7 @@ void Detail::RenderManagement::_passForwardRendering(){
 }
 void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(0,0,0,0);
-    ShaderP* p = Resources::getShaderProgram("Copy_Depth");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Copy_Depth"); p->bind();
 
     bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),0);
 
@@ -451,8 +448,7 @@ void Detail::RenderManagement::_passCopyDepth(){
 }
 void Detail::RenderManagement::_passLighting(){
     glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
-    ShaderP* p = Resources::getShaderProgram("Deferred_Light");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Light"); p->bind();
 
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
     sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
@@ -565,8 +561,7 @@ void Detail::RenderManagement::render(){
     m_TexturesToBeRendered.clear();
 }
 void Detail::RenderManagement::_passSSAO(){
-    ShaderP* p = Resources::getShaderProgram("Deferred_SSAO");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();
 
     sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
@@ -601,8 +596,7 @@ void Detail::RenderManagement::_passSSAO(){
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     Settings::clear(true,false,false);
 
-    ShaderP* p = Resources::getShaderProgram("Deferred_Edge");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Edge"); p->bind();
 
     sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
     sendUniform1f("radius", radius);
@@ -617,19 +611,18 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
 void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
     Settings::clear(true,false,false);
 
-    ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays");
-    p->bind();
-
-    sendUniform1f("decay",RendererInfo::GodRaysInfo::godRays_decay);
-    sendUniform1f("density",RendererInfo::GodRaysInfo::godRays_density);
-    sendUniform1f("exposure",RendererInfo::GodRaysInfo::godRays_exposure);
-    sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
-    sendUniform1f("weight",RendererInfo::GodRaysInfo::godRays_weight);
+    ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays"); p->bind();
+ 
+    sendUniform4f("RaysInfo",RendererInfo::GodRaysInfo::godRays_exposure,
+        RendererInfo::GodRaysInfo::godRays_decay,RendererInfo::GodRaysInfo::godRays_density,
+        RendererInfo::GodRaysInfo::godRays_weight);
+    
     sendUniform2f("lightPositionOnScreen",
         float(lightPositionOnScreen.x)/float(Resources::getWindowSize().x),
         float(lightPositionOnScreen.y/float(Resources::getWindowSize().y))
     );
 
+    sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
     sendUniform1i("behind",int(behind));
     sendUniform1f("alpha",alpha);
 
@@ -643,8 +636,7 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
 void Detail::RenderManagement::_passHDR(){
     Settings::clear(true,false,false);
 
-    ShaderP* p = Resources::getShaderProgram("Deferred_HDR");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_HDR"); p->bind();
 
     sendUniform1fSafe("exposure",RendererInfo::HDRInfo::hdr_exposure);
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
@@ -662,20 +654,19 @@ void Detail::RenderManagement::_passHDR(){
     p->unbind();
 }
 void Detail::RenderManagement::_passBlur(string type, GLuint texture,string channels){
-    ShaderP* p = Resources::getShaderProgram("Deferred_Blur");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Blur"); p->bind();
 
     sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
-    sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
+    sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
+        RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
-    if(channels.find("R") != string::npos) sendUniform1i("R",1);
-    else                                   sendUniform1i("R",0);
-    if(channels.find("G") != string::npos) sendUniform1i("G",1);
-    else                                   sendUniform1i("G",0);
-    if(channels.find("B") != string::npos) sendUniform1i("B",1);
-    else                                   sendUniform1i("B",0);
-    if(channels.find("A") != string::npos) sendUniform1i("A",1);
-    else                                   sendUniform1i("A",0);
+    glm::ivec4 rgba(0);
+    if(channels.find("R") != string::npos) rgba.x = 1;
+    if(channels.find("G") != string::npos) rgba.y = 1;
+    if(channels.find("B") != string::npos) rgba.z = 1;
+    if(channels.find("A") != string::npos) rgba.w = 1;
+    
+    sendUniform4i("RGBA",rgba.x,rgba.y,rgba.z,rgba.w);
 
     if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
     else{                     sendUniform2f("HV",0.0f,1.0f); }
@@ -690,8 +681,7 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
 void Detail::RenderManagement::_passFXAA(){
     Settings::clear(true,false,false);
 
-    ShaderP* p = Resources::getShaderProgram("Deferred_FXAA");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_FXAA"); p->bind();
 
     sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
     bindTexture("sampler0",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
@@ -703,8 +693,7 @@ void Detail::RenderManagement::_passFXAA(){
 void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);
 
-    ShaderP* p = Resources::getShaderProgram("Deferred_Final");
-    p->bind();
+    ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
 
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
