@@ -22,9 +22,7 @@ uniform mat4 invVP;
 
 vec3 reconstruct_world_pos(vec2 _uv){
     float log_depth = texture2D(gDepthMap, _uv).r;
-
-    //log to regular depth
-    float regularDepth = pow(ScreenData.y + 1.0, log_depth) - 1.0;
+    float regularDepth = pow(ScreenData.y + 1.0, log_depth) - 1.0; //log to regular depth
 
     //linearize regular depth
     float a = ScreenData.y / (ScreenData.y - ScreenData.x);
