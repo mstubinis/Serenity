@@ -1,12 +1,7 @@
 #version 120
 
 uniform sampler2D texture;
-
-uniform int R;
-uniform int G;
-uniform int B;
-uniform int A;
-
+uniform vec4 RGBA;
 uniform vec2 HV;
 
 vec2 offset[14];
@@ -30,7 +25,8 @@ void main(void){
         offset[i] = vec2(-weights[i] * radius * HV.x, -weights[i] * radius * HV.y);
         offset[13-i] = vec2(weights[i] * radius * HV.x, weights[i] * radius * HV.y);
     }
-    vec4 sum = vec4(0.0); vec2 uv = gl_TexCoord[0].st * 2.0;
+    vec4 sum = vec4(0.0);
+    vec2 uv = gl_TexCoord[0].st * 2.0;
 
     float strengthR = max(1.0, radius * strengthModifier.r);
     float strengthG = max(1.0, radius * strengthModifier.g);
@@ -46,8 +42,8 @@ void main(void){
     sum.b += texture2D(texture, uv ).b * 0.159576912161 * strengthB;
     sum.a += texture2D(texture, uv ).a * 0.159576912161 * strengthA;
 
-    if(R == 1) gl_FragColor.r = sum.r;
-    if(G == 1) gl_FragColor.g = sum.g;
-    if(B == 1) gl_FragColor.b = sum.b;
-    if(A == 1) gl_FragColor.a = sum.a;
+    if(RGBA.x == 1.0) gl_FragColor.r = sum.r;
+    if(RGBA.y == 1.0) gl_FragColor.g = sum.g;
+    if(RGBA.z == 1.0) gl_FragColor.b = sum.b;
+    if(RGBA.w == 1.0) gl_FragColor.a = sum.a;
 }
