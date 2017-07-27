@@ -98,8 +98,9 @@ void Game::update(float dt){
 		Resources::getMaterial("Defiant")->setDiffuseModel(Material::DiffuseModel::MINNAERT);
     }
     m_HUD->update(dt);
-
-	Resources::getObject("TestObject")->setPosition(Resources::getObject("SpotLightPlayer")->getPosition());
+	Resources::getObject("TestObject")->setPosition(Resources::getObject("Player")->getPosition() - (Resources::getObject("Player")->getForward()*glm::v3(5)));
+	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());
+	Resources::getObject("SpotLightPlayer")->setOrientation(Resources::getObject("Player")->getOrientation());
 }
 void Game::render(){
     m_HUD->render(Renderer::Detail::RendererInfo::DebugDrawingInfo::debug);

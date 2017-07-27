@@ -42,10 +42,10 @@ void main(void){
 
     gl_Position = MVP * PosTransformed;
     
-    Normals = NormalMatrix * NormalTransformed.xyz;
-    Binormals = NormalMatrix * BinormalTransformed.xyz;
-    Tangents = NormalMatrix * TangentTransformed.xyz;
-    
+    Normals = (NormalMatrix * NormalTransformed.xyz).xyz;
+    Binormals = (NormalMatrix * BinormalTransformed.xyz).xyz;
+    Tangents = (NormalMatrix * TangentTransformed.xyz).xyz;
+
     WorldPosition = (Model * PosTransformed).xyz;
 
     UV = uv;

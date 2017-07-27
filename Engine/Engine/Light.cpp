@@ -56,6 +56,7 @@ void SunLight::sendGenericAttributesToShader(){
     Renderer::sendUniform4f("LightDataD",m_Color.x, m_Color.y, m_Color.z,float(m_Type));
 }
 void SunLight::lighten(){
+	/*
     if(!m_Active) return;
     sendGenericAttributesToShader();
     glm::vec3 pos = glm::vec3(getPosition());
@@ -64,6 +65,7 @@ void SunLight::lighten(){
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
 
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	*/
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
     alignTo(glm::v3(dir),0);
@@ -575,10 +577,9 @@ PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos
 PointLight::~PointLight(){
 }
 float PointLight::calculatePointLightRadius(){
-    float MaxChannel = glm::max(glm::max(m_Color.x, m_Color.y), m_Color.z);
-    float ret = (-m_Linear + glm::sqrt(m_Linear * m_Linear -
-        4.0f * m_Exp * (m_Exp - 256.0f * MaxChannel * m_DiffuseIntensity))) / (2.0f * m_Exp);
-    return ret * 1.2f; //the 1.2f is there because i accidently made the mesh a little too small, and the mesh is hard coded.
+	float lightMax  = Engine::Math::Max(m_Color.x,m_Color.y,m_Color.z);
+	float radius    = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
+	return radius * 1.2f;
 }
 void PointLight::setConstant(float c){ m_Constant = c; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setLinear(float l){ m_Linear = l; m_PointLightRadius = calculatePointLightRadius(); }
@@ -615,10 +616,11 @@ void PointLight::lighten(){
     Renderer::Settings::cullFace(GL_BACK);
 }
 SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(name,pos,scene){
-    //alignTo(glm::v3(direction),0);
-    //ObjectBasic::update(0);
+    alignTo(glm::v3(direction),0);
+    ObjectBasic::update(0);
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
+	this->m_Type = LightType::Spot;
 }
 SpotLight::~SpotLight(){
 }

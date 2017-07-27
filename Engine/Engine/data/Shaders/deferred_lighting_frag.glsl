@@ -181,7 +181,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 }
 vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
-    float Distance = length(LightDir);
+    float Distance = length(LightPos - PxlWorldPos);
 
     vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
 
@@ -190,24 +190,23 @@ vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 }
 vec3 CalcSpotLight(vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
-	float Distance = length(LightDir);
+	float Distance = length(LightPos - PxlWorldPos);
 
-    float theta = dot(LightDir, normalize(-SpotLightDir));
+    float theta = dot(LightDir, SpotLightDir);
     
     vec3 c = vec3(0.0);
     if(theta > LightDataE.x){       
         c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);
-		return vec3(1.0);
     }
-    //float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
-    //return c * attenuation;
+    float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
+    return c * attenuation;
 }
 void main(void){
     //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh
     vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);
 
     vec3 PxlPosition = reconstruct_world_pos(uv);
-    vec3 PxlNormal = texture2D(gNormalMap, uv).rgb;
+    vec3 PxlNormal = normalize(texture2D(gNormalMap, uv).rgb);
 
     vec3 lightCalculation = vec3(0.0);
     vec3 LightPosition = vec3(LightDataC.yzw);
