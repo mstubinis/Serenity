@@ -106,6 +106,9 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     else if(materials[index].a == 2.0){//this is minneart
         DiffuseColor = kPi * LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
     }
+    else if(materials[index].a == 3.0){//this is ashikhmin-shirley
+
+    }
 
 
     if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
@@ -143,7 +146,10 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     else if(materials[index].b == 5.0){ //this is beckmann (physical)
         SpecularFactor = BeckmannDist(NdotH,alpha,kPi);
     }
-    else if(materials[index].b == 6.0){ //this is PBR (physical)
+    else if(materials[index].b == 6.0){ //this is ashikhmin-shirley (physical)
+
+    }
+    else if(materials[index].b == 7.0){ //this is PBR (physical)
         /*
         vec3 f0 = mix(vec3(0.04), albedo, metallic);
         vec3 Lo = vec3(0.0);
