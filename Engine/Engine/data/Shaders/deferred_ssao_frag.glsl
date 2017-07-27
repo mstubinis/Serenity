@@ -24,19 +24,17 @@ uniform float farz;
 
 vec3 reconstruct_world_pos(vec2 _uv){
     float log_depth = texture2D(gDepthMap, _uv).r;
-
-    //log to regular depth
-    float regularDepth = pow(farz + 1.0, log_depth) - 1.0;
+    float regularDepth = pow(farz + 1.0, log_depth) - 1.0; //log to regular depth
 
     //linearize regular depth
     float a = farz / (farz - nearz);
     float b = farz * nearz / (nearz - farz);
     float depth = (a + b / regularDepth);
-
-    vec4 screenSpace = vec4(_uv * 2.0 - 1.0,depth,1.0);
+    
+    //vec4 screenSpace = vec4(_uv * 2.0 - 1.0,depth,1.0);
+    vec4 screenSpace = (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
 
     //world space it!
-    //vec4 wpos = invVP * (vec4(_uv,depth, 1.0) * 2.0 - 1.0);
     vec4 wpos = invVP * screenSpace;
     return wpos.xyz / wpos.w;
 }
