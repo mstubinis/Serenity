@@ -103,11 +103,11 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         DiffuseColor = (LightDataD.xyz / kPi) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b))) * LightDataA.y;
     
     }
-    else if(materials[index].a == 2.0){//this is minneart
-        DiffuseColor = kPi * LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
-    }
-    else if(materials[index].a == 3.0){//this is ashikhmin-shirley
+    else if(materials[index].a == 2.0){//this is ashikhmin-shirley
 
+    }
+    else if(materials[index].a == 3.0){//this is minneart
+        DiffuseColor = kPi * LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
     }
 
 
