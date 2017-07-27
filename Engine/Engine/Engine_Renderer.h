@@ -55,6 +55,7 @@ class HDRToneMapAlgorithm{
     };
 };
 enum AntiAliasingAlgorithm{
+    None,
     FXAA,
     SMAA
 };
