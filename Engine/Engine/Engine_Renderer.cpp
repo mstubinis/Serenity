@@ -580,6 +580,7 @@ void Detail::RenderManagement::_passSSAO(){
     
     sendUniform1i("Samples",RendererInfo::SSAOInfo::ssao_samples);
     sendUniform1i("NoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+    
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),0);
@@ -642,7 +643,6 @@ void Detail::RenderManagement::_passHDR(){
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
     sendUniform1iSafe("HasBloom",int(RendererInfo::BloomInfo::bloom));
     sendUniform1iSafe("HDRAlgorithm",int(RendererInfo::HDRInfo::hdr_algorithm));
-    sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
 
     bindTextureSafe("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     bindTextureSafe("bloomBuffer",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),1);
@@ -660,13 +660,13 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
     sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
         RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
-    glm::ivec4 rgba(0);
-    if(channels.find("R") != string::npos) rgba.x = 1;
-    if(channels.find("G") != string::npos) rgba.y = 1;
-    if(channels.find("B") != string::npos) rgba.z = 1;
-    if(channels.find("A") != string::npos) rgba.w = 1;
+    glm::vec4 rgba(0.0f);
+    if(channels.find("R") != string::npos) rgba.x = 1.0f;
+    if(channels.find("G") != string::npos) rgba.y = 1.0f;
+    if(channels.find("B") != string::npos) rgba.z = 1.0f;
+    if(channels.find("A") != string::npos) rgba.w = 1.0f;
     
-    sendUniform4i("RGBA",rgba.x,rgba.y,rgba.z,rgba.w);
+    sendUniform4f("RGBA",rgba.x,rgba.y,rgba.z,rgba.w);
 
     if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
     else{                     sendUniform2f("HV",0.0f,1.0f); }
