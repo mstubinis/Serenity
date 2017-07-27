@@ -354,7 +354,6 @@ void Detail::RenderManagement::_passGeometry(){
     Settings::enableDepthTest();
     Settings::enableDepthMask();
 
-
     //RENDER NORMAL OBJECTS HERE
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
         vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
@@ -511,9 +510,9 @@ void Detail::RenderManagement::render(){
     _passSSAO(); //ssao AND bloom
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
         m_gBuffer->start(BUFFER_TYPE_FREE2,"RGBA",false);
-        _passBlur("Horizontal",BUFFER_TYPE_BLOOM,"RGBA");
+        _passBlur("H",BUFFER_TYPE_BLOOM,"RGBA");
         m_gBuffer->start(BUFFER_TYPE_BLOOM,"RGBA",false);
-        _passBlur("Vertical",BUFFER_TYPE_FREE2,"RGBA");
+        _passBlur("V",BUFFER_TYPE_FREE2,"RGBA");
     }
     m_gBuffer->start(BUFFER_TYPE_MISC);
     _passHDR();
@@ -639,10 +638,8 @@ void Detail::RenderManagement::_passHDR(){
 
     ShaderP* p = Resources::getShaderProgram("Deferred_HDR"); p->bind();
 
-    sendUniform1fSafe("exposure",RendererInfo::HDRInfo::hdr_exposure);
-    sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
-    sendUniform1iSafe("HasBloom",int(RendererInfo::BloomInfo::bloom));
-    sendUniform1iSafe("HDRAlgorithm",int(RendererInfo::HDRInfo::hdr_algorithm));
+    sendUniform4f("HDRInfo",RendererInfo::HDRInfo::hdr_exposure,float(int(RendererInfo::HDRInfo::hdr)),
+        float(int(RendererInfo::BloomInfo::bloom)),float(int(RendererInfo::HDRInfo::hdr_algorithm)));
 
     bindTextureSafe("lightingBuffer",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),0);
     bindTextureSafe("bloomBuffer",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),1);
@@ -668,8 +665,8 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
     
     sendUniform4f("RGBA",rgba.x,rgba.y,rgba.z,rgba.w);
 
-    if(type == "Horizontal"){ sendUniform2f("HV",1.0f,0.0f); }
-    else{                     sendUniform2f("HV",0.0f,1.0f); }
+    if(type == "H"){ sendUniform2f("HV",1.0f,0.0f); }
+    else{            sendUniform2f("HV",0.0f,1.0f); }
 
     bindTexture("texture",m_gBuffer->getTexture(texture),0);
 
