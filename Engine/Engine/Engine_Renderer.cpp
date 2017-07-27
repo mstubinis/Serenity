@@ -34,7 +34,7 @@ unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = ba
 bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
-uint Detail::RendererInfo::GeneralInfo::multisample_level = 4;
+AntiAliasingAlgorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
 float Detail::RendererInfo::BloomInfo::bloom_radius = 0.84f;
@@ -78,9 +78,9 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
-void Settings::setMultisamplingLevel(uint level){
-    if(Detail::RendererInfo::GeneralInfo::multisample_level != level){
-        Detail::RendererInfo::GeneralInfo::multisample_level = level;
+void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
+    if(Detail::RendererInfo::GeneralInfo::aa_algorithm != algorithm){
+        Detail::RendererInfo::GeneralInfo::aa_algorithm = algorithm;
     }
 }
 void Settings::enableCullFace(bool b){
@@ -522,15 +522,21 @@ void Detail::RenderManagement::render(){
     m_gBuffer->start(BUFFER_TYPE_MISC);
     _passHDR();
 
-    if(RendererInfo::GeneralInfo::multisample_level == 0){
+    if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None){
         m_gBuffer->stop();
         _passFinal();
     }
-    else{ //pass AA after this
+    else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA){
         m_gBuffer->start(BUFFER_TYPE_LIGHTING);
         _passFinal();
         m_gBuffer->stop();
         _passFXAA();
+    }
+    else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA){
+        //m_gBuffer->start(BUFFER_TYPE_LIGHTING);
+        //_passFinal();
+        //m_gBuffer->stop();
+        //_passFXAA();
     }
     _passCopyDepth();
     
