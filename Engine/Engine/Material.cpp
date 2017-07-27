@@ -240,8 +240,8 @@ class Material::impl final{
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
             m_Smoothness = 0.999f;
-            m_SpecularModel = Material::SpecularModel::BLINN_PHONG;
-            m_DiffuseModel = Material::DiffuseModel::LAMBERT;
+            m_SpecularModel = SpecularModel::Model::BLINN_PHONG;
+            m_DiffuseModel = DiffuseModel::Model::LAMBERT;
             m_Frensel = 0.5f;
 
             _addToMaterialPool();
@@ -351,8 +351,8 @@ class Material::impl final{
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSmoothness(float& s){ m_Smoothness = s; _updateGlobalMaterialPool(); }
-        void _setSpecularModel(Material::SpecularModel& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
-        void _setDiffuseModel(Material::DiffuseModel& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
+        void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
+        void _setDiffuseModel(DiffuseModel::Model& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
 };
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
@@ -478,8 +478,8 @@ void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setFrensel(float f){ m_i->_setFrensel(f); }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
-void Material::setSpecularModel(Material::SpecularModel m){ m_i->_setSpecularModel(m); }
-void Material::setDiffuseModel(Material::DiffuseModel m){ m_i->_setDiffuseModel(m); }
+void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
+void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }
 
 struct less_than_key{
     inline bool operator() ( MaterialMeshEntry* struct1,  MaterialMeshEntry* struct2){
