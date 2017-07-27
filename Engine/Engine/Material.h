@@ -50,6 +50,27 @@ class MaterialComponentTextureSlot{
         REFRACTION_CUBEMAP_MAP,
     };
 };
+class DiffuseModel{
+    public: enum Model{
+	LAMBERT,
+	OREN_NAYAR,
+	ASHIKHMIN_SHIRLEY,
+	MINNAERT
+    };
+};
+class SpecularModel{
+    public: enum Model{
+	BLINN_PHONG,
+	PHONG,
+	GXX,
+	COOK_TORRANCE,
+	GAUSSIAN,
+	BECKMANN,
+	ASHIKHMIN_SHIRLEY,
+	PBR
+    };
+};
+
 
 static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::NUMBER] = {
     "DiffuseTexture",
@@ -167,21 +188,6 @@ class MaterialMeshEntry{
 
 class Material final: public BindableResource{
     public: 
-        enum DiffuseModel{
-            LAMBERT,
-            OREN_NAYAR,
-            MINNAERT
-        };
-        enum SpecularModel{
-            BLINN_PHONG,
-            PHONG,
-            GXX,
-            COOK_TORRANCE,
-            GAUSSIAN,
-            BECKMANN,
-	    ASHIKHMIN_SHIRLEY,
-            PBR
-        };
         static std::vector<glm::vec4> m_MaterialProperities;
         static std::unordered_map<uint,std::vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP;
     private:
@@ -242,9 +248,9 @@ class Material final: public BindableResource{
         void setSmoothness(float s);
     
         const uint specularModel() const;
-        void setSpecularModel(Material::SpecularModel m);
+        void setSpecularModel(SpecularModel::Model m);
         const uint diffuseModel() const;    
-        void setDiffuseModel(Material::DiffuseModel m);
+        void setDiffuseModel(DiffuseModel::Model m);
 
         void bind();
         void unbind();
