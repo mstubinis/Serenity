@@ -13,6 +13,7 @@
 
 using namespace Engine;
 
+float Object::m_RotationThreshold = 0.0f;
 Object::Object(std::string n,Scene* scene, bool isNotCamera){
     m_Radius = 0;
     m_Parent = nullptr;
@@ -125,13 +126,12 @@ void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     if(overTime){
         x *= Resources::dt(); y *= Resources::dt(); z *= Resources::dt();
     }
-    float threshold = 0;
-    if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
+    if(abs(x) < Object::m_RotationThreshold && abs(y) < Object::m_RotationThreshold && abs(z) < Object::m_RotationThreshold)
         return;
 
-    if(abs(x) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1,0,0)));   //pitch
-    if(abs(y) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));   //yaw
-    if(abs(z) >= threshold) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
+    if(abs(x) >= Object::m_RotationThreshold) m_Orientation = m_Orientation * (glm::angleAxis(-x, glm::vec3(1,0,0)));   //pitch
+    if(abs(y) >= Object::m_RotationThreshold) m_Orientation = m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));   //yaw
+    if(abs(z) >= Object::m_RotationThreshold) m_Orientation = m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));   //roll
 
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
