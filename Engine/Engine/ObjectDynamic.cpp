@@ -57,7 +57,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
 
     m_Radius = 0;
     m_Visible = true;
-    m_BoundingBoxRadius = glm::vec3(0);
+    m_BoundingBoxRadius = glm::vec3(0.0f);
     if(mesh != "" && mat != ""){
         MeshInstance* item = new MeshInstance(name(),mesh,mat);
         m_DisplayItems.push_back(item);
@@ -81,7 +81,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
     m_Model = glm::m4(1);
     m_Model = glm::translate(m_Model,pos);
     m_Model *= glm::m4(glm::mat4_cast(glm::quat()));
-    m_Model = glm::scale(m_Model,glm::v3(glm::vec3(1)));
+    m_Model = glm::scale(m_Model,glm::v3(glm::vec3(1.0f)));
 
     tr.setFromOpenGLMatrix(glm::value_ptr(glm::mat4(m_Model)));
 
@@ -400,13 +400,12 @@ void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
     if(overTime){
         x *= Resources::dt(); y *= Resources::dt(); z *= Resources::dt();
     }
-    float threshold = 0;
-    if(abs(x) < threshold && abs(y) < threshold && abs(z) < threshold)
+    if(abs(x) < Object::m_RotationThreshold && abs(y) < Object::m_RotationThreshold && abs(z) < Object::m_RotationThreshold)
         return;
 
-    if(abs(x) >= threshold) this->applyTorqueY(-x);   //pitch
-    if(abs(y) >= threshold) this->applyTorqueX(-y);   //yaw
-    if(abs(z) >= threshold) this->applyTorqueZ(z);   //roll
+    if(abs(x) >= Object::m_RotationThreshold) this->applyTorqueY(-x);  //pitch
+    if(abs(y) >= Object::m_RotationThreshold) this->applyTorqueX(-y);  //yaw
+    if(abs(z) >= Object::m_RotationThreshold) this->applyTorqueZ(z);   //roll
 
     m_Forward = Engine::Math::getForward(m_RigidBody);
     m_Right = Engine::Math::getRight(m_RigidBody);
@@ -433,7 +432,7 @@ bool ObjectDynamic::rayIntersectSphere(Camera* c){
 }
 void ObjectDynamic::calculateRadius(){
     if(m_DisplayItems.size() == 0){
-        m_BoundingBoxRadius = glm::vec3(0);
+        m_BoundingBoxRadius = glm::vec3(0.0f);
         m_Radius = 0;
         return;
     }
@@ -447,7 +446,7 @@ void ObjectDynamic::calculateRadius(){
             maxLength = length;
         }
     }
-    glm::vec3 scale(1);
+    glm::vec3 scale(1.0f);
     if(m_Collision != nullptr){
         btVector3 s = m_Collision->getCollisionShape()->getLocalScaling();
         scale = glm::vec3(s.x(),s.y(),s.z());
