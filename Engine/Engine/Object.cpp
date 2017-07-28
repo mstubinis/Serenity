@@ -78,19 +78,13 @@ void ObjectBasic::setPosition(glm::num x, glm::num y, glm::num z){
 }
 void ObjectBasic::setPosition(glm::v3 position){ ObjectBasic::setPosition(position.x,position.y,position.z); }
 void ObjectBasic::setOrientation(glm::quat q){ 
-	m_Orientation = q;
-
-	glm::vec3 forward = glm::vec3(0,0,-1) * q;
-	glm::vec3 right = glm::vec3(1,0,0) * q;
-	glm::vec3 up = glm::vec3(0,1,0) * q;
-
-	m_Forward = glm::normalize(forward);
-    m_Right = glm::normalize(right);
-    m_Up = glm::normalize(up);
+    m_Orientation = q;
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
 }
-
 void ObjectBasic::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
-	Engine::Math::lookAtToQuat(m_Orientation,eye,target,up);
+    Engine::Math::lookAtToQuat(m_Orientation,eye,target,up);
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
     m_Up = Engine::Math::getUp(m_Orientation);
