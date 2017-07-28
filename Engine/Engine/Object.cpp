@@ -14,6 +14,7 @@
 using namespace Engine;
 
 float Object::m_RotationThreshold = 0.0f;
+float Object::m_VisibilityThreshold = 1100.0f;
 Object::Object(std::string n,Scene* scene, bool isNotCamera){
     m_Radius = 0;
     m_Parent = nullptr;
