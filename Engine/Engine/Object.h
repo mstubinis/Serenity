@@ -51,12 +51,14 @@ class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
 	static float m_RotationThreshold;
+	static float m_VisibilityThreshold;
     protected:
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;
     public:
         static void setGlobalRotationThreshold(float t){ m_RotationThreshold = t; }
+	static void setGlobalVisibilityThreshold(float t){ m_VisibilityThreshold = t; }
         Object(
                 std::string = "Object",   //Object
                 Scene* = nullptr,         //The scene to add the object to (default nullptr = the current scene)
