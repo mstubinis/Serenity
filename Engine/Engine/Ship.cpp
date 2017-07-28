@@ -211,7 +211,7 @@ void ShipSystemSensors::update(float dt){
 }
 #pragma endregion
 
-Ship::Ship(std::string mesh, std::string mat, bool player, std::string name,glm::v3 pos, glm::vec3 scl, Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Ship::Ship(std::string mesh, std::string mat, bool player, std::string name,glm::vec3 pos, glm::vec3 scl, Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
     m_WarpFactor = 0;
     m_IsPlayer = player;
     m_IsWarping = false;
@@ -244,11 +244,11 @@ void Ship::update(float dt){
 
         #pragma region PlayerFlightControls
         if(m_IsWarping && m_WarpFactor > 0){
-            glm::num speed = (m_WarpFactor * glm::num(1.0L)/glm::num(0.46L))*glm::num(2.0L);
-            glm::v3 s = (getForward() * glm::pow(speed,glm::num(15.0L)))/glm::num(getMass());
+            float speed = (m_WarpFactor * 1.0f/0.46f)*2.0f;
+            glm::vec3 s = (getForward() * glm::pow(speed,15.0f))/getMass();
             for(auto obj:Resources::getCurrentScene()->objects()){
                 if((obj.second->name().find("Skybox") == std::string::npos) && (obj.second->name().find("Camera") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
-                    obj.second->setPosition(obj.second->getPosition() + (s * glm::num(dt)));
+                    obj.second->setPosition(obj.second->getPosition() + (s * dt));
                 }
             }
         }

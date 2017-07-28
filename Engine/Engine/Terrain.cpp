@@ -13,7 +13,7 @@
 
 using namespace Engine;
 
-Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::v3(0),glm::vec3(1),n,nullptr,scene){
+Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::vec3(0),glm::vec3(1),n,nullptr,scene){
     for(unsigned int i = 0; i < image.getSize().x; i++){
         for(unsigned int j = 0; j < image.getSize().y; j++){
             float pixel(image.getPixel(i,j).r / 255.0f);
@@ -63,7 +63,7 @@ Terrain::~Terrain(){
 void Terrain::update(float dt){
     ObjectDynamic::update(dt);
 }
-void Terrain::setPosition(glm::num x,glm::num y,glm::num z){
+void Terrain::setPosition(float x,float y,float z){
     Physics::removeRigidBody(m_RigidBody);
     SAFE_DELETE(m_RigidBody);
 
@@ -75,7 +75,7 @@ void Terrain::setPosition(glm::num x,glm::num y,glm::num z){
     m_RigidBody->setUserPointer(this);
     Physics::addRigidBody(m_RigidBody);
 }
-void Terrain::setPosition(glm::v3 pos){ Terrain::setPosition(pos.x,pos.y,pos.z); }
+void Terrain::setPosition(glm::vec3 pos){ Terrain::setPosition(pos.x,pos.y,pos.z); }
 void Terrain::setScale(float x,float y,float z){
     ObjectDynamic::setScale(x,y,z);
     Terrain::setPosition(Terrain::getPosition());

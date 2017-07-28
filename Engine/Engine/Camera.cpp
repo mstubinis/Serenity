@@ -11,7 +11,7 @@
 using namespace Engine;
 using namespace boost;
 
-Camera::Camera(std::string n, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),n,scene,false){//create a perspective camera
+Camera::Camera(std::string n, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create a perspective camera
     m_Angle = angle;
     m_AspectRatio = aspectRatio;
     m_Near = near;
@@ -23,7 +23,7 @@ Camera::Camera(std::string n, float angle, float aspectRatio, float near, float 
 
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
 }
-Camera::Camera(std::string n, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
+Camera::Camera(std::string n, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;
     m_AspectRatio = 1.0f;
     m_Near = near;
@@ -67,9 +67,9 @@ void Camera::setAspectRatio(float ratio){
     m_AspectRatio = ratio;
     setPerspectiveProjection();
 }
-void Camera::lookAt(glm::v3 target){ Camera::lookAt(getPosition(),target,glm::v3(getUp())); }
-void Camera::lookAt(glm::v3 target,glm::v3 up){ Camera::lookAt(getPosition(),target,up); }
-void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
+void Camera::lookAt(glm::vec3 target){ Camera::lookAt(getPosition(),target,getUp()); }
+void Camera::lookAt(glm::vec3 target,glm::vec3 up){ Camera::lookAt(getPosition(),target,up); }
+void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
     setPosition(eye);
     m_View = glm::lookAt(eye,target,up);
     m_Orientation = glm::conjugate(glm::toQuat(m_View));
@@ -80,17 +80,17 @@ void Camera::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
     ObjectBasic::update(Resources::dt());
 }
 void Camera::lookAt(Object* target, bool targetUp){
-    glm::v3 u; if(!targetUp) u = glm::v3(getUp()); else u = target->getUp();
+    glm::vec3 u; if(!targetUp) u = getUp(); else u = target->getUp();
     Camera::lookAt((getPosition(),target->getPosition(),u));
 }
 void Camera::update(float dt){
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 }
 bool Camera::sphereIntersectTest(Object* obj){return sphereIntersectTest(obj->getPosition(),obj->getRadius());}
-bool Camera::sphereIntersectTest(glm::v3 pos, float radius){
+bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
     if(radius <= 0) return false;
     for (unsigned int i = 0; i < 6; i++){
-        glm::num dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
+        float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
         if (dist > 0) return false;
     }
     return true;

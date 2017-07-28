@@ -485,7 +485,7 @@ void Detail::RenderManagement::render(){
         Object* o = Resources::getObject("Sun");
         glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
 
-        bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),glm::v3(-Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
+        bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),-(Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
         float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
             glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         

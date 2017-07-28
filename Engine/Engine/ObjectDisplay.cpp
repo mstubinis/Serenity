@@ -23,7 +23,7 @@ struct DefaultObjectDisplayUnbindFunctor{void operator()(BindableResource* r) co
 DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_BIND_FUNCTOR;
 DefaultObjectDisplayUnbindFunctor ObjectDisplay::DEFAULT_UNBIND_FUNCTOR;
 
-ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::v3 pos, glm::vec3 scl, std::string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
+ObjectDisplay::ObjectDisplay(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
     m_Visible = true;
     m_Shadeless = false;
@@ -55,7 +55,7 @@ void ObjectDisplay::update(float dt){
 }
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){
-        m_BoundingBoxRadius = glm::vec3(0);
+        m_BoundingBoxRadius = glm::vec3(0.0f);
         m_Radius = 0;
         return;
     }
@@ -99,8 +99,8 @@ bool ObjectDisplay::rayIntersectSphere(Camera* c){
     if(c == nullptr) c = Resources::getActiveCamera();
     return c->rayIntersectSphere(this);
 }
-bool ObjectDisplay::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
-    return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
+bool ObjectDisplay::rayIntersectSphere(glm::vec3 A, glm::vec3 rayVector){
+    return Engine::Math::rayIntersectSphere(getPosition(),getRadius(),A,rayVector);
 }
 void ObjectDisplay::playAnimation(const std::string& animName,float startTime){
     for(auto renderedItem:m_DisplayItems){

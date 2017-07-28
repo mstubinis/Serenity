@@ -31,12 +31,12 @@ class OrbitInfo final{
         float eccentricity;
         float days;
         float minorRadius; float majorRadius;
-        glm::num angle;
+        float angle;
         boost::weak_ptr<Object> parent;
-        OrbitInfo(float eccentricity, float days, float majorRadius,glm::num angle,std::string parent);
+        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,std::string parent);
         ~OrbitInfo(){}
-        void setOrbitalPosition(glm::num angle,Object* thisPlanet);
-        glm::v3 getOrbitalPosition(glm::num angle,Object* thisPlanet);
+        void setOrbitalPosition(float angle,Object* thisPlanet);
+        glm::vec3 getOrbitalPosition(float angle,Object* thisPlanet);
 };
 
 struct RingInfo final{
@@ -63,8 +63,8 @@ class Planet: public ObjectDisplay{
         Planet(
                 std::string = "",               //Material
                 PlanetType = PLANET_TYPE_ROCKY, //Type
-                glm::v3 = glm::v3(0),           //Position
-                glm::num = 1,                   //Radius
+                glm::vec3 = glm::vec3(0),       //Position
+                float = 1,                      //Radius
                 std::string = "Planet",         //Name
                 float = 0,                      //Atmosphere size
                 Scene* = nullptr
@@ -100,8 +100,8 @@ class Star: public Planet{
         Star(
                 glm::vec3 = glm::vec3(1,1,0),   //Star Color
                 glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
-                glm::v3 = glm::v3(0),           //Position
-                glm::num = 1,                   //Scale
+                glm::vec3 = glm::vec3(0),       //Position
+                float = 1,                      //Scale
                 std::string = "Star",           //Name
                 Scene* = nullptr
             );

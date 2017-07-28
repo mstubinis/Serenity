@@ -108,7 +108,7 @@ class Ship: public ObjectDynamic{
             std::string,              //Material
             bool = false,             //Player Ship?
             std::string = "Ship",     //Name
-            glm::v3 = glm::v3(0),     //Position
+            glm::vec3 = glm::vec3(0), //Position
             glm::vec3 = glm::vec3(1), //Scale
             Collision* = nullptr,     //Bullet Collision Shape
             Scene* = nullptr

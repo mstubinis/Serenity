@@ -9,14 +9,14 @@ class PointLight;
 
 class CapsuleEnd final: public ObjectDisplay{
     public:
-        CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* = nullptr);
+        CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* = nullptr);
         ~CapsuleEnd();
         void update(float);
 };
 class CapsuleStar final: public ObjectDisplay{
         PointLight* m_Light;
     public:
-        CapsuleStar(float size,glm::v3 pos, std::string name, Scene* = nullptr,bool=true);
+        CapsuleStar(float size,glm::vec3 pos, std::string name, Scene* = nullptr,bool=true);
         ~CapsuleStar();
         void update(float);
 };

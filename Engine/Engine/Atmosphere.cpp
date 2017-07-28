@@ -1958,7 +1958,7 @@ Atmosphere::~Atmosphere(){
 }
 void Atmosphere::update(){
     if(m_FollowCamera){
-        glm::v3 cameraPos = Resources::getActiveCamera()->getPosition();
+        glm::vec3 cameraPos = Resources::getActiveCamera()->getPosition();
         m_Model[3][0] = float(cameraPos.x + m_Position.x);
         m_Model[3][1] = float(cameraPos.y + m_Position.y);
         m_Model[3][2] = float(cameraPos.z + m_Position.z);
@@ -1967,7 +1967,7 @@ void Atmosphere::update(){
 float Atmosphere::getRadius(){
     return m_Mesh->getRadius() * glm::max(glm::max(m_Scale.x,m_Scale.y),m_Scale.z);
 }
-glm::v3 Atmosphere::getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+glm::vec3 Atmosphere::getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 void Atmosphere::render(bool godsRays){
 	GLuint shader = Resources::getShaderProgram("AS_SkyFromAtmosphere")->program();
     Camera* cam = Resources::getActiveCamera();
@@ -1976,10 +1976,10 @@ void Atmosphere::render(bool godsRays){
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    glm::v3 earthPosition = getPosition();
-    glm::v3 camPos = glm::v3(cam->getPosition() - earthPosition);
+    glm::vec3 earthPosition = getPosition();
+    glm::vec3 camPos = cam->getPosition() - earthPosition;
 
-    glm::vec3 lightDir = glm::vec3(sun->getPosition() - earthPosition);
+    glm::vec3 lightDir = sun->getPosition() - earthPosition;
     lightDir = glm::normalize(lightDir);
 
     float innerRadius = getRadius();

@@ -22,7 +22,7 @@ class ObjectDisplay: public ObjectBasic{
     public:
         ObjectDisplay(std::string = "",
                       std::string = "",
-                      glm::v3 = glm::v3(0),
+                      glm::vec3 = glm::vec3(0),
                       glm::vec3 = glm::vec3(1),
                       std::string = "Visible Object",
                       Scene* = nullptr
@@ -63,7 +63,7 @@ class ObjectDisplay: public ObjectBasic{
         virtual bool visible() { return m_Visible; }
         virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
-        virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
+        virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);
 
         void playAnimation(const std::string& animName,float startTime = 0.0f);
 

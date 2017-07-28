@@ -20,10 +20,10 @@ GLuint Lagrange::m_Buffer;
 std::vector<glm::vec3> Lagrange::m_Vertices;
 float Lagrange::radius;
 
-Lagrange::Lagrange(std::string _p1, std::string _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
+Lagrange::Lagrange(std::string _p1, std::string _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),name,scene){
     _init(_p1,_p2,_type);
 }
-Lagrange::Lagrange(std::string _p1, std::string _p2, std::string _type, std::string name,Scene* scene):ObjectBasic(glm::v3(0),glm::vec3(1),name,scene){
+Lagrange::Lagrange(std::string _p1, std::string _p2, std::string _type, std::string name,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),name,scene){
     LAGRANGE_TYPE type;
     std::transform(_type.begin(), _type.end(), _type.begin(),std::tolower);
     if(_type == "l1")      type = LAGRANGE_TYPE_L1;
@@ -193,24 +193,24 @@ Lagrange::~Lagrange(){
 void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
     if(!exists(m_Planet1) || !exists(m_Planet2))
         return;
-    glm::v3 position = glm::v3(0);
+    glm::vec3 position = glm::vec3(0);
 
     Planet* p1 = m_Planet1.lock().get();
     Planet* p2 = m_Planet2.lock().get();
 
-    glm::v3 p1Position = p1->getPosition();
-    glm::v3 p2Position = p2->getPosition();
+    glm::vec3 p1Position = p1->getPosition();
+    glm::vec3 p2Position = p2->getPosition();
 
     if(type == LAGRANGE_TYPE_L1){
         float sizeRatio = p1->getRadius() / p2->getRadius();
         float planetaryDistanceToSubtractFromDistance = p1->getRadius() + p2->getRadius();
-        glm::num distanceFromP2AndP1 = glm::distance(p1Position,p2Position);
-        glm::num actualDistance = distanceFromP2AndP1 - glm::num(planetaryDistanceToSubtractFromDistance);
+        float distanceFromP2AndP1 = glm::distance(p1Position,p2Position);
+        float actualDistance = distanceFromP2AndP1 - planetaryDistanceToSubtractFromDistance;
 
-        glm::num step1 = actualDistance / (sizeRatio + 1);
-        glm::num distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
+        float step1 = actualDistance / (sizeRatio + 1);
+        float distanceOfL1FromP1 = (step1 * sizeRatio) + p1->getRadius();
 
-        glm::v3 unitVector = glm::normalize(p2Position - p1Position);
+        glm::vec3 unitVector = glm::normalize(p2Position - p1Position);
         this->alignTo(unitVector);
 
         unitVector *= distanceOfL1FromP1;
@@ -218,17 +218,17 @@ void Lagrange::_calculateLagrangePosition(LAGRANGE_TYPE type){
 
     }
     else if(type == LAGRANGE_TYPE_L4 || type == LAGRANGE_TYPE_L5){
-        glm::num d = ((glm::distance(p2Position,p1Position)) * glm::sqrt(3.0f)) / 2.0f;
-        glm::v3 midway = glm::v3(Engine::Math::midpoint(p2Position,p1Position));
+        float d = ((glm::distance(p2Position,p1Position)) * glm::sqrt(3.0f)) / 2.0f;
+        glm::vec3 midway = Engine::Math::midpoint(p2Position,p1Position);
 
-        glm::v3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + glm::num(0.5f),p2);
+        glm::vec3 P = p2->getOrbitInfo()->getOrbitalPosition(p2->getOrbitInfo()->angle + 0.5f,p2);
 
-        glm::v3 D = glm::normalize(p2Position - p1Position);
+        glm::vec3 D = glm::normalize(p2Position - p1Position);
         this->alignTo(D);
 
-        glm::num dotProduct = glm::dot((P-p1Position),D);
-        glm::v3 X = p1Position + (dotProduct * D);
-        glm::v3 cross = glm::normalize(X - P);
+        float dotProduct = glm::dot((P-p1Position),D);
+        glm::vec3 X = p1Position + (dotProduct * D);
+        glm::vec3 cross = glm::normalize(X - P);
 
         if(type == LAGRANGE_TYPE_L4){
             position = midway + (cross * d);

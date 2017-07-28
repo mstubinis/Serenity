@@ -31,9 +31,9 @@ class Camera: public ObjectBasic{
 
         virtual void update(float);
 
-        virtual void lookAt(glm::v3);  
-        virtual void lookAt(glm::v3,glm::v3); 
-        virtual void lookAt(glm::v3,glm::v3,glm::v3); 
+        virtual void lookAt(glm::vec3);  
+        virtual void lookAt(glm::vec3,glm::vec3); 
+        virtual void lookAt(glm::vec3,glm::vec3,glm::vec3); 
         virtual void lookAt(Object*,bool targetUp = false);
 
         virtual void setAspectRatio(float);
@@ -55,7 +55,7 @@ class Camera: public ObjectBasic{
         const CAMERA_TYPE getType() const{ return m_Type; }
 
         virtual bool sphereIntersectTest(Object*);
-        virtual bool sphereIntersectTest(glm::v3 pos, float radius);
+        virtual bool sphereIntersectTest(glm::vec3 pos, float radius);
 
         //ray tests
         virtual bool rayIntersectSphere(Object*);

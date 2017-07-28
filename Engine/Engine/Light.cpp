@@ -35,7 +35,7 @@ std::unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
 std::unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = _populateLightRanges();
 
 
-SunLight::SunLight(glm::v3 pos,std::string n,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),n,scene){
+SunLight::SunLight(glm::vec3 pos,std::string n,unsigned int type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),n,scene){
     m_Type = type;
     m_Active = true;
     m_AmbientIntensity = 0.005f;
@@ -58,15 +58,15 @@ void SunLight::sendGenericAttributesToShader(){
 void SunLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
-    glm::vec3 pos = glm::vec3(getPosition());
+    glm::vec3 pos = getPosition();
 
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
 
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
-DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
-    alignTo(glm::v3(dir),0);
+DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0),name,LightType::Directional,scene){
+    alignTo(dir,0);
     ObjectBasic::update(0);
 }
 DirectionalLight::~DirectionalLight(){
@@ -79,7 +79,7 @@ void DirectionalLight::lighten(){
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
-PointLight::PointLight(std::string name, glm::v3 pos,Scene* scene): SunLight(pos,name,LightType::Point,scene){
+PointLight::PointLight(std::string name, glm::vec3 pos,Scene* scene): SunLight(pos,name,LightType::Point,scene){
     if(Resources::getMesh("PointLightBounds") == nullptr){
         #pragma region MeshData
         std::string data =  "v 0.000000 -0.138668 0.000000\n"
@@ -590,7 +590,7 @@ void PointLight::setAttenuation(LightRange range){
 void PointLight::lighten(){
     if(!m_Active) return;
     Camera* camera = Resources::getActiveCamera();
-    glm::v3 pos = getPosition();
+    glm::vec3 pos = getPosition();
     if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > Object::m_VisibilityThreshold * m_PointLightRadius))
         return;
     sendGenericAttributesToShader();
@@ -600,13 +600,13 @@ void PointLight::lighten(){
     Renderer::sendUniform4f("LightDataC", m_Exp,float(pos.x),float(pos.y),float(pos.z));
 
     glm::mat4 m(1.0f);
-    m = glm::translate(m,glm::vec3(pos));
+    m = glm::translate(m,pos);
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     Renderer::sendUniformMatrix4f("Model",m);
 	Renderer::sendUniformMatrix4f("VP",camera->getViewProjection());
 
-    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) <= m_PointLightRadius){                                                  
+    if(glm::distance(camera->getPosition(),pos) <= m_PointLightRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
     Resources::getMesh("PointLightBounds")->bind();
@@ -614,8 +614,8 @@ void PointLight::lighten(){
     Resources::getMesh("PointLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 }
-SpotLight::SpotLight(std::string name, glm::v3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(name,pos,scene){
-    alignTo(glm::v3(direction),0);
+SpotLight::SpotLight(std::string name, glm::vec3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(name,pos,scene){
+    alignTo(direction,0);
     ObjectBasic::update(0);
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
@@ -632,7 +632,7 @@ void SpotLight::setCutoffOuter(float outerCutoff){
 void SpotLight::lighten(){
     if(!m_Active) return;
     Camera* camera = Resources::getActiveCamera();
-    glm::v3 pos = getPosition();
+    glm::vec3 pos = getPosition();
     if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > Object::m_VisibilityThreshold * m_PointLightRadius))
         return;
     sendGenericAttributesToShader();
@@ -643,13 +643,13 @@ void SpotLight::lighten(){
     Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, 0.0f,0.0f);
     
     glm::mat4 m(1.0f);
-    m = glm::translate(m,glm::vec3(pos));
+    m = glm::translate(m,pos);
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     Renderer::sendUniformMatrix4f("Model",m);
 	Renderer::sendUniformMatrix4f("VP",camera->getViewProjection());
 
-    if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) <= m_PointLightRadius){                                                  
+    if(glm::distance(camera->getPosition(),pos) <= m_PointLightRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
     Resources::getMesh("PointLightBounds")->bind();

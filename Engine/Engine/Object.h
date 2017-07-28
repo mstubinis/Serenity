@@ -21,15 +21,15 @@ class IObject: public BindableResource{
     public:
         virtual void update(float) = 0;
 
-        virtual void setPosition(glm::num,glm::num,glm::num) = 0;
-        virtual void setPosition(glm::v3) = 0;
+        virtual void setPosition(float,float,float) = 0;
+        virtual void setPosition(glm::vec3) = 0;
         virtual void setScale(float,float,float) = 0;
         virtual void setScale(glm::vec3) = 0;
 
         virtual void setOrientation(glm::quat) = 0;
 
-        virtual void translate(glm::num,glm::num,glm::num,bool local=true) = 0;
-        virtual void translate(glm::v3,bool local=true) = 0;
+        virtual void translate(float,float,float,bool local=true) = 0;
+        virtual void translate(glm::vec3,bool local=true) = 0;
         virtual void rotate(float,float,float,bool overTime = true) = 0;
         virtual void rotate(glm::vec3, bool overTime = true) = 0;
         virtual void scale(float,float,float) = 0;
@@ -39,20 +39,21 @@ class IObject: public BindableResource{
         virtual void resume() = 0;
 
         virtual glm::quat& getOrientation() = 0;
-        virtual glm::v3 getPosition() = 0;
+        virtual glm::vec3 getPosition() = 0;
         virtual glm::vec3 getScale() = 0;
-        virtual glm::v3& getForward() = 0;
-        virtual glm::v3& getRight() = 0;
-        virtual glm::v3& getUp() = 0;
-        virtual glm::m4& getModel() = 0;
+        virtual glm::vec3& getForward() = 0;
+        virtual glm::vec3& getRight() = 0;
+        virtual glm::vec3& getUp() = 0;
+        virtual glm::mat4& getModel() = 0;
 };
 
 class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
-	static float m_RotationThreshold;
-	static float m_VisibilityThreshold;
     protected:
+	    static float m_RotationThreshold;
+	    static float m_VisibilityThreshold;
+
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;
@@ -69,14 +70,14 @@ class Object: public IObject{
         void destroy(){ m_IsToBeDestroyed = true; }
         bool isDestroyed(){ return m_IsToBeDestroyed; }
 
-        virtual glm::num getDistance(Object*);
+        virtual float getDistance(Object*);
         virtual unsigned long long getDistanceLL(Object*);
 
         virtual glm::vec3 getScreenCoordinates();
 
-        virtual void lookAt(glm::v3,glm::v3,glm::v3){}
+        virtual void lookAt(glm::vec3,glm::vec3,glm::vec3){}
         virtual void lookAt(Object*){}
-        virtual void alignTo(glm::v3,float speed=0){}
+        virtual void alignTo(glm::vec3,float speed=0){}
         virtual void alignTo(Object*,float speed=0){}
         virtual void alignToX(Object*,float speed=0){}
         virtual void alignToY(Object*,float speed=0){}
@@ -96,19 +97,19 @@ class Object: public IObject{
         virtual bool visible(){ return false; }
         virtual bool passedRenderCheck(){ return false; }
         virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
-        virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector){return false;}
+        virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector){return false;}
 };
 
 class ObjectBasic: public Object{
     protected:
-        glm::v3 m_Forward, m_Right, m_Up;
+        glm::vec3 m_Forward, m_Right, m_Up;
         glm::vec3 m_Scale;
-        glm::v3 m_Position;
-        glm::m4 m_Model;
+        glm::vec3 m_Position;
+        glm::mat4 m_Model;
         glm::quat m_Orientation;
     public:
         ObjectBasic(
-                glm::v3 = glm::v3(0),         //Position
+                glm::vec3 = glm::vec3(0),     //Position
                 glm::vec3 = glm::vec3(1),     //Scale
                 std::string = "Object Basic", //Object name
                 Scene* = nullptr,             //The scene to add the object to (default nullptr = the current scene)
@@ -116,33 +117,33 @@ class ObjectBasic: public Object{
         );
         virtual ~ObjectBasic();
 
-        virtual void setPosition(glm::num,glm::num,glm::num);
-        virtual void setPosition(glm::v3);
+        virtual void setPosition(float,float,float);
+        virtual void setPosition(glm::vec3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
 
         virtual void rotate(float,float,float,bool overTime = true); 
         virtual void rotate(glm::vec3, bool overTime = true);
-        virtual void translate(glm::num,glm::num,glm::num,bool local=true); 
-        virtual void translate(glm::v3,bool local=true);
+        virtual void translate(float,float,float,bool local=true); 
+        virtual void translate(glm::vec3,bool local=true);
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);
 
         virtual void update(float);
 
-        virtual glm::v3& getForward(){ return m_Forward; }
-        virtual glm::v3& getRight(){ return m_Right; }
-        virtual glm::v3& getUp(){ return m_Up; }
-        virtual glm::v3 getPosition(){ return glm::v3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+        virtual glm::vec3& getForward(){ return m_Forward; }
+        virtual glm::vec3& getRight(){ return m_Right; }
+        virtual glm::vec3& getUp(){ return m_Up; }
+        virtual glm::vec3 getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
         virtual glm::vec3 getScale(){ return m_Scale; }
-        virtual glm::m4& getModel(){ return m_Model; }
+        virtual glm::mat4& getModel(){ return m_Model; }
         virtual glm::quat& getOrientation(){ return m_Orientation; }
         virtual void setOrientation(glm::quat);
 
-        virtual void lookAt(glm::v3,glm::v3,glm::v3);
+        virtual void lookAt(glm::vec3,glm::vec3,glm::vec3);
         virtual void lookAt(Object*);
 
-        virtual void alignTo(glm::v3,float speed=0);
+        virtual void alignTo(glm::vec3,float speed=0);
         virtual void alignTo(Object*,float speed=0);
         virtual void alignToX(Object*,float speed=0);
         virtual void alignToY(Object*,float speed=0);

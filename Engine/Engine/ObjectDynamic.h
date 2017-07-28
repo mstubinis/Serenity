@@ -25,7 +25,7 @@ class ObjectDynamic: public Object{
         static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
 
-        glm::v3 m_Forward, m_Right, m_Up;
+        glm::vec3 m_Forward, m_Right, m_Up;
         bool m_Visible;
         bool m_PassedRenderCheck;
         std::vector<MeshInstance*> m_DisplayItems;
@@ -33,8 +33,8 @@ class ObjectDynamic: public Object{
         glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
-        glm::m4 m_Model;
-        glm::v3 _prevPosition;
+        glm::mat4 m_Model;
+        glm::vec3 _prevPosition;
 
         float m_Mass;
         Collision* m_Collision;
@@ -45,7 +45,7 @@ class ObjectDynamic: public Object{
 
         ObjectDynamic( std::string = "",
                        std::string = "",
-                       glm::v3 = glm::v3(0),            //Position
+                       glm::vec3 = glm::vec3(0),            //Position
                        glm::vec3 = glm::vec3(1),        //Scale
                        std::string = "Dynamic Object",  //Object
                        Collision* = nullptr,            //Bullet Collision Shape
@@ -60,17 +60,17 @@ class ObjectDynamic: public Object{
 
         std::vector<MeshInstance*>&  getDisplayItems(){ return m_DisplayItems; }
 
-        virtual void setPosition(glm::num,glm::num,glm::num); 
-        virtual void setPosition(glm::v3);
+        virtual void setPosition(float,float,float); 
+        virtual void setPosition(glm::vec3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
         virtual void setColor(float,float,float,float);
         virtual void setColor(glm::vec4);
 
-        virtual void lookAt(glm::v3,glm::v3,glm::v3);
+        virtual void lookAt(glm::vec3,glm::vec3,glm::vec3);
         virtual void lookAt(Object*);
 
-        virtual void alignTo(glm::v3,float speed=0);
+        virtual void alignTo(glm::vec3,float speed=0);
         virtual void alignTo(Object*,float speed=0);
         virtual void alignToX(Object*,float speed=0);
         virtual void alignToY(Object*,float speed=0);
@@ -82,8 +82,8 @@ class ObjectDynamic: public Object{
         virtual void rotate(float,float,float,bool overTime = true); 
         virtual void rotate(glm::vec3, bool overTime = true);
 
-        virtual void translate(glm::num,glm::num,glm::num,bool local=true); 
-        virtual void translate(glm::v3,bool local=true);
+        virtual void translate(float,float,float,bool local=true); 
+        virtual void translate(glm::vec3,bool local=true);
 
         virtual void applyForce(float,float,float,bool local=true);
         virtual void applyForce(glm::vec3,glm::vec3 = glm::vec3(0),bool local=true);
@@ -123,17 +123,17 @@ class ObjectDynamic: public Object{
 
         virtual glm::vec4 getColor(){ return m_Color; }
         virtual glm::vec3 getGodsRaysColor(){ return m_GodsRaysColor; }
-        virtual glm::v3& getForward(){ return m_Forward; }
-        virtual glm::v3& getRight(){ return m_Right; }
-        virtual glm::v3& getUp(){ return m_Up; }
-        virtual glm::v3 getPosition();
+        virtual glm::vec3& getForward(){ return m_Forward; }
+        virtual glm::vec3& getRight(){ return m_Right; }
+        virtual glm::vec3& getUp(){ return m_Up; }
+        virtual glm::vec3 getPosition();
         virtual float getMass(){ return m_Mass; }
         virtual btRigidBody* getRigidBody(){ return m_RigidBody; }
         virtual glm::quat& getOrientation();
         virtual void setOrientation(glm::quat q);
         virtual glm::vec3 getScale();
-        virtual glm::m4& getModel();
-        virtual glm::v3 getMotionVector(){ return getPosition() - _prevPosition; }
+        virtual glm::mat4& getModel();
+        virtual glm::vec3 getMotionVector(){ return getPosition() - _prevPosition; }
         virtual bool visible() { return m_Visible; }
         virtual bool passedRenderCheck(){ return m_PassedRenderCheck; }
 
@@ -152,6 +152,6 @@ class ObjectDynamic: public Object{
         virtual void update(float);
 
         virtual bool rayIntersectSphere(Camera* = nullptr);
-        virtual bool rayIntersectSphere(glm::v3 origin, glm::vec3 vector);
+        virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);
 };
 #endif

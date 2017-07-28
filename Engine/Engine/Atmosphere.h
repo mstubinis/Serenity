@@ -42,7 +42,7 @@ class Atmosphere final: public SkyboxEmpty{
         virtual ~Atmosphere();
 
         virtual float getRadius();
-        virtual glm::v3 getPosition();
+        virtual glm::vec3 getPosition();
 
         virtual void update();
         virtual void render(bool godsRays);

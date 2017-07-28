@@ -22,21 +22,21 @@ float Math::toDegrees(float radians){ return radians * 57.2958f; }
 float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 
-bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians){
+bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
     // forced protection against NaN if vectors happen to be equal
     point.x += 0.0001f;
     //
-    glm::v3 differenceVector = glm::normalize(point - conePos);
-    glm::num t = glm::dot(coneVector,differenceVector);
+    glm::vec3 differenceVector = glm::normalize(point - conePos);
+    float t = glm::dot(coneVector,differenceVector);
     return ( t >= glm::cos( fovRadians ) );
 }
-bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num maxDistance){
+bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float maxDistance){
     // forced protection against NaN if vectors happen to be equal
     point.x += 0.0001f;
     //
-    glm::v3 differenceVector = glm::normalize(point - conePos);
-    glm::num t = glm::dot(coneVector,differenceVector);
-    glm::num length = glm::length(point-conePos);
+    glm::vec3 differenceVector = glm::normalize(point - conePos);
+    float t = glm::dot(coneVector,differenceVector);
+    float length = glm::length(point-conePos);
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
@@ -108,19 +108,13 @@ glm::vec3 Math::unpackFloatInto3(float f){
     
     return glm::vec3(r,g,b);
 }
-void Math::translate(glm::vec3& out, glm::quat& o, float x, float y, float z, bool local){
-    out = glm::vec3(x,y,z);
-    if(local){
-        out *= o;
-    }
-}
-void Math::translate(glm::vec3& out, glm::quat& o, glm::vec3& trans, bool local){ Math::translate(out,o,trans.x,trans.y,trans.z,local); }
-void Math::lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up){
-    glm::v3 forward = eye - target;
+
+void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up){
+    glm::vec3 forward = eye - target;
  
-    glm::v3 vector = glm::normalize(forward);
-    glm::v3 vector2 = glm::normalize(glm::cross(vector,up));
-    glm::v3 vector3 = glm::cross(vector,vector2);
+    glm::vec3 vector = glm::normalize(forward);
+    glm::vec3 vector2 = glm::normalize(glm::cross(vector,up));
+    glm::vec3 vector3 = glm::cross(vector,vector2);
     float m00 = vector2.x;
     float m01 = vector2.y;
     float m02 = vector2.z;
@@ -168,21 +162,19 @@ void Math::lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up)
 }
 
 glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
-glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); }
-glm::vec3 Math::direction(glm::v3& eye,glm::v3& target){ return glm::normalize(glm::vec3(eye)-glm::vec3(target)); }
 glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normalize(eye-target); }
-glm::v3 Math::getForward(glm::quat& q){return glm::normalize(glm::v3(2*(q.x*q.z+q.w*q.y),2*(q.y*q.x-q.w*q.x),1-2*(q.x*q.x+q.y*q.y)));}
-glm::v3 Math::getRight(glm::quat& q){return glm::normalize(glm::v3(1-2*(q.y*q.y+q.z*q.z),2*(q.x*q.y+q.w*q.z),2*(q.x*q.z-q.w*q.y)));}
-glm::v3 Math::getUp(glm::quat& q){return glm::normalize(glm::v3(2*(q.x*q.y-q.w*q.z),1-2*(q.x*q.x+q.z*q.z),2*(q.y*q.z+q.w*q.x)));}
-glm::v3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
+glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(glm::vec3(2*(q.x*q.z+q.w*q.y),2*(q.y*q.x-q.w*q.x),1-2*(q.x*q.x+q.y*q.y)));}
+glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(glm::vec3(1-2*(q.y*q.y+q.z*q.z),2*(q.x*q.y+q.w*q.z),2*(q.x*q.z-q.w*q.y)));}
+glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(glm::vec3(2*(q.x*q.y-q.w*q.z),1-2*(q.x*q.x+q.z*q.z),2*(q.y*q.z+q.w*q.x)));}
+glm::vec3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
     btTransform t;
     b->getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
-    return glm::v3(v.x(),v.y(),v.z());
+    return glm::vec3(v.x(),v.y(),v.z());
 }
-glm::v3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
-glm::v3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
-glm::v3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
+glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
+glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
+glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
 
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
@@ -235,10 +227,8 @@ void Math::setColor(glm::vec4& c,float r, float g, float b,float a){
 }
 float Math::fade(float t){ return t*t*t*(t*(t*6.0f-15.0f)+10.0f); }
 double Math::fade(double t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
-glm::num Math::fade(glm::num t){ return t*t*t*(t*(t*glm::num(6.0)-glm::num(15.0))+glm::num(10.0)); }
 float Math::lerp(float t, float a, float b){return a + t * (b - a);}
 double Math::lerp(double t, double a, double b){return a + t * (b - a);}
-glm::num Math::lerp(glm::num t, glm::num a, glm::num b){return a + t * (b - a);}
 float Math::grad(int hash, float x, float y, float z){
     int h = hash & 15;
     double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
@@ -249,11 +239,6 @@ double Math::grad(int hash, double x, double y, double z){
     double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
     return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 }
-glm::num Math::grad(int hash, glm::num x, glm::num y, glm::num z){
-    int h = hash & 15;
-    double u = h<8 ? x : y,v = h<4 ? y : h==12||h==14 ? x : z;
-    return glm::num(((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v));
-}
 glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
     glm::vec4 ret(0);
     float a = p.a + c.a * (1-p.a);
@@ -263,18 +248,16 @@ glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
     ret.a = a;
     return ret;
 }
-bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::v3& A, glm::vec3& rayVector){
+bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::vec3& A, glm::vec3& rayVector){
     glm::vec3 _a = glm::vec3(A);
     glm::vec3 B = _a + rayVector;
-
-    //check if point is behind
-    float dot = glm::dot(rayVector,C-_a);
+    float dot = glm::dot(rayVector,C-_a); //check if point is behind
     if(dot >= 0)
         return false;
-    glm::num a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
-    glm::num b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
-    glm::num c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
-    glm::num d = (b*b) - (4*a*c);
+    float a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
+    float b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
+    float c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
+    float d = (b*b) - (4*a*c);
     if(d < 0)
         return false;
     return true;

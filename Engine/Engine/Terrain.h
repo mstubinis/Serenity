@@ -19,8 +19,8 @@ class Terrain final: public ObjectDynamic{
         Terrain(std::string name,sf::Image& img,std::string material,Scene* = nullptr);
         virtual ~Terrain();
 
-        virtual void setPosition(glm::num,glm::num,glm::num); 
-        virtual void setPosition(glm::v3);
+        virtual void setPosition(float,float,float); 
+        virtual void setPosition(glm::vec3);
 
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);

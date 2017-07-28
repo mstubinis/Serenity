@@ -12,7 +12,7 @@ class Wheel: public ObjectDynamic{
     public:
         Wheel(std::string mesh,
               std::string mat,
-              glm::v3 pos = glm::v3(0),
+              glm::vec3 pos = glm::vec3(0),
               glm::vec3 scl = glm::vec3(1),
               std::string name = "Wheel",
               Collision* = nullptr,
@@ -34,7 +34,7 @@ class Vehicle: public ObjectDynamic{
     public:
         Vehicle(std::string mesh,
                 std::string mat,
-                glm::v3 pos = glm::v3(0),
+                glm::vec3 pos = glm::vec3(0),
                 glm::vec3 scl = glm::vec3(1),
                 std::string name = "Vehicle",
                 Collision* = nullptr,
@@ -56,11 +56,11 @@ class Vehicle: public ObjectDynamic{
         virtual void resetSuspension();
         virtual float getCurrentSpeedKmHour();
 
-        virtual glm::v3& getForward(){ return m_Forward; }
-        virtual glm::v3& getRight(){ return m_Right; }
-        virtual glm::v3& getUp(){ return m_Up; }
+        virtual glm::vec3& getForward(){ return m_Forward; }
+        virtual glm::vec3& getRight(){ return m_Right; }
+        virtual glm::vec3& getUp(){ return m_Up; }
 
-        virtual void addWheel(Wheel*,glm::v3 pos,float suspensionRestLength = 0,bool isFront = true);
+        virtual void addWheel(Wheel*,glm::vec3 pos,float suspensionRestLength = 0,bool isFront = true);
 
         virtual void applyForce(float,float,float,bool local=true);
         virtual void applyForce(glm::vec3,glm::vec3 = glm::vec3(0),bool local=true);

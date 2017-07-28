@@ -109,6 +109,7 @@ namespace glm{
         typedef m4x4_d m4x4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
+		/*
         typedef long double number;
         typedef number num;
         typedef q_ld q;
@@ -127,6 +128,7 @@ namespace glm{
         typedef m4x3_ld m4x3;
         typedef m4_ld m4;
         typedef m4x4_ld m4x4;
+		*/
     #endif
 };
 
@@ -142,28 +144,23 @@ namespace Engine{
 
         glm::vec3 getScreenCoordinates(glm::vec3&,bool clampToEdge = true);
 
-        glm::vec3 midpoint(glm::v3&,glm::v3&);
         glm::vec3 midpoint(glm::vec3&,glm::vec3&);
 
-        glm::vec3 direction(glm::v3& eye,glm::v3& target);
         glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
-        void lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up);
-	    
-	void translate(glm::vec3& out, glm::quat& o, float x, float y, float z, bool local = true);
-        void translate(glm::vec3& out, glm::quat& o, glm::vec3& trans, bool local = true);
+        void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 	    
         float pack3FloatsInto1(float,float,float);
         float pack3FloatsInto1(glm::vec3&);
         glm::vec3 unpackFloatInto3(float);
 
-        glm::v3 getForward(glm::quat& q);
-        glm::v3 getRight(glm::quat& q);
-        glm::v3 getUp(glm::quat& q);
-        glm::v3 getColumnVector(const btRigidBody* b, unsigned int column);
-        glm::v3 getForward(const btRigidBody* b);
-        glm::v3 getRight(const btRigidBody* b);
-        glm::v3 getUp(const btRigidBody* b);
+        glm::vec3 getForward(glm::quat& q);
+        glm::vec3 getRight(glm::quat& q);
+        glm::vec3 getUp(glm::quat& q);
+        glm::vec3 getColumnVector(const btRigidBody* b, unsigned int column);
+        glm::vec3 getForward(const btRigidBody* b);
+        glm::vec3 getRight(const btRigidBody* b);
+        glm::vec3 getUp(const btRigidBody* b);
 
         float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
         void alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed=0);
@@ -174,8 +171,8 @@ namespace Engine{
         void setColor(glm::vec3& color,float r,float g,float b);
         void setColor(glm::vec4& color,float r,float g,float b,float a);
 
-        bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians);
-        bool isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num fovDistance);
+        bool isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians);
+        bool isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float fovDistance);
 
         float toRadians(float degrees);
         float toDegrees(float radians);
@@ -192,19 +189,16 @@ namespace Engine{
 
         float fade(float t);
         double fade(double t);
-        glm::num fade(glm::num t);
 
         float lerp(float t, float a, float b);
         double lerp(double t, double a, double b);
-        glm::num lerp(glm::num t,glm::num a,glm::num b);
 
         float grad(int hash, float x, float y, float z);
         double grad(int hash, double x, double y, double z);
-        glm::num grad(int hash,glm::num x,glm::num y,glm::num z);
 
         glm::vec4 PaintersAlgorithm(glm::vec4& paintColor, glm::vec4& canvasColor);
 
-        bool rayIntersectSphere(glm::vec3& position, float radius, glm::v3& A, glm::vec3& rayVector);
+        bool rayIntersectSphere(glm::vec3& position, float radius, glm::vec3& A, glm::vec3& rayVector);
     };
 };
 #endif

@@ -6,13 +6,13 @@
 
 using namespace Engine;
 
-static std::list<glm::v3> Game::Pathfinding::getPathFrom(Object* start, Object* finish){
-    std::list<glm::v3> path;
+static std::list<glm::vec3> Game::Pathfinding::getPathFrom(Object* start, Object* finish){
+    std::list<glm::vec3> path;
 
     //first generate the final end point
-    glm::v3 end = finish->getPosition() - start->getPosition();
+    glm::vec3 end = finish->getPosition() - start->getPosition();
     end = glm::normalize(end);
-    end = finish->getPosition() - end * glm::num(finish->getRadius()*2);
+    end = finish->getPosition() - end * finish->getRadius()*2.0f;
 
     //now add the start & end points to the list
     path.push_front(start->getPosition());
@@ -23,7 +23,7 @@ static std::list<glm::v3> Game::Pathfinding::getPathFrom(Object* start, Object* 
     while(objInWay == true){
         objInWay = false;
         for(auto obj:Resources::getCurrentScene()->objects()){
-            if(Resources::getActiveCamera()->sphereIntersectTest(finish->getPosition(),finish->getRadius()*2) == true){
+            if(Resources::getActiveCamera()->sphereIntersectTest(finish->getPosition(),finish->getRadius()*2.0f) == true){
                 objInWay = true;
 
                 //now calculate the point perpendicular to the line from start to goal and add it to the path

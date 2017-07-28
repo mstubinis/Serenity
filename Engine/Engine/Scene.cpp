@@ -23,7 +23,7 @@ Scene::Scene(std::string name){
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Scenes,name,boost::shared_ptr<Scene>(this));
 }
 void Scene::centerSceneToObject(Object* center){
-    glm::v3 offset = -(center->getPosition());
+    glm::vec3 offset = -(center->getPosition());
     for(auto object:m_Objects){
         Object* obj = object.second;
         if(obj != center && obj->getParent() == nullptr){

@@ -34,7 +34,7 @@ class SunLight: public ObjectDisplay{
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
         void sendGenericAttributesToShader();
     public:
-        SunLight(glm::v3 = glm::v3(0),std::string = "Sun Light",uint=LightType::Sun,Scene* = nullptr);
+        SunLight(glm::vec3 = glm::vec3(0),std::string = "Sun Light",uint=LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
 
         void update(float);
@@ -64,7 +64,7 @@ class PointLight: public SunLight{
         float m_PointLightRadius;
         float calculatePointLightRadius();
     public:
-        PointLight(std::string = "Point Light",glm::v3 = glm::v3(0), Scene* = nullptr);
+        PointLight(std::string = "Point Light",glm::vec3 = glm::vec3(0), Scene* = nullptr);
         virtual ~PointLight();
 
         void setConstant(float c);
@@ -87,7 +87,7 @@ class SpotLight: public PointLight{
         float m_Cutoff;
         float m_OuterCutoff;
     public:
-        SpotLight(std::string = "Spot Light",glm::v3 = glm::v3(0), glm::vec3 = glm::vec3(0,0,-1), float = 11.0f, float = 13.0f,Scene* = nullptr);
+        SpotLight(std::string = "Spot Light",glm::vec3 = glm::vec3(0), glm::vec3 = glm::vec3(0,0,-1), float = 11.0f, float = 13.0f,Scene* = nullptr);
         virtual ~SpotLight();
 
         void lighten();

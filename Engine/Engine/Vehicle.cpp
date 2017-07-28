@@ -5,7 +5,7 @@
 
 using namespace Engine;
 
-Wheel::Wheel(std::string mesh,std::string mat,glm::v3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Wheel::Wheel(std::string mesh,std::string mat,glm::vec3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
 }
 Wheel::~Wheel(){
 }
@@ -16,7 +16,7 @@ void Wheel::on_setLinearVelocity(float,float,float,bool local){
 void Wheel::on_setAngularVelocity(float,float,float,bool local){
 }
 
-Vehicle::Vehicle(std::string mesh,std::string mat,glm::v3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Vehicle::Vehicle(std::string mesh,std::string mat,glm::vec3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
     m_Tuning = new btRaycastVehicle::btVehicleTuning();
     m_Raycaster = new btDefaultVehicleRaycaster(Physics::Detail::PhysicsManagement::m_world);
     m_Vehicle = new btRaycastVehicle(*m_Tuning,m_RigidBody,m_Raycaster);
@@ -38,7 +38,7 @@ void Vehicle::setSteeringValue(float value, unsigned int wheelIndex){ m_Vehicle-
 void Vehicle::resetSuspension(){ m_Vehicle->resetSuspension(); }
 float Vehicle::getCurrentSpeedKmHour(){ return m_Vehicle->getCurrentSpeedKmHour(); }
 
-void Vehicle::addWheel(Wheel* wheel,glm::v3 p,float suspensionRestLength,bool isFront){
+void Vehicle::addWheel(Wheel* wheel,glm::vec3 p,float suspensionRestLength,bool isFront){
     m_Wheels.push_back(wheel);
     btVector3 pos = btVector3(btScalar(p.x),btScalar(p.y),btScalar(p.z));
     m_Vehicle->addWheel(pos,btVector3(0,0,-1),btVector3(1,0,0),suspensionRestLength,wheel->getRadius(),*m_Tuning,isFront);

@@ -9,7 +9,7 @@ class Object;
 
 namespace Game{
     namespace Pathfinding{
-        static std::list<glm::v3> getPathFrom(Object* start, Object* finish);
+        static std::list<glm::vec3> getPathFrom(Object* start, Object* finish);
     };
 };
 #endif

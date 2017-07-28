@@ -12,14 +12,14 @@
 
 using namespace Engine;
 
-CapsuleEnd::CapsuleEnd(float size,glm::v3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
+CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
 CapsuleEnd::~CapsuleEnd(){}
 void CapsuleEnd::update(float dt){ObjectDisplay::update(dt);}
 
-CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
+CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
-        m_Light = new PointLight(name + " Light",pos/glm::num(100),scene);
+        m_Light = new PointLight(name + " Light",pos/float(100),scene);
         m_Light->setAttenuation(0.1f,0.1f,0.1f);
         m_Light->setColor(255,124,27,255);
         m_Light->setDiffuseIntensity(0.8f);
@@ -30,7 +30,7 @@ CapsuleStar::CapsuleStar(float size,glm::v3 pos, std::string name,Scene* scene,b
 }
 CapsuleStar::~CapsuleStar(){}
 void CapsuleStar::update(float dt){
-    glm::v3 pos = getPosition();
+    glm::vec3 pos = getPosition();
     translate(0,0,(-120 * 50 ) * dt);
     if(pos.z >= 200 * 225){
         float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
@@ -38,7 +38,7 @@ void CapsuleStar::update(float dt){
         setPosition(x*50,y*50,-200*225);
     }
     if(m_Light != nullptr){
-        m_Light->setPosition(pos/glm::num(75));
+        m_Light->setPosition(pos/float(75));
         if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
 			m_Light->deactivate();
 		}
@@ -50,13 +50,13 @@ void CapsuleStar::update(float dt){
     ObjectDisplay::update(dt);
 }
 
-CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::v3(0),glm::vec3(1),name,scene){
+CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::vec3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
-CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::v3(0),glm::vec3(1),name,scene){
+CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::vec3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
@@ -76,7 +76,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setSkybox(nullptr);
     setBackgroundColor(255.0f,0,0);
 
-    PointLight* l = new PointLight("Capsule_Static_Light",glm::v3(0,1.7f,0),this);
+    PointLight* l = new PointLight("Capsule_Static_Light",glm::vec3(0,1.7f,0),this);
 
     l->setColor(255,225,235,255);
     l->setSpecularIntensity(0.0f);
@@ -109,8 +109,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_TunnelB = new CapsuleTunnel(5000,"AAAB","Capsule_B",this);
     m_Ribbon = new CapsuleRibbon(5000,"AAAC","Capsule_C",this);
 
-    m_FrontEnd = new CapsuleEnd(2250,glm::v3(0,0,-25000),glm::vec3(1),"AAAD",this);
-    m_BackEnd = new CapsuleEnd(1650,glm::v3(0,0,25000),glm::vec3(0),"AAAE",this);
+    m_FrontEnd = new CapsuleEnd(2250,glm::vec3(0,0,-25000),glm::vec3(1),"AAAD",this);
+    m_BackEnd = new CapsuleEnd(1650,glm::vec3(0,0,25000),glm::vec3(0),"AAAE",this);
 
     m_BackEnd->rotate(0,180,0,false);
 
@@ -127,7 +127,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
         float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
 
-        glm::v3 pos = glm::v3(x,y,step)*glm::v3(50);
+        glm::vec3 pos = glm::vec3(x,y,step) * glm::vec3(50);
 
         bool spawnLight = false;
         if(i % 3 == 0){
@@ -137,7 +137,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         step -= 6.0f;
     }
     //this to just test. should set player / camera dynamically
-    setPlayer(new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::v3(0),glm::vec3(1),nullptr,this));
+    setPlayer(new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this));
     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
     getPlayerCamera()->follow(getPlayer());
 
