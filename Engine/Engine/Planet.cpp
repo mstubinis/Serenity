@@ -257,14 +257,14 @@ Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::v3 pos,glm::num scl, 
 }
 Star::~Star(){
 }
-Ring::Ring(std::vector<RingInfo> rings,Planet* parent){
+Ring::Ring(std::vector<RingInfo>& rings,Planet* parent){
     m_Parent = parent;
     _makeRingImage(rings,parent);
     m_Parent->addRing(this);
 }
 Ring::~Ring(){
 }
-void Ring::_makeRingImage(std::vector<RingInfo> rings,Planet* parent){
+void Ring::_makeRingImage(std::vector<RingInfo>& rings,Planet* parent){
     sf::Image ringImage;
     ringImage.create(1024,2,sf::Color::Black);
     ringImage.createMaskFromColor(sf::Color::Black,0);
