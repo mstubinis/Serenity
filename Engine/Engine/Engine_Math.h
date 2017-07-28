@@ -15,31 +15,49 @@ class Object;
 typedef unsigned int uint;
 
 namespace glm{
+    typedef glm::detail::tquat<float> q_f;	
+    typedef glm::detail::tvec2<float> v2_f;
+    typedef glm::detail::tvec3<float> v3_f;
+    typedef glm::detail::tvec4<float> v4_f;
+    typedef glm::detail::tmat2x2<float> m2_f;
+    typedef glm::detail::tmat3x3<float> m3_f;
+    typedef glm::detail::tmat4x4<float> m4_f;
+	
+    typedef glm::detail::tquat<double> q_d;
+    typedef glm::detail::tvec2<double> v2_d;
+    typedef glm::detail::tvec3<double> v3_d;
+    typedef glm::detail::tvec4<double> v4_d;
+    typedef glm::detail::tmat2x2<double> m2_d;
+    typedef glm::detail::tmat3x3<double> m3_d;
+    typedef glm::detail::tmat4x4<double> m4_d;
+	
+    typedef glm::detail::tquat<long double> q_ld;
+    typedef glm::detail::tvec2<long double> v2_ld;
+    typedef glm::detail::tvec3<long double> v3_ld;
+    typedef glm::detail::tvec4<long double> v4_ld;
+    typedef glm::detail::tmat2x2<long double> m2_ld;
+    typedef glm::detail::tmat3x3<long double> m3_ld;
+    typedef glm::detail::tmat4x4<long double> m4_ld;
+	
+	
     #ifdef ENGINE_PRECISION_NORMAL
-    typedef float number;
-    typedef float num;
-    typedef glm::detail::tvec3<float> v3;
-    typedef glm::detail::tmat4x4<float> m4;
+        typedef float number;
+        typedef float num;
+        typedef glm::detail::tvec3<float> v3;
+        typedef glm::detail::tmat4x4<float> m4;
     #endif
     #ifdef ENGINE_PRECISION_HIGH
-    typedef double number;
-    typedef double num;
-    typedef glm::detail::tvec3<double> v3;
-    typedef glm::detail::tmat4x4<double> m4;
+        typedef double number;
+        typedef double num;
+        typedef glm::detail::tvec3<double> v3;
+        typedef glm::detail::tmat4x4<double> m4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
-    typedef long double number;
-    typedef long double num;
-    typedef glm::detail::tvec3<long double> v3;
-    typedef glm::detail::tmat4x4<long double> m4;
+        typedef long double number;
+        typedef long double num;
+        typedef glm::detail::tvec3<long double> v3;
+        typedef glm::detail::tmat4x4<long double> m4;
     #endif
-
-    typedef glm::detail::tvec3<float> v3_f;
-    typedef glm::detail::tmat4x4<float> m4_f;
-    typedef glm::detail::tvec3<double> v3_d;
-    typedef glm::detail::tmat4x4<double> m4_d;
-    typedef glm::detail::tvec3<long double> v3_ld;
-    typedef glm::detail::tmat4x4<long double> m4_ld;
 };
 
 namespace Engine{
