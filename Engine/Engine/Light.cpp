@@ -591,7 +591,7 @@ void PointLight::lighten(){
     if(!m_Active) return;
     Camera* camera = Resources::getActiveCamera();
     glm::v3 pos = getPosition();
-    if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
+    if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > Object::m_VisibilityThreshold * m_PointLightRadius))
         return;
     sendGenericAttributesToShader();
 
@@ -633,7 +633,7 @@ void SpotLight::lighten(){
     if(!m_Active) return;
     Camera* camera = Resources::getActiveCamera();
     glm::v3 pos = getPosition();
-    if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > 1100 * m_PointLightRadius))
+    if((!camera->sphereIntersectTest(pos,m_PointLightRadius)) || (camera->getDistance(this) > Object::m_VisibilityThreshold * m_PointLightRadius))
         return;
     sendGenericAttributesToShader();
 
