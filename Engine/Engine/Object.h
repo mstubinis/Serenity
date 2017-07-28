@@ -26,7 +26,7 @@ class IObject: public BindableResource{
         virtual void setScale(float,float,float) = 0;
         virtual void setScale(glm::vec3) = 0;
 
-		virtual void setOrientation(glm::quat) = 0;
+        virtual void setOrientation(glm::quat) = 0;
 
         virtual void translate(glm::num,glm::num,glm::num,bool local=true) = 0;
         virtual void translate(glm::v3,bool local=true) = 0;
@@ -50,11 +50,13 @@ class IObject: public BindableResource{
 class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
+	static float m_RotationThreshold;
     protected:
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;
     public:
+        static void setGlobalRotationThreshold(float t){ m_RotationThreshold = t; }
         Object(
                 std::string = "Object",   //Object
                 Scene* = nullptr,         //The scene to add the object to (default nullptr = the current scene)
@@ -70,8 +72,8 @@ class Object: public IObject{
 
         virtual glm::vec3 getScreenCoordinates();
 
-		virtual void lookAt(glm::v3,glm::v3,glm::v3){}
-		virtual void lookAt(Object*){}
+        virtual void lookAt(glm::v3,glm::v3,glm::v3){}
+        virtual void lookAt(Object*){}
         virtual void alignTo(glm::v3,float speed=0){}
         virtual void alignTo(Object*,float speed=0){}
         virtual void alignToX(Object*,float speed=0){}
@@ -135,8 +137,8 @@ class ObjectBasic: public Object{
         virtual glm::quat& getOrientation(){ return m_Orientation; }
         virtual void setOrientation(glm::quat);
 
-		virtual void lookAt(glm::v3,glm::v3,glm::v3);
-		virtual void lookAt(Object*);
+        virtual void lookAt(glm::v3,glm::v3,glm::v3);
+        virtual void lookAt(Object*);
 
         virtual void alignTo(glm::v3,float speed=0);
         virtual void alignTo(Object*,float speed=0);
