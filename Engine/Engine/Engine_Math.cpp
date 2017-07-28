@@ -108,10 +108,16 @@ glm::vec3 Math::unpackFloatInto3(float f){
     
     return glm::vec3(r,g,b);
 }
+void Math::translate(glm::vec3& vect, glm::quat& o, float x, float y, float z, bool local){
+    vect = glm::vec3(x,y,z);
+    if(local){
+        vect *= o;
+    }
+}
 void Math::lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up){
     glm::v3 forward = eye - target;
  
-	glm::v3 vector = glm::normalize(forward);
+    glm::v3 vector = glm::normalize(forward);
     glm::v3 vector2 = glm::normalize(glm::cross(vector,up));
     glm::v3 vector3 = glm::cross(vector,vector2);
     float m00 = vector2.x;
