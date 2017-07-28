@@ -73,7 +73,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
                 t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
                 shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
             }
-			m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
+            m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
         }
     }
 
@@ -94,7 +94,7 @@ ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::v3 pos, glm
         m_RigidBody = new btRigidBody(rigidBodyCI);
     }
     else{
-		m_Collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
+        m_Collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
         btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
         m_RigidBody = new btRigidBody(rigidBodyCI);
     }
@@ -185,12 +185,12 @@ void ObjectDynamic::setPosition(glm::num x, glm::num y, glm::num z){
     tr.setOrigin(btVector3(btScalar(x),btScalar(y),btScalar(z)));
     tr.setRotation(m_RigidBody->getOrientation());
     
-	if(m_Collision->getCollisionType() == CollisionType::TriangleShapeStatic){
+    if(m_Collision->getCollisionType() == CollisionType::TriangleShapeStatic){
         Physics::removeRigidBody(m_RigidBody);
         SAFE_DELETE(m_RigidBody);
     }
     m_MotionState->setWorldTransform(tr);
-	if(m_Collision->getCollisionType() == CollisionType::TriangleShapeStatic){
+    if(m_Collision->getCollisionType() == CollisionType::TriangleShapeStatic){
         btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
         m_RigidBody = new btRigidBody(ci);
         m_RigidBody->setUserPointer(this);
@@ -210,7 +210,7 @@ void ObjectDynamic::setOrientation(glm::quat q){
     m_RigidBody->setCenterOfMassTransform(t);
     m_MotionState->setWorldTransform(t);
 
-	m_Forward = glm::normalize(Engine::Math::getForward(m_RigidBody));
+    m_Forward = glm::normalize(Engine::Math::getForward(m_RigidBody));
     m_Right = glm::normalize(Engine::Math::getRight(m_RigidBody));
     m_Up = glm::normalize(Engine::Math::getUp(m_RigidBody));
 
@@ -346,7 +346,7 @@ void ObjectDynamic::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
 
     m_RigidBody->getWorldTransform().setRotation(btQ);
 
-	Engine::Math::lookAtToQuat(q,eye,target,up);
+    Engine::Math::lookAtToQuat(q,eye,target,up);
 
     btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
@@ -459,13 +459,13 @@ bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
 glm::quat& ObjectDynamic::getOrientation(){
-	btTransform t;
-	m_RigidBody->getMotionState()->getWorldTransform(t);
+    btTransform t;
+    m_RigidBody->getMotionState()->getWorldTransform(t);
 
-	btQuaternion q = t.getRotation();
+    btQuaternion q = t.getRotation();
 
-	glm::quat _q(q.w(),q.x(),q.y(),q.z());
-	return glm::normalize(_q);
+    glm::quat _q(q.w(),q.x(),q.y(),q.z());
+    return glm::normalize(_q);
 }
 glm::vec3 ObjectDynamic::getScale(){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
