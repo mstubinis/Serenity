@@ -55,11 +55,11 @@ void ObjectBasic::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = glm::m4(1);
+        m_Model = glm::m4(1.0f);
     }
-	glm::m4 translationMatrix = glm::translate(m_Position);
-	glm::m4 rotationMatrix = glm::m4(glm::mat4_cast(m_Orientation));
-	glm::m4 scaleMatrix = glm::scale(glm::v3(m_Scale));
+    glm::m4 translationMatrix = glm::translate(m_Position);
+    glm::m4 rotationMatrix = glm::m4(glm::mat4_cast(m_Orientation));
+    glm::m4 scaleMatrix = glm::scale(glm::v3(m_Scale));
 
     m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
 }
