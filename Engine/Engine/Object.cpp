@@ -138,8 +138,8 @@ void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::rotate(glm::vec3 rotation,bool overTime){ ObjectBasic::rotate(rotation.x,rotation.y,rotation.z,overTime); }
-void ObjectBasic::translate(glm::num x, glm::num y, glm::num z,bool local){
-    glm::v3 offset = glm::v3(0);
+void ObjectBasic::translate(glm::num x, glm::num y, glm::num z,bool local){   
+    glm::v3 offset = glm::v3(0.0f);
     if(local){
         offset += m_Forward * z;
         offset += m_Right * x;
