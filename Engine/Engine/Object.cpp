@@ -97,7 +97,7 @@ void ObjectBasic::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
 }
 void ObjectBasic::lookAt(Object* o){ ObjectBasic::lookAt(getPosition(), o->getPosition(), o->getUp()); }
 void ObjectBasic::alignTo(glm::v3 direction, float time){ 
-	Engine::Math::alignTo(m_Orientation,this,glm::vec3(direction),time);
+    Engine::Math::alignTo(m_Orientation,this,glm::vec3(direction),time);
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
     m_Up = Engine::Math::getUp(m_Orientation);
@@ -110,19 +110,19 @@ void ObjectBasic::alignTo(Object* other, float time){
     m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::alignToX(Object* other, float time){ 
-	Engine::Math::alignToX(m_Orientation,this,other,time); 
+    Engine::Math::alignToX(m_Orientation,this,other,time); 
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
     m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::alignToY(Object* other, float time){ 
-	Engine::Math::alignToY(m_Orientation,this,other,time); 
+    Engine::Math::alignToY(m_Orientation,this,other,time); 
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
     m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::alignToZ(Object* other, float time){ 
-	Engine::Math::alignToZ(m_Orientation,this,other,time); 
+    Engine::Math::alignToZ(m_Orientation,this,other,time); 
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
     m_Up = Engine::Math::getUp(m_Orientation);
