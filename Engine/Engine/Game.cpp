@@ -97,6 +97,9 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f7")){
 		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::MINNAERT);
     }
+	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());
+	Resources::getObject("SpotLightPlayer")->setOrientation(Resources::getObject("Player")->getOrientation());
+
     m_HUD->update(dt);
 }
 void Game::render(){

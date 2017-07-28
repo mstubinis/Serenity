@@ -137,20 +137,20 @@ void ObjectDynamic::setColor(float r, float g, float b, float a){ Math::setColor
 void ObjectDynamic::setColor(glm::vec4 color){ ObjectDynamic::setColor(color.r,color.g,color.b,color.a); }
 void ObjectDynamic::translate(glm::v3 t,bool l){ ObjectDynamic::translate(t.x,t.y,t.z,l); }
 void ObjectDynamic::update(float dt){
-    glm::mat4 m(1);
+    glm::mat4 model(1.0f);
 
     btTransform tr;
     m_RigidBody->getMotionState()->getWorldTransform(tr);
-    tr.getOpenGLMatrix(glm::value_ptr(m));
+    tr.getOpenGLMatrix(glm::value_ptr(model));
 
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
-    m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
+    model = glm::scale(model,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
 
     m_Forward = Engine::Math::getForward(m_RigidBody);
     m_Right = Engine::Math::getRight(m_RigidBody);
     m_Up = Engine::Math::getUp(m_RigidBody);
 
-    m_Model = glm::m4(m);
+    m_Model = glm::m4(model);
     if(m_Parent != nullptr){
         m_Model =  m_Parent->getModel() * m_Model;
     }
@@ -461,7 +461,9 @@ bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
 glm::quat& ObjectDynamic::getOrientation(){
 	btTransform t;
 	m_RigidBody->getMotionState()->getWorldTransform(t);
+
 	btQuaternion q = t.getRotation();
+
 	glm::quat _q(q.w(),q.x(),q.y(),q.z());
 	return glm::normalize(_q);
 }
