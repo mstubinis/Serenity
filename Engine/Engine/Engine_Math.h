@@ -60,8 +60,8 @@ namespace Engine{
         glm::vec3 direction(glm::v3& eye,glm::v3& target);
         glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
-		void lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up);
-        
+        void lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up);
+	void translate(glm::vec3& vect, float x, float y, float z, bool local = true);
         float pack3FloatsInto1(float,float,float);
         float pack3FloatsInto1(glm::vec3&);
         glm::vec3 unpackFloatInto3(float);
