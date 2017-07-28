@@ -34,7 +34,7 @@ unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = ba
 bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
-AntiAliasingAlgorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
+AntiAliasingAlgorithm::Algorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
 float Detail::RendererInfo::BloomInfo::bloom_radius = 0.84f;
@@ -78,7 +78,7 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
-void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
+void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){
     if(Detail::RendererInfo::GeneralInfo::aa_algorithm != algorithm){
         Detail::RendererInfo::GeneralInfo::aa_algorithm = algorithm;
     }
@@ -534,8 +534,6 @@ void Detail::RenderManagement::render(){
         //_passFXAA();
     }
     _passCopyDepth();
-    
-    _passForwardRendering();
 
     glEnable(GL_BLEND);
     if(RendererInfo::DebugDrawingInfo::debug){
@@ -548,6 +546,8 @@ void Detail::RenderManagement::render(){
 
     Settings::enableDepthTest();
     Settings::enableDepthMask();
+
+	_passForwardRendering();
 
     Settings::clear(false,true,false); //clear depth only
 

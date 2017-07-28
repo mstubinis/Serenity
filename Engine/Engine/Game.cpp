@@ -92,15 +92,12 @@ void Game::update(float dt){
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f6")){
-		Resources::getMaterial("Defiant")->setDiffuseModel(Material::DiffuseModel::LAMBERT);
+		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::LAMBERT);
     }
     if(Events::Keyboard::isKeyDownOnce("f7")){
-		Resources::getMaterial("Defiant")->setDiffuseModel(Material::DiffuseModel::MINNAERT);
+		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::MINNAERT);
     }
     m_HUD->update(dt);
-	Resources::getObject("TestObject")->setPosition(Resources::getObject("Player")->getPosition() - (Resources::getObject("Player")->getForward()*glm::v3(5)));
-	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());
-	Resources::getObject("SpotLightPlayer")->setOrientation(Resources::getObject("Player")->getOrientation());
 }
 void Game::render(){
     m_HUD->render(Renderer::Detail::RendererInfo::DebugDrawingInfo::debug);

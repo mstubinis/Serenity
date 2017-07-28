@@ -11,8 +11,11 @@
 #include "Camera.h"
 
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/matrix_operation.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 using namespace Engine;
 
@@ -121,9 +124,9 @@ void ObjectDynamic::translate(glm::num x, glm::num y, glm::num z,bool local){
     btVector3 pos = t.getOrigin();
     glm::v3 p = glm::v3(pos.x(),pos.y(),pos.z());
     if(local){
-        p += getForward() * z;
-        p += getRight() * x;
-        p += getUp() * y;
+        p += m_Forward * z;
+        p += m_Right * x;
+        p += m_Up * y;
     }
     else{
         p += glm::vec3(x,y,z);
@@ -217,9 +220,9 @@ void ObjectDynamic::setPosition(glm::v3 p){ ObjectDynamic::setPosition(p.x,p.y,p
 void ObjectDynamic::applyForce(float x,float y,float z,bool local){ 
     m_RigidBody->activate();
     if(local){
-        glm::vec3 res = glm::vec3(getRight()) * x;
-        res += glm::vec3(getUp()) * y;
-        res += glm::vec3(getForward()) * z;
+        glm::vec3 res = glm::vec3(m_Right) * x;
+        res += glm::vec3(m_Up) * y;
+        res += glm::vec3(m_Forward) * z;
         x = res.x; y = res.y; z = res.z;
     }
     m_RigidBody->applyCentralForce(btVector3(x,y,z)); 
@@ -227,9 +230,9 @@ void ObjectDynamic::applyForce(float x,float y,float z,bool local){
 void ObjectDynamic::applyForce(glm::vec3 force,glm::vec3 relPos,bool local){ 
     m_RigidBody->activate();
     if(local){
-        glm::vec3 res = glm::vec3(getRight()) * force.x;
-        res += glm::vec3(getUp()) * force.y;
-        res += glm::vec3(getForward()) * force.z;
+        glm::vec3 res = glm::vec3(m_Right) * force.x;
+        res += glm::vec3(m_Up) * force.y;
+        res += glm::vec3(m_Forward) * force.z;
         force.x = res.x; force.y = res.y; force.z = res.z;
     }
     m_RigidBody->applyForce(btVector3(force.x,force.y,force.z),btVector3(relPos.x,relPos.y,relPos.z)); 
@@ -240,9 +243,9 @@ void ObjectDynamic::applyForceZ(float z,bool l){ ObjectDynamic::applyForce(0,0,z
 void ObjectDynamic::applyImpulse(float x,float y,float z,bool local){ 
     m_RigidBody->activate();
     if(local){
-        glm::vec3 res = glm::vec3(getForward()) * z; 
-        res += glm::vec3(getUp()) * y;
-        res += glm::vec3(getRight()) * x;
+        glm::vec3 res = glm::vec3(m_Forward) * z; 
+        res += glm::vec3(m_Up) * y;
+        res += glm::vec3(m_Right) * x;
         x = res.x; y = res.y; z = res.z;
     }
     m_RigidBody->applyCentralImpulse(btVector3(x,y,z));
@@ -250,9 +253,9 @@ void ObjectDynamic::applyImpulse(float x,float y,float z,bool local){
 void ObjectDynamic::applyImpulse(glm::vec3 impulse,glm::vec3 relPos,bool local){ 
     m_RigidBody->activate();
     if(local){
-        glm::vec3 res = glm::vec3(getForward()) * impulse.z; 
-        res += glm::vec3(getUp()) * impulse.y;
-        res += glm::vec3(getRight()) * impulse.x;
+        glm::vec3 res = glm::vec3(m_Forward) * impulse.z; 
+        res += glm::vec3(m_Up) * impulse.y;
+        res += glm::vec3(m_Right) * impulse.x;
         impulse.x = res.x; impulse.y = res.y; impulse.z = res.z;
     }
     m_RigidBody->applyImpulse(btVector3(impulse.x,impulse.y,impulse.z),btVector3(relPos.x,relPos.y,relPos.z));
@@ -287,9 +290,9 @@ void ObjectDynamic::applyTorqueImpulseZ(float z,bool l){ ObjectDynamic::applyTor
 void ObjectDynamic::setLinearVelocity(float x, float y, float z, bool local){
     m_RigidBody->activate();
     if(local){
-        glm::vec3 res = glm::vec3(getRight()) * x;
-        res += glm::vec3(getUp()) * y;
-        res += glm::vec3(getForward()) * z;
+        glm::vec3 res = glm::vec3(m_Right) * x;
+        res += glm::vec3(m_Up) * y;
+        res += glm::vec3(m_Forward) * z;
         x = res.x; y = res.y; z = res.z;
     }
     m_RigidBody->setLinearVelocity(btVector3(x,y,z)); 
@@ -310,9 +313,9 @@ void ObjectDynamic::setLinearVelocityZ(float z, bool l){
 void ObjectDynamic::setAngularVelocity(float x, float y, float z,bool local){ 
     m_RigidBody->activate();
     if(local){
-        glm::vec3 res = glm::vec3(getRight()) * x;
-        res += glm::vec3(getUp()) * y;
-        res += glm::vec3(getForward()) * z;
+        glm::vec3 res = glm::vec3(m_Right) * x;
+        res += glm::vec3(m_Up) * y;
+        res += glm::vec3(m_Forward) * z;
         x = res.x; y = res.y; z = res.z;
     }
     m_RigidBody->setAngularVelocity(btVector3(x,y,z)); 
@@ -337,6 +340,22 @@ void ObjectDynamic::setMass(float mass){
         m_RigidBody->setMassProps(m_Mass,*(m_Collision->getInertia()));
     }
 }
+void ObjectDynamic::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
+    btQuaternion btQ = m_RigidBody->getOrientation();
+    glm::quat q = Engine::Math::btToGLMQuat(btQ);
+
+    m_RigidBody->getWorldTransform().setRotation(btQ);
+
+	Engine::Math::lookAtToQuat(q,eye,target,up);
+
+    btQ = Engine::Math::glmToBTQuat(q);
+    m_RigidBody->getWorldTransform().setRotation(btQ);
+
+    m_Forward = Engine::Math::getForward(m_RigidBody);
+    m_Right = Engine::Math::getRight(m_RigidBody);
+    m_Up = Engine::Math::getUp(m_RigidBody);
+}
+void ObjectDynamic::lookAt(Object* o){ ObjectDynamic::lookAt(getPosition(), o->getPosition(), o->getUp()); }
 void ObjectDynamic::alignTo(glm::v3 direction, float speed){
     ObjectDynamic::clearAngularForces();
     btQuaternion btQ = m_RigidBody->getOrientation();
@@ -440,8 +459,11 @@ bool ObjectDynamic::rayIntersectSphere(glm::v3 A, glm::vec3 rayVector){
     return Engine::Math::rayIntersectSphere(glm::vec3(getPosition()),getRadius(),A,rayVector);
 }
 glm::quat& ObjectDynamic::getOrientation(){
-    btQuaternion q = m_RigidBody->getOrientation();
-    return Engine::Math::btToGLMQuat(q);
+	btTransform t;
+	m_RigidBody->getMotionState()->getWorldTransform(t);
+	btQuaternion q = t.getRotation();
+	glm::quat _q(q.w(),q.x(),q.y(),q.z());
+	return glm::normalize(_q);
 }
 glm::vec3 ObjectDynamic::getScale(){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();

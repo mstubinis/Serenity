@@ -1,6 +1,6 @@
 #version 120
 
-uniform vec4 RaysInfo //exposure | decay | density | weight
+uniform vec4 RaysInfo; //exposure | decay | density | weight
 
 uniform vec2 lightPositionOnScreen;
 uniform sampler2D firstPass;

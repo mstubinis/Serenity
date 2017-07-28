@@ -11,27 +11,11 @@
 
 using namespace Engine;
 
-glm::quat Math::btToGLMQuat(btQuaternion& q){
-    glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ());
-    return glmQuat;
-}
-btQuaternion Math::glmToBTQuat(glm::quat& q){
-    btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w);
-    return btQuat; 
-}
-
-glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){
-    glm::vec3 ret = glm::vec3(n.x,n.y,n.z);
-    return ret;
-}
-glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4& n){
-    glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4);
-    return ret;
-}
-glm::mat3 Math::assimpToGLMMat3(aiMatrix3x3& n){
-    glm::mat3 ret = glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3);
-    return ret;
-}
+glm::quat Math::btToGLMQuat(btQuaternion& q){ glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ()); return glmQuat; }
+btQuaternion Math::glmToBTQuat(glm::quat& q){ btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w); return btQuat; }
+glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){ glm::vec3 ret = glm::vec3(n.x,n.y,n.z); return ret; }
+glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4& n){ glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4); return ret; }
+glm::mat3 Math::assimpToGLMMat3(aiMatrix3x3& n){ glm::mat3 ret = glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3); return ret; }
 
 float Math::toRadians(float degrees){ return degrees * 0.0174533f; }
 float Math::toDegrees(float radians){ return radians * 57.2958f; }
@@ -40,7 +24,7 @@ float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 
 bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians){
     // forced protection against NaN if vectors happen to be equal
-    point.x += 0.01f;
+    point.x += 0.0001f;
     //
     glm::v3 differenceVector = glm::normalize(point - conePos);
     glm::num t = glm::dot(coneVector,differenceVector);
@@ -48,7 +32,7 @@ bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,gl
 }
 bool Math::isPointWithinCone(const glm::v3& conePos,const glm::v3& coneVector,glm::v3& point,const float fovRadians,const glm::num maxDistance){
     // forced protection against NaN if vectors happen to be equal
-    point.x += 0.01f;
+    point.x += 0.0001f;
     //
     glm::v3 differenceVector = glm::normalize(point - conePos);
     glm::num t = glm::dot(coneVector,differenceVector);
@@ -98,8 +82,6 @@ float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
-
-
 float Math::pack3FloatsInto1(float x,float y,float z){
     //Scale and bias
     x = (x + 1.0f) * 0.5f;
@@ -126,7 +108,57 @@ glm::vec3 Math::unpackFloatInto3(float f){
     
     return glm::vec3(r,g,b);
 }
-
+void Math::lookAtToQuat(glm::quat& o,glm::v3& eye, glm::v3& target, glm::v3& up){
+    glm::v3 forward = eye - target;
+ 
+	glm::v3 vector = glm::normalize(forward);
+    glm::v3 vector2 = glm::normalize(glm::cross(vector,up));
+    glm::v3 vector3 = glm::cross(vector,vector2);
+    float m00 = vector2.x;
+    float m01 = vector2.y;
+    float m02 = vector2.z;
+    float m10 = vector3.x;
+    float m11 = vector3.y;
+    float m12 = vector3.z;
+    float m20 = vector.x;
+    float m21 = vector.y;
+    float m22 = vector.z;
+ 
+    double num8 = (m00 + m11) + m22;
+    if (num8 > 0.0f){
+        float num = (double)glm::sqrt(num8 + 1.0f);
+        o.w = num * 0.5f;
+        num = 0.5f / num;
+        o.x = (m12 - m21) * num;
+        o.y = (m20 - m02) * num;
+        o.z = (m01 - m10) * num;
+        return;
+    }
+    if ((m00 >= m11) && (m00 >= m22)){
+        float num7 = (double)glm::sqrt(((1.0f + m00) - m11) - m22);
+        float num4 = 0.5f / num7;
+        o.x = 0.5f * num7;
+        o.y = (m01 + m10) * num4;
+        o.z = (m02 + m20) * num4;
+        o.w = (m12 - m21) * num4;
+        return;
+    }
+    if (m11 > m22){
+        float num6 = (double)glm::sqrt(((1.0f + m11) - m00) - m22);
+        float num3 = 0.5f / num6;
+        o.x = (m10 + m01) * num3;
+        o.y = 0.5f * num6;
+        o.z = (m21 + m12) * num3;
+        o.w = (m20 - m02) * num3;
+        return;
+    }
+    float num5 = (double)glm::sqrt(((1.0f + m22) - m00) - m11);
+    float num2 = 0.5f / num5;
+    o.x = (m20 + m02) * num2;
+    o.y = (m21 + m12) * num2;
+    o.z = 0.5f * num5;
+    o.w = (m01 - m10) * num2;
+}
 
 glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
 glm::vec3 Math::midpoint(glm::v3& a, glm::v3& b){ return glm::vec3(float((a.x+b.x)/2),float((a.y+b.y)/2),float((a.z+b.z)/2)); }
@@ -147,7 +179,7 @@ glm::v3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
 
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
-    a.x += 0.01f;
+    a.x += 0.0001f;
     //
     float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
     if(degrees) angle *= 57.2958f;

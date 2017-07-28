@@ -70,6 +70,8 @@ class Object: public IObject{
 
         virtual glm::vec3 getScreenCoordinates();
 
+		virtual void lookAt(glm::v3,glm::v3,glm::v3){}
+		virtual void lookAt(Object*){}
         virtual void alignTo(glm::v3,float speed=0){}
         virtual void alignTo(Object*,float speed=0){}
         virtual void alignToX(Object*,float speed=0){}
@@ -132,6 +134,9 @@ class ObjectBasic: public Object{
         virtual glm::m4& getModel(){ return m_Model; }
         virtual glm::quat& getOrientation(){ return m_Orientation; }
         virtual void setOrientation(glm::quat);
+
+		virtual void lookAt(glm::v3,glm::v3,glm::v3);
+		virtual void lookAt(Object*);
 
         virtual void alignTo(glm::v3,float speed=0);
         virtual void alignTo(Object*,float speed=0);

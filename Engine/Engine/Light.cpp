@@ -56,7 +56,6 @@ void SunLight::sendGenericAttributesToShader(){
     Renderer::sendUniform4f("LightDataD",m_Color.x, m_Color.y, m_Color.z,float(m_Type));
 }
 void SunLight::lighten(){
-	/*
     if(!m_Active) return;
     sendGenericAttributesToShader();
     glm::vec3 pos = glm::vec3(getPosition());
@@ -65,7 +64,6 @@ void SunLight::lighten(){
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
 
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
-	*/
 }
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::v3(0),name,LightType::Directional,scene){
     alignTo(glm::v3(dir),0);
@@ -601,11 +599,12 @@ void PointLight::lighten(){
     Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Constant,m_Linear);
     Renderer::sendUniform4f("LightDataC", m_Exp,float(pos.x),float(pos.y),float(pos.z));
 
-    glm::mat4 m(1);
+    glm::mat4 m(1.0f);
     m = glm::translate(m,glm::vec3(pos));
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     Renderer::sendUniformMatrix4f("Model",m);
+	Renderer::sendUniformMatrix4f("VP",camera->getViewProjection());
 
     if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) <= m_PointLightRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
@@ -645,10 +644,10 @@ void SpotLight::lighten(){
     
     glm::mat4 m(1.0f);
     m = glm::translate(m,glm::vec3(pos));
-    //m *= glm::mat4_cast(m_Orientation);
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     Renderer::sendUniformMatrix4f("Model",m);
+	Renderer::sendUniformMatrix4f("VP",camera->getViewProjection());
 
     if(glm::distance(glm::vec3(camera->getPosition()),glm::vec3(pos)) <= m_PointLightRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);

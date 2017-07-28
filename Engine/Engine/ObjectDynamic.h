@@ -67,6 +67,9 @@ class ObjectDynamic: public Object{
         virtual void setColor(float,float,float,float);
         virtual void setColor(glm::vec4);
 
+        virtual void lookAt(glm::v3,glm::v3,glm::v3);
+        virtual void lookAt(Object*);
+
         virtual void alignTo(glm::v3,float speed=0);
         virtual void alignTo(Object*,float speed=0);
         virtual void alignToX(Object*,float speed=0);

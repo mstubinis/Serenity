@@ -34,15 +34,11 @@ Object::~Object()
 }
 glm::num Object::getDistance(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return (glm::abs(glm::length(vecTo))); }
 unsigned long long Object::getDistanceLL(Object* other){ glm::v3 vecTo = other->getPosition() - getPosition(); return unsigned long long(glm::abs(glm::length(vecTo))); }
-glm::vec3 Object::getScreenCoordinates(){
-    return Math::getScreenCoordinates(glm::vec3(getPosition()));
-}
+glm::vec3 Object::getScreenCoordinates(){ return Math::getScreenCoordinates(glm::vec3(getPosition())); }
 void Object::addChild(Object* child){
     child->m_Parent = this;
     m_Children.push_back(child);
 }
-
-
 ObjectBasic::ObjectBasic(glm::v3 pos,glm::vec3 scl,std::string name,Scene* scene,bool isNotCameras):Object(name,scene,isNotCameras){
     m_Forward = glm::v3(0,0,-1);
     m_Right = glm::v3(1,0,0);
@@ -85,21 +81,44 @@ void ObjectBasic::setOrientation(glm::quat q){
     m_Right = Engine::Math::getRight(m_Orientation);
     m_Up = Engine::Math::getUp(m_Orientation);
 }
-void ObjectBasic::alignTo(glm::v3 direction, float time){
-    Engine::Math::alignTo(m_Orientation,this,glm::vec3(direction),time);
+
+void ObjectBasic::lookAt(glm::v3 eye,glm::v3 target,glm::v3 up){
+	Engine::Math::lookAtToQuat(m_Orientation,eye,target,up);
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
+}
+void ObjectBasic::lookAt(Object* o){ ObjectBasic::lookAt(getPosition(), o->getPosition(), o->getUp()); }
+void ObjectBasic::alignTo(glm::v3 direction, float time){ 
+	Engine::Math::alignTo(m_Orientation,this,glm::vec3(direction),time);
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::alignTo(Object* other, float time){
     glm::vec3 direction = glm::vec3(getPosition() - other->getPosition());
     Engine::Math::alignTo(m_Orientation,this,direction,time);
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
 }
-void ObjectBasic::alignToX(Object* other, float time){
-    Engine::Math::alignToX(m_Orientation,this,other,time);
+void ObjectBasic::alignToX(Object* other, float time){ 
+	Engine::Math::alignToX(m_Orientation,this,other,time); 
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
 }
-void ObjectBasic::alignToY(Object* other, float time){
-    Engine::Math::alignToY(m_Orientation,this,other,time);
+void ObjectBasic::alignToY(Object* other, float time){ 
+	Engine::Math::alignToY(m_Orientation,this,other,time); 
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
 }
-void ObjectBasic::alignToZ(Object* other, float time){
-    Engine::Math::alignToZ(m_Orientation,this,other,time);
+void ObjectBasic::alignToZ(Object* other, float time){ 
+	Engine::Math::alignToZ(m_Orientation,this,other,time); 
+    m_Forward = Engine::Math::getForward(m_Orientation);
+    m_Right = Engine::Math::getRight(m_Orientation);
+    m_Up = Engine::Math::getUp(m_Orientation);
 }
 void ObjectBasic::rotate(float x, float y, float z, bool overTime){
     if(overTime){
@@ -121,9 +140,9 @@ void ObjectBasic::rotate(glm::vec3 rotation,bool overTime){ ObjectBasic::rotate(
 void ObjectBasic::translate(glm::num x, glm::num y, glm::num z,bool local){
     glm::v3 offset = glm::v3(0);
     if(local){
-        offset += getForward() * z;
-        offset += getRight() * x;
-        offset += getUp() * y;
+        offset += m_Forward * z;
+        offset += m_Right * x;
+        offset += m_Up * y;
     }
     else{
         offset += glm::v3(x,y,z);
@@ -133,14 +152,8 @@ void ObjectBasic::translate(glm::num x, glm::num y, glm::num z,bool local){
 void ObjectBasic::translate(glm::v3 translation,bool local){ ObjectBasic::translate(translation.x,translation.y,translation.z,local); }
 void ObjectBasic::scale(float x, float y, float z){
     float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
-    m_Scale.x += x * dt;
-    m_Scale.y += y * dt;
-    m_Scale.z += z * dt;
+    m_Scale.x += x * dt; m_Scale.y += y * dt; m_Scale.z += z * dt;
 }
 void ObjectBasic::scale(glm::vec3 scl){ ObjectBasic::scale(scl.x,scl.y,scl.z); }
-void ObjectBasic::setScale(float x, float y, float z){ 
-    m_Scale.x = x;
-    m_Scale.y = y;
-    m_Scale.z = z;
-}
+void ObjectBasic::setScale(float x, float y, float z){ m_Scale.x = x; m_Scale.y = y; m_Scale.z = z; }
 void ObjectBasic::setScale(glm::vec3 scale){ ObjectBasic::setScale(scale.x,scale.y,scale.z); }
