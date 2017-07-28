@@ -39,24 +39,35 @@ namespace glm{
     typedef glm::detail::tmat3x3<long double> m3_ld;
     typedef glm::detail::tmat4x4<long double> m4_ld;
 	
-	
     #ifdef ENGINE_PRECISION_NORMAL
         typedef float number;
         typedef float num;
-        typedef glm::detail::tvec3<float> v3;
-        typedef glm::detail::tmat4x4<float> m4;
+        typedef v2_f v2;
+        typedef v3_f v3;
+        typedef v4_f v4;
+        typedef m2_f m2;
+        typedef m3_f m3;
+        typedef m4_f m4;
     #endif
     #ifdef ENGINE_PRECISION_HIGH
         typedef double number;
         typedef double num;
-        typedef glm::detail::tvec3<double> v3;
-        typedef glm::detail::tmat4x4<double> m4;
+        typedef v2_d v2;	
+        typedef v3_d v3;
+        typedef v4_d v4;
+        typedef m2_d m2;
+        typedef m3_d m3;
+        typedef m4_d m4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
         typedef long double number;
         typedef long double num;
-        typedef glm::detail::tvec3<long double> v3;
-        typedef glm::detail::tmat4x4<long double> m4;
+        typedef v2_ld v2;
+        typedef v3_ld v3;
+        typedef v4_ld v4;
+        typedef m2_ld m2;
+        typedef m3_ld m3;
+        typedef m4_ld m4;
     #endif
 };
 
