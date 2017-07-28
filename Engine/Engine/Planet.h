@@ -64,7 +64,7 @@ class Planet: public ObjectDisplay{
                 std::string = "",               //Material
                 PlanetType = PLANET_TYPE_ROCKY, //Type
                 glm::v3 = glm::v3(0),           //Position
-                glm::num = 1,                 //Radius
+                glm::num = 1,                   //Radius
                 std::string = "Planet",         //Name
                 float = 0,                      //Atmosphere size
                 Scene* = nullptr
@@ -112,9 +112,9 @@ class Ring final{
     private:
         Material* material;
         Planet* m_Parent;
-        void _makeRingImage(std::vector<RingInfo>,Planet*);
+        void _makeRingImage(std::vector<RingInfo>&,Planet*);
     public:
-        Ring(std::vector<RingInfo>,Planet*);
+        Ring(std::vector<RingInfo>&,Planet*);
         ~Ring();
 
         void update(float);
