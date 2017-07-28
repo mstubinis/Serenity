@@ -15,59 +15,117 @@ class Object;
 typedef unsigned int uint;
 
 namespace glm{
+    //floats
     typedef glm::detail::tquat<float> q_f;	
     typedef glm::detail::tvec2<float> v2_f;
     typedef glm::detail::tvec3<float> v3_f;
     typedef glm::detail::tvec4<float> v4_f;
     typedef glm::detail::tmat2x2<float> m2_f;
+    typedef glm::detail::tmat2x2<float> m2x2_f;
+    typedef glm::detail::tmat2x3<float> m2x3_f;
+    typedef glm::detail::tmat2x4<float> m2x4_f;
     typedef glm::detail::tmat3x3<float> m3_f;
+    typedef glm::detail::tmat3x3<float> m3x3_f;
+    typedef glm::detail::tmat3x2<float> m3x2_f;
+    typedef glm::detail::tmat3x4<float> m3x4_f;
+    typedef glm::detail::tmat4x2<float> m4x2_f;
+    typedef glm::detail::tmat4x3<float> m4x3_f;
     typedef glm::detail::tmat4x4<float> m4_f;
-	
+    typedef glm::detail::tmat4x4<float> m4x4_f;
+    //doubles
     typedef glm::detail::tquat<double> q_d;
     typedef glm::detail::tvec2<double> v2_d;
     typedef glm::detail::tvec3<double> v3_d;
     typedef glm::detail::tvec4<double> v4_d;
     typedef glm::detail::tmat2x2<double> m2_d;
+    typedef glm::detail::tmat2x2<double> m2x2_d;
+    typedef glm::detail::tmat2x3<double> m2x3_d;
+    typedef glm::detail::tmat2x4<double> m2x4_d;
     typedef glm::detail::tmat3x3<double> m3_d;
+    typedef glm::detail::tmat3x3<double> m3x3_d;
+    typedef glm::detail::tmat3x2<double> m3x2_d;
+    typedef glm::detail::tmat3x4<double> m3x4_d;
+    typedef glm::detail::tmat4x2<double> m4x2_d;
+    typedef glm::detail::tmat4x3<double> m4x3_d;
     typedef glm::detail::tmat4x4<double> m4_d;
-	
+    typedef glm::detail::tmat4x4<double> m4x4_d;
+    //long doubles
     typedef glm::detail::tquat<long double> q_ld;
     typedef glm::detail::tvec2<long double> v2_ld;
     typedef glm::detail::tvec3<long double> v3_ld;
     typedef glm::detail::tvec4<long double> v4_ld;
     typedef glm::detail::tmat2x2<long double> m2_ld;
+    typedef glm::detail::tmat2x2<long double> m2x2_ld;
+    typedef glm::detail::tmat2x3<long double> m2x3_ld;
+    typedef glm::detail::tmat2x4<long double> m2x4_ld;
     typedef glm::detail::tmat3x3<long double> m3_ld;
+    typedef glm::detail::tmat3x3<long double> m3x3_ld;
+    typedef glm::detail::tmat3x2<long double> m3x2_ld;
+    typedef glm::detail::tmat3x4<long double> m3x4_ld;
+    typedef glm::detail::tmat4x2<long double> m4x2_ld;
+    typedef glm::detail::tmat4x3<long double> m4x3_ld;
     typedef glm::detail::tmat4x4<long double> m4_ld;
+    typedef glm::detail::tmat4x4<long double> m4x4_ld;
 	
     #ifdef ENGINE_PRECISION_NORMAL
         typedef float number;
-        typedef float num;
+        typedef number num;
+        typedef q_f q;	
         typedef v2_f v2;
         typedef v3_f v3;
         typedef v4_f v4;
         typedef m2_f m2;
+        typedef m2x2_f m2x2;
+        typedef m2x3_f m2x3;
+        typedef m2x4_f m2x4;
         typedef m3_f m3;
+        typedef m3x3_f m3x3;
+        typedef m3x2_f m3x2;
+        typedef m3x4_f m3x4;
+        typedef m4x2_f m4x2;
+        typedef m4x3_f m4x3;
         typedef m4_f m4;
+        typedef m4x4_f m4x4;
     #endif
     #ifdef ENGINE_PRECISION_HIGH
         typedef double number;
-        typedef double num;
-        typedef v2_d v2;	
+        typedef number num;
+        typedef q_d q;
+        typedef v2_d v2;
         typedef v3_d v3;
         typedef v4_d v4;
         typedef m2_d m2;
+        typedef m2x2_d m2x2;
+        typedef m2x3_d m2x3;
+        typedef m2x4_d m2x4;
         typedef m3_d m3;
+        typedef m3x3_d m3x3;
+        typedef m3x2_d m3x2;
+        typedef m3x4_d m3x4;
+        typedef m4x2_d m4x2;
+        typedef m4x3_d m4x3;
         typedef m4_d m4;
+        typedef m4x4_d m4x4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
         typedef long double number;
-        typedef long double num;
+        typedef number num;
+        typedef q_ld q;
         typedef v2_ld v2;
         typedef v3_ld v3;
         typedef v4_ld v4;
         typedef m2_ld m2;
+        typedef m2x2_ld m2x2;
+        typedef m2x3_ld m2x3;
+        typedef m2x4_ld m2x4;
         typedef m3_ld m3;
+        typedef m3x3_ld m3x3;
+        typedef m3x2_ld m3x2;
+        typedef m3x4_ld m3x4;
+        typedef m4x2_ld m4x2;
+        typedef m4x3_ld m4x3;
         typedef m4_ld m4;
+        typedef m4x4_ld m4x4;
     #endif
 };
 
