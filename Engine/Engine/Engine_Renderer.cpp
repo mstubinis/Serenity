@@ -455,8 +455,7 @@ void Detail::RenderManagement::_passLighting(){
     glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
     Renderer::sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::HDRInfo::hdr_gamma);
 
-    uint limit = (uint)MATERIAL_COUNT_LIMIT;
-    sendUniform4fv("materials[0]",Material::m_MaterialProperities,limit);
+	sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
     sendUniform4f("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
         (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);

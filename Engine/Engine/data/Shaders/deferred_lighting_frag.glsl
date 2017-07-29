@@ -41,20 +41,18 @@ float BeckmannDist(float theta, float _alpha, float pi){
     float b = (1.0 - cos2a) / (cos2a * _alpha);
     return exp(-b) / (pi * _alpha * (cos2a * cos2a));
 }
-vec3 SchlickFrensel(float f0, float theta){
-    float ret = f0 + (1.0-f0) * pow( 1.0 - theta, 5.0);
-    return vec3(ret);
+vec3 SchlickFrensel(vec3 f0, float theta){
+    vec3 ret = f0 + (vec3(1.0)-f0) * pow( 1.0 - theta, 5.0);
+    return ret;
 }
 vec3 CookTorr(vec3 frensel,float vdoth, float vdotn, float ldotn, float ndoth,float _alpha, float pi){
     float Beck = BeckmannDist(ndoth,_alpha,pi);
 
-    float a = (2.0 * (ndoth) * (vdotn)) / (vdoth);
-    float b = (2.0 * (ndoth) * (ldotn)) / (vdoth);
-    float G = min(1.0,min(a,b));
+    float a = (2.0 * ndoth * vdotn) / vdoth;
+    float b = (2.0 * ndoth * ldotn) / vdoth;
+    float G = min(1.0, min(a,b));
 
-    vec3 fin = (vec3(Beck) * frensel * vec3(G)) / (max((vec3(4.0) * vec3(vdotn) * vec3(ldotn)),vec3(0.0)) + vec3(0.0001));
-
-    return fin;
+    return vec3(Beck * frensel * G) / max(vec3(4.0 * vdotn * ldotn),vec3(0.0 + 0.0001));
 }
 vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float Glow = texture2D(gMiscMap,uv).r;
@@ -74,7 +72,11 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
 
     float kPi = 3.1415926535898;
     float smoothness = materials[index].g; //UNIFORM
+
     float F0 = materials[index].r; //UNIFORM
+	//vec3 f0 = mix(vec3(F0), DiffuseTexture, vec3(metallic));
+	vec3 f0 = mix(vec3(F0), DiffuseTexture, vec3(0.0));
+
     float roughness = 1.0 - smoothness;
     float alpha = roughness * roughness;
     
@@ -86,7 +88,7 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     float VdotH = max(0.0, dot(ViewDir,Half));
     
     if(materials[index].a == 0.0){//this is lambert
-        DiffuseColor = LightDataA.y * (NdotL * LightDataD.xyz) / kPi; //do we need to divide by PI? i know this is for energy conservation...
+        DiffuseColor = (NdotL * LightDataD.xyz);
     }
     else if(materials[index].a == 1.0){//this is oren-nayar
         float thetaR = acos(VdotN);
@@ -100,16 +102,22 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
     
         float gamma = dot(ViewDir - PxlNormal * VdotN, LightDir - PxlNormal * NdotL);
     
-        DiffuseColor = (LightDataD.xyz / kPi) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b))) * LightDataA.y;
-    
+        //DiffuseColor = (LightDataD.xyz / kPi) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b))) * LightDataA.y;
+		DiffuseColor = (LightDataD.xyz) * (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(a) * tan(b)));
     }
     else if(materials[index].a == 2.0){//this is ashikhmin-shirley
-
+	    float s = clamp(smoothness,0.01,0.76); //this lighting model has to have some form of roughness in it to look good. cant be 1.0
+	    //vec3 A = (28.0 * LightDataD.xyz * LightDataA.y) / vec3(23.0 * kPi);
+		vec3 A = (28.0 * LightDataD.xyz) / vec3(23.0);
+		float B = (1.0 - (s * LightDataA.z));
+		float C = (1.0 - pow((1.0 - (NdotL / 2.0)),5.0));
+		float D = (1.0 - pow((1.0 - (VdotN / 2.0)),5.0));
+		DiffuseColor = A * B * C * D;
     }
     else if(materials[index].a == 3.0){//this is minneart
-        DiffuseColor = kPi * LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
+        //DiffuseColor = kPi * LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
+		DiffuseColor = LightDataD.xyz * pow(VdotN*NdotL,smoothness) * NdotL; //some of these dont use kPi. but it looks nicer with it
     }
-
 
     if(materials[index].b == 0.0){ // this is blinn phong (non-physical)
         smoothness *= 32;
@@ -128,14 +136,14 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         float alphaSqr = alpha * alpha;
         float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;
         float D = alphaSqr / (kPi * denom * denom);
-        float Fresnel = SchlickFrensel(F0,LdotH);
+        f0 = SchlickFrensel(f0,LdotH);
         float k = 0.5 * alpha;
         float k2 = k * k;
-        SpecularFactor = max(0.0, (NdotL * D * Fresnel / (LdotH*LdotH*(1.0-k2)+k2)) );
+        SpecularFactor = max(0.0, (NdotL * D * f0.r / (LdotH*LdotH*(1.0-k2)+k2)) );
     }
     else if(materials[index].b == 3.0){ //this is Cook-Torrance (physical)
-        vec3 Frensel = SchlickFrensel(F0,VdotH);
-        vec3 res = CookTorr(Frensel,VdotH,VdotN,NdotL,NdotH,alpha,kPi);
+        f0 = SchlickFrensel(f0,VdotH);
+        vec3 res = CookTorr(f0,VdotH,VdotN,NdotL,NdotH,alpha,kPi);
         SpecularFactor = res.x;
     }
     else if(materials[index].b == 4.0){ //this is gaussian (physical)
@@ -147,42 +155,30 @@ vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){
         SpecularFactor = BeckmannDist(NdotH,alpha,kPi);
     }
     else if(materials[index].b == 6.0){ //this is ashikhmin-shirley (physical)
+	    //make these controllable uniforms
+	    const float Nu = 1000.0;
+		const float Nv = 1000.0;
 
-    }
-    else if(materials[index].b == 7.0){ //this is PBR (physical)
-        /*
-        vec3 f0 = mix(vec3(0.04), albedo, metallic);
-        vec3 Lo = vec3(0.0);
-        float attenuation = 1.0;  
-        if(LightDataD.w != 0 && LightDataD.w != 2){
-            float Distance = length(LightDir);
-            attenuation = 1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Distance) + (LightDataC.x * Distance * Distance)));
-        }
-        
-        DiffuseColor = LightDataD.xyz * attenuation; // calculate per-light radiance 
-
-        vec3 Frensel = SchlickFrensel(f0,vdoth);
-        vec3 kD = (vec3(1.0) - Frensel) * (1.0 - metallic);
-
-        vec3 n  = CookTorr(Frensel,VdotH,VdotN,LdotN,NdotH,alpha,kPi);
-        float d = (4.0 * VdotN * NdotL) + 0.0001; 
-        
-        Lo = (kD * albedo / vec3(kPi) + (n / vec3(d))) * DiffuseColor * NdotL; 
-
-        // move this to the hdr pass. over there, Lo will be the lighting buffer. (will have to pass ao and albedo buffers in)
-        //vec3 ambient = AmbientColor * albedo * ao; //should just ignore ambient for now
-        vec3 color = (albedo * ao) + Lo;
-        
-        //here he tone mapped and gammad, but prob can skip this to HDR pass
-        
-        return max( vec3(Glow)*Lo, Lo);
-        */
+		vec3 epsilon = vec3(1.0,0.0,0.0);
+		vec3 tangent = normalize(cross(PxlNormal,epsilon));
+		vec3 bitangent = normalize(cross(PxlNormal,tangent));
+		float hdotT = dot(Half,tangent);
+		float hDotB = dot(Half,bitangent);
+	    float A = sqrt( (Nu + 1.0) * (Nv + 1.0) );
+		float B = pow(NdotH,((Nu * hdotT * hdotT + Nv * hDotB * hDotB) / (1.0 - (NdotH * NdotH)) ));
+		float HdotL = max(0.0, dot(Half, LightDir));
+		float C = 8.0 * kPi * HdotL * max(NdotL,VdotN);
+		SpecularFactor = (A * B) / C;
     }
 
     SpecularColor = (LightDataD.xyz * LightDataA.z * SpecularFactor) * SpecularStrength;
 
-    TotalLight = AmbientColor + DiffuseColor + SpecularColor;
-    return max( vec3(Glow)*DiffuseTexture, TotalLight*DiffuseTexture);
+	vec3 kD = (vec3(1.0) - f0);
+	kD *= 1.0 - 0.0; //second 1.0 is metallic value
+
+	TotalLight = (AmbientColor * DiffuseTexture) + (kD * DiffuseTexture  / vec3(kPi) + SpecularColor) * (DiffuseColor * LightDataA.y);
+
+    return max( vec3(Glow)*DiffuseTexture,TotalLight);
 }
 vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);

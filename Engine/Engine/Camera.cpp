@@ -70,14 +70,15 @@ void Camera::setAspectRatio(float ratio){
 void Camera::lookAt(glm::vec3 target){ Camera::lookAt(getPosition(),target,getUp()); }
 void Camera::lookAt(glm::vec3 target,glm::vec3 up){ Camera::lookAt(getPosition(),target,up); }
 void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
-    setPosition(eye);
+	ObjectBasic::update(Resources::dt());
+    setPosition(eye); 
     m_View = glm::lookAt(eye,target,up);
     m_Orientation = glm::conjugate(glm::toQuat(m_View));
     m_Forward = -glm::normalize(eye-target);
     m_Up = glm::normalize(up);
     m_Right = glm::normalize(glm::cross(m_Forward,m_Up));
     _constructFrustrum();
-    ObjectBasic::update(Resources::dt());
+    
 }
 void Camera::lookAt(Object* target, bool targetUp){
     glm::vec3 u; if(!targetUp) u = getUp(); else u = target->getUp();

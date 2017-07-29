@@ -22,7 +22,6 @@ void main(void){
         lighting = diffuse;
     }
     else{
-        //lighting *= diffuse;
         if(HDRInfo.z == 1.0){
             lighting += (diffuse * bloom);
         }

@@ -2,8 +2,6 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
-#define MATERIAL_COUNT_LIMIT 255.0
-
 #include "BindableResource.h"
 #include <glm/glm.hpp>
 #include <unordered_map>
@@ -18,68 +16,67 @@ typedef char GLchar;
 
 class MaterialComponentType{
     public: enum Type{
-        DIFFUSE,
-        NORMAL,
-        GLOW,
-        SPECULAR,
-        REFLECTION,
-        REFRACTION,
+        Diffuse,
+        Normal,
+        Glow,
+        Specular,
+        Reflection,
+        Refraction,
 
         AO,
-        METALNESS,
-        ROUGHNESS,
+        Metalness,
+        Smoothness,
 
-        NUMBER
+        Number
     };
 };
 class MaterialComponentTextureSlot{
     public: enum Slot{
-        DIFFUSE,
-        NORMAL,
-        GLOW,
-        SPECULAR,
+        Diffuse,
+        Normal,
+        Glow,
+        Specular,
 
         AO,
-        METALNESS,
-        ROUGHNESS,
+        Metalness,
+        Smoothness,
 
-        REFLECTION_CUBEMAP,
-        REFLECTION_CUBEMAP_MAP,
+        Reflection_CUBEMAP,
+        Reflection_CUBEMAP_MAP,
 
-        REFRACTION_CUBEMAP,
-        REFRACTION_CUBEMAP_MAP,
+        Refraction_CUBEMAP,
+        Refraction_CUBEMAP_MAP,
     };
 };
 class DiffuseModel{
     public: enum Model{
-	LAMBERT,
-	OREN_NAYAR,
-	ASHIKHMIN_SHIRLEY,
-	MINNAERT
+        Lambert,
+        Oren_Nayar,
+		Ashikhmin_Shirley,
+        Minnaert
     };
 };
 class SpecularModel{
     public: enum Model{
-	BLINN_PHONG,
-	PHONG,
-	GXX,
-	COOK_TORRANCE,
-	GAUSSIAN,
-	BECKMANN,
-	ASHIKHMIN_SHIRLEY,
-	PBR
+        Blinn_Phong,
+        Phong,
+        GXX,
+        Cook_Torrance,
+        Guassian,
+        Beckmann,
+        Ashikhmin_Shirley
     };
 };
 
 
-static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::NUMBER] = {
+static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
     "DiffuseTexture",
     "NormalTexture",
     "GlowTexture",
     "SpecularTexture",
     "AOTexture",
     "MetalnessTexture",
-    "RoughnessTexture",
+    "SmoothnessTexture",
     "ReflectionTexture",
     "RefractionTexture"
 };
@@ -98,48 +95,6 @@ class MaterialComponent{
 
         Texture* texture() const { return m_Texture; }
         const MaterialComponentType::Type type() const { return static_cast<MaterialComponentType::Type>(m_ComponentType); }
-};
-class MaterialComponentAO: public MaterialComponent{
-    protected:
-        float m_AOBaseValue;
-    public:
-        MaterialComponentAO(Texture* texture,float aoBaseValue);
-        MaterialComponentAO(std::string& texture,float aoBaseValue);
-        ~MaterialComponentAO();
-
-        virtual void bind();
-        void unbind();
-        void setAOBaseValue(float);
-
-        const float aoBaseValue() const { return m_AOBaseValue; }
-};
-class MaterialComponentMetalness: public MaterialComponent{
-    protected:
-        float m_MetalnessBaseValue;
-    public:
-        MaterialComponentMetalness(Texture* texture,float metalnessBaseValue);
-        MaterialComponentMetalness(std::string& texture,float metalnessBaseValue);
-        ~MaterialComponentMetalness();
-
-        virtual void bind();
-        void unbind();
-        void setMetalnessBaseValue(float);
-
-        const float metalnessBaseValue() const { return m_MetalnessBaseValue; }
-};
-class MaterialComponentRoughness: public MaterialComponent{
-    protected:
-        float m_RoughnessBaseValue;
-    public:
-        MaterialComponentRoughness(Texture* texture,float roughnessBaseValue);
-        MaterialComponentRoughness(std::string& texture,float roughnessBaseValue);
-        ~MaterialComponentRoughness();
-
-        virtual void bind();
-        void unbind();
-        void setRoughnessBaseValue(float);
-
-        const float roughnessBaseValue() const { return m_RoughnessBaseValue; }
 };
 class MaterialComponentReflection: public MaterialComponent{
     protected:
@@ -224,8 +179,8 @@ class Material final: public BindableResource{
         void addComponentMetalness(Texture* texture,float baseValue = 1.0f);
         void addComponentMetalness(std::string& textureFile,float baseValue = 1.0f);
 
-        void addComponentRoughness(Texture* texture,float baseValue = 1.0f);
-        void addComponentRoughness(std::string& textureFile,float baseValue = 1.0f);
+        void addComponentSmoothness(Texture* texture,float baseValue = 1.0f);
+        void addComponentSmoothness(std::string& textureFile,float baseValue = 1.0f);
 
         void addComponentReflection(Texture* cubeMap,Texture* map,float mixFactor = 1.0f);
         void addComponentReflection(std::string cubeMapName,std::string mapFile,float mixFactor = 1.0f);
@@ -241,11 +196,15 @@ class Material final: public BindableResource{
         const bool shadeless() const;
         const float glow() const;
         const float smoothness() const;
+        const float metalness() const;
+        const float ao() const;
         
-        void setFrensel(float f);
-        void setShadeless(bool b);
-        void setGlow(float f);
-        void setSmoothness(float s);
+        void setFrensel(float);
+        void setShadeless(bool);
+        void setGlow(float);
+        void setSmoothness(float);
+        void setAO(float);
+        void setMetalness(float);
     
         const uint specularModel() const;
         void setSpecularModel(SpecularModel::Model m);

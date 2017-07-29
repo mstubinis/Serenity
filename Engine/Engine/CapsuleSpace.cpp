@@ -20,10 +20,10 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/float(100),scene);
-        m_Light->setAttenuation(0.1f,0.1f,0.1f);
+		m_Light->setAttenuation(LightRange::_65);
         m_Light->setColor(255,124,27,255);
-        m_Light->setDiffuseIntensity(0.8f);
-        m_Light->setSpecularIntensity(0.5f);
+        m_Light->setDiffuseIntensity(15.4f);
+        m_Light->setSpecularIntensity(15.0f);
     }
     setColor(255,235,206,255);
     this->m_Shadeless = true;
@@ -31,15 +31,15 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene
 CapsuleStar::~CapsuleStar(){}
 void CapsuleStar::update(float dt){
     glm::vec3 pos = getPosition();
-    translate(0,0,(-120 * 50 ) * dt);
+    translate(0,0,(120 * 50 ) * dt,false);
     if(pos.z >= 200 * 225){
         float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
         float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
         setPosition(x*50,y*50,-200*225);
     }
     if(m_Light != nullptr){
-        m_Light->setPosition(pos/float(75));
-        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() * 1.1f){
+        m_Light->setPosition(pos * 0.015f);
+        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() + 15.0f){
 			m_Light->deactivate();
 		}
         else{
@@ -80,6 +80,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 
     l->setColor(255,225,235,255);
     l->setSpecularIntensity(0.0f);
+	l->setDiffuseIntensity(3.0f);
 
     if(!Resources::getMaterial("CapsuleTunnel")){
         Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
@@ -150,9 +151,9 @@ void CapsuleSpace::update(float dt){
     float aRadius = m_TunnelA->getTunnelRadius();
     float bRadius = m_TunnelB->getTunnelRadius();
 
-    m_TunnelA->translate(0,0,(45 * aRadius) * dt);
-    m_TunnelB->translate(0,0,(18 * bRadius) * dt);
-    m_Ribbon->translate(0,0,(-15 * aRadius) * dt);
+    m_TunnelA->translate(0,0,(45 * aRadius) * dt,false);
+    m_TunnelB->translate(0,0,(18 * bRadius) * dt,false);
+    m_Ribbon->translate(0,0,(15 * aRadius) * dt,false);
 
     float tunnelARotRand = float(rand() % 4) + 14.0f;
     float tunnelBRotRand = float(rand() % 2) + 2;
@@ -172,7 +173,7 @@ void CapsuleSpace::update(float dt){
         m_Ribbon->setPosition(0,300,0);
     }
     getPlayer()->setPosition(0,0,0);
-    getPlayer()->setOrientation(glm::quat());
+    //getPlayer()->setOrientation(glm::quat());
 
     float x = glm::sin(m_Timer*2.0f)*0.035f;
     float y = glm::cos(m_Timer*2.0f)*0.035f;

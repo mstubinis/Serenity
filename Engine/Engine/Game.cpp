@@ -64,7 +64,7 @@ void Game::initLogic(){
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
 
-    Resources::Settings::enableDynamicMemory();
+    //Resources::Settings::enableDynamicMemory();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
@@ -93,10 +93,13 @@ void Game::update(float dt){
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Events::Keyboard::isKeyDownOnce("f6")){
-		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::LAMBERT);
+		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Lambert);
     }
     if(Events::Keyboard::isKeyDownOnce("f7")){
-		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::MINNAERT);
+		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Minnaert);
+    }
+    if(Events::Keyboard::isKeyDownOnce("f8")){
+		Resources::getMaterial("Defiant")->setSpecularModel(SpecularModel::Cook_Torrance);
     }
 
 	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());

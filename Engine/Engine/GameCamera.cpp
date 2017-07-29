@@ -34,8 +34,10 @@ void GameCamera::update(float dt){
 
             m_Model = glm::mat4(1);
             m_Model = glm::translate(m_Model,m_Target->getPosition() + ((m_Target->getForward()*glm::length(m_Target->getRadius())*2.0f)+ m_Target->getUp()*glm::length(m_Target->getRadius())*0.3f)*(1.0f + m_OrbitRadius));
+			m_Model *= glm::mat4_cast(m_Orientation);
+			m_Model = glm::translate(m_Model,glm::vec3(-0.00001f,-0.00001f,0.00001f)); //for some reason this is needed to remove lighting bugs...
 
-            lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*500.0f),m_Target->getUp());
+            lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*50.0f),m_Target->getUp());
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{

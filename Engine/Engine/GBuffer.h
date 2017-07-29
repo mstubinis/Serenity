@@ -19,9 +19,9 @@ const float GBUFFER_DIVISIBLES[] = {    //framebuffer pixel size = window size *
     1.0f  // depth
 };
 const int GBUFFER_TYPES[] = {
-    GL_RGB8,               // (diffuse.rgb)
-    GL_RGB16F,             // (normals.rgb)
-    GL_RGB8,               // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
+    GL_RGB8,              // (diffuse.rgb) (smoothness.a)
+    GL_RGB16F,            // (normals.rgb) (MaterialID.a)
+    GL_RGB8,               // Glow & SpecularMap(Greyscale) & Metalness THEN HDR
     GL_RGB16F,             // (lighting.rgb)
     GL_RGBA8,              // bloom, & ssao as alpha
     GL_RGB8,               // gods rays
@@ -29,9 +29,9 @@ const int GBUFFER_TYPES[] = {
     GL_DEPTH_COMPONENT16   // depth
 };
 const int GBUFFER_PIXEL_TYPES[] = {
-    GL_RGB,                // (diffuse.rgb)
-    GL_RGB,                // (normals.rgb)
-    GL_RGB,                // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
+    GL_RGB,               // (diffuse.rgb) (smoothness.a)
+    GL_RGB,               // (normals.rgb) (MaterialID.a)
+    GL_RGB,                // Glow & SpecularMap(Greyscale) & Metalness THEN HDR
     GL_RGB,                // (lighting.rgb)
     GL_RGBA,               // bloom, & ssao as alpha
     GL_RGB,                // gods rays
