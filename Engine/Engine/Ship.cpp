@@ -241,7 +241,6 @@ Ship::~Ship(){
 }
 void Ship::update(float dt){
     if(m_IsPlayer){
-
         #pragma region PlayerFlightControls
         if(m_IsWarping && m_WarpFactor > 0){
             float speed = (m_WarpFactor * 1.0f/0.46f)*2.0f;

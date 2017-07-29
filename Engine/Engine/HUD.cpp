@@ -116,7 +116,7 @@ void HUD::render(bool debug){
                            glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     else{
-        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())),
+        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) ,
                            glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
     }
     #pragma endregion

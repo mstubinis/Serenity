@@ -123,9 +123,9 @@ class ObjectDynamic: public Object{
 
         virtual glm::vec4 getColor(){ return m_Color; }
         virtual glm::vec3 getGodsRaysColor(){ return m_GodsRaysColor; }
-        virtual glm::vec3& getForward(){ return m_Forward; }
-        virtual glm::vec3& getRight(){ return m_Right; }
-        virtual glm::vec3& getUp(){ return m_Up; }
+        virtual glm::vec3 getForward();
+        virtual glm::vec3 getRight();
+        virtual glm::vec3 getUp();
         virtual glm::vec3 getPosition();
         virtual float getMass(){ return m_Mass; }
         virtual btRigidBody* getRigidBody(){ return m_RigidBody; }

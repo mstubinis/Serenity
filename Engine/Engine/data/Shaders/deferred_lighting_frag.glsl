@@ -196,7 +196,7 @@ vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
 vec3 CalcSpotLight(vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
     vec3 c = CalcPointLight(LightPos, PxlWorldPos, PxlNormal, uv);
-    float cosAngle = dot(LightDir, SpotLightDir);
+    float cosAngle = dot(LightDir, -SpotLightDir);
     float spotEffect = smoothstep(LightDataE.y, LightDataE.x, cosAngle);   
     return c * spotEffect;
 }

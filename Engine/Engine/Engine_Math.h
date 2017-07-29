@@ -10,9 +10,11 @@
 
 #include <assimp/Importer.hpp>
 
+class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Object;
+class ObjectDynamic;
 typedef unsigned int uint;
 
 namespace glm{
@@ -150,6 +152,8 @@ namespace Engine{
 
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 	    
+		void translate(ObjectDynamic*,btVector3&,bool local);
+
         float pack3FloatsInto1(float,float,float);
         float pack3FloatsInto1(glm::vec3&);
         glm::vec3 unpackFloatInto3(float);

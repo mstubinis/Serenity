@@ -41,9 +41,9 @@ class IObject: public BindableResource{
         virtual glm::quat& getOrientation() = 0;
         virtual glm::vec3 getPosition() = 0;
         virtual glm::vec3 getScale() = 0;
-        virtual glm::vec3& getForward() = 0;
-        virtual glm::vec3& getRight() = 0;
-        virtual glm::vec3& getUp() = 0;
+        virtual glm::vec3 getForward() = 0;
+        virtual glm::vec3 getRight() = 0;
+        virtual glm::vec3 getUp() = 0;
         virtual glm::mat4& getModel() = 0;
 };
 
@@ -131,9 +131,9 @@ class ObjectBasic: public Object{
 
         virtual void update(float);
 
-        virtual glm::vec3& getForward(){ return m_Forward; }
-        virtual glm::vec3& getRight(){ return m_Right; }
-        virtual glm::vec3& getUp(){ return m_Up; }
+        virtual glm::vec3 getForward();
+        virtual glm::vec3 getRight();
+        virtual glm::vec3 getUp();
         virtual glm::vec3 getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
         virtual glm::vec3 getScale(){ return m_Scale; }
         virtual glm::mat4& getModel(){ return m_Model; }

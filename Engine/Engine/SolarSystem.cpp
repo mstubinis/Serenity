@@ -257,8 +257,6 @@ void SolarSystem::_loadFromFile(std::string filename){
 
     new Ship("Starbase","Starbase",false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
-    new ObjectDisplay("Miranda","Miranda",glm::vec3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject",nullptr);
-
     player->translate(0,0,11);
 
 	SpotLight* spot = new SpotLight("SpotLightPlayer");

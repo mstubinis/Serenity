@@ -76,6 +76,7 @@ void Game::initLogic(){
     m_HUD = new HUD();
 
     Renderer::Settings::HDR::disable();
+
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -97,6 +98,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f7")){
 		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::MINNAERT);
     }
+
 	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());
 	Resources::getObject("SpotLightPlayer")->setOrientation(Resources::getObject("Player")->getOrientation());
 

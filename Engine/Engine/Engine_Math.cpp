@@ -1,6 +1,7 @@
 #include "Engine_Math.h"
 #include "Engine_Resources.h"
 #include "Camera.h"
+#include "ObjectDynamic.h"
 
 #include <math.h>
 #include <glm/gtx/transform.hpp>
@@ -108,7 +109,14 @@ glm::vec3 Math::unpackFloatInto3(float f){
     
     return glm::vec3(r,g,b);
 }
-
+void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
+    if(local){
+		btTransform t;
+		btQuaternion q = obj->getRigidBody()->getWorldTransform().getRotation();
+		q = q.normalize();
+		vec = vec.rotate(q.getAxis(),q.getAngle());
+    }
+}
 void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up){
     glm::vec3 forward = eye - target;
  
@@ -163,14 +171,14 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
 
 glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
 glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normalize(eye-target); }
-glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(glm::vec3(2*(q.x*q.z+q.w*q.y),2*(q.y*q.x-q.w*q.x),1-2*(q.x*q.x+q.y*q.y)));}
-glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(glm::vec3(1-2*(q.y*q.y+q.z*q.z),2*(q.x*q.y+q.w*q.z),2*(q.x*q.z-q.w*q.y)));}
-glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(glm::vec3(2*(q.x*q.y-q.w*q.z),1-2*(q.x*q.x+q.z*q.z),2*(q.y*q.z+q.w*q.x)));}
+glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(q * glm::vec3(0,0,-1));}
+glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(q * glm::vec3(1,0,0));}
+glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(q * glm::vec3(0,1,0));}
 glm::vec3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
     btTransform t;
     b->getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
-    return glm::vec3(v.x(),v.y(),v.z());
+	return glm::normalize(glm::vec3(v.x(),v.y(),v.z()));
 }
 glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
 glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
