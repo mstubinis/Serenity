@@ -17,6 +17,16 @@ using namespace Engine;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
+
+void Material::setAllDiffuseModels(DiffuseModel::Model m){
+	for(auto material:Resources::Detail::ResourceManagement::m_Materials)
+		material.second->setDiffuseModel(m);
+}
+void Material::setAllSpecularModels(SpecularModel::Model m){
+	for(auto material:Resources::Detail::ResourceManagement::m_Materials)
+		material.second->setSpecularModel(m);
+}
+
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0);
@@ -192,13 +202,13 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-			m_SpecularModel = SpecularModel::Model::Cook_Torrance;
+			m_SpecularModel = SpecularModel::Model::Blinn_Phong;
 			m_DiffuseModel = DiffuseModel::Model::Lambert;
 
             m_Frensel = 0.04f;
-            m_BaseSmoothness = 0.999f;
+            m_BaseSmoothness = 0.95f;
 			m_BaseAO = 1.0f;
-			m_BaseMetalness = 0.999f;
+			m_BaseMetalness = 0.95f;
 
             _addToMaterialPool();
 

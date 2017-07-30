@@ -22,8 +22,6 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene
         m_Light = new PointLight(name + " Light",pos/float(100),scene);
 		m_Light->setAttenuation(LightRange::_65);
         m_Light->setColor(255,124,27,255);
-        m_Light->setDiffuseIntensity(15.4f);
-        m_Light->setSpecularIntensity(15.0f);
     }
     setColor(255,235,206,255);
     this->m_Shadeless = true;
@@ -80,7 +78,6 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 
     l->setColor(255,225,235,255);
     l->setSpecularIntensity(0.0f);
-	l->setDiffuseIntensity(3.0f);
 
     if(!Resources::getMaterial("CapsuleTunnel")){
         Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
@@ -173,7 +170,6 @@ void CapsuleSpace::update(float dt){
         m_Ribbon->setPosition(0,300,0);
     }
     getPlayer()->setPosition(0,0,0);
-    //getPlayer()->setOrientation(glm::quat());
 
     float x = glm::sin(m_Timer*2.0f)*0.035f;
     float y = glm::cos(m_Timer*2.0f)*0.035f;

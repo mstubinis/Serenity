@@ -143,6 +143,8 @@ class MaterialMeshEntry{
 
 class Material final: public BindableResource{
     public: 
+		static void setAllDiffuseModels(DiffuseModel::Model);
+		static void setAllSpecularModels(SpecularModel::Model);
         static std::vector<glm::vec4> m_MaterialProperities;
         static std::unordered_map<uint,std::vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP;
     private:

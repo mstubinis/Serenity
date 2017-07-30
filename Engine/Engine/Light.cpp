@@ -39,7 +39,7 @@ SunLight::SunLight(glm::vec3 pos,std::string n,unsigned int type,Scene* scene):O
     m_Type = type;
     m_Active = true;
     m_AmbientIntensity = 0.005f;
-    m_DiffuseIntensity = 1.0f;
+    m_DiffuseIntensity = 2.0f;
     m_SpecularIntensity = 1.0f;
 
     if(scene == nullptr){

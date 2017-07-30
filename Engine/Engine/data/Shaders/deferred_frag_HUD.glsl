@@ -12,7 +12,7 @@ void main(void){
     if(DiffuseTextureEnabled == 1){
         gl_FragData[0] *= texture2D(DiffuseTexture, UV);
     }
-    gl_FragData[1] = vec4(1.0);
+    gl_FragData[1].rgb = vec3(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
 }

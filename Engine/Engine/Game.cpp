@@ -92,14 +92,24 @@ void Game::update(float dt){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f6")){
-		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Lambert);
+    if(Events::Keyboard::isKeyDownOnce("f6")){ Material::setAllDiffuseModels(DiffuseModel::Lambert); }
+    if(Events::Keyboard::isKeyDownOnce("f7")){ Material::setAllDiffuseModels(DiffuseModel::Oren_Nayar); }
+    if(Events::Keyboard::isKeyDownOnce("f8")){ Material::setAllDiffuseModels(DiffuseModel::Minnaert); }
+    if(Events::Keyboard::isKeyDownOnce("f9")){ Material::setAllDiffuseModels(DiffuseModel::Ashikhmin_Shirley); }
+    if(Events::Keyboard::isKeyDownOnce("f10")){ Material::setAllSpecularModels(SpecularModel::Phong); }
+    if(Events::Keyboard::isKeyDownOnce("f11")){ Material::setAllSpecularModels(SpecularModel::Blinn_Phong); }
+    if(Events::Keyboard::isKeyDownOnce("f12")){ Material::setAllSpecularModels(SpecularModel::Cook_Torrance); }
+    if(Events::Keyboard::isKeyDown("n")){
+		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
     }
-    if(Events::Keyboard::isKeyDownOnce("f7")){
-		Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Minnaert);
+    else if(Events::Keyboard::isKeyDown("m")){
+		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.07f);
     }
-    if(Events::Keyboard::isKeyDownOnce("f8")){
-		Resources::getMaterial("Defiant")->setSpecularModel(SpecularModel::Cook_Torrance);
+    if(Events::Keyboard::isKeyDown("v")){
+		Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.07f);
+    }
+    else if(Events::Keyboard::isKeyDown("b")){
+		Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.07f);
     }
 
 	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());

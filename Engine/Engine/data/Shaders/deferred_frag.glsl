@@ -7,10 +7,10 @@ uniform sampler2D SpecularTexture;
 
 uniform sampler2D AOTexture;
 uniform sampler2D MetalnessTexture;
-uniform sampler2D RoughnessTexture;
-uniform float AOBaseValue;
-uniform float MetalnessBaseValue;
-uniform float RoughnessBaseValue;
+uniform sampler2D SmoothnessTexture;
+uniform float BaseAO;
+uniform float BaseMetalness;
+uniform float BaseSmoothness;
 
 uniform samplerCube ReflectionTexture;
 uniform sampler2D   ReflectionTextureMap;
@@ -29,7 +29,7 @@ uniform int HasGodsRays;
 
 uniform vec3 FirstConditionals;  //x = diffuse  y = normals    z = glow
 uniform vec3 SecondConditionals; //x = specular y = reflection z = refraction
-uniform vec3 ThirdConditionals; //x = ao y = metalness z = roughness
+uniform vec3 ThirdConditionals; //x = ao y = metalness z = smoothness
 
 uniform vec4 Object_Color;
 uniform vec3 Gods_Rays_Color;
@@ -78,6 +78,8 @@ void main(void){
     gl_FragData[1].rgb = normalize(Normals);
     gl_FragData[2].r = BaseGlow;
     gl_FragData[2].g = 1.0;
+	gl_FragData[2].b = BaseMetalness;
+	gl_FragData[1].a = matID;
 
     if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }
     if(FirstConditionals.y > 0.5){ gl_FragData[1].rgb = CalcBumpedNormal(); }
@@ -89,6 +91,9 @@ void main(void){
     if(SecondConditionals.z > 0.5){
         gl_FragData[0] = Refraction(gl_FragData[0],CameraPosition,gl_FragData[1].rgb,WorldPosition);
     }
+	if(ThirdConditionals.z > 0.5){
+	    gl_FragData[2].b = BaseSmoothness * texture2D(MetalnessTexture, UV).r;
+	}
     
     if(Shadeless == 0){
         if(FirstConditionals.z > 0.5){ 
@@ -101,10 +106,6 @@ void main(void){
     else{ 
         gl_FragData[1].rgb = vec3(1.0); 
     }
-
-    gl_FragData[1].a = Object_Color.a;
-    gl_FragData[2].b = matID;
-    
 
     if(HasGodsRays == 1){
         gl_FragData[3] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;
