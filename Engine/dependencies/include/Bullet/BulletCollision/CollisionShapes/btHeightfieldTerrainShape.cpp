@@ -59,15 +59,13 @@ PHY_ScalarType hdt, bool flipQuadEdges
 )
 {
 	// validation
-	btAssert(heightStickWidth > 1 && "bad width");
-	btAssert(heightStickLength > 1 && "bad length");
-	btAssert(heightfieldData && "null heightfield data");
+	btAssert(heightStickWidth > 1);// && "bad width");
+	btAssert(heightStickLength > 1);// && "bad length");
+	btAssert(heightfieldData);// && "null heightfield data");
 	// btAssert(heightScale) -- do we care?  Trust caller here
-	btAssert(minHeight <= maxHeight && "bad min/max height");
-	btAssert(upAxis >= 0 && upAxis < 3 &&
-	    "bad upAxis--should be in range [0,2]");
-	btAssert(hdt != PHY_UCHAR || hdt != PHY_FLOAT || hdt != PHY_SHORT &&
-	    "Bad height data type enum");
+	btAssert(minHeight <= maxHeight);// && "bad min/max height");
+	btAssert(upAxis >= 0 && upAxis < 3);// && "bad upAxis--should be in range [0,2]");
+	btAssert(hdt != PHY_UCHAR || hdt != PHY_FLOAT || hdt != PHY_SHORT);// && "Bad height data type enum");
 
 	// initialize member variables
 	m_shapeType = TERRAIN_SHAPE_PROXYTYPE;
@@ -110,7 +108,7 @@ PHY_ScalarType hdt, bool flipQuadEdges
 	default:
 		{
 			//need to get valid m_upAxis
-			btAssert(0 && "Bad m_upAxis");
+			btAssert(0);// && "Bad m_upAxis");
 		}
 	}
 
@@ -233,15 +231,62 @@ void	btHeightfieldTerrainShape::getVertex(int x,int y,btVector3& vertex) const
 
 	vertex*=m_localScaling;
 }
-
-
-
-static inline int
-getQuantized
-(
-btScalar x
-)
+int btHeightfieldTerrainShape::getHeightStickWidth(){
+	return m_heightStickWidth;
+}
+int btHeightfieldTerrainShape::getHeightStickLength(){
+	return m_heightStickLength;
+}
+void	btHeightfieldTerrainShape::getVertex1(int x,int y,btVector3& vertex) const
 {
+	btAssert(x>=0);
+	btAssert(y>=0);
+	btAssert(x<m_heightStickWidth);
+	btAssert(y<m_heightStickLength);
+
+	btScalar	height = getRawHeightFieldValue(x,y);
+
+	switch (m_upAxis)
+	{
+	case 0:
+		{
+		vertex.setValue(
+			height - m_localOrigin.getX(),
+			(-m_width/btScalar(2.0)) + x,
+			(-m_length/btScalar(2.0) ) + y
+			);
+			break;
+		}
+	case 1:
+		{
+			vertex.setValue(
+			(-m_width/btScalar(2.0)) + x,
+			height - m_localOrigin.getY(),
+			(-m_length/btScalar(2.0)) + y
+			);
+			break;
+		};
+	case 2:
+		{
+			vertex.setValue(
+			(-m_width/btScalar(2.0)) + x,
+			(-m_length/btScalar(2.0)) + y,
+			height - m_localOrigin.getZ()
+			);
+			break;
+		}
+	default:
+		{
+			//need to get valid m_upAxis
+			btAssert(0);
+		}
+	}
+
+	vertex*=m_localScaling;
+}
+
+
+static inline int getQuantized(btScalar x){
 	if (x < 0.0) {
 		return (int) (x - 0.5);
 	}
@@ -365,14 +410,15 @@ void	btHeightfieldTerrainShape::processAllTriangles(btTriangleCallback* callback
 			{
         //first triangle
         getVertex(x,j,vertices[0]);
-        getVertex(x+1,j,vertices[1]);
-        getVertex(x+1,j+1,vertices[2]);
+		getVertex(x, j + 1, vertices[1]);
+		getVertex(x + 1, j + 1, vertices[2]);
         callback->processTriangle(vertices,x,j);
         //second triangle
       //  getVertex(x,j,vertices[0]);//already got this vertex before, thanks to Danny Chapman
         getVertex(x+1,j+1,vertices[1]);
-        getVertex(x,j+1,vertices[2]);
-        callback->processTriangle(vertices,x,j);				
+		getVertex(x + 1, j, vertices[2]);
+		callback->processTriangle(vertices, x, j);
+
 			} else
 			{
         //first triangle

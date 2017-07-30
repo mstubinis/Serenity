@@ -74,7 +74,7 @@ protected:
 	btVector3	m_localAabbMin;
 	btVector3	m_localAabbMax;
 	btVector3	m_localOrigin;
-	
+
 	///terrain data
 	int	m_heightStickWidth;
 	int m_heightStickLength;
@@ -102,8 +102,9 @@ protected:
 
 	virtual btScalar	getRawHeightFieldValue(int x,int y) const;
 	void		quantizeWithClamp(int* out, const btVector3& point,int isMax) const;
-
 	void		getVertex(int x,int y,btVector3& vertex) const;
+
+
 
 	/// protected initialization
 	/**
@@ -140,12 +141,12 @@ public:
  	 */
 	btHeightfieldTerrainShape(int heightStickWidth,int heightStickLength,const void* heightfieldData, btScalar maxHeight,int upAxis,bool useFloatData,bool flipQuadEdges);
 
-	void	getVertex1(int x,int y,btVector3& vertex){ getVertex(x,y,vertex); }
-	int     getHeightStickWidth(){ return m_heightStickWidth; }
-	int     getHeightStickLength(){ return m_heightStickLength; }
-	
 	virtual ~btHeightfieldTerrainShape();
+
+	int getHeightStickWidth();
+	int getHeightStickLength();
 	
+	void getVertex1(int x,int y,btVector3& vertex) const;
 	void setUseDiamondSubdivision(bool useDiamondSubdivision=true) { m_useDiamondSubdivision = useDiamondSubdivision;}
 
 	///could help compatibility with Ogre heightfields. See https://code.google.com/p/bullet/issues/detail?id=625	

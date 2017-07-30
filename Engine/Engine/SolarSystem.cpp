@@ -119,7 +119,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                     }
 
                 }
-                float randAngle = rand() % 3600;
+                float randAngle = float(rand() % 3600);
                 randAngle /= 10;
                 randAngle *= 3.14159 / 180.0;
                 float xPos = glm::cos(randAngle) * static_cast<float>(POSITION);

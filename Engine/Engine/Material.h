@@ -5,6 +5,8 @@
 #include "BindableResource.h"
 #include <unordered_map>
 
+#include <glm/vec4.hpp>
+
 class MeshInstance;
 class Texture;
 class ShaderP;
