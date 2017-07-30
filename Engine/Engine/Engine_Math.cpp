@@ -4,9 +4,12 @@
 #include "ObjectDynamic.h"
 
 #include <math.h>
-#include <glm/gtx/transform.hpp>
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
@@ -135,7 +138,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
  
     double num8 = (m00 + m11) + m22;
     if (num8 > 0.0f){
-        float num = (double)glm::sqrt(num8 + 1.0f);
+        float num = (double)glm::sqrt(num8 + 1.0);
         o.w = num * 0.5f;
         num = 0.5f / num;
         o.x = (m12 - m21) * num;
@@ -144,7 +147,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if ((m00 >= m11) && (m00 >= m22)){
-        float num7 = (double)glm::sqrt(((1.0f + m00) - m11) - m22);
+        float num7 = (double)glm::sqrt(((1.0 + m00) - m11) - m22);
         float num4 = 0.5f / num7;
         o.x = 0.5f * num7;
         o.y = (m01 + m10) * num4;
@@ -153,7 +156,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if (m11 > m22){
-        float num6 = (double)glm::sqrt(((1.0f + m11) - m00) - m22);
+        float num6 = (double)glm::sqrt(((1.0 + m11) - m00) - m22);
         float num3 = 0.5f / num6;
         o.x = (m10 + m01) * num3;
         o.y = 0.5f * num6;
@@ -161,7 +164,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         o.w = (m20 - m02) * num3;
         return;
     }
-    float num5 = (double)glm::sqrt(((1.0f + m22) - m00) - m11);
+    float num5 = (double)glm::sqrt(((1.0 + m22) - m00) - m11);
     float num2 = 0.5f / num5;
     o.x = (m20 + m02) * num2;
     o.y = (m21 + m12) * num2;

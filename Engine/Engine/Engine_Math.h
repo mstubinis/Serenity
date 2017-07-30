@@ -2,10 +2,9 @@
 #ifndef ENGINE_ENGINE_MATH_H
 #define ENGINE_ENGINE_MATH_H
 
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/type_precision.hpp>
-#include <glm/gtx/quaternion.hpp>
+
 #include <vector>
 
 #include <assimp/Importer.hpp>
@@ -19,56 +18,56 @@ typedef unsigned int uint;
 
 namespace glm{
     //floats
-    typedef glm::detail::tquat<float> q_f;	
-    typedef glm::detail::tvec2<float> v2_f;
-    typedef glm::detail::tvec3<float> v3_f;
-    typedef glm::detail::tvec4<float> v4_f;
-    typedef glm::detail::tmat2x2<float> m2_f;
-    typedef glm::detail::tmat2x2<float> m2x2_f;
-    typedef glm::detail::tmat2x3<float> m2x3_f;
-    typedef glm::detail::tmat2x4<float> m2x4_f;
-    typedef glm::detail::tmat3x3<float> m3_f;
-    typedef glm::detail::tmat3x3<float> m3x3_f;
-    typedef glm::detail::tmat3x2<float> m3x2_f;
-    typedef glm::detail::tmat3x4<float> m3x4_f;
-    typedef glm::detail::tmat4x2<float> m4x2_f;
-    typedef glm::detail::tmat4x3<float> m4x3_f;
-    typedef glm::detail::tmat4x4<float> m4_f;
-    typedef glm::detail::tmat4x4<float> m4x4_f;
+    typedef glm::tquat<float> q_f;	
+    typedef glm::tvec2<float> v2_f;
+    typedef glm::tvec3<float> v3_f;
+    typedef glm::tvec4<float> v4_f;
+    typedef glm::tmat2x2<float> m2_f;
+    typedef glm::tmat2x2<float> m2x2_f;
+    typedef glm::tmat2x3<float> m2x3_f;
+    typedef glm::tmat2x4<float> m2x4_f;
+    typedef glm::tmat3x3<float> m3_f;
+    typedef glm::tmat3x3<float> m3x3_f;
+    typedef glm::tmat3x2<float> m3x2_f;
+    typedef glm::tmat3x4<float> m3x4_f;
+    typedef glm::tmat4x2<float> m4x2_f;
+    typedef glm::tmat4x3<float> m4x3_f;
+    typedef glm::tmat4x4<float> m4_f;
+    typedef glm::tmat4x4<float> m4x4_f;
     //doubles
-    typedef glm::detail::tquat<double> q_d;
-    typedef glm::detail::tvec2<double> v2_d;
-    typedef glm::detail::tvec3<double> v3_d;
-    typedef glm::detail::tvec4<double> v4_d;
-    typedef glm::detail::tmat2x2<double> m2_d;
-    typedef glm::detail::tmat2x2<double> m2x2_d;
-    typedef glm::detail::tmat2x3<double> m2x3_d;
-    typedef glm::detail::tmat2x4<double> m2x4_d;
-    typedef glm::detail::tmat3x3<double> m3_d;
-    typedef glm::detail::tmat3x3<double> m3x3_d;
-    typedef glm::detail::tmat3x2<double> m3x2_d;
-    typedef glm::detail::tmat3x4<double> m3x4_d;
-    typedef glm::detail::tmat4x2<double> m4x2_d;
-    typedef glm::detail::tmat4x3<double> m4x3_d;
-    typedef glm::detail::tmat4x4<double> m4_d;
-    typedef glm::detail::tmat4x4<double> m4x4_d;
+    typedef glm::tquat<double> q_d;
+    typedef glm::tvec2<double> v2_d;
+    typedef glm::tvec3<double> v3_d;
+    typedef glm::tvec4<double> v4_d;
+    typedef glm::tmat2x2<double> m2_d;
+    typedef glm::tmat2x2<double> m2x2_d;
+    typedef glm::tmat2x3<double> m2x3_d;
+    typedef glm::tmat2x4<double> m2x4_d;
+    typedef glm::tmat3x3<double> m3_d;
+    typedef glm::tmat3x3<double> m3x3_d;
+    typedef glm::tmat3x2<double> m3x2_d;
+    typedef glm::tmat3x4<double> m3x4_d;
+    typedef glm::tmat4x2<double> m4x2_d;
+    typedef glm::tmat4x3<double> m4x3_d;
+    typedef glm::tmat4x4<double> m4_d;
+    typedef glm::tmat4x4<double> m4x4_d;
     //long doubles
-    typedef glm::detail::tquat<long double> q_ld;
-    typedef glm::detail::tvec2<long double> v2_ld;
-    typedef glm::detail::tvec3<long double> v3_ld;
-    typedef glm::detail::tvec4<long double> v4_ld;
-    typedef glm::detail::tmat2x2<long double> m2_ld;
-    typedef glm::detail::tmat2x2<long double> m2x2_ld;
-    typedef glm::detail::tmat2x3<long double> m2x3_ld;
-    typedef glm::detail::tmat2x4<long double> m2x4_ld;
-    typedef glm::detail::tmat3x3<long double> m3_ld;
-    typedef glm::detail::tmat3x3<long double> m3x3_ld;
-    typedef glm::detail::tmat3x2<long double> m3x2_ld;
-    typedef glm::detail::tmat3x4<long double> m3x4_ld;
-    typedef glm::detail::tmat4x2<long double> m4x2_ld;
-    typedef glm::detail::tmat4x3<long double> m4x3_ld;
-    typedef glm::detail::tmat4x4<long double> m4_ld;
-    typedef glm::detail::tmat4x4<long double> m4x4_ld;
+    typedef glm::tquat<long double> q_ld;
+    typedef glm::tvec2<long double> v2_ld;
+    typedef glm::tvec3<long double> v3_ld;
+    typedef glm::tvec4<long double> v4_ld;
+    typedef glm::tmat2x2<long double> m2_ld;
+    typedef glm::tmat2x2<long double> m2x2_ld;
+    typedef glm::tmat2x3<long double> m2x3_ld;
+    typedef glm::tmat2x4<long double> m2x4_ld;
+    typedef glm::tmat3x3<long double> m3_ld;
+    typedef glm::tmat3x3<long double> m3x3_ld;
+    typedef glm::tmat3x2<long double> m3x2_ld;
+    typedef glm::tmat3x4<long double> m3x4_ld;
+    typedef glm::tmat4x2<long double> m4x2_ld;
+    typedef glm::tmat4x3<long double> m4x3_ld;
+    typedef glm::tmat4x4<long double> m4_ld;
+    typedef glm::tmat4x4<long double> m4x4_ld;
 	
     #ifdef ENGINE_PRECISION_NORMAL
         typedef float number;

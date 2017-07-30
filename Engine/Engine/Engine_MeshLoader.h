@@ -6,7 +6,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
-#include <glm/glm.hpp>
+#include "Engine_Math.h"
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -34,7 +34,7 @@ struct Vertex final{
     glm::vec3 normal;
     glm::vec3 tangent;
     glm::vec3 binormal;
-    void clear(){ position = normal = binormal = tangent = glm::vec3(0); uv = glm::vec2(0); }
+    void clear(){ position = normal = binormal = tangent = glm::vec3(0.0f); uv = glm::vec2(0.0f); }
 };
 struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
 struct VertexBoneData final{

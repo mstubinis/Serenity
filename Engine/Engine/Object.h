@@ -3,11 +3,7 @@
 #define ENGINE_OBJECT_H
 
 #include "BindableResource.h"
-
 #include "Engine_Math.h"
-#include <string>
-#include <vector>
-#include <boost/weak_ptr.hpp>
 
 class Mesh;
 class Material;

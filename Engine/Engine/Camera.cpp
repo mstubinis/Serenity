@@ -2,10 +2,12 @@
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"
 #include "Engine_Resources.h"
+
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <boost/make_shared.hpp>
 
 using namespace Engine;
@@ -73,7 +75,7 @@ void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
 	ObjectBasic::update(Resources::dt());
     setPosition(eye); 
     m_View = glm::lookAt(eye,target,up);
-    m_Orientation = glm::conjugate(glm::toQuat(m_View));
+    m_Orientation = glm::conjugate(glm::quat_cast(m_View));
     m_Forward = -glm::normalize(eye-target);
     m_Up = glm::normalize(up);
     m_Right = glm::normalize(glm::cross(m_Forward,m_Up));

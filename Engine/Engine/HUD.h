@@ -2,7 +2,9 @@
 #ifndef HUD_H
 #define HUD_H
 
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 class Font;
 class Object;
@@ -23,7 +25,7 @@ class HUD final{
         void update(float);
         void render(bool=false);
 
-        const glm::vec3 getColor() const { return m_Color; }
-        void setColor(glm::vec3 c){ m_Color = c; }
+        const glm::vec3 getColor() const;
+        void setColor(glm::vec3 c);
 };
 #endif

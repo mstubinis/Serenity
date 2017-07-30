@@ -12,6 +12,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <glm/vec3.hpp>
+
 using namespace Engine;
 
 GameSkybox::GameSkybox(std::string name, uint numFlares, Scene* scene):Skybox(name,scene){

@@ -3,7 +3,6 @@
 #define ENGINE_MATERIAL_H
 
 #include "BindableResource.h"
-#include <glm/glm.hpp>
 #include <unordered_map>
 
 class MeshInstance;

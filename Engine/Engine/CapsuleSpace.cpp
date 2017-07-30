@@ -155,10 +155,10 @@ void CapsuleSpace::update(float dt){
     float tunnelARotRand = float(rand() % 4) + 14.0f;
     float tunnelBRotRand = float(rand() % 2) + 2;
 
-    m_TunnelA->rotate(0,0,tunnelARotRand);
-    m_TunnelB->rotate(0,0,-tunnelBRotRand);
-    m_BackEnd->rotate(0,0,150);
-    m_FrontEnd->rotate(0,0,-150);
+	m_TunnelA->rotate(0,0,glm::radians(tunnelARotRand));
+    m_TunnelB->rotate(0,0,-glm::radians(tunnelBRotRand));
+    m_BackEnd->rotate(0,0,2.61f);
+    m_FrontEnd->rotate(0,0,-2.61f);
 
     if(m_TunnelA->getPosition().z >= 12.112 * aRadius || m_TunnelA->getPosition().z <= -12.112 * aRadius){
         m_TunnelA->setPosition(0,0,0);
@@ -171,14 +171,14 @@ void CapsuleSpace::update(float dt){
     }
     getPlayer()->setPosition(0,0,0);
 
-    float x = glm::sin(m_Timer*2.0f)*0.035f;
-    float y = glm::cos(m_Timer*2.0f)*0.035f;
+    float x = glm::sin(m_Timer*2.4f)*0.03f;
+    float y = glm::cos(m_Timer*2.4f)*0.022f;
 
-    float roll = glm::sin(m_Timer*2.0f)*13.0f;
-    float pitch = glm::sin(m_Timer*2.6f)*2.3f;
+    float roll = glm::sin(m_Timer*2.4f)*5.0f;
+    float pitch = glm::sin(m_Timer*2.4f)*0.7f;
 
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));
-        item->setOrientation(pitch,0,roll);
+		item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
     }
 }

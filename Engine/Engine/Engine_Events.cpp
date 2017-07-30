@@ -1,7 +1,10 @@
 #include "Engine_Events.h"
 #include "Engine_Resources.h"
 #include "Engine_Window.h"
+
 #include <boost/algorithm/string.hpp> 
+
+#include <glm/vec2.hpp>
 
 using namespace Engine::Events;
 
@@ -254,9 +257,9 @@ std::unordered_map<std::string,uint> Mouse::MouseProcessing::m_MouseMap = _popul
 std::unordered_map<uint,bool> Keyboard::KeyProcessing::m_KeyStatus;
 std::unordered_map<uint,bool> Mouse::MouseProcessing::m_MouseStatus;
 float Mouse::MouseProcessing::m_Delta = 0;
-glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0);
-glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0);
-glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0);
+glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0.0f);
+glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0.0f);
+glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f);
 
 //init prev / current variables
 uint Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;

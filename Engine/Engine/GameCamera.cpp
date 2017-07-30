@@ -32,8 +32,10 @@ void GameCamera::update(float dt){
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
+			float targetRadius = m_Target->getRadius();
+
             m_Model = glm::mat4(1);
-            m_Model = glm::translate(m_Model,m_Target->getPosition() + ((m_Target->getForward()*glm::length(m_Target->getRadius())*2.0f)+ m_Target->getUp()*glm::length(m_Target->getRadius())*0.3f)*(1.0f + m_OrbitRadius));
+            m_Model = glm::translate(m_Model,m_Target->getPosition() + ((m_Target->getForward()*glm::length(targetRadius)*1.7f)+ m_Target->getUp()*glm::length(targetRadius)*0.3f)*(1.0f + m_OrbitRadius));
 			m_Model *= glm::mat4_cast(m_Orientation);
 			m_Model = glm::translate(m_Model,glm::vec3(-0.00001f,-0.00001f,0.00001f)); //for some reason this is needed to remove lighting bugs...
 
@@ -58,7 +60,7 @@ void GameCamera::update(float dt){
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
 
-            rotate(-Mouse::getMouseDifference().y*0.6f,-Mouse::getMouseDifference().x*0.6f,0,true);
+            rotate(-Mouse::getMouseDifference().y*0.02f,-Mouse::getMouseDifference().x*0.02f,0);
 
             glm::vec3 pos = (glm::vec3(0,0,1)*glm::length(m_Target->getRadius())*0.37f) + (glm::vec3(0,0,1)*glm::length(m_Target->getRadius() * (1.0f + m_OrbitRadius)));
 

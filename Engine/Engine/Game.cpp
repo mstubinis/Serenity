@@ -18,6 +18,8 @@
 
 #include <unordered_map>
 
+#include <glm/vec2.hpp>
+
 using namespace Engine;
 
 HUD* m_HUD;

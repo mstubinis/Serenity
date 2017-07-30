@@ -22,8 +22,8 @@ class ObjectDisplay: public ObjectBasic{
     public:
         ObjectDisplay(std::string = "",
                       std::string = "",
-                      glm::vec3 = glm::vec3(0),
-                      glm::vec3 = glm::vec3(1),
+                      glm::vec3 = glm::vec3(0.0f),
+                      glm::vec3 = glm::vec3(1.0f),
                       std::string = "Visible Object",
                       Scene* = nullptr
                      );

@@ -12,6 +12,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <glm/mat4x4.hpp>
+
 using namespace Engine::Resources;
 
 bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }

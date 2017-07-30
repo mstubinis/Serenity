@@ -10,8 +10,11 @@
 #include "SolarSystem.h"
 #include "Planet.h"
 #include "Engine_Window.h"
+#include "Engine_Math.h"
 
 #include <boost/lexical_cast.hpp>
+
+#include <glm/vec4.hpp>
 
 using namespace Engine;
 using namespace Engine::Events;
@@ -24,6 +27,9 @@ HUD::HUD(){
 }
 HUD::~HUD(){
 }
+const glm::vec3 HUD::getColor() const { return m_Color; }
+void HUD::setColor(glm::vec3 c){ m_Color = c; }
+
 
 uint count = 0;
 void HUD::update(float dt){

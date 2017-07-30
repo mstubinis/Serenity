@@ -3,8 +3,8 @@
 #define ENGINE_TEXTURE_H
 
 #include "Engine_ResourceBasic.h"
+#include "Engine_Math.h"
 
-#include <glm/glm.hpp>
 #include <memory>
 
 #include <GL/glew.h>

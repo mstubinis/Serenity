@@ -16,7 +16,8 @@ class btVector3;
 class btTypedConstraint;
 class btTriangleMesh;
 
-#include <glm/glm.hpp>
+#include <glm/fwd.hpp>
+#include <glm/vec3.hpp>
 
 enum ConstraintType{
     CONSTRAINT_TYPE_FIXED,
@@ -33,7 +34,7 @@ class Constraint{
         Constraint(btRigidBody* a, btRigidBody* b);
         ~Constraint();
 
-        void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3& locationA = glm::vec3(0),glm::vec3& locationB = glm::vec3(0));
+        void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3& locationA = glm::vec3(0.0f),glm::vec3& locationB = glm::vec3(0.0f));
 };
 
 #endif

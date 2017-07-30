@@ -5,8 +5,7 @@
 #include "Engine_ResourceBasic.h"
 
 #include <SFML/Audio.hpp>
-#include <glm/glm.hpp>
-#include <string>
+#include <glm/vec3.hpp>
 
 class SoundEffectBasic: public EngineResource{
     protected:
