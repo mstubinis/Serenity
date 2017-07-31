@@ -53,7 +53,7 @@ class DiffuseModel{
     public: enum Model{
         Lambert,
         Oren_Nayar,
-		Ashikhmin_Shirley,
+        Ashikhmin_Shirley,
         Minnaert
     };
 };
@@ -202,7 +202,7 @@ class Material final: public BindableResource{
         const float metalness() const;
         const float ao() const;
         
-        void setFrensel(float);
+        void setFrensel(glm::vec3);
         void setShadeless(bool);
         void setGlow(float);
         void setSmoothness(float);
