@@ -202,7 +202,7 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-            m_SpecularModel = SpecularModel::Model::Blinn_Phong;
+            m_SpecularModel = SpecularModel::Model::Cook_Torrance;
             m_DiffuseModel = DiffuseModel::Model::Lambert;
 
             _setFrensel(0.04f);
