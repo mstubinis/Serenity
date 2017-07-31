@@ -112,12 +112,18 @@ glm::vec3 Math::unpackFloatInto3(float f){
     
     return glm::vec3(r,g,b);
 }
+float Math::pack3BytesInto1(unsigned char r,unsigned char g,unsigned char b){
+    return float(r) + float(g) * 256.0f + float(b) * 256.0f * 256.0f;
+}
+
+
+
 void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
     if(local){
-		btTransform t;
-		btQuaternion q = obj->getRigidBody()->getWorldTransform().getRotation();
-		q = q.normalize();
-		vec = vec.rotate(q.getAxis(),q.getAngle());
+        btTransform t;
+        btQuaternion q = obj->getRigidBody()->getWorldTransform().getRotation();
+        q = q.normalize();
+        vec = vec.rotate(q.getAxis(),q.getAngle());
     }
 }
 void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up){
