@@ -11,9 +11,9 @@ namespace Engine{
                 private:
                 public:
                     static std::string fullscreen_quad_vertex;
-					static std::string vertex_basic;
-					static std::string vertex_hud;
-					static std::string vertex_skybox;
+                    static std::string vertex_basic;
+                    static std::string vertex_hud;
+                    static std::string vertex_skybox;
 
                     static std::string smaa_vertex_1;
                     static std::string smaa_frag_1;
@@ -29,19 +29,19 @@ namespace Engine{
 
                     static std::string fxaa_frag;
 
-					static std::string deferred_frag;
-					static std::string deferred_frag_hud;
-					static std::string deferred_frag_skybox;
+                    static std::string deferred_frag;
+                    static std::string deferred_frag_hud;
+                    static std::string deferred_frag_skybox;
 
-					static std::string copy_depth_frag;
+                    static std::string copy_depth_frag;
 
-					static std::string ssao_frag;
-					static std::string hdr_frag;
-					static std::string godRays_frag;
-					static std::string blur_frag;
-					static std::string edge_frag;
+                    static std::string ssao_frag;
+                    static std::string hdr_frag;
+                    static std::string godRays_frag;
+                    static std::string blur_frag;
+                    static std::string edge_frag;
                     static std::string final_frag;
-					static std::string lighting_frag;
+                    static std::string lighting_frag;
             };
         };
     };
@@ -63,105 +63,105 @@ std::string Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
 
 #pragma region VertexBasic
 std::string Engine::Shaders::Detail::ShadersManagement::vertex_basic =
-	"#version 120\n"
+    "#version 120\n"
     "\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 uv;\n"
-	"attribute vec3 normal;\n"
-	"attribute vec3 binormal;\n"
-	"attribute vec3 tangent;\n"
-	"attribute vec4 BoneIDs;\n"
-	"attribute vec4 Weights;\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 uv;\n"
+    "attribute vec3 normal;\n"
+    "attribute vec3 binormal;\n"
+    "attribute vec3 tangent;\n"
+    "attribute vec4 BoneIDs;\n"
+    "attribute vec4 Weights;\n"
     "\n"
-	"uniform mat4 VP;\n"
-	"uniform mat4 Model;\n"
-	"uniform mat3 NormalMatrix;\n"
-	"uniform int AnimationPlaying;\n"
-	"uniform mat4 gBones[200];\n"
-	"\n"
-	"varying vec2 UV;\n"
-	"\n"
-	"varying vec3 Normals;\n"
-	"varying vec3 Binormals;\n"
-	"varying vec3 Tangents;\n"
-	"varying vec3 WorldPosition;\n"
-	"\n"
-	"varying float logz_f;\n"
-	"varying float FC_2_f;\n"
-	"uniform float fcoeff;\n"
+    "uniform mat4 VP;\n"
+    "uniform mat4 Model;\n"
+    "uniform mat3 NormalMatrix;\n"
+    "uniform int AnimationPlaying;\n"
+    "uniform mat4 gBones[200];\n"
     "\n"
-	"void main(void){\n"
-	"	mat4 BoneTransform = mat4(1.0);\n"
-	"	if(AnimationPlaying == 1.0){\n"
-	"		BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;\n"
-	"		BoneTransform += gBones[int(BoneIDs.y)] * Weights.y;\n"
-	"		BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;\n"
-	"		BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
-	"	}\n"
-	"	vec4 PosTransformed = BoneTransform * vec4(position, 1.0);\n"
-	"	vec4 NormalTransformed = BoneTransform * vec4(normal, 0.0);\n"
-	"	vec4 BinormalTransformed = BoneTransform * vec4(binormal, 0.0);\n"
-	"	vec4 TangentTransformed = BoneTransform * vec4(tangent, 0.0);\n"
-	"\n"
-	"	mat4 MVP = VP * Model;\n"
-	"\n"
-	"	gl_Position = MVP * PosTransformed;\n"
+    "varying vec2 UV;\n"
     "\n"
-	"	Normals = (NormalMatrix * NormalTransformed.xyz).xyz;\n"
-	"	Binormals = (NormalMatrix * BinormalTransformed.xyz).xyz;\n"
-	"	Tangents = (NormalMatrix * TangentTransformed.xyz).xyz;\n"
-	"\n"
-	"	WorldPosition = (Model * PosTransformed).xyz;\n"
-	"\n"
-	"	UV = uv;\n"
-	"	logz_f = 1.0 + gl_Position.w;\n"
-	"	gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
-	"	FC_2_f = fcoeff * 0.5;\n"
-	"}";
+    "varying vec3 Normals;\n"
+    "varying vec3 Binormals;\n"
+    "varying vec3 Tangents;\n"
+    "varying vec3 WorldPosition;\n"
+    "\n"
+    "varying float logz_f;\n"
+    "varying float FC_2_f;\n"
+    "uniform float fcoeff;\n"
+    "\n"
+    "void main(void){\n"
+    "	mat4 BoneTransform = mat4(1.0);\n"
+    "	if(AnimationPlaying == 1.0){\n"
+    "		BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;\n"
+    "		BoneTransform += gBones[int(BoneIDs.y)] * Weights.y;\n"
+    "		BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;\n"
+    "		BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
+    "	}\n"
+    "	vec4 PosTransformed = BoneTransform * vec4(position, 1.0);\n"
+    "	vec4 NormalTransformed = BoneTransform * vec4(normal, 0.0);\n"
+    "	vec4 BinormalTransformed = BoneTransform * vec4(binormal, 0.0);\n"
+    "	vec4 TangentTransformed = BoneTransform * vec4(tangent, 0.0);\n"
+    "\n"
+    "	mat4 MVP = VP * Model;\n"
+    "\n"
+    "	gl_Position = MVP * PosTransformed;\n"
+    "\n"
+    "	Normals = (NormalMatrix * NormalTransformed.xyz).xyz;\n"
+    "	Binormals = (NormalMatrix * BinormalTransformed.xyz).xyz;\n"
+    "	Tangents = (NormalMatrix * TangentTransformed.xyz).xyz;\n"
+    "\n"
+    "	WorldPosition = (Model * PosTransformed).xyz;\n"
+    "\n"
+    "	UV = uv;\n"
+    "	logz_f = 1.0 + gl_Position.w;\n"
+    "	gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
+    "	FC_2_f = fcoeff * 0.5;\n"
+    "}";
 
 #pragma endregion
 
 #pragma region VertexHUD
 std::string Engine::Shaders::Detail::ShadersManagement::vertex_hud =
-	"#version 120\n"
-	"\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 uv;\n"
-	"attribute vec3 normal;\n"
-	"attribute vec3 binormal;\n"
-	"attribute vec3 tangent;\n"
-	"\n"
-	"uniform mat4 VP;\n"
-	"uniform mat4 Model;\n"
-	"\n"
-	"varying vec2 UV;\n"
-	"\n"
-	"void main(void){\n"
-	"	mat4 MVP = VP * Model;\n"
-	"	UV = uv;\n"
-	"	gl_Position = MVP * vec4(position, 1.0);\n"
+    "#version 120\n"
     "\n"
-	"	gl_TexCoord[6] = gl_Position;\n"
-	"}";
+    "attribute vec3 position;\n"
+    "attribute vec2 uv;\n"
+    "attribute vec3 normal;\n"
+    "attribute vec3 binormal;\n"
+    "attribute vec3 tangent;\n"
+    "\n"
+    "uniform mat4 VP;\n"
+    "uniform mat4 Model;\n"
+    "\n"
+    "varying vec2 UV;\n"
+    "\n"
+    "void main(void){\n"
+    "	mat4 MVP = VP * Model;\n"
+    "	UV = uv;\n"
+    "	gl_Position = MVP * vec4(position, 1.0);\n"
+    "\n"
+    "	gl_TexCoord[6] = gl_Position;\n"
+    "}";
 
 #pragma endregion
 
 #pragma region VertexSkybox
 std::string Engine::Shaders::Detail::ShadersManagement::vertex_skybox =
-	"#version 120\n"
+    "#version 120\n"
     "\n"
-	"attribute vec3 position;\n"
-	"uniform mat4 VP;\n"
-	"uniform mat4 Model;\n"
+    "attribute vec3 position;\n"
+    "uniform mat4 VP;\n"
+    "uniform mat4 Model;\n"
     "\n"
-	"varying vec3 UV;\n"
-	"\n"
-	"void main(void){\n"
-	"	mat4 MVP = VP * Model;\n"
-	"	UV = position;\n"
-	"	gl_Position = MVP * vec4(position, 1.0);\n"
-	"	gl_Position.z = gl_Position.w;\n"
-	"}";
+    "varying vec3 UV;\n"
+    "\n"
+    "void main(void){\n"
+    "	mat4 MVP = VP * Model;\n"
+    "	UV = position;\n"
+    "	gl_Position = MVP * vec4(position, 1.0);\n"
+    "	gl_Position.z = gl_Position.w;\n"
+    "}";
 #pragma endregion
 
 #pragma region FXAA
@@ -201,10 +201,10 @@ std::string Engine::Shaders::Detail::ShadersManagement::fxaa_frag =
     "   float lumaB = dot(rgbB, luma);\n"
     "\n"
     "   if((lumaB < lumaMin) || (lumaB > lumaMax)) {\n"
-    "	   gl_FragColor = vec4(rgbA,1.0);\n"
+    "       gl_FragColor = vec4(rgbA,1.0);\n"
     "   }\n"
     "   else{\n"
-    "	   gl_FragColor = vec4(rgbB,1.0);\n"
+    "       gl_FragColor = vec4(rgbB,1.0);\n"
     "   }\n"
     "}";
 #pragma endregion
@@ -717,19 +717,19 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
 	"#version 120\n"
 	"#define MATERIAL_COUNT_LIMIT 255\n"
 	"\n"
-	"uniform vec4 LightDataA; //x = ambient, y = diffuse, z = specular, w = LightDirection.x\n"
-	"uniform vec4 LightDataB; //x = LightDirection.y, y = LightDirection.z, z = const, w = linear\n"
-	"uniform vec4 LightDataC; //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z\n"
-	"uniform vec4 LightDataD; //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType\n"
-	"uniform vec4 LightDataE; //x = cutoff, y = outerCutoff, z = UNUSED, w = UNUSED\n"
+	"uniform vec4 LightDataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
+	"uniform vec4 LightDataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
+	"uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
+	"uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
+	"uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = UNUSED, w = UNUSED
     "\n"
 	"uniform sampler2D gDiffuseMap;\n"
 	"uniform sampler2D gNormalMap;\n"
 	"uniform sampler2D gMiscMap;\n"
 	"uniform sampler2D gDepthMap;\n"
 	"\n"
-	"uniform vec4 ScreenData; //x = near, y = far, z = winSize.x, w = winSize.y\n"
-	"uniform vec4 CamPosGamma; //x = camX, y = camY, z = camZ, w = monitorGamma\n"
+	"uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
+	"uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
 	"uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = frensel, g = specPower, b = specularModel, a = diffuseModel \n"
     "\n"
 	"uniform mat4 VP;\n"
@@ -778,7 +778,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
 	"	if((PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999)){\n"
 	"		return vec3(0.0);\n"
 	"	}\n"
-	"	vec3 AmbientColor       = LightDataD.xyz * LightDataA.x;\n"
+	"	vec3 LightAmbientColor  = LightDataD.xyz * LightDataA.x;\n"
 	"	vec3 LightDiffuseColor  = LightDataD.xyz;\n"
 	"	vec3 LightSpecularColor = LightDataD.xyz * SpecularStrength;\n"
 	"	vec3 TotalLight         = vec3(0.0);\n"
@@ -790,7 +790,8 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
 	"	float kPi = 3.1415926535898;\n"
 	"	float smoothness = materials[index].g;\n" //UNIFORM
     "\n"
-	"	vec3 F0 = vec3(materials[index].r);\n" //UNIFORM
+	"	//vec3 F0 = vec3(materials[index].r);\n" //UNIFORM
+	"	vec3 F0 = vec3(1.022,0.782,0.344);\n" //gold
 	"	float metalness = texture2D(gMiscMap,uv).b;\n"
 	"	F0 = mix(F0, MaterialAlbedoTexture, vec3(metalness));\n"
 	"	vec3 Frensel = F0;\n"
@@ -895,7 +896,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
 	"   vec3 FinalDiffuse = (kD * MaterialAlbedoTexture * LightDiffuseColor) / kPi;\n"
 	"   vec3 FinalSpecular = LightSpecularColor;\n"
 	"   TotalLight = (FinalDiffuse + FinalSpecular) * NdotL;\n"
-	"	TotalLight += (AmbientColor * MaterialAlbedoTexture);\n"
+	"	TotalLight += (LightAmbientColor * MaterialAlbedoTexture);\n"
 	"	return max( vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
 	"}\n"
 	"vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
