@@ -94,19 +94,13 @@ void Game::update(float dt){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f6")){ Material::setAllDiffuseModels(DiffuseModel::Lambert); }
-    if(Events::Keyboard::isKeyDownOnce("f7")){ Material::setAllDiffuseModels(DiffuseModel::Oren_Nayar); }
-    if(Events::Keyboard::isKeyDownOnce("f8")){ Material::setAllDiffuseModels(DiffuseModel::Minnaert); }
-    if(Events::Keyboard::isKeyDownOnce("f9")){ Material::setAllDiffuseModels(DiffuseModel::Ashikhmin_Shirley); }
-    if(Events::Keyboard::isKeyDownOnce("f10")){ Material::setAllSpecularModels(SpecularModel::Phong); }
-    if(Events::Keyboard::isKeyDownOnce("f11")){ Material::setAllSpecularModels(SpecularModel::Blinn_Phong); }
+    if(Events::Keyboard::isKeyDownOnce("f6")){ Material::setAllSpecularModels(SpecularModel::Phong); }
+    if(Events::Keyboard::isKeyDownOnce("f7")){ Material::setAllSpecularModels(SpecularModel::Blinn_Phong); }
+    if(Events::Keyboard::isKeyDownOnce("f8")){ Material::setAllSpecularModels(SpecularModel::Beckmann); }
+    if(Events::Keyboard::isKeyDownOnce("f9")){ Material::setAllSpecularModels(SpecularModel::Ashikhmin_Shirley); }
+    if(Events::Keyboard::isKeyDownOnce("f10")){ Material::setAllSpecularModels(SpecularModel::Guassian); }
+    if(Events::Keyboard::isKeyDownOnce("f11")){ Material::setAllSpecularModels(SpecularModel::GXX); }
     if(Events::Keyboard::isKeyDownOnce("f12")){ Material::setAllSpecularModels(SpecularModel::Cook_Torrance); }
-	if(Events::Keyboard::isKeyDownOnce("j")){
-		if(Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None)
-		    Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); 
-		else if(Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA)
-			Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); 
-	}
     if(Events::Keyboard::isKeyDown("n")){
 		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
     }
