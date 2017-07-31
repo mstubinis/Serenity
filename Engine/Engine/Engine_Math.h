@@ -156,7 +156,7 @@ namespace Engine{
         float pack3FloatsInto1(float,float,float);
         float pack3FloatsInto1(glm::vec3&);
         glm::vec3 unpackFloatInto3(float);
-        float pack3BytesInto1(unsigned char,unsigned char,unsigned char);
+        float pack3BytesInto1Float(unsigned char,unsigned char,unsigned char);
 
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
