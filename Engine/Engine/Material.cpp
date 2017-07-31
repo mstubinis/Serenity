@@ -253,14 +253,8 @@ class Material::impl final{
         }
         void _updateGlobalMaterialPool(){
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
-
             data.r = m_Frensel;
-            data.g = m_BaseSmoothness;         
-            
-            if(data.g > 1.0){
-                data.g *= 0.03125f; // 1 / 32
-            }
-            
+            data.g = m_BaseSmoothness;
             data.b = float(m_SpecularModel);
             data.a = float(m_DiffuseModel);
         }
