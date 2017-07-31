@@ -151,11 +151,12 @@ namespace Engine{
 
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 	    
-		void translate(ObjectDynamic*,btVector3&,bool local);
+        void translate(ObjectDynamic*,btVector3&,bool local);
 
         float pack3FloatsInto1(float,float,float);
         float pack3FloatsInto1(glm::vec3&);
         glm::vec3 unpackFloatInto3(float);
+        float pack3BytesInto1(unsigned char,unsigned char,unsigned char);
 
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
