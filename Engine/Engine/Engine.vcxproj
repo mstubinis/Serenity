@@ -179,6 +179,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="MeshInstance.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Engine_BuiltInShaders.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SolarSystem.h" />
@@ -194,22 +195,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <None Include="data\Shaders\AS_skyFromAtmosphere_vert.glsl" />
     <None Include="data\Shaders\AS_skyFromSpace_frag.glsl" />
     <None Include="data\Shaders\AS_skyFromSpace_vert.glsl" />
-    <None Include="data\Shaders\copy_depth_frag.glsl" />
-    <None Include="data\Shaders\deferred_blur_frag.glsl" />
-    <None Include="data\Shaders\deferred_edge_frag.glsl" />
-    <None Include="data\Shaders\deferred_final_frag.glsl" />
-    <None Include="data\Shaders\deferred_frag.glsl" />
-    <None Include="data\Shaders\deferred_frag_HUD.glsl" />
-    <None Include="data\Shaders\deferred_frag_skybox.glsl" />
-    <None Include="data\Shaders\deferred_fxaa.glsl" />
-    <None Include="data\Shaders\deferred_hdr_frag.glsl" />
-    <None Include="data\Shaders\deferred_lighting_frag.glsl" />
-    <None Include="data\Shaders\deferred_rays_frag.glsl" />
-    <None Include="data\Shaders\vert_fullscreenQuad.glsl" />
-    <None Include="data\Shaders\deferred_ssao_frag.glsl" />
-    <None Include="data\Shaders\vert.glsl" />
-    <None Include="data\Shaders\vert_HUD.glsl" />
-    <None Include="data\Shaders\vert_skybox.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

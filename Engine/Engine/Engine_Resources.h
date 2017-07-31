@@ -150,6 +150,9 @@ namespace Engine{
 
         void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
         void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        void addShaderProgram(std::string name, std::string vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+
 
         void addSound(std::string name, std::string file,bool asEffect = true);
         void addSoundAsEffect(std::string name, std::string file);

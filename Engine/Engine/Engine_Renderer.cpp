@@ -447,13 +447,11 @@ void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(1,1,1,1);
 }
 void Detail::RenderManagement::_passLighting(){
-    glm::vec3 camPos = glm::vec3(Resources::getActiveCamera()->getPosition());
     ShaderP* p = Resources::getShaderProgram("Deferred_Light"); p->bind();
-
     sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
     sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
 
-    glm::vec3 campos = glm::vec3(Resources::getActiveCamera()->getPosition());
+    glm::vec3 campos = Resources::getActiveCamera()->getPosition();
     Renderer::sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::HDRInfo::hdr_gamma);
 
 	sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
@@ -479,15 +477,14 @@ void Detail::RenderManagement::render(){
         m_gBuffer->start(BUFFER_TYPE_DIFFUSE,BUFFER_TYPE_NORMAL,BUFFER_TYPE_MISC,BUFFER_TYPE_LIGHTING,"RGBA");
     _passGeometry();
 
-    if(RendererInfo::GodRaysInfo::godRays){
-        
+    if(RendererInfo::GodRaysInfo::godRays){     
         m_gBuffer->start(BUFFER_TYPE_GODSRAYS,"RGBA",false);
         Object* o = Resources::getObject("Sun");
-        glm::vec3 sp = Math::getScreenCoordinates(glm::vec3(o->getPosition()),false);
+        glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
 
         bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),-(Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
-        float alpha = Math::getAngleBetweenTwoVectors(glm::vec3(Resources::getActiveCamera()->getViewVector()),
-            glm::vec3(Resources::getActiveCamera()->getPosition() - o->getPosition()),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+        float alpha = Math::getAngleBetweenTwoVectors(Resources::getActiveCamera()->getViewVector(),
+            Resources::getActiveCamera()->getPosition() - o->getPosition(),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         
         alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
         alpha = glm::clamp(alpha,0.001f,0.999f);
@@ -528,10 +525,9 @@ void Detail::RenderManagement::render(){
         _passFXAA();
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA){
-        //m_gBuffer->start(BUFFER_TYPE_LIGHTING);
-        //_passFinal();
-        //m_gBuffer->stop();
-        //_passFXAA();
+        m_gBuffer->start(BUFFER_TYPE_LIGHTING);
+        _passFinal();
+        _passSMAA();
     }
     _passCopyDepth();
 
@@ -541,21 +537,20 @@ void Detail::RenderManagement::render(){
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Settings::enableAlphaTest();
-    glAlphaFunc(GL_GREATER, 0.1f);
-
     Settings::enableDepthTest();
     Settings::enableDepthMask();
 
 	_passForwardRendering();
 
-    Settings::clear(false,true,false); //clear depth only
 
+
+	//render HUD
+    Settings::clear(false,true,false); //clear depth only
+    Settings::enableAlphaTest();
+    glAlphaFunc(GL_GREATER, 0.1f);
     _renderTextures();
     _renderText();
-
     Settings::disableAlphaTest();
-
     m_FontsToBeRendered.clear();
     m_TexturesToBeRendered.clear();
 }
@@ -676,8 +671,6 @@ void Detail::RenderManagement::_passBlur(string type, GLuint texture,string chan
     p->unbind();
 }
 void Detail::RenderManagement::_passFXAA(){
-    Settings::clear(true,false,false);
-
     ShaderP* p = Resources::getShaderProgram("Deferred_FXAA"); p->bind();
 
     sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
@@ -686,6 +679,16 @@ void Detail::RenderManagement::_passFXAA(){
 
     unbindTexture2D(0);
     p->unbind();
+}
+void Detail::RenderManagement::_passSMAA(){
+	m_gBuffer->start(BUFFER_TYPE_MISC);
+	//pass first thing
+	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
+	//pass 2nd thing
+	m_gBuffer->start(BUFFER_TYPE_MISC);
+	//pass 3rd thing
+	m_gBuffer->start(BUFFER_TYPE_LIGHTING);
+	//pass 4th thing
 }
 void Detail::RenderManagement::_passFinal(){
     Settings::clear(true,false,false);

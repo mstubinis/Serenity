@@ -28,7 +28,7 @@ class Shader final: public EngineResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        Shader(std::string& name, std::string& shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
+        Shader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
         ~Shader();
 
         SHADER_TYPE type();
@@ -42,6 +42,10 @@ class ShaderP final: public BindableResource{
     public:
         ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
         ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+
+        ShaderP(std::string& name, Shader* vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        ShaderP(std::string& name, std::string& vertexShader,Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+
         ~ShaderP();
 
         void initRenderingContext();

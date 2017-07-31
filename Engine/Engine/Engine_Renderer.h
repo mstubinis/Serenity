@@ -140,6 +140,7 @@ namespace Engine{
                     static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal();
                     static void _passFXAA();
+					static void _passSMAA();
                     static void _passCopyDepth();
                 public:
                     static GBuffer* m_gBuffer;

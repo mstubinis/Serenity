@@ -15,14 +15,8 @@
     <Filter Include="Header Files\Engine">
       <UniqueIdentifier>{1fa40977-5af4-4b4b-adf5-1fd56320d21e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering">
-      <UniqueIdentifier>{2b413ee7-08eb-47dc-a422-3a6b052d31f8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Shaders\ForwardRendering">
       <UniqueIdentifier>{3449af22-024a-420d-a07b-d99f8da2eec1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\LightingShaders">
-      <UniqueIdentifier>{4970b14b-ba45-4831-81da-db3cec9cd0d5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
@@ -37,23 +31,11 @@
     <Filter Include="Header Files\Engine\Objects">
       <UniqueIdentifier>{5abb8f18-0356-4634-9735-228221637c9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing">
-      <UniqueIdentifier>{3a26f670-b952-490c-86c3-73ce4e6e7a4f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur">
-      <UniqueIdentifier>{62619f9d-393b-4dff-8c33-68bff6b11aba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO">
-      <UniqueIdentifier>{01d8a664-bbee-4225-8f52-3537791a4b3f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\Shaders\ForwardRendering\AtmopshericScattering">
       <UniqueIdentifier>{9482e4ed-522e-4fe0-b336-5a2cc2814377}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Game">
       <UniqueIdentifier>{3f40b499-c23f-4f0d-8e66-2af89ecc0fd4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\EdgeDetect">
-      <UniqueIdentifier>{ce37d8bc-972f-4b3a-b991-56b2b710c471}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine\Rendering">
       <UniqueIdentifier>{445d46fd-3b43-47ff-abec-53ef9754382a}</UniqueIdentifier>
@@ -100,26 +82,20 @@
     <Filter Include="Source Files\Engine\Engine_Core">
       <UniqueIdentifier>{649f9f71-2a39-41c2-ac03-16a3c954441d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\HDR">
-      <UniqueIdentifier>{e9991f44-6a12-4e55-84d2-d13a7b50adcf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays">
-      <UniqueIdentifier>{cb419439-da42-4a8b-8393-4bc8c7160745}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Engine\Rendering">
       <UniqueIdentifier>{47cfec7d-f190-4be3-827b-cb70d658ea58}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Game">
       <UniqueIdentifier>{9abb022b-e50f-4975-b26b-f67845d85b53}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders\DeferredRendering\PostProcessing\Antialiasing">
-      <UniqueIdentifier>{4e1ddf1d-5be1-4ec8-b794-9a71541c7a16}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Engine\Engine_Networking">
       <UniqueIdentifier>{41cf311b-9a48-4508-bbfd-4a908fc6ed7b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine\Engine_Networking">
       <UniqueIdentifier>{3a0af9fb-1f3d-4fd1-8b53-94401a2059f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Rendering\BuiltInShaders">
+      <UniqueIdentifier>{0cd400f9-fbaa-4da1-ad78-7f6737adf5b3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -377,23 +353,11 @@
     <ClInclude Include="MeshInstance.h">
       <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Engine_BuiltInShaders.h">
+      <Filter>Header Files\Engine\Rendering\BuiltInShaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\Shaders\copy_depth_frag.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
-    <None Include="data\Shaders\vert.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
-    <None Include="data\Shaders\vert_fullscreenQuad.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
-    <None Include="data\Shaders\vert_HUD.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
-    <None Include="data\Shaders\vert_skybox.glsl">
-      <Filter>Resource Files\Shaders\ForwardRendering</Filter>
-    </None>
     <None Include="data\Shaders\AS_skyFromSpace_vert.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
     </None>
@@ -411,39 +375,6 @@
     </None>
     <None Include="data\Shaders\AS_groundFromSpace_frag.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_frag_skybox.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_frag_HUD.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_final_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_ssao_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\SSAO</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_blur_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GaussianBlur</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_edge_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\EdgeDetect</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_hdr_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\HDR</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_rays_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\GodsRays</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_fxaa.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\PostProcessing\Antialiasing</Filter>
-    </None>
-    <None Include="data\Shaders\deferred_lighting_frag.glsl">
-      <Filter>Resource Files\Shaders\DeferredRendering\LightingShaders</Filter>
     </None>
   </ItemGroup>
 </Project>

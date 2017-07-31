@@ -25,7 +25,7 @@ class Shader::impl final{
             super->setName(name);
         }
 };
-Shader::Shader(std::string& name, std::string& shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl){
+Shader::Shader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl){
     m_i->_construct(name,shaderFileOrData,shaderType,fromFile,this);
 }
 Shader::~Shader(){
@@ -41,7 +41,7 @@ struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
     Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
-    glm::vec3 camPos = glm::vec3(c->getPosition());
+    glm::vec3 camPos = c->getPosition();
     Renderer::sendUniform3fSafe("CameraPosition",camPos);
 
     if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
@@ -61,10 +61,10 @@ class ShaderP::impl final{
         std::unordered_map<std::string,GLint> m_UniformLocations;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
-        void _construct(std::string& name, Shader* vs, Shader* ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(std::string& name, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
             m_Stage = stage;
             m_VertexShader = vs;
-            m_FragmentShader = ps;
+            m_FragmentShader = fs;
             m_UniformLocations.clear();
 
             if(stage == SHADER_PIPELINE_STAGE_GEOMETRY){
@@ -84,18 +84,37 @@ class ShaderP::impl final{
             super->setCustomBindFunctor(ShaderP::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(ShaderP::impl::DEFAULT_UNBIND_FUNCTOR);
         }
-        void _construct(std::string& name, std::string& vs, std::string& ps, SHADER_PIPELINE_STAGE stage,ShaderP* super){
-            Shader* v = Resources::getShader(vs); Shader* f = Resources::getShader(ps);
-            if(v == nullptr){
+        void _construct(std::string& name, std::string& vs, std::string& fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+            Shader* _vs = Resources::getShader(vs); Shader* _fs = Resources::getShader(fs);
+            if(_vs == nullptr){
                 Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true);
-                v = Resources::getShader(vs);
+                _vs = Resources::getShader(vs);
             }
-            if(f == nullptr){
-                Resources::addShader(ps,ps,SHADER_TYPE_FRAGMENT,true);
-                f = Resources::getShader(ps);
+            if(_fs == nullptr){
+                Resources::addShader(fs,fs,SHADER_TYPE_FRAGMENT,true);
+                _fs = Resources::getShader(fs);
             }
-            _construct(name,v,f,stage,super);
+            _construct(name,_vs,_fs,stage,super);
         }
+        void _construct(std::string& name, Shader* vs, std::string& fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+            Shader* _fs = Resources::getShader(fs);
+            if(_fs == nullptr){
+                Resources::addShader(fs,fs,SHADER_TYPE_FRAGMENT,true);
+                _fs = Resources::getShader(fs);
+            }
+            _construct(name,vs,_fs,stage,super);
+        }
+        void _construct(std::string& name, std::string& vs, Shader* fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+            Shader* _vs = Resources::getShader(vs);
+            if(_vs == nullptr){
+                Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true);
+                _vs = Resources::getShader(vs);
+            }
+            _construct(name,_vs,fs,stage,super);
+        }
+
+
+
 
         void _destruct(){
             _cleanupRenderingContext();
@@ -224,6 +243,14 @@ ShaderP::ShaderP(std::string& n, std::string& vs, std::string& fs, SHADER_PIPELI
 ShaderP::ShaderP(std::string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
+ShaderP::ShaderP(std::string& n, Shader* vs, std::string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
+    m_i->_construct(n,vs,fs,s,this);
+}
+ShaderP::ShaderP(std::string& n, std::string& vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
+    m_i->_construct(n,vs,fs,s,this);
+}
+
+
 ShaderP::~ShaderP(){
     m_i->_destruct();
 }

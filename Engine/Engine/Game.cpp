@@ -101,6 +101,12 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f10")){ Material::setAllSpecularModels(SpecularModel::Phong); }
     if(Events::Keyboard::isKeyDownOnce("f11")){ Material::setAllSpecularModels(SpecularModel::Blinn_Phong); }
     if(Events::Keyboard::isKeyDownOnce("f12")){ Material::setAllSpecularModels(SpecularModel::Cook_Torrance); }
+	if(Events::Keyboard::isKeyDownOnce("j")){
+		if(Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None)
+		    Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); 
+		else if(Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA)
+			Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); 
+	}
     if(Events::Keyboard::isKeyDown("n")){
 		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
     }
