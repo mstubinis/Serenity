@@ -19,12 +19,12 @@ using namespace std;
 vector<glm::vec4> Material::m_MaterialProperities;
 
 void Material::setAllDiffuseModels(DiffuseModel::Model m){
-	for(auto material:Resources::Detail::ResourceManagement::m_Materials)
-		material.second->setDiffuseModel(m);
+    for(auto material:Resources::Detail::ResourceManagement::m_Materials)
+        material.second->setDiffuseModel(m);
 }
 void Material::setAllSpecularModels(SpecularModel::Model m){
-	for(auto material:Resources::Detail::ResourceManagement::m_Materials)
-		material.second->setSpecularModel(m);
+    for(auto material:Resources::Detail::ResourceManagement::m_Materials)
+        material.second->setSpecularModel(m);
 }
 
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
