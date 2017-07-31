@@ -187,7 +187,7 @@ class Material::impl final{
         bool m_Shadeless;
         float m_BaseGlow;
 
-        float m_Frensel;
+        glm::vec3 m_Frensel;
 
         float m_BaseSmoothness;
         float m_BaseMetalness;
@@ -205,7 +205,7 @@ class Material::impl final{
             m_SpecularModel = SpecularModel::Model::Cook_Torrance;
             m_DiffuseModel = DiffuseModel::Model::Lambert;
 
-            _setFrensel(0.04f);
+            _setFrensel(glm::vec3(0.04f));
             _setSmoothness(0.95f);
             _setAO(1.0f);
             _setMetalness(0.95f);
@@ -253,7 +253,12 @@ class Material::impl final{
         }
         void _updateGlobalMaterialPool(){
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
-            data.r = m_Frensel;
+            
+            unsigned char r = (unsigned char)m_Frensel.x;
+            unsigned char g = (unsigned char)m_Frensel.y;
+            unsigned char b = (unsigned char)m_Frensel.z;
+            data.r = Engine::Math::pack3BytesInto1Float(r,g,b);
+            
             data.g = m_BaseSmoothness;
             data.b = float(m_SpecularModel);
             data.a = float(m_DiffuseModel);
@@ -307,7 +312,12 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
-        void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.04f,1.2f); }
+        void _setFrensel(glm::vec3& f){ 
+            m_Frensel.x = glm::clamp(f.x,0.04f,1.2f);
+            m_Frensel.y = glm::clamp(f.y,0.04f,1.2f); 
+            m_Frensel.z = glm::clamp(f.z,0.04f,1.2f); 
+            _updateGlobalMaterialPool();
+        }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
         void _setSmoothness(float& s){ m_BaseSmoothness = glm::clamp(s,0.05f,0.98f); _updateGlobalMaterialPool(); }
@@ -446,7 +456,7 @@ const float Material::ao() const { return m_i->m_BaseAO; }
 
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
-void Material::setFrensel(float f){ m_i->_setFrensel(f); }
+void Material::setFrensel(glm::vec3 f){ m_i->_setFrensel(f); }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
 void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }
