@@ -751,6 +751,14 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
 	"	vec4 wpos = invVP * screenSpace;\n"
 	"	return wpos.xyz / wpos.w;\n"
 	"}\n"
+    "vec3 unpackColor(float f) {\n"
+    "    vec3 color;\n"
+    "    color.b = floor(f / 256.0 / 256.0);\n"
+    "    color.g = floor((f - color.b * 256.0 * 256.0) / 256.0);\n"
+    "    color.r = floor(f - color.b * 256.0 * 256.0 - color.g * 256.0);\n"
+    "    // now we have a vec3 with the 3 components in range [0..255]. Let's normalize it!\n"
+    "    return color / 255.0;\n"
+    "}\n"
 	"float BeckmannDist(float cos2a, float _alpha, float pi){\n"
 	"	float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
 	"	return (exp(-b)) / (pi * _alpha * cos2a * cos2a);\n"
@@ -790,7 +798,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
 	"	float kPi = 3.1415926535898;\n"
 	"	float smoothness = materials[index].g;\n" //UNIFORM
     "\n"
-	"	//vec3 F0 = vec3(materials[index].r);\n" //UNIFORM
+	"	//vec3 F0 = unpackColor(materials[index].r);\n" //UNIFORM
 	"	vec3 F0 = vec3(1.022,0.782,0.344);\n" //gold
 	"	float metalness = texture2D(gMiscMap,uv).b;\n"
 	"	F0 = mix(F0, MaterialAlbedoTexture, vec3(metalness));\n"
