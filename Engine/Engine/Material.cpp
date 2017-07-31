@@ -57,9 +57,9 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
     Renderer::sendUniform1fSafe("BaseGlow",material->glow());
 
-	Renderer::sendUniform1fSafe("BaseMetalness",material->metalness());
-	Renderer::sendUniform1fSafe("BaseSmoothness",material->smoothness());
-	Renderer::sendUniform1fSafe("BaseAO",material->ao());
+    Renderer::sendUniform1fSafe("BaseMetalness",material->metalness());
+    Renderer::sendUniform1fSafe("BaseSmoothness",material->smoothness());
+    Renderer::sendUniform1fSafe("BaseAO",material->ao());
 
     float id = float(material->id());
     Renderer::sendUniform1fSafe("matID",id);
@@ -296,12 +296,12 @@ class Material::impl final{
         void _addComponentMetalness(Texture* map){
             if((m_Components.count(MaterialComponentType::Metalness) && m_Components[MaterialComponentType::Metalness] != nullptr) || (map == nullptr))
                 return;
-			m_Components.emplace(MaterialComponentType::Metalness,new MaterialComponent(MaterialComponentType::Metalness,map));
+            m_Components.emplace(MaterialComponentType::Metalness,new MaterialComponent(MaterialComponentType::Metalness,map));
         }
         void _addComponentSmoothness(Texture* map){
             if((m_Components.count(MaterialComponentType::Smoothness) && m_Components[MaterialComponentType::Smoothness] != nullptr) || (map == nullptr))
                 return;
-			m_Components.emplace(MaterialComponentType::Smoothness,new MaterialComponent(MaterialComponentType::Smoothness,map));
+            m_Components.emplace(MaterialComponentType::Smoothness,new MaterialComponent(MaterialComponentType::Smoothness,map));
         }
         void _addComponentReflection(Texture* text,Texture* map,float mixFactor){
             if((m_Components.count(MaterialComponentType::Reflection) && m_Components[MaterialComponentType::Reflection] != nullptr) || (text == nullptr || map == nullptr))
@@ -374,33 +374,33 @@ void Material::addComponentSpecular(string& textureFile){
 
 void Material::addComponentAO(Texture* texture,float baseValue){
     m_i->_addComponentAO(texture);
-	setAO(baseValue);
+    setAO(baseValue);
 }
 void Material::addComponentAO(string& textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentAO(texture);
-	setAO(baseValue);
+    setAO(baseValue);
 }
 void Material::addComponentMetalness(Texture* texture,float baseValue){
     m_i->_addComponentMetalness(texture);
-	setMetalness(baseValue);
+    setMetalness(baseValue);
 }
 void Material::addComponentMetalness(string& textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentMetalness(texture);
-	setMetalness(baseValue);
+    setMetalness(baseValue);
 }
 void Material::addComponentSmoothness(Texture* texture,float baseValue){
     m_i->_addComponentSmoothness(texture);
-	setSmoothness(baseValue);
+    setSmoothness(baseValue);
 }
 void Material::addComponentSmoothness(string& textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentSmoothness(texture);
-	setSmoothness(baseValue);
+    setSmoothness(baseValue);
 }
 void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
     if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->getSkybox()->texture();
