@@ -190,8 +190,8 @@ class Material::impl final{
         float m_Frensel;
 
         float m_BaseSmoothness;
-		float m_BaseMetalness;
-		float m_BaseAO;
+        float m_BaseMetalness;
+        float m_BaseAO;
 
         uint m_ID;
         void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
@@ -202,13 +202,13 @@ class Material::impl final{
 
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
-			m_SpecularModel = SpecularModel::Model::Blinn_Phong;
-			m_DiffuseModel = DiffuseModel::Model::Lambert;
+            m_SpecularModel = SpecularModel::Model::Blinn_Phong;
+            m_DiffuseModel = DiffuseModel::Model::Lambert;
 
-            m_Frensel = 0.04f;
-            m_BaseSmoothness = 0.95f;
-			m_BaseAO = 1.0f;
-			m_BaseMetalness = 0.95f;
+            _setFrensel(0.04f);
+            _setSmoothness(0.95f);
+            _setAO(1.0f);
+            _setMetalness(0.95f);
 
             _addToMaterialPool();
 
@@ -313,14 +313,14 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
-        void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.0001f,0.9999f); }
+        void _setFrensel(float& f){ m_Frensel = glm::clamp(f,0.04f,1.2f); }
         void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
-        void _setSmoothness(float& s){ m_BaseSmoothness = glm::clamp(s,0.0001f,0.9999f); _updateGlobalMaterialPool(); }
+        void _setSmoothness(float& s){ m_BaseSmoothness = glm::clamp(s,0.05f,0.98f); _updateGlobalMaterialPool(); }
         void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
         void _setDiffuseModel(DiffuseModel::Model& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
-		void _setAO(float a){ m_BaseAO = a; _updateGlobalMaterialPool(); }
-		void _setMetalness(float m){ m_BaseMetalness = glm::clamp(m,0.0001f,0.9999f); _updateGlobalMaterialPool(); }
+        void _setAO(float a){ m_BaseAO = a; _updateGlobalMaterialPool(); }
+        void _setMetalness(float m){ m_BaseMetalness = glm::clamp(m,0.0001f,0.9999f); _updateGlobalMaterialPool(); }
 };
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
