@@ -112,7 +112,7 @@ glm::vec3 Math::unpackFloatInto3(float f){
     
     return glm::vec3(r,g,b);
 }
-float Math::pack3BytesInto1(unsigned char r,unsigned char g,unsigned char b){
+float Math::pack3BytesInto1Float(unsigned char r,unsigned char g,unsigned char b){
     return float(r) + float(g) * 256.0f + float(b) * 256.0f * 256.0f;
 }
 
