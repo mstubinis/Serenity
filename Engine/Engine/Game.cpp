@@ -64,7 +64,6 @@ void Game::initResources(){
     Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
     Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallness.png");
     Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
-    Resources::getMaterial("Iron")->setFrensel(FrenselColor::Iron);
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
