@@ -96,25 +96,25 @@ unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
 unordered_map<uint,vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 std::unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
     std::unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
-
-    m[FrenselColor::Aluminium]            = boost::make_tuple(0.91f, 0.92f, 0.92f);
-    m[FrenselColor::Copper]               = boost::make_tuple(0.95f, 0.64f, 0.54f);
-    m[FrenselColor::Diamond]              = boost::make_tuple(0.17f, 0.17f, 0.17f);
-    m[FrenselColor::Glass_Or_Ruby_High]   = boost::make_tuple(0.08f, 0.08f, 0.08f);
-    m[FrenselColor::Gold]                 = boost::make_tuple(1.022f,0.782f,0.344f);
-    m[FrenselColor::Iron]                 = boost::make_tuple(0.56f, 0.57f, 0.58f);
-    m[FrenselColor::Plastic_High]         = boost::make_tuple(0.05f, 0.05f, 0.05f);
-    m[FrenselColor::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f, 0.03f, 0.03f);
-    m[FrenselColor::Silver]               = boost::make_tuple(0.95f, 0.93f, 0.88f);
-    m[FrenselColor::Water]                = boost::make_tuple(0.02f, 0.02f, 0.02f);
+                                                              //Base Color          //Smoothness      //Metalness
+    m[FrenselColor::Aluminium]            = boost::make_tuple(0.91f,0.92f,0.92f,      );
+    m[FrenselColor::Copper]               = boost::make_tuple(0.95f,0.64f,0.54f,      );
+    m[FrenselColor::Diamond]              = boost::make_tuple(0.17f,0.17f,0.17f,      );
+    m[FrenselColor::Glass_Or_Ruby_High]   = boost::make_tuple(0.08f,0.08f,0.08f,      );
+    m[FrenselColor::Gold]                 = boost::make_tuple(1.022f,0.782f,0.344f,   );
+    m[FrenselColor::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,      );
+    m[FrenselColor::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,      );
+    m[FrenselColor::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,      );
+    m[FrenselColor::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,      );
+    m[FrenselColor::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,      );
     
-    m[FrenselColor::Black_Leather]        = boost::make_tuple(0.006f, 0.005f, 0.007f);
-    m[FrenselColor::Yellow_Paint_MERL]    = boost::make_tuple(0.32f, 0.22f, 0.05f);
-    m[FrenselColor::Chromium]             = boost::make_tuple(0.549f, 0.556f, 0.554f);
-    m[FrenselColor::Red_Plastic_MERL]     = boost::make_tuple(0.26f, 0.05f, 0.01f);
-    m[FrenselColor::Blue_Rubber_MERL]     = boost::make_tuple(0.05f, 0.08f, 0.17f);
-    m[FrenselColor::Zinc]                 = boost::make_tuple(0.664f, 0.824f, 0.85f);
-    m[FrenselColor::Car_Paint_Orange]     = boost::make_tuple(1.0f, 0.2f, 0.0f);
+    m[FrenselColor::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,   );
+    m[FrenselColor::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,      );
+    m[FrenselColor::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,   );
+    m[FrenselColor::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,      );
+    m[FrenselColor::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,      );
+    m[FrenselColor::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,    );
+    m[FrenselColor::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,         );
 
     return m;
 }
