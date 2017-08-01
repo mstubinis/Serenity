@@ -110,7 +110,7 @@ namespace glm{
         typedef m4x4_d m4x4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
-		/*
+        /*
         typedef long double number;
         typedef number num;
         typedef q_ld q;
@@ -129,7 +129,7 @@ namespace glm{
         typedef m4x3_ld m4x3;
         typedef m4_ld m4;
         typedef m4x4_ld m4x4;
-		*/
+        */
     #endif
 };
 
@@ -153,12 +153,9 @@ namespace Engine{
 	    
         void translate(ObjectDynamic*,btVector3&,bool local);
 
-        float pack3FloatsInto1(float,float,float);
-        float pack3FloatsInto1(glm::vec3&);
-        glm::vec3 unpackFloatInto3(float);
-        float pack3BytesInto1Float(unsigned char,unsigned char,unsigned char);
-		float pack4FloatsInto1Float(float,float,float,float);
-		float pack4FloatsInto1Float(glm::vec4&);
+        float pack4FloatsInto1Float(float,float,float,float);
+        float pack4FloatsInto1Float(glm::vec4&);
+        glm::vec4 unpackFloatInto4Floats(float i){
 
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
