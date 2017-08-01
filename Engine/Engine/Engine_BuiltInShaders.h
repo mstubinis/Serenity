@@ -746,7 +746,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
     "\n"
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
-    "uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = frensel, g = specPower, b = specularModel, a = diffuseModel \n"
+    "uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = UNUSED, g = specPower, b = specularModel, a = diffuseModel \n"
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
@@ -814,8 +814,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
     "    float smoothness = stuff.y;\n" //UNIFORM
     "    float ao = stuff.z;\n"
     "\n"
-    "    vec3 F0 = DecodeFloatRGBA(materials[index].r).rgb;\n"
-    "    F0 = mix(F0, MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "\n"
     "    float roughness = 1.0 - smoothness;\n"
