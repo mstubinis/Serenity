@@ -82,7 +82,7 @@ void Game::initLogic(){
 
     m_HUD = new HUD();
 
-	Renderer::Settings::HDR::disable();
+    Renderer::Settings::HDR::disable();
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
