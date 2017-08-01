@@ -485,7 +485,7 @@ void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setBaseColor(glm::vec3 c){ Material::setBaseColor(c.r,c.g,c.b); }
 void Material::setBaseColor(float r,float g,float b){ m_i->_setBaseColor(r,g,b); }
-void Material::setMaterialProperties(MaterialProperty::Property c){
+void Material::setMaterialPhysics(MaterialProperty::Property c){
     boost::tuple<float,float,float,float,float>& t = MATERIAL_PROPERTIES.at(c);
     m_i->_setProperties(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>()));
 }
