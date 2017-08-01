@@ -143,27 +143,35 @@ void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int f
     glBindTexture(m_i->m_Type, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress, 0);
 }
+void Texture::setXWrapping(TextureWrap::Wrap w){
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+}
+void Texture::setYWrapping(TextureWrap::Wrap w){
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+void Texture::setZWrapping(TextureWrap::Wrap w){
+    if(m_Type != GL_TEXTURE_CUBE_MAP){ return; } //this is not a cubemap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+}
+void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(w); Texture::setYWrapping(w); Texture::setZWrapping(w); }
+
+void Texture::setMinFilter(TextureFilter::Filter f){
+}
+void Texture::setMaxFilter(TextureFilter::Filter f){
+}
+void Texture::setFilter(TextureFilter::Filter f){ Texture::setMinFilter(f); Texture::setMaxFilter(f); }
+
 void Texture::load(){
     if(!isLoaded()){
         m_i->_load();
-        if(m_i->m_Files.size() == 1){
-            if(m_i->m_Files.at(0) == "FRAMEBUFFER"){ cout << "(Framebuffer Texture) ";
-            }else{ cout << "(Texture) "; }
-        }
-        else if(m_i->m_Files.size() > 1){ cout << "(Cubemap Texture) ";
-        }else{ cout << "(Invalid Texture) "; }
+        cout << "(Texture) ";
         EngineResource::load();
     }
 }
 void Texture::unload(){
     if(isLoaded() && useCount() == 0){
         m_i->_unload();
-        if(m_i->m_Files.size() == 1){
-            if(m_i->m_Files.at(0) == "FRAMEBUFFER"){ cout << "(Framebuffer Texture) ";
-            }else{ cout << "(Texture) "; }
-        }
-        else if(m_i->m_Files.size() > 1){ cout << "(Cubemap Texture) ";
-        }else{ cout << "(Invalid Texture) "; }
+        cout << "(Texture) ";
         EngineResource::unload();
     }
 }
