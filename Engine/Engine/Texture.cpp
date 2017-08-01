@@ -20,7 +20,7 @@ class Texture::impl final{
         GLuint m_TextureAddress;
         GLuint m_Type;
         uint m_Width, m_Height;
-	uint m_Format;
+        uint m_Format;
 
         void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format){
             m_Pixels.clear();
@@ -41,13 +41,13 @@ class Texture::impl final{
 
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
                 sf::Image image; 
-		image.loadFromFile(m_Files[0].c_str());
+                image.loadFromFile(m_Files[0].c_str());
                 _generateFromImage(image);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
                 sf::Image i;
-		i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
+                i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
                 _generateFromImage(i);
                 glBindTexture(m_Type,0);
                 _getPixels();
@@ -55,7 +55,7 @@ class Texture::impl final{
             else if(m_Files.size() > 1){//cubemap
                 for(uint i = 0; i < m_Files.size(); i++){
                     sf::Image image;
-	            image.loadFromFile(m_Files[i].c_str());
+                    image.loadFromFile(m_Files[i].c_str());
                     _generateFromImage(image);
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, m_Format ,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
                 }
@@ -129,6 +129,7 @@ Texture::~Texture(){
     unload();
 }
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
+    if(m_i->m_Files.size() != 1){ return; } //this is either not a valid texture or a cubemap, and cannot be rendered 2D.
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
 void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment){
@@ -145,14 +146,24 @@ void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int f
 void Texture::load(){
     if(!isLoaded()){
         m_i->_load();
-        std::cout << "(Texture) ";
+        if(m_i->m_Files.size() == 1){
+            if(m_i->m_Files.at(0) == "FRAMEBUFFER"){ cout << "(Framebuffer Texture) ";
+            }else{ cout << "(Texture) "; }
+        }
+        else if(m_i->m_Files.size() > 1){ cout << "(Cubemap Texture) ";
+        }else{ cout << "(Invalid Texture) "; }
         EngineResource::load();
     }
 }
 void Texture::unload(){
     if(isLoaded() && useCount() == 0){
         m_i->_unload();
-        std::cout << "(Texture) ";
+        if(m_i->m_Files.size() == 1){
+            if(m_i->m_Files.at(0) == "FRAMEBUFFER"){ cout << "(Framebuffer Texture) ";
+            }else{ cout << "(Texture) "; }
+        }
+        else if(m_i->m_Files.size() > 1){ cout << "(Cubemap Texture) ";
+        }else{ cout << "(Invalid Texture) "; }
         EngineResource::unload();
     }
 }
