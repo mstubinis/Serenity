@@ -27,7 +27,7 @@ class GBuffer::impl final{
         GLuint m_fbo_bloom; GLuint m_depth_fake;
         std::unordered_map<uint,boost::weak_ptr<TextureBuffer>> m_Buffers;
         uint m_Width; uint m_Height;
-        void _init(uint w,uint h){
+        bool _init(uint w,uint h){
             _destruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
             m_Width = w; m_Height = h;
@@ -48,6 +48,7 @@ class GBuffer::impl final{
             _constructFramebuffer("BUFFER_DEPTH",   BUFFER_TYPE_DEPTH,   m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+                return false;
             }
             Renderer::bindFBO(0);
 
@@ -65,9 +66,10 @@ class GBuffer::impl final{
             _constructFramebuffer("BUFFER_GODSRAYS",BUFFER_TYPE_GODSRAYS,m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+                return false;
             }
-
             Renderer::bindFBO(0);
+            return true;
         }
         void _constructFramebuffer(std::string n,uint t,uint w,uint h){
             TextureBuffer* tbo = nullptr;
