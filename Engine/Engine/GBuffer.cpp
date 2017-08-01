@@ -189,5 +189,5 @@ void GBuffer::start(uint type,uint type1,uint type2,uint type3,uint type4,uint t
 void GBuffer::stop(){m_i->_stop();}
 const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& GBuffer::getBuffers() const{ return m_i->m_Buffers; }
 Texture* GBuffer::getTexture(uint type){ return m_i->m_Buffers.at(type).lock().get();}
-GLuint& GBuffer::getMainFBO(){ return m_i->m_fbo; }
-GLuint& GBuffer::getSmallFBO(){ return m_i->m_fbo_bloom; }
+const GLuint& GBuffer::getMainFBO() const{ return m_i->m_fbo; }
+const GLuint& GBuffer::getSmallFBO() const{ return m_i->m_fbo_bloom; }
