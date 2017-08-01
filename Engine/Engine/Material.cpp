@@ -94,31 +94,31 @@ unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
     return texture_slot_map;
 }
 unordered_map<uint,vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
-std::unordered_map<uint,boost::tuple<float,float,float>> _populateFrenselColors(){
-    std::unordered_map<uint,boost::tuple<float,float,float>> m;
+std::unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
+    std::unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
 
-    m[FrenselColor::Aluminium] = boost::make_tuple(0.91f, 0.92f, 0.92f);
-    m[FrenselColor::Copper] = boost::make_tuple(0.95f, 0.64f, 0.54f);
-    m[FrenselColor::Diamond] = boost::make_tuple(0.17f, 0.17f, 0.17f);
-    m[FrenselColor::Glass_Or_Ruby_High] = boost::make_tuple(0.08f, 0.08f, 0.08f);
-    m[FrenselColor::Gold] = boost::make_tuple(1.022f,0.782f,0.344f);
-    m[FrenselColor::Iron] = boost::make_tuple(0.56f, 0.57f, 0.58f);
-    m[FrenselColor::Plastic_High] = boost::make_tuple(0.05f, 0.05f, 0.05f);
+    m[FrenselColor::Aluminium]            = boost::make_tuple(0.91f, 0.92f, 0.92f);
+    m[FrenselColor::Copper]               = boost::make_tuple(0.95f, 0.64f, 0.54f);
+    m[FrenselColor::Diamond]              = boost::make_tuple(0.17f, 0.17f, 0.17f);
+    m[FrenselColor::Glass_Or_Ruby_High]   = boost::make_tuple(0.08f, 0.08f, 0.08f);
+    m[FrenselColor::Gold]                 = boost::make_tuple(1.022f,0.782f,0.344f);
+    m[FrenselColor::Iron]                 = boost::make_tuple(0.56f, 0.57f, 0.58f);
+    m[FrenselColor::Plastic_High]         = boost::make_tuple(0.05f, 0.05f, 0.05f);
     m[FrenselColor::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f, 0.03f, 0.03f);
-    m[FrenselColor::Silver] = boost::make_tuple(0.95f, 0.93f, 0.88f);
-    m[FrenselColor::Water] = boost::make_tuple(0.02f, 0.02f, 0.02f);
+    m[FrenselColor::Silver]               = boost::make_tuple(0.95f, 0.93f, 0.88f);
+    m[FrenselColor::Water]                = boost::make_tuple(0.02f, 0.02f, 0.02f);
     
-    m[FrenselColor::Black_Leather] = boost::make_tuple(0.006f, 0.005f, 0.007f);
-    m[FrenselColor::Yellow_Paint_MERL] = boost::make_tuple(0.32f, 0.22f, 0.05f);
-    m[FrenselColor::Chromium] = boost::make_tuple(0.549f, 0.556f, 0.554f);
-    m[FrenselColor::Red_Plastic_MERL] = boost::make_tuple(0.26f, 0.05f, 0.01f);
-    m[FrenselColor::Blue_Rubber_MERL] = boost::make_tuple(0.05f, 0.08f, 0.17f);
-    m[FrenselColor::Zinc] = boost::make_tuple(0.664f, 0.824f, 0.85f);
-    m[FrenselColor::Car_Paint_Orange] = boost::make_tuple(1.0f, 0.2f, 0.0f);
+    m[FrenselColor::Black_Leather]        = boost::make_tuple(0.006f, 0.005f, 0.007f);
+    m[FrenselColor::Yellow_Paint_MERL]    = boost::make_tuple(0.32f, 0.22f, 0.05f);
+    m[FrenselColor::Chromium]             = boost::make_tuple(0.549f, 0.556f, 0.554f);
+    m[FrenselColor::Red_Plastic_MERL]     = boost::make_tuple(0.26f, 0.05f, 0.01f);
+    m[FrenselColor::Blue_Rubber_MERL]     = boost::make_tuple(0.05f, 0.08f, 0.17f);
+    m[FrenselColor::Zinc]                 = boost::make_tuple(0.664f, 0.824f, 0.85f);
+    m[FrenselColor::Car_Paint_Orange]     = boost::make_tuple(1.0f, 0.2f, 0.0f);
 
     return m;
 }
-std::unordered_map<uint,boost::tuple<float,float,float>> FRENSEL_COLORS = _populateFrenselColors();
+std::unordered_map<uint,boost::tuple<float,float,float>> MATERIAL_PROPERTIES = _populateMaterialProperties();
 
 
 
@@ -214,8 +214,8 @@ class Material::impl final{
   
         bool m_Shadeless;
         float m_BaseGlow;
-
-        glm::vec3 m_Frensel;
+    
+        glm::vec3 m_BaseColor;
 
         float m_BaseSmoothness;
         float m_BaseMetalness;
@@ -227,19 +227,19 @@ class Material::impl final{
             _addComponentNormal(normal);
             _addComponentGlow(glow);
             _addComponentSpecular(specular);
-
-            m_Shadeless = false;
-            m_BaseGlow = 0.0f;
+            
             m_SpecularModel = SpecularModel::Model::Cook_Torrance;
             m_DiffuseModel = DiffuseModel::Model::Lambert;
 
             _addToMaterialPool();
 
-            super->setFrensel(FrenselColor::Gold);
-
+            _setBaseColor(1.0f,1.0f,1.0f);
             _setSmoothness(0.95f);
             _setAO(1.0f);
             _setMetalness(0.95f);
+            
+            m_Shadeless = false;
+            m_BaseGlow = 0.0f;
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
@@ -340,10 +340,14 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
-        void _setFrensel(glm::vec3& f){ 
-            m_Frensel.x = glm::clamp(f.x,0.04f,1.2f);
-            m_Frensel.y = glm::clamp(f.y,0.04f,1.2f);
-            m_Frensel.z = glm::clamp(f.z,0.04f,1.2f);
+        void _setBaseColor(float r, float g, float b){
+            m_BaseColor.r = r; m_BaseColor.g = g; m_BaseColor.b = b;
+            _updateGlobalMaterialPool();
+        }
+        void _setMaterialProperties(float r,float g,float b,float smoothness,float metalness){
+            _setBaseColor(r,g,b);
+            _setSmoothness(smoothness);
+            _setMetalness(metalness);
             _updateGlobalMaterialPool();
         }
         void _setShadeless(bool b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
@@ -474,7 +478,6 @@ const MaterialComponentReflection* Material::getComponentReflection() const { re
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::Refraction)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
-const glm::vec3& Material::frensel() const { return m_i->m_Frensel; }
 const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
 const uint Material::specularModel() const { return m_i->m_SpecularModel; }
 const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
@@ -484,10 +487,11 @@ const float Material::ao() const { return m_i->m_BaseAO; }
 
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
-void Material::setFrensel(glm::vec3 f){ m_i->_setFrensel(f); }
-void Material::setFrensel(FrenselColor::Color c){
-    boost::tuple<float,float,float>& t = FRENSEL_COLORS.at(c);
-    m_i->_setFrensel(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>()));
+void Material::setBaseColor(glm::vec3 c){ Material::setBaseColor(c.r,c.g,c.b); }
+void Material::setBaseColor(float r,float g,float b){ m_i->_setBaseColor(r,g,b); }
+void Material::setMaterialProperties(MaterialProperties::Property c){
+    boost::tuple<float,float,float,float,float>& t = MATERIAL_PROPERTIES.at(c);
+    m_i->_setProperties(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>()));
 }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
