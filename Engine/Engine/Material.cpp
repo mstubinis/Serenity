@@ -225,7 +225,7 @@ class Material::impl final{
             m_SpecularModel = SpecularModel::Model::Cook_Torrance;
             m_DiffuseModel = DiffuseModel::Model::Lambert;
 
-			_addToMaterialPool();
+            _addToMaterialPool();
 
             super->setFrensel(FrenselColor::Gold);
 
@@ -270,7 +270,7 @@ class Material::impl final{
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
 
-			float frensel = Engine::Math::pack4FloatsInto1Float(m_Frensel.x,m_Frensel.y,m_Frensel.z,0.0f);
+            float frensel = Engine::Math::pack4FloatsInto1Float(m_Frensel.x,m_Frensel.y,m_Frensel.z,0.0f);
             glm::vec4 data(frensel, m_BaseSmoothness, m_SpecularModel, m_DiffuseModel);
             Material::m_MaterialProperities.push_back(data);
         }
@@ -478,8 +478,8 @@ void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setFrensel(glm::vec3 f){ m_i->_setFrensel(f); }
 void Material::setFrensel(FrenselColor::Color c){
-	boost::tuple<float,float,float>& t = FRENSEL_COLORS.at(c);
-	m_i->_setFrensel(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>()));
+    boost::tuple<float,float,float>& t = FRENSEL_COLORS.at(c);
+    m_i->_setFrensel(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>()));
 }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
