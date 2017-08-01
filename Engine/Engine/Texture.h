@@ -15,6 +15,27 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 namespace sf{ class Image; }
 
+class TextureWrap{
+    public: enum Wrap{
+        Repeat,
+        RepeatMirrored,
+        ClampToEdge,
+        ClampToBorder
+    };
+};
+class TextureFilter{
+    public: enum Filter{
+        Linear,
+        Nearest,
+        Linear_Nearest,
+        Nearest_Linear,
+        Nearest_Mipmap_Nearest,
+        Nearest_Mipmap_Linear,
+        Linear_Mipmap_Nearest,
+        Linear_Mipmap_Linear
+    };
+};
+
 class Texture: public EngineResource{
     private:
         class impl;
@@ -34,6 +55,16 @@ class Texture: public EngineResource{
 
         virtual void load();
         virtual void unload();
+    
+        void setXWrapping(TextureWrap::Wrap);
+        void setYWrapping(TextureWrap::Wrap);
+        void setZWrapping(TextureWrap::Wrap);
+        void setWrapping(TextureWrap::Wrap);
+    
+        void setMinFilter(TextureFilter::Filter);
+        void setMaxFilter(TextureFilter::Filter);
+        void setFilter(TextureFilter::Filter);
+    
 
         void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
