@@ -33,7 +33,7 @@ void Game::initResources(){
     Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
     Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
 
-	Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
+    Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
     Resources::addMesh("Planet","data/Models/planet.obj");
     Resources::addMesh("Defiant","data/Models/defiant.obj",CollisionType::ConvexHull);
@@ -41,9 +41,9 @@ void Game::initResources(){
     Resources::addMesh("Miranda","data/Models/miranda.obj",CollisionType::ConvexHull);
     Resources::addMesh("Intrepid","data/Models/intrepid.obj",CollisionType::ConvexHull);
     Resources::addMesh("Norway","data/Models/norway.obj",CollisionType::ConvexHull);
-	Resources::addMesh("Starbase","data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
+    Resources::addMesh("Starbase","data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
     Resources::addMesh("Ring","data/Models/ring.obj");
-	Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
+    Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
@@ -61,9 +61,10 @@ void Game::initResources(){
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
 
-	Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
-	Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallness.png");
-	Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
+    Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
+    Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallness.png");
+    Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
+    Resources::getMaterial("Iron")->setFrensel(FrenselColor::Iron);
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -97,39 +98,38 @@ void Game::update(float dt){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-	if(Events::Keyboard::isKeyDownOnce("f6")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE); }
+    if(Events::Keyboard::isKeyDownOnce("f6")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE); }
     if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC); }
     if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD); }
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED); }
 
     if(Events::Keyboard::isKeyDown("z")){
-		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.07f);
+        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.07f);
     }
     else if(Events::Keyboard::isKeyDown("x")){
-		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.07f);
+        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.07f);
     }
     if(Events::Keyboard::isKeyDown("c")){
-		Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.07f);
+        Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.07f);
     }
     else if(Events::Keyboard::isKeyDown("k")){
-		Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.07f);
+        Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.07f);
     }
 
     if(Events::Keyboard::isKeyDown("n")){
-		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
+        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
-		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.07f);
+        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.07f);
     }
     if(Events::Keyboard::isKeyDown("v")){
-		Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.07f);
+        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.07f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
-		Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.07f);
+        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.07f);
     }
-
-	Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());
-	Resources::getObject("SpotLightPlayer")->setOrientation(Resources::getObject("Player")->getOrientation());
+    Resources::getObject("SpotLightPlayer")->setPosition(Resources::getObject("Player")->getPosition());
+    Resources::getObject("SpotLightPlayer")->setOrientation(Resources::getObject("Player")->getOrientation());
 
     m_HUD->update(dt);
 }
