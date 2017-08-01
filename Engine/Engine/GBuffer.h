@@ -19,9 +19,9 @@ const float GBUFFER_DIVISIBLES[] = {    //framebuffer pixel size = window size *
     1.0f  // depth
 };
 const int GBUFFER_TYPES[] = {
-    GL_RGB8,              // (diffuse.rgb)
-    GL_RGBA16F,            // (normals.rgb) (MaterialID.a)
-    GL_RGBA8,              // Glow & SpecularMap(Greyscale) & Metalness THEN HDR
+    GL_RGB8,               // (diffuse.rgb)
+    GL_RGBA32F,            // (normals.rgb) (MaterialID + Smoothness + AO + metalness ->Encoded into 1 float) //ugh... 32F is hurtful but it works with this padding
+    GL_RGBA8,              // Glow & SpecularMap(Greyscale) & UNUSED THEN HDR
     GL_RGB16F,             // (lighting.rgb)
     GL_RGBA8,              // bloom, & ssao as alpha
     GL_RGB8,               // gods rays
@@ -30,8 +30,8 @@ const int GBUFFER_TYPES[] = {
 };
 const int GBUFFER_PIXEL_TYPES[] = {
     GL_RGB,               // (diffuse.rgb)
-    GL_RGBA,               // (normals.rgb) (MaterialID.a)
-    GL_RGBA,               // Glow & SpecularMap(Greyscale) & Metalness THEN HDR
+    GL_RGBA,               // (normals.rgb) (MaterialID + Smoothness + AO + metalness ->Encoded into 1 float)
+    GL_RGBA,               // Glow & SpecularMap(Greyscale) & UNUSED THEN HDR
     GL_RGB,                // (lighting.rgb)
     GL_RGBA,               // bloom, & ssao as alpha
     GL_RGB,                // gods rays

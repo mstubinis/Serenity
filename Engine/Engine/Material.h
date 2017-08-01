@@ -49,6 +49,23 @@ class MaterialComponentTextureSlot{
         Refraction_CUBEMAP_MAP,
     };
 };
+class FrenselColor{
+	public: enum Color{
+		Water,
+		Plastic_Or_Glass_Low,
+		Plastic_High,
+		Glass_Or_Ruby_High,
+		Diamond,
+		Iron,
+		Copper,
+		Gold,
+		Aluminium,
+		Silver
+	};
+};
+
+
+
 class DiffuseModel{
     public: enum Model{
         Lambert,
@@ -165,25 +182,25 @@ class Material final: public BindableResource{
         void addComponent(uint type, Texture* texture);
 
         void addComponentDiffuse(Texture* texture);
-        void addComponentDiffuse(std::string& textureFile);
+        void addComponentDiffuse(std::string textureFile);
 
         void addComponentNormal(Texture* texture);
-        void addComponentNormal(std::string& textureFile);
+        void addComponentNormal(std::string textureFile);
 
         void addComponentGlow(Texture* texture);
-        void addComponentGlow(std::string& textureFile);
+        void addComponentGlow(std::string textureFile);
 
         void addComponentSpecular(Texture* texture);
-        void addComponentSpecular(std::string& textureFile);
+        void addComponentSpecular(std::string textureFile);
 
         void addComponentAO(Texture* texture,float baseValue = 1.0f);
-        void addComponentAO(std::string& textureFile,float baseValue = 1.0f);
+        void addComponentAO(std::string textureFile,float baseValue = 1.0f);
 
         void addComponentMetalness(Texture* texture,float baseValue = 1.0f);
-        void addComponentMetalness(std::string& textureFile,float baseValue = 1.0f);
+        void addComponentMetalness(std::string textureFile,float baseValue = 1.0f);
 
         void addComponentSmoothness(Texture* texture,float baseValue = 1.0f);
-        void addComponentSmoothness(std::string& textureFile,float baseValue = 1.0f);
+        void addComponentSmoothness(std::string textureFile,float baseValue = 1.0f);
 
         void addComponentReflection(Texture* cubeMap,Texture* map,float mixFactor = 1.0f);
         void addComponentReflection(std::string cubeMapName,std::string mapFile,float mixFactor = 1.0f);
@@ -195,7 +212,7 @@ class Material final: public BindableResource{
 
         const uint id() const;
     
-        const float frensel() const;
+        const glm::vec3& frensel() const;
         const bool shadeless() const;
         const float glow() const;
         const float smoothness() const;
@@ -203,6 +220,7 @@ class Material final: public BindableResource{
         const float ao() const;
         
         void setFrensel(glm::vec3);
+		void setFrensel(FrenselColor::Color);
         void setShadeless(bool);
         void setGlow(float);
         void setSmoothness(float);

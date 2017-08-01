@@ -86,13 +86,18 @@ float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
+float Math::pack4FloatsInto1Float(float r,float g,float b,float a){
+	const float decode_x = 1.0f/255.0f;
+	const float decode_y = 1.0f/65025.0f;
+	const float decode_z = 1.0f/16581375.0f;
+	return glm::dot( glm::vec4(r,g,b,a), glm::vec4(1.0f, decode_x, decode_y, decode_z) );
+}
+float Math::pack4FloatsInto1Float(glm::vec4& c){ return Math::pack4FloatsInto1Float(c.r,c.g,c.b,c.a); }
+
 float Math::pack3FloatsInto1(float x,float y,float z){
     //Scale and bias
-    x = (x + 1.0f) * 0.5f;
     unsigned char _x = (unsigned char)(x*255.0f);    
-    y = (y + 1.0f) * 0.5f;
     unsigned char _y = (unsigned char)(y*255.0f);        
-    z = (z + 1.0f) * 0.5f;
     unsigned char _z = (unsigned char)(z*255.0f);       
      
     unsigned int packedColor = (_x << 16) | (_y << 8) | _z;
@@ -113,7 +118,7 @@ glm::vec3 Math::unpackFloatInto3(float f){
     return glm::vec3(r,g,b);
 }
 float Math::pack3BytesInto1Float(unsigned char r,unsigned char g,unsigned char b){
-    return float(r) + float(g) * 256.0f + float(b) * 256.0f * 256.0f;
+    return float(r) + (float(g) * 256.0f) + (float(b) * 256.0f * 256.0f);
 }
 
 

@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <iostream>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
 using namespace std;
@@ -93,6 +94,25 @@ unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
     return texture_slot_map;
 }
 unordered_map<uint,vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
+std::unordered_map<uint,boost::tuple<float,float,float>> _populateFrenselColors(){
+    std::unordered_map<uint,boost::tuple<float,float,float>> m;
+
+    m[FrenselColor::Aluminium] = boost::make_tuple(0.91f, 0.92f, 0.92f);
+    m[FrenselColor::Copper] = boost::make_tuple(0.95f, 0.64f, 0.54f);
+    m[FrenselColor::Diamond] = boost::make_tuple(0.17f, 0.17f, 0.17f);
+    m[FrenselColor::Glass_Or_Ruby_High] = boost::make_tuple(0.08f, 0.08f, 0.08f);
+    m[FrenselColor::Gold] = boost::make_tuple(1.022f,0.782f,0.344f);
+    m[FrenselColor::Iron] = boost::make_tuple(0.56f, 0.57f, 0.58f);
+    m[FrenselColor::Plastic_High] = boost::make_tuple(0.05f, 0.05f, 0.05f);
+    m[FrenselColor::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f, 0.03f, 0.03f);
+    m[FrenselColor::Silver] = boost::make_tuple(0.95f, 0.93f, 0.88f);
+    m[FrenselColor::Water] = boost::make_tuple(0.02f, 0.02f, 0.02f);
+
+    return m;
+}
+std::unordered_map<uint,boost::tuple<float,float,float>> FRENSEL_COLORS = _populateFrenselColors();
+
+
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (MaterialComponentType::Type)type;
@@ -205,12 +225,13 @@ class Material::impl final{
             m_SpecularModel = SpecularModel::Model::Cook_Torrance;
             m_DiffuseModel = DiffuseModel::Model::Lambert;
 
-            _setFrensel(glm::vec3(0.04f));
+			_addToMaterialPool();
+
+            super->setFrensel(FrenselColor::Gold);
+
             _setSmoothness(0.95f);
             _setAO(1.0f);
             _setMetalness(0.95f);
-
-            _addToMaterialPool();
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
@@ -248,16 +269,15 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-            glm::vec4 data(m_Frensel, m_BaseSmoothness, m_SpecularModel, m_DiffuseModel);
+
+			float frensel = Engine::Math::pack4FloatsInto1Float(m_Frensel.x,m_Frensel.y,m_Frensel.z,0.0f);
+            glm::vec4 data(frensel, m_BaseSmoothness, m_SpecularModel, m_DiffuseModel);
             Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
             
-            unsigned char r = (unsigned char)m_Frensel.x;
-            unsigned char g = (unsigned char)m_Frensel.y;
-            unsigned char b = (unsigned char)m_Frensel.z;
-            data.r = Engine::Math::pack3BytesInto1Float(r,g,b);
+            data.r = Engine::Math::pack4FloatsInto1Float(m_Frensel.x,m_Frensel.y,m_Frensel.z,0.0f);
             
             data.g = m_BaseSmoothness;
             data.b = float(m_SpecularModel);
@@ -314,13 +334,13 @@ class Material::impl final{
         }
         void _setFrensel(glm::vec3& f){ 
             m_Frensel.x = glm::clamp(f.x,0.04f,1.2f);
-            m_Frensel.y = glm::clamp(f.y,0.04f,1.2f); 
-            m_Frensel.z = glm::clamp(f.z,0.04f,1.2f); 
+            m_Frensel.y = glm::clamp(f.y,0.04f,1.2f);
+            m_Frensel.z = glm::clamp(f.z,0.04f,1.2f);
             _updateGlobalMaterialPool();
         }
-        void _setShadeless(bool& b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
-        void _setBaseGlow(float& f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
-        void _setSmoothness(float& s){ m_BaseSmoothness = glm::clamp(s,0.05f,0.98f); _updateGlobalMaterialPool(); }
+        void _setShadeless(bool b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
+        void _setBaseGlow(float f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
+        void _setSmoothness(float s){ m_BaseSmoothness = glm::clamp(s,0.05f,0.98f); _updateGlobalMaterialPool(); }
         void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
         void _setDiffuseModel(DiffuseModel::Model& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
         void _setAO(float a){ m_BaseAO = a; _updateGlobalMaterialPool(); }
@@ -346,7 +366,7 @@ Material::~Material(){
 void Material::addComponentDiffuse(Texture* texture){
     m_i->_addComponentDiffuse(texture);
 }
-void Material::addComponentDiffuse(string& textureFile){
+void Material::addComponentDiffuse(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
     m_i->_addComponentDiffuse(texture);
@@ -354,7 +374,7 @@ void Material::addComponentDiffuse(string& textureFile){
 void Material::addComponentNormal(Texture* texture){
     m_i->_addComponentNormal(texture);
 }
-void Material::addComponentNormal(string& textureFile){
+void Material::addComponentNormal(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentNormal(texture);
@@ -362,7 +382,7 @@ void Material::addComponentNormal(string& textureFile){
 void Material::addComponentGlow(Texture* texture){
     m_i->_addComponentGlow(texture);
 }
-void Material::addComponentGlow(string& textureFile){
+void Material::addComponentGlow(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentGlow(texture);
@@ -370,7 +390,7 @@ void Material::addComponentGlow(string& textureFile){
 void Material::addComponentSpecular(Texture* texture){
     m_i->_addComponentSpecular(texture);
 }
-void Material::addComponentSpecular(string& textureFile){
+void Material::addComponentSpecular(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentSpecular(texture);
@@ -380,7 +400,7 @@ void Material::addComponentAO(Texture* texture,float baseValue){
     m_i->_addComponentAO(texture);
     setAO(baseValue);
 }
-void Material::addComponentAO(string& textureFile,float baseValue){
+void Material::addComponentAO(string textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentAO(texture);
@@ -390,7 +410,7 @@ void Material::addComponentMetalness(Texture* texture,float baseValue){
     m_i->_addComponentMetalness(texture);
     setMetalness(baseValue);
 }
-void Material::addComponentMetalness(string& textureFile,float baseValue){
+void Material::addComponentMetalness(string textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentMetalness(texture);
@@ -400,7 +420,7 @@ void Material::addComponentSmoothness(Texture* texture,float baseValue){
     m_i->_addComponentSmoothness(texture);
     setSmoothness(baseValue);
 }
-void Material::addComponentSmoothness(string& textureFile,float baseValue){
+void Material::addComponentSmoothness(string textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,GL_RGBA8);
     m_i->_addComponentSmoothness(texture);
@@ -446,7 +466,7 @@ const MaterialComponentReflection* Material::getComponentReflection() const { re
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::Refraction)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
-const float Material::frensel() const { return m_i->m_Frensel; }
+const glm::vec3& Material::frensel() const { return m_i->m_Frensel; }
 const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
 const uint Material::specularModel() const { return m_i->m_SpecularModel; }
 const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
@@ -457,6 +477,10 @@ const float Material::ao() const { return m_i->m_BaseAO; }
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setFrensel(glm::vec3 f){ m_i->_setFrensel(f); }
+void Material::setFrensel(FrenselColor::Color c){
+	boost::tuple<float,float,float>& t = FRENSEL_COLORS.at(c);
+	m_i->_setFrensel(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>()));
+}
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
 void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }

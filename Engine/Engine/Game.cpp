@@ -60,6 +60,10 @@ void Game::initResources(){
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","","Deferred_HUD");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
+
+	Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
+	Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallness.png");
+	Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -77,8 +81,7 @@ void Game::initLogic(){
 
     m_HUD = new HUD();
 
-    Renderer::Settings::HDR::disable();
-
+	Renderer::Settings::HDR::disable();
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -94,13 +97,24 @@ void Game::update(float dt){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f6")){ Material::setAllSpecularModels(SpecularModel::Phong); }
-    if(Events::Keyboard::isKeyDownOnce("f7")){ Material::setAllSpecularModels(SpecularModel::Blinn_Phong); }
-    if(Events::Keyboard::isKeyDownOnce("f8")){ Material::setAllSpecularModels(SpecularModel::Beckmann); }
-    if(Events::Keyboard::isKeyDownOnce("f9")){ Material::setAllSpecularModels(SpecularModel::Ashikhmin_Shirley); }
-    if(Events::Keyboard::isKeyDownOnce("f10")){ Material::setAllSpecularModels(SpecularModel::Guassian); }
-    if(Events::Keyboard::isKeyDownOnce("f11")){ Material::setAllSpecularModels(SpecularModel::GXX); }
-    if(Events::Keyboard::isKeyDownOnce("f12")){ Material::setAllSpecularModels(SpecularModel::Cook_Torrance); }
+	if(Events::Keyboard::isKeyDownOnce("f6")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE); }
+    if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC); }
+    if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD); }
+    if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED); }
+
+    if(Events::Keyboard::isKeyDown("z")){
+		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.07f);
+    }
+    else if(Events::Keyboard::isKeyDown("x")){
+		Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.07f);
+    }
+    if(Events::Keyboard::isKeyDown("c")){
+		Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.07f);
+    }
+    else if(Events::Keyboard::isKeyDown("k")){
+		Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.07f);
+    }
+
     if(Events::Keyboard::isKeyDown("n")){
 		Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
     }

@@ -26,6 +26,7 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
+float Detail::RendererInfo::GeneralInfo::gamma = 2.1f;
 bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
 bool Detail::RendererInfo::GeneralInfo::depth_test = true;
 bool Detail::RendererInfo::GeneralInfo::depth_mask = true;
@@ -67,8 +68,7 @@ GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
 bool Detail::RendererInfo::HDRInfo::hdr = true;
 float Detail::RendererInfo::HDRInfo::hdr_exposure = 3.2f;
-float Detail::RendererInfo::HDRInfo::hdr_gamma = 1.3f;
-HDRToneMapAlgorithm::Algorithm Detail::RendererInfo::HDRInfo::hdr_algorithm = HDRToneMapAlgorithm::EXPOSURE;
+HDRToneMapAlgorithm::Algorithm Detail::RendererInfo::HDRInfo::hdr_algorithm = HDRToneMapAlgorithm::UNCHARTED;
 
 GBuffer* Detail::RenderManagement::m_gBuffer = nullptr;
 glm::mat4 Detail::RenderManagement::m_2DProjectionMatrix;
@@ -181,6 +181,8 @@ void Settings::disableDepthMask(){
         Detail::RendererInfo::GeneralInfo::depth_mask = false;
     }
 }
+void Settings::setGamma(float g){ Detail::RendererInfo::GeneralInfo::gamma = g; }
+float Settings::getGamma(){ return Detail::RendererInfo::GeneralInfo::gamma; }
 
 void Renderer::bindTexture(const char* l,Texture* t,uint slot){Renderer::bindTexture(l,t->address(),slot,t->type());}
 void Renderer::bindTexture(const char* l,GLuint address,uint slot,GLuint type){
@@ -452,7 +454,7 @@ void Detail::RenderManagement::_passLighting(){
     sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
 
     glm::vec3 campos = Resources::getActiveCamera()->getPosition();
-    Renderer::sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::HDRInfo::hdr_gamma);
+    Renderer::sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
 
 	sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
@@ -698,7 +700,7 @@ void Detail::RenderManagement::_passFinal(){
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
-    sendUniform1fSafe("gamma",RendererInfo::HDRInfo::hdr_gamma);
+	sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
     bindTextureSafe("gLightMap",m_gBuffer->getTexture(BUFFER_TYPE_LIGHTING),1);

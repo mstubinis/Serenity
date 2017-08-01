@@ -67,6 +67,7 @@ namespace Engine{
         namespace Detail{
             struct RendererInfo final{
                 struct GeneralInfo final{
+					static float gamma;
                     static bool alpha_test;
                     static bool depth_mask;
                     static bool depth_test;
@@ -93,7 +94,6 @@ namespace Engine{
                 struct HDRInfo final{
                     static bool hdr;
                     static float hdr_exposure;
-                    static float hdr_gamma;
                     static HDRToneMapAlgorithm::Algorithm hdr_algorithm;
                 };
                 struct GodRaysInfo final{
@@ -162,6 +162,9 @@ namespace Engine{
 
         namespace Settings{
 
+			void setGamma(float g);
+			float getGamma();
+
             void clear(bool color = true, bool depth = true, bool stencil = true);
 
             void enableCullFace(bool b = true);
@@ -182,9 +185,7 @@ namespace Engine{
                 static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
 
                 static float getExposure(){ return Detail::RendererInfo::HDRInfo::hdr_exposure; }
-                static float getGamma(){ return Detail::RendererInfo::HDRInfo::hdr_gamma; }
                 static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
-                static void setGamma(float g){ Detail::RendererInfo::HDRInfo::hdr_gamma = g; }
 
                 static void setAlgorithm(HDRToneMapAlgorithm::Algorithm a){ Detail::RendererInfo::HDRInfo::hdr_algorithm = a; }
             };

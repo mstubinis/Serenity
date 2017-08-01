@@ -3,8 +3,6 @@
 #define ENGINE_LIGHT_H
 
 #include "ObjectDisplay.h"
-
-#include <boost/tuple/tuple.hpp>
 #include <unordered_map>
 
 enum LightType {

@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
 
@@ -41,6 +42,7 @@ SunLight::SunLight(glm::vec3 pos,std::string n,unsigned int type,Scene* scene):O
     m_AmbientIntensity = 0.005f;
     m_DiffuseIntensity = 2.0f;
     m_SpecularIntensity = 1.0f;
+	m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
 
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
@@ -68,6 +70,7 @@ void SunLight::lighten(){
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0),name,LightType::Directional,scene){
     alignTo(dir,0);
     ObjectBasic::update(0);
+	m_Color = glm::vec4(1.2,1.2f,1.2f,1.0f);
 }
 DirectionalLight::~DirectionalLight(){
 }
@@ -571,6 +574,7 @@ PointLight::PointLight(std::string name, glm::vec3 pos,Scene* scene): SunLight(p
     m_Linear = 0.1f;
     m_Exp = 0.1f;
     m_PointLightRadius = calculatePointLightRadius();
+	m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
 }
 PointLight::~PointLight(){
 }
