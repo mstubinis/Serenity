@@ -87,13 +87,11 @@ float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
 float Math::pack4FloatsInto1Float(float r,float g,float b,float a){
-    float r = ((int)floor((a)*63) << 18) | ((int)floor((b)*63) <<  12) | ((int)floor((c)*63) <<   6) | ((int)floor((d)*63));
+    float r = ((int)glm::floor((a)*63) << 18) | ((int)glm::floor((b)*63) <<  12) | ((int)glm::floor((c)*63) <<   6) | ((int)glm::floor((d)*63));
     return r;
 }
 float Math::pack4FloatsInto1Float(glm::vec4& c){ return Math::pack4FloatsInto1Float(c.r,c.g,c.b,c.a); }
-glm::vec4 Math::packFloatInto4Floats(float i){
-   return glm::mod(glm::vec4(i / 262144.0f, i / 4096.0f, i / 64.0f, i), 64.0f);
-}
+glm::vec4 Math::unpackFloatInto4Floats(float i){ return glm::mod(glm::vec4(i / 262144.0f, i / 4096.0f, i / 64.0f, i), 64.0f); }
 
 void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
     if(local){
@@ -164,7 +162,7 @@ glm::vec3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
     btTransform t;
     b->getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
-	return glm::normalize(glm::vec3(v.x(),v.y(),v.z()));
+    return glm::normalize(glm::vec3(v.x(),v.y(),v.z()));
 }
 glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
 glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
