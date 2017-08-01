@@ -49,7 +49,7 @@ class MaterialComponentTextureSlot{
         Refraction_CUBEMAP_MAP,
     };
 };
-class MaterialProperties{
+class MaterialProperty{
     public: enum Property{
         Water,
         Plastic_Or_Glass_Low,
@@ -225,7 +225,7 @@ class Material final: public BindableResource{
         const float metalness() const;
         const float ao() const;
         
-        void setMaterialProperties(MaterialProperties::Property);
+        void setMaterialProperties(MaterialProperty::Property);
         void setShadeless(bool);
         void setGlow(float);
         void setSmoothness(float);
