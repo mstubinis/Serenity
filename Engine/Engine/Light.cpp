@@ -70,7 +70,7 @@ void SunLight::lighten(){
 DirectionalLight::DirectionalLight(std::string name, glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0),name,LightType::Directional,scene){
     alignTo(dir,0);
     ObjectBasic::update(0);
-	m_Color = glm::vec4(1.2,1.2f,1.2f,1.0f);
+	m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
 }
 DirectionalLight::~DirectionalLight(){
 }

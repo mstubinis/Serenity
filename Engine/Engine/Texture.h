@@ -20,19 +20,17 @@ class TextureWrap{
         Repeat,
         RepeatMirrored,
         ClampToEdge,
-        ClampToBorder
+        ClampToBorder,
     };
 };
 class TextureFilter{
     public: enum Filter{
         Linear,
         Nearest,
-        Linear_Nearest,
-        Nearest_Linear,
         Nearest_Mipmap_Nearest,
         Nearest_Mipmap_Linear,
         Linear_Mipmap_Nearest,
-        Linear_Mipmap_Linear
+        Linear_Mipmap_Linear,
     };
 };
 

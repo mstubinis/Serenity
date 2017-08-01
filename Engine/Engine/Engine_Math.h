@@ -68,7 +68,7 @@ namespace glm{
     typedef glm::tmat4x3<long double> m4x3_ld;
     typedef glm::tmat4x4<long double> m4_ld;
     typedef glm::tmat4x4<long double> m4x4_ld;
-	
+    
     #ifdef ENGINE_PRECISION_NORMAL
         typedef float number;
         typedef number num;
@@ -150,12 +150,12 @@ namespace Engine{
         glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
-	    
+        
         void translate(ObjectDynamic*,btVector3&,bool local);
 
-        float pack4FloatsInto1Float(float,float,float,float);
-        float pack4FloatsInto1Float(glm::vec4&);
-        glm::vec4 unpackFloatInto4Floats(float i){
+        float pack3FloatsInto1Float(float,float,float);
+        float pack3FloatsInto1Float(glm::vec3&);
+        glm::vec3 unpack3FloatsInto1Float(float i);
 
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);

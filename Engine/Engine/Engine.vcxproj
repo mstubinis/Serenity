@@ -106,6 +106,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_AnimationProcessor.cpp" />
+    <ClCompile Include="Engine_BuiltInShaders.cpp" />
     <ClCompile Include="Engine_Math.cpp" />
     <ClCompile Include="Engine_MeshLoader.cpp" />
     <ClCompile Include="Engine_Networking.cpp" />

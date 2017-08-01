@@ -97,28 +97,28 @@ unordered_map<uint,vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populat
 std::unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
     std::unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
                                                                   //Base Color            //Smoothness    //Metalness
-    m[MaterialProperty::Aluminium]            = boost::make_tuple(0.91f,0.92f,0.92f,      0.75f,          1.0f);
-    m[MaterialProperty::Copper]               = boost::make_tuple(0.95f,0.64f,0.54f,      0.9f,           1.0f);
-    m[MaterialProperty::Diamond]              = boost::make_tuple(0.17f,0.17f,0.17f,      0.98f,          0.0f);
-    m[MaterialProperty::Glass_Or_Ruby_High]   = boost::make_tuple(0.08f,0.08f,0.08f,      0.98f,          0.0f);
-    m[MaterialProperty::Gold]                 = boost::make_tuple(1.022f,0.782f,0.344f,   0.9f,           1.0f);
-    m[MaterialProperty::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,      0.5f,           1.0f);
-    m[MaterialProperty::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,      0.92f,          0.0f);
-    m[MaterialProperty::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,      0.965f,         0.0f);
-    m[MaterialProperty::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,      0.94f,          1.0f);
-    m[MaterialProperty::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,      0.5f,           0.0f);
+    m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.91f,0.92f,0.92f,      0.75f,          1.0f);
+    m[MaterialPhysics::Copper]               = boost::make_tuple(0.95f,0.64f,0.54f,      0.9f,           1.0f);
+    m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17f,0.17f,0.17f,      0.98f,          0.0f);
+    m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.08f,0.08f,0.08f,      0.98f,          0.0f);
+    m[MaterialPhysics::Gold]                 = boost::make_tuple(1.022f,0.782f,0.344f,   0.9f,           1.0f);
+    m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,      0.5f,           1.0f);
+    m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,      0.92f,          0.0f);
+    m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,      0.965f,         0.0f);
+    m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,      0.94f,          1.0f);
+    m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,      0.5f,           0.0f);
     
-    m[MaterialProperty::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,   0.45f,          0.0f);
-    m[MaterialProperty::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,      0.32f,          0.0f);
-    m[MaterialProperty::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,   0.8f,           1.0f);
-    m[MaterialProperty::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,      0.92f,          0.0f);
-    m[MaterialProperty::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,      0.35f,          0.0f);
-    m[MaterialProperty::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,    0.9f,           1.0f);
-    m[MaterialProperty::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,         0.9f,           0.5f);
+    m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,   0.45f,          0.0f);
+    m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,      0.32f,          0.0f);
+    m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,   0.8f,           1.0f);
+    m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,      0.92f,          0.0f);
+    m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,      0.35f,          0.0f);
+    m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,    0.9f,           1.0f);
+    m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,         0.9f,           0.5f);
 
     return m;
 }
-std::unordered_map<uint,boost::tuple<float,float,float>> MATERIAL_PROPERTIES = _populateMaterialProperties();
+std::unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = _populateMaterialProperties();
 
 
 
@@ -234,9 +234,9 @@ class Material::impl final{
             _addToMaterialPool();
 
             _setBaseColor(1.0f,1.0f,1.0f);
-            _setSmoothness(0.95f);
+            _setSmoothness(0.92f);
             _setAO(1.0f);
-            _setMetalness(0.95f);
+            _setMetalness(0.1f);
             
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
@@ -340,7 +340,7 @@ class Material::impl final{
             m_BaseColor.r = r; m_BaseColor.g = g; m_BaseColor.b = b;
             _updateGlobalMaterialPool();
         }
-        void _setMaterialProperties(float r,float g,float b,float smoothness,float metalness){
+        void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
             _setBaseColor(r,g,b);
             _setSmoothness(smoothness);
             _setMetalness(metalness);
@@ -485,9 +485,9 @@ void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setBaseColor(glm::vec3 c){ Material::setBaseColor(c.r,c.g,c.b); }
 void Material::setBaseColor(float r,float g,float b){ m_i->_setBaseColor(r,g,b); }
-void Material::setMaterialPhysics(MaterialProperty::Property c){
+void Material::setMaterialPhysics(MaterialPhysics::Physics c){
     boost::tuple<float,float,float,float,float>& t = MATERIAL_PROPERTIES.at(c);
-    m_i->_setProperties(glm::vec3(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>()));
+    m_i->_setMaterialProperties(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>());
 }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }

@@ -49,8 +49,8 @@ class MaterialComponentTextureSlot{
         Refraction_CUBEMAP_MAP,
     };
 };
-class MaterialProperty{
-    public: enum Property{
+class MaterialPhysics{
+    public: enum Physics{
         Water,
         Plastic_Or_Glass_Low,
         Plastic_High,
@@ -67,18 +67,15 @@ class MaterialProperty{
         Red_Plastic_MERL,
         Blue_Rubber_MERL,
         Zinc,
-        Car_Paint_Orange
+        Car_Paint_Orange,
     };
 };
-
-
-
 class DiffuseModel{
     public: enum Model{
         Lambert,
         Oren_Nayar,
         Ashikhmin_Shirley,
-        Minnaert
+        Minnaert,
     };
 };
 class SpecularModel{
@@ -89,11 +86,9 @@ class SpecularModel{
         Cook_Torrance,
         Guassian,
         Beckmann,
-        Ashikhmin_Shirley
+        Ashikhmin_Shirley,
     };
 };
-
-
 static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
     "DiffuseTexture",
     "NormalTexture",
@@ -103,7 +98,7 @@ static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Ty
     "MetalnessTexture",
     "SmoothnessTexture",
     "ReflectionTexture",
-    "RefractionTexture"
+    "RefractionTexture",
 };
 
 class MaterialComponent{
@@ -225,7 +220,10 @@ class Material final: public BindableResource{
         const float metalness() const;
         const float ao() const;
         
-        void setMaterialPhysics(MaterialProperty::Property);
+		void setBaseColor(glm::vec3 c);
+		void setBaseColor(float r,float g,float b);
+
+        void setMaterialPhysics(MaterialPhysics::Physics);
         void setShadeless(bool);
         void setGlow(float);
         void setSmoothness(float);

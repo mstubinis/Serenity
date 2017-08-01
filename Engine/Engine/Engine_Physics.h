@@ -28,7 +28,7 @@ enum CollisionType {
     TriangleShapeStatic,
     Compund,
     Box,
-    None
+    None,
 };
 class Collision final{
     private:

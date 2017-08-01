@@ -17,6 +17,7 @@
 #include "Texture.h"
 
 #include <unordered_map>
+#include <iostream>
 
 #include <glm/vec2.hpp>
 
@@ -82,6 +83,14 @@ void Game::initLogic(){
     m_HUD = new HUD();
 
     Renderer::Settings::HDR::disable();
+
+	float metalness = 0.934532332f;
+	float smoothness = 0.8154648568f;
+	float r = 0.3234535f;
+
+	float encode = Engine::Math::pack3FloatsInto1Float(metalness,smoothness,r);
+	glm::vec3 decode = Engine::Math::unpack3FloatsInto1Float(encode);
+	std::cout << "metalness: " << decode.r << " | smoothness: " << decode.g << " | r: " << decode.b << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));

@@ -97,6 +97,9 @@
     <Filter Include="Header Files\Engine\Rendering\BuiltInShaders">
       <UniqueIdentifier>{0cd400f9-fbaa-4da1-ad78-7f6737adf5b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Rendering\BuiltInShaders">
+      <UniqueIdentifier>{1c8c44f9-8af0-406e-8975-9a88ecb0f866}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -227,6 +230,9 @@
     </ClCompile>
     <ClCompile Include="MeshInstance.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_BuiltInShaders.cpp">
+      <Filter>Source Files\Engine\Rendering\BuiltInShaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -86,12 +86,34 @@ float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
-float Math::pack4FloatsInto1Float(float r,float g,float b,float a){
-    float r = ((int)glm::floor((a)*63) << 18) | ((int)glm::floor((b)*63) <<  12) | ((int)glm::floor((c)*63) <<   6) | ((int)glm::floor((d)*63));
-    return r;
+float Math::pack3FloatsInto1Float(float r,float g,float b){
+    //Scale and bias
+    r = (r + 1.0f) * 0.5f;
+    unsigned char _r = (unsigned char)(r*255.0f);
+    //Scale and bias
+    g = (g + 1.0f) * 0.5f;
+    unsigned char _g = (unsigned char)(g*255.0f);
+    //Scale and bias
+    b = (b + 1.0f) * 0.5f;
+    unsigned char _b = (unsigned char)(b*255.0f);
+
+	unsigned int packedColor = (_r << 8) | (_g << 4) | _b;
+	float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 12)) );
+	return packedFloat;
 }
-float Math::pack4FloatsInto1Float(glm::vec4& c){ return Math::pack4FloatsInto1Float(c.r,c.g,c.b,c.a); }
-glm::vec4 Math::unpackFloatInto4Floats(float i){ return glm::mod(glm::vec4(i / 262144.0f, i / 4096.0f, i / 64.0f, i), 64.0f); }
+float Math::pack3FloatsInto1Float(glm::vec3& c){ return Math::pack3FloatsInto1Float(c.r,c.g,c.b); }
+glm::vec3 Math::unpack3FloatsInto1Float(float v){
+	glm::vec3 ret;
+	ret.r = (float)fmod(v, 1.0f);
+	ret.g = (float)fmod(v * 256.0f, 1.0f);
+	ret.b = (float)fmod(v * 65536.0f, 1.0f);
+ 
+	//Unpack to the -1..1 range
+	ret.r = (ret.r * 2.0f) - 1.0f;
+	ret.g = (ret.g * 2.0f) - 1.0f;
+	ret.b = (ret.b * 2.0f) - 1.0f;
+	return ret;
+}
 
 void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
     if(local){
@@ -171,20 +193,16 @@ glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); 
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0001f;
-    //
     float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
     if(degrees) angle *= 57.2958f;
     return angle;
 }
 
 void Math::alignToX(glm::quat& o,Object* origin, Object* target,float speed){
-
 }
 void Math::alignToY(glm::quat& o,Object* origin, Object* target,float speed){
-
 }
 void Math::alignToZ(glm::quat& o,Object* origin, Object* target,float speed){
-
 }
 void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed){
     glm::quat original(o);
