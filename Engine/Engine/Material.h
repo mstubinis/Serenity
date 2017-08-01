@@ -225,7 +225,7 @@ class Material final: public BindableResource{
         const float metalness() const;
         const float ao() const;
         
-        void setMaterialProperties(MaterialProperty::Property);
+        void setMaterialPhysics(MaterialProperty::Property);
         void setShadeless(bool);
         void setGlow(float);
         void setSmoothness(float);
