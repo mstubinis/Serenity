@@ -50,18 +50,25 @@ class MaterialComponentTextureSlot{
     };
 };
 class FrenselColor{
-	public: enum Color{
-		Water,
-		Plastic_Or_Glass_Low,
-		Plastic_High,
-		Glass_Or_Ruby_High,
-		Diamond,
-		Iron,
-		Copper,
-		Gold,
-		Aluminium,
-		Silver
-	};
+    public: enum Color{
+        Water,
+        Plastic_Or_Glass_Low,
+        Plastic_High,
+        Glass_Or_Ruby_High,
+        Diamond,
+        Iron,
+        Copper,
+        Gold,
+        Aluminium,
+        Silver,
+        Black_Leather,
+        Yellow_Paint_MERL,
+        Chromium,
+        Red_Plastic_MERL,
+        Blue_Rubber_MERL,
+        Zinc,
+        Car_Paint_Orange
+    };
 };
 
 
