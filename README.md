@@ -18,7 +18,7 @@ Installing & Building - Visual Studio
   - Modify the Additional Include Directories to include your directory to boost.
 
 4. Build the boost libraries. The project uses boost's filesystem, iostreams, and system library. However if you intend to really work in C++ it is recommended to build all of the boost libraries. For more information on how to build boost, visit [The getting started guide](http://www.boost.org/doc/libs/1_64_0/more/getting_started/windows.html)
-  - The project expects the /MT Static version of the library to be built. `./b2 link=static runtime-link=static variant=debug,release threading=single,multi` your version of visual studio will determine what toolset version you will use. Example, VS 2012 requires `toolset=msvc-11.0` added to the ./b2 build command.
+  - The project expects the /MT Static version of the library to be built. `./b2 link=static runtime-link=static variant=debug,release threading=single,multi`. Your version of Visual Studio will determine what toolset version you will use. Example: VS 2012 requires `toolset=msvc-11.0` added to the ./b2 build command.
 
 5. Modify the linker to include the boost library directories. Normally they are built in your directory of boost under the stage/lib folder. Example: `C:/boost/stage/lib`. In Visual Studio, Project > Serenity Properties...
   - Make sure Configuration is set to **All Configurations**.
