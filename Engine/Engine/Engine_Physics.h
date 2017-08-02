@@ -36,11 +36,11 @@ class Collision final{
         btVector3* m_Inertia;
         uint m_CollisionType;
         btCollisionShape* m_CollisionShape;
-		void _init(CollisionType = CollisionType::None, float mass = 0);
+        void _init(CollisionType = CollisionType::None, float mass = 0);
         void _load(ImportedMeshData&, CollisionType);
     public:
-		Collision(btCollisionShape* shape = nullptr,CollisionType = CollisionType::None, float mass = 0);
-		Collision(ImportedMeshData&,CollisionType = CollisionType::None, float mass = 0);
+        Collision(btCollisionShape* shape = nullptr,CollisionType = CollisionType::None, float mass = 0);
+        Collision(ImportedMeshData&,CollisionType = CollisionType::None, float mass = 0);
         ~Collision();
 
         void setMass(float mass);
