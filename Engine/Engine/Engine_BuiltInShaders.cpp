@@ -194,8 +194,8 @@ std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag =
     "uniform int HasGodsRays;\n"
     "\n"
     "uniform vec3 FirstConditionals;\n" //x = diffuse  y = normals    z = glow
-    "uniform vec3 SecondConditionals;\n" //x = specular y = reflection z = refraction
-    "uniform vec3 ThirdConditionals;\n" //x = ao y = metalness z = smoothness
+    "uniform vec3 SecondConditionals;\n" //x = specular y = ao z = metal
+    "uniform vec3 ThirdConditionals;\n" //x = smoothness y = reflection z = refraction
     "\n"
     "uniform vec4 Object_Color;\n"
     "uniform vec3 Gods_Rays_Color;\n"
@@ -254,22 +254,22 @@ std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag =
     "    float ao = BaseAO;\n"
     "    float metalness = BaseMetalness;\n"
     "\n"
-    "    if(ThirdConditionals.x > 0.5){\n"
+    "    if(SecondConditionals.y > 0.5){\n"
     "        ao *= texture2D(AOTexture, UV).r;\n"
     "    }\n"
-    "    if(ThirdConditionals.y > 0.5){\n"
+    "    if(SecondConditionals.z > 0.5){\n"
     "        metalness *= texture2D(MetalnessTexture, UV).r;\n"
     "    }\n"
-    "    if(ThirdConditionals.z > 0.5){\n"
+    "    if(ThirdConditionals.x > 0.5){\n"
     "        smoothness *= texture2D(SmoothnessTexture, UV).r;\n"
     "    }\n"
     "    gl_FragData[1].a = Pack2FloatsInto16BitFloat(smoothness,metalness);\n"
     "    if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }\n"
     "    if(FirstConditionals.y > 0.5){ gl_FragData[1].rgb = CalcBumpedNormal(); }\n"
-    "    if(SecondConditionals.y > 0.5){\n"
+    "    if(ThirdConditionals.y > 0.5){\n"
     "        gl_FragData[0] = Reflection(gl_FragData[0],CameraPosition,gl_FragData[1].rgb,WorldPosition);\n"
     "    }\n"
-    "    if(SecondConditionals.z > 0.5){\n"
+    "    if(ThirdConditionals.z > 0.5){\n"
     "        gl_FragData[0] = Refraction(gl_FragData[0],CameraPosition,gl_FragData[1].rgb,WorldPosition);\n"
     "    }\n"
     "    if(Shadeless == 0){\n"
