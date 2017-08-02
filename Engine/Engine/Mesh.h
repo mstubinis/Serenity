@@ -23,8 +23,21 @@ typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-const uint NUM_VERTEX_DATA = 7;
-const uint VERTEX_AMOUNTS[NUM_VERTEX_DATA] = {3,2,3,3,3,4,4};
+class VertexFormat{
+    public: enum Format{
+        Position,
+        UV,
+        Normal,
+        Binormal,
+        Tangent,
+        BoneIDs,
+        BoneWeights,
+        
+        EnumTotal
+    };
+};
+
+const uint VERTEX_AMOUNTS[VertexFormat::EnumTotal] = {3,2,3,3,3,4,4};
 
 class AnimationData{
     friend class Mesh;
@@ -78,8 +91,8 @@ class MeshSkeleton final{
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
 class Mesh final: public BindableResource{
-	friend struct DefaultMeshBindFunctor;
-	friend struct DefaultMeshUnbindFunctor;
+    friend struct DefaultMeshBindFunctor;
+    friend struct DefaultMeshUnbindFunctor;
     friend class AnimationData;
     friend class MeshSkeleton;
     friend class AnimationProcessor;
@@ -88,7 +101,7 @@ class Mesh final: public BindableResource{
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-        GLuint m_buffers[NUM_VERTEX_DATA]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
+        GLuint m_buffers[VertexFormat::EnumTotal]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
         GLuint m_elementbuffer;
         Collision* m_Collision;
 
@@ -119,7 +132,7 @@ class Mesh final: public BindableResource{
         Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string& name,float width, float height,float threshhold);
         Mesh(std::string& name,float x, float y, float width, float height,float threshhold);
-		Mesh(std::string& name,std::string = "",CollisionType = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f);
+        Mesh(std::string& name,std::string = "",CollisionType = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f);
         ~Mesh();
 
         void initRenderingContext();
