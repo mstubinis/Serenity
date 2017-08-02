@@ -80,11 +80,11 @@ void ObjectBasic::setPosition(float x,float y,float z){
 }
 void ObjectBasic::setPosition(glm::vec3 position){ ObjectBasic::setPosition(position.x,position.y,position.z); }
 void ObjectBasic::setOrientation(glm::quat q){
-	q = glm::normalize(q);
-	m_Orientation.x = q.x;
-	m_Orientation.y = q.y;
-	m_Orientation.z = q.z;
-	m_Orientation.w = q.w;
+    q = glm::normalize(q);
+    m_Orientation.x = q.x;
+    m_Orientation.y = q.y;
+    m_Orientation.z = q.z;
+    m_Orientation.w = q.w;
 
     m_Forward = Engine::Math::getForward(m_Orientation);
     m_Right = Engine::Math::getRight(m_Orientation);
@@ -150,7 +150,7 @@ void ObjectBasic::rotate(glm::vec3 rotation,bool overTime){ ObjectBasic::rotate(
 void ObjectBasic::translate(float x,float y,float z,bool local){   
     glm::vec3 offset = glm::vec3(x,y,z);
     if(local){
-		offset = m_Orientation * offset;
+        offset = m_Orientation * offset;
     }
     setPosition(getPosition() + offset);
 }
