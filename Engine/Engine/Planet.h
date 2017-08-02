@@ -61,14 +61,14 @@ class Planet: public ObjectDisplay{
         float m_AtmosphereHeight;
     public:
         Planet(
-                std::string = "",               //Material
-                PlanetType = PLANET_TYPE_ROCKY, //Type
-                glm::vec3 = glm::vec3(0),       //Position
-                float = 1,                      //Radius
-                std::string = "Planet",         //Name
-                float = 0,                      //Atmosphere size
-                Scene* = nullptr
-              );
+            std::string = "",               //Material
+            PlanetType = PLANET_TYPE_ROCKY, //Type
+            glm::vec3 = glm::vec3(0),       //Position
+            float = 1,                      //Radius
+            std::string = "Planet",         //Name
+            float = 0,                      //Atmosphere size
+            Scene* = nullptr
+        );
         virtual ~Planet();
 
         glm::vec2 getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
@@ -98,13 +98,13 @@ class Star: public Planet{
         SunLight* m_Light;
     public:
         Star(
-                glm::vec3 = glm::vec3(1,1,0),   //Star Color
-                glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
-                glm::vec3 = glm::vec3(0),       //Position
-                float = 1,                      //Scale
-                std::string = "Star",           //Name
-                Scene* = nullptr
-            );
+            glm::vec3 = glm::vec3(1,1,0),   //Star Color
+            glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
+            glm::vec3 = glm::vec3(0),       //Position
+            float = 1,                      //Scale
+            std::string = "Star",           //Name
+            Scene* = nullptr
+        );
         virtual ~Star();
 };
 
