@@ -11,9 +11,9 @@ uniform sampler2D SpecularTexture;
 uniform sampler2D AOTexture;
 uniform sampler2D MetalnessTexture;
 uniform sampler2D SmoothnessTexture;
-uniform float BaseAO;
-uniform float BaseMetalness;
-uniform float BaseSmoothness;
+uniform float     BaseAO;
+uniform float     BaseMetalness;
+uniform float     BaseSmoothness;
 
 uniform samplerCube ReflectionTexture;
 uniform sampler2D   ReflectionTextureMap;
