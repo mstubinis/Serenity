@@ -71,6 +71,7 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
 struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
     //Material* m = static_cast<Material*>(r);
 }};
+struct srtKey{inline bool operator()(MaterialMeshEntry* _1,MaterialMeshEntry* _2){return(_1->mesh()->name()<_2->mesh()->name());}};
 
 unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
     unordered_map<uint,vector<uint>> texture_slot_map;
@@ -366,8 +367,7 @@ Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Te
 Material::~Material(){
     m_i->_destruct();
     for(auto entry:m_i->m_Meshes){
-        delete entry;
-        entry = nullptr;
+        SAFE_DELETE(entry);
     }
     m_i->m_Meshes.clear();
 }
@@ -472,22 +472,25 @@ const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { 
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
 const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at(MaterialComponentType::Reflection)); }
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::Refraction)); }
+
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
-const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
-const uint Material::specularModel() const { return m_i->m_SpecularModel; }
-const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
+
 const uint Material::id() const { return m_i->m_ID; }
-const float Material::metalness() const{ return m_i->m_BaseMetalness; }
+const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
+const uint Material::specularModel() const { return m_i->m_SpecularModel; }
+
 const float Material::ao() const { return m_i->m_BaseAO; }
+const float Material::metalness() const{ return m_i->m_BaseMetalness; }
+const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
 
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
-void Material::setBaseColor(glm::vec3 c){ Material::setBaseColor(c.r,c.g,c.b); }
-void Material::setBaseColor(float r,float g,float b){ m_i->_setBaseColor(r,g,b); }
+void Material::setBaseColor(glm::vec3 color){ Material::setBaseColor(color.r, color.g, color.b); }
+void Material::setBaseColor(float r, float g, float b){ m_i->_setBaseColor(r, g, b); }
 void Material::setMaterialPhysics(MaterialPhysics::Physics c){
-    boost::tuple<float,float,float,float,float>& t = MATERIAL_PROPERTIES.at(c);
-    m_i->_setMaterialProperties(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>());
+    boost::tuple<float, float, float, float, float>& t = MATERIAL_PROPERTIES.at(c);
+    m_i->_setMaterialProperties( t.get<0>(), t.get<1>(), t.get<2>(), t.get<3>(), t.get<4>() );
 }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }
@@ -495,18 +498,12 @@ void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m);
 void Material::setAO(float a){ m_i->_setAO(a); }
 void Material::setMetalness(float m){ m_i->_setMetalness(m); }
 
-struct less_than_key{
-    inline bool operator() ( MaterialMeshEntry* struct1,  MaterialMeshEntry* struct2){
-        return (struct1->mesh()->name() < struct2->mesh()->name());
-    }
-};
-
 void Material::addMeshEntry(string objectName){
     for(auto entry:m_i->m_Meshes){
         if(entry->mesh() == Resources::getMesh(objectName)){ return; }
     }
     m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
-    std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
+    std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey());
 }
 void Material::removeMeshEntry(string objectName){
     bool did = false;
@@ -521,7 +518,7 @@ void Material::removeMeshEntry(string objectName){
         }
     }
     if(did){
-        std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),less_than_key());
+        std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey());
     }
 }
 vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
