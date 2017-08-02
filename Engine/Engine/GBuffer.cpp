@@ -184,7 +184,7 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(string name,int internalformat, int format, int type, int attatchment,uint width,uint height,float divisor):Texture(name,width,height),m_i(new impl){
+TextureBuffer::TextureBuffer(string name,GLuint internalformat, GLuint format, GLuint type, GLuint attatchment,uint width,uint height,float divisor):Texture(name,width,height),m_i(new impl){
     m_i->_init(internalformat,format,type,attatchment,width,height,divisor,this);
 }
 TextureBuffer::~TextureBuffer(){
