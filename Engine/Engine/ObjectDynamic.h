@@ -21,7 +21,7 @@ struct DefaultObjectDynamicBindFunctor;
 struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
     public: 
-		static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
+        static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
 
@@ -43,14 +43,15 @@ class ObjectDynamic: public Object{
     public:
         virtual void collisionResponse(ObjectDynamic* other);
 
-        ObjectDynamic( std::string = "",
-                       std::string = "",
-                       glm::vec3 = glm::vec3(0),            //Position
-                       glm::vec3 = glm::vec3(1),        //Scale
-                       std::string = "Dynamic Object",  //Object
-                       Collision* = nullptr,            //Bullet Collision Shape
-                       Scene* = nullptr
-                     );
+        ObjectDynamic( 
+	    std::string = "",
+            std::string = "",
+            glm::vec3 = glm::vec3(0),            //Position
+            glm::vec3 = glm::vec3(1),        //Scale
+            std::string = "Dynamic Object",  //Object
+            Collision* = nullptr,            //Bullet Collision Shape
+            Scene* = nullptr
+        );
         virtual ~ObjectDynamic();
 
         virtual void setDynamic(bool=true);
@@ -143,11 +144,11 @@ class ObjectDynamic: public Object{
         virtual void clearAngularForces();
         virtual void clearAllForces();
 
-		void setMesh(Mesh*);
-		void setMesh(const std::string& mesh);
+        void setMesh(Mesh*);
+        void setMesh(const std::string& mesh);
 
-		void setMaterial(Material*);
-		void setMaterial(const std::string& material);
+        void setMaterial(Material*);
+        void setMaterial(const std::string& material);
 
         virtual void update(float);
 
