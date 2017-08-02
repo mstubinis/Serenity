@@ -347,13 +347,13 @@ class Material::impl final{
             _setMetalness(metalness);
             _updateGlobalMaterialPool();
         }
-        void _setShadeless(bool b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
-        void _setBaseGlow(float f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
-        void _setSmoothness(float s){ m_BaseSmoothness = s; _updateGlobalMaterialPool(); }
-        void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
-        void _setDiffuseModel(DiffuseModel::Model& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
-        void _setAO(float a){ m_BaseAO = a; _updateGlobalMaterialPool(); }
-        void _setMetalness(float m){ m_BaseMetalness = m; _updateGlobalMaterialPool(); }
+        void _setShadeless(bool b){                      m_Shadeless = b;      _updateGlobalMaterialPool(); }
+        void _setBaseGlow(float f){                      m_BaseGlow = f;       _updateGlobalMaterialPool(); }
+        void _setSmoothness(float s){                    m_BaseSmoothness = s; _updateGlobalMaterialPool(); }
+        void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m;  _updateGlobalMaterialPool(); }
+        void _setDiffuseModel(DiffuseModel::Model& m){   m_DiffuseModel = m;   _updateGlobalMaterialPool(); }
+        void _setAO(float a){                            m_BaseAO = a;         _updateGlobalMaterialPool(); }
+        void _setMetalness(float m){                     m_BaseMetalness = m;  _updateGlobalMaterialPool(); }
 };
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
