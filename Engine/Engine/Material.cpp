@@ -147,11 +147,11 @@ void MaterialComponent::unbind(){
     }
 }
 MaterialComponentReflection::MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor):MaterialComponent(type,cubemap){
-    m_MixFactor = mixFactor;
+    setMixFactor(mixFactor);
     m_Map = map;
 }
 MaterialComponentReflection::MaterialComponentReflection(uint type,string& cubemap,string& map,float mixFactor):MaterialComponent(type,cubemap){
-    m_MixFactor = mixFactor;
+    setMixFactor(mixFactor);
     m_Map = Resources::getTexture(map); 
     if(m_Map == nullptr && map != "") m_Map = new Texture(map);
 }
