@@ -13,7 +13,6 @@ class Engine_Window;
 #include <windowsx.h>
 #endif
 
-typedef unsigned int GLuint;
 typedef unsigned int uint;
 
 namespace Engine{
