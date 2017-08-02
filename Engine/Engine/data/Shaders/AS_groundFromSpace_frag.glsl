@@ -16,7 +16,8 @@ uniform sampler2D   RefractionTextureMap;
 uniform float       RefractionRatio;
 
 uniform vec3 FirstConditionals;  //x = diffuse  y = normals    z = glow
-uniform vec3 SecondConditionals; //x = specular y = reflection z = refraction
+uniform vec3 SecondConditionals; //x = specular y = ao z = metalness
+uniform vec3 ThirdConditionals; //x = smoothness y = reflection z = refraction
 
 uniform int HasGodsRays;
 
