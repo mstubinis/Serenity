@@ -8,27 +8,44 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <boost/filesystem.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <iostream>
 
+
+std::unordered_map<uint,boost::tuple<uint,uint,uint,uint,uint,uint> _populateVertexFormatMap(){
+    std::unordered_map<uint,boost::tuple<uint,uint,uint,uint,uint,uint> m;
+                                                //#components  //componentFormat   //normalized?
+    m[VertexFormat::Position]    = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::UV]          = boost::tuple(2,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Normal]      = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Binormal]    = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Tangent]     = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::BoneIDs]     = boost::tuple(4,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::BoneWeights] = boost::tuple(4,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    
+    return m;
+}
+std::unordered_map<uint,boost::tuple<uint,uint,uint,uint,uint,uint> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
+
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
-    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
+    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
         if(i <= 4 || (mesh->m_Skeleton != nullptr && (i >= 5 && mesh->m_Skeleton->m_BoneIDs.size() > 0))){
+            boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_FORMAT_DATA.at(i);
             glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, VERTEX_AMOUNTS[i], GL_FLOAT, GL_FALSE, 0,(void*)0);
+            glVertexAttribPointer(i, format.get<0>(), format.get<1>(), format.get<2>(), 0,(void*)0);
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    Mesh* mesh = static_cast<Mesh*>(r);
-    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
+    //Mesh* mesh = static_cast<Mesh*>(r);
+    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
         glDisableVertexAttribArray(i);
     }
 }};
-
 DefaultMeshBindFunctor Mesh::DEFAULT_BIND_FUNCTOR;
 DefaultMeshUnbindFunctor Mesh::DEFAULT_UNBIND_FUNCTOR;
 
@@ -324,7 +341,7 @@ void Mesh::initRenderingContext(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
 }
 void Mesh::cleanupRenderingContext(){
-    for(uint i = 0; i < NUM_VERTEX_DATA; i++){
+    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
         glDeleteBuffers(1, &m_buffers[i]);
     }
     glDeleteBuffers(1,&m_elementbuffer);
