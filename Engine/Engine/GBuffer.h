@@ -27,7 +27,7 @@ class TextureBuffer final: public Texture{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(std::string name,int,int,int,int,uint,uint,float divisor);
+        TextureBuffer(std::string name,GLuint,GLuint,GLuint,GLuint,uint,uint,float divisor);
         ~TextureBuffer();
 
         const float divisor() const;
