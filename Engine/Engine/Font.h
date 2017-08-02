@@ -14,16 +14,16 @@
 
 class Mesh;
 class Texture;
-
+typedef unsigned int uint;
 struct FontGlyph final{
-     unsigned int id;
-     unsigned int x;
-     unsigned int y;
-     unsigned int width;
-     unsigned int height;
+     uint id;
+     uint x;
+     uint y;
+     uint width;
+     uint height;
      int xoffset;
      int yoffset;
-     unsigned int xadvance;
+     uint xadvance;
      Mesh* char_mesh;
      glm::mat4 m_Model;
 };
