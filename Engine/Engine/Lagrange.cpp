@@ -15,17 +15,18 @@
 #include <cctype>
 
 using namespace Engine;
+using namespace std;
 
 GLuint Lagrange::m_Buffer;
-std::vector<glm::vec3> Lagrange::m_Vertices;
+vector<glm::vec3> Lagrange::m_Vertices;
 float Lagrange::radius;
 
-Lagrange::Lagrange(std::string _p1, std::string _p2, LAGRANGE_TYPE _type, std::string name,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),name,scene){
+Lagrange::Lagrange(string _p1, string _p2, LAGRANGE_TYPE _type, string name,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),name,scene){
     _init(_p1,_p2,_type);
 }
-Lagrange::Lagrange(std::string _p1, std::string _p2, std::string _type, std::string name,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),name,scene){
+Lagrange::Lagrange(string _p1, string _p2, string _type, string name,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),name,scene){
     LAGRANGE_TYPE type;
-    std::transform(_type.begin(), _type.end(), _type.begin(),std::tolower);
+    transform(_type.begin(), _type.end(), _type.begin(),tolower);
     if(_type == "l1")      type = LAGRANGE_TYPE_L1;
     else if(_type == "l2") type = LAGRANGE_TYPE_L2;
     else if(_type == "l3") type = LAGRANGE_TYPE_L3;
@@ -33,7 +34,7 @@ Lagrange::Lagrange(std::string _p1, std::string _p2, std::string _type, std::str
     else                   type = LAGRANGE_TYPE_L5;
     _init(_p1,_p2,type);
 }
-void Lagrange::_init(std::string _planet1, std::string _planet2, LAGRANGE_TYPE _type){
+void Lagrange::_init(string _planet1, string _planet2, LAGRANGE_TYPE _type){
     #pragma region MeshData
     if(Lagrange::m_Vertices.size() == 0){
         //68 verts
@@ -107,11 +108,9 @@ void Lagrange::_init(std::string _planet1, std::string _planet2, LAGRANGE_TYPE _
         Lagrange::m_Vertices.push_back(glm::vec3(0,-6.262f,-8.53f));
         Lagrange::m_Vertices.push_back(glm::vec3(0,-3.964f,-3.46f));
 
-        std::vector<glm::vec3> temp2;
-
+        vector<glm::vec3> temp2;
         for(auto point:Lagrange::m_Vertices)
             temp2.push_back(glm::vec3(point.x,point.y,-point.z));
-
         Lagrange::m_Vertices.insert(Lagrange::m_Vertices.end(),temp2.begin(),temp2.end());
 
         //middle ring (17 vertices)
@@ -145,7 +144,7 @@ void Lagrange::_init(std::string _planet1, std::string _planet2, LAGRANGE_TYPE _
             if(y > maxY) maxY = y;
             if(z > maxZ) maxZ = z;
         }
-        Lagrange::radius = glm::max(maxX, glm::max(maxY,maxZ));
+        Lagrange::radius = Engine::Math::Max(maxX,maxY,maxZ);
 
         glGenBuffers(1, &Lagrange::m_Buffer);
         glBindBuffer(GL_ARRAY_BUFFER, Lagrange::m_Buffer );
@@ -163,7 +162,7 @@ void Lagrange::_init(std::string _planet1, std::string _planet2, LAGRANGE_TYPE _
     _calculateLagrangePosition(_type);
     m_Scale = glm::vec3(2,2,2);
 
-    m_Radius = Lagrange::radius * glm::max(glm::abs(m_Scale.x),glm::max(glm::abs(m_Scale.y),glm::abs(m_Scale.z)));
+    m_Radius = Lagrange::radius * Engine::Math::Max(m_Scale.x,m_Scale.y,m_Scale.z);
 
     // p1 has the bigger radius
     boost::weak_ptr<Object> p1 = m_Planet1;
