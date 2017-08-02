@@ -21,14 +21,15 @@ class MaterialComponentType{
         Normal,
         Glow,
         Specular,
-        Reflection,
-        Refraction,
-
+	    
         AO,
         Metalness,
-        Smoothness,
-
-        Number
+        Smoothness,  
+	    
+        Reflection,
+        Refraction,
+	    
+        Number,
     };
 };
 class MaterialComponentTextureSlot{
@@ -220,8 +221,8 @@ class Material final: public BindableResource{
         const float metalness() const;
         const float ao() const;
         
-		void setBaseColor(glm::vec3 c);
-		void setBaseColor(float r,float g,float b);
+        void setBaseColor(glm::vec3 c);
+        void setBaseColor(float r,float g,float b);
 
         void setMaterialPhysics(MaterialPhysics::Physics);
         void setShadeless(bool);
