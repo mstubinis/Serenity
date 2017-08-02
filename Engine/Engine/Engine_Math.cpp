@@ -97,8 +97,8 @@ float Math::pack3FloatsInto1Float(float r,float g,float b){
     b = (b + 1.0f) * 0.5f;
     unsigned char _b = (unsigned char)(b*255.0f);
 
-	unsigned int packedColor = (_r << 8) | (_g << 4) | _b;
-	float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 12)) );
+	unsigned int packedColor = (_r << 16) | (_g << 8) | _b;
+	float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );
 	return packedFloat;
 }
 float Math::pack3FloatsInto1Float(glm::vec3& c){ return Math::pack3FloatsInto1Float(c.r,c.g,c.b); }
@@ -113,6 +113,23 @@ glm::vec3 Math::unpack3FloatsInto1Float(float v){
 	ret.g = (ret.g * 2.0f) - 1.0f;
 	ret.b = (ret.b * 2.0f) - 1.0f;
 	return ret;
+}
+
+float Math::pack2FloatsInto1Float(float x,float y){
+	x = (x + 1.0f) * 0.5f;
+	y = (y + 1.0f) * 0.5f;
+	return glm::floor(x * 1000.0f) + y; 
+}
+float Math::pack2FloatsInto1Float(glm::vec2 v){
+	return Math::pack2FloatsInto1Float(v.x,v.y);
+}
+glm::vec2 Math::unpack2FloatsInto1Float(float i){
+	glm::vec2 res;
+	res.y = glm::fract(i);
+	res.x = (i - res.y) / 1000.0f;
+	res.x = (res.x - 0.5f) * 2.0f;
+	res.y = (res.y - 0.5f) * 2.0f;
+	return res;
 }
 
 void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){

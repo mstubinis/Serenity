@@ -63,7 +63,7 @@ void Game::initResources(){
     Resources::getMaterial("SunFlare")->setShadeless(true);
 
     Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
-    Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallness.png");
+    Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallic.png");
     Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
 }
 void Game::initLogic(){
@@ -84,13 +84,13 @@ void Game::initLogic(){
 
     Renderer::Settings::HDR::disable();
 
-	float metalness = 0.934532332f;
-	float smoothness = 0.8154648568f;
-	float r = 0.3234535f;
+	float metalness = 0.99;
+	float smoothness = 0.01;
+	float test = 0.783737f;
 
-	float encode = Engine::Math::pack3FloatsInto1Float(metalness,smoothness,r);
-	glm::vec3 decode = Engine::Math::unpack3FloatsInto1Float(encode);
-	std::cout << "metalness: " << decode.r << " | smoothness: " << decode.g << " | r: " << decode.b << std::endl;
+	float encode = Engine::Math::pack2FloatsInto1Float(metalness,smoothness);
+	glm::vec2 decode = Engine::Math::unpack2FloatsInto1Float(encode);
+	std::cout << "metalness: " << decode.r << " | smoothness: " << decode.g << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -110,6 +110,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC); }
     if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD); }
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED); }
+	if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
 
     if(Events::Keyboard::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.07f);

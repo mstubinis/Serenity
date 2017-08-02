@@ -30,9 +30,9 @@ void Material::setAllSpecularModels(SpecularModel::Model m){
 
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
-    glm::vec3 first(0);
-    glm::vec3 second(0);
-    glm::vec3 third(0);
+    glm::vec3 first(0.0f);
+    glm::vec3 second(0.0f);
+    glm::vec3 third(0.0f);
     for(uint i = 0; i < MaterialComponentType::Number; i++){
         if(material->getComponents().count(i)){
             MaterialComponent* component = material->getComponents().at(i);
@@ -58,9 +58,9 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
     Renderer::sendUniform1fSafe("BaseGlow",material->glow());
 
+    Renderer::sendUniform1fSafe("BaseAO",material->ao());
     Renderer::sendUniform1fSafe("BaseMetalness",material->metalness());
     Renderer::sendUniform1fSafe("BaseSmoothness",material->smoothness());
-    Renderer::sendUniform1fSafe("BaseAO",material->ao());
 
     float id = float(material->id());
     Renderer::sendUniform1fSafe("matID",id);
@@ -277,7 +277,7 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-            glm::vec4 data(0.0f /*UNUSED*/, m_BaseSmoothness, m_SpecularModel, m_DiffuseModel);
+            glm::vec4 data(0.0f /*UNUSED*/, m_BaseSmoothness, float(m_SpecularModel), float(m_DiffuseModel));
             Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
@@ -348,11 +348,11 @@ class Material::impl final{
         }
         void _setShadeless(bool b){ m_Shadeless = b; _updateGlobalMaterialPool(); }
         void _setBaseGlow(float f){ m_BaseGlow = f; _updateGlobalMaterialPool(); }
-        void _setSmoothness(float s){ m_BaseSmoothness = glm::clamp(s,0.05f,0.98f); _updateGlobalMaterialPool(); }
+        void _setSmoothness(float s){ m_BaseSmoothness = s; _updateGlobalMaterialPool(); }
         void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m; _updateGlobalMaterialPool(); }
         void _setDiffuseModel(DiffuseModel::Model& m){ m_DiffuseModel = m; _updateGlobalMaterialPool(); }
         void _setAO(float a){ m_BaseAO = a; _updateGlobalMaterialPool(); }
-        void _setMetalness(float m){ m_BaseMetalness = glm::clamp(m,0.0001f,0.9999f); _updateGlobalMaterialPool(); }
+        void _setMetalness(float m){ m_BaseMetalness = m; _updateGlobalMaterialPool(); }
 };
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;

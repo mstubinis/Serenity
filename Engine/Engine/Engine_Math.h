@@ -157,6 +157,10 @@ namespace Engine{
         float pack3FloatsInto1Float(glm::vec3&);
         glm::vec3 unpack3FloatsInto1Float(float i);
 
+        float pack2FloatsInto1Float(float,float);
+        float pack2FloatsInto1Float(glm::vec2);
+        glm::vec2 unpack2FloatsInto1Float(float i);
+
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
         glm::vec3 getUp(glm::quat& q);

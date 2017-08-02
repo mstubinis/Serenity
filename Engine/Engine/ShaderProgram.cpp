@@ -166,7 +166,7 @@ class ShaderP::impl final{
 
             if(res == GL_FALSE) {
                 if(vs->fromFile()){ std::cout << "VertexShader Log (" + vs->data() + "): " << std::endl; }
-                else{         std::cout << "VertexShader Log : " << std::endl; }
+				else{               std::cout << "VertexShader Log (" + vs->name() + "): " << std::endl; }
                 std::cout << &vError[0] << std::endl;
             }
  
@@ -183,7 +183,7 @@ class ShaderP::impl final{
  
             if(res == GL_FALSE) {
                 if(ps->fromFile()){ std::cout << "FragmentShader Log (" + ps->data() + "): " << std::endl; }
-                else{         std::cout << "FragmentShader Log : " << std::endl; }
+                else{               std::cout << "FragmentShader Log (" + ps->name() + "): " << std::endl; }
                 std::cout << &fError[0] << std::endl;
             }
 

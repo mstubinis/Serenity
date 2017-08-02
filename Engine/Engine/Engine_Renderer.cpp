@@ -454,17 +454,17 @@ void Detail::RenderManagement::_passLighting(){
     sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
 
     glm::vec3 campos = Resources::getActiveCamera()->getPosition();
-    Renderer::sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
+    Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
 
-	sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
+	sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
-    sendUniform4f("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
+    sendUniform4fSafe("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
         (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
-    bindTexture("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
-    bindTexture("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),1);
-    bindTexture("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
-    bindTexture("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
+    bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(BUFFER_TYPE_DIFFUSE),0);
+    bindTextureSafe("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),1);
+    bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
+    bindTextureSafe("gDepthMap",m_gBuffer->getTexture(BUFFER_TYPE_DEPTH),3);
 
     for (auto light:Resources::getCurrentScene()->lights()){
         light.second->lighten();
@@ -707,14 +707,15 @@ void Detail::RenderManagement::_passFinal(){
     bindTextureSafe("gMiscMap",m_gBuffer->getTexture(BUFFER_TYPE_MISC),2);
     bindTextureSafe("gGodsRaysMap",m_gBuffer->getTexture(BUFFER_TYPE_GODSRAYS),3);
     bindTextureSafe("gBloomMap",m_gBuffer->getTexture(BUFFER_TYPE_BLOOM),4);
+    bindTextureSafe("gNormalMap",m_gBuffer->getTexture(BUFFER_TYPE_NORMAL),5);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
-    glm::mat4 m(1);
+    glm::mat4 m(1.0f);
     glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
 
     sendUniformMatrix4f("Model",m);
@@ -723,9 +724,9 @@ void Detail::renderFullscreenQuad(uint width,uint height){
     glViewport(0,0,width,height);
 
     glBegin(GL_QUADS);
-        glTexCoord2f(0,0); glVertex2f(-float(width)/2,-float(height)/2);
-        glTexCoord2f(1,0); glVertex2f(float(width)/2,-float(height)/2);
-        glTexCoord2f(1,1); glVertex2f(float(width)/2,float(height)/2);
-        glTexCoord2f(0,1); glVertex2f(-float(width)/2,float(height)/2);
+        glTexCoord2f(0.0f,0.0f); glVertex2f(-float(width)/2,-float(height)/2);
+        glTexCoord2f(1.0f,0.0f); glVertex2f(float(width)/2,-float(height)/2);
+        glTexCoord2f(1.0f,1.0f); glVertex2f(float(width)/2,float(height)/2);
+        glTexCoord2f(0.0f,1.0f); glVertex2f(-float(width)/2,float(height)/2);
     glEnd();
 }
