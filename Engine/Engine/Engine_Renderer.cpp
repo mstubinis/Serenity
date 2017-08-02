@@ -456,7 +456,7 @@ void Detail::RenderManagement::_passLighting(){
     glm::vec3 campos = Resources::getActiveCamera()->getPosition();
     Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
 
-	sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
+    sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
     sendUniform4fSafe("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
         (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
@@ -542,11 +542,10 @@ void Detail::RenderManagement::render(){
     Settings::enableDepthTest();
     Settings::enableDepthMask();
 
-	_passForwardRendering();
+    _passForwardRendering();
 
 
-
-	//render HUD
+    //render HUD
     Settings::clear(false,true,false); //clear depth only
     Settings::enableAlphaTest();
     glAlphaFunc(GL_GREATER, 0.1f);
