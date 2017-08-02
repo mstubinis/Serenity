@@ -4,71 +4,24 @@
 
 #include "Texture.h"
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <SFML/OpenGL.hpp>
 #include <unordered_map>
 
 typedef unsigned int uint;
-const float GBUFFER_DIVISIBLES[] = {    //framebuffer pixel size = window size * this value here
-    1.0f, // (diffuse.rgb)
-    1.0f, // (normals.rgb)
-    1.0f, // Glow & SpecularMap(Greyscale) & MaterialID THEN HDR
-    1.0f, // (lighting.rgb)
-    0.5f, // bloom, & ssao as alpha
-    0.5f, // gods rays
-    0.5f, // free2 buffer
-    1.0f  // depth
-};
-const int GBUFFER_TYPES[] = {
-    GL_RGB8,               // (diffuse.rgb)
-    GL_RGBA16F,            // (normals.rgb) (currently trying to pack metal & smoothness into alpha)
-    GL_RGBA8,              // Glow & SpecularMap(Greyscale) & UNUSED THEN HDR
-    GL_RGB16F,             // (lighting.rgb)
-    GL_RGBA8,              // bloom, & ssao as alpha
-    GL_RGB8,               // gods rays
-    GL_RGBA8,              // free2 buffer
-    GL_DEPTH_COMPONENT16   // depth
-};
-const int GBUFFER_PIXEL_TYPES[] = {
-    GL_RGB,               // (diffuse.rgb)
-    GL_RGBA,               // (normals.rgb) (currently trying to pack metal & smoothness into alpha)
-    GL_RGBA,               // Glow & SpecularMap(Greyscale) & UNUSED THEN HDR
-    GL_RGB,                // (lighting.rgb)
-    GL_RGBA,               // bloom, & ssao as alpha
-    GL_RGB,                // gods rays
-    GL_RGBA,               // free2 buffer
-    GL_DEPTH_COMPONENT     // depth
-};
-const int GBUFFER_FLOAT_TYPES[] = {
-    GL_UNSIGNED_BYTE,
-    GL_FLOAT,
-    GL_UNSIGNED_BYTE,
-    GL_FLOAT,
-    GL_UNSIGNED_BYTE,
-    GL_UNSIGNED_BYTE,
-    GL_UNSIGNED_BYTE,
-    GL_FLOAT
-};
-const int GBUFFER_ATTACHMENT_TYPES[] = {
-    GL_COLOR_ATTACHMENT0,
-    GL_COLOR_ATTACHMENT1,
-    GL_COLOR_ATTACHMENT2,
-    GL_COLOR_ATTACHMENT3,
-    GL_COLOR_ATTACHMENT0,
-    GL_COLOR_ATTACHMENT1,
-    GL_COLOR_ATTACHMENT2,
-    GL_DEPTH_ATTACHMENT
-};
-enum BUFFER_TYPES {
-    BUFFER_TYPE_DIFFUSE,
-    BUFFER_TYPE_NORMAL,
-    BUFFER_TYPE_MISC,
-    BUFFER_TYPE_LIGHTING,
-    BUFFER_TYPE_BLOOM,
-    BUFFER_TYPE_GODSRAYS,
-    BUFFER_TYPE_FREE2,
-    BUFFER_TYPE_DEPTH,
-    BUFFER_TYPE_NUMBER
-};
+
+class GBufferType{public: enum Type{
+    Diffuse,
+    Normal,
+    Misc,
+    Lighting,
+    Bloom,
+    GodRays,
+    Free2,
+    Depth,
+
+    EnumTotal
+};};
+
 class TextureBuffer final: public Texture{
     private:
         class impl;
