@@ -4,6 +4,7 @@
 
 #include "BindableResource.h"
 #include <unordered_map>
+#include <SFML/OpenGL.hpp>
 
 #include <glm/vec4.hpp>
 
@@ -11,9 +12,7 @@ class MeshInstance;
 class Texture;
 class ShaderP;
 class Mesh;
-typedef unsigned int GLuint;
 typedef unsigned int uint;
-typedef char GLchar;
 
 class MaterialComponentType{public: enum Type{
     Diffuse,
