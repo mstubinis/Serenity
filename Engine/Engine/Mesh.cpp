@@ -13,20 +13,20 @@
 #include <iostream>
 
 
-std::unordered_map<uint,boost::tuple<uint,uint,uint,uint,uint,uint> _populateVertexFormatMap(){
-    std::unordered_map<uint,boost::tuple<uint,uint,uint,uint,uint,uint> m;
+std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> _populateVertexFormatMap(){
+    std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> m;
                                                 //#components  //componentFormat   //normalized?
-    m[VertexFormat::Position]    = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
-    m[VertexFormat::UV]          = boost::tuple(2,             GL_FLOAT,           GL_FALSE,       0,0,0);
-    m[VertexFormat::Normal]      = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
-    m[VertexFormat::Binormal]    = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
-    m[VertexFormat::Tangent]     = boost::tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
-    m[VertexFormat::BoneIDs]     = boost::tuple(4,             GL_FLOAT,           GL_FALSE,       0,0,0);
-    m[VertexFormat::BoneWeights] = boost::tuple(4,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Position]    = boost::make_tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::UV]          = boost::make_tuple(2,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Normal]      = boost::make_tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Binormal]    = boost::make_tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::Tangent]     = boost::make_tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::BoneIDs]     = boost::make_tuple(4,             GL_FLOAT,           GL_FALSE,       0,0,0);
+    m[VertexFormat::BoneWeights] = boost::make_tuple(4,             GL_FLOAT,           GL_FALSE,       0,0,0);
     
     return m;
 }
-std::unordered_map<uint,boost::tuple<uint,uint,uint,uint,uint,uint> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
+std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
@@ -35,7 +35,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
             boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_FORMAT_DATA.at(i);
             glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, format.get<0>(), format.get<1>(), format.get<2>(), 0,(void*)0);
+            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), 0,(void*)0);
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
