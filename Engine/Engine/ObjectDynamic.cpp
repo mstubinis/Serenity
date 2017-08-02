@@ -120,7 +120,7 @@ ObjectDynamic::~ObjectDynamic(){
 }
 void ObjectDynamic::translate(float x,float y,float z,bool local){
     m_RigidBody->activate();
-	btVector3 vec = btVector3(x,y,z);
+    btVector3 vec = btVector3(x,y,z);
     Math::translate(this,vec,local);
     setPosition(getPosition() + glm::vec3(vec.x(),vec.y(),vec.z()));
 }
@@ -195,12 +195,11 @@ void ObjectDynamic::setOrientation(glm::quat q){
     btTransform t;
     btQuaternion quat;
 
-	quat.setX(q.x);
-	quat.setY(q.y);
-	quat.setZ(q.z);
-	quat.setW(q.w);
-
-	quat = quat.normalize();
+    quat.setX(q.x);
+    quat.setY(q.y);
+    quat.setZ(q.z);
+    quat.setW(q.w);
+    quat = quat.normalize();
 
     t.setOrigin(m_RigidBody->getWorldTransform().getOrigin());
     t.setRotation(quat);
@@ -220,13 +219,13 @@ glm::vec3 ObjectDynamic::getRight(){ return m_Right; }
 glm::vec3 ObjectDynamic::getUp(){ return m_Up; }
 void ObjectDynamic::applyForce(float x,float y,float z,bool local){ 
     m_RigidBody->activate();
-	btVector3 vec = btVector3(x,y,z);
-	Math::translate(this,vec,local);
+    btVector3 vec = btVector3(x,y,z);
+    Math::translate(this,vec,local);
     m_RigidBody->applyCentralForce(vec); 
 }
 void ObjectDynamic::applyForce(glm::vec3 force,glm::vec3 relPos,bool local){ 
     m_RigidBody->activate();
-	btVector3 vec = btVector3(force.x,force.y,force.z);
+    btVector3 vec = btVector3(force.x,force.y,force.z);
     Math::translate(this,vec,local);
     m_RigidBody->applyForce(vec,btVector3(relPos.x,relPos.y,relPos.z)); 
 }
@@ -235,13 +234,13 @@ void ObjectDynamic::applyForceY(float y,bool l){ ObjectDynamic::applyForce(0,y,0
 void ObjectDynamic::applyForceZ(float z,bool l){ ObjectDynamic::applyForce(0,0,z,l); }
 void ObjectDynamic::applyImpulse(float x,float y,float z,bool local){ 
     m_RigidBody->activate();
-	btVector3 vec = btVector3(x,y,z);
+    btVector3 vec = btVector3(x,y,z);
     Math::translate(this,vec,local);
     m_RigidBody->applyCentralImpulse(vec);
 }
 void ObjectDynamic::applyImpulse(glm::vec3 impulse,glm::vec3 relPos,bool local){ 
     m_RigidBody->activate();
-	btVector3 vec = btVector3(impulse.x,impulse.y,impulse.z);
+    btVector3 vec = btVector3(impulse.x,impulse.y,impulse.z);
     Math::translate(this,vec,local);
     m_RigidBody->applyImpulse(vec,btVector3(relPos.x,relPos.y,relPos.z));
 }
@@ -274,7 +273,7 @@ void ObjectDynamic::applyTorqueImpulseY(float y,bool l){ ObjectDynamic::applyTor
 void ObjectDynamic::applyTorqueImpulseZ(float z,bool l){ ObjectDynamic::applyTorqueImpulse(0,0,z,l); }
 void ObjectDynamic::setLinearVelocity(float x, float y, float z, bool local){
     m_RigidBody->activate();
-	btVector3 vec = btVector3(x,y,z);
+    btVector3 vec = btVector3(x,y,z);
     Math::translate(this,vec,local);
     m_RigidBody->setLinearVelocity(vec); 
 }
@@ -293,7 +292,7 @@ void ObjectDynamic::setLinearVelocityZ(float z, bool l){
 }
 void ObjectDynamic::setAngularVelocity(float x, float y, float z,bool local){ 
     m_RigidBody->activate();
-	btVector3 vec = btVector3(x,y,z);
+    btVector3 vec = btVector3(x,y,z);
     Math::translate(this,vec,local);
     m_RigidBody->setAngularVelocity(vec); 
 }
@@ -335,22 +334,18 @@ void ObjectDynamic::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
 void ObjectDynamic::lookAt(Object* o){ ObjectDynamic::lookAt(getPosition(), o->getPosition(), o->getUp()); }
 void ObjectDynamic::alignTo(glm::vec3 direction, float speed){
     ObjectDynamic::clearAngularForces();
-	btQuaternion _q = m_RigidBody->getWorldTransform().getRotation();
+    btQuaternion _q = m_RigidBody->getWorldTransform().getRotation();
     glm::quat q;
-	q.x = _q.x();
-	q.y = _q.y();
-	q.z = _q.z();
-	q.w = _q.w();
-
+    q.x = _q.x();
+    q.y = _q.y();
+    q.z = _q.z();
+    q.w = _q.w();
     Engine::Math::alignTo(q,this,direction, speed);
-
-	_q.setX(q.x);
-	_q.setY(q.y);
-	_q.setZ(q.z);
-	_q.setW(q.w);
-
-	_q = _q.normalize();
-
+    _q.setX(q.x);
+    _q.setY(q.y);
+    _q.setZ(q.z);
+    _q.setW(q.w);
+    _q = _q.normalize();
     m_RigidBody->getWorldTransform().setRotation(_q);
 }
 void ObjectDynamic::alignTo(Object* other, float speed){
@@ -449,14 +444,12 @@ bool ObjectDynamic::rayIntersectSphere(glm::vec3 A, glm::vec3 rayVector){
 glm::quat& ObjectDynamic::getOrientation(){
     btTransform t;
     m_RigidBody->getMotionState()->getWorldTransform(t);
-
-	btQuaternion q = t.getRotation().normalize();
-
+    btQuaternion q = t.getRotation().normalize();
     glm::quat _q;
-	_q.x = q.x();
-	_q.y = q.y();
-	_q.z = q.z();
-	_q.w = q.w();
+    _q.x = q.x();
+    _q.y = q.y();
+    _q.z = q.z();
+    _q.w = q.w();
     return _q;
 }
 glm::vec3 ObjectDynamic::getScale(){
