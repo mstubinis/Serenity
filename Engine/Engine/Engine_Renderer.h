@@ -6,12 +6,10 @@
 #include "ShaderProgram.h"
 
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <SFML/OpenGL.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-typedef unsigned int GLuint;
 typedef unsigned int uint;
-typedef int GLint;
 
 class Texture;
 class Font;
