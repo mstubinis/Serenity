@@ -23,21 +23,17 @@ typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-class VertexFormat{
-    public: enum Format{
-        Position,
-        UV,
-        Normal,
-        Binormal,
-        Tangent,
-        BoneIDs,
-        BoneWeights,
-        
-        EnumTotal
-    };
-};
+class VertexFormat{ public: enum Format{
+    Position,
+    UV,
+    Normal,
+    Binormal,
+    Tangent,
+    BoneIDs,
+    BoneWeights,
 
-const uint VERTEX_AMOUNTS[VertexFormat::EnumTotal] = {3,2,3,3,3,4,4};
+    EnumTotal
+};};
 
 class AnimationData{
     friend class Mesh;
@@ -66,8 +62,8 @@ class MeshSkeleton final{
     friend class AnimationData;
     friend class AnimationProcessor;
     friend class Mesh;
-	friend struct DefaultMeshBindFunctor;
-	friend struct DefaultMeshUnbindFunctor;
+    friend struct DefaultMeshBindFunctor;
+    friend struct DefaultMeshUnbindFunctor;
     friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
         //animation data
