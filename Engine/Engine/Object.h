@@ -47,19 +47,19 @@ class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
     protected:
-	    static float m_RotationThreshold;
-	    static float m_VisibilityThreshold;
+        static float m_RotationThreshold;
+        static float m_VisibilityThreshold;
 
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;
     public:
         static void setGlobalRotationThreshold(float t){ m_RotationThreshold = t; }
-	static void setGlobalVisibilityThreshold(float t){ m_VisibilityThreshold = t; }
+        static void setGlobalVisibilityThreshold(float t){ m_VisibilityThreshold = t; }
         Object(
-                std::string = "Object",   //Object
-                Scene* = nullptr,         //The scene to add the object to (default nullptr = the current scene)
-                bool = true               //This is not a camera
+            std::string = "Object",   //Object
+            Scene* = nullptr,         //The scene to add the object to (default nullptr = the current scene)
+            bool = true               //This is not a camera
         );
         virtual ~Object();
 
@@ -105,11 +105,11 @@ class ObjectBasic: public Object{
         glm::quat m_Orientation;
     public:
         ObjectBasic(
-                glm::vec3 = glm::vec3(0),     //Position
-                glm::vec3 = glm::vec3(1),     //Scale
-                std::string = "Object Basic", //Object name
-                Scene* = nullptr,             //The scene to add the object to (default nullptr = the current scene)
-                bool = true                   //This is not a camera
+            glm::vec3 = glm::vec3(0),     //Position
+            glm::vec3 = glm::vec3(1),     //Scale
+            std::string = "Object Basic", //Object name
+            Scene* = nullptr,             //The scene to add the object to (default nullptr = the current scene)
+            bool = true                   //This is not a camera
         );
         virtual ~ObjectBasic();
 
