@@ -15,93 +15,71 @@ typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef char GLchar;
 
-class MaterialComponentType{
-    public: enum Type{
-        Diffuse,
-        Normal,
-        Glow,
-        Specular,
-	    
-        AO,
-        Metalness,
-        Smoothness,  
-	    
-        Reflection,
-        Refraction,
-	    
-        Number,
-    };
-};
-class MaterialComponentTextureSlot{
-    public: enum Slot{
-        Diffuse,
-        Normal,
-        Glow,
-        Specular,
+class MaterialComponentType{public: enum Type{
+    Diffuse,
+    Normal,
+    Glow,
+    Specular,
 
-        AO,
-        Metalness,
-        Smoothness,
+    AO,
+    Metalness,
+    Smoothness,  
 
-        Reflection_CUBEMAP,
-        Reflection_CUBEMAP_MAP,
+    Reflection,
+    Refraction,
 
-        Refraction_CUBEMAP,
-        Refraction_CUBEMAP_MAP,
-    };
-};
-class MaterialPhysics{
-    public: enum Physics{
-        Water,
-        Plastic_Or_Glass_Low,
-        Plastic_High,
-        Glass_Or_Ruby_High,
-        Diamond,
-        Iron,
-        Copper,
-        Gold,
-        Aluminium,
-        Silver,
-        Black_Leather,
-        Yellow_Paint_MERL,
-        Chromium,
-        Red_Plastic_MERL,
-        Blue_Rubber_MERL,
-        Zinc,
-        Car_Paint_Orange,
-    };
-};
-class DiffuseModel{
-    public: enum Model{
-        Lambert,
-        Oren_Nayar,
-        Ashikhmin_Shirley,
-        Minnaert,
-    };
-};
-class SpecularModel{
-    public: enum Model{
-        Blinn_Phong,
-        Phong,
-        GXX,
-        Cook_Torrance,
-        Guassian,
-        Beckmann,
-        Ashikhmin_Shirley,
-    };
-};
-static GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
-    "DiffuseTexture",
-    "NormalTexture",
-    "GlowTexture",
-    "SpecularTexture",
-    "AOTexture",
-    "MetalnessTexture",
-    "SmoothnessTexture",
-    "ReflectionTexture",
-    "RefractionTexture",
-};
+    Number,
+};};
+class MaterialComponentTextureSlot{public: enum Slot{
+    Diffuse,
+    Normal,
+    Glow,
+    Specular,
 
+    AO,
+    Metalness,
+    Smoothness,
+
+    Reflection_CUBEMAP,
+    Reflection_CUBEMAP_MAP,
+
+    Refraction_CUBEMAP,
+    Refraction_CUBEMAP_MAP,
+};};
+class MaterialPhysics{public: enum Physics{
+    Water,
+    Plastic_Or_Glass_Low,
+    Plastic_High,
+    Glass_Or_Ruby_High,
+    Diamond,
+    Iron,
+    Copper,
+    Gold,
+    Aluminium,
+    Silver,
+    Black_Leather,
+    Yellow_Paint_MERL,
+    Chromium,
+    Red_Plastic_MERL,
+    Blue_Rubber_MERL,
+    Zinc,
+    Car_Paint_Orange,
+};};
+class DiffuseModel{public: enum Model{
+    Lambert,
+    Oren_Nayar,
+    Ashikhmin_Shirley,
+    Minnaert,
+};};
+class SpecularModel{public: enum Model{
+    Blinn_Phong,
+    Phong,
+    GXX,
+    Cook_Torrance,
+    Guassian,
+    Beckmann,
+    Ashikhmin_Shirley,
+};};
 class MaterialComponent{
     protected:
         Texture* m_Texture;
