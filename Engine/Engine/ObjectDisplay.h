@@ -20,13 +20,14 @@ class ObjectDisplay: public ObjectBasic{
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
     public:
-        ObjectDisplay(std::string = "",
-                      std::string = "",
-                      glm::vec3 = glm::vec3(0.0f),
-                      glm::vec3 = glm::vec3(1.0f),
-                      std::string = "Visible Object",
-                      Scene* = nullptr
-                     );
+        ObjectDisplay(
+	    std::string = "",
+            std::string = "",
+            glm::vec3 = glm::vec3(0.0f),
+            glm::vec3 = glm::vec3(1.0f),
+            std::string = "Visible Object",
+            Scene* = nullptr
+        );
         virtual ~ObjectDisplay();
 
         virtual void update(float);
@@ -46,11 +47,11 @@ class ObjectDisplay: public ObjectBasic{
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);
 
-		void setMesh(Mesh*);
-		void setMesh(const std::string& mesh);
+        void setMesh(Mesh*);
+        void setMesh(const std::string& mesh);
 
-		void setMaterial(Material*);
-		void setMaterial(const std::string& material);
+        void setMaterial(Material*);
+        void setMaterial(const std::string& material);
 
         virtual glm::vec3& getRadiusBox(){ return m_BoundingBoxRadius; }
 
