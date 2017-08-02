@@ -125,7 +125,7 @@ float Math::pack2FloatsInto1Float(glm::vec2 v){
 }
 glm::vec2 Math::unpack2FloatsInto1Float(float i){
     glm::vec2 res;
-    res.y = glm::fract(i);
+    res.y = i - glm::floor(i); //glm::fract(i)
     res.x = (i - res.y) / 1000.0f;
     res.x = (res.x - 0.5f) * 2.0f;
     res.y = (res.y - 0.5f) * 2.0f;
