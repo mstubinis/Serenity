@@ -4,6 +4,7 @@
 
 #include "BindableResource.h"
 #include <unordered_map>
+#include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
 #include <glm/vec4.hpp>

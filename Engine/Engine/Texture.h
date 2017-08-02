@@ -8,9 +8,8 @@
 #include <memory>
 
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <SFML/OpenGL.hpp>
 
-typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 namespace sf{ class Image; }

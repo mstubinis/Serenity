@@ -10,6 +10,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include <SFML/OpenGL.hpp>
+#include <GL/glew.h>
+
 using namespace Engine;
 
 Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEmpty(name,scene){

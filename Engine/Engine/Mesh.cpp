@@ -12,9 +12,11 @@
 
 #include <iostream>
 
+using namespace std;
 
-std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> _populateVertexFormatMap(){
-    std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> m;
+
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
+    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
                                                 //#components  //componentFormat   //normalized?
     m[VertexFormat::Position]    = boost::make_tuple(3,             GL_FLOAT,           GL_FALSE,       0,0,0);
     m[VertexFormat::UV]          = boost::make_tuple(2,             GL_FLOAT,           GL_FALSE,       0,0,0);
@@ -26,7 +28,7 @@ std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> _populat
     
     return m;
 }
-std::unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
@@ -102,7 +104,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
     this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshold):BindableResource(name){
+Mesh::Mesh(string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -110,10 +112,10 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
     ImportedMeshData d;
     for(uint i = 0; i < width-1; i++){
         for(uint j = 0; j < length-1; j++){
-            std::string key1 = boost::lexical_cast<std::string>(i) + "," + boost::lexical_cast<std::string>(j);
-            std::string key2 = boost::lexical_cast<std::string>(i+1) + "," + boost::lexical_cast<std::string>(j);
-            std::string key3 = boost::lexical_cast<std::string>(i) + "," + boost::lexical_cast<std::string>(j+1);
-            std::string key4 = boost::lexical_cast<std::string>(i+1) + "," + boost::lexical_cast<std::string>(j+1);
+            string key1 = boost::lexical_cast<string>(i) + "," + boost::lexical_cast<string>(j);
+            string key2 = boost::lexical_cast<string>(i+1) + "," + boost::lexical_cast<string>(j);
+            string key3 = boost::lexical_cast<string>(i) + "," + boost::lexical_cast<string>(j+1);
+            string key4 = boost::lexical_cast<string>(i+1) + "," + boost::lexical_cast<string>(j+1);
 
             Vertex v1,v2,v3,v4;
             v1.position = glm::vec3(i-width/2.0f,   grid[key1], j-length/2.0f);
@@ -151,7 +153,7 @@ Mesh::Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint wi
     this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,float x, float y,float width, float height,float threshold):BindableResource(name){
+Mesh::Mesh(string& name,float x, float y,float width, float height,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -194,7 +196,7 @@ Mesh::Mesh(std::string& name,float x, float y,float width, float height,float th
     this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,float width, float height,float threshold):BindableResource(name){
+Mesh::Mesh(string& name,float width, float height,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
     m_Collision = nullptr;
@@ -237,7 +239,7 @@ Mesh::Mesh(std::string& name,float width, float height,float threshold):Bindable
     this->setCustomUnbindFunctor(Mesh::DEFAULT_UNBIND_FUNCTOR);
     this->load();
 }
-Mesh::Mesh(std::string& name,std::string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name){
+Mesh::Mesh(string& name,string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name){
     m_File = "";
     m_Collision = nullptr;
     m_Skeleton = nullptr;
@@ -279,8 +281,8 @@ void Mesh::_clearData(){
         m_Skeleton = nullptr;
     }
 }
-void Mesh::_loadFromFile(std::string file,CollisionType type,float threshold){
-    std::string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
+void Mesh::_loadFromFile(string file,CollisionType type,float threshold){
+    string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
     ImportedMeshData d;
     Engine::Resources::MeshLoader::load(this,d,m_File);
     m_threshold = threshold; //this is needed
@@ -290,7 +292,7 @@ void Mesh::_loadFromFile(std::string file,CollisionType type,float threshold){
         m_Collision = new Collision(new btEmptyShape());
     }
     else{
-        std::string colFile = m_File.substr(0,m_File.size()-4);
+        string colFile = m_File.substr(0,m_File.size()-4);
         colFile += "Col.obj";
         if(boost::filesystem::exists(colFile)){
             d.clear();
@@ -299,7 +301,7 @@ void Mesh::_loadFromFile(std::string file,CollisionType type,float threshold){
         m_Collision = new Collision(d,type);
     }
 }
-void Mesh::_loadFromOBJMemory(std::string data,CollisionType type,float threshold){
+void Mesh::_loadFromOBJMemory(string data,CollisionType type,float threshold){
     ImportedMeshData d;
     Engine::Resources::MeshLoader::loadObjFromMemory(d,data);
     _loadData(d,threshold);
@@ -359,7 +361,7 @@ void Mesh::render(GLuint mode){
     glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
 }
 
-void Mesh::playAnimation(std::vector<glm::mat4>& transforms,const std::string& animationName,float time){
+void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){
     m_Skeleton->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
 }
 void Mesh::load(){
@@ -369,7 +371,7 @@ void Mesh::load(){
         }
         _calculateMeshRadius();
         initRenderingContext();
-        std::cout << "(Mesh) ";
+        cout << "(Mesh) ";
         EngineResource::load();
     }
 }
@@ -379,7 +381,7 @@ void Mesh::unload(){
             _clearData();
         }
         cleanupRenderingContext();
-        std::cout << "(Mesh) ";
+        cout << "(Mesh) ";
         EngineResource::unload();
     }
 }
@@ -389,12 +391,11 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_TicksPerSecond = anim->mTicksPerSecond;
     m_DurationInTicks = anim->mDuration;
     for(uint i = 0; i < anim->mNumChannels; i++){
-        std::string key = (anim->mChannels[i]->mNodeName.data);
+        string key = (anim->mChannels[i]->mNodeName.data);
         m_KeyframeData.emplace(key,anim->mChannels[i]);
     }
 }
 AnimationData::~AnimationData(){
-    
 }
 uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    
     for (uint i = 0 ; i < node->mNumPositionKeys - 1 ; i++) {
@@ -463,8 +464,8 @@ void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime
     glm::vec3 Delta = End - Start;
     Out = Start + Factor * Delta;
 }
-void AnimationData::_ReadNodeHeirarchy(const std::string& animationName,float time, const aiNode* n, glm::mat4& ParentTransform,std::vector<glm::mat4>& Transforms){    
-    std::string BoneName(n->mName.data);
+void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, const aiNode* n, glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){    
+    string BoneName(n->mName.data);
     glm::mat4 NodeTransform = Engine::Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(n->mTransformation));
     if(m_KeyframeData.count(BoneName)){
         const aiNodeAnim* keyframes = m_KeyframeData.at(BoneName);
@@ -495,7 +496,7 @@ void AnimationData::_ReadNodeHeirarchy(const std::string& animationName,float ti
         _ReadNodeHeirarchy(animationName,time,n->mChildren[i],Transform,Transforms);
     }
 }
-void AnimationData::_BoneTransform(const std::string& animationName,float TimeInSeconds, std::vector<glm::mat4>& Transforms){   
+void AnimationData::_BoneTransform(const string& animationName,float TimeInSeconds,vector<glm::mat4>& Transforms){   
     float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
     float TimeInTicks = TimeInSeconds * TicksPerSecond;
     float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));

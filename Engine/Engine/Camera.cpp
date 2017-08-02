@@ -13,11 +13,11 @@
 using namespace Engine;
 using namespace boost;
 
-Camera::Camera(std::string n, float angle, float aspectRatio, float near, float far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create a perspective camera
+Camera::Camera(std::string n, float angle, float aspectRatio, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create a perspective camera
     m_Angle = angle;
     m_AspectRatio = aspectRatio;
-    m_Near = near;
-    m_Far = far;
+    m_Near = _near;
+    m_Far = _far;
     m_Scene = scene;
     m_Type = CAMERA_TYPE_PERSPECTIVE;
     setPerspectiveProjection();
@@ -25,11 +25,11 @@ Camera::Camera(std::string n, float angle, float aspectRatio, float near, float 
 
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
 }
-Camera::Camera(std::string n, float left, float right, float bottom, float top, float near, float far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
+Camera::Camera(std::string n, float left, float right, float bottom, float top, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;
     m_AspectRatio = 1.0f;
-    m_Near = near;
-    m_Far = far;
+    m_Near = _near;
+    m_Far = _far;
     m_Scene = scene;
     m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
     setOrthoProjection(left,right,bottom,top);

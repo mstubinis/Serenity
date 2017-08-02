@@ -7,8 +7,6 @@
 
 #include <unordered_map>
 #include <map>
-#include <GL/glew.h>
-#include <GL/GL.h>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <boost/shared_ptr.hpp>
@@ -146,12 +144,12 @@ namespace Engine{
         void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         void removeMaterial(std::string name);
 
-        void addShader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
+        void addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
 
-        void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        void addShaderProgram(std::string name, std::string vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        void addShaderProgram(std::string name, std::string vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
 
         void addSound(std::string name, std::string file,bool asEffect = true);

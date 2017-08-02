@@ -105,19 +105,19 @@ void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, 
     program->addMaterial(n);
 }
 
-void Resources::addShader(std::string n, std::string s, SHADER_TYPE t, bool b){
+void Resources::addShader(std::string n, std::string s, ShaderType::Type t, bool b){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<Shader>(n,s,t,b));
 }
-void Resources::addShaderProgram(std::string n, Shader* v, Shader* f, SHADER_PIPELINE_STAGE s){
+void Resources::addShaderProgram(std::string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-void Resources::addShaderProgram(std::string n, std::string v, std::string f, SHADER_PIPELINE_STAGE s){
+void Resources::addShaderProgram(std::string n, std::string v, std::string f, ShaderRenderPass::Pass s){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-void Resources::addShaderProgram(std::string n, Shader* v, std::string f, SHADER_PIPELINE_STAGE s){
+void Resources::addShaderProgram(std::string n, Shader* v, std::string f, ShaderRenderPass::Pass s){
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-void Resources::addShaderProgram(std::string n, std::string v, Shader* f, SHADER_PIPELINE_STAGE s){
+void Resources::addShaderProgram(std::string n, std::string v, Shader* f, ShaderRenderPass::Pass s){
 	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
 
@@ -169,35 +169,35 @@ void Resources::initResources(){
     //addMesh("Cube",cubeMesh,COLLISION_TYPE_NONE,false);
 
 
-	Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,SHADER_TYPE_VERTEX,false);
-	Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* vertexBasic = new Shader("vert_basic",Engine::Shaders::Detail::ShadersManagement::vertex_basic,SHADER_TYPE_VERTEX,false);
-	Shader* vertexHUD = new Shader("vert_hud",Engine::Shaders::Detail::ShadersManagement::vertex_hud,SHADER_TYPE_VERTEX,false);
-	Shader* vertexSkybox = new Shader("vert_skybox",Engine::Shaders::Detail::ShadersManagement::vertex_skybox,SHADER_TYPE_VERTEX,false);
-	Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,SHADER_TYPE_FRAGMENT,false);
-	Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,SHADER_TYPE_FRAGMENT,false);
-	Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* edge = new Shader("edge_frag",Engine::Shaders::Detail::ShadersManagement::edge_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,SHADER_TYPE_FRAGMENT,false);
-	Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,SHADER_TYPE_FRAGMENT,false);
+	Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
+	Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
+	Shader* vertexBasic = new Shader("vert_basic",Engine::Shaders::Detail::ShadersManagement::vertex_basic,ShaderType::Vertex,false);
+	Shader* vertexHUD = new Shader("vert_hud",Engine::Shaders::Detail::ShadersManagement::vertex_hud,ShaderType::Vertex,false);
+	Shader* vertexSkybox = new Shader("vert_skybox",Engine::Shaders::Detail::ShadersManagement::vertex_skybox,ShaderType::Vertex,false);
+	Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,ShaderType::Fragment,false);
+	Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,ShaderType::Fragment,false);
+	Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,ShaderType::Fragment,false);
+	Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,ShaderType::Fragment,false);
+	Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,ShaderType::Fragment,false);
+	Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
+	Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,ShaderType::Fragment,false);
+	Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,ShaderType::Fragment,false);
+	Shader* edge = new Shader("edge_frag",Engine::Shaders::Detail::ShadersManagement::edge_frag,ShaderType::Fragment,false);
+	Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
+	Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
 
-    addShaderProgram("Deferred",vertexBasic,deferredFrag,SHADER_PIPELINE_STAGE_GEOMETRY);
-    addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,SHADER_PIPELINE_STAGE_GEOMETRY);
-    addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_Blur",fullscreenVertexShader,blur,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_HDR",fullscreenVertexShader,hdr,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_SSAO",fullscreenVertexShader,ssao,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_Edge",fullscreenVertexShader,edge,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_Final",fullscreenVertexShader,finalFrag,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_FXAA",fullscreenVertexShader,fxaa,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_Skybox",vertexSkybox,deferredFragSkybox,SHADER_PIPELINE_STAGE_GEOMETRY);
-    addShaderProgram("Copy_Depth",fullscreenVertexShader,copyDepth,SHADER_PIPELINE_STAGE_POSTPROCESSING);
-    addShaderProgram("Deferred_Light",fullscreenVertexShader,lightingFrag,SHADER_PIPELINE_STAGE_LIGHTING);
+	addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
+    addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
+	addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_Blur",fullscreenVertexShader,blur,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_HDR",fullscreenVertexShader,hdr,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_SSAO",fullscreenVertexShader,ssao,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_Edge",fullscreenVertexShader,edge,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_Final",fullscreenVertexShader,finalFrag,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_FXAA",fullscreenVertexShader,fxaa,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_Skybox",vertexSkybox,deferredFragSkybox,ShaderRenderPass::Geometry);
+    addShaderProgram("Copy_Depth",fullscreenVertexShader,copyDepth,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_Light",fullscreenVertexShader,lightingFrag,ShaderRenderPass::Lighting);
 
     addMaterial("Default","","","","","Deferred");
 

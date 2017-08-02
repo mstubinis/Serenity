@@ -203,7 +203,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship("Defiant","Iron",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 

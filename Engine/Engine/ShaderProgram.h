@@ -5,33 +5,34 @@
 #include "BindableResource.h"
 #include <unordered_map>
 
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
+
 class Material;
-typedef int GLint;
-typedef unsigned int GLuint;
 typedef unsigned int uint;
 
-enum SHADER_PIPELINE_STAGE{
-    SHADER_PIPELINE_STAGE_GEOMETRY,
-    SHADER_PIPELINE_STAGE_FORWARD,
-    SHADER_PIPELINE_STAGE_LIGHTING,
-    SHADER_PIPELINE_STAGE_POSTPROCESSING,
-    SHADER_PIPELINE_STAGE_NONE
-};
-enum SHADER_TYPE{
-    SHADER_TYPE_VERTEX,
-    SHADER_TYPE_FRAGMENT,
-    SHADER_TYPE_GEOMETRY
-};
+class ShaderRenderPass{public: enum Pass{
+    Geometry,
+    Forward,
+    Lighting,
+    Postprocess,
+    None,
+};};
+class ShaderType{public:enum Type{
+    Vertex,
+    Fragment,
+    Geometry,
+};};
 
 class Shader final: public EngineResource{
     private:
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        Shader(std::string name, std::string shaderFileOrData, SHADER_TYPE shaderType, bool fromFile = true);
+        Shader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         ~Shader();
 
-        SHADER_TYPE type();
+		ShaderType::Type type();
         std::string data();
         bool fromFile();
 };
@@ -40,11 +41,11 @@ class ShaderP final: public BindableResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
-        ShaderP(std::string& name, Shader* vertexShader,std::string& fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
-        ShaderP(std::string& name, std::string& vertexShader,Shader* fragmentShader, SHADER_PIPELINE_STAGE = SHADER_PIPELINE_STAGE_GEOMETRY);
+        ShaderP(std::string& name, Shader* vertexShader,std::string& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        ShaderP(std::string& name, std::string& vertexShader,Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
         ~ShaderP();
 
@@ -55,7 +56,7 @@ class ShaderP final: public BindableResource{
         void unbind();
 
         GLuint program();
-        SHADER_PIPELINE_STAGE stage();
+        ShaderRenderPass::Pass stage();
         Shader* vertexShader();
         Shader* fragmentShader();
         std::vector<Material*>& getMaterials();

@@ -5,8 +5,6 @@
 #include "Engine_Math.h"
 #include "ShaderProgram.h"
 
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 typedef unsigned int uint;

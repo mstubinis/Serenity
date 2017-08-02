@@ -3,11 +3,7 @@
 #define ENGINE_GBUFFER_H
 
 #include "Texture.h"
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
 #include <unordered_map>
-
-typedef unsigned int uint;
 
 class GBufferType{public: enum Type{
     Diffuse,

@@ -30,9 +30,9 @@ void Game::cleanup(){
 void Game::initResources(){
     Resources::getWindow()->setIcon("data/Textures/icon.png");
 
-    Resources::addShaderProgram("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_GEOMETRY);
-    Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
-    Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",SHADER_PIPELINE_STAGE_NONE);
+    Resources::addShaderProgram("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderRenderPass::Geometry);
+	Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderRenderPass::None);
+	Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderRenderPass::None);
 
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
@@ -84,13 +84,17 @@ void Game::initLogic(){
 
     Renderer::Settings::HDR::disable();
 
-	float metalness = 0.99;
-	float smoothness = 0.01;
-	float test = 0.783737f;
+	float metalness = 0.94f;
+	float smoothness = 0.28f;
 
-	float encode = Engine::Math::pack2FloatsInto1Float(metalness,smoothness);
-	glm::vec2 decode = Engine::Math::unpack2FloatsInto1Float(encode);
-	std::cout << "metalness: " << decode.r << " | smoothness: " << decode.g << std::endl;
+	glm::uint encode = glm::packHalf2x16(glm::vec2(metalness,smoothness));
+	glm::vec2 decode = glm::unpackHalf2x16(encode);
+	std::cout << "Test 1 (glm -> uint to half's)   -   metalness: " << decode.r << " | smoothness: " << decode.g << std::endl;
+	std::cout << "---------------" << std::endl;
+	std::cout << "---------------" << std::endl;
+	float encode1 = Engine::Math::pack2FloatsInto1Float(metalness,smoothness);
+	glm::vec2 decode1 = Engine::Math::unpack2FloatsInto1Float(encode1);
+	std::cout << "Test 2 (float to 2 float's)   -   metalness: " << decode1.r << " | smoothness: " << decode1.g << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));

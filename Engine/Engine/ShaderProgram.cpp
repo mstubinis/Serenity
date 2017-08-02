@@ -7,6 +7,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <iostream>
+#include <SFML/OpenGL.hpp>
 
 using namespace Engine;
 using namespace std;
@@ -15,22 +16,22 @@ using namespace std;
 
 class Shader::impl final{
     public:
-        SHADER_TYPE m_Type;
+        ShaderType::Type m_Type;
         bool m_FromFile;
         string m_Data;
-        void _construct(string& name, string& data, SHADER_TYPE type, bool fromFile,Shader* super){
+        void _construct(string& name, string& data, ShaderType::Type type, bool fromFile,Shader* super){
             m_Data = data;
             m_Type = type;
             m_FromFile = fromFile;
             super->setName(name);
         }
 };
-Shader::Shader(string name, string shaderFileOrData, SHADER_TYPE shaderType,bool fromFile):m_i(new impl){
+Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
     m_i->_construct(name,shaderFileOrData,shaderType,fromFile,this);
 }
 Shader::~Shader(){
 }
-SHADER_TYPE Shader::type(){ return m_i->m_Type; }
+ShaderType::Type Shader::type(){ return m_i->m_Type; }
 string Shader::data(){ return m_i->m_Data; }
 bool Shader::fromFile(){ return m_i->m_FromFile; }
 
@@ -56,27 +57,27 @@ class ShaderP::impl final{
         static DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-        SHADER_PIPELINE_STAGE m_Stage;
+        ShaderRenderPass::Pass m_Stage;
         GLuint m_ShaderProgram;
         vector<Material*> m_Materials;
         unordered_map<string,GLint> m_UniformLocations;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
-        void _construct(string& name, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             m_Stage = stage;
             m_VertexShader = vs;
             m_FragmentShader = fs;
             m_UniformLocations.clear();
 
-            if(stage == SHADER_PIPELINE_STAGE_GEOMETRY){
+            if(stage == ShaderRenderPass::Geometry){
                 Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms.push_back(super);
             }
-            else if(stage == SHADER_PIPELINE_STAGE_FORWARD){
+            else if(stage == ShaderRenderPass::Forward){
                 Renderer::Detail::RenderManagement::m_ForwardPassShaderPrograms.push_back(super);
             }
-            else if(stage == SHADER_PIPELINE_STAGE_LIGHTING){
+            else if(stage == ShaderRenderPass::Lighting){
             }
-            else if(stage == SHADER_PIPELINE_STAGE_POSTPROCESSING){
+            else if(stage == ShaderRenderPass::Postprocess){
             }
             else{
             }
@@ -85,30 +86,30 @@ class ShaderP::impl final{
             super->setCustomBindFunctor(ShaderP::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(ShaderP::impl::DEFAULT_UNBIND_FUNCTOR);
         }
-        void _construct(string& name, string& vs, string& fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(string& name, string& vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _vs = Resources::getShader(vs); Shader* _fs = Resources::getShader(fs);
             if(_vs == nullptr){
-                Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true);
+                Resources::addShader(vs,vs,ShaderType::Vertex,true);
                 _vs = Resources::getShader(vs);
             }
             if(_fs == nullptr){
-                Resources::addShader(fs,fs,SHADER_TYPE_FRAGMENT,true);
+                Resources::addShader(fs,fs,ShaderType::Fragment,true);
                 _fs = Resources::getShader(fs);
             }
             _construct(name,_vs,_fs,stage,super);
         }
-        void _construct(string& name, Shader* vs, string& fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(string& name, Shader* vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _fs = Resources::getShader(fs);
             if(_fs == nullptr){
-                Resources::addShader(fs,fs,SHADER_TYPE_FRAGMENT,true);
+                Resources::addShader(fs,fs,ShaderType::Fragment,true);
                 _fs = Resources::getShader(fs);
             }
             _construct(name,vs,_fs,stage,super);
         }
-        void _construct(string& name, string& vs, Shader* fs, SHADER_PIPELINE_STAGE stage,ShaderP* super){
+        void _construct(string& name, string& vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _vs = Resources::getShader(vs);
             if(_vs == nullptr){
-                Resources::addShader(vs,vs,SHADER_TYPE_VERTEX,true);
+                Resources::addShader(vs,vs,ShaderType::Vertex,true);
                 _vs = Resources::getShader(vs);
             }
             _construct(name,_vs,fs,stage,super);
@@ -162,7 +163,7 @@ class ShaderP::impl final{
 
             if(res == GL_FALSE) {
                 if(vs->fromFile()){ cout << "VertexShader Log (" + vs->data() + "): " << endl; }
-		else{               cout << "VertexShader Log (" + vs->name() + "): " << endl; }
+                else{               cout << "VertexShader Log (" + vs->name() + "): " << endl; }
                 cout << &vError[0] << endl;
             }
  
@@ -230,16 +231,16 @@ class ShaderP::impl final{
 DefaultShaderBindFunctor ShaderP::impl::DEFAULT_BIND_FUNCTOR;
 DefaultShaderUnbindFunctor ShaderP::impl::DEFAULT_UNBIND_FUNCTOR;
 
-ShaderP::ShaderP(string& n, string& vs, string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
+ShaderP::ShaderP(string& n, string& vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(string& n, Shader* vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
+ShaderP::ShaderP(string& n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(string& n, Shader* vs, string& fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
+ShaderP::ShaderP(string& n, Shader* vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
-ShaderP::ShaderP(string& n, string& vs, Shader* fs, SHADER_PIPELINE_STAGE s):m_i(new impl){
+ShaderP::ShaderP(string& n, string& vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
     m_i->_construct(n,vs,fs,s,this);
 }
 ShaderP::~ShaderP(){
@@ -254,7 +255,7 @@ void ShaderP::cleanupRenderingContext(){
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }
 Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
-SHADER_PIPELINE_STAGE ShaderP::stage(){ return m_i->m_Stage; }
+ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::bind(){
