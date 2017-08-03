@@ -5,15 +5,16 @@
 #include "Mesh.h"
 
 using namespace Engine;
+using namespace std;
 
 AnimationProcessor::AnimationProcessor(){
 }
 AnimationProcessor::~AnimationProcessor(){
 }
-void AnimationProcessor::process(MeshInstance* renderedItem,std::vector<MeshInstanceAnimation>& queue,std::vector<glm::mat4>& transforms){
+void AnimationProcessor::process(MeshInstance* item,vector<MeshInstanceAnimation>& queue,vector<glm::mat4>& transforms){
     for(uint j = 0; j < queue.size(); j++){
         MeshInstanceAnimation& a = queue.at(j);
-        if(a.mesh == renderedItem->mesh()){
+        if(a.mesh == item->mesh()){
             a.currentTime += Resources::dt();
             if(transforms.size() == 0){
                 transforms.resize(a.mesh->m_Skeleton->m_NumBones,glm::mat4(1));
@@ -30,7 +31,7 @@ void AnimationProcessor::process(MeshInstance* renderedItem,std::vector<MeshInst
 
     _cleanupQueue(queue);
 }
-void AnimationProcessor::_cleanupQueue(std::vector<MeshInstanceAnimation>& queue){
+void AnimationProcessor::_cleanupQueue(vector<MeshInstanceAnimation>& queue){
     for (auto it = queue.cbegin(); it != queue.cend();){ //replace with remove/erase eventaully...
         if (it->requestedLoops > 0 && (it->currentLoops >= it->requestedLoops)){
             it = queue.erase(it);
