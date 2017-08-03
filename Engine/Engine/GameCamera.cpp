@@ -9,14 +9,15 @@
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Engine::Events;
+using namespace std;
 
-GameCamera::GameCamera(std::string name, float a, float r, float n, float f,Scene* scene):Camera(name,a,r,n,f,scene){
+GameCamera::GameCamera(string name, float a, float r, float n, float f,Scene* scene):Camera(name,a,r,n,f,scene){
     m_State = CAMERA_STATE_FREEFORM;
     m_Target = nullptr;
     m_Player = nullptr;
     m_OrbitRadius = 0;
 }
-GameCamera::GameCamera(std::string name, float l, float r, float b, float t, float n, float f, Scene* scene):Camera(name,l,r,b,t,n,f,scene){
+GameCamera::GameCamera(string name, float l, float r, float b, float t, float n, float f, Scene* scene):Camera(name,l,r,b,t,n,f,scene){
     m_State = CAMERA_STATE_FREEFORM;
     m_Target = nullptr;
     m_Player = nullptr;
@@ -32,12 +33,12 @@ void GameCamera::update(float dt){
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
-			float targetRadius = m_Target->getRadius();
+            float targetRadius = m_Target->getRadius();
 
             m_Model = glm::mat4(1);
             m_Model = glm::translate(m_Model,m_Target->getPosition() + ((m_Target->getForward()*glm::length(targetRadius)*1.7f)+ m_Target->getUp()*glm::length(targetRadius)*0.3f)*(1.0f + m_OrbitRadius));
-			m_Model *= glm::mat4_cast(m_Orientation);
-			m_Model = glm::translate(m_Model,glm::vec3(-0.00001f,-0.00001f,0.00001f)); //for some reason this is needed to remove lighting bugs...
+            m_Model *= glm::mat4_cast(m_Orientation);
+            m_Model = glm::translate(m_Model,glm::vec3(-0.00001f,-0.00001f,0.00001f)); //for some reason this is needed to remove lighting bugs...
 
             lookAt(getPosition(),m_Target->getPosition()-(m_Target->getForward()*50.0f),m_Target->getUp());
             break;
@@ -49,8 +50,8 @@ void GameCamera::update(float dt){
 
             m_Model = glm::mat4(1);
             m_Model = glm::translate(m_Model,m_Player->getPosition() -
-                                            ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*2.7f)* (1.0f + m_OrbitRadius))
-                                            - m_Player->getUp() * glm::length(m_Player->getRadius())*0.3f));
+                ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*2.7f)* (1.0f + m_OrbitRadius))
+                - m_Player->getUp() * glm::length(m_Player->getRadius())*0.3f));
 
             lookAt(getPosition(),m_Target->getPosition(),m_Player->getUp());
             break;
@@ -80,7 +81,7 @@ void GameCamera::update(float dt){
 }
 Object* GameCamera::getObjectInCenterRay(Object* exclusion){
     Object* ret = nullptr;
-    std::vector<Object*> objs;
+    vector<Object*> objs;
     for(auto object:Engine::Resources::getCurrentScene()->objects()){
         if(object.second->rayIntersectSphere(this)){
             if(object.second != exclusion)
