@@ -7,7 +7,10 @@
 class Scene;
 class ObjectDisplay;
 class ObjectDynamic;
-enum CAMERA_TYPE { CAMERA_TYPE_PERSPECTIVE, CAMERA_TYPE_ORTHOGRAPHIC };
+class CameraType{public: enum Type { 
+    Perspective, 
+    Orthographic,
+};};
 
 class Camera: public ObjectBasic{
     private:
@@ -15,7 +18,7 @@ class Camera: public ObjectBasic{
         glm::vec4 m_Planes[6];
         Scene* m_Scene;
     protected:
-        CAMERA_TYPE m_Type;
+        CameraType::Type m_Type;
         float m_Angle;
         float m_AspectRatio;
         float m_Near, m_Far;
