@@ -682,9 +682,12 @@ void Detail::RenderManagement::_passFXAA(){
 
     sendUniform2f("resolution",(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
     bindTexture("sampler0",m_gBuffer->getTexture(GBufferType::Lighting),0);
+    bindTexture("depthTexture",m_gBuffer->getTexture(GBufferType::Depth),1);
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 
-    unbindTexture2D(0);
+    for(uint i = 0; i < 2; i++){
+        unbindTexture2D(i); 
+    }
     p->unbind();
 }
 void Detail::RenderManagement::_passSMAA(){
