@@ -8,8 +8,9 @@
 #include <boost/make_shared.hpp>
 
 using namespace Engine;
+using namespace std;
 
-Scene::Scene(std::string name){
+Scene::Scene(string name){
     m_Skybox = nullptr;
     if(Resources::getCurrentScene() == nullptr){
         Resources::Detail::ResourceManagement::m_CurrentScene = this;
@@ -65,11 +66,11 @@ void Scene::renderSkybox(bool godsRays){ if(m_Skybox != nullptr) m_Skybox->draw(
 
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 
-std::unordered_map<std::string,Object*>& Scene::objects() { return m_Objects; }
-std::unordered_map<std::string,SunLight*>& Scene::lights() { return m_Lights; }
+unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
+unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }
 
-Object* Scene::getObject(std::string& name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
-SunLight* Scene::getLight(std::string& name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()
+Object* Scene::getObject(string& name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
+SunLight* Scene::getLight(string& name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()
 
 SkyboxEmpty* Scene::getSkybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
