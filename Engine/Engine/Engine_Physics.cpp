@@ -24,6 +24,7 @@
 
 using namespace Engine;
 using namespace Engine::Physics;
+using namespace std;
 
 btBroadphaseInterface* Physics::Detail::PhysicsManagement::m_broadphase = nullptr;
 btDefaultCollisionConfiguration* Physics::Detail::PhysicsManagement::m_collisionConfiguration = nullptr;
@@ -82,8 +83,7 @@ void Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){
         btPersistentManifold* contactManifold =  m_world->getDispatcher()->getManifoldByIndexInternal(i);
         btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-        uint numContacts = contactManifold->getNumContacts();
-        for (uint j = 0; j < numContacts; j++){
+        for (uint j = 0; j < contactManifold->getNumContacts(); j++){
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
             if (pt.getDistance() < 0.0f){
                 const btVector3& ptA = pt.getPositionWorldOnA();
@@ -99,39 +99,39 @@ void Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){
         }
     }
 }
-std::vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
+vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored != nullptr) Detail::PhysicsManagement::m_world->removeRigidBody(ignored);
-    std::vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
+    vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
     if(ignored != nullptr) Detail::PhysicsManagement::m_world->addRigidBody(ignored);
     return result;
 }
-std::vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,std::vector<btRigidBody*> ignored){
+vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*> ignored){
     for(auto object:ignored) Detail::PhysicsManagement::m_world->removeRigidBody(object);
-    std::vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
+    vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
     for(auto object:ignored) Detail::PhysicsManagement::m_world->addRigidBody(object);
     return result;
  }
-std::vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Object* ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Object* ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
     if(b != NULL) return Physics::rayCast(_s,_e,b->getRigidBody());
     return Physics::rayCast(_s,_e,nullptr);
  }
-std::vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,std::vector<Object*> ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Object*> ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
-    std::vector<btRigidBody*> objs;
+    vector<btRigidBody*> objs;
     for(auto o:ignored){
         ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(o);
         if(b != NULL) objs.push_back(b->getRigidBody());
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
-std::vector<glm::vec3> Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
+vector<glm::vec3> Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
     Detail::PhysicsManagement::m_world->rayTest(start, end, RayCallback);
-    std::vector<glm::vec3> result;
+    vector<glm::vec3> result;
     if(RayCallback.hasHit()){
         glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
         glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
@@ -188,69 +188,55 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
     switch(collisionType){
         case CollisionType::ConvexHull:{
             shape = new btConvexHullShape();
-
             for(auto vertex:data.points){
                 ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z));
             }
-
             m_CollisionShape = shape;	
             break;
         }
         case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
-
             for(auto triangle:data.file_triangles){
                 glm::vec3 v1,v2,v3;
-
                 v1 = triangle.v1.position;
                 v2 = triangle.v2.position;
                 v3 = triangle.v3.position;
-
                 btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
                 btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
                 btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
                 m_InternalMeshData->addTriangle(bv1, bv2, bv3,true);
             }
-
             shape = new btGImpactMeshShape(m_InternalMeshData);
             ((btGImpactMeshShape*)shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             ((btGImpactMeshShape*)shape)->setMargin(0.001f);
             ((btGImpactMeshShape*)shape)->updateBound();
-
             m_CollisionShape = shape;
             break;
         }
         case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
-
             for(auto triangle:data.file_triangles){
                 glm::vec3 v1Pos,v2Pos,v3Pos;
-
                 v1Pos = triangle.v1.position;
                 v2Pos = triangle.v2.position;
                 v3Pos = triangle.v3.position;
-
                 btVector3 v1 = btVector3(v1Pos.x,v1Pos.y,v1Pos.z);
                 btVector3 v2 = btVector3(v2Pos.x,v2Pos.y,v2Pos.z);
                 btVector3 v3 = btVector3(v3Pos.x,v3Pos.y,v3Pos.z);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
-
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
             (shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             (shape)->setMargin(0.001f);
-
             m_CollisionShape = shape;
             break;
         }
         case CollisionType::Box:{
             glm::vec3 max = glm::vec3(0);
-
             for(auto vertex:data.file_points){
                 float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
                 if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
             }
-
             shape = new btBoxShape(btVector3(max.x,max.y,max.z));
             m_CollisionShape = shape;
             break;
