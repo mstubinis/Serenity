@@ -437,8 +437,11 @@ void Detail::RenderManagement::_passForwardRendering(){
     }
 }
 void Detail::RenderManagement::_passCopyDepth(){
-    glColorMask(0,0,0,0);
+    glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
     ShaderP* p = Resources::getShaderProgram("Copy_Depth"); p->bind();
+
+    Settings::enableDepthMask(true);
+    Settings::enableDepthTest(true); //has to be enabled for some reason
 
     bindTexture("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),0);
 
@@ -446,7 +449,7 @@ void Detail::RenderManagement::_passCopyDepth(){
 
     unbindTexture2D(0);
     p->unbind();
-    glColorMask(1,1,1,1);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 }
 void Detail::RenderManagement::_passLighting(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Light"); p->bind();
@@ -531,9 +534,12 @@ void Detail::RenderManagement::render(){
         _passFinal();
         _passSMAA();
     }
+    m_gBuffer->stop();
     _passCopyDepth();
 
     glEnable(GL_BLEND);
+    Settings::disableDepthTest();
+    Settings::disableDepthMask();
     if(RendererInfo::DebugDrawingInfo::debug){
         Physics::Detail::PhysicsManagement::render();
     }
