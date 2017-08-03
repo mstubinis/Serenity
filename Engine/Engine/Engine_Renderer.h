@@ -77,9 +77,6 @@ namespace Engine{
 		    static bool draw_physics_debug;
                     static unsigned char cull_face_status;
                 };
-                struct DebugDrawingInfo final{
-                    static bool debug;
-                };
                 struct LightingInfo final{
                     static bool lighting;
                 };
@@ -159,8 +156,8 @@ namespace Engine{
 
         namespace Settings{
 
-			void setGamma(float g);
-			float getGamma();
+            void setGamma(float g);
+            float getGamma();
 
             void clear(bool color = true, bool depth = true, bool stencil = true);
 
@@ -176,7 +173,9 @@ namespace Engine{
             void disableDepthTest();
             void enableDepthMask(bool b = true);
             void disableDepthMask();
-
+            void enableDrawPhysicsInfo(bool b = true);
+            void disableDrawPhysicsInfo();
+		
             namespace HDR{
                 static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
                 static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
