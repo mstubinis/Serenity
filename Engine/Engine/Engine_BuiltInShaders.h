@@ -11,6 +11,7 @@ namespace Engine{
                 private:
                 public:
                     static std::string normals_octahedron_compression_functions;
+                    static std::string reconstruct_log_depth_functions;
                 
                     static std::string fullscreen_quad_vertex;
                     static std::string vertex_basic;
