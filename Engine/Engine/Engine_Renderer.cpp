@@ -186,6 +186,8 @@ void Settings::disableDepthMask(){
         Detail::RendererInfo::GeneralInfo::depth_mask = false;
     }
 }
+void Settings::enableDrawPhysicsInfo(bool b){ Detail::RendererInfo::GeneralInfo::draw_physics_debug = b; }
+void Settings::disableDrawPhysicsInfo(){ Detail::RendererInfo::GeneralInfo::draw_physics_debug = false; }
 void Settings::setGamma(float g){ Detail::RendererInfo::GeneralInfo::gamma = g; }
 float Settings::getGamma(){ return Detail::RendererInfo::GeneralInfo::gamma; }
 
