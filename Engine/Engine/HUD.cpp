@@ -35,23 +35,13 @@ uint count = 0;
 void HUD::update(float dt){
     if(Keyboard::isKeyDownOnce(",")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-        
-        std::vector<Planet*> objs;
-        for(auto p:scene->getPlanets()){
-            objs.push_back(p.second);
-        }
-        scene->getPlayer()->setTarget(Resources::getObject("Sun"));
+        scene->getPlayer()->setTarget(scene->getPlanets().at(count));
         count++;
         if (count > scene->getPlanets().size()-1){ count = 0; }
     }
     else if(Keyboard::isKeyDownOnce(".")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-        
-        std::vector<Planet*> objs;
-        for(auto p:scene->getPlanets()){
-            objs.push_back(p.second);
-        }
-        scene->getPlayer()->setTarget(objs.at(count));
+        scene->getPlayer()->setTarget(scene->getPlanets().at(count));
         count--;
         if (count <= 0){ count = scene->getPlanets().size()-1; }
     }
@@ -109,7 +99,7 @@ void HUD::render(bool debug){
                 else
                     angle = 135;
             }
-            Resources::getTexture("data/Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),angle,glm::vec2(scl,scl),0.1f);
+            Resources::getTexture("data/Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
         }
     }
     #pragma endregion
