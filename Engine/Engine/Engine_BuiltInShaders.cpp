@@ -1,5 +1,33 @@
 #include "Engine_BuiltInShaders.h"
 
+
+#pragma region NormalsCompressionFunctions
+std::string Engine::Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = 
+    vec2 OctWrap( vec2 v ){
+        return vec2( 1.0-abs(v.y),1.0-abs(v.x) ) * ( v.x >= 0.0 && v.y >= 0.0 ? 1.0 : -1.0 );
+    }
+    vec2 Encode( vec3 n ){
+        if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
+            return vec2(1.0);
+        n /= ( abs( n.x ) + abs( n.y ) + abs( n.z ) );
+        n.xy = n.z >= 0.0 ? n.xy : OctWrap( n.xy );
+        n.xy = n.xy * 0.5 + 0.5;
+        return n.xy;
+    }
+    vec3 Decode( vec2 encN ){
+        if(encN.r > 0.9999 && encN.g > 0.9999)
+            return vec3(1.0);
+        encN = encN * 2.0 - 1.0;
+        vec3 n;
+        n.z = 1.0 - abs( encN.x ) - abs( encN.y );
+        n.xy = n.z >= 0.0 ? encN.xy : OctWrap( encN.xy );
+        n = normalize( n );
+        return n;
+    }
+
+#pragma endregion
+
+
 #pragma region FullscreenQuadVertex
 std::string Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
     "#version 120\n"
