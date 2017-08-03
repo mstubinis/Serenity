@@ -2,28 +2,45 @@
 
 
 #pragma region NormalsCompressionFunctions
+std::string Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
+    "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
+    "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
+    "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
+    "\n"  //linearize regular depth
+    "    float a = _far / (_far - _near);\n"
+    "    float b = _far * _near / (_near - _far);\n"
+    "    float depth = (a + b / regularDepth);\n"
+    "\n"
+    "    //vec4 screenSpace = vec4(_uv * 2.0 - 1.0,depth,1.0);\n"
+    "    vec4 screenSpace = (vec4(_uv,depth, 1.0) * 2.0 - 1.0);\n"
+    "\n"
+    "    \n"//world space it!
+    "    vec4 wpos = invVP * screenSpace;\n"
+    "    return wpos.xyz / wpos.w;\n"
+    "}\n"
+
 std::string Engine::Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = 
-    vec2 OctWrap( vec2 v ){
-        return vec2( 1.0-abs(v.y),1.0-abs(v.x) ) * ( v.x >= 0.0 && v.y >= 0.0 ? 1.0 : -1.0 );
-    }
-    vec2 Encode( vec3 n ){
-        if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
-            return vec2(1.0);
-        n /= ( abs( n.x ) + abs( n.y ) + abs( n.z ) );
-        n.xy = n.z >= 0.0 ? n.xy : OctWrap( n.xy );
-        n.xy = n.xy * 0.5 + 0.5;
-        return n.xy;
-    }
-    vec3 Decode( vec2 encN ){
-        if(encN.r > 0.9999 && encN.g > 0.9999)
-            return vec3(1.0);
-        encN = encN * 2.0 - 1.0;
-        vec3 n;
-        n.z = 1.0 - abs( encN.x ) - abs( encN.y );
-        n.xy = n.z >= 0.0 ? encN.xy : OctWrap( encN.xy );
-        n = normalize( n );
-        return n;
-    }
+    "vec2 OctWrap( vec2 v ){\n"
+    "    return vec2( 1.0-abs(v.y),1.0-abs(v.x) ) * ( v.x >= 0.0 && v.y >= 0.0 ? 1.0 : -1.0 );\n"
+    "}\n"
+    "vec2 Encode( vec3 n ){\n"
+    "    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)\n"
+    "        return vec2(1.0);\n"
+    "    n /= ( abs( n.x ) + abs( n.y ) + abs( n.z ) );\n"
+    "    n.xy = n.z >= 0.0 ? n.xy : OctWrap( n.xy );\n"
+    "    n.xy = n.xy * 0.5 + 0.5;\n"
+    "    return n.xy;\n"
+    "}\n"
+    "vec3 Decode( vec2 encN ){\n"
+    "    if(encN.r > 0.9999 && encN.g > 0.9999)\n"
+    "        return vec3(1.0);\n"
+    "    encN = encN * 2.0 - 1.0;\n"
+    "    vec3 n;\n"
+    "    n.z = 1.0 - abs( encN.x ) - abs( encN.y );\n"
+    "    n.xy = n.z >= 0.0 ? encN.xy : OctWrap( encN.xy );\n"
+    "    n = normalize( n );\n"
+    "    return n;\n"
+    "}\n"
 
 #pragma endregion
 
@@ -404,23 +421,10 @@ std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag =
     "uniform mat4 invVP;\n"
     "uniform float nearz;\n"
     "uniform float farz;\n"
-    "\n"
-    "vec3 reconstruct_world_pos(vec2 _uv){\n"
-    "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
-    "    float regularDepth = pow(farz + 1.0, log_depth) - 1.0; //log to regular depth\n"
-    "\n"
-    "    //linearize regular depth\n"
-    "    float a = farz / (farz - nearz);\n"
-    "    float b = farz * nearz / (nearz - farz);\n"
-    "    float depth = (a + b / regularDepth);\n"
-    "\n"
-    "    //vec4 screenSpace = vec4(_uv * 2.0 - 1.0,depth,1.0);\n"
-    "    vec4 screenSpace = (vec4(_uv,depth, 1.0) * 2.0 - 1.0);\n"
-    "\n"
-    "    //world space it!\n"
-    "    vec4 wpos = invVP * screenSpace;\n"
-    "    return wpos.xyz / wpos.w;\n"
-    "}\n"
+    "\n";
+std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag +=
+Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
+std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag +=
     "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
     "    vec3 diff = (reconstruct_world_pos(uv + offsetUV)) - origin;\n"
     "    vec3 vec = normalize(diff);\n"
@@ -429,7 +433,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag =
     "}\n"
     "void main(void){\n"
     "    vec2 uv = gl_TexCoord[0].st * 2.0;\n"
-    "    vec3 worldPosition = reconstruct_world_pos(uv);\n"
+    "    vec3 worldPosition = reconstruct_world_pos(uv,nearz,farz);\n"
     "    vec3 normal = texture2D(gNormalMap, uv).xyz;\n"
     "    vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xy * 2.0 - 1.0);\n"
     "\n"
@@ -628,7 +632,6 @@ std::string Engine::Shaders::Detail::ShadersManagement::edge_frag =
     "    if (val > thr2) { return 1.0; }\n"
     "    return val;\n"
     "}\n"
-    "\n"
     "// averaged pixel intensity from 3 color channels\n"
     "float avg_intensity(vec4 pix) {\n"
     "    return (pix.r + pix.g + pix.b)/3.0;\n"
@@ -643,7 +646,6 @@ std::string Engine::Shaders::Detail::ShadersManagement::edge_frag =
     "    float pix[9];\n"
     "    int k = -1;\n"
     "    float delta;\n"
-    "\n"
     "    // read neighboring pixel intensities\n"
     "    for (int i=-1; i<2; i++) {\n"
     "        for(int j=-1; j<2; j++) {\n"
@@ -710,7 +712,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::final_frag =
     "    }\n"
     "    lighting += rays;\n"
     "    //lighting = pow(lighting, vec3(1.0 / gamma));\n"
-	"    gl_FragColor = vec4(lighting,1.0);\n"
+    "    gl_FragColor = vec4(lighting,1.0);\n"
     "}";
 
 #pragma endregion
@@ -737,27 +739,17 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
-    "\n"
+    "\n";
+std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag +=
+Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
+std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag +=	
     "vec2 Unpack16BitFloatInto2Floats(float src){\n"
     "    vec2 ret;\n"
-	"    float g = src - floor(src);\n"
-	"    float r = (src - g) / 1000;\n"
+    "    float g = src - floor(src);\n"
+    "    float r = (src - g) / 1000;\n"
     "    ret.x = (r - 0.5) * 2;\n"
     "    ret.y = (g - 0.5) * 2;\n"
     "    return ret;\n"
-    "}\n"
-    "vec3 reconstruct_world_pos(vec2 _uv){\n"
-    "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
-    "    float regularDepth = pow(ScreenData.y + 1.0, log_depth) - 1.0;\n" //log to regular depth
-    "\n"
-    "    //linearize regular depth\n"
-    "    float a = ScreenData.y / (ScreenData.y - ScreenData.x);\n"
-    "    float b = ScreenData.y * ScreenData.x / (ScreenData.x - ScreenData.y);\n"
-    "    float depth = (a + b / regularDepth);\n"
-    "\n"
-    "    vec4 screenSpace = (vec4(_uv,depth, 1.0) * 2.0 - 1.0);\n"
-    "    vec4 wpos = invVP * screenSpace;\n" //world space it!
-    "    return wpos.xyz / wpos.w;\n"
     "}\n"
     "float BeckmannDist(float cos2a, float _alpha, float pi){\n"
     "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
@@ -795,9 +787,9 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
     "    float kPi = 3.1415926535898;\n"
     "    //highp int index = int(texture2D(gNormalMap,uv).a);\n"
     "    highp int index = 0;\n"
-	"    vec2 stuff = Unpack16BitFloatInto2Floats(texture2D(gNormalMap,uv).a);\n"
-	"    float metalness = stuff.x;\n"
-	"    float smoothness = stuff.y;\n"
+    "    vec2 stuff = Unpack16BitFloatInto2Floats(texture2D(gNormalMap,uv).a);\n"
+    "    float metalness = stuff.x;\n"
+    "    float smoothness = stuff.y;\n"
     "\n"
     "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
@@ -925,7 +917,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
     "    //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh\n"
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
-    "    vec3 PxlPosition = reconstruct_world_pos(uv);\n"
+    "    vec3 PxlPosition = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
     "    vec3 PxlNormal = normalize(texture2D(gNormalMap, uv).rgb);\n"
     "\n"
     "    vec3 lightCalculation = vec3(0.0);\n"
