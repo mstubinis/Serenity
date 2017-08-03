@@ -63,7 +63,7 @@ namespace Engine{
         namespace Detail{
             struct RendererInfo final{
                 struct GeneralInfo final{
-					static float gamma;
+                    static float gamma;
                     static bool alpha_test;
                     static bool depth_mask;
                     static bool depth_test;
@@ -74,6 +74,7 @@ namespace Engine{
                     static AntiAliasingAlgorithm::Algorithm aa_algorithm;
 
                     static bool cull_face_enabled;
+		    static bool draw_physics_debug;
                     static unsigned char cull_face_status;
                 };
                 struct DebugDrawingInfo final{
