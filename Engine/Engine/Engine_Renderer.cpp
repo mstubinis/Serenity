@@ -37,6 +37,11 @@ bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disable
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 AntiAliasingAlgorithm::Algorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
+bool Detail::RendererInfo::GeneralInfo::draw_physics_debug = false;
+
+#ifdef(_DEBUG)
+    Detail::RendererInfo::GeneralInfo::draw_physics_debug = true;
+#endif
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
 float Detail::RendererInfo::BloomInfo::bloom_radius = 0.84f;
@@ -219,12 +224,6 @@ void Renderer::unbindTextureCubemap(uint slot){
 }
 
 void Detail::RenderManagement::init(){
-    #ifdef _DEBUG
-    RendererInfo::DebugDrawingInfo::debug = true;
-    #else
-    RendererInfo::DebugDrawingInfo::debug = false;
-    #endif
-
     uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
     uniform_real_distribution<float> randFloats1(0.0f,1.0f);
     default_random_engine gen;
@@ -540,7 +539,7 @@ void Detail::RenderManagement::render(){
     glEnable(GL_BLEND);
     Settings::disableDepthTest();
     Settings::disableDepthMask();
-    if(RendererInfo::DebugDrawingInfo::debug){
+    if(Detail::RendererInfo::GeneralInfo::draw_physics_debug){
         Physics::Detail::PhysicsManagement::render();
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
