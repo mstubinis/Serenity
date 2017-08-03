@@ -35,18 +35,34 @@ uint count = 0;
 void HUD::update(float dt){
     if(Keyboard::isKeyDownOnce(",")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-        scene->getPlayer()->setTarget(scene->getPlanets().at(count));
+		std::unordered_map<std::string,Planet*>& planets = scene->getPlanets();
+		uint a = 0;
+		for(auto p:planets){
+			if(a == count){
+				scene->getPlayer()->setTarget(p.second);
+				break;
+			}
+			a++;
+		}
         count++;
         if (count > scene->getPlanets().size()-1){ count = 0; }
     }
     else if(Keyboard::isKeyDownOnce(".")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-        scene->getPlayer()->setTarget(scene->getPlanets().at(count));
+		std::unordered_map<std::string,Planet*>& planets = scene->getPlanets();
+		uint a = 0;
+		for(auto p:planets){
+			if(a == count){
+				scene->getPlayer()->setTarget(p.second);
+				break;
+			}
+			a++;
+		}
         count--;
         if (count <= 0){ count = scene->getPlanets().size()-1; }
     }
 }
-void HUD::render(bool debug){
+void HUD::render(){
     //render hud stuff
     SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
@@ -105,15 +121,11 @@ void HUD::render(bool debug){
     #pragma endregion
 
     #pragma region DrawDebugStuff
-    if(debug){
-        m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
-                           "\nFPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) + 
-                           "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->objects().size()),
-                           glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
-    }
-    else{
-        m_Font->renderText("FPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) ,
-                           glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
-    }
+
+    m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
+                        "\nFPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) + 
+                        "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->objects().size()),
+                        glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
+
     #pragma endregion
 }

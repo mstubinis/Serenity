@@ -9,6 +9,7 @@ class Mesh;
 class Material;
 class Scene;
 class Camera;
+class MeshInstance;
 typedef unsigned int GLuint;
 
 template <typename T> bool exists(boost::weak_ptr<T> t){ if(t.expired() || !t.lock().get()) return false; return true; }
@@ -44,12 +45,12 @@ class IObject: public BindableResource{
 };
 
 class Object: public IObject{
+	friend class MeshInstance;
     private:
         bool m_IsToBeDestroyed;
     protected:
-        static float m_RotationThreshold;
         static float m_VisibilityThreshold;
-
+        static float m_RotationThreshold;
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;

@@ -17,8 +17,7 @@ enum COLLISION_GROUPS {
     COLLISION_GROUP_EVERYTHING = BIT(0),
 };
 */
-struct DefaultObjectDynamicBindFunctor;
-struct DefaultObjectDynamicUnbindFunctor;
+struct DefaultObjectDynamicBindFunctor; struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
     public: 
         static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;

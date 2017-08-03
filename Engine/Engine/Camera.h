@@ -55,7 +55,7 @@ class Camera: public ObjectBasic{
         glm::mat4 getView(){ return m_View; }
         glm::mat4 getViewProjection(){ return m_Projection * m_View; }
         glm::vec3 getViewVector(){ return glm::vec3(m_View[0][2],m_View[1][2],m_View[2][2]); }
-        const CAMERA_TYPE getType() const{ return m_Type; }
+        const CameraType::Type getType() const{ return m_Type; }
 
         virtual bool sphereIntersectTest(Object*);
         virtual bool sphereIntersectTest(glm::vec3 pos, float radius);

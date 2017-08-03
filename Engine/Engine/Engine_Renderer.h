@@ -241,10 +241,6 @@ namespace Engine{
                 static void enable(bool b = true){ Detail::RendererInfo::LightingInfo::lighting = b; }
                 static void disable(){ Detail::RendererInfo::LightingInfo::lighting = false; }
             };
-            namespace Debug{
-                static void enable(bool b = true){ Detail::RendererInfo::DebugDrawingInfo::debug = b;  }
-                static void disable(){ Detail::RendererInfo::DebugDrawingInfo::debug = false;  }
-            };
         };
         inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
         inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }

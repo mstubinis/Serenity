@@ -135,6 +135,8 @@ void Resources::removeMaterial(string n){Detail::ResourceManagement::_removeFrom
 void Resources::removeSound(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Sounds,n);}
 
 void Resources::initResources(){
+	Engine::Shaders::Detail::ShadersManagement::init();
+
     //add a basic cube mesh
     #pragma region MeshData
     string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"

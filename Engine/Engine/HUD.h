@@ -23,7 +23,7 @@ class HUD final{
         ~HUD();
 
         void update(float);
-        void render(bool=false);
+        void render();
 
         const glm::vec3 getColor() const;
         void setColor(glm::vec3 c);

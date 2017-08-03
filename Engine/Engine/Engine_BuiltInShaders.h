@@ -10,6 +10,7 @@ namespace Engine{
             class ShadersManagement{
                 private:
                 public:
+					static void init();
                     static std::string normals_octahedron_compression_functions;
                     static std::string reconstruct_log_depth_functions;
                 

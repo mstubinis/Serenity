@@ -124,11 +124,11 @@ class GBuffer::impl final{
                 Renderer::bindReadFBO(m_fbo_bloom);
                 Renderer::bindDrawFBO(m_fbo_bloom);
             }
-            bool r,g,b,a;
-            if(channels.find("R") != string::npos) r=true; else r=false;
-            if(channels.find("G") != string::npos) g=true; else g=false;
-            if(channels.find("B") != string::npos) b=true; else b=false;
-            if(channels.find("A") != string::npos) a=true; else a=false;
+            GLboolean r,g,b,a;
+            if(channels.find("R") != string::npos) r=GL_TRUE; else r=GL_FALSE;
+            if(channels.find("G") != string::npos) g=GL_TRUE; else g=GL_FALSE;
+            if(channels.find("B") != string::npos) b=GL_TRUE; else b=GL_FALSE;
+            if(channels.find("A") != string::npos) a=GL_TRUE; else a=GL_FALSE;
             glColorMask(r,g,b,a);
             glDrawBuffers(types.size(), &types[0]); // Specify what to render an start acquiring
             glClear(GL_COLOR_BUFFER_BIT);           // Clear the render targets

@@ -100,8 +100,9 @@ void Skybox::draw(bool godsRays){
     ShaderP* p = Resources::getShaderProgram("Deferred_Skybox");
     p->bind();
 
-    Renderer::sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-    Renderer::sendUniformMatrix4f("Model",m_Model);
+	Camera* c = Resources::getActiveCamera();
+	glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
+    Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
 
     Renderer::bindTexture("Texture",m_Texture,0);
 

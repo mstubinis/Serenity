@@ -16,6 +16,7 @@
 using namespace Engine;
 using namespace std;
 
+
 unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
     unordered_map<uint,boost::tuple<float,float,float>> m;
 

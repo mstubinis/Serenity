@@ -39,7 +39,7 @@ GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 AntiAliasingAlgorithm::Algorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
 bool Detail::RendererInfo::GeneralInfo::draw_physics_debug = false;
 
-#ifdef(_DEBUG)
+#ifdef _DEBUG
     Detail::RendererInfo::GeneralInfo::draw_physics_debug = true;
 #endif
 
@@ -48,8 +48,6 @@ float Detail::RendererInfo::BloomInfo::bloom_radius = 0.84f;
 float Detail::RendererInfo::BloomInfo::bloom_strength = 2.5f;
 
 bool Detail::RendererInfo::LightingInfo::lighting = true;
-
-bool Detail::RendererInfo::DebugDrawingInfo::debug = false;
 
 bool Detail::RendererInfo::GodRaysInfo::godRays = true;
 float Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
@@ -441,9 +439,6 @@ void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
     ShaderP* p = Resources::getShaderProgram("Copy_Depth"); p->bind();
 
-    Settings::enableDepthMask(true);
-    Settings::enableDepthTest(true); //has to be enabled for some reason
-
     bindTexture("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),0);
 
     renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -535,7 +530,9 @@ void Detail::RenderManagement::render(){
         _passFinal();
         _passSMAA();
     }
-    m_gBuffer->stop();
+    //m_gBuffer->stop();
+    //Settings::enableDepthMask(true);
+    //Settings::enableDepthTest(true); //has to be enabled for some reason
     _passCopyDepth();
 
     glEnable(GL_BLEND);

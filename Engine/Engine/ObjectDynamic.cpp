@@ -19,7 +19,6 @@
 
 using namespace Engine;
 
-
 struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) const {
     ObjectDynamic* o = static_cast<ObjectDynamic*>(r);
 

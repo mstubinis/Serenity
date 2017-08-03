@@ -1,8 +1,42 @@
 #include "Engine_BuiltInShaders.h"
 
+using namespace Engine;
+using namespace std;
 
-#pragma region NormalsCompressionFunctions
-std::string Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
+#pragma region Declarations
+string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
+string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = "";
+string Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = "";
+string Shaders::Detail::ShadersManagement::vertex_basic = "";
+string Shaders::Detail::ShadersManagement::vertex_hud = "";
+string Shaders::Detail::ShadersManagement::vertex_skybox = "";
+string Shaders::Detail::ShadersManagement::smaa_vertex_1 = "";
+string Shaders::Detail::ShadersManagement::smaa_frag_1 = "";
+string Shaders::Detail::ShadersManagement::smaa_vertex_2 = "";
+string Shaders::Detail::ShadersManagement::smaa_frag_2 = "";
+string Shaders::Detail::ShadersManagement::smaa_vertex_3 = "";
+string Shaders::Detail::ShadersManagement::smaa_frag_3 = "";
+string Shaders::Detail::ShadersManagement::smaa_vertex_4 = "";
+string Shaders::Detail::ShadersManagement::smaa_frag_4 = "";
+string Shaders::Detail::ShadersManagement::fxaa_frag = "";
+string Shaders::Detail::ShadersManagement::deferred_frag = "";
+string Shaders::Detail::ShadersManagement::deferred_frag_hud = "";
+string Shaders::Detail::ShadersManagement::deferred_frag_skybox = "";
+string Shaders::Detail::ShadersManagement::copy_depth_frag = "";
+string Shaders::Detail::ShadersManagement::ssao_frag = "";
+string Shaders::Detail::ShadersManagement::hdr_frag = "";
+string Shaders::Detail::ShadersManagement::godRays_frag = "";
+string Shaders::Detail::ShadersManagement::blur_frag = "";
+string Shaders::Detail::ShadersManagement::edge_frag = "";
+string Shaders::Detail::ShadersManagement::final_frag = "";
+string Shaders::Detail::ShadersManagement::lighting_frag = "";
+#pragma endregion
+
+void Shaders::Detail::ShadersManagement::init(){
+
+#pragma region Functions
+Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
+	"\n"
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
     "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
     "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
@@ -11,15 +45,16 @@ std::string Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_fu
     "    float b = _far * _near / (_near - _far);\n"
     "    float depth = (a + b / regularDepth);\n"
     "\n"
-    "    //vec4 screenSpace = vec4(_uv * 2.0 - 1.0,depth,1.0);\n"
     "    vec4 screenSpace = (vec4(_uv,depth, 1.0) * 2.0 - 1.0);\n"
     "\n"
     "    \n"//world space it!
     "    vec4 wpos = invVP * screenSpace;\n"
     "    return wpos.xyz / wpos.w;\n"
     "}\n"
+	"\n";
 
-std::string Engine::Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = 
+Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = 
+	"\n"
     "vec2 OctWrap( vec2 v ){\n"
     "    return vec2( 1.0-abs(v.y),1.0-abs(v.x) ) * ( v.x >= 0.0 && v.y >= 0.0 ? 1.0 : -1.0 );\n"
     "}\n"
@@ -41,12 +76,13 @@ std::string Engine::Shaders::Detail::ShadersManagement::normals_octahedron_compr
     "    n = normalize( n );\n"
     "    return n;\n"
     "}\n"
+	"\n";
 
 #pragma endregion
 
 
 #pragma region FullscreenQuadVertex
-std::string Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
+Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
     "#version 120\n"
     "\n"
     "uniform mat4 VP;\n"
@@ -60,7 +96,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
 #pragma endregion
 
 #pragma region VertexBasic
-std::string Engine::Shaders::Detail::ShadersManagement::vertex_basic =
+Shaders::Detail::ShadersManagement::vertex_basic =
     "#version 120\n"
     "\n"
     "attribute vec3 position;\n"
@@ -120,7 +156,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::vertex_basic =
 #pragma endregion
 
 #pragma region VertexHUD
-std::string Engine::Shaders::Detail::ShadersManagement::vertex_hud =
+Shaders::Detail::ShadersManagement::vertex_hud =
     "#version 120\n"
     "\n"
     "attribute vec3 position;\n"
@@ -145,25 +181,21 @@ std::string Engine::Shaders::Detail::ShadersManagement::vertex_hud =
 #pragma endregion
 
 #pragma region VertexSkybox
-std::string Engine::Shaders::Detail::ShadersManagement::vertex_skybox =
+Shaders::Detail::ShadersManagement::vertex_skybox =
     "#version 120\n"
     "\n"
     "attribute vec3 position;\n"
     "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
-    "\n"
     "varying vec3 UV;\n"
-    "\n"
     "void main(void){\n"
-    "    mat4 MVP = VP * Model;\n"
     "    UV = position;\n"
-    "    gl_Position = MVP * vec4(position, 1.0);\n"
+    "    gl_Position = VP * vec4(position, 1.0);\n"
     "    gl_Position.z = gl_Position.w;\n"
     "}";
 #pragma endregion
 
 #pragma region FXAA
-std::string Engine::Shaders::Detail::ShadersManagement::fxaa_frag = 
+Shaders::Detail::ShadersManagement::fxaa_frag = 
     "#version 120\n"
     "#define FXAA_REDUCE_MIN (1.0/128.0)\n"
     "#define FXAA_REDUCE_MUL (1.0/8.0)\n"
@@ -176,7 +208,8 @@ std::string Engine::Shaders::Detail::ShadersManagement::fxaa_frag =
     "   vec2 uv = gl_TexCoord[0].st;\n"
     "   float depth = texture2D(depthTexture,uv);\n"
     "   if(depth >= 0.99999){\n"
-    "       discard;\n"
+	"       gl_FragColor = texture2D(sampler0, uv);\n"
+	"       return;\n"
     "   }\n"
     "\n"
     "   vec2 inverse_resolution = vec2(1.0/resolution.x, 1.0/resolution.y);\n"
@@ -213,7 +246,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::fxaa_frag =
 #pragma endregion
 
 #pragma region DeferredFrag
-std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag = 
+Shaders::Detail::ShadersManagement::deferred_frag = 
     "#version 120\n"
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
@@ -342,7 +375,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag =
 #pragma endregion
 
 #pragma region DeferredFragHUD
-std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud = 
+Shaders::Detail::ShadersManagement::deferred_frag_hud = 
     "#version 120\n"
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
@@ -361,7 +394,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud =
 #pragma endregion
 
 #pragma region DeferredFragSkybox
-std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox = 
+Shaders::Detail::ShadersManagement::deferred_frag_skybox = 
     "#version 120\n"
     "\n"
     "uniform samplerCube Texture;\n"
@@ -370,7 +403,6 @@ std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox =
     "varying vec3 WorldPosition;\n"
     "\n"
     "uniform int HasGodsRays;\n"
-    "\n"
     "void main(void){\n"
     "    gl_FragData[0] = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rgb = vec3(1.0);\n"
@@ -385,7 +417,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox =
 #pragma endregion
 
 #pragma region CopyDepthFrag
-std::string Engine::Shaders::Detail::ShadersManagement::copy_depth_frag = 
+Shaders::Detail::ShadersManagement::copy_depth_frag = 
     "#version 120\n"
     "\n"
     "uniform sampler2D gDepthMap;\n"
@@ -397,7 +429,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::copy_depth_frag =
 #pragma endregion
 
 #pragma region SSAO
-std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag = 
+Shaders::Detail::ShadersManagement::ssao_frag = 
     "#version 120\n"
     "\n"
     "uniform sampler2D gNormalMap;\n"
@@ -422,11 +454,10 @@ std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag =
     "uniform float nearz;\n"
     "uniform float farz;\n"
     "\n";
-std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag +=
-Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag +=
+Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
+Shaders::Detail::ShadersManagement::ssao_frag +=
     "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 diff = (reconstruct_world_pos(uv + offsetUV)) - origin;\n"
+    "    vec3 diff = reconstruct_world_pos(uv + offsetUV,nearz,farz) - origin;\n"
     "    vec3 vec = normalize(diff);\n"
     "    float dist = length(diff) * SSAOInfo.w;\n"
     "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
@@ -478,7 +509,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::ssao_frag +=
 #pragma endregion
 
 #pragma region HDR
-std::string Engine::Shaders::Detail::ShadersManagement::hdr_frag = 
+Shaders::Detail::ShadersManagement::hdr_frag = 
     "#version 120\n"
     "\n"
     "uniform sampler2D lightingBuffer;\n"
@@ -532,7 +563,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::hdr_frag =
 #pragma endregion
 
 #pragma region Blur
-std::string Engine::Shaders::Detail::ShadersManagement::blur_frag = 
+Shaders::Detail::ShadersManagement::blur_frag = 
     "#version 120\n"
     "\n"
     "uniform sampler2D texture;\n"
@@ -586,7 +617,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::blur_frag =
 #pragma endregion
 
 #pragma region GodRays
-std::string Engine::Shaders::Detail::ShadersManagement::godRays_frag = 
+Shaders::Detail::ShadersManagement::godRays_frag = 
     "#version 120\n"
     "\n"
     "uniform vec4 RaysInfo; //exposure | decay | density | weight\n"
@@ -620,7 +651,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::godRays_frag =
 #pragma endregion
 
 #pragma region EdgeDetect
-std::string Engine::Shaders::Detail::ShadersManagement::edge_frag = 
+Shaders::Detail::ShadersManagement::edge_frag = 
     "#version 120\n"
     "\n"
     "uniform vec2 gScreenSize;\n"
@@ -665,7 +696,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::edge_frag =
 #pragma endregion
 
 #pragma region FinalFrag
-std::string Engine::Shaders::Detail::ShadersManagement::final_frag = 
+Shaders::Detail::ShadersManagement::final_frag = 
     "#version 120\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
@@ -718,7 +749,7 @@ std::string Engine::Shaders::Detail::ShadersManagement::final_frag =
 #pragma endregion
 
 #pragma region LightingFrag
-std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag = 
+Shaders::Detail::ShadersManagement::lighting_frag = 
     "#version 120\n"
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
@@ -740,9 +771,8 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag =
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "\n";
-std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag +=
-Engine::Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag +=	
+Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
+Shaders::Detail::ShadersManagement::lighting_frag +=	
     "vec2 Unpack16BitFloatInto2Floats(float src){\n"
     "    vec2 ret;\n"
     "    float g = src - floor(src);\n"
@@ -940,3 +970,5 @@ std::string Engine::Shaders::Detail::ShadersManagement::lighting_frag +=
     "}";
 
 #pragma endregion
+
+}

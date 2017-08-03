@@ -83,7 +83,7 @@ void Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){
         btPersistentManifold* contactManifold =  m_world->getDispatcher()->getManifoldByIndexInternal(i);
         btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
         btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-        for (uint j = 0; j < contactManifold->getNumContacts(); j++){
+        for (uint j = 0; j < uint(contactManifold->getNumContacts()); j++){
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
             if (pt.getDistance() < 0.0f){
                 const btVector3& ptA = pt.getPositionWorldOnA();

@@ -5,11 +5,11 @@
 #include "Object.h"
 #include "MeshInstance.h"
 
-struct DefaultObjectDisplayBindFunctor;
-struct DefaultObjectDisplayUnbindFunctor;
+struct DefaultObjectDisplayBindFunctor; struct DefaultObjectDisplayUnbindFunctor;
 class ObjectDisplay: public ObjectBasic{
-    public: static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
-            static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+    public: 
+        static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
+        static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
         bool m_Shadeless;
         bool m_Visible;

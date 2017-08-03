@@ -120,8 +120,8 @@ void SolarSystem::_loadFromFile(std::string filename){
 
                 }
                 float randAngle = float(rand() % 3600);
-                randAngle /= 10;
-                randAngle *= 3.14159 / 180.0;
+                randAngle /= 10.0f;
+                randAngle *= 3.14159f / 180.0f;
                 float xPos = glm::cos(randAngle) * static_cast<float>(POSITION);
                 float zPos = glm::sin(randAngle) * static_cast<float>(POSITION);
 
@@ -306,8 +306,8 @@ void SolarSystem::_loadRandomly(){
     for(uint i = 0; i < numberOfStars; i++){
         Star* star = nullptr;
         //star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
-        float radius = static_cast<float>(97412.0 + (rand() % 1252440000))*10.0;
-        float position = static_cast<float>(radius * 2.0 + (rand() % 841252440000));
+        float radius = static_cast<float>(97412.0f + (rand() % 1252440000))*10.0f;
+        float position = static_cast<float>(radius * 2.0f + (rand() % 841252440000));
 
         float R = static_cast<float>((rand()%100)/100.0f);
         float G = static_cast<float>((rand()%100)/100.0f);

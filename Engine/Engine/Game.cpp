@@ -147,7 +147,7 @@ void Game::update(float dt){
     m_HUD->update(dt);
 }
 void Game::render(){
-    m_HUD->render(Renderer::Detail::RendererInfo::DebugDrawingInfo::debug);
+    m_HUD->render();
 }
 
 #pragma region EventHandlers
