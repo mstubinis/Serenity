@@ -19,7 +19,7 @@ Camera::Camera(std::string n, float angle, float aspectRatio, float _near, float
     m_Near = _near;
     m_Far = _far;
     m_Scene = scene;
-    m_Type = CAMERA_TYPE_PERSPECTIVE;
+    m_Type = CameraType::Perspective;
     setPerspectiveProjection();
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
@@ -31,7 +31,7 @@ Camera::Camera(std::string n, float left, float right, float bottom, float top, 
     m_Near = _near;
     m_Far = _far;
     m_Scene = scene;
-    m_Type = CAMERA_TYPE_ORTHOGRAPHIC;
+    m_Type = CameraType::Orthographic;
     setOrthoProjection(left,right,bottom,top);
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
@@ -57,7 +57,7 @@ void Camera::_constructFrustrum(){
     }
 }
 void Camera::resize(unsigned int width, unsigned int height){
-    if(m_Type == CAMERA_TYPE_PERSPECTIVE){setAspectRatio(float(width)/float(height));}
+    if(m_Type == CameraType::Perspective){setAspectRatio(float(width)/float(height));}
     else{setOrthoProjection(0,float(width),0,float(height));}
 }
 Camera::~Camera()
@@ -72,7 +72,7 @@ void Camera::setAspectRatio(float ratio){
 void Camera::lookAt(glm::vec3 target){ Camera::lookAt(getPosition(),target,getUp()); }
 void Camera::lookAt(glm::vec3 target,glm::vec3 up){ Camera::lookAt(getPosition(),target,up); }
 void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
-	ObjectBasic::update(Resources::dt());
+    ObjectBasic::update(Resources::dt());
     setPosition(eye); 
     m_View = glm::lookAt(eye,target,up);
     m_Orientation = glm::conjugate(glm::quat_cast(m_View));
@@ -80,7 +80,6 @@ void Camera::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
     m_Up = glm::normalize(up);
     m_Right = glm::normalize(glm::cross(m_Forward,m_Up));
     _constructFrustrum();
-    
 }
 void Camera::lookAt(Object* target, bool targetUp){
     glm::vec3 u; if(!targetUp) u = getUp(); else u = target->getUp();
