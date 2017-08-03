@@ -21,6 +21,7 @@
 
 using namespace Engine;
 using namespace Engine::Resources;
+using namespace std;
 
 float Detail::ResourceManagement::m_DeltaTime = 1;
 float Detail::ResourceManagement::m_ApplicationTime = 0;
@@ -29,17 +30,17 @@ Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 bool Detail::ResourceManagement::m_DynamicMemory = false;
 
-std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_RenderedItems;
-std::unordered_map<std::string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
-std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
-std::unordered_map<std::string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
-std::unordered_map<std::string,boost::shared_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
-std::unordered_map<std::string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
-std::unordered_map<std::string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
-std::unordered_map<std::string,boost::shared_ptr<Texture>> Detail::ResourceManagement::m_Textures;
-std::unordered_map<std::string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
-std::unordered_map<std::string,boost::shared_ptr<Shader>> Detail::ResourceManagement::m_Shaders;
-std::unordered_map<std::string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_ShaderPrograms;
+unordered_map<string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_RenderedItems;
+unordered_map<string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
+unordered_map<string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
+unordered_map<string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
+unordered_map<string,boost::shared_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
+unordered_map<string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
+unordered_map<string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
+unordered_map<string,boost::shared_ptr<Texture>> Detail::ResourceManagement::m_Textures;
+unordered_map<string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
+unordered_map<string,boost::shared_ptr<Shader>> Detail::ResourceManagement::m_Shaders;
+unordered_map<string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_ShaderPrograms;
 
 void Resources::Detail::ResourceManagement::destruct(){
     for (auto it = m_RenderedItems.begin();it != m_RenderedItems.end(); ++it )   it->second.reset();
@@ -60,135 +61,131 @@ sf::Vector2u Resources::getWindowSize(){ return Detail::ResourceManagement::m_Wi
 Camera* Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
 boost::weak_ptr<Camera>& Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
 void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras.at(c->name()); }
-void Resources::setActiveCamera(std::string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras.at(name); }
+void Resources::setActiveCamera(string name){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras.at(name); }
 
-boost::shared_ptr<Object>& Resources::getObjectPtr(std::string n){return Detail::ResourceManagement::m_Objects.at(n);}
-boost::shared_ptr<Camera>& Resources::getCameraPtr(std::string n){return Detail::ResourceManagement::m_Cameras.at(n);}
-boost::shared_ptr<Texture>& Resources::getTexturePtr(std::string n){return Detail::ResourceManagement::m_Textures.at(n);}
+boost::shared_ptr<Object>& Resources::getObjectPtr(string n){return Detail::ResourceManagement::m_Objects.at(n);}
+boost::shared_ptr<Camera>& Resources::getCameraPtr(string n){return Detail::ResourceManagement::m_Cameras.at(n);}
+boost::shared_ptr<Texture>& Resources::getTexturePtr(string n){return Detail::ResourceManagement::m_Textures.at(n);}
 
-Scene* Resources::getScene(std::string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
-SoundEffectBasic* Resources::getSound(std::string n){return static_cast<SoundEffectBasic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
-Object* Resources::getObject(std::string n){return static_cast<Object*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Objects,n));}
-Camera* Resources::getCamera(std::string n){return static_cast<Camera*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Cameras,n));}
-Font* Resources::getFont(std::string n){return static_cast<Font*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Fonts,n));}
-Texture* Resources::getTexture(std::string n){return static_cast<Texture*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Textures,n));}
-Mesh* Resources::getMesh(std::string n){return static_cast<Mesh*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Meshes,n));}
-Material* Resources::getMaterial(std::string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
-Shader* Resources::getShader(std::string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
-ShaderP* Resources::getShaderProgram(std::string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
-MeshInstance* Resources::getRenderedItem(std::string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
+Scene* Resources::getScene(string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
+SoundEffectBasic* Resources::getSound(string n){return static_cast<SoundEffectBasic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
+Object* Resources::getObject(string n){return static_cast<Object*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Objects,n));}
+Camera* Resources::getCamera(string n){return static_cast<Camera*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Cameras,n));}
+Font* Resources::getFont(string n){return static_cast<Font*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Fonts,n));}
+Texture* Resources::getTexture(string n){return static_cast<Texture*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Textures,n));}
+Mesh* Resources::getMesh(string n){return static_cast<Mesh*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Meshes,n));}
+Material* Resources::getMaterial(string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
+Shader* Resources::getShader(string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
+ShaderP* Resources::getShaderProgram(string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
+MeshInstance* Resources::getRenderedItem(string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
 
-void Resources::addMesh(std::string n,std::string f, CollisionType t, bool b,float threshhold){
+void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
 }
-void Resources::addMesh(std::string n,float x,float y,float w,float h,float threshhold){
+void Resources::addMesh(string n,float x,float y,float w,float h,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,x,y,w,h,threshhold));
 }
-void Resources::addMesh(std::string n,float w,float h,float threshhold){
+void Resources::addMesh(string n,float w,float h,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,w,h,threshhold));
 }
-void Resources::addMesh(std::string f, CollisionType t,float threshhold){std::string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,true,threshhold);}
-void Resources::addMesh(std::string n, std::unordered_map<std::string,float>& g, uint w, uint l,float threshhold){
+void Resources::addMesh(string f, CollisionType t,float threshhold){string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,true,threshhold);}
+void Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,g,w,l,threshhold));
 }
 
-void Resources::addMaterial(std::string n, std::string d, std::string nm , std::string g, std::string s,std::string program){
+void Resources::addMaterial(string n, string d, string nm , string g, string s,string program){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
-    if(program == "") 
-		program = "Deferred";
+    if(program == "") program = "Deferred";
     Resources::getShaderProgram(program)->addMaterial(n);
 }
-void Resources::addMaterial(std::string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* program){
+void Resources::addMaterial(string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* program){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
-    if(program == nullptr) 
-		program = Resources::getShaderProgram("Deferred");
+    if(program == nullptr) program = Resources::getShaderProgram("Deferred");
     program->addMaterial(n);
 }
 
-void Resources::addShader(std::string n, std::string s, ShaderType::Type t, bool b){
+void Resources::addShader(string n, string s, ShaderType::Type t, bool b){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Shaders,n,boost::make_shared<Shader>(n,s,t,b));
 }
-void Resources::addShaderProgram(std::string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){
+void Resources::addShaderProgram(string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-void Resources::addShaderProgram(std::string n, std::string v, std::string f, ShaderRenderPass::Pass s){
+void Resources::addShaderProgram(string n, string v, string f, ShaderRenderPass::Pass s){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-void Resources::addShaderProgram(std::string n, Shader* v, std::string f, ShaderRenderPass::Pass s){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
+void Resources::addShaderProgram(string n, Shader* v, string f, ShaderRenderPass::Pass s){
+    Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-void Resources::addShaderProgram(std::string n, std::string v, Shader* f, ShaderRenderPass::Pass s){
-	Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
+void Resources::addShaderProgram(string n, string v, Shader* f, ShaderRenderPass::Pass s){
+    Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
 
-
-void Resources::addSound(std::string n, std::string f, bool b){
+void Resources::addSound(string n, string f, bool b){
     if(b){Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundEffect>(n,f));}
     else{Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundMusic>(n,f));}
 }
-void Resources::addSoundAsEffect(std::string n, std::string f){ addSound(n,f,true); }
-void Resources::addSoundAsMusic(std::string n, std::string f){ addSound(n,f,false); }
+void Resources::addSoundAsEffect(string n, string f){ addSound(n,f,true); }
+void Resources::addSoundAsMusic(string n, string f){ addSound(n,f,false); }
 
-SoundMusic* Resources::getSoundAsMusic(std::string n){return static_cast<SoundMusic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
-SoundEffect* Resources::getSoundAsEffect(std::string n){ return static_cast<SoundEffect*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
+SoundMusic* Resources::getSoundAsMusic(string n){return static_cast<SoundMusic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
+SoundEffect* Resources::getSoundAsEffect(string n){ return static_cast<SoundEffect*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
 
-void Resources::removeMesh(std::string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Meshes,n);}
-void Resources::removeMaterial(std::string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Materials,n);}
-void Resources::removeSound(std::string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Sounds,n);}
+void Resources::removeMesh(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Meshes,n);}
+void Resources::removeMaterial(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Materials,n);}
+void Resources::removeSound(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Sounds,n);}
 
 void Resources::initResources(){
     //add a basic cube mesh
     #pragma region MeshData
-    std::string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"
-                            "v -1.0000 1.0000 1.0000\n"
-                            "v -1.0000 -1.0000 -1.0000\n"
-                            "v -1.0000 1.0000 -1.0000\n"
-                            "v 1.0000 -1.0000 1.0000\n"
-                            "v 1.0000 1.0000 1.0000\n"
-                            "v 1.0000 -1.0000 -1.0000\n"
-                            "v 1.0000 1.0000 -1.0000\n"
-                            "vn -1.0000 0.0000 0.0000\n"
-                            "vn 0.0000 0.0000 -1.0000\n"
-                            "vn 1.0000 0.0000 0.0000\n"
-                            "vn 0.0000 0.0000 1.0000\n"
-                            "vn 0.0000 -1.0000 0.0000\n"
-                            "vn 0.0000 1.0000 0.0000\n"
-                            "f 4/1 1/1 2/1\n"
-                            "f 8/2 3/2 4/2\n"
-                            "f 6/3 7/3 8/3\n"
-                            "f 2/4 5/4 6/4\n"
-                            "f 3/5 5/5 1/5\n"
-                            "f 8/6 2/6 6/6\n"
-                            "f 4/1 3/1 1/1\n"
-                            "f 8/2 7/2 3/2\n"
-                            "f 6/3 5/3 7/3\n"
-                            "f 2/4 1/4 5/4\n"
-                            "f 3/5 7/5 5/5\n"
-                            "f 8/6 4/6 2/6\n";
+    string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"
+                        "v -1.0000 1.0000 1.0000\n"
+                        "v -1.0000 -1.0000 -1.0000\n"
+                        "v -1.0000 1.0000 -1.0000\n"
+                        "v 1.0000 -1.0000 1.0000\n"
+                        "v 1.0000 1.0000 1.0000\n"
+                        "v 1.0000 -1.0000 -1.0000\n"
+                        "v 1.0000 1.0000 -1.0000\n"
+                        "vn -1.0000 0.0000 0.0000\n"
+                        "vn 0.0000 0.0000 -1.0000\n"
+                        "vn 1.0000 0.0000 0.0000\n"
+                        "vn 0.0000 0.0000 1.0000\n"
+                        "vn 0.0000 -1.0000 0.0000\n"
+                        "vn 0.0000 1.0000 0.0000\n"
+                        "f 4/1 1/1 2/1\n"
+                        "f 8/2 3/2 4/2\n"
+                        "f 6/3 7/3 8/3\n"
+                        "f 2/4 5/4 6/4\n"
+                        "f 3/5 5/5 1/5\n"
+                        "f 8/6 2/6 6/6\n"
+                        "f 4/1 3/1 1/1\n"
+                        "f 8/2 7/2 3/2\n"
+                        "f 6/3 5/3 7/3\n"
+                        "f 2/4 1/4 5/4\n"
+                        "f 3/5 7/5 5/5\n"
+                        "f 8/6 4/6 2/6\n";
     #pragma endregion
     //addMesh("Cube",cubeMesh,COLLISION_TYPE_NONE,false);
 
+    Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
+    Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
+    Shader* vertexBasic = new Shader("vert_basic",Engine::Shaders::Detail::ShadersManagement::vertex_basic,ShaderType::Vertex,false);
+    Shader* vertexHUD = new Shader("vert_hud",Engine::Shaders::Detail::ShadersManagement::vertex_hud,ShaderType::Vertex,false);
+    Shader* vertexSkybox = new Shader("vert_skybox",Engine::Shaders::Detail::ShadersManagement::vertex_skybox,ShaderType::Vertex,false);
+    Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,ShaderType::Fragment,false);
+    Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,ShaderType::Fragment,false);
+    Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,ShaderType::Fragment,false);
+    Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,ShaderType::Fragment,false);
+    Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,ShaderType::Fragment,false);
+    Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
+    Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,ShaderType::Fragment,false);
+    Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,ShaderType::Fragment,false);
+    Shader* edge = new Shader("edge_frag",Engine::Shaders::Detail::ShadersManagement::edge_frag,ShaderType::Fragment,false);
+    Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
+    Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
 
-	Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
-	Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
-	Shader* vertexBasic = new Shader("vert_basic",Engine::Shaders::Detail::ShadersManagement::vertex_basic,ShaderType::Vertex,false);
-	Shader* vertexHUD = new Shader("vert_hud",Engine::Shaders::Detail::ShadersManagement::vertex_hud,ShaderType::Vertex,false);
-	Shader* vertexSkybox = new Shader("vert_skybox",Engine::Shaders::Detail::ShadersManagement::vertex_skybox,ShaderType::Vertex,false);
-	Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,ShaderType::Fragment,false);
-	Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,ShaderType::Fragment,false);
-	Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,ShaderType::Fragment,false);
-	Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,ShaderType::Fragment,false);
-	Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,ShaderType::Fragment,false);
-	Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
-	Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,ShaderType::Fragment,false);
-	Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,ShaderType::Fragment,false);
-	Shader* edge = new Shader("edge_frag",Engine::Shaders::Detail::ShadersManagement::edge_frag,ShaderType::Fragment,false);
-	Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
-	Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
-
-	addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
+    addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
-	addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Blur",fullscreenVertexShader,blur,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_HDR",fullscreenVertexShader,hdr,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_SSAO",fullscreenVertexShader,ssao,ShaderRenderPass::Postprocess);
@@ -211,7 +208,7 @@ void Resources::cleanupRenderingContexts(){
 }
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){
-        std::cout << "---- Scene Change started (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << std::endl;
+        cout << "---- Scene Change started (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << endl;
         if(Resources::Detail::ResourceManagement::m_DynamicMemory){
             //mark game object resources to minus use count
             for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
@@ -231,9 +228,9 @@ void Resources::setCurrentScene(Scene* scene){
                 obj.second->resume();
             }
         }
-        std::cout << "-------- Scene Change ended --------" << std::endl;
+        cout << "-------- Scene Change ended --------" << endl;
     }
 }
-void Resources::setCurrentScene(std::string s){
+void Resources::setCurrentScene(string s){
     Resources::setCurrentScene(static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,s))); 
 }
