@@ -85,17 +85,17 @@ void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorit
     }
 }
 void Settings::enableCullFace(bool b){
-    if(b && !Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+    if(b == true && Detail::RendererInfo::GeneralInfo::cull_face_enabled == false){
         glEnable(GL_CULL_FACE);
         Detail::RendererInfo::GeneralInfo::cull_face_enabled = true;
     }
-    else if(!b && Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+    else if(b == false && Detail::RendererInfo::GeneralInfo::cull_face_enabled == true){
         glDisable(GL_CULL_FACE);
         Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
     }
 }
 void Settings::disableCullFace(){
-    if(Detail::RendererInfo::GeneralInfo::cull_face_enabled){
+    if(Detail::RendererInfo::GeneralInfo::cull_face_enabled == true){
         glDisable(GL_CULL_FACE);
         Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
     }
@@ -134,49 +134,49 @@ void Settings::clear(bool color, bool depth, bool stencil){
     }
 }
 void Settings::enableAlphaTest(bool b){
-    if(b && !Renderer::Detail::RendererInfo::GeneralInfo::alpha_test){
+    if(b == true && Renderer::Detail::RendererInfo::GeneralInfo::alpha_test == false){
         glEnable(GL_ALPHA_TEST);
         Detail::RendererInfo::GeneralInfo::alpha_test = true;
     }
-    else if(!b && Detail::RendererInfo::GeneralInfo::alpha_test){
+    else if(b == false && Detail::RendererInfo::GeneralInfo::alpha_test == true){
         glDisable(GL_ALPHA_TEST);
         Detail::RendererInfo::GeneralInfo::alpha_test = false;
     }
 }
 void Settings::disableAlphaTest(){
-    if(Detail::RendererInfo::GeneralInfo::alpha_test){
+    if(Detail::RendererInfo::GeneralInfo::alpha_test == true){
         glDisable(GL_ALPHA_TEST);
         Detail::RendererInfo::GeneralInfo::alpha_test = false;
     }
 }
 void Settings::enableDepthTest(bool b){
-    if(b && !Detail::RendererInfo::GeneralInfo::depth_test){
+    if(b == true && Detail::RendererInfo::GeneralInfo::depth_test == false){
         glEnable(GL_DEPTH_TEST);
         Detail::RendererInfo::GeneralInfo::depth_test = true;
     }
-    else if(!b && Detail::RendererInfo::GeneralInfo::depth_test){
+    else if(b ==false && Detail::RendererInfo::GeneralInfo::depth_test == true){
         glDisable(GL_DEPTH_TEST);
         Detail::RendererInfo::GeneralInfo::depth_test = false;
     }
 }
 void Settings::disableDepthTest(){
-    if(Detail::RendererInfo::GeneralInfo::depth_test){
+    if(Detail::RendererInfo::GeneralInfo::depth_test == true){
         glDisable(GL_DEPTH_TEST);
         Detail::RendererInfo::GeneralInfo::depth_test = false;
     }
 }
 void Settings::enableDepthMask(bool b){
-    if(b && !Detail::RendererInfo::GeneralInfo::depth_mask){
+    if(b == true && Detail::RendererInfo::GeneralInfo::depth_mask == false){
         glDepthMask(GL_TRUE);
         Detail::RendererInfo::GeneralInfo::depth_mask = true;
     }
-    else if(!b && Detail::RendererInfo::GeneralInfo::depth_mask){
+    else if(b == false && Detail::RendererInfo::GeneralInfo::depth_mask == true){
         glDepthMask(GL_FALSE);
         Detail::RendererInfo::GeneralInfo::depth_mask = false;
     }
 }
 void Settings::disableDepthMask(){
-    if(Detail::RendererInfo::GeneralInfo::depth_mask){
+    if(Detail::RendererInfo::GeneralInfo::depth_mask == true){
         glDepthMask(GL_FALSE);
         Detail::RendererInfo::GeneralInfo::depth_mask = false;
     }
