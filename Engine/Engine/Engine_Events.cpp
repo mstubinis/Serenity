@@ -7,10 +7,11 @@
 #include <glm/vec2.hpp>
 
 using namespace Engine::Events;
+using namespace std;
 
 //return string dictionaries of keys / mouse buttons
-std::unordered_map<std::string,uint> _populatekeymap(){
-    std::unordered_map<std::string,uint> k;
+unordered_map<string,uint> _populatekeymap(){
+    unordered_map<string,uint> k;
     k["a"] = sf::Keyboard::A;
     k["add"] = sf::Keyboard::Add;
     k["b"] = sf::Keyboard::B;
@@ -228,8 +229,8 @@ std::unordered_map<std::string,uint> _populatekeymap(){
     k["z"] = sf::Keyboard::Z;
     return k;
 }
-std::unordered_map<std::string,uint> _populatemousemap(){
-    std::unordered_map<std::string,uint> m;
+unordered_map<string,uint> _populatemousemap(){
+    unordered_map<string,uint> m;
 
     m["l"] = sf::Mouse::Button::Left;
     m["left"] = sf::Mouse::Button::Left;
@@ -252,10 +253,10 @@ std::unordered_map<std::string,uint> _populatemousemap(){
 
 //init static values with actual objects
 
-std::unordered_map<std::string,uint> Keyboard::KeyProcessing::m_KeyMap = _populatekeymap();
-std::unordered_map<std::string,uint> Mouse::MouseProcessing::m_MouseMap = _populatemousemap();
-std::unordered_map<uint,bool> Keyboard::KeyProcessing::m_KeyStatus;
-std::unordered_map<uint,bool> Mouse::MouseProcessing::m_MouseStatus;
+unordered_map<string,uint> Keyboard::KeyProcessing::m_KeyMap = _populatekeymap();
+unordered_map<string,uint> Mouse::MouseProcessing::m_MouseMap = _populatemousemap();
+unordered_map<uint,bool> Keyboard::KeyProcessing::m_KeyStatus;
+unordered_map<uint,bool> Mouse::MouseProcessing::m_MouseStatus;
 float Mouse::MouseProcessing::m_Delta = 0;
 glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0.0f);
 glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0.0f);
@@ -267,12 +268,12 @@ uint Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
 uint Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
 uint Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
 
-bool Mouse::MouseProcessing::_IsMouseButtonDown(std::string str){
+bool Mouse::MouseProcessing::_IsMouseButtonDown(string str){
     boost::algorithm::to_lower(str);
     uint key = MouseProcessing::m_MouseMap[str];
     if(MouseProcessing::m_MouseStatus[key]) return true; return false;
 }
-bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(std::string str){
+bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(string str){
     bool res = MouseProcessing::_IsMouseButtonDown(str);
     uint key = MouseProcessing::m_MouseMap[str];
     if(res && m_currentButton == key && (m_currentButton != m_previousButton)) return true; return false;
@@ -283,17 +284,17 @@ void Mouse::MouseProcessing::_SetMousePositionInternal(float x, float y){
     m_Difference.x += (m_Position.x - m_Position_Previous.x);
     m_Difference.y += (m_Position.y - m_Position_Previous.y);
 }
-bool Keyboard::KeyProcessing::_IsKeyDown(std::string str){
+bool Keyboard::KeyProcessing::_IsKeyDown(string str){
     boost::algorithm::to_lower(str);
     uint key = KeyProcessing::m_KeyMap[str];
     if(KeyProcessing::m_KeyStatus[key]) return true; return false;
 }
-bool Keyboard::KeyProcessing::_IsKeyUp(std::string str){
+bool Keyboard::KeyProcessing::_IsKeyUp(string str){
     boost::algorithm::to_lower(str);
     uint key = KeyProcessing::m_KeyMap[str];
     if(!KeyProcessing::m_KeyStatus[key]) return true; return false;
 }
-bool Keyboard::KeyProcessing::_IsKeyDownOnce(std::string str){
+bool Keyboard::KeyProcessing::_IsKeyDownOnce(string str){
     bool res = KeyProcessing::_IsKeyDown(str);
     uint key = KeyProcessing::m_KeyMap[str];
     if(res && m_currentKey == key && (m_currentKey != m_previousKey)) return true; return false;
@@ -302,8 +303,8 @@ const glm::vec2& Mouse::getMouseDifference(){ return MouseProcessing::m_Differen
 const glm::vec2& Mouse::getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
 const glm::vec2& Mouse::getMousePosition(){ return MouseProcessing::m_Position; }
 const float Mouse::getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
-bool Mouse::isMouseButtonDown(std::string str){ return MouseProcessing::_IsMouseButtonDown(str); }
-bool Mouse::isMouseButtonDownOnce(std::string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
+bool Mouse::isMouseButtonDown(string str){ return MouseProcessing::_IsMouseButtonDown(str); }
+bool Mouse::isMouseButtonDownOnce(string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
 
 void Mouse::setMousePosition(float x,float y){ 
     sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
@@ -318,12 +319,12 @@ void Mouse::setMousePosition(glm::uvec2 pos){
     Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y)); 
 }
 
-bool Keyboard::isKeyDown(std::string str){ return KeyProcessing::_IsKeyDown(str); }
-bool Keyboard::isKeyDownOnce(std::string str){ return KeyProcessing::_IsKeyDownOnce(str); }
-bool Keyboard::isKeyUp(std::string str){ return KeyProcessing::_IsKeyUp(str); }
+bool Keyboard::isKeyDown(string str){ return KeyProcessing::_IsKeyDown(str); }
+bool Keyboard::isKeyDownOnce(string str){ return KeyProcessing::_IsKeyDownOnce(str); }
+bool Keyboard::isKeyUp(string str){ return KeyProcessing::_IsKeyUp(str); }
 
-bool Engine::Events::isKeyDown(std::string str){ return Keyboard::KeyProcessing::_IsKeyDown(str); }
-bool Engine::Events::isKeyDownOnce(std::string str){ return Keyboard::KeyProcessing::_IsKeyDownOnce(str); }
-bool Engine::Events::isKeyUp(std::string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
+bool Engine::Events::isKeyDown(string str){ return Keyboard::KeyProcessing::_IsKeyDown(str); }
+bool Engine::Events::isKeyDownOnce(string str){ return Keyboard::KeyProcessing::_IsKeyDownOnce(str); }
+bool Engine::Events::isKeyUp(string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
 
 const glm::vec2& Engine::Events::getMousePosition(){ return Mouse::MouseProcessing::m_Position; }
