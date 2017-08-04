@@ -39,6 +39,7 @@ void Engine::Detail::EngineClass::destruct(){
 }
 void Engine::Detail::EngineClass::initGame(){
     Events::Mouse::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
+    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f); //see if this stops initial kickback
 
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
     Renderer::Detail::RenderManagement::init();
