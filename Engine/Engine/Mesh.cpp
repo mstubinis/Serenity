@@ -20,6 +20,7 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVer
                                           //#components  //componentFormat //normalized?
     m[VertexFormat::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    //m[VertexFormat::Normal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,         GL_TRUE,       0,0,0);
     m[VertexFormat::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::Binormal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::Tangent]     = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
@@ -324,7 +325,8 @@ void Mesh::initRenderingContext(){
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
     glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
-
+    //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(unsigned long), &m_Normals[0], GL_STATIC_DRAW);
+    
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
     glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
 
