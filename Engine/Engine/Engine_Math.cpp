@@ -81,6 +81,16 @@ std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
 std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
+
+std::int32_t Math::pack2UVSInto32Int(float x, float y){
+   // Convert to signed integer -511 to +511 range
+   int iX = (int)(x * 511.0f);
+   int iY = (int)(y * 511.0f);
+   return (iX & 0x3FF) | ((iY & 0x3FF) << 16);
+}
+std::int32_t Math::pack2UVSInto32Int(glm::vec2 v){ return Math::pack2UVSInto32Int(v.x,v.y); }
+
+
 float Math::pack3FloatsInto1Float(float r,float g,float b){
     //Scale and bias
     r = (r + 1.0f) * 0.5f; unsigned char _r = (unsigned char)(r*255.0f);
