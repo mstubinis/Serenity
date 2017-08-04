@@ -252,6 +252,7 @@ namespace Engine{
         void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
         void bindTextureSafe(const char* location,Texture*,uint slot);
         void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint type);
+	void unbindTexture(uint slot,Texture*);
         void unbindTexture2D(uint slot);
         void unbindTextureCubemap(uint slot);
 	    
