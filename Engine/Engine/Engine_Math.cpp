@@ -85,7 +85,6 @@ float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w
 float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
-
 std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    // Convert to signed integer -511 to +511 range
    int iX = (int)(x * 511.0f);
@@ -93,8 +92,7 @@ std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    int iZ = (int)(z * 511.0f);
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
-std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
-
+std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 float Math::pack3FloatsInto1Float(float r,float g,float b){
     //Scale and bias
     r = (r + 1.0f) * 0.5f;
@@ -123,15 +121,12 @@ glm::vec3 Math::unpack3FloatsInto1Float(float v){
     ret.b = (ret.b * 2.0f) - 1.0f;
     return ret;
 }
-
 float Math::pack2FloatsInto1Float(float x,float y){
     x = (x + 1.0f) * 0.5f;
     y = (y + 1.0f) * 0.5f;
     return glm::floor(x * 1000.0f) + y; 
 }
-float Math::pack2FloatsInto1Float(glm::vec2 v){
-    return Math::pack2FloatsInto1Float(v.x,v.y);
-}
+float Math::pack2FloatsInto1Float(glm::vec2 v){ return Math::pack2FloatsInto1Float(v.x,v.y); }
 glm::vec2 Math::unpack2FloatsInto1Float(float i){
     glm::vec2 res;
     res.y = i - glm::floor(i); //glm::fract(i)
@@ -151,7 +146,6 @@ void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
 }
 void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up){
     glm::vec3 forward = eye - target;
- 
     glm::vec3 vector = glm::normalize(forward);
     glm::vec3 vector2 = glm::normalize(glm::cross(vector,up));
     glm::vec3 vector3 = glm::cross(vector,vector2);
@@ -164,7 +158,6 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
     float m20 = vector.x;
     float m21 = vector.y;
     float m22 = vector.z;
- 
     double num8 = (m00 + m11) + m22;
     if (num8 > 0.0f){
         float num = float((double)glm::sqrt(num8 + 1.0));
@@ -200,7 +193,6 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
     o.z = 0.5f * num5;
     o.w = (m01 - m10) * num2;
 }
-
 glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
 glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normalize(eye-target); }
 glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(q * glm::vec3(0,0,-1));}
@@ -215,7 +207,6 @@ glm::vec3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
 glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
 glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
 glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
-
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0001f;
@@ -223,7 +214,6 @@ float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     if(degrees) angle *= 57.2958f;
     return angle;
 }
-
 void Math::alignToX(glm::quat& o,Object* origin, Object* target,float speed){
 }
 void Math::alignToY(glm::quat& o,Object* origin, Object* target,float speed){
