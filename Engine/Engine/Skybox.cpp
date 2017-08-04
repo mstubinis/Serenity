@@ -11,11 +11,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace Engine;
+using namespace std;
 
 GLuint Skybox::m_Buffer;
-std::vector<glm::vec3> Skybox::m_Vertices;
+vector<glm::vec3> Skybox::m_Vertices;
 
-SkyboxEmpty::SkyboxEmpty(std::string name,Scene* scene){
+SkyboxEmpty::SkyboxEmpty(string name,Scene* scene){
     m_Model = glm::mat4(1);
     if(scene == nullptr) scene = Resources::getCurrentScene();
     if(scene->getSkybox() == nullptr)
@@ -25,9 +26,9 @@ SkyboxEmpty::~SkyboxEmpty(){
 
 }
         
-Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
+Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
     if(Skybox::m_Vertices.size() == 0){
-        std::vector<glm::vec3> temp;
+        vector<glm::vec3> temp;
         temp.push_back(glm::vec3(-1,1,1));//1
         temp.push_back(glm::vec3(1,1,1));//2
         temp.push_back(glm::vec3(1,-1,1));//3
@@ -74,13 +75,13 @@ Skybox::Skybox(std::string name,Scene* scene):SkyboxEmpty(name,scene){
     }
     glActiveTexture(GL_TEXTURE0);
 
-    std::string front = name + "/Right.jpg";
-    std::string back = name + "/Left.jpg";
-    std::string left = name + "/Top.jpg";
-    std::string right = name + "/Bottom.jpg";
-    std::string top = name + "/Front.jpg";
-    std::string bottom = name + "/Back.jpg";
-    std::string names[6] = {front,back,left,right,top,bottom};
+    string front = name + "/Right.jpg";
+    string back = name + "/Left.jpg";
+    string left = name + "/Top.jpg";
+    string right = name + "/Bottom.jpg";
+    string top = name + "/Front.jpg";
+    string bottom = name + "/Back.jpg";
+    string names[6] = {front,back,left,right,top,bottom};
 
     m_Texture = new Texture(names,"Cubemap",GL_TEXTURE_CUBE_MAP);
 
@@ -100,8 +101,8 @@ void Skybox::draw(bool godsRays){
     ShaderP* p = Resources::getShaderProgram("Deferred_Skybox");
     p->bind();
 
-	Camera* c = Resources::getActiveCamera();
-	glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
+    Camera* c = Resources::getActiveCamera();
+    glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
     Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
 
     Renderer::bindTexture("Texture",m_Texture,0);
