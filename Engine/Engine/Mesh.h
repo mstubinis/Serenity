@@ -114,7 +114,7 @@ class Mesh final: public BindableResource{
         std::vector<glm::vec3> m_Points;
         std::vector<glm::vec2> m_UVs;
         std::vector<glm::vec3> m_Normals;
-        //std::vector<unsigned long> m_Normals;
+        //std::vector<int32_t> m_Normals;
         std::vector<glm::vec3> m_Binormals;
         std::vector<glm::vec3> m_Tangents;
         std::vector<ushort> m_Indices;
