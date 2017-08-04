@@ -44,7 +44,6 @@ bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVecto
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
-
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
     glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
@@ -135,7 +134,6 @@ glm::vec2 Math::unpack2FloatsInto1Float(float i){
     res.y = (res.y - 0.5f) * 2.0f;
     return res;
 }
-
 void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
     if(local){
         btTransform t;
@@ -223,18 +221,18 @@ void Math::alignToZ(glm::quat& o,Object* origin, Object* target,float speed){
 void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed){
     glm::quat original(o);
     direction = glm::normalize(direction);
-    glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0,1,0), direction));
+    glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0.0f,1.0f,0.0f), direction));
     glm::vec3 yaxis = glm::normalize(glm::cross(direction, xaxis));
     glm::mat3 rot;
     rot[0][0] = float(xaxis.x);     rot[0][1] = float(xaxis.y);     rot[0][2] = float(xaxis.z);
     rot[1][0] = float(yaxis.x);     rot[1][1] = float(yaxis.y);     rot[1][2] = float(yaxis.z);
     rot[2][0] = float(direction.x); rot[2][1] = float(direction.y); rot[2][2] = float(direction.z);
     o = glm::quat_cast(rot);
-    if(speed != 0){
+    if(speed != 0.0f){
         float angle = Math::getAngleBetweenTwoVectors(direction,glm::vec3(getForward(original)),true); // degrees
         speed *= 1.0f/angle;
         speed *= Resources::dt();
-        o = glm::mix(original,o,speed*5);
+        o = glm::mix(original,o,speed*5.0f);
     }
     o = glm::normalize(o);
 }
@@ -275,16 +273,15 @@ glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
     return ret;
 }
 bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::vec3& A, glm::vec3& rayVector){
-    glm::vec3 _a = glm::vec3(A);
-    glm::vec3 B = _a + rayVector;
-    float dot = glm::dot(rayVector,C-_a); //check if point is behind
-    if(dot >= 0)
+    glm::vec3 B = A + rayVector;
+    float dot = glm::dot(rayVector,C - A); //check if point is behind
+    if(dot >= 0.0f)
         return false;
     float a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
     float b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
     float c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
-    float d = (b*b) - (4*a*c);
-    if(d < 0)
+    float d = (b*b) - (4.0f*a*c);
+    if(d < 0.0f)
         return false;
     return true;
 }
