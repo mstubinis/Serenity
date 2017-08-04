@@ -512,7 +512,7 @@ void Material::addMeshEntry(string objectName){
         if(entry->mesh() == Resources::getMesh(objectName)){ return; }
     }
     m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
-    std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey());
+    sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey());
 }
 void Material::removeMeshEntry(string objectName){
     bool did = false;
@@ -522,13 +522,9 @@ void Material::removeMeshEntry(string objectName){
             m_i->m_Meshes.erase(it++);
             did = true;
         }
-        else{
-            ++it;
-        }
+        else ++it;
     }
-    if(did){
-        std::sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey());
-    }
+    if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey()); }
 }
 vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
 
