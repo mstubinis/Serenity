@@ -6,8 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <vector>
-#include <inttypes.h>
-//#include <stdint.h>
+#include <cstdint>
 #include <assimp/Importer.hpp>
 
 class btVector3;
@@ -154,8 +153,8 @@ namespace Engine{
         
         void translate(ObjectDynamic*,btVector3&,bool local);
 
-        int32_t pack3NormalsInto32Int(float x, float y, float z);
-        int32_t pack3NormalsInto32Int(glm::vec3 v);
+        std::uint32_t pack3NormalsInto32Int(float x, float y, float z);
+        std::uint32_t pack3NormalsInto32Int(glm::vec3 v);
         
         float pack3FloatsInto1Float(float,float,float);
         float pack3FloatsInto1Float(glm::vec3&);
