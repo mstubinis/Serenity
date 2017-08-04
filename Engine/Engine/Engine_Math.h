@@ -110,7 +110,6 @@ namespace glm{
         typedef m4x4_d m4x4;
     #endif
     #ifdef ENGINE_PRECISION_VERY_HIGH
-        /*
         typedef long double number;
         typedef number num;
         typedef q_ld q;
@@ -129,13 +128,11 @@ namespace glm{
         typedef m4x3_ld m4x3;
         typedef m4_ld m4;
         typedef m4x4_ld m4x4;
-        */
     #endif
 };
 
 namespace Engine{
     namespace Math{
-
         glm::quat btToGLMQuat(btQuaternion& q);
         btQuaternion glmToBTQuat(glm::quat& q);
 
@@ -167,7 +164,7 @@ namespace Engine{
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
         glm::vec3 getUp(glm::quat& q);
-        glm::vec3 getColumnVector(const btRigidBody* b, unsigned int column);
+        glm::vec3 getColumnVector(const btRigidBody* b, uint column);
         glm::vec3 getForward(const btRigidBody* b);
         glm::vec3 getRight(const btRigidBody* b);
         glm::vec3 getUp(const btRigidBody* b);
