@@ -343,6 +343,7 @@ void Detail::RenderManagement::_passGeometry(){
     Scene* scene = Resources::getCurrentScene();
     glm::vec3 clear = scene->getBackgroundColor();
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
+    glDepthFunc(GL_LEQUAL);
     glClearBufferfv(GL_COLOR,GBufferType::Diffuse,colors);
     glDisable(GL_BLEND); //disable blending on all mrts
     scene->renderSkybox(RendererInfo::GodRaysInfo::godRays);
@@ -531,6 +532,7 @@ void Detail::RenderManagement::render(){
         _passSMAA();
     }
     //m_gBuffer->stop();
+    //glDepthFunc(GL_ALWAYS);
     //Settings::enableDepthMask(true);
     //Settings::enableDepthTest(true); //has to be enabled for some reason
     _passCopyDepth();
