@@ -327,15 +327,15 @@ void Mesh::initRenderingContext(){
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
     glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(uint32_t), &m_Normals[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(std::uint32_t), &m_Normals[0], GL_STATIC_DRAW);
     
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
     glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(uint32_t), &m_Binormals[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(std::uint32_t), &m_Binormals[0], GL_STATIC_DRAW);
     
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
     glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(uint32_t), &m_Tangents[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(std::uint32_t), &m_Tangents[0], GL_STATIC_DRAW);
     
     if(m_Skeleton != nullptr){
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
