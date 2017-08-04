@@ -198,7 +198,7 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
 void MaterialComponentRefraction::bind(){
-    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
