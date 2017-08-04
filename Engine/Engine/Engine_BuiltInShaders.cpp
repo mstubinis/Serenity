@@ -33,28 +33,34 @@ string Shaders::Detail::ShadersManagement::lighting_frag = "";
 #pragma endregion
 
 void Shaders::Detail::ShadersManagement::init(){
-
+//consider this code for view space positions...
+/*
+float depth = texture(depthbuffer, texcoord).x;
+vec4 clipSpace_position = invP * (vec4(texcoord, depth, 1.0) * 2.0 - 1.0);
+vec3 viewspace_position = clipSpace_position.xyz / clipSpace_position.w;
+vec3 worldspace_position = vec3(invV * vec4(viewspace_position, 1.0));	
+*/
 #pragma region Functions
 Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
-	"\n"
+    "\n"
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
     "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
     "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
     "\n"  //linearize regular depth
     "    float a = _far / (_far - _near);\n"
     "    float b = _far * _near / (_near - _far);\n"
-    "    float depth = (a + b / regularDepth);\n"
+    "    float linearDepth = (a + b / regularDepth);\n"
     "\n"
-    "    vec4 screenSpace = (vec4(_uv,depth, 1.0) * 2.0 - 1.0);\n"
+    "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
     "\n"
     "    \n"//world space it!
-    "    vec4 wpos = invVP * screenSpace;\n"
+    "    vec4 wpos = invVP * clipSpace;\n"
     "    return wpos.xyz / wpos.w;\n"
     "}\n"
-	"\n";
+    "\n";
 
 Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = 
-	"\n"
+    "\n"
     "vec2 OctWrap( vec2 v ){\n"
     "    return vec2( 1.0-abs(v.y),1.0-abs(v.x) ) * ( v.x >= 0.0 && v.y >= 0.0 ? 1.0 : -1.0 );\n"
     "}\n"
@@ -76,7 +82,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    n = normalize( n );\n"
     "    return n;\n"
     "}\n"
-	"\n";
+    "\n";
 
 #pragma endregion
 
