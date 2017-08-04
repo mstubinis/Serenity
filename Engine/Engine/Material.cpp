@@ -104,7 +104,6 @@ unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
 
     return texture_slot_map;
 }
-unordered_map<uint,vector<uint>> Material::MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
     unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
                                                                   //Base Color            //Smoothness    //Metalness
@@ -129,6 +128,7 @@ unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMateria
 
     return m;
 }
+unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = _populateMaterialProperties();
 
 
@@ -144,14 +144,14 @@ MaterialComponent::MaterialComponent(uint type,string& t){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
-    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
-    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::unbindTexture2D(slots.at(i));
     }
@@ -172,7 +172,7 @@ void MaterialComponentReflection::setMixFactor(float factor){
     m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(){
-    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
     string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
 
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
@@ -183,7 +183,7 @@ void MaterialComponentReflection::bind(){
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
-    vector<uint>& slots = Material::MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
 
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
