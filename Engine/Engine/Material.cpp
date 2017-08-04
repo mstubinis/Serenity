@@ -244,9 +244,9 @@ class Material::impl final{
             _addToMaterialPool();
 
             _setBaseColor(1.0f,1.0f,1.0f);
-            _setSmoothness(0.92f);
+            _setSmoothness(0.97f);
             _setAO(1.0f);
-            _setMetalness(0.1f);
+            _setMetalness(0.0f);
             
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
