@@ -145,7 +145,6 @@ class Material final: public BindableResource{
         static void setAllDiffuseModels(DiffuseModel::Model);
         static void setAllSpecularModels(SpecularModel::Model);
         static std::vector<glm::vec4> m_MaterialProperities;
-        static std::unordered_map<uint,std::vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP;
     private:
         class impl;
         std::unique_ptr<impl> m_i;
