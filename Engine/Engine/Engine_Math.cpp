@@ -27,55 +27,44 @@ float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
-    // forced protection against NaN if vectors happen to be equal
-    point.x += 0.0001f;
-    //
-    glm::vec3 differenceVector = glm::normalize(point - conePos);
-    float t = glm::dot(coneVector,differenceVector);
+    point.x += 0.0001f;// forced protection against NaN if vectors happen to be equal
+    glm::vec3 diff = glm::normalize(point - conePos);
+    float t = glm::dot(coneVector,diff);
     return ( t >= glm::cos( fovRadians ) );
 }
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float maxDistance){
-    // forced protection against NaN if vectors happen to be equal
-    point.x += 0.0001f;
-    //
-    glm::vec3 differenceVector = glm::normalize(point - conePos);
-    float t = glm::dot(coneVector,differenceVector);
+    point.x += 0.0001f;// forced protection against NaN if vectors happen to be equal
+    glm::vec3 diff = glm::normalize(point - conePos);
+    float t = glm::dot(coneVector,diff);
     float length = glm::length(point-conePos);
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
-    glm::vec2 windowSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
-    glm::vec4 viewport = glm::vec4(0,0,windowSize.x,windowSize.y);
+    glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    glm::vec4 viewport = glm::vec4(0,0,winSize.x,winSize.y);
     glm::vec3 screen = glm::project(objPos,Resources::getActiveCamera()->getView(),Resources::getActiveCamera()->getProjection(),viewport);
-
     //check if point is behind
-    float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos-glm::vec3(Resources::getActiveCamera()->getPosition()));
-
+    float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos - Resources::getActiveCamera()->getPosition());
     float resX = float(screen.x);
     float resY = float(screen.y);
-
-    unsigned int inBounds = 1;
-
+    uint inBounds = 1;
     if(clampToEdge){
         if(screen.x < 0){ resX = 0; inBounds = 0; }
-        else if(screen.x > windowSize.x){ resX = windowSize.x; inBounds = 0; }
+        else if(screen.x > winSize.x){ resX = winSize.x; inBounds = 0; }
         if(resY < 0){ resY = 0; inBounds = 0; }
-        else if(resY > windowSize.y){ resY = windowSize.y; inBounds = 0; }
+        else if(resY > winSize.y){ resY = winSize.y; inBounds = 0; }
     }
-
     if(dot < 0.0f){
         return glm::vec3(resX,resY,inBounds);
     }
     inBounds = 0;
-    float fX = windowSize.x - screen.x;
-    float fY = windowSize.y - screen.y;
-    
-    if(fX < windowSize.x/2){ if(clampToEdge) fX = 0; else fX = -9999999999.0f; }
-    else if(fX > windowSize.x/2){ if(clampToEdge) fX = windowSize.x; else fX = -9999999999.0f; }
-    if(fY < windowSize.y/2){ if(clampToEdge) fY = 0; else fY = -9999999999.0f; }
-    else if(fY > windowSize.y/2){ if(clampToEdge) fY = windowSize.y; else fY = -9999999999.0f; }
-
+    float fX = winSize.x - screen.x;
+    float fY = winSize.y - screen.y;
+    if(fX < winSize.x/2){ if(clampToEdge) fX = 0; else fX = -9999999.0f; }
+    else if(fX > winSize.x/2){ if(clampToEdge) fX = winSize.x; else fX = -9999999.0f; }
+    if(fY < winSize.y/2){ if(clampToEdge) fY = 0; else fY = -9999999.0f; }
+    else if(fY > winSize.y/2){ if(clampToEdge) fY = winSize.y; else fY = -9999999.0f; }
     return glm::vec3(fX,fY,inBounds);
 }
 float Math::Max(glm::vec2& v){ return glm::max(v.x,v.y); }
@@ -94,26 +83,16 @@ std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
 std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 float Math::pack3FloatsInto1Float(float r,float g,float b){
     //Scale and bias
-    r = (r + 1.0f) * 0.5f;
-    unsigned char _r = (unsigned char)(r*255.0f);
-    //Scale and bias
-    g = (g + 1.0f) * 0.5f;
-    unsigned char _g = (unsigned char)(g*255.0f);
-    //Scale and bias
-    b = (b + 1.0f) * 0.5f;
-    unsigned char _b = (unsigned char)(b*255.0f);
-
-    unsigned int packedColor = (_r << 16) | (_g << 8) | _b;
+    r = (r + 1.0f) * 0.5f; unsigned char _r = (unsigned char)(r*255.0f);
+    g = (g + 1.0f) * 0.5f; unsigned char _g = (unsigned char)(g*255.0f);
+    b = (b + 1.0f) * 0.5f; unsigned char _b = (unsigned char)(b*255.0f);
+    uint packedColor = (_r << 16) | (_g << 8) | _b;
     float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );
     return packedFloat;
 }
 float Math::pack3FloatsInto1Float(glm::vec3& c){ return Math::pack3FloatsInto1Float(c.r,c.g,c.b); }
 glm::vec3 Math::unpack3FloatsInto1Float(float v){
-    glm::vec3 ret;
-    ret.r = (float)fmod(v, 1.0f);
-    ret.g = (float)fmod(v * 256.0f, 1.0f);
-    ret.b = (float)fmod(v * 65536.0f, 1.0f);
- 
+    glm::vec3 ret = glm::vec3((float)fmod(v, 1.0f), (float)fmod(v * 256.0f, 1.0f), (float)fmod(v * 65536.0f, 1.0f));
     //Unpack to the -1..1 range
     ret.r = (ret.r * 2.0f) - 1.0f;
     ret.g = (ret.g * 2.0f) - 1.0f;
@@ -156,9 +135,9 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
     float m20 = vector.x;
     float m21 = vector.y;
     float m22 = vector.z;
-    double num8 = (m00 + m11) + m22;
+    float num8 = (m00 + m11) + m22;
     if (num8 > 0.0f){
-        float num = float((double)glm::sqrt(num8 + 1.0));
+        float num = glm::sqrt(num8 + 1.0);
         o.w = num * 0.5f;
         num = 0.5f / num;
         o.x = (m12 - m21) * num;
@@ -167,7 +146,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if ((m00 >= m11) && (m00 >= m22)){
-        float num7 = float((double)glm::sqrt(((1.0 + m00) - m11) - m22));
+        float num7 = glm::sqrt(((1.0 + m00) - m11) - m22);
         float num4 = 0.5f / num7;
         o.x = 0.5f * num7;
         o.y = (m01 + m10) * num4;
@@ -176,7 +155,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if (m11 > m22){
-        float num6 = float((double)glm::sqrt(((1.0 + m11) - m00) - m22));
+        float num6 = glm::sqrt(((1.0 + m11) - m00) - m22);
         float num3 = 0.5f / num6;
         o.x = (m10 + m01) * num3;
         o.y = 0.5f * num6;
@@ -184,7 +163,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         o.w = (m20 - m02) * num3;
         return;
     }
-    float num5 = float((double)glm::sqrt(((1.0 + m22) - m00) - m11));
+    float num5 = glm::sqrt(((1.0 + m22) - m00) - m11);
     float num2 = 0.5f / num5;
     o.x = (m20 + m02) * num2;
     o.y = (m21 + m12) * num2;
@@ -196,7 +175,7 @@ glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normali
 glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(q * glm::vec3(0,0,-1));}
 glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(q * glm::vec3(1,0,0));}
 glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(q * glm::vec3(0,1,0));}
-glm::vec3 Math::getColumnVector(const btRigidBody* b, unsigned int column){
+glm::vec3 Math::getColumnVector(const btRigidBody* b, uint column){
     btTransform t;
     b->getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
