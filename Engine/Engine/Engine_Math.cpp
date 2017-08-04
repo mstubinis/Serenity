@@ -86,14 +86,14 @@ float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 
-unsigned long Math::pack3NormalsInto32Int(float x, float y, float z){
+int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    // Convert to signed integer -511 to +511 range
    int iX = (int)(x * 511.0f);
    int iY = (int)(y * 511.0f);
    int iZ = (int)(z * 511.0f);
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
-unsigned long Math::pack3NormalsInto32Int(glm::vec3 v){ Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
+int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 
 float Math::pack3FloatsInto1Float(float r,float g,float b){
     //Scale and bias
