@@ -189,17 +189,17 @@ void Settings::disableDrawPhysicsInfo(){ Detail::RendererInfo::GeneralInfo::draw
 void Settings::setGamma(float g){ Detail::RendererInfo::GeneralInfo::gamma = g; }
 float Settings::getGamma(){ return Detail::RendererInfo::GeneralInfo::gamma; }
 
-void Renderer::bindTexture(const char* l,Texture* t,uint slot){Renderer::bindTexture(l,t->address(),slot,t->type());}
-void Renderer::bindTexture(const char* l,GLuint address,uint slot,GLuint type){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(type, address);
-    sendUniform1i(l,slot);
+void Renderer::bindTexture(const char* l,Texture* t,uint s){Renderer::bindTexture(l,t->address(),s,t->type());}
+void Renderer::bindTexture(const char* l,GLuint a,uint s,GLuint t){
+    glActiveTexture(GL_TEXTURE0+s);
+    glBindTexture(t,a);
+    sendUniform1i(l,s);
 }
 void Renderer::bindTextureSafe(const char* l,Texture* t,uint slot){Renderer::bindTextureSafe(l,t->address(),slot,t->type());}
-void Renderer::bindTextureSafe(const char* l,GLuint address,uint slot,GLuint type){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(type, address);
-    sendUniform1iSafe(l,slot);
+void Renderer::bindTextureSafe(const char* l,GLuint a,uint s,GLuint t){
+    glActiveTexture(GL_TEXTURE0+s);
+    glBindTexture(t,a);
+    sendUniform1iSafe(l,s);
 }
 void Renderer::bindReadFBO(GLuint r){
     if(Detail::RendererInfo::GeneralInfo::current_bound_read_fbo != r){
@@ -213,16 +213,19 @@ void Renderer::bindDrawFBO(GLuint d){
         Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = d;
     }
 }
-void Renderer::bindFBO(GLuint fbo){Renderer::bindReadFBO(fbo); Renderer::bindDrawFBO(fbo);}
-void Renderer::unbindTexture2D(uint slot){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, 0);
+void Renderer::bindFBO(GLuint f){Renderer::bindReadFBO(f);Renderer::bindDrawFBO(f);}
+void Renderer::unbindTexture(uint s,Texture* t){
+    glActiveTexture(GL_TEXTURE0+s);
+    glBindTexture(t->type(),0);
 }
-void Renderer::unbindTextureCubemap(uint slot){
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+void Renderer::unbindTexture2D(uint s){
+    glActiveTexture(GL_TEXTURE0+s);
+    glBindTexture(GL_TEXTURE_2D,0);
 }
-
+void Renderer::unbindTextureCubemap(uint s){
+    glActiveTexture(GL_TEXTURE0+s);
+    glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+}
 void Detail::RenderManagement::init(){
     uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
     uniform_real_distribution<float> randFloats1(0.0f,1.0f);
