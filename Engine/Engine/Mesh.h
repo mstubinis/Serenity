@@ -2,7 +2,8 @@
 #ifndef ENGINE_MESH_H
 #define ENGINE_MESH_H
 
-#define GL_TRIANGLES 0x0004
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 #include "BindableResource.h"
 #include "Engine_MeshLoader.h"
@@ -19,7 +20,6 @@ struct ImportedMeshData;
 struct BoneInfo;
 struct VertexBoneData;
 struct aiAnimation;
-typedef unsigned int GLuint;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
@@ -116,7 +116,9 @@ class Mesh final: public BindableResource{
         std::vector<glm::vec3> m_Normals;
         //std::vector<int32_t> m_Normals;
         std::vector<glm::vec3> m_Binormals;
+        //std::vector<int32_t> m_Binormals;
         std::vector<glm::vec3> m_Tangents;
+        //std::vector<int32_t> m_Tangents;
         std::vector<ushort> m_Indices;
 
         void _loadData(ImportedMeshData&,float threshhold);
