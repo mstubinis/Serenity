@@ -11,6 +11,7 @@ namespace Engine{
                 private:
                 public:
 					static void init();
+					static std::string determinent_mat3;
                     static std::string normals_octahedron_compression_functions;
                     static std::string reconstruct_log_depth_functions;
                 

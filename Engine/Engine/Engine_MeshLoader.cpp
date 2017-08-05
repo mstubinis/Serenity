@@ -83,7 +83,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 binorm.y = aimesh->mBitangents[i].y;
                 binorm.z = aimesh->mBitangents[i].z;
                 binorm = glm::normalize(binorm);
-                //data.binormals.push_back(glm::normalize(glm::cross(norm,tangent)));
                 data.binormals.push_back(binorm);
             }
         }
@@ -329,9 +328,9 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vecto
         b = glm::cross(n, t);
 
 		//handedness
-        if (glm::dot(glm::cross(n, t), b) < 0.0f){
+        //if (glm::dot(glm::cross(n, t), b) < 0.0f){
              //t = t * -1.0f;
-        }
+        //}
     }
 }
 void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<std::uint32_t>& out_norm, std::vector<std::uint32_t>& out_binorm,std::vector<std::uint32_t>& out_tangents, float threshold){
@@ -342,7 +341,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         //out_norm = data.normals;
         //out_binorm = data.binormals;
         //out_tangents = data.tangents;
-
 
         for(auto normals:data.normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
         for(auto binormals:data.binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }

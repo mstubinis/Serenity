@@ -4,6 +4,7 @@ using namespace Engine;
 using namespace std;
 
 #pragma region Declarations
+string Shaders::Detail::ShadersManagement::determinent_mat3 = "";
 string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
 string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = "";
 string Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = "";
@@ -33,14 +34,12 @@ string Shaders::Detail::ShadersManagement::lighting_frag = "";
 #pragma endregion
 
 void Shaders::Detail::ShadersManagement::init(){
-//consider this code for view space positions...
-/*
-float depth = texture(depthbuffer, texcoord).x;
-vec4 clipSpace_position = invP * (vec4(texcoord, depth, 1.0) * 2.0 - 1.0);
-vec3 viewspace_position = clipSpace_position.xyz / clipSpace_position.w;
-vec3 worldspace_position = vec3(invV * vec4(viewspace_position, 1.0));	
-*/
+
 #pragma region Functions
+Shaders::Detail::ShadersManagement::determinent_mat3 = 
+	"float det(mat3 m){\n"
+	"    return m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])-m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2])+m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2]);\n"
+    "}\n";
 Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
     "\n"
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
@@ -54,8 +53,20 @@ Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions =
     "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
     "\n"
     "    \n"//world space it!
-    "    vec4 wpos = invVP * clipSpace;\n"
+	"    vec4 wpos = invVP * clipSpace;\n"
     "    return wpos.xyz / wpos.w;\n"
+    "}\n"
+    "\n"
+    "vec3 reconstruct_view_pos(vec2 _uv,float _near, float _far){\n"
+    "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
+    "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
+    "\n"  //linearize regular depth
+    "    float a = _far / (_far - _near);\n"
+    "    float b = _far * _near / (_near - _far);\n"
+    "    float linearDepth = (a + b / regularDepth);\n"
+    "\n"
+    "    vec4 clipSpace = invP * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+    "    return clipSpace.xyz / clipSpace.w;\n"
     "}\n"
     "\n";
 
@@ -146,9 +157,9 @@ Shaders::Detail::ShadersManagement::vertex_basic =
     "\n"
     "    gl_Position = MVP * PosTransformed;\n"
     "\n"
-    "    Normals = (NormalMatrix * NormalTransformed.xyz).xyz;\n"
-    "    vec3 Binormals = (NormalMatrix * BinormalTransformed.xyz).xyz;\n"
-    "    vec3 Tangents = (NormalMatrix * TangentTransformed.xyz).xyz;\n"
+    "    Normals = normalize(NormalMatrix * NormalTransformed.xyz).xyz;\n"
+    "    vec3 Binormals = normalize(NormalMatrix * BinormalTransformed.xyz).xyz;\n"
+    "    vec3 Tangents = normalize(NormalMatrix * TangentTransformed.xyz).xyz;\n"
 	"\n"
 	"    TBN = mat3(Tangents,Binormals,Normals);\n"
     "\n"
@@ -323,7 +334,7 @@ Shaders::Detail::ShadersManagement::deferred_frag =
     "\n"
     "vec3 CalcBumpedNormal(void){\n"
     "    vec3 normTexture = texture2D(NormalTexture, UV).xyz;\n"
-	"    vec3 t = normTexture * 2.0 - 1.0;\n"
+	"    vec3 t = normalize(normTexture * 2.0 - 1.0);\n"
     "    return normalize(TBN * t);\n"
     "}\n"
     "void main(void){\n"
@@ -448,6 +459,7 @@ Shaders::Detail::ShadersManagement::ssao_frag =
     "uniform vec2 poisson[32];\n"
     "\n"
     "uniform mat4 invVP;\n"
+    "uniform mat4 invP;\n"
     "uniform float nearz;\n"
     "uniform float farz;\n"
     "\n";
@@ -767,6 +779,7 @@ Shaders::Detail::ShadersManagement::lighting_frag =
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
+    "uniform mat4 invP;\n"
     "\n";
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
 Shaders::Detail::ShadersManagement::lighting_frag +=	

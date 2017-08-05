@@ -290,9 +290,7 @@ void Detail::RenderManagement::_renderTextures(){
         sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
         glm::mat4 model = glm::mat4(1);
-        model = glm::translate(model, glm::vec3(item.pos.x,
-                                                item.pos.y,
-                                                -0.001f - item.depth));
+        model = glm::translate(model, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
         model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
         if(item.texture != "")
             model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
@@ -454,15 +452,17 @@ void Detail::RenderManagement::_passCopyDepth(){
 }
 void Detail::RenderManagement::_passLighting(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Light"); p->bind();
-    sendUniformMatrix4f("VP",Resources::getActiveCamera()->getViewProjection());
-    sendUniformMatrix4f("invVP",Resources::getActiveCamera()->getViewProjInverted());
+	Camera* c = Resources::getActiveCamera();
+    sendUniformMatrix4f("VP",c->getViewProjection());
+	sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
+	sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
 
-    glm::vec3 campos = Resources::getActiveCamera()->getPosition();
+    glm::vec3 campos = c->getPosition();
     Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
 
     sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
-    sendUniform4fSafe("ScreenData",Resources::getActiveCamera()->getNear(),Resources::getActiveCamera()->getFar(),
+    sendUniform4fSafe("ScreenData",c->getNear(),c->getFar(),
         (float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
@@ -572,9 +572,9 @@ void Detail::RenderManagement::_passSSAO(){
     sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
 
     Camera* c = Resources::getActiveCamera();
-    glm::vec3 camPos = glm::vec3(c->getPosition());
-
-    sendUniformMatrix4f("invVP",c->getViewProjInverted());
+    glm::vec3 camPos = c->getPosition();
+	sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
+	sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
     sendUniform1f("nearz",c->getNear());
     sendUniform1f("farz",c->getFar());
 
