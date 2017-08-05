@@ -160,8 +160,8 @@ void Texture::setZWrapping(TextureWrap::Wrap w){
     GLuint gl; m_i->_enumWrapToGL(gl,w); glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, gl);
 }
 void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(w); Texture::setYWrapping(w); Texture::setZWrapping(w); }
-void Texture::setMinFilter(TextureFilter::Filter f){ GLuint gl; m_i->_enumFilterToGL(gl,f); glTexParameterf(m_i->m_Type, GL_TEXTURE_MIN_FILTER, gl); }
-void Texture::setMaxFilter(TextureFilter::Filter f){ GLuint gl; m_i->_enumFilterToGL(gl,f); glTexParameterf(m_i->m_Type, GL_TEXTURE_MAG_FILTER, gl); }
+void Texture::setMinFilter(TextureFilter::Filter f){ GLuint gl; m_i->_enumFilterToGL(gl,f); glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, gl); }
+void Texture::setMaxFilter(TextureFilter::Filter f){ GLuint gl; m_i->_enumFilterToGL(gl,f); glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, gl); }
 void Texture::setFilter(TextureFilter::Filter f){ Texture::setMinFilter(f); Texture::setMaxFilter(f); }
 
 void Texture::load(){

@@ -73,22 +73,14 @@ float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w
 float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
-std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
+std::uint32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    // Convert to signed integer -511 to +511 range
    int iX = (int)(x * 511.0f);
    int iY = (int)(y * 511.0f);
    int iZ = (int)(z * 511.0f);
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
-std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
-
-std::int32_t Math::pack2UVSInto32Int(float x, float y){
-   // Convert to signed integer -511 to +511 range
-   int iX = (int)(x * 511.0f);
-   int iY = (int)(y * 511.0f);
-   return (iX & 0x3FF) | ((iY & 0x3FF) << 16);
-}
-std::int32_t Math::pack2UVSInto32Int(glm::vec2 v){ return Math::pack2UVSInto32Int(v.x,v.y); }
+std::uint32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 
 
 float Math::pack3FloatsInto1Float(float r,float g,float b){
@@ -147,7 +139,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
     float m22 = vector.z;
     float num8 = (m00 + m11) + m22;
     if (num8 > 0.0f){
-        float num = glm::sqrt(num8 + 1.0);
+        float num = glm::sqrt(num8 + 1.0f);
         o.w = num * 0.5f;
         num = 0.5f / num;
         o.x = (m12 - m21) * num;
@@ -156,7 +148,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if ((m00 >= m11) && (m00 >= m22)){
-        float num7 = glm::sqrt(((1.0 + m00) - m11) - m22);
+        float num7 = glm::sqrt(((1.0f + m00) - m11) - m22);
         float num4 = 0.5f / num7;
         o.x = 0.5f * num7;
         o.y = (m01 + m10) * num4;
@@ -165,7 +157,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         return;
     }
     if (m11 > m22){
-        float num6 = glm::sqrt(((1.0 + m11) - m00) - m22);
+        float num6 = glm::sqrt(((1.0f + m11) - m00) - m22);
         float num3 = 0.5f / num6;
         o.x = (m10 + m01) * num3;
         o.y = 0.5f * num6;
@@ -173,7 +165,7 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
         o.w = (m20 - m02) * num3;
         return;
     }
-    float num5 = glm::sqrt(((1.0 + m22) - m00) - m11);
+    float num5 = glm::sqrt(((1.0f + m22) - m00) - m11);
     float num2 = 0.5f / num5;
     o.x = (m20 + m02) * num2;
     o.y = (m21 + m12) * num2;

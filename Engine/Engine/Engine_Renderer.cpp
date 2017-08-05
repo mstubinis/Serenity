@@ -348,7 +348,7 @@ void Detail::RenderManagement::_passGeometry(){
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
     glDepthFunc(GL_LEQUAL);
     //glClearBufferfv(GL_COLOR,GBufferType::Diffuse,colors);
-    glClearBufferfv(GL_COLOR,m_gBuffer->getTexture(GBufferType::Diffuse)->attachment(),colors);
+	glClearBufferfv(GL_COLOR,m_gBuffer->getBuffers().at(GBufferType::Diffuse).lock().get()->attatchment(),colors);
     glDisable(GL_BLEND); //disable blending on all mrts
     scene->renderSkybox(RendererInfo::GodRaysInfo::godRays);
 

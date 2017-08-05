@@ -23,7 +23,7 @@ void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){
     MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
 }
 void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data, std::string file){
-    mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_Triangulate); 
+    mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace); 
     if(!mesh->m_aiScene || mesh->m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !mesh->m_aiScene->mRootNode){
         return;
     }
@@ -66,21 +66,25 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 norm.x = aimesh->mNormals[i].x;
                 norm.y = aimesh->mNormals[i].y;
                 norm.z = aimesh->mNormals[i].z;
+                norm = glm::normalize(norm);
                 data.normals.push_back(norm);
-
-                //binorm
-                glm::vec3 binorm;
-                binorm.x = aimesh->mBitangents[i].x;
-                binorm.y = aimesh->mBitangents[i].y;
-                binorm.z = aimesh->mBitangents[i].z;
-                data.binormals.push_back(binorm);
 
                 //tangent
                 glm::vec3 tangent;
                 tangent.x = aimesh->mTangents[i].x;
                 tangent.y = aimesh->mTangents[i].y;
                 tangent.z = aimesh->mTangents[i].z;
+                tangent = glm::normalize(tangent);
                 data.tangents.push_back(tangent);
+
+                //binorm
+                glm::vec3 binorm;
+                binorm.x = aimesh->mBitangents[i].x;
+                binorm.y = aimesh->mBitangents[i].y;
+                binorm.z = aimesh->mBitangents[i].z;
+                binorm = glm::normalize(binorm);
+                //data.binormals.push_back(glm::normalize(glm::cross(norm,tangent)));
+                data.binormals.push_back(binorm);
             }
         }
         #pragma endregion
@@ -152,6 +156,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                  }
             }
         }
+        _calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
     }
     for(uint i = 0; i < node->mNumChildren; i++){
         MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,node->mChildren[i], scene);
@@ -303,14 +308,10 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& 
 
 bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result, float threshold){
     for (uint i=0; i < out_vertices.size(); i++ ){
-        if (is_near( in_pos.x , out_vertices[i].x ,threshold) &&
-            is_near( in_pos.y , out_vertices[i].y ,threshold) &&
-            is_near( in_pos.z , out_vertices[i].z ,threshold) &&
-            is_near( in_uv.x  , out_uvs[i].x      ,threshold) &&
-            is_near( in_uv.y  , out_uvs[i].y      ,threshold) &&
-            is_near( in_norm.x , out_normals[i].x ,threshold) &&
-            is_near( in_norm.y , out_normals[i].y ,threshold) &&
-            is_near( in_norm.z , out_normals[i].z ,threshold)
+        if (is_near( in_pos.x , out_vertices[i].x ,threshold) && is_near( in_pos.y , out_vertices[i].y ,threshold) &&
+            is_near( in_pos.z , out_vertices[i].z ,threshold) && is_near( in_uv.x  , out_uvs[i].x      ,threshold) &&
+            is_near( in_uv.y  , out_uvs[i].y      ,threshold) && is_near( in_norm.x , out_normals[i].x ,threshold) &&
+            is_near( in_norm.y , out_normals[i].y ,threshold) && is_near( in_norm.z , out_normals[i].z ,threshold)
         ){
             result = i;
             return true;
@@ -319,55 +320,73 @@ bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3
     return false;
 }
 void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents){
-    //this does something funky with mirrored uvs.
     for(uint i=0; i < points.size(); i++){
         glm::vec3& n = normals[i];
         glm::vec3& t = binormals[i];
         glm::vec3& b = tangents[i];
         // Gram-Schmidt orthogonalize
-        t = glm::normalize(t - n * glm::dot(n, t));
-    }
-    /*
-    //this is bad for mirrored uvs in most cases...
-    for(uint i=0; i < points.size(); i++){
-        // Calculate handedness
-        glm::vec3& n = normals[i];
-        glm::vec3& t = binormals[i];
-        glm::vec3& b = tangents[i];
-        if (glm::dot(glm::cross(n, t), b) < 0.0f){ 
-            t *= -1.0f; 
+        t = glm::normalize(t - glm::dot(t, n) * n);
+        b = glm::cross(n, t);
+
+		//handedness
+        if (glm::dot(glm::cross(n, t), b) < 0.0f){
+             //t = t * -1.0f;
         }
     }
-    */
 }
-void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<glm::vec3>& out_norm, std::vector<glm::vec3>& out_binorm,std::vector<glm::vec3>& out_tangents, float threshold){
+void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<std::uint32_t>& out_norm, std::vector<std::uint32_t>& out_binorm,std::vector<std::uint32_t>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
-        out_norm = data.normals;
         out_uvs = data.uvs;
-        out_binorm = data.binormals;
-        out_tangents = data.tangents;
+		
+        //out_norm = data.normals;
+        //out_binorm = data.binormals;
+        //out_tangents = data.tangents;
+
+
+        for(auto normals:data.normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
+        for(auto binormals:data.binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
+        for(auto tangents:data.tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
+
         out_indices = data.indices;
         return;
-    }   
+    }
+    std::vector<glm::vec3> temp_normals;
+    std::vector<glm::vec3> temp_binormals;
+    std::vector<glm::vec3> temp_tangents;
     for (uint i=0; i < data.points.size(); i++){
         ushort index;
-        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, out_norm, index,threshold);
+        //bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, out_norm, index,threshold);
+        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, temp_normals, index,threshold);
         if (found){
             out_indices.push_back(index);
 
             //average out TBN. I think this does more harm than good though
-            out_tangents.at(index) += data.tangents.at(i);
-            out_binorm.at(index) += data.binormals.at(i);
+            //out_binorm.at(index) += data.binormals.at(i);
+            //out_tangents.at(index) += data.tangents.at(i);
+
+            //infact these seem to make compressed normals weak. so dont include them
+            //temp_binormals.at(index) += data.binormals.at(i);
+            //temp_tangents.at(index) += data.tangents.at(i);
         }
         else{
             out_pos.push_back( data.points.at(i));
             out_uvs.push_back(data.uvs.at(i));
-            out_norm .push_back(data.normals.at(i));
-            out_tangents.push_back(data.tangents.at(i));
-            out_binorm.push_back(data.binormals.at(i));
-            ushort newindex = (ushort)out_pos.size() - 1;
-            out_indices.push_back(newindex);
+
+            //out_norm .push_back(data.normals.at(i));
+            //out_binorm.push_back(data.binormals.at(i));
+            //out_tangents.push_back(data.tangents.at(i));
+
+            temp_normals .push_back(data.normals.at(i));
+            temp_binormals.push_back(data.binormals.at(i));
+            temp_tangents.push_back(data.tangents.at(i));
+
+            out_indices.push_back((ushort)out_pos.size() - 1);
         }
     }
+
+    for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
+    for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
+    for(auto tangents:temp_tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
+
 }

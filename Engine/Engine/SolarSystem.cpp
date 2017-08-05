@@ -433,19 +433,19 @@ void SolarSystem::_loadRandomly(){
             float positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
 
             float posX,posZ;
-            float randomDegree = rand() % 36000 / 100.0f;
+            float randomDegree = (rand() % 36000) / 100.0f;
             posX = sin(randomDegree) * positionAwayFromSun;
             posZ = cos(randomDegree) * positionAwayFromSun;
 
-            float RADIUS = (500.0 + rand() % 85000)*10.0;
+            float RADIUS = (500.0f + (rand() % 85000))*10.0f;
             PlanetType PLANET_TYPE = PLANET_TYPE_ROCKY;
-            if(RADIUS <= 15000){
+            if(RADIUS <= 15000.0f){
                 float chance = rand() % 1000 / 1000.0f;
                 if(chance > 0.85f)
                     PLANET_TYPE = PLANET_TYPE_ICE;
             }
             else{
-                float chance = rand() % 1000 / 1000.0f;
+                float chance = (rand() % 1000) / 1000.0f;
                 if(chance > 0.6f)
                     PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
                 else
@@ -457,7 +457,7 @@ void SolarSystem::_loadRandomly(){
             //dist of earth from sun 149,600,000. radius of sun 695,800
             //planets with atmosphere must be roughly 215 sun radius's away (Earth like) to min 155 away (Venus) and max 327 (Mars)
             if(positionAwayFromSun > 155.0 * star.second->getRadius() && positionAwayFromSun < 327.0 * star.second->getRadius()){
-                float chance = rand() % 1000 / 1000.0f;
+                float chance = (rand() % 1000) / 1000.0f;
                 if(chance > 0.5f)
                     ATMOSPHERE_HEIGHT = 0.025f;
             }

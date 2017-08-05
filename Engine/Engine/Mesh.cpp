@@ -20,12 +20,16 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVer
                                           //#components  //componentFormat //normalized?
     m[VertexFormat::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    //m[VertexFormat::Normal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,         GL_TRUE,       0,0,0);
+
+    m[VertexFormat::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormat::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+
+	/*
     m[VertexFormat::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    //m[VertexFormat::Binormal]  = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,         GL_TRUE,       0,0,0);
     m[VertexFormat::Binormal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    //m[VertexFormat::Tangent]   = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,         GL_TRUE,       0,0,0);
     m[VertexFormat::Tangent]     = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
+	*/
     m[VertexFormat::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
     
@@ -46,7 +50,6 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    //Mesh* mesh = static_cast<Mesh*>(r);
     for(uint i = 0; i < VertexFormat::EnumTotal; i++){
         glDisableVertexAttribArray(i);
     }
@@ -326,16 +329,16 @@ void Mesh::initRenderingContext(){
     glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(glm::vec2), &m_UVs[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-    glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(std::int32_t), &m_Normals[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(std::uint32_t), &m_Normals[0], GL_STATIC_DRAW);
     
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(std::int32_t), &m_Binormals[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(std::uint32_t), &m_Binormals[0], GL_STATIC_DRAW);
     
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(std::int32_t), &m_Tangents[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(std::uint32_t), &m_Tangents[0], GL_STATIC_DRAW);
     
     if(m_Skeleton != nullptr){
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);

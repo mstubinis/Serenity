@@ -150,10 +150,8 @@ namespace Engine{
         
         void translate(ObjectDynamic*,btVector3&,bool local);
 
-        std::int32_t pack3NormalsInto32Int(float x, float y, float z);
-        std::int32_t pack3NormalsInto32Int(glm::vec3 v);
-        std::int32_t pack2UVSInto32Int(float x, float y);
-        std::int32_t pack2UVSInto32Int(glm::vec2 v);
+        std::uint32_t pack3NormalsInto32Int(float x, float y, float z);
+        std::uint32_t pack3NormalsInto32Int(glm::vec3 v);
         
         float pack3FloatsInto1Float(float,float,float);
         float pack3FloatsInto1Float(glm::vec3&);

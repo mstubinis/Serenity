@@ -12,7 +12,7 @@ unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> _populateGBu
     unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> m;
                                                  //winSizeRatio              //type             //components       //component format //attatchment
     m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  GL_RGB8,             GL_RGB,            GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT0);
-    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  GL_RGB10_A2,         GL_RGBA,           GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT1);
+    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  GL_RGBA16F,          GL_RGBA,           GL_FLOAT,          GL_COLOR_ATTACHMENT1);
     m[GBufferType::Misc]     = boost::make_tuple(1.0f,  GL_RGBA8,            GL_RGBA,           GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT2);
     m[GBufferType::Lighting] = boost::make_tuple(1.0f,  GL_RGB16F,           GL_RGB,            GL_FLOAT,          GL_COLOR_ATTACHMENT3);
     m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  GL_RGBA8,            GL_RGBA,           GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT0);
