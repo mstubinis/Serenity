@@ -14,7 +14,6 @@
 
 using namespace std;
 
-
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
                                           //#components  //componentFormat //normalized?
@@ -26,11 +25,11 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVer
     m[VertexFormat::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
     m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
 
-	/*
+    /*
     m[VertexFormat::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::Binormal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::Tangent]     = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-	*/
+    */
     m[VertexFormat::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
     
@@ -60,6 +59,7 @@ DefaultMeshUnbindFunctor Mesh::DEFAULT_UNBIND_FUNCTOR;
 
 Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name){
     m_File = "";
+    m_SaveMeshData = false;
     m_threshold = threshold;
     m_Collision = nullptr;
     m_Skeleton = nullptr;
@@ -114,6 +114,7 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
 Mesh::Mesh(string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
+    m_SaveMeshData = false;
     m_Collision = nullptr;
     m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -163,6 +164,7 @@ Mesh::Mesh(string& name,unordered_map<string,float>& grid,uint width,uint length
 Mesh::Mesh(string& name,float x, float y,float width, float height,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
+    m_SaveMeshData = false;
     m_Collision = nullptr;
     m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -206,6 +208,7 @@ Mesh::Mesh(string& name,float x, float y,float width, float height,float thresho
 Mesh::Mesh(string& name,float width, float height,float threshold):BindableResource(name){
     m_File = "";
     m_threshold = threshold;
+    m_SaveMeshData = false;
     m_Collision = nullptr;
     m_Skeleton = nullptr;
     ImportedMeshData d;
@@ -248,6 +251,7 @@ Mesh::Mesh(string& name,float width, float height,float threshold):BindableResou
 }
 Mesh::Mesh(string& name,string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name){
     m_File = "";
+    m_SaveMeshData = false;
     m_Collision = nullptr;
     m_Skeleton = nullptr;
     if(notMemory){
@@ -277,15 +281,14 @@ void Mesh::_loadData(ImportedMeshData& data,float threshold){
     Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,m_threshold);
 }
 void Mesh::_clearData(){
-    m_Indices.clear();
-    m_Points.clear();
-    m_UVs.clear();
-    m_Normals.clear();
-    m_Binormals.clear();
-    m_Tangents.clear();
+    vector_clear(m_Indices);
+    vector_clear(m_Points);
+    vector_clear(m_UVs);
+    vector_clear(m_Normals);
+    vector_clear(m_Binormals);
+    vector_clear(m_Tangents);
     if(m_Skeleton != nullptr){
-        delete m_Skeleton;
-        m_Skeleton = nullptr;
+        SAFE_DELETE(m_Skeleton);
     }
 }
 void Mesh::_loadFromFile(string file,CollisionType type,float threshold){
@@ -352,6 +355,15 @@ void Mesh::initRenderingContext(){
     glGenBuffers(1, &m_elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
+
+    //cannot clear indices buffer. just dont do it. ;)
+    if(m_SaveMeshData == false){
+        vector_clear(m_Points);
+        vector_clear(m_UVs);
+        vector_clear(m_Normals);
+        vector_clear(m_Binormals);
+        vector_clear(m_Tangents);
+    }
 }
 void Mesh::cleanupRenderingContext(){
     for(uint i = 0; i < VertexFormat::EnumTotal; i++){
@@ -396,7 +408,7 @@ void Mesh::unload(){
         EngineResource::unload();
     }
 }
-
+void Mesh::saveMeshData(bool save){ m_SaveMeshData = save; }
 AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
     m_Mesh = mesh;
     m_TicksPerSecond = anim->mTicksPerSecond;

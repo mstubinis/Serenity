@@ -33,6 +33,8 @@ class MeshInstance;
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 #define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
 
+template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
+
 namespace Engine{
     namespace Resources{
         namespace Detail{

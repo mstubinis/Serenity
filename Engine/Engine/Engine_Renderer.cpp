@@ -346,7 +346,7 @@ void Detail::RenderManagement::_passGeometry(){
     const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
     glDepthFunc(GL_LEQUAL);
     //glClearBufferfv(GL_COLOR,GBufferType::Diffuse,colors);
-	glClearBufferfv(GL_COLOR,m_gBuffer->getBuffers().at(GBufferType::Diffuse).lock().get()->attatchment(),colors);
+    glClearBufferfv(GL_COLOR,m_gBuffer->getBuffers().at(GBufferType::Diffuse).lock().get()->attatchment(),colors);
     glDisable(GL_BLEND); //disable blending on all mrts
     scene->renderSkybox(RendererInfo::GodRaysInfo::godRays);
 
@@ -452,10 +452,10 @@ void Detail::RenderManagement::_passCopyDepth(){
 }
 void Detail::RenderManagement::_passLighting(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Light"); p->bind();
-	Camera* c = Resources::getActiveCamera();
+    Camera* c = Resources::getActiveCamera();
     sendUniformMatrix4f("VP",c->getViewProjection());
-	sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
-	sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
+    sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
+    sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
 
     glm::vec3 campos = c->getPosition();
     Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
@@ -562,8 +562,9 @@ void Detail::RenderManagement::render(){
     _renderTextures();
     _renderText();
     Settings::disableAlphaTest();
-    m_FontsToBeRendered.clear();
-    m_TexturesToBeRendered.clear();
+
+	vector_clear(m_FontsToBeRendered);
+	vector_clear(m_TexturesToBeRendered);
 }
 void Detail::RenderManagement::_passSSAO(){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();
@@ -573,8 +574,8 @@ void Detail::RenderManagement::_passSSAO(){
 
     Camera* c = Resources::getActiveCamera();
     glm::vec3 camPos = c->getPosition();
-	sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
-	sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
+    sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
+    sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
     sendUniform1f("nearz",c->getNear());
     sendUniform1f("farz",c->getFar());
 
@@ -712,7 +713,7 @@ void Detail::RenderManagement::_passFinal(){
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
-	sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
+    sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gLightMap",m_gBuffer->getTexture(GBufferType::Lighting),1);

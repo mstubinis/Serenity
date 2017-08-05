@@ -10,9 +10,9 @@ namespace Engine{
             class ShadersManagement{
                 private:
                 public:
-					static void init();
-					static std::string unpack_float_into_2_floats;
-					static std::string determinent_mat3;
+                    static void init();
+                    static std::string unpack_float_into_2_floats;
+                    static std::string determinent_mat3;
                     static std::string normals_octahedron_compression_functions;
                     static std::string reconstruct_log_depth_functions;
                 

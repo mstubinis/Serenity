@@ -23,7 +23,7 @@ class Texture::impl final{
         uint m_Format;
 
         void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format){
-            m_Pixels.clear();
+            vector_clear(m_Pixels);
             m_Width = m_Height = m_TextureAddress = 0;
             m_Type = type;
             m_Format = format;
@@ -70,6 +70,7 @@ class Texture::impl final{
         void _unload(){
             glDeleteTextures(1,&m_TextureAddress);
             glBindTexture(m_Type,0);
+			vector_clear(m_Pixels);
         }
         void _generateFromImage(sf::Image& img,Texture* super){
             if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){

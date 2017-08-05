@@ -110,14 +110,15 @@ class Mesh final: public BindableResource{
         glm::vec3 m_radiusBox;
         float m_radius;
         float m_threshold;
+        bool m_SaveMeshData;
         CollisionType m_Type;
         std::vector<glm::vec3> m_Points;
 
-		std::vector<float> m_UVs;
+        std::vector<float> m_UVs;
         //std::vector<glm::vec2> m_UVs;
 
         std::vector<std::uint32_t> m_Normals;
-		std::vector<std::uint32_t> m_Binormals;
+        std::vector<std::uint32_t> m_Binormals;
         std::vector<std::uint32_t> m_Tangents;
 
         //std::vector<glm::vec3> m_Normals;
@@ -149,6 +150,10 @@ class Mesh final: public BindableResource{
 
         void load();
         void unload();
+
+        //Specify wether or not to save the mesh data after loading the data into the OpenGL buffers. By default mesh data is NOT saved. Saving data is useful
+        //if you plan on modifying the buffer data manually later on. Mesh data takes up alot of memory space so only save the data if you really need it.
+        void saveMeshData(bool);
 
         void render(GLuint mode = GL_TRIANGLES);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);

@@ -85,6 +85,8 @@ struct ImportedMeshData final{
     void clear(){ 
         file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
         points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
+        file_points.shrink_to_fit(); file_uvs.shrink_to_fit(); file_normals.shrink_to_fit(); file_triangles.shrink_to_fit();
+        points.shrink_to_fit(); uvs.shrink_to_fit(); normals.shrink_to_fit(); binormals.shrink_to_fit(); tangents.shrink_to_fit(); indices.shrink_to_fit();
     }
 };
 

@@ -132,6 +132,7 @@ class GBuffer::impl final{
             glColorMask(r,g,b,a);
             glDrawBuffers(types.size(), &types[0]); // Specify what to render an start acquiring
             glClear(GL_COLOR_BUFFER_BIT);           // Clear the render targets
+			vector_clear(types);
         }
         void _start(uint t1,string& c,bool f){
             vector<uint> t;

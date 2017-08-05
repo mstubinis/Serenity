@@ -59,9 +59,9 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             if(aimesh->mTextureCoords[0]){ uv.x = aimesh->mTextureCoords[0][i].x; uv.y = aimesh->mTextureCoords[0][i].y; }
             else{ uv = glm::vec2(0.0f, 0.0f); }
 
-			//this is to prevent uv compression from beign f-ed up at the poles.
-			if(uv.y <= 0.0001f){ uv.y = 0.001f; }
-			if(uv.y >= 0.9999f){ uv.y = 0.999f; }
+            //this is to prevent uv compression from beign f-ed up at the poles.
+            if(uv.y <= 0.0001f){ uv.y = 0.001f; }
+            if(uv.y >= 0.9999f){ uv.y = 0.999f; }
 
             data.uvs.push_back(uv);
 
@@ -332,7 +332,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vecto
         t = glm::normalize(t - glm::dot(t, n) * n);
         b = glm::cross(n, t);
 
-		//handedness
+        //handedness
         //if (glm::dot(glm::cross(n, t), b) < 0.0f){
              //t = t * -1.0f;
         //}
@@ -345,8 +345,8 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
 
         //out_uvs = data.uvs;
 
-		for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
-		
+        for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
+        
         //out_norm = data.normals;
         //out_binorm = data.binormals;
         //out_tangents = data.tangents;
@@ -358,7 +358,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         out_indices = data.indices;
         return;
     }
-	std::vector<glm::vec2> temp_uvs;
+    std::vector<glm::vec2> temp_uvs;
     std::vector<glm::vec3> temp_normals;
     std::vector<glm::vec3> temp_binormals;
     std::vector<glm::vec3> temp_tangents;
@@ -380,7 +380,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         else{
             out_pos.push_back( data.points.at(i));
             //out_uvs.push_back(data.uvs.at(i));
-			temp_uvs.push_back(data.uvs.at(i));
+            temp_uvs.push_back(data.uvs.at(i));
 
             //out_norm .push_back(data.normals.at(i));
             //out_binorm.push_back(data.binormals.at(i));
@@ -393,7 +393,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
             out_indices.push_back((ushort)out_pos.size() - 1);
         }
     }
-	for(auto uvs:temp_uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
+    for(auto uvs:temp_uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
 
     for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
     for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
