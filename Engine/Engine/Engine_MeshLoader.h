@@ -112,7 +112,7 @@ namespace Engine{
 						float threshold);
 						*/
 
-						static void _indexVBO(ImportedMeshData&,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, 
+						static void _indexVBO(ImportedMeshData&,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
 							std::vector<std::uint32_t>& out_norm, 
 							std::vector<std::uint32_t>& out_binorm,
 							std::vector<std::uint32_t>& out_tangents,

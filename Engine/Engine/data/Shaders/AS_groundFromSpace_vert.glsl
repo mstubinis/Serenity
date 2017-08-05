@@ -1,7 +1,7 @@
 #version 120
 
 attribute vec3 position;
-attribute vec2 uv;
+attribute float uv;
 attribute vec3 normal;
 attribute vec3 binormal;
 attribute vec3 tangent;
@@ -44,6 +44,14 @@ varying float logz_f;
 varying float FC_2_f;
 uniform float fcoeff;
 
+vec2 unpackFloatInto2Floats(float i){
+    vec2 res;
+    res.y = i - floor(i);
+    res.x = (i - res.y) / 1000.0;
+    res.x = (res.x - 0.5) * 2.0;
+    res.y = (res.y - 0.5) * 2.0;
+    return res;
+}
 float scale(float fCos) {   
     float x = 1.0 - fCos;   
     return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25)))); 
@@ -95,7 +103,7 @@ void main(void){
     }
     gl_Position = MVP * vec4(position, 1.0);
 
-    UV = uv;
+    UV = unpackFloatInto2Floats(uv);
     CameraPosition = v3CameraPos;
 
     Normals = (Model * vec4(normal,0.0)).xyz;

@@ -112,7 +112,9 @@ class Mesh final: public BindableResource{
         float m_threshold;
         CollisionType m_Type;
         std::vector<glm::vec3> m_Points;
-        std::vector<glm::vec2> m_UVs;
+
+		std::vector<float> m_UVs;
+        //std::vector<glm::vec2> m_UVs;
 
         std::vector<std::uint32_t> m_Normals;
 		std::vector<std::uint32_t> m_Binormals;

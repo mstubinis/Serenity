@@ -4,6 +4,7 @@ using namespace Engine;
 using namespace std;
 
 #pragma region Declarations
+string Shaders::Detail::ShadersManagement::unpack_float_into_2_floats = "";
 string Shaders::Detail::ShadersManagement::determinent_mat3 = "";
 string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
 string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = "";
@@ -36,10 +37,23 @@ string Shaders::Detail::ShadersManagement::lighting_frag = "";
 void Shaders::Detail::ShadersManagement::init(){
 
 #pragma region Functions
+Shaders::Detail::ShadersManagement::unpack_float_into_2_floats = 
+    "\n"
+	"vec2 unpackFloatInto2Floats(float i){\n"
+    "    vec2 res;\n"
+    "    res.y = i - floor(i);\n"
+    "    res.x = (i - res.y) / 1000.0;\n"
+    "    res.x = (res.x - 0.5) * 2.0;\n"
+    "    res.y = (res.y - 0.5) * 2.0;\n"
+    "    return res;\n"
+    "}\n"
+    "\n";
 Shaders::Detail::ShadersManagement::determinent_mat3 = 
+    "\n"
 	"float det(mat3 m){\n"
 	"    return m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])-m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2])+m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2]);\n"
-    "}\n";
+    "}\n"
+    "\n";
 Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
     "\n"
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
@@ -117,7 +131,7 @@ Shaders::Detail::ShadersManagement::vertex_basic =
     "#version 120\n"
     "\n"
     "attribute vec3 position;\n"
-    "attribute vec2 uv;\n"
+    "attribute float uv;\n"
     "attribute vec4 normal;\n"
     "attribute vec4 binormal;\n"
     "attribute vec4 tangent;\n"
@@ -139,7 +153,9 @@ Shaders::Detail::ShadersManagement::vertex_basic =
     "varying float logz_f;\n"
     "varying float FC_2_f;\n"
     "uniform float fcoeff;\n"
-    "\n"
+    "\n";
+Shaders::Detail::ShadersManagement::vertex_basic += Shaders::Detail::ShadersManagement::unpack_float_into_2_floats;
+Shaders::Detail::ShadersManagement::vertex_basic +=
     "void main(void){\n"
     "    mat4 BoneTransform = mat4(1.0);\n"
     "    if(AnimationPlaying == 1.0){\n"
@@ -165,7 +181,7 @@ Shaders::Detail::ShadersManagement::vertex_basic =
     "\n"
     "    WorldPosition = (Model * PosTransformed).xyz;\n"
     "\n"
-    "    UV = uv;\n"
+	"    UV = unpackFloatInto2Floats(uv);\n"
     "    logz_f = 1.0 + gl_Position.w;\n"
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
     "    FC_2_f = fcoeff * 0.5;\n"
@@ -178,14 +194,16 @@ Shaders::Detail::ShadersManagement::vertex_hud =
     "#version 120\n"
     "\n"
     "attribute vec3 position;\n"
-    "attribute vec2 uv;\n"
+    "attribute float uv;\n"
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
-    "varying vec2 UV;\n"
+    "varying vec2 UV;\n";
+Shaders::Detail::ShadersManagement::vertex_hud += Shaders::Detail::ShadersManagement::unpack_float_into_2_floats;
+Shaders::Detail::ShadersManagement::vertex_hud +=
     "void main(void){\n"
     "    mat4 MVP = VP * Model;\n"
-    "    UV = uv;\n"
+	"    UV = unpackFloatInto2Floats(uv);\n"
     "    gl_Position = MVP * vec4(position, 1.0);\n"
     "    gl_TexCoord[6] = gl_Position;\n"
     "}";

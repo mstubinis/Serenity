@@ -58,6 +58,11 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             glm::vec2 uv;
             if(aimesh->mTextureCoords[0]){ uv.x = aimesh->mTextureCoords[0][i].x; uv.y = aimesh->mTextureCoords[0][i].y; }
             else{ uv = glm::vec2(0.0f, 0.0f); }
+
+			//this is to prevent uv compression from beign f-ed up at the poles.
+			if(uv.y <= 0.0001f){ uv.y = 0.001f; }
+			if(uv.y >= 0.9999f){ uv.y = 0.999f; }
+
             data.uvs.push_back(uv);
 
             //norm
@@ -333,10 +338,14 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vecto
         //}
     }
 }
-void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<glm::vec2>& out_uvs, std::vector<std::uint32_t>& out_norm, std::vector<std::uint32_t>& out_binorm,std::vector<std::uint32_t>& out_tangents, float threshold){
+void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, std::vector<std::uint32_t>& out_norm, std::vector<std::uint32_t>& out_binorm,std::vector<std::uint32_t>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
-        out_uvs = data.uvs;
+
+
+        //out_uvs = data.uvs;
+
+		for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
 		
         //out_norm = data.normals;
         //out_binorm = data.binormals;
@@ -349,13 +358,14 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         out_indices = data.indices;
         return;
     }
+	std::vector<glm::vec2> temp_uvs;
     std::vector<glm::vec3> temp_normals;
     std::vector<glm::vec3> temp_binormals;
     std::vector<glm::vec3> temp_tangents;
     for (uint i=0; i < data.points.size(); i++){
         ushort index;
         //bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, out_norm, index,threshold);
-        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, temp_normals, index,threshold);
+        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, temp_normals, index,threshold);
         if (found){
             out_indices.push_back(index);
 
@@ -369,7 +379,8 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         }
         else{
             out_pos.push_back( data.points.at(i));
-            out_uvs.push_back(data.uvs.at(i));
+            //out_uvs.push_back(data.uvs.at(i));
+			temp_uvs.push_back(data.uvs.at(i));
 
             //out_norm .push_back(data.normals.at(i));
             //out_binorm.push_back(data.binormals.at(i));
@@ -382,6 +393,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
             out_indices.push_back((ushort)out_pos.size() - 1);
         }
     }
+	for(auto uvs:temp_uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
 
     for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
     for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
