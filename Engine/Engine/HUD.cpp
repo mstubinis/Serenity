@@ -12,8 +12,6 @@
 #include "Engine_Window.h"
 #include "Engine_Math.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <glm/vec4.hpp>
 
 using namespace Engine;
@@ -122,9 +120,9 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-    m_Font->renderText("Delta Time: " + boost::lexical_cast<std::string>(Resources::dt()) +
-                        "\nFPS: " + boost::lexical_cast<std::string>(uint(1.0f/Resources::dt())) + 
-                        "\nObject Count: " + boost::lexical_cast<std::string>(Resources::getCurrentScene()->objects().size()),
+    m_Font->renderText("Delta Time: " + to_string(Resources::dt()) +
+                        "\nFPS: " + to_string(uint(1.0f/Resources::dt())) + 
+                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
                         glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion

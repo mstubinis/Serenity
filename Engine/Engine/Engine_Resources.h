@@ -34,6 +34,7 @@ class MeshInstance;
 #define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
 
 template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
+template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
 
 namespace Engine{
     namespace Resources{

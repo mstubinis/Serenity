@@ -17,7 +17,6 @@ GLuint Skybox::m_Buffer;
 vector<glm::vec3> Skybox::m_Vertices;
 
 SkyboxEmpty::SkyboxEmpty(string name,Scene* scene){
-    m_Model = glm::mat4(1);
     if(scene == nullptr) scene = Resources::getCurrentScene();
     if(scene->getSkybox() == nullptr)
         scene->setSkybox(this);
@@ -84,34 +83,19 @@ Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
     string names[6] = {front,back,left,right,top,bottom};
 
     m_Texture = new Texture(names,"Cubemap",GL_TEXTURE_CUBE_MAP);
-
-    m_Model = glm::mat4(1);
-    m_Model = glm::translate(m_Model, glm::vec3(Resources::getActiveCamera()->getPosition()));
-    m_Model = glm::scale(m_Model,glm::vec3(999999,999999,999999));
 }
 Skybox::~Skybox(){
 }
 void Skybox::update(){
-    glm::vec3 p = glm::vec3(Resources::getActiveCamera()->getPosition());
-    m_Model[3][0] = p.x;
-    m_Model[3][1] = p.y;
-    m_Model[3][2] = p.z;
 }
-void Skybox::draw(bool godsRays){
-    ShaderP* p = Resources::getShaderProgram("Deferred_Skybox");
-    p->bind();
+void Skybox::draw(){
+    ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
 
     Camera* c = Resources::getActiveCamera();
     glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
     Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
 
     Renderer::bindTexture("Texture",m_Texture,0);
-
-    if(godsRays){ 
-        Renderer::sendUniform1i("HasGodsRays",1); 
-    }else{         
-        Renderer::sendUniform1i("HasGodsRays",0); 
-    }
 
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
     glEnableVertexAttribArray(0);

@@ -189,7 +189,7 @@ glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); 
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0001f;
-    float angle = glm::acos( glm::dot(a,b) / (glm::length(a)*glm::length(b)) );
+	float angle = glm::acos( glm::dot(glm::normalize(a),glm::normalize(b)) );
     if(degrees) angle *= 57.2958f;
     return angle;
 }

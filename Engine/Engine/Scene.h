@@ -38,6 +38,6 @@ class Scene: public EngineResource{
         SkyboxEmpty* getSkybox() const;
         void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Object*);
-        void renderSkybox(bool);
+        void renderSkybox();
 };
 #endif

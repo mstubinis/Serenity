@@ -417,19 +417,13 @@ Shaders::Detail::ShadersManagement::deferred_frag_hud = Shaders::Detail::Shaders
 Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform samplerCube Texture;\n"
-    "\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
-    "\n"
-    "uniform int HasGodsRays;\n"
     "void main(void){\n"
     "    gl_FragData[0] = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rgb = vec3(1.0);\n"
     "    gl_FragData[2].r = 0.0;\n"
     "    gl_FragData[2].b = 0.0;\n"
-    "    if(HasGodsRays == 1){\n"
-    "        gl_FragData[3] = vec4(0.0259,0.0224,0.0290,1.0);\n"
-    "    } \n"
     "    gl_FragDepth = 0.99999;\n"
     "}";
 

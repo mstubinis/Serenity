@@ -44,8 +44,8 @@ GameSkybox::~GameSkybox(){
 void GameSkybox::update(){
     Skybox::update();
 }
-void GameSkybox::draw(bool godsRays){
-    Skybox::draw(godsRays);
+void GameSkybox::draw(){
+    Skybox::draw();
     if(m_SunFlares.size() > 0){
         Texture* texture = Resources::getTexture("data/Textures/Skyboxes/StarFlare.png");
         for(auto flare:m_SunFlares){

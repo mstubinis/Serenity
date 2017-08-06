@@ -21,37 +21,30 @@ struct SkyboxTextures final{
     std::string top;
     std::string bottom;
 };
-
 class ISkybox{
     public:
         virtual ~ISkybox(){}
         virtual void update() = 0;
-        virtual void draw(bool godsRays) = 0;
+        virtual void draw() = 0;
         virtual Texture* texture() = 0;
 };
 class SkyboxEmpty: public ISkybox{
-    protected:
-        glm::mat4 m_Model;
     public:
         SkyboxEmpty(std::string name,Scene* = nullptr);
         virtual ~SkyboxEmpty();
         virtual void update(){}
-        virtual void draw(bool godsRays){}
+        virtual void draw(){}
 };
-
 class Skybox: public SkyboxEmpty{
     protected:
         Texture* m_Texture;
-
         static GLuint m_Buffer;
         static std::vector<glm::vec3> m_Vertices;
     public:
         Skybox(std::string name,Scene* = nullptr);
         virtual ~Skybox();
-
         Texture* texture(){ return m_Texture; }
-
         virtual void update();
-        virtual void draw(bool godsRays);
+        virtual void draw();
 };
 #endif

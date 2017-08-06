@@ -37,10 +37,12 @@ bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disable
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 AntiAliasingAlgorithm::Algorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
-bool Detail::RendererInfo::GeneralInfo::draw_physics_debug = false;
+
 
 #ifdef _DEBUG
-    Detail::RendererInfo::GeneralInfo::draw_physics_debug = true;
+    bool Detail::RendererInfo::GeneralInfo::draw_physics_debug = true;
+#else
+    bool Detail::RendererInfo::GeneralInfo::draw_physics_debug = false;
 #endif
 
 bool Detail::RendererInfo::BloomInfo::bloom = true;
@@ -340,15 +342,28 @@ void Detail::RenderManagement::_renderText(){
     p->unbind();
 }
 void Detail::RenderManagement::_passGeometry(){
-    Settings::clear();
+    if(RendererInfo::GodRaysInfo::godRays)
+		m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+	else
+        m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+ 
+	Settings::clear();
+    glDepthFunc(GL_LEQUAL);
+    glDisable(GL_BLEND); //disable blending on all mrts
+
     Scene* scene = Resources::getCurrentScene();
     glm::vec3 clear = scene->getBackgroundColor();
-    const float colors[4] = { clear.r, clear.g, clear.b, 1.0f };
-    glDepthFunc(GL_LEQUAL);
-    //glClearBufferfv(GL_COLOR,GBufferType::Diffuse,colors);
-    glClearBufferfv(GL_COLOR,m_gBuffer->getBuffers().at(GBufferType::Diffuse).lock().get()->attatchment(),colors);
-    glDisable(GL_BLEND); //disable blending on all mrts
-    scene->renderSkybox(RendererInfo::GodRaysInfo::godRays);
+    const float colors[4] = { clear.r,clear.g,clear.b,1.0f };
+
+    glClearBufferfv(GL_COLOR,0,colors);
+	if(RendererInfo::GodRaysInfo::godRays){
+		const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
+	    glClearBufferfv(GL_COLOR,3,godRays);
+	}
+	m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+    scene->renderSkybox();
+    if(RendererInfo::GodRaysInfo::godRays)
+		m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
     glBlendEquationi(GL_FUNC_ADD,0);
@@ -477,23 +492,24 @@ void Detail::RenderManagement::_passLighting(){
     p->unbind();
 }
 void Detail::RenderManagement::render(){
-    if(!RendererInfo::GodRaysInfo::godRays)
-        m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
-    else
-        m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA");
     _passGeometry();
 
-    if(RendererInfo::GodRaysInfo::godRays){     
+
+    if(RendererInfo::GodRaysInfo::godRays){
         m_gBuffer->start(GBufferType::GodRays,"RGBA",false);
         Object* o = Resources::getObject("Sun");
         glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
 
-        bool behind = Math::isPointWithinCone(Resources::getActiveCamera()->getPosition(),-(Resources::getActiveCamera()->getViewVector()),o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
-        float alpha = Math::getAngleBetweenTwoVectors(Resources::getActiveCamera()->getViewVector(),
-            Resources::getActiveCamera()->getPosition() - o->getPosition(),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
+		Camera* c = Resources::getActiveCamera();
+        bool behind = Math::isPointWithinCone(
+			c->getPosition(),-c->getViewVector(),
+			o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees)
+		);
+        float alpha = Math::getAngleBetweenTwoVectors(c->getViewVector(),
+            c->getPosition() - o->getPosition(),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         
         alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
-        alpha = glm::clamp(alpha,0.001f,0.999f);
+        alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
         _passGodsRays(glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
         m_gBuffer->stop();
@@ -508,6 +524,10 @@ void Detail::RenderManagement::render(){
         _passLighting();
     }
     glDisable(GL_BLEND);
+
+
+    //_passForwardRendering();
+
 
     m_gBuffer->start(GBufferType::Bloom,"RGBA",false);
     _passSSAO(); //ssao AND bloom
@@ -551,8 +571,6 @@ void Detail::RenderManagement::render(){
 
     Settings::enableDepthTest();
     Settings::enableDepthMask();
-
-    _passForwardRendering();
 
 
     //render HUD
@@ -601,8 +619,6 @@ void Detail::RenderManagement::_passSSAO(){
     p->unbind();
 }
 void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
-    Settings::clear(true,false,false);
-
     ShaderP* p = Resources::getShaderProgram("Deferred_Edge"); p->bind();
 
     sendUniform2f("gScreenSize",float(Resources::getWindowSize().x),float(Resources::getWindowSize().y));
@@ -616,8 +632,7 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     p->unbind();
 }
 void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
-    Settings::clear(true,false,false);
-
+	Settings::clear(true,false,false);
     ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays"); p->bind();
  
     sendUniform4f("RaysInfo",RendererInfo::GodRaysInfo::godRays_exposure,
@@ -641,8 +656,6 @@ void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,boo
     p->unbind();
 }
 void Detail::RenderManagement::_passHDR(){
-    Settings::clear(true,false,false);
-
     ShaderP* p = Resources::getShaderProgram("Deferred_HDR"); p->bind();
 
     sendUniform4f("HDRInfo",RendererInfo::HDRInfo::hdr_exposure,float(int(RendererInfo::HDRInfo::hdr)),
@@ -706,8 +719,6 @@ void Detail::RenderManagement::_passSMAA(){
     //pass 4th thing
 }
 void Detail::RenderManagement::_passFinal(){
-    Settings::clear(true,false,false);
-
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
 
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));

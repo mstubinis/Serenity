@@ -20,7 +20,7 @@ class GameSkybox: public Skybox{
         virtual ~GameSkybox();
 
         virtual void update();
-        virtual void draw(bool godsRays);
+        virtual void draw();
 };
 
 #endif
