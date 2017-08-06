@@ -145,10 +145,10 @@ void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& sc
     if(m_i->m_Files.size() != 1){ return; } //this is either not a valid texture or a cubemap, and cannot be rendered 2D.
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
-void Texture::_constructAsFramebuffer(uint w,uint h,float scale,int intern,int format,int type,int attatchment){
+void Texture::_constructAsFramebuffer(uint w,uint h,float s,int intern,int format,int type,int attatchment){
     m_i->m_Width = w; m_i->m_Height = h;
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress);
-    glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*scale), (GLsizei)(h*scale), 0, format, type, 0);
+    glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*s), (GLsizei)(h*s), 0, format, type, NULL);
     this->setFilter(TextureFilter::Linear);
     this->setWrapping(TextureWrap::ClampToEdge);
     glBindTexture(m_i->m_Type, 0);

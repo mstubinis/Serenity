@@ -57,7 +57,7 @@ float Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
 float Detail::RendererInfo::GodRaysInfo::godRays_density = 0.84f;
 float Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
 uint Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
-float Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 55.0f;
+float Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 75.0f;
 float Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
 bool Detail::RendererInfo::SSAOInfo::ssao = true;
@@ -493,7 +493,6 @@ void Detail::RenderManagement::_passLighting(){
 }
 void Detail::RenderManagement::render(){
     _passGeometry();
-
 
     if(RendererInfo::GodRaysInfo::godRays){
         m_gBuffer->start(GBufferType::GodRays,"RGBA",false);
