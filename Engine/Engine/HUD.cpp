@@ -16,6 +16,7 @@
 
 using namespace Engine;
 using namespace Engine::Events;
+using namespace std;
 
 HUD::HUD(){
     m_Font = new Font("data/Fonts/consolas.fnt");
@@ -29,35 +30,35 @@ const glm::vec3 HUD::getColor() const { return m_Color; }
 void HUD::setColor(glm::vec3 c){ m_Color = c; }
 
 
-uint count = 0;
+uint _count = 0;
 void HUD::update(float dt){
     if(Keyboard::isKeyDownOnce(",")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-		std::unordered_map<std::string,Planet*>& planets = scene->getPlanets();
-		uint a = 0;
-		for(auto p:planets){
-			if(a == count){
-				scene->getPlayer()->setTarget(p.second);
-				break;
-			}
-			a++;
-		}
-        count++;
-        if (count > scene->getPlanets().size()-1){ count = 0; }
+        unordered_map<string,Planet*>& planets = scene->getPlanets();
+        uint a = 0;
+        for(auto p:planets){
+            if(a == _count){
+                scene->getPlayer()->setTarget(p.second);
+                break;
+            }
+            a++;
+        }
+        _count++;
+        if (_count > scene->getPlanets().size()-1){ _count = 0; }
     }
     else if(Keyboard::isKeyDownOnce(".")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
-		std::unordered_map<std::string,Planet*>& planets = scene->getPlanets();
-		uint a = 0;
-		for(auto p:planets){
-			if(a == count){
-				scene->getPlayer()->setTarget(p.second);
-				break;
-			}
-			a++;
-		}
-        count--;
-        if (count <= 0){ count = scene->getPlanets().size()-1; }
+        unordered_map<string,Planet*>& planets = scene->getPlanets();
+        uint a = 0;
+        for(auto p:planets){
+            if(a == _count){
+                scene->getPlayer()->setTarget(p.second);
+                break;
+            }
+            a++;
+        }
+        _count--;
+        if (_count <= 0){ _count = scene->getPlanets().size()-1; }
     }
 }
 void HUD::render(){
@@ -77,13 +78,13 @@ void HUD::render(){
         if(pos.z == 1){
             Resources::getTexture("data/Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
-            std::string stringRepresentation = "";
+            string stringRepresentation = "";
             if(distanceInKm > 0){
                 stringRepresentation = Engine::convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
             }
             else{
                 float distanceInm = (player->getTarget()->getDistance(player))*100.0f;
-                stringRepresentation = boost::lexical_cast<std::string>(uint(distanceInm)) + " m";
+                stringRepresentation = to_string(uint(distanceInm)) + " m";
             }
             m_Font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
@@ -122,7 +123,7 @@ void HUD::render(){
 
     m_Font->renderText("Delta Time: " + to_string(Resources::dt()) +
                         "\nFPS: " + to_string(uint(1.0f/Resources::dt())) + 
-                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
+                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()),
                         glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion

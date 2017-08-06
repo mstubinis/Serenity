@@ -74,7 +74,7 @@ namespace Engine{
                     static AntiAliasingAlgorithm::Algorithm aa_algorithm;
 
                     static bool cull_face_enabled;
-		    static bool draw_physics_debug;
+            static bool draw_physics_debug;
                     static unsigned char cull_face_status;
                 };
                 struct LightingInfo final{
@@ -134,7 +134,7 @@ namespace Engine{
                     static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal();
                     static void _passFXAA();
-					static void _passSMAA();
+                    static void _passSMAA();
                     static void _passCopyDepth();
                 public:
                     static GBuffer* m_gBuffer;
@@ -175,7 +175,7 @@ namespace Engine{
             void disableDepthMask();
             void enableDrawPhysicsInfo(bool b = true);
             void disableDrawPhysicsInfo();
-		
+        
             namespace HDR{
                 static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
                 static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
@@ -252,13 +252,13 @@ namespace Engine{
         void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
         void bindTextureSafe(const char* location,Texture*,uint slot);
         void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint type);
-	void unbindTexture(uint slot,Texture*);
+    void unbindTexture(uint slot,Texture*);
         void unbindTexture2D(uint slot);
         void unbindTextureCubemap(uint slot);
-	    
-	    
+        
+        
         //Uniform 1
-	    //seperate (dont need vectors for 1 component ;) )
+        //seperate (dont need vectors for 1 component ;) )
         inline void sendUniform1(const char* l,double x){ glUniform1d(getUniformLocationUnsafe(l),x); }
         inline void sendUniform1(const char* l,int x){ glUniform1i(getUniformLocationUnsafe(l),x); }
         inline void sendUniform1(const char* l,float x){ glUniform1f(getUniformLocationUnsafe(l),x); }
@@ -277,9 +277,9 @@ namespace Engine{
         inline void sendUniform1dForce(const char* l,double x){ glUniform1d(getUniformLocation(l),x); }
         inline void sendUniform1iForce(const char* l,int x){ glUniform1i(getUniformLocation(l),x); }
         inline void sendUniform1fForce(const char* l,float x){ glUniform1f(getUniformLocation(l),x); }
-	    
-	//Uniform 2
-	    //vectors
+        
+    //Uniform 2
+        //vectors
         inline void sendUniform2(const char* l,glm::dvec2& v){ glUniform2d(getUniformLocationUnsafe(l),v.x,v.y); }
         inline void sendUniform2(const char* l,glm::ivec2& v){ glUniform2i(getUniformLocationUnsafe(l),v.x,v.y); }
         inline void sendUniform2(const char* l,glm::vec2& v){ glUniform2f(getUniformLocationUnsafe(l),v.x,v.y); }
@@ -298,7 +298,7 @@ namespace Engine{
         inline void sendUniform2dForce(const char* l,glm::dvec2& v){ glUniform2d(getUniformLocation(l),v.x,v.y); }
         inline void sendUniform2iForce(const char* l,glm::ivec2& v){ glUniform2i(getUniformLocation(l),v.x,v.y); }
         inline void sendUniform2fForce(const char* l,glm::vec2& v){ glUniform2f(getUniformLocation(l),v.x,v.y); } 
-	    //seperate
+        //seperate
         inline void sendUniform2(const char* l,double x,double y){ glUniform2d(getUniformLocationUnsafe(l),x,y); }
         inline void sendUniform2(const char* l,int x,int y){ glUniform2i(getUniformLocationUnsafe(l),x,y); }
         inline void sendUniform2(const char* l,float x,float y){ glUniform2f(getUniformLocationUnsafe(l),x,y); } 
@@ -317,7 +317,7 @@ namespace Engine{
         inline void sendUniform2dForce(const char* l,double x,double y){ glUniform2d(getUniformLocation(l),x,y); }
         inline void sendUniform2iForce(const char* l,int x,int y){ glUniform2i(getUniformLocation(l),x,y); }
         inline void sendUniform2fForce(const char* l,float x,float y){ glUniform2f(getUniformLocation(l),x,y); }
-	    //vector and array of values
+        //vector and array of values
         inline void sendUniform2v(const char* l,std::vector<glm::dvec2>& d,uint i){ glUniform2dv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform2v(const char* l,std::vector<glm::ivec2>& d,uint i){ glUniform2iv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform2v(const char* l,std::vector<glm::vec2>& d,uint i){ glUniform2fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
@@ -342,9 +342,9 @@ namespace Engine{
         inline void sendUniform2ivSafe(const char* l,glm::ivec2* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform2iv(o,i,glm::value_ptr(d[0])); }
         inline void sendUniform2ivForce(const char* l,std::vector<glm::ivec2>& d,uint i){ glUniform2iv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform2ivForce(const char* l,glm::ivec2* d,uint i){ glUniform2iv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
-	    
-	//Uniform 3
-	    //vectors
+        
+    //Uniform 3
+        //vectors
         inline void sendUniform3(const char* l,glm::dvec3& v){ glUniform3d(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
         inline void sendUniform3(const char* l,glm::ivec3& v){ glUniform3i(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
         inline void sendUniform3(const char* l,glm::vec3& v){ glUniform3f(getUniformLocationUnsafe(l),v.x,v.y,v.z); }
@@ -363,7 +363,7 @@ namespace Engine{
         inline void sendUniform3dForce(const char* l,glm::dvec3& v){ glUniform3d(getUniformLocation(l),v.x,v.y,v.z); }
         inline void sendUniform3iForce(const char* l,glm::ivec3& v){ glUniform3i(getUniformLocation(l),v.x,v.y,v.z); }
         inline void sendUniform3fForce(const char* l,glm::vec3& v){ glUniform3f(getUniformLocation(l),v.x,v.y,v.z); }
-	    //seperate
+        //seperate
         inline void sendUniform3(const char* l,double x,double y,double z){ glUniform3d(getUniformLocationUnsafe(l),x,y,z); }
         inline void sendUniform3(const char* l,int x,int y,int z){ glUniform3i(getUniformLocationUnsafe(l),x,y,z); }
         inline void sendUniform3(const char* l,float x,float y,float z){ glUniform3f(getUniformLocationUnsafe(l),x,y,z); }
@@ -382,7 +382,7 @@ namespace Engine{
         inline void sendUniform3dForce(const char* l,double x,double y,double z){ glUniform3d(getUniformLocation(l),x,y,z); }
         inline void sendUniform3iForce(const char* l,int x,int y,int z){ glUniform3i(getUniformLocation(l),x,y,z); }
         inline void sendUniform3fForce(const char* l,float x,float y,float z){ glUniform3f(getUniformLocation(l),x,y,z); }
-	    //vector and array of values
+        //vector and array of values
         inline void sendUniform3v(const char* l,std::vector<glm::dvec3>& d,uint i){ glUniform3dv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform3v(const char* l,std::vector<glm::ivec3>& d,uint i){ glUniform3iv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform3v(const char* l,std::vector<glm::vec3>& d,uint i){ glUniform3fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
@@ -407,9 +407,9 @@ namespace Engine{
         inline void sendUniform3ivSafe(const char* l,glm::ivec3* d,uint i){ const GLint& o=getUniformLocation(l);if(o==-1)return;glUniform3iv(o,i,glm::value_ptr(d[0])); }
         inline void sendUniform3ivForce(const char* l,std::vector<glm::ivec3>& d,uint i){ glUniform3iv(getUniformLocation(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform3ivForce(const char* l,glm::ivec3* d,uint i){ glUniform3iv(getUniformLocation(l),i,glm::value_ptr(d[0])); }  
-	    
-	//Uniform 4
-	    //vectors
+        
+    //Uniform 4
+        //vectors
         inline void sendUniform4(const char* l,glm::dvec4& v){ glUniform4d(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
         inline void sendUniform4(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
         inline void sendUniform4(const char* l,glm::vec4& v){ glUniform4f(getUniformLocationUnsafe(l),v.x,v.y,v.z,v.w); }
@@ -428,7 +428,7 @@ namespace Engine{
         inline void sendUniform4dForce(const char* l,glm::dvec4& v){ glUniform4d(getUniformLocation(l),v.x,v.y,v.z,v.w); }
         inline void sendUniform4iForce(const char* l,glm::ivec4& v){ glUniform4i(getUniformLocation(l),v.x,v.y,v.z,v.w); }
         inline void sendUniform4fForce(const char* l,glm::vec4& v){ glUniform4f(getUniformLocation(l),v.x,v.y,v.z,v.w); }
-	    //seperate
+        //seperate
         inline void sendUniform4(const char* l,double x,double y,double z,double w){ glUniform4d(getUniformLocationUnsafe(l),x,y,z,w); }
         inline void sendUniform4(const char* l,int x,int y,int z,int w){ glUniform4i(getUniformLocationUnsafe(l),x,y,z,w); }
         inline void sendUniform4(const char* l,float x,float y,float z,float w){ glUniform4f(getUniformLocationUnsafe(l),x,y,z,w); }
@@ -447,7 +447,7 @@ namespace Engine{
         inline void sendUniform4dForce(const char* l,double x,double y,double z,double w){ glUniform4d(getUniformLocation(l),x,y,z,w); }
         inline void sendUniform4iForce(const char* l,int x,int y,int z,int w){ glUniform4i(getUniformLocation(l),x,y,z,w); }
         inline void sendUniform4fForce(const char* l,float x,float y,float z,float w){ glUniform4f(getUniformLocation(l),x,y,z,w); }
-	    //vector / array of values
+        //vector / array of values
         inline void sendUniform4v(const char* l,std::vector<glm::dvec4>& d,uint i){ glUniform4dv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform4v(const char* l,std::vector<glm::ivec4>& d,uint i){ glUniform4iv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); }
         inline void sendUniform4v(const char* l,std::vector<glm::vec4>& d,uint i){ glUniform4fv(getUniformLocationUnsafe(l),i,glm::value_ptr(d[0])); } 
@@ -498,8 +498,8 @@ namespace Engine{
         inline void sendUniformMatrix2dvForce(const char* l,std::vector<glm::dmat2>& m,uint count){ std::vector<double> d;for(auto ma:m){double* m = glm::value_ptr(ma);for(uint i = 0; i < 4; i++){d.push_back(m[i]);}}glUniformMatrix2dv(getUniformLocation(l),count,0,&d[0]); }   
         //inline void sendUniformMatrix2iForce(const char* l,glm::imat2& m){ glUniformMatrix2iv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
         //inline void sendUniformMatrix2ivForce(const char* l,std::vector<glm::imat2>& m,uint count){ std::vector<int> d;for(auto ma:m){int* m = glm::value_ptr(ma);for(uint i = 0; i < 4; i++){d.push_back(m[i]);}}glUniformMatrix2iv(getUniformLocation(l),count,0,&d[0]); } 
-	    
-	//Matrix 3x3
+        
+    //Matrix 3x3
         inline void sendUniformMatrix3(const char* l,glm::mat3& m){ glUniformMatrix3fv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
         inline void sendUniformMatrix3v(const char* l,std::vector<glm::mat3>& m,uint count){ std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 9; i++){d.push_back(m[i]);}}glUniformMatrix3fv(getUniformLocationUnsafe(l),count,0,&d[0]); }
         inline void sendUniformMatrix3(const char* l,glm::dmat3& m){ glUniformMatrix3dv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
@@ -524,8 +524,8 @@ namespace Engine{
         inline void sendUniformMatrix3dvForce(const char* l,std::vector<glm::dmat3>& m,uint count){ std::vector<double> d;for(auto ma:m){double* m = glm::value_ptr(ma);for(uint i = 0; i < 9; i++){d.push_back(m[i]);}}glUniformMatrix3dv(getUniformLocation(l),count,0,&d[0]); }   
         //inline void sendUniformMatrix3iForce(const char* l,glm::imat3& m){ glUniformMatrix3iv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
         //inline void sendUniformMatrix3ivForce(const char* l,std::vector<glm::imat3>& m,uint count){ std::vector<int> d;for(auto ma:m){int* m = glm::value_ptr(ma);for(uint i = 0; i < 9; i++){d.push_back(m[i]);}}glUniformMatrix3iv(getUniformLocation(l),count,0,&d[0]); } 
-	    
-	//Matrix4x4
+        
+    //Matrix4x4
         inline void sendUniformMatrix4(const char* l,glm::mat4& m){ glUniformMatrix4fv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
         inline void sendUniformMatrix4v(const char* l,std::vector<glm::mat4>& m,uint count){ std::vector<float> d;for(auto ma:m){float* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4fv(getUniformLocationUnsafe(l),count,0,&d[0]); }
         inline void sendUniformMatrix4(const char* l,glm::dmat4& m){ glUniformMatrix4dv(getUniformLocationUnsafe(l),1,0,glm::value_ptr(m)); }
@@ -550,7 +550,7 @@ namespace Engine{
         inline void sendUniformMatrix4dvForce(const char* l,std::vector<glm::dmat4>& m,uint count){ std::vector<double> d;for(auto ma:m){double* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4dv(getUniformLocation(l),count,0,&d[0]); }   
         //inline void sendUniformMatrix4iForce(const char* l,glm::imat4& m){ glUniformMatrix4iv(getUniformLocation(l),1,0,glm::value_ptr(m)); }
         //inline void sendUniformMatrix4ivForce(const char* l,std::vector<glm::imat4>& m,uint count){ std::vector<int> d;for(auto ma:m){int* m = glm::value_ptr(ma);for(uint i = 0; i < 16; i++){d.push_back(m[i]);}}glUniformMatrix4iv(getUniformLocation(l),count,0,&d[0]); } 
-	    
+        
 
         void renderTexture(Texture*,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth);
         void renderText(std::string& text,Font*, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth);

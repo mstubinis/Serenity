@@ -343,11 +343,11 @@ void Detail::RenderManagement::_renderText(){
 }
 void Detail::RenderManagement::_passGeometry(){
     if(RendererInfo::GodRaysInfo::godRays)
-		m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
-	else
+        m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+    else
         m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
  
-	Settings::clear();
+    Settings::clear();
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_BLEND); //disable blending on all mrts
 
@@ -356,14 +356,14 @@ void Detail::RenderManagement::_passGeometry(){
     const float colors[4] = { clear.r,clear.g,clear.b,1.0f };
 
     glClearBufferfv(GL_COLOR,0,colors);
-	if(RendererInfo::GodRaysInfo::godRays){
-		const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
-	    glClearBufferfv(GL_COLOR,3,godRays);
-	}
-	m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+    if(RendererInfo::GodRaysInfo::godRays){
+        const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
+        glClearBufferfv(GL_COLOR,3,godRays);
+    }
+    m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
     scene->renderSkybox();
     if(RendererInfo::GodRaysInfo::godRays)
-		m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+        m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
     glBlendEquationi(GL_FUNC_ADD,0);
@@ -500,11 +500,11 @@ void Detail::RenderManagement::render(){
         Object* o = Resources::getObject("Sun");
         glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
 
-		Camera* c = Resources::getActiveCamera();
+        Camera* c = Resources::getActiveCamera();
         bool behind = Math::isPointWithinCone(
-			c->getPosition(),-c->getViewVector(),
-			o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees)
-		);
+            c->getPosition(),-c->getViewVector(),
+            o->getPosition(),Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees)
+        );
         float alpha = Math::getAngleBetweenTwoVectors(c->getViewVector(),
             c->getPosition() - o->getPosition(),true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         
@@ -581,8 +581,8 @@ void Detail::RenderManagement::render(){
     _renderText();
     Settings::disableAlphaTest();
 
-	vector_clear(m_FontsToBeRendered);
-	vector_clear(m_TexturesToBeRendered);
+    vector_clear(m_FontsToBeRendered);
+    vector_clear(m_TexturesToBeRendered);
 }
 void Detail::RenderManagement::_passSSAO(){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();
@@ -632,7 +632,7 @@ void Detail::RenderManagement::_passEdge(GLuint texture, float radius){
     p->unbind();
 }
 void Detail::RenderManagement::_passGodsRays(glm::vec2 lightPositionOnScreen,bool behind,float alpha){
-	Settings::clear(true,false,false);
+    Settings::clear(true,false,false);
     ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays"); p->bind();
  
     sendUniform4f("RaysInfo",RendererInfo::GodRaysInfo::godRays_exposure,

@@ -17,7 +17,7 @@ unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> _populateGBu
     m[GBufferType::Lighting] = boost::make_tuple(1.0f,  GL_RGB16F,           GL_RGB,            GL_FLOAT,          GL_COLOR_ATTACHMENT3);
     m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  GL_RGBA8,            GL_RGBA,           GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT0);
     m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  GL_RGB8,             GL_RGB,            GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT1);
-    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  GL_RGB8,            GL_RGB,           GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT2);
+    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  GL_RGB8,             GL_RGB,            GL_UNSIGNED_BYTE,  GL_COLOR_ATTACHMENT2);
     m[GBufferType::Depth]    = boost::make_tuple(1.0f,  GL_DEPTH_COMPONENT16,GL_DEPTH_COMPONENT,GL_FLOAT,          GL_DEPTH_ATTACHMENT);
     
     return m;
@@ -132,7 +132,7 @@ class GBuffer::impl final{
             glColorMask(r,g,b,a);
             glDrawBuffers(types.size(), &types[0]); // Specify what to render an start acquiring
             //glClear(GL_COLOR_BUFFER_BIT);         // Clear the render targets
-			vector_clear(types);
+            vector_clear(types);
         }
         void _start(uint t1,string& c,bool f){
             vector<uint> t;
