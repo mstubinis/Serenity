@@ -24,6 +24,7 @@ class Shader::impl final{
             m_Type = type;
             m_FromFile = fromFile;
             super->setName(name);
+			Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Shaders,name,boost::shared_ptr<Shader>(super));
         }
 };
 Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
@@ -89,11 +90,11 @@ class ShaderP::impl final{
         void _construct(string& name, string& vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _vs = Resources::getShader(vs); Shader* _fs = Resources::getShader(fs);
             if(_vs == nullptr){
-                Resources::addShader(vs,vs,ShaderType::Vertex,true);
+                new Shader(vs,vs,ShaderType::Vertex,true);
                 _vs = Resources::getShader(vs);
             }
             if(_fs == nullptr){
-                Resources::addShader(fs,fs,ShaderType::Fragment,true);
+                new Shader(fs,fs,ShaderType::Fragment,true);
                 _fs = Resources::getShader(fs);
             }
             _construct(name,_vs,_fs,stage,super);
@@ -101,7 +102,7 @@ class ShaderP::impl final{
         void _construct(string& name, Shader* vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _fs = Resources::getShader(fs);
             if(_fs == nullptr){
-                Resources::addShader(fs,fs,ShaderType::Fragment,true);
+                new Shader(fs,fs,ShaderType::Fragment,true);
                 _fs = Resources::getShader(fs);
             }
             _construct(name,vs,_fs,stage,super);
@@ -109,7 +110,7 @@ class ShaderP::impl final{
         void _construct(string& name, string& vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _vs = Resources::getShader(vs);
             if(_vs == nullptr){
-                Resources::addShader(vs,vs,ShaderType::Vertex,true);
+                new Shader(vs,vs,ShaderType::Vertex,true);
                 _vs = Resources::getShader(vs);
             }
             _construct(name,_vs,fs,stage,super);
