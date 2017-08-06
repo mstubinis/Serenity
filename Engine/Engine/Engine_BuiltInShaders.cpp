@@ -4,6 +4,7 @@ using namespace Engine;
 using namespace std;
 
 #pragma region Declarations
+string Shaders::Detail::ShadersManagement::version = "#version 120\n";
 string Shaders::Detail::ShadersManagement::unpack_float_into_2_floats = "";
 string Shaders::Detail::ShadersManagement::determinent_mat3 = "";
 string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
@@ -113,8 +114,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
 
 
 #pragma region FullscreenQuadVertex
-Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
@@ -127,8 +127,7 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex =
 #pragma endregion
 
 #pragma region VertexBasic
-Shaders::Detail::ShadersManagement::vertex_basic =
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "attribute vec3 position;\n"
     "attribute float uv;\n"
@@ -190,8 +189,7 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
 #pragma endregion
 
 #pragma region VertexHUD
-Shaders::Detail::ShadersManagement::vertex_hud =
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::vertex_hud = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "attribute vec3 position;\n"
     "attribute float uv;\n"
@@ -211,8 +209,7 @@ Shaders::Detail::ShadersManagement::vertex_hud +=
 #pragma endregion
 
 #pragma region VertexSkybox
-Shaders::Detail::ShadersManagement::vertex_skybox =
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::vertex_skybox = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "attribute vec3 position;\n"
     "uniform mat4 VP;\n"
@@ -225,8 +222,7 @@ Shaders::Detail::ShadersManagement::vertex_skybox =
 #pragma endregion
 
 #pragma region FXAA
-Shaders::Detail::ShadersManagement::fxaa_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
     "#define FXAA_REDUCE_MIN (1.0/128.0)\n"
     "#define FXAA_REDUCE_MUL (1.0/8.0)\n"
     "#define FXAA_SPAN_MAX 8.0\n"
@@ -276,8 +272,7 @@ Shaders::Detail::ShadersManagement::fxaa_frag =
 #pragma endregion
 
 #pragma region DeferredFrag
-Shaders::Detail::ShadersManagement::deferred_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
     "uniform sampler2D NormalTexture;\n"
@@ -403,8 +398,7 @@ Shaders::Detail::ShadersManagement::deferred_frag =
 #pragma endregion
 
 #pragma region DeferredFragHUD
-Shaders::Detail::ShadersManagement::deferred_frag_hud = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::deferred_frag_hud = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
     "uniform int DiffuseTextureEnabled;\n"
@@ -420,8 +414,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_hud =
 #pragma endregion
 
 #pragma region DeferredFragSkybox
-Shaders::Detail::ShadersManagement::deferred_frag_skybox = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform samplerCube Texture;\n"
     "\n"
@@ -443,8 +436,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox =
 #pragma endregion
 
 #pragma region CopyDepthFrag
-Shaders::Detail::ShadersManagement::copy_depth_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gDepthMap;\n"
     "\n"
@@ -455,8 +447,7 @@ Shaders::Detail::ShadersManagement::copy_depth_frag =
 #pragma endregion
 
 #pragma region SSAO
-Shaders::Detail::ShadersManagement::ssao_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gRandomMap;\n"
@@ -536,8 +527,7 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
 #pragma endregion
 
 #pragma region HDR
-Shaders::Detail::ShadersManagement::hdr_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D lightingBuffer;\n"
     "uniform sampler2D bloomBuffer;\n"
@@ -590,8 +580,7 @@ Shaders::Detail::ShadersManagement::hdr_frag =
 #pragma endregion
 
 #pragma region Blur
-Shaders::Detail::ShadersManagement::blur_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D texture;\n"
     "uniform vec4 RGBA;\n"
@@ -644,8 +633,7 @@ Shaders::Detail::ShadersManagement::blur_frag =
 #pragma endregion
 
 #pragma region GodRays
-Shaders::Detail::ShadersManagement::godRays_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform vec4 RaysInfo; //exposure | decay | density | weight\n"
     "\n"
@@ -678,8 +666,7 @@ Shaders::Detail::ShadersManagement::godRays_frag =
 #pragma endregion
 
 #pragma region EdgeDetect
-Shaders::Detail::ShadersManagement::edge_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::edge_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform vec2 gScreenSize;\n"
     "uniform sampler2D texture;\n"
@@ -723,8 +710,7 @@ Shaders::Detail::ShadersManagement::edge_frag =
 #pragma endregion
 
 #pragma region FinalFrag
-Shaders::Detail::ShadersManagement::final_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gLightMap;\n"
@@ -776,8 +762,7 @@ Shaders::Detail::ShadersManagement::final_frag =
 #pragma endregion
 
 #pragma region LightingFrag
-Shaders::Detail::ShadersManagement::lighting_frag = 
-    "#version 120\n"
+Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersManagement::version + 
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
     "uniform vec4 LightDataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
