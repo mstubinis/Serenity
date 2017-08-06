@@ -518,7 +518,7 @@ void Detail::RenderManagement::render(){
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
-    if(RendererInfo::LightingInfo::lighting){
+	if(RendererInfo::LightingInfo::lighting == true && Resources::getCurrentScene()->lights().size() > 0){
         m_gBuffer->start(GBufferType::Lighting,"RGB");
         _passLighting();
     }
@@ -660,6 +660,8 @@ void Detail::RenderManagement::_passHDR(){
     sendUniform4f("HDRInfo",RendererInfo::HDRInfo::hdr_exposure,float(int(RendererInfo::HDRInfo::hdr)),
         float(int(RendererInfo::BloomInfo::bloom)),float(int(RendererInfo::HDRInfo::hdr_algorithm)));
 
+	sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
+
     bindTextureSafe("lightingBuffer",m_gBuffer->getTexture(GBufferType::Lighting),0);
     bindTextureSafe("bloomBuffer",m_gBuffer->getTexture(GBufferType::Bloom),1);
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),2);
@@ -721,7 +723,6 @@ void Detail::RenderManagement::_passFinal(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
 
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
-    sendUniform1iSafe("HasLighting",int(RendererInfo::LightingInfo::lighting));
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
     sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
