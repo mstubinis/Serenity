@@ -653,7 +653,7 @@ void SpotLight::lighten(){
     m = glm::scale(m,glm::vec3(m_PointLightRadius));
 
     Renderer::sendUniformMatrix4f("Model",m);
-	Renderer::sendUniformMatrix4f("VP",camera->getViewProjection());
+    Renderer::sendUniformMatrix4f("VP",camera->getViewProjection());
 
     if(glm::distance(camera->getPosition(),pos) <= m_PointLightRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
