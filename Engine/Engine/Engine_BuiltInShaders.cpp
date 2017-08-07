@@ -21,7 +21,6 @@ GLSL Version      OpenGL Version
 
 #pragma region Declarations
 string Shaders::Detail::ShadersManagement::version = "#version 120\n";
-string Shaders::Detail::ShadersManagement::spot_light_vertex = "";
 string Shaders::Detail::ShadersManagement::unpack_float_into_2_floats = "";
 string Shaders::Detail::ShadersManagement::determinent_mat3 = "";
 string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
@@ -135,34 +134,22 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::Sh
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
+    "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
+	"uniform float SpotLight;\n"
     "\n"
     "void main(void){\n"
+    "    vec4 vert = gl_Vertex;\n"
     "    mat4 MVP = VP * Model;\n"
-    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
-    "    gl_Position = MVP * gl_Vertex;\n"
-    "}";
-#pragma endregion
-
-#pragma region SpotLightVertex
-Shaders::Detail::ShadersManagement::spot_light_vertex = Shaders::Detail::ShadersManagement::version + 
-    "\n"
-    "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
-    "uniform float LightRadius;\n"
-    "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = UNUSED, w = UNUSED
-    "\n"
-    "void main(void){\n"
-    "    vec3 vert = gl_Vertex;\n"
-    "\n"
-    "    float opposite = tan(outerCutoff) * LightRadius;\n" //outerCutoff might need to be in degrees?
-    "    vert.xy *= opposite;\n" //might need to switch around x,y,z to fit GL's coordinate system
-    "\n"
-    "    mat4 MVP = VP * Model;\n"
+	"    if(SpotLight > 0.99){\n"
+    "        float opposite = tan(VertexShaderData.x*0.5) * VertexShaderData.y;\n" //outerCutoff might need to be in degrees?
+    "        vert.xy *= vec2(opposite/VertexShaderData.y);\n" //might need to switch around x,y,z to fit GL's coordinate system
+	"    }\n"
     "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
     "    gl_Position = MVP * vert;\n"
     "}";
 #pragma endregion
-    
+
+  
 #pragma region VertexBasic
 Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -1005,7 +992,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    else if(LightDataD.w == 3.0){\n"
     "        lightCalculation = CalcSpotLight(LightDirection,LightPosition,PxlPosition,PxlNormal,uv);\n"
     "    }\n"
-    "    gl_FragData[0].rgb = lightCalculation;\n"
+	"    gl_FragData[0].rgb = lightCalculation;\n"
     "}";
 
 #pragma endregion

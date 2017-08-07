@@ -70,7 +70,7 @@ void ObjectBasic::setPosition(float x,float y,float z){
     m_Position.y = y;
     m_Position.z = z;
 
-    glm::vec3 parentPos(0);
+    glm::vec3 parentPos(0.0f);
     if(m_Parent != nullptr){
         parentPos = m_Parent->getPosition();
     }

@@ -43,8 +43,8 @@ class Camera: public ObjectBasic{
 
         const float getAngle() const { return m_Angle; }
         const float getAspectRatio() const { return m_AspectRatio; }
-        const float near() const { return m_Near; }
-        const float far() const { return m_Far; }
+        const float getNear() const { return m_Near; }
+        const float getFar() const { return m_Far; }
 
         Scene* getScene(){ return m_Scene; }
 

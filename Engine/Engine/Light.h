@@ -5,12 +5,12 @@
 #include "ObjectDisplay.h"
 #include <unordered_map>
 
-enum LightType {
+class LightType{public: enum Type{
     Sun,
     Point,
     Directional,
     Spot
-};
+};};
 enum LightRange{
     _7,
     _13,
@@ -29,7 +29,7 @@ enum LightRange{
 class Scene;
 class SunLight: public ObjectDisplay{
     protected:
-        unsigned int m_Type;
+        uint m_Type;
         bool m_Active;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
         void sendGenericAttributesToShader();
@@ -37,7 +37,7 @@ class SunLight: public ObjectDisplay{
         SunLight(glm::vec3 = glm::vec3(0.0f),std::string = "Sun Light",uint=LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
 
-        void update(float);
+        virtual void update(float);
 
         virtual void lighten();
         float getAmbientIntensity(){ return m_AmbientIntensity; }
@@ -50,6 +50,7 @@ class SunLight: public ObjectDisplay{
         void activate(){ m_Active = true; }
         void deactivate(){ m_Active = false; }
         bool isActive(){ return m_Active; }
+		uint type(){ return m_Type; }
 };
 class DirectionalLight: public SunLight{
     public:
@@ -80,6 +81,7 @@ class PointLight: public SunLight{
         float& getExponent(){ return m_Exp; }
         glm::vec3 getAttributes(){ return glm::vec3(m_Constant,m_Linear,m_Exp); }
 
+		virtual void update(float);
         virtual void lighten();
 };
 class SpotLight: public PointLight{
@@ -90,6 +92,7 @@ class SpotLight: public PointLight{
         SpotLight(std::string = "Spot Light",glm::vec3 = glm::vec3(0.0f), glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), float = 11.0f, float = 13.0f,Scene* = nullptr);
         virtual ~SpotLight();
 
+		void update(float);
         void lighten();
         void setCutoff(float);
         void setCutoffOuter(float);

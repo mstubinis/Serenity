@@ -62,8 +62,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1f("fExposure", 2.0f);
     Renderer::sendUniform1f("fInnerRadius", innerRadius);
     Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-    float fScale = 1.0f / (outerRadius - innerRadius);
     float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
+    float fScale = 1.0f / (outerRadius - innerRadius);
     Renderer::sendUniform1f("fOuterRadius", outerRadius);
     Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
     Renderer::sendUniform1f("fScale",fScale);
@@ -106,7 +106,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
         Renderer::sendUniformMatrix4f("Model",mod);
-        Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->far() + 1.0f));
+        Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
         Renderer::sendUniform1i("nSamples", 2);
         Renderer::sendUniform1f("fSamples", 2.0f);

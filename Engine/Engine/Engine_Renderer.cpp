@@ -466,10 +466,10 @@ void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 }
 void Detail::RenderManagement::_passLighting(){
-    ShaderP* p;
     ShaderP* pNormal = Resources::getShaderProgram("Deferred_Light"); pNormal->bind();
-    //ShaderP* pSpot = Resources::getShaderProgram("Deferred_Light_Spot");
-	
+    ShaderP* pSpot = Resources::getShaderProgram("Deferred_Light_Spot");
+	ShaderP* p = pNormal;
+
     Camera* c = Resources::getActiveCamera();
     sendUniformMatrix4f("VP",c->getViewProjection());
     sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
@@ -480,7 +480,7 @@ void Detail::RenderManagement::_passLighting(){
 
     sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
-    sendUniform4fSafe("ScreenData",c->near(),c->far(),(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+    sendUniform4fSafe("ScreenData",c->getNear(),c->getFar(),(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),1);
@@ -488,10 +488,7 @@ void Detail::RenderManagement::_passLighting(){
     bindTextureSafe("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),3);
 
     for (auto light:Resources::getCurrentScene()->lights()){
-	//if is spot light, p = pSpot; p->bind();
         light.second->lighten();
-	//if currentlyBoundShader is not Resources::getShaderProgram("Deferred_Light"), 
-	//p->unbind(); p = pNormal; p->bind();
     }
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -597,8 +594,8 @@ void Detail::RenderManagement::_passSSAO(){
     glm::vec3 camPos = c->getPosition();
     sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
     sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
-    sendUniform1f("nearz",c->near());
-    sendUniform1f("farz",c->far());
+    sendUniform1f("nearz",c->getNear());
+    sendUniform1f("farz",c->getFar());
 
     sendUniform3fSafe("CameraPosition",camPos.x,camPos.y,camPos.z);
     
