@@ -31,15 +31,15 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         float innerRadius = obj->getDefaultRadius();
         float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
 
-        glm::vec3& pos = glm::vec3(obj->getPosition());
+        glm::vec3& pos = obj->getPosition();
         glm::quat& orientation = obj->getOrientation();
 
-        glm::mat4 mod = glm::mat4(1);
+        glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
         mod = glm::scale(mod,obj->getScale());
 
-        glm::mat4 rot = glm::mat4(1);
+        glm::mat4 rot = glm::mat4(1.0f);
         rot *= glm::mat4_cast(orientation);
 
         Renderer::sendUniformMatrix4f("Model",mod);
@@ -51,14 +51,14 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform1i("nSamples", 2);
         Renderer::sendUniform1f("fSamples", 2.0f);
 
-        glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
+        glm::vec3 camPos = c->getPosition() - pos;
         Renderer::sendUniform3f("v3CameraPos", camPos);
 
-        glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
+        glm::vec3 lightDir = Resources::getCurrentScene()->lights().begin()->second->getPosition() - pos;
         lightDir = glm::normalize(lightDir);
         Renderer::sendUniform3f("v3LightDir", lightDir);
 
-        glm::vec3 v3InvWaveLength = glm::vec3(1.0f / glm::pow(0.65f, 4.0f),1.0f / glm::pow(0.57f, 4.0f),1.0f / glm::pow(0.475f, 4.0f));
+        glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
         float Km = 0.0025f;
@@ -100,14 +100,14 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         Renderer::Settings::cullFace(GL_FRONT);
         glEnable(GL_BLEND);
-        mod = glm::mat4(1);
+        mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod = glm::scale(mod,obj->getScale());
         mod = glm::scale(mod,glm::vec3(1 + atmosphereHeight));
 
         Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
         Renderer::sendUniformMatrix4f("Model",mod);
-        Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+        Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->far() + 1.0f));
 
         Renderer::sendUniform1i("nSamples", 2);
         Renderer::sendUniform1f("fSamples", 2.0f);
@@ -147,15 +147,15 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         float innerRadius = obj->getDefaultRadius();
         float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
 
-        glm::vec3& pos = glm::vec3(obj->getPosition());
+        glm::vec3& pos = obj->getPosition();
         glm::quat& orientation = obj->getOrientation();
 
-        glm::mat4 mod = glm::mat4(1);
+        glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
         mod = glm::scale(mod,obj->getScale());
 
-        glm::mat4 rot = glm::mat4(1);
+        glm::mat4 rot = glm::mat4(1.0f);
         rot *= glm::mat4_cast(orientation);
 
         Renderer::sendUniformMatrix4f("Model",mod);
@@ -167,18 +167,14 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform1i("nSamples", 2);
         Renderer::sendUniform1f("fSamples", 2.0f);
 
-        glm::vec3 camPos = glm::vec3(c->getPosition()) - pos;
+        glm::vec3 camPos = c->getPosition() - pos;
         Renderer::sendUniform3f("v3CameraPos", camPos);
 
-        glm::vec3 lightDir = glm::vec3(Resources::getCurrentScene()->lights().begin()->second->getPosition()) - pos;
+        glm::vec3 lightDir = Resources::getCurrentScene()->lights().begin()->second->getPosition() - pos;
         lightDir = glm::normalize(lightDir);
         Renderer::sendUniform3f("v3LightDir", lightDir);
 
-        glm::vec3 v3InvWaveLength = glm::vec3(
-            1.0f / glm::pow(0.29f, 4.0f),
-            1.0f / glm::pow(0.29f, 4.0f),
-            1.0f / glm::pow(0.29f, 4.0f)
-        );
+        glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f));
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
         float Km = 0.0025f;
