@@ -4,35 +4,27 @@
 
 #include "Engine_ResourceBasic.h"
 #include "Engine_Math.h"
-
-#include <memory>
-
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <memory>
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
 namespace sf{ class Image; }
-
-class TextureWrap{
-    public: enum Wrap{
-        Repeat,
-        RepeatMirrored,
-        ClampToEdge,
-        ClampToBorder,
-    };
-};
-class TextureFilter{
-    public: enum Filter{
-        Linear,
-        Nearest,
-        Nearest_Mipmap_Nearest,
-        Nearest_Mipmap_Linear,
-        Linear_Mipmap_Nearest,
-        Linear_Mipmap_Linear,
-    };
-};
-
+class TextureWrap{public: enum Wrap{
+    Repeat,
+    RepeatMirrored,
+    ClampToEdge,
+    ClampToBorder,
+};};
+class TextureFilter{public: enum Filter{
+    Linear,
+    Nearest,
+    Nearest_Mipmap_Nearest,
+    Nearest_Mipmap_Linear,
+    Linear_Mipmap_Nearest,
+    Linear_Mipmap_Linear,
+};};
 class Texture: public EngineResource{
     private:
         class impl;
@@ -62,9 +54,7 @@ class Texture: public EngineResource{
         void setMaxFilter(TextureFilter::Filter);
         void setFilter(TextureFilter::Filter);
     
-
         void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
-
 };
 #endif
