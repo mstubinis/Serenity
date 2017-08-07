@@ -3,6 +3,22 @@
 using namespace Engine;
 using namespace std;
 
+/*
+GLSL Version      OpenGL Version
+1.10              2.0
+1.20              2.1
+1.30              3.0
+1.40              3.1
+1.50              3.2
+3.30              3.3
+4.00              4.0
+4.10              4.1
+4.20              4.2
+4.30              4.3
+4.40              4.4
+4.50              4.5
+*/
+
 #pragma region Declarations
 string Shaders::Detail::ShadersManagement::version = "#version 120\n";
 string Shaders::Detail::ShadersManagement::spot_light_vertex = "";
