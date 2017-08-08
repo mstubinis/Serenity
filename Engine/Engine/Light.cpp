@@ -61,9 +61,10 @@ void SunLight::sendGenericAttributesToShader(){
 }
 void SunLight::lighten(){
     if(!m_Active) return;
+	glm::vec3 pos = getPosition();
     sendGenericAttributesToShader();
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
-    Renderer::sendUniform4f("LightDataC",0.0f,m_Position.x, m_Position.y, m_Position.z);
+    Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
 	Renderer::sendUniform1fSafe("SpotLight",0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
