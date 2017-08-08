@@ -44,7 +44,7 @@ varying float logz_f;
 varying float FC_2_f;
 uniform float fcoeff;
 
-vec2 unpackFloatInto2Floats(float i){
+vec2 UnpackFloat32Into2Floats(float i){
     vec2 res;
     res.y = i - floor(i);
     res.x = (i - res.y) / 1000.0;
@@ -103,7 +103,7 @@ void main(void){
     }
     gl_Position = MVP * vec4(position, 1.0);
 
-    UV = unpackFloatInto2Floats(uv);
+    UV = UnpackFloat32Into2Floats(uv);
     CameraPosition = v3CameraPos;
 
     Normals = (Model * vec4(normal,0.0)).xyz;

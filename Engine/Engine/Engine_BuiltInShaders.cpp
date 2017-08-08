@@ -21,7 +21,7 @@ GLSL Version      OpenGL Version
 
 #pragma region Declarations
 string Shaders::Detail::ShadersManagement::version = "#version 120\n";
-string Shaders::Detail::ShadersManagement::unpack_float_into_2_floats = "";
+string Shaders::Detail::ShadersManagement::float_into_2_floats = "";
 string Shaders::Detail::ShadersManagement::determinent_mat3 = "";
 string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
 string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = "";
@@ -54,9 +54,31 @@ string Shaders::Detail::ShadersManagement::lighting_frag = "";
 void Shaders::Detail::ShadersManagement::init(){
 
 #pragma region Functions
-Shaders::Detail::ShadersManagement::unpack_float_into_2_floats = 
+Shaders::Detail::ShadersManagement::float_into_2_floats = 
     "\n"
-    "vec2 unpackFloatInto2Floats(float i){\n"
+    "float Pack2FloatIntoFloat16(float x,float y){\n"
+	"    x = clamp(x,0.001,0.99);\n"
+	"    y = clamp(y,0.001,0.99);\n"
+    "    float _x = (x + 1.0) * 0.5;\n"
+    "    float _y = (y + 1.0) * 0.5;\n"
+    "    return floor(_x * 100.0) + _y;\n"
+    "}\n"
+    "vec2 UnpackFloat16Into2Floats(float i){\n"
+    "    vec2 res;\n"
+    "    res.y = i - floor(i);\n"
+    "    res.x = (i - res.y) / 100.0;\n"
+    "    res.x = (res.x - 0.5) * 2.0;\n"
+    "    res.y = (res.y - 0.5) * 2.0;\n"
+    "    return res;\n"
+    "}\n"
+    "float Pack2FloatIntoFloat32(float x,float y){\n"
+	"    x = clamp(x,0.001,0.99);\n"
+	"    y = clamp(y,0.001,0.99);\n"
+    "    float _x = (x + 1.0) * 0.5;\n"
+    "    float _y = (y + 1.0) * 0.5;\n"
+    "    return floor(_x * 1000.0) + _y;\n"
+    "}\n"
+    "vec2 UnpackFloat32Into2Floats(float i){\n"
     "    vec2 res;\n"
     "    res.y = i - floor(i);\n"
     "    res.x = (i - res.y) / 1000.0;\n"
@@ -177,7 +199,7 @@ Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManag
     "varying float FC_2_f;\n"
     "uniform float fcoeff;\n"
     "\n";
-Shaders::Detail::ShadersManagement::vertex_basic += Shaders::Detail::ShadersManagement::unpack_float_into_2_floats;
+Shaders::Detail::ShadersManagement::vertex_basic += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::vertex_basic +=
     "void main(void){\n"
     "    mat4 BoneTransform = mat4(1.0);\n"
@@ -204,7 +226,7 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "\n"
     "    WorldPosition = (Model * PosTransformed).xyz;\n"
     "\n"
-    "    UV = unpackFloatInto2Floats(uv);\n"
+    "    UV = UnpackFloat32Into2Floats(uv);\n"
     "    logz_f = 1.0 + gl_Position.w;\n"
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
     "    FC_2_f = fcoeff * 0.5;\n"
@@ -221,11 +243,11 @@ Shaders::Detail::ShadersManagement::vertex_hud = Shaders::Detail::ShadersManagem
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "varying vec2 UV;\n";
-Shaders::Detail::ShadersManagement::vertex_hud += Shaders::Detail::ShadersManagement::unpack_float_into_2_floats;
+Shaders::Detail::ShadersManagement::vertex_hud += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::vertex_hud +=
     "void main(void){\n"
     "    mat4 MVP = VP * Model;\n"
-    "    UV = unpackFloatInto2Floats(uv);\n"
+    "    UV = UnpackFloat32Into2Floats(uv);\n"
     "    gl_Position = MVP * vec4(position, 1.0);\n"
     "    gl_TexCoord[6] = gl_Position;\n"
     "}";
@@ -339,12 +361,9 @@ Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersMana
     "\n"
     "varying float FC_2_f;\n"
     "varying float logz_f;\n"
-    "\n"
-    "float Pack2FloatsInto16BitFloat(float x, float y){\n"
-    "    float _x = (x + 1) * 0.5;\n"
-    "    float _y = (y + 1) * 0.5;\n"
-    "    return floor(_x * 1000) + _y;\n"
-    "}\n"
+    "\n";
+Shaders::Detail::ShadersManagement::deferred_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
+Shaders::Detail::ShadersManagement::deferred_frag +=
     "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){\n"
     "    vec4 r = vec4(0.0);\n"
     "    float Alpha = paint.a + canvas.a * (1.0 - paint.a);\n"
@@ -393,7 +412,7 @@ Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersMana
     "    if(ThirdConditionals.x > 0.5){\n"
     "        smoothness *= texture2D(SmoothnessTexture, UV).r;\n"
     "    }\n"
-    "    gl_FragData[1].a = Pack2FloatsInto16BitFloat(0.1,0.9);\n"
+	"    gl_FragData[1].a = Pack2FloatIntoFloat16(metalness,smoothness);\n"
     "    if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }\n"
     "    if(FirstConditionals.y > 0.5){ gl_FragData[1].rgb = CalcBumpedNormal(); }\n"
     "    if(ThirdConditionals.y > 0.5){\n"
@@ -742,15 +761,9 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "uniform int HasHDR;\n"
     "\n"
     "uniform float gamma;\n"
-    "\n"
-    "vec2 Unpack16BitFloatInto2Floats(float src){\n"
-    "    vec2 ret;\n"
-    "    float g = src - floor(src);\n"
-    "    float r = (src - g) / 1000;\n"
-    "    ret.x = (r - 0.5) * 2;\n"
-    "    ret.y = (g - 0.5) * 2;\n"
-    "    return ret;\n"
-    "}\n"
+    "\n";
+Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
+Shaders::Detail::ShadersManagement::final_frag +=
     "void main(void){\n"
     "    vec2 uv = gl_TexCoord[0].st;\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, uv).rgb;\n"
@@ -759,7 +772,7 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "    vec3 lighting = texture2D(gLightMap, uv).rgb;\n"
     "    vec4 normal = texture2D(gNormalMap, uv);\n"
     "\n"
-    "    vec2 stuff = Unpack16BitFloatInto2Floats(texture2D(gNormalMap, uv).a);\n"
+    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
     "    lighting = hdr;\n"
     "    if(HasSSAO == 1){ \n"
     "        float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));\n"
@@ -769,7 +782,7 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "    }\n"
     "    lighting += rays;\n"
     "    //lighting = pow(lighting, vec3(1.0 / gamma));\n"
-    "    gl_FragColor = vec4(lighting,1.0);\n"
+	"    gl_FragColor = vec4(lighting,1.0);\n"
     "}";
 
 #pragma endregion
@@ -797,16 +810,9 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
     "\n";
+Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-Shaders::Detail::ShadersManagement::lighting_frag +=	
-    "vec2 Unpack16BitFloatInto2Floats(float src){\n"
-    "    vec2 ret;\n"
-    "    float g = src - floor(src);\n"
-    "    float r = (src - g) / 1000;\n"
-    "    ret.x = (r - 0.5) * 2;\n"
-    "    ret.y = (g - 0.5) * 2;\n"
-    "    return ret;\n"
-    "}\n"
+Shaders::Detail::ShadersManagement::lighting_frag +=
     "float BeckmannDist(float cos2a, float _alpha, float pi){\n"
     "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
     "    return (exp(-b)) / (pi * _alpha * cos2a * cos2a);\n"
@@ -843,9 +849,9 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float kPi = 3.1415926535898;\n"
     "    //highp int index = int(texture2D(gNormalMap,uv).a);\n"
     "    highp int index = 0;\n"
-    "    vec2 stuff = Unpack16BitFloatInto2Floats(texture2D(gNormalMap,uv).a);\n"
-    "    float metalness = 0.05+(stuff.x*0.0001);\n"
-    "    float smoothness = 0.95+(stuff.y*0.0001);\n"
+    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
+    "    float metalness = stuff.x;\n"
+    "    float smoothness = stuff.y;\n"
     "\n"
     "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
