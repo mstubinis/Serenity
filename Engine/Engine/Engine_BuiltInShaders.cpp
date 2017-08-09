@@ -551,7 +551,6 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
     "    gl_FragData[1].rgb = vec3(1.0);\n"
     "    gl_FragData[2].r = 0.0;\n"
     "    gl_FragData[2].b = 0.0;\n"
-    "    gl_FragDepth = 0.99999;\n"
     "}";
 
 #pragma endregion
