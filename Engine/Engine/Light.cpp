@@ -765,7 +765,7 @@ void SpotLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
     Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),m_Constant,m_Linear);
     Renderer::sendUniform4f("LightDataC", m_Exp,float(m_Position.x),float(m_Position.y),float(m_Position.z));
-    Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, 0.0f,0.0f);
+    Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_PointLightRadius);
     Renderer::sendUniform1fSafe("SpotLight",1.0f);
 
