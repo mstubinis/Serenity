@@ -594,7 +594,7 @@ void PointLight::setConstant(float c){ m_Constant = c; m_PointLightRadius = calc
 void PointLight::setLinear(float l){ m_Linear = l; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setExponent(float e){ m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setAttenuation(float c,float l, float e){ m_Constant = c; m_Linear = l; m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
-void PointLight::setAttenuation(LightRange range){
+void PointLight::setAttenuation(LightRange::Range range){
     boost::tuple<float,float,float>& data = LIGHT_RANGES[uint(range)];
     PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
 }
