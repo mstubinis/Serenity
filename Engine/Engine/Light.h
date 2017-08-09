@@ -11,7 +11,7 @@ class LightType{public: enum Type{
     Directional,
     Spot
 };};
-enum LightRange{
+class LightRange{public:enum Range{
     _7,
     _13,
     _20,
@@ -24,7 +24,7 @@ enum LightRange{
     _325,
     _600,
     _3250
-};
+};};
 
 class Scene;
 class SunLight: public ObjectDisplay{
@@ -50,7 +50,7 @@ class SunLight: public ObjectDisplay{
         void activate(){ m_Active = true; }
         void deactivate(){ m_Active = false; }
         bool isActive(){ return m_Active; }
-		uint type(){ return m_Type; }
+        uint type(){ return m_Type; }
 };
 class DirectionalLight: public SunLight{
     public:
@@ -72,7 +72,7 @@ class PointLight: public SunLight{
         void setLinear(float l);
         void setExponent(float e);
         void setAttenuation(float c,float l, float e);
-        void setAttenuation(LightRange);
+        void setAttenuation(LightRange::Range);
 
         float& getLightRadius(){ return m_PointLightRadius; }
 
@@ -81,7 +81,7 @@ class PointLight: public SunLight{
         float& getExponent(){ return m_Exp; }
         glm::vec3 getAttributes(){ return glm::vec3(m_Constant,m_Linear,m_Exp); }
 
-		virtual void update(float);
+        virtual void update(float);
         virtual void lighten();
 };
 class SpotLight: public PointLight{
@@ -92,7 +92,7 @@ class SpotLight: public PointLight{
         SpotLight(std::string = "Spot Light",glm::vec3 = glm::vec3(0.0f), glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), float = 11.0f, float = 13.0f,Scene* = nullptr);
         virtual ~SpotLight();
 
-		void update(float);
+        void update(float);
         void lighten();
         void setCutoff(float);
         void setCutoffOuter(float);
