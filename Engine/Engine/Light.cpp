@@ -578,6 +578,7 @@ PointLight::PointLight(string name, glm::vec3 pos,Scene* scene): SunLight(pos,na
     m_Exp = 0.1f;
     m_PointLightRadius = calculatePointLightRadius();
     m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
+    m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
 }
 PointLight::~PointLight(){
 }
@@ -585,17 +586,25 @@ float PointLight::calculatePointLightRadius(){
     float lightMax = Engine::Math::Max(m_Color.x,m_Color.y,m_Color.z);
     float radius = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
     return radius;
+    
+    /* this is the equation if you use the attenuation function 1.0 / (distance * distance)
+    float radius = glm::sqrt(lightMax + (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
+    return radius;
+    */
 }
 void PointLight::setConstant(float c){ m_Constant = c; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setLinear(float l){ m_Linear = l; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setExponent(float e){ m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
 void PointLight::setAttenuation(float c,float l, float e){ m_Constant = c; m_Linear = l; m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
-void PointLight::setAttenuation(LightRange range){
+void PointLight::setAttenuation(LightRange::Range range){
     boost::tuple<float,float,float>& data = LIGHT_RANGES[uint(range)];
     PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
 }
+void PointLight::setAttenuationModel(LightAttenuation::Model model){
+    m_AttenuationModel = model;
+}
 void PointLight::update(float dt){
-	if(m_Parent != nullptr){
+    if(m_Parent != nullptr){
         m_Model = m_Parent->getModel();
     }
     else{
@@ -616,7 +625,7 @@ void PointLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Constant,m_Linear);
     Renderer::sendUniform4f("LightDataC", m_Exp,float(m_Position.x),float(m_Position.y),float(m_Position.z));
-	Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("SpotLight",0.0f);
 
     Renderer::sendUniformMatrix4f("Model",m_Model);
     Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
@@ -756,9 +765,9 @@ void SpotLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
     Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),m_Constant,m_Linear);
     Renderer::sendUniform4f("LightDataC", m_Exp,float(m_Position.x),float(m_Position.y),float(m_Position.z));
-    Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, 0.0f,0.0f);
-	Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_PointLightRadius);
-	Renderer::sendUniform1fSafe("SpotLight",1.0f);
+    Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
+    Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_PointLightRadius);
+    Renderer::sendUniform1fSafe("SpotLight",1.0f);
 
     Renderer::sendUniformMatrix4f("Model",m_Model);
     Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
@@ -771,5 +780,5 @@ void SpotLight::lighten(){
     Resources::getMesh("SpotLightBounds")->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 
-	Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("SpotLight",0.0f);
 }
