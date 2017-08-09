@@ -61,11 +61,11 @@ void SunLight::sendGenericAttributesToShader(){
 }
 void SunLight::lighten(){
     if(!m_Active) return;
-	glm::vec3 pos = getPosition();
+    glm::vec3 pos = getPosition();
     sendGenericAttributesToShader();
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
-	Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("SpotLight",0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 DirectionalLight::DirectionalLight(string name, glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0),name,LightType::Directional,scene){
@@ -80,7 +80,7 @@ void DirectionalLight::lighten(){
     sendGenericAttributesToShader();
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
     Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),0.0f, 0.0f);
-	Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("SpotLight",0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
@@ -576,13 +576,13 @@ PointLight::PointLight(string name, glm::vec3 pos,Scene* scene): SunLight(pos,na
     m_Constant = 0.1f;
     m_Linear = 0.1f;
     m_Exp = 0.1f;
-    m_PointLightRadius = calculatePointLightRadius();
+    m_CullingRadius = calculateCullingRadius();
     m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
     m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
 }
 PointLight::~PointLight(){
 }
-float PointLight::calculatePointLightRadius(){
+float PointLight::calculateCullingRadius(){
     float lightMax = Engine::Math::Max(m_Color.x,m_Color.y,m_Color.z);
     float radius = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
     return radius;
@@ -592,10 +592,10 @@ float PointLight::calculatePointLightRadius(){
     return radius;
     */
 }
-void PointLight::setConstant(float c){ m_Constant = c; m_PointLightRadius = calculatePointLightRadius(); }
-void PointLight::setLinear(float l){ m_Linear = l; m_PointLightRadius = calculatePointLightRadius(); }
-void PointLight::setExponent(float e){ m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
-void PointLight::setAttenuation(float c,float l, float e){ m_Constant = c; m_Linear = l; m_Exp = e; m_PointLightRadius = calculatePointLightRadius(); }
+void PointLight::setConstant(float c){ m_Constant = c; m_CullingRadius = calculateCullingRadius(); }
+void PointLight::setLinear(float l){ m_Linear = l; m_CullingRadius = calculateCullingRadius(); }
+void PointLight::setExponent(float e){ m_Exp = e; m_CullingRadius = calculateCullingRadius(); }
+void PointLight::setAttenuation(float c,float l, float e){ m_Constant = c; m_Linear = l; m_Exp = e; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setAttenuation(LightRange::Range range){
     boost::tuple<float,float,float>& data = LIGHT_RANGES[uint(range)];
     PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
@@ -611,14 +611,13 @@ void PointLight::update(float dt){
         m_Model = glm::mat4(1.0f);
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
-    glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_PointLightRadius));
-
+    glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_CullingRadius));
     m_Model = translationMatrix * scaleMatrix * m_Model;
 }
 void PointLight::lighten(){
     if(!m_Active) return;
     Camera* c = Resources::getActiveCamera();
-    if((!c->sphereIntersectTest(m_Position,m_PointLightRadius)) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_PointLightRadius))
+    if((!c->sphereIntersectTest(m_Position,m_CullingRadius)) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
         return;
     sendGenericAttributesToShader();
 
@@ -630,7 +629,7 @@ void PointLight::lighten(){
     Renderer::sendUniformMatrix4f("Model",m_Model);
     Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
 
-    if(glm::distance(c->getPosition(),m_Position) <= m_PointLightRadius){                                                  
+    if(glm::distance(c->getPosition(),m_Position) <= m_CullingRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
     Resources::getMesh("PointLightBounds")->bind();
@@ -751,14 +750,13 @@ void SpotLight::update(float dt){
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
-    glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_PointLightRadius));
-
+    glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_CullingRadius));
     m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
 }
 void SpotLight::lighten(){
     if(!m_Active) return;
     Camera* c = Resources::getActiveCamera();
-    if((!c->sphereIntersectTest(m_Position,m_PointLightRadius)) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_PointLightRadius))
+    if(!c->sphereIntersectTest(m_Position,m_CullingRadius) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
         return;
     sendGenericAttributesToShader();
 
@@ -766,13 +764,13 @@ void SpotLight::lighten(){
     Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),m_Constant,m_Linear);
     Renderer::sendUniform4f("LightDataC", m_Exp,float(m_Position.x),float(m_Position.y),float(m_Position.z));
     Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
-    Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_PointLightRadius);
+    Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     Renderer::sendUniform1fSafe("SpotLight",1.0f);
 
     Renderer::sendUniformMatrix4f("Model",m_Model);
     Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
 
-    if(glm::distance(c->getPosition(),m_Position) <= m_PointLightRadius){                                                  
+    if(glm::distance(c->getPosition(),m_Position) <= m_CullingRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
     Resources::getMesh("SpotLightBounds")->bind();
