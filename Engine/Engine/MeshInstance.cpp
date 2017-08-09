@@ -30,11 +30,11 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
     
-    glm::mat4 objModel = glm::mat4(obj->getModel()) * i->model();
-    glm::mat4 normalMatrix = glm::transpose(glm::inverse(objModel));
+    glm::mat4 model = glm::mat4(obj->getModel()) * i->model(); //might need to reverse this order.
+    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(model)));
     
-    Renderer::sendUniformMatrix3f("NormalMatrix",glm::mat3(normalMatrix));
-    Renderer::sendUniformMatrix4f("Model",objModel);
+    Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
+    Renderer::sendUniformMatrix4f("Model",model);
     i->render();
     Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
 
@@ -139,8 +139,6 @@ class MeshInstance::impl{
                 }
             }
         }
-        
-
         void _removeMeshInstanceFromMaterial(MeshInstance* super){
             for(auto meshEntry:m_Material->getMeshEntries()){
                 if(meshEntry->mesh() == m_Mesh){
@@ -157,9 +155,7 @@ class MeshInstance::impl{
                 }
             }
             if(del){ m_Material->removeMeshEntry(m_Mesh->name()); }
-        }		
-        
-        
+        }		  
         void _destruct(MeshInstance* super){
             _removeMeshFromInstance(super);
             _removeMaterialFromInstance(super);
@@ -177,10 +173,11 @@ class MeshInstance::impl{
         }
         void _updateModelMatrix(){
             if(m_NeedsUpdate){
-                m_Model = glm::mat4(1);
-                m_Model = glm::translate(m_Model, m_Position);
-                m_Model *= glm::mat4_cast(m_Orientation);
-                m_Model = glm::scale(m_Model,m_Scale);
+                m_Model = glm::mat4(1.0f);
+                glm::mat4 translationMatrix = glm::translate(m_Position);
+                glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
+                glm::mat4 scaleMatrix = glm::scale(m_Scale);
+                m_Model = translationMatrix * rotationMatrix * scaleMatrix;
                 m_NeedsUpdate = false;
             }
         }
