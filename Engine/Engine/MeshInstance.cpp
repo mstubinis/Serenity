@@ -31,7 +31,7 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     }
     
     glm::mat4 model = glm::mat4(obj->getModel()) * i->model(); //might need to reverse this order.
-    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(model)));
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
     Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
     Renderer::sendUniformMatrix4f("Model",model);
