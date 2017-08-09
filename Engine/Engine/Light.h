@@ -25,6 +25,14 @@ class LightRange{public:enum Range{
     _600,
     _3250
 };};
+class LightAttenuation{public:enum Model{
+    Constant,
+    Distance,
+    Distance_Squared,
+    Constant_Linear_Exponent,
+    Distance_Radius_Squared,
+    Spherical_Quadratic
+};};
 
 class Scene;
 class SunLight: public ObjectDisplay{
@@ -73,6 +81,7 @@ class PointLight: public SunLight{
         void setExponent(float e);
         void setAttenuation(float c,float l, float e);
         void setAttenuation(LightRange::Range);
+        void setAttenuationModel(LightAttenuation::Model);
 
         float& getLightRadius(){ return m_PointLightRadius; }
 
