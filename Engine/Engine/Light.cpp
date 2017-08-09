@@ -598,6 +598,9 @@ void PointLight::setAttenuation(LightRange::Range range){
     boost::tuple<float,float,float>& data = LIGHT_RANGES[uint(range)];
     PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
 }
+void PointLight::setAttenuationModel(LightAttenuation::Model model){
+    m_AttenuationModel = model;
+}
 void PointLight::update(float dt){
     if(m_Parent != nullptr){
         m_Model = m_Parent->getModel();
