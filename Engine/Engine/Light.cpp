@@ -586,6 +586,7 @@ float PointLight::calculatePointLightRadius(){
     float lightMax = Engine::Math::Max(m_Color.x,m_Color.y,m_Color.z);
     float radius = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
     return radius;
+    
     /* this is the equation if you use the attenuation function 1.0 / (distance * distance)
     float radius = glm::sqrt(lightMax + (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
     return radius;
