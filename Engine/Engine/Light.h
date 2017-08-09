@@ -9,7 +9,8 @@ class LightType{public: enum Type{
     Sun,
     Point,
     Directional,
-    Spot
+    Spot,
+    Sphere //basically a point light with a radius
 };};
 class LightRange{public:enum Range{
     _7,
