@@ -72,6 +72,7 @@ class PointLight: public SunLight{
         float m_Constant, m_Linear, m_Exp;
         float m_PointLightRadius;
         float calculatePointLightRadius();
+        float calculateAttenuation();
         LightAttenuation::Model m_AttenuationModel;
     public:
         PointLight(std::string = "Point Light",glm::vec3 = glm::vec3(0.0f), Scene* = nullptr);
