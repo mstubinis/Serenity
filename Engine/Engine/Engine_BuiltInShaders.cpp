@@ -883,7 +883,7 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform vec4 LightDataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const, w = linear
     "uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
     "uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
-    "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = UNUSED, w = UNUSED
+    "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
@@ -921,6 +921,28 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "vec3 SchlickFrensel(float cosTheta, vec3 frenselFactor){\n"
     "    vec3 ret = frenselFactor + (vec3(1.0) - frenselFactor) * pow( 1.0 - cosTheta, 5.0);\n"
     "    return ret;\n"
+    "}\n"
+    "float CalculateAttenuation(float Dist,float LightRadius){\n"
+    "   float attenuation =  0.0;\n"
+    "   if(LightDataE.z == 0.0){\n" //constant
+    "       attenuation = 1.0 / max(1.0 , LightDataB.z);\n"
+    "   }\n"
+    "   else if(LightDataE.z == 1.0){\n" //distance
+    "       attenuation = 1.0 / max(1.0 , Dist);\n"
+    "   }\n"
+    "   else if(LightDataE.z == 2.0){\n" //distance squared
+    "       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
+    "   }\n"
+    "   else if(LightDataE.z == 3.0){\n" //constant linear exponent
+    "       attenuation = 1.0 / max(1.0 , LightDataB.z + (LightDataB.w * Dist) + (LightDataC.x * Dist * Dist));\n"
+    "   }\n"
+    "   else if(LightDataE.z == 4.0){\n" //distance radius squared
+    "       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
+    "   }\n"
+    "   else if(LightDataE.z == 5.0){\n" //spherical quadratic
+    "       attenuation = 1.0 / max(1.0 ,1.0 + ((2.0 / LightRadius) * Dist) + (1.0 / (LightRadius*LightRadius))*(Dist*Dist) );\n"
+    "   }\n"
+    "   return attenuation;\n"
     "}\n"
     "vec3 CalcLightInternal(vec3 LightDir,vec3 PxlWorldPos,vec3 PxlNormal,vec2 uv){\n"
     "    float Glow = texture2D(gMiscMap,uv).r;\n"
@@ -1051,10 +1073,8 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
     "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"
     "    float Dist = length(LightPos - PxlWorldPos);\n"
-    "\n"
     "    vec3 c = CalcLightInternal(LightDir, PxlWorldPos, PxlNormal, uv);\n"
-    "\n"
-    "    float attenuation =  1.0 / (max(1.0 , LightDataB.z + (LightDataB.w * Dist) + (LightDataC.x * Dist * Dist)));\n"
+    "    float attenuation = CalculateAttenuation(Dist,1.0);
     "    return c * attenuation;\n"
     "}\n"
     "vec3 CalcSpotLight(vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
