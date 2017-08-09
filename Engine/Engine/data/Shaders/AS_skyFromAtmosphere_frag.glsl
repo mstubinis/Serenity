@@ -39,7 +39,7 @@ void main(void){
     gl_FragData[0] = clamp(vec4(HDR.xyz,nightmult),0.01,0.99);
     gl_FragData[0].a = clamp(alpha * (gl_FragData[0].rgb * 5.5),0.01,0.99);
 
-    gl_FragData[1] = vec4(1.0);
+    gl_FragData[1].rgb = vec3(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
     if(HasGodsRays == 1){

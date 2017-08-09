@@ -48,6 +48,89 @@ varying vec3 Tangents;
 varying float FC_2_f;
 varying float logz_f;
 
+float Round(float x){
+    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);
+}
+vec2 OctWrap( vec2 v ){
+    return vec2( 1.0-abs(v.y),1.0-abs(v.x) ) * ( v.x >= 0.0 && v.y >= 0.0 ? 1.0 : -1.0 );
+}
+vec2 EncodeOctahedron(vec3 n){
+    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
+        return vec2(1.0);
+    n /= ( abs( n.x ) + abs( n.y ) + abs( n.z ) );
+    n.xy = n.z >= 0.0 ? n.xy : OctWrap( n.xy );
+    n.xy = n.xy * 0.5 + 0.5;
+    return n.xy;
+}
+vec3 DecodeOctahedron(vec2 encN){
+    if(encN.r > 0.9999 && encN.g > 0.9999)
+        return vec3(1.0);
+    encN = encN * 2.0 - 1.0;
+    vec3 n;
+    n.z = 1.0 - abs( encN.x ) - abs( encN.y );
+    n.xy = n.z >= 0.0 ? encN.xy : OctWrap( encN.xy );
+    n = normalize( n );
+    return n;
+}
+/* For the next 2 functions, The caller should store the return value into a GL_RGB8 texture or attribute without modification. */
+vec3 DecodeOctahedron2(vec2 f) {
+    vec2 u = vec2(Round(clamp(f, -1.0, 1.0) * 2047 + 2047));
+    float t = floor(u.y / 256.0);
+    // If storing to GL_RGB8UI, omit the final division
+    return floor(vec3(u.x / 16.0,fract(u.x / 16.0) * 256.0 + t,u.y - t * 256.0)) / 255.0;
+}
+vec2 EncodeOctahedron2(vec3 u) {
+    u *= 255.0;
+    u.y *= (1.0 / 16.0);
+    vec2 s = vec2(u.x * 16.0 + floor(u.y),fract(u.y) * (16.0 * 256.0) + u.z);
+    return clamp(s * (1.0 / 2047.0) - 1.0, vec2(-1.0), vec2(1.0));
+}
+vec2 EncodeSpherical(vec3 n){
+    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
+        return vec2(1.0);
+    vec2 encN;
+    encN.x = atan( n.x, n.y ) * 1.0 / 3.1415926535898;
+    encN.y = n.z;
+    encN = encN * 0.5 + 0.5;
+    return encN;
+}
+vec3 DecodeSpherical(vec2 encN){
+    if(encN.r > 0.9999 && encN.g > 0.9999)
+        return vec3(1.0);
+     vec2 ang = encN * 2.0 - 1.0;
+     vec2 scth;
+     float ang2 = ang.x * 3.1415926535898;
+     scth.x = sin(ang2);
+     scth.y = cos(ang2);
+     vec2 scphi = vec2( sqrt( 1.0 - ang.y * ang.y ), ang.y );
+     vec3 n;
+     n.x = scth.y * scphi.x;
+     n.y = scth.x * scphi.x;
+     n.z = scphi.y;
+     return n;
+}
+vec2 EncodeStereographic(vec3 n){
+    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
+        return vec2(1.0);
+	float scale = 1.7777;
+	vec2 enc = n.xy / (n.z+1.0);
+	enc /= scale;
+	enc = enc*0.5+0.5;
+	return enc;
+}
+vec3 DecodeStereographic(vec2 enc){
+    if(enc.r > 0.9999 && enc.g > 0.9999)
+        return vec3(1.0);
+	float scale = 1.7777;
+	vec3 nn = vec3(enc.xy,1.0)*vec3(2.0*scale,2.0*scale,0.0) + vec3(-scale,-scale,1.0);
+	float g = 2.0 / dot(nn.xyz,nn.xyz);
+	vec3 n;
+	n.xy = g*nn.xy;
+	n.z = g-1.0;
+	return normalize(n);
+}
+
+
 vec3 CalcBumpedNormal(void){
     vec3 t = (texture2D(NormalTexture, UV).xyz * 2.0) - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
@@ -67,7 +150,7 @@ void main(void){
         else{
             gl_FragData[0] = vec4(0.0);
         }
-        gl_FragData[1].rgb = vec3(1.0); //was gl_FragData[1] = vec4(1.0) before. just be aware..
+        gl_FragData[1].rgb = vec3(1.0);
         
         gl_FragData[2].r = 0.0;
         gl_FragData[2].g = 1.0;
@@ -81,11 +164,11 @@ void main(void){
         }
 
         if(FirstConditionals.y > 0.5){
-            gl_FragData[1].rgb = normalize(CalcBumpedNormal());
+            gl_FragData[1].rgb = (CalcBumpedNormal());
             gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
         else{
-            gl_FragData[1].rgb = normalize(Normals);
+            gl_FragData[1].rgb = (normalize(Normals));
             gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
 

@@ -46,7 +46,7 @@ void Game::initResources(){
     Resources::addMesh("Ring","data/Models/ring.obj");
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
 
-    Resources::addMaterial("Starbase","data/Textures/starbase.png","","data/Textures/starbase_Glow.png");
+    Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
     Resources::getMaterial("Star")->setShadeless(true);
     Resources::getMaterial("Star")->setGlow(0.21f);
