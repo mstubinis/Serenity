@@ -9,8 +9,7 @@ class LightType{public: enum Type{
     Sun,
     Point,
     Directional,
-    Spot,
-    Sphere //basically a point light with a radius
+    Spot
 };};
 class LightRange{public:enum Range{
     _7,
@@ -71,8 +70,8 @@ class DirectionalLight: public SunLight{
 class PointLight: public SunLight{
     protected:
         float m_Constant, m_Linear, m_Exp;
-        float m_PointLightRadius;
-        float calculatePointLightRadius();
+        float m_CullingRadius;
+        float calculateCullingRadius();
         LightAttenuation::Model m_AttenuationModel;
     public:
         PointLight(std::string = "Point Light",glm::vec3 = glm::vec3(0.0f), Scene* = nullptr);
@@ -85,7 +84,7 @@ class PointLight: public SunLight{
         void setAttenuation(LightRange::Range);
         void setAttenuationModel(LightAttenuation::Model);
 
-        float& getLightRadius(){ return m_PointLightRadius; }
+        float& getCullingRadius(){ return m_CullingRadius; }
 
         float& getConstant(){ return m_Constant; }
         float& getLinear(){ return m_Linear; }
