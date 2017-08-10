@@ -12,10 +12,11 @@
 #include <boost/make_shared.hpp>
 
 using namespace Engine;
+using namespace std;
 
 float Object::m_RotationThreshold = 0.0f;
 float Object::m_VisibilityThreshold = 1100.0f;
-Object::Object(std::string n,Scene* scene, bool isNotCamera){
+Object::Object(string n,Scene* scene, bool isNotCamera){
     m_Radius = 0;
     m_Parent = nullptr;
     m_IsToBeDestroyed = false;
@@ -41,7 +42,7 @@ void Object::addChild(Object* child){
     child->m_Parent = this;
     m_Children.push_back(child);
 }
-ObjectBasic::ObjectBasic(glm::vec3 pos,glm::vec3 scl,std::string name,Scene* scene,bool isNotCameras):Object(name,scene,isNotCameras){
+ObjectBasic::ObjectBasic(glm::vec3 pos,glm::vec3 scl,string name,Scene* scene,bool isNotCameras):Object(name,scene,isNotCameras){
     m_Forward = glm::vec3(0,0,-1);
     m_Right = glm::vec3(1,0,0);
     m_Up = glm::vec3(0,1,0);
