@@ -74,10 +74,11 @@ float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
 std::uint32_t Math::pack3NormalsInto32Int(float x, float y, float z){
-   // Convert to signed integer -511 to +511 range
-   int iX = (int)(x * 511.0f);
-   int iY = (int)(y * 511.0f);
-   int iZ = (int)(z * 511.0f);
+   // Convert to signed integer -511 to +511 range (or should it be -512 to +511?)
+   int iX = 0; int iY = 0; int iZ = 0;
+   iX = int(x * 511.0f); //if(x < 0.0f){ iX = int(x * 512.0f); }else{ iX = int(x * 511.0f); }
+   iY = int(y * 511.0f); //if(y < 0.0f){ iY = int(y * 512.0f); }else{ iY = int(y * 511.0f); }
+   iZ = int(z * 511.0f); //if(z < 0.0f){ iX = int(x * 512.0f); }else{ iX = int(x * 511.0f); }
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
 std::uint32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
