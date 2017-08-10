@@ -18,6 +18,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 using namespace Engine;
+using namespace std;
 
 struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) const {
     ObjectDynamic* o = static_cast<ObjectDynamic*>(r);
@@ -51,7 +52,7 @@ void ObjectDynamic::collisionResponse(ObjectDynamic* other){
     // if this collides with other, execute this function
 }
 
-ObjectDynamic::ObjectDynamic(std::string mesh, std::string mat, glm::vec3 pos, glm::vec3 scl, std::string n,Collision* col,Scene* scene): Object(n,scene){
+ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 scl,string n,Collision* col,Scene* scene): Object(n,scene){
     m_Forward = glm::vec3(0,0,-1); m_Right = glm::vec3(1,0,0); m_Up = glm::vec3(0,1,0); m_Color = glm::vec4(1); m_GodsRaysColor = glm::vec3(0);
 
     m_Radius = 0;
@@ -495,7 +496,7 @@ void ObjectDynamic::setMesh(Mesh* mesh){
     } 
     if(m_DisplayItems.size() > 0){
         if(m_Collision != nullptr){
-            std::vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
+            vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
             collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
             SAFE_DELETE(m_Collision);
         }
@@ -513,14 +514,14 @@ void ObjectDynamic::setMesh(Mesh* mesh){
     }
     Physics::addRigidBody(this);
 }
-void ObjectDynamic::setMesh(const std::string& mesh){ 
+void ObjectDynamic::setMesh(const string& mesh){ 
     Physics::removeRigidBody(this);
     for(auto entry:this->getDisplayItems()){ 
         entry->setMesh(Resources::getMesh(mesh)); 
     }
     if(m_DisplayItems.size() > 0){
         if(m_Collision != nullptr){
-            std::vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
+            vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
             collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
             SAFE_DELETE(m_Collision);
         }
@@ -539,4 +540,4 @@ void ObjectDynamic::setMesh(const std::string& mesh){
     Physics::addRigidBody(this);
 }
 void ObjectDynamic::setMaterial(Material* material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(material); } }
-void ObjectDynamic::setMaterial(const std::string& material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(Resources::getMaterial(material)); } }
+void ObjectDynamic::setMaterial(const string& material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(Resources::getMaterial(material)); } }
