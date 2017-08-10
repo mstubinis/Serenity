@@ -1,12 +1,14 @@
 #include "Engine_Networking.h"
 
+using namespace std;
+
 class Engine::Networking::SocketTCP::impl{
     public:
         sf::TcpSocket m_Socket;
-        std::string m_IP;
+        string m_IP;
         ushort m_Port;
         ushort m_Timeout;
-        void _init(const std::string& _ip, const ushort _port,ushort _timeout){
+        void _init(const string& _ip, const ushort _port,ushort _timeout){
             m_IP = _ip;
             m_Port = _port;
             m_Timeout = _timeout;
@@ -22,12 +24,12 @@ class Engine::Networking::SocketTCP::impl{
         sf::Socket::Status _receive(sf::Packet& _packet){ return m_Socket.receive(_packet); }
         sf::Socket::Status _receive(void* _data, size_t _size,size_t& _received){ return m_Socket.receive(_data,_size,_received); }
 };
-Engine::Networking::SocketTCP::SocketTCP(const uint _port,const std::string& _ip,uint _timeout):m_i(new impl){
+Engine::Networking::SocketTCP::SocketTCP(const uint _port,const string& _ip,uint _timeout):m_i(new impl){
     m_i->_init(_ip,_port,_timeout);
 }
 Engine::Networking::SocketTCP::~SocketTCP(){ disconnect(); }
 const sf::TcpSocket& Engine::Networking::SocketTCP::socket(){ return m_i->m_Socket; }
-const std::string& Engine::Networking::SocketTCP::ip(){ return m_i->m_Socket.getRemoteAddress().toString(); }
+const string& Engine::Networking::SocketTCP::ip(){ return m_i->m_Socket.getRemoteAddress().toString(); }
 const ushort Engine::Networking::SocketTCP::remotePort(){ return m_i->m_Socket.getRemotePort(); }
 const ushort Engine::Networking::SocketTCP::localPort(){ return m_i->m_Socket.getLocalPort(); }
 void Engine::Networking::SocketTCP::connect(){
@@ -82,10 +84,10 @@ class Engine::Networking::SocketUDP::impl{
             else{ return m_Socket.bind(m_Port,_ip); }
         }
         void _unbind(){ m_Socket.unbind(); }
-        sf::Socket::Status _send(sf::Packet& _packet,const std::string& _ip){ return m_Socket.send(_packet,_ip,m_Port); }
-        sf::Socket::Status _send(const void* _data, size_t _size,const std::string& _ip){ return m_Socket.send(_data,_size,_ip,m_Port); }
-        sf::Socket::Status _receive(sf::Packet& _packet,const std::string& _ip){ return m_Socket.receive(_packet,sf::IpAddress(_ip),m_Port); }
-        sf::Socket::Status _receive(void* _data, size_t _size,size_t& _received,const std::string& _ip){ return m_Socket.receive(_data,_size,_received,sf::IpAddress(_ip),m_Port); }
+        sf::Socket::Status _send(sf::Packet& _packet,const string& _ip){ return m_Socket.send(_packet,_ip,m_Port); }
+        sf::Socket::Status _send(const void* _data, size_t _size,const string& _ip){ return m_Socket.send(_data,_size,_ip,m_Port); }
+        sf::Socket::Status _receive(sf::Packet& _packet,const string& _ip){ return m_Socket.receive(_packet,sf::IpAddress(_ip),m_Port); }
+        sf::Socket::Status _receive(void* _data, size_t _size,size_t& _received,const string& _ip){ return m_Socket.receive(_data,_size,_received,sf::IpAddress(_ip),m_Port); }
 };
 Engine::Networking::SocketUDP::SocketUDP(const uint _port):m_i(new impl){
     m_i->_init(_port);
@@ -95,29 +97,29 @@ const sf::UdpSocket& Engine::Networking::SocketUDP::socket(){ return m_i->m_Sock
 const ushort Engine::Networking::SocketUDP::localPort(){ return m_i->m_Socket.getLocalPort(); }
 void Engine::Networking::SocketUDP::setBlocking(bool b){ m_i->m_Socket.setBlocking(b); }
 const bool Engine::Networking::SocketUDP::isBlocking(){ return m_i->m_Socket.isBlocking(); }
-void Engine::Networking::SocketUDP::bind(const std::string& _ip){
+void Engine::Networking::SocketUDP::bind(const string& _ip){
     sf::Socket::Status status = m_i->_bind(_ip);
 }
 void Engine::Networking::SocketUDP::unbind(){ m_i->_unbind(); }
-void Engine::Networking::SocketUDP::send(sf::Packet& _packet,const std::string& _ip){
+void Engine::Networking::SocketUDP::send(sf::Packet& _packet,const string& _ip){
     sf::Socket::Status status = m_i->_send(_packet,_ip);
     if(status != sf::Socket::Done){
         //error
     }
 }
-void Engine::Networking::SocketUDP::send(const void* _data, size_t _size,const std::string& _ip){
+void Engine::Networking::SocketUDP::send(const void* _data, size_t _size,const string& _ip){
     sf::Socket::Status status = m_i->_send(_data,_size,_ip);
     if(status != sf::Socket::Done){
         //error
     }
 }
-void Engine::Networking::SocketUDP::receive(sf::Packet& _packet,const std::string& _ip){
+void Engine::Networking::SocketUDP::receive(sf::Packet& _packet,const string& _ip){
     sf::Socket::Status status = m_i->_receive(_packet,_ip);
     if(status != sf::Socket::Done){
         //error
     }
 }
-void Engine::Networking::SocketUDP::receive(void* _data, size_t _size,size_t& _received,const std::string& _ip){
+void Engine::Networking::SocketUDP::receive(void* _data, size_t _size,size_t& _received,const string& _ip){
     sf::Socket::Status status = m_i->_receive(_data,_size,_received,_ip);
     if(status != sf::Socket::Done){
         //error
@@ -128,9 +130,9 @@ void Engine::Networking::SocketUDP::receive(void* _data, size_t _size,size_t& _r
 class Engine::Networking::ListenerTCP::impl{
     public:
         sf::TcpListener m_Listener;
-        std::string m_IP;
+        string m_IP;
         ushort m_Port;
-        void _init(const std::string& _ip, const uint _port){
+        void _init(const string& _ip, const uint _port){
             m_IP = _ip;
             m_Port = _port;
         }
@@ -144,26 +146,16 @@ class Engine::Networking::ListenerTCP::impl{
         }
 };
 
-Engine::Networking::ListenerTCP::ListenerTCP(const uint _port,const std::string& _ip):m_i(new impl){
+Engine::Networking::ListenerTCP::ListenerTCP(const uint _port,const string& _ip):m_i(new impl){
     m_i->_init(_ip,_port);
 }
 Engine::Networking::ListenerTCP::~ListenerTCP(){ close(); }
 
-const sf::TcpListener& Engine::Networking::ListenerTCP::socket(){
-    return m_i->m_Listener;
-}
-const ushort Engine::Networking::ListenerTCP::localPort(){
-    return m_i->m_Listener.getLocalPort();
-}
-void Engine::Networking::ListenerTCP::setBlocking(bool b){
-    m_i->m_Listener.setBlocking(b);
-}
-const bool Engine::Networking::ListenerTCP::isBlocking(){
-    return m_i->m_Listener.isBlocking();
-}
-void Engine::Networking::ListenerTCP::close(){
-    m_i->m_Listener.close();
-}
+const sf::TcpListener& Engine::Networking::ListenerTCP::socket(){ return m_i->m_Listener; }
+const ushort Engine::Networking::ListenerTCP::localPort(){ return m_i->m_Listener.getLocalPort(); }
+void Engine::Networking::ListenerTCP::setBlocking(bool b){ m_i->m_Listener.setBlocking(b); }
+const bool Engine::Networking::ListenerTCP::isBlocking(){ return m_i->m_Listener.isBlocking(); }
+void Engine::Networking::ListenerTCP::close(){ m_i->m_Listener.close(); }
 void Engine::Networking::ListenerTCP::accept(SocketTCP& _client){
     sf::TcpSocket& s = const_cast<sf::TcpSocket&>(_client.socket());
     sf::Socket::Status status = m_i->_accept(s);
