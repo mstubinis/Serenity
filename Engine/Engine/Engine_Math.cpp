@@ -173,11 +173,11 @@ void Math::lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec
     o.z = 0.5f * num5;
     o.w = (m01 - m10) * num2;
 }
-glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.f,(a.y+b.y)/2.f,(a.z+b.z)/2.f); }
+glm::vec3 Math::midpoint(glm::vec3& a, glm::vec3& b){ return glm::vec3((a.x+b.x)/2.0f,(a.y+b.y)/2.0f,(a.z+b.z)/2.0f); }
 glm::vec3 Math::direction(glm::vec3& eye,glm::vec3& target){ return glm::normalize(eye-target); }
-glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(q * glm::vec3(0,0,-1));}
-glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(q * glm::vec3(1,0,0));}
-glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(q * glm::vec3(0,1,0));}
+glm::vec3 Math::getForward(glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,0.0f,-1.0f));}
+glm::vec3 Math::getRight(glm::quat& q){return glm::normalize(q * glm::vec3(1.0f,0.0f,0.0f));}
+glm::vec3 Math::getUp(glm::quat& q){return glm::normalize(q * glm::vec3(0.0f,1.0f,0.0f));}
 glm::vec3 Math::getColumnVector(const btRigidBody* b, uint column){
     btTransform t;
     b->getMotionState()->getWorldTransform(t);
@@ -192,7 +192,7 @@ void Math::recalculateForwardRightUp(const btRigidBody* b,glm::vec3& f,glm::vec3
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0001f;
-	float angle = glm::acos( glm::dot(glm::normalize(a),glm::normalize(b)) );
+    float angle = glm::acos( glm::dot(glm::normalize(a),glm::normalize(b)) );
     if(degrees) angle *= 57.2958f;
     return angle;
 }
