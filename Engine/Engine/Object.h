@@ -45,7 +45,7 @@ class IObject: public BindableResource{
 };
 
 class Object: public IObject{
-	friend class MeshInstance;
+    friend class MeshInstance;
     private:
         bool m_IsToBeDestroyed;
     protected:
