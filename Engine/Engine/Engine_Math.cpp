@@ -187,6 +187,7 @@ glm::vec3 Math::getColumnVector(const btRigidBody* b, uint column){
 glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
 glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
 glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
+void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){ f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(u); }
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0001f;
