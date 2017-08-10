@@ -19,7 +19,7 @@ using namespace std;
 struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance* i = static_cast<MeshInstance*>(r);
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
-    Object* obj = o.lock().get();
+    Object* parent = o.lock().get();
     vector<MeshInstanceAnimation>& q = i->animationQueue();
     if(q.size() > 0){
         vector<glm::mat4> transforms;
@@ -30,7 +30,7 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
     
-    glm::mat4 model = glm::mat4(obj->getModel()) * i->model(); //might need to reverse this order.
+    glm::mat4 model = parent->getModel() * i->model(); //might need to reverse this order.
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
     Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
