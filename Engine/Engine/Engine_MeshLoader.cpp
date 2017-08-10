@@ -71,7 +71,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 norm.x = aimesh->mNormals[i].x;
                 norm.y = aimesh->mNormals[i].y;
                 norm.z = aimesh->mNormals[i].z;
-                norm = glm::normalize(norm);
+                //norm = glm::normalize(norm);
                 data.normals.push_back(norm);
 
                 //tangent
@@ -79,7 +79,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 tangent.x = aimesh->mTangents[i].x;
                 tangent.y = aimesh->mTangents[i].y;
                 tangent.z = aimesh->mTangents[i].z;
-                tangent = glm::normalize(tangent);
+                //tangent = glm::normalize(tangent);
                 data.tangents.push_back(tangent);
 
                 //binorm
@@ -87,7 +87,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 binorm.x = aimesh->mBitangents[i].x;
                 binorm.y = aimesh->mBitangents[i].y;
                 binorm.z = aimesh->mBitangents[i].z;
-                binorm = glm::normalize(binorm);
+                //binorm = glm::normalize(binorm);
                 data.binormals.push_back(binorm);
             }
         }
@@ -341,10 +341,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vecto
 void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, std::vector<std::uint32_t>& out_norm, std::vector<std::uint32_t>& out_binorm,std::vector<std::uint32_t>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
-
-
-        //out_uvs = data.uvs;
-
         for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
         
         //out_norm = data.normals;
@@ -374,12 +370,11 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
             //out_tangents.at(index) += data.tangents.at(i);
 
             //infact these seem to make compressed normals weak. so dont include them
-            //temp_binormals.at(index) += data.binormals.at(i);
-            //temp_tangents.at(index) += data.tangents.at(i);
+            temp_binormals.at(index) += data.binormals.at(i);
+            temp_tangents.at(index) += data.tangents.at(i);
         }
         else{
             out_pos.push_back( data.points.at(i));
-            //out_uvs.push_back(data.uvs.at(i));
             temp_uvs.push_back(data.uvs.at(i));
 
             //out_norm .push_back(data.normals.at(i));
@@ -394,7 +389,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         }
     }
     for(auto uvs:temp_uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
-
     for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
     for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
     for(auto tangents:temp_tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }

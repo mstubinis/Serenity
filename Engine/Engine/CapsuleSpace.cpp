@@ -37,7 +37,7 @@ void CapsuleStar::update(float dt){
     }
     if(m_Light != nullptr){
         m_Light->setPosition(pos * 0.015f);
-        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getLightRadius() + 15.0f){
+        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
 			m_Light->deactivate();
 		}
         else{

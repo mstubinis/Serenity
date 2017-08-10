@@ -30,7 +30,7 @@ void main(void){
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
     gl_FragData[0] = vec4(HDR.xyz,nightmult);
-    gl_FragData[1].rgb = vec3(1.0);
+    gl_FragData[1].rg = vec2(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
     if(HasGodsRays == 1){

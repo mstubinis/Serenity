@@ -95,9 +95,6 @@ void Game::initLogic(){
 	float encode1 = Engine::Math::pack2FloatsInto1Float(metalness,smoothness);
 	glm::vec2 decode1 = Engine::Math::unpack2FloatsInto1Float(encode1);
 	std::cout << "Test 2 (float to 2 float's)   -   metalness: " << decode1.r << " | smoothness: " << decode1.g << std::endl;
-	glm::vec3 test1 = glm::vec3(1.0f,1.0f,1.0f);
-	test1 = glm::normalize(test1);
-	std::cout << "Test 3 (normalizing 1,1,1): " << test1.x << "  ,  " << test1.y << "  ,  " << test1.z << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));

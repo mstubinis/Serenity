@@ -260,7 +260,7 @@ void SolarSystem::_loadFromFile(std::string filename){
     player->translate(0,0,11);
 
 	SpotLight* spot = new SpotLight("SpotLightPlayer");
-	spot->setAttenuation(LightRange::_32);
+	spot->setAttenuation(LightRange::_65);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox
