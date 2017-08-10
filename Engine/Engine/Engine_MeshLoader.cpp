@@ -15,14 +15,15 @@
 #include <glm/mat4x4.hpp>
 
 using namespace Engine::Resources;
+using namespace std;
 
 bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
 
 
-void MeshLoader::load(Mesh* mesh,ImportedMeshData& data, std::string file){	
+void MeshLoader::load(Mesh* mesh,ImportedMeshData& data,string file){	
     MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
 }
-void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data, std::string file){
+void MeshLoader::Detail::MeshLoadingManagement::_load(Mesh* mesh,ImportedMeshData& data,string file){
     mesh->m_aiScene = mesh->m_Importer.ReadFile(file,aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace); 
     if(!mesh->m_aiScene || mesh->m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !mesh->m_aiScene->mRootNode){
         return;
@@ -62,7 +63,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             //this is to prevent uv compression from beign f-ed up at the poles.
             if(uv.y <= 0.0001f){ uv.y = 0.001f; }
             if(uv.y >= 0.9999f){ uv.y = 0.999f; }
-
             data.uvs.push_back(uv);
 
             //norm
@@ -119,12 +119,11 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
             }
         }
         #pragma endregion
-
         //bones
         if(aimesh->mNumBones > 0){
             for (uint i = 0; i < aimesh->mNumBones; i++) { 
                 uint BoneIndex = 0; 
-                std::string BoneName(aimesh->mBones[i]->mName.data);
+                string BoneName(aimesh->mBones[i]->mName.data);
                 if(!mesh->m_Skeleton->m_BoneMapping.count(BoneName)) {
                     BoneIndex = mesh->m_Skeleton->m_NumBones;
                     mesh->m_Skeleton->m_NumBones++; 
@@ -135,7 +134,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                     BoneIndex = mesh->m_Skeleton->m_BoneMapping.at(BoneName);
                 }
                 mesh->m_Skeleton->m_BoneMapping.emplace(BoneName,BoneIndex);
-
                 aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
                 mesh->m_Skeleton->m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
                 for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
@@ -150,9 +148,9 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
         if(scene->mAnimations && scene->mNumAnimations > 0){
             for(uint i = 0; i < scene->mNumAnimations; i++){
                  aiAnimation* anim = scene->mAnimations[i];
-                 std::string key(anim->mName.C_Str());
+                 string key(anim->mName.C_Str());
                  if(key == ""){
-                     key = "Animation " + boost::lexical_cast<std::string>(mesh->m_Skeleton->m_AnimationData.size());
+                     key = "Animation " + to_string(mesh->m_Skeleton->m_AnimationData.size());
                  }
                  if(!mesh->m_Skeleton->m_AnimationData.count(key)){
                     AnimationData* animData = new AnimationData(mesh,anim);
@@ -167,7 +165,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
     }
 }
 
-void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshData& data, std::vector<uint>& _pi, std::vector<uint>& _ui, std::vector<uint>& _ni, const char _f){
+void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(string& l,ImportedMeshData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,const char _f){
     if(l[0] == 'o'){
     }
     //vertex positions
@@ -225,16 +223,16 @@ void MeshLoader::Detail::_OBJ::_loadObjDataFromLine(std::string& l,ImportedMeshD
     }
 }
 
-void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsigned char _flags){
-    std::vector<uint> positionIndices;
-    std::vector<uint> uvIndices;
-    std::vector<uint> normalIndices;
+void MeshLoader::loadObjFromMemory(ImportedMeshData& data,string input,unsigned char _flags){
+    vector<uint> positionIndices;
+    vector<uint> uvIndices;
+    vector<uint> normalIndices;
 
-    std::istringstream stream;
+    istringstream stream;
     stream.str(input);
 
     //first read in all data
-    for(std::string line; std::getline(stream, line, '\n');){
+    for(string line; getline(stream, line, '\n');){
         MeshLoader::Detail::_OBJ::_loadObjDataFromLine(line,data,positionIndices,uvIndices,normalIndices,_flags);
     }
     if(_flags && LOAD_FACES){
@@ -244,7 +242,7 @@ void MeshLoader::loadObjFromMemory(ImportedMeshData& data,std::string input,unsi
         MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(data);
     }
 }
-void MeshLoader::Detail::MeshLoadingManagement::_loadDataIntoTriangles(ImportedMeshData& data,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags){
+void MeshLoader::Detail::MeshLoadingManagement::_loadDataIntoTriangles(ImportedMeshData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,unsigned char _flags){
     uint count = 0;
     Triangle triangle;
     for(uint i=0; i < _pi.size(); i++ ){
@@ -310,7 +308,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& 
     MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 
-bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result, float threshold){
+bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<glm::vec3>& out_vertices,vector<glm::vec2>& out_uvs,vector<glm::vec3>& out_normals,ushort& result, float threshold){
     for (uint i=0; i < out_vertices.size(); i++ ){
         if (is_near( in_pos.x , out_vertices[i].x ,threshold) && is_near( in_pos.y , out_vertices[i].y ,threshold) &&
             is_near( in_pos.z , out_vertices[i].z ,threshold) && is_near( in_uv.x  , out_uvs[i].x      ,threshold) &&
@@ -323,7 +321,7 @@ bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3
     }
     return false;
 }
-void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents){
+void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(vector<glm::vec3>& points,vector<glm::vec3>& normals,vector<glm::vec3>& binormals,vector<glm::vec3>& tangents){
     for(uint i=0; i < points.size(); i++){
         glm::vec3& n = normals[i];
         glm::vec3& t = binormals[i];
@@ -338,7 +336,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(std::vecto
         //}
     }
 }
-void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,std::vector<ushort> & out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, std::vector<std::uint32_t>& out_norm, std::vector<std::uint32_t>& out_binorm,std::vector<std::uint32_t>& out_tangents, float threshold){
+void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,vector<ushort> & out_indices,vector<glm::vec3>& out_pos,vector<float>& out_uvs,vector<uint32_t>& out_norm,vector<uint32_t>& out_binorm,vector<uint32_t>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
         for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
@@ -354,13 +352,13 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
         out_indices = data.indices;
         return;
     }
-    std::vector<glm::vec2> temp_uvs;
-    std::vector<glm::vec3> temp_normals;
-    std::vector<glm::vec3> temp_binormals;
-    std::vector<glm::vec3> temp_tangents;
+    vector<glm::vec2> temp_uvs;
+    vector<glm::vec3> temp_normals;
+    vector<glm::vec3> temp_binormals;
+    vector<glm::vec3> temp_tangents;
     for (uint i=0; i < data.points.size(); i++){
         ushort index;
-        //bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, out_uvs, out_norm, index,threshold);
+        //bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, out_norm, index,threshold);
         bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, temp_normals, index,threshold);
         if (found){
             out_indices.push_back(index);
