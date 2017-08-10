@@ -78,7 +78,7 @@ ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 sc
     }
 
     btTransform tr;
-    m_Model = glm::mat4(1);
+    m_Model = glm::mat4(1.0f);
     m_Model = glm::translate(m_Model,pos);
     m_Model *= glm::mat4_cast(glm::quat());
     m_Model = glm::scale(m_Model,glm::vec3(1.0f));
@@ -128,18 +128,17 @@ void ObjectDynamic::setColor(float r, float g, float b, float a){ Math::setColor
 void ObjectDynamic::setColor(glm::vec4 color){ ObjectDynamic::setColor(color.r,color.g,color.b,color.a); }
 void ObjectDynamic::translate(glm::vec3 t,bool l){ ObjectDynamic::translate(t.x,t.y,t.z,l); }
 void ObjectDynamic::update(float dt){
-    glm::mat4 model(1.0f);
+    m_Model = glm::mat4(1.0f);
 
     btTransform tr;
     m_RigidBody->getMotionState()->getWorldTransform(tr);
-    tr.getOpenGLMatrix(glm::value_ptr(model));
+    tr.getOpenGLMatrix(glm::value_ptr(m_Model));
 
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
-    model = glm::scale(model,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
+    m_Model = glm::scale(m_Model,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
 
     Engine::Math::recalculateForwardRightUp(m_RigidBody,m_Forward,m_Right,m_Up);
 
-    m_Model = glm::mat4(model);
     if(m_Parent != nullptr){
         m_Model =  m_Parent->getModel() * m_Model;
     }
