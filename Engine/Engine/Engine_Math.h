@@ -160,6 +160,8 @@ namespace Engine{
         float pack2FloatsInto1Float(float,float);
         float pack2FloatsInto1Float(glm::vec2);
         glm::vec2 unpack2FloatsInto1Float(float i);
+        
+        void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
 
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
