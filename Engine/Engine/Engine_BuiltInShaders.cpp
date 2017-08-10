@@ -142,7 +142,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "        return vec3(1.0);\n"
 	"	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
 	"	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);\n"
-	"	 return -normalize(v.zyx);\n" //figure this shit out...
+	"	 return normalize(v);\n" //figure this shit out...
 	"}\n"
     "vec2 EncodeSpherical(vec3 n){\n"
     "    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)\n"

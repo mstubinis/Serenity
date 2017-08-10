@@ -73,7 +73,7 @@ float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w
 float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
-std::uint32_t Math::pack3NormalsInto32Int(float x, float y, float z){
+std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    // Convert to signed integer -511 to +511 range (or should it be -512 to +511?)
    int iX = 0; int iY = 0; int iZ = 0;
    iX = int(x * 511.0f); //if(x < 0.0f){ iX = int(x * 512.0f); }else{ iX = int(x * 511.0f); }
@@ -81,7 +81,7 @@ std::uint32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    iZ = int(z * 511.0f); //if(z < 0.0f){ iX = int(x * 512.0f); }else{ iX = int(x * 511.0f); }
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
-std::uint32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
+std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 
 
 float Math::pack3FloatsInto1Float(float r,float g,float b){
@@ -187,7 +187,7 @@ glm::vec3 Math::getColumnVector(const btRigidBody* b, uint column){
 glm::vec3 Math::getForward(const btRigidBody* b){ return Math::getColumnVector(b,2); }
 glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0); }
 glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
-void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){ f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(u); }
+void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){ f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(o); }
 void Math::recalculateForwardRightUp(const btRigidBody* b,glm::vec3& f,glm::vec3& r,glm::vec3& u){f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);}
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal

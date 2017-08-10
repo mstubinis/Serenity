@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include "Engine_Math.h"
+#include "Engine_Resources.h"
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -82,11 +83,9 @@ struct ImportedMeshData final{
     ImportedMeshData(){ clear(); }
     ~ImportedMeshData(){}
 
-    void clear(){ 
-        file_points.clear(); file_uvs.clear(); file_normals.clear(); file_triangles.clear();
-        points.clear(); uvs.clear(); normals.clear(); binormals.clear(); tangents.clear(); indices.clear();
-        file_points.shrink_to_fit(); file_uvs.shrink_to_fit(); file_normals.shrink_to_fit(); file_triangles.shrink_to_fit();
-        points.shrink_to_fit(); uvs.shrink_to_fit(); normals.shrink_to_fit(); binormals.shrink_to_fit(); tangents.shrink_to_fit(); indices.shrink_to_fit();
+    void clear(){
+		vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
+		vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
     }
 };
 
@@ -106,20 +105,20 @@ namespace Engine{
                         static void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
                         static void _calculateTBN(ImportedMeshData&);
                         static bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
-                        /*
+                        
                         static void _indexVBO(ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
                             std::vector<glm::vec3>& out_norm, 
                             std::vector<glm::vec3>& out_binorm,
                             std::vector<glm::vec3>& out_tangents,
                         float threshold);
-                        */
-
+                        
+						/*
                         static void _indexVBO(ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
-                            std::vector<std::uint32_t>& out_norm, 
-                            std::vector<std::uint32_t>& out_binorm,
-                            std::vector<std::uint32_t>& out_tangents,
+                            std::vector<std::int32_t>& out_norm, 
+                            std::vector<std::int32_t>& out_binorm,
+                            std::vector<std::int32_t>& out_tangents,
                         float threshold);
-
+						*/
                         static void _loadDataIntoTriangles(ImportedMeshData&,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
                 };
 

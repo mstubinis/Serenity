@@ -71,7 +71,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 norm.x = aimesh->mNormals[i].x;
                 norm.y = aimesh->mNormals[i].y;
                 norm.z = aimesh->mNormals[i].z;
-                //norm = glm::normalize(norm);
+                norm = glm::normalize(norm);
                 data.normals.push_back(norm);
 
                 //tangent
@@ -79,7 +79,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 tangent.x = aimesh->mTangents[i].x;
                 tangent.y = aimesh->mTangents[i].y;
                 tangent.z = aimesh->mTangents[i].z;
-                //tangent = glm::normalize(tangent);
+                tangent = glm::normalize(tangent);
                 data.tangents.push_back(tangent);
 
                 //binorm
@@ -87,7 +87,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 binorm.x = aimesh->mBitangents[i].x;
                 binorm.y = aimesh->mBitangents[i].y;
                 binorm.z = aimesh->mBitangents[i].z;
-                //binorm = glm::normalize(binorm);
+                binorm = glm::normalize(binorm);
                 data.binormals.push_back(binorm);
             }
         }
@@ -336,18 +336,18 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(vector<glm
         //}
     }
 }
-void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,vector<ushort> & out_indices,vector<glm::vec3>& out_pos,vector<float>& out_uvs,vector<uint32_t>& out_norm,vector<uint32_t>& out_binorm,vector<uint32_t>& out_tangents, float threshold){
+void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,vector<ushort> & out_indices,vector<glm::vec3>& out_pos,vector<float>& out_uvs,vector<glm::vec3>& out_norm,vector<glm::vec3>& out_binorm,vector<glm::vec3>& out_tangents, float threshold){
     if(threshold == 0.0f){
         out_pos = data.points;
         for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
         
-        //out_norm = data.normals;
-        //out_binorm = data.binormals;
-        //out_tangents = data.tangents;
+        out_norm = data.normals;
+        out_binorm = data.binormals;
+        out_tangents = data.tangents;
 
-        for(auto normals:data.normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
-        for(auto binormals:data.binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
-        for(auto tangents:data.tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
+        //for(auto normals:data.normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
+        //for(auto binormals:data.binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
+        //for(auto tangents:data.tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
 
         out_indices = data.indices;
         return;
@@ -358,37 +358,37 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
     vector<glm::vec3> temp_tangents;
     for (uint i=0; i < data.points.size(); i++){
         ushort index;
-        //bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, out_norm, index,threshold);
-        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, temp_normals, index,threshold);
+        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, out_norm, index,threshold);
+        //bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, temp_normals, index,threshold);
         if (found){
             out_indices.push_back(index);
 
             //average out TBN. I think this does more harm than good though
-            //out_binorm.at(index) += data.binormals.at(i);
-            //out_tangents.at(index) += data.tangents.at(i);
+            out_binorm.at(index) += data.binormals.at(i);
+            out_tangents.at(index) += data.tangents.at(i);
 
-            //infact these seem to make compressed normals weak. so dont include them
-            temp_binormals.at(index) += data.binormals.at(i);
-            temp_tangents.at(index) += data.tangents.at(i);
+
+            //temp_binormals.at(index) += data.binormals.at(i);
+            //temp_tangents.at(index) += data.tangents.at(i);
         }
         else{
             out_pos.push_back( data.points.at(i));
             temp_uvs.push_back(data.uvs.at(i));
 
-            //out_norm .push_back(data.normals.at(i));
-            //out_binorm.push_back(data.binormals.at(i));
-            //out_tangents.push_back(data.tangents.at(i));
+            out_norm .push_back(data.normals.at(i));
+            out_binorm.push_back(data.binormals.at(i));
+            out_tangents.push_back(data.tangents.at(i));
 
-            temp_normals .push_back(data.normals.at(i));
-            temp_binormals.push_back(data.binormals.at(i));
-            temp_tangents.push_back(data.tangents.at(i));
+            //temp_normals .push_back(data.normals.at(i));
+            //temp_binormals.push_back(data.binormals.at(i));
+            //temp_tangents.push_back(data.tangents.at(i));
 
             out_indices.push_back((ushort)out_pos.size() - 1);
         }
     }
     for(auto uvs:temp_uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
-    for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
-    for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
-    for(auto tangents:temp_tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
+    //for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
+    //for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
+    //for(auto tangents:temp_tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
 
 }

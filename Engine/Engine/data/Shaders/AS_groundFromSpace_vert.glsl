@@ -2,9 +2,9 @@
 
 attribute vec3 position;
 attribute float uv;
-attribute vec3 normal;
-attribute vec3 binormal;
-attribute vec3 tangent;
+attribute vec4 normal;
+attribute vec4 binormal;
+attribute vec4 tangent;
 
 uniform int hasAtmosphere;
 
@@ -106,9 +106,9 @@ void main(void){
     UV = UnpackFloat32Into2Floats(uv);
     CameraPosition = v3CameraPos;
 
-    Normals = (Model * vec4(normal,0.0)).xyz;
-    Tangents = (Model * vec4(tangent,0.0)).xyz;
-    Binormals = (Model * vec4(binormal,0.0)).xyz;
+    Normals = (Model * vec4(normal.xyz,0.0)).xyz;
+    Binormals = (Model * vec4(binormal.xyz,0.0)).xyz;
+    Tangents = (Model * vec4(tangent.xyz,0.0)).xyz;
 
     WorldPosition = (Model * vec4(position,1.0)).xyz;
 
