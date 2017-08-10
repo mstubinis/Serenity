@@ -137,9 +137,7 @@ void ObjectDynamic::update(float dt){
     btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
     model = glm::scale(model,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
 
-    m_Forward = Engine::Math::getForward(m_RigidBody);
-    m_Right = Engine::Math::getRight(m_RigidBody);
-    m_Up = Engine::Math::getUp(m_RigidBody);
+    Engine::Math::recalculateForwardRightUp(m_RigidBody,m_Forward,m_Right,m_Up);
 
     m_Model = glm::mat4(model);
     if(m_Parent != nullptr){
@@ -208,10 +206,7 @@ void ObjectDynamic::setOrientation(glm::quat q){
     m_RigidBody->setCenterOfMassTransform(t);
     m_MotionState->setWorldTransform(t);
 
-    m_Forward = Engine::Math::getForward(m_RigidBody);
-    m_Right = Engine::Math::getRight(m_RigidBody);
-    m_Up = Engine::Math::getUp(m_RigidBody);
-
+    Engine::Math::recalculateForwardRightUp(m_RigidBody,m_Forward,m_Right,m_Up);
     clearAngularForces();
 }
 glm::vec3 ObjectDynamic::getForward(){ return m_Forward; }
@@ -327,9 +322,7 @@ void ObjectDynamic::lookAt(glm::vec3 eye,glm::vec3 target,glm::vec3 up){
     btQ = Engine::Math::glmToBTQuat(q);
     m_RigidBody->getWorldTransform().setRotation(btQ);
 
-    m_Forward = Engine::Math::getForward(m_RigidBody);
-    m_Right = Engine::Math::getRight(m_RigidBody);
-    m_Up = Engine::Math::getUp(m_RigidBody);
+    Engine::Math::recalculateForwardRightUp(m_RigidBody,m_Forward,m_Right,m_Up);
 }
 void ObjectDynamic::lookAt(Object* o){ ObjectDynamic::lookAt(getPosition(), o->getPosition(), o->getUp()); }
 void ObjectDynamic::alignTo(glm::vec3 direction, float speed){
@@ -391,9 +384,7 @@ void ObjectDynamic::rotate(float x,float y,float z,bool overTime){
     if(abs(y) >= Object::m_RotationThreshold) this->applyTorqueX(-y);  //yaw
     if(abs(z) >= Object::m_RotationThreshold) this->applyTorqueZ(z);   //roll
 
-    m_Forward = Engine::Math::getForward(m_RigidBody);
-    m_Right = Engine::Math::getRight(m_RigidBody);
-    m_Up = Engine::Math::getUp(m_RigidBody);
+    Engine::Math::recalculateForwardRightUp(m_RigidBody,m_Forward,m_Right,m_Up);
 }
 void ObjectDynamic::rotate(glm::vec3 r, bool overTime){ ObjectDynamic::rotate(r.x,r.y,r.z,overTime); }
 void ObjectDynamic::clearLinearForces(){
@@ -409,7 +400,6 @@ void ObjectDynamic::clearAllForces(){
     ObjectDynamic::setLinearVelocity(0,0,0);
     ObjectDynamic::setAngularVelocity(0,0,0);
 }
-
 bool ObjectDynamic::rayIntersectSphere(Camera* c){
     if(c == nullptr) c = Resources::getActiveCamera();
     return c->rayIntersectSphere(this);
