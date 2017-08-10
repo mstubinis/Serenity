@@ -190,16 +190,16 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
         case CollisionType::ConvexHull:{
             shape = new btConvexHullShape();
             for(auto vertex:data.points){ ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z)); }
-			btShapeHull* hull =  new btShapeHull((btConvexHullShape*)shape);
-			hull->buildHull(shape->getMargin());
-			delete shape;
-			const btVector3* ptsArray = hull->getVertexPointer();
-			shape = new btConvexHullShape();
-			for(int i = 0; i < hull->numVertices(); i++){
-				((btConvexHullShape*)shape)->addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
-			}
+            btShapeHull* hull =  new btShapeHull((btConvexHullShape*)shape);
+            hull->buildHull(shape->getMargin());
+            delete shape;
+            const btVector3* ptsArray = hull->getVertexPointer();
+            shape = new btConvexHullShape();
+            for(int i = 0; i < hull->numVertices(); i++){
+                ((btConvexHullShape*)shape)->addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
+            }
             m_CollisionShape = shape;
-			delete hull;
+            delete hull;
             break;
         }
         case CollisionType::TriangleShape:{
@@ -209,7 +209,7 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
                 v1 = triangle.v1.position;
                 v2 = triangle.v2.position;
                 v3 = triangle.v3.position;
-				btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
+                btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
                 btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
                 btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
                 m_InternalMeshData->addTriangle(bv1, bv2, bv3,true);
