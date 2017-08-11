@@ -21,10 +21,14 @@ class Texture::impl final{
         GLuint m_Type;
         uint m_Width, m_Height;
         uint m_Format;
+	bool m_Mipmapped;
+	GLuint m_MinFilter; //used to determine filter type for mipmaps
 
         void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format){
             vector_clear(m_Pixels);
             m_Width = m_Height = m_TextureAddress = 0;
+            m_Mipmapped = false;
+	    m_MinFilter = GL_Linear;
             m_Type = type;
             m_Format = format;
             if(img.getSize().x > 0 && img.getSize().y > 0){
@@ -38,7 +42,6 @@ class Texture::impl final{
         void _load(Texture* super){
             glGenTextures(1, &m_TextureAddress);
             glBindTexture(m_Type, m_TextureAddress);
-
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
                 sf::Image image; 
                 image.loadFromFile(m_Files[0].c_str());
@@ -54,14 +57,14 @@ class Texture::impl final{
             }
             else if(m_Files.size() > 1){//cubemap
                 for(uint i = 0; i < m_Files.size(); i++){
-                    sf::Image image;
-                    image.loadFromFile(m_Files[i].c_str());
-                    _generateFromImage(image,super);
-                    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, m_Format ,image.getSize().x, image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,image.getPixelsPtr());
+                    sf::Image img;
+                    img.loadFromFile(m_Files[i].c_str());
+                    _generateFromImage(img,super);
+                    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, m_Format ,img.getSize().x, img.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,img.getPixelsPtr());
                 }
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
-                glGenerateMipmap(m_Type);
+                _generateMipmaps();
                 glBindTexture(m_Type,0);
             }
             else{//no files
@@ -70,7 +73,7 @@ class Texture::impl final{
         void _unload(){
             glDeleteTextures(1,&m_TextureAddress);
             glBindTexture(m_Type,0);
-			vector_clear(m_Pixels);
+            vector_clear(m_Pixels);
         }
         void _generateFromImage(sf::Image& img,Texture* super){
             if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
@@ -79,11 +82,8 @@ class Texture::impl final{
             else if(m_Format == GL_RGB8 || m_Format == GL_SRGB8){
                 glTexImage2D(m_Type,0,m_Format,img.getSize().x,img.getSize().y,0,GL_RGB,GL_UNSIGNED_BYTE,img.getPixelsPtr());
             }
-
             super->setFilter(TextureFilter::Linear);
-
-            glGenerateMipmap(m_Type);
-
+            _generateMipmaps();
             m_Width = img.getSize().x;
             m_Height = img.getSize().y;
         }
@@ -98,6 +98,7 @@ class Texture::impl final{
                 else{
                     glGetTexImage(m_Type,0,GL_RGB,GL_UNSIGNED_BYTE,&m_Pixels[0]);
                 }
+                glBindTexture(m_Type,0);
             }
             return &m_Pixels[0];
         }
@@ -107,14 +108,41 @@ class Texture::impl final{
             else if(wrap == TextureWrap::ClampToBorder)  gl = GL_CLAMP_TO_BORDER;
             else if(wrap == TextureWrap::ClampToEdge)    gl = GL_CLAMP_TO_EDGE;
         }
-        void _enumFilterToGL(uint& gl, TextureFilter::Filter& filter){
-            if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
-            else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
-            else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR_MIPMAP_LINEAR;
-            else if(filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR_MIPMAP_NEAREST;
-            else if(filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST_MIPMAP_LINEAR;
-            else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST_MIPMAP_NEAREST;
+        void _enumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min){
+            if(min == true){
+                if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
+                else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
+                else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR_MIPMAP_LINEAR;
+                else if(filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR_MIPMAP_NEAREST;
+                else if(filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST_MIPMAP_LINEAR;
+                else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST_MIPMAP_NEAREST;
+            }
+            else{
+                if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
+                else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
+                else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR;
+                else if(filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR;
+                else if(filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST;
+                else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
+            }
         }
+	void _generateMipmaps(){
+        if(m_Mipmapped == false){
+            glBindTexture(m_Type, m_TextureAddress);
+            glGenerateMipmap(m_Type);
+            
+            if(m_MinFilter == GL_LINEAR){
+                m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
+            }
+            else if(m_MinFilter == GL_NEAREST){
+                m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
+            }
+            
+            glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, m_MinFilter);
+            m_Mipmapped = true;
+            glBindTexture(m_Type, 0);
+        }
+	}
 };
 Texture::Texture(string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
@@ -133,7 +161,7 @@ Texture::Texture(string file,string n,GLuint t,uint format):m_i(new impl){ //ima
 }
 Texture::Texture(string files[],string n,GLuint t,uint format):m_i(new impl){ //cubemap images
     for(uint q = 0; q < 6; q++){ 
-    m_i->m_Files.push_back(files[q]); 
+        m_i->m_Files.push_back(files[q]); 
     }
     sf::Image i;
     m_i->_init(t,this,n,i,format);
@@ -161,8 +189,12 @@ void Texture::setZWrapping(TextureWrap::Wrap w){
     GLuint gl; m_i->_enumWrapToGL(gl,w); glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, gl);
 }
 void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(w); Texture::setYWrapping(w); Texture::setZWrapping(w); }
-void Texture::setMinFilter(TextureFilter::Filter f){ GLuint gl; m_i->_enumFilterToGL(gl,f); glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, gl); }
-void Texture::setMaxFilter(TextureFilter::Filter f){ GLuint gl; m_i->_enumFilterToGL(gl,f); glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, gl); }
+void Texture::setMinFilter(TextureFilter::Filter f){ 
+    GLuint g; m_i->_enumFilterToGL(g,f,true); glTexParameteri(m_i->m_Type,GL_TEXTURE_MIN_FILTER,g); m_MinFilter = g;
+}
+void Texture::setMaxFilter(TextureFilter::Filter f){ 
+    GLuint g; m_i->_enumFilterToGL(g,f,false); glTexParameteri(m_i->m_Type,GL_TEXTURE_MAG_FILTER,g); 
+}
 void Texture::setFilter(TextureFilter::Filter f){ Texture::setMinFilter(f); Texture::setMaxFilter(f); }
 
 void Texture::load(){
