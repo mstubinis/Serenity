@@ -274,18 +274,14 @@ void Texture::convolute(){
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
-    
-    //obviously use our own convolution shader program...
-    /*
-    irradianceShader.use();
-    irradianceShader.setMat4("projection", captureProjection);
-    */
+    ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
+    Renderer::sendUniformMatrix4f("projection",captureProjection);
     Renderer::bindTexture("environmentMap",m_TextureAddress.at(1),0,m_Type);
     
     glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
     //Renderer::bindFBO(captureFBO);
     for (uint i = 0; i < 6; ++i){
-        //irradianceShader.setMat4("view", captureViews[i]);
+        Renderer::sendUniformMatrix4f("view", captureViews[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_TextureAddress.at(1), 0);
         Renderer::Settings::Clear(true,true,false);
         Resources::getMesh("Cube")->bind();
@@ -297,7 +293,7 @@ void Texture::convolute(){
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
     ////
-    
+    p->unbind();
     
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
