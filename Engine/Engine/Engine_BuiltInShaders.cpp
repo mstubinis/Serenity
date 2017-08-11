@@ -42,6 +42,7 @@ string Shaders::Detail::ShadersManagement::deferred_frag = "";
 string Shaders::Detail::ShadersManagement::deferred_frag_hud = "";
 string Shaders::Detail::ShadersManagement::deferred_frag_skybox = "";
 string Shaders::Detail::ShadersManagement::copy_depth_frag = "";
+string Shaders::Detail::ShadersManagement::cubemap_convolude_frag = "";
 string Shaders::Detail::ShadersManagement::ssao_frag = "";
 string Shaders::Detail::ShadersManagement::hdr_frag = "";
 string Shaders::Detail::ShadersManagement::godRays_frag = "";
@@ -329,6 +330,33 @@ Shaders::Detail::ShadersManagement::vertex_skybox = Shaders::Detail::ShadersMana
     "}";
 #pragma endregion
 
+#pragma region CubemapConvoludeFrag
+Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::ShadersManagement::version + 
+    "\n"
+    "varying vec3 UV;\n"
+    "uniform samplerCube environmentMap;\n"
+    "const float PI = 3.14159265359;\n"
+    "void main(void){\n"
+    "    vec3 N = normalize(UV);\n"
+    "    vec3 irradiance = vec3(0.0);\n"
+    "    vec3 up = vec3(0.0, 1.0, 0.0);\n"
+    "    vec3 right = cross(up, N);\n"
+    "    up = cross(N, right);\n"
+    "    float sampleDelta = 0.025;\n"
+    "    float nrSamples = 0.0;\n"
+    "    for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta){\n"
+    "        for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta){\n"
+    "            vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));\n"
+    "            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;\n"
+    "            irradiance += textureCube(environmentMap, sampleVec).rgb * cos(theta) * sin(theta);\n"
+    "            nrSamples++;\n"
+    "        }\n"
+    "    }\n"
+    "    irradiance = PI * irradiance * (1.0 / float(nrSamples));\n"
+    "    gl_FragColor = vec4(irradiance, 1.0);\n"
+    "}\n"
+#pragma endregion
+	
 #pragma region FXAA
 Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
     "#define FXAA_REDUCE_MIN (1.0/128.0)\n"
