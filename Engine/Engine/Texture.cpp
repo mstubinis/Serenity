@@ -275,13 +275,13 @@ void Texture::convolute(){
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
-    Renderer::sendUniformMatrix4f("projection",captureProjection);
-    Renderer::bindTexture("environmentMap",m_TextureAddress.at(1),0,m_Type);
+    Renderer::bindTexture("cubemap",m_TextureAddress.at(1),0,m_Type);
     
     glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
     //Renderer::bindFBO(captureFBO);
     for (uint i = 0; i < 6; ++i){
-        Renderer::sendUniformMatrix4f("view", captureViews[i]);
+        glm::mat4 vp = captureProjection * captureViews[i];
+        Renderer::sendUniformMatrix4f("VP", vp);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_TextureAddress.at(1), 0);
         Renderer::Settings::Clear(true,true,false);
         Resources::getMesh("Cube")->bind();
