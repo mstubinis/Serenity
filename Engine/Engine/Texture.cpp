@@ -21,14 +21,16 @@ class Texture::impl final{
         GLuint m_Type;
         uint m_Width, m_Height;
         uint m_Format;
-	bool m_Mipmapped;
-	GLuint m_MinFilter; //used to determine filter type for mipmaps
+        ushort m_MipMapLevels;
+        bool m_Mipmapped;
+        GLuint m_MinFilter; //used to determine filter type for mipmaps
 
         void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format){
             vector_clear(m_Pixels);
             m_Width = m_Height = m_TextureAddress = 0;
             m_Mipmapped = false;
-	    m_MinFilter = GL_Linear;
+            m_MinFilter = GL_Linear;
+            m_MipMapLevels = 0;
             m_Type = type;
             m_Format = format;
             if(img.getSize().x > 0 && img.getSize().y > 0){
@@ -64,7 +66,6 @@ class Texture::impl final{
                 }
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
-                _generateMipmaps();
                 glBindTexture(m_Type,0);
             }
             else{//no files
@@ -83,7 +84,6 @@ class Texture::impl final{
                 glTexImage2D(m_Type,0,m_Format,img.getSize().x,img.getSize().y,0,GL_RGB,GL_UNSIGNED_BYTE,img.getPixelsPtr());
             }
             super->setFilter(TextureFilter::Linear);
-            _generateMipmaps();
             m_Width = img.getSize().x;
             m_Height = img.getSize().y;
         }
@@ -126,45 +126,53 @@ class Texture::impl final{
                 else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
             }
         }
-	void _generateMipmaps(){
-        if(m_Mipmapped == false){
-            glBindTexture(m_Type, m_TextureAddress);
-            glGenerateMipmap(m_Type);
-            
-            if(m_MinFilter == GL_LINEAR){
-                m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
+	    void _generateMipmaps(){
+            if(m_Mipmapped == false){
+                glBindTexture(m_Type, m_TextureAddress);
+                glTexParameteri(m_Type, GL_TEXTURE_BASE_LEVEL, 0);
+                glTexParameteri(m_Type, GL_TEXTURE_MAX_LEVEL, 20);
+
+                if(m_MinFilter == GL_LINEAR){        m_MinFilter = GL_LINEAR_MIPMAP_LINEAR; }
+                else if(m_MinFilter == GL_NEAREST){  m_MinFilter = GL_NEAREST_MIPMAP_NEAREST; }
+
+                glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, m_MinFilter);
+                glGenerateMipmap(m_Type);
+                m_Mipmapped = true;
+                m_MipMapLevels =  glm::log2(glm::max(m_Width, m_Height)) + 1;
+                glBindTexture(m_Type, 0);
             }
-            else if(m_MinFilter == GL_NEAREST){
-                m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
-            }
-            
-            glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, m_MinFilter);
-            m_Mipmapped = true;
-            glBindTexture(m_Type, 0);
-        }
-	}
+	    }
 };
 Texture::Texture(string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
     m_i->_init(t,this,n,i,format);
 }
-Texture::Texture(sf::Image& img,string n,GLuint t,uint format):m_i(new impl){ //pixels
+Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
     m_i->_init(t,this,n,img,format);
+    if(genMipMaps){
+        m_i->_generateMipmaps();
+    }
 }
-Texture::Texture(string file,string n,GLuint t,uint format):m_i(new impl){ //image file
+Texture::Texture(string file,string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
     sf::Image i;
     if(n == "") n = file;
     m_i->_init(t,this,n,i,format);
+    if(genMipMaps){
+        m_i->_generateMipmaps();
+    }
 }
-Texture::Texture(string files[],string n,GLuint t,uint format):m_i(new impl){ //cubemap images
+Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //cubemap images
     for(uint q = 0; q < 6; q++){ 
         m_i->m_Files.push_back(files[q]); 
     }
     sf::Image i;
     m_i->_init(t,this,n,i,format);
+    if(genMipMaps){
+        m_i->_generateMipmaps();
+    }
 }
 Texture::~Texture(){
     unload();
