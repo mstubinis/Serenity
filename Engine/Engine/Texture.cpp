@@ -23,13 +23,14 @@ class Texture::impl final{
         uint m_Format;
         ushort m_MipMapLevels;
         bool m_Mipmapped;
+        bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-        void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format){
+        void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format,bool genMipMaps){
             vector_clear(m_Pixels);
             m_Width = m_Height = 0;
-            m_TextureAddress.push_back(0); //vector.at(0) will be the default address. at(1) is the colvoluted map address
             m_Mipmapped = false;
+            m_IsToBeMipmapped = genMipMaps;
             m_MinFilter = GL_Linear;
             m_MipMapLevels = 0;
             m_Type = type;
@@ -43,6 +44,9 @@ class Texture::impl final{
             super->load();
         }
         void _load(Texture* super){
+            if(m_TextureAddress.size() == 0)
+                m_TextureAddress.push_back(0); //vector.at(0) will be the default address. at(1) is the colvoluted map address (for cubemap only)
+            
             glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
@@ -71,11 +75,20 @@ class Texture::impl final{
             }
             else{//no files
             }
+            if(m_IsToBeMipmapped){
+                m_i->_generateMipmaps();
+            }
         }
         void _unload(){
             glDeleteTextures(1,&m_TextureAddress.at(0));
+            if(m_TextureAddress.size() == 2)
+                glDeleteTextures(1,&m_TextureAddress.at(1));
             glBindTexture(m_Type,0);
+            m_Width = m_Height = 0;
+            m_MipMapLevels = 0;
+            m_Mipmapped = false;
             vector_clear(m_Pixels);
+            vector_clear(m_TextureAddress);
         }
         void _generateFromImage(sf::Image& img,Texture* super){
             if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
@@ -91,7 +104,7 @@ class Texture::impl final{
         uchar* _getPixels(){
             if(m_Pixels.size() == 0){
                 m_Pixels.resize(m_Width*m_Height*4);
-                glBindTexture(m_Type,m_TextureAddress);
+                glBindTexture(m_Type,m_TextureAddress.at(0));
                 glPixelStorei(GL_UNPACK_ALIGNMENT,1);
                 if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
                     glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
@@ -127,11 +140,10 @@ class Texture::impl final{
                 else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
             }
         }
-	    void _generateMipmaps(){
+        void _generateMipmaps(){
             if(m_Mipmapped == false){
                 glBindTexture(m_Type, m_TextureAddress.at(0));
                 glTexParameteri(m_Type, GL_TEXTURE_BASE_LEVEL, 0);
-                glTexParameteri(m_Type, GL_TEXTURE_MAX_LEVEL, 20);
 
                 if(m_MinFilter == GL_LINEAR){        m_MinFilter = GL_LINEAR_MIPMAP_LINEAR; }
                 else if(m_MinFilter == GL_NEAREST){  m_MinFilter = GL_NEAREST_MIPMAP_NEAREST; }
@@ -139,41 +151,32 @@ class Texture::impl final{
                 glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, m_MinFilter);
                 glGenerateMipmap(m_Type);
                 m_Mipmapped = true;
-                m_MipMapLevels =  glm::log2(glm::max(m_Width, m_Height)) + 1;
+                m_MipMapLevels = glm::log2(glm::max(m_Width, m_Height)) + 1;
                 glBindTexture(m_Type, 0);
             }
-	    }
+      }
 };
 Texture::Texture(string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(t,this,n,i,format);
+    m_i->_init(t,this,n,i,format,false);
 }
 Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
-    m_i->_init(t,this,n,img,format);
-    if(genMipMaps){
-        m_i->_generateMipmaps();
-    }
+    m_i->_init(t,this,n,img,format,genMipMaps);
 }
 Texture::Texture(string file,string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
     sf::Image i;
     if(n == "") n = file;
-    m_i->_init(t,this,n,i,format);
-    if(genMipMaps){
-        m_i->_generateMipmaps();
-    }
+    m_i->_init(t,this,n,i,format,genMipMaps);
 }
 Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //cubemap images
     for(uint q = 0; q < 6; q++){ 
         m_i->m_Files.push_back(files[q]); 
     }
     sf::Image i;
-    m_i->_init(t,this,n,i,format);
-    if(genMipMaps){
-        m_i->_generateMipmaps();
-    }
+    m_i->_init(t,this,n,i,format,genMipMaps);
 }
 Texture::~Texture(){
     unload();
@@ -225,28 +228,34 @@ void Texture::convolute(){
         cout << "(Texture) : Only cubemaps can be convoluted. Ignoring convolute() call..." << endl;
         return;
     }
+    uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
+    uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
+    
     //cleanup previous convolute operation
-    if(m_TextureAddress.size() == 2){
+    if(m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_TextureAddress.at(1));
         glBindTexture(m_Type,0);
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    else if(m_TextureAddress.size() == 1){
+        m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
+    }
+    Renderer::bindFBO(0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0); //might not even need this line
     
-    GLuint captureFBO, captureRBO, convolutedMap;
+    GLuint captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
     glGenRenderbuffers(1, &captureRBO);
     
     //or just use plain 32...
-    uint width = glm::max(32, m_Width / 32);
-    uint height = glm::max(32, m_Height / 32);
+    uint width = 32; /*glm::max(32, m_Width / 32);*/
+    uint height = 32; /*glm::max(32, m_Height / 32);*/
 
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    Renderer::bindFBO(captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);  
     
-    glGenTextures(1, &convolutedMap);
-    glBindTexture(m_Type, convolutedMap);
+    glGenTextures(1, &m_TextureAddress.at(1));
+    glBindTexture(m_Type, m_TextureAddress.at(1));
     for (uint i = 0; i < 6; ++i){
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
     }
@@ -271,18 +280,17 @@ void Texture::convolute(){
     irradianceShader.use();
     irradianceShader.setMat4("projection", captureProjection);
     */
-    Renderer::bindTexture("environmentMap",convolutedMap,0,m_Type);
+    Renderer::bindTexture("environmentMap",m_TextureAddress.at(1),0,m_Type);
     
     glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
-    Renderer::bindFBO(captureFBO);
+    //Renderer::bindFBO(captureFBO);
     for (uint i = 0; i < 6; ++i){
         //irradianceShader.setMat4("view", captureViews[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutedMap, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_TextureAddress.at(1), 0);
         Renderer::Settings::Clear(true,true,false);
         Resources::getMesh("Cube")->bind();
         Resources::getMesh("Cube")->render();
         Resources::getMesh("Cube")->unbind();
-        //renderCube();
     }
     
     //cleanup... might have to comment this out if this bugs it out
@@ -291,15 +299,9 @@ void Texture::convolute(){
     ////
     
     
-    Renderer::bindFBO(0);
+    Renderer::bindReadFBO(prevReadBuffer);
+    Renderer::bindDrawFBO(prevDrawBuffer);
     glViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
-    
-    if(m_TextureAddress.size() == 1){
-        m_TextureAddress.push_back(convolutedMap);
-    }
-    else{
-        m_TextureAddress.at(1) = convolutedMap;
-    }
 }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
