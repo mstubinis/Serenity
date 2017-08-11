@@ -59,5 +59,7 @@ class Texture: public EngineResource{
     
         void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
+    
+        void convolute();
 };
 #endif
