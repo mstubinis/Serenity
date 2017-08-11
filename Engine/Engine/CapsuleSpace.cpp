@@ -20,7 +20,7 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/float(100),scene);
-		m_Light->setAttenuation(LightRange::_65);
+        m_Light->setAttenuation(LightRange::_65);
         m_Light->setColor(255,124,27,255);
     }
     setColor(255,235,206,255);
@@ -38,11 +38,11 @@ void CapsuleStar::update(float dt){
     if(m_Light != nullptr){
         m_Light->setPosition(pos * 0.015f);
         if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
-			m_Light->deactivate();
-		}
+            m_Light->deactivate();
+        }
         else{
-			m_Light->activate();
-		}
+            m_Light->activate();
+        }
     }
     this->m_Orientation = Resources::getActiveCamera()->getOrientation();
     ObjectDisplay::update(dt);
@@ -155,7 +155,7 @@ void CapsuleSpace::update(float dt){
     float tunnelARotRand = float(rand() % 4) + 14.0f;
     float tunnelBRotRand = float(rand() % 2) + 2;
 
-	m_TunnelA->rotate(0,0,glm::radians(tunnelARotRand));
+    m_TunnelA->rotate(0,0,glm::radians(tunnelARotRand));
     m_TunnelB->rotate(0,0,-glm::radians(tunnelBRotRand));
     m_BackEnd->rotate(0,0,2.61f);
     m_FrontEnd->rotate(0,0,-2.61f);
@@ -179,6 +179,6 @@ void CapsuleSpace::update(float dt){
 
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));
-		item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
+        item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
     }
 }
