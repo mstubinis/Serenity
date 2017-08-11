@@ -42,7 +42,8 @@ class Texture: public EngineResource{
         GLuint type();
         uint width();
         uint height();
-        ushort maxMipmapLevels();
+        ushort mipmapLevels();
+        bool mipmapped();
 
         virtual void load();
         virtual void unload();
