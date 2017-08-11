@@ -10,6 +10,7 @@
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
+typedef unsigned short ushort;
 namespace sf{ class Image; }
 class TextureWrap{public: enum Wrap{
     Repeat,
@@ -41,6 +42,7 @@ class Texture: public EngineResource{
         GLuint type();
         uint width();
         uint height();
+        ushort maxMipmapLevels();
 
         virtual void load();
         virtual void unload();
