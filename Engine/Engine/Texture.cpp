@@ -219,6 +219,7 @@ void Texture::unload(){
         EngineResource::unload();
     }
 }
+ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
 uchar* Texture::pixels(){ return m_i->_getPixels(); }
 GLuint& Texture::address(){ return m_i->m_TextureAddress; }
 GLuint Texture::type(){ return m_i->m_Type; }
