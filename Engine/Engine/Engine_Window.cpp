@@ -118,7 +118,7 @@ class Engine_Window::impl{
         }
         void _setIcon(const char* file){
             if(!Resources::Detail::ResourceManagement::m_Textures.count(file)){
-                new Texture(file,"",GL_TEXTURE_2D,GL_RGBA8);
+                new Texture(file,"",GL_TEXTURE_2D,false,GL_RGBA8);
             }
             Texture* texture = Resources::getTexture(file);
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
