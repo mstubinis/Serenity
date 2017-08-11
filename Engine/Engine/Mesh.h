@@ -115,14 +115,14 @@ class Mesh final: public BindableResource{
         std::vector<glm::vec3> m_Points;
 
         std::vector<float> m_UVs;
-		/*
-        std::vector<std::int32_t> m_Normals;
-        std::vector<std::int32_t> m_Binormals;
-        std::vector<std::int32_t> m_Tangents;
-		*/
-        std::vector<glm::vec3> m_Normals;
-        std::vector<glm::vec3> m_Binormals;
-        std::vector<glm::vec3> m_Tangents;
+
+        std::vector<GLuint> m_Normals;
+        std::vector<GLuint> m_Binormals;
+        std::vector<GLuint> m_Tangents;
+
+        //std::vector<glm::vec3> m_Normals;
+        //std::vector<glm::vec3> m_Binormals;
+        //std::vector<glm::vec3> m_Tangents;
 
         std::vector<ushort> m_Indices;
 

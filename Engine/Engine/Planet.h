@@ -81,14 +81,8 @@ class Planet: public ObjectDisplay{
 
         void addRing(Ring*);
 
-        void setOrbit(OrbitInfo* o){ 
-            m_OrbitInfo = o; 
-            update(0);
-        }
-        void setRotation(RotationInfo* r){ 
-            m_RotationInfo = r;
-            rotate(0,0,-m_RotationInfo->tilt,false);
-        }
+        void setOrbit(OrbitInfo* o);
+        void setRotation(RotationInfo* r);
 
         void update(float);
 };

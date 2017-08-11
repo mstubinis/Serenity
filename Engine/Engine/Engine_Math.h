@@ -8,6 +8,8 @@
 #include <vector>
 #include <cstdint>
 #include <assimp/Importer.hpp>
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
 
 class btVector3;
 class btRigidBody;
@@ -15,7 +17,8 @@ class btQuaternion;
 class Object;
 class ObjectDynamic;
 typedef unsigned int uint;
-
+typedef unsigned short ushort;
+typedef unsigned char uchar;
 namespace glm{
     //floats
     typedef glm::tquat<float> q_f;	
@@ -150,8 +153,8 @@ namespace Engine{
         
         void translate(ObjectDynamic*,btVector3&,bool local);
 
-        std::int32_t pack3NormalsInto32Int(float x, float y, float z);
-        std::int32_t pack3NormalsInto32Int(glm::vec3 v);
+        GLuint pack3NormalsInto32Int(float x, float y, float z);
+        GLuint pack3NormalsInto32Int(glm::vec3 v);
         
         float pack3FloatsInto1Float(float,float,float);
         float pack3FloatsInto1Float(glm::vec3&);
@@ -160,6 +163,8 @@ namespace Engine{
         float pack2FloatsInto1Float(float,float);
         float pack2FloatsInto1Float(glm::vec2);
         glm::vec2 unpack2FloatsInto1Float(float i);
+
+		float remainder(float,float);
         
         void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
         void recalculateForwardRightUp(const btRigidBody*,glm::vec3&,glm::vec3&,glm::vec3&);

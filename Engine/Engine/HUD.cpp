@@ -38,7 +38,7 @@ void HUD::update(float dt){
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
-                scene->getPlayer()->setTarget("Sun Light");
+				scene->getPlayer()->setTarget(p.second);
                 break;
             }
             a++;
@@ -52,7 +52,7 @@ void HUD::update(float dt){
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
-                scene->getPlayer()->setTarget("Sun Light");
+                scene->getPlayer()->setTarget(p.second);
                 break;
             }
             a++;

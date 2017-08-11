@@ -106,9 +106,9 @@ void main(void){
     UV = UnpackFloat32Into2Floats(uv);
     CameraPosition = v3CameraPos;
 
-    Normals = (Model * vec4(normal.xyz,0.0)).xyz;
-    Binormals = (Model * vec4(binormal.xyz,0.0)).xyz;
-    Tangents = (Model * vec4(tangent.xyz,0.0)).xyz;
+    Normals = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    Binormals = (Model * vec4(binormal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    Tangents = (Model * vec4(tangent.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
 
     WorldPosition = (Model * vec4(position,1.0)).xyz;
 

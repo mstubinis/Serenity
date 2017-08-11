@@ -239,9 +239,9 @@ Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManag
     "\n"
     "attribute vec3 position;\n"
     "attribute float uv;\n"
-    "attribute vec4 normal;\n"
-    "attribute vec4 binormal;\n"
-    "attribute vec4 tangent;\n"
+    "attribute vec4 normal;\n" //Order is ZYXW
+    "attribute vec4 binormal;\n"//Order is ZYXW
+    "attribute vec4 tangent;\n"//Order is ZYXW
     "attribute vec4 BoneIDs;\n"
     "attribute vec4 Weights;\n"
     "\n"
@@ -272,9 +272,9 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "        BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
     "    }\n"
     "    vec4 PosTrans = BoneTransform * vec4(position, 1.0);\n"
-    "    vec3 NormalTrans = (BoneTransform * vec4(normal.xyz, 0.0)).xyz;\n"
-    "    vec3 BinormalTrans = (BoneTransform * vec4(binormal.xyz, 0.0)).xyz;\n"
-    "    vec3 TangentTrans = (BoneTransform * vec4(tangent.xyz, 0.0)).xyz;\n"
+    "    vec3 NormalTrans = (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 BinormalTrans = (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans = (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
     "\n"
     "    mat4 MVP = VP * Model;\n"
     "\n"

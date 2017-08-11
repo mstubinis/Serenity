@@ -25,6 +25,7 @@ float Math::toRadians(float degrees){ return degrees * 0.0174533f; }
 float Math::toDegrees(float radians){ return radians * 57.2958f; }
 float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
+float Math::remainder(float x,float y){ return x - (glm::round(x/y)*y); }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
     point.x += 0.0001f;// forced protection against NaN if vectors happen to be equal
@@ -46,8 +47,8 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec3 screen = glm::project(objPos,Resources::getActiveCamera()->getView(),Resources::getActiveCamera()->getProjection(),viewport);
     //check if point is behind
     float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos - Resources::getActiveCamera()->getPosition());
-    float resX = float(screen.x);
-    float resY = float(screen.y);
+    float resX = screen.x;
+    float resY = screen.y;
     uint inBounds = 1;
     if(clampToEdge){
         if(screen.x < 0){ resX = 0; inBounds = 0; }
@@ -73,7 +74,7 @@ float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w
 float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
-std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
+GLuint Math::pack3NormalsInto32Int(float x, float y, float z){
    // Convert to signed integer -511 to +511 range (or should it be -512 to +511?)
    int iX = 0; int iY = 0; int iZ = 0;
    iX = int(x * 511.0f); //if(x < 0.0f){ iX = int(x * 512.0f); }else{ iX = int(x * 511.0f); }
@@ -81,14 +82,14 @@ std::int32_t Math::pack3NormalsInto32Int(float x, float y, float z){
    iZ = int(z * 511.0f); //if(z < 0.0f){ iX = int(x * 512.0f); }else{ iX = int(x * 511.0f); }
    return (iX & 0x3FF) | ((iY & 0x3FF) << 10) | ((iZ & 0x3FF) << 20);
 }
-std::int32_t Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
+GLuint Math::pack3NormalsInto32Int(glm::vec3 v){ return Math::pack3NormalsInto32Int(v.x,v.y,v.z); }
 
 
 float Math::pack3FloatsInto1Float(float r,float g,float b){
     //Scale and bias
-    r = (r + 1.0f) * 0.5f; unsigned char _r = (unsigned char)(r*255.0f);
-    g = (g + 1.0f) * 0.5f; unsigned char _g = (unsigned char)(g*255.0f);
-    b = (b + 1.0f) * 0.5f; unsigned char _b = (unsigned char)(b*255.0f);
+    r = (r + 1.0f) * 0.5f; uchar _r = (uchar)(r*255.0f);
+    g = (g + 1.0f) * 0.5f; uchar _g = (uchar)(g*255.0f);
+    b = (b + 1.0f) * 0.5f; uchar _b = (uchar)(b*255.0f);
     uint packedColor = (_r << 16) | (_g << 8) | _b;
     float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );
     return packedFloat;

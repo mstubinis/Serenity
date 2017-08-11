@@ -83,18 +83,6 @@ void Game::initLogic(){
     m_HUD = new HUD();
 
     Renderer::Settings::HDR::disable();
-
-	float metalness = 0.94f;
-	float smoothness = 0.28f;
-
-	glm::uint encode = glm::packHalf2x16(glm::vec2(metalness,smoothness));
-	glm::vec2 decode = glm::unpackHalf2x16(encode);
-	std::cout << "Test 1 (glm -> uint to half's)   -   metalness: " << decode.r << " | smoothness: " << decode.g << std::endl;
-	std::cout << "---------------" << std::endl;
-	std::cout << "---------------" << std::endl;
-	float encode1 = Engine::Math::pack2FloatsInto1Float(metalness,smoothness);
-	glm::vec2 decode1 = Engine::Math::unpack2FloatsInto1Float(encode1);
-	std::cout << "Test 2 (float to 2 float's)   -   metalness: " << decode1.r << " | smoothness: " << decode1.g << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));

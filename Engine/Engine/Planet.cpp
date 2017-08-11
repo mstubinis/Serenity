@@ -198,6 +198,14 @@ void Planet::update(float dt){
     for(auto ring:m_Rings)  ring->update(dt);
     ObjectDisplay::update(dt);
 }
+void Planet::setOrbit(OrbitInfo* o){ 
+    m_OrbitInfo = o; 
+    update(0);
+}
+void Planet::setRotation(RotationInfo* r){ 
+    m_RotationInfo = r;
+	rotate(0,0,glm::radians(-m_RotationInfo->tilt),false);
+}
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 Star::Star(glm::vec3 starColor, glm::vec3 lightColor, glm::vec3 pos,float scl, std::string name,Scene* scene): Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0,scene){
     m_Light = new SunLight(glm::vec3(0),name + " Light",LightType::Sun,scene);
