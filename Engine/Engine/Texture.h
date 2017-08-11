@@ -31,7 +31,7 @@ class Texture: public EngineResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D,bool = true,uint format = GL_SRGB8_ALPHA8);
+        Texture(std::string name,uint w, uint h,GLuint = GL_TEXTURE_2D,uint format = GL_SRGB8_ALPHA8);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D,bool = true,uint format = GL_SRGB8_ALPHA8);
         Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D,bool = true,uint format = GL_SRGB8_ALPHA8);
         Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP,bool = true,uint format = GL_SRGB8_ALPHA8);
