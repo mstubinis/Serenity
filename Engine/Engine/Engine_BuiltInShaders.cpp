@@ -334,7 +334,7 @@ Shaders::Detail::ShadersManagement::vertex_skybox = Shaders::Detail::ShadersMana
 Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "varying vec3 UV;\n"
-    "uniform samplerCube environmentMap;\n"
+    "uniform samplerCube cubemap;\n"
     "const float PI = 3.14159265359;\n"
     "void main(void){\n"
     "    vec3 N = normalize(UV);\n"
@@ -348,7 +348,7 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
     "        for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta){\n"
     "            vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));\n"
     "            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;\n"
-    "            irradiance += textureCube(environmentMap, sampleVec).rgb * cos(theta) * sin(theta);\n"
+    "            irradiance += textureCube(cubemap, sampleVec).rgb * cos(theta) * sin(theta);\n"
     "            nrSamples++;\n"
     "        }\n"
     "    }\n"
