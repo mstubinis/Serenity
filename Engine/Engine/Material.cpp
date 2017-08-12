@@ -262,9 +262,9 @@ class Material::impl final{
             Texture* glowT = Resources::getTexture(glow);
             Texture* specularT = Resources::getTexture(specular);
             if(diffuseT == nullptr && diffuse != "") diffuseT = new Texture(diffuse);
-            if(normalT == nullptr && normal != "") normalT = new Texture(normal,"",GL_TEXTURE_2D,GL_RGBA8);
-            if(glowT == nullptr && glow != "") glowT = new Texture(glow,"",GL_TEXTURE_2D,GL_RGBA8);
-            if(specularT == nullptr && specular != "") specularT = new Texture(specular,"",GL_TEXTURE_2D,GL_RGBA8);
+            if(normalT == nullptr && normal != "") normalT = new Texture(normal,"",GL_TEXTURE_2D,false,GL_RGBA8);
+            if(glowT == nullptr && glow != "") glowT = new Texture(glow,"",GL_TEXTURE_2D,false,GL_RGBA8);
+            if(specularT == nullptr && specular != "") specularT = new Texture(specular,"",GL_TEXTURE_2D,false,GL_RGBA8);
             _init(name,diffuseT,normalT,glowT,specularT,super);
         }
         void _load(){

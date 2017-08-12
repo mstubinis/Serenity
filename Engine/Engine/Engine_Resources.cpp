@@ -184,7 +184,7 @@ void Resources::initResources(){
     Shader* edge = new Shader("edge_frag",Engine::Shaders::Detail::ShadersManagement::edge_frag,ShaderType::Fragment,false);
     Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
     Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
-    Shader* cubemapConvolude = new Shader("cubemap_convolude_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_convolude_frag,false);
+    Shader* cubemapConvolude = new Shader("cubemap_convolude_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_convolude_frag,ShaderType::Fragment,false);
     
     addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);

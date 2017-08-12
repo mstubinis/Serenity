@@ -8,50 +8,39 @@
 #include <cassert>
 
 namespace glm{
-namespace detail
-{
+namespace detail{
 #	if GLM_HAS_CXX11_STL
 		using std::log2;
 #	else
 		template <typename genType>
-		genType log2(genType Value)
-		{
+		genType log2(genType Value){
 			return std::log(Value) * static_cast<genType>(1.4426950408889634073599246810019);
 		}
 #	endif
 
 	template <typename T, precision P, template <class, precision> class vecType, bool isFloat, bool Aligned>
-	struct compute_log2
-	{
-		GLM_FUNC_QUALIFIER static vecType<T, P> call(vecType<T, P> const & vec)
-		{
+	struct compute_log2{
+		GLM_FUNC_QUALIFIER static vecType<T, P> call(vecType<T, P> const & vec){
 			return detail::functor1<T, T, P, vecType>::call(log2, vec);
 		}
 	};
 
 	template <template <class, precision> class vecType, typename T, precision P, bool Aligned>
-	struct compute_sqrt
-	{
-		GLM_FUNC_QUALIFIER static vecType<T, P> call(vecType<T, P> const & x)
-		{
+	struct compute_sqrt{
+		GLM_FUNC_QUALIFIER static vecType<T, P> call(vecType<T, P> const & x){
 			return detail::functor1<T, T, P, vecType>::call(std::sqrt, x);
 		}
 	};
 
 	template <template <class, precision> class vecType, typename T, precision P, bool Aligned>
-	struct compute_inversesqrt
-	{
-		GLM_FUNC_QUALIFIER static vecType<T, P> call(vecType<T, P> const & x)
-		{
+	struct compute_inversesqrt{
+		GLM_FUNC_QUALIFIER static vecType<T, P> call(vecType<T, P> const & x){
 			return static_cast<T>(1) / sqrt(x);
 		}
-	};
-		
+	};		
 	template <template <class, precision> class vecType, bool Aligned>
-	struct compute_inversesqrt<vecType, float, lowp, Aligned>
-	{
-		GLM_FUNC_QUALIFIER static vecType<float, lowp> call(vecType<float, lowp> const & x)
-		{
+	struct compute_inversesqrt<vecType, float, lowp, Aligned>{
+		GLM_FUNC_QUALIFIER static vecType<float, lowp> call(vecType<float, lowp> const & x){
 			vecType<float, lowp> tmp(x);
 			vecType<float, lowp> xhalf(tmp * 0.5f);
 			vecType<uint, lowp>* p = reinterpret_cast<vecType<uint, lowp>*>(const_cast<vecType<float, lowp>*>(&x));
@@ -67,16 +56,14 @@ namespace detail
 	// pow
 	using std::pow;
 	template <typename T, precision P, template <typename, precision> class vecType>
-	GLM_FUNC_QUALIFIER vecType<T, P> pow(vecType<T, P> const & base, vecType<T, P> const & exponent)
-	{
+	GLM_FUNC_QUALIFIER vecType<T, P> pow(vecType<T, P> const & base, vecType<T, P> const & exponent){
 		return detail::functor2<T, P, vecType>::call(pow, base, exponent);
 	}
 
 	// exp
 	using std::exp;
 	template <typename T, precision P, template <typename, precision> class vecType>
-	GLM_FUNC_QUALIFIER vecType<T, P> exp(vecType<T, P> const & x)
-	{
+	GLM_FUNC_QUALIFIER vecType<T, P> exp(vecType<T, P> const & x){
 		return detail::functor1<T, T, P, vecType>::call(exp, x);
 	}
 

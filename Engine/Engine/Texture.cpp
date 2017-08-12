@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "Mesh.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "ShaderProgram.h"
@@ -31,7 +32,7 @@ class Texture::impl final{
             m_Width = m_Height = 0;
             m_Mipmapped = false;
             m_IsToBeMipmapped = genMipMaps;
-            m_MinFilter = GL_Linear;
+            m_MinFilter = GL_LINEAR;
             m_MipMapLevels = 0;
             m_Type = type;
             m_Format = format;
@@ -76,7 +77,7 @@ class Texture::impl final{
             else{//no files
             }
             if(m_IsToBeMipmapped){
-                m_i->_generateMipmaps();
+                _generateMipmaps();
             }
         }
         void _unload(){
@@ -202,7 +203,7 @@ void Texture::setZWrapping(TextureWrap::Wrap w){
 }
 void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(w); Texture::setYWrapping(w); Texture::setZWrapping(w); }
 void Texture::setMinFilter(TextureFilter::Filter f){ 
-    GLuint g; m_i->_enumFilterToGL(g,f,true); glTexParameteri(m_i->m_Type,GL_TEXTURE_MIN_FILTER,g); m_MinFilter = g;
+    GLuint g; m_i->_enumFilterToGL(g,f,true); glTexParameteri(m_i->m_Type,GL_TEXTURE_MIN_FILTER,g); m_i->m_MinFilter = g;
 }
 void Texture::setMaxFilter(TextureFilter::Filter f){ 
     GLuint g; m_i->_enumFilterToGL(g,f,false); glTexParameteri(m_i->m_Type,GL_TEXTURE_MAG_FILTER,g); 
@@ -232,12 +233,12 @@ void Texture::convolute(){
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
     
     //cleanup previous convolute operation
-    if(m_TextureAddress.size() >= 2){
-        glDeleteTextures(1,&m_TextureAddress.at(1));
-        glBindTexture(m_Type,0);
+    if(m_i->m_TextureAddress.size() >= 2){
+        glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
+        glBindTexture(m_i->m_Type,0);
     }
-    else if(m_TextureAddress.size() == 1){
-        m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
+    else if(m_i->m_TextureAddress.size() == 1){
+        m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
     }
     Renderer::bindFBO(0);
     glBindRenderbuffer(GL_RENDERBUFFER, 0); //might not even need this line
@@ -254,16 +255,16 @@ void Texture::convolute(){
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);  
     
-    glGenTextures(1, &m_TextureAddress.at(1));
-    glBindTexture(m_Type, m_TextureAddress.at(1));
+    glGenTextures(1, &m_i->m_TextureAddress.at(1));
+    glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
     for (uint i = 0; i < 6; ++i){
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
     }
-    glTexParameteri(m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_Type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
     glm::mat4 captureViews[] = {
@@ -275,15 +276,15 @@ void Texture::convolute(){
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
-    Renderer::bindTexture("cubemap",m_TextureAddress.at(1),0,m_Type);
+    Renderer::bindTexture("cubemap",m_i->m_TextureAddress.at(1),0,m_i->m_Type);
     
     glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
     //Renderer::bindFBO(captureFBO);
     for (uint i = 0; i < 6; ++i){
         glm::mat4 vp = captureProjection * captureViews[i];
         Renderer::sendUniformMatrix4f("VP", vp);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_TextureAddress.at(1), 0);
-        Renderer::Settings::Clear(true,true,false);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(1), 0);
+        Renderer::Settings::clear(true,true,false);
         Resources::getMesh("Cube")->bind();
         Resources::getMesh("Cube")->render();
         Resources::getMesh("Cube")->unbind();

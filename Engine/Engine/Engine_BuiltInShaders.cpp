@@ -354,7 +354,7 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
     "    }\n"
     "    irradiance = PI * irradiance * (1.0 / float(nrSamples));\n"
     "    gl_FragColor = vec4(irradiance, 1.0);\n"
-    "}\n"
+    "}\n";
 #pragma endregion
 	
 #pragma region FXAA
