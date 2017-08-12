@@ -9,7 +9,8 @@ class LightType{public: enum Type{
     Sun,
     Point,
     Directional,
-    Spot
+    Spot,
+	Rod
 };};
 class LightRange{public:enum Range{
     _7,
@@ -45,20 +46,18 @@ class SunLight: public ObjectDisplay{
         SunLight(glm::vec3 = glm::vec3(0.0f),std::string = "Sun Light",uint=LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
 
-        virtual void update(float);
-
         virtual void lighten();
-        float getAmbientIntensity(){ return m_AmbientIntensity; }
-        void setAmbientIntensity(float a){ m_AmbientIntensity = a; }
-        float getDiffuseIntensity(){ return m_DiffuseIntensity; }
-        void setDiffuseIntensity(float d){ m_DiffuseIntensity = d; }
-        float getSpecularIntensity(){ return m_SpecularIntensity; }
-        void setSpecularIntensity(float s){ m_SpecularIntensity = s; }
+        float getAmbientIntensity();
+        void setAmbientIntensity(float a);
+        float getDiffuseIntensity();
+        void setDiffuseIntensity(float d);
+        float getSpecularIntensity();
+        void setSpecularIntensity(float s);
 
-        void activate(){ m_Active = true; }
-        void deactivate(){ m_Active = false; }
-        bool isActive(){ return m_Active; }
-        uint type(){ return m_Type; }
+        void activate();
+        void deactivate();
+        bool isActive();
+        uint type();
 };
 class DirectionalLight: public SunLight{
     public:
@@ -84,12 +83,10 @@ class PointLight: public SunLight{
         void setAttenuation(LightRange::Range);
         void setAttenuationModel(LightAttenuation::Model);
 
-        float& getCullingRadius(){ return m_CullingRadius; }
-
-        float& getConstant(){ return m_Constant; }
-        float& getLinear(){ return m_Linear; }
-        float& getExponent(){ return m_Exp; }
-        glm::vec3 getAttributes(){ return glm::vec3(m_Constant,m_Linear,m_Exp); }
+        float getCullingRadius();
+        float getConstant();
+        float getLinear();
+        float getExponent();
 
         virtual void update(float);
         virtual void lighten();
@@ -106,5 +103,18 @@ class SpotLight: public PointLight{
         void lighten();
         void setCutoff(float);
         void setCutoffOuter(float);
+};
+class RodLight: public PointLight{
+    private:
+        float m_RodLength;
+    public:
+        RodLight(std::string = "Rod Light",glm::vec3 = glm::vec3(0.0f), float = 2.0f,Scene* = nullptr);
+        virtual ~RodLight();
+
+        void update(float);
+        void lighten();
+
+	    float rodLength();
+		void setRodLength(float);
 };
 #endif

@@ -38,7 +38,7 @@ unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
 unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = _populateLightRanges();
 
 
-SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1),n,scene){
+SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1.0f),n,scene){
     m_Type = type;
     m_Active = true;
     m_AmbientIntensity = 0.005f;
@@ -53,9 +53,6 @@ SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay(
 }
 SunLight::~SunLight(){
 }
-void SunLight::update(float dt){
-    ObjectBasic::update(dt);
-}
 void SunLight::sendGenericAttributesToShader(){
     Renderer::sendUniform4f("LightDataD",m_Color.x, m_Color.y, m_Color.z,float(m_Type));
 }
@@ -68,6 +65,16 @@ void SunLight::lighten(){
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
+float SunLight::getAmbientIntensity(){ return m_AmbientIntensity; }
+void SunLight::setAmbientIntensity(float a){ m_AmbientIntensity = a; }
+float SunLight::getDiffuseIntensity(){ return m_DiffuseIntensity; }
+void SunLight::setDiffuseIntensity(float d){ m_DiffuseIntensity = d; }
+float SunLight::getSpecularIntensity(){ return m_SpecularIntensity; }
+void SunLight::setSpecularIntensity(float s){ m_SpecularIntensity = s; }
+void SunLight::activate(){ m_Active = true; }
+void SunLight::deactivate(){ m_Active = false; }
+bool SunLight::isActive(){ return m_Active; }
+uint SunLight::type(){ return m_Type; }
 DirectionalLight::DirectionalLight(string name, glm::vec3 dir,Scene* scene): SunLight(glm::vec3(0),name,LightType::Directional,scene){
     alignTo(dir,0);
     ObjectBasic::update(0);
@@ -78,8 +85,8 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!m_Active) return;
     sendGenericAttributesToShader();
-    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
-    Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),0.0f, 0.0f);
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
+    Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,0.0f, 0.0f);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
@@ -583,15 +590,20 @@ PointLight::PointLight(string name, glm::vec3 pos,Scene* scene): SunLight(pos,na
 PointLight::~PointLight(){
 }
 float PointLight::calculateCullingRadius(){
-    float lightMax = Engine::Math::Max(m_Color.x,m_Color.y,m_Color.z);
-    float radius = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
+	float lightMax = Engine::Math::Max(m_Color.x,m_Color.y,m_Color.z);
+	float radius = 0;
+	if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
+        radius = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
+	}
+	else if(m_AttenuationModel == LightAttenuation::Distance_Squared){
+		radius = glm::sqrt(lightMax + (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
+	}
     return radius;
-    
-    /* this is the equation if you use the attenuation function 1.0 / (distance * distance)
-    float radius = glm::sqrt(lightMax + (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
-    return radius;
-    */
 }
+float PointLight::getCullingRadius(){ return m_CullingRadius; }
+float PointLight::getConstant(){ return m_Constant; }
+float PointLight::getLinear(){ return m_Linear; }
+float PointLight::getExponent(){ return m_Exp; }
 void PointLight::setConstant(float c){ m_Constant = c; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setLinear(float l){ m_Linear = l; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setExponent(float e){ m_Exp = e; m_CullingRadius = calculateCullingRadius(); }
@@ -617,19 +629,20 @@ void PointLight::update(float dt){
 void PointLight::lighten(){
     if(!m_Active) return;
     Camera* c = Resources::getActiveCamera();
-    if((!c->sphereIntersectTest(m_Position,m_CullingRadius)) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
+	glm::vec3 pos = getPosition();
+    if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
         return;
     sendGenericAttributesToShader();
 
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_Constant,m_Linear);
-    Renderer::sendUniform4f("LightDataC", m_Exp,float(m_Position.x),float(m_Position.y),float(m_Position.z));
+    Renderer::sendUniform4f("LightDataC", m_Exp,pos.x,pos.y,pos.z);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
 
     Renderer::sendUniformMatrix4f("Model",m_Model);
     Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
 
-    if(glm::distance(c->getPosition(),m_Position) <= m_CullingRadius){                                                  
+    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
     Resources::getMesh("PointLightBounds")->bind();
@@ -756,13 +769,14 @@ void SpotLight::update(float dt){
 void SpotLight::lighten(){
     if(!m_Active) return;
     Camera* c = Resources::getActiveCamera();
-    if(!c->sphereIntersectTest(m_Position,m_CullingRadius) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
+	glm::vec3 pos = getPosition();
+    if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
         return;
     sendGenericAttributesToShader();
 
-    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,float(m_Forward.x));
-    Renderer::sendUniform4f("LightDataB", float(m_Forward.y),float(m_Forward.z),m_Constant,m_Linear);
-    Renderer::sendUniform4f("LightDataC", m_Exp,float(m_Position.x),float(m_Position.y),float(m_Position.z));
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
+    Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,m_Constant,m_Linear);
+    Renderer::sendUniform4f("LightDataC", m_Exp,pos.x,pos.y,pos.z);
     Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     Renderer::sendUniform1fSafe("SpotLight",1.0f);
@@ -770,7 +784,7 @@ void SpotLight::lighten(){
     Renderer::sendUniformMatrix4f("Model",m_Model);
     Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
 
-    if(glm::distance(c->getPosition(),m_Position) <= m_CullingRadius){                                                  
+    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
     }
     Resources::getMesh("SpotLightBounds")->bind();
@@ -780,3 +794,190 @@ void SpotLight::lighten(){
 
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
 }
+RodLight::RodLight(string name, glm::vec3 pos,float rodLength,Scene* scene): PointLight(name,pos,scene){
+	if(Resources::getMesh("RodLightBounds") == nullptr){
+        #pragma region Data
+		std::string data = 
+			"v -0.000000 1.000000 -1.000000\n"
+			"v -0.000000 1.000000 1.000000\n"
+			"v 0.284630 0.959493 -1.000000\n"
+			"v 0.284630 0.959493 1.000000\n"
+			"v 0.546200 0.841254 -1.000000\n"
+			"v 0.546200 0.841254 1.000000\n"
+			"v 0.763521 0.654861 -1.000000\n"
+			"v 0.763521 0.654861 1.000000\n"
+			"v 0.918986 0.415415 -1.000000\n"
+			"v 0.918986 0.415415 1.000000\n"
+			"v 1.000000 0.142315 -1.000000\n"
+			"v 1.000000 0.142315 1.000000\n"
+			"v 1.000000 -0.142315 -1.000000\n"
+			"v 1.000000 -0.142315 1.000000\n"
+			"v 0.918986 -0.415415 -1.000000\n"
+			"v 0.918986 -0.415415 1.000000\n"
+			"v 0.763521 -0.654860 -1.000000\n"
+			"v 0.763521 -0.654861 1.000000\n"
+			"v 0.546200 -0.841253 -1.000000\n"
+			"v 0.546200 -0.841253 1.000000\n"
+			"v 0.284630 -0.959493 -1.000000\n"
+			"v 0.284630 -0.959493 1.000000\n"
+			"v 0.000000 -1.000000 -1.000000\n"
+			"v 0.000000 -1.000000 1.000000\n"
+			"v -0.284629 -0.959493 -1.000000\n"
+			"v -0.284629 -0.959493 1.000000\n"
+			"v -0.546200 -0.841253 -1.000000\n"
+			"v -0.546200 -0.841254 1.000000\n"
+			"v -0.763521 -0.654861 -1.000000\n"
+			"v -0.763521 -0.654861 1.000000\n"
+			"v -0.918986 -0.415415 -1.000000\n"
+			"v -0.918986 -0.415415 1.000000\n"
+			"v -1.000000 -0.142315 -1.000000\n"
+			"v -1.000000 -0.142315 1.000000\n"
+			"v -1.000000 0.142314 -1.000000\n"
+			"v -1.000000 0.142314 1.000000\n"
+			"v -0.918986 0.415415 -1.000000\n"
+			"v -0.918986 0.415414 1.000000\n"
+			"v -0.763522 0.654860 -1.000000\n"
+			"v -0.763522 0.654860 1.000000\n"
+			"v -0.546201 0.841253 -1.000000\n"
+			"v -0.546201 0.841253 1.000000\n"
+			"v -0.284631 0.959493 -1.000000\n"
+			"v -0.284631 0.959493 1.000000\n"
+			"f 2 3 1\n"
+			"f 4 5 3\n"
+			"f 6 7 5\n"
+			"f 8 9 7\n"
+			"f 10 11 9\n"
+			"f 12 13 11\n"
+			"f 14 15 13\n"
+			"f 16 17 15\n"
+			"f 18 19 17\n"
+			"f 20 21 19\n"
+			"f 21 24 23\n"
+			"f 24 25 23\n"
+			"f 26 27 25\n"
+			"f 28 29 27\n"
+			"f 29 32 31\n"
+			"f 32 33 31\n"
+			"f 34 35 33\n"
+			"f 35 38 37\n"
+			"f 38 39 37\n"
+			"f 39 42 41\n"
+			"f 25 1 23\n"
+			"f 42 43 41\n"
+			"f 44 1 43\n"
+			"f 3 23 1\n"
+			"f 27 43 25\n"
+			"f 29 41 27\n"
+			"f 31 39 29\n"
+			"f 33 37 31\n"
+			"f 5 21 3\n"
+			"f 7 19 5\n"
+			"f 9 17 7\n"
+			"f 11 15 9\n"
+			"f 2 22 4\n"
+			"f 24 44 26\n"
+			"f 26 42 28\n"
+			"f 28 40 30\n"
+			"f 30 38 32\n"
+			"f 32 36 34\n"
+			"f 6 22 20\n"
+			"f 8 20 18\n"
+			"f 8 16 10\n"
+			"f 12 16 14\n"
+			"f 2 4 3\n"
+			"f 4 6 5\n"
+			"f 6 8 7\n"
+			"f 8 10 9\n"
+			"f 10 12 11\n"
+			"f 12 14 13\n"
+			"f 14 16 15\n"
+			"f 16 18 17\n"
+			"f 18 20 19\n"
+			"f 20 22 21\n"
+			"f 21 22 24\n"
+			"f 24 26 25\n"
+			"f 26 28 27\n"
+			"f 28 30 29\n"
+			"f 29 30 32\n"
+			"f 32 34 33\n"
+			"f 34 36 35\n"
+			"f 35 36 38\n"
+			"f 38 40 39\n"
+			"f 39 40 42\n"
+			"f 25 43 1\n"
+			"f 42 44 43\n"
+			"f 44 2 1\n"
+			"f 3 21 23\n"
+			"f 27 41 43\n"
+			"f 29 39 41\n"
+			"f 31 37 39\n"
+			"f 33 35 37\n"
+			"f 5 19 21\n"
+			"f 7 17 19\n"
+			"f 9 15 17\n"
+			"f 11 13 15\n"
+			"f 2 24 22\n"
+			"f 24 2 44\n"
+			"f 26 44 42\n"
+			"f 28 42 40\n"
+			"f 30 40 38\n"
+			"f 32 38 36\n"
+			"f 6 4 22\n"
+			"f 8 6 20\n"
+			"f 8 18 16\n"
+			"f 12 10 16";
+        #pragma endregion
+		Resources::addMesh("RodLightBounds",data,CollisionType::None,false);    
+	}
+    ObjectBasic::update(0);
+    setRodLength(rodLength);
+    m_Type = LightType::Rod;
+}
+RodLight::~RodLight(){
+}
+void RodLight::setRodLength(float length){ m_RodLength = length; }
+void RodLight::update(float dt){
+    if(m_Parent != nullptr){
+        m_Model = m_Parent->getModel();
+    }
+    else{
+        m_Model = glm::mat4(1.0f);
+    }
+    glm::mat4 translationMatrix = glm::translate(m_Position);
+    glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
+	glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_CullingRadius,m_CullingRadius,(m_RodLength / 2.0f)+m_CullingRadius));
+    m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
+}
+void RodLight::lighten(){
+    if(!m_Active) return;
+    Camera* c = Resources::getActiveCamera();
+	glm::vec3 pos = getPosition();
+	float cullingDistance = m_RodLength+(m_CullingRadius*2.0f);
+    if(!c->sphereIntersectTest(pos,cullingDistance) || (c->getDistance(this) > Object::m_VisibilityThreshold * cullingDistance))
+        return;	
+    sendGenericAttributesToShader();
+
+	float half = m_RodLength / 2.0f;
+	glm::vec3 firstEndPt = pos + (m_Forward * half);
+	glm::vec3 secndEndPt = pos - (m_Forward * half);
+
+    Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,firstEndPt.x);
+    Renderer::sendUniform4f("LightDataB", firstEndPt.y,firstEndPt.z,m_Constant,m_Linear);
+    Renderer::sendUniform4f("LightDataC", m_Exp,secndEndPt.x,secndEndPt.y,secndEndPt.z);
+    Renderer::sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
+    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+
+    Renderer::sendUniformMatrix4f("Model",m_Model);
+    Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+
+    if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
+        Renderer::Settings::cullFace(GL_FRONT);
+    }
+    Resources::getMesh("RodLightBounds")->bind();
+    Resources::getMesh("RodLightBounds")->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
+    Resources::getMesh("RodLightBounds")->unbind();
+    Renderer::Settings::cullFace(GL_BACK);
+
+    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+}
+float RodLight::rodLength(){ return m_RodLength; }

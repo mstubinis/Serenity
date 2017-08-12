@@ -244,7 +244,7 @@ void SolarSystem::_loadFromFile(std::string filename){
     float xPos = Resources::getObject("Valiant")->getPosition().x;
     float zPos = Resources::getObject("Valiant")->getPosition().z;
 
-    ObjectDisplay* _s = new ObjectDisplay("Test","Miranda",glm::vec3(xPos+4,0,zPos-2),glm::vec3(1),"TestObject1",nullptr);
+    ObjectDisplay* _s = new ObjectDisplay("Test","Miranda",glm::vec3(xPos+4,0,zPos-2),glm::vec3(1.0f),"TestObject1",nullptr);
     _s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
@@ -257,10 +257,13 @@ void SolarSystem::_loadFromFile(std::string filename){
 
     new Ship("Starbase","Starbase",false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
-    player->translate(0,0,11);
+    player->translate(0,0,2);
 
-	SpotLight* spot = new SpotLight("SpotLightPlayer");
-	spot->setAttenuation(LightRange::_65);
+	RodLight* rod = new RodLight("RodLightPlayer",glm::vec3(0.0f,0.0f,0.0f),20.0f);
+	rod->setAttenuation(LightRange::_20);
+	rod->setColor(0.0f,1.0f,0.0f,1.0f);
+	//rod->setDiffuseIntensity(6.0f);
+	//rod->setSpecularIntensity(2.5f);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox
