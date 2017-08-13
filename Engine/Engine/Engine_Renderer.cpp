@@ -467,6 +467,7 @@ void Detail::RenderManagement::_passCopyDepth(){
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 }
 void Detail::RenderManagement::_passLighting(){
+	ShaderP* pGI = Resources::getShaderProgram("Deferred_Light_GI");
     ShaderP* pNormal = Resources::getShaderProgram("Deferred_Light"); pNormal->bind();
     ShaderP* pSpot = Resources::getShaderProgram("Deferred_Light_Spot");
 	ShaderP* p = pNormal;
@@ -488,24 +489,31 @@ void Detail::RenderManagement::_passLighting(){
     bindTextureSafe("gMiscMap",m_gBuffer->getTexture(GBufferType::Misc),2);
     bindTextureSafe("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),3);
 
-    Renderer::sendUniform1fSafe("LastLight",0.0f);
+    for (auto light:Resources::getCurrentScene()->lights()){
+        light.second->lighten();
+    }
+    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
+    p->unbind();
 
+	//do GI here.
+	p = pGI; p->bind();
+    sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
+    sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
+    sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
+    Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
+    sendUniform4fSafe("ScreenData",c->getNear(),c->getFar(),(float)Resources::getWindowSize().x,(float)Resources::getWindowSize().y);
+    bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
+    bindTextureSafe("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),1);
+    bindTextureSafe("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),2);
 
 	SkyboxEmpty* sky = Resources::getCurrentScene()->getSkybox();
 	if(sky != nullptr && sky->texture()->numAddresses() >= 2){
-		bindTextureSafe("irradianceMap",sky->texture()->address(1),4,GL_TEXTURE_CUBE_MAP);
+		bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
 	}
-	uint count = 0;
-    for (auto light:Resources::getCurrentScene()->lights()){
-		if(count == Resources::getCurrentScene()->lights().size()-1){
-			Renderer::sendUniform1fSafe("LastLight",1.0f);
-		}
-        light.second->lighten();
-		count++;
-    }
-    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
-	unbindTextureCubemap(4);
-    p->unbind();
+	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+	for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
+	unbindTextureCubemap(3);
+	p->unbind();
 }
 void Detail::RenderManagement::render(){
     _passGeometry();

@@ -50,6 +50,7 @@ string Shaders::Detail::ShadersManagement::blur_frag = "";
 string Shaders::Detail::ShadersManagement::edge_frag = "";
 string Shaders::Detail::ShadersManagement::final_frag = "";
 string Shaders::Detail::ShadersManagement::lighting_frag = "";
+string Shaders::Detail::ShadersManagement::lighting_frag_gi = "";
 #pragma endregion
 
 void Shaders::Detail::ShadersManagement::init(){
@@ -886,13 +887,11 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
     "uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
     "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
-	"uniform float LastLight;\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gDepthMap;\n"
-	"uniform samplerCube irradianceMap;\n"
     "\n"
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
@@ -924,10 +923,6 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "}\n"
     "vec3 SchlickFrensel(float theta, vec3 _F0){\n"
     "    vec3 ret = _F0 + (vec3(1.0) - _F0) * pow(1.0 - theta,5.0);\n"
-    "    return ret;\n"
-    "}\n"
-    "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
-	"    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"
     "}\n"
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
@@ -1071,15 +1066,6 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    kD *= 1.0 - metalness;\n"
 	"    vec3 FinalLight = (kD * MaterialAlbedoTexture  / kPi + LightSpecularColor) * LightDiffuseColor * NdotL;\n"
 	"    TotalLight = FinalLight;\n"
-	"    if(LastLight > 0.999){\n"
-	"        vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
-	"		 vec3 kS1 = SchlickFrenselRoughness(VdotN,F0,roughness);\n"
-	"		 vec3 kD1 = vec3(1.0) - kS1;\n"
-	"		 kD1 *= 1.0 - metalness;\n"
-	"	 	 vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
-	"		 AmbientIrradiance = (kD1 * AmbientIrradiance);\n" //* ao
-	"        TotalLight += AmbientIrradiance;\n"
-	"    }\n"
     "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
     "}\n"
     "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
@@ -1132,6 +1118,63 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
 	"        lightCalculation = CalcRodLight(vec3(LightDataA.w,LightDataB.xy),LightDataC.yzw,PxlPosition,PxlNormal,uv);\n"
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"
+    "}";
+
+#pragma endregion
+
+
+#pragma region LightingFragGI
+Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersManagement::version + 
+    "#define MATERIAL_COUNT_LIMIT 255\n"
+    "\n"
+    "uniform sampler2D gDiffuseMap;\n"
+    "uniform sampler2D gNormalMap;\n"
+    "uniform sampler2D gDepthMap;\n"
+	"uniform samplerCube irradianceMap;\n"
+    "\n"
+    "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
+    "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
+    "uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = UNUSED, g = specPower, b = specularModel, a = diffuseModel\n"
+    "uniform mat4 VP;\n"
+    "uniform mat4 invVP;\n"
+    "uniform mat4 invP;\n"
+    "\n";
+Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::float_into_2_floats;
+Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
+Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
+Shaders::Detail::ShadersManagement::lighting_frag_gi +=
+    "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
+	"    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
+    "    return ret;\n"
+    "}\n"
+    "void main(void){\n"
+    "    //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh\n"
+    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
+    "\n"
+    "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
+    "    vec3 PxlWorldPos = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
+    "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
+    "\n"
+    "    vec3 ViewDir = normalize(CamPosGamma.xyz - PxlWorldPos);\n"
+    "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
+    "    float kPi = 3.1415926535898;\n"
+    "    //highp int index = int(texture2D(gNormalMap,uv).a);\n"
+    "    highp int index = 0;\n"
+    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
+    "    float metalness = stuff.x;\n"
+    "    float smoothness = stuff.y;\n"
+    "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 Frensel = F0;\n"
+    "    float roughness = 1.0 - smoothness;\n"
+	"    vec3 TotalLight = vec3(0.0);\n"
+	"    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
+	"    vec3 kS1 = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
+	"    vec3 kD1 = vec3(1.0) - kS1;\n"
+	"    kD1 *= 1.0 - metalness;\n"
+	"    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
+	"    AmbientIrradiance = (kD1 * AmbientIrradiance);\n" //* ao
+	"    TotalLight += AmbientIrradiance;\n"
+	"    gl_FragColor += vec4(TotalLight,1.0);\n"
     "}";
 
 #pragma endregion
