@@ -1,5 +1,6 @@
 #include "Texture.h"
 #include "Mesh.h"
+#include "Skybox.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "ShaderProgram.h"
@@ -152,7 +153,7 @@ class Texture::impl final{
                 glTexParameteri(m_Type, GL_TEXTURE_MIN_FILTER, m_MinFilter);
                 glGenerateMipmap(m_Type);
                 m_Mipmapped = true;
-                m_MipMapLevels = glm::log2(glm::max(m_Width, m_Height)) + 1;
+                m_MipMapLevels = uint(glm::log2(glm::max(m_Width, m_Height)) + 1.0f);
                 glBindTexture(m_Type, 0);
             }
       }
@@ -231,7 +232,9 @@ void Texture::convolute(){
     }
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-    
+    //or just use plain 32...
+    uint width = 32; /*glm::max(32, m_Width / 32);*/
+    uint height = 32; /*glm::max(32, m_Height / 32);*/
     //cleanup previous convolute operation
     if(m_i->m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
@@ -241,20 +244,20 @@ void Texture::convolute(){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
     }
     Renderer::bindFBO(0);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0); //might not even need this line
-    
+
     GLuint captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
     glGenRenderbuffers(1, &captureRBO);
     
-    //or just use plain 32...
-    uint width = 32; /*glm::max(32, m_Width / 32);*/
-    uint height = 32; /*glm::max(32, m_Height / 32);*/
-
     Renderer::bindFBO(captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);  
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
     
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+        return;
+    }
+
     glGenTextures(1, &m_i->m_TextureAddress.at(1));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
     for (uint i = 0; i < 6; ++i){
@@ -266,7 +269,7 @@ void Texture::convolute(){
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 1000.0f);
     glm::mat4 captureViews[] = {
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -276,18 +279,15 @@ void Texture::convolute(){
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
-    Renderer::bindTexture("cubemap",m_i->m_TextureAddress.at(1),0,m_i->m_Type);
+	Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     
     glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
-    //Renderer::bindFBO(captureFBO);
     for (uint i = 0; i < 6; ++i){
         glm::mat4 vp = captureProjection * captureViews[i];
         Renderer::sendUniformMatrix4f("VP", vp);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(1), 0);
         Renderer::Settings::clear(true,true,false);
-        Resources::getMesh("Cube")->bind();
-        Resources::getMesh("Cube")->render();
-        Resources::getMesh("Cube")->unbind();
+		Skybox::bindMesh();
     }
     
     //cleanup... might have to comment this out if this bugs it out
@@ -304,6 +304,8 @@ bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
 uchar* Texture::pixels(){ return m_i->_getPixels(); }
 GLuint& Texture::address(){ return m_i->m_TextureAddress.at(0); }
+GLuint& Texture::address(uint index){ return m_i->m_TextureAddress.at(index); }
+uint Texture::numAddresses(){ return m_i->m_TextureAddress.size(); }
 GLuint Texture::type(){ return m_i->m_Type; }
 uint Texture::width(){ return m_i->m_Width; }
 uint Texture::height(){ return m_i->m_Height; }

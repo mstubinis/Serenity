@@ -353,7 +353,7 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
     "        }\n"
     "    }\n"
     "    irradiance = PI * irradiance * (1.0 / float(nrSamples));\n"
-    "    gl_FragColor = vec4(irradiance, 1.0);\n"
+	"    gl_FragColor = vec4(irradiance, 1.0);\n"
     "}\n";
 #pragma endregion
 	
@@ -886,11 +886,13 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform vec4 LightDataC;\n" //x = exp, y = LightPosition.x, z = LightPosition.y, w = LightPosition.z
     "uniform vec4 LightDataD;\n" //x = LightColor.r, y = LightColor.g, z = LightColor.b, w = LightType
     "uniform vec4 LightDataE;\n" //x = cutoff, y = outerCutoff, z = AttenuationModel, w = UNUSED
+	"uniform float LastLight;\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gDepthMap;\n"
+	"uniform samplerCube irradianceMap;\n"
     "\n"
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
@@ -920,8 +922,12 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float denom = NdotV * (1.0 - k) + k;\n"
     "    return nom / denom;\n"
     "}\n"
-    "vec3 SchlickFrensel(float cosTheta, vec3 frenselFactor){\n"
-    "    vec3 ret = frenselFactor + (vec3(1.0) - frenselFactor) * pow( 1.0 - cosTheta, 5.0);\n"
+    "vec3 SchlickFrensel(float theta, vec3 _F0){\n"
+    "    vec3 ret = _F0 + (vec3(1.0) - _F0) * pow(1.0 - theta,5.0);\n"
+    "    return ret;\n"
+    "}\n"
+    "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
+	"    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"
     "}\n"
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
@@ -953,7 +959,6 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    if(PxlNormal.r > 0.9999 && PxlNormal.g > 0.9999 && PxlNormal.b > 0.9999){\n"
     "        return vec3(0.0);\n"
     "    }\n"
-    "    vec3 LightAmbientColor  = LightDataD.xyz * LightDataA.x;\n"
     "    vec3 LightDiffuseColor  = LightDataD.xyz;\n"
     "    vec3 LightSpecularColor = LightDataD.xyz * SpecularStrength;\n"
     "    vec3 TotalLight         = vec3(0.0);\n"
@@ -1006,13 +1011,11 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    if(materials[index].b == 0.0){\n" // this is blinn phong (non-physical)
     "        float gloss = exp2(10.0 * smoothness + 1.0);\n"
     "        float kS = (8.0 + gloss ) / (8.0 * kPi);\n"
-    "        //kS /= kPi;\n"
     "        SpecularFactor = vec3(kS * pow(NdotH, gloss));\n"
     "    }\n"
     "    else if(materials[index].b == 1.0){\n" //this is phong (non-physical)
     "        float gloss = exp2(10.0 * smoothness + 1.0);\n"
     "        float kS = (2.0 + gloss ) / (2.0 * kPi);\n"
-    "        //kS /= kPi;\n"
     "        vec3 Reflect = reflect(-LightDir, PxlNormal);\n"
     "        float VdotR = max(0.0, dot(ViewDir,Reflect));\n"
     "        SpecularFactor = vec3(kS * pow(VdotR, gloss));\n"
@@ -1066,11 +1069,18 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    vec3 kS = Frensel;\n"
     "    vec3 kD = vec3(1.0) - kS;\n"
     "    kD *= 1.0 - metalness;\n"
-    "    vec3 FinalDiffuse = (kD * MaterialAlbedoTexture * LightDiffuseColor) / kPi;\n"
-    "    vec3 FinalSpecular = LightSpecularColor;\n"
-    "    TotalLight = (FinalDiffuse + FinalSpecular) * NdotL;\n"
-    "    TotalLight += (LightAmbientColor * MaterialAlbedoTexture);\n"
-    "    return max( vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
+	"    vec3 FinalLight = (kD * MaterialAlbedoTexture  / kPi + LightSpecularColor) * LightDiffuseColor * NdotL;\n"
+	"    TotalLight = FinalLight;\n"
+	"    if(LastLight > 0.999){\n"
+	"        vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
+	"		 vec3 kS1 = SchlickFrenselRoughness(VdotN,F0,roughness);\n"
+	"		 vec3 kD1 = vec3(1.0) - kS1;\n"
+	"		 kD1 *= 1.0 - metalness;\n"
+	"	 	 vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
+	"		 AmbientIrradiance = (kD1 * AmbientIrradiance);\n" //* ao
+	"        TotalLight += AmbientIrradiance;\n"
+	"    }\n"
+    "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
     "}\n"
     "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
     "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"

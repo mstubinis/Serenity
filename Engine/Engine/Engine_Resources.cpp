@@ -139,34 +139,55 @@ void Resources::initResources(){
 
     //add a basic cube mesh
     #pragma region MeshData
-    string cubeMesh =  "v -1.0000 -1.0000 1.0000\n"
-                        "v -1.0000 1.0000 1.0000\n"
-                        "v -1.0000 -1.0000 -1.0000\n"
-                        "v -1.0000 1.0000 -1.0000\n"
-                        "v 1.0000 -1.0000 1.0000\n"
-                        "v 1.0000 1.0000 1.0000\n"
-                        "v 1.0000 -1.0000 -1.0000\n"
-                        "v 1.0000 1.0000 -1.0000\n"
-                        "vn -1.0000 0.0000 0.0000\n"
-                        "vn 0.0000 0.0000 -1.0000\n"
-                        "vn 1.0000 0.0000 0.0000\n"
-                        "vn 0.0000 0.0000 1.0000\n"
-                        "vn 0.0000 -1.0000 0.0000\n"
-                        "vn 0.0000 1.0000 0.0000\n"
-                        "f 4/1 1/1 2/1\n"
-                        "f 8/2 3/2 4/2\n"
-                        "f 6/3 7/3 8/3\n"
-                        "f 2/4 5/4 6/4\n"
-                        "f 3/5 5/5 1/5\n"
-                        "f 8/6 2/6 6/6\n"
-                        "f 4/1 3/1 1/1\n"
-                        "f 8/2 7/2 3/2\n"
-                        "f 6/3 5/3 7/3\n"
-                        "f 2/4 1/4 5/4\n"
-                        "f 3/5 7/5 5/5\n"
-                        "f 8/6 4/6 2/6\n";
+    string cubeMesh =  
+		"v 1.000000 -1.000000 -1.000000\n"
+		"v 1.000000 -1.000000 1.000000\n"
+		"v -1.000000 -1.000000 1.000000\n"
+		"v -1.000000 -1.000000 -1.000000\n"
+		"v 1.000000 1.000000 -1.000000\n"
+		"v 1.000000 1.000000 1.000000\n"
+		"v -1.000000 1.000000 1.000000\n"
+		"v -1.000000 1.000000 -1.000000\n"
+		"vt 1.0000 0.0000\n"
+		"vt 0.0000 1.0000\n"
+		"vt 0.0000 0.0000\n"
+		"vt 1.0000 0.0000\n"
+		"vt 0.0000 1.0000\n"
+		"vt 0.0000 0.0000\n"
+		"vt 1.0000 0.0000\n"
+		"vt 0.0000 1.0000\n"
+		"vt 1.0000 0.0000\n"
+		"vt 0.0000 1.0000\n"
+		"vt 0.0000 0.0000\n"
+		"vt 0.0000 0.0000\n"
+		"vt 1.0000 1.0000\n"
+		"vt 1.0000 0.0000\n"
+		"vt 0.0000 1.0000\n"
+		"vt 1.0000 1.0000\n"
+		"vt 1.0000 1.0000\n"
+		"vt 1.0000 1.0000\n"
+		"vt 1.0000 0.0000\n"
+		"vt 1.0000 1.0000\n"
+		"vn 0.0000 -1.0000 0.0000\n"
+		"vn 0.0000 1.0000 0.0000\n"
+		"vn 1.0000 -0.0000 0.0000\n"
+		"vn 0.0000 -0.0000 1.0000\n"
+		"vn -1.0000 -0.0000 -0.0000\n"
+		"vn 0.0000 0.0000 -1.0000\n"
+		"f 2/1/1 4/2/1 1/3/1\n"
+		"f 8/4/2 6/5/2 5/6/2\n"
+		"f 5/7/3 2/8/3 1/3/3\n"
+		"f 6/9/4 3/10/4 2/11/4\n"
+		"f 3/12/5 8/13/5 4/2/5\n"
+		"f 1/14/6 8/15/6 5/6/6\n"
+		"f 2/1/1 3/16/1 4/2/1\n"
+		"f 8/4/2 7/17/2 6/5/2\n"
+		"f 5/7/3 6/18/3 2/8/3\n"
+		"f 6/9/4 7/17/4 3/10/4\n"
+		"f 3/12/5 7/19/5 8/13/5\n"
+		"f 1/14/6 4/20/6 8/15/6";
     #pragma endregion
-    //addMesh("Cube",cubeMesh,COLLISION_TYPE_NONE,false);
+	addMesh("Cube",cubeMesh,CollisionType::None,false);
 
     Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
     Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
@@ -203,12 +224,6 @@ void Resources::initResources(){
     addMaterial("Default","","","","","Deferred");
 
     addMesh("Plane",1.0f,1.0f);
-}
-void Resources::initRenderingContexts(){
-    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->initRenderingContext();
-}
-void Resources::cleanupRenderingContexts(){
-    for(auto shaderProgram:Detail::ResourceManagement::m_ShaderPrograms) shaderProgram.second.get()->cleanupRenderingContext();
 }
 void Resources::setCurrentScene(Scene* scene){ 
     if(Detail::ResourceManagement::m_CurrentScene != scene){

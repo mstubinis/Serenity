@@ -53,7 +53,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                 skybox = line;
             }
             else if(count == 3){//this line has the system's skybox's number of flares
-                new GameSkybox(skybox,boost::lexical_cast<uint>(line),this);
+                GameSkybox* box = new GameSkybox(skybox,boost::lexical_cast<uint>(line),this);
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;
@@ -203,7 +203,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    setPlayer(new Ship("Defiant","Iron",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 
@@ -258,12 +258,6 @@ void SolarSystem::_loadFromFile(std::string filename){
     new Ship("Starbase","Starbase",false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
     player->translate(0,0,2);
-
-	RodLight* rod = new RodLight("RodLightPlayer",glm::vec3(0.0f,0.0f,0.0f),20.0f);
-	rod->setAttenuation(LightRange::_20);
-	rod->setColor(0.0f,1.0f,0.0f,1.0f);
-	//rod->setDiffuseIntensity(6.0f);
-	//rod->setSpecularIntensity(2.5f);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox

@@ -86,6 +86,7 @@ class ShaderP::impl final{
 
             super->setCustomBindFunctor(ShaderP::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(ShaderP::impl::DEFAULT_UNBIND_FUNCTOR);
+			m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
         }
         void _construct(string& name, string& vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _vs = Resources::getShader(vs); Shader* _fs = Resources::getShader(fs);
@@ -116,12 +117,6 @@ class ShaderP::impl final{
             _construct(name,_vs,fs,stage,super);
         }
         void _destruct(){
-            _cleanupRenderingContext();
-        }
-        void _initRenderingContext(string& name){
-            m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
-        }
-        void _cleanupRenderingContext(){
             glDeleteShader(m_ShaderProgram);
             glDeleteProgram(m_ShaderProgram);
             m_UniformLocations.clear();
@@ -246,12 +241,6 @@ ShaderP::ShaderP(string& n, string& vs, Shader* fs, ShaderRenderPass::Pass s):m_
 }
 ShaderP::~ShaderP(){
     m_i->_destruct();
-}
-void ShaderP::initRenderingContext(){
-    m_i->_initRenderingContext(this->name());
-}
-void ShaderP::cleanupRenderingContext(){
-    m_i->_cleanupRenderingContext();
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }

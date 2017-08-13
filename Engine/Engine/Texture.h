@@ -39,9 +39,11 @@ class Texture: public EngineResource{
 
         uchar* pixels();
         GLuint& address();
+		GLuint& address(uint);
         GLuint type();
         uint width();
         uint height();
+		uint numAddresses();
         ushort mipmapLevels();
         bool mipmapped();
 

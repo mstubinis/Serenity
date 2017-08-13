@@ -46,5 +46,6 @@ class Skybox: public SkyboxEmpty{
         Texture* texture(){ return m_Texture; }
         virtual void update();
         virtual void draw();
+		static void bindMesh();
 };
 #endif

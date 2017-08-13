@@ -83,10 +83,18 @@ Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
     string names[6] = {front,back,left,right,top,bottom};
 
     m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,GL_SRGB8_ALPHA8);
+	m_Texture->convolute();
 }
 Skybox::~Skybox(){
 }
 void Skybox::update(){
+}
+void Skybox::bindMesh(){
+    glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
+    glDisableVertexAttribArray(0);
 }
 void Skybox::draw(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
@@ -95,13 +103,9 @@ void Skybox::draw(){
     glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
     Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
 
-    Renderer::bindTexture("Texture",m_Texture,0);
+    Renderer::bindTexture("Texture",m_Texture->address(0),0,GL_TEXTURE_CUBE_MAP);
 
-    glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
-    glDisableVertexAttribArray(0);
+	Skybox::bindMesh();
 
     Renderer::unbindTextureCubemap(0);
     p->unbind();

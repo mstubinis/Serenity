@@ -46,7 +46,6 @@ void Game::initResources(){
     Resources::addMesh("Starbase","data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
     Resources::addMesh("Ring","data/Models/ring.obj");
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
-	Resources::addMesh("Ground","data/Models/ground.obj",CollisionType::None);
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
@@ -85,9 +84,6 @@ void Game::initLogic(){
     m_HUD = new HUD();
 
     Renderer::Settings::HDR::disable();
-
-	ObjectDisplay* d = new ObjectDisplay("Ground","Defiant",glm::vec3(0.0f,-0.5f,0.0f),glm::vec3(1.0f),"GroundTest");
-	d->rotate(0,20,0);
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));

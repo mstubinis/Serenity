@@ -162,8 +162,6 @@ namespace Engine{
         void removeSound(std::string name);
 
         void initResources();
-        void initRenderingContexts();
-        void cleanupRenderingContexts();
     };
     //TODO: Move this somewhere else
     template<typename T>

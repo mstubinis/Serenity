@@ -49,9 +49,6 @@ class ShaderP final: public BindableResource{
 
         ~ShaderP();
 
-        void initRenderingContext();
-        void cleanupRenderingContext();
-
         void bind();
         void unbind();
 
