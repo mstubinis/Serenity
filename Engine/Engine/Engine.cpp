@@ -69,14 +69,14 @@ void Engine::Detail::EngineClass::update(){
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
-    Engine::Physics::Detail::PhysicsManagement::update(dt);
+    Physics::Detail::PhysicsManagement::update(dt);
     Events::Mouse::MouseProcessing::m_Difference *= (0.975f);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 }
 void Engine::Detail::EngineClass::render(){
     Game::render();
-    Engine::Renderer::Detail::RenderManagement::render();
+    Renderer::Detail::RenderManagement::render(Resources::getWindowSize().x,Resources::getWindowSize().y);
     Resources::getWindow()->display();
 }
 #pragma region Event Handler Methods
