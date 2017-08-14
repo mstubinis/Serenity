@@ -466,21 +466,24 @@ void Detail::RenderManagement::_passCopyDepth(Camera* c,uint& fbufferWidth, uint
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 }
 void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
-    ShaderP* pGI = Resources::getShaderProgram("Deferred_Light_GI");
     ShaderP* pNormal = Resources::getShaderProgram("Deferred_Light"); pNormal->bind();
+    ShaderP* pGI = Resources::getShaderProgram("Deferred_Light_GI");
     ShaderP* pSpot = Resources::getShaderProgram("Deferred_Light_Spot");
     ShaderP* p = pNormal;
 
-    sendUniformMatrix4fSafe("VP",c->getViewProjection());
-    sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
-    sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
-
+    glm::mat4 invVP = c->getViewProjInverted();
+    glm::mat4 invP = glm::inverse(c->getProjection());
     glm::vec3 campos = c->getPosition();
-    Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
+    float cNear = c->getNear(); float cFar = c->getFar();
+    
+    sendUniformMatrix4fSafe("VP",c->getViewProjection());
+    sendUniformMatrix4fSafe("invVP",invVP);
+    sendUniformMatrix4fSafe("invP",invP);
+    sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
 
     sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
-    sendUniform4fSafe("ScreenData",c->getNear(),c->getFar(),(float)fbufferWidth,(float)fbufferHeight);
+    sendUniform4fSafe("ScreenData",cNear,cFar,(float)fbufferWidth,(float)fbufferHeight);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),1);
@@ -495,11 +498,11 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
 
     //do GI here.
     p = pGI; p->bind();
-    sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
-    sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
+    sendUniformMatrix4fSafe("invVP",invVP);
+    sendUniformMatrix4fSafe("invP",invP);
     sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-    Renderer::sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
-    sendUniform4fSafe("ScreenData",c->getNear(),c->getFar(),(float)fbufferWidth,(float)fbufferHeight);
+    sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,RendererInfo::GeneralInfo::gamma);
+    sendUniform4fSafe("ScreenData",cNear,cFar,float(fbufferWidth),float(fbufferHeight));
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),1);
     bindTextureSafe("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),2);
@@ -525,8 +528,8 @@ void Detail::RenderManagement::render(Camera* c,uint& fbufferWidth, uint& fbuffe
         Object* o = Resources::getObject("Sun");
         glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
         glm::vec3 camPos = c->getPosition();
-	glm::vec3 oPos = o->getPosition();
-	glm::vec3 camVec = c->getViewVector();
+        glm::vec3 oPos = o->getPosition();
+        glm::vec3 camVec = c->getViewVector();
         bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
         float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
         
@@ -722,9 +725,7 @@ void Detail::RenderManagement::_passFXAA(Camera* c,uint& fbufferWidth, uint& fbu
     bindTexture("depthTexture",m_gBuffer->getTexture(GBufferType::Depth),1);
     renderFullscreenQuad(fbufferWidth,fbufferHeight);
 
-    for(uint i = 0; i < 2; i++){
-        unbindTexture2D(i); 
-    }
+    for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passSMAA(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
