@@ -20,8 +20,9 @@
 
 using namespace Engine;
 using namespace Engine::Events;
+using namespace std;
 
-SolarSystem::SolarSystem(std::string n, std::string file):Scene(n){
+SolarSystem::SolarSystem(string n, string file):Scene(n){
     playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
     Resources::setActiveCamera(playerCamera);
 
@@ -37,14 +38,14 @@ SolarSystem::SolarSystem(std::string n, std::string file):Scene(n){
 SolarSystem::~SolarSystem(){
 
 }
-void SolarSystem::_loadFromFile(std::string filename){
+void SolarSystem::_loadFromFile(string filename){
     uint count = 0;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-    std::unordered_map<std::string,std::vector<RingInfo>> planetRings;
+    unordered_map<string,std::vector<RingInfo>> planetRings;
 
-    std::string skybox;
-    for(std::string line; std::getline(str, line, '\n');){
-        line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() ); //remove \r from the line
+    string skybox;
+    for(string line; getline(str, line, '\n');){
+        line.erase( remove(line.begin(), line.end(), '\r'), line.end() ); //remove \r from the line
         if(line[0] != '#'){//ignore commented lines
             if(count == 1){//this line has the system's name
                 setName(line);
@@ -58,19 +59,19 @@ void SolarSystem::_loadFromFile(std::string filename){
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;
 
-                std::string token;
-                std::istringstream stream(line);
+                string token;
+                istringstream stream(line);
 
-                std::string NAME;
-                std::string LAGRANGE__TYPE;
-                std::string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
-                std::string PARENT = "";
+                string NAME;
+                string LAGRANGE__TYPE;
+                string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
+                string PARENT = "";
                 float R,G,B,   R1,G1,B1;
                 float ATMOSPHERE_HEIGHT;
-                std::string LIGHTCOLOR;
-                std::string TYPE;
-                std::string TEXTURE = "data/Textures/Planets/";
-                std::string MATERIAL_NAME = "";
+                string LIGHTCOLOR;
+                string TYPE;
+                string TEXTURE = "data/Textures/Planets/";
+                string MATERIAL_NAME = "";
 
                 float ORBIT_PERIOD = -1;
                 unsigned long long ORBIT_MAJOR_AXIS = -1;
@@ -83,15 +84,15 @@ void SolarSystem::_loadFromFile(std::string filename){
                 unsigned long long POSITION = 0;
                 uint BREAK = 0;
 
-                while(std::getline(stream, token, ' ')) {
+                while(getline(stream, token, ' ')) {
                     size_t pos = token.find("=");
 
-                    std::string key = token.substr(0, pos);
-                    std::string value = token.substr(pos + 1, std::string::npos);
+                    string key = token.substr(0, pos);
+                    string value = token.substr(pos + 1,string::npos);
 
                     if(key == "name"){                  
                         NAME = value;
-                        std::replace(NAME.begin(),NAME.end(),'_',' ');
+                        replace(NAME.begin(),NAME.end(),'_',' ');
                     }
                     else if(key == "lp1")              LAGRANGE_PLANET_1 = value;
                     else if(key == "lp2")              LAGRANGE_PLANET_2 = value;
@@ -122,23 +123,23 @@ void SolarSystem::_loadFromFile(std::string filename){
                 float randAngle = float(rand() % 3600);
                 randAngle /= 10.0f;
                 randAngle *= 3.14159f / 180.0f;
-                float xPos = glm::cos(randAngle) * static_cast<float>(POSITION);
-                float zPos = glm::sin(randAngle) * static_cast<float>(POSITION);
+                float xPos = glm::cos(randAngle) * float(POSITION);
+                float zPos = glm::sin(randAngle) * float(POSITION);
 
                 if(MATERIAL_NAME != ""){
-                    std::string normalFile = "";
-                    std::string glowFile = "";
-                    std::string extention;
+                    string normalFile = "";
+                    string glowFile = "";
+                    string extention;
 
                     //get file extension
                     for(uint i = TEXTURE.length() - 4; i < TEXTURE.length(); i++) extention += tolower(TEXTURE.at(i));
 
-                    std::string normFile = TEXTURE.substr(0,TEXTURE.size()-4);
+                    string normFile = TEXTURE.substr(0,TEXTURE.size()-4);
                     normFile += "_Normal" + extention;
                     if(boost::filesystem::exists(normFile)){
                         normalFile = normFile;
                     }
-                    std::string gloFile = TEXTURE.substr(0,TEXTURE.size()-4);
+                    string gloFile = TEXTURE.substr(0,TEXTURE.size()-4);
                     gloFile += "_Glow" + extention;
                     if(boost::filesystem::exists(gloFile)){
                         glowFile = gloFile;
@@ -220,7 +221,7 @@ void SolarSystem::_loadFromFile(std::string filename){
                 else if(line[0] == 'R'){//Rings
                     if(PARENT != ""){
                         if(!planetRings.count(PARENT)){
-                            std::vector<RingInfo> rings;
+                            vector<RingInfo> rings;
                             planetRings.emplace(PARENT,rings);
                         }
                         planetRings.at(PARENT).push_back(RingInfo((uint)POSITION/10,(uint)RADIUS/10,glm::uvec3(R,G,B),BREAK));
@@ -262,53 +263,47 @@ void SolarSystem::_loadFromFile(std::string filename){
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox
     //get random skybox folder from the skybox directory
-    std::vector<std::string> folders;
-    std::string path = "data/Textures/Skyboxes/";
+    vector<std::string> folders;
+    string path = "data/Textures/Skyboxes/";
     if ( boost::filesystem::exists( path ) ) {
         boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
         for ( boost::filesystem::directory_iterator itr( path );itr != end_itr;++itr ){
             if ( boost::filesystem::is_directory(itr->status()) ){
-                std::string path_name = boost::lexical_cast<std::string>(itr->path());
-                std::replace(path_name.begin(),path_name.end(),'\\','/');
+                string path_name = to_string(itr->path());
+                replace(path_name.begin(),path_name.end(),'\\','/');
                 boost::erase_all(path_name,"\"");
                 path_name = path_name.substr(path.size(),path_name.size());
                 folders.push_back(path_name);
             }
         }
     }
-    uint random_skybox_index = static_cast<uint>((rand() % folders.size()));
-    std::string skybox = folders.at(random_skybox_index);
+    uint random_skybox_index = uint(rand() % folders.size());
+    string skybox = folders.at(random_skybox_index);
     uint numFlares = rand() % 200;
     new GameSkybox(path + skybox,numFlares,this);
     #pragma endregion
 
     #pragma region ConstructStars
-    uint percent = static_cast<uint>(rand() % 1000);
+    uint percent = uint(rand() % 1000);
 
     uint numberOfStars = 1;
-    if(percent < 50) 
-        numberOfStars = 7;
-    else if(percent >= 50 && percent < 135)
-        numberOfStars = 6;
-    else if(percent >= 135 && percent < 250)
-        numberOfStars = 5;
-    else if(percent >= 250 && percent < 450)
-        numberOfStars = 4;
-    else if(percent >= 450 && percent < 750)
-        numberOfStars = 3;
-    else if(percent >= 750 && percent < 850)
-        numberOfStars = 2;
+    if(percent < 50)                         numberOfStars = 7;
+    else if(percent >= 50 && percent < 135)  numberOfStars = 6;
+    else if(percent >= 135 && percent < 250) numberOfStars = 5;
+    else if(percent >= 250 && percent < 450) numberOfStars = 4;
+    else if(percent >= 450 && percent < 750) numberOfStars = 3;
+    else if(percent >= 750 && percent < 850) numberOfStars = 2;
 
 
     for(uint i = 0; i < numberOfStars; i++){
         Star* star = nullptr;
         //star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
-        float radius = static_cast<float>(97412.0f + (rand() % 1252440000))*10.0f;
-        float position = static_cast<float>(radius * 2.0f + (rand() % 841252440000));
+        float radius = float(97412.0f + (rand() % 1252440000))*10.0f;
+        float position = float(radius * 2.0f + (rand() % 841252440000));
 
-        float R = static_cast<float>((rand()%100)/100.0f);
-        float G = static_cast<float>((rand()%100)/100.0f);
-        float B = static_cast<float>((rand()%100)/100.0f);
+        float R = float((rand()%100)/100.0f);
+        float G = float((rand()%100)/100.0f);
+        float B = float((rand()%100)/100.0f);
 
         glm::vec3 starColor = glm::vec3(R,G,B);
         glm::vec3 lightColor = glm::vec3(glm::min(1.0f,R+0.1f),glm::min(1.0f,G+0.1f),glm::min(1.0f,B+0.1f));
@@ -318,8 +313,8 @@ void SolarSystem::_loadRandomly(){
         posX = glm::sin(randomDegree) * position;
         posZ = glm::cos(randomDegree) * position;
 
-        star = new Star(starColor,lightColor,glm::vec3(posX,0,posZ),radius,"Star " + boost::lexical_cast<std::string>(1 + i),this);
-        m_Stars["Star " + boost::lexical_cast<std::string>(1 + i)] = star;
+        star = new Star(starColor,lightColor,glm::vec3(posX,0,posZ),radius,"Star " + to_string(1 + i),this);
+        m_Stars["Star " + to_string(1 + i)] = star;
     }
     #pragma endregion
 
@@ -328,8 +323,8 @@ void SolarSystem::_loadRandomly(){
     bool allStarsGood = true;
     glm::vec3 centerOfMassPosition;
 
-    std::vector<float> starMasses;
-    std::vector<glm::vec3> starPositions;
+    vector<float> starMasses;
+    vector<glm::vec3> starPositions;
     float totalMasses = 0.0;
     float biggestRadius = 0.0;
     for(auto star:m_Stars){
@@ -342,7 +337,7 @@ void SolarSystem::_loadRandomly(){
                 }
             }
         }
-        biggestRadius = glm::max(static_cast<float>(star.second->getRadius()),biggestRadius);
+        biggestRadius = glm::max(float(star.second->getRadius()),biggestRadius);
         starPositions.push_back(star.second->getPosition());
         starMasses.push_back(star.second->getRadius());
         totalMasses += star.second->getRadius();
@@ -361,7 +356,7 @@ void SolarSystem::_loadRandomly(){
             glm::vec3 starPos = star.second->getPosition();
             glm::vec3 offset = starPos - centerOfMassPosition;
             glm::vec3 normOffset = glm::normalize(offset);
-            star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*static_cast<float>(2.0)));
+            star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*float(2.0)));
         }
         allStarsGood = true;
         for(auto star:m_Stars){
@@ -381,18 +376,18 @@ void SolarSystem::_loadRandomly(){
     //Then load planets. Generally the more stars, the more planets
 
     //First get the database of random textures to choose from
-    std::unordered_map<std::string,std::string> planets_folders;
-    std::unordered_map<std::string,std::vector<std::string>> planet_textures;
-    std::string planets_path = "data/Textures/Planets/Random/Planet";
+    unordered_map<string,string> planets_folders;
+    unordered_map<string,vector<string>> planet_textures;
+    string planets_path = "data/Textures/Planets/Random/Planet";
     if ( boost::filesystem::exists( planets_path ) ) {
         boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
         for ( boost::filesystem::directory_iterator itr( planets_path );itr != end_itr;++itr ){
             if ( boost::filesystem::is_directory(itr->status()) ){
-                std::string path_name = boost::lexical_cast<std::string>(itr->path());
-                std::string folder_name = "";
-                std::replace(path_name.begin(),path_name.end(),'\\','/');
+                string path_name = to_string(itr->path());
+                string folder_name = "";
+                replace(path_name.begin(),path_name.end(),'\\','/');
                 boost::erase_all(path_name,"\"");
-                std::string short_name = path_name.substr(planets_path.size()+1,path_name.size()-1);
+                string short_name = path_name.substr(planets_path.size()+1,path_name.size()-1);
                 planets_folders[short_name] = path_name;
 
             }
@@ -401,14 +396,14 @@ void SolarSystem::_loadRandomly(){
     
     for(auto folder: planets_folders){
         if ( boost::filesystem::exists( folder.second ) ) {
-            std::string key = folder.second.substr(planets_path.size() + 1,folder.second.size()-1);
+            string key = folder.second.substr(planets_path.size() + 1,folder.second.size()-1);
             boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-            std::vector<std::string> value;
+            vector<string> value;
             for ( boost::filesystem::directory_iterator itr( folder.second );itr != end_itr;++itr ){
                 if ( boost::filesystem::is_directory(itr->status()) ){
-                    std::string path_name = boost::lexical_cast<std::string>(itr->path());
-                    std::string folder_name = "";
-                    std::replace(path_name.begin(),path_name.end(),'\\','/');
+                    string path_name = to_string(itr->path());
+                    string folder_name = "";
+                    replace(path_name.begin(),path_name.end(),'\\','/');
                     boost::erase_all(path_name,"\"");
                     value.push_back(path_name);
                 }
@@ -418,7 +413,7 @@ void SolarSystem::_loadRandomly(){
     }
 
     for(auto star:m_Stars){
-        uint numberOfPlanets = static_cast<uint>(1 + (rand() % 100));
+        uint numberOfPlanets = uint(1 + rand() % 100);
         for(uint i = 0; i < numberOfPlanets; i++){
             Planet* planet = nullptr;
 
@@ -460,40 +455,32 @@ void SolarSystem::_loadRandomly(){
             }
 
             //now to get a random planet material based on a random texture based on planet type
-            std::string MATERIAL_NAME,FOLDER,normalFile,glowFile = "";
-            std::string base_name;
-            std::string base_path = planets_path;
-            std::string key = "";
-            if(PLANET_TYPE == PLANET_TYPE_ROCKY){
-                key = "Rocky";
-            }
-            else if(PLANET_TYPE == PLANET_TYPE_ICE){
-                key = "Ice";
-            }
-            else if(PLANET_TYPE == PLANET_TYPE_GAS_GIANT){
-                key = "GasGiant";
-            }
-            else if(PLANET_TYPE == PLANET_TYPE_ICE_GIANT){
-                key = "IceGiant";
-            }
+            string MATERIAL_NAME,FOLDER,normalFile,glowFile = "";
+            string base_name;
+            string base_path = planets_path;
+            string key = "";
+            if(PLANET_TYPE == PLANET_TYPE_ROCKY){          key = "Rocky"; }
+            else if(PLANET_TYPE == PLANET_TYPE_ICE){       key = "Ice"; }
+            else if(PLANET_TYPE == PLANET_TYPE_GAS_GIANT){ key = "GasGiant"; }
+            else if(PLANET_TYPE == PLANET_TYPE_ICE_GIANT){ key = "IceGiant"; }
             FOLDER = planets_folders[key];
             base_path += "/" + key + "/";
-            std::vector<std::string> textures = planet_textures[key];
-            std::string texture = textures.at(rand() % textures.size());
+            vector<string> textures = planet_textures[key];
+            string texture = textures.at(rand() % textures.size());
             base_name = texture.substr(base_path.size(),texture.size()-1);
             FOLDER += "/" + base_name;
             MATERIAL_NAME = FOLDER;
             FOLDER += "/";
 
-            std::string diffuseFile = FOLDER + base_name + ".jpg";
-            std::string normFile = FOLDER + base_name + "_Normal.jpg";
-            std::string gloFile = FOLDER + base_name + "_Glow.jpg";
+            string diffuseFile = FOLDER + base_name + ".jpg";
+            string normFile = FOLDER + base_name + "_Normal.jpg";
+            string gloFile = FOLDER + base_name + "_Glow.jpg";
             if(boost::filesystem::exists(normFile)){ normalFile = normFile; }
             if(boost::filesystem::exists(gloFile)){ glowFile = gloFile; }
 
             if(boost::filesystem::exists(diffuseFile)){
                 Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
-                std::string pName = "Planet " + boost::lexical_cast<std::string>(i + 1);
+                string pName = "Planet " + to_string(i + 1);
                 planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(posX,0,posZ),RADIUS,pName,ATMOSPHERE_HEIGHT,this);
 
                 float R = (rand() % 1000)/1000.0f;
@@ -503,14 +490,12 @@ void SolarSystem::_loadRandomly(){
                 m_Planets[pName] = planet;
 
                 //rings
-                std::vector<RingInfo> rings;
+                vector<RingInfo> rings;
                 uint numRings = rand() % 20;
                 uint chance = rand() % 100;
                 if(chance <= 20){
                     for(uint i = 0; i < numRings; i++){
-                        
-                        uint randSize = ((rand() % 200 + 3));
-
+                        uint randSize = (rand() % 200 + 3);
                         uint randPos = (randSize + 1 ) + (rand() % (1024 - ((randSize + 1)*2)));
 
                         uint RR = rand() % 255;
@@ -535,7 +520,7 @@ void SolarSystem::_loadRandomly(){
             }
         }
     }
-    //Then load moons. Generally the number of moons depends on the type of planet. Giants have more moons than normal planets, etc..
+    //Then load moons. Generally the number of moons depends on the type of planet. Gas Giants have more moons than normal planets, etc..
 
     player = new Ship("Akira","Akira",true,"USS Thunderchild",glm::vec3(0),glm::vec3(1),nullptr,this);
     playerCamera = static_cast<GameCamera*>(Resources::getActiveCamera());
