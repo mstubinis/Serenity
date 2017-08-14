@@ -228,13 +228,11 @@ void Texture::unload(){
 }
 void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,uint brdfSize){
     if(m_i->m_Type != GL_TEXTURE_CUBE_MAP){
-        cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl;
-        return;
+        cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
     }
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-    uint width = convoludeTextureSize;
-    uint height = convoludeTextureSize;
+    uint size = convoludeTextureSize;
     //cleanup previous convolute operation
     if(m_i->m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
@@ -251,17 +249,17 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     
     Renderer::bindFBO(captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);  
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);  
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
     
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-        return;
+        cout << "Framebuffer completeness in genPBREnvMapData() is incomplete!" << endl; return;
     }
 
     glGenTextures(1, &m_i->m_TextureAddress.at(1));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
     for (uint i = 0; i < 6; ++i){
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
     }
     glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -269,7 +267,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 1000.0f);
+    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000.0f);
     glm::mat4 captureViews[] = {
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -281,7 +279,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     
-    glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
+    glViewport(0, 0, size, size); // don't forget to configure the viewport to the capture dimensions.
     for (uint i = 0; i < 6; ++i){
         glm::mat4 vp = captureProjection * captureViews[i];
         Renderer::sendUniformMatrix4f("VP", vp);
@@ -303,12 +301,11 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     else if(m_i->m_TextureAddress.size() == 2){
         m_i->m_TextureAddress.push_back(0); // this should be element 3 (.at(2)) now
     }
-    width = preEnvFilterSize;
-    height = preEnvFilterSize;
+    size = preEnvFilterSize;
     glGenTextures(1, &m_i->m_TextureAddress.at(2));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
     for (uint i = 0; i < 6; ++i){
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
     }
     glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -324,11 +321,10 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     Renderer::bindFBO(captureFBO);
     uint maxMipLevels = 5;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
-        uint mipWidth  = uint(width * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
-        uint mipHeight = uint(height * glm::pow(0.5, mip));
+        uint mipSize  = uint(size * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-        glViewport(0, 0, mipWidth, mipHeight);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);
+        glViewport(0, 0, mipSize, mipSize);
         float roughness = (float)mip / (float)(maxMipLevels - 1);
         Renderer::sendUniform1f("roughness",roughness);
         for (uint i = 0; i < 6; ++i){
@@ -347,8 +343,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     //now generate the BDRF LUT -- should probably just make this a global variable
     //
     //cleanup previous BDRF LUT operation
-    width = brdfSize; //might have to be 512
-    height = brdfSize; //might have to be 512
+    size = brdfSize; //might have to be 512
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
         glBindTexture(m_i->m_Type,0);
@@ -358,7 +353,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     }
     glGenTextures(1, &m_i->m_TextureAddress.at(3));
     glBindTexture(GL_TEXTURE_2D, m_i->m_TextureAddress.at(3));
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, width, height, 0, GL_RG, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, size, size, 0, GL_RG, GL_FLOAT, 0);
     // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -368,15 +363,15 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
     Renderer::bindFBO(captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, size, size);
     p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
     Renderer::sendUniform1i("NUM_SAMPLES",512);
     Renderer::Settings::clear(true,true,false);
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
-    Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
+    Renderer::Detail::renderFullscreenQuad(size,size); //this might have to be winsize x and winsize y
     cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
 
     p->unbind();
