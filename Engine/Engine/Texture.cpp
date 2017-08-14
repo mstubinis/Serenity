@@ -226,15 +226,15 @@ void Texture::unload(){
         EngineResource::unload();
     }
 }
-void Texture::genPBREnvMapData(){
+void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,uint brdfSize){
     if(m_i->m_Type != GL_TEXTURE_CUBE_MAP){
         cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl;
         return;
     }
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-    uint width = 32;
-    uint height = 32;
+    uint width = convoludeTextureSize;
+    uint height = convoludeTextureSize;
     //cleanup previous convolute operation
     if(m_i->m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
@@ -303,8 +303,8 @@ void Texture::genPBREnvMapData(){
     else if(m_i->m_TextureAddress.size() == 2){
         m_i->m_TextureAddress.push_back(0); // this should be element 3 (.at(2)) now
     }
-    width = this->width()/4;
-    height = this->height()/4;
+    width = preEnvFilterSize;
+    height = preEnvFilterSize;
     glGenTextures(1, &m_i->m_TextureAddress.at(2));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
     for (uint i = 0; i < 6; ++i){
@@ -346,8 +346,8 @@ void Texture::genPBREnvMapData(){
     //now generate the BDRF LUT -- should probably just make this a global variable
     //
     //cleanup previous BDRF LUT operation
-    width = 512; //might have to be 512
-    height = 512; //might have to be 512
+    width = brdfSize; //might have to be 512
+    height = brdfSize; //might have to be 512
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
         glBindTexture(m_i->m_Type,0);
