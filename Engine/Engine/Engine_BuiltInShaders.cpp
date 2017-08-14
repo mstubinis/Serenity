@@ -361,7 +361,9 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
 #pragma endregion
 
 #pragma region CubemapPrefilterEnvMap
-
+//https://placeholderart.wordpress.com/2015/07/28/implementation-notes-runtime-environment-map-filtering-for-image-based-lighting/
+//  ^
+//  |--------- visit that link to optimize this process
 Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "varying vec3 UV;\n"
