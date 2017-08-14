@@ -258,6 +258,8 @@ void SolarSystem::_loadFromFile(string filename){
 
     new Ship("Starbase","Starbase",false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
+	new ObjectDisplay("Planet","Gold",glm::vec3(0,5,2),glm::vec3(2));
+
     player->translate(0,0,2);
 }
 void SolarSystem::_loadRandomly(){

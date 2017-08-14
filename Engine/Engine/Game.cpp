@@ -66,6 +66,10 @@ void Game::initResources(){
     Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
     Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallic.png");
     Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
+
+    Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
+    Resources::getMaterial("Gold")->addComponentMetalness("data/Textures/gold_Metalness.png");
+    Resources::getMaterial("Gold")->addComponentSmoothness("data/Textures/gold_Smoothness.png");
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);

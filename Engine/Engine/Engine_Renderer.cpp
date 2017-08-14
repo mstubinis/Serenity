@@ -520,7 +520,7 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     unbindTexture2D(5);
     p->unbind();
 }
-void Detail::RenderManagement::render(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHeight){
     _passGeometry(c,fbufferWidth,fbufferHeight);
 
     if(RendererInfo::GodRaysInfo::godRays){
