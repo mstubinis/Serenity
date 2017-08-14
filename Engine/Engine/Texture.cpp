@@ -327,6 +327,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
         glViewport(0, 0, mipSize, mipSize);
         float roughness = (float)mip / (float)(maxMipLevels - 1);
         Renderer::sendUniform1f("roughness",roughness);
+        Renderer::sendUniform1f("a",roughness * roughness);
         for (uint i = 0; i < 6; ++i){
             glm::mat4 vp = captureProjection * captureViews[i];
             Renderer::sendUniformMatrix4f("VP", vp);
