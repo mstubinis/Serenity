@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "Skybox.h"
+#include "Engine_Window.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "ShaderProgram.h"
@@ -82,9 +83,9 @@ class Texture::impl final{
             }
         }
         void _unload(){
-            glDeleteTextures(1,&m_TextureAddress.at(0));
-            if(m_TextureAddress.size() == 2)
-                glDeleteTextures(1,&m_TextureAddress.at(1));
+			for(uint i = 0; i < m_TextureAddress.size(); i++){
+                glDeleteTextures(1,&m_TextureAddress.at(i));
+			}
             glBindTexture(m_Type,0);
             m_Width = m_Height = 0;
             m_MipMapLevels = 0;
@@ -289,6 +290,7 @@ void Texture::genPBREnvMapData(){
 		Skybox::bindMesh();
     }
 	cout << "-------- " + this->name() + " (Cubemap): convolution complete --------" << endl;
+	Resources::getWindow()->display(); //prevent opengl & windows timeout
 	Renderer::bindFBO(0);
     p->unbind();
     
@@ -318,7 +320,7 @@ void Texture::genPBREnvMapData(){
 
 	p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
 	Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
-
+	Renderer::sendUniform1i("resSquared",this->width() * this->width());
     Renderer::bindFBO(captureFBO);
     uint maxMipLevels = 10;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
@@ -338,6 +340,7 @@ void Texture::genPBREnvMapData(){
         }
     }
 	cout << "-------- " + this->name() + " (Cubemap): prefilter complete --------" << endl;
+	Resources::getWindow()->display(); //prevent opengl & windows timeout
     Renderer::bindFBO(0);
 
 
@@ -377,6 +380,7 @@ void Texture::genPBREnvMapData(){
 
 	p->unbind();
 	glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+	Resources::getWindow()->display(); //prevent opengl & windows timeout
     Renderer::bindFBO(0);
 
     //cleanup... might have to comment this out if this bugs it out
