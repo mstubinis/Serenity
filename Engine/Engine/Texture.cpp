@@ -287,7 +287,7 @@ void Texture::genPBREnvMapData(){
         Renderer::sendUniformMatrix4f("VP", vp);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(1), 0);
         Renderer::Settings::clear(true,true,false);
-		Skybox::bindMesh();
+        Skybox::bindMesh();
     }
     cout << "---- " + this->name() + " (Cubemap): convolution done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
