@@ -1344,7 +1344,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
 	"    kD1 *= 1.0 - metalness;\n"
 	"    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
 	"\n"
-    "    const float MAX_REFLECTION_LOD = 10.0;\n"
+    "    const float MAX_REFLECTION_LOD = 5.0;\n"
     "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
     "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
     "    vec3 GISpecular = prefilteredColor * (kS1 * brdf.x + brdf.y);\n"

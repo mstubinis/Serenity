@@ -322,7 +322,7 @@ void Texture::genPBREnvMapData(){
 	Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
 	Renderer::sendUniform1i("resSquared",this->width() * this->width());
     Renderer::bindFBO(captureFBO);
-    uint maxMipLevels = 10;
+    uint maxMipLevels = 5;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
         uint mipWidth  = uint(width * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
         uint mipHeight = uint(height * glm::pow(0.5, mip));
