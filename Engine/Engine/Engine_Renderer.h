@@ -122,20 +122,20 @@ namespace Engine{
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
 
-                    static void _renderText();
-                    static void _renderTextures();
-                    static void _passGodsRays(glm::vec2,bool,float);
-                    static void _passHDR();
-                    static void _passGeometry();
-                    static void _passForwardRendering();
-                    static void _passLighting();
-                    static void _passSSAO();
-                    static void _passEdge(GLuint texture,float radius = 1.0f);
-                    static void _passBlur(std::string type,GLuint texture,std::string channels = "RGBA");
-                    static void _passFinal();
-                    static void _passFXAA();
-                    static void _passSMAA();
-                    static void _passCopyDepth();
+                    static void _renderText(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _renderTextures(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passGodsRays(uint& fbufferWidth, uint& fbufferHeight,glm::vec2,bool,float);
+                    static void _passHDR(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passGeometry(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passForwardRendering(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passLighting(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passSSAO(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passEdge(uint& fbufferWidth, uint& fbufferHeight,GLuint texture,float radius = 1.0f);
+                    static void _passBlur(uint& fbufferWidth, uint& fbufferHeight,std::string type,GLuint texture,std::string channels = "RGBA");
+                    static void _passFinal(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passFXAA(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passSMAA(uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passCopyDepth(uint& fbufferWidth, uint& fbufferHeight);
                 public:
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
