@@ -83,9 +83,9 @@ class Texture::impl final{
             }
         }
         void _unload(){
-			for(uint i = 0; i < m_TextureAddress.size(); i++){
+            for(uint i = 0; i < m_TextureAddress.size(); i++){
                 glDeleteTextures(1,&m_TextureAddress.at(i));
-			}
+            }
             glBindTexture(m_Type,0);
             m_Width = m_Height = 0;
             m_MipMapLevels = 0;
@@ -252,7 +252,7 @@ void Texture::genPBREnvMapData(){
     Renderer::bindFBO(captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);  
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
     
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
         return;
@@ -279,7 +279,7 @@ void Texture::genPBREnvMapData(){
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
-	Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
+    Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     
     glViewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
     for (uint i = 0; i < 6; ++i){
@@ -289,13 +289,12 @@ void Texture::genPBREnvMapData(){
         Renderer::Settings::clear(true,true,false);
 		Skybox::bindMesh();
     }
-	cout << "---- " + this->name() + " (Cubemap): convolution done ----" << endl;
-	Resources::getWindow()->display(); //prevent opengl & windows timeout
-	Renderer::bindFBO(0);
+    cout << "---- " + this->name() + " (Cubemap): convolution done ----" << endl;
+    Resources::getWindow()->display(); //prevent opengl & windows timeout
+    Renderer::bindFBO(0);
     p->unbind();
-    
 
-	//now gen EnvPrefilterMap for specular IBL
+    //now gen EnvPrefilterMap for specular IBL
     //cleanup previous EnvPrefilterMap operation
     if(m_i->m_TextureAddress.size() >= 3){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
@@ -318,9 +317,9 @@ void Texture::genPBREnvMapData(){
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glGenerateMipmap(m_i->m_Type);
 
-	p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
-	Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
-	Renderer::sendUniform1i("resSquared",this->width() * this->width());
+    p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
+    Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
+    Renderer::sendUniform1i("resSquared",this->width() * this->width());
     Renderer::bindFBO(captureFBO);
     uint maxMipLevels = 5;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
@@ -330,25 +329,25 @@ void Texture::genPBREnvMapData(){
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
         glViewport(0, 0, mipWidth, mipHeight);
         float roughness = (float)mip / (float)(maxMipLevels - 1);
-		Renderer::sendUniform1f("roughness",roughness);
+        Renderer::sendUniform1f("roughness",roughness);
         for (uint i = 0; i < 6; ++i){
-			glm::mat4 vp = captureProjection * captureViews[i];
-			Renderer::sendUniformMatrix4f("VP", vp);
+            glm::mat4 vp = captureProjection * captureViews[i];
+            Renderer::sendUniformMatrix4f("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(2), mip);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
         }
     }
-	cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
-	Resources::getWindow()->display(); //prevent opengl & windows timeout
+    cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
+    Resources::getWindow()->display(); //prevent opengl & windows timeout
     Renderer::bindFBO(0);
 
 
-	//now generate the BDRF LUT -- should probably just make this a global variable
-	//
+    //now generate the BDRF LUT -- should probably just make this a global variable
+    //
     //cleanup previous BDRF LUT operation
-	width = 512; //might have to be 512
-	height = 512; //might have to be 512
+    width = 512; //might have to be 512
+    height = 512; //might have to be 512
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
         glBindTexture(m_i->m_Type,0);
@@ -356,7 +355,7 @@ void Texture::genPBREnvMapData(){
     else if(m_i->m_TextureAddress.size() == 3){
         m_i->m_TextureAddress.push_back(0); // this should be element 4 (.at(3)) now
     }
-	glGenTextures(1, &m_i->m_TextureAddress.at(3));
+    glGenTextures(1, &m_i->m_TextureAddress.at(3));
     glBindTexture(GL_TEXTURE_2D, m_i->m_TextureAddress.at(3));
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, width, height, 0, GL_RG, GL_FLOAT, 0);
     // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
@@ -372,15 +371,15 @@ void Texture::genPBREnvMapData(){
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
 
     glViewport(0, 0, width, height);
-	p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
+    p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
     Renderer::Settings::clear(true,true,false);
-	glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
-	Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
-	cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
+    glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
+    Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
+    cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
 
-	p->unbind();
-	glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-	Resources::getWindow()->display(); //prevent opengl & windows timeout
+    p->unbind();
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    Resources::getWindow()->display(); //prevent opengl & windows timeout
     Renderer::bindFBO(0);
 
     //cleanup... might have to comment this out if this bugs it out
