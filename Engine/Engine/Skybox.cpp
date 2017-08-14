@@ -83,7 +83,7 @@ Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
     string names[6] = {front,back,left,right,top,bottom};
 
     m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,GL_SRGB8_ALPHA8);
-	m_Texture->genPBREnvMapData();
+    m_Texture->genPBREnvMapData(32,width() / 4,512);
 }
 Skybox::~Skybox(){
 }
@@ -105,7 +105,7 @@ void Skybox::draw(){
 
     Renderer::bindTexture("Texture",m_Texture->address(0),0,GL_TEXTURE_CUBE_MAP);
 
-	Skybox::bindMesh();
+    Skybox::bindMesh();
 
     Renderer::unbindTextureCubemap(0);
     p->unbind();
