@@ -408,6 +408,7 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
     "    H.x = cos(phi) * sinTheta;\n"
     "    H.y = sin(phi) * sinTheta;\n"
     "    H.z = cosTheta;\n"
+    "\n"
     "    vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);\n"
     "    vec3 tangent = normalize(cross(up, N));\n"
     "    vec3 bitangent = cross(N, tangent);\n"
