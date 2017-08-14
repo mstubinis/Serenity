@@ -43,6 +43,8 @@ string Shaders::Detail::ShadersManagement::deferred_frag_hud = "";
 string Shaders::Detail::ShadersManagement::deferred_frag_skybox = "";
 string Shaders::Detail::ShadersManagement::copy_depth_frag = "";
 string Shaders::Detail::ShadersManagement::cubemap_convolude_frag = "";
+string Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = "";
+string Shaders::Detail::ShadersManagement::brdf_precompute = "";
 string Shaders::Detail::ShadersManagement::ssao_frag = "";
 string Shaders::Detail::ShadersManagement::hdr_frag = "";
 string Shaders::Detail::ShadersManagement::godRays_frag = "";
@@ -357,7 +359,175 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
 	"    gl_FragColor = vec4(irradiance, 1.0);\n"
     "}\n";
 #pragma endregion
-	
+
+#pragma region CubemapPrefilterEnvMap
+
+Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Detail::ShadersManagement::version + 
+	"\n"
+	"varying vec3 UV;\n"
+	"uniform samplerCube cubemap;\n"
+	"uniform float roughness;\n"
+	"const float PI = 3.14159265359;\n"
+	"float DistributionGGX(vec3 N, vec3 H, float roughness){\n"
+	"	float a = roughness*roughness;\n"
+	"	float a2 = a*a;\n"
+	"	float NdotH = max(dot(N, H), 0.0);\n"
+	"	float NdotH2 = NdotH*NdotH;\n"
+	"	float nom   = a2;\n"
+	"	float denom = (NdotH2 * (a2 - 1.0) + 1.0);\n"
+	"	denom = PI * denom * denom;\n"
+	"	return nom / denom;\n"
+	"}\n"
+	"float VanDerCorpus(int n, int base){\n"
+	"	float invBase = 1.0 / float(base);\n"
+	"	float denom   = 1.0;\n"
+	"	float result  = 0.0;\n"
+	"	for(int i = 0; i < 32; ++i){\n"
+	"		if(n > 0){\n"
+	"			denom = mod(float(n), 2.0);\n"
+	"			result += denom * invBase;\n"
+	"			invBase = invBase / 2.0;\n"
+	"			n = int(float(n) / 2.0);\n"
+	"		}\n"
+	"	}\n"
+	"	return result;\n"
+	"}\n"
+	"vec2 Hammersley(int i, int N){\n"
+	"	return vec2(float(i)/float(N), VanDerCorpus(i,2));\n"
+	"}\n"
+	"vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness){\n"
+	"	float a = roughness*roughness;\n"
+	"	float phi = 2.0 * PI * Xi.x;\n"
+	"	float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));\n"
+	"	float sinTheta = sqrt(1.0 - cosTheta*cosTheta);\n"
+	"	vec3 H;\n"
+	"	H.x = cos(phi) * sinTheta;\n"
+	"	H.y = sin(phi) * sinTheta;\n"
+	"	H.z = cosTheta;\n"
+	"	vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);\n"
+	"	vec3 tangent = normalize(cross(up, N));\n"
+	"	vec3 bitangent = cross(N, tangent);\n"
+	"	vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;\n"
+	"	return normalize(sampleVec);\n"
+	"}\n"
+	"void main(void){\n"
+	"	vec3 N = normalize(UV);\n"
+	"	vec3 R = N;\n"
+	"	vec3 V = R;\n"
+	"	const int SAMPLE_COUNT = 1024;\n"
+	"	vec3 prefilteredColor = vec3(0.0);\n"
+	"	float totalWeight = 0.0;\n"
+	"	for(int i = 0; i < SAMPLE_COUNT; ++i){\n"
+	"		vec2 Xi = Hammersley(i, SAMPLE_COUNT);\n"
+	"		vec3 H = ImportanceSampleGGX(Xi, N, roughness);\n"
+	"		vec3 L  = normalize(2.0 * dot(V, H) * H - V);\n"
+	"		float NdotL = max(dot(N, L), 0.0);\n"
+	"		if(NdotL > 0.0){\n"
+	"			float D   = DistributionGGX(N, H, roughness);\n"
+	"			float NdotH = max(dot(N, H), 0.0);\n"
+	"			float HdotV = max(dot(H, V), 0.0);\n"
+	"			float pdf = D * NdotH / (4.0 * HdotV) + 0.0001;\n"
+	"			float resolution = 512.0;\n" // resolution of source cubemap (per face)
+	"			float saTexel  = 4.0 * PI / (6.0 * resolution * resolution);\n"
+	"			float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);\n"
+	"			float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);\n"
+	"			prefilteredColor += textureCubeLod(cubemap, L, mipLevel).rgb * NdotL;\n"
+	"			totalWeight += NdotL;\n"
+	"		}\n"
+	"	}\n"
+	"	prefilteredColor = prefilteredColor / totalWeight;\n"
+	"	gl_FragColor = vec4(prefilteredColor, 1.0);\n"
+	"}";
+
+#pragma endregion
+
+#pragma region BRDFPrecompute
+
+Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersManagement::version +
+	"\n"
+	"const float PI = 3.14159265359;\n"
+	"float VanDerCorpus(int n, int base){\n"
+	"	float invBase = 1.0 / float(base);\n"
+	"	float denom   = 1.0;\n"
+	"	float result  = 0.0;\n"
+	"	for(int i = 0; i < 32; ++i){\n"
+	"		if(n > 0){\n"
+	"			denom = mod(float(n), 2.0);\n"
+	"			result += denom * invBase;\n"
+	"			invBase = invBase / 2.0;\n"
+	"			n = int(float(n) / 2.0);\n"
+	"		}\n"
+	"	}\n"
+	"	return result;\n"
+	"}\n"
+	"vec2 Hammersley(int i, int N){\n"
+	"	return vec2(float(i)/float(N), VanDerCorpus(i,2));\n"
+	"}\n"
+	"vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness){\n"
+	"	float a = roughness*roughness;\n"
+	"	float phi = 2.0 * PI * Xi.x;\n"
+	"	float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));\n"
+	"	float sinTheta = sqrt(1.0 - cosTheta*cosTheta);\n"
+	"	vec3 H;\n"
+	"	H.x = cos(phi) * sinTheta;\n"
+	"	H.y = sin(phi) * sinTheta;\n"
+	"	H.z = cosTheta;\n"
+	"	vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);\n"
+	"	vec3 tangent   = normalize(cross(up, N));\n"
+	"	vec3 bitangent = cross(N, tangent);\n"
+	"	vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;\n"
+	"	return normalize(sampleVec);\n"
+	"}\n"
+	"float GeometrySchlickGGX(float NdotV, float roughness){\n"
+	"	float a = roughness;\n"
+	"	float k = (a * a) / 2.0;\n"
+	"	float nom   = NdotV;\n"
+	"	float denom = NdotV * (1.0 - k) + k;\n"
+	"	return nom / denom;\n"
+	"}\n"
+	"float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness){\n"
+	"	float NdotV = max(dot(N, V), 0.0);\n"
+	"	float NdotL = max(dot(N, L), 0.0);\n"
+	"	float ggx2 = GeometrySchlickGGX(NdotV, roughness);\n"
+	"	float ggx1 = GeometrySchlickGGX(NdotL, roughness);\n"
+	"	return ggx1 * ggx2;\n"
+	"}\n"
+	"vec2 IntegrateBRDF(float NdotV, float roughness){\n"
+	"	vec3 V;\n"
+	"	V.x = sqrt(1.0 - NdotV*NdotV);\n"
+	"	V.y = 0.0;\n"
+	"	V.z = NdotV;\n"
+	"	float A = 0.0;\n"
+	"	float B = 0.0;\n"
+	"	vec3 N = vec3(0.0, 0.0, 1.0);\n"
+	"	const int SAMPLE_COUNT = 1024;\n"
+	"	for(int i = 0; i < SAMPLE_COUNT; ++i){\n"
+	"		vec2 Xi = Hammersley(i, SAMPLE_COUNT);\n"
+	"		vec3 H = ImportanceSampleGGX(Xi, N, roughness);\n"
+	"		vec3 L = normalize(2.0 * dot(V, H) * H - V);\n"
+	"		float NdotL = max(L.z, 0.0);\n"
+	"		float NdotH = max(H.z, 0.0);\n"
+	"		float VdotH = max(dot(V, H), 0.0);\n"
+	"		if(NdotL > 0.0){\n"
+	"			float G = GeometrySmith(N, V, L, roughness);\n"
+	"			float G_Vis = (G * VdotH) / (NdotH * NdotV);\n"
+	"			float Fc = pow(1.0 - VdotH, 5.0);\n"
+	"			A += (1.0 - Fc) * G_Vis;\n"
+	"			B += Fc * G_Vis;\n"
+	"		}\n"
+	"	}\n"
+	"	A /= float(SAMPLE_COUNT);\n"
+	"	B /= float(SAMPLE_COUNT);\n"
+	"	return vec2(A, B);\n"
+	"}\n"
+	"void main(void){\n"
+    "   vec2 uv = gl_TexCoord[0].st;\n"
+	"	vec2 integratedBRDF = IntegrateBRDF(uv.x, uv.y);\n"
+	"	gl_FragColor.rg = integratedBRDF;\n"
+	"}";
+
+#pragma endregion
+
 #pragma region FXAA
 Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
     "#define FXAA_REDUCE_MIN (1.0/128.0)\n"
@@ -1122,7 +1292,6 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
 
 #pragma endregion
 
-
 #pragma region LightingFragGI
 Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersManagement::version + 
     "#define MATERIAL_COUNT_LIMIT 255\n"
@@ -1131,6 +1300,8 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gDepthMap;\n"
 	"uniform samplerCube irradianceMap;\n"
+	"uniform samplerCube prefilterMap;\n"
+	"uniform sampler2D brdfLUT;\n"
     "\n"
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
@@ -1156,6 +1327,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "\n"
     "    vec3 ViewDir = normalize(CamPosGamma.xyz - PxlWorldPos);\n"
+    "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
     "    float kPi = 3.1415926535898;\n"
     "    //highp int index = int(texture2D(gNormalMap,uv).a);\n"
@@ -1166,15 +1338,19 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "    float roughness = 1.0 - smoothness;\n"
-	"    vec3 TotalLight = vec3(0.0);\n"
 	"    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
 	"    vec3 kS1 = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
 	"    vec3 kD1 = vec3(1.0) - kS1;\n"
 	"    kD1 *= 1.0 - metalness;\n"
 	"    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
-	"    AmbientIrradiance = (kD1 * AmbientIrradiance);\n" //* ao
-	"    TotalLight += AmbientIrradiance;\n"
-	"    gl_FragColor += vec4(TotalLight,1.0);\n"
+	"\n"
+    "    const float MAX_REFLECTION_LOD = 10.0;\n"
+    "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
+    "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
+    "    vec3 GISpecular = prefilteredColor * (kS1 * brdf.x + brdf.y);\n"
+	"\n"
+	"    vec3 TotalIrradiance = (kD1 * AmbientIrradiance + GISpecular);\n" //* ao
+	"    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
     "}";
 
 #pragma endregion

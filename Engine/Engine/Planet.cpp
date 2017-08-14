@@ -24,9 +24,6 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Camera* c = Resources::getActiveCamera();
 
     float atmosphereHeight = obj->getAtmosphereHeight();
-    if(atmosphereHeight <= 0){
-        atmosphereHeight = 0.025f;
-    }
     ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
     
     Renderer::sendUniform1i("nSamples", 2);
@@ -142,6 +139,15 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     }
     else{
         //GroundFromAtmosphere should be currently binded
+		atmosphereHeight = 0.025f;
+
+		outerRadius = innerRadius + (innerRadius * atmosphereHeight);
+        fScale = 1.0f / (outerRadius - innerRadius);
+        Renderer::sendUniform1f("fOuterRadius", outerRadius);
+        Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
+        Renderer::sendUniform1f("fScale",fScale);
+        Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+
         glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);

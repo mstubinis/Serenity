@@ -507,12 +507,16 @@ void Detail::RenderManagement::_passLighting(){
     bindTextureSafe("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),2);
 
 	SkyboxEmpty* sky = Resources::getCurrentScene()->getSkybox();
-	if(sky != nullptr && sky->texture()->numAddresses() >= 2){
+	if(sky != nullptr && sky->texture()->numAddresses() >= 4){
 		bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
+		bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
+		bindTextureSafe("brdfLUT",sky->texture()->address(3),5,GL_TEXTURE_2D);
 	}
 	Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 	for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
 	unbindTextureCubemap(3);
+	unbindTextureCubemap(4);
+	unbindTexture2D(5);
 	p->unbind();
 }
 void Detail::RenderManagement::render(){

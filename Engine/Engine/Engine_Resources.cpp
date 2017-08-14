@@ -207,7 +207,9 @@ void Resources::initResources(){
     Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
     Shader* lightingFragGI = new Shader("lighting_frag_gi",Engine::Shaders::Detail::ShadersManagement::lighting_frag_gi,ShaderType::Fragment,false);
     Shader* cubemapConvolude = new Shader("cubemap_convolude_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_convolude_frag,ShaderType::Fragment,false);
-    
+    Shader* cubemapPrefilterEnv = new Shader("cubemap_prefilterEnv_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
+    Shader* brdfPrecompute = new Shader("brdf_precompute_frag",Engine::Shaders::Detail::ShadersManagement::brdf_precompute,ShaderType::Fragment,false);
+
     addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
@@ -222,7 +224,9 @@ void Resources::initResources(){
     addShaderProgram("Deferred_Light",fullscreenVertexShader,lightingFrag,ShaderRenderPass::Lighting);
     addShaderProgram("Deferred_Light_GI",fullscreenVertexShader,lightingFragGI,ShaderRenderPass::Lighting);
     addShaderProgram("Cubemap_Convolude",vertexSkybox,cubemapConvolude,ShaderRenderPass::Postprocess);
-    
+    addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
+    addShaderProgram("BRDF_Precompute",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
+
     addMaterial("Default","","","","","Deferred");
 
     addMesh("Plane",1.0f,1.0f);

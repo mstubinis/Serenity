@@ -43,6 +43,8 @@ namespace Engine{
 
                     static std::string copy_depth_frag;
                     static std::string cubemap_convolude_frag;
+                    static std::string cubemap_prefilter_envmap_frag;
+					static std::string brdf_precompute;
 
                     static std::string ssao_frag;
                     static std::string hdr_frag;

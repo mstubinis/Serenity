@@ -225,7 +225,7 @@ void Texture::unload(){
         EngineResource::unload();
     }
 }
-void Texture::convolute(){
+void Texture::genPBREnvMapData(){
     if(m_i->m_Type != GL_TEXTURE_CUBE_MAP){
         cout << "(Texture) : Only cubemaps can be convoluted. Ignoring convolute() call..." << endl;
         return;
@@ -289,13 +289,99 @@ void Texture::convolute(){
         Renderer::Settings::clear(true,true,false);
 		Skybox::bindMesh();
     }
+	Renderer::bindFBO(0);
+    p->unbind();
     
+
+	//now gen EnvPrefilterMap for specular IBL
+    //cleanup previous EnvPrefilterMap operation
+    if(m_i->m_TextureAddress.size() >= 3){
+        glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
+        glBindTexture(m_i->m_Type,0);
+    }
+    else if(m_i->m_TextureAddress.size() == 2){
+        m_i->m_TextureAddress.push_back(0); // this should be element 3 (.at(2)) now
+    }
+    width = 128;
+    height = 128;
+    glGenTextures(1, &m_i->m_TextureAddress.at(2));
+    glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
+    for (uint i = 0; i < 6; ++i){
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+    }
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glGenerateMipmap(m_i->m_Type);
+
+	p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
+	Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
+
+    Renderer::bindFBO(captureFBO);
+    uint maxMipLevels = 10;
+    for (uint mip = 0; mip < maxMipLevels; ++mip){
+        uint mipWidth  = width * glm::pow(0.5, mip); // reisze framebuffer according to mip-level size.
+        uint mipHeight = height * glm::pow(0.5, mip);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+        glViewport(0, 0, mipWidth, mipHeight);
+        float roughness = (float)mip / (float)(maxMipLevels - 1);
+		Renderer::sendUniform1f("roughness",roughness);
+        for (uint i = 0; i < 6; ++i){
+			glm::mat4 vp = captureProjection * captureViews[i];
+			Renderer::sendUniformMatrix4f("VP", vp);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(2), mip);
+            Renderer::Settings::clear(true,true,false);
+            Skybox::bindMesh();
+        }
+    }
+    Renderer::bindFBO(0);
+
+
+	//now generate the BDRF LUT -- should probably just make this a global variable
+	//
+    //cleanup previous BDRF LUT operation
+	width = 512; //might have to be 512
+	height = 512; //might have to be 512
+    if(m_i->m_TextureAddress.size() >= 4){
+        glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
+        glBindTexture(m_i->m_Type,0);
+    }
+    else if(m_i->m_TextureAddress.size() == 3){
+        m_i->m_TextureAddress.push_back(0); // this should be element 4 (.at(3)) now
+    }
+	glGenTextures(1, &m_i->m_TextureAddress.at(3));
+    glBindTexture(GL_TEXTURE_2D, m_i->m_TextureAddress.at(3));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, width, height, 0, GL_RG, GL_FLOAT, 0);
+    // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+    Renderer::bindFBO(captureFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
+
+    glViewport(0, 0, width, height);
+	p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
+    Renderer::Settings::clear(true,true,false);
+	glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
+	Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
+
+	p->unbind();
+	glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    Renderer::bindFBO(0);
+
     //cleanup... might have to comment this out if this bugs it out
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
     ////
-    p->unbind();
-    
+
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
     glViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
