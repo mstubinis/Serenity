@@ -14,7 +14,7 @@ namespace detail{
 #	else
 		template <typename genType>
 		genType log2(genType Value){
-			return std::log(Value) * static_cast<genType>(1.4426950408889634073599246810019);
+			return static_cast<genType>(std::log(Value)) * static_cast<genType>(1.4426950408889634073599246810019);
 		}
 #	endif
 

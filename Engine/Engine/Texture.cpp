@@ -289,7 +289,7 @@ void Texture::genPBREnvMapData(){
         Renderer::Settings::clear(true,true,false);
 		Skybox::bindMesh();
     }
-	cout << "-------- " + this->name() + " (Cubemap): convolution complete --------" << endl;
+	cout << "---- " + this->name() + " (Cubemap): convolution done ----" << endl;
 	Resources::getWindow()->display(); //prevent opengl & windows timeout
 	Renderer::bindFBO(0);
     p->unbind();
@@ -304,8 +304,8 @@ void Texture::genPBREnvMapData(){
     else if(m_i->m_TextureAddress.size() == 2){
         m_i->m_TextureAddress.push_back(0); // this should be element 3 (.at(2)) now
     }
-    width = 128;
-    height = 128;
+    width = this->width()/4;
+    height = this->height()/4;
     glGenTextures(1, &m_i->m_TextureAddress.at(2));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
     for (uint i = 0; i < 6; ++i){
@@ -324,8 +324,8 @@ void Texture::genPBREnvMapData(){
     Renderer::bindFBO(captureFBO);
     uint maxMipLevels = 10;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
-        uint mipWidth  = width * glm::pow(0.5, mip); // reisze framebuffer according to mip-level size.
-        uint mipHeight = height * glm::pow(0.5, mip);
+        uint mipWidth  = uint(width * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
+        uint mipHeight = uint(height * glm::pow(0.5, mip));
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
         glViewport(0, 0, mipWidth, mipHeight);
@@ -339,7 +339,7 @@ void Texture::genPBREnvMapData(){
             Skybox::bindMesh();
         }
     }
-	cout << "-------- " + this->name() + " (Cubemap): prefilter complete --------" << endl;
+	cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
 	Resources::getWindow()->display(); //prevent opengl & windows timeout
     Renderer::bindFBO(0);
 
@@ -376,7 +376,7 @@ void Texture::genPBREnvMapData(){
     Renderer::Settings::clear(true,true,false);
 	glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
 	Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
-	cout << "-------- " + this->name() + " (Cubemap): BRDF precompute complete --------" << endl;
+	cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
 
 	p->unbind();
 	glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);

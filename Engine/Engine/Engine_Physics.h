@@ -68,7 +68,7 @@ namespace Engine{
 
                     static void init();
                     static void destruct();
-                    static void update(float dt,uint maxSteps = 1,float = 1/60.0f);
+                    static void update(float dt,int maxSteps = 1,float = 0.0166666f);
                     static void render();
 
                     static std::vector<glm::vec3> rayCastInternal(const btVector3& start, const btVector3& end);

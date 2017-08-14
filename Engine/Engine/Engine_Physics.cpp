@@ -77,9 +77,8 @@ void Physics::addRigidBody(btRigidBody* body){ Physics::Detail::PhysicsManagemen
 void Physics::removeRigidBody(btRigidBody* body){ Physics::Detail::PhysicsManagement::m_world->removeRigidBody(body); }
 void Physics::removeRigidBody(ObjectDynamic* obj){ Physics::removeRigidBody(obj->getRigidBody()); }
 
-void Detail::PhysicsManagement::update(float dt,uint maxSteps,float other){ 
-    //m_world->stepSimulation(dt,maxSteps,other);
-	m_world->stepSimulation(dt);
+void Detail::PhysicsManagement::update(float dt,int maxSteps,float other){ 
+    m_world->stepSimulation(dt,maxSteps,other);
     uint numManifolds = m_world->getDispatcher()->getNumManifolds();
     for (uint i = 0; i < numManifolds; i++){
         btPersistentManifold* contactManifold =  m_world->getDispatcher()->getManifoldByIndexInternal(i);
