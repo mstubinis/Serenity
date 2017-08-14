@@ -227,14 +227,13 @@ void Texture::unload(){
 }
 void Texture::genPBREnvMapData(){
     if(m_i->m_Type != GL_TEXTURE_CUBE_MAP){
-        cout << "(Texture) : Only cubemaps can be convoluted. Ignoring convolute() call..." << endl;
+        cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl;
         return;
     }
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-    //or just use plain 32...
-    uint width = 32; /*glm::max(32, m_Width / 32);*/
-    uint height = 32; /*glm::max(32, m_Height / 32);*/
+    uint width = 32;
+    uint height = 32;
     //cleanup previous convolute operation
     if(m_i->m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
@@ -289,6 +288,7 @@ void Texture::genPBREnvMapData(){
         Renderer::Settings::clear(true,true,false);
 		Skybox::bindMesh();
     }
+	cout << "-------- " + this->name() + " (Cubemap): convolution complete --------" << endl;
 	Renderer::bindFBO(0);
     p->unbind();
     
@@ -337,6 +337,7 @@ void Texture::genPBREnvMapData(){
             Skybox::bindMesh();
         }
     }
+	cout << "-------- " + this->name() + " (Cubemap): prefilter complete --------" << endl;
     Renderer::bindFBO(0);
 
 
@@ -372,6 +373,7 @@ void Texture::genPBREnvMapData(){
     Renderer::Settings::clear(true,true,false);
 	glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
 	Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
+	cout << "-------- " + this->name() + " (Cubemap): BRDF precompute complete --------" << endl;
 
 	p->unbind();
 	glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
