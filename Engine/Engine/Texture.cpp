@@ -320,6 +320,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1i("resSquared",this->width() * this->width());
+    Renderer::sendUniform1i("NUM_SAMPLES",800);
     Renderer::bindFBO(captureFBO);
     uint maxMipLevels = 5;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
@@ -372,6 +373,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
 
     glViewport(0, 0, width, height);
     p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
+    Renderer::sendUniform1i("NUM_SAMPLES",512);
     Renderer::Settings::clear(true,true,false);
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
     Renderer::Detail::renderFullscreenQuad(width,height); //this might have to be winsize x and winsize y
