@@ -3,6 +3,7 @@
 #define ENGINE_LIGHT_H
 
 #include "ObjectDisplay.h"
+#include "Camera.h"
 #include <unordered_map>
 
 class LightType{public: enum Type{
@@ -114,7 +115,22 @@ class RodLight: public PointLight{
         void update(float);
         void lighten();
 
-	    float rodLength();
-		void setRodLength(float);
+        float rodLength();
+        void setRodLength(float);
+};
+class LightProbe: public Camera{
+    private:
+        uint m_EnvMapWidth;
+        uint m_EnvMapSize;
+        GLuint m_FBO;
+        GLuint m_RBO;
+        GLuint m_EnvMapPrefilterTextureAddress;
+        GLuint m_EnvMapConvolutionTextureAddress;
+    public:
+        LightProbe(std::string = "Light Probe", uint envMapWidth, uint envMapHeight);
+        ~LightProbe();
+    
+        void update(float);
+        void render();
 };
 #endif
