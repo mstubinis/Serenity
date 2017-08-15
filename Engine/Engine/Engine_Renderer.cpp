@@ -633,6 +633,9 @@ void Detail::RenderManagement::_passSSAO(Camera* c,uint& fbufferWidth, uint& fbu
     sendUniform1i("Samples",RendererInfo::SSAOInfo::ssao_samples);
     sendUniform1i("NoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
     
+    float _divisor = m_gBuffer->getBuffer(GBufferType::Bloom)->divisor();
+    sendUniform1f("fbufferDivisor",_divisor);
+	
     sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),0);
@@ -672,6 +675,9 @@ void Detail::RenderManagement::_passGodsRays(Camera* c,uint& fbufferWidth, uint&
     sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
     sendUniform1i("behind",int(behind));
     sendUniform1f("alpha",alpha);
+	
+    float _divisor = m_gBuffer->getBuffer(GBufferType::GodRays)->divisor();
+    sendUniform1f("fbufferDivisor",_divisor);
 
     bindTexture("firstPass",m_gBuffer->getTexture(GBufferType::Lighting),0);
 
@@ -704,6 +710,9 @@ void Detail::RenderManagement::_passBlur(Camera* c,uint& fbufferWidth, uint& fbu
     sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
         RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
+    float _divisor = m_gBuffer->getBuffer(GBufferType::Bloom)->divisor();
+    sendUniform1f("fbufferDivisor",_divisor);
+	
     glm::vec4 rgba(0.0f);
     if(channels.find("R") != string::npos) rgba.x = 1.0f;
     if(channels.find("G") != string::npos) rgba.y = 1.0f;
