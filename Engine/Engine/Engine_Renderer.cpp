@@ -341,8 +341,8 @@ void Detail::RenderManagement::_renderText(Camera* c,uint& fbufferWidth, uint& f
     }
     p->unbind();
 }
-void Detail::RenderManagement::_passGeometry(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
-    if(RendererInfo::GodRaysInfo::godRays)
+void Detail::RenderManagement::_passGeometry(Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays){
+    if(RendererInfo::GodRaysInfo::godRays && renderGodRays)
         m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
     else
         m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
@@ -362,7 +362,7 @@ void Detail::RenderManagement::_passGeometry(Camera* c,uint& fbufferWidth, uint&
     }
     m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
     scene->renderSkybox();
-    if(RendererInfo::GodRaysInfo::godRays)
+    if(RendererInfo::GodRaysInfo::godRays && renderGodRays)
         m_gBuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 
     glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
@@ -415,7 +415,7 @@ void Detail::RenderManagement::_passGeometry(Camera* c,uint& fbufferWidth, uint&
 
     //RENDER FOREGROUND OBJECTS HERE
 }
-void Detail::RenderManagement::_passForwardRendering(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::_passForwardRendering(Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays){
     Scene* scene = Resources::getCurrentScene();
     for(auto shaderProgram:Detail::RenderManagement::m_ForwardPassShaderPrograms){
         vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
@@ -520,10 +520,10 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     unbindTexture2D(5);
     p->unbind();
 }
-void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHeight){
-    _passGeometry(c,fbufferWidth,fbufferHeight);
+void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHeight,bool renderSSAO, bool renderGodRays, bool renderAA){
+    _passGeometry(c,fbufferWidth,fbufferHeight,renderGodRays);
 
-    if(RendererInfo::GodRaysInfo::godRays){
+    if(RendererInfo::GodRaysInfo::godRays && renderGodRays){
         m_gBuffer->start(GBufferType::GodRays,"RGBA",false);
         Object* o = Resources::getObject("Sun");
         glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
@@ -552,14 +552,17 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
 
     //_passForwardRendering();
 
-
-    m_gBuffer->start(GBufferType::Bloom,"RGBA",false);
-    _passSSAO(c,fbufferWidth,fbufferHeight); //ssao AND bloom
+    string _channels;
+    if(renderSSAO && RendererInfo::SSAOInfo::ssao){ _channels = "RGBA"; }
+    else{                                           _channels = "RGB";  }
+	
+    m_gBuffer->start(GBufferType::Bloom,_channels,false);
+    _passSSAO(c,fbufferWidth,fbufferHeight,renderSSAO); //ssao AND bloom
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
-        m_gBuffer->start(GBufferType::Free2,"RGBA",false);
-        _passBlur(c,fbufferWidth,fbufferHeight,"H",GBufferType::Bloom,"RGBA");
-        m_gBuffer->start(GBufferType::Bloom,"RGBA",false);
-        _passBlur(c,fbufferWidth,fbufferHeight,"V",GBufferType::Free2,"RGBA");
+        m_gBuffer->start(GBufferType::Free2,_channels,false);
+        _passBlur(c,fbufferWidth,fbufferHeight,"H",GBufferType::Bloom,_channels);
+        m_gBuffer->start(GBufferType::Bloom,_channels,false);
+        _passBlur(c,fbufferWidth,fbufferHeight,"V",GBufferType::Free2,_channels);
     }
     m_gBuffer->start(GBufferType::Misc);
     _passHDR(c,fbufferWidth,fbufferHeight);
@@ -568,13 +571,13 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
         m_gBuffer->stop();
         _passFinal(c,fbufferWidth,fbufferHeight);
     }
-    else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA){
+    else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA && renderAA){
         m_gBuffer->start(GBufferType::Lighting);
         _passFinal(c,fbufferWidth,fbufferHeight);
         m_gBuffer->stop();
         _passFXAA(c,fbufferWidth,fbufferHeight);
     }
-    else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA){
+    else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && renderAA){
         m_gBuffer->start(GBufferType::Lighting);
         _passFinal(c,fbufferWidth,fbufferHeight);
         _passSMAA(c,fbufferWidth,fbufferHeight);
@@ -588,7 +591,7 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
     glEnable(GL_BLEND);
     Settings::disableDepthTest();
     Settings::disableDepthMask();
-    if(Detail::RendererInfo::GeneralInfo::draw_physics_debug){
+    if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && c == Resources::getActiveCamera()){
         Physics::Detail::PhysicsManagement::render();
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -608,10 +611,12 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
     vector_clear(m_FontsToBeRendered);
     vector_clear(m_TexturesToBeRendered);
 }
-void Detail::RenderManagement::_passSSAO(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::_passSSAO(Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderSSAO){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();
 
-    sendUniform1i("doSSAO",int(RendererInfo::SSAOInfo::ssao));
+    int doSSAO = 1;
+    if(renderSSAO == false || RendererInfo::SSAOInfo::ssao == false) doSSAO = 0;
+    sendUniform1i("doSSAO",doSSAO);
     sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
 
     glm::vec3 camPos = c->getPosition();
