@@ -246,12 +246,12 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     GLuint captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
     glGenRenderbuffers(1, &captureRBO);
-    
+
     Renderer::bindFBO(captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);  
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
-    
+
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
         cout << "Framebuffer completeness in genPBREnvMapData() is incomplete!" << endl; return;
     }
@@ -266,7 +266,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
+
     glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000.0f);
     glm::mat4 captureViews[] = {
         glm::lookAt(glm::vec3(0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -278,7 +278,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     };
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
-    
+
     glViewport(0, 0, size, size); // don't forget to configure the viewport to the capture dimensions.
     for (uint i = 0; i < 6; ++i){
         glm::mat4 vp = captureProjection * captureViews[i];
@@ -327,8 +327,8 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
         glViewport(0, 0, mipSize, mipSize);
         float roughness = (float)mip / (float)(maxMipLevels - 1);
         Renderer::sendUniform1f("roughness",roughness);
-		float a = roughness * roughness;
-	    Renderer::sendUniform1f("a2",a*a);
+        float a = roughness * roughness;
+        Renderer::sendUniform1f("a2",a*a);
         for (uint i = 0; i < 6; ++i){
             glm::mat4 vp = captureProjection * captureViews[i];
             Renderer::sendUniformMatrix4f("VP", vp);
