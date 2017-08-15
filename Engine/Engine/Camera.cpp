@@ -12,8 +12,9 @@
 
 using namespace Engine;
 using namespace boost;
+using namespace std;
 
-Camera::Camera(std::string n, float angle, float aspectRatio, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create a perspective camera
+Camera::Camera(string n, float angle, float aspectRatio, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create a perspective camera
     m_Angle = angle;
     m_AspectRatio = aspectRatio;
     m_Near = _near;
@@ -25,7 +26,7 @@ Camera::Camera(std::string n, float angle, float aspectRatio, float _near, float
 
     Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
 }
-Camera::Camera(std::string n, float left, float right, float bottom, float top, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
+Camera::Camera(string n, float left, float right, float bottom, float top, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;
     m_AspectRatio = 1.0f;
     m_Near = _near;
@@ -56,7 +57,7 @@ void Camera::_constructFrustrum(){
         m_Planes[i] = -m_Planes[i] / glm::length(normal);
     }
 }
-void Camera::resize(unsigned int width, unsigned int height){
+void Camera::resize(uint width,uint height){
     if(m_Type == CameraType::Perspective){setAspectRatio(float(width)/float(height));}
     else{setOrthoProjection(0,float(width),0,float(height));}
 }
