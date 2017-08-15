@@ -49,7 +49,7 @@ class GBuffer final{
         void stop();
 
         const std::unordered_map<uint,boost::weak_ptr<TextureBuffer>>& getBuffers() const;
-        const TextureBuffer* getBuffer(uint) const;
+        TextureBuffer* getBuffer(uint);
         Texture* getTexture(uint);
 
         const GLuint& getMainFBO() const;
