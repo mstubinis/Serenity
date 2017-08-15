@@ -114,9 +114,9 @@ vec3 DecodeStereographic(vec2 enc){
 }
 
 vec3 CalcBumpedNormal(void){
-    vec3 t = (texture2D(NormalTexture, UV).xyz * 2.0) - 1.0;
+    vec3 normalTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
-    return normalize(TBN * t);
+    return TBN * normalize(normalTexture);
 }
 void main(void){
     if(HasAtmosphere == 1){
