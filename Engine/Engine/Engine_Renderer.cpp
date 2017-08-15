@@ -567,7 +567,7 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
     m_gBuffer->start(GBufferType::Misc);
     _passHDR(c,fbufferWidth,fbufferHeight);
 
-    if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None){
+    if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None || renderAA == false){
         m_gBuffer->stop();
         _passFinal(c,fbufferWidth,fbufferHeight);
     }
@@ -575,12 +575,12 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
         m_gBuffer->start(GBufferType::Lighting);
         _passFinal(c,fbufferWidth,fbufferHeight);
         m_gBuffer->stop();
-        _passFXAA(c,fbufferWidth,fbufferHeight);
+        _passFXAA(c,fbufferWidth,fbufferHeight,renderAA);
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && renderAA){
         m_gBuffer->start(GBufferType::Lighting);
         _passFinal(c,fbufferWidth,fbufferHeight);
-        _passSMAA(c,fbufferWidth,fbufferHeight);
+        _passSMAA(c,fbufferWidth,fbufferHeight,renderAA);
     }
     //m_gBuffer->stop();
     //glDepthFunc(GL_ALWAYS);
@@ -722,7 +722,9 @@ void Detail::RenderManagement::_passBlur(Camera* c,uint& fbufferWidth, uint& fbu
     unbindTexture2D(0);
     p->unbind();
 }
-void Detail::RenderManagement::_passFXAA(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::_passFXAA(Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
+    if(!renderAA) return;
+	
     ShaderP* p = Resources::getShaderProgram("Deferred_FXAA"); p->bind();
 
     sendUniform2f("resolution",float(fbufferWidth),float(fbufferHeight));
@@ -733,7 +735,9 @@ void Detail::RenderManagement::_passFXAA(Camera* c,uint& fbufferWidth, uint& fbu
     for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
 }
-void Detail::RenderManagement::_passSMAA(Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::_passSMAA(Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
+    if(!renderAA) return;
+	
     m_gBuffer->start(GBufferType::Misc);
     //pass first thing
     m_gBuffer->start(GBufferType::Lighting);
