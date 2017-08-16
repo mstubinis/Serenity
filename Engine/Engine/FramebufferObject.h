@@ -30,7 +30,7 @@ class FramebufferObjectAttatchment{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        FramebufferObjectAttatchment();
+        FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment);
         ~FramebufferObjectAttatchment();
     
         uint width();
