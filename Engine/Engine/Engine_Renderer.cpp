@@ -36,6 +36,7 @@ unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = ba
 bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
+GLuint Detail::RendererInfo::GeneralInfo::current_bound_rbo = 0;
 AntiAliasingAlgorithm::Algorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
 
 
@@ -216,6 +217,16 @@ void Renderer::bindDrawFBO(GLuint d){
     }
 }
 void Renderer::bindFBO(GLuint f){Renderer::bindReadFBO(f);Renderer::bindDrawFBO(f);}
+void Renderer::bindRBO(GLuint r){
+    if(Detail::RendererInfo::GeneralInfo::current_bound_rbo != r){
+        glBindRenderbuffer(GL_RENDERBUFFER, r);
+        Detail::RendererInfo::GeneralInfo::current_bound_rbo = r;
+    }
+}
+void Renderer::unbindFBO(){ Renderer::bindFBO(0); }
+void Renderer::unbindRBO(){ Renderer::bindRBO(0); }
+void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
+void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
 void Renderer::unbindTexture(uint s,Texture* t){
     glActiveTexture(GL_TEXTURE0+s);
     glBindTexture(t->type(),0);
