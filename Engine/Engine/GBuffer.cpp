@@ -119,6 +119,15 @@ class GBuffer::impl final{
             Renderer::unbindFBO();
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
+            //Try this to use only 1 framebuffer / rbo for various texture sizes.
+            /*
+            I think you can do that by simply changing the Viewport to match the texture
+            dimensions before you do the render to texture, then set the viewport back
+            to the dimensions of the View before you render to the framebuffer.
+            There should be no significant performance loss because you will be calling glViewport() twice as often.
+            Your suggestion about scaling the projection matrix should also work.
+            */
+            
             if(first_fbo){ Renderer::bindFBO(m_FBO); }
             else{ Renderer::bindFBO(m_FBO_bloom); }
             GLboolean r,g,b,a;
