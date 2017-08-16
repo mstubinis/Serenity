@@ -114,9 +114,10 @@ FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferObject* _f
     m_i->_init(this,_fbo,a);
 }
 FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ m_i->_destruct(this); }
-uint FramebufferObjectAttatchment::width(){ m_i->m_FBO->width(); }
-uint FramebufferObjectAttatchment::height(){ m_i->m_FBO->height(); }
-FramebufferObject* FramebufferObjectAttatchment::fbo(){ m_i->m_FBO; }
+uint FramebufferObjectAttatchment::width(){ return m_i->m_FBO->width(); }
+uint FramebufferObjectAttatchment::height(){ return m_i->m_FBO->height(); }
+FramebufferObject* FramebufferObjectAttatchment::fbo(){ return m_i->m_FBO; }
+uint FramebufferObjectAttatchment::attachment(){ return m_i->m_GL_Attatchment; }
 
 class RenderbufferObject::impl{
     public:
@@ -141,6 +142,7 @@ RenderbufferObject::RenderbufferObject(FramebufferObject* f,FramebufferAttatchme
 }
 RenderbufferObject::~RenderbufferObject(){ m_i->_destruct(this); }
 void RenderbufferObject::resize(uint w,uint h){m_i->_resize(this,w,h); }
+GLuint RenderbufferObject::address(){ return m_i->m_RBO; }
 
 class FramebufferObject::impl{
     public:
