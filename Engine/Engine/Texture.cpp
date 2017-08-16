@@ -188,14 +188,14 @@ void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& sc
     if(m_i->m_Files.size() != 1){ return; } //this is either not a valid texture or a cubemap, and cannot be rendered 2D.
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
-void Texture::_constructAsFramebuffer(uint w,uint h,float s,int intern,int format,int type,int attatchment){
+void Texture::_constructAsFramebuffer(uint w,uint h,float divisor,int intern,int format,int type,int attatchment){
     m_i->m_Width = w; m_i->m_Height = h;
-    glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(0));
-    glTexImage2D(m_i->m_Type, 0, intern, (GLsizei)(w*s), (GLsizei)(h*s), 0, format, type, NULL);
+    glBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(0));
+    glTexImage2D(m_i->m_Type,0,intern,GLsizei(w*divisor),GLsizei(h*divisor),0,format,type,NULL);
     this->setFilter(TextureFilter::Linear);
     this->setWrapping(TextureWrap::ClampToEdge);
-    glBindTexture(m_i->m_Type, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress.at(0), 0);
+    glBindTexture(m_i->m_Type,0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,attatchment,m_i->m_Type,m_i->m_TextureAddress.at(0),0);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }
