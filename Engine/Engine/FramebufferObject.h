@@ -42,7 +42,7 @@ class RenderbufferObject{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        RenderbufferObject(uint width,uint height,GLuint internalFormat);
+        RenderbufferObject(uint width,uint height,ImageInternalFormat::Format);
         ~RenderbufferObject();
 };
 
