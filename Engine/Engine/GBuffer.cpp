@@ -58,7 +58,8 @@ class GBuffer::impl final{
             glGenRenderbuffers(1, &m_RBO);
             
             Renderer::bindFBO(m_FBO);
-            glBindRenderbuffer(GL_RENDERBUFFER, m_RBO);// Bind the depth buffer
+            Renderer::bindRBO(m_RBO);// Bind the depth buffer
+            //glBindRenderbuffer(GL_RENDERBUFFER, m_RBO);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
             //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved below
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
@@ -72,14 +73,16 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-            glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
+            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
+            Renderer::bindRBO(0); //was moved to down here
             Renderer::bindFBO(0);
 
             glGenFramebuffers(1, &m_FBO_bloom);
             glGenRenderbuffers(1, &m_RBO_bloom);
             
             Renderer::bindFBO(m_FBO_bloom);
-            glBindRenderbuffer(GL_RENDERBUFFER, m_RBO_bloom);// Bind the depth buffer
+            Renderer::bindRBO(m_RBO_bloom);// Bind the depth buffer
+            //glBindRenderbuffer(GL_RENDERBUFFER, m_RBO_bloom);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
             //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved below
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO_bloom);
@@ -91,7 +94,8 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-            glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
+            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
+            Renderer::bindRBO(0); //was moved to down here
             Renderer::bindFBO(0);
             return true;
         }
