@@ -247,6 +247,7 @@ namespace Engine{
         inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
         inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
         
+        void setViewport(uint x, uint y, uint width, uint height);
         void bindFBO(GLuint);
         void bindRBO(GLuint);
         void bindReadFBO(GLuint);
