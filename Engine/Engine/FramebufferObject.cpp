@@ -3,8 +3,30 @@
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <unordered_map>
 
 using namespace Engine;
+using namespace std;
+
+unordered_map<uint,GLuint> _populateGLAttatchmentMap(){
+    unordered_map<uint,GLuint> m;
+
+    m.emplace(uint(Color_0), GL_COLOR_ATTACHMENT0);
+    m.emplace(uint(Color_1), GL_COLOR_ATTACHMENT1);
+    m.emplace(uint(Color_2), GL_COLOR_ATTACHMENT2);
+    m.emplace(uint(Color_3), GL_COLOR_ATTACHMENT3);
+    m.emplace(uint(Color_4), GL_COLOR_ATTACHMENT4);
+    m.emplace(uint(Color_5), GL_COLOR_ATTACHMENT5);
+    m.emplace(uint(Color_6), GL_COLOR_ATTACHMENT6);
+    m.emplace(uint(Color_7), GL_COLOR_ATTACHMENT7);
+    m.emplace(uint(Color_8), GL_COLOR_ATTACHMENT8);
+    m.emplace(uint(Depth), GL_DEPTH_ATTACHMENT);
+    m.emplace(uint(Stencil), GL_STENCIL_ATTACHMENT);
+    m.emplace(uint(DepthAndStencil), GL_DEPTH_STENCIL_ATTACHMENT);
+
+    return m;
+}
+unordered_map<uint,GLuint> GL_ATTATCHMENT_MAP = _populateGLAttatchmentMap();
 
 
 struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
@@ -21,6 +43,22 @@ struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r
     Renderer::unbindFBO();
     Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }};
+
+class FramebufferObjectAttatchment::impl{
+    public:
+        GLuint m_GL_Attatchment;
+        void _init(FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a){
+            m_GL_Attatchment = GL_ATTATCHMENT_MAP.at(uint(a));
+        }
+        void _destruct(FramebufferObjectAttatchment* super){
+
+        }
+};
+FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferAttatchment::Attatchment a){
+    m_i->_init(this,a);
+}
+FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ m_i->_destruct(this); }
+
 
 class RenderbufferObject::impl{
     public:
@@ -44,6 +82,8 @@ class FramebufferObject::impl{
 
         GLuint m_FBO;
     
+        unordered_map<uint,FramebufferObjectAttatchment*> m_Attatchments;
+    
         uint m_FramebufferWidth;
         uint m_FramebufferHeight;
 
@@ -65,6 +105,9 @@ class FramebufferObject::impl{
             }
         }
         void _destruct(FramebufferObject* super){
+            for(auto attatchment:m_Attatchments){
+                delete attatchment.second;
+            }
             glDeleteFramebuffers(1, &m_FBO);
         }
         void _resize(FramebufferObject* super,uint new_width,uint new_height){
@@ -77,39 +120,21 @@ class FramebufferObject::impl{
             //Renderer::unbindRBO();
             Renderer::unbindFBO();
         }
-        void _attatchTexture(FramebufferObject* super,Texture* texture,FramebufferAttatchment::Attatchment attatchment){
-            if(attatchment != FramebufferAttatchment::Depth && attatchment != FramebufferAttatchment::Stencil && attatchment != FramebufferAttatchment::DepthAndStencil){
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attatchment,texture->type(),texture->address(), 0);
-            }
-            else{
-                if(attatchment == FramebufferAttatchment::Depth)
-                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->type(), texture->address(), 0);
-                else if(attatchment == FramebufferAttatchment::Stencil)
-                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, texture->type(), texture->address(), 0);
-                else if(attatchment == FramebufferAttatchment::DepthAndStencil)
-                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, texture->type(), texture->address(), 0);
-            }
+        void _attatchTexture(FramebufferObject* super,Texture* txtre,FramebufferAttatchment::Attatchment atchmnt){
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_ATTATCHMENT_MAP.at(uint(atchmnt)),txtre->type(),txtre->address(),0);
+            FramebufferObjectAttatchment attatchmentObject = new FramebufferObjectAttatchment(atchmnt);
+            m_Attatchments.emplace(atchmnt,attatchmentObject);
         }
-        void _attatchRenderbuffer(FramebufferObject* super,RenderbufferObject* rbo,FramebufferAttatchment::Attatchment attatchment){
+        void _attatchRenderbuffer(FramebufferObject* super,RenderbufferObject* rbo,FramebufferAttatchment::Attatchment atchmnt){
             Renderer::bindRBO(rbo);
-            if(attatchment != FramebufferAttatchment::Depth && attatchment != FramebufferAttatchment::Stencil && attatchment != FramebufferAttatchment::DepthAndStencil){
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attatchment,GL_RENDERBUFFER,rbo->address());
-            }
-            else{
-                if(attatchment == FramebufferAttatchment::Depth)
-                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,rbo->address());
-                else if(attatchment == FramebufferAttatchment::Stencil)
-                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo->address());
-                else if(attatchment == FramebufferAttatchment::DepthAndStencil)
-                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,rbo->address());
-            }
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_ATTATCHMENT_MAP.at(uint(atchmnt)),GL_RENDERBUFFER,rbo->address());
             Renderer::unbindRBO();
         }
 };
 FramebufferObjectDefaultBindFunctor FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
 FramebufferObjectDefaultUnbindFunctor FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR;
 
-FramebufferObject::FramebufferObject(std::string name,uint w,uint h):BindableResource(name),m_i(new impl){
+FramebufferObject::FramebufferObject(string name,uint w,uint h):BindableResource(name),m_i(new impl){
     m_i->_init(this,w,h);
 }
 FramebufferObject::~FramebufferObject(){ m_i->_destruct(this); }
