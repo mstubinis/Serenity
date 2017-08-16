@@ -37,7 +37,7 @@ class FramebufferObjectAttatchment{
         uint height();
 };
 
-class RenderbufferObject{
+class RenderbufferObject: public FramebufferObjectAttatchment{
     private:
         class impl;
         std::unique_ptr<impl> m_i;
