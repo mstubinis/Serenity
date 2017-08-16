@@ -42,7 +42,7 @@ class RenderbufferObject: public FramebufferObjectAttatchment{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        RenderbufferObject(uint width,uint height,ImageInternalFormat::Format);
+        RenderbufferObject(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
         ~RenderbufferObject();
 };
 
