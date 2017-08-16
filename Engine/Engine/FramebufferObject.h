@@ -11,5 +11,7 @@ class FramebufferObject: public BindableResource{
     public:
         FramebufferObject(std::string name,uint width,uint height);
         ~FramebufferObject();
+
+        void resize(uint,uint);
 };
 #endif
