@@ -9,7 +9,7 @@ class FramebufferObject: public BindableResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        FramebufferObject(std::string);
+        FramebufferObject(std::string name,uint width,uint height);
         ~FramebufferObject();
 };
 #endif
