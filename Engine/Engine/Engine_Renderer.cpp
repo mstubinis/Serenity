@@ -539,7 +539,7 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     unbindTexture2D(5);
     p->unbind();
 }
-void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHeight,bool renderSSAO, bool renderGodRays, bool renderAA,bool HUD, Object* ignore,bool mainRenderFunc){
+void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHeight,bool renderSSAO, bool renderGodRays, bool renderAA,bool HUD, Object* ignore,bool mainRenderFunc,GLuint fbo, GLuint rbo){
     if(mainRenderFunc){
         for(auto lightProbe:Resources::getCurrentScene()->m_LightProbes){
             lightProbe.second->renderCubemap();
@@ -561,7 +561,7 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
         alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
         _passGodsRays(c,fbufferWidth,fbufferHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
-        m_gBuffer->stop();
+        m_gBuffer->stop(fbo,rbo); //is this really needed?
     }
 
     glEnable(GL_BLEND);
@@ -592,13 +592,13 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
     _passHDR(c,fbufferWidth,fbufferHeight);
 
     if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None || renderAA == false){
-        m_gBuffer->stop();
+        m_gBuffer->stop(fbo,rbo);
         _passFinal(c,fbufferWidth,fbufferHeight);
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA && renderAA){
         m_gBuffer->start(GBufferType::Lighting);
         _passFinal(c,fbufferWidth,fbufferHeight);
-        m_gBuffer->stop();
+        m_gBuffer->stop(fbo,rbo);
         _passFXAA(c,fbufferWidth,fbufferHeight,renderAA);
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && renderAA){
