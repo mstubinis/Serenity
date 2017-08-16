@@ -800,12 +800,10 @@ void Detail::RenderManagement::_passFinal(Camera* c,uint& fbufferWidth, uint& fb
 void Detail::renderFullscreenQuad(uint width,uint height){
     glm::mat4 m(1.0f);
     glm::mat4 p = glm::ortho(-float(width)/2,float(width)/2,-float(height)/2,float(height)/2);
-
     sendUniformMatrix4f("Model",m);
     sendUniformMatrix4f("VP",p);
-
-    glViewport(0,0,width,height);
-
+    setViewport(0,0,width,height);
+    
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f,0.0f); glVertex2f(-float(width)/2,-float(height)/2);
         glTexCoord2f(1.0f,0.0f); glVertex2f(float(width)/2,-float(height)/2);
