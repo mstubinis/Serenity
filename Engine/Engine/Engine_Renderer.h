@@ -246,6 +246,7 @@ namespace Engine{
         inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
         
         void bindFBO(GLuint);
+        void bindRBO(GLuint);
         void bindReadFBO(GLuint);
         void bindDrawFBO(GLuint);
         void bindTexture(const char* location,Texture*,uint slot);
@@ -255,6 +256,10 @@ namespace Engine{
         void unbindTexture(uint slot,Texture*);
         void unbindTexture2D(uint slot);
         void unbindTextureCubemap(uint slot);
+        void unbindFBO();
+        void unbindRBO();
+        void unbindReadFBO();
+        void unbindDrawFBO();
         
         
         //Uniform 1
