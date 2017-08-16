@@ -124,7 +124,7 @@ class RenderbufferObject::impl{
         void _init(RenderbufferObject* super,FramebufferObject* _fbo,ImageInternalFormat::Format internalFormat){
             glGenRenderbuffers(1, &m_RBO);
             Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_IMAGE_FORMAT_MAP.at(internalFormat), fbo()->width(), fbo()->height());
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_IMAGE_FORMAT_MAP.at(uint(internalFormat)), fbo()->width(), fbo()->height());
             Renderer::unbindRBO();
         }
         void _destruct(RenderbufferObject* super){
@@ -132,7 +132,7 @@ class RenderbufferObject::impl{
         }
         void _resize(RenderbufferObject* super){
             Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_IMAGE_FORMAT_MAP.at(internalFormat), fbo()->width(), fbo()->height());
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_IMAGE_FORMAT_MAP.at(uint(internalFormat)), fbo()->width(), fbo()->height());
             Renderer::unbindRBO();
         }
 };
