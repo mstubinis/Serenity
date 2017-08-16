@@ -5,7 +5,7 @@
 #include "BindableResource.h"
 
 class Texture;
-
+typedef unsigned int uint;
 class FramebufferAttatchment{public: enum Attatchment{
     Color_0, Color_1, Color_2, Color_3, Color_4, Color_5,
     Color_6, Color_7, Color_8, Depth, Stencil, DepthAndStencil
@@ -18,6 +18,9 @@ class FramebufferObjectAttatchment{
     public:
         FramebufferObjectAttatchment();
         ~FramebufferObjectAttatchment();
+    
+        uint width();
+        uint height();
 };
 
 class RenderbufferObject{
