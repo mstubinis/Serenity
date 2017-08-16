@@ -280,7 +280,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
 
-    glViewport(0, 0, size, size); // don't forget to configure the viewport to the capture dimensions.
+    Renderer::setViewport(0,0,size,size);
     for (uint i = 0; i < 6; ++i){
         glm::mat4 vp = captureProjection * captureViews[i];
         Renderer::sendUniformMatrix4f("VP", vp);
@@ -321,7 +321,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     for (uint mip = 0; mip < maxMipLevels; ++mip){
         uint mipSize  = uint(size * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);//do we really need 24? maybe 16 is enough
-        glViewport(0, 0, mipSize, mipSize);
+        Renderer::setViewport(0,0,mipSize,mipSize);
         float roughness = (float)mip /(float)(maxMipLevels - 1);
         Renderer::sendUniform1f("roughness",roughness);
         float a = roughness * roughness;
@@ -336,7 +336,6 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     }
     cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
-
 
     //now generate the BDRF LUT -- should probably just make this a global variable
     //
@@ -362,7 +361,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size); //24 is prob too big. use 16?
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
 
-    glViewport(0, 0, size, size);
+    Renderer::setViewport(0,0,size,size);
     p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
     Renderer::sendUniform1i("NUM_SAMPLES",256);
     Renderer::Settings::clear(true,true,false);
@@ -380,7 +379,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
 
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
-    glViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
