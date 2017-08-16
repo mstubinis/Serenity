@@ -17,7 +17,6 @@ class Engine_Window::impl{
         const char* m_WindowName;
         sf::Window* m_SFMLWindow;
         uint m_Width; uint m_Height;
-
         void _init(const char* name,uint width,uint height){
             m_WindowName = name;
             m_Width = width;
@@ -37,9 +36,9 @@ class Engine_Window::impl{
             settings.minorVersion = 3;
 
             #ifdef _DEBUG
-            settings.attributeFlags = settings.Debug;
+                settings.attributeFlags = settings.Debug;
             #else
-            settings.attributeFlags = settings.Default;
+                settings.attributeFlags = settings.Default;
             #endif
 
             m_VideoMode.width = width;
@@ -57,9 +56,11 @@ class Engine_Window::impl{
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
 
+            //move these 2 functions elsewhere like renderer::init() or engine::init() ?
             glewExperimental = GL_TRUE; 
             glewInit();
-            glEnable(GL_TEXTURE_2D);
+            
+            glEnable(GL_TEXTURE_2D);//is this really needed?
 
             Renderer::Settings::enableCullFace();
             Renderer::Settings::cullFace(GL_BACK);
@@ -67,19 +68,9 @@ class Engine_Window::impl{
             SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
             Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
         }
-        void _destroyOpenGLContext(){
-            HGLRC hglrc; HDC hdc ; 
-            if(hglrc = wglGetCurrentContext()){ 
-                hdc = wglGetCurrentDC(); 
-                wglMakeCurrent(0,0); 
-                ReleaseDC(m_SFMLWindow->getSystemHandle(), hdc); 
-                wglDeleteContext(hglrc); 
-            }
-            SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
-        }
         void _setFullScreen(bool fullscreen){
-            if(m_Style == sf::Style::Fullscreen && fullscreen == true) return;
-            if(m_Style != sf::Style::Fullscreen && fullscreen == false) return;
+            if(m_Style == sf::Style::Fullscreen && fullscreen) return;
+            if(m_Style != sf::Style::Fullscreen && !fullscreen) return;
             if(!m_SFMLWindow->hasFocus()) return;
 
             m_VideoMode = sf::VideoMode::getDesktopMode();
@@ -92,7 +83,7 @@ class Engine_Window::impl{
             SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
             m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
 
-            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_TEXTURE_2D);//is this really needed?
             Renderer::Settings::enableCullFace();
             Renderer::Settings::cullFace(GL_BACK);
 
@@ -106,10 +97,8 @@ class Engine_Window::impl{
             _createOpenGLWindow(m_WindowName,m_Width,m_Height);
         }
         void _setSize(uint w, uint h){
-            m_Width = w;
-            m_Height = h;
-            const sf::Vector2u size = sf::Vector2u(w,h);
-            m_SFMLWindow->setSize(size);
+            m_Width = w; m_Height = h;
+            m_SFMLWindow->setSize(sf::Vector2u(w,h));
         }
         void _setName(const char* name){
             if(m_WindowName == name) return;
