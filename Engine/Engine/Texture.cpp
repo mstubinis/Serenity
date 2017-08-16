@@ -248,8 +248,9 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glGenRenderbuffers(1, &captureRBO);
 
     Renderer::bindFBO(captureFBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);  
+    Renderer::bindRBO(captureRBO);
+    //glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);  //do we really need 24? 16 might be enough
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
@@ -319,7 +320,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     uint maxMipLevels = 5;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
         uint mipSize  = uint(size * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);//do we really need 24? maybe 16 is enough
         glViewport(0, 0, mipSize, mipSize);
         float roughness = (float)mip /(float)(maxMipLevels - 1);
         Renderer::sendUniform1f("roughness",roughness);
@@ -340,7 +341,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     //now generate the BDRF LUT -- should probably just make this a global variable
     //
     //cleanup previous BDRF LUT operation
-    size = brdfSize; //might have to be 512
+    size = brdfSize;
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
         glBindTexture(m_i->m_Type,0);
@@ -358,7 +359,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size); //24 is prob too big. use 16?
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
 
     glViewport(0, 0, size, size);
