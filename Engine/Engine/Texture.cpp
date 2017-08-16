@@ -252,7 +252,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     //cleanup previous convolute operation
     if(m_i->m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
-        glBindTexture(m_i->m_Type,0);
+        //glBindTexture(m_i->m_Type,0);
     }
     else if(m_i->m_TextureAddress.size() == 1){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
@@ -307,7 +307,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
     if(m_i->m_TextureAddress.size() >= 3){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
-        glBindTexture(m_i->m_Type,0);
+        //glBindTexture(m_i->m_Type,0);
     }
     else if(m_i->m_TextureAddress.size() == 2){
         m_i->m_TextureAddress.push_back(0); // this should be element 3 (.at(2)) now
@@ -354,7 +354,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     size = brdfSize;
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
-        glBindTexture(m_i->m_Type,0);
+        //glBindTexture(m_i->m_Type,0);
     }
     else if(m_i->m_TextureAddress.size() == 3){
         m_i->m_TextureAddress.push_back(0); // this should be element 4 (.at(3)) now
