@@ -98,40 +98,49 @@ struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r
 
 class FramebufferObjectAttatchment::impl{
     public:
+        ImageInternalFormat::Format m_InternalFormat;
         FramebufferObject* m_FBO;
         GLuint m_GL_Attatchment;
         uint m_AttatchmentWidth; uint m_AttatchmentHeight;
-        void _init(FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a){
+        void _init(FramebufferObject* _fbo,FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a){
+            m_FBO = _fbo;
             m_GL_Attatchment = GL_ATTATCHMENT_MAP.at(uint(a));
         }
         void _destruct(FramebufferObjectAttatchment* super){
 
         }
 };
-FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferAttatchment::Attatchment a){
-    m_i->_init(this,a);
+FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a){
+    m_i->_init(this,_fbo,a);
 }
 FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ m_i->_destruct(this); }
 uint FramebufferObjectAttatchment::width(){ m_i->m_FBO->width(); }
 uint FramebufferObjectAttatchment::height(){ m_i->m_FBO->height(); }
+FramebufferObject* FramebufferObjectAttatchment::fbo(){ m_i->m_FBO; }
 
 class RenderbufferObject::impl{
     public:
         GLuint m_RBO;
-        void _init(RenderbufferObject* super,uint width,uint height,GLuint internalFormat){
+        void _init(RenderbufferObject* super,FramebufferObject* _fbo,ImageInternalFormat::Format internalFormat){
             glGenRenderbuffers(1, &m_RBO);
             Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, width, height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_IMAGE_FORMAT_MAP.at(internalFormat), fbo()->width(), fbo()->height());
             Renderer::unbindRBO();
         }
         void _destruct(RenderbufferObject* super){
             glDeleteRenderbuffers(1, &m_RBO);
         }
+        void _resize(RenderbufferObject* super){
+            Renderer::bindRBO(m_RBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_IMAGE_FORMAT_MAP.at(internalFormat), fbo()->width(), fbo()->height());
+            Renderer::unbindRBO();
+        }
 };
-RenderbufferObject::RenderbufferObject(uint w,uint h,GLuint internalFormat){
+RenderbufferObject::RenderbufferObject(uint w,uint h,ImageInternalFormat::Format internalFormat){
     m_i->_init(this,w,h,internalFormat);
 }
 RenderbufferObject::~RenderbufferObject(){ m_i->_destruct(this); }
+void RenderbufferObject::resize(uint w,uint h){m_i->_resize(this,w,h); }
 
 class FramebufferObject::impl{
     public:
