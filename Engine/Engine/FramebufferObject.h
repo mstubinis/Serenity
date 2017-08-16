@@ -35,6 +35,8 @@ class FramebufferObjectAttatchment{
     
         uint width();
         uint height();
+        FramebufferObject* fbo();
+        uint attachment();
 };
 
 class RenderbufferObject: public FramebufferObjectAttatchment{
