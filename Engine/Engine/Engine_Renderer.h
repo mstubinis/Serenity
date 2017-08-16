@@ -142,7 +142,7 @@ namespace Engine{
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
 
-                    static void render(Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true);
+                    static void render(Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true,GLuint fbo = 0, GLuint rbo = 0);
 
                     static void init();
                     static void destruct();
