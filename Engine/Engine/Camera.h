@@ -14,7 +14,7 @@ class CameraType{public: enum Type {
 };};
 
 class Camera: public ObjectBasic{
-	friend class LightProbe;
+    friend class LightProbe;
     private:
         void _constructFrustrum();
         glm::vec4 m_Planes[6];
