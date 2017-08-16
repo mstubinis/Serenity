@@ -79,10 +79,10 @@ namespace Engine{
 
         // vector[0] = end point, vector[1] = hit normal
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);
-        std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*> ignoredObjects);
+        std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*>& ignoredObjects);
 
         std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,Object* ignoredObject = nullptr);
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Object*> ignoredObjects);
+        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Object*>& ignoredObjects);
 
         void setGravity(float,float,float); 
         void setGravity(glm::vec3&);
