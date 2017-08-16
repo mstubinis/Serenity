@@ -24,7 +24,7 @@ Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEm
     if(Resources::getMesh("Atmosphere") == nullptr){
         #pragma region MeshData
              std::string data = 
-                 "v 0.000000 -1.000000 0.000000\n"
+                "v 0.000000 -1.000000 0.000000\n"
                 "v 0.723607 -0.447220 0.525725\n"
                 "v -0.276388 -0.447220 0.850649\n"
                 "v -0.894426 -0.447216 0.000000\n"
