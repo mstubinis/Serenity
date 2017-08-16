@@ -36,7 +36,7 @@ class Atmosphere final: public SkyboxEmpty{
         Mesh* m_Mesh;
         glm::vec3 m_Position;
         glm::vec3 m_Scale;
-		glm::mat4 m_Model;
+        glm::mat4 m_Model;
         bool m_FollowCamera;
     public:
         Atmosphere(std::string name = "Atmosphere",Scene* = nullptr, bool followCamera = true);
