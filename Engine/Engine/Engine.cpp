@@ -83,7 +83,7 @@ void Engine::Detail::EngineClass::render(){
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
     for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
-    glViewport(0,0,w,h);
+    Renderer::setViewport(0,0,w,h);
     Renderer::Detail::RenderManagement::m_gBuffer->resize(w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
     Game::onResize(w,h);
