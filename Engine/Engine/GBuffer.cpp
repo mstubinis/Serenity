@@ -59,9 +59,8 @@ class GBuffer::impl final{
             
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);// Bind the depth buffer
-            //glBindRenderbuffer(GL_RENDERBUFFER, m_RBO);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved below
+            //Renderer::unbindRBO(); //was moved below
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
             _constructFramebuffer("BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
@@ -73,7 +72,6 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
             Renderer::unbindRBO(); //was moved to down here
             Renderer::unbindFBO();
 
@@ -82,9 +80,8 @@ class GBuffer::impl final{
             
             Renderer::bindFBO(m_FBO_bloom);
             Renderer::bindRBO(m_RBO_bloom);// Bind the depth buffer
-            //glBindRenderbuffer(GL_RENDERBUFFER, m_RBO_bloom);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved below
+            //Renderer::unbindRBO(); //was moved below
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO_bloom);
 
             _constructFramebuffer("BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
@@ -94,7 +91,6 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
             Renderer::unbindRBO(); //was moved to down here
             Renderer::unbindFBO();
             return true;
@@ -123,16 +119,8 @@ class GBuffer::impl final{
             Renderer::unbindFBO();
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
-            if(first_fbo){
-                Renderer::bindFBO(m_FBO);
-                //Renderer::bindReadFBO(m_FBO);
-                //Renderer::bindDrawFBO(m_FBO);
-            }
-            else{
-                Renderer::bindFBO(m_FBO_bloom);
-                //Renderer::bindReadFBO(m_FBO_bloom);
-                //Renderer::bindDrawFBO(m_FBO_bloom);
-            }
+            if(first_fbo){ Renderer::bindFBO(m_FBO); }
+            else{ Renderer::bindFBO(m_FBO_bloom); }
             GLboolean r,g,b,a;
             if(channels.find("R") != string::npos) r=GL_TRUE; else r=GL_FALSE;
             if(channels.find("G") != string::npos) g=GL_TRUE; else g=GL_FALSE;
