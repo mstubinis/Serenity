@@ -38,6 +38,7 @@ GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_rbo = 0;
 AntiAliasingAlgorithm::Algorithm Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::FXAA;
+glm::uvec4 Detail::RendererInfo::GeneralInfo::gl_viewport_data = glm::uvec4(0,0,0,0);
 
 
 #ifdef _DEBUG
@@ -192,6 +193,12 @@ void Settings::disableDrawPhysicsInfo(){ Detail::RendererInfo::GeneralInfo::draw
 void Settings::setGamma(float g){ Detail::RendererInfo::GeneralInfo::gamma = g; }
 float Settings::getGamma(){ return Detail::RendererInfo::GeneralInfo::gamma; }
 
+void Renderer::setViewport(uint x, uint y, uint width, uint height){
+    glm::uvec4& viewport = Detail::RendererInfo::GeneralInfo::gl_viewport_data;
+    if(viewport.x == x && viewport.y == y && viewport.width == width && viewport.height == height) return;
+    glViewport(GLint(x), GLint(y), GLsizei(width), GLsizei(height));
+    Detail::RendererInfo::GeneralInfo::gl_viewport_data = glm::uvec4(x,y,width,height);
+}
 void Renderer::bindTexture(const char* l,Texture* t,uint s){Renderer::bindTexture(l,t->address(),s,t->type());}
 void Renderer::bindTexture(const char* l,GLuint a,uint s,GLuint t){
     glActiveTexture(GL_TEXTURE0+s);
