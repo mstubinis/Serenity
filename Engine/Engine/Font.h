@@ -18,12 +18,9 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 struct FontGlyph final{
      uint id;
-     uint x;
-     uint y;
-     uint width;
-     uint height;
-     int xoffset;
-     int yoffset;
+     uint x; uint y;
+     uint width; uint height;
+     int xoffset; int yoffset;
      uint xadvance;
      Mesh* char_mesh;
      glm::mat4 m_Model;
