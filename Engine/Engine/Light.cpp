@@ -1081,7 +1081,7 @@ class LightProbe::impl{
                 super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
                 super->_constructFrustrum();
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_EnvMapConvolutionTextureAddress,0);
-                Renderer::Detail::RenderManagement::render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,m_Ignore,false);
+                Renderer::Detail::RenderManagement::render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,m_Ignore,false,m_FBO,m_RBO);
             }
             /////////////////////////////////////////////////////////////////
 
