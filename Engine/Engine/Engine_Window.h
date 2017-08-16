@@ -9,11 +9,9 @@ class Engine_Window final{
     private:
         class impl;
         std::unique_ptr<impl> m_i;
-
     public:
         Engine_Window(const char* name,uint width,uint height);
         ~Engine_Window();
-
         const char* name() const;
         sf::Vector2u getSize();
         void setName(const char* name);
@@ -33,8 +31,6 @@ class Engine_Window final{
         void setStyle(uint style);
         void display();
         void keepMouseInWindow(bool=true);
-
         sf::Window* getSFMLHandle() const;
 };
-
 #endif
