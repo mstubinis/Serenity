@@ -2,15 +2,14 @@
 #ifndef ENGINE_FRAMEBUFFER_OBJECT_H
 #define ENGINE_FRAMEBUFFER_OBJECT_H
 
-#include <SFML/OpenGL.hpp>
-#include <memory>
+#include "BindableResource.h"
 
-class FramebufferObject{
+class FramebufferObject: public BindableResource{
     private:
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        FramebufferObject();
+        FramebufferObject(std::string);
         ~FramebufferObject();
 };
 #endif
