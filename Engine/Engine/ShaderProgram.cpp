@@ -238,8 +238,7 @@ vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::bind(){
     if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != this){
-        GLuint p = this->program();
-        glUseProgram(p);
+        glUseProgram(this->program());
         Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = this;
     }
     BindableResource::bind();
