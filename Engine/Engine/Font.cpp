@@ -17,9 +17,9 @@ using namespace std;
 
 FontData::FontData(string& filename){
     _loadTextFile(filename);
-    string texture_filename = filename.substr(0,filename.size()-4);
-    texture_filename += ".png";
-    m_FontTexture = new Texture(texture_filename);
+    string file = filename.substr(0,filename.size()-4);
+    file += ".png";
+	m_FontTexture = new Texture(file,"",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
 }
 FontData::~FontData(){
     for(auto glyph:m_FontGlyphs){

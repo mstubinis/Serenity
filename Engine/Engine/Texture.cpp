@@ -23,13 +23,13 @@ class Texture::impl final{
         vector<GLuint> m_TextureAddress;
         GLuint m_Type;
         uint m_Width, m_Height;
-        uint m_Format;
+        ImageInternalFormat::Format m_InternalFormat;
         ushort m_MipMapLevels;
         bool m_Mipmapped;
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-        void _init(GLuint type,Texture* super,string name,sf::Image& img,uint format,bool genMipMaps){
+        void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,bool genMipMaps){
             vector_clear(m_Pixels);
             m_Width = m_Height = 0;
             m_Mipmapped = false;
@@ -37,7 +37,7 @@ class Texture::impl final{
             m_MinFilter = GL_LINEAR;
             m_MipMapLevels = 0;
             m_Type = type;
-            m_Format = format;
+            m_InternalFormat = format;
             if(img.getSize().x > 0 && img.getSize().y > 0){
                 vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
                 m_Pixels = p;
@@ -53,9 +53,9 @@ class Texture::impl final{
             glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
-                sf::Image image; 
-                image.loadFromFile(m_Files[0].c_str());
-                _generateFromImage(image,super);
+                sf::Image i; 
+                i.loadFromFile(m_Files[0].c_str());
+                _generateFromImage(i,super);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
@@ -70,7 +70,7 @@ class Texture::impl final{
                     sf::Image img;
                     img.loadFromFile(m_Files[i].c_str());
                     _generateFromImage(img,super);
-                    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, m_Format ,img.getSize().x, img.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,img.getPixelsPtr());
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, ImageInternalFormat::at(m_InternalFormat) ,img.getSize().x, img.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,img.getPixelsPtr());
                 }
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
@@ -94,11 +94,11 @@ class Texture::impl final{
             vector_clear(m_TextureAddress);
         }
         void _generateFromImage(sf::Image& img,Texture* super){
-            if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
-                glTexImage2D(m_Type,0,m_Format,img.getSize().x,img.getSize().y,0,GL_RGBA,GL_UNSIGNED_BYTE,img.getPixelsPtr());
+            if(m_InternalFormat == ImageInternalFormat::RGBA8 || m_InternalFormat == ImageInternalFormat::SRGB8_ALPHA8){
+                glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),img.getSize().x,img.getSize().y,0,GL_RGBA,GL_UNSIGNED_BYTE,img.getPixelsPtr());
             }
-            else if(m_Format == GL_RGB8 || m_Format == GL_SRGB8){
-                glTexImage2D(m_Type,0,m_Format,img.getSize().x,img.getSize().y,0,GL_RGB,GL_UNSIGNED_BYTE,img.getPixelsPtr());
+            else if(m_InternalFormat == ImageInternalFormat::RGB8 || m_InternalFormat == ImageInternalFormat::SRGB8){
+                glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),img.getSize().x,img.getSize().y,0,GL_RGB,GL_UNSIGNED_BYTE,img.getPixelsPtr());
             }
             super->setFilter(TextureFilter::Linear);
             m_Width = img.getSize().x;
@@ -109,7 +109,7 @@ class Texture::impl final{
                 m_Pixels.resize(m_Width*m_Height*4);
                 glBindTexture(m_Type,m_TextureAddress.at(0));
                 glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-                if(m_Format == GL_RGBA8 || m_Format == GL_SRGB8_ALPHA8){
+                if(m_InternalFormat == ImageInternalFormat::RGBA8 || m_InternalFormat == ImageInternalFormat::SRGB8_ALPHA8){
                     glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
                 }
                 else{
@@ -159,33 +159,33 @@ class Texture::impl final{
             }
       }
 };
-Texture::Texture(string n,uint w, uint h,GLuint t,uint format):m_i(new impl){ //framebuffer
+Texture::Texture(string n,uint w, uint h,GLuint t,ImageInternalFormat::Format internalFormat):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(t,this,n,i,format,false);
+    m_i->_init(t,this,n,i,internalFormat,false);
 }
-Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //pixels
+Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
-    m_i->_init(t,this,n,img,format,genMipMaps);
+    m_i->_init(t,this,n,img,internalFormat,genMipMaps);
 }
-Texture::Texture(string file,string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //image file
+Texture::Texture(string file,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
     sf::Image i;
     if(n == "") n = file;
-    m_i->_init(t,this,n,i,format,genMipMaps);
+    m_i->_init(t,this,n,i,internalFormat,genMipMaps);
 }
-Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,uint format):m_i(new impl){ //cubemap images
+Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //cubemap images
     for(uint q = 0; q < 6; q++){ 
         m_i->m_Files.push_back(files[q]); 
     }
     sf::Image i;
-    m_i->_init(t,this,n,i,format,genMipMaps);
+    m_i->_init(t,this,n,i,internalFormat,genMipMaps);
 }
 Texture::~Texture(){
     unload();
 }
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
-    if(m_i->m_Files.size() != 1){ return; } //this is either not a valid texture or a cubemap, and cannot be rendered 2D.
+    if(m_i->m_Files.size() != 1)return;
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
 }
 void Texture::_constructAsFramebuffer(uint w,uint h,float divisor,int intern,int format,int type,int attatchment){
@@ -201,32 +201,18 @@ void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Ty
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }
 void Texture::setZWrapping(TextureWrap::Wrap w){ Texture::setZWrapping(m_i->m_Type,w); }
 void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setWrapping(m_i->m_Type,w); }
-void Texture::setMinFilter(TextureFilter::Filter f){ Texture::setMinFilter(m_i->m_Type,f); m_i->m_MinFilter = g; }
+void Texture::setMinFilter(TextureFilter::Filter f){ Texture::setMinFilter(m_i->m_Type,f); m_i->m_MinFilter = f; }
 void Texture::setMaxFilter(TextureFilter::Filter f){ Texture::setMaxFilter(m_i->m_Type,f); }
 void Texture::setFilter(TextureFilter::Filter f){ Texture::setFilter(m_i->m_Type,f); }
-
-static void Texture::setXWrapping(GLuint type,TextureWrap::Wrap w){
-    GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_S, gl); }
+void Texture::setXWrapping(GLuint type,TextureWrap::Wrap w){ GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_S, gl); }
+void Texture::setYWrapping(GLuint type,TextureWrap::Wrap w){ GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_T, gl); }
+void Texture::setZWrapping(GLuint type,TextureWrap::Wrap w){
+    if(type != GL_TEXTURE_CUBE_MAP)return;GLuint gl;Texture::impl::_enumWrapToGL(gl,w);glTexParameteri(type,GL_TEXTURE_WRAP_R,gl);
 }
-static void Texture::setYWrapping(GLuint type,TextureWrap::Wrap w){
-    GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_T, gl); 
-}
-static void Texture::setZWrapping(GLuint type,TextureWrap::Wrap w){
-    if(type != GL_TEXTURE_CUBE_MAP){ return; } //this is not a cubemap
-    GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_R, gl);
-}
-static void Texture::setWrapping(GLuint type,TextureWrap::Wrap w){
-    Texture::setXWrapping(type,w); Texture::setYWrapping(type,w); Texture::setZWrapping(type,w); 
-}
-static void Texture::setMinFilter(GLuint type,TextureFilter::Filter f){
-    GLuint g; Texture::impl::_enumFilterToGL(g,f,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g);
-}
-static void Texture::setMaxFilter(GLuint type,TextureFilter::Filter f){
-    GLuint g; Texture::impl::_enumFilterToGL(g,f,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g); 
-}
-static void Texture::setFilter(GLuint type,TextureFilter::Filter f){
-    Texture::setMinFilter(type,f); Texture::setMaxFilter(type,f);
-}
+void Texture::setWrapping(GLuint type,TextureWrap::Wrap w){ Texture::setXWrapping(type,w); Texture::setYWrapping(type,w); Texture::setZWrapping(type,w); }
+void Texture::setMinFilter(GLuint type,TextureFilter::Filter f){ GLuint g; Texture::impl::_enumFilterToGL(g,f,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g); }
+void Texture::setMaxFilter(GLuint type,TextureFilter::Filter f){ GLuint g; Texture::impl::_enumFilterToGL(g,f,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g);  }
+void Texture::setFilter(GLuint type,TextureFilter::Filter f){ Texture::setMinFilter(type,f); Texture::setMaxFilter(type,f); }
 
 void Texture::load(){
     if(!isLoaded()){
@@ -252,12 +238,11 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     //cleanup previous convolute operation
     if(m_i->m_TextureAddress.size() >= 2){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
-        //glBindTexture(m_i->m_Type,0);
     }
     else if(m_i->m_TextureAddress.size() == 1){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
     }
-    Renderer::bindFBO(0);
+    Renderer::unbindFBO();
 
     GLuint captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
@@ -265,7 +250,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
 
     Renderer::bindFBO(captureFBO);
     Renderer::bindRBO(captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);  //do we really need 24? 16 might be enough
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, size, size);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
@@ -307,10 +292,9 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
     if(m_i->m_TextureAddress.size() >= 3){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
-        //glBindTexture(m_i->m_Type,0);
     }
     else if(m_i->m_TextureAddress.size() == 2){
-        m_i->m_TextureAddress.push_back(0); // this should be element 3 (.at(2)) now
+        m_i->m_TextureAddress.push_back(0);
     }
     size = preEnvFilterSize;
     glGenTextures(1, &m_i->m_TextureAddress.at(2));
@@ -321,26 +305,25 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     this->setWrapping(TextureWrap::ClampToEdge);
     this->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
     this->setMaxFilter(TextureFilter::Linear);
-    m_i->_generateMipmaps();
-    //glGenerateMipmap(m_i->m_Type);
+    glGenerateMipmap(m_i->m_Type);
 
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((this->width() * this->width())*6));
     Renderer::sendUniform1i("NUM_SAMPLES",32);
     uint maxMipLevels = 5;
-    for (uint mip = 0; mip < maxMipLevels; ++mip){
-        uint mipSize  = uint(size * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);//do we really need 24? maybe 16 is enough
+    for (uint m = 0; m < maxMipLevels; ++m){
+        uint mipSize  = uint(size * glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mipSize, mipSize);
         Renderer::setViewport(0,0,mipSize,mipSize);
-        float roughness = (float)mip /(float)(maxMipLevels - 1);
+        float roughness = (float)m/(float)(maxMipLevels-1);
         Renderer::sendUniform1f("roughness",roughness);
         float a = roughness * roughness;
         Renderer::sendUniform1f("a2",a*a);
         for (uint i = 0; i < 6; ++i){
             glm::mat4 vp = captureProjection * captureViews[i];
             Renderer::sendUniformMatrix4f("VP", vp);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(2), mip);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_i->m_TextureAddress.at(2),m);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
         }
@@ -349,15 +332,13 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     Resources::getWindow()->display(); //prevent opengl & windows timeout
 
     //now generate the BDRF LUT -- should probably just make this a global variable
-    //
     //cleanup previous BDRF LUT operation
     size = brdfSize;
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
-        //glBindTexture(m_i->m_Type,0);
     }
     else if(m_i->m_TextureAddress.size() == 3){
-        m_i->m_TextureAddress.push_back(0); // this should be element 4 (.at(3)) now
+        m_i->m_TextureAddress.push_back(0);
     }
     glGenTextures(1, &m_i->m_TextureAddress.at(3));
     glBindTexture(GL_TEXTURE_2D, m_i->m_TextureAddress.at(3));
@@ -366,7 +347,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
 
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size); //24 is prob too big. use 16?
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, size, size);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
 
     Renderer::setViewport(0,0,size,size);
@@ -380,7 +361,6 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     Resources::getWindow()->display(); //prevent opengl & windows timeout
-    //Renderer::bindFBO(0);
 
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
@@ -398,3 +378,4 @@ uint Texture::numAddresses(){ return m_i->m_TextureAddress.size(); }
 GLuint Texture::type(){ return m_i->m_Type; }
 uint Texture::width(){ return m_i->m_Width; }
 uint Texture::height(){ return m_i->m_Height; }
+ImageInternalFormat::Format Texture::internalFormat(){ return m_i->m_InternalFormat; }

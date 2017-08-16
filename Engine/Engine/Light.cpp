@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Scene.h"
 #include "Skybox.h"
+#include "Texture.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>

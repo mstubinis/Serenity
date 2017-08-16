@@ -234,6 +234,12 @@
     <ClCompile Include="Engine_BuiltInShaders.cpp">
       <Filter>Source Files\Engine\Rendering\BuiltInShaders</Filter>
     </ClCompile>
+    <ClCompile Include="FramebufferObject.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="GLImageConstants.cpp">
+      <Filter>Source Files\Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -361,6 +367,12 @@
     </ClInclude>
     <ClInclude Include="Engine_BuiltInShaders.h">
       <Filter>Header Files\Engine\Rendering\BuiltInShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="FramebufferObject.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GLImageConstants.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

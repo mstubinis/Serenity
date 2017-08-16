@@ -82,7 +82,7 @@ Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
     string bottom = name + "/Back.jpg";
     string names[6] = {front,back,left,right,top,bottom};
 
-    m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,GL_SRGB8_ALPHA8);
+    m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4,512);
 }
 Skybox::~Skybox(){

@@ -14,6 +14,7 @@
 #include "Object.h"
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"
+#include "FramebufferObject.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -193,11 +194,11 @@ void Settings::disableDrawPhysicsInfo(){ Detail::RendererInfo::GeneralInfo::draw
 void Settings::setGamma(float g){ Detail::RendererInfo::GeneralInfo::gamma = g; }
 float Settings::getGamma(){ return Detail::RendererInfo::GeneralInfo::gamma; }
 
-void Renderer::setViewport(uint x, uint y, uint width, uint height){
+void Renderer::setViewport(uint x, uint y, uint _w, uint _h){
     glm::uvec4& viewport = Detail::RendererInfo::GeneralInfo::gl_viewport_data;
-    if(viewport.x == x && viewport.y == y && viewport.width == width && viewport.height == height) return;
-    glViewport(GLint(x), GLint(y), GLsizei(width), GLsizei(height));
-    Detail::RendererInfo::GeneralInfo::gl_viewport_data = glm::uvec4(x,y,width,height);
+    if(viewport.x == x && viewport.y == y && viewport.z == _w && viewport.w == _h) return;
+    glViewport(GLint(x), GLint(y), GLsizei(_w), GLsizei(_h));
+    Detail::RendererInfo::GeneralInfo::gl_viewport_data = glm::uvec4(x,y,_w,_h);
 }
 void Renderer::bindTexture(const char* l,Texture* t,uint s){Renderer::bindTexture(l,t->address(),s,t->type());}
 void Renderer::bindTexture(const char* l,GLuint a,uint s,GLuint t){
@@ -217,6 +218,12 @@ void Renderer::bindReadFBO(GLuint r){
         Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = r;
     }
 }
+void Renderer::bindFBO(FramebufferObject* fbo){
+	Renderer::bindFBO(fbo->address());
+}
+void Renderer::bindRBO(RenderbufferObject* rbo){
+	Renderer::bindRBO(rbo->address());
+}
 void Renderer::bindDrawFBO(GLuint d){
     if(Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo != d){
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d);
@@ -230,8 +237,8 @@ void Renderer::bindRBO(GLuint r){
         Detail::RendererInfo::GeneralInfo::current_bound_rbo = r;
     }
 }
-void Renderer::unbindFBO(){ Renderer::bindFBO(0); }
-void Renderer::unbindRBO(){ Renderer::bindRBO(0); }
+void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
+void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
 void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
 void Renderer::unbindTexture(uint s,Texture* t){

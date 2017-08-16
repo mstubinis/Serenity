@@ -117,10 +117,12 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine_ResourceBasic.cpp" />
     <ClCompile Include="Engine_Sounds.cpp" />
     <ClCompile Include="Engine_Window.cpp" />
+    <ClCompile Include="FramebufferObject.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameCamera.cpp" />
     <ClCompile Include="GameSkybox.cpp" />
     <ClCompile Include="GBuffer.cpp" />
+    <ClCompile Include="GLImageConstants.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Lagrange.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -162,9 +164,11 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_ResourceBasic.h" />
     <ClInclude Include="Engine_Sounds.h" />
     <ClInclude Include="Engine_Window.h" />
+    <ClInclude Include="FramebufferObject.h" />
     <ClInclude Include="GameCamera.h" />
     <ClInclude Include="GameSkybox.h" />
     <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="GLImageConstants.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="Lagrange.h" />
     <ClInclude Include="Light.h" />

@@ -262,9 +262,9 @@ class Material::impl final{
             Texture* glowT = Resources::getTexture(glow);
             Texture* specularT = Resources::getTexture(specular);
             if(diffuseT == nullptr && diffuse != "") diffuseT = new Texture(diffuse);
-            if(normalT == nullptr && normal != "") normalT = new Texture(normal,"",GL_TEXTURE_2D,false,GL_RGBA8);
-            if(glowT == nullptr && glow != "") glowT = new Texture(glow,"",GL_TEXTURE_2D,false,GL_RGBA8);
-            if(specularT == nullptr && specular != "") specularT = new Texture(specular,"",GL_TEXTURE_2D,false,GL_RGBA8);
+            if(normalT == nullptr && normal != "") normalT = new Texture(normal,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+            if(glowT == nullptr && glow != "") glowT = new Texture(glow,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+            if(specularT == nullptr && specular != "") specularT = new Texture(specular,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
             _init(name,diffuseT,normalT,glowT,specularT,super);
         }
         void _load(){
@@ -393,7 +393,7 @@ void Material::addComponentNormal(Texture* texture){
 }
 void Material::addComponentNormal(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,GL_RGBA8);
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentNormal(texture);
 }
 void Material::addComponentGlow(Texture* texture){
@@ -401,7 +401,7 @@ void Material::addComponentGlow(Texture* texture){
 }
 void Material::addComponentGlow(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,GL_RGBA8);
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentGlow(texture);
 }
 void Material::addComponentSpecular(Texture* texture){
@@ -409,7 +409,7 @@ void Material::addComponentSpecular(Texture* texture){
 }
 void Material::addComponentSpecular(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,GL_RGBA8);
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentSpecular(texture);
 }
 
@@ -419,7 +419,7 @@ void Material::addComponentAO(Texture* texture,float baseValue){
 }
 void Material::addComponentAO(string textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,GL_RGBA8);
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentAO(texture);
     setAO(baseValue);
 }
@@ -429,7 +429,7 @@ void Material::addComponentMetalness(Texture* texture,float baseValue){
 }
 void Material::addComponentMetalness(string textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,GL_RGBA8);
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentMetalness(texture);
     setMetalness(baseValue);
 }
@@ -439,7 +439,7 @@ void Material::addComponentSmoothness(Texture* texture,float baseValue){
 }
 void Material::addComponentSmoothness(string textureFile,float baseValue){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,GL_RGBA8);
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentSmoothness(texture);
     setSmoothness(baseValue);
 }

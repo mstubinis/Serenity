@@ -119,15 +119,6 @@ class GBuffer::impl final{
             Renderer::unbindFBO();
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
-            //Try this to use only 1 framebuffer / rbo for various texture sizes.
-            /*
-            I think you can do that by simply changing the Viewport to match the texture
-            dimensions before you do the render to texture, then set the viewport back
-            to the dimensions of the View before you render to the framebuffer.
-            There should be no significant performance loss because you will be calling glViewport() twice as often.
-            Your suggestion about scaling the projection matrix should also work.
-            */
-            
             if(first_fbo){ Renderer::bindFBO(m_FBO); }
             else{ Renderer::bindFBO(m_FBO_bloom); }
             GLboolean r,g,b,a;
@@ -206,7 +197,7 @@ GBuffer::~GBuffer(){
     m_i->_destruct();
 }
 void GBuffer::resize(uint width, uint height){
-    m_i->_stop();
+    stop();
     m_i->_init(width,height);
 }
 void GBuffer::start(vector<uint>& types,string channels,bool first_fbo){m_i->_start(types,channels,first_fbo);}
@@ -220,5 +211,5 @@ void GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const unordered_map<uint,boost::weak_ptr<TextureBuffer>>& GBuffer::getBuffers() const{ return m_i->m_Buffers; }
 Texture* GBuffer::getTexture(uint type){ return m_i->m_Buffers.at(type).lock().get();}
 TextureBuffer* GBuffer::getBuffer(uint type){ return m_i->m_Buffers.at(type).lock().get();}
-const GLuint& GBuffer::getMainFBO() const{ return m_i->m_fbo; }
-const GLuint& GBuffer::getSmallFBO() const{ return m_i->m_fbo_bloom; }
+const GLuint& GBuffer::getMainFBO() const{ return m_i->m_FBO; }
+const GLuint& GBuffer::getSmallFBO() const{ return m_i->m_FBO_bloom; }

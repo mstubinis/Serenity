@@ -20,11 +20,9 @@ class MaterialComponentType{public: enum Type{
     Normal,
     Glow,
     Specular,
-
     AO,
     Metalness,
     Smoothness,  
-
     Reflection,
     Refraction,
 
@@ -35,14 +33,11 @@ class MaterialComponentTextureSlot{public: enum Slot{
     Normal,
     Glow,
     Specular,
-
     AO,
     Metalness,
     Smoothness,
-
     Reflection_CUBEMAP,
     Reflection_CUBEMAP_MAP,
-
     Refraction_CUBEMAP,
     Refraction_CUBEMAP_MAP,
 };};

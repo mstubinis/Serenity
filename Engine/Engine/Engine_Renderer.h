@@ -17,6 +17,8 @@ class ObjectDisplay;
 class ObjectDynamic;
 class RenderedItem;
 class Camera;
+class FramebufferObject;
+class RenderbufferObject;
 
 struct TextureRenderInfo{
     std::string texture;
@@ -249,7 +251,9 @@ namespace Engine{
         
         void setViewport(uint x, uint y, uint width, uint height);
         void bindFBO(GLuint);
+		void bindFBO(FramebufferObject*);
         void bindRBO(GLuint);
+		void bindRBO(RenderbufferObject*);
         void bindReadFBO(GLuint);
         void bindDrawFBO(GLuint);
         void bindTexture(const char* location,Texture*,uint slot);
