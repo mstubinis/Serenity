@@ -61,7 +61,7 @@ class FramebufferObject: public BindableResource{
         void resize(uint,uint);
     
         void attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
-        void attatchRenderBuffer(RenderbufferObject*,FramebufferAttatchment::Attatchment);
+        void attatchRenderBuffer(RenderbufferObject*);
     
         uint width();
         uint height();
