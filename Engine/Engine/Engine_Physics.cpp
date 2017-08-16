@@ -142,20 +142,16 @@ vector<glm::vec3> Physics::Detail::PhysicsManagement::rayCastInternal(const btVe
     return result;
 }
 void Detail::PhysicsManagement::render(){
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
+    glMatrixMode(GL_PROJECTION); glPushMatrix();
     glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW); glPushMatrix();
     glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
 
     m_world->debugDrawWorld();
 
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
+    glMatrixMode(GL_PROJECTION); glPopMatrix();
+    glMatrixMode(GL_MODELVIEW); glPopMatrix();
 }
 Collision::Collision(btCollisionShape* shape,CollisionType type, float mass){
     m_CollisionShape = shape;
