@@ -46,6 +46,8 @@ class RenderbufferObject: public FramebufferObjectAttatchment{
     public:
         RenderbufferObject(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
         ~RenderbufferObject();
+    
+        GLuint address();
 };
 
 class FramebufferObject: public BindableResource{
