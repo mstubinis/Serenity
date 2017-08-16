@@ -16,10 +16,6 @@ class FramebufferAttatchment{public: enum Attatchment{
     Color_6,
     Color_7,
     Color_8,
-    Color_9,
-    Color_10,
-    Color_11,
-    Color_12,
     Depth,
     Stencil,
     DepthAndStencil
