@@ -24,7 +24,7 @@ class Shader::impl final{
             m_Type = type;
             m_FromFile = fromFile;
             super->setName(name);
-			Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Shaders,name,boost::shared_ptr<Shader>(super));
+            Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Shaders,name,boost::shared_ptr<Shader>(super));
         }
 };
 Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
@@ -86,7 +86,7 @@ class ShaderP::impl final{
 
             super->setCustomBindFunctor(ShaderP::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(ShaderP::impl::DEFAULT_UNBIND_FUNCTOR);
-			m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
+            m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
         }
         void _construct(string& name, string& vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
             Shader* _vs = Resources::getShader(vs); Shader* _fs = Resources::getShader(fs);
@@ -125,7 +125,7 @@ class ShaderP::impl final{
             m_UniformLocations.clear();
             GLuint vid = glCreateShader(GL_VERTEX_SHADER);
             GLuint fid = glCreateShader(GL_FRAGMENT_SHADER);
- 
+
             string VertexShaderCode = ""; string FragmentShaderCode = "";
 
             if(vs->fromFile()){
@@ -142,15 +142,15 @@ class ShaderP::impl final{
             else{
                 FragmentShaderCode = ps->data();
             }
- 
+
             GLint res = GL_FALSE;
             int logLength;
- 
+
             // Compile Vertex Shader
             char const * vSource = VertexShaderCode.c_str();
             glShaderSource(vid, 1, &vSource , NULL);
             glCompileShader(vid);
- 
+
             // Check Vertex Shader
             glGetShaderiv(vid, GL_COMPILE_STATUS, &res);
             glGetShaderiv(vid, GL_INFO_LOG_LENGTH, &logLength);
@@ -162,18 +162,18 @@ class ShaderP::impl final{
                 else{               cout << "VertexShader Log (" + vs->name() + "): " << endl; }
                 cout << &vError[0] << endl;
             }
- 
+
             // Compile Fragment Shader
             char const* fSource = FragmentShaderCode.c_str();
             glShaderSource(fid, 1, &fSource , NULL);
             glCompileShader(fid);
- 
+
             // Check Fragment Shader
             glGetShaderiv(fid, GL_COMPILE_STATUS, &res);
             glGetShaderiv(fid, GL_INFO_LOG_LENGTH, &logLength);
             vector<char> fError(logLength);
             glGetShaderInfoLog(fid, logLength, NULL, &fError[0]);
- 
+
             if(res == GL_FALSE) {
                 if(ps->fromFile()){ cout << "FragmentShader Log (" + ps->data() + "): " << endl; }
                 else{               cout << "FragmentShader Log (" + ps->name() + "): " << endl; }
@@ -185,13 +185,13 @@ class ShaderP::impl final{
             glAttachShader(pid, vid);
             glAttachShader(pid, fid);
             glLinkProgram(pid);
- 
+
             // Check the program
             glGetProgramiv(pid, GL_LINK_STATUS, &res);
             glGetProgramiv(pid, GL_INFO_LOG_LENGTH, &logLength);
             vector<char> pError( std::max(logLength, int(1)) );
             glGetProgramInfoLog(pid, logLength, NULL, &pError[0]);
- 
+
             if(res == GL_FALSE) {
                 cout << "ShaderProgram Log : " << endl;
                 cout << &pError[0] << endl;
@@ -227,18 +227,10 @@ class ShaderP::impl final{
 DefaultShaderBindFunctor ShaderP::impl::DEFAULT_BIND_FUNCTOR;
 DefaultShaderUnbindFunctor ShaderP::impl::DEFAULT_UNBIND_FUNCTOR;
 
-ShaderP::ShaderP(string& n, string& vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){
-    m_i->_construct(n,vs,fs,s,this);
-}
-ShaderP::ShaderP(string& n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
-    m_i->_construct(n,vs,fs,s,this);
-}
-ShaderP::ShaderP(string& n, Shader* vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){
-    m_i->_construct(n,vs,fs,s,this);
-}
-ShaderP::ShaderP(string& n, string& vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
-    m_i->_construct(n,vs,fs,s,this);
-}
+ShaderP::ShaderP(string& n, string& vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
+ShaderP::ShaderP(string& n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
+ShaderP::ShaderP(string& n, Shader* vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
+ShaderP::ShaderP(string& n, string& vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
 ShaderP::~ShaderP(){
     m_i->_destruct();
 }
