@@ -119,13 +119,13 @@ class Texture::impl final{
             }
             return &m_Pixels[0];
         }
-        void _enumWrapToGL(uint& gl, TextureWrap::Wrap& wrap){
+        static void _enumWrapToGL(uint& gl, TextureWrap::Wrap& wrap){
             if(wrap == TextureWrap::Repeat)              gl = GL_REPEAT;
             else if(wrap == TextureWrap::RepeatMirrored) gl = GL_MIRRORED_REPEAT;
             else if(wrap == TextureWrap::ClampToBorder)  gl = GL_CLAMP_TO_BORDER;
             else if(wrap == TextureWrap::ClampToEdge)    gl = GL_CLAMP_TO_EDGE;
         }
-        void _enumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min){
+        static void _enumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min){
             if(min == true){
                 if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
                 else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
@@ -197,20 +197,36 @@ void Texture::_constructAsFramebuffer(uint w,uint h,float s,int intern,int forma
     glBindTexture(m_i->m_Type, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, attatchment, m_i->m_Type, m_i->m_TextureAddress.at(0), 0);
 }
-void Texture::setXWrapping(TextureWrap::Wrap w){ GLuint gl; m_i->_enumWrapToGL(gl,w); glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, gl); }
-void Texture::setYWrapping(TextureWrap::Wrap w){ GLuint gl; m_i->_enumWrapToGL(gl,w); glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, gl); }
-void Texture::setZWrapping(TextureWrap::Wrap w){
-    if(m_i->m_Type != GL_TEXTURE_CUBE_MAP){ return; } //this is not a cubemap
-    GLuint gl; m_i->_enumWrapToGL(gl,w); glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, gl);
+void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
+void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }
+void Texture::setZWrapping(TextureWrap::Wrap w){ Texture::setZWrapping(m_i->m_Type,w); }
+void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setWrapping(m_i->m_Type,w); }
+void Texture::setMinFilter(TextureFilter::Filter f){ Texture::setMinFilter(m_i->m_Type,f); m_i->m_MinFilter = g; }
+void Texture::setMaxFilter(TextureFilter::Filter f){ Texture::setMaxFilter(m_i->m_Type,f); }
+void Texture::setFilter(TextureFilter::Filter f){ Texture::setFilter(m_i->m_Type,f); }
+
+static void Texture::setXWrapping(GLuint type,TextureWrap::Wrap w){
+    GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_S, gl); }
 }
-void Texture::setWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(w); Texture::setYWrapping(w); Texture::setZWrapping(w); }
-void Texture::setMinFilter(TextureFilter::Filter f){ 
-    GLuint g; m_i->_enumFilterToGL(g,f,true); glTexParameteri(m_i->m_Type,GL_TEXTURE_MIN_FILTER,g); m_i->m_MinFilter = g;
+static void Texture::setYWrapping(GLuint type,TextureWrap::Wrap w){
+    GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_T, gl); 
 }
-void Texture::setMaxFilter(TextureFilter::Filter f){ 
-    GLuint g; m_i->_enumFilterToGL(g,f,false); glTexParameteri(m_i->m_Type,GL_TEXTURE_MAG_FILTER,g); 
+static void Texture::setZWrapping(GLuint type,TextureWrap::Wrap w){
+    if(type != GL_TEXTURE_CUBE_MAP){ return; } //this is not a cubemap
+    GLuint gl; Texture::impl::_enumWrapToGL(gl,w); glTexParameteri(type, GL_TEXTURE_WRAP_R, gl);
 }
-void Texture::setFilter(TextureFilter::Filter f){ Texture::setMinFilter(f); Texture::setMaxFilter(f); }
+static void Texture::setWrapping(GLuint type,TextureWrap::Wrap w){
+    Texture::setXWrapping(type,w); Texture::setYWrapping(type,w); Texture::setZWrapping(type,w); 
+}
+static void Texture::setMinFilter(GLuint type,TextureFilter::Filter f){
+    GLuint g; Texture::impl::_enumFilterToGL(g,f,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g);
+}
+static void Texture::setMaxFilter(GLuint type,TextureFilter::Filter f){
+    GLuint g; Texture::impl::_enumFilterToGL(g,f,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g); 
+}
+static void Texture::setFilter(GLuint type,TextureFilter::Filter f){
+    Texture::setMinFilter(type,f); Texture::setMaxFilter(type,f);
+}
 
 void Texture::load(){
     if(!isLoaded()){
@@ -249,7 +265,6 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
 
     Renderer::bindFBO(captureFBO);
     Renderer::bindRBO(captureRBO);
-    //glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);  //do we really need 24? 16 might be enough
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
 
@@ -262,11 +277,8 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     for (uint i = 0; i < 6; ++i){
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
     }
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    this->setWrapping(TextureWrap::ClampToEdge);
+    this->setFilter(TextureFilter::Linear);
 
     glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000.0f);
     glm::mat4 captureViews[] = {
@@ -306,12 +318,11 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     for (uint i = 0; i < 6; ++i){
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
     }
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(m_i->m_Type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glGenerateMipmap(m_i->m_Type);
+    this->setWrapping(TextureWrap::ClampToEdge);
+    this->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
+    this->setMaxFilter(TextureFilter::Linear);
+    m_i->_generateMipmaps();
+    //glGenerateMipmap(m_i->m_Type);
 
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
@@ -351,11 +362,8 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glGenTextures(1, &m_i->m_TextureAddress.at(3));
     glBindTexture(GL_TEXTURE_2D, m_i->m_TextureAddress.at(3));
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, size, size, 0, GL_RG, GL_FLOAT, 0);
-    // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
 
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size); //24 is prob too big. use 16?
@@ -372,7 +380,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     Resources::getWindow()->display(); //prevent opengl & windows timeout
-    Renderer::bindFBO(0);
+    //Renderer::bindFBO(0);
 
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
