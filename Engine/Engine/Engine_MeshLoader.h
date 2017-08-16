@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_MESHLOADER_H
-#define ENGINE_MESHLOADER_H
+#ifndef ENGINE_MESH_LOADER_H
+#define ENGINE_MESH_LOADER_H
 
 #include <string>
 #include <map>
