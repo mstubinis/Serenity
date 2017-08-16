@@ -8,9 +8,17 @@ using namespace Engine;
 
 struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
     Renderer::setViewport(0,0,m_FramebufferWidth,m_FramebufferHeight);
+    Renderer::bindFBO(m_FBO);
+    
+    
+    
 }};
 struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
     
+    
+    
+    Renderer::unbindFBO();
+    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }};
 
 
