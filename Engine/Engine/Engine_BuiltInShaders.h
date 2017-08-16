@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_BUILTINSHADERS_H
-#define ENGINE_BUILTINSHADERS_H
+#ifndef ENGINE_BUILT_IN_SHADERS_H
+#define ENGINE_BUILT_IN_SHADERS_H
 
 #include <string>
 
