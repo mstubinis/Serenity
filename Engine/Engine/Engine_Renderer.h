@@ -264,7 +264,6 @@ namespace Engine{
         void unbindReadFBO();
         void unbindDrawFBO();
         
-        
         //Uniform 1
         //seperate (dont need vectors for 1 component ;) )
         inline void sendUniform1(const char* l,double x){ glUniform1d(getUniformLocationUnsafe(l),x); }
