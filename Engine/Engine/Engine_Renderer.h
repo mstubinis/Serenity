@@ -73,6 +73,7 @@ namespace Engine{
                     static GLuint current_bound_draw_fbo;
                     static GLuint current_bound_rbo;
                     static AntiAliasingAlgorithm::Algorithm aa_algorithm;
+                    static glm::uvec4 gl_viewport_data;
 
                     static bool cull_face_enabled;
                     static bool draw_physics_debug;
