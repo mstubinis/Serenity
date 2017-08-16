@@ -101,7 +101,6 @@ class FramebufferObjectAttatchment::impl{
         ImageInternalFormat::Format m_InternalFormat;
         FramebufferObject* m_FBO;
         GLuint m_GL_Attatchment;
-        uint m_AttatchmentWidth; uint m_AttatchmentHeight;
         void _init(FramebufferObject* _fbo,FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a){
             m_FBO = _fbo;
             m_GL_Attatchment = GL_ATTATCHMENT_MAP.at(uint(a));
@@ -186,20 +185,26 @@ class FramebufferObject::impl{
             Renderer::unbindFBO();
         }
         void _attatchTexture(FramebufferObject* super,Texture* txtre,FramebufferAttatchment::Attatchment atchmnt){
+            if(m_Attatchments.count(atchmnt)){ return; }
+            
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_ATTATCHMENT_MAP.at(uint(atchmnt)),txtre->type(),txtre->address(),0);
             FramebufferObjectAttatchment attatchmentObject = new FramebufferObjectAttatchment(atchmnt);
             m_Attatchments.emplace(atchmnt,attatchmentObject);
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
             }
+            m_Attatchments.emplace(atchmnt,txtre);
         }
         void _attatchRenderbuffer(FramebufferObject* super,RenderbufferObject* rbo){
+            if(m_Attatchments.count(rbo->attatchment())){ return; }
+            
             Renderer::bindRBO(rbo);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
             Renderer::unbindRBO();
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
             }
+            m_Attatchments.emplace(rbo->attatchment(),rbo);
         }
 };
 FramebufferObjectDefaultBindFunctor FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
