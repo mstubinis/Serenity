@@ -1056,7 +1056,7 @@ class LightProbe::impl{
             //render the scene into a cubemap. this will be VERY expensive...
             //cleanup previous cubemap operation
             glDeleteTextures(1,&m_EnvMapTextureAddress);
-            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);
@@ -1083,13 +1083,11 @@ class LightProbe::impl{
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_EnvMapConvolutionTextureAddress,0);
                 Renderer::Detail::RenderManagement::render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,m_Ignore,false);
             }
-
             /////////////////////////////////////////////////////////////////
-
 
             //cleanup previous convolute operation
             glDeleteTextures(1,&m_EnvMapConvolutionTextureAddress);
-            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             uint size = 32;
 
             glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,size,size);//use 16 instead of 24?
@@ -1120,7 +1118,7 @@ class LightProbe::impl{
 
             //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
             glDeleteTextures(1,&m_EnvMapPrefilterTextureAddress);
-            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
             glGenTextures(1, &m_EnvMapPrefilterTextureAddress);
             glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapPrefilterTextureAddress);
@@ -1155,7 +1153,6 @@ class LightProbe::impl{
                     Skybox::bindMesh();
                 }
             }
-            //Renderer::bindFBO(0); do we really need this?
             Renderer::bindReadFBO(prevReadBuffer);
             Renderer::bindDrawFBO(prevDrawBuffer);
             Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
