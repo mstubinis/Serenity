@@ -71,6 +71,7 @@ namespace Engine{
                     static std::string current_bound_material;
                     static GLuint current_bound_read_fbo;
                     static GLuint current_bound_draw_fbo;
+                    static GLuint current_bound_rbo;
                     static AntiAliasingAlgorithm::Algorithm aa_algorithm;
 
                     static bool cull_face_enabled;
