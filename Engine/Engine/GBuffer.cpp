@@ -74,8 +74,8 @@ class GBuffer::impl final{
                 return false;
             }
             //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
-            Renderer::bindRBO(0); //was moved to down here
-            Renderer::bindFBO(0);
+            Renderer::unbindRBO(); //was moved to down here
+            Renderer::unbindFBO();
 
             glGenFramebuffers(1, &m_FBO_bloom);
             glGenRenderbuffers(1, &m_RBO_bloom);
@@ -95,8 +95,8 @@ class GBuffer::impl final{
                 return false;
             }
             //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
-            Renderer::bindRBO(0); //was moved to down here
-            Renderer::bindFBO(0);
+            Renderer::unbindRBO(); //was moved to down here
+            Renderer::unbindFBO();
             return true;
         }
         void _constructFramebuffer(string n,uint t,uint w,uint h){
@@ -120,7 +120,7 @@ class GBuffer::impl final{
             //Renderer::bindFBO(m_FBO_bloom);
             glDeleteRenderbuffers(1, &m_RBO_bloom);
             glDeleteFramebuffers(1, &m_FBO_bloom);
-            Renderer::bindFBO(0);
+            Renderer::unbindFBO();
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
             if(first_fbo){
@@ -188,8 +188,9 @@ class GBuffer::impl final{
             t.push_back(m_Buffers.at(t6).lock().get()->attatchment());
             _start(t,c,f);
         }
-        void _stop(){
-            Renderer::bindFBO(0);
+        void _stop(GLuint final_fbo, GLuint final_rbo){
+            Renderer::bindFBO(final_fbo);
+            Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
             glColorMask(1,1,1,1);
             glClear(GL_COLOR_BUFFER_BIT);
         }
@@ -218,7 +219,7 @@ void GBuffer::start(uint type,uint type1,uint type2,string channels,bool first_f
 void GBuffer::start(uint type,uint type1,uint type2,uint type3,string channels,bool first_fbo){m_i->_start(type,type1,type2,type3,channels,first_fbo);}
 void GBuffer::start(uint type,uint type1,uint type2,uint type3,uint type4,string channels,bool first_fbo){m_i->_start(type,type1,type2,type3,type4,channels,first_fbo);}
 void GBuffer::start(uint type,uint type1,uint type2,uint type3,uint type4,uint type5,string channels,bool first_fbo){m_i->_start(type,type1,type2,type3,type4,type5,channels,first_fbo);}
-void GBuffer::stop(){m_i->_stop();}
+void GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const unordered_map<uint,boost::weak_ptr<TextureBuffer>>& GBuffer::getBuffers() const{ return m_i->m_Buffers; }
 Texture* GBuffer::getTexture(uint type){ return m_i->m_Buffers.at(type).lock().get();}
 TextureBuffer* GBuffer::getBuffer(uint type){ return m_i->m_Buffers.at(type).lock().get();}
