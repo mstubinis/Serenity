@@ -110,7 +110,7 @@ class FramebufferObjectAttatchment::impl{
 
         }
 };
-FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a){
+FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a):m_i(new impl){
     m_i->_init(this,_fbo,a);
 }
 FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ m_i->_destruct(this); }
@@ -136,8 +136,8 @@ class RenderbufferObject::impl{
             Renderer::unbindRBO();
         }
 };
-RenderbufferObject::RenderbufferObject(uint w,uint h,ImageInternalFormat::Format internalFormat){
-    m_i->_init(this,w,h,internalFormat);
+RenderbufferObject::RenderbufferObject(FramebufferObject* f,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i):FramebufferObjectAttatchment(_fbo,a),m_i(new impl){
+    m_i->_init(this,f,i);
 }
 RenderbufferObject::~RenderbufferObject(){ m_i->_destruct(this); }
 void RenderbufferObject::resize(uint w,uint h){m_i->_resize(this,w,h); }
