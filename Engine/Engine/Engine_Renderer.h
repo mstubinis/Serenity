@@ -126,8 +126,8 @@ namespace Engine{
                     static void _renderTextures(Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _passGodsRays(Camera*,uint& fbufferWidth, uint& fbufferHeight,glm::vec2,bool,float);
                     static void _passHDR(Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passGeometry(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays);
-                    static void _passForwardRendering(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays);
+                    static void _passGeometry(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
+                    static void _passForwardRendering(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
                     static void _passLighting(Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _passSSAO(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderSSAO);
                     static void _passEdge(Camera*,uint& fbufferWidth, uint& fbufferHeight,GLuint texture,float radius = 1.0f);
@@ -140,7 +140,7 @@ namespace Engine{
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
 
-                    static void render(Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true);
+                    static void render(Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true);
 
                     static void init();
                     static void destruct();

@@ -7,12 +7,14 @@
 class Scene;
 class ObjectDisplay;
 class ObjectDynamic;
+class LightProbe;
 class CameraType{public: enum Type { 
     Perspective, 
     Orthographic,
 };};
 
 class Camera: public ObjectBasic{
+	friend class LightProbe;
     private:
         void _constructFrustrum();
         glm::vec4 m_Planes[6];

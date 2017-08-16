@@ -289,11 +289,9 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     }
     cout << "---- " + this->name() + " (Cubemap): convolution done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
-    Renderer::bindFBO(0);
     p->unbind();
 
-    //now gen EnvPrefilterMap for specular IBL
-    //cleanup previous EnvPrefilterMap operation
+    //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
     if(m_i->m_TextureAddress.size() >= 3){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
         glBindTexture(m_i->m_Type,0);
@@ -318,14 +316,12 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((this->width() * this->width())*6));
     Renderer::sendUniform1i("NUM_SAMPLES",32);
-    Renderer::bindFBO(captureFBO);
     uint maxMipLevels = 5;
     for (uint mip = 0; mip < maxMipLevels; ++mip){
         uint mipSize  = uint(size * glm::pow(0.5, mip)); // reisze framebuffer according to mip-level size.
-        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);
         glViewport(0, 0, mipSize, mipSize);
-        float roughness = (float)mip / (float)(maxMipLevels - 1);
+        float roughness = (float)mip /(float)(maxMipLevels - 1);
         Renderer::sendUniform1f("roughness",roughness);
         float a = roughness * roughness;
         Renderer::sendUniform1f("a2",a*a);
@@ -339,7 +335,6 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     }
     cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
-    Renderer::bindFBO(0);
 
 
     //now generate the BDRF LUT -- should probably just make this a global variable
@@ -363,8 +358,6 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
-    Renderer::bindFBO(captureFBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size, size);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_i->m_TextureAddress.at(3), 0);
 
@@ -381,10 +374,8 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     Resources::getWindow()->display(); //prevent opengl & windows timeout
     Renderer::bindFBO(0);
 
-    //cleanup... might have to comment this out if this bugs it out
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
-    ////
 
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);

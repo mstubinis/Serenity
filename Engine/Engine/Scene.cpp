@@ -44,8 +44,7 @@ void Scene::update(float dt){
             m_Objects.erase(it++);
         }
         else{
-            it->second->update(dt);
-            ++it;
+            it->second->update(dt); ++it;
         }
     }
     for (auto it = Resources::Detail::ResourceManagement::m_Cameras.cbegin(); it != Resources::Detail::ResourceManagement::m_Cameras.cend();){
@@ -53,10 +52,7 @@ void Scene::update(float dt){
             Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Cameras,it->second->name());
         }
         else{
-            if(it->second->getScene() == this){
-                it->second->update(dt);
-            }
-            ++it;
+            if(it->second->getScene() == this){ it->second->update(dt); } ++it;
         }
     }
     if(m_Skybox != nullptr) m_Skybox->update();

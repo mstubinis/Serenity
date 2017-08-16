@@ -135,10 +135,13 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         step -= 6.0f;
     }
     //this to just test. should set player / camera dynamically
-    setPlayer(new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this));
+	Ship* dread = new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
+    setPlayer(dread);
     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
     getPlayerCamera()->follow(getPlayer());
 
+	LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),this);
+	lp->attatchTo(dread);
 }
 CapsuleSpace::~CapsuleSpace(){}
 void CapsuleSpace::update(float dt){
