@@ -46,7 +46,9 @@ struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r
 
 class FramebufferObjectAttatchment::impl{
     public:
+        FramebufferObject* m_FBO;
         GLuint m_GL_Attatchment;
+        uint m_AttatchmentWidth; uint m_AttatchmentHeight;
         void _init(FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a){
             m_GL_Attatchment = GL_ATTATCHMENT_MAP.at(uint(a));
         }
@@ -58,7 +60,8 @@ FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferAttatchmen
     m_i->_init(this,a);
 }
 FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ m_i->_destruct(this); }
-
+uint FramebufferObjectAttatchment::width(){ m_i->m_FBO->width(); }
+uint FramebufferObjectAttatchment::height(){ m_i->m_FBO->height(); }
 
 class RenderbufferObject::impl{
     public:
@@ -141,3 +144,6 @@ FramebufferObject::~FramebufferObject(){ m_i->_destruct(this); }
 void FramebufferObject::resize(uint w,uint h){ m_i->_resize(this,w,h); }
 void FramebufferObject::attatchTexture(Texture* t,FramebufferAttatchment::Attatchment a){ m_i->_attatchTexture(this,t,a); }
 void FramebufferObject::attatchRenderBuffer(Renderbuffer* t,FramebufferAttatchment::Attatchment a){ m_i->_attatchRenderbuffer(this,t,a); }
+uint FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
+uint FramebufferObject::height(){ return m_i->m_FramebufferHeight; }
+
