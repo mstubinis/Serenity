@@ -6,7 +6,7 @@
 
 class Texture;
 
-class FramebufferColorAttatchment{public: enum Attatchment{
+class FramebufferAttatchment{public: enum Attatchment{
     Color_0,
     Color_1,
     Color_2,
@@ -25,6 +25,15 @@ class FramebufferColorAttatchment{public: enum Attatchment{
     DepthAndStencil
 };};
 
+class RenderbufferObject{
+    private:
+        class impl;
+        std::unique_ptr<impl> m_i;
+    public:
+        RenderbufferObject();
+        ~RenderbufferObject();
+};
+
 class FramebufferObject: public BindableResource{
     private:
         class impl;
@@ -35,6 +44,7 @@ class FramebufferObject: public BindableResource{
 
         void resize(uint,uint);
     
-        void attatchTexture(Texture*,FramebufferColorAttatchment::Attatchment);
+        void attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
+        void attatchRenderBuffer(RenderbufferObject*,FramebufferAttatchment::Attatchment);
 };
 #endif
