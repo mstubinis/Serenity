@@ -106,7 +106,7 @@ vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigi
     if(ignored != nullptr) Detail::PhysicsManagement::m_world->addRigidBody(ignored);
     return result;
 }
-vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*> ignored){
+vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
     for(auto object:ignored) Detail::PhysicsManagement::m_world->removeRigidBody(object);
     vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
     for(auto object:ignored) Detail::PhysicsManagement::m_world->addRigidBody(object);
@@ -119,7 +119,7 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Object
     if(b != NULL) return Physics::rayCast(_s,_e,b->getRigidBody());
     return Physics::rayCast(_s,_e,nullptr);
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Object*> ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Object*>& ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     vector<btRigidBody*> objs;
