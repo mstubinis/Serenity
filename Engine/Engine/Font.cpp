@@ -26,13 +26,12 @@ FontData::~FontData(){
         SAFE_DELETE(glyph.second);
     }
 }
-FontGlyph* FontData::getGlyphData(unsigned char c){ return m_FontGlyphs[c]; }
+FontGlyph* FontData::getGlyphData(uchar c){ return m_FontGlyphs[c]; }
 void FontData::_loadTextFile(string& filename){
-    unordered_map<unsigned char,FontGlyph*> _Font_Chars;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     for(string line; getline(str, line, '\n');){
         if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
-            FontGlyph* font = new FontGlyph();
+            FontGlyph* f = new FontGlyph();
             string token;
             istringstream stream(line);
             while(getline(stream, token, ' ')) {
@@ -41,27 +40,22 @@ void FontData::_loadTextFile(string& filename){
                 string key = token.substr(0, pos);
                 string value = token.substr(pos + 1, string::npos);
 
-                if(key == "id")            font->id = stoi(value);
-                else if(key == "x")        font->x = stoi(value);
-                else if(key == "y")        font->y = stoi(value);
-                else if(key == "width")    font->width = stoi(value);
-                else if(key == "height")   font->height = stoi(value); 
-                else if(key == "xoffset")  font->xoffset = stoi(value);
-                else if(key == "yoffset")  font->yoffset = stoi(value);
-                else if(key == "xadvance") font->xadvance = stoi(value);
+                if(key == "id")            f->id = stoi(value);
+                else if(key == "x")        f->x = stoi(value);
+                else if(key == "y")        f->y = stoi(value);
+                else if(key == "width")    f->width = stoi(value);
+                else if(key == "height")   f->height = stoi(value); 
+                else if(key == "xoffset")  f->xoffset = stoi(value);
+                else if(key == "yoffset")  f->yoffset = stoi(value);
+                else if(key == "xadvance") f->xadvance = stoi(value);
             }
-            font->m_Model = glm::mat4(1);
+            f->m_Model = glm::mat4(1.0f);
             string name = filename.substr(0,filename.size()-4);
-            Resources::addMesh(name + "_" + boost::lexical_cast<std::string>(font->id),
-                static_cast<float>(font->x),
-                static_cast<float>(font->y),
-                static_cast<float>(font->width),
-                static_cast<float>(font->height));
-            font->char_mesh = Resources::getMesh(name + "_" + boost::lexical_cast<string>(font->id));
-            _Font_Chars[font->id] = font;
+            Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
+            f->char_mesh = Resources::getMesh(name+"_"+to_string(f->id));
+            m_FontGlyphs.emplace(f->id,f);
         }
     }
-    m_FontGlyphs = _Font_Chars;
 }
 
 Font::Font(string filename):EngineResource(filename){
