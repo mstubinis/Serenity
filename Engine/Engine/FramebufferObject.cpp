@@ -54,6 +54,16 @@ class FramebufferObject::impl{
             glDeleteRenderbuffers(1, &m_RBO);
             glDeleteFramebuffers(1, &m_FBO);
         }
+        void _resize(FramebufferObject* super,uint new_width,uint new_height){
+            Renderer::bindFBO(m_FBO);
+            Renderer::bindRBO(m_RBO);
+            
+            m_FramebufferWidth = new_width; m_FramebufferHeight = new_height;
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, new_width, new_height);
+            
+            Renderer::unbindFBO(m_FBO);
+            Renderer::unbindRBO(m_RBO);
+        }
 
 };
 FramebufferObjectDefaultBindFunctor FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
@@ -64,4 +74,7 @@ FramebufferObject::FramebufferObject(std::string name,uint w,uint h):BindableRes
 }
 FramebufferObject::~FramebufferObject(){
     m_i->_destruct(this);
+}
+void FramebufferObject::resize(uint w,uint h){
+    m_i->_resize(this,w,h);
 }
