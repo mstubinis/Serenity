@@ -12,8 +12,6 @@
 using namespace Engine;
 using namespace std;
 
-#pragma region individualShaderFiles
-
 class Shader::impl final{
     public:
         ShaderType::Type m_Type;
@@ -35,8 +33,6 @@ Shader::~Shader(){
 ShaderType::Type Shader::type(){ return m_i->m_Type; }
 string Shader::data(){ return m_i->m_Data; }
 bool Shader::fromFile(){ return m_i->m_FromFile; }
-
-#pragma endregion
 
 struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     Camera* c = Resources::getActiveCamera();
