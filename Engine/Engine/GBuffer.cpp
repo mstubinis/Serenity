@@ -45,8 +45,8 @@ class TextureBuffer::impl final{
 };
 class GBuffer::impl final{
     public:
-        GLuint m_fbo;       GLuint m_depth;
-        GLuint m_fbo_bloom; GLuint m_depth_fake;
+        GLuint m_FBO;       GLuint m_RBO;
+        GLuint m_FBO_bloom; GLuint m_RBO_bloom;
         unordered_map<uint,boost::weak_ptr<TextureBuffer>> m_Buffers;
         uint m_Width; uint m_Height;
         bool _init(uint w,uint h){
@@ -54,14 +54,14 @@ class GBuffer::impl final{
 
             m_Width = w; m_Height = h;
 
-            glGenFramebuffers(1, &m_fbo);
-            Renderer::bindFBO(m_fbo);
-
-            glGenRenderbuffers(1, &m_depth);
-            glBindRenderbuffer(GL_RENDERBUFFER, m_depth);// Bind the depth buffer
+            glGenFramebuffers(1, &m_FBO);
+            glGenRenderbuffers(1, &m_RBO);
+            
+            Renderer::bindFBO(m_FBO);
+            glBindRenderbuffer(GL_RENDERBUFFER, m_RBO);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-            glBindRenderbuffer(GL_RENDERBUFFER, 0);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
+            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved below
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
             _constructFramebuffer("BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
             _constructFramebuffer("BUFFER_NORMAL",  GBufferType::Normal,  m_Width,m_Height);
@@ -72,16 +72,17 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
+            glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
             Renderer::bindFBO(0);
 
-            glGenFramebuffers(1, &m_fbo_bloom);
-            Renderer::bindFBO(m_fbo_bloom);
-
-            glGenRenderbuffers(1, &m_depth_fake);
-            glBindRenderbuffer(GL_RENDERBUFFER, m_depth_fake);// Bind the depth buffer
+            glGenFramebuffers(1, &m_FBO_bloom);
+            glGenRenderbuffers(1, &m_RBO_bloom);
+            
+            Renderer::bindFBO(m_FBO_bloom);
+            glBindRenderbuffer(GL_RENDERBUFFER, m_RBO_bloom);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-            glBindRenderbuffer(GL_RENDERBUFFER, 0);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth_fake);
+            //glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved below
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO_bloom);
 
             _constructFramebuffer("BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
             _constructFramebuffer("BUFFER_FREE2",   GBufferType::Free2,   m_Width,m_Height);
@@ -90,13 +91,15 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
+            glBindRenderbuffer(GL_RENDERBUFFER, 0); //was moved to down here
             Renderer::bindFBO(0);
             return true;
         }
         void _constructFramebuffer(string n,uint t,uint w,uint h){
             boost::tuple<float,GLuint,GLuint,GLuint,GLuint>& i = GBUFFER_TYPE_DATA.at(t);
-            TextureBuffer* tbo = nullptr;
-            tbo = new TextureBuffer(n,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),w,h,i.get<0>());
+            //TextureBuffer* tbo = nullptr;
+            //tbo = new TextureBuffer(n,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),w,h,i.get<0>());
+            TextureBuffer* tbo = new TextureBuffer(n,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),w,h,i.get<0>());
             boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
             m_Buffers.emplace(t,ptr);
         }
@@ -105,24 +108,26 @@ class GBuffer::impl final{
             m_Buffers.clear();
             m_Width = m_Height = 0;
 
-            Renderer::bindFBO(m_fbo);
-            glDeleteRenderbuffers(1, &m_depth);
-            glDeleteFramebuffers(1, &m_fbo);
-            Renderer::bindFBO(0);
+            //Renderer::bindFBO(m_FBO);
+            glDeleteRenderbuffers(1, &m_RBO);
+            glDeleteFramebuffers(1, &m_FBO);
+            //Renderer::bindFBO(0);
 
-            Renderer::bindFBO(m_fbo_bloom);
-            glDeleteRenderbuffers(1, &m_depth_fake);
-            glDeleteFramebuffers(1, &m_fbo_bloom);
+            //Renderer::bindFBO(m_FBO_bloom);
+            glDeleteRenderbuffers(1, &m_RBO_bloom);
+            glDeleteFramebuffers(1, &m_FBO_bloom);
             Renderer::bindFBO(0);
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
             if(first_fbo){
-                Renderer::bindReadFBO(m_fbo);
-                Renderer::bindDrawFBO(m_fbo);
+                Renderer::bindFBO(m_FBO);
+                //Renderer::bindReadFBO(m_FBO);
+                //Renderer::bindDrawFBO(m_FBO);
             }
             else{
-                Renderer::bindReadFBO(m_fbo_bloom);
-                Renderer::bindDrawFBO(m_fbo_bloom);
+                Renderer::bindFBO(m_FBO_bloom);
+                //Renderer::bindReadFBO(m_FBO_bloom);
+                //Renderer::bindDrawFBO(m_FBO_bloom);
             }
             GLboolean r,g,b,a;
             if(channels.find("R") != string::npos) r=GL_TRUE; else r=GL_FALSE;
