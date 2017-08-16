@@ -59,6 +59,15 @@ class Texture: public EngineResource{
         void setMaxFilter(TextureFilter::Filter);
         void setFilter(TextureFilter::Filter);
     
+        static void setXWrapping(GLuint type,TextureWrap::Wrap);
+        static void setYWrapping(GLuint type,TextureWrap::Wrap);
+        static void setZWrapping(GLuint type,TextureWrap::Wrap);
+        static void setWrapping(GLuint type,TextureWrap::Wrap);
+    
+        static void setMinFilter(GLuint type,TextureFilter::Filter);
+        static void setMaxFilter(GLuint type,TextureFilter::Filter);
+        static void setFilter(GLuint type,TextureFilter::Filter);
+    
         void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
     
