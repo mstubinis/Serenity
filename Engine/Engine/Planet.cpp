@@ -56,7 +56,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1f("fCameraHeight2", camHeight2);
     float fScaledepth = 0.25f;
     float innerRadius = obj->getDefaultRadius();
-    Renderer::sendUniform1f("fExposure", 2.0f);
+    Renderer::sendUniform1fSafe("fExposure", 2.0f);
     Renderer::sendUniform1f("fInnerRadius", innerRadius);
     Renderer::sendUniform1f("fScaleDepth",fScaledepth);
     float outerRadius = innerRadius + (innerRadius * atmosphereHeight);

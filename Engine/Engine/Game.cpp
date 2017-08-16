@@ -87,7 +87,7 @@ void Game::initLogic(){
 
     m_HUD = new HUD();
 
-    Renderer::Settings::HDR::disable();
+    //Renderer::Settings::HDR::disable();
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -111,16 +111,16 @@ void Game::update(float dt){
 	if(Events::Keyboard::isKeyDownOnce("f11")){ Renderer::Settings::enableDrawPhysicsInfo(!Renderer::Detail::RendererInfo::GeneralInfo::draw_physics_debug); }
 
     if(Events::Keyboard::isKeyDown("z")){
-        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.07f);
+        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
     }
     else if(Events::Keyboard::isKeyDown("x")){
-        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.07f);
+        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.03f);
     }
     if(Events::Keyboard::isKeyDown("c")){
-        Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.07f);
+        Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("k")){
-        Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.07f);
+        Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.02f);
     }
 
     if(Events::Keyboard::isKeyDown("n")){

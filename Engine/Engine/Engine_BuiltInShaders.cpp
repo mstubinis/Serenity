@@ -284,11 +284,11 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "\n"
     "    gl_Position = MVP * PosTrans;\n"
     "\n"
-    "    Normals = normalize(NormalMatrix * NormalTrans);\n"
-    "    vec3 Binormals = normalize(NormalMatrix * BinormalTrans);\n"
-    "    vec3 Tangents = normalize(NormalMatrix * TangentTrans);\n"
+    "    Normals = (NormalMatrix * NormalTrans);\n"
+    "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"
+    "    vec3 Tangents = (NormalMatrix * TangentTrans);\n"
     "\n"
-    "    TBN = mat3(Tangents,Binormals,Normals);\n"
+	"    TBN = (mat3(Tangents,Binormals,Normals));\n"
     "\n"
     "    WorldPosition = (Model * PosTrans).xyz;\n"
     "\n"
@@ -1019,8 +1019,6 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "uniform int HasSSAO;\n"
     "uniform int HasLighting;\n"
     "uniform int HasHDR;\n"
-    "\n"
-    "uniform float gamma;\n"
     "\n";
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
@@ -1042,7 +1040,6 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "        lighting *= max(brightness, ssao);\n"
     "    }\n"
     "    lighting += rays;\n"
-    "    //lighting = pow(lighting, vec3(1.0 / gamma));\n"
     "    gl_FragColor = vec4(lighting,1.0);\n"
     "}";
 
@@ -1300,6 +1297,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "uniform samplerCube irradianceMap;\n"
     "uniform samplerCube prefilterMap;\n"
     "uniform sampler2D brdfLUT;\n"
+	"uniform float gamma;\n"
     "\n"
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
@@ -1346,6 +1344,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec3 GISpecular = prefilteredColor * (kS1 * brdf.x + brdf.y);\n"
     "\n"
     "    vec3 TotalIrradiance = (kD1 * AmbientIrradiance + GISpecular);\n" //* ao
+	"    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / gamma));\n"
     "    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
     "}";
 

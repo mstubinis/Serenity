@@ -122,7 +122,8 @@ void main(void){
     if(HasAtmosphere == 1){
         if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-            gl_FragData[0].rgb = max(vec3(0.05,0.05,0.05)*diffuse.rgb,(1.0-exp(-fExposure*((c0+diffuse.rgb)*c1))));    
+			vec3 HDR = (1.0-exp(-fExposure*(c0+diffuse.rgb)*c1));
+            gl_FragData[0].rgb = max(vec3(0.05,0.05,0.05)*diffuse.rgb,HDR);    
             if(FirstConditionals.z > 0.5){
                 vec3 lightIntensity = max(vec3(0.05,0.05,0.05)*vec3(1.0),(1.0 - exp( -fExposure * ((c0+vec3(1.0)) * c1) )));
                 gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0-lightIntensity)*texture2D(GlowTexture, UV).rgb);

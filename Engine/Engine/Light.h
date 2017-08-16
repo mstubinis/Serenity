@@ -121,13 +121,13 @@ class RodLight: public PointLight{
 class LightProbe: public Camera{
     private:
         uint m_EnvMapWidth;
-        uint m_EnvMapSize;
+        uint m_EnvMapHeight;
         GLuint m_FBO;
         GLuint m_RBO;
         GLuint m_EnvMapPrefilterTextureAddress;
         GLuint m_EnvMapConvolutionTextureAddress;
     public:
-        LightProbe(std::string = "Light Probe", uint envMapWidth, uint envMapHeight);
+        LightProbe(std::string = "Light Probe", uint envMapWidth = 256, uint envMapHeight = 256);
         ~LightProbe();
     
         void update(float);

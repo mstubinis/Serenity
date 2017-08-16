@@ -26,7 +26,7 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
-float Detail::RendererInfo::GeneralInfo::gamma = 2.1f;
+float Detail::RendererInfo::GeneralInfo::gamma = 2.2f;
 bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
 bool Detail::RendererInfo::GeneralInfo::depth_test = true;
 bool Detail::RendererInfo::GeneralInfo::depth_mask = true;
@@ -72,7 +72,7 @@ glm::vec2 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::Rendere
 GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
 bool Detail::RendererInfo::HDRInfo::hdr = true;
-float Detail::RendererInfo::HDRInfo::hdr_exposure = 3.2f;
+float Detail::RendererInfo::HDRInfo::hdr_exposure = 3.0f;
 HDRToneMapAlgorithm::Algorithm Detail::RendererInfo::HDRInfo::hdr_algorithm = HDRToneMapAlgorithm::UNCHARTED;
 
 GBuffer* Detail::RenderManagement::m_gBuffer = nullptr;
@@ -506,6 +506,7 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),1);
     bindTextureSafe("gDepthMap",m_gBuffer->getTexture(GBufferType::Depth),2);
+    sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
     SkyboxEmpty* sky = Resources::getCurrentScene()->getSkybox();
     if(sky != nullptr && sky->texture()->numAddresses() >= 4){
@@ -761,7 +762,6 @@ void Detail::RenderManagement::_passFinal(Camera* c,uint& fbufferWidth, uint& fb
 
     sendUniform1iSafe("HasSSAO",int(RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasHDR",int(RendererInfo::HDRInfo::hdr));
-    sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
     bindTextureSafe("gDiffuseMap",m_gBuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gLightMap",m_gBuffer->getTexture(GBufferType::Lighting),1);

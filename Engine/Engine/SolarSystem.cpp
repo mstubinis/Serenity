@@ -260,6 +260,8 @@ void SolarSystem::_loadFromFile(string filename){
 
 	new ObjectDisplay("Planet","Gold",glm::vec3(0,5,2),glm::vec3(2));
 
+	//new DirectionalLight();
+
     player->translate(0,0,2);
 }
 void SolarSystem::_loadRandomly(){

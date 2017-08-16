@@ -982,7 +982,7 @@ void RodLight::lighten(){
 }
 float RodLight::rodLength(){ return m_RodLength; }
 
-LightProbe::LightProbe(std::string name, uint envMapWidth, uint envMapHeight):Camera(name,glm::radians(90),1.0f,0.1f,1000.0f){
+LightProbe::LightProbe(std::string name, uint envMapWidth, uint envMapHeight):Camera(name,glm::radians(90.0f),1.0f,0.1f,1000.0f){
     m_EnvMapWidth = envMapWidth;
     m_EnvMapHeight = envMapHeight;
 }
