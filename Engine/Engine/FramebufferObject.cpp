@@ -43,7 +43,6 @@ class FramebufferObject::impl{
         static FramebufferObjectDefaultUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
         GLuint m_FBO;
-        GLuint m_RBO;
     
         uint m_FramebufferWidth;
         uint m_FramebufferHeight;
@@ -55,11 +54,11 @@ class FramebufferObject::impl{
             super->setCustomUnbindFunctor(FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR);
 
             glGenFramebuffers(1, &m_FBO);
-            glGenRenderbuffers(1, &m_RBO);
+            //glGenRenderbuffers(1, &m_RBO);
             Renderer::bindFBO(m_FBO);
-            Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO); 
+            //Renderer::bindRBO(m_RBO);
+            //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+            //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO); 
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl; return;
@@ -70,13 +69,13 @@ class FramebufferObject::impl{
         }
         void _resize(FramebufferObject* super,uint new_width,uint new_height){
             Renderer::bindFBO(m_FBO);
-            Renderer::bindRBO(m_RBO);
+            //Renderer::bindRBO(m_RBO);
             
             m_FramebufferWidth = new_width; m_FramebufferHeight = new_height;
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, new_width, new_height);
             
+            //Renderer::unbindRBO();
             Renderer::unbindFBO();
-            Renderer::unbindRBO();
         }
         void _attatchTexture(FramebufferObject* super,Texture* texture,FramebufferAttatchment::Attatchment attatchment){
             if(attatchment != FramebufferAttatchment::Depth && attatchment != FramebufferAttatchment::Stencil && attatchment != FramebufferAttatchment::DepthAndStencil){
