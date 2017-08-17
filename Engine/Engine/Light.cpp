@@ -586,7 +586,7 @@ PointLight::PointLight(string name, glm::vec3 pos,Scene* scene): SunLight(pos,na
     m_Exp = 0.1f;
     m_CullingRadius = calculateCullingRadius();
     m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
-    m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
+    m_AttenuationModel = LightAttenuation::Distance_Squared;
 }
 PointLight::~PointLight(){
 }
