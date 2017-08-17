@@ -37,6 +37,7 @@ class TextureBuffer::impl final{
             super->decrementUseCount();
             super->unload();
             super->load();
+            glFramebufferTexture2D(GL_FRAMEBUFFER,m_BufferAttatchment,super->type(),super->address(),0);
         }
 };
 class GBuffer::impl final{
