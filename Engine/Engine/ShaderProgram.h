@@ -26,20 +26,18 @@ class ShaderType{public:enum Type{
 
 class Shader final: public EngineResource{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Shader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         ~Shader();
 
-		ShaderType::Type type();
+        ShaderType::Type type();
         std::string data();
         bool fromFile();
 };
 class ShaderP final: public BindableResource{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
