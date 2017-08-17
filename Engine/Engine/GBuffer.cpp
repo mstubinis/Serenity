@@ -193,16 +193,16 @@ void GBuffer::resize(uint width, uint height){
     stop();
     m_i->_init(width,height);
 }
-void GBuffer::start(vector<uint>& types,string channels,bool first_fbo){m_i->_start(types,channels,first_fbo);}
-void GBuffer::start(uint type,string channels,bool first_fbo){m_i->_start(type,channels,first_fbo);}
-void GBuffer::start(uint type,uint type1,string channels,bool first_fbo){m_i->_start(type,type1,channels,first_fbo);}
-void GBuffer::start(uint type,uint type1,uint type2,string channels,bool first_fbo){m_i->_start(type,type1,type2,channels,first_fbo);}
-void GBuffer::start(uint type,uint type1,uint type2,uint type3,string channels,bool first_fbo){m_i->_start(type,type1,type2,type3,channels,first_fbo);}
-void GBuffer::start(uint type,uint type1,uint type2,uint type3,uint type4,string channels,bool first_fbo){m_i->_start(type,type1,type2,type3,type4,channels,first_fbo);}
-void GBuffer::start(uint type,uint type1,uint type2,uint type3,uint type4,uint type5,string channels,bool first_fbo){m_i->_start(type,type1,type2,type3,type4,type5,channels,first_fbo);}
+void GBuffer::start(vector<uint>& t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
+void GBuffer::start(uint t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
+void GBuffer::start(uint t,uint t1,string c,bool mainFBO){m_i->_start(t,t1,c,mainFBO);}
+void GBuffer::start(uint t,uint t1,uint t2,string c,bool mainFBO){m_i->_start(t,t1,t2,c,mainFBO);}
+void GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,c,mainFBO);}
+void GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
+void GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,uint t5,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,t5,c,mainFBO);}
 void GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const unordered_map<uint,boost::weak_ptr<TextureBuffer>>& GBuffer::getBuffers() const{ return m_i->m_Buffers; }
-Texture* GBuffer::getTexture(uint type){ return m_i->m_Buffers.at(type).lock().get();}
-TextureBuffer* GBuffer::getBuffer(uint type){ return m_i->m_Buffers.at(type).lock().get();}
+Texture* GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t).lock().get();}
+TextureBuffer* GBuffer::getBuffer(uint t){ return m_i->m_Buffers.at(t).lock().get();}
 const GLuint& GBuffer::getMainFBO() const{ return m_i->m_FBO; }
 const GLuint& GBuffer::getSmallFBO() const{ return m_i->m_FBO_bloom; }
