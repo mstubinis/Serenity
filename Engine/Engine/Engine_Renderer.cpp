@@ -650,6 +650,7 @@ void Detail::RenderManagement::_passSSAO(Camera* c,uint& fbufferWidth, uint& fbu
     sendUniform1iSafe("doBloom",int(RendererInfo::BloomInfo::bloom));
 
     glm::vec3 camPos = c->getPosition();
+    sendUniformMatrix4fSafe("View",c->getView());
     sendUniformMatrix4fSafe("Projection",c->getProjection());
     sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
     sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
