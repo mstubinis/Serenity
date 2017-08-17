@@ -646,27 +646,27 @@ void Detail::RenderManagement::_passSSAO(Camera* c,uint& fbufferWidth, uint& fbu
 
     int doSSAO = 1;
     if(renderSSAO == false || RendererInfo::SSAOInfo::ssao == false) doSSAO = 0;
-    sendUniform1i("doSSAO",doSSAO);
-    sendUniform1i("doBloom",int(RendererInfo::BloomInfo::bloom));
+    sendUniform1iSafe("doSSAO",doSSAO);
+    sendUniform1iSafe("doBloom",int(RendererInfo::BloomInfo::bloom));
 
     glm::vec3 camPos = c->getPosition();
     sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
     sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
-    sendUniform1f("nearz",c->getNear());
-    sendUniform1f("farz",c->getFar());
+    sendUniform1fSafe("nearz",c->getNear());
+    sendUniform1fSafe("farz",c->getFar());
 
     sendUniform3fSafe("CameraPosition",camPos.x,camPos.y,camPos.z);
     
-    sendUniform4f("SSAOInfo",RendererInfo::SSAOInfo::ssao_radius,RendererInfo::SSAOInfo::ssao_intensity,
+    sendUniform4fSafe("SSAOInfo",RendererInfo::SSAOInfo::ssao_radius,RendererInfo::SSAOInfo::ssao_intensity,
         RendererInfo::SSAOInfo::ssao_bias,RendererInfo::SSAOInfo::ssao_scale);
     
-    sendUniform1i("Samples",RendererInfo::SSAOInfo::ssao_samples);
-    sendUniform1i("NoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
+    sendUniform1iSafe("Samples",RendererInfo::SSAOInfo::ssao_samples);
+    sendUniform1iSafe("NoiseTextureSize",RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE);
     
     float _divisor = m_gBuffer->getBuffer(GBufferType::Bloom)->divisor();
-    sendUniform1f("fbufferDivisor",_divisor);
+    sendUniform1fSafe("fbufferDivisor",_divisor);
     
-    sendUniform2fv("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+    sendUniform2fvSafe("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),0);
     bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,1,GL_TEXTURE_2D);
