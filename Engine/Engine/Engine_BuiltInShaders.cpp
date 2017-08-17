@@ -749,7 +749,7 @@ Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersMa
 "    for(int i = 0; i < Samples; ++i){\n"
 "\n"     // get sample position
 "        vec3 sample = TBN * poisson[i];\n"// from tangent to (hopefully) world space
-"        sample = fragPos + sample * SSAOInfo.x;\n"
+"        sample = (fragPos + sample * SSAOInfo.x) * SSAOInfo.w;\n"
 "\n"     // project sample position (to sample texture)(to get position on screen/texture)
 "        vec4 offset = vec4(sample, 1.0);\n"
 "        offset = (Projection * View) * offset;\n"// from world to view to clip-space
