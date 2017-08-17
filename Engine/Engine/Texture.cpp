@@ -31,7 +31,7 @@ class Texture::impl final{
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-        void _init(uint w,uint h,float divisor,GLuint pxlType,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
+        void _init(uint w,uint h,float divisor,ImagePixelType::Type pxlType,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
             m_PixelFormat = pxlFormat;
             _baseInit(type,super,n,i,internFormat,genMipMaps);
             m_Width = uint(float(w) * divisor); m_Height = uint(float(h) * divisor);
@@ -179,7 +179,7 @@ class Texture::impl final{
 Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint t,float divisor):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(w,h,divisor,type,t,this,n,i,internal,pxlFormat,false);
+    m_i->_init(w,h,divisor,pxlType,t,this,n,i,internal,pxlFormat,false);
 }
 Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
@@ -388,3 +388,4 @@ uint Texture::width(){ return m_i->m_Width; }
 uint Texture::height(){ return m_i->m_Height; }
 ImageInternalFormat::Format Texture::internalFormat(){ return m_i->m_InternalFormat; }
 ImagePixelFormat::Format Texture::pixelFormat(){ return m_i->m_PixelFormat; }
+ImagePixelType::Type Texture::pixelType(){ return m_i->m_PixelType; }
