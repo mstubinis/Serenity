@@ -94,8 +94,11 @@ class Texture::impl final{
                 _generateMipmaps();
             }
         }
-        void _buildTexImage2D(GLuint targetType,GLuint internal,sf::Image& img, GLuint pxlFormat,GLuint pxlType){
-            glTexImage2D(targetType,0,internal,img.getSize().x,img.getSize().y,0,pxlFormat,pxlType,img.getPixelsPtr());
+        void _buildTexImage2D(GLuint targetType,GLuint internal,sf::Image& img, GLuint pxlFormat,GLuint pxlType,float divisor=1.0f){
+            glTexImage2D(targetType,0,internal,GLsizei(img.getSize().x*divisor),GLsizei(img.getSize().y*divisor),0,pxlFormat,pxlType,img.getPixelsPtr());
+        }
+        void _buildTexImage2D(GLuint targetType,GLuint internal,GLsizei w,GLsizei h, GLuint pxlFormat,GLuint pxlType,float divisor){
+            glTexImage2D(targetType,0,internal,GLsizei(w*divisor),GLsizei(h*divisor),0,pxlFormat,pxlType,NULL);
         }
         void _unload(){
             for(uint i = 0; i < m_TextureAddress.size(); i++){
@@ -170,10 +173,10 @@ class Texture::impl final{
             }
       }
 };
-Texture::Texture(string n,uint w, uint h,GLuint t,ImageInternalFormat::Format internalFormat,ImagePixelFormat::Format pxlFormat):m_i(new impl){ //framebuffer
+Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,GLuint t):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(t,this,n,i,internalFormat,pxlFormat,false);
+    m_i->_init(t,this,n,i,internal,pxlFormat,false);
 }
 Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
@@ -202,7 +205,7 @@ void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& sc
 void Texture::_constructAsFramebuffer(uint w,uint h,float divisor,int intern,int format,int type,int attatchment){
     m_i->m_Width = w; m_i->m_Height = h;
     glBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(0));
-    glTexImage2D(m_i->m_Type,0,intern,GLsizei(w*divisor),GLsizei(h*divisor),0,format,type,NULL);
+    m_i->_buildTexImage2D(m_i->m_Type,intern,GLsizei(w),GLsizei(h),format,type,divisor);
     this->setFilter(TextureFilter::Linear);
     this->setWrapping(TextureWrap::ClampToEdge);
     glBindTexture(m_i->m_Type,0);
