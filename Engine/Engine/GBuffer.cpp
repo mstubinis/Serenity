@@ -26,21 +26,15 @@ unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> GBUFFER_TYPE
 
 class TextureBuffer::impl final{
     public:
-        GLuint m_BufferInternalFormat;
-        GLuint m_BufferFormat;
-        GLuint m_BufferType; 
         GLuint m_BufferAttatchment;
         float m_Divisor;
-        void _init(GLuint internalformat,GLuint format,GLuint type,GLuint attatchment,uint width,uint height,float divisor,TextureBuffer* super){
-            m_BufferInternalFormat = internalformat;
-            m_BufferFormat = format;
-            m_BufferType = type;
+        void _init(GLuint attatchment,float divisor,TextureBuffer* super){
             m_BufferAttatchment = attatchment;
             m_Divisor = divisor;
-            _resize(width,height,super);
+            _resize(m_Width,m_Height,super);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
-            super->_constructAsFramebuffer(width,height,m_Divisor,m_BufferInternalFormat,m_BufferFormat,m_BufferType,m_BufferAttatchment);
+            super->_constructAsFramebuffer(width,height,m_Divisor,m_BufferAttatchment);
         }
 };
 class GBuffer::impl final{
@@ -183,8 +177,8 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(string name,GLuint internalformat, GLuint format, GLuint type, GLuint attatchment,uint width,uint height,float divisor):Texture(name,width,height),m_i(new impl){
-    m_i->_init(internalformat,format,type,attatchment,width,height,divisor,this);
+TextureBuffer::TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format internalFormat,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint attatchment,GLuint t,float divisor):Texture(name,w,hinternalFormat,pxlFormat,pxlType,attatchment,t,divisor),m_i(new impl){
+    m_i->_init(attatchment,divisor,this);
 }
 TextureBuffer::~TextureBuffer(){
 }
