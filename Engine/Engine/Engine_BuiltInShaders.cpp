@@ -760,7 +760,7 @@ Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersMa
 "        occlusion += (sampleDepth >= sample.z + SSAOInfo.z ? 1.0 : 0.0) * rangeCheck;\n"         
 "    }\n"
 "    occlusion = 1.0 - (occlusion / Samples);\n"
-"    gl_FragColor.a = occlusion;\n"
+"    gl_FragColor.a = pow(occlusion,SSAOInfo.y);\n"
 "}\n"
 "\n";
 */	
