@@ -31,7 +31,7 @@ class Texture::impl final{
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-        void _init(uint w,uint h,float divisor,GLuint pxlType,GLuint attatchment,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
+        void _init(uint w,uint h,float divisor,GLuint pxlType,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
             m_PixelFormat = pxlFormat;
             _baseInit(type,super,n,i,internFormat,genMipMaps);
             m_Width = uint(float(w) * divisor); m_Height = uint(float(h) * divisor);
@@ -76,13 +76,10 @@ class Texture::impl final{
             }
             else if(m_Files.size() == 1 && m_Files[0] == "FRAMEBUFFER"){//Framebuffer
                 glBindTexture(m_Type,m_TextureAddress.at(0));
-
                 _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
-                
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
                 glBindTexture(m_Type,0);
-                glFramebufferTexture2D(GL_FRAMEBUFFER,attatchment,m_Type,m_TextureAddress.at(0),0);
             }
             else if(m_Files.size() > 1){//cubemap
                 for(uint k = 0; k < m_Files.size(); k++){
@@ -179,10 +176,10 @@ class Texture::impl final{
             }
       }
 };
-Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint attatchment,GLuint t,float divisor):m_i(new impl){ //framebuffer
+Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint t,float divisor):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(w,h,divisor,type,attatchment,t,this,n,i,internal,pxlFormat,false);
+    m_i->_init(w,h,divisor,type,t,this,n,i,internal,pxlFormat,false);
 }
 Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
