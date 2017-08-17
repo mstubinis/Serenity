@@ -20,8 +20,7 @@ class GBufferType{public: enum Type{
 
 class TextureBuffer final: public Texture{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment,GLuint t,float divisor);
         ~TextureBuffer();
@@ -31,8 +30,7 @@ class TextureBuffer final: public Texture{
 };
 class GBuffer final{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         GBuffer(uint w,uint h);
         ~GBuffer();
