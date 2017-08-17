@@ -64,14 +64,21 @@ void FramebufferObjectAttatchment::resize(){ m_i->_resize(this); }
 class FramebufferTexture::impl{
     public:
         Texture* m_Texture;
-
+        ImagePixelFormat::Format m_PixelFormat;
+        ImagePixelType::Type m_PixelType;
         void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
             m_Texture = t;
+            m_PixelFormat = t->pixelFormat();
+            m_PixelType = t->pixelType();
+            _resize(super);
         }
         void _destruct(FramebufferTexture* super){
         }
         void _resize(FramebufferTexture* super){
-            
+            glBindTexture(m_Texture->type(),m_Texture->address());
+            glTexImage2D(m_Texture->type(),0,ImageInternalFormat::at(m_Texture->internalFormat()),m_Texture->width(),m_Texture->height(),0,ImagePixelFormat::at(m_Texture->pixelFormat()),ImagePixelType::at(m_Texture->pixelType()),NULL);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
+            glBindTexture(m_Texture->type(),0);
         }
 };
 FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t):FramebufferObjectAttatchment(_fbo,a,t),m_i(new impl){
