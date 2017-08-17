@@ -1325,7 +1325,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "uniform samplerCube irradianceMap;\n"
     "uniform samplerCube prefilterMap;\n"
     "uniform sampler2D brdfLUT;\n"
-	"uniform float gamma;\n"
+    "uniform float gamma;\n"
     "\n"
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
@@ -1372,7 +1372,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec3 GISpecular = prefilteredColor * (kS1 * brdf.x + brdf.y);\n"
     "\n"
     "    vec3 TotalIrradiance = (kD1 * AmbientIrradiance + GISpecular);\n" //* ao
-	"    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / gamma));\n"
+    "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / gamma));\n"
     "    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
     "}";
 
