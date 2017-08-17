@@ -101,12 +101,9 @@ class GBuffer::impl final{
             m_Buffers.clear();
             m_Width = m_Height = 0;
 
-            //Renderer::bindFBO(m_FBO);
             glDeleteRenderbuffers(1, &m_RBO);
             glDeleteFramebuffers(1, &m_FBO);
-            //Renderer::bindFBO(0);
 
-            //Renderer::bindFBO(m_FBO_bloom);
             glDeleteRenderbuffers(1, &m_RBO_bloom);
             glDeleteFramebuffers(1, &m_FBO_bloom);
             Renderer::unbindFBO();
@@ -172,7 +169,7 @@ class GBuffer::impl final{
         void _stop(GLuint final_fbo, GLuint final_rbo){
             Renderer::bindFBO(final_fbo);
             Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
-            glColorMask(1,1,1,1);
+            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
