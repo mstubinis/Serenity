@@ -50,6 +50,7 @@ class Texture: public EngineResource{
 
         ImageInternalFormat::Format internalFormat();
         ImagePixelFormat::Format pixelFormat();
+        ImagePixelType::Type pixelType();
     
         virtual void load();
         virtual void unload();
@@ -72,7 +73,6 @@ class Texture: public EngineResource{
         static void setMaxFilter(GLuint type,TextureFilter::Filter);
         static void setFilter(GLuint type,TextureFilter::Filter);
     
-        void _constructAsFramebuffer(uint,uint,float,int,int,int,int);
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
     
         void genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,uint brdfSize);
