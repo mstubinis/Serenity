@@ -54,6 +54,7 @@ uint FramebufferObjectAttatchment::height(){ return m_i->m_FBO->height(); }
 FramebufferObject* FramebufferObjectAttatchment::fbo(){ return m_i->m_FBO; }
 uint FramebufferObjectAttatchment::attatchment(){ return m_i->m_GL_Attatchment; }
 void FramebufferObjectAttatchment::resize(){ m_i->_resize(this); }
+GLuint FramebufferObjectAttatchment::address(){ return GLuint(0); }
 
 class FramebufferTexture::impl{
     public:

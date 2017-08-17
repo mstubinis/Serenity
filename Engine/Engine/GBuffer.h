@@ -22,7 +22,7 @@ class TextureBuffer final: public Texture{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment,GLuint t,float divisor);
+        TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment,float divisor);
         ~TextureBuffer();
 
         const float divisor() const;

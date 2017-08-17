@@ -26,7 +26,7 @@ class FramebufferObjectAttatchment{
         virtual void resize();
         virtual GLuint address();
 };
-class FramebufferTexture{
+class FramebufferTexture: public FramebufferObjectAttatchment{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -53,6 +53,7 @@ class FramebufferObject: public BindableResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         FramebufferObject(std::string name,uint width,uint height);
+		FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format);
         ~FramebufferObject();
 
         void resize(uint,uint);

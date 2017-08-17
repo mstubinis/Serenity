@@ -10,15 +10,15 @@ using namespace std;
 
 unordered_map<uint,boost::tuple<float,uint,uint,uint,uint>> _populateGBufferTypesInfo(){
     unordered_map<uint,boost::tuple<float,uint,uint,uint,uint>> m;
-                                       //winSizeRatio   //internFormat                          //pxl_components                   //pxl_format
-    m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,              ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
-    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,           ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m[GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,             ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m[GBufferType::Lighting] = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,            ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
-    m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,             ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
-    m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,              ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,             ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::DEPTH_COMPONENT16, ImagePixelFormat::DEPTH_COMPONENT, ImagePixelType::FLOAT,  FramebufferAttatchment::Depth);
+                                       //winSizeRatio   //internFormat                       //pxl_components                         //pxl_format
+    m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  uint(ImageInternalFormat::RGB8),     uint(ImagePixelFormat::RGB),             uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_0));
+    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  uint(ImageInternalFormat::RGBA16F),  uint(ImagePixelFormat::RGBA),            uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_1));
+    m[GBufferType::Misc]     = boost::make_tuple(1.0f,  uint(ImageInternalFormat::RGBA8),    uint(ImagePixelFormat::RGBA),            uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_2));
+    m[GBufferType::Lighting] = boost::make_tuple(1.0f,  uint(ImageInternalFormat::RGB16F),   uint(ImagePixelFormat::RGB),             uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_3));
+    m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  uint(ImageInternalFormat::RGBA8),    uint(ImagePixelFormat::RGBA),            uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_0));
+    m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  uint(ImageInternalFormat::RGB8),     uint(ImagePixelFormat::RGB),             uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_1));
+    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  uint(ImageInternalFormat::RGBA8),    uint(ImagePixelFormat::RGBA),            uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Color_2));
+    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  uint(ImageInternalFormat::Depth16),  uint(ImagePixelFormat::DEPTH_COMPONENT), uint(ImagePixelType::FLOAT),  uint(FramebufferAttatchment::Depth));
     
     return m;
 }
@@ -31,7 +31,7 @@ class TextureBuffer::impl final{
         void _init(FramebufferAttatchment::Attatchment attatchment,float divisor,TextureBuffer* super){
             m_BufferAttatchment = attatchment;
             m_Divisor = divisor;
-            _resize(m_Width,m_Height,super);
+			_resize(super->width(),super->height(),super);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
             super->decrementUseCount();
@@ -92,7 +92,9 @@ class GBuffer::impl final{
         }
         void _constructFramebuffer(string n,uint t,uint w,uint h){
             boost::tuple<float,uint,uint,uint,uint>& i = GBUFFER_TYPE_DATA.at(t);
-            TextureBuffer* tbo = new TextureBuffer(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),i.get<0>());
+            TextureBuffer* tbo = new TextureBuffer(n,w,h,
+				ImageInternalFormat::Format(i.get<1>()),ImagePixelFormat::Format(i.get<2>()),
+				ImagePixelType::Type(i.get<3>()),FramebufferAttatchment::Attatchment(i.get<4>()),i.get<0>());
             boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
             m_Buffers.emplace(t,ptr);
         }
@@ -173,7 +175,7 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format if,ImagePixelFormat::Format pf,ImagePixelType::Type pt,FramebufferAttatchment::Attatchment a,float d):Texture(n,w,h,if,pf,pt,GL_TEXTURE_2D,d),m_i(new impl){
+TextureBuffer::TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format _if,ImagePixelFormat::Format pf,ImagePixelType::Type pt,FramebufferAttatchment::Attatchment a,float d):Texture(n,w,h,_if,pf,pt,GL_TEXTURE_2D,d),m_i(new impl){
     m_i->_init(a,d,this);
 }
 TextureBuffer::~TextureBuffer(){

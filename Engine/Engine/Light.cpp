@@ -1014,7 +1014,7 @@ class LightProbe::impl{
             Renderer::bindRBO(m_RBO);
             glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,m_EnvMapSize,m_EnvMapSize); //16 instead of 24?
             glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,m_RBO);
-            Renderer::bindFBO(0);
+            Renderer::unbindFBO();
         }
         void _destruct(){
             //glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapTextureAddress);

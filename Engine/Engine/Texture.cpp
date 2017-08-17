@@ -33,6 +33,7 @@ class Texture::impl final{
 
         void _init(uint w,uint h,float divisor,ImagePixelType::Type pxlType,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
             m_PixelFormat = pxlFormat;
+			m_PixelType = pxlType;
             _baseInit(type,super,n,i,internFormat,genMipMaps);
             m_Width = uint(float(w) * divisor); m_Height = uint(float(h) * divisor);
             super->load();
@@ -85,7 +86,6 @@ class Texture::impl final{
                 for(uint k = 0; k < m_Files.size(); k++){
                     sf::Image i;i.loadFromFile(m_Files[k].c_str());
                     _generateFromImage(i,super);
-                    m_InternalFormat = ImagePixelFormat::RGBA;
                     _buildTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+k,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
                 }
                 super->setFilter(TextureFilter::Linear);
