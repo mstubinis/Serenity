@@ -112,7 +112,6 @@ class Texture::impl final{
                 glDeleteTextures(1,&m_TextureAddress.at(i));
             }
             glBindTexture(m_Type,0);
-            m_Width = m_Height = 0;
             m_MipMapLevels = 0;
             m_Mipmapped = false;
             vector_clear(m_Pixels);
