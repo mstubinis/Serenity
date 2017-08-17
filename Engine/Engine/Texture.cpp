@@ -24,6 +24,7 @@ class Texture::impl final{
         GLuint m_Type;
         uint m_Width, m_Height;
         ImageInternalFormat::Format m_InternalFormat;
+	ImagePixelFormat::Format m_PixelFormat;
         ushort m_MipMapLevels;
         bool m_Mipmapped;
         bool m_IsToBeMipmapped;
@@ -379,3 +380,4 @@ GLuint Texture::type(){ return m_i->m_Type; }
 uint Texture::width(){ return m_i->m_Width; }
 uint Texture::height(){ return m_i->m_Height; }
 ImageInternalFormat::Format Texture::internalFormat(){ return m_i->m_InternalFormat; }
+ImagePixelFormat::Format Texture::pixelFormat(){ return m_i->m_PixelFormat; }
