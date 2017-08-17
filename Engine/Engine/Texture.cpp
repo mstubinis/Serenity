@@ -24,12 +24,16 @@ class Texture::impl final{
         GLuint m_Type;
         uint m_Width, m_Height;
         ImageInternalFormat::Format m_InternalFormat;
-	ImagePixelFormat::Format m_PixelFormat;
+        ImagePixelFormat::Format m_PixelFormat;
         ushort m_MipMapLevels;
         bool m_Mipmapped;
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
+        void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
+            m_PixelFormat = pxlFormat;
+            _init(type,super,name,img,format,genMipMaps);
+        }
         void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,bool genMipMaps){
             vector_clear(m_Pixels);
             m_Width = m_Height = 0;
@@ -50,28 +54,35 @@ class Texture::impl final{
         void _load(Texture* super){
             if(m_TextureAddress.size() == 0)
                 m_TextureAddress.push_back(0); //vector.at(0) will be the default address. at(1) is the colvoluted map address (for cubemap only)
-            
+
             glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
             if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
-                sf::Image i; 
-                i.loadFromFile(m_Files[0].c_str());
+                sf::Image i;i.loadFromFile(m_Files[0].c_str());
                 _generateFromImage(i,super);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
-                sf::Image i;
-                i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
+                sf::Image i;i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
                 _generateFromImage(i,super);
                 glBindTexture(m_Type,0);
                 _getPixels();
             }
+            else if(m_Files.size() == 1 && m_Files[0] == "FRAMEBUFFER"){//Framebuffer
+                m_Width = w;m_Height = h;
+                glBindTexture(m_Type,m_TextureAddress.at(0));
+                glTexImage2D(m_Type,0,intern,GLsizei(w*divisor),GLsizei(h*divisor),0,format,type,NULL);
+                super->setFilter(TextureFilter::Linear);
+                super->setWrapping(TextureWrap::ClampToEdge);
+                glBindTexture(m_Type,0);
+                glFramebufferTexture2D(GL_FRAMEBUFFER,attatchment,m_Type,m_TextureAddress.at(0),0);
+            }
             else if(m_Files.size() > 1){//cubemap
-                for(uint i = 0; i < m_Files.size(); i++){
-                    sf::Image img;
-                    img.loadFromFile(m_Files[i].c_str());
-                    _generateFromImage(img,super);
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, ImageInternalFormat::at(m_InternalFormat) ,img.getSize().x, img.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,img.getPixelsPtr());
+                for(uint k = 0; k < m_Files.size(); k++){
+                    sf::Image i;i.loadFromFile(m_Files[k].c_str());
+                    _generateFromImage(i,super);
+                    m_InternalFormat = ImagePixelFormat::RGBA;
+                    _buildTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+k,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
                 }
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
@@ -82,6 +93,9 @@ class Texture::impl final{
             if(m_IsToBeMipmapped){
                 _generateMipmaps();
             }
+        }
+        void _buildTexImage2D(GLuint targetType,GLuint internal,sf::Image& img, GLuint pxlFormat,GLuint pxlType){
+            glTexImage2D(targetType,0,internal,img.getSize().x,img.getSize().y,0,pxlFormat,pxlType,img.getPixelsPtr());
         }
         void _unload(){
             for(uint i = 0; i < m_TextureAddress.size(); i++){
@@ -94,28 +108,24 @@ class Texture::impl final{
             vector_clear(m_Pixels);
             vector_clear(m_TextureAddress);
         }
-        void _generateFromImage(sf::Image& img,Texture* super){
+        void _generateFromImage(sf::Image& i,Texture* super){
             if(m_InternalFormat == ImageInternalFormat::RGBA8 || m_InternalFormat == ImageInternalFormat::SRGB8_ALPHA8){
-                glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),img.getSize().x,img.getSize().y,0,GL_RGBA,GL_UNSIGNED_BYTE,img.getPixelsPtr());
+                m_PixelFormat = ImagePixelFormat::RGBA;
             }
             else if(m_InternalFormat == ImageInternalFormat::RGB8 || m_InternalFormat == ImageInternalFormat::SRGB8){
-                glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),img.getSize().x,img.getSize().y,0,GL_RGB,GL_UNSIGNED_BYTE,img.getPixelsPtr());
+                m_PixelFormat = ImagePixelFormat::RGB;
             }
+            _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
             super->setFilter(TextureFilter::Linear);
-            m_Width = img.getSize().x;
-            m_Height = img.getSize().y;
+            m_Width = i.getSize().x;
+            m_Height = i.getSize().y;
         }
         uchar* _getPixels(){
             if(m_Pixels.size() == 0){
                 m_Pixels.resize(m_Width*m_Height*4);
                 glBindTexture(m_Type,m_TextureAddress.at(0));
                 glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-                if(m_InternalFormat == ImageInternalFormat::RGBA8 || m_InternalFormat == ImageInternalFormat::SRGB8_ALPHA8){
-                    glGetTexImage(m_Type,0,GL_RGBA,GL_UNSIGNED_BYTE,&m_Pixels[0]);
-                }
-                else{
-                    glGetTexImage(m_Type,0,GL_RGB,GL_UNSIGNED_BYTE,&m_Pixels[0]);
-                }
+                glGetTexImage(m_Type,0,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE,&m_Pixels[0]);
                 glBindTexture(m_Type,0);
             }
             return &m_Pixels[0];
@@ -160,10 +170,10 @@ class Texture::impl final{
             }
       }
 };
-Texture::Texture(string n,uint w, uint h,GLuint t,ImageInternalFormat::Format internalFormat):m_i(new impl){ //framebuffer
+Texture::Texture(string n,uint w, uint h,GLuint t,ImageInternalFormat::Format internalFormat,ImagePixelFormat::Format pxlFormat):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(t,this,n,i,internalFormat,false);
+    m_i->_init(t,this,n,i,internalFormat,pxlFormat,false);
 }
 Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
