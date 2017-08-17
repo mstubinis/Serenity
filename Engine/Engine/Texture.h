@@ -29,8 +29,7 @@ class TextureFilter{public: enum Filter{
 };};
 class Texture: public EngineResource{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Texture(std::string name,uint w, uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,GLuint = GL_TEXTURE_2D,float divisor=1.0f);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D,bool = true,ImageInternalFormat::Format format = ImageInternalFormat::SRGB8_ALPHA8);
@@ -51,30 +50,30 @@ class Texture: public EngineResource{
         ImageInternalFormat::Format internalFormat();
         ImagePixelFormat::Format pixelFormat();
         ImagePixelType::Type pixelType();
-    
+
         virtual void load();
         virtual void unload();
-    
+
         void setXWrapping(TextureWrap::Wrap);
         void setYWrapping(TextureWrap::Wrap);
         void setZWrapping(TextureWrap::Wrap);
         void setWrapping(TextureWrap::Wrap);
-    
+
         void setMinFilter(TextureFilter::Filter);
         void setMaxFilter(TextureFilter::Filter);
         void setFilter(TextureFilter::Filter);
-    
+
         static void setXWrapping(GLuint type,TextureWrap::Wrap);
         static void setYWrapping(GLuint type,TextureWrap::Wrap);
         static void setZWrapping(GLuint type,TextureWrap::Wrap);
         static void setWrapping(GLuint type,TextureWrap::Wrap);
-    
+
         static void setMinFilter(GLuint type,TextureFilter::Filter);
         static void setMaxFilter(GLuint type,TextureFilter::Filter);
         static void setFilter(GLuint type,TextureFilter::Filter);
-    
+
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
-    
+
         void genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,uint brdfSize);
 };
 #endif
