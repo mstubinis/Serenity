@@ -56,7 +56,6 @@ class GBuffer::impl final{
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-            //Renderer::unbindRBO(); //was moved below
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
             _constructFramebuffer("BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
@@ -77,7 +76,6 @@ class GBuffer::impl final{
             Renderer::bindFBO(m_FBO_bloom);
             Renderer::bindRBO(m_RBO_bloom);// Bind the depth buffer
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
-            //Renderer::unbindRBO(); //was moved below
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO_bloom);
 
             _constructFramebuffer("BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
@@ -92,10 +90,8 @@ class GBuffer::impl final{
             return true;
         }
         void _constructFramebuffer(string n,uint t,uint w,uint h){
-            boost::tuple<float,GLuint,GLuint,GLuint,GLuint>& i = GBUFFER_TYPE_DATA.at(t);
-            //TextureBuffer* tbo = nullptr;
-            //tbo = new TextureBuffer(n,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),w,h,i.get<0>());
-            TextureBuffer* tbo = new TextureBuffer(n,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),w,h,i.get<0>());
+            boost::tuple<float,uint,uint,uint,GLuint>& i = GBUFFER_TYPE_DATA.at(t);
+            TextureBuffer* tbo = new TextureBuffer(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),i.get<0>());
             boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
             m_Buffers.emplace(t,ptr);
         }
@@ -179,8 +175,8 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-TextureBuffer::TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format internalFormat,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint attatchment,GLuint t,float divisor):Texture(name,w,hinternalFormat,pxlFormat,pxlType,attatchment,t,divisor),m_i(new impl){
-    m_i->_init(attatchment,divisor,this);
+TextureBuffer::TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Format if,ImagePixelFormat::Format pf,ImagePixelType::Type pt,GLuint a,float d):Texture(n,w,h,if,pf,pt,a,GL_TEXTURE_2D,d),m_i(new impl){
+    m_i->_init(a,d,this);
 }
 TextureBuffer::~TextureBuffer(){
 }
