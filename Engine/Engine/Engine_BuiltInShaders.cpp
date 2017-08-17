@@ -736,7 +736,37 @@ Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersMa
     "    gl_FragDepth = texture2D(gDepthMap,uv);\n"
     "}";
 #pragma endregion
-
+/*
+"\n"
+"void main(void){\n"
+"    vec3 fragPos = reconstruct_world_pos(uv,nearz,farz);\n"
+"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
+"    vec3 randomVec = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xyz);\n"
+"    // create TBN change-of-basis matrix: from tangent-space to view-space\n"
+"    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));\n"
+"    vec3 bitangent = cross(normal, tangent);\n"
+"    mat3 TBN = mat3(tangent, bitangent, normal);\n"
+"    float occlusion = 0.0;\n"
+"    for(int i = 0; i < Samples; ++i){\n"
+"        // get sample position\n"
+"        vec3 sample = invP * TBN * poisson[i]; // from tangent to view-space to (hopefully) world space\n"
+"        sample = fragPos + sample * SSAOInfo.x;\n"
+"        // project sample position (to sample texture) (to get position on screen/texture)\n"
+"        vec4 offset = vec4(sample, 1.0);\n"
+"        offset = Projection * offset; // from view to clip-space\n"
+"        offset.xyz /= offset.w; // perspective divide\n"
+"        offset.xyz = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0\n"
+"        // get sample depth\n"
+"        float sampleDepth = texture2D(gDepthMap, offset.xy).x;// get depth value of kernel sample (might have to linearize this depth)\n"
+"        // range check & accumulate\n"
+"        float rangeCheck = smoothstep(0.0, 1.0, SSAOInfo.x / abs(fragPos.z - sampleDepth));\n"
+"        occlusion += (sampleDepth >= sample.z + SSAOInfo.z ? 1.0 : 0.0) * rangeCheck;\n"         
+"    }\n"
+"    occlusion = 1.0 - (occlusion / Samples);\n"
+"    gl_FragColor.a = occlusion;\n"
+"}\n"
+"\n";
+*/	
 #pragma region SSAO
 Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -759,6 +789,7 @@ Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManageme
     "\n"
     "uniform vec2 poisson[32];\n"
     "\n"
+    "uniform mat4 Projection;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
     "uniform float nearz;\n"
