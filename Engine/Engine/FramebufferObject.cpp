@@ -61,6 +61,24 @@ FramebufferObject* FramebufferObjectAttatchment::fbo(){ return m_i->m_FBO; }
 uint FramebufferObjectAttatchment::attatchment(){ return m_i->m_GL_Attatchment; }
 void FramebufferObjectAttatchment::resize(){ m_i->_resize(); }
 
+class FramebufferTexture::impl{
+    public:
+        FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
+        ~FramebufferTexture();
+    
+        void resize();
+        GLuint address();
+};
+FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
+    
+}
+FramebufferTexture::~FramebufferTexture(){
+}
+void FramebufferTexture::resize(){
+}
+GLuint FramebufferTexture::address(){
+}
+
 class RenderbufferObject::impl{
     public:
         GLuint m_RBO;
