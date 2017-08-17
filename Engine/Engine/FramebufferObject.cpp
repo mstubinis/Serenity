@@ -10,18 +10,13 @@
 using namespace Engine;
 using namespace std;
 
-
 struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
     FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
     Renderer::setViewport(0,0,fbo->width(),fbo->height());
     Renderer::bindFBO(fbo);
-    
-    
-    
+
 }};
 struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
-
-
 
     Renderer::unbindFBO();
     Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -43,7 +38,6 @@ class FramebufferObjectAttatchment::impl{
             m_InternalFormat = t->internalFormat();
         }
         void _destruct(FramebufferObjectAttatchment* super){
-
         }
         void _resize(FramebufferObjectAttatchment* super){
         }
