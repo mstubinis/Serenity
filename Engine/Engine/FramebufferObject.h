@@ -13,8 +13,7 @@ typedef unsigned int uint;
 
 class FramebufferObjectAttatchment{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
         FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
@@ -29,32 +28,28 @@ class FramebufferObjectAttatchment{
 };
 class FramebufferTexture{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
         ~FramebufferTexture();
 
-        FramebufferObject* fbo();
         void resize();
         GLuint address();
 };
 class RenderbufferObject: public FramebufferObjectAttatchment{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         RenderbufferObject(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
         ~RenderbufferObject();
 
-        GLuint address();
         void resize();
+        GLuint address();
 };
 
 class FramebufferObject: public BindableResource{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         FramebufferObject(std::string name,uint width,uint height);
         ~FramebufferObject();
