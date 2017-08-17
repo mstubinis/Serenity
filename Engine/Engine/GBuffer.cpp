@@ -8,21 +8,21 @@
 using namespace Engine;
 using namespace std;
 
-unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> _populateGBufferTypesInfo(){
-    unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> m;
-                                       //winSizeRatio   //internFormat        //pxl_components    //pxl_format
-    m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  GL_RGB8,              GL_RGB,             GL_FLOAT,  GL_COLOR_ATTACHMENT0);
-    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  GL_RGBA16F,           GL_RGBA,            GL_FLOAT,  GL_COLOR_ATTACHMENT1);
-    m[GBufferType::Misc]     = boost::make_tuple(1.0f,  GL_RGBA8,             GL_RGBA,            GL_FLOAT,  GL_COLOR_ATTACHMENT2);
-    m[GBufferType::Lighting] = boost::make_tuple(1.0f,  GL_RGB16F,            GL_RGB,             GL_FLOAT,  GL_COLOR_ATTACHMENT3);
-    m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  GL_RGBA8,             GL_RGBA,            GL_FLOAT,  GL_COLOR_ATTACHMENT0);
-    m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  GL_RGB8,              GL_RGB,             GL_FLOAT,  GL_COLOR_ATTACHMENT1);
-    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  GL_RGBA8,             GL_RGBA,            GL_FLOAT,  GL_COLOR_ATTACHMENT2);
-    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_FLOAT,  GL_DEPTH_ATTACHMENT);
+unordered_map<uint,boost::tuple<float,uint,uint,uint,GLuint>> _populateGBufferTypesInfo(){
+    unordered_map<uint,boost::tuple<float,uint,uint,uint,GLuint>> m;
+                                       //winSizeRatio   //internFormat                          //pxl_components                   //pxl_format
+    m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,              ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT0);
+    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,           ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT1);
+    m[GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,             ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT2);
+    m[GBufferType::Lighting] = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,            ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT3);
+    m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,             ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT0);
+    m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,              ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT1);
+    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,             ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  GL_COLOR_ATTACHMENT2);
+    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::DEPTH_COMPONENT16, ImagePixelFormat::DEPTH_COMPONENT, ImagePixelType::FLOAT,  GL_DEPTH_ATTACHMENT);
     
     return m;
 }
-unordered_map<uint,boost::tuple<float,GLuint,GLuint,GLuint,GLuint>> GBUFFER_TYPE_DATA = _populateGBufferTypesInfo();
+unordered_map<uint,boost::tuple<float,uint,uint,uint,GLuint>> GBUFFER_TYPE_DATA = _populateGBufferTypesInfo();
 
 class TextureBuffer::impl final{
     public:
@@ -34,7 +34,9 @@ class TextureBuffer::impl final{
             _resize(m_Width,m_Height,super);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
-            super->_constructAsFramebuffer(width,height,m_Divisor,m_BufferAttatchment);
+            super->decrementUseCount();
+            super->unload();
+            super->load();
         }
 };
 class GBuffer::impl final{
