@@ -141,8 +141,7 @@ class Material final: public BindableResource{
         static void setAllSpecularModels(SpecularModel::Model);
         static std::vector<glm::vec4> m_MaterialProperities;
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="",std::string shader = "");
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
