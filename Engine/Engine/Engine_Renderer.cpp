@@ -254,26 +254,26 @@ void Renderer::unbindTextureCubemap(uint s){
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 }
 void Detail::RenderManagement::init(){
-    uniform_real_distribution<float> randFloats(0.0f,1.0f);//random floats between 0.0-1.0
-    uniform_real_distribution<float> randFloats1(0.0f,1.0f);
+    uniform_real_distribution<float> randFloats(0.0f,1.0f);
     default_random_engine gen;
-    vector<glm::vec2> kernels;
+    vector<glm::vec3> kernels;
     for(uint i = 0; i < RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT; ++i){
-        glm::vec2 sample(randFloats(gen)*2.0f-1.0f,randFloats(gen)*2.0f-1.0f);
+        glm::vec3 sample(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,randFloats(gen));
         sample = glm::normalize(sample);
         sample *= randFloats(gen);
         float scale = float(i) / float(RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+        // scale samples s.t. they're more aligned to center of kernel
         float a = 0.1f; float b = 1.0f; float f = scale * scale;
-        scale = a + f * (b - a); //basic lerp
+        scale = a + f * (b - a); //basic lerp   
         sample *= scale;
         kernels.push_back(sample);
     }
     copy(kernels.begin(),kernels.end(),RendererInfo::SSAOInfo::ssao_Kernels);
     vector<glm::vec3> ssaoNoise;
     for(uint i = 0; i < RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE*RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE; i++){
-        glm::vec3 noise(randFloats1(gen)*2.0-1.0,randFloats1(gen)*2.0-1.0,0.0f); 
+        glm::vec3 noise(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f); 
         ssaoNoise.push_back(noise);
-    } 
+    }
     glGenTextures(1, &RendererInfo::SSAOInfo::ssao_noise_texture);
     glBindTexture(GL_TEXTURE_2D, RendererInfo::SSAOInfo::ssao_noise_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, RendererInfo::SSAOInfo::SSAO_NORMALMAP_SIZE, 
