@@ -26,9 +26,9 @@ unordered_map<uint,boost::tuple<float,uint,uint,uint,uint>> GBUFFER_TYPE_DATA = 
 
 class TextureBuffer::impl final{
     public:
-        GLuint m_BufferAttatchment;
+        FramebufferAttatchment::Attatchment m_BufferAttatchment;
         float m_Divisor;
-        void _init(GLuint attatchment,float divisor,TextureBuffer* super){
+        void _init(FramebufferAttatchment::Attatchment attatchment,float divisor,TextureBuffer* super){
             m_BufferAttatchment = attatchment;
             m_Divisor = divisor;
             _resize(m_Width,m_Height,super);
@@ -37,7 +37,7 @@ class TextureBuffer::impl final{
             super->decrementUseCount();
             super->unload();
             super->load();
-            glFramebufferTexture2D(GL_FRAMEBUFFER,m_BufferAttatchment,super->type(),super->address(),0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::at(m_BufferAttatchment),super->type(),super->address(),0);
         }
 };
 class GBuffer::impl final{
@@ -91,7 +91,7 @@ class GBuffer::impl final{
             return true;
         }
         void _constructFramebuffer(string n,uint t,uint w,uint h){
-            boost::tuple<float,uint,uint,uint,GLuint>& i = GBUFFER_TYPE_DATA.at(t);
+            boost::tuple<float,uint,uint,uint,uint>& i = GBUFFER_TYPE_DATA.at(t);
             TextureBuffer* tbo = new TextureBuffer(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),i.get<4>(),i.get<0>());
             boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
             m_Buffers.emplace(t,ptr);
