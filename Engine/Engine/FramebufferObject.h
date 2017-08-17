@@ -35,6 +35,7 @@ class FramebufferTexture{
 
         void resize();
         GLuint address();
+        Texture* texture();
 };
 class RenderbufferObject: public FramebufferObjectAttatchment{
     private:
