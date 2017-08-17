@@ -32,7 +32,7 @@ class Texture: public EngineResource{
         class impl;
         std::unique_ptr<impl> m_i;
     public:
-        Texture(std::string name,uint w, uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,GLuint attatchment,GLuint = GL_TEXTURE_2D,float divisor=1.0f);
+        Texture(std::string name,uint w, uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,GLuint = GL_TEXTURE_2D,float divisor=1.0f);
         Texture(std::string file,std::string name = "",GLuint = GL_TEXTURE_2D,bool = true,ImageInternalFormat::Format format = ImageInternalFormat::SRGB8_ALPHA8);
         Texture(sf::Image&,std::string name = "",GLuint = GL_TEXTURE_2D,bool = true,ImageInternalFormat::Format format = ImageInternalFormat::SRGB8_ALPHA8);
         Texture(std::string file[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP,bool = true,ImageInternalFormat::Format format = ImageInternalFormat::SRGB8_ALPHA8);
