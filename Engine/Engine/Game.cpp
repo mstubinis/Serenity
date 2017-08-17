@@ -32,8 +32,8 @@ void Game::initResources(){
     Resources::getWindow()->setIcon("data/Textures/icon.png");
 
     Resources::addShaderProgram("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderRenderPass::Geometry);
-	Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderRenderPass::None);
-	Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderRenderPass::None);
+    Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderRenderPass::None);
+    Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderRenderPass::None);
 
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
@@ -81,7 +81,7 @@ void Game::initLogic(){
     new SolarSystem("Sol","data/Systems/Sol.txt");
     //new SolarSystem("Sol","");
     new CapsuleSpace();
-    
+
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 
@@ -107,8 +107,8 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC); }
     if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD); }
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED); }
-	if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
-	if(Events::Keyboard::isKeyDownOnce("f11")){ Renderer::Settings::enableDrawPhysicsInfo(!Renderer::Detail::RendererInfo::GeneralInfo::draw_physics_debug); }
+    if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
+    if(Events::Keyboard::isKeyDownOnce("f11")){ Renderer::Settings::enableDrawPhysicsInfo(!Renderer::Detail::RendererInfo::GeneralInfo::draw_physics_debug); }
 
     if(Events::Keyboard::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
@@ -124,16 +124,16 @@ void Game::update(float dt){
     }
 
     if(Events::Keyboard::isKeyDown("n")){
-        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.07f);
+        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
-        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.07f);
+        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
     }
     if(Events::Keyboard::isKeyDown("v")){
-        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.07f);
+        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
-        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.07f);
+        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
     }
     m_HUD->update(dt);
 }
