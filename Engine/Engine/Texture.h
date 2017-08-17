@@ -48,8 +48,9 @@ class Texture: public EngineResource{
         ushort mipmapLevels();
         bool mipmapped();
 
-		ImageInternalFormat::Format internalFormat();
-
+        ImageInternalFormat::Format internalFormat();
+        ImagePixelFormat::Format pixelFormat();
+    
         virtual void load();
         virtual void unload();
     
