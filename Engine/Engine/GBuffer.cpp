@@ -179,7 +179,7 @@ TextureBuffer::TextureBuffer(std::string n,uint w,uint h,ImageInternalFormat::Fo
 TextureBuffer::~TextureBuffer(){
 }
 const float TextureBuffer::divisor() const{ return m_i->m_Divisor; }
-const int TextureBuffer::attatchment() const{ return m_i->m_BufferAttatchment; }
+const int TextureBuffer::attatchment() const{ return FramebufferAttatchment::at(m_i->m_BufferAttatchment); }
 GBuffer::GBuffer(uint width,uint height):m_i(new impl){ 
     m_i->_init(width,height);
 }
