@@ -53,6 +53,31 @@ unordered_map<uint,GLuint> _populateImageFormatMap(){
     
     return m;
 }
+unordered_map<uint,GLuint> _populateImagePixelTypeMap(){
+    unordered_map<uint,GLuint> m;
+
+    m.emplace(uint(ImagePixelType::UNSIGNED_BYTE),GL_UNSIGNED_BYTE);
+    m.emplace(uint(ImagePixelType::BYTE),GL_BYTE);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT),GL_UNSIGNED_SHORT);
+    m.emplace(uint(ImagePixelType::SHORT),GL_SHORT);
+    m.emplace(uint(ImagePixelType::UNSIGNED_INT),GL_UNSIGNED_INT);
+    m.emplace(uint(ImagePixelType::INT),GL_INT);
+    m.emplace(uint(ImagePixelType::FLOAT),GL_FLOAT);
+    m.emplace(uint(ImagePixelType::UNSIGNED_BYTE_3_3_2),GL_UNSIGNED_BYTE_3_3_2);
+    m.emplace(uint(ImagePixelType::UNSIGNED_BYTE_2_3_3_REV),GL_UNSIGNED_BYTE_2_3_3_REV);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT_5_6_5),GL_UNSIGNED_SHORT_5_6_5);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT_5_6_5_REV),GL_UNSIGNED_SHORT_5_6_5_REV);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT_4_4_4_4),GL_UNSIGNED_SHORT_4_4_4_4);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT_4_4_4_4_REV),GL_UNSIGNED_SHORT_4_4_4_4_REV);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT_5_5_5_1),GL_UNSIGNED_SHORT_5_5_5_1);
+    m.emplace(uint(ImagePixelType::UNSIGNED_SHORT_1_5_5_5_REV),GL_UNSIGNED_SHORT_1_5_5_5_REV);
+    m.emplace(uint(ImagePixelType::UNSIGNED_INT_8_8_8_8),GL_UNSIGNED_INT_8_8_8_8);
+    m.emplace(uint(ImagePixelType::UNSIGNED_INT_8_8_8_8_REV),GL_UNSIGNED_INT_8_8_8_8_REV);
+    m.emplace(uint(ImagePixelType::UNSIGNED_INT_10_10_10_2),GL_UNSIGNED_INT_10_10_10_2);
+    m.emplace(uint(ImagePixelType::UNSIGNED_INT_2_10_10_10_REV),GL_UNSIGNED_INT_2_10_10_10_REV);
+
+    return m;
+}
 unordered_map<uint,GLuint> _populateImagePixelFormatMap(){
     unordered_map<uint,GLuint> m;
 
@@ -93,4 +118,5 @@ unordered_map<uint,GLuint> _populateGLAttatchmentMap(){
 }
 unordered_map<uint,GLuint> ImageInternalFormat::IMAGE_INTERNAL_FORMAT_MAP = _populateImageFormatMap();
 unordered_map<uint,GLuint> ImagePixelFormat::IMAGE_PIXEL_FORMAT_MAP = _populateImagePixelFormatMap();
+unordered_map<uint,GLuint> ImagePixelType::IMAGE_PIXEL_TYPE_MAP = _populateImagePixelTypeMap();
 unordered_map<uint,GLuint> FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP = _populateGLAttatchmentMap();
