@@ -63,21 +63,25 @@ void FramebufferObjectAttatchment::resize(){ m_i->_resize(); }
 
 class FramebufferTexture::impl{
     public:
-        FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
-        ~FramebufferTexture();
-    
-        void resize();
-        GLuint address();
+        Texture* m_Texture;
+
+        void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
+            m_Texture = t;
+        }
+        void _destruct(){
+        }
+        void _resize(){
+        }
 };
-FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
-    
+FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t):FramebufferObjectAttatchment(_fbo,a,t),m_i(new impl){
+    m_i->_init(this,_fbo,a,t);
 }
 FramebufferTexture::~FramebufferTexture(){
+    m_i->_destruct();
 }
-void FramebufferTexture::resize(){
-}
-GLuint FramebufferTexture::address(){
-}
+void FramebufferTexture::resize(){ m_i->_resize(); }
+GLuint FramebufferTexture::address(){ return m_i->m_Texture->address(); }
+Texture* FramebufferTexture::texture(){ return m_i->m_Texture; }
 
 class RenderbufferObject::impl{
     public:
