@@ -68,7 +68,7 @@ bool Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
 uint Detail::RendererInfo::SSAOInfo::ssao_samples = 16;
 float Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
 float Detail::RendererInfo::SSAOInfo::ssao_scale = 0.1f;
-float Detail::RendererInfo::SSAOInfo::ssao_intensity = 5.0f;
+float Detail::RendererInfo::SSAOInfo::ssao_intensity = 1.0f;
 float Detail::RendererInfo::SSAOInfo::ssao_bias = 0.495f;
 float Detail::RendererInfo::SSAOInfo::ssao_radius = 0.5f;
 glm::vec2 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
