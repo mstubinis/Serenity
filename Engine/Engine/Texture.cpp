@@ -25,16 +25,23 @@ class Texture::impl final{
         uint m_Width, m_Height;
         ImageInternalFormat::Format m_InternalFormat;
         ImagePixelFormat::Format m_PixelFormat;
+        ImagePixelType::Type m_PixelType;
         ushort m_MipMapLevels;
         bool m_Mipmapped;
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-        void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
+        void _init(uint w,uint h,float divisor,GLuint pxlType,GLuint attatchment,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
             m_PixelFormat = pxlFormat;
-            _init(type,super,name,img,format,genMipMaps);
+            _baseInit(type,super,n,i,internFormat,genMipMaps);
+            m_Width = uint(float(w) * divisor); m_Height = uint(float(h) * divisor);
+            super->load();
         }
         void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,bool genMipMaps){
+            _baseInit(type,super,name,img,format,genMipMaps);
+            super->load();
+        }
+        void _baseInit(GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,bool genMipMaps){
             vector_clear(m_Pixels);
             m_Width = m_Height = 0;
             m_Mipmapped = false;
@@ -42,14 +49,13 @@ class Texture::impl final{
             m_MinFilter = GL_LINEAR;
             m_MipMapLevels = 0;
             m_Type = type;
-            m_InternalFormat = format;
-            if(img.getSize().x > 0 && img.getSize().y > 0){
-                vector<uchar> p(img.getPixelsPtr(),img.getPixelsPtr() + (img.getSize().x * img.getSize().y * 4));
+            m_InternalFormat = internFormat;
+            if(i.getSize().x > 0 && i.getSize().y > 0){
+                vector<uchar> p(i.getPixelsPtr(),i.getPixelsPtr()+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
-            super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,name));
+            super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,n));
             Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,super->name(),boost::shared_ptr<Texture>(super));
-            super->load();
         }
         void _load(Texture* super){
             if(m_TextureAddress.size() == 0)
@@ -69,9 +75,10 @@ class Texture::impl final{
                 _getPixels();
             }
             else if(m_Files.size() == 1 && m_Files[0] == "FRAMEBUFFER"){//Framebuffer
-                m_Width = w;m_Height = h;
                 glBindTexture(m_Type,m_TextureAddress.at(0));
-                glTexImage2D(m_Type,0,intern,GLsizei(w*divisor),GLsizei(h*divisor),0,format,type,NULL);
+
+                _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
+                
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
                 glBindTexture(m_Type,0);
@@ -97,8 +104,8 @@ class Texture::impl final{
         void _buildTexImage2D(GLuint targetType,GLuint internal,sf::Image& img, GLuint pxlFormat,GLuint pxlType,float divisor=1.0f){
             glTexImage2D(targetType,0,internal,GLsizei(img.getSize().x*divisor),GLsizei(img.getSize().y*divisor),0,pxlFormat,pxlType,img.getPixelsPtr());
         }
-        void _buildTexImage2D(GLuint targetType,GLuint internal,GLsizei w,GLsizei h, GLuint pxlFormat,GLuint pxlType,float divisor){
-            glTexImage2D(targetType,0,internal,GLsizei(w*divisor),GLsizei(h*divisor),0,pxlFormat,pxlType,NULL);
+        void _buildTexImage2D(GLuint targetType,GLuint internal,GLsizei w,GLsizei h, GLuint pxlFormat,GLuint pxlType){
+            glTexImage2D(targetType,0,internal,w,h,0,pxlFormat,pxlType,NULL);
         }
         void _unload(){
             for(uint i = 0; i < m_TextureAddress.size(); i++){
@@ -173,10 +180,10 @@ class Texture::impl final{
             }
       }
 };
-Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,GLuint t):m_i(new impl){ //framebuffer
+Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint attatchment,GLuint t,float divisor):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
     sf::Image i;
-    m_i->_init(t,this,n,i,internal,pxlFormat,false);
+    m_i->_init(w,h,divisor,type,attatchment,t,this,n,i,internal,pxlFormat,false);
 }
 Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
@@ -201,15 +208,6 @@ Texture::~Texture(){
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
     if(m_i->m_Files.size() != 1)return;
     Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
-}
-void Texture::_constructAsFramebuffer(uint w,uint h,float divisor,int intern,int format,int type,int attatchment){
-    m_i->m_Width = w; m_i->m_Height = h;
-    glBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(0));
-    m_i->_buildTexImage2D(m_i->m_Type,intern,GLsizei(w),GLsizei(h),format,type,divisor);
-    this->setFilter(TextureFilter::Linear);
-    this->setWrapping(TextureWrap::ClampToEdge);
-    glBindTexture(m_i->m_Type,0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,attatchment,m_i->m_Type,m_i->m_TextureAddress.at(0),0);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }
