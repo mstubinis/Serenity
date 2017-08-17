@@ -135,7 +135,7 @@ class FramebufferObject::impl{
             if(m_Attatchments.count(a)) return;
 
             glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),t->type(),t->address(),0);
-            FramebufferObjectAttatchment* at = new FramebufferObjectAttatchment(super,a,t,t->type(),t->address());
+            FramebufferObjectAttatchment* at = new FramebufferObjectAttatchment(super,a,t);
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
             }
