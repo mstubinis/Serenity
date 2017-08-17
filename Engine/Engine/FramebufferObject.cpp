@@ -45,7 +45,7 @@ class FramebufferObjectAttatchment::impl{
         void _destruct(FramebufferObjectAttatchment* super){
 
         }
-        void _resize(){
+        void _resize(FramebufferObjectAttatchment* super){
         }
 };
 FramebufferObjectAttatchment::FramebufferObjectAttatchment(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i):m_i(new impl){
@@ -59,7 +59,7 @@ uint FramebufferObjectAttatchment::width(){ return m_i->m_FBO->width(); }
 uint FramebufferObjectAttatchment::height(){ return m_i->m_FBO->height(); }
 FramebufferObject* FramebufferObjectAttatchment::fbo(){ return m_i->m_FBO; }
 uint FramebufferObjectAttatchment::attatchment(){ return m_i->m_GL_Attatchment; }
-void FramebufferObjectAttatchment::resize(){ m_i->_resize(); }
+void FramebufferObjectAttatchment::resize(){ m_i->_resize(this); }
 
 class FramebufferTexture::impl{
     public:
@@ -68,18 +68,17 @@ class FramebufferTexture::impl{
         void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
             m_Texture = t;
         }
-        void _destruct(){
+        void _destruct(FramebufferTexture* super){
         }
-        void _resize(){
+        void _resize(FramebufferTexture* super){
+            
         }
 };
 FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t):FramebufferObjectAttatchment(_fbo,a,t),m_i(new impl){
     m_i->_init(this,_fbo,a,t);
 }
-FramebufferTexture::~FramebufferTexture(){
-    m_i->_destruct();
-}
-void FramebufferTexture::resize(){ m_i->_resize(); }
+FramebufferTexture::~FramebufferTexture(){ m_i->_destruct(this); }
+void FramebufferTexture::resize(){ m_i->_resize(this); }
 GLuint FramebufferTexture::address(){ return m_i->m_Texture->address(); }
 Texture* FramebufferTexture::texture(){ return m_i->m_Texture; }
 
@@ -120,18 +119,22 @@ class FramebufferObject::impl{
         uint m_FramebufferWidth;
         uint m_FramebufferHeight;
 
-        void _init(FramebufferObject* super,uint width, uint height){
+        void _baseInit(FramebufferObject* super,uint width, uint height){
             m_FramebufferWidth = width; m_FramebufferHeight = height;
 
             super->setCustomBindFunctor(FramebufferObject::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR);
 
             glGenFramebuffers(1, &m_FBO);
-            //glGenRenderbuffers(1, &m_RBO);
             Renderer::bindFBO(m_FBO);
-            //Renderer::bindRBO(m_RBO);
-            //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-            //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO); 
+        }
+        void _init(FramebufferObject* super,uint width, uint height){
+            _baseInit(super,width,height);
+        }
+        void _init(FramebufferObject* super,uint width, uint height,ImageInternalFormat::Format depthInternalFormat){
+            _baseInit(super,width,height);
+            RenderbufferObject* rbo = new RenderbufferObject(super,FramebufferAttatchment::Depth,depthInternalFormat);
+            _attatchRenderbuffer(super,rbo);
         }
         void _destruct(FramebufferObject* super){
             for(auto attatchment:m_Attatchments){
@@ -141,38 +144,35 @@ class FramebufferObject::impl{
         }
         void _resize(FramebufferObject* super,uint new_width,uint new_height){
             Renderer::bindFBO(m_FBO);
-            //Renderer::bindRBO(m_RBO);
-
             m_FramebufferWidth = new_width; m_FramebufferHeight = new_height;
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, new_width, new_height);
-
             for(auto attatchment:m_Attatchments){
                 attatchment.second->resize();
             }
-
-            //Renderer::unbindRBO();
             Renderer::unbindFBO();
         }
         void _attatchTexture(FramebufferObject* super,Texture* t,FramebufferAttatchment::Attatchment a){
             if(m_Attatchments.count(a)) return;
-
+            Renderer::bindFBO(m_FBO);
             glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),t->type(),t->address(),0);
-            FramebufferObjectAttatchment* at = new FramebufferObjectAttatchment(super,a,t);
+            FramebufferTexture* at = new FramebufferTexture(super,a,t);
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
             }
             m_Attatchments.emplace(a,at);
+            Renderer::unbindFBO();
         }
         void _attatchRenderbuffer(FramebufferObject* super,RenderbufferObject* rbo){
             if(m_Attatchments.count(rbo->attatchment())){ return; }
-
+            Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(rbo);
+            
             glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
             Renderer::unbindRBO();
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
             }
             m_Attatchments.emplace(rbo->attatchment(),rbo);
+            Renderer::unbindFBO();
         }
 };
 FramebufferObjectDefaultBindFunctor FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
@@ -180,6 +180,9 @@ FramebufferObjectDefaultUnbindFunctor FramebufferObject::impl::DEFAULT_UNBIND_FU
 
 FramebufferObject::FramebufferObject(string name,uint w,uint h):BindableResource(name),m_i(new impl){
     m_i->_init(this,w,h);
+}
+FramebufferObject::FramebufferObject(string name,uint w,uint h,ImageInternalFormat::Format depthInternalFormat):BindableResource(name),m_i(new impl){
+    m_i->_init(this,w,h,depthInternalFormat);
 }
 FramebufferObject::~FramebufferObject(){ m_i->_destruct(this); }
 void FramebufferObject::resize(uint w,uint h){ m_i->_resize(this,w,h); }
