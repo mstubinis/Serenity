@@ -364,6 +364,9 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
 
             //we wont average TBN. this is because assimp smoothes the averages for us
             
+            //also note: assimp source: if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ). should be replaced with:
+            // if ( sx * ty == sy * tx ). in their CalcTangentsProcess.cpp file
+            
             //average out TBN. I think this does more harm than good though
             //temp_binormals.at(index) += data.binormals.at(i);
             //temp_tangents.at(index) += data.tangents.at(i);
