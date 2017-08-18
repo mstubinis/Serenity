@@ -11,7 +11,7 @@ class LightType{public: enum Type{
     Point,
     Directional,
     Spot,
-	Rod
+    Rod
 };};
 class LightRange{public:enum Range{
     _7,
@@ -120,20 +120,20 @@ class RodLight: public PointLight{
 };
 class LightProbe: public Camera{
     private:
-		class impl;
-		std::unique_ptr<impl> m_i;
+        class impl;
+        std::unique_ptr<impl> m_i;
     public:
         LightProbe(std::string = "Light Probe", uint envMapWidth = 128,glm::vec3 = glm::vec3(0),Scene* = nullptr);
         ~LightProbe();
-    
+
         void update(float);
         void renderCubemap();
 
-		void attatchTo(Object*);
+        void attatchTo(Object*);
 
-		const GLuint& getEnvMapAddress() const;
-		const GLuint& getEnvMapConvolutionAddress() const;
-		const GLuint& getEnvMapPrefilterAddress() const;
-		const uint getEnvMapSize() const;
+        const GLuint& getEnvMapAddress() const;
+        const GLuint& getEnvMapConvolutionAddress() const;
+        const GLuint& getEnvMapPrefilterAddress() const;
+        const uint getEnvMapSize() const;
 };
 #endif
