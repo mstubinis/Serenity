@@ -992,9 +992,11 @@ class LightProbe::impl{
         GLuint m_EnvMapPrefilterTextureAddress;
         GLuint m_EnvMapConvolutionTextureAddress;
         glm::mat4 m_Views[6];
-
-        void _init(uint envMapSize,LightProbe* super,Scene* scene){
+        bool m_OnlyOnce;
+        bool m_DidFirst;
+        void _init(uint envMapSize,LightProbe* super,bool onlyOnce,Scene* scene){
             m_EnvMapSize = envMapSize;
+            m_OnlyOnce = onlyOnce;
             glm::vec3 pos = super->getPosition();
             Camera* c = Resources::getActiveCamera();
             if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, c->getNear(), c->getFar());
@@ -1039,6 +1041,8 @@ class LightProbe::impl{
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
         }
         void _render(LightProbe* super){
+            if(m_DidFirst == true && m_OnlyOnce == true) return;
+            
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
             uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
@@ -1133,11 +1137,12 @@ class LightProbe::impl{
             Renderer::bindReadFBO(prevReadBuffer);
             Renderer::bindDrawFBO(prevDrawBuffer);
             Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+            m_DidFirst = true;
         }
 };
 
-LightProbe::LightProbe(std::string n, uint envMapSize,glm::vec3 pos,Scene* scene):Camera(n,glm::radians(90.0f),1.0f,0.1f,1000.0f,scene),m_i(new impl){
-    m_i->_init(envMapSize,this,scene);
+LightProbe::LightProbe(std::string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene):Camera(n,glm::radians(90.0f),1.0f,0.1f,1000.0f,scene),m_i(new impl){
+    m_i->_init(envMapSize,this,onlyOnce,scene);
     this->setPosition(pos);
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
