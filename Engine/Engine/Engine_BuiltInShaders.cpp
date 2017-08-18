@@ -1176,12 +1176,12 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    if(materials[index].a == 0.0){//this is lambert\n"
     "    }\n"
     "    else if(materials[index].a == 1.0){//this is oren-nayar\n"
-    "        float thetaR = acos(VdotN);\n"
-    "        float thetaI = acos(NdotL);\n"
-    "        float A = 1.0 - 0.5 * (alpha / (alpha + 0.33));\n"
-    "        float B = 0.45 * (alpha / (alpha + 0.09));\n"
-    "        float gamma = dot(ViewDir - PxlNormal * VdotN, LightDir - PxlNormal * NdotL);\n"
-    "        LightDiffuseColor *= (cos(thetaI)) * (A + (B * max(0.0,cos(gamma)) * sin(max(thetaI,thetaR)) * tan(min(thetaI,thetaR))));\n"
+    "        float LdotV = max(0.0, dot(ViewDir, LightDir));\n"
+    "        float s = LdotV - NdotL * VdotN;\n"
+    "        float t = mix(1.0, max(NdotL, VdotN), step(0.0, s));\n"
+    "        float A = 1.0 + alpha * (LightDataA.y / (alpha + 0.13) + 0.5 / (alpha + 0.33));\n"
+    "        float B = 0.45 * alpha / (alpha + 0.09);\n"
+    "        LightDiffuseColor *= (A + B * s / t) / kPi;\n"//might have to remove divide by pi here
     "    }\n"
     "    else if(materials[index].a == 2.0){//this is ashikhmin-shirley\n"
     "        float s = clamp(smoothness,0.01,0.76);\n" //this lighting model has to have some form of roughness in it to look good. cant be 1.0
@@ -1190,7 +1190,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "        float B = 1.0 - s;\n"
     "        float C = (1.0 - pow((1.0 - (NdotL / 2.0)),5.0));\n"
     "        float D = (1.0 - pow((1.0 - (VdotN / 2.0)),5.0));\n"
-    "        LightDiffuseColor *= A * B * C * D;\n"
+    "        LightDiffuseColor *= (A * B * C * D);\n"
     "        LightDiffuseColor *= kPi;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
     "     }\n"
     "     else if(materials[index].a == 3.0){//this is minneart\n"
