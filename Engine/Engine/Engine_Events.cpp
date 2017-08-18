@@ -308,15 +308,15 @@ bool Mouse::isMouseButtonDownOnce(string str){ return MouseProcessing::_IsMouseB
 
 void Mouse::setMousePosition(float x,float y){ 
     sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
-    Mouse::MouseProcessing::_SetMousePositionInternal(x,y); 
+    Mouse::MouseProcessing::_SetMousePositionInternal(x,y);
 }
 void Mouse::setMousePosition(glm::vec2 pos){ 
     sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
-    Mouse::MouseProcessing::_SetMousePositionInternal(pos.x,pos.y); 
+    Mouse::MouseProcessing::_SetMousePositionInternal(pos.x,pos.y);
 }
 void Mouse::setMousePosition(glm::uvec2 pos){ 
     sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
-    Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y)); 
+    Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y));
 }
 
 bool Keyboard::isKeyDown(string str){ return KeyProcessing::_IsKeyDown(str); }
