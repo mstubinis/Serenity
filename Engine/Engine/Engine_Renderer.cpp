@@ -27,6 +27,8 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
+GLuint Detail::RenderManagement::m_BRDF_LUT_CookTorrance = 0;
+
 float Detail::RendererInfo::GeneralInfo::gamma = 2.2f;
 bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
 bool Detail::RendererInfo::GeneralInfo::depth_test = true;
@@ -86,6 +88,57 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
+
+
+
+void _generateBRDFLUTCookTorrance(uint brdfSize){
+    uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
+    uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
+    
+    GLuint captureFBO; 
+    GLuint captureRBO;
+    glGenFramebuffers(1, &captureFBO);
+    glGenRenderbuffers(1, &captureRBO);
+
+    Renderer::bindFBO(captureFBO);
+    Renderer::bindRBO(captureRBO);
+    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, brdfSize, brdfSize);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+        cout << "Framebuffer completeness in _generateBRDFLUTCookTorrance() is incomplete!" << endl; return;
+    }
+
+    glDeleteTextures(1,&Detail::RenderManagement::m_BRDF_LUT_CookTorrance);
+    glGenTextures(1, &Detail::RenderManagement::m_BRDF_LUT_CookTorrance);
+    glBindTexture(GL_TEXTURE_2D, Detail::RenderManagement::m_BRDF_LUT_CookTorrance);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
+    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Detail::RenderManagement::m_BRDF_LUT_CookTorrance, 0);
+    
+    Renderer::setViewport(0,0,brdfSize,brdfSize);
+    p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
+    Renderer::sendUniform1i("NUM_SAMPLES",256);
+    Renderer::Settings::clear(true,true,false);
+    glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
+    Renderer::Detail::renderFullscreenQuad(brdfSize,brdfSize); //this might have to be winsize x and winsize y
+    cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
+
+    p->unbind();
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    Resources::getWindow()->display(); //prevent opengl & windows timeout
+
+    glDeleteRenderbuffers(1, &captureRBO);
+    glDeleteFramebuffers(1, &captureFBO);
+
+    Renderer::bindReadFBO(prevReadBuffer);
+    Renderer::bindDrawFBO(prevDrawBuffer);
+    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+}
+
+
+
+
 
 void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){
     if(Detail::RendererInfo::GeneralInfo::aa_algorithm != algorithm){
@@ -287,6 +340,8 @@ void Detail::RenderManagement::init(){
     Settings::enableDepthTest(true);
     glDepthFunc(GL_LEQUAL);
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //recommended for specular IBL. but causes HUGE fps drops. investigate this...
+    
+    _generateBRDFLUTCookTorrance(512);
 }
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
@@ -537,7 +592,7 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     if(sky != nullptr && sky->texture()->numAddresses() >= 4){
         bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
         bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-        bindTextureSafe("brdfLUT",sky->texture()->address(3),5,GL_TEXTURE_2D);
+        bindTextureSafe("brdfLUT",Detail::RenderManagement::m_BRDF_LUT_CookTorrance,5,GL_TEXTURE_2D);
     }
     Renderer::Detail::renderFullscreenQuad(fbufferWidth,fbufferHeight);
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
