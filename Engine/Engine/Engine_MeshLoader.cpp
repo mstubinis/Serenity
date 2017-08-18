@@ -13,12 +13,17 @@
 #include <assimp/postprocess.h>
 
 #include <glm/mat4x4.hpp>
+#include <math.h>
 
 using namespace Engine::Resources;
 using namespace std;
 
 bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
-
+bool is_special_float(float f){
+    if(f != f) return true;
+    if(isinf(f)) return true;
+    return false;
+}
 
 void MeshLoader::load(Mesh* mesh,ImportedMeshData& data,string file){	
     MeshLoader::Detail::MeshLoadingManagement::_load(mesh,data,file);
@@ -284,32 +289,62 @@ void MeshLoader::Detail::MeshLoadingManagement::_loadDataIntoTriangles(ImportedM
 void MeshLoader::Detail::MeshLoadingManagement::_calculateTBNAssimp(ImportedMeshData& data){
     if(data.normals.size() == 0) return;
     for(uint i=0; i < data.points.size(); i+=3){
-        glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];
-        glm::vec3 deltaPos2 = data.points[i + 2] - data.points[i + 0];
-
-        glm::vec2 deltaUV1 = data.uvs[i + 1] - data.uvs[i + 0];
-        glm::vec2 deltaUV2 = data.uvs[i + 2] - data.uvs[i + 0];
-
-        float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-        glm::vec3 tangent = r * (deltaUV2.y * deltaPos1 - deltaUV1.y * deltaPos2);
-        glm::vec3 bitangent = r * (deltaUV1.x * deltaPos2 - deltaUV2.x * deltaPos1);
-        tangent = glm::normalize(tangent); bitangent = glm::normalize(bitangent);
+        uint p0 = i + 0; uint p1 = i + 1; uint p2 = i + 2;
         
-        glm::vec3 t1 = tangent; glm::vec3 t2 = tangent; glm::vec3 t3 = tangent;
-        glm::vec3 b1 = bitangent; glm::vec3 b2 = bitangent; glm::vec3 b3 = bitangent;
-        //do we even need these next 6 lines?
-        t1 = glm::normalize(tangent - data.normals[i + 0] * glm::dot(data.normals[i + 0], tangent));
-        t2 = glm::normalize(tangent - data.normals[i + 1] * glm::dot(data.normals[i + 1], tangent));
-        t3 = glm::normalize(tangent - data.normals[i + 2] * glm::dot(data.normals[i + 2], tangent));
+        glm::vec3 v = data.points[p1] - data.points[p0];
+        glm::vec3 w = data.points[p2] - data.points[p0];
+        
+        // texture offset p1->p2 and p1->p3
+        float sx = data.uvs[p1].x - data.uvs[p0].x;
+        float sy = data.uvs[p1].y - data.uvs[p0].y;
+        float tx = data.uvs[p2].x - data.uvs[p0].xf
+        float ty = data.uvs[p2].y - data.uvs[p0].y;
+        
+        float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
+        // when t1, t2, t3 in same position in UV space, just use default UV direction.
+        //if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ) {
+        if ( sx * ty == sy * tx ){
+            sx = 0.0; sy = 1.0;
+            tx = 1.0; ty = 0.0;
+        }
+        // tangent points in the direction where to positive X axis of the texture coord's would point in model space
+        // bitangent's points along the positive Y axis of the texture coord's, respectively
+        glm::vec3 tangent; glm::vec3 bitangent;
+        tangent.x = (w.x * sy - v.x * ty) * dirCorrection;
+        tangent.y = (w.y * sy - v.y * ty) * dirCorrection;
+        tangent.z = (w.z * sy - v.z * ty) * dirCorrection;
+        bitangent.x = (w.x * sx - v.x * tx) * dirCorrection;
+        bitangent.y = (w.y * sx - v.y * tx) * dirCorrection;
+        bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
+        
+        // store for every vertex of that face
+        for( uint b = 0; b < 3; ++b ) {
+            uint p;
+            if(b==0)      p = p0;
+            else if(b==1) p = p1;
+            else          p = p2;
 
-        b1 = glm::normalize(bitangent - data.normals[i + 0] * glm::dot(data.normals[i + 0], bitangent));
-        b2 = glm::normalize(bitangent - data.normals[i + 1] * glm::dot(data.normals[i + 1], bitangent));
-        b3 = glm::normalize(bitangent - data.normals[i + 2] * glm::dot(data.normals[i + 2], bitangent));
-        //////////////////////////////////////
-        data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
-        data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
+            // project tangent and bitangent into the plane formed by the vertex' normal
+            glm::vec3 localTangent = tangent - data.normals[p] * (tangent * data.normals[p]);
+            glm::vec3 localBitangent = bitangent - data.normals[p] * (bitangent * data.normals[p]);
+            localTangent = glm::normalize(localTangent);
+            localBitangent = glm::normalize(localBitangent);
+
+            // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
+            bool invalid_tangent = is_special_float(localTangent.x) || is_special_float(localTangent.y) || is_special_float(localTangent.z);
+            bool invalid_bitangent = is_special_float(localBitangent.x) || is_special_float(localBitangent.y) || is_special_float(localBitangent.z);
+            if (invalid_tangent != invalid_bitangent) {
+                if (invalid_tangent) {
+                    localTangent = glm::normalize(glm::cross(data.normals[p],localBitangent));
+                } else {
+                    localBitangent = glm::normalize(glm::cross(localTangent,data.normals[p]));
+                }
+            }
+            data.tangents.push_back(localTangent);
+            data.binormals.push_back(localBitangent);
+        }
     }
-    MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
+    //MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& data){
     if(data.normals.size() == 0) return;
@@ -339,7 +374,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& 
         data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
         data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
     }
-    MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
+    //MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 
 bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<glm::vec3>& out_vertices,vector<glm::vec2>& out_uvs,vector<glm::vec3>& out_normals,ushort& result, float threshold){
