@@ -983,7 +983,6 @@ void RodLight::lighten(){
 }
 float RodLight::rodLength(){ return m_RodLength; }
 
-
 class LightProbe::impl{
     public:
         uint m_EnvMapSize;
@@ -1012,16 +1011,13 @@ class LightProbe::impl{
             glGenRenderbuffers(1,&m_RBO);
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,m_EnvMapSize,m_EnvMapSize); //16 instead of 24?
+            glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,m_EnvMapSize,m_EnvMapSize);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,m_RBO);
             Renderer::unbindFBO();
         }
         void _destruct(){
-            //glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapTextureAddress);
             glDeleteTextures(1,&m_EnvMapTextureAddress);
-            //glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapPrefilterTextureAddress);
             glDeleteTextures(1,&m_EnvMapPrefilterTextureAddress);
-            //glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapConvolutionTextureAddress);
             glDeleteTextures(1,&m_EnvMapConvolutionTextureAddress);
             glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
@@ -1054,13 +1050,11 @@ class LightProbe::impl{
             uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
             //render the scene into a cubemap. this will be VERY expensive...
-            //cleanup previous cubemap operation
             glDeleteTextures(1,&m_EnvMapTextureAddress);
-            //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,m_EnvMapSize,m_EnvMapSize);//use 16 instead of 24?
+            glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,m_EnvMapSize,m_EnvMapSize);
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in _render() is incomplete!" << endl; return;
             }
@@ -1084,10 +1078,9 @@ class LightProbe::impl{
 
             //cleanup previous convolute operation
             glDeleteTextures(1,&m_EnvMapConvolutionTextureAddress);
-            //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             uint size = 32;
 
-            glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,size,size);//use 16 instead of 24?
+            glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,size,size);
 
             glGenTextures(1,&m_EnvMapConvolutionTextureAddress);
             glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapConvolutionTextureAddress);
@@ -1112,7 +1105,6 @@ class LightProbe::impl{
 
             //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
             glDeleteTextures(1,&m_EnvMapPrefilterTextureAddress);
-            //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
             glGenTextures(1, &m_EnvMapPrefilterTextureAddress);
             glBindTexture(GL_TEXTURE_CUBE_MAP,m_EnvMapPrefilterTextureAddress);
