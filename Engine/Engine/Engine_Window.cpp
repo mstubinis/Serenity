@@ -65,7 +65,7 @@ class Engine_Window::impl{
             Renderer::Settings::enableCullFace();
             Renderer::Settings::cullFace(GL_BACK);
 
-            SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
+            SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
             Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
         }
         void _setFullScreen(bool fullscreen){
