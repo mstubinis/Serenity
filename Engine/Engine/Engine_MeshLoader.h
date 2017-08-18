@@ -11,6 +11,7 @@
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
+typedef unsigned char uchar;
 
 struct aiScene;
 struct aiNode;
@@ -81,18 +82,18 @@ struct ImportedMeshData final{
     std::vector<ushort> indices;
 
     ImportedMeshData(){ clear(); }
-    ~ImportedMeshData(){}
+    ~ImportedMeshData(){ clear(); }
 
     void clear(){
-		vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
-		vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
+        vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
+        vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
     }
 };
 
 namespace Engine{
     namespace Resources{
         namespace MeshLoader{
-            void loadObjFromMemory(ImportedMeshData&,std::string file,unsigned char = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
+            void loadObjFromMemory(ImportedMeshData&,std::string file,uchar = LOAD_POINTS | LOAD_UVS | LOAD_NORMALS | LOAD_FACES | LOAD_TBN);
             void load(Mesh*,ImportedMeshData&,std::string file);
             namespace Detail{
 
@@ -112,7 +113,7 @@ namespace Engine{
                             std::vector<glm::vec3>& out_tangents,
                         float threshold);
                         */
-	
+
                         static void _indexVBO(ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
                             std::vector<GLuint>& out_norm, 
                             std::vector<GLuint>& out_binorm,
@@ -124,9 +125,7 @@ namespace Engine{
 
                 namespace _OBJ{
                     void _loadObjDataFromLine(std::string& line,ImportedMeshData&, std::vector<uint>& vertexIndices, std::vector<uint>& uvIndices, std::vector<uint>& normalIndices, const char flags);
-                    
-                };
-                namespace _3DS{
+
                 };
             };
         };
