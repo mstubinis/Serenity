@@ -105,6 +105,7 @@ namespace Engine{
                         static void _processNode(Mesh*,ImportedMeshData&,aiNode* node, const aiScene* scene);
                         static void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
                         static void _calculateTBN(ImportedMeshData&);
+                        static void _calculateTBNAssimp(ImportedMeshData&);
                         static bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
                         /*
                         static void _indexVBO(ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
