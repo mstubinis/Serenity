@@ -74,6 +74,6 @@ class Texture: public EngineResource{
 
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
 
-        void genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,uint brdfSize);
+        void genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize);
 };
 #endif
