@@ -1154,7 +1154,8 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    vec3 SpecularFactor     = vec3(0.0);\n"
     "\n"
     "    float kPi = 3.14159265;\n"
-    "    highp int index = int(texture2D(gNormalMap,uv).b);\n"
+    "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
+    "    highp int index = int(ceil(matIDandAO)-1.0);\n"
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
     "    float metalness = stuff.x;\n"
     "    float smoothness = stuff.y;\n"
@@ -1354,6 +1355,9 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
     "    float kPi = 3.14159265;\n"
+    "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
+    "    highp int index = int(ceil(matIDandAO)-1.0);\n"
+    "    float ao = (matIDandAO - float(index))+0.001;\n"//the 0.001 makes up for the clamp in material class
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
     "    float metalness = stuff.x;\n"
     "    float smoothness = stuff.y;\n"
@@ -1371,7 +1375,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
     "    vec3 GISpecular = prefilteredColor * (kS1 * brdf.x + brdf.y);\n"
     "\n"
-    "    vec3 TotalIrradiance = (kD1 * AmbientIrradiance + GISpecular);\n" //* ao
+    "    vec3 TotalIrradiance = (kD1 * AmbientIrradiance + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / gamma));\n"
     "    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
     "}";
