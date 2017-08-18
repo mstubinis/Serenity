@@ -345,6 +345,8 @@ void Detail::RenderManagement::init(){
 }
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
+    glDeleteTextures(1,&RenderManagement::m_BRDF_LUT_CookTorrance);
+    glDeleteTextures(1,&RendererInfo::SSAOInfo::ssao_noise_texture);
 }
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
