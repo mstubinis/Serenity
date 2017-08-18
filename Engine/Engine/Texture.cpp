@@ -341,6 +341,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
 
     //now generate the BDRF LUT -- should probably just make this a global variable
     //cleanup previous BDRF LUT operation
+    /*
     size = brdfSize;
     if(m_i->m_TextureAddress.size() >= 4){
         glDeleteTextures(1,&m_i->m_TextureAddress.at(3));
@@ -365,11 +366,12 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,u
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
     Renderer::Detail::renderFullscreenQuad(size,size); //this might have to be winsize x and winsize y
     cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
-
+    
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     Resources::getWindow()->display(); //prevent opengl & windows timeout
-
+    */
+    
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
 
