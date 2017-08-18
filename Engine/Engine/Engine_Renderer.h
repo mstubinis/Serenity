@@ -125,6 +125,8 @@ namespace Engine{
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
+                
+                    static GLuint m_BRDF_LUT_CookTorrance;
 
                     static void _renderText(Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _renderTextures(Camera*,uint& fbufferWidth, uint& fbufferHeight);
