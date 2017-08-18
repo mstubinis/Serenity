@@ -31,7 +31,7 @@ class TextureBuffer::impl final{
         void _init(FramebufferAttatchment::Attatchment attatchment,float divisor,TextureBuffer* super){
             m_BufferAttatchment = attatchment;
             m_Divisor = divisor;
-			_resize(super->width(),super->height(),super);
+            _resize(super->width(),super->height(),super);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
             super->decrementUseCount();
