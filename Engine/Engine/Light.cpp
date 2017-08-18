@@ -991,12 +991,10 @@ class LightProbe::impl{
         GLuint m_EnvMapTextureAddress;
         GLuint m_EnvMapPrefilterTextureAddress;
         GLuint m_EnvMapConvolutionTextureAddress;
-        Object* m_Ignore;
         glm::mat4 m_Views[6];
 
         void _init(uint envMapSize,LightProbe* super,Scene* scene){
             m_EnvMapSize = envMapSize;
-            m_Ignore = nullptr;
             glm::vec3 pos = super->getPosition();
             Camera* c = Resources::getActiveCamera();
             if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, c->getNear(), c->getFar());
@@ -1025,7 +1023,6 @@ class LightProbe::impl{
             glDeleteFramebuffers(1, &m_FBO);
         }
         void _update(float dt,LightProbe* super){
-            if(m_Ignore != nullptr){ super->setPosition(m_Ignore->getPosition()); }
             if(super->m_Parent != nullptr){ super->m_Model = super->m_Parent->getModel(); }
             else{ super->m_Model = glm::mat4(1.0f); }
             glm::mat4 translationMatrix = glm::translate(super->m_Position);
@@ -1040,10 +1037,6 @@ class LightProbe::impl{
             m_Views[3] = glm::lookAt(pos, pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
             m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-        }
-        void _attatchTo(LightProbe* super, Object* ignore){
-            m_Ignore = ignore;
-            super->setPosition(ignore->getPosition());
         }
         void _render(LightProbe* super){
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
@@ -1154,7 +1147,6 @@ LightProbe::LightProbe(std::string n, uint envMapSize,glm::vec3 pos,Scene* scene
 LightProbe::~LightProbe(){
     m_i->_destruct();
 }
-void LightProbe::attatchTo(Object* o){ m_i->_attatchTo(this,o); }
 void LightProbe::update(float dt){ m_i->_update(dt,this); }
 void LightProbe::renderCubemap(){ m_i->_render(this); }
 const GLuint& LightProbe::getEnvMapAddress() const{ return m_i->m_EnvMapTextureAddress; }
