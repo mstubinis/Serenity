@@ -609,6 +609,10 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
             lightProbe.second->renderCubemap();
         }
     }
+    //Yes, i know, this is dangerous.
+    SAFE_DELETE(Engine::Renderer::Detail::RenderManagement::m_gBuffer);
+    Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    
     _passGeometry(c,fbufferWidth,fbufferHeight,renderGodRays,ignore);
 
     if(RendererInfo::GodRaysInfo::godRays && renderGodRays){
