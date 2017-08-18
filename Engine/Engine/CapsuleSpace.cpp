@@ -183,5 +183,9 @@ void CapsuleSpace::update(float dt){
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));
         item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
+        
+        //double check this (this is the light probe)
+        getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
+        getPlayer()->getChildren().at(0)->setOrientation(glm::radians(pitch),0,glm::radians(roll));
     }
 }
