@@ -2,6 +2,7 @@
 #include <cstdint>
 
 using namespace Engine::Math;
+using namespace std;
 
 const double Noise::Detail::MathNoiseManagement::STRETCH_CONSTANT_2D = -0.211324865405187;
 const double Noise::Detail::MathNoiseManagement::SQUISH_CONSTANT_2D = 0.366025403784439;
@@ -14,16 +15,16 @@ const double Noise::Detail::MathNoiseManagement::NORM_CONSTANT_2D = 47.0;
 const double Noise::Detail::MathNoiseManagement::NORM_CONSTANT_3D = 103.0;
 const double Noise::Detail::MathNoiseManagement::NORM_CONSTANT_4D = 30.0;
 
-std::vector<glm::ivec2> _populateGrad2(){
-    std::vector<glm::ivec2> _v;
+vector<glm::ivec2> _populateGrad2(){
+    vector<glm::ivec2> _v;
     _v.push_back(glm::ivec2(5,2)); _v.push_back(glm::ivec2(2,5));
     _v.push_back(glm::ivec2(-5,2)); _v.push_back(glm::ivec2(-2,5));
     _v.push_back(glm::ivec2(5,-2)); _v.push_back(glm::ivec2(2,-5));
     _v.push_back(glm::ivec2(-5,-2)); _v.push_back(glm::ivec2(-2,-5));
     return _v;
 }
-std::vector<glm::ivec3> _populateGrad3(){
-    std::vector<glm::ivec3> _v;
+vector<glm::ivec3> _populateGrad3(){
+    vector<glm::ivec3> _v;
     _v.push_back(glm::ivec3(-11,  4,  4)); _v.push_back(glm::ivec3(-4,  11,  4));
     _v.push_back(glm::ivec3(-4,  4,  11)); _v.push_back(glm::ivec3(11,  4,  4));
     _v.push_back(glm::ivec3(4,  11,  4)); _v.push_back(glm::ivec3(4,  4,  11));
@@ -38,8 +39,8 @@ std::vector<glm::ivec3> _populateGrad3(){
     _v.push_back(glm::ivec3(4, -11, -4)); _v.push_back(glm::ivec3(4, -4, -11));
     return _v;
 }
-std::vector<glm::ivec4> _populateGrad4(){
-    std::vector<glm::ivec4> _v;
+vector<glm::ivec4> _populateGrad4(){
+    vector<glm::ivec4> _v;
     _v.push_back(glm::ivec4(3,  1,  1,  1)); _v.push_back(glm::ivec4(1,  3,  1,  1));
     _v.push_back(glm::ivec4(1,  1,  3,  1)); _v.push_back(glm::ivec4(1,  1,  1,  3));
     _v.push_back(glm::ivec4(-3,  1,  1,  1)); _v.push_back(glm::ivec4(-1,  3,  1,  1));
@@ -75,16 +76,16 @@ std::vector<glm::ivec4> _populateGrad4(){
     return _v;
 }
 
-std::vector<glm::ivec2> Noise::Detail::MathNoiseManagement::grad2 = _populateGrad2();
-std::vector<glm::ivec3> Noise::Detail::MathNoiseManagement::grad3 = _populateGrad3();
-std::vector<glm::ivec4> Noise::Detail::MathNoiseManagement::grad4 = _populateGrad4();
-std::vector<short> Noise::Detail::MathNoiseManagement::perm;
-std::vector<short> Noise::Detail::MathNoiseManagement::permGradIndex3D;
+vector<glm::ivec2> Noise::Detail::MathNoiseManagement::grad2 = _populateGrad2();
+vector<glm::ivec3> Noise::Detail::MathNoiseManagement::grad3 = _populateGrad3();
+vector<glm::ivec4> Noise::Detail::MathNoiseManagement::grad4 = _populateGrad4();
+vector<short> Noise::Detail::MathNoiseManagement::perm;
+vector<short> Noise::Detail::MathNoiseManagement::permGradIndex3D;
 
 void Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long seed){
     Noise::Detail::MathNoiseManagement::perm.clear(); Noise::Detail::MathNoiseManagement::perm.resize(256);
     Noise::Detail::MathNoiseManagement::permGradIndex3D.clear(); Noise::Detail::MathNoiseManagement::permGradIndex3D.resize(256);
-    std::vector<short> source; source.resize(256);
+    vector<short> source; source.resize(256);
     for (short i = 0; i < 256; i++)
         source[i] = i;
     seed = seed * (6364136223846793005LL) + (1442695040888963407LL);
