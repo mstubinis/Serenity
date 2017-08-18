@@ -129,9 +129,6 @@ class LightProbe: public Camera{
         void update(float);
         void renderCubemap();
 
-        //or just override addChild()?
-        void attatchTo(Object*);
-
         const GLuint& getEnvMapAddress() const;
         const GLuint& getEnvMapConvolutionAddress() const;
         const GLuint& getEnvMapPrefilterAddress() const;
