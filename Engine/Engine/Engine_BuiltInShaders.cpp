@@ -666,7 +666,7 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "    if(ThirdConditionals.x > 0.5){\n"
     "        smoothness *= texture2D(SmoothnessTexture, UV).r;\n"
     "    }\n"
-    "    gl_FragData[1].b = matID;\n"
+    "    gl_FragData[1].b = matID + ao;\n"
     "    gl_FragData[1].a = Pack2FloatIntoFloat16(metalness,smoothness);\n"
     "    if(FirstConditionals.x > 0.5){ gl_FragData[0] *= texture2D(DiffuseTexture, UV); }\n"
     "    if(FirstConditionals.y > 0.5){ gl_FragData[1].rg = EncodeOctahedron(CalcBumpedNormal()); }\n"
