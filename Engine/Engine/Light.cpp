@@ -1043,6 +1043,10 @@ class LightProbe::impl{
         void _render(LightProbe* super){
             if(m_DidFirst == true && m_OnlyOnce == true) return;
             
+            //Yes, i know, this is dangerous. Very dangerous
+            SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
+            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_EnvMapSize,m_EnvMapSize);
+            
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
             uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
