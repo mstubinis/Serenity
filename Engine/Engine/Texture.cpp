@@ -236,7 +236,7 @@ void Texture::unload(){
         EngineResource::unload();
     }
 }
-void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize,uint brdfSize){
+void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     if(m_i->m_Type != GL_TEXTURE_CUBE_MAP){
         cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
     }
