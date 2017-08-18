@@ -19,7 +19,7 @@ namespace Engine{
                         const static double SQUISH_CONSTANT_3D;     //(Math.sqrt(3+1)-1)/3;
                         const static double STRETCH_CONSTANT_4D;    //(1/Math.sqrt(4+1)-1)/4;
                         const static double SQUISH_CONSTANT_4D;     //(Math.sqrt(4+1)-1)/4;
-    
+
                         const static double NORM_CONSTANT_2D;
                         const static double NORM_CONSTANT_3D;
                         const static double NORM_CONSTANT_4D;
