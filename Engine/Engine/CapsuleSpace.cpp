@@ -140,7 +140,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
     getPlayerCamera()->follow(getPlayer());
 
-    LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),this);
+    LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),false,this);
     dread->addChild(lp);
 }
 CapsuleSpace::~CapsuleSpace(){}
