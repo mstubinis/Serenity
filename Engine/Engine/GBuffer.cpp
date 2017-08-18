@@ -53,10 +53,10 @@ class GBuffer::impl final{
 
             glGenFramebuffers(1, &m_FBO);
             glGenRenderbuffers(1, &m_RBO);
-            
+
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);// Bind the depth buffer
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);//replace GL_DEPTH_COMPONENT with GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24 or GL_DEPTH_COMPONENT32
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
             _constructFramebuffer("BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
@@ -73,10 +73,10 @@ class GBuffer::impl final{
 
             glGenFramebuffers(1, &m_FBO_bloom);
             glGenRenderbuffers(1, &m_RBO_bloom);
-            
+
             Renderer::bindFBO(m_FBO_bloom);
             Renderer::bindRBO(m_RBO_bloom);// Bind the depth buffer
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);//replace GL_DEPTH_COMPONENT with GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24 or GL_DEPTH_COMPONENT32
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO_bloom);
 
             _constructFramebuffer("BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
@@ -93,8 +93,8 @@ class GBuffer::impl final{
         void _constructFramebuffer(string n,uint t,uint w,uint h){
             boost::tuple<float,uint,uint,uint,uint>& i = GBUFFER_TYPE_DATA.at(t);
             TextureBuffer* tbo = new TextureBuffer(n,w,h,
-				ImageInternalFormat::Format(i.get<1>()),ImagePixelFormat::Format(i.get<2>()),
-				ImagePixelType::Type(i.get<3>()),FramebufferAttatchment::Attatchment(i.get<4>()),i.get<0>());
+                ImageInternalFormat::Format(i.get<1>()),ImagePixelFormat::Format(i.get<2>()),
+                ImagePixelType::Type(i.get<3>()),FramebufferAttatchment::Attatchment(i.get<4>()),i.get<0>());
             boost::weak_ptr<TextureBuffer> ptr = boost::dynamic_pointer_cast<TextureBuffer>(Resources::getTexturePtr(tbo->name()));
             m_Buffers.emplace(t,ptr);
         }
