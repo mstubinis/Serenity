@@ -91,10 +91,8 @@ vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
 
 void _generateBRDFLUTCookTorrance(uint brdfSize){
- /*
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-
 
     Renderer::unbindFBO();
     GLuint captureFBO, captureRBO;
@@ -110,7 +108,6 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
 
 	Texture* t = Resources::getTexture("BRDFCookTorrance");
 
-
 	//lut
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
 	glBindTexture(GL_TEXTURE_2D, t->address());
@@ -125,18 +122,15 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
     Renderer::Settings::clear(true,true,false);
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
     Renderer::Detail::renderFullscreenQuad(brdfSize,brdfSize); //this might have to be winsize x and winsize y
-    cout << "----  (Cubemap): BRDF precompute done ----" << endl;
+    cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    //Resources::getWindow()->display(); //prevent opengl & windows timeout
-
 
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
     Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
-*/
 }
 
 void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){
@@ -590,13 +584,11 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
     SkyboxEmpty* sky = Resources::getCurrentScene()->getSkybox();
-    if(sky != nullptr && sky->texture()->numAddresses() >= 4){
+    if(sky != nullptr && sky->texture()->numAddresses() >= 3){
         bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
         bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
 
-		Texture* t = Resources::getTexture("BRDFCookTorrance");
-
-		bindTextureSafe("brdfLUT",t->address(),5,GL_TEXTURE_2D);
+		bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
     }
     Renderer::Detail::renderFullscreenQuad(fbufferWidth,fbufferHeight);
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
@@ -868,7 +860,7 @@ void Detail::RenderManagement::_passFinal(Camera* c,uint& fbufferWidth, uint& fb
 
     renderFullscreenQuad(fbufferWidth,fbufferHeight);
 
-    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 7; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){

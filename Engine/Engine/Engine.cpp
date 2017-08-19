@@ -47,14 +47,13 @@ void Engine::Detail::EngineClass::initGame(){
     Sound::Detail::SoundManagement::init();
 
     Resources::initResources();
-
+	Renderer::Detail::RenderManagement::postInit();
     Game::initResources();
     Game::initLogic();
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if(Resources::Detail::ResourceManagement::m_Scenes.size() == 0)
         new Scene("Default");
-	Renderer::Detail::RenderManagement::postInit();
 }
 void Engine::Detail::EngineClass::RESET_EVENTS(){
     Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
