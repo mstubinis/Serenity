@@ -127,25 +127,25 @@ namespace Engine{
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
 
-                    static void _renderText(Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _renderTextures(Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passGodsRays(Camera*,uint& fbufferWidth, uint& fbufferHeight,glm::vec2,bool,float);
-                    static void _passHDR(Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passGeometry(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
-                    static void _passForwardRendering(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
-                    static void _passLighting(Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passSSAO(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderSSAO);
-                    static void _passEdge(Camera*,uint& fbufferWidth, uint& fbufferHeight,GLuint texture,float radius = 1.0f);
-                    static void _passBlur(Camera*,uint& fbufferWidth, uint& fbufferHeight,std::string type,GLuint texture,std::string channels = "RGBA");
-                    static void _passFinal(Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passFXAA(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
-                    static void _passSMAA(Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
-                    static void _passCopyDepth(Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _renderText(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _renderTextures(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passGodsRays(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,glm::vec2,bool,float);
+                    static void _passHDR(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passGeometry(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
+                    static void _passForwardRendering(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
+                    static void _passLighting(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passSSAO(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderSSAO);
+                    static void _passEdge(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,GLuint texture,float radius = 1.0f);
+                    static void _passBlur(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,std::string type,GLuint texture,std::string channels = "RGBA");
+                    static void _passFinal(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passFXAA(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
+                    static void _passSMAA(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
+                    static void _passCopyDepth(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                 public:
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
 
-                    static void render(Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true,GLuint fbo = 0, GLuint rbo = 0);
+                    static void render(GBuffer*,Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true,GLuint fbo = 0, GLuint rbo = 0);
 
                     static void init();
 					static void postInit();

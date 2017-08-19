@@ -1074,7 +1074,12 @@ class LightProbe::impl{
                 super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
                 super->_constructFrustrum();
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_EnvMapConvolutionTextureAddress,0);
-                Renderer::Detail::RenderManagement::render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO,m_RBO);
+                
+				//replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
+				// fps loss?)
+				Renderer::Detail::RenderManagement::render(
+					Renderer::Detail::RenderManagement::m_gBuffer,
+					super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO,m_RBO);
             }
             /////////////////////////////////////////////////////////////////
 

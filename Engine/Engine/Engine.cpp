@@ -76,7 +76,7 @@ void Engine::Detail::EngineClass::update(){
 }
 void Engine::Detail::EngineClass::render(){
     Game::render();
-    Renderer::Detail::RenderManagement::render(Resources::getActiveCamera(),Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),Resources::getWindowSize().x,Resources::getWindowSize().y);
     Resources::getWindow()->display();
 }
 #pragma region Event Handler Methods
