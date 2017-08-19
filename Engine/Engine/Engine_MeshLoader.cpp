@@ -6,6 +6,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <map>
 
 #include <assimp/Importer.hpp>
@@ -13,15 +14,14 @@
 #include <assimp/postprocess.h>
 
 #include <glm/mat4x4.hpp>
-#include <math.h>
 
 using namespace Engine::Resources;
 using namespace std;
 
 bool is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
 bool is_special_float(float f){
-    if(f != f) return true;
-    if(isinf(f)) return true;
+    if(boost::math::isnan(f)) return true;
+    if(boost::math::isinf(f)) return true;
     return false;
 }
 
@@ -297,7 +297,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBNAssimp(ImportedMesh
         // texture offset p1->p2 and p1->p3
         float sx = data.uvs[p1].x - data.uvs[p0].x;
         float sy = data.uvs[p1].y - data.uvs[p0].y;
-        float tx = data.uvs[p2].x - data.uvs[p0].xf
+        float tx = data.uvs[p2].x - data.uvs[p0].x;
         float ty = data.uvs[p2].y - data.uvs[p0].y;
         
         float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;

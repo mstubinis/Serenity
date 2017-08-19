@@ -140,8 +140,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
     getPlayerCamera()->follow(getPlayer());
 
-    LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),false,this);
-    dread->addChild(lp);
+    //LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),false,this);
+    //dread->addChild(lp);
 }
 CapsuleSpace::~CapsuleSpace(){}
 void CapsuleSpace::update(float dt){
@@ -185,7 +185,6 @@ void CapsuleSpace::update(float dt){
         item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
         
         //double check this (this is the light probe)
-        getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
-        getPlayer()->getChildren().at(0)->setOrientation(glm::radians(pitch),0,glm::radians(roll));
+        //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
     }
 }

@@ -1,6 +1,7 @@
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
 #include "Engine_Physics.h"
+#include "Engine_Window.h"
 #include "ShaderProgram.h"
 #include "GBuffer.h"
 #include "Camera.h"
@@ -26,8 +27,6 @@
 using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
-
-GLuint Detail::RenderManagement::m_BRDF_LUT_CookTorrance = 0;
 
 float Detail::RendererInfo::GeneralInfo::gamma = 2.2f;
 bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
@@ -92,53 +91,53 @@ vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
 
 void _generateBRDFLUTCookTorrance(uint brdfSize){
+ /*
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-    
-    GLuint captureFBO; 
-    GLuint captureRBO;
+
+
+    Renderer::unbindFBO();
+    GLuint captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
     glGenRenderbuffers(1, &captureRBO);
-
     Renderer::bindFBO(captureFBO);
     Renderer::bindRBO(captureRBO);
-    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, brdfSize, brdfSize);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
         cout << "Framebuffer completeness in _generateBRDFLUTCookTorrance() is incomplete!" << endl; return;
     }
 
-    glDeleteTextures(1,&Detail::RenderManagement::m_BRDF_LUT_CookTorrance);
-    glGenTextures(1, &Detail::RenderManagement::m_BRDF_LUT_CookTorrance);
-    glBindTexture(GL_TEXTURE_2D, Detail::RenderManagement::m_BRDF_LUT_CookTorrance);
+	Texture* t = Resources::getTexture("BRDFCookTorrance");
+
+
+	//lut
+    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+	glBindTexture(GL_TEXTURE_2D, t->address());
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
     Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
     Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Detail::RenderManagement::m_BRDF_LUT_CookTorrance, 0);
-    
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,t->address(), 0);
+
     Renderer::setViewport(0,0,brdfSize,brdfSize);
-    p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
+    ShaderP* p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
     Renderer::sendUniform1i("NUM_SAMPLES",256);
     Renderer::Settings::clear(true,true,false);
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
     Renderer::Detail::renderFullscreenQuad(brdfSize,brdfSize); //this might have to be winsize x and winsize y
-    cout << "---- " + this->name() + " (Cubemap): BRDF precompute done ----" << endl;
-
+    cout << "----  (Cubemap): BRDF precompute done ----" << endl;
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    Resources::getWindow()->display(); //prevent opengl & windows timeout
+    //Resources::getWindow()->display(); //prevent opengl & windows timeout
+
 
     glDeleteRenderbuffers(1, &captureRBO);
     glDeleteFramebuffers(1, &captureFBO);
-
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
     Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+*/
 }
-
-
-
-
 
 void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){
     if(Detail::RendererInfo::GeneralInfo::aa_algorithm != algorithm){
@@ -215,7 +214,7 @@ void Settings::enableDepthTest(bool b){
         glEnable(GL_DEPTH_TEST);
         Detail::RendererInfo::GeneralInfo::depth_test = true;
     }
-    else if(b ==false && Detail::RendererInfo::GeneralInfo::depth_test == true){
+    else if(b == false && Detail::RendererInfo::GeneralInfo::depth_test == true){
         glDisable(GL_DEPTH_TEST);
         Detail::RendererInfo::GeneralInfo::depth_test = false;
     }
@@ -272,10 +271,10 @@ void Renderer::bindReadFBO(GLuint r){
     }
 }
 void Renderer::bindFBO(FramebufferObject* fbo){
-	Renderer::bindFBO(fbo->address());
+    Renderer::bindFBO(fbo->address());
 }
 void Renderer::bindRBO(RenderbufferObject* rbo){
-	Renderer::bindRBO(rbo->address());
+    Renderer::bindRBO(rbo->address());
 }
 void Renderer::bindDrawFBO(GLuint d){
     if(Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo != d){
@@ -335,17 +334,17 @@ void Detail::RenderManagement::init(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
-
     RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,float(Resources::getWindowSize().x),0.0f,float(Resources::getWindowSize().y),0.005f,1000.0f);
-    Settings::enableDepthTest(true);
+	Settings::enableDepthTest(true);
     glDepthFunc(GL_LEQUAL);
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //recommended for specular IBL. but causes HUGE fps drops. investigate this...
     
+}
+void Detail::RenderManagement::postInit(){
     _generateBRDFLUTCookTorrance(512);
 }
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
-    glDeleteTextures(1,&RenderManagement::m_BRDF_LUT_CookTorrance);
     glDeleteTextures(1,&RendererInfo::SSAOInfo::ssao_noise_texture);
 }
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
@@ -594,7 +593,10 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
     if(sky != nullptr && sky->texture()->numAddresses() >= 4){
         bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
         bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-        bindTextureSafe("brdfLUT",Detail::RenderManagement::m_BRDF_LUT_CookTorrance,5,GL_TEXTURE_2D);
+
+		Texture* t = Resources::getTexture("BRDFCookTorrance");
+
+		bindTextureSafe("brdfLUT",t->address(),5,GL_TEXTURE_2D);
     }
     Renderer::Detail::renderFullscreenQuad(fbufferWidth,fbufferHeight);
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
@@ -605,13 +607,15 @@ void Detail::RenderManagement::_passLighting(Camera* c,uint& fbufferWidth, uint&
 }
 void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHeight,bool renderSSAO, bool renderGodRays, bool renderAA,bool HUD, Object* ignore,bool mainRenderFunc,GLuint fbo, GLuint rbo){
     if(mainRenderFunc){
-        for(auto lightProbe:Resources::getCurrentScene()->m_LightProbes){
-            lightProbe.second->renderCubemap();
+        if(Resources::getCurrentScene()->m_LightProbes.size() > 0){
+            for(auto lightProbe:Resources::getCurrentScene()->m_LightProbes){
+                lightProbe.second->renderCubemap();
+            }
+            //Yes, i know, this is dangerous.
+            SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
+            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
         }
     }
-    //Yes, i know, this is dangerous.
-    SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-    Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
     
     _passGeometry(c,fbufferWidth,fbufferHeight,renderGodRays,ignore);
 

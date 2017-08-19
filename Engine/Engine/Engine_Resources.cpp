@@ -227,6 +227,9 @@ void Resources::initResources(){
     addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
     addShaderProgram("BRDF_Precompute",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
 
+	Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
+	brdfCook->setWrapping(TextureWrap::ClampToEdge);
+
     addMaterial("Default","","","","","Deferred");
 
     addMesh("Plane",1.0f,1.0f);

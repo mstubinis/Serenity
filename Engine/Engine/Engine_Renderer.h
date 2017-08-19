@@ -6,6 +6,7 @@
 #include "ShaderProgram.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 typedef unsigned int uint;
 
@@ -125,8 +126,6 @@ namespace Engine{
                 private:
                     static std::vector<FontRenderInfo> m_FontsToBeRendered;
                     static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
-                
-                    static GLuint m_BRDF_LUT_CookTorrance;
 
                     static void _renderText(Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _renderTextures(Camera*,uint& fbufferWidth, uint& fbufferHeight);
@@ -149,6 +148,7 @@ namespace Engine{
                     static void render(Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true,GLuint fbo = 0, GLuint rbo = 0);
 
                     static void init();
+					static void postInit();
                     static void destruct();
 
                     static std::vector<ShaderP*> m_GeometryPassShaderPrograms;

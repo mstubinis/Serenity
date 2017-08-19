@@ -40,6 +40,7 @@ unordered_map<uint,GLuint> _populateImageFormatMap(){
     m.emplace(uint(ImageInternalFormat::R11F_G11F_B10F), GL_R11F_G11F_B10F);
     m.emplace(uint(ImageInternalFormat::RGB9_E5), GL_RGB9_E5);
     //m.emplace(uint(ImageInternalFormat::RGB565), GL_RGB565);
+    m.emplace(uint(ImageInternalFormat::RG16F), GL_RG16F);
     m.emplace(uint(ImageInternalFormat::RGB8), GL_RGB8);
     m.emplace(uint(ImageInternalFormat::RGBA8), GL_RGBA8);
     m.emplace(uint(ImageInternalFormat::RGB16), GL_RGB16);

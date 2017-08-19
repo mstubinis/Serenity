@@ -31,7 +31,7 @@ class TextureBuffer::impl final{
         void _init(FramebufferAttatchment::Attatchment attatchment,float divisor,TextureBuffer* super){
             m_BufferAttatchment = attatchment;
             m_Divisor = divisor;
-            _resize(super->width(),super->height(),super);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::at(m_BufferAttatchment),super->type(),super->address(),0);
         }
         void _resize(uint width,uint height,TextureBuffer* super){
             super->decrementUseCount();
@@ -56,7 +56,7 @@ class GBuffer::impl final{
 
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);// Bind the depth buffer
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);//replace GL_DEPTH_COMPONENT with GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24 or GL_DEPTH_COMPONENT32
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_Width, m_Height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
             _constructFramebuffer("BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
@@ -76,7 +76,7 @@ class GBuffer::impl final{
 
             Renderer::bindFBO(m_FBO_bloom);
             Renderer::bindRBO(m_RBO_bloom);// Bind the depth buffer
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Width, m_Height);//replace GL_DEPTH_COMPONENT with GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24 or GL_DEPTH_COMPONENT32
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, m_Width, m_Height);//replace GL_DEPTH_COMPONENT with GL_DEPTH_COMPONENT16 or GL_DEPTH_COMPONENT24 or GL_DEPTH_COMPONENT32
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RBO_bloom);
 
             _constructFramebuffer("BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);

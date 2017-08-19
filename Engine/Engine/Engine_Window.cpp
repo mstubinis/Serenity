@@ -57,9 +57,8 @@ class Engine_Window::impl{
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
 
             //move these 2 functions elsewhere like renderer::init() or engine::init() ?
-            glewExperimental = GL_TRUE; 
-            glewInit();
-            
+            glewExperimental = GL_TRUE;
+            glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
             glEnable(GL_TEXTURE_2D);//is this really needed?
 
             Renderer::Settings::enableCullFace();
