@@ -225,7 +225,7 @@ void Resources::initResources(){
     addShaderProgram("Deferred_Light_GI",fullscreenVertexShader,lightingFragGI,ShaderRenderPass::Lighting);
     addShaderProgram("Cubemap_Convolude",vertexSkybox,cubemapConvolude,ShaderRenderPass::Postprocess);
     addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
-    addShaderProgram("BRDF_Precompute",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
+    addShaderProgram("BRDF_Precompute_CookTorrance",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
 
 	Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
 	brdfCook->setWrapping(TextureWrap::ClampToEdge);

@@ -745,22 +745,29 @@ Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersMa
 "    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));\n"
 "    vec3 bitangent = cross(normal, tangent);\n"
 "    mat3 TBN = mat3(tangent, bitangent, normal);\n"
-"    float occlusion = 0.0;\n"
-"    for(int i = 0; i < Samples; ++i){\n"
-"\n"     // get sample position
-"        vec3 sample = TBN * poisson[i];\n"// from tangent to (hopefully) world space
-"        sample = (fragPos + sample * SSAOInfo.x) * SSAOInfo.w;\n"
-"\n"     // project sample position (to sample texture)(to get position on screen/texture)
-"        vec4 offset = vec4(sample, 1.0);\n"
-"        offset = (Projection * View) * offset;\n"// from world to view to clip-space
-"        offset.xyz /= offset.w;\n"
-"        offset.xyz = offset.xyz * 0.5 + 0.5;\n"// transform to range 0.0 - 1.0
-"        float sampleDepth = texture2D(gDepthMap, offset.xy).x;\n"//get depth (might have to linearize this depth)
-"        float rangeCheck = smoothstep(0.0, 1.0, SSAOInfo.x / abs(fragPos.z - sampleDepth));\n"
-"        occlusion += (sampleDepth >= sample.z + SSAOInfo.z ? 1.0 : 0.0) * rangeCheck;\n"         
+"    if(doSSAO == 1){\n"
+"        if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }\n"
+"        else{\n"
+"			float occlusion = 0.0;\n"
+"			for(int i = 0; i < Samples; ++i){\n"
+"\n"			// get sample position
+"				vec3 sample = TBN * poisson[i];\n"// from tangent to (hopefully) world space
+"				sample = (fragPos + sample * SSAOInfo.x) * SSAOInfo.w;\n"
+"\n"			 // project sample position (to sample texture)(to get position on screen/texture)
+"				vec4 offset = vec4(sample, 1.0);\n"
+"				offset = (Projection * View) * offset;\n"// from world to view to clip-space
+"				offset.xyz /= offset.w;\n"
+"				offset.xyz = offset.xyz * 0.5 + 0.5;\n"// transform to range 0.0 - 1.0
+"				float sampleDepth = texture2D(gDepthMap, offset.xy).x;\n"//get depth (might have to linearize this depth)
+"				float rangeCheck = smoothstep(0.0, 1.0, SSAOInfo.x / abs(fragPos.z - sampleDepth));\n"
+"				occlusion += (sampleDepth >= sample.z + SSAOInfo.z ? 1.0 : 0.0) * rangeCheck;\n"         
+"			}\n"
+"			occlusion = 1.0 - (occlusion / Samples);\n"
+"			gl_FragColor.a = pow(occlusion,SSAOInfo.y);\n"
 "    }\n"
-"    occlusion = 1.0 - (occlusion / Samples);\n"
-"    gl_FragColor.a = pow(occlusion,SSAOInfo.y);\n"
+"    else{\n"
+"        gl_FragColor.a = 1.0;\n"
+"    }\n"
 "}\n"
 "\n";
 */	
@@ -784,7 +791,7 @@ Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManageme
     "uniform int Samples;\n"
     "uniform int NoiseTextureSize;\n"
     "\n"
-    "uniform vec2 poisson[32];\n"
+    "uniform vec3 poisson[32];\n"
     "\n"
     "uniform mat4 Projection;\n"
     "uniform mat4 View;\n"
@@ -806,25 +813,27 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
     "    vec2 uv = gl_TexCoord[0].st * (1.0 / fbufferDivisor);\n"
     "    vec3 worldPosition = reconstruct_world_pos(uv,nearz,farz);\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    vec2 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xy * 2.0 - 1.0);\n"
+    "    vec3 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xyz);\n"
     "\n"
-    "    float dist = distance(worldPosition, CameraPosition) + 0.0001; //cuz we dont like divide by zeros ;)\n"
-    "    float rad = max(0.35,SSAOInfo.x / dist); //not having max 0.35, etc will make this behave very badly when zoomed far out\n"
+    "    float _distance = distance(worldPosition, CameraPosition) + 0.0001;\n"//cuz we dont like divide by zeros ;)
+	"    float radius = max(0.05,SSAOInfo.x / _distance);\n"
     "\n"
     "    if(doSSAO == 1){\n"
     "        if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }\n"
     "        else{\n"
-    "            float occlusion = 0.0;\n"
+    "            float o = 0.0;\n"
     "            for (int i = 0; i < Samples; ++i) {\n"
-    "               vec2 coord1 = reflect(poisson[i], randomVector)*rad;\n"
+    "               vec2 coord1 = reflect(poisson[i].xy, randomVector.xy)*radius;\n"
     "               vec2 coord2 = vec2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);\n"
-    "               occlusion += occlude(uv, coord1 * 0.25, worldPosition, normal);\n"
-    "               occlusion += occlude(uv, coord2 * 0.50, worldPosition, normal);\n"
-    "               occlusion += occlude(uv, coord1 * 0.75, worldPosition, normal);\n"
-    "               occlusion += occlude(uv, coord2, worldPosition, normal);\n"
+    "               o += occlude(uv, coord1 * 0.25, worldPosition, normal);\n"
+    "               o += occlude(uv, coord2 * 0.50, worldPosition, normal);\n"
+    "               o += occlude(uv, coord1 * 0.75, worldPosition, normal);\n"
+    "               o += occlude(uv, coord2,        worldPosition, normal);\n"
     "           }\n"
-    "           occlusion /= (Samples*4.0);\n"
-    "           gl_FragColor.a = 1.0-occlusion;\n"
+    "           o /= (Samples*4.0);\n"
+	"           o = clamp(o,0.0001,0.9999);\n"
+    "           o = mix(0.0,o,(o >= 0.999 ? 0.0 : 1.0 ));\n"//this gets rid of the dark annoying edges around models. in a very hacky way...
+    "           gl_FragColor.a = 1.0-o;\n"
     "       }\n"
     "    }\n"
     "    else{\n"
@@ -959,7 +968,7 @@ Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManageme
 #pragma region GodRays
 Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
-    "uniform vec4 RaysInfo; //exposure | decay | density | weight\n"
+    "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
     "\n"
     "uniform vec2 lightPositionOnScreen;\n"
     "uniform sampler2D firstPass;\n"
@@ -1062,14 +1071,15 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "\n"
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
     "    lighting = hdr;\n"
+	"    float ssao = 1.0;\n"
     "    if(HasSSAO == 1){ \n"
     "        float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));\n"
-    "        float ssao = texture2D(gBloomMap,uv).a + 0.0001;\n"
+    "        ssao = texture2D(gBloomMap,uv).a + 0.0001;\n"
     "        brightness = min(1.0,pow(brightness,0.125));\n"
     "        lighting *= max(brightness, ssao);\n"
     "    }\n"
     "    lighting += rays;\n"
-    "    gl_FragColor = vec4(lighting,1.0);\n"
+	"    gl_FragColor = vec4(lighting,1.0);\n"
     "}";
 
 #pragma endregion

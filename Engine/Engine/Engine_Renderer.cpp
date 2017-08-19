@@ -66,13 +66,13 @@ float Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 
 bool Detail::RendererInfo::SSAOInfo::ssao = true;
 bool Detail::RendererInfo::SSAOInfo::ssao_do_blur = true;
-uint Detail::RendererInfo::SSAOInfo::ssao_samples = 16;
+uint Detail::RendererInfo::SSAOInfo::ssao_samples = 8;
 float Detail::RendererInfo::SSAOInfo::ssao_blur_strength = 0.5f;
 float Detail::RendererInfo::SSAOInfo::ssao_scale = 1.0f;
-float Detail::RendererInfo::SSAOInfo::ssao_intensity = 1.0f;
+float Detail::RendererInfo::SSAOInfo::ssao_intensity = 1.1f;
 float Detail::RendererInfo::SSAOInfo::ssao_bias = 0.495f;
 float Detail::RendererInfo::SSAOInfo::ssao_radius = 0.5f;
-glm::vec2 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
+glm::vec3 Detail::RendererInfo::SSAOInfo::ssao_Kernels[Renderer::Detail::RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT];
 GLuint Detail::RendererInfo::SSAOInfo::ssao_noise_texture;
 
 bool Detail::RendererInfo::HDRInfo::hdr = true;
@@ -117,7 +117,7 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,t->address(), 0);
 
     Renderer::setViewport(0,0,brdfSize,brdfSize);
-    ShaderP* p = Resources::getShaderProgram("BRDF_Precompute"); p->bind();
+    ShaderP* p = Resources::getShaderProgram("BRDF_Precompute_CookTorrance"); p->bind();
     Renderer::sendUniform1i("NUM_SAMPLES",256);
     Renderer::Settings::clear(true,true,false);
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
@@ -646,12 +646,14 @@ void Detail::RenderManagement::render(Camera* c,uint fbufferWidth,uint fbufferHe
     
     m_gBuffer->start(GBufferType::Bloom,_channels,false);
     _passSSAO(c,fbufferWidth,fbufferHeight,renderSSAO); //ssao AND bloom
+
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
         m_gBuffer->start(GBufferType::Free2,_channels,false);
         _passBlur(c,fbufferWidth,fbufferHeight,"H",GBufferType::Bloom,_channels);
         m_gBuffer->start(GBufferType::Bloom,_channels,false);
         _passBlur(c,fbufferWidth,fbufferHeight,"V",GBufferType::Free2,_channels);
     }
+
     m_gBuffer->start(GBufferType::Misc);
     _passHDR(c,fbufferWidth,fbufferHeight);
 
@@ -725,7 +727,7 @@ void Detail::RenderManagement::_passSSAO(Camera* c,uint& fbufferWidth, uint& fbu
     float _divisor = m_gBuffer->getBuffer(GBufferType::Bloom)->divisor();
     sendUniform1fSafe("fbufferDivisor",_divisor);
     
-    sendUniform2fvSafe("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
+    sendUniform3fvSafe("poisson[0]",RendererInfo::SSAOInfo::ssao_Kernels,RendererInfo::SSAOInfo::SSAO_KERNEL_COUNT);
 
     bindTexture("gNormalMap",m_gBuffer->getTexture(GBufferType::Normal),0);
     bindTexture("gRandomMap",RendererInfo::SSAOInfo::ssao_noise_texture,1,GL_TEXTURE_2D);
@@ -796,8 +798,7 @@ void Detail::RenderManagement::_passBlur(Camera* c,uint& fbufferWidth, uint& fbu
     ShaderP* p = Resources::getShaderProgram("Deferred_Blur"); p->bind();
 
     sendUniform1f("radius",RendererInfo::BloomInfo::bloom_radius);
-    sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,
-        RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
+    sendUniform4f("strengthModifier",RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::BloomInfo::bloom_strength,RendererInfo::SSAOInfo::ssao_blur_strength);
 
     float _divisor = m_gBuffer->getBuffer(GBufferType::Bloom)->divisor();
     sendUniform1f("fbufferDivisor",_divisor);

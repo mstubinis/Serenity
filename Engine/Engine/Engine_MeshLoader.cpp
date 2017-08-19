@@ -85,7 +85,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 tangent.y = aimesh->mTangents[i].y;
                 tangent.z = aimesh->mTangents[i].z;
                 //tangent = glm::normalize(tangent);
-                data.tangents.push_back(tangent);
+                //data.tangents.push_back(tangent);
 
                 //binorm
                 glm::vec3 binorm;
@@ -93,7 +93,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                 binorm.y = aimesh->mBitangents[i].y;
                 binorm.z = aimesh->mBitangents[i].z;
                 //binorm = glm::normalize(binorm);
-                data.binormals.push_back(binorm);
+                //data.binormals.push_back(binorm);
             }
         }
         #pragma endregion
@@ -163,7 +163,8 @@ void MeshLoader::Detail::MeshLoadingManagement::_processNode(Mesh* mesh,Imported
                  }
             }
         }
-        _calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
+		_calculateTBN(data);
+        //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
     }
     for(uint i = 0; i < node->mNumChildren; i++){
         MeshLoader::Detail::MeshLoadingManagement::_processNode(mesh,data,node->mChildren[i], scene);
@@ -344,7 +345,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBNAssimp(ImportedMesh
             data.binormals.push_back(localBitangent);
         }
     }
-    //MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& data){
     if(data.normals.size() == 0) return;
@@ -374,7 +374,6 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& 
         data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
         data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
     }
-    //MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
 }
 
 bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<glm::vec3>& out_vertices,vector<glm::vec2>& out_uvs,vector<glm::vec3>& out_normals,ushort& result, float threshold){
@@ -401,7 +400,7 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(vector<glm
 
         //handedness
         //if (glm::dot(glm::cross(n, t), b) < 0.0f){
-             //t = t * -1.0f;
+        //     t = t * -1.0f;
         //}
     }
 }

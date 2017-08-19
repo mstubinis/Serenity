@@ -117,7 +117,7 @@ namespace Engine{
 
                     static const int SSAO_KERNEL_COUNT = 32;
                     static const int SSAO_NORMALMAP_SIZE = 128;
-                    static glm::vec2 ssao_Kernels[SSAO_KERNEL_COUNT];
+                    static glm::vec3 ssao_Kernels[SSAO_KERNEL_COUNT];
                     static GLuint ssao_noise_texture;
                     static uint ssao_noise_texture_size;
                 };
