@@ -17,16 +17,19 @@ class FramebufferObjectAttatchment{
     public:
         FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
         FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
-        ~FramebufferObjectAttatchment();
+        virtual ~FramebufferObjectAttatchment();
 
-        uint width();
-        uint height();
-        FramebufferObject* fbo();
-        uint attatchment();
+        virtual uint width();
+        virtual uint height();
+		virtual GLuint internalFormat();
+        virtual FramebufferObject* fbo();
+        virtual uint attatchment();
         virtual void resize();
         virtual GLuint address();
+		virtual void bind();
+		virtual void unbind();
 };
-class FramebufferTexture: public FramebufferObjectAttatchment{
+class FramebufferTexture final: public FramebufferObjectAttatchment{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -36,8 +39,10 @@ class FramebufferTexture: public FramebufferObjectAttatchment{
         void resize();
         GLuint address();
         Texture* texture();
+		void bind();
+		void unbind();
 };
-class RenderbufferObject: public FramebufferObjectAttatchment{
+class RenderbufferObject final: public FramebufferObjectAttatchment{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -46,9 +51,11 @@ class RenderbufferObject: public FramebufferObjectAttatchment{
 
         void resize();
         GLuint address();
+		void bind();
+		void unbind();
 };
 
-class FramebufferObject: public BindableResource{
+class FramebufferObject final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -57,13 +64,12 @@ class FramebufferObject: public BindableResource{
         ~FramebufferObject();
 
         void resize(uint,uint);
-
         void attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
         void attatchRenderBuffer(RenderbufferObject*);
-
         uint width();
         uint height();
-
+		std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();
         GLuint address();
+		void check();
 };
 #endif

@@ -94,29 +94,18 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
-    Renderer::unbindFBO();
-    GLuint captureFBO, captureRBO;
-    glGenFramebuffers(1, &captureFBO);
-    glGenRenderbuffers(1, &captureRBO);
-    Renderer::bindFBO(captureFBO);
-    Renderer::bindRBO(captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, brdfSize, brdfSize);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-        cout << "Framebuffer completeness in _generateBRDFLUTCookTorrance() is incomplete!" << endl; return;
-    }
+	FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize,ImageInternalFormat::Depth16);
+	fbo->bind();
 
 	Texture* t = Resources::getTexture("BRDFCookTorrance");
 
 	//lut
-    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
 	glBindTexture(GL_TEXTURE_2D, t->address());
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
     Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
     Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,t->address(), 0);
 
-    Renderer::setViewport(0,0,brdfSize,brdfSize);
     ShaderP* p = Resources::getShaderProgram("BRDF_Precompute_CookTorrance"); p->bind();
     Renderer::sendUniform1i("NUM_SAMPLES",256);
     Renderer::Settings::clear(true,true,false);
@@ -126,11 +115,9 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
-    glDeleteRenderbuffers(1, &captureRBO);
-    glDeleteFramebuffers(1, &captureFBO);
+	delete fbo;
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
-    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
 void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){

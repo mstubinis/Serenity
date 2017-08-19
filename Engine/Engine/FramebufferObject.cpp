@@ -10,32 +10,22 @@
 using namespace Engine;
 using namespace std;
 
-struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
-    FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
-    Renderer::setViewport(0,0,fbo->width(),fbo->height());
-    Renderer::bindFBO(fbo);
-
-}};
-struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
-
-    Renderer::unbindFBO();
-    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
-}};
+#pragma region FramebufferObjectAttatchmentBaseClass
 
 class FramebufferObjectAttatchment::impl{
     public:
-        ImageInternalFormat::Format m_InternalFormat;
+        GLuint m_InternalFormat;
         FramebufferObject* m_FBO;
         GLuint m_GL_Attatchment;
         void _init(FramebufferObject* _fbo,FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i){
             m_FBO = _fbo;
-            m_GL_Attatchment = FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a));
-            m_InternalFormat = i;
+            m_GL_Attatchment = FramebufferAttatchment::at(a);
+            m_InternalFormat = ImageInternalFormat::at(i);
         }
         void _init(FramebufferObject* _fbo,FramebufferObjectAttatchment* super,FramebufferAttatchment::Attatchment a,Texture* t){
             m_FBO = _fbo;
-            m_GL_Attatchment = FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a));
-            m_InternalFormat = t->internalFormat();
+            m_GL_Attatchment = FramebufferAttatchment::at(a);
+            m_InternalFormat = ImageInternalFormat::at(t->internalFormat());
         }
         void _destruct(FramebufferObjectAttatchment* super){
         }
@@ -55,23 +45,28 @@ FramebufferObject* FramebufferObjectAttatchment::fbo(){ return m_i->m_FBO; }
 uint FramebufferObjectAttatchment::attatchment(){ return m_i->m_GL_Attatchment; }
 void FramebufferObjectAttatchment::resize(){ m_i->_resize(this); }
 GLuint FramebufferObjectAttatchment::address(){ return GLuint(0); }
+void FramebufferObjectAttatchment::bind(){}
+void FramebufferObjectAttatchment::unbind(){}
+GLuint FramebufferObjectAttatchment::internalFormat(){ return m_i->m_InternalFormat; }
+
+#pragma endregion
 
 class FramebufferTexture::impl{
     public:
         Texture* m_Texture;
-        ImagePixelFormat::Format m_PixelFormat;
-        ImagePixelType::Type m_PixelType;
+        GLuint m_PixelFormat;
+        GLuint m_PixelType;
         void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
             m_Texture = t;
-            m_PixelFormat = t->pixelFormat();
-            m_PixelType = t->pixelType();
+            m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
+            m_PixelType = ImagePixelType::at(t->pixelType());
             _resize(super);
         }
         void _destruct(FramebufferTexture* super){
         }
         void _resize(FramebufferTexture* super){
             glBindTexture(m_Texture->type(),m_Texture->address());
-            glTexImage2D(m_Texture->type(),0,ImageInternalFormat::at(m_Texture->internalFormat()),m_Texture->width(),m_Texture->height(),0,ImagePixelFormat::at(m_Texture->pixelFormat()),ImagePixelType::at(m_Texture->pixelType()),NULL);
+			glTexImage2D(m_Texture->type(),0,super->internalFormat(),m_Texture->width(),m_Texture->height(),0,m_PixelFormat,m_PixelType,NULL);
             glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
             glBindTexture(m_Texture->type(),0);
         }
@@ -83,15 +78,14 @@ FramebufferTexture::~FramebufferTexture(){ m_i->_destruct(this); }
 void FramebufferTexture::resize(){ m_i->_resize(this); }
 GLuint FramebufferTexture::address(){ return m_i->m_Texture->address(); }
 Texture* FramebufferTexture::texture(){ return m_i->m_Texture; }
+void FramebufferTexture::bind(){}
+void FramebufferTexture::unbind(){}
 
 class RenderbufferObject::impl{
     public:
         GLuint m_RBO;
-        void _init(RenderbufferObject* super,FramebufferObject* _fbo,ImageInternalFormat::Format internalFormat){
+        void _init(RenderbufferObject* super,FramebufferObject* _fbo,ImageInternalFormat::Format internalFormat,FramebufferAttatchment::Attatchment a){
             glGenRenderbuffers(1, &m_RBO);
-            Renderer::bindRBO(m_RBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, ImageInternalFormat::IMAGE_INTERNAL_FORMAT_MAP.at(uint(internalFormat)), super->fbo()->width(), super->fbo()->height());
-            Renderer::unbindRBO();
         }
         void _destruct(RenderbufferObject* super){
             glDeleteRenderbuffers(1, &m_RBO);
@@ -103,12 +97,33 @@ class RenderbufferObject::impl{
         }
 };
 RenderbufferObject::RenderbufferObject(FramebufferObject* f,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i):FramebufferObjectAttatchment(f,a,i),m_i(new impl){
-    m_i->_init(this,f,i);
+    m_i->_init(this,f,i,a);
 }
 RenderbufferObject::~RenderbufferObject(){ m_i->_destruct(this); }
 void RenderbufferObject::resize(){ m_i->_resize(this); }
 GLuint RenderbufferObject::address(){ return m_i->m_RBO; }
 
+void RenderbufferObject::bind(){ Renderer::bindRBO(m_i->m_RBO); }
+void RenderbufferObject::unbind(){ Renderer::unbindRBO(); }
+
+
+struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
+    FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
+    Renderer::setViewport(0,0,fbo->width(),fbo->height());
+    Renderer::bindFBO(fbo);
+	for(auto attatchment:fbo->attatchments()){
+		attatchment.second->bind();
+	}
+
+}};
+struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
+	FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
+	for(auto attatchment:fbo->attatchments()){
+		attatchment.second->unbind();
+	}
+    Renderer::unbindFBO();
+    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+}};
 class FramebufferObject::impl{
     public:
         static FramebufferObjectDefaultBindFunctor DEFAULT_BIND_FUNCTOR;
@@ -128,7 +143,6 @@ class FramebufferObject::impl{
             super->setCustomUnbindFunctor(FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR);
 
             glGenFramebuffers(1, &m_FBO);
-            Renderer::bindFBO(m_FBO);
         }
         void _init(FramebufferObject* super,uint width, uint height){
             _baseInit(super,width,height);
@@ -150,32 +164,39 @@ class FramebufferObject::impl{
             for(auto attatchment:m_Attatchments){
                 attatchment.second->resize();
             }
-            Renderer::unbindFBO();
+			Renderer::setViewport(0,0,new_width,new_height);
         }
-        void _attatchTexture(FramebufferObject* super,Texture* t,FramebufferAttatchment::Attatchment a){
+        void _attatchTexture(FramebufferObject* super,Texture* _t,FramebufferAttatchment::Attatchment a){
             if(m_Attatchments.count(a)) return;
             Renderer::bindFBO(m_FBO);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),t->type(),t->address(),0);
-            FramebufferTexture* at = new FramebufferTexture(super,a,t);
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-                cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
-            }
-            m_Attatchments.emplace(a,at);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),_t->type(),_t->address(),0);
+            FramebufferTexture* t = new FramebufferTexture(super,a,_t);
+
+            m_Attatchments.emplace(a,t);
             Renderer::unbindFBO();
         }
         void _attatchRenderbuffer(FramebufferObject* super,RenderbufferObject* rbo){
             if(m_Attatchments.count(rbo->attatchment())){ return; }
+
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(rbo);
-            
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
-            Renderer::unbindRBO();
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-                cout << "Framebuffer completeness in FramebufferObject::impl is incomplete!" << endl;
-            }
+
+			glRenderbufferStorage(GL_RENDERBUFFER,rbo->internalFormat(), super->width(), super->height());
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
+
             m_Attatchments.emplace(rbo->attatchment(),rbo);
+
+			Renderer::unbindRBO();
             Renderer::unbindFBO();
         }
+		void _check(FramebufferObject* super){
+			super->bind();
+			GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if(err != GL_FRAMEBUFFER_COMPLETE){
+                cout << "Framebuffer completeness in FramebufferObject::impl (_attatchRenderbuffer()) is incomplete!" << endl;
+				cout << "Error is: " << err << std::endl;
+            }
+		}
 };
 FramebufferObjectDefaultBindFunctor FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
 FramebufferObjectDefaultUnbindFunctor FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR;
@@ -193,3 +214,5 @@ void FramebufferObject::attatchRenderBuffer(RenderbufferObject* t){ m_i->_attatc
 uint FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint FramebufferObject::height(){ return m_i->m_FramebufferHeight; }
 GLuint FramebufferObject::address(){ return m_i->m_FBO; }
+unordered_map<uint,FramebufferObjectAttatchment*>& FramebufferObject::attatchments(){ return m_i->m_Attatchments; }
+void FramebufferObject::check(){ m_i->_check(this); }

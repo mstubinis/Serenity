@@ -5,6 +5,7 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "ShaderProgram.h"
+#include "FramebufferObject.h"
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -245,14 +246,11 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     else if(m_i->m_TextureAddress.size() == 1){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
     }
-    Renderer::unbindFBO();
-    GLuint captureFBO, captureRBO;
-    glGenFramebuffers(1, &captureFBO);
-    glGenRenderbuffers(1, &captureRBO);
-    Renderer::bindFBO(captureFBO);
-    Renderer::bindRBO(captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, size, size);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); 
+
+	Renderer::unbindFBO();
+
+	FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
+	fbo->bind();
 
     glGenTextures(1, &m_i->m_TextureAddress.at(1));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
@@ -309,8 +307,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     uint maxMipLevels = 5;
     for (uint m = 0; m < maxMipLevels; ++m){
         uint mipSize  = uint(size * glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mipSize, mipSize);
-        Renderer::setViewport(0,0,mipSize,mipSize);
+		fbo->resize(mipSize,mipSize);
         float roughness = (float)m/(float)(maxMipLevels-1);
         Renderer::sendUniform1f("roughness",roughness);
         float a = roughness * roughness;
@@ -326,11 +323,8 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
 
-    glDeleteRenderbuffers(1, &captureRBO);
-    glDeleteFramebuffers(1, &captureFBO);
-    Renderer::unbindReadFBO();
-    Renderer::unbindDrawFBO();
-    Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+	fbo->unbind();
+	delete fbo;
 }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
