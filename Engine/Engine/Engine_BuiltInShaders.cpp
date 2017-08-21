@@ -493,11 +493,11 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
     "    float B = 0.0;\n"
     "    vec3 N = vec3(0.0, 0.0, 1.0);\n"
     "    float a = roughness*roughness;\n"
-	"    float a2 = a * a;\n"
+    "    float a2 = a * a;\n"
     "    vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);\n"
     "    vec3 tangent   = normalize(cross(up, N));\n"
     "    vec3 bitangent = cross(N, tangent);\n"
-	"    mat3 TBN = mat3(tangent,bitangent,N);\n"
+    "    mat3 TBN = mat3(tangent,bitangent,N);\n"
     "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
     "        vec2 Xi = Hammersley(i, NUM_SAMPLES);\n"
     "        vec3 H = ImportanceSampleGGX(Xi,a2,TBN);\n"
@@ -736,41 +736,7 @@ Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersMa
     "    gl_FragDepth = texture2D(gDepthMap,uv);\n"
     "}";
 #pragma endregion
-/*
-"\n"
-"void main(void){\n"
-"    vec3 fragPos = reconstruct_world_pos(uv,nearz,farz);\n"
-"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-"    vec3 randomVec = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xyz);\n"
-"    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));\n"
-"    vec3 bitangent = cross(normal, tangent);\n"
-"    mat3 TBN = mat3(tangent, bitangent, normal);\n"
-"    if(doSSAO == 1){\n"
-"        if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){ gl_FragColor.a = 1.0; }\n"
-"        else{\n"
-"			float occlusion = 0.0;\n"
-"			for(int i = 0; i < Samples; ++i){\n"
-"\n"			// get sample position
-"				vec3 sample = TBN * poisson[i];\n"// from tangent to (hopefully) world space
-"				sample = (fragPos + sample * SSAOInfo.x) * SSAOInfo.w;\n"
-"\n"			 // project sample position (to sample texture)(to get position on screen/texture)
-"				vec4 offset = vec4(sample, 1.0);\n"
-"				offset = (Projection * View) * offset;\n"// from world to view to clip-space
-"				offset.xyz /= offset.w;\n"
-"				offset.xyz = offset.xyz * 0.5 + 0.5;\n"// transform to range 0.0 - 1.0
-"				float sampleDepth = texture2D(gDepthMap, offset.xy).x;\n"//get depth (might have to linearize this depth)
-"				float rangeCheck = smoothstep(0.0, 1.0, SSAOInfo.x / abs(fragPos.z - sampleDepth));\n"
-"				occlusion += (sampleDepth >= sample.z + SSAOInfo.z ? 1.0 : 0.0) * rangeCheck;\n"         
-"			}\n"
-"			occlusion = 1.0 - (occlusion / Samples);\n"
-"			gl_FragColor.a = pow(occlusion,SSAOInfo.y);\n"
-"    }\n"
-"    else{\n"
-"        gl_FragColor.a = 1.0;\n"
-"    }\n"
-"}\n"
-"\n";
-*/	
+
 #pragma region SSAO
 Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
