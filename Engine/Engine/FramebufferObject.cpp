@@ -193,7 +193,7 @@ class FramebufferObject::impl{
             super->bind();
             GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             if(err != GL_FRAMEBUFFER_COMPLETE){
-                cout << "Framebuffer completeness in FramebufferObject::impl (_attatchRenderbuffer()) is incomplete!" << endl;
+                cout << "Framebuffer completeness in FramebufferObject::impl _check() is incomplete!" << endl;
                 cout << "Error is: " << err << std::endl;
             }
         }
