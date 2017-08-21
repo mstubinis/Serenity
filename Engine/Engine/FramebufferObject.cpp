@@ -66,7 +66,7 @@ class FramebufferTexture::impl{
         }
         void _resize(FramebufferTexture* super){
             glBindTexture(m_Texture->type(),m_Texture->address());
-			glTexImage2D(m_Texture->type(),0,super->internalFormat(),m_Texture->width(),m_Texture->height(),0,m_PixelFormat,m_PixelType,NULL);
+            glTexImage2D(m_Texture->type(),0,super->internalFormat(),m_Texture->width(),m_Texture->height(),0,m_PixelFormat,m_PixelType,NULL);
             glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
             glBindTexture(m_Texture->type(),0);
         }
@@ -111,16 +111,16 @@ struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) 
     FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
     Renderer::setViewport(0,0,fbo->width(),fbo->height());
     Renderer::bindFBO(fbo);
-	for(auto attatchment:fbo->attatchments()){
-		attatchment.second->bind();
-	}
+    for(auto attatchment:fbo->attatchments()){
+        attatchment.second->bind();
+    }
 
 }};
 struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
-	FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
-	for(auto attatchment:fbo->attatchments()){
-		attatchment.second->unbind();
-	}
+    FramebufferObject* fbo = static_cast<FramebufferObject*>(r);
+    for(auto attatchment:fbo->attatchments()){
+        attatchment.second->unbind();
+    }
     Renderer::unbindFBO();
     Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
 }};
@@ -164,7 +164,7 @@ class FramebufferObject::impl{
             for(auto attatchment:m_Attatchments){
                 attatchment.second->resize();
             }
-			Renderer::setViewport(0,0,new_width,new_height);
+            Renderer::setViewport(0,0,new_width,new_height);
         }
         void _attatchTexture(FramebufferObject* super,Texture* _t,FramebufferAttatchment::Attatchment a){
             if(m_Attatchments.count(a)) return;
@@ -181,22 +181,22 @@ class FramebufferObject::impl{
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(rbo);
 
-			glRenderbufferStorage(GL_RENDERBUFFER,rbo->internalFormat(), super->width(), super->height());
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
+            glRenderbufferStorage(GL_RENDERBUFFER,rbo->internalFormat(), super->width(), super->height());
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
 
             m_Attatchments.emplace(rbo->attatchment(),rbo);
 
-			Renderer::unbindRBO();
+            Renderer::unbindRBO();
             Renderer::unbindFBO();
         }
-		void _check(FramebufferObject* super){
-			super->bind();
-			GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        void _check(FramebufferObject* super){
+            super->bind();
+            GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             if(err != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl (_attatchRenderbuffer()) is incomplete!" << endl;
-				cout << "Error is: " << err << std::endl;
+                cout << "Error is: " << err << std::endl;
             }
-		}
+        }
 };
 FramebufferObjectDefaultBindFunctor FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
 FramebufferObjectDefaultUnbindFunctor FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR;
