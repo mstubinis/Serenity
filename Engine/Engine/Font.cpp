@@ -19,7 +19,7 @@ FontData::FontData(string& filename){
     _loadTextFile(filename);
     string file = filename.substr(0,filename.size()-4);
     file += ".png";
-	m_FontTexture = new Texture(file,"",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+    m_FontTexture = new Texture(file,"",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
 }
 FontData::~FontData(){
     for(auto glyph:m_FontGlyphs){
