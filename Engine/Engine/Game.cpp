@@ -86,8 +86,6 @@ void Game::initLogic(){
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
 
     m_HUD = new HUD();
-
-    //Renderer::Settings::HDR::disable();
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
