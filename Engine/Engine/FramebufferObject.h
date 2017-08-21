@@ -21,13 +21,13 @@ class FramebufferObjectAttatchment{
 
         virtual uint width();
         virtual uint height();
-		virtual GLuint internalFormat();
+        virtual GLuint internalFormat();
         virtual FramebufferObject* fbo();
         virtual uint attatchment();
         virtual void resize();
         virtual GLuint address();
-		virtual void bind();
-		virtual void unbind();
+        virtual void bind();
+        virtual void unbind();
 };
 class FramebufferTexture final: public FramebufferObjectAttatchment{
     private:
@@ -39,8 +39,8 @@ class FramebufferTexture final: public FramebufferObjectAttatchment{
         void resize();
         GLuint address();
         Texture* texture();
-		void bind();
-		void unbind();
+        void bind();
+        void unbind();
 };
 class RenderbufferObject final: public FramebufferObjectAttatchment{
     private:
@@ -51,8 +51,8 @@ class RenderbufferObject final: public FramebufferObjectAttatchment{
 
         void resize();
         GLuint address();
-		void bind();
-		void unbind();
+        void bind();
+        void unbind();
 };
 
 class FramebufferObject final: public BindableResource{
@@ -60,7 +60,7 @@ class FramebufferObject final: public BindableResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         FramebufferObject(std::string name,uint width,uint height);
-		FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format);
+        FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format);
         ~FramebufferObject();
 
         void resize(uint,uint);
@@ -68,8 +68,8 @@ class FramebufferObject final: public BindableResource{
         void attatchRenderBuffer(RenderbufferObject*);
         uint width();
         uint height();
-		std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();
+        std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();
         GLuint address();
-		void check();
+        void check();
 };
 #endif
