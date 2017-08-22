@@ -33,7 +33,7 @@ class FramebufferTexture final: public FramebufferObjectAttatchment{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-		FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*,float divisor);
+        FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*,float divisor);
         FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
         ~FramebufferTexture();
 
@@ -42,7 +42,7 @@ class FramebufferTexture final: public FramebufferObjectAttatchment{
         Texture* texture();
         void bind();
         void unbind();
-		float divisor();
+        float divisor();
 };
 class RenderbufferObject final: public FramebufferObjectAttatchment{
     private:
@@ -67,7 +67,7 @@ class FramebufferObject final: public BindableResource{
 
         void resize(uint,uint);
         FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
-		FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment,float divisor);
+        FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment,float divisor);
         RenderbufferObject* attatchRenderBuffer(RenderbufferObject*);
         uint width();
         uint height();
