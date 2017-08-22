@@ -60,15 +60,16 @@ float scale(float fCos) {
 void main(void){
     mat4 MVP = VP * Model;
     if(hasAtmosphere == 1){
-        vec4 test = (Rot * vec4(position,1.0));
-        vec3 v3Pos = vec3(test) * vec3(fInnerRadius);
+        vec3 test = (Rot * vec4(position,1.0)).xyz;
+        vec3 v3Pos = test * fInnerRadius;
         vec3 v3Ray = v3Pos - v3CameraPos;
         float fFar = length(v3Ray); 
         v3Ray /= fFar;  
     
+        vec3 normal = normalize(v3Pos);
         float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);    
-        float fCameraAngle = dot(-v3Ray, v3Pos) / length(v3Pos);
-        float fLightAngle = dot(v3LightDir, v3Pos) / length(v3Pos);
+        float fCameraAngle = dot(-v3Ray, normal);
+        float fLightAngle = dot(v3LightDir, normal);
         float fCameraScale = scale(fCameraAngle);
         float fLightScale = scale(fLightAngle);
         float fCameraOffset = fDepth*fCameraScale;
@@ -77,12 +78,13 @@ void main(void){
         float fSampleLength = fFar / fSamples;
         float fScaledLength = fSampleLength * fScale;   
         vec3 v3SampleRay = v3Ray * fSampleLength;   
-        vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;   
+        vec3 v3SamplePoint = v3SampleRay * 0.5;   
     
-        vec3 v3FrontColor = vec3(0);    
-        vec3 v3Attenuate = vec3(0);
+        vec3 v3FrontColor = vec3(0.0);    
+        vec3 v3Attenuate = vec3(0.0);
         for(int i = 0; i < nSamples; i++)   {   
-            float fHeight = length(v3SamplePoint);  
+            float fHeight = length(v3SamplePoint);
+            //float fHeight = length(v3SamplePoint-earthCenter);
             float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));    
             float fScatter = fDepth*fTemp - fCameraOffset;  
             v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI)); 
