@@ -27,12 +27,12 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float atmosphereHeight = obj->getAtmosphereHeight();
     ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
 
-    float camHeight = glm::length(camPos);
-    float camHeight2 = camHeight*camHeight;
     glm::vec3& pos = obj->getPosition();
     glm::quat& orientation = obj->getOrientation();
     glm::vec3 camPos = c->getPosition() - pos;
-    
+    float camHeight = glm::length(camPos);
+    float camHeight2 = camHeight*camHeight;
+
     //uint numberSamples = 2;
     uint numberSamples = 8;
     
@@ -50,9 +50,15 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
     float fScale = 1.0f / (outerRadius - innerRadius);
     if(camHeight <= outerRadius){
+		/*
         program->unbind();
         program = Resources::getShaderProgram("AS_GroundFromAtmosphere");
         program->bind();
+
+		obj->getDisplayItems().at(0)->material()->bind();
+		obj->bind();
+		obj->getDisplayItems().at(0)->mesh()->bind();
+		*/
     }
     
     Renderer::sendUniform1i("nSamples", numberSamples);
@@ -66,12 +72,12 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
     Renderer::sendUniform1i("hasAtmosphere",1);
     Renderer::sendUniform1i("HasAtmosphere",1);   
-    Renderer::sendUniform1f("fCameraHeight2", camHeight2);
+    Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
     Renderer::sendUniform1fSafe("fExposure", 2.0f);
-    Renderer::sendUniform1f("fInnerRadius", innerRadius);
+    Renderer::sendUniform1fSafe("fInnerRadius", innerRadius);
     Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-    Renderer::sendUniform1f("fOuterRadius", outerRadius);
-    Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
+    Renderer::sendUniform1fSafe("fOuterRadius", outerRadius);
+    Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
     Renderer::sendUniform1f("fScale",fScale);
     Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
     if(atmosphereHeight > 0){
@@ -105,9 +111,9 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         Renderer::Settings::cullFace(GL_FRONT);
         glEnable(GL_BLEND);
-        //mod = glm::mat4(1.0f);
-        //mod = glm::translate(mod,pos);
-        //mod = glm::scale(mod,obj->getScale());
+        mod = glm::mat4(1.0f);
+        mod = glm::translate(mod,pos);
+        mod = glm::scale(mod,obj->getScale());
         mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
 
         Renderer::sendUniformMatrix4f("VP",c->getViewProjection());

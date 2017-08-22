@@ -65,8 +65,8 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 void main(void){
     mat4 MVP = VP * Model;
     if(hasAtmosphere == 1){
-        vec4 test = (Rot * vec4(position,1.0));
-        vec3 v3Pos = vec3(test) * vec3(fInnerRadius);
+        vec3 test = (Rot * vec4(position,1.0)).xyz;
+        vec3 v3Pos = test * fInnerRadius;
         vec3 v3Ray = v3Pos - v3CameraPos;
         float fFar = length(v3Ray); 
         v3Ray /= fFar;  
@@ -97,7 +97,7 @@ void main(void){
             float fScatter = fDepth*fTemp - fCameraOffset;  
             v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI)); 
             v3FrontColor += v3Attenuate * (fDepth * fScaledLength); 
-            v3SamplePoint += v3SampleRay;   
+            v3SamplePoint += v3SampleRay;
         }
         c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);  
         c1 = v3Attenuate;

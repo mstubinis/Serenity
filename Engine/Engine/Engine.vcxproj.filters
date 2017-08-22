@@ -394,5 +394,11 @@
     <None Include="data\Shaders\AS_groundFromSpace_frag.glsl">
       <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
     </None>
+    <None Include="data\Shaders\AS_groundFromAtmosphere_frag.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
+    </None>
+    <None Include="data\Shaders\AS_groundFromAtmosphere_vert.glsl">
+      <Filter>Resource Files\Shaders\ForwardRendering\AtmopshericScattering</Filter>
+    </None>
   </ItemGroup>
 </Project>

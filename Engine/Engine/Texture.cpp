@@ -165,9 +165,9 @@ class Texture::impl final{
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
-            glDeleteTextures(1,&m_TextureAddress.at(0));
-            m_Width = w; m_Height = h;
-            glGenTextures(1, &m_TextureAddress.at(0));
+            //glDeleteTextures(1,&m_TextureAddress.at(0));
+            //m_Width = w; m_Height = h;
+            //glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
             glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }

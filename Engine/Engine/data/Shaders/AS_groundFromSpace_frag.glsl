@@ -55,7 +55,6 @@ vec2 EncodeOctahedron(vec3 v) {
     if(v.r > 0.9999 && v.g > 0.9999 && v.b > 0.9999)
         return vec2(1.0);
 	v.xy /= dot(abs(v), vec3(1.0));
-	// Branch-Less version
 	return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
 }
 vec3 DecodeOctahedron(vec2 n) {

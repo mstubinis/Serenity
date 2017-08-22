@@ -349,11 +349,15 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBNAssimp(ImportedMesh
 void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& data){
     if(data.normals.size() == 0) return;
     for(uint i=0; i < data.points.size(); i+=3){
-        glm::vec3 deltaPos1 = data.points[i + 1] - data.points[i + 0];
-        glm::vec3 deltaPos2 = data.points[i + 2] - data.points[i + 0];
+		uint p0 = i + 0; uint p1 = i + 1; uint p2 = i + 2;
 
-        glm::vec2 deltaUV1 = data.uvs[i + 1] - data.uvs[i + 0];
-        glm::vec2 deltaUV2 = data.uvs[i + 2] - data.uvs[i + 0];
+		if(p2 > data.points.size() || p1 > data.points.size()) break;
+
+        glm::vec3 deltaPos1 = data.points.at(p1) - data.points.at(p0);
+        glm::vec3 deltaPos2 = data.points.at(p2) - data.points.at(p0);
+
+        glm::vec2 deltaUV1 = data.uvs.at(p1) - data.uvs.at(p0);
+        glm::vec2 deltaUV2 = data.uvs.at(p2) - data.uvs.at(p0);
 
         float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
         glm::vec3 tangent = r * (deltaUV2.y * deltaPos1 - deltaUV1.y * deltaPos2);
@@ -363,13 +367,13 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& 
         glm::vec3 t1 = tangent; glm::vec3 t2 = tangent; glm::vec3 t3 = tangent;
         glm::vec3 b1 = bitangent; glm::vec3 b2 = bitangent; glm::vec3 b3 = bitangent;
         //do we even need these next 6 lines?
-        t1 = glm::normalize(tangent - data.normals[i + 0] * glm::dot(data.normals[i + 0], tangent));
-        t2 = glm::normalize(tangent - data.normals[i + 1] * glm::dot(data.normals[i + 1], tangent));
-        t3 = glm::normalize(tangent - data.normals[i + 2] * glm::dot(data.normals[i + 2], tangent));
+        t1 = glm::normalize(tangent - data.normals.at(p0) * glm::dot(data.normals.at(p0), tangent));
+        t2 = glm::normalize(tangent - data.normals.at(p1) * glm::dot(data.normals.at(p1), tangent));
+        t3 = glm::normalize(tangent - data.normals.at(p2) * glm::dot(data.normals.at(p2), tangent));
 
-        b1 = glm::normalize(bitangent - data.normals[i + 0] * glm::dot(data.normals[i + 0], bitangent));
-        b2 = glm::normalize(bitangent - data.normals[i + 1] * glm::dot(data.normals[i + 1], bitangent));
-        b3 = glm::normalize(bitangent - data.normals[i + 2] * glm::dot(data.normals[i + 2], bitangent));
+        b1 = glm::normalize(bitangent - data.normals.at(p0) * glm::dot(data.normals.at(p0), bitangent));
+        b2 = glm::normalize(bitangent - data.normals.at(p1) * glm::dot(data.normals.at(p1), bitangent));
+        b3 = glm::normalize(bitangent - data.normals.at(p2) * glm::dot(data.normals.at(p2), bitangent));
         //////////////////////////////////////
         data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
         data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);

@@ -78,18 +78,17 @@ void main(void){
         float fSampleLength = fFar / fSamples;
         float fScaledLength = fSampleLength * fScale;   
         vec3 v3SampleRay = v3Ray * fSampleLength;   
-        vec3 v3SamplePoint = v3SampleRay * 0.5;   
+        vec3 v3SamplePoint = v3CameraPos + v3SampleRay * 0.5;   
     
         vec3 v3FrontColor = vec3(0.0);    
         vec3 v3Attenuate = vec3(0.0);
         for(int i = 0; i < nSamples; i++)   {   
             float fHeight = length(v3SamplePoint);
-            //float fHeight = length(v3SamplePoint-earthCenter);
             float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));    
             float fScatter = fDepth*fTemp - fCameraOffset;  
             v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI)); 
             v3FrontColor += v3Attenuate * (fDepth * fScaledLength); 
-            v3SamplePoint += v3SampleRay;   
+            v3SamplePoint += v3SampleRay;
         }
         c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);  
         c1 = v3Attenuate;

@@ -55,7 +55,6 @@ vec2 EncodeOctahedron(vec3 v) {
     if(v.r > 0.9999 && v.g > 0.9999 && v.b > 0.9999)
         return vec2(1.0);
     v.xy /= dot(abs(v), vec3(1.0));
-    // Branch-Less version
     return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
 }
 vec3 DecodeOctahedron(vec2 n) {
@@ -65,7 +64,6 @@ vec3 DecodeOctahedron(vec2 n) {
     if (v.z < 0.0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);
     return normalize(v);
 }
-
 vec3 CalcBumpedNormal(void){
     vec3 normalTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
