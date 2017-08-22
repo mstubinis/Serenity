@@ -74,10 +74,11 @@ void main(void){
         float fNear = getNearIntersection(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2);
     
         vec3 v3Start = v3CameraPos + v3Ray * fNear; 
-        fFar -= fNear;  
+        fFar -= fNear;
+        vec3 normal = normalize(v3Pos);
         float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);    
-        float fCameraAngle = dot(-v3Ray, v3Pos) / length(v3Pos);
-        float fLightAngle = dot(v3LightDir, v3Pos) / length(v3Pos);
+        float fCameraAngle = dot(-v3Ray, normal);
+        float fLightAngle = dot(v3LightDir, normal);
         float fCameraScale = scale(fCameraAngle);
         float fLightScale = scale(fLightAngle);
         float fCameraOffset = fDepth*fCameraScale;
@@ -88,8 +89,8 @@ void main(void){
         vec3 v3SampleRay = v3Ray * fSampleLength;   
         vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;   
     
-        vec3 v3FrontColor = vec3(0);    
-        vec3 v3Attenuate = vec3(0);
+        vec3 v3FrontColor = vec3(0.0);    
+        vec3 v3Attenuate = vec3(0.0);
         for(int i = 0; i < nSamples; i++)   {   
             float fHeight = length(v3SamplePoint);  
             float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));    
