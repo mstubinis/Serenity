@@ -598,7 +598,13 @@ float PointLight::calculateCullingRadius(){
         radius = (-m_Linear +  glm::sqrt(m_Linear * m_Linear - 4.0f * m_Exp * (m_Constant - (256.0f / 5.0f) * lightMax))) / (2.0f * m_Exp);
     }
     else if(m_AttenuationModel == LightAttenuation::Distance_Squared){
-        radius = glm::sqrt(lightMax + (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
+        radius = glm::sqrt(lightMax * (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
+    }
+    else if(m_AttenuationModel == LightAttenuation::Distance){
+        radius = (lightMax * (256.0f / 5.0f));
+    }
+    else if(m_AttenuationModel == LightAttenuation::Spherical_Quadratic){
+        radius = (((lightMax * (256.0f / 5.0f) - 1.0f) * (m_Radius*m_Radius)) / m_Radius) * 0.5f;
     }
     return radius;
 }
@@ -1043,11 +1049,11 @@ class LightProbe::impl{
         }
         void _render(LightProbe* super){
             if(m_DidFirst == true && m_OnlyOnce == true) return;
-            
+
             //Yes, i know, this is dangerous. Very dangerous
             SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
             Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_EnvMapSize,m_EnvMapSize);
-            
+
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
             uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
@@ -1074,12 +1080,12 @@ class LightProbe::impl{
                 super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
                 super->_constructFrustrum();
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_EnvMapConvolutionTextureAddress,0);
-                
-				//replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
-				// fps loss?)
-				Renderer::Detail::RenderManagement::render(
-					Renderer::Detail::RenderManagement::m_gBuffer,
-					super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO,m_RBO);
+
+                //replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
+                // fps loss?)
+                Renderer::Detail::RenderManagement::render(
+                    Renderer::Detail::RenderManagement::m_gBuffer,
+                    super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO,m_RBO);
             }
             /////////////////////////////////////////////////////////////////
 
