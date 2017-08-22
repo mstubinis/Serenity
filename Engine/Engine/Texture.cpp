@@ -64,18 +64,18 @@ class Texture::impl final{
                 m_TextureAddress.push_back(0); //vector.at(0) will be the default address. at(1) is the colvoluted map address (for cubemap only)
             glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
-            if(m_Files.size() == 1 && m_Files[0] != "FRAMEBUFFER" && m_Files[0] != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
-                sf::Image i;i.loadFromFile(m_Files[0].c_str());
+            if(m_Files.size() == 1 && m_Files.at(0) != "FRAMEBUFFER" && m_Files.at(0) != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
+                sf::Image i;i.loadFromFile(m_Files.at(0).c_str());
                 _generateFromImage(i,super);
                 glBindTexture(m_Type,0);
             }
-            else if(m_Files.size() == 1 && m_Files[0] == "PIXELS"){//pixel data image
+            else if(m_Files.size() == 1 && m_Files.at(0) == "PIXELS"){//pixel data image
                 sf::Image i;i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
                 _generateFromImage(i,super);
                 glBindTexture(m_Type,0);
                 _getPixels();
             }
-            else if(m_Files.size() == 1 && m_Files[0] == "FRAMEBUFFER"){//Framebuffer
+            else if(m_Files.size() == 1 && m_Files.at(0) == "FRAMEBUFFER"){//Framebuffer
                 glBindTexture(m_Type,m_TextureAddress.at(0));
                 _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
                 super->setFilter(TextureFilter::Linear);
@@ -159,6 +159,17 @@ class Texture::impl final{
                 else if(filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST;
                 else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
             }
+        }
+        void _resize(uint w, uint h){
+            if(m_Files.size() == 0 || (m_Files.size() == 1 && m_Files.at(0) != "FRAMEBUFFER")){
+                cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
+                return;
+            }
+            glDeleteTextures(1,&m_TextureAddress.at(0));
+            m_Width = w; m_Height = h;
+            glGenTextures(1, &m_TextureAddress.at(0));
+            glBindTexture(m_Type, m_TextureAddress.at(0));
+            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }
         void _generateMipmaps(){
             if(m_Mipmapped == false){
@@ -326,6 +337,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     fbo->unbind();
     delete fbo;
 }
+void Texture::resize(uint w, uint h){ m_i->_resize(w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
 uchar* Texture::pixels(){ return m_i->_getPixels(); }
