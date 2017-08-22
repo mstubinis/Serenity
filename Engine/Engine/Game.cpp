@@ -146,11 +146,11 @@ void Game::onClose(){
 }
 void Game::onLostFocus(){
     Engine::getWindow()->keepMouseInWindow(false);
-    Engine::getWindow()->setMouseCursorVisible(true);
+    //Engine::getWindow()->setMouseCursorVisible(true);
 }
 void Game::onGainedFocus(){
     Engine::getWindow()->keepMouseInWindow(true);
-    Engine::getWindow()->setMouseCursorVisible(false);
+    //Engine::getWindow()->setMouseCursorVisible(false);
     const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
     Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
@@ -177,7 +177,7 @@ void Game::onMouseEntered(){
 }
 void Game::onMouseLeft(){
     Engine::getWindow()->keepMouseInWindow(false);
-    Engine::getWindow()->setMouseCursorVisible(true);
+    //Engine::getWindow()->setMouseCursorVisible(true);
 }
 void Game::onPreUpdate(float dt){
 }
