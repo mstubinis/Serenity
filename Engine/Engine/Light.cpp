@@ -1074,6 +1074,7 @@ class LightProbe::impl{
             Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
             Texture::setFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
 
+            //Renderer::Detail::RenderManagement::m_gBuffer->resize(m_EnvMapSize,m_EnvMapSize);
             Renderer::setViewport(0,0,m_EnvMapSize,m_EnvMapSize);
             for (uint i = 0; i < 6; ++i){
                 super->m_View = m_Views[i];
