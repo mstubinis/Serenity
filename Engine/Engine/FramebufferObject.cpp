@@ -74,11 +74,7 @@ class FramebufferTexture::impl{
         void _destruct(FramebufferTexture* super){
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
-            //glDeleteTextures(1,&m_Texture->address());
-            //glGenTextures(1,&m_Texture->address());
-            
-            glBindTexture(m_Texture->type(),m_Texture->address());
-            glTexImage2D(m_Texture->type(),0,super->internalFormat(),w,h,0,m_PixelFormat,m_PixelType,NULL);
+            m_Texture->resize(w,h);
             glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
             glBindTexture(m_Texture->type(),0);
         }
