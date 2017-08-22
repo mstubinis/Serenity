@@ -45,21 +45,17 @@ struct FontRenderInfo final: public TextureRenderInfo{
     }
 };
 
-class HDRToneMapAlgorithm{
-    public: enum Algorithm{
-        REINHARD,
-        FILMIC,
-        EXPOSURE,
-        UNCHARTED
-    };
-};
-class AntiAliasingAlgorithm{
-    public: enum Algorithm{
-        None,
-        FXAA,
-        SMAA
-    };
-};
+class HDRToneMapAlgorithm{public: enum Algorithm{
+    REINHARD,
+    FILMIC,
+    EXPOSURE,
+    UNCHARTED
+};};
+class AntiAliasingAlgorithm{public: enum Algorithm{
+    None,
+    FXAA,
+    SMAA
+};};
 
 namespace Engine{
     namespace Renderer{
@@ -145,7 +141,11 @@ namespace Engine{
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
 
-                    static void render(GBuffer*,Camera*,uint fbufferWidth, uint fbufferHeight,bool ssao = true, bool godRays = true, bool AA = true,bool HUD = true,Object* ignore = nullptr,bool mainRenderFunc = true,GLuint fbo = 0, GLuint rbo = 0);
+                    static void render(
+                        GBuffer*,Camera*,uint fbufferWidth,uint fbufferHeight,
+                        bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+                        Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                    );
 
                     static void init();
 					static void postInit();
