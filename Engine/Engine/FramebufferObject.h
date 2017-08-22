@@ -24,7 +24,7 @@ class FramebufferObjectAttatchment{
         virtual GLuint internalFormat();
         virtual FramebufferObject* fbo();
         virtual uint attatchment();
-        virtual void resize();
+        virtual void resize(uint,uint);
         virtual GLuint address();
         virtual void bind();
         virtual void unbind();
@@ -33,14 +33,16 @@ class FramebufferTexture final: public FramebufferObjectAttatchment{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
+		FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*,float divisor);
         FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
         ~FramebufferTexture();
 
-        void resize();
+        void resize(uint,uint);
         GLuint address();
         Texture* texture();
         void bind();
         void unbind();
+		float divisor();
 };
 class RenderbufferObject final: public FramebufferObjectAttatchment{
     private:
@@ -49,7 +51,7 @@ class RenderbufferObject final: public FramebufferObjectAttatchment{
         RenderbufferObject(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
         ~RenderbufferObject();
 
-        void resize();
+        void resize(uint,uint);
         GLuint address();
         void bind();
         void unbind();
@@ -64,8 +66,9 @@ class FramebufferObject final: public BindableResource{
         ~FramebufferObject();
 
         void resize(uint,uint);
-        void attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
-        void attatchRenderBuffer(RenderbufferObject*);
+        FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
+		FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment,float divisor);
+        RenderbufferObject* attatchRenderBuffer(RenderbufferObject*);
         uint width();
         uint height();
         std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();

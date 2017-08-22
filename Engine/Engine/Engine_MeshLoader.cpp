@@ -432,8 +432,8 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
             // if ( sx * ty == sy * tx ). in their CalcTangentsProcess.cpp file
             
             //average out TBN. I think this does more harm than good though
-            //temp_binormals.at(index) += data.binormals.at(i);
-            //temp_tangents.at(index) += data.tangents.at(i);
+            temp_binormals.at(index) += data.binormals.at(i);
+            temp_tangents.at(index) += data.tangents.at(i);
         }
         else{
             out_pos.push_back( data.points.at(i));

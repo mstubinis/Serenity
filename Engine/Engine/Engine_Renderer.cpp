@@ -609,7 +609,6 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWid
         alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
         _passGodsRays(gbuffer,c,fbufferWidth,fbufferHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
-        gbuffer->stop(fbo,rbo); //is this really needed?
     }
 
     glEnable(GL_BLEND);
