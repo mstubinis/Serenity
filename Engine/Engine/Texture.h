@@ -46,6 +46,7 @@ class Texture: public EngineResource{
         uint numAddresses();
         ushort mipmapLevels();
         bool mipmapped();
+        void resize(uint width,uint height);
 
         ImageInternalFormat::Format internalFormat();
         ImagePixelFormat::Format pixelFormat();
