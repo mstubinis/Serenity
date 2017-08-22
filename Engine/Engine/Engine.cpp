@@ -47,7 +47,7 @@ void Engine::Detail::EngineClass::initGame(){
     Sound::Detail::SoundManagement::init();
 
     Resources::initResources();
-	Renderer::Detail::RenderManagement::postInit();
+    Renderer::Detail::RenderManagement::postInit();
     Game::initResources();
     Game::initLogic();
 
