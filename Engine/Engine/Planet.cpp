@@ -26,8 +26,10 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float atmosphereHeight = obj->getAtmosphereHeight();
     ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
     
-    Renderer::sendUniform1i("nSamples", 2);
-    Renderer::sendUniform1f("fSamples", 2.0f);   
+    //uint numberSamples = 2;
+    uint numberSamples = 8;
+    Renderer::sendUniform1i("nSamples", numberSamples);
+    Renderer::sendUniform1f("fSamples", float(numberSamples));   
     
     glm::vec3& pos = obj->getPosition();
     glm::quat& orientation = obj->getOrientation();
@@ -47,8 +49,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float ESun = 20.0f;
     Renderer::sendUniform1f("fKrESun", Kr * ESun);
     Renderer::sendUniform1f("fKmESun", Km * ESun);
-    Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-    Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+    Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
+    Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
     Renderer::sendUniform1i("hasAtmosphere",1);
     Renderer::sendUniform1i("HasAtmosphere",1);   
     float camHeight = glm::length(camPos);
@@ -105,8 +107,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniformMatrix4f("Model",mod);
         Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
-        Renderer::sendUniform1i("nSamples", 2);
-        Renderer::sendUniform1f("fSamples", 2.0f);
+        Renderer::sendUniform1i("nSamples", numberSamples);
+        Renderer::sendUniform1f("fSamples", float(numberSamples));   
         Renderer::sendUniform3f("v3CameraPos", camPos);
         Renderer::sendUniform3f("v3LightDir", lightDir);
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
@@ -121,8 +123,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         Renderer::sendUniform1f("fKrESun", Kr * ESun);
         Renderer::sendUniform1f("fKmESun", Km * ESun);
-        Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979323846f);
-        Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979323846f);
+        Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
+        Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
 
         Renderer::sendUniform1f("fScaleDepth",fScaledepth);
         Renderer::sendUniform1f("fScale",fScale);
