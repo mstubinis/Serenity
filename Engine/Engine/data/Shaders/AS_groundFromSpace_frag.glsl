@@ -48,9 +48,6 @@ varying vec3 Tangents;
 varying float FC_2_f;
 varying float logz_f;
 
-float Round(float x){
-    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);
-}
 vec2 sign_not_zero(vec2 v) {
     return vec2(v.x >= 0 ? 1.0 : -1.0,v.y >= 0 ? 1.0 : -1.0);
 }
@@ -68,51 +65,6 @@ vec3 DecodeOctahedron(vec2 n) {
 	if (v.z < 0.0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);
 	return normalize(v);
 }
-vec2 EncodeSpherical(vec3 n){
-    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
-        return vec2(1.0);
-    vec2 encN;
-    encN.x = atan( n.x, n.y ) * 1.0 / 3.1415926535898;
-    encN.y = n.z;
-    encN = encN * 0.5 + 0.5;
-    return encN;
-}
-vec3 DecodeSpherical(vec2 encN){
-    if(encN.r > 0.9999 && encN.g > 0.9999)
-        return vec3(1.0);
-     vec2 ang = encN * 2.0 - 1.0;
-     vec2 scth;
-     float ang2 = ang.x * 3.1415926535898;
-     scth.x = sin(ang2);
-     scth.y = cos(ang2);
-     vec2 scphi = vec2( sqrt( 1.0 - ang.y * ang.y ), ang.y );
-     vec3 n;
-     n.x = scth.y * scphi.x;
-     n.y = scth.x * scphi.x;
-     n.z = scphi.y;
-     return n;
-}
-vec2 EncodeStereographic(vec3 n){
-    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)
-        return vec2(1.0);
-	float scale = 1.7777777;
-	vec2 enc = n.xy / (n.z+1.0);
-	enc /= scale;
-	enc = enc*0.5+0.5;
-	return enc;
-}
-vec3 DecodeStereographic(vec2 enc){
-    if(enc.r > 0.9999 && enc.g > 0.9999)
-        return vec3(1.0);
-	float scale = 1.7777777;
-	vec3 nn = vec3(enc.xy,1.0)*vec3(2.0*scale,2.0*scale,0.0) + vec3(-scale,-scale,1.0);
-	float g = 2.0 / dot(nn.xyz,nn.xyz);
-	vec3 n;
-	n.xy = g*nn.xy;
-	n.z = g-1.0;
-	return normalize(n);
-}
-
 vec3 CalcBumpedNormal(void){
     vec3 normalTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
