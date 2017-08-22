@@ -76,9 +76,9 @@ class Texture::impl final{
                 _getPixels();
             }
             else if(m_Files.size() == 1 && m_Files[0] == "FRAMEBUFFER"){//Framebuffer
-				glBindTexture(m_Type,m_TextureAddress.at(0));
-				_buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
-				super->setFilter(TextureFilter::Linear);
+                glBindTexture(m_Type,m_TextureAddress.at(0));
+                _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
+                super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
                 glBindTexture(m_Type,0);
             }
@@ -247,10 +247,10 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
     }
 
-	Renderer::unbindFBO();
+    Renderer::unbindFBO();
 
-	FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
-	fbo->bind();
+    FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
+    fbo->bind();
 
     glGenTextures(1, &m_i->m_TextureAddress.at(1));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
@@ -307,7 +307,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     uint maxMipLevels = 5;
     for (uint m = 0; m < maxMipLevels; ++m){
         uint mipSize  = uint(size * glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
-		fbo->resize(mipSize,mipSize);
+        fbo->resize(mipSize,mipSize);
         float roughness = (float)m/(float)(maxMipLevels-1);
         Renderer::sendUniform1f("roughness",roughness);
         float a = roughness * roughness;
@@ -323,8 +323,8 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
 
-	fbo->unbind();
-	delete fbo;
+    fbo->unbind();
+    delete fbo;
 }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
