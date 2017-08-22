@@ -32,6 +32,7 @@ void Game::initResources(){
     Resources::getWindow()->setIcon("data/Textures/icon.png");
 
     Resources::addShaderProgram("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderRenderPass::Geometry);
+    Resources::addShaderProgram("AS_GroundFromAtmosphere","data/Shaders/AS_groundFromAtmosphere_vert.glsl","data/Shaders/AS_groundFromAtmosphere_frag.glsl",ShaderRenderPass::Geometry);
     Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderRenderPass::None);
     Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderRenderPass::None);
 
