@@ -590,9 +590,10 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWid
             for(auto lightProbe:Resources::getCurrentScene()->m_LightProbes){
                 lightProbe.second->renderCubemap();
             }
+            //Renderer::Detail::RenderManagement::m_gBuffer->resize(fbufferWidth,fbufferHeight);
         }
     }
-    
+
     _passGeometry(gbuffer,c,fbufferWidth,fbufferHeight,renderGodRays,ignore);
 
     if(RendererInfo::GodRaysInfo::godRays && renderGodRays){
