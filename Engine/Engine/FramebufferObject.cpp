@@ -61,14 +61,16 @@ class FramebufferTexture::impl{
             m_Texture = t;
             m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
             m_PixelType = ImagePixelType::at(t->pixelType());
-            _resize(super,_fbo->width(),_fbo->height());
+            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
+            glBindTexture(m_Texture->type(),0);
             m_Divisor = 1.0f;
         }
         void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t,float divisor){
             m_Texture = t;
             m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
             m_PixelType = ImagePixelType::at(t->pixelType());
-            _resize(super,_fbo->width(),_fbo->height());
+            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
+            glBindTexture(m_Texture->type(),0);
             m_Divisor = divisor;
         }
         void _destruct(FramebufferTexture* super){

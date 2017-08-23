@@ -1061,17 +1061,18 @@ class LightProbe::impl{
                 }
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
                 Texture::setFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            }
+            else{
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
+                //for (uint i = 0; i < 6; ++i){
+                    //glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,m_EnvMapSize,m_EnvMapSize,GL_RGB,GL_FLOAT,NULL);
+                //}
             }
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);
             glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,m_EnvMapSize,m_EnvMapSize);
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in LightProbe::impl::_render() is incomplete!" << endl; return;
-            }
-            glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
-            for (uint i = 0; i < 6; ++i){
-                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,m_EnvMapSize,m_EnvMapSize,GL_RGB,GL_FLOAT,NULL);
             }
             Renderer::setViewport(0,0,m_EnvMapSize,m_EnvMapSize);
             for (uint i = 0; i < 6; ++i){
@@ -1095,16 +1096,16 @@ class LightProbe::impl{
                 }
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
                 Texture::setFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            }
+            else{
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
+                //for (uint i = 0; i < 6; ++i){
+                    //glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
+                //}
             }
             glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,size,size);
-
-            glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
-            for (uint i = 0; i < 6; ++i){
-                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
-            }
             ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
-            Renderer::bindTexture("cubemap",m_EnvMapTextureAddress,0,GL_TEXTURE_CUBE_MAP);
+            Renderer::bindTexture("cubemap",m_TextureAddresses.at(0),0,GL_TEXTURE_CUBE_MAP);
 
             Renderer::setViewport(0,0,size,size);
             for (uint i = 0; i < 6; ++i){
@@ -1128,12 +1129,12 @@ class LightProbe::impl{
                 Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear_Mipmap_Linear);
                 Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
                 glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             }
-            
-            glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(2));
-            for (uint i = 0; i < 6; ++i){
-                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
+            else{
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(2));
+                //for (uint i = 0; i < 6; ++i){
+                    //glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
+                //}
             }
 
             p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
@@ -1177,7 +1178,4 @@ LightProbe::~LightProbe(){
 }
 void LightProbe::update(float dt){ m_i->_update(dt,this); }
 void LightProbe::renderCubemap(){ m_i->_render(this); }
-const GLuint& LightProbe::getEnvMapAddress() const{ return m_i->m_EnvMapTextureAddress; }
-const GLuint& LightProbe::getEnvMapConvolutionAddress() const{ return m_i->m_EnvMapConvolutionTextureAddress; }
-const GLuint& LightProbe::getEnvMapPrefilterAddress() const{ return m_i->m_EnvMapPrefilterTextureAddress; }
 const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }

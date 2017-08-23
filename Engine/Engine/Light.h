@@ -129,9 +129,6 @@ class LightProbe: public Camera{
         void update(float);
         void renderCubemap();
 
-        const GLuint& getEnvMapAddress() const;
-        const GLuint& getEnvMapConvolutionAddress() const;
-        const GLuint& getEnvMapPrefilterAddress() const;
         const uint getEnvMapSize() const;
 };
 #endif

@@ -165,13 +165,9 @@ class Texture::impl final{
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
-            //glDeleteTextures(1,&m_TextureAddress.at(0));
-            //glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
-            
             m_Width = w; m_Height = h;
-            glTexSubImage2D(m_Type,0,0,0,w,h,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
-            //glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
+            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }
         void _generateMipmaps(){
             if(m_Mipmapped == false){
@@ -261,16 +257,17 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         }
         this->setWrapping(TextureWrap::ClampToEdge);
         this->setFilter(TextureFilter::Linear);
-        glBindTexture(m_i->m_Type,0);
     }
+	else{
+		glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
+		//for (uint i = 0; i < 6; ++i){
+			//glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
+		//}
+	}
     Renderer::unbindFBO();
     FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
     fbo->bind();
 
-    glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
-    for (uint i = 0; i < 6; ++i){
-        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
-    }
     
     //make these 2 variables global in the renderer class?
     glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000.0f);
@@ -300,6 +297,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     //now gen EnvPrefilterMap for specular IBL
     size = preEnvFilterSize;
     if(m_i->m_TextureAddress.size() == 2){
+		glBindTexture(m_i->m_Type,0);
         m_i->m_TextureAddress.push_back(0);
         glGenTextures(1, &m_i->m_TextureAddress.at(2));
         glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
@@ -311,10 +309,12 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         this->setMaxFilter(TextureFilter::Linear);
         glGenerateMipmap(m_i->m_Type);
     }
-    glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
-    for (uint i = 0; i < 6; ++i){
-        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
-    }
+	else{
+		glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
+		//for (uint i = 0; i < 6; ++i){
+			//glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
+		//}
+	}
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((this->width() * this->width())*6));
