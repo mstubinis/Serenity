@@ -50,15 +50,10 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
     float fScale = 1.0f / (outerRadius - innerRadius);
     if(camHeight <= outerRadius){
-		/*
-        program->unbind();
-        program = Resources::getShaderProgram("AS_GroundFromAtmosphere");
-        program->bind();
-
-		obj->getDisplayItems().at(0)->material()->bind();
-		obj->bind();
-		obj->getDisplayItems().at(0)->mesh()->bind();
-		*/
+        Renderer::sendUniform1i("fromAtmosphere", 1);
+    }
+    else{
+        Renderer::sendUniform1i("fromAtmosphere", 0);
     }
     
     Renderer::sendUniform1i("nSamples", numberSamples);
