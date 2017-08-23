@@ -130,7 +130,7 @@ class Texture::impl final{
             if(m_Pixels.size() == 0){
                 m_Pixels.resize(m_Width*m_Height*4);
                 glBindTexture(m_Type,m_TextureAddress.at(0));
-                glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+                //glPixelStorei(GL_UNPACK_ALIGNMENT,1);
                 glGetTexImage(m_Type,0,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE,&m_Pixels[0]);
                 glBindTexture(m_Type,0);
             }
