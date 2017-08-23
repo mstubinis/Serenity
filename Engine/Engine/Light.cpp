@@ -39,7 +39,6 @@ unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
 }
 unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = _populateLightRanges();
 
-
 SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1.0f),n,scene){
     m_Type = type;
     m_Active = true;
@@ -47,7 +46,6 @@ SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay(
     m_DiffuseIntensity = 2.0f;
     m_SpecularIntensity = 1.0f;
     m_Color = glm::vec4(1.0,1.0f,1.0f,1.0f);
-
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
     }
@@ -63,7 +61,7 @@ void SunLight::lighten(){
     glm::vec3 pos = getPosition();
     sendGenericAttributesToShader();
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
-    Renderer::sendUniform4f("LightDataC",0.0f,pos.x, pos.y, pos.z);
+    Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
     Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
@@ -805,7 +803,7 @@ void SpotLight::lighten(){
 RodLight::RodLight(string name, glm::vec3 pos,float rodLength,Scene* scene): PointLight(name,pos,scene){
     if(Resources::getMesh("RodLightBounds") == nullptr){
         #pragma region Data
-        std::string data = 
+        string data = 
             "v -0.000000 1.000000 -1.000000\n"
             "v -0.000000 1.000000 1.000000\n"
             "v 0.284630 0.959493 -1.000000\n"
@@ -1112,7 +1110,7 @@ class LightProbe::impl{
             for (uint i = 0; i < 6; ++i){
                 glm::mat4 vp = super->m_Projection * m_Views[i];
                 Renderer::sendUniformMatrix4f("VP", vp);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureAddresses.at(1),0);
+                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(1),0);
                 Renderer::Settings::clear(true,true,false);
                 Skybox::bindMesh();
             }
@@ -1166,7 +1164,7 @@ class LightProbe::impl{
         }
 };
 
-LightProbe::LightProbe(std::string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene):Camera(n,glm::radians(90.0f),1.0f,0.1f,1000.0f,scene),m_i(new impl){
+LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene):Camera(n,glm::radians(90.0f),1.0f,0.1f,1000.0f,scene),m_i(new impl){
     m_i->_init(envMapSize,this,onlyOnce,scene);
     this->setPosition(pos);
     if(scene == nullptr){
