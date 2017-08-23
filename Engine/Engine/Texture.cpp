@@ -169,7 +169,10 @@ class Texture::impl final{
             //m_Width = w; m_Height = h;
             //glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
-            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
+            
+            
+            glTexSubImage2D(m_Type,0,0,0,w,h,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
+            //glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }
         void _generateMipmaps(){
             if(m_Mipmapped == false){
@@ -251,73 +254,90 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     }
     uint size = convoludeTextureSize;
     //cleanup previous convolute operation
-    if(m_i->m_TextureAddress.size() >= 2){
-        glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
-    }
-    else if(m_i->m_TextureAddress.size() == 1){
+    //if(m_i->m_TextureAddress.size() >= 2){
+        //glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
+    //}
+    if(m_i->m_TextureAddress.size() == 1){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
+        glGenTextures(1, &m_i->m_TextureAddress.at(1));
+        glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
+        for (uint i = 0; i < 6; ++i){
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
+        }
+        this->setWrapping(TextureWrap::ClampToEdge);
+        this->setFilter(TextureFilter::Linear);
+        glBindTexture(m_i->m_Type,0);
     }
-
     Renderer::unbindFBO();
-
     FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
     fbo->bind();
 
-    glGenTextures(1, &m_i->m_TextureAddress.at(1));
+    //glGenTextures(1, &m_i->m_TextureAddress.at(1));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
     for (uint i = 0; i < 6; ++i){
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
+        //glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
+        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
     }
 
-    this->setWrapping(TextureWrap::ClampToEdge);
-    this->setFilter(TextureFilter::Linear);
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000.0f);
+    //this->setWrapping(TextureWrap::ClampToEdge);
+    //this->setFilter(TextureFilter::Linear);
+    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000.0f);
     glm::mat4 captureViews[] = {
-        glm::lookAt(glm::vec3(0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+        glm::lookAt(glm::vec3(0.0f),glm::vec3( 1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
     };
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::setViewport(0,0,size,size);
     for (uint i = 0; i < 6; ++i){
-        glm::mat4 vp = captureProjection * captureViews[i];
-        Renderer::sendUniformMatrix4f("VP", vp);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_i->m_TextureAddress.at(1), 0);
+        glm::mat4 vp = captureProjection*captureViews[i];
+        Renderer::sendUniformMatrix4f("VP",vp);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_i->m_TextureAddress.at(1),0);
         Renderer::Settings::clear(true,true,false);
         Skybox::bindMesh();
     }
-    cout << "---- " + this->name() + " (Cubemap): convolution done ----" << endl;
+    cout << "---- " + name() + " (Cubemap): convolution done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
     p->unbind();
 
     //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
-    if(m_i->m_TextureAddress.size() >= 3){
-        glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
-    }
-    else if(m_i->m_TextureAddress.size() == 2){
-        m_i->m_TextureAddress.push_back(0);
-    }
+    //if(m_i->m_TextureAddress.size() >= 3){
+        //glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
+    //}
     size = preEnvFilterSize;
-    glGenTextures(1, &m_i->m_TextureAddress.at(2));
+    if(m_i->m_TextureAddress.size() == 2){
+        m_i->m_TextureAddress.push_back(0);
+        glGenTextures(1, &m_i->m_TextureAddress.at(2));
+        glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
+        for (uint i = 0; i < 6; ++i){
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
+        }
+        this->setWrapping(TextureWrap::ClampToEdge);
+        this->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
+        this->setMaxFilter(TextureFilter::Linear);
+        glGenerateMipmap(m_i->m_Type);
+    }
+    //glGenTextures(1, &m_i->m_TextureAddress.at(2));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
     for (uint i = 0; i < 6; ++i){
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
+        //glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
+        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
     }
-    this->setWrapping(TextureWrap::ClampToEdge);
-    this->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
-    this->setMaxFilter(TextureFilter::Linear);
-    glGenerateMipmap(m_i->m_Type);
+    //this->setWrapping(TextureWrap::ClampToEdge);
+    //this->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
+    //this->setMaxFilter(TextureFilter::Linear);
+    //glGenerateMipmap(m_i->m_Type);
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((this->width() * this->width())*6));
     Renderer::sendUniform1i("NUM_SAMPLES",32);
     uint maxMipLevels = 5;
     for (uint m = 0; m < maxMipLevels; ++m){
-        uint mipSize  = uint(size * glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
+        uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
         fbo->resize(mipSize,mipSize);
         float roughness = (float)m/(float)(maxMipLevels-1);
         Renderer::sendUniform1f("roughness",roughness);
@@ -331,7 +351,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
             Skybox::bindMesh();
         }
     }
-    cout << "---- " + this->name() + " (Cubemap): prefilter done ----" << endl;
+    cout << "---- " + name() + " (Cubemap): prefilter done ----" << endl;
     Resources::getWindow()->display(); //prevent opengl & windows timeout
 
     fbo->unbind();
