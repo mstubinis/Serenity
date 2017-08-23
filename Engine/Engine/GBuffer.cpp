@@ -10,7 +10,7 @@ using namespace Engine;
 using namespace std;
 
 unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> _populateGBufferTypesInfo(){
-	unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
+    unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
                                        //winSizeRatio   //internFormat                 //pxl_components                         //pxl_format
     m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
     m[GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
@@ -20,15 +20,15 @@ unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelForm
     m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
     m[GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
     m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth16,  ImagePixelFormat::DEPTH_COMPONENT, ImagePixelType::FLOAT,  FramebufferAttatchment::Depth);
-    
+
     return m;
 }
 unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = _populateGBufferTypesInfo();
 
 class GBuffer::impl final{
     public:
-		FramebufferObject* m_FBO;
-		FramebufferObject* m_SmallFBO;
+        FramebufferObject* m_FBO;
+        FramebufferObject* m_SmallFBO;
         unordered_map<uint,FramebufferTexture*> m_Buffers;
         uint m_Width; uint m_Height;
         bool _init(uint w,uint h){
@@ -36,8 +36,8 @@ class GBuffer::impl final{
 
             m_Width = w; m_Height = h;
 
-			m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,ImageInternalFormat::Depth16);
-			m_FBO->bind();
+            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,ImageInternalFormat::Depth16);
+            m_FBO->bind();
 
             _constructFramebuffer(m_FBO,"BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
             _constructFramebuffer(m_FBO,"BUFFER_NORMAL",  GBufferType::Normal,  m_Width,m_Height);
@@ -48,8 +48,8 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-			m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,ImageInternalFormat::Depth16);
-			m_SmallFBO->bind();
+            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,ImageInternalFormat::Depth16);
+            m_SmallFBO->bind();
 
             _constructFramebuffer(m_SmallFBO,"BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
             _constructFramebuffer(m_SmallFBO,"BUFFER_FREE2",   GBufferType::Free2,   m_Width,m_Height);
@@ -60,29 +60,29 @@ class GBuffer::impl final{
             }
             return true;
         }
-		void _resize(uint w, uint h){
-			m_Width = w; m_Height = h;
-			m_FBO->bind();
-			m_FBO->resize(w,h);
-			m_SmallFBO->bind();
-			m_SmallFBO->resize(w,h);
-		}
+        void _resize(uint w, uint h){
+            m_Width = w; m_Height = h;
+            m_FBO->bind();
+            m_FBO->resize(w,h);
+            m_SmallFBO->bind();
+            m_SmallFBO->resize(w,h);
+        }
         void _constructFramebuffer(FramebufferObject* fbo,string n,uint t,uint w,uint h){
             boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>& i = GBUFFER_TYPE_DATA.at(t);
-			Texture* texture = new Texture(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),GL_TEXTURE_2D,i.get<0>());
+            Texture* texture = new Texture(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),GL_TEXTURE_2D,i.get<0>());
             m_Buffers.emplace(t,fbo->attatchTexture(texture,i.get<4>()));
         }
         void _destruct(){
             m_Width = m_Height = 0;
 
-			delete m_FBO;
-			delete m_SmallFBO;
+            delete m_FBO;
+            delete m_SmallFBO;
 
             Renderer::unbindFBO();
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
-			if(first_fbo){ m_FBO->bind(); }
-			else{ m_SmallFBO->bind(); }
+            if(first_fbo){ m_FBO->bind(); }
+            else{ m_SmallFBO->bind(); }
             GLboolean r,g,b,a;
             if(channels.find("R") != string::npos) r=GL_TRUE; else r=GL_FALSE;
             if(channels.find("G") != string::npos) g=GL_TRUE; else g=GL_FALSE;
@@ -153,7 +153,7 @@ GBuffer::~GBuffer(){
 }
 void GBuffer::resize(uint width, uint height){
     stop();
-	m_i->_resize(width,height);
+    m_i->_resize(width,height);
 }
 void GBuffer::start(vector<uint>& t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
 void GBuffer::start(uint t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
