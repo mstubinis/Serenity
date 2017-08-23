@@ -27,7 +27,8 @@ uniform float fScale;               // 1 / (fOuterRadius - fInnerRadius)
 uniform float fScaleDepth;          // The scale depth (i.e. the altitude at which the atmosphere's average density is found) 
 uniform float fScaleOverScaleDepth; // fScale / fScaleDepth
 uniform float fSamples;
-uniform int nSamples;   
+uniform int nSamples;
+uniform int fromAtmosphere;
 
 varying vec3 c0;
 varying vec3 c1;
@@ -68,13 +69,19 @@ void main(void){
         vec3 test = (Rot * vec4(position,1.0)).xyz;
         vec3 v3Pos = test * fInnerRadius;
         vec3 v3Ray = v3Pos - v3CameraPos;
-        float fFar = length(v3Ray); 
+        float fFar = length(v3Ray);
         v3Ray /= fFar;  
-    
-        float fNear = getNearIntersection(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2);
-    
-        vec3 v3Start = v3CameraPos + v3Ray * fNear; 
-        fFar -= fNear;
+        
+        vec3 v3Start;
+        if(fromAtmosphere == 0){
+            float fNear = getNearIntersection(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2);
+            v3Start = v3CameraPos + v3Ray * fNear; 
+            fFar -= fNear;
+        }
+        else{
+            v3Start = v3CameraPos;
+        }
+        
         vec3 normal = normalize(v3Pos);
         float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);    
         float fCameraAngle = dot(-v3Ray, normal);
