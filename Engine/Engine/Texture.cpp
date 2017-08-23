@@ -252,10 +252,6 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
     }
     uint size = convoludeTextureSize;
-    //cleanup previous convolute operation
-    //if(m_i->m_TextureAddress.size() >= 2){
-        //glDeleteTextures(1,&m_i->m_TextureAddress.at(1));
-    //}
     if(m_i->m_TextureAddress.size() == 1){
         m_i->m_TextureAddress.push_back(0); // this should be element 2 (.at(1)) now
         glGenTextures(1, &m_i->m_TextureAddress.at(1));
@@ -271,15 +267,12 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
     fbo->bind();
 
-    //glGenTextures(1, &m_i->m_TextureAddress.at(1));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
     for (uint i = 0; i < 6; ++i){
-        //glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
         glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
     }
-
-    //this->setWrapping(TextureWrap::ClampToEdge);
-    //this->setFilter(TextureFilter::Linear);
+    
+    //make these 2 variables global in the renderer class?
     glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000.0f);
     glm::mat4 captureViews[] = {
         glm::lookAt(glm::vec3(0.0f),glm::vec3( 1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
@@ -289,6 +282,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
         glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
     };
+    
     ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::setViewport(0,0,size,size);
@@ -303,10 +297,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     Resources::getWindow()->display(); //prevent opengl & windows timeout
     p->unbind();
 
-    //now gen EnvPrefilterMap for specular IBL. cleanup previous EnvPrefilterMap operation
-    //if(m_i->m_TextureAddress.size() >= 3){
-        //glDeleteTextures(1,&m_i->m_TextureAddress.at(2));
-    //}
+    //now gen EnvPrefilterMap for specular IBL
     size = preEnvFilterSize;
     if(m_i->m_TextureAddress.size() == 2){
         m_i->m_TextureAddress.push_back(0);
@@ -320,16 +311,10 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         this->setMaxFilter(TextureFilter::Linear);
         glGenerateMipmap(m_i->m_Type);
     }
-    //glGenTextures(1, &m_i->m_TextureAddress.at(2));
     glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
     for (uint i = 0; i < 6; ++i){
-        //glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
         glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
     }
-    //this->setWrapping(TextureWrap::ClampToEdge);
-    //this->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
-    //this->setMaxFilter(TextureFilter::Linear);
-    //glGenerateMipmap(m_i->m_Type);
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((this->width() * this->width())*6));
