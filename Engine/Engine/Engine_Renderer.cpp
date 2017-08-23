@@ -94,17 +94,17 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
-	FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize,ImageInternalFormat::Depth16);
-	fbo->bind();
+    FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize,ImageInternalFormat::Depth16);
+    fbo->bind();
 
-	Texture* t = Resources::getTexture("BRDFCookTorrance");
+    Texture* t = Resources::getTexture("BRDFCookTorrance");
 
-	//lut
-	glBindTexture(GL_TEXTURE_2D, t->address());
+    //lut
+    glBindTexture(GL_TEXTURE_2D, t->address());
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
     Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
     Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,t->address(), 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,t->address(), 0);
 
     ShaderP* p = Resources::getShaderProgram("BRDF_Precompute_CookTorrance"); p->bind();
     Renderer::sendUniform1i("NUM_SAMPLES",256);
@@ -115,7 +115,7 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
-	delete fbo;
+    delete fbo;
     Renderer::bindReadFBO(prevReadBuffer);
     Renderer::bindDrawFBO(prevDrawBuffer);
 }
@@ -318,7 +318,10 @@ void Detail::RenderManagement::init(){
     RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,float(Resources::getWindowSize().x),0.0f,float(Resources::getWindowSize().y),0.005f,1000.0f);
 	Settings::enableDepthTest(true);
     glDepthFunc(GL_LEQUAL);
-    //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //recommended for specular IBL. but causes HUGE fps drops. investigate this...
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
+    
+    //recommended for specular IBL. but causes HUGE fps drops (prob because OGL 3.3 does not support this). investigate this...
+    //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
 }
 void Detail::RenderManagement::postInit(){
