@@ -191,6 +191,17 @@ void Settings::cullFace(uint s){
     }
 }
 void Settings::clear(bool color, bool depth, bool stencil){
+    if(!color && !depth && !stencil) return;
+	/*
+    GLuint settings;
+    if(color) settings = settings | GL_COLOR_BUFFER_BIT;
+    if(stencil) setting = settings | GL_STENCIL_BUFFER_BIT;
+    if(depth){
+        enableDepthMask();
+        setting = setting | GL_DEPTH_BUFFER_BIT;
+    }
+    glClear(setting);
+	*/
     if(depth){ 
         enableDepthMask();
         if(color && stencil){ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); }
