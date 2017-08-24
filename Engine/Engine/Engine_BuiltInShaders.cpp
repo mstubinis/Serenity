@@ -49,7 +49,6 @@ string Shaders::Detail::ShadersManagement::ssao_frag = "";
 string Shaders::Detail::ShadersManagement::hdr_frag = "";
 string Shaders::Detail::ShadersManagement::godRays_frag = "";
 string Shaders::Detail::ShadersManagement::blur_frag = "";
-string Shaders::Detail::ShadersManagement::edge_frag = "";
 string Shaders::Detail::ShadersManagement::edge_canny_frag = "";
 string Shaders::Detail::ShadersManagement::edge_canny_blur = "";
 string Shaders::Detail::ShadersManagement::final_frag = "";
@@ -1448,51 +1447,6 @@ Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManag
     "        gl_FragColor = totalColor * alpha;\n"
     "        gl_FragColor *= RaysInfo.x;\n"
     "    }\n"
-    "}";
-
-#pragma endregion
-
-#pragma region EdgeDetect
-Shaders::Detail::ShadersManagement::edge_frag = Shaders::Detail::ShadersManagement::version + 
-    "\n"
-    "uniform vec2 gScreenSize;\n"
-    "uniform sampler2D texture;\n"
-    "uniform float radius;\n"
-    "\n"
-    "float threshold(float thr1,float thr2 ,float val) {\n"
-    "    if (val < thr1) { return 0.0; }\n"
-    "    if (val > thr2) { return 1.0; }\n"
-    "    return val;\n"
-    "}\n"
-    "// averaged pixel intensity from 3 color channels\n"
-    "float avg_intensity(vec4 pix) {\n"
-    "    return (pix.r + pix.g + pix.b)/3.0;\n"
-    "}\n"
-    "vec4 get_pixel(vec2 coords,float dx,float dy) {\n"
-    "    float value = texture2D(texture,coords + vec2(dx, dy)).r;\n"
-    "    return vec4(value);\n"
-    "}\n"
-    "float IsEdge(vec2 coords){\n"
-    "    float dxtex = 1.0 / gScreenSize.x;\n"
-    "    float dytex = 1.0 / gScreenSize.y;\n"
-    "    float pix[9];\n"
-    "    int k = -1;\n"
-    "    float delta;\n"
-    "    // read neighboring pixel intensities\n"
-    "    for (int i=-1; i<2; i++) {\n"
-    "        for(int j=-1; j<2; j++) {\n"
-    "            k++;\n"
-    "            pix[k] = avg_intensity(get_pixel(coords,float(i)*dxtex,float(j)*dytex));\n"
-    "        }\n"
-    "    }\n"
-    "    // average color differences around neighboring pixels\n"
-    "    delta = (abs(pix[1]-pix[7])+abs(pix[5]-pix[3]) +abs(pix[0]-pix[8])+abs(pix[2]-pix[6]))/2.0;\n"
-    "    return threshold(0.15,0.6,clamp(1.8*delta,0.0,1.0));\n"
-    "}\n"
-    "void main(void){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
-    "    float edge = IsEdge(uv);\n"
-    "    gl_FragColor = vec4(edge);\n"
     "}";
 #pragma endregion
 
