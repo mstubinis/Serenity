@@ -65,6 +65,9 @@ float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = 1.0f/128.0f;
 float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = 1.0f/8.0f;
 float Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = 8.0f;
 
+
+GLuint Detail::RendererInfo::SMAAInfo::SMAA_AreaTexture;
+GLuint Detail::RendererInfo::SMAAInfo::SMAA_SearchTexture;
 glm::vec2 Detail::RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE = glm::vec2(1.0f / 300.0f, 1.0f / 300.0f);
 float Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
 uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 8;
@@ -381,6 +384,20 @@ void Detail::RenderManagement::init(){
     //recommended for specular IBL. but causes HUGE fps drops (prob because OGL 3.3 does not support this). investigate this...
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
+    // Create SMAA lookup textures
+    glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
+    glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_SearchTexture);
+    Texture::setFilter(Texture::TextureFilter::Linear);
+    Texture::setWrapping(Texture::TextureWrap::ClampToBorder);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_AreaTexture);
+    glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_AreaTexture);
+    Texture::setFilter(Texture::TextureFilter::Linear);
+    Texture::setWrapping(Texture::TextureWrap::ClampToBorder);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
+    glBindTexture(GL_TEXTURE_2D,0);
 }
 void Detail::RenderManagement::postInit(){
     _generateBRDFLUTCookTorrance(512);
@@ -388,6 +405,8 @@ void Detail::RenderManagement::postInit(){
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
     glDeleteTextures(1,&RendererInfo::SSAOInfo::ssao_noise_texture);
+    glDeleteTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
+    glDeleteTextures(1,&RendererInfo::SMAAInfo::SMAA_AreaTexture);
 }
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
     Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
@@ -886,22 +905,6 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
     if(!renderAA) return;
 	
-    // Create lookup textures
-    GLuint searchTexture; GLuint areaTexture;
-    glGenTextures(1,&searchTexture);
-    glBindTexture(GL_TEXTURE_2D,searchTexture);
-    Texture::setFilter(Texture::TextureFilter::Linear);
-    Texture::setWrapping(Texture::TextureWrap::ClampToBorder);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
-    glBindTexture(GL_TEXTURE_2D,0);
-
-    glGenTextures(1,&areaTexture);
-    glBindTexture(GL_TEXTURE_2D,areaTexture);
-    Texture::setFilter(Texture::TextureFilter::Linear);
-    Texture::setWrapping(Texture::TextureWrap::ClampToBorder);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
-    glBindTexture(GL_TEXTURE_2D,0);
-    
     gbuffer->start(GBufferType::Misc,GBufferType::Diffuse); //we save the original image to Diffuse buffer so it can be used later
     ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
     sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
@@ -921,8 +924,8 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
     sendUniform1i("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
     bindTextureSafe("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
-    bindTextureSafe("area_tex",areaTexture,1,GL_TEXTURE_2D);
-    bindTextureSafe("search_tex",searchTexture,2,GL_TEXTURE_2D);
+    bindTextureSafe("area_tex",RendererInfo::SMAAInfo::SMAA_AreaTexture,1,GL_TEXTURE_2D);
+    bindTextureSafe("search_tex",RendererInfo::SMAAInfo::SMAA_SearchTexture,2,GL_TEXTURE_2D);
     sendUniform1i("SMAA_MAX_SEARCH_STEPS_DIAG",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG);
     sendUniform1i("SMAA_AREATEX_MAX_DISTANCE",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE);
     sendUniform1i("SMAA_AREATEX_MAX_DISTANCE_DIAG",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG);
@@ -958,8 +961,6 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     p->unbind();
     */
 	
-    glDeleteTextures(1,&searchTexture);
-    glDeleteTextures(1,&areaTexture);
 }
 void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
