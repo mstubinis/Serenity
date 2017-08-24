@@ -28,6 +28,10 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
+float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = 1.0f/128.0f;
+float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = 1.0f/8.0f;
+float Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = 8.0f;
+
 glm::vec2 Detail::RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE = glm::vec2(1.0f / 300.0f, 1.0f / 300.0f);
 float Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
 uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 8;
@@ -810,7 +814,7 @@ void Detail::RenderManagement::_passBlur(GBuffer* gbuffer,Camera* c,uint& fbuffe
 
     float _divisor = gbuffer->getBuffer(GBufferType::Bloom)->divisor();
     sendUniform1f("fbufferDivisor",_divisor);
-    
+
     glm::vec4 rgba(0.0f);
     if(channels.find("R") != string::npos) rgba.x = 1.0f;
     if(channels.find("G") != string::npos) rgba.y = 1.0f;
@@ -831,13 +835,13 @@ void Detail::RenderManagement::_passBlur(GBuffer* gbuffer,Camera* c,uint& fbuffe
 }
 void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
     if(!renderAA) return;
-    
+
     ShaderP* p = Resources::getShaderProgram("Deferred_FXAA"); p->bind();
 
-    sendUniform1f("FXAA_REDUCE_MIN",1.0f/128.0f);
-    sendUniform1f("FXAA_REDUCE_MUL",1.0f/8.0f);
-    sendUniform1f("FXAA_SPAN_MAX",8.0f);
-	    
+    sendUniform1f("FXAA_REDUCE_MIN",Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN);
+    sendUniform1f("FXAA_REDUCE_MUL",Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL);
+    sendUniform1f("FXAA_SPAN_MAX",Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX);
+
     sendUniform2f("resolution",float(fbufferWidth),float(fbufferHeight));
     bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
     bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),1);
