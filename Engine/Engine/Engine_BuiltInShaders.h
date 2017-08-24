@@ -11,7 +11,7 @@ namespace Engine{
                 private:
                 public:
                     static void init();
-                    static void convertShaderCode();
+                    static void convertShaderCode(std::string&);
                 
                     static std::string version;
 
