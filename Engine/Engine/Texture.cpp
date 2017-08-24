@@ -36,7 +36,8 @@ class Texture::impl final{
             m_PixelFormat = pxlFormat;
             m_PixelType = pxlType;
             _baseInit(type,super,n,i,internFormat,genMipMaps);
-            m_Width = uint(float(w) * divisor); m_Height = uint(float(h) * divisor);
+            m_Width = uint(float(w) * divisor);
+			m_Height = uint(float(h) * divisor);
             super->load();
         }
         void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,bool genMipMaps){
@@ -79,7 +80,7 @@ class Texture::impl final{
                 glBindTexture(m_Type,m_TextureAddress.at(0));
                 _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
                 super->setFilter(TextureFilter::Linear);
-                super->setWrapping(TextureWrap::ClampToEdge);
+                super->setWrapping(TextureWrap::ClampToBorder);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() > 1){//cubemap
@@ -130,7 +131,6 @@ class Texture::impl final{
             if(m_Pixels.size() == 0){
                 m_Pixels.resize(m_Width*m_Height*4);
                 glBindTexture(m_Type,m_TextureAddress.at(0));
-                //glPixelStorei(GL_UNPACK_ALIGNMENT,1);
                 glGetTexImage(m_Type,0,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE,&m_Pixels[0]);
                 glBindTexture(m_Type,0);
             }
@@ -160,14 +160,15 @@ class Texture::impl final{
                 else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
             }
         }
-        void _resize(uint w, uint h){
+        void _resize(FramebufferTexture* t,uint w, uint h){
             if(m_Files.size() == 0 || (m_Files.size() == 1 && m_Files.at(0) != "FRAMEBUFFER")){
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
             glBindTexture(m_Type, m_TextureAddress.at(0));
-            m_Width = w; m_Height = h;
-            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),w,h,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
+			m_Width = uint(float(w) * t->divisor()); 
+			m_Height = uint(float(h) * t->divisor());
+            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),m_Width,m_Height,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }
         void _generateMipmaps(){
             if(m_Mipmapped == false){
@@ -341,7 +342,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     fbo->unbind();
     delete fbo;
 }
-void Texture::resize(uint w, uint h){ m_i->_resize(w,h); }
+void Texture::resize(FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
 uchar* Texture::pixels(){ return m_i->_getPixels(); }

@@ -76,7 +76,7 @@ class FramebufferTexture::impl{
         void _destruct(FramebufferTexture* super){
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
-            m_Texture->resize(w,h);
+            m_Texture->resize(super,w,h);
             glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
             glBindTexture(m_Texture->type(),0);
         }
@@ -235,6 +235,7 @@ FramebufferObject::FramebufferObject(string name,uint w,uint h,ImageInternalForm
 FramebufferObject::~FramebufferObject(){ m_i->_destruct(this); }
 void FramebufferObject::resize(uint w,uint h){ m_i->_resize(this,w,h); }
 FramebufferTexture* FramebufferObject::attatchTexture(Texture* t,FramebufferAttatchment::Attatchment a){ return m_i->_attatchTexture(this,t,a); }
+FramebufferTexture* FramebufferObject::attatchTexture(Texture* t,FramebufferAttatchment::Attatchment a,float d){ return m_i->_attatchTexture(this,t,a,d); }
 RenderbufferObject* FramebufferObject::attatchRenderBuffer(RenderbufferObject* t){ return m_i->_attatchRenderbuffer(this,t); }
 uint FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint FramebufferObject::height(){ return m_i->m_FramebufferHeight; }

@@ -45,7 +45,7 @@ float Detail::RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD = (0.1f * Detail::Ren
 bool Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = false;
 float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD = 0.01f;
 float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE = 2.0f;
-float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH = 0.4;
+float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH = 0.4f;
 
 bool Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = false;
 float Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION_WEIGHT_SCALE = 30.0f;
@@ -365,15 +365,15 @@ void Detail::RenderManagement::init(){
     // Create SMAA lookup textures
     glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_SearchTexture);
-    Texture::setFilter(Texture::TextureFilter::Linear);
-    Texture::setWrapping(Texture::TextureWrap::ClampToBorder);
+    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
 
     glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_AreaTexture);
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_AreaTexture);
-    Texture::setFilter(Texture::TextureFilter::Linear);
-    Texture::setWrapping(Texture::TextureWrap::ClampToBorder);
+    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
 }
@@ -803,9 +803,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
-	
-    //diffuse texture is now greyscaled and blurred
-	
+	/*
     //blur it again
     gbuffer->start(GBufferType::Misc);
     p->bind();
@@ -813,12 +811,19 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
-	
-    //misc is now the final blurred greyscale image
+    //blur it again
     gbuffer->start(GBufferType::Diffuse);
-    p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
-    sendUniform4f("data",1.0f,1.0f,0.4f,0.4f);
+    p->bind();
     bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
+    renderFullscreenQuad(fboWidth,fboHeight);
+    unbindTexture2D(0);
+    p->unbind();
+	*/
+
+    //misc is now the final blurred greyscale image
+    gbuffer->start(GBufferType::Misc);
+    p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
+    bindTexture("texture",gbuffer->getTexture(GBufferType::Diffuse),0);
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
@@ -903,7 +908,7 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 
     sendUniform2f("resolution",float(fbufferWidth),float(fbufferHeight));
     bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
-    bindTexture("edgeTexture",gbuffer->getTexture(GBufferType::Diffuse),1);
+    bindTextureSafe("edgeTexture",gbuffer->getTexture(GBufferType::Misc),1);
     bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),2);
     renderFullscreenQuad(fbufferWidth,fbufferHeight);
 

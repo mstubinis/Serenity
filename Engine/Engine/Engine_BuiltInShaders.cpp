@@ -49,6 +49,7 @@ string Shaders::Detail::ShadersManagement::ssao_frag = "";
 string Shaders::Detail::ShadersManagement::hdr_frag = "";
 string Shaders::Detail::ShadersManagement::godRays_frag = "";
 string Shaders::Detail::ShadersManagement::blur_frag = "";
+string Shaders::Detail::ShadersManagement::greyscale_frag = "";
 string Shaders::Detail::ShadersManagement::edge_canny_frag = "";
 string Shaders::Detail::ShadersManagement::edge_canny_blur = "";
 string Shaders::Detail::ShadersManagement::final_frag = "";
@@ -531,18 +532,19 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
 
 #pragma region FXAA
 Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
-    "uniform FXAA_REDUCE_MIN;\n"
+	"\n"
+    "uniform float FXAA_REDUCE_MIN;\n"
     "uniform float FXAA_REDUCE_MUL;\n"
     "uniform int FXAA_SPAN_MAX;\n"
     "uniform sampler2D sampler0;\n"
-    "uniform sampler2D edgeTexture;\n"
+    "//uniform sampler2D edgeTexture;\n"
     "uniform sampler2D depthTexture;\n"
     "uniform vec2 resolution;\n"
     "void main(void){\n"
     "   vec2 uv = gl_TexCoord[0].st;\n"
     "   float depth = texture2D(depthTexture,uv);\n"
-    "   float edge = texture2D(edgeTexture,uv).r;
-    "   if(depth >= 0.99999 || edge <= 0.3){\n"
+    "   float edge = texture2D(edgeTexture,uv).r;\n"
+    "   if(depth >= 0.99999){\n"
     "       gl_FragColor = texture2D(sampler0, uv);\n"
     "       return;\n"
     "   }\n"
@@ -570,10 +572,10 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
     "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(sampler0,uv + dir * - 0.5).xyz + texture2D(sampler0,uv + dir * 0.5).xyz);\n"
     "   float lumaB = dot(rgbB,luma);\n"
     "   if((lumaB < lumaMin) || (lumaB > lumaMax)){\n"
-    "       gl_FragColor = vec4(rgbA,1.0);\n"
+	"       gl_FragColor = vec4(rgbA,1.0);\n"
     "   }\n"
     "   else{\n"
-    "       gl_FragColor = vec4(rgbB,1.0);\n"
+	"       gl_FragColor = vec4(rgbB,1.0);\n"
     "   }\n"
     "}";
 #pragma endregion
@@ -1465,50 +1467,84 @@ Shaders::Detail::ShadersManagement::greyscale_frag = Shaders::Detail::ShadersMan
 #pragma endregion
     
 #pragma region EdgeCannyBlur
-Shaders::Detail::ShadersManagement::edge_frag_blur = Shaders::Detail::ShadersManagement::version + 
+Shaders::Detail::ShadersManagement::edge_canny_blur = Shaders::Detail::ShadersManagement::version + 
     "\n"
+	"vec2 textureCoordinate;\n"
+	"vec2 leftTextureCoordinate;\n"
+	"vec2 rightTextureCoordinate;\n"
+	"vec2 topTextureCoordinate;\n"
+	"vec2 topLeftTextureCoordinate;\n"
+	"vec2 topRightTextureCoordinate;\n"
+	"vec2 bottomTextureCoordinate;\n"
+	"vec2 bottomLeftTextureCoordinate;\n"
+	"vec2 bottomRightTextureCoordinate;\n"
     "uniform sampler2D texture;\n"
     "void main(void){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
-    "    vec2 left_uv = uv + vec2(-1.0, 0.0);\n"
-    "    vec2 right_uv = uv + vec2(1.0, 0.0);\n"
-    "    vec2 top_uv = uv + vec2(0.0, -1.0);\n"
-    "    vec2 topLeft_uv = uv + vec2(-1.0, -1.0);\n"
-    "    vec2 topRight_uv = uv + vec2(1.0, -1.0);\n"
-    "    vec2 bottom_uv = uv + vec2(0.0,1.0);\n"
-    "    vec2 bottomLeft_uv = uv + vec2(-1.0,1.0);\n"
-    "    vec2 bottomRight_uv = uv + vec2(1.0,1.0);\n"
-    "    float blInt = texture2D(texture, bottomLeft_uv).r;\n"
-    "    float trInt = texture2D(texture, topRight_uv).r;\n"
-    "    float tlInt = texture2D(texture, topLeft_uv).r;\n"
-    "    float brInt = texture2D(texture, bottomRight_uv).r;\n"
-    "    float lInt = texture2D(texture, left_uv).r;\n"
-    "    float rInt = texture2D(texture, right_uv).r;\n"
-    "    float bInt = texture2D(texture, bottom_uv).r;\n"
-    "    float tInt = texture2D(texture, top_uv).r;\n"
-    "    float blur = lInt + rInt + tInt + bInt + blInt + trInt + tlInt + brInt + texture2D(texture, uv).r;\n"
-    "    blur *= 0.11111;\n"
-    "    gl_FragColor = vec4(vec3(blur), 1.0);\n"
+	"	textureCoordinate = gl_TexCoord[0].st;\n"
+	"	leftTextureCoordinate = textureCoordinate + vec2(-1.0, 0.0);\n"
+	"	rightTextureCoordinate = textureCoordinate + vec2(1.0, 0.0);\n"
+	"	topTextureCoordinate = textureCoordinate + vec2(0.0, -1.0);\n"
+	"	topLeftTextureCoordinate = textureCoordinate + vec2(-1.0, -1.0);\n"
+	"	topRightTextureCoordinate = textureCoordinate + vec2(1.0, -1.0);\n"
+	"	bottomTextureCoordinate = textureCoordinate + vec2(0.0,1.0);\n"
+	"	bottomLeftTextureCoordinate = textureCoordinate + vec2(-1.0,1.0);\n"
+	"	bottomRightTextureCoordinate = textureCoordinate + vec2(1.0,1.0);\n"
+	"	float bottomLeftIntensity = texture2D(texture, bottomLeftTextureCoordinate).r;\n"
+	"	float topRightIntensity = texture2D(texture, topRightTextureCoordinate).r;\n"
+	"	float topLeftIntensity = texture2D(texture, topLeftTextureCoordinate).r;\n"
+	"	float bottomRightIntensity = texture2D(texture, bottomRightTextureCoordinate).r;\n"
+	"	float leftIntensity = texture2D(texture, leftTextureCoordinate).r;\n"
+	"	float rightIntensity = texture2D(texture, rightTextureCoordinate).r;\n"
+	"	float bottomIntensity = texture2D(texture, bottomTextureCoordinate).r;\n"
+	"	float topIntensity = texture2D(texture, topTextureCoordinate).r;\n"
+	"	float blur = leftIntensity + rightIntensity + topIntensity + bottomIntensity + bottomLeftIntensity + topRightIntensity + topLeftIntensity + bottomRightIntensity + texture2D(texture, textureCoordinate).r;\n"
+	"	blur *= 0.11111;\n"
+	"	gl_FragColor = vec4(vec3(blur), 1.0);\n"
     "}\n"
     "\n";
 #pragma endregion
 	
 #pragma region EdgeCannyFrag
-Shaders::Detail::ShadersManagement::edge_frag_canny = Shaders::Detail::ShadersManagement::version + 
+Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D texture;\n"
-    "uniform vec4 data;\n" // texelWidth | texelHeight | upperThreshold | lowerThreshold
+	"const float texWidth  = 1.0 / 1024.0;\n"	///< Web cam width size 
+	"const float texHeight = 1.0 / 768.0;\n"	///< Web cam height size
+	"const float threshold = 0.2;\n"			///< Threshold value
+	"const vec2 unshift = vec2(1.0 / 256.0, 1.0);\n" ///< Value used to unpack 16 bit float data
+	"const float atan0   = 0.414213;\n"  ///< Support value for atan
+	"const float atan45  = 2.414213;\n"  ///< Support value for atan
+	"const float atan90  = -2.414213;\n" ///< Support value for atan
+	"const float atan135 = -0.414213;\n" ///< Support value for atan
+	"vec2 atanForCanny(float x) {\n"
+	"	if (x < atan0 && x > atan135) { return vec2(1.0, 0.0); }\n"
+	"	if (x < atan90 && x > atan45) { return vec2(0.0, 1.0); }\n"
+	"	if (x > atan135 && x < atan90) { return vec2(-1.0, 1.0); }\n"
+	"	return vec2(1.0, 1.0);\n"
+	"}\n"
+	"vec4 cannyEdge(vec2 coords) {\n"
+	"  vec4 color = texture2D(texture, coords);\n"
+	"  if (color.z > threshold) {\n"
+	"	color.x -= 0.5;\n"
+	"	color.y -= 0.5;\n"
+	"	vec2 offset = atanForCanny(color.y / color.x);\n"
+	"	offset.x *= texWidth;\n"
+	"	offset.y *= texHeight;\n"
+	"	vec4 forward  = texture2D(texture, coords + offset);\n"
+	"	vec4 backward = texture2D(texture, coords - offset);\n"
+	"	forward.z  = dot(forward.zw, unshift);\n"
+	"	backward.z = dot(backward.zw, unshift);\n"
+	"	if (forward.z >= color.z || backward.z >= color.z) {\n"
+	"	  return vec4(0.0, 0.0, 0.0, 1.0);\n"
+	"	} else {\n"
+	"	  color.x += 0.5; color.y += 0.5;\n"
+	"	  return vec4(1.0, color.x, color.y, 1.0);\n"
+	"	}\n"
+	"  }\n"
+	"  return vec4(0.0, 0.0, 0.0, 1.0);\n"
+	"}\n"
     "void main(void){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
-    "    vec3 currentGradientAndDirection = texture2DRect(texture, uv).rgb;\n"
-    "    vec2 gradientDirection = ((currentGradientAndDirection.gb * 2.0) - 1.0) * vec2(data.x, data.y);\n"
-    "    float firstSampledGradientMagnitude = texture2DRect(texture, uv + gradientDirection).r;\n"
-    "    float secondSampledGradientMagnitude = texture2DRect(texture, uv - gradientDirection).r;\n"
-    "    float multiplier = step(firstSampledGradientMagnitude, currentGradientAndDirection.r);\n"
-    "    multiplier = multiplier * step(secondSampledGradientMagnitude, currentGradientAndDirection.r);\n"
-    "    float thresholdCompliance = smoothstep(data.w, data.z, currentGradientAndDirection.r);\n"
-    "    multiplier = multiplier * thresholdCompliance;\n"
-    "    gl_FragColor = vec4(vec3(multiplier), 1.0);\n"
+    "    gl_FragColor = cannyEdge(gl_TexCoord[0].st);\n"
     "}\n"
     "\n";
 #pragma endregion
@@ -1889,7 +1925,8 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     convertShaderCode(hdr_frag);
     convertShaderCode(godRays_frag);
     convertShaderCode(blur_frag);
-    convertShaderCode(edge_frag);
+    convertShaderCode(edge_canny_blur);
+	convertShaderCode(edge_canny_frag);
     convertShaderCode(final_frag);
     convertShaderCode(lighting_frag);
     convertShaderCode(lighting_frag_gi);
