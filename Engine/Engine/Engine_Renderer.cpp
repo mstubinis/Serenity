@@ -838,9 +838,9 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 
     ShaderP* p = Resources::getShaderProgram("Deferred_FXAA"); p->bind();
 
-    sendUniform1f("FXAA_REDUCE_MIN",Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN);
-    sendUniform1f("FXAA_REDUCE_MUL",Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL);
-    sendUniform1f("FXAA_SPAN_MAX",Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX);
+    sendUniform1f("FXAA_REDUCE_MIN",RendererInfo::FXAAInfo::FXAA_REDUCE_MIN);
+    sendUniform1f("FXAA_REDUCE_MUL",RendererInfo::FXAAInfo::FXAA_REDUCE_MUL);
+    sendUniform1f("FXAA_SPAN_MAX",RendererInfo::FXAAInfo::FXAA_SPAN_MAX);
 
     sendUniform2f("resolution",float(fbufferWidth),float(fbufferHeight));
     bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
@@ -852,15 +852,61 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 }
 void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
     if(!renderAA) return;
+    gbuffer->start(GBufferType::Misc,GBufferType::Diffuse); //we save the original image to Diffuse buffer so it can be used later
+    ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
+    sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
+    sendUniform1f("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
+    sendUniform1f("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
+    bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0);
+
+    //edge pass
+    renderFullscreenQuad(fbufferWidth,fbufferHeight);
     
-    gbuffer->start(GBufferType::Misc);
-    //pass first thing
+    for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
+    p->unbind();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
     gbuffer->start(GBufferType::Lighting);
-    //pass 2nd thing
+    p = Resources::getShaderProgram("Deferred_SMAA_2"); p->bind();
+    sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
+    sendUniform1i("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
+    bindTextureSafe("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
+    //bindTextureSafe("area_tex",,1);
+    //bindTextureSafe("search_tex",,2);
+    sendUniform1i("SMAA_MAX_SEARCH_STEPS_DIAG",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG);
+    sendUniform1i("SMAA_AREATEX_MAX_DISTANCE",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE);
+    sendUniform1i("SMAA_AREATEX_MAX_DISTANCE_DIAG",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG);
+    sendUniform2f("SMAA_AREATEX_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_PIXEL_SIZE);
+    sendUniform1f("SMAA_AREATEX_SUBTEX_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE);
+    sendUniform1i("SMAA_CORNER_ROUNDING",RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING);
+    
+    //blend pass
+    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    
+    for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
+    p->unbind();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
     gbuffer->start(GBufferType::Misc);
-    //pass 3rd thing
+    p = Resources::getShaderProgram("Deferred_SMAA_3"); p->bind();
+    sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
+    bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Diffuse),0); //need original final image from first smaa pass
+    bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Lighting),1);
+    
+    //neighbor pass
+    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    
+    for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
+    p->unbind();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    /*
+    //this pass is optional. lets skip it for now
     gbuffer->start(GBufferType::Lighting);
-    //pass 4th thing
+    p = Resources::getShaderProgram("Deferred_SMAA_4"); p->bind();
+    
+    p->unbind();
+    */
 }
 void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
