@@ -50,6 +50,7 @@ string Shaders::Detail::ShadersManagement::hdr_frag = "";
 string Shaders::Detail::ShadersManagement::godRays_frag = "";
 string Shaders::Detail::ShadersManagement::blur_frag = "";
 string Shaders::Detail::ShadersManagement::edge_frag = "";
+string Shaders::Detail::ShadersManagement::edge_canny_frag = "";
 string Shaders::Detail::ShadersManagement::final_frag = "";
 string Shaders::Detail::ShadersManagement::lighting_frag = "";
 string Shaders::Detail::ShadersManagement::lighting_frag_gi = "";
@@ -1494,6 +1495,27 @@ Shaders::Detail::ShadersManagement::edge_frag = Shaders::Detail::ShadersManageme
     "}";
 #pragma endregion
 
+	
+#pragma region EdgeCannyFrag
+Shaders::Detail::ShadersManagement::edge_frag_canny = Shaders::Detail::ShadersManagement::version + 
+    "\n"
+    "uniform sampler2D texture;\n"
+    "uniform vec4 data;\n" // texelWidth | texelHeight | upperThreshold | lowerThreshold
+    "void main(void){\n"
+    "    vec2 uv = gl_TexCoord[0].st;\n"
+    "    vec3 currentGradientAndDirection = texture2DRect(texture, uv).rgb;\n"
+    "    vec2 gradientDirection = ((currentGradientAndDirection.gb * 2.0) - 1.0) * vec2(data.x, data.y);\n"
+    "    float firstSampledGradientMagnitude = texture2DRect(texture, uv + gradientDirection).r;\n"
+    "    float secondSampledGradientMagnitude = texture2DRect(texture, uv - gradientDirection).r;\n"
+    "    float multiplier = step(firstSampledGradientMagnitude, currentGradientAndDirection.r);\n"
+    "    multiplier = multiplier * step(secondSampledGradientMagnitude, currentGradientAndDirection.r);\n"
+    "    float thresholdCompliance = smoothstep(data.w, data.z, currentGradientAndDirection.r);\n"
+    "    multiplier = multiplier * thresholdCompliance;\n"
+    "    gl_FragColor = vec4(vec3(multiplier), 1.0);\n"
+    "}\n"
+    "\n";
+#pragma endregion
+	
 #pragma region FinalFrag
 Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
