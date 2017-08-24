@@ -29,8 +29,8 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
-float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = 1.0f/128.0f;
-float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = 1.0f/8.0f;
+float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = 0.0078125f; // (1 / 128)
+float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = 0.125f; // (1 / 8)
 float Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = 8.0f;
 
 GLuint Detail::RendererInfo::SMAAInfo::SMAA_AreaTexture;
@@ -706,7 +706,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
         gbuffer->start(GBufferType::Lighting);
         _passFinal(gbuffer,c,fboWidth,fboHeight);
 
-        _passEdgeCanny(gbuffer,c,fboWidth,fboHeight,GBufferType::Lighting);
+        //_passEdgeCanny(gbuffer,c,fboWidth,fboHeight,GBufferType::Lighting);
 
         gbuffer->stop(fbo,rbo);
         _passFXAA(gbuffer,c,fboWidth,fboHeight,renderAA);
