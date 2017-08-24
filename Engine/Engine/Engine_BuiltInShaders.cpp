@@ -681,9 +681,11 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "}\n"
     "void main(void){\n"
     "    vec2 uv = gl_TexCoord[0].xy;\n"
-    "    //gl_FragColor = SMAAColorEdgeDetectionPS(uv, offset, texture);\n"
-    "    gl_FragColor = SMAALumaEdgeDetectionPS(uv, offset, texture);\n"
-    "    //gl_FragColor.a = 1.0;\n" //turn blending off
+    "    //gl_FragData[0] = SMAAColorEdgeDetectionPS(uv, offset, texture);\n"
+    "    gl_FragData[0] = SMAALumaEdgeDetectionPS(uv, offset, texture);\n"
+    "    //gl_FragData[0].a = 1.0;\n" //turn blending off
+    "\n"
+    "    gl_FragData[1].rgb = texture2D(texture,uv).rgb;\n"
     "}\n"
     "\n";
 Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersManagement::version + 
