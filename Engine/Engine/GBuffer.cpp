@@ -11,7 +11,7 @@ using namespace std;
 
 unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> _populateGBufferTypesInfo(){
     unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
-                                       //winSizeRatio   //internFormat                 //pxl_components                         //pxl_format
+                                       //winSizeRatio   //internFormat                 //pxl_components                   //pxl_format
     m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
     m[GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
     m[GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
