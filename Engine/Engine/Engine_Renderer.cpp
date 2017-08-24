@@ -630,17 +630,17 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     unbindTexture2D(5);
     p->unbind();
 }
-void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWidth,uint fbufferHeight,bool renderSSAO, bool renderGodRays, bool renderAA,bool HUD, Object* ignore,bool mainRenderFunc,GLuint fbo, GLuint rbo){
+void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,uint fboHeight,bool renderSSAO, bool renderGodRays, bool renderAA,bool HUD, Object* ignore,bool mainRenderFunc,GLuint fbo, GLuint rbo){
     if(mainRenderFunc){
         if(Resources::getCurrentScene()->m_LightProbes.size() > 0){
             for(auto lightProbe:Resources::getCurrentScene()->m_LightProbes){
                 lightProbe.second->renderCubemap();
             }
-            //Renderer::Detail::RenderManagement::m_gBuffer->resize(fbufferWidth,fbufferHeight);
+            //Renderer::Detail::RenderManagement::m_gBuffer->resize(fboWidth,fboHeight);
         }
     }
 
-    _passGeometry(gbuffer,c,fbufferWidth,fbufferHeight,renderGodRays,ignore);
+    _passGeometry(gbuffer,c,fboWidth,fboHeight,renderGodRays,ignore);
 
     if(RendererInfo::GodRaysInfo::godRays && renderGodRays){
         gbuffer->start(GBufferType::GodRays,"RGBA",false);
@@ -651,11 +651,11 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWid
         glm::vec3 camVec = c->getViewVector();
         bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(RendererInfo::GodRaysInfo::godRays_fovDegrees));
         float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / RendererInfo::GodRaysInfo::godRays_fovDegrees;
-        
+
         alpha = glm::pow(alpha,RendererInfo::GodRaysInfo::godRays_alphaFalloff);
         alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
-        _passGodsRays(gbuffer,c,fbufferWidth,fbufferHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
+        _passGodsRays(gbuffer,c,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
     }
 
     glEnable(GL_BLEND);
@@ -663,53 +663,53 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWid
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::LightingInfo::lighting == true && Resources::getCurrentScene()->lights().size() > 0){
         gbuffer->start(GBufferType::Lighting,"RGB");
-        _passLighting(gbuffer,c,fbufferWidth,fbufferHeight);
+        _passLighting(gbuffer,c,fboWidth,fboHeight);
     }
     glDisable(GL_BLEND);
 
 
-    //_passForwardRendering(c,fbufferWidth,fbufferHeight,renderGodRays,ignore);
+    //_passForwardRendering(c,fboWidth,fbufferHeight,renderGodRays,ignore);
 
     string _channels;
     if(renderSSAO && RendererInfo::SSAOInfo::ssao){ _channels = "RGBA"; }
     else{                                           _channels = "RGB";  }
-    
+
     gbuffer->start(GBufferType::Bloom,_channels,false);
-    _passSSAO(gbuffer,c,fbufferWidth,fbufferHeight,renderSSAO); //ssao AND bloom
+    _passSSAO(gbuffer,c,fboWidth,fboHeight,renderSSAO); //ssao AND bloom
 
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
         gbuffer->start(GBufferType::Free2,_channels,false);
-        _passBlur(gbuffer,c,fbufferWidth,fbufferHeight,"H",GBufferType::Bloom,_channels);
+        _passBlur(gbuffer,c,fboWidth,fboHeight,"H",GBufferType::Bloom,_channels);
         gbuffer->start(GBufferType::Bloom,_channels,false);
-        _passBlur(gbuffer,c,fbufferWidth,fbufferHeight,"V",GBufferType::Free2,_channels);
+        _passBlur(gbuffer,c,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
     }
 
     gbuffer->start(GBufferType::Misc);
-    _passHDR(gbuffer,c,fbufferWidth,fbufferHeight);
+    _passHDR(gbuffer,c,fboWidth,fboHeight);
 
     if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None || renderAA == false){
         gbuffer->stop(fbo,rbo);
-        _passFinal(gbuffer,c,fbufferWidth,fbufferHeight);
+        _passFinal(gbuffer,c,fboWidth,fboHeight);
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA && renderAA){
         gbuffer->start(GBufferType::Lighting);
-        _passFinal(gbuffer,c,fbufferWidth,fbufferHeight);
-	    
-	//_passEdgeCanny(gbuffer,c,fbufferWidth,fbufferHeight,GBufferType::Lighting);
-	    
+        _passFinal(gbuffer,c,fboWidth,fboHeight);
+
+        _passEdgeCanny(gbuffer,c,fboWidth,fboHeight,GBufferType::Lighting);
+
         gbuffer->stop(fbo,rbo);
-        _passFXAA(gbuffer,c,fbufferWidth,fbufferHeight,renderAA);
+        _passFXAA(gbuffer,c,fboWidth,fboHeight,renderAA);
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && renderAA){
         gbuffer->start(GBufferType::Lighting);
-        _passFinal(gbuffer,c,fbufferWidth,fbufferHeight);
-        _passSMAA(gbuffer,c,fbufferWidth,fbufferHeight,renderAA);
+        _passFinal(gbuffer,c,fboWidth,fboHeight);
+        _passSMAA(gbuffer,c,fboWidth,fboHeight,renderAA);
     }
     //gbuffer->stop();
     //glDepthFunc(GL_ALWAYS);
     //Settings::enableDepthMask(true);
     //Settings::enableDepthTest(true); //has to be enabled for some reason
-    _passCopyDepth(gbuffer,c,fbufferWidth,fbufferHeight);
+    _passCopyDepth(gbuffer,c,fboWidth,fboHeight);
 
     glEnable(GL_BLEND);
     Settings::disableDepthTest();
@@ -726,8 +726,8 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWid
         Settings::clear(false,true,false); //clear depth only
         Settings::enableAlphaTest();
         glAlphaFunc(GL_GREATER, 0.1f);
-        _renderTextures(gbuffer,c,fbufferWidth,fbufferHeight);
-        _renderText(gbuffer,c,fbufferWidth,fbufferHeight);
+        _renderTextures(gbuffer,c,fboWidth,fboHeight);
+        _renderText(gbuffer,c,fboWidth,fboHeight);
         Settings::disableAlphaTest();
     }
     vector_clear(m_FontsToBeRendered);
