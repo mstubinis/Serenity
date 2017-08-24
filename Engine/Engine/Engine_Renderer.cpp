@@ -16,7 +16,7 @@
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"
 #include "FramebufferObject.h"
-#include "SMAA_AreaTexture.h"
+#include "SMAA_LUT.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
