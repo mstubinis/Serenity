@@ -39,12 +39,12 @@ uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
 uint Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 100;
 float Detail::RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD = (0.1f * Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD);
 
-uint Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = 0;
+bool Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = false;
 float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD = 0.01f;
 float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE = 2.0f;
 float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH = 0.4;
 
-uint Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = 0;
+bool Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = false;
 float Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION_WEIGHT_SCALE = 30.0f;
 
 uint Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE = 16;
