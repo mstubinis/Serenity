@@ -211,6 +211,12 @@ namespace Engine{
             namespace SMAA{
             };
             namespace FXAA{
+                static void setReduceMin(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = r; }
+                static void setReduceMul(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = r; }
+                static void setSpanMax(float r){ Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = r; }
+                static float getReduceMin(){ return Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN; }
+                static float getReduceMul(){ return Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL; }
+                static float getSpanMax(){ return Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX; }
             };
             namespace HDR{
                 static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
