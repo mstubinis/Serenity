@@ -621,8 +621,7 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     if(sky != nullptr && sky->texture()->numAddresses() >= 3){
         bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
         bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-
-		bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+        bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
     }
     Renderer::Detail::renderFullscreenQuad(fbufferWidth,fbufferHeight);
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
@@ -695,6 +694,9 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fbufferWid
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::FXAA && renderAA){
         gbuffer->start(GBufferType::Lighting);
         _passFinal(gbuffer,c,fbufferWidth,fbufferHeight);
+	    
+	//_passEdgeCanny(gbuffer,c,fbufferWidth,fbufferHeight,GBufferType::Lighting);
+	    
         gbuffer->stop(fbo,rbo);
         _passFXAA(gbuffer,c,fbufferWidth,fbufferHeight,renderAA);
     }
@@ -772,33 +774,44 @@ void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fbuffe
     p->unbind();
 }
 void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
-    ShaderP* p = Resources::getShaderProgram("Greyscale_Frag"); p->bind();
-    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
-    bindTexture("texture",gbuffer->getTexture(texture),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
-    unbindTexture2D(0);
-    p->unbind();
-
-    p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
-    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
-    bindTexture("texture",gbuffer->getTexture(texture),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
-    unbindTexture2D(0);
-    p->unbind();
-    //blur it again
-    p->bind();
-    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
-    bindTexture("texture",gbuffer->getTexture(texture),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
-    unbindTexture2D(0);
-    p->unbind();
+	
+    //texture is the lighting buffer which is the final pass results
     
-    p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
-    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
+    gbuffer->start(GBufferType::Misc);
+    ShaderP* p = Resources::getShaderProgram("Greyscale_Frag"); p->bind();
     bindTexture("texture",gbuffer->getTexture(texture),0);
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
+	
+    //misc is now greyscale scene. lighting is still final scene
+
+    gbuffer->start(GBufferType::Diffuse);
+    p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
+    bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
+    renderFullscreenQuad(fboWidth,fboHeight);
+    unbindTexture2D(0);
+    p->unbind();
+	
+    //diffuse texture is now greyscaled and blurred
+	
+    //blur it again
+    gbuffer->start(GBufferType::Misc);
+    p->bind();
+    bindTexture("texture",gbuffer->getTexture(GBufferType::Diffuse),0);
+    renderFullscreenQuad(fboWidth,fboHeight);
+    unbindTexture2D(0);
+    p->unbind();
+	
+    //misc is now the final blurred greyscale image
+    gbuffer->start(GBufferType::Diffuse);
+    p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
+    sendUniform4f("data",1.0f,1.0f,0.4f,0.4f);
+    bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
+    renderFullscreenQuad(fboWidth,fboHeight);
+    unbindTexture2D(0);
+    p->unbind();
+    //diffuse is the end result of the edge program. lighting is the final pass that we still need
 }
 void Detail::RenderManagement::_passGodsRays(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
     Settings::clear(true,false,false);
@@ -879,10 +892,11 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 
     sendUniform2f("resolution",float(fbufferWidth),float(fbufferHeight));
     bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
-    bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),1);
+    bindTexture("edgeTexture",gbuffer->getTexture(GBufferType::Diffuse),1);
+    bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),2);
     renderFullscreenQuad(fbufferWidth,fbufferHeight);
 
-    for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
