@@ -55,6 +55,9 @@ string Shaders::Detail::ShadersManagement::lighting_frag = "";
 string Shaders::Detail::ShadersManagement::lighting_frag_gi = "";
 #pragma endregion
 
+void Shaders::Detail::ShadersManagement::convertShaderCode(string& code){
+}
+
 void Shaders::Detail::ShadersManagement::init(){
 
 #pragma region Functions
@@ -1827,4 +1830,36 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
 
 #pragma endregion
 
+    convertShaderCode(float_into_2_floats);
+    convertShaderCode(determinent_mat3);
+    convertShaderCode(normals_octahedron_compression_functions);
+    convertShaderCode(reconstruct_log_depth_functions);
+    convertShaderCode(fullscreen_quad_vertex);
+    convertShaderCode(vertex_basic);
+    convertShaderCode(vertex_hud);
+    convertShaderCode(vertex_skybox);
+    convertShaderCode(smaa_vertex_1);
+    convertShaderCode(smaa_frag_1);
+    convertShaderCode(smaa_vertex_2);
+    convertShaderCode(smaa_frag_2);
+    convertShaderCode(smaa_vertex_3);
+    convertShaderCode(smaa_frag_3);
+    convertShaderCode(smaa_vertex_4);
+    convertShaderCode(smaa_frag_4);
+    convertShaderCode(fxaa_frag);
+    convertShaderCode(deferred_frag);
+    convertShaderCode(deferred_frag_hud);
+    convertShaderCode(deferred_frag_skybox);
+    convertShaderCode(copy_depth_frag);
+    convertShaderCode(cubemap_convolude_frag);
+    convertShaderCode(cubemap_prefilter_envmap_frag);
+    convertShaderCode(brdf_precompute);
+    convertShaderCode(ssao_frag);
+    convertShaderCode(hdr_frag);
+    convertShaderCode(godRays_frag);
+    convertShaderCode(blur_frag);
+    convertShaderCode(edge_frag);
+    convertShaderCode(final_frag);
+    convertShaderCode(lighting_frag);
+    convertShaderCode(lighting_frag_gi);
 }
