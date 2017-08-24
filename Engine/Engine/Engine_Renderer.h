@@ -86,12 +86,12 @@ namespace Engine{
                     static uint SMAA_CORNER_ROUNDING;
                     static float SMAA_DEPTH_THRESHOLD;
 
-                    static uint SMAA_PREDICATION;
+                    static bool SMAA_PREDICATION;
                     static float SMAA_PREDICATION_THRESHOLD;
                     static float SMAA_PREDICATION_SCALE;
                     static float SMAA_PREDICATION_STRENGTH;
 
-                    static uint SMAA_REPROJECTION;
+                    static bool SMAA_REPROJECTION;
                     static float SMAA_REPROJECTION_WEIGHT_SCALE;
 
                     static uint SMAA_AREATEX_MAX_DISTANCE;
