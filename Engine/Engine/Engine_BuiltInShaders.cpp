@@ -1489,7 +1489,7 @@ Shaders::Detail::ShadersManagement::edge_frag = Shaders::Detail::ShadersManageme
     "}\n"
     "void main(void){\n"
     "    vec2 uv = gl_TexCoord[0].st;\n"
-    "    float edge = IsEdge(gl_TexCoord[0].xy);\n"
+    "    float edge = IsEdge(uv);\n"
     "    gl_FragColor = vec4(edge);\n"
     "}";
 #pragma endregion
