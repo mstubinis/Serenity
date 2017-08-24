@@ -51,6 +51,7 @@ string Shaders::Detail::ShadersManagement::godRays_frag = "";
 string Shaders::Detail::ShadersManagement::blur_frag = "";
 string Shaders::Detail::ShadersManagement::edge_frag = "";
 string Shaders::Detail::ShadersManagement::edge_canny_frag = "";
+string Shaders::Detail::ShadersManagement::edge_canny_blur = "";
 string Shaders::Detail::ShadersManagement::final_frag = "";
 string Shaders::Detail::ShadersManagement::lighting_frag = "";
 string Shaders::Detail::ShadersManagement::lighting_frag_gi = "";
@@ -1495,6 +1496,46 @@ Shaders::Detail::ShadersManagement::edge_frag = Shaders::Detail::ShadersManageme
     "}";
 #pragma endregion
 
+#pragma region Greyscale
+Shaders::Detail::ShadersManagement::greyscale_frag = Shaders::Detail::ShadersManagement::version + 
+    "\n"
+    "uniform sampler2D texture;\n"
+    "void main(void){\n"
+    "    vec4 col = texture2D(texture, gl_TexCoord[0].st);\n"
+    "    float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));\n"
+    "    gl_FragColor = vec4(vec3(lum), 1.0);\n"
+    "}\n"
+    "\n";
+#pragma endregion
+    
+#pragma region EdgeCannyBlur
+Shaders::Detail::ShadersManagement::edge_frag_blur = Shaders::Detail::ShadersManagement::version + 
+    "\n"
+    "uniform sampler2D texture;\n"
+    "void main(void){\n"
+    "    vec2 uv = gl_TexCoord[0].st;\n"
+    "    vec2 left_uv = uv + vec2(-1.0, 0.0);\n"
+    "    vec2 right_uv = uv + vec2(1.0, 0.0);\n"
+    "    vec2 top_uv = uv + vec2(0.0, -1.0);\n"
+    "    vec2 topLeft_uv = uv + vec2(-1.0, -1.0);\n"
+    "    vec2 topRight_uv = uv + vec2(1.0, -1.0);\n"
+    "    vec2 bottom_uv = uv + vec2(0.0,1.0);\n"
+    "    vec2 bottomLeft_uv = uv + vec2(-1.0,1.0);\n"
+    "    vec2 bottomRight_uv = uv + vec2(1.0,1.0);\n"
+    "    float blInt = texture2D(texture, bottomLeft_uv).r;\n"
+    "    float trInt = texture2D(texture, topRight_uv).r;\n"
+    "    float tlInt = texture2D(texture, topLeft_uv).r;\n"
+    "    float brInt = texture2D(texture, bottomRight_uv).r;\n"
+    "    float lInt = texture2D(texture, left_uv).r;\n"
+    "    float rInt = texture2D(texture, right_uv).r;\n"
+    "    float bInt = texture2D(texture, bottom_uv).r;\n"
+    "    float tInt = texture2D(texture, top_uv).r;\n"
+    "    float blur = lInt + rInt + tInt + bInt + blInt + trInt + tlInt + brInt + texture2D(texture, uv).r;\n"
+    "    blur *= 0.11111;\n"
+    "    gl_FragColor = vec4(vec3(blur), 1.0);\n"
+    "}\n"
+    "\n";
+#pragma endregion
 	
 #pragma region EdgeCannyFrag
 Shaders::Detail::ShadersManagement::edge_frag_canny = Shaders::Detail::ShadersManagement::version + 
