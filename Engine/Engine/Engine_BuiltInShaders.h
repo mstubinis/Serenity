@@ -55,7 +55,6 @@ namespace Engine{
                     
                     static std::string greyscale_frag;
                     static std::string edge_canny_blur;
-                    static std::string edge_frag;
                     static std::string edge_canny_frag;
                 
                     static std::string final_frag;
