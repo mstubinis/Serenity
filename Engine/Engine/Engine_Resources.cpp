@@ -209,7 +209,9 @@ void Resources::initResources(){
     Shader* cubemapPrefilterEnv = new Shader("cubemap_prefilterEnv_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
     Shader* brdfPrecompute = new Shader("brdf_precompute_frag",Engine::Shaders::Detail::ShadersManagement::brdf_precompute,ShaderType::Fragment,false);
     Shader* greyscale = new Shader("greyscale_frag",Engine::Shaders::Detail::ShadersManagement::greyscale_frag,ShaderType::Fragment,false);
-    
+    Shader* edgeCannyBlur = new Shader("edge_canny_blur",Engine::Shaders::Detail::ShadersManagement::edge_canny_blur,ShaderType::Fragment,false);
+    Shader* edgeCannyFrag = new Shader("edge_canny_frag",Engine::Shaders::Detail::ShadersManagement::edge_canny_frag,ShaderType::Fragment,false);
+	
     addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
@@ -226,7 +228,9 @@ void Resources::initResources(){
     addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
     addShaderProgram("BRDF_Precompute_CookTorrance",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
     addShaderProgram("Greyscale_Frag",fullscreenVertexShader,greyscale,ShaderRenderPass::Postprocess);
-
+    addShaderProgram("Deferred_Edge_Canny_Blur",fullscreenVertexShader,edgeCannyBlur,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_Edge_Canny",fullscreenVertexShader,edgeCannyFrag,ShaderRenderPass::Postprocess);
+	
     Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
     brdfCook->setWrapping(TextureWrap::ClampToEdge);
 
