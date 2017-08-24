@@ -78,6 +78,27 @@ namespace Engine{
                     static bool draw_physics_debug;
                     static unsigned char cull_face_status;
                 };
+                struct SMAAInfo final{
+                    static glm::vec2 SMAA_PIXEL_SIZE;
+                    static float SMAA_THRESHOLD;
+                    static uint SMAA_MAX_SEARCH_STEPS;
+                    static uint SMAA_MAX_SEARCH_STEPS_DIAG;
+                    static uint SMAA_CORNER_ROUNDING;
+                    static float SMAA_DEPTH_THRESHOLD;
+                    
+                    static uint SMAA_PREDICATION;
+                    static float SMAA_PREDICATION_THRESHOLD;
+                    static float SMAA_PREDICATION_SCALE;
+                    static float SMAA_PREDICATION_STRENGTH;
+                    
+                    static uint SMAA_REPROJECTION;
+                    static float SMAA_REPROJECTION_WEIGHT_SCALE;
+                    
+                    static uint SMAA_AREATEX_MAX_DISTANCE;
+                    static uint SMAA_AREATEX_MAX_DISTANCE_DIAG;
+                    static glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
+                    static float SMAA_AREATEX_SUBTEX_SIZE;  
+                };
                 struct LightingInfo final{
                     static bool lighting;
                 };
@@ -148,12 +169,12 @@ namespace Engine{
                     );
 
                     static void init();
-					static void postInit();
+                    static void postInit();
                     static void destruct();
 
                     static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
                     static std::vector<ShaderP*> m_ForwardPassShaderPrograms;
-                
+
                     static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
             };
@@ -182,6 +203,8 @@ namespace Engine{
             void enableDrawPhysicsInfo(bool b = true);
             void disableDrawPhysicsInfo();
         
+	    namespace SMAA{
+	    };
             namespace HDR{
                 static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
                 static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
