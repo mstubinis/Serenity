@@ -202,21 +202,20 @@ void Resources::initResources(){
     Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
     Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,ShaderType::Fragment,false);
     Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,ShaderType::Fragment,false);
-    Shader* edge = new Shader("edge_frag",Engine::Shaders::Detail::ShadersManagement::edge_frag,ShaderType::Fragment,false);
     Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
     Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
     Shader* lightingFragGI = new Shader("lighting_frag_gi",Engine::Shaders::Detail::ShadersManagement::lighting_frag_gi,ShaderType::Fragment,false);
     Shader* cubemapConvolude = new Shader("cubemap_convolude_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_convolude_frag,ShaderType::Fragment,false);
     Shader* cubemapPrefilterEnv = new Shader("cubemap_prefilterEnv_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
     Shader* brdfPrecompute = new Shader("brdf_precompute_frag",Engine::Shaders::Detail::ShadersManagement::brdf_precompute,ShaderType::Fragment,false);
-
+    Shader* greyscale = new Shader("greyscale_frag",Engine::Shaders::Detail::ShadersManagement::greyscale_frag,ShaderType::Fragment,false);
+    
     addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Blur",fullscreenVertexShader,blur,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_HDR",fullscreenVertexShader,hdr,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_SSAO",fullscreenVertexShader,ssao,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Edge",fullscreenVertexShader,edge,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Final",fullscreenVertexShader,finalFrag,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_FXAA",fullscreenVertexShader,fxaa,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Skybox",vertexSkybox,deferredFragSkybox,ShaderRenderPass::Geometry);
@@ -226,9 +225,10 @@ void Resources::initResources(){
     addShaderProgram("Cubemap_Convolude",vertexSkybox,cubemapConvolude,ShaderRenderPass::Postprocess);
     addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
     addShaderProgram("BRDF_Precompute_CookTorrance",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
+    addShaderProgram("Greyscale_Frag",fullscreenVertexShader,greyscale,ShaderRenderPass::Postprocess);
 
-	Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
-	brdfCook->setWrapping(TextureWrap::ClampToEdge);
+    Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
+    brdfCook->setWrapping(TextureWrap::ClampToEdge);
 
     addMaterial("Default","","","","","Deferred");
 
