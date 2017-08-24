@@ -530,9 +530,9 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
 
 #pragma region FXAA
 Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
-    "#define FXAA_REDUCE_MIN (1.0/128.0)\n"
-    "#define FXAA_REDUCE_MUL (1.0/8.0)\n"
-    "#define FXAA_SPAN_MAX 8.0\n"
+    "uniform FXAA_REDUCE_MIN;\n"
+    "uniform float FXAA_REDUCE_MUL;\n"
+    "uniform int FXAA_SPAN_MAX;\n"
     "uniform sampler2D sampler0;\n"
     "uniform sampler2D depthTexture;\n"
     "uniform vec2 resolution;\n"
@@ -580,7 +580,7 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
 Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersManagement::version + 
     "\n"//edge vert
     "\n"
-    "#define SMAA_PIXEL_SIZE vec2(1.0 / 300.0, 1.0 / 300.0)\n" //make this globally inherit for all smaa shaders
+    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
@@ -606,8 +606,8 @@ Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersMana
 Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManagement::version + 
     "\n"//edge frag
     "\n"
-    "#define SMAA_THRESHOLD 0.1\n" //make this global to all smaa shaders
-    "#define SMAA_DEPTH_THRESHOLD (0.1 * SMAA_THRESHOLD)\n" //make this global to all smaa shaders
+    "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
+    "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
     "\n"
     "uniform sampler2D texture;\n"
     "varying vec4 offset[3];\n"
@@ -691,8 +691,8 @@ Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersMana
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "\n"
-    "#define SMAA_PIXEL_SIZE vec2(1.0 / 300.0, 1.0 / 300.0)\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_MAX_SEARCH_STEPS 16\n" //make this globally inherit for all smaa shaders
+    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
+    "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
     "\n"
     "varying vec2 pixCoord;\n"
     "varying vec4 offset[3];\n"
@@ -723,14 +723,14 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "varying vec4 offset[3];\n"
     "varying vec4 dummy2;\n"
     "\n"
-    "#define SMAA_PIXEL_SIZE vec2(1.0 / 300.0, 1.0 / 300.0)\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_MAX_SEARCH_STEPS_DIAG 8\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_MAX_SEARCH_STEPS 16\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_AREATEX_MAX_DISTANCE 16\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_AREATEX_MAX_DISTANCE_DIAG 20\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_AREATEX_PIXEL_SIZE (1.0 / vec2(160.0, 560.0))\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_AREATEX_SUBTEX_SIZE (1.0 / 7.0)\n" //make this globally inherit for all smaa shaders
-    "#define SMAA_CORNER_ROUNDING 25\n" //make this globally inherit for all smaa shaders
+    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
+    "uniform int SMAA_MAX_SEARCH_STEPS_DIAG;\n" //make this globally inherit for all smaa shaders
+    "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
+    "uniform int SMAA_AREATEX_MAX_DISTANCE;\n" //make this globally inherit for all smaa shaders
+    "uniform int SMAA_AREATEX_MAX_DISTANCE_DIAG;\n" //make this globally inherit for all smaa shaders
+    "uniform vec2 SMAA_AREATEX_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
+    "uniform float SMAA_AREATEX_SUBTEX_SIZE;\n" //make this globally inherit for all smaa shaders
+    "uniform int SMAA_CORNER_ROUNDING;\n" //make this globally inherit for all smaa shaders
     "\n"
     "float SMAASearchDiag1(sampler2D edgesTex, vec2 uv, vec2 dir, float c){\n"
     "    uv += dir * SMAA_PIXEL_SIZE;\n"
@@ -856,30 +856,30 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "    return SMAASampleLevelZero(areaTex, uv).rg;\n"
     "}\n"
     "void SMAADetectHorizontalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec2 uv, vec2 d) {\n"
-    "    #if SMAA_CORNER_ROUNDING < 100 || SMAA_FORCE_CORNER_DETECTION == 1\n"
-    "    vec4 coords = vec4(d.x, 0.0, d.y, 0.0) * SMAA_PIXEL_SIZE.xyxy + uv.xyxy;\n"
-    "    vec2 e;\n"
-    "    e.r = texture2DLodOffset(edgesTex, coords.xy, 0.0,ivec2(0.0,  1.0)).r;\n"
-    "    bool left = abs(d.x) < abs(d.y);\n"
-    "    e.g = texture2DLodOffset(edgesTex, coords.xy,0.0, ivec2(0.0, -2.0)).r;\n"
-    "    if (left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
-    "    e.r = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2(1.0,  1.0)).r;\n"
-    "    e.g = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2(1.0, -2.0)).r;\n"
-    "    if (!left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
-    "    #endif\n"
+    "    if(SMAA_CORNER_ROUNDING < 100 || SMAA_FORCE_CORNER_DETECTION == 1){\n"
+    "       vec4 coords = vec4(d.x, 0.0, d.y, 0.0) * SMAA_PIXEL_SIZE.xyxy + uv.xyxy;\n"
+    "       vec2 e;\n"
+    "       e.r = texture2DLodOffset(edgesTex, coords.xy, 0.0,ivec2(0.0,  1.0)).r;\n"
+    "       bool left = abs(d.x) < abs(d.y);\n"
+    "       e.g = texture2DLodOffset(edgesTex, coords.xy,0.0, ivec2(0.0, -2.0)).r;\n"
+    "       if (left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
+    "       e.r = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2(1.0,  1.0)).r;\n"
+    "       e.g = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2(1.0, -2.0)).r;\n"
+    "       if (!left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
+    "    }\n"
     "}\n"
     "void SMAADetectVerticalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec2 uv, vec2 d) {\n"
-    "    #if SMAA_CORNER_ROUNDING < 100 || SMAA_FORCE_CORNER_DETECTION == 1\n"
-    "    vec4 coords = vec4(0.0, d.x, 0.0, d.y) * SMAA_PIXEL_SIZE.xyxy + uv.xyxy;\n"
-    "    vec2 e;\n"
-    "    e.r = texture2DLodOffset(edgesTex, coords.xy,0.0, ivec2( 1.0, 0.0)).g;\n"
-    "    bool left = abs(d.x) < abs(d.y);\n"
-    "    e.g = texture2DLodOffset(edgesTex, coords.xy,0.0, ivec2(-2.0, 0.0)).g;\n"
-    "    if (left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
-    "    e.r = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2( 1.0, 1.0)).g;\n"
-    "    e.g = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2(-2.0, 1.0)).g;\n"
-    "    if (!left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
-    "    #endif\n"
+    "    if(SMAA_CORNER_ROUNDING < 100 || SMAA_FORCE_CORNER_DETECTION == 1){\n"
+    "       vec4 coords = vec4(0.0, d.x, 0.0, d.y) * SMAA_PIXEL_SIZE.xyxy + uv.xyxy;\n"
+    "       vec2 e;\n"
+    "       e.r = texture2DLodOffset(edgesTex, coords.xy,0.0, ivec2( 1.0, 0.0)).g;\n"
+    "       bool left = abs(d.x) < abs(d.y);\n"
+    "       e.g = texture2DLodOffset(edgesTex, coords.xy,0.0, ivec2(-2.0, 0.0)).g;\n"
+    "       if (left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
+    "       e.r = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2( 1.0, 1.0)).g;\n"
+    "       e.g = texture2DLodOffset(edgesTex, coords.zw,0.0, ivec2(-2.0, 1.0)).g;\n"
+    "       if (!left) weights *= clamp(float(SMAA_CORNER_ROUNDING) / 100.0 + 1.0 - e,0.0,1.0);\n"
+    "    }\n"
     "}\n"
     "vec4 SMAANeighborhoodBlendingPS(vec2 uv,vec4 offset[2],sampler2D colorTex,sampler2D blendTex) {\n"
     "    vec4 a;\n"
@@ -908,10 +908,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "    vec4 weights = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    vec2 e = texture2D(edgesTex, uv).rg;\n"
     "    if (e.g > 0.0) {\n"
-    "        #if SMAA_MAX_SEARCH_STEPS_DIAG > 0 || SMAA_FORCE_DIAGONAL_DETECTION == 1\n"
+    "        if(SMAA_MAX_SEARCH_STEPS_DIAG > 0 || SMAA_FORCE_DIAGONAL_DETECTION == 1){\n"
     "            weights.rg = SMAACalculateDiagWeights(edgesTex, areaTex, uv, e, subsampleIndices);\n"
     "            if (dot(weights.rg, vec2(1.0, 1.0)) == 0.0) {\n"
-    "        #endif\n"
     "                vec2 d;\n"
     "                vec2 coords;\n"
     "                coords.x = SMAASearchXLeft(edgesTex, searchTex, offset[0].xy, offset[2].x);\n"
@@ -925,11 +924,26 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "                float e2 = texture2DLodOffset(edgesTex, coords, 0.0, ivec2(1, 0)).r;\n"
     "                weights.rg = SMAAArea(areaTex, sqrt_d, e1, e2, float(subsampleIndices.y));\n"
     "                SMAADetectHorizontalCornerPattern(edgesTex, weights.rg, uv, d);\n"
-    "                #if SMAA_MAX_SEARCH_STEPS_DIAG > 0 || SMAA_FORCE_DIAGONAL_DETECTION == 1\n"
     "            } \n"
-    "            else\n"
+    "            else{\n"
     "                e.r = 0.0;\n"
-    "                #endif\n"
+    "            }\n"
+    "        }\n"
+    "        else{\n"
+    "            vec2 d;\n"
+    "            vec2 coords;\n"
+    "            coords.x = SMAASearchXLeft(edgesTex, searchTex, offset[0].xy, offset[2].x);\n"
+    "            coords.y = offset[1].y;\n" // offset[1].y = texcoord.y - 0.25 * SMAA_PIXEL_SIZE.y (@CROSSING_OFFSET)
+    "            d.x = coords.x;\n"
+    "            float e1 = texture2DLod(edgesTex, coords,0.0).r;\n"
+    "            coords.x = SMAASearchXRight(edgesTex, searchTex, offset[0].zw, offset[2].y);\n"
+    "            d.y = coords.x;\n"
+    "            d = d / SMAA_PIXEL_SIZE.x - pixcoord.x;\n"
+    "            vec2 sqrt_d = sqrt(abs(d));\n"
+    "            float e2 = texture2DLodOffset(edgesTex, coords, 0.0, ivec2(1, 0)).r;\n"
+    "            weights.rg = SMAAArea(areaTex, sqrt_d, e1, e2, float(subsampleIndices.y));\n"
+    "            SMAADetectHorizontalCornerPattern(edgesTex, weights.rg, uv, d);\n"
+    "        }\n"
     "    }\n"
     "    if (e.r > 0.0) {\n"
     "        vec2 d;\n"
@@ -960,7 +974,7 @@ Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersMana
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "\n"
-    "#define SMAA_PIXEL_SIZE vec2(1.0 / 300.0, 1.0 / 300.0)\n" //make this globally inherit for all smaa shaders
+    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
     "varying vec2 pixCoord;\n"
     "varying vec4 offset[3];\n"
@@ -984,11 +998,11 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
     "uniform sampler2D texture;\n"
     "uniform sampler2D blend_tex;\n"
     "\n"
-    "#define SMAA_PIXEL_SIZE vec2(1.0 / 300.0, 1.0 / 300.0)\n" //make this globally inherit for all smaa shaders
+    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
     "varying vec4 offset[2];\n"
     "varying vec4 dummy2;\n"
-    "vec4 SMAANeighborhoodBlendingPS(vec2 uv,vec4 offset[2],sampler2D colorTex,sampler2D blendTex) {\n"
+    "vec4 SMAANeighborhoodBlendingPS(vec2 uv,vec4 offset[2],sampler2D colorTex,sampler2D blendTex){\n"
     "    vec4 a;\n"
     "    a.xz = texture2D(blendTex, uv).xz;\n"
     "    a.y = texture2D(blendTex, offset[1].zw).g;\n"
@@ -1022,10 +1036,10 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
 //vertex & frag 4 are optional passes
 Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersManagement::version + 
     "\n"
-    "void SMAAResolveVS(vec4 position,out vec4 svPosition,inout vec2 uv) {\n"
+    "void SMAAResolveVS(vec4 position,out vec4 svPosition,inout vec2 uv){\n"
     "    svPosition = position;\n"
     "}\n"
-    "void SMAASeparateVS(vec4 position,out vec4 svPosition,inout vec2 uv) {\n"
+    "void SMAASeparateVS(vec4 position,out vec4 svPosition,inout vec2 uv){\n"
     "    svPosition = position;\n"
     "}\n"
     "void main(void){\n"
@@ -1033,7 +1047,7 @@ Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersMana
     "\n";
 Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManagement::version + 
     "\n"
-    "vec4 SMAAResolvePS(vec2 uv,sampler2D colorTexCurr,sampler2D colorTexPrev) {\n"
+    "vec4 SMAAResolvePS(vec2 uv,sampler2D colorTexCurr,sampler2D colorTexPrev){\n"
     "    vec4 current = texture2D(colorTexCurr, uv);\n"
     "    vec4 previous = texture2D(colorTexPrev, uv);\n"
     "    return mix(current, previous, 0.5);\n"
