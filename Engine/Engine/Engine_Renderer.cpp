@@ -834,6 +834,10 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     
     ShaderP* p = Resources::getShaderProgram("Deferred_FXAA"); p->bind();
 
+    sendUniform1f("FXAA_REDUCE_MIN",1.0f/128.0f);
+    sendUniform1f("FXAA_REDUCE_MUL",1.0f/8.0f);
+    sendUniform1f("FXAA_SPAN_MAX",8.0f);
+	    
     sendUniform2f("resolution",float(fbufferWidth),float(fbufferHeight));
     bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
     bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),1);
