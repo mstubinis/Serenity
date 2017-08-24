@@ -85,15 +85,15 @@ namespace Engine{
                     static uint SMAA_MAX_SEARCH_STEPS_DIAG;
                     static uint SMAA_CORNER_ROUNDING;
                     static float SMAA_DEPTH_THRESHOLD;
-                    
+
                     static uint SMAA_PREDICATION;
                     static float SMAA_PREDICATION_THRESHOLD;
                     static float SMAA_PREDICATION_SCALE;
                     static float SMAA_PREDICATION_STRENGTH;
-                    
+
                     static uint SMAA_REPROJECTION;
                     static float SMAA_REPROJECTION_WEIGHT_SCALE;
-                    
+
                     static uint SMAA_AREATEX_MAX_DISTANCE;
                     static uint SMAA_AREATEX_MAX_DISTANCE_DIAG;
                     static glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
@@ -207,13 +207,13 @@ namespace Engine{
             void disableDepthMask();
             void enableDrawPhysicsInfo(bool b = true);
             void disableDrawPhysicsInfo();
-        
+
             namespace SMAA{
             };
             namespace FXAA{
-                static void setReduceMin(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = r; }
-                static void setReduceMul(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = r; }
-                static void setSpanMax(float r){ Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = r; }
+                static void setReduceMin(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = glm::max(0.0f,r); }
+                static void setReduceMul(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = glm::max(0.0f,r); }
+                static void setSpanMax(float r){ Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = glm::max(0.0f,r); }
                 static float getReduceMin(){ return Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN; }
                 static float getReduceMul(){ return Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL; }
                 static float getSpanMax(){ return Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX; }
@@ -233,8 +233,8 @@ namespace Engine{
 
                 static float getRadius(){ return Detail::RendererInfo::BloomInfo::bloom_radius; }
                 static float getStrength(){ return Detail::RendererInfo::BloomInfo::bloom_strength; }
-                static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = r; }
-                static void setStrength(float r){ Detail::RendererInfo::BloomInfo::bloom_strength = r; }
+                static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = glm::max(0.0f,r); }
+                static void setStrength(float r){ Detail::RendererInfo::BloomInfo::bloom_strength = glm::max(0.0f,r); }
             };
             namespace GodRays{
                 static void enable(bool b = true){ Detail::RendererInfo::GodRaysInfo::godRays = b; }
@@ -271,11 +271,11 @@ namespace Engine{
                 static float getBias(){ return Detail::RendererInfo::SSAOInfo::ssao_bias; }
                 static uint getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
 
-                static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = s; }
+                static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = glm::max(0.0f,s); }
 
-                static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = i; }
-                static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = r; }
-                static void setScale(float s){ Detail::RendererInfo::SSAOInfo::ssao_scale = s; }
+                static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = glm::max(0.0f,i); }
+                static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = glm::max(0.0f,r); }
+                static void setScale(float s){ Detail::RendererInfo::SSAOInfo::ssao_scale = glm::max(0.0f,s); }
                 static void setBias(float b){ Detail::RendererInfo::SSAOInfo::ssao_bias = b; }
                 static void setSamples(uint s){ Detail::RendererInfo::SSAOInfo::ssao_samples = s; }
             };
@@ -286,12 +286,12 @@ namespace Engine{
         };
         inline const GLint getUniformLocation(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
         inline const GLint& getUniformLocationUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
-        
+
         void setViewport(uint x, uint y, uint width, uint height);
         void bindFBO(GLuint);
-		void bindFBO(FramebufferObject*);
+        void bindFBO(FramebufferObject*);
         void bindRBO(GLuint);
-		void bindRBO(RenderbufferObject*);
+        void bindRBO(RenderbufferObject*);
         void bindReadFBO(GLuint);
         void bindDrawFBO(GLuint);
         void bindTexture(const char* location,Texture*,uint slot);
