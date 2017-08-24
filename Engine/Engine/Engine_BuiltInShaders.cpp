@@ -723,9 +723,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "varying vec4 offset[3];\n"
     "varying vec4 dummy2;\n"
     "\n"
-    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_MAX_SEARCH_STEPS_DIAG;\n" //make this globally inherit for all smaa shaders
-    "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_AREATEX_MAX_DISTANCE;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_AREATEX_MAX_DISTANCE_DIAG;\n" //make this globally inherit for all smaa shaders
     "uniform vec2 SMAA_AREATEX_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
@@ -997,8 +995,6 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
     "\n"//neighbor frag
     "uniform sampler2D texture;\n"
     "uniform sampler2D blend_tex;\n"
-    "\n"
-    "uniform vec2 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
     "varying vec4 offset[2];\n"
     "varying vec4 dummy2;\n"
