@@ -52,7 +52,10 @@ namespace Engine{
                     static std::string hdr_frag;
                     static std::string godRays_frag;
                     static std::string blur_frag;
+                    
                     static std::string edge_frag;
+                    static std::string edge_canny_frag;
+                
                     static std::string final_frag;
                     static std::string lighting_frag;
                     static std::string lighting_frag_gi;
