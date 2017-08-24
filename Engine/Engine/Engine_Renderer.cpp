@@ -28,6 +28,27 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
+glm::vec2 Detail::RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE = glm::vec2(1.0f / 300.0f, 1.0f / 300.0f);
+float Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
+uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 8;
+uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
+uint Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 100;
+float Detail::RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD = (0.1f * Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD);
+
+uint Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = 0;
+float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD = 0.01f;
+float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE = 2.0f;
+float Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH = 0.4;
+
+uint Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = 0;
+float Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION_WEIGHT_SCALE = 30.0f;
+
+uint Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE = 16;
+uint Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG = 20;
+glm::vec2 Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_PIXEL_SIZE = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
+float Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE = 1.0f / 7.0f;
+
+
 float Detail::RendererInfo::GeneralInfo::gamma = 2.2f;
 bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
 bool Detail::RendererInfo::GeneralInfo::depth_test = true;
