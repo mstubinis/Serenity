@@ -97,7 +97,10 @@ namespace Engine{
                     static uint SMAA_AREATEX_MAX_DISTANCE;
                     static uint SMAA_AREATEX_MAX_DISTANCE_DIAG;
                     static glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
-                    static float SMAA_AREATEX_SUBTEX_SIZE;  
+                    static float SMAA_AREATEX_SUBTEX_SIZE;
+                    
+                    static GLuint SMAA_AreaTexture;
+                    static GLuint SMAA_SearchTexture;
                 };
                 struct FXAAInfo final{
                     static float FXAA_REDUCE_MIN;
