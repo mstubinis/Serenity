@@ -16,6 +16,7 @@
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"
 #include "FramebufferObject.h"
+#include "SMAA_AreaTexture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -901,15 +902,6 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
     
-    
-    // Search Texture (Grayscale, 8 bits unsigned)
-    mSearchTex = gl::Texture2d::create( searchTexBytes, GL_RED, 64, 16, fmt );
-
-    // Area Texture (Red+Green Channels, 8 bits unsigned)
-    fmt.setInternalFormat( GL_RG );
-    fmt.setSwizzleMask( GL_RED, GL_GREEN, GL_ZERO, GL_ONE );
-    mAreaTex = gl::Texture2d::create( areaTexBytes, GL_RG, AREATEX_WIDTH, AREATEX_HEIGHT, fmt );
-	
     gbuffer->start(GBufferType::Misc,GBufferType::Diffuse); //we save the original image to Diffuse buffer so it can be used later
     ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
     sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
@@ -929,8 +921,8 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
     sendUniform1i("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
     bindTextureSafe("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
-    //bindTextureSafe("area_tex",,1);
-    //bindTextureSafe("search_tex",,2);
+    bindTextureSafe("area_tex",areaTexture,1,GL_TEXTURE_2D);
+    bindTextureSafe("search_tex",searchTexture,2,GL_TEXTURE_2D);
     sendUniform1i("SMAA_MAX_SEARCH_STEPS_DIAG",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG);
     sendUniform1i("SMAA_AREATEX_MAX_DISTANCE",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE);
     sendUniform1i("SMAA_AREATEX_MAX_DISTANCE_DIAG",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG);
@@ -965,6 +957,9 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     
     p->unbind();
     */
+	
+    glDeleteTextures(1,&searchTexture);
+    glDeleteTextures(1,&areaTexture);
 }
 void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
