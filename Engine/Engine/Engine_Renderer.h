@@ -99,6 +99,11 @@ namespace Engine{
                     static glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
                     static float SMAA_AREATEX_SUBTEX_SIZE;  
                 };
+                struct FXAAInfo final{
+                    static float FXAA_REDUCE_MIN;
+                    static float FXAA_REDUCE_MUL;
+                    static float FXAA_SPAN_MAX;
+                };
                 struct LightingInfo final{
                     static bool lighting;
                 };
@@ -203,8 +208,10 @@ namespace Engine{
             void enableDrawPhysicsInfo(bool b = true);
             void disableDrawPhysicsInfo();
         
-	    namespace SMAA{
-	    };
+            namespace SMAA{
+            };
+            namespace FXAA{
+            };
             namespace HDR{
                 static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
                 static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
