@@ -784,6 +784,20 @@ void Detail::RenderManagement::_passEdge(GBuffer* gbuffer,Camera* c,uint& fbuffe
     unbindTexture2D(0);
     p->unbind();
 }
+void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
+    ShaderP* p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
+    bindTexture("texture",gbuffer->getTexture(texture),0);
+    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    unbindTexture2D(0);
+    p->unbind();
+	
+    p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
+    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
+    bindTexture("texture",gbuffer->getTexture(texture),0);
+    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    unbindTexture2D(0);
+    p->unbind();
+}
 void Detail::RenderManagement::_passGodsRays(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
     Settings::clear(true,false,false);
     ShaderP* p = Resources::getShaderProgram("Deferred_GodsRays"); p->bind();
