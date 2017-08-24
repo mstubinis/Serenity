@@ -11,6 +11,8 @@ namespace Engine{
                 private:
                 public:
                     static void init();
+                    static void convertShaderCode();
+                
                     static std::string version;
 
                     static std::string float_into_2_floats;
