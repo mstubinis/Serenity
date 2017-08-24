@@ -771,30 +771,32 @@ void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fbuffe
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
 }
-void Detail::RenderManagement::_passEdge(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,GLuint texture, float radius){
-    ShaderP* p = Resources::getShaderProgram("Deferred_Edge"); p->bind();
-
-    sendUniform2f("gScreenSize",float(fbufferWidth),float(fbufferHeight));
-    sendUniform1f("radius", radius);
-
-    bindTexture("texture",gbuffer->getTexture(texture),0);
-
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
-
-    unbindTexture2D(0);
-    p->unbind();
-}
 void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
-    ShaderP* p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
+    ShaderP* p = Resources::getShaderProgram("Greyscale_Frag"); p->bind();
+    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
     bindTexture("texture",gbuffer->getTexture(texture),0);
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
-	
+
+    p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
+    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
+    bindTexture("texture",gbuffer->getTexture(texture),0);
+    renderFullscreenQuad(fboWidth,fboHeight);
+    unbindTexture2D(0);
+    p->unbind();
+    //blur it again
+    p->bind();
+    sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
+    bindTexture("texture",gbuffer->getTexture(texture),0);
+    renderFullscreenQuad(fboWidth,fboHeight);
+    unbindTexture2D(0);
+    p->unbind();
+    
     p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
     sendUniform2f("gScreenSize",float(fboWidth),float(fboHeight));
     bindTexture("texture",gbuffer->getTexture(texture),0);
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
 }
