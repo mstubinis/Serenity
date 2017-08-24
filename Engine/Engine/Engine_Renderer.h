@@ -160,7 +160,6 @@ namespace Engine{
                     static void _passForwardRendering(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
                     static void _passLighting(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _passSSAO(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderSSAO);
-                    static void _passEdge(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,GLuint texture,float radius = 1.0f);
                     static void _passEdgeCanny(GBuffer*,Camera*,uint& fboWidth,uint& fboHeight,GLuint texture);
                     static void _passBlur(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
