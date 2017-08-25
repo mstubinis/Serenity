@@ -65,6 +65,14 @@ void Shaders::Detail::ShadersManagement::init(){
 #pragma region Functions
 Shaders::Detail::ShadersManagement::float_into_2_floats = 
     "\n"
+    "vec3 Unpack3FloatsInto1Float(float v){\n"
+    "    vec3 ret;\n"
+    "    ret.r = (float)mod(v,          1.0);\n"
+    "    ret.g = (float)mod(v * 256.0,  1.0);\n"
+    "    ret.b = (float)mod(v * 65536.0,1.0);\n"
+    "    ret = ret * 2.0 - 1.0;\n"
+    "    return ret;\n"
+    "}\n"
     "float Pack2FloatIntoFloat16(float x,float y){\n"
     "    x = clamp(x,0.0001,0.9999);\n"
     "    y = clamp(y,0.0001,0.9999);\n"
@@ -1606,7 +1614,7 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "\n"
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
-    "uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = UNUSED, g = specPower, b = specularModel, a = diffuseModel\n"
+    "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = specPower, b = specularModel, a = diffuseModel
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
@@ -1675,7 +1683,8 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float metalness = stuff.x;\n"
     "    float smoothness = stuff.y;\n"
     "\n"
-    "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 MaterialF0 = Unpack3FloatsInto1Float(materials[index].r);\n"
+    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "\n"
     "    float roughness = 1.0 - smoothness;\n"
@@ -1845,7 +1854,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "\n"
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
-    "uniform vec4 materials[MATERIAL_COUNT_LIMIT]; //r = UNUSED, g = specPower, b = specularModel, a = diffuseModel\n"
+    "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = specPower, b = specularModel, a = diffuseModel
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
@@ -1876,21 +1885,22 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
     "    float metalness = stuff.x;\n"
     "    float smoothness = stuff.y;\n"
-    "    vec3 F0 = mix(vec3(0.04), MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 MaterialF0 = Unpack3FloatsInto1Float(materials[index].r);\n"
+    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "    float roughness = 1.0 - smoothness;\n"
     "    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
-    "    vec3 kS1 = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
-    "    vec3 kD1 = vec3(1.0) - kS1;\n"
-    "    kD1 *= 1.0 - metalness;\n"
+    "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
+    "    vec3 kD = vec3(1.0) - kS;\n"
+    "    kD *= 1.0 - metalness;\n"
     "    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
     "\n"
     "    const float MAX_REFLECTION_LOD = 5.0;\n"
     "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
     "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
-    "    vec3 GISpecular = prefilteredColor * (kS1 * brdf.x + brdf.y);\n"
+    "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y);\n"
     "\n"
-    "    vec3 TotalIrradiance = (kD1 * AmbientIrradiance + GISpecular) * ao;\n"
+    "    vec3 TotalIrradiance = (kD * AmbientIrradiance + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / gamma));\n"
     "    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
     "}";
