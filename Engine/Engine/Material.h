@@ -201,8 +201,8 @@ class Material final: public BindableResource{
         const float metalness() const;
         const float ao() const;
         
-        void setBaseColor(glm::vec3 c);
-        void setBaseColor(float r,float g,float b);
+        void setF0Color(glm::vec3 c);
+        void setF0Color(float r,float g,float b);
 
         void setMaterialPhysics(MaterialPhysics::Physics);
         void setShadeless(bool);
