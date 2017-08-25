@@ -235,7 +235,7 @@ class Material::impl final{
         bool m_Shadeless;
         float m_BaseGlow;
     
-        glm::vec3 m_BaseColor;
+        glm::vec3 m_F0Color;
 
         float m_BaseSmoothness;
         float m_BaseMetalness;
@@ -253,7 +253,7 @@ class Material::impl final{
 
             _addToMaterialPool();
 
-            _setBaseColor(1.0f,1.0f,1.0f);
+            _setF0Color(0.04f,0.04f,0.04f);
             _setSmoothness(0.3f);
             _setAO(1.0f);
             _setMetalness(0.0f);
@@ -356,8 +356,8 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
-        void _setBaseColor(float r, float g, float b){
-            m_BaseColor.r = r; m_BaseColor.g = g; m_BaseColor.b = b;
+        void _setF0Color(float r, float g, float b){
+            m_F0Color.r = r; m_F0Color.g = g; m_F0Color.b = b;
             _updateGlobalMaterialPool();
         }
         void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
@@ -505,8 +505,8 @@ const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
 
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
-void Material::setBaseColor(glm::vec3 color){ Material::setBaseColor(color.r, color.g, color.b); }
-void Material::setBaseColor(float r, float g, float b){ m_i->_setBaseColor(r, g, b); }
+void Material::setF0Color(glm::vec3 color){ Material::setF0Color(color.r, color.g, color.b); }
+void Material::setF0Color(float r, float g, float b){ m_i->_setF0Color(r, g, b); }
 void Material::setMaterialPhysics(MaterialPhysics::Physics c){
     boost::tuple<float, float, float, float, float>& t = MATERIAL_PROPERTIES.at(c);
     m_i->_setMaterialProperties( t.get<0>(), t.get<1>(), t.get<2>(), t.get<3>(), t.get<4>() );
