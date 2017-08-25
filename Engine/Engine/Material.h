@@ -59,6 +59,15 @@ class MaterialPhysics{public: enum Physics{
     Blue_Rubber_MERL,
     Zinc,
     Car_Paint_Orange,
+    Skin,
+    Quartz,
+    Crystal,
+    Alcohol,
+    Milk,
+    Glass,
+    Titanium,
+    Platinum,
+    Nickel,
 };};
 class DiffuseModel{public: enum Model{
     Lambert,
