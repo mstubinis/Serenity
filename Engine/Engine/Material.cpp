@@ -106,25 +106,35 @@ unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
 }
 unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
     unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
-                                                                  //Base Color            //Smoothness    //Metalness
-    m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.91f,0.92f,0.92f,      0.75f,          1.0f);
-    m[MaterialPhysics::Copper]               = boost::make_tuple(0.95f,0.64f,0.54f,      0.9f,           1.0f);
-    m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17f,0.17f,0.17f,      0.98f,          0.0f);
-    m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.08f,0.08f,0.08f,      0.98f,          0.0f);
-    m[MaterialPhysics::Gold]                 = boost::make_tuple(1.022f,0.782f,0.344f,   0.9f,           1.0f);
-    m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,      0.5f,           1.0f);
-    m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,      0.92f,          0.0f);
-    m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,      0.965f,         0.0f);
-    m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,      0.94f,          1.0f);
-    m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,      0.5f,           0.0f);
     
-    m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,   0.45f,          0.0f);
-    m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,      0.32f,          0.0f);
-    m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,   0.8f,           1.0f);
-    m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,      0.92f,          0.0f);
-    m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,      0.35f,          0.0f);
-    m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,    0.9f,           1.0f);
-    m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,         0.9f,           0.5f);
+    //Remember specular reflection of dielectrics is white!      //(F0)                     //Smoothness    //Metalness
+    m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,   0.75f,          1.0f);
+    m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,     0.9f,           1.0f);
+    m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f, 0.98f,          0.0f);
+    m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.0773f,0.0773f,0.0773f,    0.98f,          0.0f);
+    m[MaterialPhysics::Gold]                 = boost::make_tuple(1.022f,0.7655f,0.336f,      0.9f,           1.0f);
+    m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,          0.5f,           1.0f);
+    m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,          0.92f,          0.0f);
+    m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,          0.965f,         0.0f);
+    m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,          0.94f,          1.0f);
+    m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,          0.5f,           0.0f);
+    m[MaterialPhysics::Skin]                 = boost::make_tuple(0.028,0.028,0.028,          0.1f,           0.0f);
+    m[MaterialPhysics::Quartz]               = boost::make_tuple(0.045594,0.045594,0.04554,  0.8f,           0.0f);
+    m[MaterialPhysics::Crystal]              = boost::make_tuple(0.11111,0.11111,0.11111,    0.9f,           0.0f);
+    m[MaterialPhysics::Alcohol]              = boost::make_tuple(0.01995,0.01995,0.01995,    0.8f,           0.0f);
+    m[MaterialPhysics::Milk]                 = boost::make_tuple(0.02218,0.02218,0.02218,    0.6f,           0.0f);
+    m[MaterialPhysics::Glass]                = boost::make_tuple(0.04,0.04,0.04,             0.97f,          0.0f);
+    m[MaterialPhysics::Titanium]             = boost::make_tuple(0.5419,0.4967,0.4494,       0.91f,          1.0f);
+    m[MaterialPhysics::Platinum]             = boost::make_tuple(0.6724,0.6373,0.5854,       0.91f,          1.0f);
+    m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597,0.6086,0.5256,       0.95f,          1.0f);
+    
+    m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,       0.45f,          0.0f);
+    m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,          0.32f,          0.0f);
+    m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,       0.8f,           1.0f);
+    m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,          0.92f,          0.0f);
+    m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,          0.35f,          0.0f);
+    m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,        0.9f,           1.0f);
+    m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,             0.9f,           0.5f);
 
     return m;
 }
