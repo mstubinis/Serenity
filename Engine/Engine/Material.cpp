@@ -361,7 +361,7 @@ class Material::impl final{
             _updateGlobalMaterialPool();
         }
         void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
-            _setBaseColor(r,g,b);
+            _setF0Color(r,g,b);
             _setSmoothness(smoothness);
             _setMetalness(metalness);
             _updateGlobalMaterialPool();
