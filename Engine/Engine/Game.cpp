@@ -70,6 +70,7 @@ void Game::initResources(){
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
     Resources::getMaterial("Gold")->addComponentMetalness("data/Textures/gold_Metalness.png");
     Resources::getMaterial("Gold")->addComponentSmoothness("data/Textures/gold_Smoothness.png");
+	Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
