@@ -1054,6 +1054,7 @@ class LightProbe::impl{
 
             //render the scene into a cubemap. this will be VERY expensive...
             if(m_TextureAddresses.size() == 0){
+				m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(0));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
                 for (uint i = 0; i < 6; ++i){
@@ -1071,9 +1072,6 @@ class LightProbe::impl{
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(m_RBO);
             glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,m_EnvMapSize,m_EnvMapSize);
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-                cout << "Framebuffer completeness in LightProbe::impl::_render() is incomplete!" << endl; return;
-            }
             Renderer::setViewport(0,0,m_EnvMapSize,m_EnvMapSize);
             for (uint i = 0; i < 6; ++i){
                 super->m_View = m_Views[i];
@@ -1089,6 +1087,7 @@ class LightProbe::impl{
             /////////////////////////////////////////////////////////////////
             uint size = 32;
             if(m_TextureAddresses.size() == 1){
+				m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(1));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
                 for (uint i = 0; i < 6; ++i){
@@ -1120,6 +1119,7 @@ class LightProbe::impl{
             //now gen EnvPrefilterMap for specular IBL.
             size = m_EnvMapSize/4;
             if(m_TextureAddresses.size() == 2){
+				m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1, &m_TextureAddresses.at(2));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(2));
                 for (uint i = 0; i < 6; ++i){
@@ -1179,3 +1179,5 @@ LightProbe::~LightProbe(){
 void LightProbe::update(float dt){ m_i->_update(dt,this); }
 void LightProbe::renderCubemap(){ m_i->_render(this); }
 const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }
+GLuint LightProbe::getIrriadianceMap(){ return m_i->m_TextureAddresses.at(1); }
+GLuint LightProbe::getPrefilterMap(){ return m_i->m_TextureAddresses.at(2); }

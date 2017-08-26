@@ -239,6 +239,6 @@ FramebufferTexture* FramebufferObject::attatchTexture(Texture* t,FramebufferAtta
 RenderbufferObject* FramebufferObject::attatchRenderBuffer(RenderbufferObject* t){ return m_i->_attatchRenderbuffer(this,t); }
 uint FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint FramebufferObject::height(){ return m_i->m_FramebufferHeight; }
-GLuint FramebufferObject::address(){ return m_i->m_FBO; }
+const GLuint& FramebufferObject::address() const { return m_i->m_FBO; }
 unordered_map<uint,FramebufferObjectAttatchment*>& FramebufferObject::attatchments(){ return m_i->m_Attatchments; }
 void FramebufferObject::check(){ m_i->_check(this); }

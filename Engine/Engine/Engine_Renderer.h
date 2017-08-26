@@ -156,10 +156,10 @@ namespace Engine{
                     static void _renderTextures(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _passGodsRays(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,glm::vec2,bool,float);
                     static void _passHDR(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passGeometry(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
-                    static void _passForwardRendering(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderGodRays,Object* ignore);
-                    static void _passLighting(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passSSAO(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderSSAO);
+                    static void _passGeometry(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,Object* ignore);
+                    static void _passForwardRendering(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,Object* ignore);
+                    static void _passLighting(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool mainFunc);
+                    static void _passSSAO(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _passEdgeCanny(GBuffer*,Camera*,uint& fboWidth,uint& fboHeight,GLuint texture);
                     static void _passBlur(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,std::string type,GLuint texture,std::string channels = "RGBA");
                     static void _passFinal(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
@@ -171,7 +171,7 @@ namespace Engine{
                     static glm::mat4 m_2DProjectionMatrix;
 
                     static void render(
-                        GBuffer*,Camera*,uint fbufferWidth,uint fbufferHeight,
+                        GBuffer*,Camera*,uint fboWidth,uint fboHeight,
                         bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
                         Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                     );

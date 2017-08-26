@@ -72,7 +72,7 @@ class FramebufferObject final: public BindableResource{
         uint width();
         uint height();
         std::unordered_map<uint,FramebufferObjectAttatchment*>& attatchments();
-        GLuint address();
+        const GLuint& address() const;
         void check();
 };
 #endif

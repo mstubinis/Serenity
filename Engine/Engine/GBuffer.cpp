@@ -152,7 +152,6 @@ GBuffer::~GBuffer(){
     m_i->_destruct();
 }
 void GBuffer::resize(uint width, uint height){
-    stop();
     m_i->_resize(width,height);
 }
 void GBuffer::start(vector<uint>& t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}

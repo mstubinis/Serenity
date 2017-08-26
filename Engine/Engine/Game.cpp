@@ -68,8 +68,6 @@ void Game::initResources(){
     Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
 
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
-    Resources::getMaterial("Gold")->addComponentMetalness("data/Textures/gold_Metalness.png");
-    Resources::getMaterial("Gold")->addComponentSmoothness("data/Textures/gold_Smoothness.png");
 	Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
 }
 void Game::initLogic(){
@@ -108,6 +106,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED); }
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
     if(Events::Keyboard::isKeyDownOnce("f11")){ Renderer::Settings::enableDrawPhysicsInfo(!Renderer::Detail::RendererInfo::GeneralInfo::draw_physics_debug); }
+	if(Events::Keyboard::isKeyDownOnce("f12")){ Renderer::Settings::GodRays::enable(!Renderer::Detail::RendererInfo::GodRaysInfo::godRays); }
 
     if(Events::Keyboard::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
@@ -124,15 +123,19 @@ void Game::update(float dt){
 
     if(Events::Keyboard::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
+		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
+		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
     }
     if(Events::Keyboard::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
+		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
+		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() + 0.02f);
     }
     m_HUD->update(dt);
 }

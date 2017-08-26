@@ -1569,7 +1569,7 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "\n"
     "uniform int HasSSAO;\n"
     "uniform int HasLighting;\n"
-    "uniform int HasHDR;\n"
+    "uniform int HasRays;\n"
     "\n";
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
@@ -1577,7 +1577,6 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "void main(void){\n"
     "    vec2 uv = gl_TexCoord[0].st;\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, uv).rgb;\n"
-    "    vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
     "    vec3 hdr = texture2D(gMiscMap,uv).rgb;\n"
     "    vec3 lighting = texture2D(gLightMap, uv).rgb;\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
@@ -1591,7 +1590,10 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "        brightness = min(1.0,pow(brightness,0.125));\n"
     "        lighting *= max(brightness, ssao);\n"
     "    }\n"
-    "    lighting += rays;\n"
+	"    if(HasRays == 1){\n"
+    "        vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
+    "        lighting += rays;\n"
+	"    }\n"
 	"    gl_FragColor = vec4(lighting,1.0);\n"
     "}";
 
@@ -1684,7 +1686,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float smoothness = stuff.y;\n"
     "\n"
     "    vec3 MaterialF0 = Unpack3FloatsInto1Float(materials[index].r);\n"
-    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
+	"    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "\n"
     "    float roughness = 1.0 - smoothness;\n"
@@ -1886,7 +1888,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    float metalness = stuff.x;\n"
     "    float smoothness = stuff.y;\n"
     "    vec3 MaterialF0 = Unpack3FloatsInto1Float(materials[index].r);\n"
-    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
+	"    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "    float roughness = 1.0 - smoothness;\n"
     "    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
