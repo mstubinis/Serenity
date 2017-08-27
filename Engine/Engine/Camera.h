@@ -32,6 +32,7 @@ class Camera: public ObjectBasic{
 
         virtual void resize(unsigned int w, unsigned int h);
         virtual void setPerspectiveProjection();
+		virtual void setPerspectiveProjection(float angle,float aspectRatio,float near,float far);
         virtual void setOrthoProjection(float,float,float,float);
 
         virtual void update(float);

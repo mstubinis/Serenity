@@ -36,7 +36,7 @@ bool Shader::fromFile(){ return m_i->m_FromFile; }
 
 struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     Camera* c = Resources::getActiveCamera();
-	if(c == nullptr) return;
+    if(c == nullptr) return;
     Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
     Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 

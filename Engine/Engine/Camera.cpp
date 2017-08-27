@@ -64,6 +64,13 @@ void Camera::resize(uint width,uint height){
 Camera::~Camera()
 { 
 }
+void Camera::setPerspectiveProjection(float angle,float aspectRatio,float _near,float _far){
+	m_Angle = angle;
+	m_AspectRatio = aspectRatio;
+	m_Near = _near;
+	m_Far = _far;
+	m_Projection = glm::perspective(angle,aspectRatio,_near,_far);
+}
 void Camera::setPerspectiveProjection(){m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far);}
 void Camera::setOrthoProjection(float l, float r, float b, float t){m_Projection = glm::ortho(l,r,b,t,m_Near,m_Far);}
 void Camera::setAspectRatio(float ratio){ 

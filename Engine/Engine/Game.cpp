@@ -100,13 +100,10 @@ void Game::update(float dt){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f6")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::EXPOSURE); }
-    if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::FILMIC); }
-    if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::REINHARD); }
-    if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::HDR::setAlgorithm(HDRToneMapAlgorithm::UNCHARTED); }
+	if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
+	if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
+	if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
-    if(Events::Keyboard::isKeyDownOnce("f11")){ Renderer::Settings::enableDrawPhysicsInfo(!Renderer::Detail::RendererInfo::GeneralInfo::draw_physics_debug); }
-	if(Events::Keyboard::isKeyDownOnce("f12")){ Renderer::Settings::GodRays::enable(!Renderer::Detail::RendererInfo::GodRaysInfo::godRays); }
 
     if(Events::Keyboard::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);

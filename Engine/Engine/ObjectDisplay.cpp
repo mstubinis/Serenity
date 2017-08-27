@@ -46,12 +46,12 @@ void ObjectDisplay::update(float dt){
     for(auto renderedItem:m_DisplayItems){
         renderedItem->update(dt);
     }
-    Camera* c = Resources::getActiveCamera();
-    m_PassedRenderCheck = true;
-    float radius = getRadius();
-    if(!m_Visible || !c->sphereIntersectTest(getPosition(),radius) || c->getDistance(this) > radius * Object::m_VisibilityThreshold){
-        m_PassedRenderCheck = false;
+}
+bool ObjectDisplay::checkRender(Camera* c){
+    if(!m_Visible || !c->sphereIntersectTest(getPosition(),m_Radius) || c->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
+        return false;
     }
+    return true;
 }
 void ObjectDisplay::calculateRadius(){
     if(m_DisplayItems.size() == 0){

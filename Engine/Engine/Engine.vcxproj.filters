@@ -374,6 +374,9 @@
     <ClInclude Include="GLImageConstants.h">
       <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="SMAA_LUT.h">
+      <Filter>Header Files\Engine\Rendering\BuiltInShaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Shaders\AS_skyFromSpace_vert.glsl">

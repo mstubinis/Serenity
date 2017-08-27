@@ -145,11 +145,12 @@ void ObjectDynamic::update(float dt){
     for(auto renderedItem:m_DisplayItems){
         renderedItem->update(dt);
     }
-    Camera* c = Resources::getActiveCamera();
-    m_PassedRenderCheck = true;
-    if(!m_Visible || !c->sphereIntersectTest(this) || c->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
-        m_PassedRenderCheck = false;
+}
+bool ObjectDynamic::checkRender(Camera* c){
+    if(!m_Visible || !c->sphereIntersectTest(getPosition(),m_Radius) || c->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
+        return false;
     }
+    return true;
 }
 glm::vec3 ObjectDynamic::getPosition(){
     glm::mat4 m(1);

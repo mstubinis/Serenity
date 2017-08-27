@@ -212,6 +212,17 @@ void Resources::initResources(){
     Shader* edgeCannyBlur = new Shader("edge_canny_blur",Engine::Shaders::Detail::ShadersManagement::edge_canny_blur,ShaderType::Fragment,false);
     Shader* edgeCannyFrag = new Shader("edge_canny_frag",Engine::Shaders::Detail::ShadersManagement::edge_canny_frag,ShaderType::Fragment,false);
 	
+
+	Shader* smaa_vert_1 = new Shader("smaa_vert_1",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_1,ShaderType::Vertex,false);
+    Shader* smaa_vert_2 = new Shader("smaa_vert_2",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_2,ShaderType::Vertex,false);
+    Shader* smaa_vert_3 = new Shader("smaa_vert_3",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_3,ShaderType::Vertex,false);
+    Shader* smaa_vert_4 = new Shader("smaa_vert_4",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_4,ShaderType::Vertex,false);
+	Shader* smaa_frag_1 = new Shader("smaa_frag_1",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1,ShaderType::Fragment,false);
+    Shader* smaa_frag_2 = new Shader("smaa_frag_2",Engine::Shaders::Detail::ShadersManagement::smaa_frag_2,ShaderType::Fragment,false);
+    Shader* smaa_frag_3 = new Shader("smaa_frag_3",Engine::Shaders::Detail::ShadersManagement::smaa_frag_3,ShaderType::Fragment,false);
+    Shader* smaa_frag_4 = new Shader("smaa_frag_4",Engine::Shaders::Detail::ShadersManagement::smaa_frag_4,ShaderType::Fragment,false);
+
+
     addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
     addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
@@ -231,6 +242,11 @@ void Resources::initResources(){
     addShaderProgram("Deferred_Edge_Canny_Blur",fullscreenVertexShader,edgeCannyBlur,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Edge_Canny",fullscreenVertexShader,edgeCannyFrag,ShaderRenderPass::Postprocess);
 	
+    addShaderProgram("Deferred_SMAA_1",smaa_vert_1,smaa_frag_1,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_SMAA_2",smaa_vert_2,smaa_frag_2,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_SMAA_3",smaa_vert_3,smaa_frag_3,ShaderRenderPass::Postprocess);
+    addShaderProgram("Deferred_SMAA_4",smaa_vert_4,smaa_frag_4,ShaderRenderPass::Postprocess);
+
     Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
     brdfCook->setWrapping(TextureWrap::ClampToEdge);
 

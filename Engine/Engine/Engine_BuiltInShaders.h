@@ -25,6 +25,8 @@ namespace Engine{
                     static std::string vertex_hud;
                     static std::string vertex_skybox;
 
+					static std::string smaa_common;
+
                     static std::string smaa_vertex_1;
                     static std::string smaa_frag_1;
 

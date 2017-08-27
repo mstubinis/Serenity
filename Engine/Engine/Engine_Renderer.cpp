@@ -35,11 +35,11 @@ float Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = 8.0f;
 
 GLuint Detail::RendererInfo::SMAAInfo::SMAA_AreaTexture;
 GLuint Detail::RendererInfo::SMAAInfo::SMAA_SearchTexture;
-glm::vec2 Detail::RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE = glm::vec2(1.0f / 300.0f, 1.0f / 300.0f);
-float Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
-uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 8;
-uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
-uint Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 100;
+float Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.05f;
+uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 32;
+uint Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 16;
+uint Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 25;
+float Detail::RendererInfo::SMAAInfo::SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR = 2.0f;
 float Detail::RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD = (0.1f * Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD);
 
 bool Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = false;
@@ -345,7 +345,7 @@ void Detail::RenderManagement::init(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
     RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,float(Resources::getWindowSize().x),0.0f,float(Resources::getWindowSize().y),0.005f,1000.0f);
-	Settings::enableDepthTest(true);
+    Settings::enableDepthTest(true);
     glDepthFunc(GL_LEQUAL);
     glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
@@ -353,18 +353,18 @@ void Detail::RenderManagement::init(){
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
     // Create SMAA lookup textures
-    glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
-    glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_SearchTexture);
-    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
-    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
-    glBindTexture(GL_TEXTURE_2D,0);
-
     glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_AreaTexture);
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_AreaTexture);
     Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
-    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
+    glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_SearchTexture);
+    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Nearest);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
 }
 void Detail::RenderManagement::postInit(){
@@ -452,7 +452,7 @@ void Detail::RenderManagement::_renderText(GBuffer* gbuffer,Camera* c,uint& fbuf
     p->unbind();
 }
 void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
-	if(Detail::RendererInfo::GodRaysInfo::godRays)
+    if(Detail::RendererInfo::GodRaysInfo::godRays)
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
     else
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
@@ -498,7 +498,7 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fb
                     Object* object = o.lock().get();
                     if(exists(o)){
                         if(scene->objects().count(object->name()) && (object != ignore)){
-                            if(object->passedRenderCheck()){
+                            if(object->checkRender(c)){
                                 object->bind();
                                 for(auto meshInstance:instance.second){
                                     meshInstance->bind(); //render also
@@ -540,7 +540,7 @@ void Detail::RenderManagement::_passForwardRendering(GBuffer* gbuffer,Camera* c,
                     Object* object = o.lock().get();
                     if(exists(o)){
                         if(scene->objects().count(object->name()) && (object != ignore)){
-                            if(object->passedRenderCheck()){
+                            if(object->checkRender(c)){
                                 object->bind();
                                 for(auto meshInstance:instance.second){
                                     meshInstance->bind(); //render also
@@ -618,21 +618,21 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),2);
     sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
-	Scene* s = Resources::getCurrentScene();
+    Scene* s = Resources::getCurrentScene();
     SkyboxEmpty* sky = s->getSkybox();
-	if(mainRenderFunc){
-		if(s->m_LightProbes.size() > 0){
-			LightProbe* p = s->m_LightProbes.at("CapsuleLightProbe");
-			bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
-			bindTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
-			bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
-		}
-		else if(sky != nullptr && sky->texture()->numAddresses() >= 3){
-			bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
-			bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-			bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
-		}
-	}
+    if(mainRenderFunc){
+        if(s->m_LightProbes.size() > 0){
+            LightProbe* p = s->m_LightProbes.at("CapsuleLightProbe");
+            bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
+            bindTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
+            bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+        }
+        else if(sky != nullptr && sky->texture()->numAddresses() >= 3){
+            bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
+            bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
+            bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+        }
+    }
     Renderer::Detail::renderFullscreenQuad(fbufferWidth,fbufferHeight);
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     unbindTextureCubemap(3);
@@ -650,13 +650,13 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
         }
     }
 
-	if(doSSAO == false) Renderer::Settings::SSAO::disable();
-	if(doGodRays == false) Renderer::Settings::GodRays::disable();
-	if(doAA == false) Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::None;
+    if(doSSAO == false) Renderer::Settings::SSAO::disable();
+    if(doGodRays == false) Renderer::Settings::GodRays::disable();
+    if(doAA == false) Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::None;
 
-	_passGeometry(gbuffer,c,fboWidth,fboHeight,ignore);
+    _passGeometry(gbuffer,c,fboWidth,fboHeight,ignore);
 
-	if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays){
+    if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays){
         gbuffer->start(GBufferType::GodRays,"RGBA",false);
         Object* o = Resources::getObject("Sun");
         glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
@@ -677,7 +677,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::LightingInfo::lighting == true && Resources::getCurrentScene()->lights().size() > 0){
         gbuffer->start(GBufferType::Lighting,"RGB");
-		Renderer::Settings::clear(true,false,false);//this is needed for godrays
+        Renderer::Settings::clear(true,false,false);//this is needed for godrays
         _passLighting(gbuffer,c,fboWidth,fboHeight,mainRenderFunc);
     }
     glDisable(GL_BLEND);
@@ -686,7 +686,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
     //_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
 
     string _channels;
-	bool isdoingssao = false;
+    bool isdoingssao = false;
     if(doSSAO && RendererInfo::SSAOInfo::ssao){ isdoingssao = true; _channels = "RGBA"; }
     else{                                       _channels = "RGB";  }
 
@@ -704,8 +704,8 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
     _passHDR(gbuffer,c,fboWidth,fboHeight);
 
 
-	bool doingaa = false;
-	if(doAA && RendererInfo::GeneralInfo::aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
+    bool doingaa = false;
+    if(doAA && RendererInfo::GeneralInfo::aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
 
     if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None || !doingaa){
         gbuffer->stop(fbo,rbo);
@@ -722,7 +722,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && doingaa){
         gbuffer->start(GBufferType::Lighting);
-		_passFinal(gbuffer,c,fboWidth,fboHeight);
+        _passFinal(gbuffer,c,fboWidth,fboHeight);
         _passSMAA(gbuffer,c,fboWidth,fboHeight,doingaa);
     }
     //gbuffer->stop();
@@ -792,7 +792,7 @@ void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWid
     p->unbind();
 }
 void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
-	
+    
     //texture is the lighting buffer which is the final pass results
     
     gbuffer->start(GBufferType::Misc);
@@ -801,7 +801,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
-	
+    
     //misc is now greyscale scene. lighting is still final scene
 
     gbuffer->start(GBufferType::Diffuse);
@@ -810,7 +810,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
-	/*
+    /*
     //blur it again
     gbuffer->start(GBufferType::Misc);
     p->bind();
@@ -825,7 +825,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     renderFullscreenQuad(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
-	*/
+    */
 
     //misc is now the final blurred greyscale image
     gbuffer->start(GBufferType::Misc);
@@ -922,51 +922,63 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
 }
-void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool renderAA){
+void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
     if(!renderAA) return;
-	
-    gbuffer->start(GBufferType::Misc,GBufferType::Diffuse); //we save the original image to Diffuse buffer so it can be used later
+
+	glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / float(fboWidth), 1.0f / float(fboHeight), float(fboWidth), float(fboHeight));
+
+	gbuffer->start(GBufferType::Misc); //we save the original image to Diffuse buffer so it can be used later
+	Settings::clear(true,false,false);
     ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
-    sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
-    sendUniform1f("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
-    sendUniform1f("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
+    sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
+    sendUniform1fSafe("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
+    sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
+	sendUniform1fSafe("SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR",RendererInfo::SMAAInfo::SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR);
     bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0);
 
     //edge pass
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenQuad(fboWidth,fboHeight);
     
     for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
     p->unbind();
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    gbuffer->start(GBufferType::Lighting);
+    gbuffer->start(GBufferType::Normal);
+	Settings::clear(true,false,false);
+	//gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_2"); p->bind();
-    sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
-    sendUniform1i("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
+    sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
+    sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
+
     bindTextureSafe("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
     bindTextureSafe("area_tex",RendererInfo::SMAAInfo::SMAA_AreaTexture,1,GL_TEXTURE_2D);
     bindTextureSafe("search_tex",RendererInfo::SMAAInfo::SMAA_SearchTexture,2,GL_TEXTURE_2D);
-    sendUniform1i("SMAA_MAX_SEARCH_STEPS_DIAG",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG);
-    sendUniform1i("SMAA_AREATEX_MAX_DISTANCE",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE);
-    sendUniform1i("SMAA_AREATEX_MAX_DISTANCE_DIAG",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG);
-    sendUniform2f("SMAA_AREATEX_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_PIXEL_SIZE);
-    sendUniform1f("SMAA_AREATEX_SUBTEX_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE);
-    sendUniform1i("SMAA_CORNER_ROUNDING",RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING);
+
+    sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS_DIAG",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG);
+    sendUniform1iSafe("SMAA_AREATEX_MAX_DISTANCE",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE);
+    sendUniform1iSafe("SMAA_AREATEX_MAX_DISTANCE_DIAG",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG);
+    sendUniform2fSafe("SMAA_AREATEX_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_PIXEL_SIZE);
+    sendUniform1fSafe("SMAA_AREATEX_SUBTEX_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE);
+    sendUniform1iSafe("SMAA_CORNER_ROUNDING",RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING);
+	sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING) / 100.0f));
     
     //blend pass
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenQuad(fboWidth,fboHeight);
     
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    gbuffer->start(GBufferType::Misc);
+	//gbuffer->start(GBufferType::Misc);
+    gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_3"); p->bind();
-    sendUniform2f("SMAA_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_PIXEL_SIZE);
-    bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Diffuse),0); //need original final image from first smaa pass
-    bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Lighting),1);
+    sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
+    bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
+    bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
     
     //neighbor pass
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenQuad(fboWidth,fboHeight);
     
     for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -975,18 +987,19 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     
     /*
     //this pass is optional. lets skip it for now
-    gbuffer->start(GBufferType::Lighting);
+    //gbuffer->start(GBufferType::Lighting);
+    gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_4"); p->bind();
-    
+    renderFullscreenQuad(fboWidth,fboHeight);
     p->unbind();
     */
-	
+    
 }
-void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
 
-	sendUniform1iSafe("HasSSAO",int(Detail::RendererInfo::SSAOInfo::ssao));
-	sendUniform1iSafe("HasRays",int(Detail::RendererInfo::GodRaysInfo::godRays));
+    sendUniform1iSafe("HasSSAO",int(Detail::RendererInfo::SSAOInfo::ssao));
+    sendUniform1iSafe("HasRays",int(Detail::RendererInfo::GodRaysInfo::godRays));
 
     bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),1);
@@ -995,14 +1008,14 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fbuff
     bindTextureSafe("gBloomMap",gbuffer->getTexture(GBufferType::Bloom),4);
     bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),5);
 
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenQuad(fboWidth,fboHeight);
 
-    for(uint i = 0; i < 7; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
-    float w2 = float(width)/2;
-    float h2 = float(height)/2;
+    float w2 = float(width)/2.0f;
+    float h2 = float(height)/2.0f;
     glm::mat4 m(1.0f);
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("Model",m);

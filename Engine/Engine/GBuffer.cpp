@@ -90,7 +90,6 @@ class GBuffer::impl final{
             if(channels.find("A") != string::npos) a=GL_TRUE; else a=GL_FALSE;
             glColorMask(r,g,b,a);
             glDrawBuffers(types.size(), &types[0]); // Specify what to render an start acquiring
-            //glClear(GL_COLOR_BUFFER_BIT);         // Clear the render targets
             vector_clear(types);
         }
         void _start(uint t1,string& c,bool f){

@@ -37,7 +37,7 @@ class Texture::impl final{
             m_PixelType = pxlType;
             _baseInit(type,super,n,i,internFormat,genMipMaps);
             m_Width = uint(float(w) * divisor);
-			m_Height = uint(float(h) * divisor);
+            m_Height = uint(float(h) * divisor);
             super->load();
         }
         void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,bool genMipMaps){
@@ -80,7 +80,7 @@ class Texture::impl final{
                 glBindTexture(m_Type,m_TextureAddress.at(0));
                 _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),GLsizei(m_Width),GLsizei(m_Height),ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType));
                 super->setFilter(TextureFilter::Linear);
-                super->setWrapping(TextureWrap::ClampToBorder);
+                super->setWrapping(TextureWrap::ClampToEdge);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() > 1){//cubemap
@@ -166,8 +166,8 @@ class Texture::impl final{
                 return;
             }
             glBindTexture(m_Type, m_TextureAddress.at(0));
-			m_Width = uint(float(w) * t->divisor()); 
-			m_Height = uint(float(h) * t->divisor());
+            m_Width = uint(float(w) * t->divisor()); 
+            m_Height = uint(float(h) * t->divisor());
             glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),m_Width,m_Height,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }
         void _generateMipmaps(){
@@ -259,12 +259,9 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         this->setWrapping(TextureWrap::ClampToEdge);
         this->setFilter(TextureFilter::Linear);
     }
-	else{
-		glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
-		//for (uint i = 0; i < 6; ++i){
-			//glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
-		//}
-	}
+    else{
+        glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
+    }
     Renderer::unbindFBO();
     FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
     fbo->bind();
@@ -298,7 +295,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     //now gen EnvPrefilterMap for specular IBL
     size = preEnvFilterSize;
     if(m_i->m_TextureAddress.size() == 2){
-		glBindTexture(m_i->m_Type,0);
+        glBindTexture(m_i->m_Type,0);
         m_i->m_TextureAddress.push_back(GLuint(0));
         glGenTextures(1, &m_i->m_TextureAddress.at(2));
         glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
@@ -310,12 +307,9 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         this->setMaxFilter(TextureFilter::Linear);
         glGenerateMipmap(m_i->m_Type);
     }
-	else{
-		glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
-		//for (uint i = 0; i < 6; ++i){
-			//glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,0,0,size,size,GL_RGB,GL_FLOAT,NULL);
-		//}
-	}
+    else{
+        glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
+    }
     p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
     Renderer::bindTexture("cubemap",address(),0,m_i->m_Type);
     Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((this->width() * this->width())*6));

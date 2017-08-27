@@ -187,6 +187,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_BuiltInShaders.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SMAA_LUT.h" />
     <ClInclude Include="SolarSystem.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />

@@ -79,12 +79,12 @@ namespace Engine{
                     static unsigned char cull_face_status;
                 };
                 struct SMAAInfo final{
-                    static glm::vec2 SMAA_PIXEL_SIZE;
                     static float SMAA_THRESHOLD;
                     static uint SMAA_MAX_SEARCH_STEPS;
                     static uint SMAA_MAX_SEARCH_STEPS_DIAG;
                     static uint SMAA_CORNER_ROUNDING;
                     static float SMAA_DEPTH_THRESHOLD;
+					static float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;
 
                     static bool SMAA_PREDICATION;
                     static float SMAA_PREDICATION_THRESHOLD;
