@@ -127,18 +127,12 @@ class Mesh final: public BindableResource{
         float m_threshold;
         bool m_SaveMeshData;
         CollisionType m_Type;
+    
         std::vector<glm::vec3> m_Points;
-
         std::vector<float> m_UVs;
-
         std::vector<GLuint> m_Normals;
         std::vector<GLuint> m_Binormals;
         std::vector<GLuint> m_Tangents;
-
-        //std::vector<glm::vec3> m_Normals;
-        //std::vector<glm::vec3> m_Binormals;
-        //std::vector<glm::vec3> m_Tangents;
-
         std::vector<ushort> m_Indices;
 
         void _loadData(ImportedMeshData&,float threshhold);
