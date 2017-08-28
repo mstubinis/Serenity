@@ -14,28 +14,41 @@
 
 using namespace std;
 
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexAnimatedFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
-                                          //#components  //componentFormat //normalized?
     m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
-
     m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
     m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
     m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    //m[VertexFormatAnimated::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-	
+    //m[VertexFormatAnimated::Normal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    
+    return m;
+}
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
+    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
+    m[VertexFormat::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormat::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormat::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormat::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);	
     return m;
 }
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
-    for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
-        if(i <= 4 || (mesh->m_Skeleton != nullptr && (i >= 5 && mesh->m_Skeleton->m_BoneIDs.size() > 0))){
+    if(mesh->m_Skeleton != nullptr){
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
+            boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
+            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), 0,(void*)0);
+        }
+    }else{
+        for(uint i = 0; i < VertexFormat::EnumTotal; i++){
             boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_FORMAT_DATA.at(i);
             glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
             glEnableVertexAttribArray(i);
@@ -45,8 +58,10 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
-        glDisableVertexAttribArray(i);
+    if(mesh->m_Skeleton != nullptr){
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){ glDisableVertexAttribArray(i); }
+    }else{
+        for(uint i = 0; i < VertexFormat::EnumTotal; i++){ glDisableVertexAttribArray(i); }
     }
 }};
 DefaultMeshBindFunctor Mesh::DEFAULT_BIND_FUNCTOR;
@@ -98,7 +113,6 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
             d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
             Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(d);
-
         }
     }
     _loadData(d,threshold);
@@ -358,8 +372,10 @@ void Mesh::initRenderingContext(){
     }
 }
 void Mesh::cleanupRenderingContext(){
-    for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
-        glDeleteBuffers(1, &m_buffers[i]);
+    if(m_Skeleton != nullptr){
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){ glDeleteBuffers(1, &m_buffers[i]); }
+    }else{
+        for(uint i = 0; i < VertexFormat::EnumTotal; i++){ glDeleteBuffers(1, &m_buffers[i]); }
     }
     glDeleteBuffers(1,&m_elementbuffer);
 }
@@ -413,27 +429,17 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
 AnimationData::~AnimationData(){
 }
 uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    
-    for (uint i = 0 ; i < node->mNumPositionKeys - 1 ; i++) {
-        if (AnimationTime < (float)node->mPositionKeys[i + 1].mTime) { return i; }
-    }  
-    return 0;
+    for(uint i=0;i<node->mNumPositionKeys-1;i++){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
 }
 uint AnimationData::_FindRotation(float AnimationTime, const aiNodeAnim* node){
-    for (uint i = 0 ; i < node->mNumRotationKeys - 1 ; i++) {
-        if (AnimationTime < (float)node->mRotationKeys[i + 1].mTime) { return i; }
-    }   
-    return 0;
+    for(uint i=0;i<node->mNumRotationKeys-1;i++){if(AnimationTime<(float)node->mRotationKeys[i+1].mTime){return i;}}return 0;
 }
 uint AnimationData::_FindScaling(float AnimationTime, const aiNodeAnim* node){  
-    for (uint i = 0 ; i < node->mNumScalingKeys - 1 ; i++) {
-        if (AnimationTime < (float)node->mScalingKeys[i + 1].mTime) { return i; }
-    }
-    return 0;
+    for(uint i=0;i<node->mNumScalingKeys-1;i++){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
 }
 void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
     if (node->mNumPositionKeys == 1) {
-        Out = Engine::Math::assimpToGLMVec3(node->mPositionKeys[0].mValue);
-        return;
+        Out = Engine::Math::assimpToGLMVec3(node->mPositionKeys[0].mValue); return;
     }           
     uint PositionIndex = _FindPosition(AnimationTime,node);
     uint NextPositionIndex = (PositionIndex + 1);
@@ -449,8 +455,7 @@ void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTim
 void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* node){
     // we need at least two values to interpolate...
     if (node->mNumRotationKeys == 1) {
-        Out = node->mRotationKeys[0].mValue;
-        return;
+        Out = node->mRotationKeys[0].mValue; return;
     }
     uint RotationIndex = _FindRotation(AnimationTime, node);
     uint NextRotationIndex = (RotationIndex + 1);
@@ -465,8 +470,7 @@ void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float Animation
 }
 void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
     if (node->mNumScalingKeys == 1) {
-        Out = Engine::Math::assimpToGLMVec3(node->mScalingKeys[0].mValue);
-        return;
+        Out = Engine::Math::assimpToGLMVec3(node->mScalingKeys[0].mValue); return;
     }
     uint ScalingIndex = _FindScaling(AnimationTime, node);
     uint NextScalingIndex = (ScalingIndex + 1);
@@ -485,13 +489,10 @@ void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, c
     if(m_KeyframeData.count(BoneName)){
         const aiNodeAnim* keyframes = m_KeyframeData.at(BoneName);
         if(keyframes){
-            glm::vec3 s;    _CalcInterpolatedScaling(s, time, keyframes);
-        
+            glm::vec3 s; _CalcInterpolatedScaling(s, time, keyframes);
             aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
             glm::mat4 rotation = glm::mat4(Engine::Math::assimpToGLMMat3(q.GetMatrix()));
-
-            glm::vec3 t;    _CalcInterpolatedPosition(t, time, keyframes);
-
+            glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
             NodeTransform = glm::mat4(1.0f);
             NodeTransform = glm::translate(NodeTransform,t);
             NodeTransform *= rotation;
@@ -503,7 +504,6 @@ void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, c
         uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping.at(BoneName);
         glm::mat4& Final = m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform;
         Final = m_Mesh->m_Skeleton->m_GlobalInverseTransform * Transform * m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).BoneOffset;
-
         //this line allows for animation combinations. only works when additional animations start off in their resting places...
         Final = Transforms.at(BoneIndex) * Final;
     }
@@ -517,7 +517,6 @@ void AnimationData::_BoneTransform(const string& animationName,float TimeInSecon
     float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
     glm::mat4 Identity = glm::mat4(1.0f);
     _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity,Transforms);
-
     for(uint i = 0; i < m_Mesh->m_Skeleton->m_NumBones; i++){
         Transforms.at(i) = m_Mesh->m_Skeleton->m_BoneInfo.at(i).FinalTransform;
     }
