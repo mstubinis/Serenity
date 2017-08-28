@@ -992,9 +992,7 @@ float RodLight::rodLength(){ return m_RodLength; }
 class LightProbe::impl{
     public:
         uint m_EnvMapSize;
-
-		FramebufferObject* m_FBO;
-
+        FramebufferObject* m_FBO;
         vector<GLuint> m_TextureAddresses;  
         glm::mat4 m_Views[6];
         bool m_OnlyOnce;
@@ -1005,6 +1003,7 @@ class LightProbe::impl{
             glm::vec3 pos = super->getPosition();
             Camera* c = Resources::getActiveCamera();
             if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, c->getNear(), c->getFar());
+            else             super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 99999999.0f);
             m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
@@ -1012,14 +1011,14 @@ class LightProbe::impl{
             m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
 
-			m_FBO = new FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
+            m_FBO = new FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
         }
         void _destruct(){
             for(auto addr:m_TextureAddresses){
                 glDeleteTextures(1,&addr);
             }
             glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-			SAFE_DELETE(m_FBO);
+            SAFE_DELETE(m_FBO);
         }
         void _update(float dt,LightProbe* super){
             if(super->m_Parent != nullptr){ super->m_Model = super->m_Parent->getModel(); }
@@ -1042,13 +1041,13 @@ class LightProbe::impl{
 
             //Yes, i know, this is dangerous. Very dangerous
             Renderer::Detail::RenderManagement::m_gBuffer->resize(m_EnvMapSize,m_EnvMapSize);
-            
+
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
             uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
             //render the scene into a cubemap. this will be VERY expensive...
             if(m_TextureAddresses.size() == 0){
-				m_TextureAddresses.push_back(GLuint(0));
+                m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(0));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
                 for (uint i = 0; i < 6; ++i){
@@ -1060,23 +1059,26 @@ class LightProbe::impl{
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
             }
+            //_update(0,super); //this might be needed
+            m_FBO->bind();
             for (uint i = 0; i < 6; ++i){
                 super->m_View = m_Views[i];
                 super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
                 super->_constructFrustrum();
+                
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(0),0);
 
                 //replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
                 // fps loss?)
                 Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,
-					super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),
-					m_FBO->attatchments().at(FramebufferAttatchment::at(FramebufferAttatchment::Depth))->address());
+                    super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),
+                    m_FBO->attatchments().at(FramebufferAttatchment::at(FramebufferAttatchment::Depth))->address());
             }
             /////////////////////////////////////////////////////////////////
-			m_FBO->bind();
+            m_FBO->bind();
             uint size = 32;
             if(m_TextureAddresses.size() == 1){
-				m_TextureAddresses.push_back(GLuint(0));
+                m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(1));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
                 for (uint i = 0; i < 6; ++i){
@@ -1105,7 +1107,7 @@ class LightProbe::impl{
             //now gen EnvPrefilterMap for specular IBL.
             size = m_EnvMapSize/4;
             if(m_TextureAddresses.size() == 2){
-				m_TextureAddresses.push_back(GLuint(0));
+                m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1, &m_TextureAddresses.at(2));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(2));
                 for (uint i = 0; i < 6; ++i){
@@ -1141,7 +1143,7 @@ class LightProbe::impl{
                     Skybox::bindMesh();
                 }
             }
-			m_FBO->unbind();
+            m_FBO->unbind();
             Renderer::bindReadFBO(prevReadBuffer);
             Renderer::bindDrawFBO(prevDrawBuffer);
             m_DidFirst = true;
