@@ -260,9 +260,11 @@ void SolarSystem::_loadFromFile(string filename){
 
 	new ObjectDisplay("Planet","Gold",glm::vec3(0,5,2),glm::vec3(2));
 
-	//new DirectionalLight();
 
     player->translate(0,0,2);
+
+	//LightProbe* lightP = new LightProbe("MainLightProbe",256,glm::vec3(0),false,this);
+	//player->addChild(lightP);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox

@@ -128,6 +128,7 @@ class LightProbe: public Camera{
         void update(float);
         void renderCubemap();
 
+		GLuint getEnvMap();
 		GLuint getIrriadianceMap();
 		GLuint getPrefilterMap();
 

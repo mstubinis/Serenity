@@ -621,13 +621,13 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     Scene* s = Resources::getCurrentScene();
     SkyboxEmpty* sky = s->getSkybox();
     if(mainRenderFunc){
-        if(s->m_LightProbes.size() > 0){
-            LightProbe* p = s->m_LightProbes.at("CapsuleLightProbe");
-            bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
-            bindTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
-            bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
-        }
-        else if(sky != nullptr && sky->texture()->numAddresses() >= 3){
+        //if(s->m_LightProbes.size() > 0){
+            //LightProbe* p = s->m_LightProbes.at("CapsuleLightProbe");
+            //bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
+            //bindTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
+            //bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+        //}
+        if(sky != nullptr && sky->texture()->numAddresses() >= 3){
             bindTextureSafe("irradianceMap",sky->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
             bindTextureSafe("prefilterMap",sky->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
             bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
@@ -725,33 +725,53 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
         _passFinal(gbuffer,c,fboWidth,fboHeight);
         _passSMAA(gbuffer,c,fboWidth,fboHeight,doingaa);
     }
-    //gbuffer->stop();
-    //glDepthFunc(GL_ALWAYS);
-    //Settings::enableDepthMask(true);
-    //Settings::enableDepthTest(true); //has to be enabled for some reason
-    _passCopyDepth(gbuffer,c,fboWidth,fboHeight);
+	if(mainRenderFunc){
 
-    glEnable(GL_BLEND);
-    Settings::disableDepthTest();
-    Settings::disableDepthMask();
-    if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && c == Resources::getActiveCamera()){
-        Physics::Detail::PhysicsManagement::render();
-    }
+		//gbuffer->stop();
+		//glDepthFunc(GL_ALWAYS);
+		//Settings::enableDepthMask(true);
+		//Settings::enableDepthTest(true); //has to be enabled for some reason
+		_passCopyDepth(gbuffer,c,fboWidth,fboHeight);
 
-    //render HUD
-    if(HUD == true){
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        Settings::enableDepthTest();
-        Settings::enableDepthMask();
-        Settings::clear(false,true,false); //clear depth only
-        Settings::enableAlphaTest();
-        glAlphaFunc(GL_GREATER, 0.1f);
-        _renderTextures(gbuffer,c,fboWidth,fboHeight);
-        _renderText(gbuffer,c,fboWidth,fboHeight);
-        Settings::disableAlphaTest();
-    }
-    vector_clear(m_FontsToBeRendered);
-    vector_clear(m_TexturesToBeRendered);
+		glEnable(GL_BLEND);
+		Settings::disableDepthTest();
+		Settings::disableDepthMask();
+		if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && c == Resources::getActiveCamera()){
+			Physics::Detail::PhysicsManagement::render();
+		}
+
+	    //to try and see what the lightprobe is outputting
+		/*
+		Renderer::unbindFBO();
+		Settings::clear();
+		LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
+		Skybox* sky = static_cast<Skybox*>(Resources::getCurrentScene()->getSkybox());
+		if(pr != nullptr){
+			ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
+			glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
+			Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
+			Renderer::bindTexture("Texture",pr->getEnvMap(),0,GL_TEXTURE_CUBE_MAP);
+			Skybox::bindMesh();
+			Renderer::unbindTextureCubemap(0);
+			p->unbind();
+		}
+		*/
+
+		//render HUD
+		if(HUD == true){
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			Settings::enableDepthTest();
+			Settings::enableDepthMask();
+			Settings::clear(false,true,false); //clear depth only
+			Settings::enableAlphaTest();
+			glAlphaFunc(GL_GREATER, 0.1f);
+			_renderTextures(gbuffer,c,fboWidth,fboHeight);
+			_renderText(gbuffer,c,fboWidth,fboHeight);
+			Settings::disableAlphaTest();
+		}
+		vector_clear(m_FontsToBeRendered);
+		vector_clear(m_TexturesToBeRendered);
+	}
 }
 void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();

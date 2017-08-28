@@ -1004,7 +1004,7 @@ class LightProbe::impl{
             m_OnlyOnce = onlyOnce;
             glm::vec3 pos = super->getPosition();
             Camera* c = Resources::getActiveCamera();
-            if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, c->getNear(), c->getFar());
+			if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f,c->getNear(),c->getFar());
             m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
@@ -1061,9 +1061,11 @@ class LightProbe::impl{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
             }
             for (uint i = 0; i < 6; ++i){
+				Renderer::Settings::clear();
                 super->m_View = m_Views[i];
-                super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
-                super->_constructFrustrum();
+				//super->update(0);
+				super->_constructFrustrum();
+				//super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(0),0);
 
                 //replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
@@ -1074,6 +1076,7 @@ class LightProbe::impl{
             }
             /////////////////////////////////////////////////////////////////
 			m_FBO->bind();
+			
             uint size = 32;
             if(m_TextureAddresses.size() == 1){
 				m_TextureAddresses.push_back(GLuint(0));
@@ -1123,7 +1126,7 @@ class LightProbe::impl{
             p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
             Renderer::bindTexture("cubemap",m_TextureAddresses.at(0),0,GL_TEXTURE_CUBE_MAP);
             Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((m_EnvMapSize * m_EnvMapSize)*6));
-            Renderer::sendUniform1i("NUM_SAMPLES",16);
+            Renderer::sendUniform1i("NUM_SAMPLES",32);
             uint maxMipLevels = 5;
             for (uint m = 0; m < maxMipLevels; ++m){
                 uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
@@ -1148,18 +1151,13 @@ class LightProbe::impl{
         }
 };
 
-LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene):Camera(n,glm::radians(90.0f),1.0f,0.1f,1000.0f,scene),m_i(new impl){
+LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene):Camera(n,glm::radians(90.0f),1.0f,0.01f,9999999.0f,scene),m_i(new impl){
     m_i->_init(envMapSize,this,onlyOnce,scene);
     this->setPosition(pos);
     if(scene == nullptr){
         scene = Resources::getCurrentScene();
     }
     scene->m_LightProbes.emplace(name(),this);
-
-	Camera* d = Resources::getActiveCamera();
-	float defaultNear = d->getNear();
-	float defaultFar = d->getFar();
-	this->setPerspectiveProjection(glm::radians(90.0f),1.0f,defaultNear,defaultFar);
 }
 LightProbe::~LightProbe(){
     m_i->_destruct();
@@ -1167,5 +1165,15 @@ LightProbe::~LightProbe(){
 void LightProbe::update(float dt){ m_i->_update(dt,this); }
 void LightProbe::renderCubemap(){ m_i->_render(this); }
 const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }
-GLuint LightProbe::getIrriadianceMap(){ return m_i->m_TextureAddresses.at(1); }
-GLuint LightProbe::getPrefilterMap(){ return m_i->m_TextureAddresses.at(2); }
+GLuint LightProbe::getEnvMap(){ 
+	if(m_i->m_TextureAddresses.size() <= 0) return 0;
+	return m_i->m_TextureAddresses.at(0); 
+}
+GLuint LightProbe::getIrriadianceMap(){ 
+	if(m_i->m_TextureAddresses.size() <= 1) return 0;
+	return m_i->m_TextureAddresses.at(1); 
+}
+GLuint LightProbe::getPrefilterMap(){
+	if(m_i->m_TextureAddresses.size() <= 2) return 0;
+	return m_i->m_TextureAddresses.at(2); 
+}

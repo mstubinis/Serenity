@@ -1196,7 +1196,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
     "void main(void){\n"
-    "    gl_FragData[0] = textureCube(Texture, UV);\n"
+	"    gl_FragData[0] = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rg = vec2(1.0);\n"
     "    gl_FragData[2].r = 0.0;\n"
     "    gl_FragData[2].b = 0.0;\n"
