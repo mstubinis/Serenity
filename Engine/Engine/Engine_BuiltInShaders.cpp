@@ -1068,9 +1068,9 @@ Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersMana
     "\n";
 Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"
-    "vec4 SMAAResolvePS(vec2 _uv,sampler2D _colorTexCurr,sampler2D _colorTexPrev){\n"
-    "    vec4 current = texture2D(_colorTexCurr, _uv);\n"
-    "    vec4 previous = texture2D(_colorTexPrev, _uv);\n"
+    "vec4 SMAAResolvePS(vec2 texcoord,sampler2D currentColorTex,sampler2D previousColorTex){\n"
+    "    vec4 current = texture2D(currentColorTex, texcoord);\n"
+    "    vec4 previous = texture2D(previousColorTex, texcoord);\n"
     "    return mix(current, previous, 0.5);\n"
     "}\n"
     "void main(void){\n"
@@ -1697,7 +1697,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float smoothness = stuff.y;\n"
     "\n"
     "    vec3 MaterialF0 = Unpack3FloatsInto1Float(materials[index].r);\n"
-	"    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
     "    vec3 Frensel = F0;\n"
     "\n"
     "    float roughness = 1.0 - smoothness;\n"
