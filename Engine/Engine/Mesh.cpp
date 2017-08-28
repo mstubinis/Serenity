@@ -17,16 +17,16 @@ using namespace std;
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
                                           //#components  //componentFormat //normalized?
-    m[VertexFormat::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
 
-    m[VertexFormat::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormat::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    //m[VertexFormat::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    //m[VertexFormatAnimated::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
 	
-    m[VertexFormat::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
     
     return m;
 }
@@ -34,7 +34,7 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_FORMA
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
-    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
+    for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
         if(i <= 4 || (mesh->m_Skeleton != nullptr && (i >= 5 && mesh->m_Skeleton->m_BoneIDs.size() > 0))){
             boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_FORMAT_DATA.at(i);
             glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
@@ -45,7 +45,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
+    for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
         glDisableVertexAttribArray(i);
     }
 }};
@@ -358,7 +358,7 @@ void Mesh::initRenderingContext(){
     }
 }
 void Mesh::cleanupRenderingContext(){
-    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
+    for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
         glDeleteBuffers(1, &m_buffers[i]);
     }
     glDeleteBuffers(1,&m_elementbuffer);
