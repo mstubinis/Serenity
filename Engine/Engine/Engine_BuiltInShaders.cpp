@@ -621,6 +621,22 @@ Shaders::Detail::ShadersManagement::smaa_common =
     "    e.rb = e.rb * abs(5.0 * e.rb - 5.0 * 0.75);\n"
     "    return round(e);\n"
     "}\n"
+    "float API_V_DIR(float v){ return -v; }\n"
+    "float API_V_COORD(float v){ return 1.0 - v; }\n"
+    "vec2 API_V_DIR(vec2 v){ return -v; }\n"
+    "vec2 API_V_COORD(vec2 v){ return vec2(1.0) - v; }\n"
+    "vec3 API_V_DIR(vec3 v){ return -v; }\n"
+    "vec3 API_V_COORD(vec3 v){ return vec3(1.0) - v; }\n"
+    "vec4 API_V_DIR(vec4 v){ return -v; }\n"
+    "vec4 API_V_COORD(vec4 v){ return vec4(1.0) - v; }\n"
+    "bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
+    "bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
+    "bool API_V_BELOW(vec2 v1, vec2 v2){ if(v1.x < v2.x && v1.y < v2.y) return true; return false; }\n"
+    "bool API_V_ABOVE(vec2 v1, vec2 v2){ if(v1.x > v2.x && v1.y > v2.y) return true; return false; }\n"
+    "bool API_V_BELOW(vec3 v1, vec3 v2){ if(v1.x < v2.x && v1.y < v2.y && v1.z < v2.z) return true; return false; }\n"
+    "bool API_V_ABOVE(vec3 v1, vec3 v2){ if(v1.x > v2.x && v1.y > v2.y && v1.z > v2.z) return true; return false; }\n"
+    "bool API_V_BELOW(vec4 v1, vec4 v2){ if(v1.x < v2.x && v1.y < v2.y && v1.z < v2.z && v1.w < v2.w) return true; return false; }\n"
+    "bool API_V_ABOVE(vec4 v1, vec4 v2){ if(v1.x > v2.x && v1.y > v2.y && v1.z > v2.z && v1.w > v2.w) return true; return false; }\n"
     "\n";
 
 
