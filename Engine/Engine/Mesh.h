@@ -24,17 +24,32 @@ typedef unsigned int uint;
 typedef unsigned short ushort;
 
 class VertexFormat{ public: enum Format{
-    Position,
-    UV,
-    Normal,
-    Binormal,
-    Tangent,
-    BoneIDs,
-    BoneWeights,
+    Position,UV,Normal,Binormal,Tangent,
 
     EnumTotal
 };};
+class VertexFormatAnimated{ public: enum Format{
+    Position,UV,Normal,Binormal,Tangent,
+    BoneIDs,BoneWeights,
 
+    EnumTotal
+};};
+struct MeshVertexData final{
+    glm::vec3 position;
+    float uv;
+    GLuint normal;
+    GLuint binormal;
+    GLuint tangent;
+};
+struct MeshVertexDataAnimated final{
+    glm::vec3 position;
+    float uv;
+    GLuint normal;
+    GLuint binormal;
+    GLuint tangent;
+    glm::vec4 boneIDs;
+    glm::vec4 boneWeights;
+};
 class AnimationData{
     friend class Mesh;
     friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
@@ -97,7 +112,8 @@ class Mesh final: public BindableResource{
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-        GLuint m_buffers[VertexFormat::EnumTotal]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
+        std::vector<GLuint> m_buffers;
+    
         GLuint m_elementbuffer;
         Collision* m_Collision;
 
@@ -112,18 +128,12 @@ class Mesh final: public BindableResource{
         float m_threshold;
         bool m_SaveMeshData;
         CollisionType m_Type;
+    
         std::vector<glm::vec3> m_Points;
-
         std::vector<float> m_UVs;
-
         std::vector<GLuint> m_Normals;
         std::vector<GLuint> m_Binormals;
         std::vector<GLuint> m_Tangents;
-
-        //std::vector<glm::vec3> m_Normals;
-        //std::vector<glm::vec3> m_Binormals;
-        //std::vector<glm::vec3> m_Tangents;
-
         std::vector<ushort> m_Indices;
 
         void _loadData(ImportedMeshData&,float threshhold);

@@ -77,7 +77,11 @@ class FramebufferTexture::impl{
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);
+            
+            //is this line even needed?
             glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
+            
+            
             glBindTexture(m_Texture->type(),0);
         }
 };

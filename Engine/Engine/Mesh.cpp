@@ -14,34 +14,43 @@
 
 using namespace std;
 
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexAnimatedFormatMap(){
+    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
+    m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
+    //m[VertexFormatAnimated::Normal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
+    return m;
+}
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
-                                          //#components  //componentFormat //normalized?
     m[VertexFormat::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
     m[VertexFormat::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
-
     m[VertexFormat::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
     m[VertexFormat::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-
-	/*
-    m[VertexFormat::Normal]      = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::Binormal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::Tangent]     = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-	*/
-    m[VertexFormat::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    
+    m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);	
     return m;
 }
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
-    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
-        if(i <= 4 || (mesh->m_Skeleton != nullptr && (i >= 5 && mesh->m_Skeleton->m_BoneIDs.size() > 0))){
+    if(mesh->m_Skeleton != nullptr){
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
+            boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(i));
+            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), 0,(void*)0);
+        }
+    }else{
+        for(uint i = 0; i < VertexFormat::EnumTotal; i++){
             boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_FORMAT_DATA.at(i);
-            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers[i]);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(i));
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), 0,(void*)0);
         }
@@ -49,8 +58,11 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
-        glDisableVertexAttribArray(i);
+	Mesh* mesh = static_cast<Mesh*>(r);
+    if(mesh->m_Skeleton != nullptr){
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){ glDisableVertexAttribArray(i); }
+    }else{
+        for(uint i = 0; i < VertexFormat::EnumTotal; i++){ glDisableVertexAttribArray(i); }
     }
 }};
 DefaultMeshBindFunctor Mesh::DEFAULT_BIND_FUNCTOR;
@@ -102,7 +114,6 @@ Mesh::Mesh(std::string& name,btHeightfieldTerrainShape* heightfield,float thresh
             d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
             Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(d);
-
         }
     }
     _loadData(d,threshold);
@@ -119,10 +130,10 @@ Mesh::Mesh(string& name,unordered_map<string,float>& grid,uint width,uint length
     ImportedMeshData d;
     for(uint i = 0; i < width-1; i++){
         for(uint j = 0; j < length-1; j++){
-            string key1 = boost::lexical_cast<string>(i) + "," + boost::lexical_cast<string>(j);
-            string key2 = boost::lexical_cast<string>(i+1) + "," + boost::lexical_cast<string>(j);
-            string key3 = boost::lexical_cast<string>(i) + "," + boost::lexical_cast<string>(j+1);
-            string key4 = boost::lexical_cast<string>(i+1) + "," + boost::lexical_cast<string>(j+1);
+            string key1 = to_string(i) + "," + to_string(j);
+            string key2 = to_string(i+1) + "," + to_string(j);
+            string key3 = to_string(i) + "," + to_string(j+1);
+            string key4 = to_string(i+1) + "," + to_string(j+1);
 
             Vertex v1,v2,v3,v4;
             v1.position = glm::vec3(i-width/2.0f,   grid[key1], j-length/2.0f);
@@ -219,17 +230,17 @@ Mesh::Mesh(string& name,float width, float height,float threshold):BindableResou
     d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
     d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
 
-    float uv_topLeft_x = float(0);
-    float uv_topLeft_y = float(0);
+    float uv_topLeft_x = 0.0f;
+    float uv_topLeft_y = 0.0f;
     
-    float uv_bottomLeft_x = float(0);
-    float uv_bottomLeft_y = float(0) + float(height);
+    float uv_bottomLeft_x = 0.0f;
+    float uv_bottomLeft_y = 0.0f + float(height);
 
-    float uv_bottomRight_x = float(0) + float(width);
-    float uv_bottomRight_y = float(0) + float(height);
+    float uv_bottomRight_x = 0.0f + float(width);
+    float uv_bottomRight_y = 0.0f + float(height);
 
-    float uv_topRight_x = float(0) + float(width);
-    float uv_topRight_y = float(0);
+    float uv_topRight_x = 0.0f + float(width);
+    float uv_topRight_y = 0.0f;
 
     d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
     d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
@@ -323,30 +334,40 @@ void Mesh::_loadFromOBJMemory(string data,CollisionType type,float threshold){
     }
 }
 void Mesh::initRenderingContext(){
-    glGenBuffers((sizeof(m_buffers)/sizeof(m_buffers[0])), m_buffers);
-
+    m_buffers.push_back(GLuint(0));
+    glGenBuffers(1, &m_buffers.at(0));
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
     glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
 
+    m_buffers.push_back(GLuint(0));
+    glGenBuffers(1, &m_buffers.at(1));
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
     glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(float), &m_UVs[0], GL_STATIC_DRAW);
 
+    m_buffers.push_back(GLuint(0));
+    glGenBuffers(1, &m_buffers.at(2));
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
     //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(GLuint), &m_Normals[0], GL_STATIC_DRAW);
     
+    m_buffers.push_back(GLuint(0));
+    glGenBuffers(1, &m_buffers.at(3));
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-    //glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(glm::vec3), &m_Binormals[0], GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(GLuint), &m_Binormals[0], GL_STATIC_DRAW);
     
+    m_buffers.push_back(GLuint(0));
+    glGenBuffers(1, &m_buffers.at(4));
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-    //glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(glm::vec3), &m_Tangents[0], GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(GLuint), &m_Tangents[0], GL_STATIC_DRAW);
     
     if(m_Skeleton != nullptr){
+        m_buffers.push_back(GLuint(0));
+        glGenBuffers(1, &m_buffers.at(5));
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
         glBufferData(GL_ARRAY_BUFFER, m_Skeleton->m_BoneIDs.size() * sizeof(glm::vec4), &m_Skeleton->m_BoneIDs[0], GL_STATIC_DRAW);
 
+        m_buffers.push_back(GLuint(0));
+        glGenBuffers(1, &m_buffers.at(6));
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[6]);
         glBufferData(GL_ARRAY_BUFFER, m_Skeleton->m_BoneWeights.size() * sizeof(glm::vec4), &m_Skeleton->m_BoneWeights[0], GL_STATIC_DRAW);
     }
@@ -364,8 +385,8 @@ void Mesh::initRenderingContext(){
     }
 }
 void Mesh::cleanupRenderingContext(){
-    for(uint i = 0; i < VertexFormat::EnumTotal; i++){
-        glDeleteBuffers(1, &m_buffers[i]);
+    for(uint i = 0; i < m_buffers.size(); i++){
+        glDeleteBuffers(1,&m_buffers.at(i));
     }
     glDeleteBuffers(1,&m_elementbuffer);
 }
@@ -419,27 +440,17 @@ AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
 AnimationData::~AnimationData(){
 }
 uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    
-    for (uint i = 0 ; i < node->mNumPositionKeys - 1 ; i++) {
-        if (AnimationTime < (float)node->mPositionKeys[i + 1].mTime) { return i; }
-    }  
-    return 0;
+    for(uint i=0;i<node->mNumPositionKeys-1;i++){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
 }
 uint AnimationData::_FindRotation(float AnimationTime, const aiNodeAnim* node){
-    for (uint i = 0 ; i < node->mNumRotationKeys - 1 ; i++) {
-        if (AnimationTime < (float)node->mRotationKeys[i + 1].mTime) { return i; }
-    }   
-    return 0;
+    for(uint i=0;i<node->mNumRotationKeys-1;i++){if(AnimationTime<(float)node->mRotationKeys[i+1].mTime){return i;}}return 0;
 }
 uint AnimationData::_FindScaling(float AnimationTime, const aiNodeAnim* node){  
-    for (uint i = 0 ; i < node->mNumScalingKeys - 1 ; i++) {
-        if (AnimationTime < (float)node->mScalingKeys[i + 1].mTime) { return i; }
-    }
-    return 0;
+    for(uint i=0;i<node->mNumScalingKeys-1;i++){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
 }
 void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
     if (node->mNumPositionKeys == 1) {
-        Out = Engine::Math::assimpToGLMVec3(node->mPositionKeys[0].mValue);
-        return;
+        Out = Engine::Math::assimpToGLMVec3(node->mPositionKeys[0].mValue); return;
     }           
     uint PositionIndex = _FindPosition(AnimationTime,node);
     uint NextPositionIndex = (PositionIndex + 1);
@@ -455,8 +466,7 @@ void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTim
 void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* node){
     // we need at least two values to interpolate...
     if (node->mNumRotationKeys == 1) {
-        Out = node->mRotationKeys[0].mValue;
-        return;
+        Out = node->mRotationKeys[0].mValue; return;
     }
     uint RotationIndex = _FindRotation(AnimationTime, node);
     uint NextRotationIndex = (RotationIndex + 1);
@@ -471,8 +481,7 @@ void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float Animation
 }
 void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
     if (node->mNumScalingKeys == 1) {
-        Out = Engine::Math::assimpToGLMVec3(node->mScalingKeys[0].mValue);
-        return;
+        Out = Engine::Math::assimpToGLMVec3(node->mScalingKeys[0].mValue); return;
     }
     uint ScalingIndex = _FindScaling(AnimationTime, node);
     uint NextScalingIndex = (ScalingIndex + 1);
@@ -491,13 +500,10 @@ void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, c
     if(m_KeyframeData.count(BoneName)){
         const aiNodeAnim* keyframes = m_KeyframeData.at(BoneName);
         if(keyframes){
-            glm::vec3 s;    _CalcInterpolatedScaling(s, time, keyframes);
-        
+            glm::vec3 s; _CalcInterpolatedScaling(s, time, keyframes);
             aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
             glm::mat4 rotation = glm::mat4(Engine::Math::assimpToGLMMat3(q.GetMatrix()));
-
-            glm::vec3 t;    _CalcInterpolatedPosition(t, time, keyframes);
-
+            glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
             NodeTransform = glm::mat4(1.0f);
             NodeTransform = glm::translate(NodeTransform,t);
             NodeTransform *= rotation;
@@ -509,7 +515,6 @@ void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, c
         uint BoneIndex = m_Mesh->m_Skeleton->m_BoneMapping.at(BoneName);
         glm::mat4& Final = m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform;
         Final = m_Mesh->m_Skeleton->m_GlobalInverseTransform * Transform * m_Mesh->m_Skeleton->m_BoneInfo.at(BoneIndex).BoneOffset;
-
         //this line allows for animation combinations. only works when additional animations start off in their resting places...
         Final = Transforms.at(BoneIndex) * Final;
     }
@@ -523,7 +528,6 @@ void AnimationData::_BoneTransform(const string& animationName,float TimeInSecon
     float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
     glm::mat4 Identity = glm::mat4(1.0f);
     _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_aiScene->mRootNode, Identity,Transforms);
-
     for(uint i = 0; i < m_Mesh->m_Skeleton->m_NumBones; i++){
         Transforms.at(i) = m_Mesh->m_Skeleton->m_BoneInfo.at(i).FinalTransform;
     }
