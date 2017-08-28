@@ -34,7 +34,22 @@ class VertexFormat{ public: enum Format{
 
     EnumTotal
 };};
-
+struct MeshVertexData final{
+    glm::vec3 position;
+    float uv;
+    GLuint normal;
+    GLuint binormal;
+    GLuint tangent;
+};
+struct MeshVertexDataAnimated final{
+    glm::vec3 position;
+    float uv;
+    GLuint normal;
+    GLuint binormal;
+    GLuint tangent;
+    glm::vec4 boneIDs;
+    glm::vec4 boneWeights;
+};
 class AnimationData{
     friend class Mesh;
     friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
