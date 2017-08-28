@@ -112,7 +112,8 @@ class Mesh final: public BindableResource{
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-        GLuint m_buffers[VertexFormatAnimated::EnumTotal]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
+        std::vector<GLuint> m_buffers;
+    
         GLuint m_elementbuffer;
         Collision* m_Collision;
 
