@@ -24,13 +24,13 @@ typedef unsigned int uint;
 typedef unsigned short ushort;
 
 class VertexFormat{ public: enum Format{
-    Position,
-    UV,
-    Normal,
-    Binormal,
-    Tangent,
-    BoneIDs,
-    BoneWeights,
+    Position,UV,Normal,Binormal,Tangent,
+
+    EnumTotal
+};};
+class VertexFormatAnimated{ public: enum Format{
+    Position,UV,Normal,Binormal,Tangent,
+    BoneIDs,BoneWeights,
 
     EnumTotal
 };};
@@ -112,7 +112,7 @@ class Mesh final: public BindableResource{
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-        GLuint m_buffers[VertexFormat::EnumTotal]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
+        GLuint m_buffers[VertexFormatAnimated::EnumTotal]; //0 - position, 1 - uv, 2 - normal, 3 - binormals, 4 - tangents
         GLuint m_elementbuffer;
         Collision* m_Collision;
 
