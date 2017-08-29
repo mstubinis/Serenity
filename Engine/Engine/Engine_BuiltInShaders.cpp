@@ -653,6 +653,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;\n"
+    "uniform float SMAA_PREDICATION_THRESHOLD;\n"
+    "uniform float SMAA_PREDICATION_SCALE;\n"
+    "uniform float SMAA_PREDICATION_STRENGTH;\n"
     "\n"
     "uniform sampler2D texture;\n"
     "\n"
@@ -664,6 +667,12 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "    float Pleft = texture2D(tex, offset[0].xy).r;\n"
     "    float Ptop  = texture2D(tex, offset[0].zw).r;\n"
     "    return vec3(P, Pleft, Ptop);\n"
+    "}\n"
+    "vec2 SMAACalculatePredicatedThreshold(vec2 texcoord,vec4 offset[3],sampler2D predicationTex){\n"
+    "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset,predicationTex);\n"
+    "    vec2 delta = abs(neighbours.xx - neighbours.yz);\n"
+    "    vec2 edges = step(SMAA_PREDICATION_THRESHOLD, delta);\n"
+    "    return SMAA_PREDICATION_SCALE * SMAA_THRESHOLD * (1.0 - SMAA_PREDICATION_STRENGTH * edges);\n"
     "}\n"
     "vec2 SMAADepthEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D depthTex) {\n"
     "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, depthTex);\n"
@@ -728,9 +737,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "    return edges;\n"
     "}\n"
     "void main(void){\n"
-    "    //gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, texture),0.0,1.0);\n"
+    "    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, texture),0.0,1.0);\n"
     "    //gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, texture),0.0,1.0);\n"
-    "    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, texture),0.0,1.0);\n"
+    "    //gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, texture),0.0,1.0);\n"
     "}\n"
     "\n";
 Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
