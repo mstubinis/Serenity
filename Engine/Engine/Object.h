@@ -12,7 +12,7 @@ class Camera;
 class MeshInstance;
 typedef unsigned int GLuint;
 
-template <typename T> bool exists(boost::weak_ptr<T> t){ if(t.expired() || !t.lock().get()) return false; return true; }
+template <typename T> bool exists(const boost::weak_ptr<T>& t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
 class IObject: public BindableResource{
     public:
