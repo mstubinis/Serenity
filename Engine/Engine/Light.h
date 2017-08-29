@@ -6,26 +6,12 @@
 #include "Camera.h"
 #include <unordered_map>
 
+class Scene;
 class LightType{public: enum Type{
-    Sun,
-    Point,
-    Directional,
-    Spot,
-    Rod
+    Sun,Point,Directional,Spot,Rod
 };};
 class LightRange{public:enum Range{
-    _7,
-    _13,
-    _20,
-    _32,
-    _50,
-    _65,
-    _100,
-    _160,
-    _200,
-    _325,
-    _600,
-    _3250
+    _7,_13,_20,_32,_50,_65,_100,_160,_200,_325,_600,_3250
 };};
 class LightAttenuation{public:enum Model{
     Constant,
@@ -35,8 +21,6 @@ class LightAttenuation{public:enum Model{
     Distance_Radius_Squared,
     Spherical_Quadratic
 };};
-
-class Scene;
 class SunLight: public ObjectDisplay{
     protected:
         uint m_Type;
@@ -128,9 +112,9 @@ class LightProbe: public Camera{
         void update(float);
         void renderCubemap();
 
-		GLuint getEnvMap();
-		GLuint getIrriadianceMap();
-		GLuint getPrefilterMap();
+        GLuint getEnvMap();
+        GLuint getIrriadianceMap();
+        GLuint getPrefilterMap();
 
         const uint getEnvMapSize() const;
 };
