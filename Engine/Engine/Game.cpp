@@ -83,8 +83,15 @@ void Game::initLogic(){
 
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
-
     m_HUD = new HUD();
+    
+        glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
+    
+    float testX = 0.35f; float testY = 0.87f; float testZ = 0.61f;
+    float _pack = Engine::Math::pack3FloatsInto1FloatUnsigned(testX,testY,testZ);
+    glm::vec3 _unpack = Engine::Math::unpack3FloatsInto1FloatUnsigned(_pack);
+    std::cout << "REGULAR   x: " << testX << " y: " << testY << " z: " << testZ << std::endl;
+    std::cout << "UNPACKED   x: " << _unpack.x << " y: " << _unpack.y << " z: " << _unpack.z << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
@@ -100,9 +107,9 @@ void Game::update(float dt){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-	if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
-	if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
-	if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
+    if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
+    if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
+    if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
 
     if(Events::Keyboard::isKeyDown("z")){
@@ -120,19 +127,19 @@ void Game::update(float dt){
 
     if(Events::Keyboard::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
-		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
+        Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
-		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
+        Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
     }
     if(Events::Keyboard::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
-		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
+        Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
-		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() + 0.02f);
+        Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() + 0.02f);
     }
     m_HUD->update(dt);
 }
