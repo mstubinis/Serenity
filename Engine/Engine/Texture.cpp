@@ -54,7 +54,8 @@ class Texture::impl final{
             m_Type = type;
             m_InternalFormat = internFormat;
             if(i.getSize().x > 0 && i.getSize().y > 0){
-                vector<uchar> p(i.getPixelsPtr(),i.getPixelsPtr()+(i.getSize().x*i.getSize().y*4));
+                const sf::Uint8* pxls = i.getPixelsPtr();
+                vector<uchar> p(pxls,pxls+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
             super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,n));
