@@ -44,7 +44,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
             glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), sizeof(MeshVertexData),(void*)format.get<3>());
         }
     }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_buffers.at(1));
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
@@ -348,7 +348,6 @@ void Mesh::cleanupRenderingContext(){
     for(uint i = 0; i < m_buffers.size(); i++){
         glDeleteBuffers(1,&m_buffers.at(i));
     }
-    glDeleteBuffers(1,&m_elementbuffer);
 }
 void Mesh::_calculateMeshRadius(){
     float maxX = 0; float maxY = 0; float maxZ = 0;
