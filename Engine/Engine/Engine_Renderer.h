@@ -84,7 +84,7 @@ namespace Engine{
                     static uint SMAA_MAX_SEARCH_STEPS_DIAG;
                     static uint SMAA_CORNER_ROUNDING;
                     static float SMAA_DEPTH_THRESHOLD;
-					static float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;
+                    static float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;
 
                     static bool SMAA_PREDICATION;
                     static float SMAA_PREDICATION_THRESHOLD;
@@ -98,7 +98,7 @@ namespace Engine{
                     static uint SMAA_AREATEX_MAX_DISTANCE_DIAG;
                     static glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
                     static float SMAA_AREATEX_SUBTEX_SIZE;
-                    
+
                     static GLuint SMAA_AreaTexture;
                     static GLuint SMAA_SearchTexture;
                 };
