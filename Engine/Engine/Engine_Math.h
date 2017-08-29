@@ -150,25 +150,29 @@ namespace Engine{
         glm::vec3 direction(glm::vec3& eye,glm::vec3& target);
 
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
-        
+
         void translate(ObjectDynamic*,btVector3&,bool local);
 
         GLuint pack3NormalsInto32Int(float x, float y, float z);
         GLuint pack3NormalsInto32Int(glm::vec3 v);
-        
+
         float pack3FloatsInto1Float(float,float,float);
         float pack3FloatsInto1Float(glm::vec3&);
         glm::vec3 unpack3FloatsInto1Float(float i);
 
+        float pack3FloatsInto1FloatUnsigned(float,float,float);
+        float pack3FloatsInto1FloatUnsigned(glm::vec3&);
+        glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
+        
         float pack2FloatsInto1Float(float,float);
         float pack2FloatsInto1Float(glm::vec2);
         glm::vec2 unpack2FloatsInto1Float(float i);
 
-		float remainder(float,float);
-        
+        float remainder(float,float);
+
         void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
         void recalculateForwardRightUp(const btRigidBody*,glm::vec3&,glm::vec3&,glm::vec3&);
-        
+
         glm::vec3 getForward(glm::quat& q);
         glm::vec3 getRight(glm::quat& q);
         glm::vec3 getUp(glm::quat& q);
