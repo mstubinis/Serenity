@@ -40,11 +40,11 @@ class Texture::impl final{
             m_Height = uint(float(h) * divisor);
             super->load();
         }
-        void _init(GLuint type,Texture* super,string name,sf::Image& img,ImageInternalFormat::Format format,bool genMipMaps){
-            _baseInit(type,super,name,img,format,genMipMaps);
+        void _init(GLuint type,Texture* super,string name,const sf::Image& i,ImageInternalFormat::Format format,bool genMipMaps){
+            _baseInit(type,super,name,i,format,genMipMaps);
             super->load();
         }
-        void _baseInit(GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,bool genMipMaps){
+        void _baseInit(GLuint type,Texture* super,string n,const sf::Image& i,ImageInternalFormat::Format internFormat,bool genMipMaps){
             vector_clear(m_Pixels);
             m_Width = m_Height = 0;
             m_Mipmapped = false;
@@ -99,8 +99,8 @@ class Texture::impl final{
                 _generateMipmaps();
             }
         }
-        void _buildTexImage2D(GLuint targetType,GLuint internal,sf::Image& img, GLuint pxlFormat,GLuint pxlType,float divisor=1.0f){
-            glTexImage2D(targetType,0,internal,GLsizei(img.getSize().x*divisor),GLsizei(img.getSize().y*divisor),0,pxlFormat,pxlType,img.getPixelsPtr());
+        void _buildTexImage2D(GLuint targetType,GLuint internal,const sf::Image& i, GLuint pxlFormat,GLuint pxlType,float divisor=1.0f){
+            glTexImage2D(targetType,0,internal,GLsizei(i.getSize().x*divisor),GLsizei(i.getSize().y*divisor),0,pxlFormat,pxlType,i.getPixelsPtr());
         }
         void _buildTexImage2D(GLuint targetType,GLuint internal,GLsizei w,GLsizei h, GLuint pxlFormat,GLuint pxlType){
             glTexImage2D(targetType,0,internal,w,h,0,pxlFormat,pxlType,NULL);
@@ -115,7 +115,7 @@ class Texture::impl final{
             vector_clear(m_Pixels);
             vector_clear(m_TextureAddress);
         }
-        void _generateFromImage(sf::Image& i,Texture* super){
+        void _generateFromImage(const sf::Image& i,Texture* super){
             if(m_InternalFormat == ImageInternalFormat::RGBA8 || m_InternalFormat == ImageInternalFormat::SRGB8_ALPHA8){
                 m_PixelFormat = ImagePixelFormat::RGBA;
             }
@@ -184,18 +184,18 @@ class Texture::impl final{
             }
       }
 };
-Texture::Texture(std::string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint t,float divisor):m_i(new impl){ //framebuffer
+Texture::Texture(string n,uint w, uint h,ImageInternalFormat::Format internal,ImagePixelFormat::Format pxlFormat,ImagePixelType::Type pxlType,GLuint t,float divisor):m_i(new impl){ //framebuffer
     m_i->m_Files.push_back("FRAMEBUFFER");
-    sf::Image i;
+    const sf::Image i;
     m_i->_init(w,h,divisor,pxlType,t,this,n,i,internal,pxlFormat,false);
 }
-Texture::Texture(sf::Image& img,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
+Texture::Texture(const sf::Image& i,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //pixels
     m_i->m_Files.push_back("PIXELS");
-    m_i->_init(t,this,n,img,internalFormat,genMipMaps);
+    m_i->_init(t,this,n,i,internalFormat,genMipMaps);
 }
 Texture::Texture(string file,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
-    sf::Image i;
+    const sf::Image i;
     if(n == "") n = file;
     m_i->_init(t,this,n,i,internalFormat,genMipMaps);
 }
@@ -203,7 +203,7 @@ Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,ImageInternalF
     for(uint q = 0; q < 6; q++){ 
         m_i->m_Files.push_back(files[q]); 
     }
-    sf::Image i;
+    const sf::Image i;
     m_i->_init(t,this,n,i,internalFormat,genMipMaps);
 }
 Texture::~Texture(){
