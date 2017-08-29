@@ -68,7 +68,7 @@ void Game::initResources(){
     Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
 
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
-	Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
+    Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -84,9 +84,7 @@ void Game::initLogic(){
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     m_HUD = new HUD();
-    
-        glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
-    
+
     float testX = 0.35f; float testY = 0.87f; float testZ = 0.61f;
     float _pack = Engine::Math::pack3FloatsInto1FloatUnsigned(testX,testY,testZ);
     glm::vec3 _unpack = Engine::Math::unpack3FloatsInto1FloatUnsigned(_pack);
