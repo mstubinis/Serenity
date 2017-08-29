@@ -72,7 +72,7 @@ float SunLight::getDiffuseIntensity(){ return m_DiffuseIntensity; }
 void SunLight::setDiffuseIntensity(float d){ m_DiffuseIntensity = d; }
 float SunLight::getSpecularIntensity(){ return m_SpecularIntensity; }
 void SunLight::setSpecularIntensity(float s){ m_SpecularIntensity = s; }
-void SunLight::activate(){ m_Active = true; }
+void SunLight::activate(bool b){ m_Active = b; }
 void SunLight::deactivate(){ m_Active = false; }
 bool SunLight::isActive(){ return m_Active; }
 uint SunLight::type(){ return m_Type; }
