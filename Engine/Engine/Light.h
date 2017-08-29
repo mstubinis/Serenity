@@ -39,7 +39,7 @@ class SunLight: public ObjectDisplay{
         float getSpecularIntensity();
         void setSpecularIntensity(float s);
 
-        void activate();
+        void activate(bool=true);
         void deactivate();
         bool isActive();
         uint type();
