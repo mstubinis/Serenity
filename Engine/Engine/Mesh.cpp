@@ -335,8 +335,9 @@ void Mesh::initRenderingContext(){
     else{
         glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexData),&m_Vertices[0], GL_STATIC_DRAW );
     }
-    glGenBuffers(1, &m_elementbuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
+    m_buffers.push_back(GLuint(0));
+    glGenBuffers(1, &m_buffers.at(1));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
 
     //cannot clear indices buffer. just dont do it. ;)
