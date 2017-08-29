@@ -18,6 +18,7 @@ struct aiNode;
 struct aiNodeAnim;
 class Mesh;
 class AnimationData;
+struct MeshVertexData;
 
 const uint NUM_BONES_PER_VEREX = 4;
 
@@ -106,20 +107,17 @@ namespace Engine{
                         static void _calculateGramSchmidt(std::vector<glm::vec3>& points,std::vector<glm::vec3>& normals,std::vector<glm::vec3>& binormals,std::vector<glm::vec3>& tangents);
                         static void _calculateTBN(ImportedMeshData&);
                         static void _calculateTBNAssimp(ImportedMeshData&);
-                        static bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& out_vertices,std::vector<glm::vec2>& out_uvs,std::vector<glm::vec3>& out_normals,ushort& result,float threshold);
+                        static bool _getSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<MeshVertexData>& out_vertices,std::vector<glm::vec2>& uvs,std::vector<glm::vec3>& norms,ushort& result,float threshold);
                         /*
-                        static void _indexVBO(ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
+                        static void _indexVBO(Mesh*,ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
                             std::vector<glm::vec3>& out_norm, 
                             std::vector<glm::vec3>& out_binorm,
                             std::vector<glm::vec3>& out_tangents,
+							std::vector<MeshVertexData>&,
                         float threshold);
                         */
 
-                        static void _indexVBO(ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<glm::vec3>& out_pos, std::vector<float>& out_uvs, 
-                            std::vector<GLuint>& out_norm, 
-                            std::vector<GLuint>& out_binorm,
-                            std::vector<GLuint>& out_tangents,
-                        float threshold);
+                        static void _indexVBO(Mesh*,ImportedMeshData&,std::vector<ushort>& out_indices,std::vector<MeshVertexData>&,float threshold);
 
                         static void _loadDataIntoTriangles(ImportedMeshData&,std::vector<uint>& _pi, std::vector<uint>& _ui,std::vector<uint>& _ni,unsigned char _flags);
                 };

@@ -34,21 +34,37 @@ class VertexFormatAnimated{ public: enum Format{
 
     EnumTotal
 };};
-struct MeshVertexData final{
+struct MeshVertexData{
     glm::vec3 position;
     float uv;
     GLuint normal;
     GLuint binormal;
     GLuint tangent;
+	MeshVertexData(){
+	}
+	MeshVertexData(const MeshVertexData& copy){
+		position = copy.position; uv = copy.uv; normal = copy.normal;
+		binormal = copy.binormal; tangent = copy.tangent;
+	}
+	~MeshVertexData(){
+	}
 };
-struct MeshVertexDataAnimated final{
-    glm::vec3 position;
-    float uv;
-    GLuint normal;
-    GLuint binormal;
-    GLuint tangent;
+struct MeshVertexDataAnimated: public MeshVertexData{
     glm::vec4 boneIDs;
     glm::vec4 boneWeights;
+	MeshVertexDataAnimated():MeshVertexData(){
+	}
+	MeshVertexDataAnimated(const MeshVertexData& copy){
+		position = copy.position; uv = copy.uv; normal = copy.normal;
+		binormal = copy.binormal; tangent = copy.tangent;
+	}
+	MeshVertexDataAnimated(const MeshVertexDataAnimated& copy){
+		boneIDs = copy.boneIDs; boneWeights = copy.boneWeights;
+		position = copy.position; uv = copy.uv; normal = copy.normal;
+		binormal = copy.binormal; tangent = copy.tangent;
+	}
+	~MeshVertexDataAnimated(){
+	}
 };
 class AnimationData{
     friend class Mesh;
@@ -129,11 +145,7 @@ class Mesh final: public BindableResource{
         bool m_SaveMeshData;
         CollisionType m_Type;
     
-        std::vector<glm::vec3> m_Points;
-        std::vector<float> m_UVs;
-        std::vector<GLuint> m_Normals;
-        std::vector<GLuint> m_Binormals;
-        std::vector<GLuint> m_Tangents;
+		std::vector<MeshVertexData> m_Vertices;
         std::vector<ushort> m_Indices;
 
         void _loadData(ImportedMeshData&,float threshhold);

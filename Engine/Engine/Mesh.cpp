@@ -14,45 +14,34 @@
 
 using namespace std;
 
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexAnimatedFormatMap(){
-    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
-    m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    //m[VertexFormatAnimated::Normal]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       0,0,0);
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnimatedFormatMap(){
+    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
+    m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0);
+    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       offsetof(MeshVertexDataAnimated,uv));
+    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
+    m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
+    m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
+    m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       offsetof(MeshVertexDataAnimated,boneIDs));
+    m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       offsetof(MeshVertexDataAnimated,boneWeights));
     return m;
 }
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> _populateVertexFormatMap(){
-    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> m;
-    m[VertexFormat::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       0,0,0);
-    m[VertexFormat::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormat::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);
-    m[VertexFormat::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    0,0,0);	
-    return m;
-}
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,uint,uint,uint>> VERTEX_FORMAT_DATA = _populateVertexFormatMap();
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
 
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
     if(mesh->m_Skeleton != nullptr){
+		glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(0));
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
-            boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
-            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(i));
+            boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), 0,(void*)0);
+            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), sizeof(MeshVertexDataAnimated),(void*)format.get<3>());
         }
     }else{
+		glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(0));
         for(uint i = 0; i < VertexFormat::EnumTotal; i++){
-            boost::tuple<uint,uint,uint,uint,uint,uint>& format = VERTEX_FORMAT_DATA.at(i);
-            glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(i));
+            boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), 0,(void*)0);
+            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), sizeof(MeshVertexData),(void*)format.get<3>());
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
@@ -288,15 +277,10 @@ void Mesh::_loadData(ImportedMeshData& data,float threshold){
     if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
     if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-    Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(data,m_Indices,m_Points,m_UVs,m_Normals,m_Binormals,m_Tangents,m_threshold);
+    Engine::Resources::MeshLoader::Detail::MeshLoadingManagement::_indexVBO(this,data,m_Indices,m_Vertices,m_threshold);
 }
 void Mesh::_clearData(){
-    vector_clear(m_Indices);
-    vector_clear(m_Points);
-    vector_clear(m_UVs);
-    vector_clear(m_Normals);
-    vector_clear(m_Binormals);
-    vector_clear(m_Tangents);
+    vector_clear(m_Vertices);
     if(m_Skeleton != nullptr){
         SAFE_DELETE(m_Skeleton);
     }
@@ -336,52 +320,28 @@ void Mesh::_loadFromOBJMemory(string data,CollisionType type,float threshold){
 void Mesh::initRenderingContext(){
     m_buffers.push_back(GLuint(0));
     glGenBuffers(1, &m_buffers.at(0));
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[0]);
-    glBufferData(GL_ARRAY_BUFFER, m_Points.size() * sizeof(glm::vec3),&m_Points[0], GL_STATIC_DRAW );
-
-    m_buffers.push_back(GLuint(0));
-    glGenBuffers(1, &m_buffers.at(1));
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[1]);
-    glBufferData(GL_ARRAY_BUFFER, m_UVs.size() * sizeof(float), &m_UVs[0], GL_STATIC_DRAW);
-
-    m_buffers.push_back(GLuint(0));
-    glGenBuffers(1, &m_buffers.at(2));
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[2]);
-    //glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(glm::vec3), &m_Normals[0], GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, m_Normals.size() * sizeof(GLuint), &m_Normals[0], GL_STATIC_DRAW);
-    
-    m_buffers.push_back(GLuint(0));
-    glGenBuffers(1, &m_buffers.at(3));
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[3]);
-    glBufferData(GL_ARRAY_BUFFER, m_Binormals.size() * sizeof(GLuint), &m_Binormals[0], GL_STATIC_DRAW);
-    
-    m_buffers.push_back(GLuint(0));
-    glGenBuffers(1, &m_buffers.at(4));
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffers[4]);
-    glBufferData(GL_ARRAY_BUFFER, m_Tangents.size() * sizeof(GLuint), &m_Tangents[0], GL_STATIC_DRAW);
-    
-    if(m_Skeleton != nullptr){
-        m_buffers.push_back(GLuint(0));
-        glGenBuffers(1, &m_buffers.at(5));
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[5]);
-        glBufferData(GL_ARRAY_BUFFER, m_Skeleton->m_BoneIDs.size() * sizeof(glm::vec4), &m_Skeleton->m_BoneIDs[0], GL_STATIC_DRAW);
-
-        m_buffers.push_back(GLuint(0));
-        glGenBuffers(1, &m_buffers.at(6));
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffers[6]);
-        glBufferData(GL_ARRAY_BUFFER, m_Skeleton->m_BoneWeights.size() * sizeof(glm::vec4), &m_Skeleton->m_BoneWeights[0], GL_STATIC_DRAW);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+	if(m_Skeleton != nullptr){
+		std::vector<MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
+		for(uint i = 0; i < m_Skeleton->m_BoneIDs.size(); i++){
+			MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(m_Vertices.at(i));
+			vert.boneIDs = m_Skeleton->m_BoneIDs.at(i);
+			vert.boneWeights = m_Skeleton->m_BoneWeights.at(i);
+			temp.push_back(vert);
+		}
+        glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataAnimated),&temp[0], GL_STATIC_DRAW );
+		vector_clear(temp);
+	}
+	else{
+		glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexData),&m_Vertices[0], GL_STATIC_DRAW );
+	}
     glGenBuffers(1, &m_elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
 
     //cannot clear indices buffer. just dont do it. ;)
     if(m_SaveMeshData == false){
-        vector_clear(m_Points);
-        vector_clear(m_UVs);
-        vector_clear(m_Normals);
-        vector_clear(m_Binormals);
-        vector_clear(m_Tangents);
+        vector_clear(m_Vertices);
     }
 }
 void Mesh::cleanupRenderingContext(){
@@ -392,15 +352,15 @@ void Mesh::cleanupRenderingContext(){
 }
 void Mesh::_calculateMeshRadius(){
     float maxX = 0; float maxY = 0; float maxZ = 0;
-    for(auto point:m_Points){
-        float x = abs(point.x); float y = abs(point.y); float z = abs(point.z);
+    for(auto vertex:m_Vertices){
+		float x = abs(vertex.position.x); float y = abs(vertex.position.y); float z = abs(vertex.position.z);
         if(x > maxX) maxX = x; if(y > maxY) maxY = y; if(z > maxZ) maxZ = z;
     }
     m_radiusBox = glm::vec3(maxX,maxY,maxZ);
     m_radius = Engine::Math::Max(m_radiusBox);
 }
 void Mesh::render(GLuint mode){
-    glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,(void*)0);
+    glDrawElements(mode,m_Indices.size(),GL_UNSIGNED_SHORT,0);
 }
 
 void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){

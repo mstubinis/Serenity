@@ -380,12 +380,12 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateTBN(ImportedMeshData& 
     }
 }
 
-bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<glm::vec3>& out_vertices,vector<glm::vec2>& out_uvs,vector<glm::vec3>& out_normals,ushort& result, float threshold){
+bool MeshLoader::Detail::MeshLoadingManagement::_getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<MeshVertexData>& out_vertices,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
     for (uint i=0; i < out_vertices.size(); i++ ){
-        if (is_near( in_pos.x , out_vertices[i].x ,threshold) && is_near( in_pos.y , out_vertices[i].y ,threshold) &&
-            is_near( in_pos.z , out_vertices[i].z ,threshold) && is_near( in_uv.x  , out_uvs[i].x      ,threshold) &&
-            is_near( in_uv.y  , out_uvs[i].y      ,threshold) && is_near( in_norm.x , out_normals[i].x ,threshold) &&
-            is_near( in_norm.y , out_normals[i].y ,threshold) && is_near( in_norm.z , out_normals[i].z ,threshold)
+        if (is_near( in_pos.x , out_vertices.at(i).position.x ,threshold) && is_near( in_pos.y , out_vertices.at(i).position.y ,threshold) &&
+            is_near( in_pos.z , out_vertices.at(i).position.z ,threshold) && is_near( in_uv.x  , uvs[i].x      ,threshold) &&
+            is_near( in_uv.y  , uvs[i].y      ,threshold) && is_near( in_norm.x , norms[i].x ,threshold) &&
+            is_near( in_norm.y , norms[i].y ,threshold) && is_near( in_norm.z , norms[i].z ,threshold)
         ){
             result = i;
             return true;
@@ -408,16 +408,33 @@ void MeshLoader::Detail::MeshLoadingManagement::_calculateGramSchmidt(vector<glm
         //}
     }
 }
-void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data,vector<ushort> & out_indices,vector<glm::vec3>& out_pos,vector<float>& out_uvs,vector<GLuint>& out_norm,vector<GLuint>& out_binorm,vector<GLuint>& out_tangents, float threshold){
+void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(Mesh* mesh,ImportedMeshData& data,vector<ushort> & out_indices,vector<MeshVertexData>& out_vertices, float threshold){
     if(threshold == 0.0f){
-        out_pos = data.points;
-        for(auto uvs:data.uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
-        
-        for(auto normals:data.normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
-        for(auto binormals:data.binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
-        for(auto tangents:data.tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
-
-        out_indices = data.indices;
+		uint c = 0;
+		for(auto pt:data.points){
+			if(mesh->m_Skeleton != nullptr){
+				MeshVertexDataAnimated vert;
+				vert.position = pt;
+				vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
+				vert.normal = Engine::Math::pack3NormalsInto32Int(data.normals.at(c));
+				if(c <= data.binormals.size()-1)
+				    vert.binormal = Engine::Math::pack3NormalsInto32Int(data.binormals.at(c));
+				if(c <= data.tangents.size()-1)
+				    vert.tangent = Engine::Math::pack3NormalsInto32Int(data.tangents.at(c));
+				out_vertices.push_back(vert);
+			}
+			else{
+				MeshVertexData vert;
+				vert.position = pt;
+				vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
+				vert.normal = Engine::Math::pack3NormalsInto32Int(data.normals.at(c));
+				vert.binormal = Engine::Math::pack3NormalsInto32Int(data.binormals.at(c));
+				vert.tangent = Engine::Math::pack3NormalsInto32Int(data.tangents.at(c));
+				out_vertices.push_back(vert);
+			}
+			c++;
+		}
+		out_indices = data.indices;
         return;
     }
     vector<glm::vec2> temp_uvs;
@@ -426,32 +443,48 @@ void MeshLoader::Detail::MeshLoadingManagement::_indexVBO(ImportedMeshData& data
     vector<glm::vec3> temp_tangents;
     for (uint i=0; i < data.points.size(); i++){
         ushort index;
-        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_pos, temp_uvs, temp_normals, index,threshold);
+        bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_vertices,temp_uvs,temp_normals, index,threshold);
         if (found){
             out_indices.push_back(index);
 
-            //we wont average TBN. this is because assimp smoothes the averages for us
-            
-            //also note: assimp source: if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ). should be replaced with:
-            // if ( sx * ty == sy * tx ). in their CalcTangentsProcess.cpp file
-            
             //average out TBN. I think this does more harm than good though
             temp_binormals.at(index) += data.binormals.at(i);
             temp_tangents.at(index) += data.tangents.at(i);
         }
         else{
-            out_pos.push_back( data.points.at(i));
+			if(mesh->m_Skeleton != nullptr){
+				MeshVertexDataAnimated vert;
+				vert.position = data.points.at(i);
+				out_vertices.push_back(vert);
+			}
+			else{
+				MeshVertexData vert;
+				vert.position = data.points.at(i);
+				out_vertices.push_back(vert);
+			}
             temp_uvs.push_back(data.uvs.at(i));
 
             temp_normals .push_back(data.normals.at(i));
             temp_binormals.push_back(data.binormals.at(i));
             temp_tangents.push_back(data.tangents.at(i));
 
-            out_indices.push_back((ushort)out_pos.size() - 1);
+            out_indices.push_back((ushort)out_vertices.size() - 1);
         }
     }
-    for(auto uvs:temp_uvs){ out_uvs.push_back(Engine::Math::pack2FloatsInto1Float(uvs)); }
-    for(auto normals:temp_normals){ out_norm.push_back(Engine::Math::pack3NormalsInto32Int(normals)); }
-    for(auto binormals:temp_binormals){ out_binorm.push_back(Engine::Math::pack3NormalsInto32Int(binormals)); }
-    for(auto tangents:temp_tangents){ out_tangents.push_back(Engine::Math::pack3NormalsInto32Int(tangents)); }
+	for(uint i = 0; i < out_vertices.size(); i++){
+		if(mesh->m_Skeleton != nullptr){
+			MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(out_vertices.at(i));
+			vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
+			vert.normal = Engine::Math::pack3NormalsInto32Int(temp_normals.at(i));
+			vert.binormal = Engine::Math::pack3NormalsInto32Int(temp_binormals.at(i));
+			vert.tangent = Engine::Math::pack3NormalsInto32Int(temp_tangents.at(i));
+		}
+		else{
+			MeshVertexData& vert = out_vertices.at(i);
+			vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
+			vert.normal = Engine::Math::pack3NormalsInto32Int(temp_normals.at(i));
+			vert.binormal = Engine::Math::pack3NormalsInto32Int(temp_binormals.at(i));
+			vert.tangent = Engine::Math::pack3NormalsInto32Int(temp_tangents.at(i));
+		}
+	}
 }
