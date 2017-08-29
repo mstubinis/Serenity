@@ -945,28 +945,31 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
     if(!renderAA) return;
 
-	glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / float(fboWidth), 1.0f / float(fboHeight), float(fboWidth), float(fboHeight));
+    glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
-	gbuffer->start(GBufferType::Misc); //we save the original image to Diffuse buffer so it can be used later
-	Settings::clear(true,false,false);
+    gbuffer->start(GBufferType::Misc); //we save the original image to Diffuse buffer so it can be used later
+    Settings::clear(true,false,false);
     ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
     sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     sendUniform1fSafe("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
     sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
-	sendUniform1fSafe("SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR",RendererInfo::SMAAInfo::SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR);
+    sendUniform1fSafe("SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR",RendererInfo::SMAAInfo::SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR);
+    sendUniform1fSafe("SMAA_PREDICATION_THRESHOLD",RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD);
+    sendUniform1fSafe("SMAA_PREDICATION_SCALE",RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE);
+    sendUniform1fSafe("SMAA_PREDICATION_STRENGTH",RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH);
     bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0);
 
     //edge pass
     renderFullscreenQuad(fboWidth,fboHeight);
-    
+
     for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
     p->unbind();
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     gbuffer->start(GBufferType::Normal);
-	Settings::clear(true,false,false);
-	//gbuffer->stop();
+    Settings::clear(true,false,false);
+    //gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_2"); p->bind();
     sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
@@ -981,30 +984,30 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     sendUniform2fSafe("SMAA_AREATEX_PIXEL_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_PIXEL_SIZE);
     sendUniform1fSafe("SMAA_AREATEX_SUBTEX_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE);
     sendUniform1iSafe("SMAA_CORNER_ROUNDING",RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING);
-	sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING) / 100.0f));
-    
+    sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING) / 100.0f));
+
     //blend pass
     renderFullscreenQuad(fboWidth,fboHeight);
-    
+
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//gbuffer->start(GBufferType::Misc);
+    //gbuffer->start(GBufferType::Misc);
     gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_3"); p->bind();
     sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
     bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
-    
+
     //neighbor pass
     renderFullscreenQuad(fboWidth,fboHeight);
-    
+
     for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    
+
+
     /*
     //this pass is optional. lets skip it for now
     //gbuffer->start(GBufferType::Lighting);
