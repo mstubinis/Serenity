@@ -321,20 +321,20 @@ void Mesh::initRenderingContext(){
     m_buffers.push_back(GLuint(0));
     glGenBuffers(1, &m_buffers.at(0));
     glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-	if(m_Skeleton != nullptr){
-		std::vector<MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-		for(uint i = 0; i < m_Skeleton->m_BoneIDs.size(); i++){
-			MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(m_Vertices.at(i));
-			vert.boneIDs = m_Skeleton->m_BoneIDs.at(i);
-			vert.boneWeights = m_Skeleton->m_BoneWeights.at(i);
-			temp.push_back(vert);
-		}
+    if(m_Skeleton != nullptr){
+        std::vector<MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
+        for(uint i = 0; i < m_Skeleton->m_BoneIDs.size(); i++){
+            MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(m_Vertices.at(i));
+            vert.boneIDs = m_Skeleton->m_BoneIDs.at(i);
+            vert.boneWeights = m_Skeleton->m_BoneWeights.at(i);
+            temp.push_back(vert);
+        }
         glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataAnimated),&temp[0], GL_STATIC_DRAW );
-		vector_clear(temp);
-	}
-	else{
-		glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexData),&m_Vertices[0], GL_STATIC_DRAW );
-	}
+        vector_clear(temp);
+    }
+    else{
+        glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexData),&m_Vertices[0], GL_STATIC_DRAW );
+    }
     glGenBuffers(1, &m_elementbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
