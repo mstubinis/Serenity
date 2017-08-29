@@ -353,17 +353,19 @@ void Detail::RenderManagement::init(){
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
     // Create SMAA lookup textures
+    //area
     glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_AreaTexture);
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_AreaTexture);
     Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
-    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
 
+    //search
     glGenTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
     glBindTexture(GL_TEXTURE_2D,RendererInfo::SMAAInfo::SMAA_SearchTexture);
-    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Nearest);
-    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
+    Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
+    Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
 }
