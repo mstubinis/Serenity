@@ -314,9 +314,9 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
         }
         count++;
     }
-    Texture* diffuse = new Texture(ringImage,parent->name() + "RingsDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
-    Resources::addMaterial(parent->name() + "Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
-    this->material = Resources::getMaterial(parent->name() + "Rings");
+    Texture* diffuse = new Texture(ringImage,parent->name()+"RingsDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+    Resources::addMaterial(parent->name()+"Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
+    this->material = Resources::getMaterial(parent->name()+"Rings");
 }
 void Ring::update(float dt){
 }
