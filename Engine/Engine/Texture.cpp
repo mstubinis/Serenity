@@ -32,7 +32,7 @@ class Texture::impl final{
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-        void _init(uint w,uint h,float divisor,ImagePixelType::Type pxlType,GLuint type,Texture* super,string n,sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
+        void _init(uint w,uint h,float divisor,ImagePixelType::Type pxlType,GLuint type,Texture* super,string n,const sf::Image& i,ImageInternalFormat::Format internFormat,ImagePixelFormat::Format pxlFormat,bool genMipMaps){
             m_PixelFormat = pxlFormat;
             m_PixelType = pxlType;
             _baseInit(type,super,n,i,internFormat,genMipMaps);

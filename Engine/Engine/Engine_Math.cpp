@@ -102,7 +102,7 @@ glm::vec3 Math::unpack3FloatsInto1Float(float v){
     ret.b = (ret.b * 2.0f) - 1.0f;
     return ret;
 }
-float pack3FloatsInto1FloatUnsigned(float r,float g,float b){
+float Math::pack3FloatsInto1FloatUnsigned(float r,float g,float b){
     uchar _r = (uchar)(r*255.0f);
     uchar _g = (uchar)(g*255.0f);
     uchar _b = (uchar)(b*255.0f);
@@ -110,8 +110,8 @@ float pack3FloatsInto1FloatUnsigned(float r,float g,float b){
     float packedFloat = (float) ( ((double)packedColor) / ((double) (1 << 24)) );
     return packedFloat;
 }
-float pack3FloatsInto1FloatUnsigned(glm::vec3& c){ return Math::pack3FloatsInto1Float(c.r,c.g,c.b); }
-glm::vec3 unpack3FloatsInto1FloatUnsigned(float v){
+float Math::pack3FloatsInto1FloatUnsigned(glm::vec3& c){ return Math::pack3FloatsInto1Float(c.r,c.g,c.b); }
+glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
     glm::vec3 ret = glm::vec3((float)fmod(v, 1.0f), (float)fmod(v * 256.0f, 1.0f), (float)fmod(v * 65536.0f, 1.0f));
     return ret;
 }

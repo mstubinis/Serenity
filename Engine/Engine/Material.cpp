@@ -297,12 +297,12 @@ class Material::impl final{
         }
         void _addToMaterialPool(){
             this->m_ID = Material::m_MaterialProperities.size();
-            glm::vec4 data(Math::pack3FloatsInto1Float(m_F0Color.r,m_F0Color.g,m_F0Color.b), m_BaseSmoothness, float(m_SpecularModel), float(m_DiffuseModel));
+            glm::vec4 data(Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r,m_F0Color.g,m_F0Color.b), m_BaseSmoothness, float(m_SpecularModel), float(m_DiffuseModel));
             Material::m_MaterialProperities.push_back(data);
         }
         void _updateGlobalMaterialPool(){
             glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
-            data.r = Math::pack3FloatsInto1Float(m_F0Color.r,m_F0Color.g,m_F0Color.b);
+            data.r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r,m_F0Color.g,m_F0Color.b);
             data.g = m_BaseSmoothness;
             data.b = float(m_SpecularModel);
             data.a = float(m_DiffuseModel);

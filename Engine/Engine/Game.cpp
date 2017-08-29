@@ -84,12 +84,6 @@ void Game::initLogic(){
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     m_HUD = new HUD();
-
-    float testX = 0.35f; float testY = 0.87f; float testZ = 0.61f;
-    float _pack = Engine::Math::pack3FloatsInto1FloatUnsigned(testX,testY,testZ);
-    glm::vec3 _unpack = Engine::Math::unpack3FloatsInto1FloatUnsigned(_pack);
-    std::cout << "REGULAR   x: " << testX << " y: " << testY << " z: " << testZ << std::endl;
-    std::cout << "UNPACKED   x: " << _unpack.x << " y: " << _unpack.y << " z: " << _unpack.z << std::endl;
 }
 void Game::update(float dt){
     SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
