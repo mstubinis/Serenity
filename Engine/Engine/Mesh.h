@@ -25,13 +25,10 @@ typedef unsigned short ushort;
 
 class VertexFormat{ public: enum Format{
     Position,UV,Normal,Binormal,Tangent,
-
     EnumTotal
 };};
 class VertexFormatAnimated{ public: enum Format{
-    Position,UV,Normal,Binormal,Tangent,
-    BoneIDs,BoneWeights,
-
+    Position,UV,Normal,Binormal,Tangent,BoneIDs,BoneWeights,
     EnumTotal
 };};
 struct MeshVertexData{
@@ -40,31 +37,31 @@ struct MeshVertexData{
     GLuint normal;
     GLuint binormal;
     GLuint tangent;
-	MeshVertexData(){
-	}
-	MeshVertexData(const MeshVertexData& copy){
-		position = copy.position; uv = copy.uv; normal = copy.normal;
-		binormal = copy.binormal; tangent = copy.tangent;
-	}
-	~MeshVertexData(){
-	}
+    MeshVertexData(){
+    }
+    MeshVertexData(const MeshVertexData& copy){
+        position = copy.position; uv = copy.uv; normal = copy.normal;
+        binormal = copy.binormal; tangent = copy.tangent;
+    }
+    ~MeshVertexData(){
+    }
 };
 struct MeshVertexDataAnimated: public MeshVertexData{
     glm::vec4 boneIDs;
     glm::vec4 boneWeights;
-	MeshVertexDataAnimated():MeshVertexData(){
-	}
-	MeshVertexDataAnimated(const MeshVertexData& copy){
-		position = copy.position; uv = copy.uv; normal = copy.normal;
-		binormal = copy.binormal; tangent = copy.tangent;
-	}
-	MeshVertexDataAnimated(const MeshVertexDataAnimated& copy){
-		boneIDs = copy.boneIDs; boneWeights = copy.boneWeights;
-		position = copy.position; uv = copy.uv; normal = copy.normal;
-		binormal = copy.binormal; tangent = copy.tangent;
-	}
-	~MeshVertexDataAnimated(){
-	}
+    MeshVertexDataAnimated():MeshVertexData(){
+    }
+    MeshVertexDataAnimated(const MeshVertexData& copy){
+        position = copy.position; uv = copy.uv; normal = copy.normal;
+        binormal = copy.binormal; tangent = copy.tangent;
+    }
+    MeshVertexDataAnimated(const MeshVertexDataAnimated& copy){
+        boneIDs = copy.boneIDs; boneWeights = copy.boneWeights;
+        position = copy.position; uv = copy.uv; normal = copy.normal;
+        binormal = copy.binormal; tangent = copy.tangent;
+    }
+    ~MeshVertexDataAnimated(){
+    }
 };
 class AnimationData{
     friend class Mesh;
@@ -113,7 +110,6 @@ class MeshSkeleton final{
         void fill(ImportedMeshData&);
         void clear();
         ~MeshSkeleton();
-
 };
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
@@ -129,8 +125,6 @@ class Mesh final: public BindableResource{
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
         std::vector<GLuint> m_buffers;
-    
-        GLuint m_elementbuffer;
         Collision* m_Collision;
 
         MeshSkeleton* m_Skeleton;
@@ -144,8 +138,8 @@ class Mesh final: public BindableResource{
         float m_threshold;
         bool m_SaveMeshData;
         CollisionType m_Type;
-    
-		std::vector<MeshVertexData> m_Vertices;
+
+        std::vector<MeshVertexData> m_Vertices;
         std::vector<ushort> m_Indices;
 
         void _loadData(ImportedMeshData&,float threshhold);
