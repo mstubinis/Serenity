@@ -30,14 +30,14 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORM
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = static_cast<Mesh*>(r);
     if(mesh->m_Skeleton != nullptr){
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(0));
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(0));
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
             boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(), sizeof(MeshVertexDataAnimated),(void*)format.get<3>());
         }
     }else{
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(0));
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->m_buffers.at(0));
         for(uint i = 0; i < VertexFormat::EnumTotal; i++){
             boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
@@ -47,7 +47,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_elementbuffer);
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-	Mesh* mesh = static_cast<Mesh*>(r);
+    Mesh* mesh = static_cast<Mesh*>(r);
     if(mesh->m_Skeleton != nullptr){
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){ glDisableVertexAttribArray(i); }
     }else{
