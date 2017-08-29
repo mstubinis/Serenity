@@ -616,13 +616,13 @@ Shaders::Detail::ShadersManagement::smaa_common =
     "\n"
     "//float API_V_DIR(float v){ return -v; }\n"
     "float API_V_COORD(float v){ return 1.0 - v; }\n"
-    "//bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return false; return true; }\n"
-    "//bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return false; return true; }\n"
+    "//bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
+    "//bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
     "\n"
     "float API_V_DIR(float v){ return v; }\n"
     "//float API_V_COORD(float v){ return v; }\n"
-    "bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
-    "bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
+    "bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
+    "bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
     "\n";
 
 
