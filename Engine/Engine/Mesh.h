@@ -126,13 +126,10 @@ class Mesh final: public BindableResource{
         Mesh(std::string& name,std::string = "",CollisionType = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f);
         ~Mesh();
 
-        void initRenderingContext();
-        void cleanupRenderingContext();
-
-        Collision* getCollision() const { return m_Collision; }
-        std::unordered_map<std::string,AnimationData*>& animationData(){ return m_Skeleton->m_AnimationData; }
-        const glm::vec3& getRadiusBox() const { return m_radiusBox; }
-        const float getRadius() const { return m_radius; }
+        Collision* getCollision() const;
+        std::unordered_map<std::string,AnimationData*>& animationData();
+        const glm::vec3& getRadiusBox() const;
+        const float getRadius() const;
 
         void load();
         void unload();
