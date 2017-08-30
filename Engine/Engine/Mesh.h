@@ -115,6 +115,12 @@ class MeshSkeleton final{
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
 class Mesh final: public BindableResource{
+    friend struct DefaultMeshBindFunctor;
+    friend struct DefaultMeshUnbindFunctor;
+    friend class AnimationData;
+    friend class MeshSkeleton;
+    friend class AnimationProcessor;
+    friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
         class impl;
         std::unique_ptr<impl> m_i;
