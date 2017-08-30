@@ -187,7 +187,7 @@ void Resources::initResources(){
         "f 3/12/5 7/19/5 8/13/5\n"
         "f 1/14/6 4/20/6 8/15/6";
     #pragma endregion
-	addMesh("Cube",cubeMesh,CollisionType::None,false);
+    addMesh("Cube",cubeMesh,CollisionType::None,false);
 
     Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
     Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
@@ -211,13 +211,12 @@ void Resources::initResources(){
     Shader* greyscale = new Shader("greyscale_frag",Engine::Shaders::Detail::ShadersManagement::greyscale_frag,ShaderType::Fragment,false);
     Shader* edgeCannyBlur = new Shader("edge_canny_blur",Engine::Shaders::Detail::ShadersManagement::edge_canny_blur,ShaderType::Fragment,false);
     Shader* edgeCannyFrag = new Shader("edge_canny_frag",Engine::Shaders::Detail::ShadersManagement::edge_canny_frag,ShaderType::Fragment,false);
-	
 
-	Shader* smaa_vert_1 = new Shader("smaa_vert_1",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_1,ShaderType::Vertex,false);
+    Shader* smaa_vert_1 = new Shader("smaa_vert_1",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_1,ShaderType::Vertex,false);
     Shader* smaa_vert_2 = new Shader("smaa_vert_2",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_2,ShaderType::Vertex,false);
     Shader* smaa_vert_3 = new Shader("smaa_vert_3",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_3,ShaderType::Vertex,false);
     Shader* smaa_vert_4 = new Shader("smaa_vert_4",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_4,ShaderType::Vertex,false);
-	Shader* smaa_frag_1 = new Shader("smaa_frag_1",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1,ShaderType::Fragment,false);
+    Shader* smaa_frag_1 = new Shader("smaa_frag_1",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1,ShaderType::Fragment,false);
     Shader* smaa_frag_2 = new Shader("smaa_frag_2",Engine::Shaders::Detail::ShadersManagement::smaa_frag_2,ShaderType::Fragment,false);
     Shader* smaa_frag_3 = new Shader("smaa_frag_3",Engine::Shaders::Detail::ShadersManagement::smaa_frag_3,ShaderType::Fragment,false);
     Shader* smaa_frag_4 = new Shader("smaa_frag_4",Engine::Shaders::Detail::ShadersManagement::smaa_frag_4,ShaderType::Fragment,false);
@@ -241,7 +240,7 @@ void Resources::initResources(){
     addShaderProgram("Greyscale_Frag",fullscreenVertexShader,greyscale,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Edge_Canny_Blur",fullscreenVertexShader,edgeCannyBlur,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Edge_Canny",fullscreenVertexShader,edgeCannyFrag,ShaderRenderPass::Postprocess);
-	
+
     addShaderProgram("Deferred_SMAA_1",smaa_vert_1,smaa_frag_1,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_SMAA_2",smaa_vert_2,smaa_frag_2,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_SMAA_3",smaa_vert_3,smaa_frag_3,ShaderRenderPass::Postprocess);
