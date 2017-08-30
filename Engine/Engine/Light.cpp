@@ -603,8 +603,8 @@ float PointLight::calculateCullingRadius(){
         radius = (lightMax * (256.0f / 5.0f));
     }
     else if(m_AttenuationModel == LightAttenuation::Spherical_Quadratic){
-        radius = (((lightMax * (256.0f / 5.0f) - 1.0f) * (m_Radius*m_Radius)) / m_Radius) * 0.5f;
-    }
+        radius = (-2.0f+glm::sqrt(4.0f-4.0f*(1.0f/m_Radius)*(-((lightMax*(256.0f/5.0f)-1.0f)*m_Radius))))/(2*(1.0f/m_Radius));
+    }	
     return radius;
 }
 float PointLight::getCullingRadius(){ return m_CullingRadius; }
