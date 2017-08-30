@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <memory>
 
 namespace sf{ class Image; };
 
@@ -114,39 +115,9 @@ class MeshSkeleton final{
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
 class Mesh final: public BindableResource{
-    friend struct DefaultMeshBindFunctor;
-    friend struct DefaultMeshUnbindFunctor;
-    friend class AnimationData;
-    friend class MeshSkeleton;
-    friend class AnimationProcessor;
-    friend class Engine::Resources::MeshLoader::Detail::MeshLoadingManagement;
     private:
-        static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
-        std::vector<GLuint> m_buffers;
-        Collision* m_Collision;
-
-        MeshSkeleton* m_Skeleton;
-
-        const aiScene* m_aiScene;
-        Assimp::Importer m_Importer;
-        std::string m_File;
-
-        glm::vec3 m_radiusBox;
-        float m_radius;
-        float m_threshold;
-        bool m_SaveMeshData;
-        CollisionType m_Type;
-
-        std::vector<MeshVertexData> m_Vertices;
-        std::vector<ushort> m_Indices;
-
-        void _loadData(ImportedMeshData&,float threshhold);
-        void _clearData();
-        void _loadFromFile(std::string,CollisionType,float threshold);
-        void _loadFromOBJMemory(std::string,CollisionType,float threshold);
-        void _calculateMeshRadius();
+        class impl;
+        std::unique_ptr<impl> m_i;
     public:
         Mesh(std::string& name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
