@@ -1,9 +1,9 @@
 #include "Engine_Physics.h"
-#include "Engine_MeshLoader.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Camera.h"
 #include "ObjectDynamic.h"
+#include "Mesh.h"
 
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
 #include <bullet/btBulletDynamicsCommon.h>

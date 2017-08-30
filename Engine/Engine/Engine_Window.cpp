@@ -6,6 +6,7 @@
 #include "GBuffer.h"
 
 #include <SFML/Window.hpp>
+#include <SFML/System.hpp>
 
 using namespace Engine;
 

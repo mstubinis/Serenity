@@ -17,7 +17,7 @@ void AnimationProcessor::process(MeshInstance* item,vector<MeshInstanceAnimation
         if(a.mesh == item->mesh()){
             a.currentTime += Resources::dt();
             if(transforms.size() == 0){
-                transforms.resize(a.mesh->m_Skeleton->m_NumBones,glm::mat4(1.0f));
+				transforms.resize(a.mesh->skeleton()->m_NumBones,glm::mat4(1.0f));
             }
             a.mesh->playAnimation(transforms,a.animName,a.currentTime);
             if(a.currentTime >= a.endTime){
