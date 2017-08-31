@@ -357,7 +357,9 @@ class Material::impl final{
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
         void _setF0Color(float r, float g, float b){
-            m_F0Color.r = r; m_F0Color.g = g; m_F0Color.b = b;
+            m_F0Color.r = glm::clamp(r,0.001f,0.999f); 
+            m_F0Color.g = glm::clamp(g,0.001f,0.999f); 
+            m_F0Color.b = glm::clamp(b,0.001f,0.999f);
             _updateGlobalMaterialPool();
         }
         void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
