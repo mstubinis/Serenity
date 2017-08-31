@@ -338,7 +338,6 @@ Shaders::Detail::ShadersManagement::vertex_hud +=
     "    gl_Position = MVP * vec4(position, 1.0);\n"
     "    gl_TexCoord[6] = gl_Position;\n"
     "}";
-
 #pragma endregion
 
 #pragma region VertexSkybox
@@ -457,7 +456,6 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
     "    PreEnv = PreEnv / totalWeight;\n"
     "    gl_FragColor = vec4(PreEnv, 1.0);\n"
     "}";
-
 #pragma endregion
 
 #pragma region BRDFPrecompute
@@ -543,7 +541,6 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
     "    vec2 integratedBRDF = IntegrateBRDF(uv.x, uv.y);\n"
     "    gl_FragColor.rg = integratedBRDF;\n"
     "}";
-
 #pragma endregion
 
 #pragma region FXAA
@@ -631,7 +628,6 @@ Shaders::Detail::ShadersManagement::smaa_common =
     "bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
     "bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
     "\n";
-
 
 Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"//edge vert
@@ -1046,8 +1042,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
     "}\n"
     "void main(void){\n"
     "    gl_FragColor = SMAANeighborhoodBlendingPS(uv, _offset, texture, blend_tex);\n"
-    "}\n"
-    "\n";
+    "}";
 
 //vertex & frag 4 are optional passes
 Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
@@ -1062,8 +1057,7 @@ Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersMana
     "    mat4 MVP = VP * Model;\n"
     "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
     "    gl_Position = MVP * gl_Vertex;\n"
-    "}\n"
-    "\n";
+    "}";
 Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"
     "vec4 SMAAResolvePS(vec2 texcoord,sampler2D currentColorTex,sampler2D previousColorTex){\n"
@@ -1073,9 +1067,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManage
     "}\n"
     "void main(void){\n"
     "    gl_FragColor = vec4(0.0,0.0,0.0,1.0);\n"
-    "}\n"
-    "\n";
-    
+    "}";
 #pragma endregion
 	
 #pragma region DeferredFrag
@@ -1198,7 +1190,6 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "    }\n"
     "    gl_FragDepth = log2(logz_f) * FC_2_f;\n"
     "}";
-
 #pragma endregion
 
 #pragma region DeferredFragHUD
@@ -1214,7 +1205,6 @@ Shaders::Detail::ShadersManagement::deferred_frag_hud = Shaders::Detail::Shaders
     "        gl_FragColor *= texture2D(DiffuseTexture, UV);\n"
     "    }\n"
     "}";
-
 #pragma endregion
 
 #pragma region DeferredFragSkybox
@@ -1229,7 +1219,6 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
     "    gl_FragData[2].r = 0.0;\n"
     "    gl_FragData[2].b = 0.0;\n"
     "}";
-
 #pragma endregion
 
 #pragma region CopyDepthFrag
@@ -1326,7 +1315,6 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
     "        gl_FragColor.rgb = vec3(0.0);\n"
     "    }\n"
     "}";
-
 #pragma endregion
 
 #pragma region HDR
@@ -1380,7 +1368,6 @@ Shaders::Detail::ShadersManagement::hdr_frag +=
     "    }\n"
     "    gl_FragColor = vec4(lighting, 1.0);\n"
     "}";
-
 #pragma endregion
 
 #pragma region Blur
@@ -1434,7 +1421,6 @@ Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManageme
     "    if(RGBA.z == 1.0) gl_FragColor.b = sum.b;\n"
     "    if(RGBA.w == 1.0) gl_FragColor.a = sum.a;\n"
     "}";
-
 #pragma endregion
 
 #pragma region GodRays
@@ -1455,7 +1441,6 @@ Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManag
     "        vec2 uv = gl_TexCoord[0].st * (1.0 / fbufferDivisor);\n"
     "        vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
     "        deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
-    "\n"
     "        float illuminationDecay = 1.0;\n"
     "        vec4 totalColor = vec4(0.0);\n"
     "        for(int i=0; i < samples; i++){\n"
@@ -1479,8 +1464,7 @@ Shaders::Detail::ShadersManagement::greyscale_frag = Shaders::Detail::ShadersMan
     "    vec4 col = texture2D(texture, gl_TexCoord[0].st);\n"
     "    float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));\n"
     "    gl_FragColor = vec4(vec3(lum), 1.0);\n"
-    "}\n"
-    "\n";
+    "}";
 #pragma endregion
     
 #pragma region EdgeCannyBlur
@@ -1517,8 +1501,7 @@ Shaders::Detail::ShadersManagement::edge_canny_blur = Shaders::Detail::ShadersMa
     "    float blur = leftIntensity + rightIntensity + topIntensity + bottomIntensity + bottomLeftIntensity + topRightIntensity + topLeftIntensity + bottomRightIntensity + texture2D(texture, textureCoordinate).r;\n"
     "    blur *= 0.11111;\n"
     "    gl_FragColor = vec4(vec3(blur), 1.0);\n"
-    "}\n"
-    "\n";
+    "}";
 #pragma endregion
 	
 #pragma region EdgeCannyFrag
@@ -1589,7 +1572,6 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "    vec3 hdr = texture2D(gMiscMap,uv).rgb;\n"
     "    vec3 lighting = texture2D(gLightMap, uv).rgb;\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "\n"
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
     "    lighting = hdr;\n"
     "    float ssao = 1.0;\n"
@@ -1727,8 +1709,8 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "        float D = (1.0 - pow((1.0 - (VdotN / 2.0)),5.0));\n"
     "        LightDiffuseColor *= (A * B * C * D);\n"
     "        LightDiffuseColor *= kPi;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
-    "     }\n"
-    "     else if(materials[index].a == 3.0){//this is minneart\n"
+    "    }\n"
+    "    else if(materials[index].a == 3.0){//this is minneart\n"
     "        LightDiffuseColor *= pow(VdotN*NdotL,smoothness);\n"
     "    }\n"
     "\n"
@@ -1753,8 +1735,8 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "        float k = 0.5 * alpha;\n"
     "        float k2 = k * k;\n"
     "        SpecularFactor = max(vec3(0.0), (NdotL * D * Frensel / (LdotH*LdotH*(1.0-k2)+k2)) );\n"
-    "     }\n"
-    "     else if(materials[index].b == 3.0){\n" //this is Cook-Torrance (physical)
+    "    }\n"
+    "    else if(materials[index].b == 3.0){\n" //this is Cook-Torrance (physical)
     "         Frensel = SchlickFrensel(VdotH,F0);\n"
     "         float NDF = GGXDist(NdotH*NdotH,alpha*alpha,kPi);\n"
     "         //float G = min(1.0, min(  (2.0 * NdotH * VdotN) / VdotH  ,  (2.0 * NdotH * NdotL) / VdotH  ));\n"
@@ -1821,7 +1803,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    return c;\n"
     "}\n"
     "void main(void){\n"
-    "    //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh\n"
+    "    //vec2 uv = gl_TexCoord[0].st;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
     "    vec3 PxlPosition = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
@@ -1879,7 +1861,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    return ret;\n"
     "}\n"
     "void main(void){\n"
-    "    //vec2 uv = gl_TexCoord[0].st; //this cannot be used for point light mesh\n"
+    "    //vec2 uv = gl_TexCoord[0].st;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
