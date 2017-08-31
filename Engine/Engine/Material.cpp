@@ -141,7 +141,7 @@ MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
     vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
@@ -169,7 +169,7 @@ void MaterialComponentReflection::setMixFactor(float factor){
 }
 void MaterialComponentReflection::bind(){
     vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     if(m_Texture == nullptr)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
@@ -193,7 +193,7 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
 }
 void MaterialComponentRefraction::bind(){
     vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
     if(m_Texture == nullptr)
