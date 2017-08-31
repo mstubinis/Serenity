@@ -31,17 +31,16 @@ enum LoadWhat{
 
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnimatedFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
-    m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,       0);
-    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,       offsetof(MeshVertexDataAnimated,uv));
-    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
-    m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
-    m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV,      GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
-    m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       offsetof(MeshVertexDataAnimated,boneIDs));
-    m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,       offsetof(MeshVertexDataAnimated,boneWeights));
+    m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
+    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
+    m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
+    m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
+    m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
+    m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
     return m;
 }
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
-
 
 class Mesh::impl{
     public:
@@ -295,7 +294,6 @@ class Mesh::impl{
                 doOther = true;
             }
             _processNode(mesh,data,m_aiScene->mRootNode,m_aiScene);
-
             if(doOther == true){
                 m_Skeleton->fill(data);
             }
@@ -873,7 +871,6 @@ struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
 }};
 DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMeshUnbindFunctor Mesh::impl::DEFAULT_UNBIND_FUNCTOR;
-
 
 Mesh::Mesh(string& name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,heightfield,threshold);
