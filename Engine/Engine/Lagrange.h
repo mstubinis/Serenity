@@ -21,22 +21,22 @@ class Lagrange: public ObjectBasic{
         static std::vector<glm::vec3> m_Vertices;
     public:
         Lagrange(
-            std::string,
-            std::string,
+            std::string p1,
+            std::string p2,
             LAGRANGE_TYPE = LAGRANGE_TYPE_L1,
             std::string = "Lagrange Point",   //Object name
             Scene* = nullptr
         );
         Lagrange(
-            std::string,
-            std::string,
-            std::string = "L1",
+            std::string p1,
+            std::string p2,
+            std::string lagrangeType = "L1",
             std::string = "Lagrange Point",   //Object name
             Scene* = nullptr
         );
         virtual ~Lagrange();
-        const LAGRANGE_TYPE getType() const{ return m_Type; }
-        glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }
+        const LAGRANGE_TYPE getType() const;
+        glm::vec2 getGravityInfo();
         void update(float);
 };
 
