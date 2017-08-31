@@ -25,9 +25,7 @@ struct aiAnimation;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-
 const uint NUM_BONES_PER_VERTEX = 4;
-
 class VertexFormat{ public: enum Format{
     Position,UV,Normal,Binormal,Tangent,
     EnumTotal
@@ -48,7 +46,6 @@ struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
 struct VertexBoneData final{
     float IDs[NUM_BONES_PER_VERTEX];
     float Weights[NUM_BONES_PER_VERTEX];
-
     VertexBoneData(){
         memset(&IDs,0,sizeof(IDs));
         memset(&Weights,0,sizeof(Weights));  
@@ -86,14 +83,12 @@ struct ImportedMeshData final{
     std::vector<glm::vec3> binormals;
     std::vector<glm::vec3> tangents;
     std::vector<ushort> indices;
-
-    ImportedMeshData(){ clear(); }
-    ~ImportedMeshData(){ clear(); }
-
     void clear(){
         vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
         vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
     }
+    ImportedMeshData(){ clear(); }
+    ~ImportedMeshData(){ clear(); }
 };
 struct MeshVertexData{
     glm::vec3 position;
@@ -134,7 +129,6 @@ class AnimationData{
         double m_TicksPerSecond;
         double m_DurationInTicks;
         std::unordered_map<std::string,aiNodeAnim*> m_KeyframeData;
-
         void _ReadNodeHeirarchy(const std::string& animationName,float AnimationTime, const aiNode* node,glm::mat4& ParentTransform,std::vector<glm::mat4>& Transforms);
         void _BoneTransform(const std::string& animationName,float TimeInSeconds, std::vector<glm::mat4>& Transforms);
         void _CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node);
@@ -146,7 +140,6 @@ class AnimationData{
     public:
         AnimationData(Mesh*,aiAnimation*);
         ~AnimationData();
-
         float duration();
 };
 class MeshSkeleton final{
@@ -156,16 +149,13 @@ class MeshSkeleton final{
     friend struct DefaultMeshBindFunctor;
     friend struct DefaultMeshUnbindFunctor;
     private:
-        //animation data
         std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
         uint m_NumBones;
         std::vector<BoneInfo> m_BoneInfo;
         glm::mat4 m_GlobalInverseTransform;
         std::unordered_map<std::string,AnimationData*> m_AnimationData;
-
         std::vector<glm::vec4> m_BoneIDs;
         std::vector<glm::vec4> m_BoneWeights;
-
     public:
         MeshSkeleton();
         MeshSkeleton(ImportedMeshData&);
@@ -196,7 +186,7 @@ class Mesh final: public BindableResource{
         std::unordered_map<std::string,AnimationData*>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
-		MeshSkeleton* skeleton();
+        MeshSkeleton* skeleton();
 
         void load();
         void unload();
