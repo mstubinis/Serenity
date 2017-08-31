@@ -59,14 +59,10 @@ void Scene::update(float dt){
 }
 void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
 void Scene::renderSkybox(){ if(m_Skybox != nullptr) m_Skybox->draw(); }
-
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
-
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }
-
-Object* Scene::getObject(string& name){ return m_Objects.at(name); } //might need skey(name) instead of name in at()
-SunLight* Scene::getLight(string& name){ return m_Lights.at(name); } //might need skey(name) instead of name in at()
-
+Object* Scene::getObject(string& name){ return m_Objects.at(name); }
+SunLight* Scene::getLight(string& name){ return m_Lights.at(name); }
 SkyboxEmpty* Scene::getSkybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
