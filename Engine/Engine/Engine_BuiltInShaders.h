@@ -8,24 +8,23 @@ namespace Engine{
     namespace Shaders{
         namespace Detail{
             class ShadersManagement{
-                private:
                 public:
                     static void init();
                     static void convertShaderCode(std::string&);
-                
+
                     static std::string version;
 
                     static std::string float_into_2_floats;
                     static std::string determinent_mat3;
                     static std::string normals_octahedron_compression_functions;
                     static std::string reconstruct_log_depth_functions;
-                
+
                     static std::string fullscreen_quad_vertex;
                     static std::string vertex_basic;
                     static std::string vertex_hud;
                     static std::string vertex_skybox;
 
-					static std::string smaa_common;
+                    static std::string smaa_common;
 
                     static std::string smaa_vertex_1;
                     static std::string smaa_frag_1;
@@ -54,11 +53,11 @@ namespace Engine{
                     static std::string hdr_frag;
                     static std::string godRays_frag;
                     static std::string blur_frag;
-                    
+
                     static std::string greyscale_frag;
                     static std::string edge_canny_blur;
                     static std::string edge_canny_frag;
-                
+
                     static std::string final_frag;
                     static std::string lighting_frag;
                     static std::string lighting_frag_gi;
