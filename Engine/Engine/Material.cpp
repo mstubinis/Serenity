@@ -18,7 +18,6 @@ using namespace Engine;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
-
 GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
     "DiffuseTexture",
     "NormalTexture",
@@ -30,7 +29,6 @@ GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Num
     "ReflectionTexture",
     "RefractionTexture",
 };
-
 void Material::setAllDiffuseModels(DiffuseModel::Model m){
     for(auto material:Resources::Detail::ResourceManagement::m_Materials)
         material.second->setDiffuseModel(m);
@@ -39,12 +37,9 @@ void Material::setAllSpecularModels(SpecularModel::Model m){
     for(auto material:Resources::Detail::ResourceManagement::m_Materials)
         material.second->setSpecularModel(m);
 }
-
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
-    glm::vec3 first(0.0f);
-    glm::vec3 second(0.0f);
-    glm::vec3 third(0.0f);
+    glm::vec3 first(0.0f); glm::vec3 second(0.0f); glm::vec3 third(0.0f);
     for(uint i = 0; i < MaterialComponentType::Number; i++){
         if(material->getComponents().count(i)){
             MaterialComponent* component = material->getComponents().at(i);
@@ -62,7 +57,6 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
                 component->bind();
             }
             else{ 
-                //disable
                 component->unbind(); 
             }
         }
@@ -87,26 +81,21 @@ struct srtKey{inline bool operator()(MaterialMeshEntry* _1,MaterialMeshEntry* _2
 
 unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
     unordered_map<uint,vector<uint>> texture_slot_map;
-
     texture_slot_map[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
     texture_slot_map[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
     texture_slot_map[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
     texture_slot_map[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
-
     texture_slot_map[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
     texture_slot_map[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
     texture_slot_map[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
-
     texture_slot_map[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
     texture_slot_map[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
     texture_slot_map[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
     texture_slot_map[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
-
     return texture_slot_map;
 }
 unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
     unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
-    
     //Remember specular reflection of dielectrics is white!      //(F0)                         //Smoothness    //Metalness
     m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
     m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
@@ -126,21 +115,18 @@ unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMateria
     m[MaterialPhysics::Glass]                = boost::make_tuple(0.04f,0.04f,0.04f,             0.97f,          0.0f);
     m[MaterialPhysics::Titanium]             = boost::make_tuple(0.5419f,0.4967f,0.4494f,       0.91f,          1.0f);
     m[MaterialPhysics::Platinum]             = boost::make_tuple(0.6724f,0.6373f,0.5854f,       0.91f,          1.0f);
-    m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597f,0.6086f,0.5256f,       0.95f,          1.0f);
-    
-    m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,       0.45f,          0.0f);
-    m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,          0.32f,          0.0f);
-    m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,       0.8f,           1.0f);
-    m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,          0.92f,          0.0f);
-    m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,          0.35f,          0.0f);
-    m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,        0.9f,           1.0f);
-    m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,             0.9f,           0.5f);
-
+    m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597f,0.6086f,0.5256f,       0.95f,          1.0f);    
+    m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,          0.45f,          0.0f);
+    m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,             0.32f,          0.0f);
+    m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,          0.8f,           1.0f);
+    m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,             0.92f,          0.0f);
+    m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,             0.35f,          0.0f);
+    m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,           0.9f,           1.0f);
+    m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
     return m;
 }
 unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
 unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = _populateMaterialProperties();
-
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (MaterialComponentType::Type)type;
@@ -154,14 +140,14 @@ MaterialComponent::MaterialComponent(uint type,string& t){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES.at(m_ComponentType);
     for(uint i = 0; i < slots.size(); i++){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     for(uint i = 0; i < slots.size(); i++){
         Renderer::unbindTexture2D(slots.at(i));
     }
@@ -182,9 +168,8 @@ void MaterialComponentReflection::setMixFactor(float factor){
     m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES.at(m_ComponentType);
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     if(m_Texture == nullptr)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
@@ -193,8 +178,7 @@ void MaterialComponentReflection::bind(){
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
 }
@@ -208,19 +192,16 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
 void MaterialComponentRefraction::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP[m_ComponentType];
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES.at(m_ComponentType);
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
-
     if(m_Texture == nullptr)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
     else
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
-
 class Material::impl final{
     public:
         static DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
@@ -263,7 +244,6 @@ class Material::impl final{
 
             super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
-
             super->load();
         }
         void _init(string& name,string& diffuse,string& normal,string& glow,string& specular,Material* super){
@@ -312,47 +292,47 @@ class Material::impl final{
                 delete component.second;
         }
         void _addComponentDiffuse(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Diffuse) && m_Components[MaterialComponentType::Diffuse] != nullptr) || texture == nullptr)
+            if((m_Components.count(MaterialComponentType::Diffuse) && m_Components.at(MaterialComponentType::Diffuse) != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(MaterialComponentType::Diffuse,new MaterialComponent(MaterialComponentType::Diffuse,texture));
         }
         void _addComponentNormal(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Normal) && m_Components[MaterialComponentType::Normal] != nullptr) || texture == nullptr)
+            if((m_Components.count(MaterialComponentType::Normal) && m_Components.at(MaterialComponentType::Normal) != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(MaterialComponentType::Normal,new MaterialComponent(MaterialComponentType::Normal,texture));
         }
         void _addComponentGlow(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Glow) && m_Components[MaterialComponentType::Glow] != nullptr) || texture == nullptr)
+            if((m_Components.count(MaterialComponentType::Glow) && m_Components.at(MaterialComponentType::Glow) != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(MaterialComponentType::Glow,new MaterialComponent(MaterialComponentType::Glow,texture));
         }
         void _addComponentSpecular(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Specular) && m_Components[MaterialComponentType::Specular] != nullptr) || texture == nullptr)
+            if((m_Components.count(MaterialComponentType::Specular) && m_Components.at(MaterialComponentType::Specular) != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(MaterialComponentType::Specular,new MaterialComponent(MaterialComponentType::Specular,texture));
         }
         void _addComponentAO(Texture* map){
-            if((m_Components.count(MaterialComponentType::AO) && m_Components[MaterialComponentType::AO] != nullptr) || (map == nullptr))
+            if((m_Components.count(MaterialComponentType::AO) && m_Components.at(MaterialComponentType::AO) != nullptr) || (map == nullptr))
                 return;
             m_Components.emplace(MaterialComponentType::AO,new MaterialComponent(MaterialComponentType::AO,map));
         }
         void _addComponentMetalness(Texture* map){
-            if((m_Components.count(MaterialComponentType::Metalness) && m_Components[MaterialComponentType::Metalness] != nullptr) || (map == nullptr))
+            if((m_Components.count(MaterialComponentType::Metalness) && m_Components.at(MaterialComponentType::Metalness) != nullptr) || (map == nullptr))
                 return;
             m_Components.emplace(MaterialComponentType::Metalness,new MaterialComponent(MaterialComponentType::Metalness,map));
         }
         void _addComponentSmoothness(Texture* map){
-            if((m_Components.count(MaterialComponentType::Smoothness) && m_Components[MaterialComponentType::Smoothness] != nullptr) || (map == nullptr))
+            if((m_Components.count(MaterialComponentType::Smoothness) && m_Components.at(MaterialComponentType::Smoothness) != nullptr) || (map == nullptr))
                 return;
             m_Components.emplace(MaterialComponentType::Smoothness,new MaterialComponent(MaterialComponentType::Smoothness,map));
         }
         void _addComponentReflection(Texture* text,Texture* map,float mixFactor){
-            if((m_Components.count(MaterialComponentType::Reflection) && m_Components[MaterialComponentType::Reflection] != nullptr) || (text == nullptr || map == nullptr))
+            if((m_Components.count(MaterialComponentType::Reflection) && m_Components.at(MaterialComponentType::Reflection) != nullptr) || (text == nullptr || map == nullptr))
                 return;
             m_Components.emplace(MaterialComponentType::Reflection,new MaterialComponentReflection(MaterialComponentType::Reflection,text,map,mixFactor));
         }
         void _addComponentRefraction(Texture* text,Texture* map,float refractiveIndex,float mixFactor){
-            if((m_Components.count(MaterialComponentType::Refraction) && m_Components[MaterialComponentType::Refraction] != nullptr) || (text == nullptr || map == nullptr))
+            if((m_Components.count(MaterialComponentType::Refraction) && m_Components.at(MaterialComponentType::Refraction) != nullptr) || (text == nullptr || map == nullptr))
                 return;
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
@@ -424,7 +404,6 @@ void Material::addComponentSpecular(string textureFile){
     if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
     m_i->_addComponentSpecular(texture);
 }
-
 void Material::addComponentAO(Texture* texture,float baseValue){
     m_i->_addComponentAO(texture);
     setAO(baseValue);
@@ -488,23 +467,18 @@ void Material::addComponentRefraction(string cubemapName,string mapFile,float re
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
-
 const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
 const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at(MaterialComponentType::Reflection)); }
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::Refraction)); }
-
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
-
 const uint Material::id() const { return m_i->m_ID; }
 const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }
 const uint Material::specularModel() const { return m_i->m_SpecularModel; }
-
 const float Material::ao() const { return m_i->m_BaseAO; }
 const float Material::metalness() const{ return m_i->m_BaseMetalness; }
 const float Material::smoothness() const { return m_i->m_BaseSmoothness; }
-
 void Material::setShadeless(bool b){ m_i->_setShadeless(b); }
 void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setF0Color(glm::vec3 color){ Material::setF0Color(color.r, color.g, color.b); }
@@ -518,7 +492,6 @@ void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(
 void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }
 void Material::setAO(float a){ m_i->_setAO(a); }
 void Material::setMetalness(float m){ m_i->_setMetalness(m); }
-
 void Material::addMeshEntry(string objectName){
     for(auto entry:m_i->m_Meshes){
         if(entry->mesh() == Resources::getMesh(objectName)){ return; }
@@ -539,7 +512,6 @@ void Material::removeMeshEntry(string objectName){
     if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey()); }
 }
 vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
-
 void Material::bind(){
     string _name = name();
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
