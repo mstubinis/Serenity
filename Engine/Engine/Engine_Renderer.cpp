@@ -116,8 +116,6 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
-
-
 void _generateBRDFLUTCookTorrance(uint brdfSize){
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
@@ -458,7 +456,7 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fb
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
     else
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
- 
+
     Settings::clear();
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_BLEND); //disable blending on all mrts
@@ -498,16 +496,14 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fb
                 for(auto instance:meshEntry->meshInstances()){
                     boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
                     Object* object = o.lock().get();
-                    if(exists(o)){
-                        if(scene->objects().count(object->name()) && (object != ignore)){
-                            if(object->checkRender(c)){
-                                object->bind();
-                                for(auto meshInstance:instance.second){
-                                    meshInstance->bind(); //render also
-                                    meshInstance->unbind();
-                                }
-                                object->unbind();
+                    if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
+                        if(object->checkRender(c)){ //culling check
+                            object->bind();
+                            for(auto meshInstance:instance.second){
+                                meshInstance->bind(); //render also
+                                meshInstance->unbind();
                             }
+                            object->unbind();
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
@@ -540,16 +536,14 @@ void Detail::RenderManagement::_passForwardRendering(GBuffer* gbuffer,Camera* c,
                 for(auto instance:meshEntry->meshInstances()){
                     boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
                     Object* object = o.lock().get();
-                    if(exists(o)){
-                        if(scene->objects().count(object->name()) && (object != ignore)){
-                            if(object->checkRender(c)){
-                                object->bind();
-                                for(auto meshInstance:instance.second){
-                                    meshInstance->bind(); //render also
-                                    meshInstance->unbind();
-                                }
-                                object->unbind();
+                    if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
+                        if(object->checkRender(c)){ //culling check
+                            object->bind();
+                            for(auto meshInstance:instance.second){
+                                meshInstance->bind(); //render also
+                                meshInstance->unbind();
                             }
+                            object->unbind();
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
@@ -578,6 +572,8 @@ void Detail::RenderManagement::_passCopyDepth(GBuffer* gbuffer,Camera* c,uint& f
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 }
 void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool mainRenderFunc){
+    Scene* s = Resources::getCurrentScene();
+    
     ShaderP* pNormal = Resources::getShaderProgram("Deferred_Light"); pNormal->bind();
     ShaderP* pGI = Resources::getShaderProgram("Deferred_Light_GI");
     ShaderP* pSpot = Resources::getShaderProgram("Deferred_Light_Spot");
@@ -602,7 +598,7 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     bindTextureSafe("gMiscMap",gbuffer->getTexture(GBufferType::Misc),2);
     bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),3);
 
-    for (auto light:Resources::getCurrentScene()->lights()){
+    for (auto light:s->lights()){
         light.second->lighten();
     }
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
@@ -620,7 +616,6 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),2);
     sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
-    Scene* s = Resources::getCurrentScene();
     SkyboxEmpty* sky = s->getSkybox();
     if(mainRenderFunc){
         //if(s->m_LightProbes.size() > 0){
@@ -643,9 +638,10 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     p->unbind();
 }
 void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,uint fboHeight,bool doSSAO, bool doGodRays, bool doAA,bool HUD, Object* ignore,bool mainRenderFunc,GLuint fbo, GLuint rbo){
+    Scene* s = Resources::getCurrentScene();
     if(mainRenderFunc){
-        if(Resources::getCurrentScene()->m_LightProbes.size() > 0){
-            for(auto lightProbe:Resources::getCurrentScene()->m_LightProbes){
+        if(s->m_LightProbes.size() > 0){
+            for(auto lightProbe:s->m_LightProbes){
                 lightProbe.second->renderCubemap();
             }
             Renderer::Detail::RenderManagement::m_gBuffer->resize(fboWidth,fboHeight);
@@ -677,7 +673,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
-    if(RendererInfo::LightingInfo::lighting == true && Resources::getCurrentScene()->lights().size() > 0){
+    if(RendererInfo::LightingInfo::lighting == true && s->lights().size() > 0){
         gbuffer->start(GBufferType::Lighting,"RGB");
         Renderer::Settings::clear(true,false,false);//this is needed for godrays
         _passLighting(gbuffer,c,fboWidth,fboHeight,mainRenderFunc);
@@ -747,7 +743,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
 		Renderer::unbindFBO();
 		Settings::clear();
 		LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
-		Skybox* sky = static_cast<Skybox*>(Resources::getCurrentScene()->getSkybox());
+		Skybox* sky = static_cast<Skybox*>(s->getSkybox());
 		if(pr != nullptr){
 			ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
 			glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
@@ -871,7 +867,7 @@ void Detail::RenderManagement::_passGodsRays(GBuffer* gbuffer,Camera* c,uint& fb
     sendUniform1i("samples",RendererInfo::GodRaysInfo::godRays_samples);
     sendUniform1i("behind",int(behind));
     sendUniform1f("alpha",alpha);
-    
+
     float _divisor = gbuffer->getBuffer(GBufferType::GodRays)->divisor();
     sendUniform1f("fbufferDivisor",_divisor);
 
@@ -967,7 +963,6 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
     p->unbind();
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     gbuffer->start(GBufferType::Normal);
     Settings::clear(true,false,false);
@@ -1009,7 +1004,6 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     p->unbind();
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     /*
     //this pass is optional. lets skip it for now
     //gbuffer->start(GBufferType::Lighting);
@@ -1017,8 +1011,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     p = Resources::getShaderProgram("Deferred_SMAA_4"); p->bind();
     renderFullscreenQuad(fboWidth,fboHeight);
     p->unbind();
-    */
-    
+    */  
 }
 void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
@@ -1046,7 +1039,7 @@ void Detail::renderFullscreenQuad(uint width,uint height){
     sendUniformMatrix4f("Model",m);
     sendUniformMatrix4f("VP",p);
     setViewport(0,0,width,height);
-    
+
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
         glTexCoord2f(1.0f, 0.0f);  glVertex2f( w2, -h2);
