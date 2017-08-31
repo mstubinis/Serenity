@@ -19,26 +19,24 @@ class Lagrange: public ObjectBasic{
         static float radius;
         static GLuint m_Buffer;
         static std::vector<glm::vec3> m_Vertices;
-
     public:
-        Lagrange(std::string,
-                 std::string,
-                 LAGRANGE_TYPE = LAGRANGE_TYPE_L1,
-                 std::string = "Lagrange Point",   //Object name
-                 Scene* = nullptr
-               );
-        Lagrange(std::string,
-                 std::string,
-                 std::string = "L1",
-                 std::string = "Lagrange Point",   //Object name
-                 Scene* = nullptr
-               );
+        Lagrange(
+            std::string,
+            std::string,
+            LAGRANGE_TYPE = LAGRANGE_TYPE_L1,
+            std::string = "Lagrange Point",   //Object name
+            Scene* = nullptr
+        );
+        Lagrange(
+            std::string,
+            std::string,
+            std::string = "L1",
+            std::string = "Lagrange Point",   //Object name
+            Scene* = nullptr
+        );
         virtual ~Lagrange();
-
         const LAGRANGE_TYPE getType() const{ return m_Type; }
-
         glm::vec2 getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }
-
         void update(float);
 };
 
