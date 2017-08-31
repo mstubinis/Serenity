@@ -391,7 +391,7 @@ class Mesh::impl{
                         }
                         mesh->skeleton()->m_BoneMapping.emplace(BoneName,BoneIndex);
                         aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
-                        mesh->skeleton()->m_BoneInfo[BoneIndex].BoneOffset = Engine::Math::assimpToGLMMat4(n);
+                        mesh->skeleton()->m_BoneInfo.at(BoneIndex).BoneOffset = Engine::Math::assimpToGLMMat4(n);
                         for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
                             uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
                             float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
@@ -431,9 +431,9 @@ class Mesh::impl{
         bool _getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<MeshVertexData>& out_vertices,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
             for (uint i=0; i < out_vertices.size(); i++ ){
                 if (_is_near( in_pos.x , out_vertices.at(i).position.x ,threshold) && _is_near( in_pos.y , out_vertices.at(i).position.y ,threshold) &&
-                    _is_near( in_pos.z , out_vertices.at(i).position.z ,threshold) && _is_near( in_uv.x  , uvs[i].x      ,threshold) &&
-                    _is_near( in_uv.y  , uvs[i].y      ,threshold) && _is_near( in_norm.x , norms[i].x ,threshold) &&
-                    _is_near( in_norm.y , norms[i].y ,threshold) && _is_near( in_norm.z , norms[i].z ,threshold)
+                    _is_near( in_pos.z , out_vertices.at(i).position.z ,threshold) && _is_near( in_uv.x  , uvs.at(i).x      ,threshold) &&
+                    _is_near( in_uv.y  , uvs.at(i).y      ,threshold) && _is_near( in_norm.x , norms.at(i).x ,threshold) &&
+                    _is_near( in_norm.y , norms.at(i).y ,threshold) && _is_near( in_norm.z , norms.at(i).z ,threshold)
                 ){
                     result = i;
                     return true;
@@ -443,9 +443,9 @@ class Mesh::impl{
         }
         void _calculateGramSchmidt(vector<glm::vec3>& points,vector<glm::vec3>& normals,vector<glm::vec3>& binormals,vector<glm::vec3>& tangents){
             for(uint i=0; i < points.size(); i++){
-                glm::vec3& n = normals[i];
-                glm::vec3& t = binormals[i];
-                glm::vec3& b = tangents[i];
+                glm::vec3& n = normals.at(i);
+                glm::vec3& t = binormals.at(i);
+                glm::vec3& b = tangents.at(i);
                 // Gram-Schmidt orthogonalize
                 t = glm::normalize(t - glm::dot(t, n) * n);
                 b = glm::cross(n, t);
@@ -774,9 +774,7 @@ class Mesh::impl{
             if(_flags && LOAD_TBN && d.normals.size() > 0){
                 _calculateTBN(d);
             }
-
             _loadData(super,d,threshold);
-
             if(type == CollisionType::None){
                 m_Collision = new Collision(new btEmptyShape());
             }
