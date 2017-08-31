@@ -77,11 +77,7 @@ class FramebufferTexture::impl{
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);
-            
-            //is this line even needed?
-            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
-            
-            
+            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);//is this line even needed?
             glBindTexture(m_Texture->type(),0);
         }
 };
@@ -151,15 +147,11 @@ class FramebufferObject::impl{
 
         unordered_map<uint,FramebufferObjectAttatchment*> m_Attatchments;
 
-        uint m_FramebufferWidth;
-        uint m_FramebufferHeight;
-
+        uint m_FramebufferWidth; uint m_FramebufferHeight;
         void _baseInit(FramebufferObject* super,uint width, uint height){
             m_FramebufferWidth = width; m_FramebufferHeight = height;
-
             super->setCustomBindFunctor(FramebufferObject::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR);
-
             glGenFramebuffers(1, &m_FBO);
         }
         void _init(FramebufferObject* super,uint width, uint height){
@@ -189,7 +181,6 @@ class FramebufferObject::impl{
             Renderer::bindFBO(m_FBO);
             glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),_t->type(),_t->address(),0);
             FramebufferTexture* t = new FramebufferTexture(super,a,_t);
-
             m_Attatchments.emplace(a,t);
             Renderer::unbindFBO();
             return t;
@@ -205,15 +196,11 @@ class FramebufferObject::impl{
         }
         RenderbufferObject* _attatchRenderbuffer(FramebufferObject* super,RenderbufferObject* rbo){
             if(m_Attatchments.count(rbo->attatchment())){ return nullptr; }
-
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(rbo);
-
             glRenderbufferStorage(GL_RENDERBUFFER,rbo->internalFormat(), super->width(), super->height());
             glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
-
             m_Attatchments.emplace(rbo->attatchment(),rbo);
-
             Renderer::unbindRBO();
             Renderer::unbindFBO();
             return rbo;
