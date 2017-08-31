@@ -293,3 +293,5 @@ void Lagrange::draw(GLuint shader, bool debug){
     glUseProgram(0);
 }
 */
+const LAGRANGE_TYPE Lagrange::getType() const{ return m_Type; }
+glm::vec2 Lagrange::getGravityInfo(){ return glm::vec2(this->getRadius()*100,this->getRadius()*150); }
