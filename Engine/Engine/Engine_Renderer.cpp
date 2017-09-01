@@ -945,22 +945,23 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
 
     glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
-    gbuffer->start(GBufferType::Misc); //we save the original image to Diffuse buffer so it can be used later
+    gbuffer->start(GBufferType::Misc);
     Settings::clear(true,false,false);
     ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
     sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     sendUniform1fSafe("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
     sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
     sendUniform1fSafe("SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR",RendererInfo::SMAAInfo::SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR);
+    sendUniform1iSafe("SMAA_PREDICATION",int(RendererInfo::SMAAInfo::SMAA_PREDICATION));
     sendUniform1fSafe("SMAA_PREDICATION_THRESHOLD",RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD);
     sendUniform1fSafe("SMAA_PREDICATION_SCALE",RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE);
     sendUniform1fSafe("SMAA_PREDICATION_STRENGTH",RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH);
     bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0);
-
+    bindTextureSafe("texturePredication",gbuffer->getTexture(GBufferType::Diffuse),1);
     //edge pass
     renderFullscreenQuad(fboWidth,fboHeight);
 
-    for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
