@@ -84,11 +84,11 @@ float Detail::RendererInfo::BloomInfo::bloom_strength = 2.5f;
 bool Detail::RendererInfo::LightingInfo::lighting = true;
 
 bool Detail::RendererInfo::GodRaysInfo::godRays = true;
-float Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.0034f;
-float Detail::RendererInfo::GodRaysInfo::godRays_decay = 1.0f;
-float Detail::RendererInfo::GodRaysInfo::godRays_density = 0.84f;
-float Detail::RendererInfo::GodRaysInfo::godRays_weight = 5.65f;
-uint Detail::RendererInfo::GodRaysInfo::godRays_samples = 45;
+float Detail::RendererInfo::GodRaysInfo::godRays_exposure = 0.15f;
+float Detail::RendererInfo::GodRaysInfo::godRays_decay = 0.96815f;
+float Detail::RendererInfo::GodRaysInfo::godRays_density = 0.926f;
+float Detail::RendererInfo::GodRaysInfo::godRays_weight = 0.58767f;
+uint Detail::RendererInfo::GodRaysInfo::godRays_samples = 50;
 float Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = 75.0f;
 float Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = 2.0f;
 

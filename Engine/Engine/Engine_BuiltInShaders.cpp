@@ -1620,8 +1620,8 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "    }\n"
     "    if(HasRays == 1){\n"
     "        vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
-    "        gl_FragColor = vec4(rays * godRaysExposure,1.0) + vec4(lighting*(1.1),1.0);\n"
-    "        lighting += rays;\n"
+    "        //lighting = lighting + rays;\n"
+	"        lighting = (lighting*1.1) + (rays * godRaysExposure);\n"
     "    }\n"
     "    gl_FragColor = vec4(lighting,1.0);\n"
     "}";
