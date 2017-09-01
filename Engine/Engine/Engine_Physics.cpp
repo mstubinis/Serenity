@@ -51,7 +51,7 @@ void Detail::PhysicsManagement::init(){
     m_debugDrawer = new GLDebugDrawer();
     m_debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE );
     m_world->setDebugDrawer(m_debugDrawer);
-    m_world->setGravity(btVector3(0,0,0));
+    m_world->setGravity(btVector3(0.0f,0.0f,0.0f));
 
     btGImpactCollisionAlgorithm::registerAlgorithm(m_dispatcher);
 
@@ -164,10 +164,10 @@ Collision::Collision(ImportedMeshData& data,CollisionType type, float mass){
 }
 void Collision::_init(CollisionType type, float mass){
     if(m_Inertia == nullptr){
-        m_Inertia = new btVector3(0,0,0);
+        m_Inertia = new btVector3(0.0f,0.0f,0.0f);
     }
     else{
-        m_Inertia->setX(0);m_Inertia->setY(0);m_Inertia->setZ(0);
+        m_Inertia->setX(0.0f);m_Inertia->setY(0.0f);m_Inertia->setZ(0.0f);
     }
     setMass(mass);
     Detail::PhysicsManagement::m_Collisions.push_back(this);
@@ -236,7 +236,7 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
             break;
         }
         case CollisionType::Box:{
-            glm::vec3 max = glm::vec3(0);
+            glm::vec3 max = glm::vec3(0.0f);
             for(auto vertex:data.file_points){
                 float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
                 if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
@@ -285,18 +285,18 @@ void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVec
     int i, j;
     for(i = 0; i <= lats; i++) {
         btScalar lat0 = SIMD_PI * (-btScalar(0.5) + (btScalar) (i - 1) / lats);
-        btScalar z0  = radius*sin(lat0);
-        btScalar zr0 =  radius*cos(lat0);
+        btScalar z0  = radius*glm::sin(lat0);
+        btScalar zr0 =  radius*glm::cos(lat0);
 
         btScalar lat1 = SIMD_PI * (-btScalar(0.5) + (btScalar) i / lats);
-        btScalar z1 = radius*sin(lat1);
-        btScalar zr1 = radius*cos(lat1);
+        btScalar z1 = radius*glm::sin(lat1);
+        btScalar zr1 = radius*glm::cos(lat1);
 
         glBegin(GL_QUAD_STRIP);
         for(j = 0; j <= longs; j++) {
             btScalar lng = 2 * SIMD_PI * (btScalar) (j - 1) / longs;
-            btScalar x = cos(lng);
-            btScalar y = sin(lng);
+            btScalar x = glm::cos(lng);
+            btScalar y = glm::sin(lng);
 
             glNormal3f(x * zr0, y * zr0, z0);
             glVertex3f(x * zr0, y * zr0, z0);
