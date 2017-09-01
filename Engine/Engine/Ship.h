@@ -6,7 +6,7 @@
 
 class GameCamera;
 class Ship;
-
+typedef unsigned int uint;
 enum SHIP_SYSTEM_TYPE { 
     SHIP_SYSTEM_REACTOR,
     SHIP_SYSTEM_PITCH_THRUSTERS,
@@ -21,11 +21,11 @@ SHIP_SYSTEM_NUMBER};
 class ShipSystem{
     protected:
         Ship* m_Ship;
-        unsigned int m_Type;
+        uint m_Type;
         float m_Health;
         float m_Power;
     public:
-        ShipSystem(unsigned int type,Ship*);
+        ShipSystem(uint type,Ship*);
         virtual ~ShipSystem();
 
         const bool isOnline() const { if(m_Health > 0 && m_Power > 0) return true; return false; }
@@ -94,11 +94,9 @@ class ShipSystemSensors final: public ShipSystem{
 
 class Ship: public ObjectDynamic{
     protected:
-        std::unordered_map<unsigned int,ShipSystem*> m_ShipSystems;
-
+        std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool m_IsPlayer;
         GameCamera* m_PlayerCamera;
-
         bool m_IsWarping;
         float m_WarpFactor;
         Object* m_Target;
@@ -116,17 +114,14 @@ class Ship: public ObjectDynamic{
         virtual ~Ship();
 
         void translateWarp(float);
-
         void toggleWarp(){
             m_IsWarping = !m_IsWarping;
             m_WarpFactor = 0;
         }
-
         GameCamera* getPlayerCamera(){ return m_PlayerCamera; }
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
-        ShipSystem* getShipSystem(unsigned int type){ return m_ShipSystems[type]; }
-
+        ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }
         Object* getTarget() { return m_Target; }
         virtual void setTarget(Object*);
         virtual void setTarget(std::string);
