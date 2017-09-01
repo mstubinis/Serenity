@@ -318,7 +318,6 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
     "    FC_2_f = fcoeff * 0.5;\n"
     "}";
-
 #pragma endregion
 
 #pragma region VertexHUD
@@ -721,7 +720,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "    delta.w = max(max(t.r, t.g), t.b);\n"
     "    maxDelta = max(maxDelta.xy, delta.zw);\n"
     "    float finalDelta = max(maxDelta.x, maxDelta.y);\n"
-    "    edges.xy *= step((finalDelta), (SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR) * delta.xy);\n"
+    "    edges.xy *= step((finalDelta), (SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR) * delta.xy);\n" //do we need this line in opengl?
     "    return edges;\n"
     "}\n"
     "vec2 SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex) {\n"
@@ -750,7 +749,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "    delta.zw = abs(vec2(Lleft, Ltop) - vec2(Lleftleft, Ltoptop));\n"
     "    maxDelta = max(maxDelta.xy, delta.zw);\n"
     "    float finalDelta = max(maxDelta.x, maxDelta.y);\n"
-    "    edges.xy *= step((finalDelta), (SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR) * delta.xy);\n"
+    "    edges.xy *= step((finalDelta), (SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR) * delta.xy);\n" //do we need this line in opengl?
     "    return edges;\n"
     "}\n"
     "void main(void){\n"
