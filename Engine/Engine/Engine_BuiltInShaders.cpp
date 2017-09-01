@@ -1598,6 +1598,7 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "uniform int HasSSAO;\n"
     "uniform int HasLighting;\n"
     "uniform int HasRays;\n"
+    "uniform float godRaysExposure;\n"
     "\n";
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
@@ -1619,6 +1620,7 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "    }\n"
     "    if(HasRays == 1){\n"
     "        vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
+    "        gl_FragColor = vec4(rays * godRaysExposure,1.0) + vec4(lighting*(1.1),1.0);\n"
     "        lighting += rays;\n"
     "    }\n"
     "    gl_FragColor = vec4(lighting,1.0);\n"
