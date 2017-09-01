@@ -48,17 +48,11 @@ class SMAAQualityLevel{public: enum Level{
     Low,Medium,High,Ultra
 };};
 class HDRToneMapAlgorithm{public: enum Algorithm{
-    REINHARD,
-    FILMIC,
-    EXPOSURE,
-    UNCHARTED
+    REINHARD,FILMIC,EXPOSURE,UNCHARTED
 };};
 class AntiAliasingAlgorithm{public: enum Algorithm{
-    None,
-    FXAA,
-    SMAA
+    None,FXAA,SMAA
 };};
-
 namespace Engine{
     namespace Renderer{
         namespace Detail{
@@ -190,9 +184,7 @@ namespace Engine{
             };
             void renderFullscreenQuad(uint width, uint height);
         };
-
         namespace Settings{
-
             void setGamma(float g);
             float getGamma();
 
@@ -212,7 +204,6 @@ namespace Engine{
             void disableDepthMask();
             void enableDrawPhysicsInfo(bool b = true);
             void disableDrawPhysicsInfo();
-
             namespace SMAA{
                 static void setThreshold(float f){ Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = f; }
                 static void setSearchSteps(uint s){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = s; }
@@ -266,16 +257,13 @@ namespace Engine{
             namespace HDR{
                 static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
                 static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
-
                 static float getExposure(){ return Detail::RendererInfo::HDRInfo::hdr_exposure; }
                 static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
-
                 static void setAlgorithm(HDRToneMapAlgorithm::Algorithm a){ Detail::RendererInfo::HDRInfo::hdr_algorithm = a; }
             };
             namespace Bloom{
                 static void enable(bool b = true){ Detail::RendererInfo::BloomInfo::bloom = b; }
                 static void disable(){ Detail::RendererInfo::BloomInfo::bloom = false; }
-
                 static float getRadius(){ return Detail::RendererInfo::BloomInfo::bloom_radius; }
                 static float getStrength(){ return Detail::RendererInfo::BloomInfo::bloom_strength; }
                 static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = glm::max(0.0f,r); }
@@ -284,7 +272,6 @@ namespace Engine{
             namespace GodRays{
                 static void enable(bool b = true){ Detail::RendererInfo::GodRaysInfo::godRays = b; }
                 static void disable(){ Detail::RendererInfo::GodRaysInfo::godRays = false; }
-
                 static float getExposure(){ return Detail::RendererInfo::GodRaysInfo::godRays_exposure; }
                 static float getDecay(){ return Detail::RendererInfo::GodRaysInfo::godRays_decay; }
                 static float getDensity(){ return Detail::RendererInfo::GodRaysInfo::godRays_density; }
@@ -292,7 +279,6 @@ namespace Engine{
                 static uint getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
                 static float getFOVDegrees(){ return Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees; }
                 static float getAlphaFalloff(){ return Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff; }
-
                 static void setExposure(float e){ Detail::RendererInfo::GodRaysInfo::godRays_exposure = e; }
                 static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
                 static void setDensity(float d){ Detail::RendererInfo::GodRaysInfo::godRays_density = d; }
@@ -304,20 +290,15 @@ namespace Engine{
             namespace SSAO{
                 static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }
                 static void disable(){ Detail::RendererInfo::SSAOInfo::ssao = false;  }
-
                 static void enableBlur(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = b;  }
                 static void disableBlur(){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = false;  }
-
                 static float getBlurStrength(){ return Detail::RendererInfo::SSAOInfo::ssao_blur_strength; }
-
                 static float getIntensity(){ return Detail::RendererInfo::SSAOInfo::ssao_intensity; }
                 static float getRadius(){ return Detail::RendererInfo::SSAOInfo::ssao_radius; }
                 static float getScale(){ return Detail::RendererInfo::SSAOInfo::ssao_scale; }
                 static float getBias(){ return Detail::RendererInfo::SSAOInfo::ssao_bias; }
                 static uint getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
-
                 static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = glm::max(0.0f,s); }
-
                 static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = glm::max(0.0f,i); }
                 static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = glm::max(0.0f,r); }
                 static void setScale(float s){ Detail::RendererInfo::SSAOInfo::ssao_scale = glm::max(0.0f,s); }
