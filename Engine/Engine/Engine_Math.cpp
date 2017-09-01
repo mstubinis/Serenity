@@ -51,9 +51,9 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     float resY = screen.y;
     uint inBounds = 1;
     if(clampToEdge){
-        if(screen.x < 0){ resX = 0; inBounds = 0; }
+        if(screen.x < 0.0f){ resX = 0.0f; inBounds = 0; }
         else if(screen.x > winSize.x){ resX = winSize.x; inBounds = 0; }
-        if(resY < 0){ resY = 0; inBounds = 0; }
+        if(resY < 0.0f){ resY = 0.0f; inBounds = 0; }
         else if(resY > winSize.y){ resY = winSize.y; inBounds = 0; }
     }
     if(dot < 0.0f){
@@ -62,9 +62,9 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     inBounds = 0;
     float fX = winSize.x - screen.x;
     float fY = winSize.y - screen.y;
-    if(fX < winSize.x/2){ if(clampToEdge) fX = 0; else fX = -9999999.0f; }
+    if(fX < winSize.x/2){ if(clampToEdge) fX = 0.0f; else fX = -9999999.0f; }
     else if(fX > winSize.x/2){ if(clampToEdge) fX = winSize.x; else fX = -9999999.0f; }
-    if(fY < winSize.y/2){ if(clampToEdge) fY = 0; else fY = -9999999.0f; }
+    if(fY < winSize.y/2){ if(clampToEdge) fY = 0.0f; else fY = -9999999.0f; }
     else if(fY > winSize.y/2){ if(clampToEdge) fY = winSize.y; else fY = -9999999.0f; }
     return glm::vec3(fX,fY,inBounds);
 }
@@ -235,16 +235,16 @@ void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed
     o = glm::normalize(o);
 }
 void Math::setColor(glm::vec3& c,float r, float g, float b){
-    if(r > 1) r = r / 255.0f;
-    if(g > 1) g = g / 255.0f;
-    if(b > 1) b = b / 255.0f;
+    if(r > 1.0f) r = r / 255.0f;
+    if(g > 1.0f) g = g / 255.0f;
+    if(b > 1.0f) b = b / 255.0f;
     c.x = r; c.y = g; c.z = b;
 }
 void Math::setColor(glm::vec4& c,float r, float g, float b,float a){
-    if(r > 1) r = r / 255.0f;
-    if(g > 1) g = g / 255.0f;
-    if(b > 1) b = b / 255.0f;
-    if(a > 1) a = a / 255.0f;
+    if(r > 1.0f) r = r / 255.0f;
+    if(g > 1.0f) g = g / 255.0f;
+    if(b > 1.0f) b = b / 255.0f;
+    if(a > 1.0f) a = a / 255.0f;
     c.x = r; c.y = g; c.z = b; c.w = a; 
 }
 float Math::fade(float t){ return t*t*t*(t*(t*6.0f-15.0f)+10.0f); }
@@ -262,11 +262,11 @@ double Math::grad(int hash, double x, double y, double z){
     return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 }
 glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
-    glm::vec4 ret(0);
-    float a = p.a + c.a * (1-p.a);
-    ret.r = ((p.r*p.a + c.r*c.a * (1-p.a)) / a);
-    ret.g = ((p.g*p.a + c.g*c.a * (1-p.a)) / a);
-    ret.b = ((p.b*p.a + c.b*c.a * (1-p.a)) / a);
+    glm::vec4 ret(0.0f);
+    float a = p.a + c.a * (1.0f-p.a);
+    ret.r = ((p.r*p.a + c.r*c.a * (1.0f-p.a)) / a);
+    ret.g = ((p.g*p.a + c.g*c.a * (1.0f-p.a)) / a);
+    ret.b = ((p.b*p.a + c.b*c.a * (1.0f-p.a)) / a);
     ret.a = a;
     return ret;
 }
@@ -276,7 +276,7 @@ bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::vec3& A, glm::vec3& ray
     if(dot >= 0.0f)
         return false;
     float a = ((B.x-A.x)*(B.x-A.x))  +  ((B.y - A.y)*(B.y - A.y))  +  ((B.z - A.z)*(B.z - A.z));
-    float b = 2* ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
+    float b = 2.0f * ((B.x - A.x)*(A.x - C.x)  +  (B.y - A.y)*(A.y - C.y)  +  (B.z - A.z)*(A.z-C.z));
     float c = (((A.x-C.x)*(A.x-C.x))  +  ((A.y - C.y)*(A.y - C.y))  +  ((A.z - C.z)*(A.z - C.z))) - (r*r);
     float d = (b*b) - (4.0f*a*c);
     if(d < 0.0f)
