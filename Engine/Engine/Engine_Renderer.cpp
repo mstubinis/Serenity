@@ -347,7 +347,8 @@ void Detail::RenderManagement::init(){
     glDepthFunc(GL_LEQUAL);
     glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
-    //recommended for specular IBL. but causes HUGE fps drops (prob because OGL 3.3 does not support this). investigate this...
+    //recommended for specular IBL. but causes HUGE fps drops 
+    //(prob because the gpu might not support it or glew is not loading it). investigate this...
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
     // Create SMAA lookup textures
