@@ -44,7 +44,9 @@ struct FontRenderInfo final: public TextureRenderInfo{
         text = _text;
     }
 };
-
+class SMAAQualityLevel{public: enum Level{
+    Low,Medium,High,Ultra
+};};
 class HDRToneMapAlgorithm{public: enum Algorithm{
     REINHARD,
     FILMIC,
@@ -212,6 +214,46 @@ namespace Engine{
             void disableDrawPhysicsInfo();
 
             namespace SMAA{
+                static void setThreshold(float f){ Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = f; }
+                static void setSearchSteps(uint s){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = s; }
+                static void disableCornerDetection(){ Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 0; }
+                static void enableCornerDetection(uint c = 25){ Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = c; }
+                static void disableDiagonalDetection(){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
+                static void enableDiagonalDetection(uint d = 8){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = d; }
+                static void setQuality(SMAAQualityLevel::Level l){
+                    if(l == SMAAQualityLevel::Low){
+                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.15f;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 4;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
+                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 0;
+                    }
+                    else if(l == SMAAQualityLevel::Medium){
+                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 8;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
+                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 0;
+                    }
+                    else if(l == SMAAQualityLevel::High){
+                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 16;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 8;
+                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 25;
+                    }
+                    else if(l == SMAAQualityLevel::Ultra){
+                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.05f;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 32;
+                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 16;
+                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 25;
+                    }
+                }
+                static void setPredicationThreshold(float f){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD = f; }
+                static void setPredicationScale(float f){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE = f; }
+                static void setPredicationStrength(float s){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH = s; }
+                static void setReprojectionScale(float s){ Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION_WEIGHT_SCALE = s; }
+                static void enablePredication(bool b = true){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = b; }
+                static void disablePredication(){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = false; }
+                static void enableReprojection(bool b = true){ Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = b; }
+                static void disableReprojection(){ Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = false; }
             };
             namespace FXAA{
                 static void setReduceMin(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = glm::max(0.0f,r); }
