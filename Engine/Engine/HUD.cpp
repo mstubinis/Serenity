@@ -125,7 +125,8 @@ void HUD::render(){
                         "\nFPS: " + to_string(uint(1.0f/Resources::dt())) + 
                         "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
 						"\nExposure: " + to_string(Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure) + 
-						"\nGamma: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::gamma),
+						"\nGamma: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::gamma) +
+						"\nPred?: " + to_string(Renderer::Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION),
                         glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion
