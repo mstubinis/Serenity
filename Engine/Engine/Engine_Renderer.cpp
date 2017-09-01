@@ -53,7 +53,7 @@ float Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION_WEIGHT_SCALE = 30.0f;
 uint Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE = 16;
 uint Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE_DIAG = 20;
 glm::vec2 Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_PIXEL_SIZE = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
-float Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE = 1.0f / 7.0f;
+float Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE = 0.14285714285f; //(1 / 7)
 
 
 float Detail::RendererInfo::GeneralInfo::gamma = 2.2f;
