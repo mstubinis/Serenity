@@ -1019,6 +1019,7 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
 
     sendUniform1iSafe("HasSSAO",int(Detail::RendererInfo::SSAOInfo::ssao));
     sendUniform1iSafe("HasRays",int(Detail::RendererInfo::GodRaysInfo::godRays));
+    sendUniform1fSafe("godRaysExposure",RendererInfo::GodRaysInfo::godRays_exposure);
 
     bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0);
     bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),1);
