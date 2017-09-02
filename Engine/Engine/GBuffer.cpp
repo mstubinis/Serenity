@@ -19,7 +19,7 @@ unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelForm
     m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
     m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
     m[GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth16,  ImagePixelFormat::DEPTH_COMPONENT, ImagePixelType::FLOAT,  FramebufferAttatchment::Depth);
+    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;
 }
@@ -36,7 +36,7 @@ class GBuffer::impl final{
 
             m_Width = w; m_Height = h;
 
-            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,ImageInternalFormat::Depth16);
+            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height);
             m_FBO->bind();
 
             _constructFramebuffer(m_FBO,"BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
@@ -48,7 +48,7 @@ class GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,ImageInternalFormat::Depth16);
+			m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
             m_SmallFBO->bind();
 
             _constructFramebuffer(m_SmallFBO,"BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);

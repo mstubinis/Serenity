@@ -1074,7 +1074,7 @@ class LightProbe::impl{
                 // fps loss?)
                 Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,
                     super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),
-                    m_FBO->attatchments().at(FramebufferAttatchment::at(FramebufferAttatchment::Depth))->address());
+                    0);
             }
             /////////////////////////////////////////////////////////////////
 			m_FBO->bind();

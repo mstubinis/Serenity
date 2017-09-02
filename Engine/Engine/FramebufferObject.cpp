@@ -77,7 +77,7 @@ class FramebufferTexture::impl{
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);//is this line even needed?
+            //glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);//is this line even needed?
             glBindTexture(m_Texture->type(),0);
         }
 };
@@ -159,7 +159,13 @@ class FramebufferObject::impl{
         }
         void _init(FramebufferObject* super,uint width, uint height,ImageInternalFormat::Format depthInternalFormat){
             _baseInit(super,width,height);
-            RenderbufferObject* rbo = new RenderbufferObject(super,FramebufferAttatchment::Depth,depthInternalFormat);
+			RenderbufferObject* rbo;
+			if(depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8)
+                rbo = new RenderbufferObject(super,FramebufferAttatchment::DepthAndStencil,depthInternalFormat);
+			else if(depthInternalFormat == ImageInternalFormat::StencilIndex8)
+				rbo = new RenderbufferObject(super,FramebufferAttatchment::Stencil,depthInternalFormat);
+			else
+                rbo = new RenderbufferObject(super,FramebufferAttatchment::Depth,depthInternalFormat);
             _attatchRenderbuffer(super,rbo);
         }
         void _destruct(FramebufferObject* super){

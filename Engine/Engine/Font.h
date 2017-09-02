@@ -42,7 +42,7 @@ class Font final: public EngineResource{
     public:
         Font(std::string);
         ~Font();
-        void renderText(std::string& text,glm::vec2& pos,glm::vec4 color = glm::vec4(1),float angle = 0,glm::vec2 scl = glm::vec2(1),float depth = 0);
+        void renderText(std::string text,glm::vec2& pos,glm::vec4 color = glm::vec4(1),float angle = 0,glm::vec2 scl = glm::vec2(1),float depth = 0.1);
         FontData* getFontData() { return m_FontData; }
 };
 #endif

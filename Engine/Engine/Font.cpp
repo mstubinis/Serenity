@@ -65,6 +65,6 @@ Font::Font(string filename):EngineResource(filename){
 Font::~Font(){
     SAFE_DELETE(m_FontData);
 }
-void Font::renderText(string& text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
+void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(name(),text,pos,color,scl,angle,depth));
 }

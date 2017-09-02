@@ -367,6 +367,9 @@ void Detail::RenderManagement::init(){
     Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
     glBindTexture(GL_TEXTURE_2D,0);
+
+    glDisable(GL_STENCIL_TEST);
+    glClearStencil(0x00);
 }
 void Detail::RenderManagement::postInit(){
     _generateBRDFLUTCookTorrance(512);
@@ -724,53 +727,53 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
         _passFinal(gbuffer,c,fboWidth,fboHeight);
         _passSMAA(gbuffer,c,fboWidth,fboHeight,doingaa);
     }
-	if(mainRenderFunc){
+    if(mainRenderFunc){
 
-		//gbuffer->stop();
-		//glDepthFunc(GL_ALWAYS);
-		//Settings::enableDepthMask(true);
-		//Settings::enableDepthTest(true); //has to be enabled for some reason
-		_passCopyDepth(gbuffer,c,fboWidth,fboHeight);
+        //gbuffer->stop();
+        //glDepthFunc(GL_ALWAYS);
+        //Settings::enableDepthMask(true);
+        //Settings::enableDepthTest(true); //has to be enabled for some reason
+        _passCopyDepth(gbuffer,c,fboWidth,fboHeight);
 
-		glEnable(GL_BLEND);
-		Settings::disableDepthTest();
-		Settings::disableDepthMask();
-		if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && c == Resources::getActiveCamera()){
-			Physics::Detail::PhysicsManagement::render();
-		}
+        glEnable(GL_BLEND);
+        Settings::disableDepthTest();
+        Settings::disableDepthMask();
+        if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && c == Resources::getActiveCamera()){
+            Physics::Detail::PhysicsManagement::render();
+        }
 
-	    //to try and see what the lightprobe is outputting
-		/*
-		Renderer::unbindFBO();
-		Settings::clear();
-		LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
-		Skybox* sky = static_cast<Skybox*>(s->getSkybox());
-		if(pr != nullptr){
-			ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
-			glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
-			Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
-			Renderer::bindTexture("Texture",pr->getEnvMap(),0,GL_TEXTURE_CUBE_MAP);
-			Skybox::bindMesh();
-			Renderer::unbindTextureCubemap(0);
-			p->unbind();
-		}
-		*/
+        //to try and see what the lightprobe is outputting
+        /*
+        Renderer::unbindFBO();
+        Settings::clear();
+        LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
+        Skybox* sky = static_cast<Skybox*>(s->getSkybox());
+        if(pr != nullptr){
+            ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
+            glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
+            Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
+            Renderer::bindTexture("Texture",pr->getEnvMap(),0,GL_TEXTURE_CUBE_MAP);
+            Skybox::bindMesh();
+            Renderer::unbindTextureCubemap(0);
+            p->unbind();
+        }
+        */
 
-		//render HUD
-		if(HUD == true){
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			Settings::enableDepthTest();
-			Settings::enableDepthMask();
-			Settings::clear(false,true,false); //clear depth only
-			Settings::enableAlphaTest();
-			glAlphaFunc(GL_GREATER, 0.1f);
-			_renderTextures(gbuffer,c,fboWidth,fboHeight);
-			_renderText(gbuffer,c,fboWidth,fboHeight);
-			Settings::disableAlphaTest();
-		}
-		vector_clear(m_FontsToBeRendered);
-		vector_clear(m_TexturesToBeRendered);
-	}
+        //render HUD
+        if(HUD == true){
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            Settings::enableDepthTest();
+            Settings::enableDepthMask();
+            Settings::clear(false,true,false); //clear depth only
+            Settings::enableAlphaTest();
+            glAlphaFunc(GL_GREATER, 0.1f);
+            _renderTextures(gbuffer,c,fboWidth,fboHeight);
+            _renderText(gbuffer,c,fboWidth,fboHeight);
+            Settings::disableAlphaTest();
+        }
+        vector_clear(m_FontsToBeRendered);
+        vector_clear(m_TexturesToBeRendered);
+    }
 }
 void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();
@@ -943,11 +946,16 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 }
 void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
     if(!renderAA) return;
-
+	boost::timer::auto_cpu_timer t;
     glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
     gbuffer->start(GBufferType::Misc);
-    Settings::clear(true,false,false);
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    Settings::clear(true,false,true);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should update the stencil buffer
+    glStencilMask(0xFF); // enable writing to the stencil buffer
+
     ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
     sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     sendUniform1fSafe("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
@@ -964,11 +972,13 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
 
     for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     gbuffer->start(GBufferType::Normal);
     Settings::clear(true,false,false);
-    //gbuffer->stop();
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00); // disable writing to the stencil buffer
+
     p = Resources::getShaderProgram("Deferred_SMAA_2"); p->bind();
     sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
@@ -984,6 +994,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     sendUniform1fSafe("SMAA_AREATEX_SUBTEX_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE);
     sendUniform1iSafe("SMAA_CORNER_ROUNDING",RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING);
     sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING) / 100.0f));
+
 
     //blend pass
     renderFullscreenQuad(fboWidth,fboHeight);
@@ -1014,6 +1025,8 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     renderFullscreenQuad(fboWidth,fboHeight);
     p->unbind();
     */  
+    glDisable(GL_STENCIL_TEST);
+
 }
 void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();
