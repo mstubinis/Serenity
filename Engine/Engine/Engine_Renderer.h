@@ -162,6 +162,7 @@ namespace Engine{
                     static void _passFXAA(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
                     static void _passSMAA(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
                     static void _passCopyDepth(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
+                    static void _passStencil(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                 public:
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
