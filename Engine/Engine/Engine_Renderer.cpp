@@ -813,6 +813,21 @@ void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWid
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
 }
+void Detail::RenderManagement::_passStencil(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight){
+    ShaderP* p = Resources::getShaderProgram("Stencil_Pass"); p->bind();
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    Settings::clear(false,false,true); //might not need this line
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should update the stencil buffer
+    glStencilMask(0xFF); // enable writing to the stencil buffer
+    
+    bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
+
+    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    
+    for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
+    p->unbind();
+}
 void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
     
     //texture is the lighting buffer which is the final pass results
@@ -994,7 +1009,6 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     sendUniform1fSafe("SMAA_AREATEX_SUBTEX_SIZE",RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE);
     sendUniform1iSafe("SMAA_CORNER_ROUNDING",RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING);
     sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING) / 100.0f));
-
 
     //blend pass
     renderFullscreenQuad(fboWidth,fboHeight);
