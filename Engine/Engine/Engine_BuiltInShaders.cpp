@@ -595,7 +595,13 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
 	
 Shaders::Detail::ShadersManagement::stencil_passover = Shaders::Detail::ShadersManagement::version +
     "\n"
+    "uniform sampler2D gNormalMap;\n"
     "void main(void){\n"
+    "    vec2 uv = gl_TexCoord[0].st;\n"
+    "    vec3 normal = texture2D(gNormalMap,uv).xyz;\n"
+    "    if(normal.r > 0.9999 && normal.g > 0.9999 && normal.b > 0.9999){\n"
+    "        discard;\n"//this is where the magic happens with the stencil buffer.
+    "    }\n"
     "    gl_FragColor = gl_FragColor;\n"
     "}";
 
