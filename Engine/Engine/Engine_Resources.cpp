@@ -211,7 +211,8 @@ void Resources::initResources(){
     Shader* greyscale = new Shader("greyscale_frag",Engine::Shaders::Detail::ShadersManagement::greyscale_frag,ShaderType::Fragment,false);
     Shader* edgeCannyBlur = new Shader("edge_canny_blur",Engine::Shaders::Detail::ShadersManagement::edge_canny_blur,ShaderType::Fragment,false);
     Shader* edgeCannyFrag = new Shader("edge_canny_frag",Engine::Shaders::Detail::ShadersManagement::edge_canny_frag,ShaderType::Fragment,false);
-
+    Shader* stencilPass = new Shader("stencil_pass",Engine::Shaders::Detail::ShadersManagement::stencil_passover,ShaderType::Fragment,false);
+    
     Shader* smaa_vert_1 = new Shader("smaa_vert_1",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_1,ShaderType::Vertex,false);
     Shader* smaa_vert_2 = new Shader("smaa_vert_2",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_2,ShaderType::Vertex,false);
     Shader* smaa_vert_3 = new Shader("smaa_vert_3",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_3,ShaderType::Vertex,false);
@@ -240,6 +241,7 @@ void Resources::initResources(){
     addShaderProgram("Greyscale_Frag",fullscreenVertexShader,greyscale,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Edge_Canny_Blur",fullscreenVertexShader,edgeCannyBlur,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Edge_Canny",fullscreenVertexShader,edgeCannyFrag,ShaderRenderPass::Postprocess);
+    addShaderProgram("Stencil_Pass",fullscreenVertexShader,stencilPass,ShaderRenderPass::Postprocess);
 
     addShaderProgram("Deferred_SMAA_1",smaa_vert_1,smaa_frag_1,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_SMAA_2",smaa_vert_2,smaa_frag_2,ShaderRenderPass::Postprocess);
