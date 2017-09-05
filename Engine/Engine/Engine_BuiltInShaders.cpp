@@ -29,6 +29,7 @@ string Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = "";
 string Shaders::Detail::ShadersManagement::vertex_basic = "";
 string Shaders::Detail::ShadersManagement::vertex_hud = "";
 string Shaders::Detail::ShadersManagement::vertex_skybox = "";
+string Shaders::Detail::ShadersManagement::stencil_passover = "";
 string Shaders::Detail::ShadersManagement::smaa_common = "";
 string Shaders::Detail::ShadersManagement::smaa_vertex_1 = "";
 string Shaders::Detail::ShadersManagement::smaa_frag_1 = "";
@@ -591,6 +592,12 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
     "   }\n"
     "}";
 #pragma endregion
+	
+Shaders::Detail::ShadersManagement::stencil_passover = Shaders::Detail::ShadersManagement::version +
+    "\n"
+    "void main(void){\n"
+    "    gl_FragColor = gl_FragColor;\n"
+    "}";
 
 #pragma region SMAA
    
