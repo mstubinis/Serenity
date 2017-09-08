@@ -73,6 +73,8 @@ namespace Engine{
                     static bool cull_face_enabled;
                     static bool draw_physics_debug;
                     static unsigned char cull_face_status;
+
+					static bool stencil;
                 };
                 struct SMAAInfo final{
                     static float SMAA_THRESHOLD;

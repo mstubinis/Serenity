@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 class FramebufferTexture;
+class FramebufferObject;
 class GBufferType{public: enum Type{
     Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Free2, Depth,
 
@@ -34,7 +35,7 @@ class GBuffer final{
         FramebufferTexture* getBuffer(uint);
         Texture* getTexture(uint);
 
-        const GLuint& getMainFBO() const;
-        const GLuint& getSmallFBO() const;
+        FramebufferObject* getMainFBO();
+        FramebufferObject* getSmallFBO();
 };
 #endif

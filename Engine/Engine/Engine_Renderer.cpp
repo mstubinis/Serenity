@@ -29,6 +29,8 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
+bool Detail::RendererInfo::GeneralInfo::stencil = true;
+
 float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = 0.0078125f; // (1 / 128)
 float Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = 0.125f; // (1 / 8)
 float Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = 8.0f;
@@ -464,6 +466,8 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fb
     Settings::clear();
     glDepthFunc(GL_LEQUAL);
     glDisable(GL_BLEND); //disable blending on all mrts
+	//glDisable(GL_STENCIL_TEST);
+	//glStencilMask(0x00);
 
     Scene* scene = Resources::getCurrentScene();
     glm::vec3 clear = scene->getBackgroundColor();
@@ -642,7 +646,7 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
     p->unbind();
 }
 void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,uint fboHeight,bool doSSAO, bool doGodRays, bool doAA,bool HUD, Object* ignore,bool mainRenderFunc,GLuint fbo, GLuint rbo){
-    Scene* s = Resources::getCurrentScene();
+	Scene* s = Resources::getCurrentScene();
     if(mainRenderFunc){
         if(s->m_LightProbes.size() > 0){
             for(auto lightProbe:s->m_LightProbes){
@@ -674,6 +678,13 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
         _passGodsRays(gbuffer,c,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
     }
 
+	glDisable(GL_BLEND);
+
+	_passStencil(gbuffer,c,fboWidth,fboHeight);
+
+    glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is not equal to 1 (0xFF == 255)
+    glStencilMask(0x00); // disable writing to the stencil buffer
+
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
@@ -683,9 +694,9 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
         _passLighting(gbuffer,c,fboWidth,fboHeight,mainRenderFunc);
     }
     glDisable(GL_BLEND);
-
-
     //_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
+
+	glDisable(GL_STENCIL_TEST);
 
     string _channels;
     bool isdoingssao = false;
@@ -694,7 +705,6 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* c,uint fboWidth,u
 
     gbuffer->start(GBufferType::Bloom,_channels,false);
     _passSSAO(gbuffer,c,fboWidth,fboHeight); //ssao AND bloom
-
     if(RendererInfo::SSAOInfo::ssao_do_blur || RendererInfo::BloomInfo::bloom){
         gbuffer->start(GBufferType::Free2,_channels,false);
         _passBlur(gbuffer,c,fboWidth,fboHeight,"H",GBufferType::Bloom,_channels);
@@ -813,20 +823,26 @@ void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWid
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
 }
-void Detail::RenderManagement::_passStencil(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight){
+void Detail::RenderManagement::_passStencil(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+	glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
     ShaderP* p = Resources::getShaderProgram("Stencil_Pass"); p->bind();
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    Settings::clear(false,false,true); //might not need this line
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should update the stencil buffer
-    glStencilMask(0xFF); // enable writing to the stencil buffer
-    
-    bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
 
+	gbuffer->getMainFBO()->bind();
+
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NEVER, 1, 0xFF); // all fragments should update the stencil buffer
+    glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+    glStencilMask(0xFF); // enable writing to the stencil buffer
+	Settings::clear(false,false,true); //stencil is completely filled with 0's
+
+    bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
     renderFullscreenQuad(fbufferWidth,fbufferHeight);
+
+	//if normals are == 1 , then that area of the buffer is 0. otherwise the area is now 1.
     
     for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
     p->unbind();
+	glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 }
 void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
     
@@ -961,26 +977,31 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
 }
 void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
     if(!renderAA) return;
-	boost::timer::auto_cpu_timer t;
+
     glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
-    gbuffer->start(GBufferType::Misc);
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    Settings::clear(true,false,true);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should update the stencil buffer
-    glStencilMask(0xFF); // enable writing to the stencil buffer
+	ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
 
-    ShaderP* p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
-    sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-    sendUniform1fSafe("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
+	gbuffer->start(GBufferType::Misc);
+
+	if(Detail::RendererInfo::GeneralInfo::stencil){
+		glEnable(GL_STENCIL_TEST); // by default not enabled
+		glStencilFunc(GL_NEVER, 1, 0xFF); // never pass stencil test
+		glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // replace stencil buffer values to ref=1
+		glStencilMask(0xFF); // stencil buffer free to write
+	}
+	Settings::clear(true,false,true);
+
+    
+    sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
+    sendUniform1f("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
     sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
     sendUniform1fSafe("SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR",RendererInfo::SMAAInfo::SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR);
     sendUniform1iSafe("SMAA_PREDICATION",int(RendererInfo::SMAAInfo::SMAA_PREDICATION));
     sendUniform1fSafe("SMAA_PREDICATION_THRESHOLD",RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD);
     sendUniform1fSafe("SMAA_PREDICATION_SCALE",RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE);
     sendUniform1fSafe("SMAA_PREDICATION_STRENGTH",RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH);
-    bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0);
+    bindTexture("texture",gbuffer->getTexture(GBufferType::Lighting),0);
     bindTextureSafe("texturePredication",gbuffer->getTexture(GBufferType::Diffuse),1);
     //edge pass
     renderFullscreenQuad(fboWidth,fboHeight);
@@ -989,18 +1010,20 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     p->unbind();
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     gbuffer->start(GBufferType::Normal);
-    Settings::clear(true,false,false);
-    glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilMask(0x00); // disable writing to the stencil buffer
 
+    Settings::clear(true,false,false);
+	if(Detail::RendererInfo::GeneralInfo::stencil){
+	    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+	}
+	
     p = Resources::getShaderProgram("Deferred_SMAA_2"); p->bind();
-    sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
+    sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS);
 
-    bindTextureSafe("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
-    bindTextureSafe("area_tex",RendererInfo::SMAAInfo::SMAA_AreaTexture,1,GL_TEXTURE_2D);
-    bindTextureSafe("search_tex",RendererInfo::SMAAInfo::SMAA_SearchTexture,2,GL_TEXTURE_2D);
+    bindTexture("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
+    bindTexture("area_tex",RendererInfo::SMAAInfo::SMAA_AreaTexture,1,GL_TEXTURE_2D);
+    bindTexture("search_tex",RendererInfo::SMAAInfo::SMAA_SearchTexture,2,GL_TEXTURE_2D);
 
     sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS_DIAG",RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG);
     sendUniform1iSafe("SMAA_AREATEX_MAX_DISTANCE",RendererInfo::SMAAInfo::SMAA_AREATEX_MAX_DISTANCE);
@@ -1020,7 +1043,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     //gbuffer->start(GBufferType::Misc);
     gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_3"); p->bind();
-    sendUniform4fSafe("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
+    sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
     bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
     bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
 
@@ -1040,7 +1063,6 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     p->unbind();
     */  
     glDisable(GL_STENCIL_TEST);
-
 }
 void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_Final"); p->bind();

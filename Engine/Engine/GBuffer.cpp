@@ -164,5 +164,5 @@ void GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const unordered_map<uint,FramebufferTexture*>& GBuffer::getBuffers() const{ return m_i->m_Buffers; }
 Texture* GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t)->texture();}
 FramebufferTexture* GBuffer::getBuffer(uint t){ return m_i->m_Buffers.at(t); }
-const GLuint& GBuffer::getMainFBO() const{ return m_i->m_FBO->address(); }
-const GLuint& GBuffer::getSmallFBO() const{ return m_i->m_SmallFBO->address(); }
+FramebufferObject* GBuffer::getMainFBO(){ return m_i->m_FBO; }
+FramebufferObject* GBuffer::getSmallFBO(){ return m_i->m_SmallFBO; }

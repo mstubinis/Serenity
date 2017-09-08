@@ -103,6 +103,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
+	if(Events::Keyboard::isKeyDownOnce("f11")){ Renderer::Detail::RendererInfo::GeneralInfo::stencil = !Renderer::Detail::RendererInfo::GeneralInfo::stencil; }
 
     if(Events::Keyboard::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
