@@ -28,6 +28,8 @@ namespace Engine{
 
                     static std::string smaa_common;
 
+                    static std::string smaa_frag_1_stencil;
+
                     static std::string smaa_vertex_1;
                     static std::string smaa_frag_1;
 
