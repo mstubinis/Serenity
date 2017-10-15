@@ -186,6 +186,7 @@ namespace Engine{
                     static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
             };
             void renderFullscreenQuad(uint width, uint height);
+			void renderFullscreenTriangle(uint width,uint height);
         };
         namespace Settings{
             void setGamma(float g);

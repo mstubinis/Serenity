@@ -579,7 +579,7 @@ void Detail::RenderManagement::_passCopyDepth(GBuffer* gbuffer,Camera* c,uint& f
 
     bindTexture("gDepthMap",gbuffer->getTexture(GBufferType::Depth),0);
 
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
     unbindTexture2D(0);
     p->unbind();
@@ -644,7 +644,7 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
             bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
         }
     }
-    Renderer::Detail::renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     unbindTextureCubemap(3);
     unbindTextureCubemap(4);
@@ -824,7 +824,7 @@ void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWid
     bindTexture("gLightMap",gbuffer->getTexture(GBufferType::Lighting),3);
     bindTexture("gDepthMap",gbuffer->getTexture(GBufferType::Depth),4);
 
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
 
     for(uint i = 0; i < 5; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -842,7 +842,7 @@ void Detail::RenderManagement::_passStencil(GBuffer* gbuffer,Camera* c,uint& fbu
 	Settings::clear(false,false,true); //stencil is completely filled with 0's
 
     bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
 	//if normals are white, then that area of the buffer is 0. otherwise the area is now 1.
     
@@ -857,7 +857,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     gbuffer->start(GBufferType::Misc);
     ShaderP* p = Resources::getShaderProgram("Greyscale_Frag"); p->bind();
     bindTexture("texture",gbuffer->getTexture(texture),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
     
@@ -866,7 +866,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     gbuffer->start(GBufferType::Diffuse);
     p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
     bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
     /*
@@ -874,14 +874,14 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     gbuffer->start(GBufferType::Misc);
     p->bind();
     bindTexture("texture",gbuffer->getTexture(GBufferType::Diffuse),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
     //blur it again
     gbuffer->start(GBufferType::Diffuse);
     p->bind();
     bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
     */
@@ -890,7 +890,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     gbuffer->start(GBufferType::Misc);
     p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
     bindTexture("texture",gbuffer->getTexture(GBufferType::Diffuse),0);
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
     //diffuse is the end result of the edge program. lighting is the final pass that we still need
@@ -914,7 +914,7 @@ void Detail::RenderManagement::_passGodsRays(GBuffer* gbuffer,Camera* c,uint& fb
 
     bindTexture("firstPass",gbuffer->getTexture(GBufferType::Lighting),0);
 
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
     unbindTexture2D(0);
     p->unbind();
@@ -931,7 +931,7 @@ void Detail::RenderManagement::_passHDR(GBuffer* gbuffer,Camera* c,uint& fbuffer
     bindTextureSafe("bloomBuffer",gbuffer->getTexture(GBufferType::Bloom),1);
     bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),2);
     bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),3);
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
     for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -958,7 +958,7 @@ void Detail::RenderManagement::_passBlur(GBuffer* gbuffer,Camera* c,uint& fbuffe
 
     bindTexture("texture",gbuffer->getTexture(texture),0);
 
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
     unbindTexture2D(0);
     p->unbind();
@@ -976,7 +976,7 @@ void Detail::RenderManagement::_passFXAA(GBuffer* gbuffer,Camera* c,uint& fbuffe
     bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
     bindTextureSafe("edgeTexture",gbuffer->getTexture(GBufferType::Misc),1);
     bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),2);
-    renderFullscreenQuad(fbufferWidth,fbufferHeight);
+    renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -987,35 +987,36 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
 	ShaderP* p;
-	#pragma region PassEdgeStencil
 	if(Detail::RendererInfo::GeneralInfo::stencil){
+		glEnable(GL_STENCIL_TEST);
+		#pragma region PassEdgeStencil
 		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 		gbuffer->getMainFBO()->bind();
 		p = Resources::getShaderProgram("Deferred_SMAA_1_Stencil"); p->bind();
 	
-		glEnable(GL_STENCIL_TEST);
-		glStencilMask(0xFF); //all 8 bits are modified
 		glStencilFunc(GL_NEVER, 1, 0xFF);//stencil test never passes, non discarded pixels are now 1 in the stencil buffer
 		glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-		//Settings::enableDepthMask(); //is this needed?
-		Settings::clear(false,false,true);//clear stencil buffer (stencil is filled with 0's... i think)
+		glStencilMask(0xFF); //all 8 bits are modified
+		glClear(GL_STENCIL_BUFFER_BIT);
 
 		sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 		sendUniform1f("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
 		sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
 		bindTexture("texture",gbuffer->getTexture(GBufferType::Lighting),0);
-		renderFullscreenQuad(fboWidth,fboHeight);
+		renderFullscreenTriangle(fboWidth,fboHeight);
 
 		for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
 		p->unbind();
 		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
 		glStencilMask(0x00); // disable writing to the stencil buffer
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // never write to stencil buffer
 		glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is equal to 1 (0x01 should be the value in the stencil buffer now)
+		#pragma endregion
+		glDisable(GL_STENCIL_TEST);
 	}
-	#pragma endregion
-
+	if(Detail::RendererInfo::GeneralInfo::stencil){
+		glEnable(GL_STENCIL_TEST);
+	}
 	#pragma region PassEdge
 	gbuffer->start(GBufferType::Misc);
 	p = Resources::getShaderProgram("Deferred_SMAA_1"); p->bind();
@@ -1033,12 +1034,17 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     bindTexture("texture",gbuffer->getTexture(GBufferType::Lighting),0);
     bindTextureSafe("texturePredication",gbuffer->getTexture(GBufferType::Diffuse),1);
     //edge pass
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
 
     for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
 	#pragma endregion
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(Detail::RendererInfo::GeneralInfo::stencil){
+		glDisable(GL_STENCIL_TEST);
+	}
+	if(Detail::RendererInfo::GeneralInfo::stencil){
+	    glEnable(GL_STENCIL_TEST);
+	}
 	#pragma region PassBlend
     gbuffer->start(GBufferType::Normal);
     Settings::clear(true,false,false);
@@ -1060,13 +1066,14 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING) / 100.0f));
 
     //blend pass
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
 
     for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
     p->unbind();
-	glDisable(GL_STENCIL_TEST);
 	#pragma endregion
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(Detail::RendererInfo::GeneralInfo::stencil){
+        glDisable(GL_STENCIL_TEST);
+	}
 	#pragma region PassNeighbor
     //gbuffer->start(GBufferType::Misc);
     gbuffer->stop();
@@ -1076,7 +1083,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
 
     //neighbor pass
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
 
     for(uint i = 0; i < 2; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -1088,7 +1095,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     //gbuffer->start(GBufferType::Lighting);
     gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_4"); p->bind();
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
     p->unbind();
     */  
 	#pragma endregion
@@ -1107,7 +1114,7 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
     bindTextureSafe("gBloomMap",gbuffer->getTexture(GBufferType::Bloom),4);
     bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),5);
 
-    renderFullscreenQuad(fboWidth,fboHeight);
+    renderFullscreenTriangle(fboWidth,fboHeight);
 
     for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
     p->unbind();
@@ -1126,5 +1133,20 @@ void Detail::renderFullscreenQuad(uint width,uint height){
         glTexCoord2f(1.0f, 0.0f);  glVertex2f( w2, -h2);
         glTexCoord2f(1.0f, 1.0f);  glVertex2f( w2,  h2);
         glTexCoord2f(0.0f, 1.0f);  glVertex2f(-w2,  h2);
+    glEnd();
+}
+void Detail::renderFullscreenTriangle(uint width,uint height){
+    float w2 = float(width)/2.0f;
+    float h2 = float(height)/2.0f;
+    glm::mat4 m(1.0f);
+    glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
+    sendUniformMatrix4f("Model",m);
+    sendUniformMatrix4f("VP",p);
+    setViewport(0,0,width,height);
+	//apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice
+    glBegin(GL_TRIANGLES);
+        glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
+        glTexCoord2f(2.5f, 0.0f);  glVertex2f( w2*4.0f, -h2);
+        glTexCoord2f(0.0f, 2.5f);  glVertex2f(-w2,  h2*4.0f);
     glEnd();
 }

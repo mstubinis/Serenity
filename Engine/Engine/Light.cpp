@@ -64,7 +64,7 @@ void SunLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
-    Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::Detail::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 float SunLight::getAmbientIntensity(){ return m_AmbientIntensity; }
 void SunLight::setAmbientIntensity(float a){ m_AmbientIntensity = a; }
@@ -89,7 +89,7 @@ void DirectionalLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
     Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,0.0f, 0.0f);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
-    Renderer::Detail::renderFullscreenQuad(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::Detail::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
 PointLight::PointLight(string name, glm::vec3 pos,Scene* scene): SunLight(pos,name,LightType::Point,scene){
