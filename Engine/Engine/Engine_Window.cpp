@@ -141,5 +141,6 @@ void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
 void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
 void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }
 void Engine_Window::keepMouseInWindow(bool keep){ m_i->m_SFMLWindow->setMouseCursorGrabbed(keep); }
+void Engine_Window::setFramerateLimit(uint limit){ m_i->m_SFMLWindow->setFramerateLimit(limit); }
 sf::Window* Engine_Window::getSFMLHandle() const { return m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }

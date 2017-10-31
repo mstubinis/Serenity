@@ -29,14 +29,8 @@ GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Num
     "ReflectionTexture",
     "RefractionTexture",
 };
-void Material::setAllDiffuseModels(DiffuseModel::Model m){
-    for(auto material:Resources::Detail::ResourceManagement::m_Materials)
-        material.second->setDiffuseModel(m);
-}
-void Material::setAllSpecularModels(SpecularModel::Model m){
-    for(auto material:Resources::Detail::ResourceManagement::m_Materials)
-        material.second->setSpecularModel(m);
-}
+void Material::setAllDiffuseModels(DiffuseModel::Model m){ for(auto material:Resources::Detail::ResourceManagement::m_Materials){ material.second->setDiffuseModel(m); } }
+void Material::setAllSpecularModels(SpecularModel::Model m){ for(auto material:Resources::Detail::ResourceManagement::m_Materials){ material.second->setSpecularModel(m); } }
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0.0f); glm::vec3 second(0.0f); glm::vec3 third(0.0f);
@@ -96,7 +90,7 @@ unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
 }
 unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
     unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
-    //Remember specular reflection of dielectrics is white!      //(F0)                         //Smoothness    //Metalness
+    //Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
     m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
     m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
     m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f,    0.98f,          0.0f);
@@ -229,7 +223,7 @@ class Material::impl final{
             _addComponentGlow(glow);
             _addComponentSpecular(specular);
             
-            m_SpecularModel = SpecularModel::Model::Blinn_Phong;
+            m_SpecularModel = SpecularModel::Model::Cook_Torrance;
             m_DiffuseModel = DiffuseModel::Model::Lambert;
 
             _addToMaterialPool();

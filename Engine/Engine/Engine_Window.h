@@ -30,6 +30,7 @@ class Engine_Window final{
         void setStyle(uint style);
         void display();
         void keepMouseInWindow(bool=true);
+		void setFramerateLimit(uint limit);
         sf::Window* getSFMLHandle() const;
 };
 #endif

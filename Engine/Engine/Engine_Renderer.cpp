@@ -137,7 +137,7 @@ void _generateBRDFLUTCookTorrance(uint brdfSize){
     Renderer::sendUniform1i("NUM_SAMPLES",256);
     Renderer::Settings::clear(true,true,false);
     glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
-    Renderer::Detail::renderFullscreenQuad(brdfSize,brdfSize);
+    Renderer::Detail::renderFullscreenTriangle(brdfSize,brdfSize);
     cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
     p->unbind();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
