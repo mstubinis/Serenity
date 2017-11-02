@@ -123,19 +123,19 @@ void Game::update(float dt){
 
     if(Events::Keyboard::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
-        Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
+        Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
-        Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
+        Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
     }
     if(Events::Keyboard::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
-        Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
+        Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
-        Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() + 0.02f);
+        Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
     }
     m_HUD->update(dt);
 }

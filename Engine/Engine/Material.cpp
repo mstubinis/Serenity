@@ -229,7 +229,7 @@ class Material::impl final{
             _addToMaterialPool();
 
             _setF0Color(0.04f,0.04f,0.04f);
-            _setSmoothness(0.3f);
+            _setSmoothness(0.7f);
             _setAO(1.0f);
             _setMetalness(0.0f);
             
