@@ -46,6 +46,7 @@ void Game::initResources(){
     Resources::addMesh("Starbase","data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
     Resources::addMesh("Ring","data/Models/ring.obj");
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
+	Resources::addMesh("Venerex","data/Models/venerex.obj",CollisionType::ConvexHull);
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
@@ -57,8 +58,9 @@ void Game::initResources(){
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
     Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
-    Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png","data/Textures/norway_Specular.png");
-    Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","","Deferred_HUD");
+    Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
+    Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
+	Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","","Deferred_HUD");
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","","Deferred_HUD");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
@@ -124,18 +126,22 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
+		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
+		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() + 0.02f);
     }
     if(Events::Keyboard::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
+		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
+		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() + 0.02f);
     }
     m_HUD->update(dt);
 }
