@@ -204,7 +204,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship("Venerex","Venerex",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    setPlayer(new Ship("Miranda","Miranda",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 

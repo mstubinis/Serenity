@@ -265,7 +265,8 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::Sh
 Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "attribute vec3 position;\n"
-    "attribute float uv;\n"
+    "//attribute float uv;\n"
+	"attribute vec2 uv;\n"
     "attribute vec4 normal;\n" //Order is ZYXW
     "attribute vec4 binormal;\n"//Order is ZYXW
     "attribute vec4 tangent;\n"//Order is ZYXW
@@ -315,7 +316,8 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "\n"
     "    WorldPosition = (Model * PosTrans).xyz;\n"
     "\n"
-    "    UV = UnpackFloat32Into2Floats(uv);\n"
+    "    //UV = UnpackFloat32Into2Floats(uv);\n"
+    "    UV = uv;\n"
     "    logz_f = 1.0 + gl_Position.w;\n"
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
     "    FC_2_f = fcoeff * 0.5;\n"
@@ -326,7 +328,8 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
 Shaders::Detail::ShadersManagement::vertex_hud = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "attribute vec3 position;\n"
-    "attribute float uv;\n"
+    "//attribute float uv;\n"
+    "attribute vec2 uv;\n"
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
@@ -335,7 +338,8 @@ Shaders::Detail::ShadersManagement::vertex_hud += Shaders::Detail::ShadersManage
 Shaders::Detail::ShadersManagement::vertex_hud +=
     "void main(void){\n"
     "    mat4 MVP = VP * Model;\n"
-    "    UV = UnpackFloat32Into2Floats(uv);\n"
+    "    //UV = UnpackFloat32Into2Floats(uv);\n"
+    "    UV = uv;\n"
     "    gl_Position = MVP * vec4(position, 1.0);\n"
     "    gl_TexCoord[6] = gl_Position;\n"
     "}";

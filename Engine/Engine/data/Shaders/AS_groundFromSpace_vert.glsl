@@ -1,7 +1,8 @@
 #version 120
 
 attribute vec3 position;
-attribute float uv;
+//attribute float uv;
+attribute vec2 uv;
 attribute vec4 normal;
 attribute vec4 binormal;
 attribute vec4 tangent;
@@ -111,7 +112,8 @@ void main(void){
     }
     gl_Position = MVP * vec4(position, 1.0);
 
-    UV = UnpackFloat32Into2Floats(uv);
+    //UV = UnpackFloat32Into2Floats(uv);
+    UV = uv;
     CameraPosition = v3CameraPos;
 
     Normals = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX

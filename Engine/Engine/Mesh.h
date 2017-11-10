@@ -92,7 +92,8 @@ struct ImportedMeshData final{
 };
 struct MeshVertexData{
     glm::vec3 position;
-    float uv;
+    //float uv;
+	glm::vec2 uv;
     GLuint normal;
     GLuint binormal;
     GLuint tangent;

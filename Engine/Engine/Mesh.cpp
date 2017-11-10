@@ -32,8 +32,9 @@ enum LoadWhat{
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnimatedFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
     m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
-    m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
+    //m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+    m[VertexFormatAnimated::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+	m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
     m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
     m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
     m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
@@ -555,7 +556,8 @@ class Mesh::impl{
                     if(mesh->skeleton() != nullptr){
                         MeshVertexDataAnimated vert;
                         vert.position = pt;
-                        vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
+                        //vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
+						vert.uv = data.uvs.at(c);
                         vert.normal = Engine::Math::pack3NormalsInto32Int(data.normals.at(c));
                         if(c <= data.binormals.size()-1)
                             vert.binormal = Engine::Math::pack3NormalsInto32Int(data.binormals.at(c));
@@ -566,7 +568,8 @@ class Mesh::impl{
                     else{
                         MeshVertexData vert;
                         vert.position = pt;
-                        vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
+                        //vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
+						vert.uv = data.uvs.at(c);
                         vert.normal = Engine::Math::pack3NormalsInto32Int(data.normals.at(c));
                         vert.binormal = Engine::Math::pack3NormalsInto32Int(data.binormals.at(c));
                         vert.tangent = Engine::Math::pack3NormalsInto32Int(data.tangents.at(c));
@@ -614,14 +617,16 @@ class Mesh::impl{
             for(uint i = 0; i < out_vertices.size(); i++){
                 if(m_Skeleton != nullptr){
                     MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(out_vertices.at(i));
-                    vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
+                    //vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
+					vert.uv = temp_uvs.at(i);
                     vert.normal = Engine::Math::pack3NormalsInto32Int(temp_normals.at(i));
                     vert.binormal = Engine::Math::pack3NormalsInto32Int(temp_binormals.at(i));
                     vert.tangent = Engine::Math::pack3NormalsInto32Int(temp_tangents.at(i));
                 }
                 else{
                     MeshVertexData& vert = out_vertices.at(i);
-                    vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
+                    //vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
+					vert.uv = temp_uvs.at(i);
                     vert.normal = Engine::Math::pack3NormalsInto32Int(temp_normals.at(i));
                     vert.binormal = Engine::Math::pack3NormalsInto32Int(temp_binormals.at(i));
                     vert.tangent = Engine::Math::pack3NormalsInto32Int(temp_tangents.at(i));
