@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "GBuffer.h"
 #include "FramebufferObject.h"
+#include "Engine_Window.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -1039,37 +1040,38 @@ class LightProbe::impl{
         void _render(LightProbe* super){
             if(m_DidFirst == true && m_OnlyOnce == true) return;
 
-            //Yes, i know, this is dangerous. Very dangerous
-            Renderer::Detail::RenderManagement::m_gBuffer->resize(m_EnvMapSize,m_EnvMapSize);
-
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
             uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
+            //Yes, i know, this is dangerous. Very dangerous
+            Renderer::Detail::RenderManagement::m_gBuffer->resize(m_EnvMapSize,m_EnvMapSize);
+
             //render the scene into a cubemap. this will be VERY expensive...
+			
             if(m_TextureAddresses.size() == 0){
                 m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(0));
+				
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
-                for (uint i = 0; i < 6; ++i){
+                for (uint i = 0; i < 6; i++){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,m_EnvMapSize,m_EnvMapSize,0,GL_RGB,GL_FLOAT,NULL);
                 }
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                Texture::setFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
+                //Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
+				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
             }
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
             }
-            //_update(0,super); //this might be needed
+
+            _update(0,super); //this might be needed
             m_FBO->bind();
             for (uint i = 0; i < 6; ++i){
 				Renderer::Settings::clear();
                 super->m_View = m_Views[i];
-
                 super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
                 super->_constructFrustrum();
-                
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(0),0);
-
                 //replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
                 // fps loss?)
                 Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,
@@ -1087,7 +1089,8 @@ class LightProbe::impl{
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
                 }
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                Texture::setFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
+                //Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
+				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
             }
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));

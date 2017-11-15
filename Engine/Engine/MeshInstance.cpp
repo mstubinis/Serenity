@@ -36,7 +36,6 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
     Renderer::sendUniformMatrix4f("Model",model);
     i->render();
-    //Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
 }};
 struct DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};
@@ -69,7 +68,7 @@ class MeshInstance::impl{
             m_NeedsUpdate = false;
 
             string n = m_Mesh->name() + "_" + m_Material->name();
-            n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_RenderedItems,n);      
+            n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_MeshInstances,n);      
 
             super->setName(n);
             super->setCustomBindFunctor(MeshInstance::impl::DEFAULT_BIND_FUNCTOR);
@@ -176,7 +175,7 @@ class MeshInstance::impl{
                 glm::mat4 translationMatrix = glm::translate(m_Position);
                 glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
                 glm::mat4 scaleMatrix = glm::scale(m_Scale);
-                m_Model = translationMatrix * rotationMatrix * scaleMatrix;
+                m_Model = translationMatrix * rotationMatrix * scaleMatrix * m_Model;
                 m_NeedsUpdate = false;
             }
         }
@@ -186,13 +185,13 @@ DefaultMeshInstanceUnbindFunctor MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR;
 
 MeshInstance::MeshInstance(string& parentName, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,parentName);
-    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<MeshInstance>(this));
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_MeshInstances,name(),boost::shared_ptr<MeshInstance>(this));
 }
 MeshInstance::MeshInstance(string& parentName,string mesh,string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
-    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_RenderedItems,name(),boost::shared_ptr<MeshInstance>(this));
+    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_MeshInstances,name(),boost::shared_ptr<MeshInstance>(this));
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
 
@@ -215,9 +214,9 @@ glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
 
-void MeshInstance::setMesh(string n){ m_i->_setMesh(Resources::getMesh(n),this); }
+void MeshInstance::setMesh(const string& n){ m_i->_setMesh(Resources::getMesh(n),this); }
 void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
-void MeshInstance::setMaterial(string n){ m_i->_setMaterial(Resources::getMaterial(n),this); }
+void MeshInstance::setMaterial(const string& n){ m_i->_setMaterial(Resources::getMaterial(n),this); }
 void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
 void MeshInstance::setOrientation(glm::quat& o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 

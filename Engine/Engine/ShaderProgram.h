@@ -52,11 +52,9 @@ class ShaderP final: public BindableResource{
 
         GLuint program();
         ShaderRenderPass::Pass stage();
-        Shader* vertexShader();
-        Shader* fragmentShader();
         std::vector<Material*>& getMaterials();
 
-        void addMaterial(std::string);
+        void addMaterial(const std::string&);
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };
 

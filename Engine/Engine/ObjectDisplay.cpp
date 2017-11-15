@@ -43,8 +43,8 @@ ObjectDisplay::~ObjectDisplay(){
 }
 void ObjectDisplay::update(float dt){
     ObjectBasic::update(dt);
-    for(auto renderedItem:m_DisplayItems){
-        renderedItem->update(dt);
+    for(auto meshInstance:m_DisplayItems){
+        meshInstance->update(dt);
     }
 }
 bool ObjectDisplay::checkRender(Camera* c){

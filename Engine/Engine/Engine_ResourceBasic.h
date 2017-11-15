@@ -25,8 +25,8 @@ class EngineResource{
         bool isLoaded();
         uint useCount();
 
-        void incrementUseCount(){ m_UsageCount++; }
-        void decrementUseCount(){ if(m_UsageCount > 0) m_UsageCount--; }
+        void incrementUseCount();
+        void decrementUseCount();
 
         virtual void load();
         virtual void unload();

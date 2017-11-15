@@ -86,6 +86,7 @@ void Game::initLogic(){
     //new SolarSystem("Sol","");
     new CapsuleSpace();
 
+
     Resources::setCurrentScene("Sol");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     m_HUD = new HUD();
@@ -128,24 +129,28 @@ void Game::update(float dt){
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
 		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() - 0.02f);
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() - 0.02f);
+		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
 		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() + 0.02f);
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() + 0.02f);
+		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
     }
     if(Events::Keyboard::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
 		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() - 0.02f);
 		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() - 0.02f);
+		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
     }
     else if(Events::Keyboard::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
 		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() + 0.02f);
 		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() + 0.02f);
+		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() + 0.02f);
     }
     m_HUD->update(dt);
 }

@@ -46,13 +46,16 @@ void Scene::update(float dt){
         else{
             it->second->update(dt); ++it;
         }
-    }
+    }//create a scene specific container for cameras?
     for (auto it = Resources::Detail::ResourceManagement::m_Cameras.cbegin(); it != Resources::Detail::ResourceManagement::m_Cameras.cend();){
         if (it->second->isDestroyed()){
             Resources::Detail::ResourceManagement::_removeFromContainer(Resources::Detail::ResourceManagement::m_Cameras,it->second->name());
         }
         else{
-            if(it->second->getScene() == this){ it->second->update(dt); } ++it;
+            if(it->second->getScene() == this){ 
+				it->second->update(dt); 
+			} 
+			++it;
         }
     }
     if(m_Skybox != nullptr) m_Skybox->update();

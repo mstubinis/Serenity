@@ -49,9 +49,9 @@ class MeshInstance final: public BindableResource{
         void setOrientation(glm::quat&);
         void setOrientation(float x,float y,float z);
 
-        void setMesh(std::string);
+        void setMesh(const std::string&);
         void setMesh(Mesh*);
-        void setMaterial(std::string);
+        void setMaterial(const std::string&);
         void setMaterial(Material*);
 
         void setPosition(float x,float y,float z);

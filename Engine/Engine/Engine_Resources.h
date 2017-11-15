@@ -74,7 +74,7 @@ namespace Engine{
 
                     static Engine_Window* m_Window;
 
-                    static std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> m_RenderedItems;
+                    static std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
                     static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
                     static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
                     static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
@@ -134,7 +134,7 @@ namespace Engine{
         Material* getMaterial(std::string n);
         Shader* getShader(std::string n);
         ShaderP* getShaderProgram(std::string n);
-        MeshInstance* getRenderedItem(std::string n);
+        MeshInstance* getMeshInstance(std::string n);
 
         void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         void addMesh(std::string file, CollisionType = CollisionType::None,float threshhold = 0.0005f);

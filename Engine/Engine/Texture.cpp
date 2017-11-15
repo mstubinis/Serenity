@@ -143,8 +143,8 @@ class Texture::impl final{
             else if(wrap == TextureWrap::ClampToBorder)  gl = GL_CLAMP_TO_BORDER;
             else if(wrap == TextureWrap::ClampToEdge)    gl = GL_CLAMP_TO_EDGE;
         }
-        static void _enumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min){
-            if(min == true){
+        static void _enumFilterToGL(int& gl, TextureFilter::Filter& filter,bool min){
+            if(min){
                 if(filter == TextureFilter::Linear)                       gl = GL_LINEAR;
                 else if(filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
                 else if(filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR_MIPMAP_LINEAR;
@@ -227,8 +227,12 @@ void Texture::setZWrapping(GLuint type,TextureWrap::Wrap w){
     if(type != GL_TEXTURE_CUBE_MAP)return;GLuint gl;Texture::impl::_enumWrapToGL(gl,w);glTexParameteri(type,GL_TEXTURE_WRAP_R,gl);
 }
 void Texture::setWrapping(GLuint type,TextureWrap::Wrap w){ Texture::setXWrapping(type,w); Texture::setYWrapping(type,w); Texture::setZWrapping(type,w); }
-void Texture::setMinFilter(GLuint type,TextureFilter::Filter f){ GLuint g; Texture::impl::_enumFilterToGL(g,f,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g); }
-void Texture::setMaxFilter(GLuint type,TextureFilter::Filter f){ GLuint g; Texture::impl::_enumFilterToGL(g,f,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g);  }
+void Texture::setMinFilter(GLuint type,TextureFilter::Filter filter){ 
+	GLint g; Texture::impl::_enumFilterToGL(g,filter,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g); 
+}
+void Texture::setMaxFilter(GLuint type,TextureFilter::Filter filter){ 
+	GLint g; Texture::impl::_enumFilterToGL(g,filter,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g);  
+}
 void Texture::setFilter(GLuint type,TextureFilter::Filter f){ Texture::setMinFilter(type,f); Texture::setMaxFilter(type,f); }
 
 void Texture::load(){

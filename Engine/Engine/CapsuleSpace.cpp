@@ -11,6 +11,7 @@
 #include <boost/lexical_cast.hpp>
 
 using namespace Engine;
+using namespace std;
 
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
 CapsuleEnd::~CapsuleEnd(){}
@@ -48,13 +49,13 @@ void CapsuleStar::update(float dt){
     ObjectDisplay::update(dt);
 }
 
-CapsuleTunnel::CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::vec3(0),glm::vec3(1),name,scene){
+CapsuleTunnel::CapsuleTunnel(float tunnelRadius, string name, string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::vec3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
-CapsuleRibbon::CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::vec3(0),glm::vec3(1),name,scene){
+CapsuleRibbon::CapsuleRibbon(float tunnelRadius, string name, string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::vec3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
@@ -131,7 +132,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         if(i % 3 == 0){
             spawnLight = true;
         }
-        m_CapsuleStars.push_back(new CapsuleStar(50,pos,"AAAF_Star_" + boost::lexical_cast<std::string>(i),this,spawnLight));
+        m_CapsuleStars.push_back(new CapsuleStar(50,pos,"AAAF_Star_" + boost::lexical_cast<string>(i),this,spawnLight));
         step -= 6.0f;
     }
     //this to just test. should set player / camera dynamically

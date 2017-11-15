@@ -120,25 +120,18 @@ class ShaderP::impl final{
         }
         GLuint _compileOGL(Shader* vs,Shader*  ps,string& _shaderProgramName){
             m_UniformLocations.clear();
-            GLuint vid = glCreateShader(GL_VERTEX_SHADER);
-            GLuint fid = glCreateShader(GL_FRAGMENT_SHADER);
-
+            GLuint vid = glCreateShader(GL_VERTEX_SHADER); GLuint fid = glCreateShader(GL_FRAGMENT_SHADER);
             string VertexShaderCode = ""; string FragmentShaderCode = "";
-
             if(vs->fromFile()){
                 boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vs->data());
                 for(string line; getline(str, line, '\n');){ VertexShaderCode += "\n" + line; }
             }
-            else{
-                VertexShaderCode = vs->data();
-            }
+            else{ VertexShaderCode = vs->data(); }
             if(ps->fromFile()){
                 boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(ps->data());
                 for(string line; getline(str1, line, '\n');){ FragmentShaderCode += "\n" + line; }
             }
-            else{
-                FragmentShaderCode = ps->data();
-            }
+            else{ FragmentShaderCode = ps->data(); }
 
             GLint res = GL_FALSE;
             int logLength;
@@ -179,8 +172,7 @@ class ShaderP::impl final{
 
             // Link the program id
             GLuint pid = glCreateProgram();
-            glAttachShader(pid, vid);
-            glAttachShader(pid, fid);
+            glAttachShader(pid, vid); glAttachShader(pid, fid);
             glLinkProgram(pid);
 
             // Check the program
@@ -190,19 +182,14 @@ class ShaderP::impl final{
             glGetProgramInfoLog(pid, logLength, NULL, &pError[0]);
 
             if(res == GL_FALSE) {
-                cout << "ShaderProgram Log : " << endl;
-                cout << &pError[0] << endl;
+                cout << "ShaderProgram Log : " << endl; cout << &pError[0] << endl;
             }
-            glDetachShader(pid,vid);
-            glDetachShader(pid,fid);
-
-            glDeleteShader(vid);
-            glDeleteShader(fid);
+            glDetachShader(pid,vid); glDetachShader(pid,fid);
+            glDeleteShader(vid); glDeleteShader(fid);
 
             //populate uniform table
             if(res == GL_TRUE) {
-                GLint _i;GLint _count;
-                GLint _size; // size of the variable
+                GLint _i; GLint _count; GLint _size;
                 GLenum _type; // type of the variable (float, vec3 or mat4, etc)
 
                 const GLsizei _bufSize = 256; // maximum name length
@@ -232,14 +219,12 @@ ShaderP::~ShaderP(){
     m_i->_destruct();
 }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
-Shader* ShaderP::vertexShader(){ return m_i->m_VertexShader; }
-Shader* ShaderP::fragmentShader(){ return m_i->m_FragmentShader; }
 ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::bind(){
     if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != this){
-        glUseProgram(this->program());
+        glUseProgram(m_i->m_ShaderProgram);
         Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = this;
     }
     BindableResource::bind();
@@ -251,7 +236,7 @@ void ShaderP::unbind(){
         Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
     }
 }
-void ShaderP::addMaterial(std::string materialName){
+void ShaderP::addMaterial(const string& materialName){
     if(materialName == "" || !Resources::Detail::ResourceManagement::m_Materials.count(materialName)){
         cout << "Material : '" << materialName << "' does not exist (ShaderP::addMaterial()) Returning..." << endl;
         return;

@@ -30,7 +30,7 @@ Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
 bool Detail::ResourceManagement::m_DynamicMemory = false;
 
-unordered_map<string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_RenderedItems;
+unordered_map<string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_MeshInstances;
 unordered_map<string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
 unordered_map<string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 unordered_map<string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
@@ -43,7 +43,7 @@ unordered_map<string,boost::shared_ptr<Shader>> Detail::ResourceManagement::m_Sh
 unordered_map<string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_ShaderPrograms;
 
 void Resources::Detail::ResourceManagement::destruct(){
-    for (auto it = m_RenderedItems.begin();it != m_RenderedItems.end(); ++it )   it->second.reset();
+    for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
     for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
     for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
     for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                   it->second.reset();
@@ -77,7 +77,7 @@ Mesh* Resources::getMesh(string n){return static_cast<Mesh*>(Detail::ResourceMan
 Material* Resources::getMaterial(string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
 Shader* Resources::getShader(string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
 ShaderP* Resources::getShaderProgram(string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
-MeshInstance* Resources::getRenderedItem(string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_RenderedItems,n)); }
+MeshInstance* Resources::getMeshInstance(string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_MeshInstances,n)); }
 
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
@@ -140,40 +140,40 @@ void Resources::initResources(){
     //add a basic cube mesh
     #pragma region MeshData
     string cubeMesh =  
-        "v 1.000000 -1.000000 -1.000000\n"
-        "v 1.000000 -1.000000 1.000000\n"
-        "v -1.000000 -1.000000 1.000000\n"
-        "v -1.000000 -1.000000 -1.000000\n"
-        "v 1.000000 1.000000 -1.000000\n"
-        "v 1.000000 1.000000 1.000000\n"
-        "v -1.000000 1.000000 1.000000\n"
-        "v -1.000000 1.000000 -1.000000\n"
-        "vt 1.0000 0.0000\n"
-        "vt 0.0000 1.0000\n"
-        "vt 0.0000 0.0000\n"
-        "vt 1.0000 0.0000\n"
-        "vt 0.0000 1.0000\n"
-        "vt 0.0000 0.0000\n"
-        "vt 1.0000 0.0000\n"
-        "vt 0.0000 1.0000\n"
-        "vt 1.0000 0.0000\n"
-        "vt 0.0000 1.0000\n"
-        "vt 0.0000 0.0000\n"
-        "vt 0.0000 0.0000\n"
-        "vt 1.0000 1.0000\n"
-        "vt 1.0000 0.0000\n"
-        "vt 0.0000 1.0000\n"
-        "vt 1.0000 1.0000\n"
-        "vt 1.0000 1.0000\n"
-        "vt 1.0000 1.0000\n"
-        "vt 1.0000 0.0000\n"
-        "vt 1.0000 1.0000\n"
-        "vn 0.0000 -1.0000 0.0000\n"
-        "vn 0.0000 1.0000 0.0000\n"
-        "vn 1.0000 -0.0000 0.0000\n"
-        "vn 0.0000 -0.0000 1.0000\n"
-        "vn -1.0000 -0.0000 -0.0000\n"
-        "vn 0.0000 0.0000 -1.0000\n"
+        "v 1.0 -1.0 -1.0\n"
+        "v 1.0 -1.0 1.0\n"
+        "v -1.0 -1.0 1.0\n"
+        "v -1.0 -1.0 -1.0\n"
+        "v 1.0 1.0 -1.0\n"
+        "v 1.0 1.0 1.0\n"
+        "v -1.0 1.0 1.0\n"
+        "v -1.0 1.0 -1.0\n"
+        "vt 1.0 0.0\n"
+        "vt 0.0 1.0\n"
+        "vt 0.0 0.0\n"
+        "vt 1.0 0.0\n"
+        "vt 0.0 1.0\n"
+        "vt 0.0 0.0\n"
+        "vt 1.0 0.0\n"
+        "vt 0.0 1.0\n"
+        "vt 1.0 0.0\n"
+        "vt 0.0 1.0\n"
+        "vt 0.0 0.0\n"
+        "vt 0.0 0.0\n"
+        "vt 1.0 1.0\n"
+        "vt 1.0 0.0\n"
+        "vt 0.0 1.0\n"
+        "vt 1.0 1.0\n"
+        "vt 1.0 1.0\n"
+        "vt 1.0 1.0\n"
+        "vt 1.0 0.0\n"
+        "vt 1.0 1.0\n"
+        "vn 0.0 -1.0 0.0\n"
+        "vn 0.0 1.0 0.0\n"
+        "vn 1.0 -0.0 0.0\n"
+        "vn 0.0 -0.0 1.0\n"
+        "vn -1.0 -0.0 -0.0\n"
+        "vn 0.0 0.0 -1.0\n"
         "f 2/1/1 4/2/1 1/3/1\n"
         "f 8/4/2 6/5/2 5/6/2\n"
         "f 5/7/3 2/8/3 1/3/3\n"
@@ -262,22 +262,16 @@ void Resources::setCurrentScene(Scene* scene){
         cout << "---- Scene Change started (" << Detail::ResourceManagement::m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << endl;
         if(Resources::Detail::ResourceManagement::m_DynamicMemory){
             //mark game object resources to minus use count
-            for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){
-                obj.second->suspend();
-            }
-            for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){
-                obj.second->suspend();
-            }
+            for(auto obj:Detail::ResourceManagement::m_CurrentScene->objects()){ obj.second->suspend(); }
+            for(auto obj:Detail::ResourceManagement::m_CurrentScene->lights()){ obj.second->suspend(); }
+			//suspend cameras too?
         }
         Detail::ResourceManagement::m_CurrentScene = scene;
         if(Resources::Detail::ResourceManagement::m_DynamicMemory){
             //mark game object resources to add use count
-            for(auto obj:scene->objects()){
-                obj.second->resume();
-            }
-            for(auto obj:scene->lights()){
-                obj.second->resume();
-            }
+            for(auto obj:scene->objects()){ obj.second->resume(); }
+            for(auto obj:scene->lights()){ obj.second->resume(); }
+			//resume cameras too?
         }
         cout << "-------- Scene Change ended --------" << endl;
     }
