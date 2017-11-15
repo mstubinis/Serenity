@@ -255,16 +255,13 @@ void SolarSystem::_loadFromFile(string filename){
     new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::vec3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
     new Ship("Norway","Norway",false,"Norway 5",glm::vec3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
     new Ship("Norway","Norway",false,"Norway 6",glm::vec3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
-
     new Ship("Starbase","Starbase",false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
-
 	new ObjectDisplay("Planet","Gold",glm::vec3(0,5,2),glm::vec3(2));
-
-
     player->translate(0,0,2);
 
-	//LightProbe* lightP = new LightProbe("MainLightProbe",256,glm::vec3(0),false,this);
-	//player->addChild(lightP);
+
+	LightProbe* lightP = new LightProbe("MainLightProbe",256,glm::vec3(0),true,this);
+	player->addChild(lightP);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox

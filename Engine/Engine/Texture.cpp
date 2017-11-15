@@ -273,7 +273,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
 
     
     //make these 2 variables global in the renderer class?
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000.0f);
+    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000000.0f);
     glm::mat4 captureViews[] = {
         glm::lookAt(glm::vec3(0.0f),glm::vec3( 1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
         glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),

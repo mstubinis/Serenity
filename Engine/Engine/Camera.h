@@ -44,20 +44,20 @@ class Camera: public ObjectBasic{
 
         virtual void setAspectRatio(float);
 
-        const float getAngle() const { return m_Angle; }
-        const float getAspectRatio() const { return m_AspectRatio; }
-        const float getNear() const { return m_Near; }
-        const float getFar() const { return m_Far; }
+        const float getAngle() const;
+        const float getAspectRatio() const;
+        const float getNear() const;
+        const float getFar() const;
 
         Scene* getScene(){ return m_Scene; }
 
         glm::quat& getOrientation(){ return m_Orientation; }
 
         virtual glm::mat4 getViewProjInverted(){ return glm::inverse(m_Projection * m_View); }
-        glm::mat4 getProjection(){ return m_Projection; }
-        glm::mat4 getView(){ return m_View; }
-        glm::mat4 getViewProjection(){ return m_Projection * m_View; }
-        glm::vec3 getViewVector(){ return glm::vec3(m_View[0][2],m_View[1][2],m_View[2][2]); }
+        glm::mat4 getProjection();
+        glm::mat4 getView();
+        glm::mat4 getViewProjection();
+        glm::vec3 getViewVector();
         const CameraType::Type getType() const{ return m_Type; }
 
         virtual bool sphereIntersectTest(Object*);

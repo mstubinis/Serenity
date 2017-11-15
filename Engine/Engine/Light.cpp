@@ -1051,33 +1051,30 @@ class LightProbe::impl{
             if(m_TextureAddresses.size() == 0){
                 m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(0));
-				
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
                 for (uint i = 0; i < 6; i++){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,m_EnvMapSize,m_EnvMapSize,0,GL_RGB,GL_FLOAT,NULL);
                 }
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                //Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
+                Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work... but it is needed to work completely... wierd
 				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
             }
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
             }
-
+			Renderer::unbindFBO();
             _update(0,super); //this might be needed
             m_FBO->bind();
-            for (uint i = 0; i < 6; ++i){
-				Renderer::Settings::clear();
+            for (uint i = 0; i < 6; i++){	
                 super->m_View = m_Views[i];
-                super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
+                //super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
+				super->update(0);
                 super->_constructFrustrum();
-                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(0),0);
-                //replace this gbuffer eventually with a gbuffer for the light probe specifically... or recycle the default gbuffer (but that will be a serious
-                // fps loss?)
-                Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,
-                    super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),
-                    0);
-            }
+                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureAddresses.at(0),0);
+				Renderer::Settings::clear();
+				Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
+			}
+			/*
             /////////////////////////////////////////////////////////////////
 			m_FBO->bind();
             uint size = 32;
@@ -1148,7 +1145,9 @@ class LightProbe::impl{
                     Skybox::bindMesh();
                 }
             }
+			*/
             m_FBO->unbind();
+
             Renderer::bindReadFBO(prevReadBuffer);
             Renderer::bindDrawFBO(prevDrawBuffer);
             m_DidFirst = true;

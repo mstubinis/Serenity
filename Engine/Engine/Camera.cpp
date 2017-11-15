@@ -106,3 +106,11 @@ bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
     return true;
 }
 bool Camera::rayIntersectSphere(Object* obj){return obj->rayIntersectSphere(getPosition(),getViewVector());}
+glm::mat4 Camera::getProjection(){ return m_Projection; }
+glm::mat4 Camera::getView(){ return m_View; }
+glm::mat4 Camera::getViewProjection(){ return m_Projection * m_View; }
+glm::vec3 Camera::getViewVector(){ return glm::vec3(m_View[0][2],m_View[1][2],m_View[2][2]); }
+const float Camera::getAngle() const { return m_Angle; }
+const float Camera::getAspectRatio() const { return m_AspectRatio; }
+const float Camera::getNear() const { return m_Near; }
+const float Camera::getFar() const { return m_Far; }
