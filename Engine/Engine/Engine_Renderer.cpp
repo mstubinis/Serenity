@@ -500,37 +500,41 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fb
 
     //RENDER NORMAL OBJECTS HERE
     for(auto shaderProgram:m_GeometryPassShaderPrograms){
-        vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
-        shaderProgram->bind();
-        for(auto material:shaderMaterials){
-            vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); if(materialMeshes.size() > 0){
-            material->bind();
-            for(auto meshEntry:materialMeshes){
-                meshEntry->mesh()->bind();
-                for(auto instance:meshEntry->meshInstances()){
-                    boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
-                    Object* object = o.lock().get();
-                    if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
-                        if(object->checkRender(c)){ //culling check
-                            object->bind();
-                            for(auto meshInstance:instance.second){
-                                meshInstance->bind(); //render also
-                                meshInstance->unbind();
-                            }
-                            object->unbind();
-                        }
-                    }
-                    //protect against any custom changes by restoring to the regular shader and material
-                    if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-                        shaderProgram->bind();
-                        material->bind();
-                    }
-                }
-                meshEntry->mesh()->unbind();
-            }
-            material->unbind();}
-        }
-        shaderProgram->unbind();}
+        vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); 
+		if(shaderMaterials.size() > 0){
+			shaderProgram->bind();
+			for(auto material:shaderMaterials){
+				vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); 
+				if(materialMeshes.size() > 0){
+					material->bind();
+					for(auto meshEntry:materialMeshes){
+						meshEntry->mesh()->bind();
+						for(auto instance:meshEntry->meshInstances()){
+							boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
+							Object* object = o.lock().get();
+							if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
+								if(object->checkRender(c)){ //culling check
+									object->bind();
+									for(auto meshInstance:instance.second){
+										meshInstance->bind(); //render also
+										meshInstance->unbind();
+									}
+									object->unbind();
+								}
+							}
+							//protect against any custom changes by restoring to the regular shader and material
+							if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
+								shaderProgram->bind();
+								material->bind();
+							}
+						}
+						meshEntry->mesh()->unbind();
+					}
+					material->unbind();
+				}
+			}
+			shaderProgram->unbind();
+		}
     }
     Settings::disableDepthTest();
     Settings::disableDepthMask();

@@ -36,8 +36,7 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
     Renderer::sendUniformMatrix4f("Model",model);
     i->render();
-    Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
-
+    //Renderer::sendUniform1iSafe("AnimationPlaying",0); //this is needed here. cant seem to find out why...
 }};
 struct DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};

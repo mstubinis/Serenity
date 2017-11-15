@@ -944,10 +944,8 @@ void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTim
     }
     uint PositionIndex = _FindPosition(AnimationTime,node);
     uint NextPositionIndex = (PositionIndex + 1);
-    //assert(NextPositionIndex < node->mNumPositionKeys);
     float DeltaTime = (float)(node->mPositionKeys[NextPositionIndex].mTime - node->mPositionKeys[PositionIndex].mTime);
     float Factor = (AnimationTime - (float)node->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-    //assert(Factor >= 0.0f && Factor <= 1.0f);
     glm::vec3 Start = Engine::Math::assimpToGLMVec3(node->mPositionKeys[PositionIndex].mValue);
     glm::vec3 End = Engine::Math::assimpToGLMVec3(node->mPositionKeys[NextPositionIndex].mValue);
     glm::vec3 Delta = End - Start;
@@ -959,10 +957,8 @@ void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float Animation
     }
     uint RotationIndex = _FindRotation(AnimationTime, node);
     uint NextRotationIndex = (RotationIndex + 1);
-    //assert(NextRotationIndex < node->mNumRotationKeys);
     float DeltaTime = (float)(node->mRotationKeys[NextRotationIndex].mTime - node->mRotationKeys[RotationIndex].mTime);
     float Factor = (AnimationTime - (float)node->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-    //assert(Factor >= 0.0f && Factor <= 1.0f);
     const aiQuaternion& StartRotationQ = node->mRotationKeys[RotationIndex].mValue;
     const aiQuaternion& EndRotationQ   = node->mRotationKeys[NextRotationIndex].mValue;    
     aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
@@ -974,10 +970,8 @@ void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime
     }
     uint ScalingIndex = _FindScaling(AnimationTime, node);
     uint NextScalingIndex = (ScalingIndex + 1);
-    //assert(NextScalingIndex < node->mNumScalingKeys);
     float DeltaTime = (float)(node->mScalingKeys[NextScalingIndex].mTime - node->mScalingKeys[ScalingIndex].mTime);
     float Factor = (AnimationTime - (float)node->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
-    //assert(Factor >= 0.0f && Factor <= 1.0f);
     glm::vec3 Start = Engine::Math::assimpToGLMVec3(node->mScalingKeys[ScalingIndex].mValue);
     glm::vec3 End   = Engine::Math::assimpToGLMVec3(node->mScalingKeys[NextScalingIndex].mValue);
     glm::vec3 Delta = End - Start;
@@ -1039,7 +1033,7 @@ void MeshSkeleton::fill(ImportedMeshData& data){
     }
 }
 void MeshSkeleton::clear(){
-    for(auto animationData : m_AnimationData){
+    for(auto animationData:m_AnimationData){
         delete animationData.second;
     }
     m_AnimationData.clear();
