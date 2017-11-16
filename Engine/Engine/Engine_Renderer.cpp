@@ -463,7 +463,7 @@ void Detail::RenderManagement::_renderText(GBuffer* gbuffer,Camera* c,uint& fbuf
     }
     p->unbind();
 }
-void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
+void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* camera,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
     if(Detail::RendererInfo::GodRaysInfo::godRays)
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
     else
@@ -511,7 +511,7 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* c,uint& fb
 							boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
 							Object* object = o.lock().get();
 							if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
-								if(object->checkRender(c)){ //culling check
+								if(object->checkRender(camera)){ //culling check
 									object->bind();
 									for(auto meshInstance:instance.second){
 										meshInstance->bind(); //render also
@@ -762,7 +762,6 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 	}
 
     //to try and see what the lightprobe is outputting
-	/*
     Renderer::unbindFBO();
     Settings::clear();
     LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
@@ -777,7 +776,6 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         Renderer::unbindTextureCubemap(0);
         p->unbind();
     }
-	*/
 
 
     Settings::enableDepthTest();

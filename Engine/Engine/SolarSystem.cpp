@@ -260,7 +260,7 @@ void SolarSystem::_loadFromFile(string filename){
     player->translate(0,0,2);
 
 
-	LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),true,this);
+	LightProbe* lightP = new LightProbe("MainLightProbe",1024,glm::vec3(0),true,this);
 	player->addChild(lightP);
 }
 void SolarSystem::_loadRandomly(){

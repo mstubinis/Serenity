@@ -994,17 +994,26 @@ class LightProbe::impl{
     public:
         uint m_EnvMapSize;
         FramebufferObject* m_FBO;
-        vector<GLuint> m_TextureAddresses;  
+
+		GLuint m_TextureEnvMap;
+		GLuint m_TextureConvolutionMap;
+		GLuint m_TexturePrefilterMap;
+		uint m_TexturesMade;
+
+
         glm::mat4 m_Views[6];
+		bool m_SecondFrame;
         bool m_OnlyOnce;
         bool m_DidFirst;
         void _init(uint envMapSize,LightProbe* super,bool onlyOnce,Scene* scene){
-            m_EnvMapSize = envMapSize;
+			m_SecondFrame = false;
+            m_TexturesMade = 0;
+			m_EnvMapSize = envMapSize;
             m_OnlyOnce = onlyOnce;
             glm::vec3 pos = super->getPosition();
             Camera* c = Resources::getActiveCamera();
-            if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, c->getNear(), c->getFar());
-            else             super->m_Projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 99999999.0f);
+            if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, c->getNear(), c->getFar());
+            else             super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, 0.001f, 99999999.0f);
             m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
             m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
@@ -1015,9 +1024,10 @@ class LightProbe::impl{
             m_FBO = new FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
         }
         void _destruct(){
-            for(auto addr:m_TextureAddresses){
-                glDeleteTextures(1,&addr);
-            }
+			glDeleteTextures(1,&m_TextureEnvMap);
+			glDeleteTextures(1,&m_TextureConvolutionMap);
+			glDeleteTextures(1,&m_TexturePrefilterMap);
+
             glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             SAFE_DELETE(m_FBO);
         }
@@ -1038,6 +1048,10 @@ class LightProbe::impl{
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
         }
         void _render(LightProbe* super){
+			if(m_SecondFrame == false){
+				m_SecondFrame = true;
+				return;
+			}
             if(m_DidFirst == true && m_OnlyOnce == true) return;
 
             uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
@@ -1048,14 +1062,11 @@ class LightProbe::impl{
 
             //render the scene into a cubemap. this will be VERY expensive...
 			
-            if(m_TextureAddresses.size() == 0){
-                m_TextureAddresses.push_back(GLuint(0));
-                glGenTextures(1,&m_TextureAddresses.at(0));
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
+            if(m_TexturesMade == 0){
+                glGenTextures(1,&m_TextureEnvMap);
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
 
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
-                Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
+                //Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
@@ -1065,51 +1076,59 @@ class LightProbe::impl{
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA8,m_EnvMapSize,m_EnvMapSize,0,GL_RGBA,GL_UNSIGNED_BYTE,&testData[0]);
                 }
 				vector_clear(testData);
+				m_TexturesMade++;
             }
             else{
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
             }
-			Renderer::unbindFBO();
-            _update(0,super); //this might be needed
+			Camera* old = Resources::getActiveCamera();
+			Renderer::unbindFBO(); //this might not be needed
+			super->setPosition(old->getPosition());
+            _update(0,super); //this might not be needed
+			Resources::setActiveCamera(super);
             for (uint i = 0; i < 6; i++){	
 				m_FBO->bind();
                 super->m_View = m_Views[i];
                 super->m_Orientation = glm::conjugate(glm::quat_cast(super->m_View));
 				super->update(0);
 
-                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureAddresses.at(0),0);
+				super->m_Forward = Engine::Math::getForward(super->m_Orientation);
+			    super->m_Up = Engine::Math::getUp(super->m_Orientation);
+			    super->m_Right = glm::normalize(glm::cross(super->m_Right,super->m_Up));
+
+                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureEnvMap,0);
 				Renderer::Settings::clear();
 				Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
 			    m_FBO->unbind();
 			}
-
+			Resources::setActiveCamera(old);
             /////////////////////////////////////////////////////////////////
 			m_FBO->bind();
             uint size = 32;
-            if(m_TextureAddresses.size() == 1){
-                m_TextureAddresses.push_back(GLuint(0));
-                glGenTextures(1,&m_TextureAddresses.at(1));
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
+            if(m_TexturesMade == 1){
+                glGenTextures(1,&m_TextureConvolutionMap);
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
                 Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
 				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
                 }
+				m_TexturesMade++;
 			}
             else{
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
             }
             glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,size,size);
             ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
-            Renderer::bindTexture("cubemap",m_TextureAddresses.at(0),0,GL_TEXTURE_CUBE_MAP);
+            Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
 
             Renderer::setViewport(0,0,size,size);
             for (uint i = 0; i < 6; ++i){
 				m_FBO->bind();
                 glm::mat4 vp = super->m_Projection * m_Views[i];
                 Renderer::sendUniformMatrix4f("VP", vp);
-                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(1),0);
+                glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureConvolutionMap,0);
                 Renderer::Settings::clear(true,true,false);
                 Skybox::bindMesh();
 				m_FBO->unbind();
@@ -1118,10 +1137,9 @@ class LightProbe::impl{
 
             //now gen EnvPrefilterMap for specular IBL.
             size = m_EnvMapSize/4;
-            if(m_TextureAddresses.size() == 2){
-                m_TextureAddresses.push_back(GLuint(0));
-                glGenTextures(1, &m_TextureAddresses.at(2));
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(2));
+            if(m_TexturesMade == 2){
+                glGenTextures(1, &m_TexturePrefilterMap);
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,NULL);
                 }
@@ -1129,13 +1147,14 @@ class LightProbe::impl{
                 Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear_Mipmap_Linear);
                 Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
                 glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+				m_TexturesMade++;
             }
             else{
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(2));
+                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
             }
 
             p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
-            Renderer::bindTexture("cubemap",m_TextureAddresses.at(0),0,GL_TEXTURE_CUBE_MAP);
+            Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
             Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((m_EnvMapSize * m_EnvMapSize)*6));
             Renderer::sendUniform1i("NUM_SAMPLES",32);
             uint maxMipLevels = 5;
@@ -1151,7 +1170,7 @@ class LightProbe::impl{
 					m_FBO->bind();
                     glm::mat4 vp = super->m_Projection * m_Views[i];
                     Renderer::sendUniformMatrix4f("VP", vp);
-                    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(2),m);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TexturePrefilterMap,m);
                     Renderer::Settings::clear(true,true,false);
                     Skybox::bindMesh();
 					m_FBO->unbind();
@@ -1180,15 +1199,6 @@ LightProbe::~LightProbe(){
 void LightProbe::update(float dt){ m_i->_update(dt,this); }
 void LightProbe::renderCubemap(){ m_i->_render(this); }
 const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }
-GLuint LightProbe::getEnvMap(){ 
-	if(m_i->m_TextureAddresses.size() <= 0) return 0;
-	return m_i->m_TextureAddresses.at(0); 
-}
-GLuint LightProbe::getIrriadianceMap(){
-	if(m_i->m_TextureAddresses.size() <= 1) return 0;
-	return m_i->m_TextureAddresses.at(1); 
-}
-GLuint LightProbe::getPrefilterMap(){
-	if(m_i->m_TextureAddresses.size() <= 2) return 0;
-	return m_i->m_TextureAddresses.at(2); 
-}
+GLuint LightProbe::getEnvMap(){ return m_i->m_TextureEnvMap; }
+GLuint LightProbe::getIrriadianceMap(){ return m_i->m_TextureConvolutionMap; }
+GLuint LightProbe::getPrefilterMap(){ return m_i->m_TexturePrefilterMap; }

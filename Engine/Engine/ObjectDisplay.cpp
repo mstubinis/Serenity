@@ -47,8 +47,8 @@ void ObjectDisplay::update(float dt){
         meshInstance->update(dt);
     }
 }
-bool ObjectDisplay::checkRender(Camera* c){
-    if(!m_Visible || !c->sphereIntersectTest(getPosition(),m_Radius) || c->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
+bool ObjectDisplay::checkRender(Camera* camera){
+    if(!m_Visible || !camera->sphereIntersectTest(getPosition(),m_Radius) || camera->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
         return false;
     }
     return true;
