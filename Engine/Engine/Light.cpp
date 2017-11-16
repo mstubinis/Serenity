@@ -1052,29 +1052,37 @@ class LightProbe::impl{
                 m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(0));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
-                for (uint i = 0; i < 6; i++){
-                    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,m_EnvMapSize,m_EnvMapSize,0,GL_RGB,GL_FLOAT,NULL);
-                }
+
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work... but it is needed to work completely... wierd
-				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+				std::vector<GLubyte> testData(m_EnvMapSize * m_EnvMapSize * 256, 128);
+
+                for (uint i = 0; i < 6; i++){
+                    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA8,m_EnvMapSize,m_EnvMapSize,0,GL_RGBA,GL_UNSIGNED_BYTE,&testData[0]);
+                }
+				vector_clear(testData);
             }
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(0));
             }
 			Renderer::unbindFBO();
             _update(0,super); //this might be needed
-            m_FBO->bind();
             for (uint i = 0; i < 6; i++){	
+				m_FBO->bind();
                 super->m_View = m_Views[i];
-                //super->m_Orientation = glm::conjugate(glm::quat_cast(m_Views[i]));
+                super->m_Orientation = glm::conjugate(glm::quat_cast(super->m_View));
 				super->update(0);
-                super->_constructFrustrum();
+
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureAddresses.at(0),0);
 				Renderer::Settings::clear();
 				Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
+			    m_FBO->unbind();
 			}
-			/*
+
             /////////////////////////////////////////////////////////////////
 			m_FBO->bind();
             uint size = 32;
@@ -1082,13 +1090,13 @@ class LightProbe::impl{
                 m_TextureAddresses.push_back(GLuint(0));
                 glGenTextures(1,&m_TextureAddresses.at(1));
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
+                Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
+                Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
+				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, NULL);
                 }
-                Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                //Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
-				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
-            }
+			}
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureAddresses.at(1));
             }
@@ -1098,11 +1106,13 @@ class LightProbe::impl{
 
             Renderer::setViewport(0,0,size,size);
             for (uint i = 0; i < 6; ++i){
+				m_FBO->bind();
                 glm::mat4 vp = super->m_Projection * m_Views[i];
                 Renderer::sendUniformMatrix4f("VP", vp);
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(1),0);
                 Renderer::Settings::clear(true,true,false);
                 Skybox::bindMesh();
+				m_FBO->unbind();
             }
             p->unbind();
 
@@ -1138,14 +1148,16 @@ class LightProbe::impl{
                 float a = roughness * roughness;
                 Renderer::sendUniform1f("a2",a*a);
                 for (uint i = 0; i < 6; ++i){
+					m_FBO->bind();
                     glm::mat4 vp = super->m_Projection * m_Views[i];
                     Renderer::sendUniformMatrix4f("VP", vp);
                     glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureAddresses.at(2),m);
                     Renderer::Settings::clear(true,true,false);
                     Skybox::bindMesh();
+					m_FBO->unbind();
                 }
             }
-			*/
+
             m_FBO->unbind();
 
             Renderer::bindReadFBO(prevReadBuffer);

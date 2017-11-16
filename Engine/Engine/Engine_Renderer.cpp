@@ -762,7 +762,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 	}
 
     //to try and see what the lightprobe is outputting
-/*
+	/*
     Renderer::unbindFBO();
     Settings::clear();
     LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
@@ -777,7 +777,9 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         Renderer::unbindTextureCubemap(0);
         p->unbind();
     }
-*/
+	*/
+
+
     Settings::enableDepthTest();
     Settings::enableDepthMask();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
