@@ -644,11 +644,13 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
 			}
         }
 		*/
+
         if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
             bindTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
             bindTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
             bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
         }
+
 		renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 		for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
 		unbindTextureCubemap(3);
@@ -770,13 +772,12 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
         glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));
         Renderer::sendUniformMatrix4f("VP",camera->getProjection() * view);
-		GLuint address = pr->getEnvMap();
+		GLuint address = pr->getPrefilterMap();
 		Renderer::bindTexture("Texture",address,0,GL_TEXTURE_CUBE_MAP);
         Skybox::bindMesh();
         Renderer::unbindTextureCubemap(0);
         p->unbind();
     }
-
 
     Settings::enableDepthTest();
     Settings::enableDepthMask();

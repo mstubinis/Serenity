@@ -106,7 +106,7 @@ class LightProbe: public Camera{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        LightProbe(std::string = "Light Probe", uint envMapWidth = 128,glm::vec3 = glm::vec3(0),bool onlyOnce = false,Scene* = nullptr);
+        LightProbe(std::string = "Light Probe", uint envMapWidth = 128,glm::vec3 = glm::vec3(0),bool onlyOnce = false,Scene* = nullptr,uint sidesPerFrame = 6);
         ~LightProbe();
 
         void update(float);

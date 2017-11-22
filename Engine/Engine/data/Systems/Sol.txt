@@ -1,6 +1,6 @@
 #NOTE radius is in KM. Position is in KM (distance from sun, use sin/cos to place them). Orbit speed is in days
 Sol
-data/Textures/Skyboxes/SolarSystem
+data/Textures/Skyboxes/Skybox2
 0
 
 S name=Sun radius=695800 r=1 g=1 b=0 r1=0.9 g1=0.9 b1=1 position=0
