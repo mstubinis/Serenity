@@ -1124,7 +1124,7 @@ class LightProbe::impl{
             }
 			Camera* old = Resources::getActiveCamera();
 			Renderer::unbindFBO(); //this might not be needed
-			super->setPosition(old->getPosition());
+			//super->setPosition(old->getPosition());
             _update(0,super); //this might not be needed
 			Resources::setActiveCamera(super);
 			for(auto side:m_Sides){
@@ -1155,7 +1155,7 @@ class LightProbe::impl{
             ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
             Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
 
-			//m_FBO->resize(size,size);
+			m_FBO->resize(size,size);
 
 			for(auto side:m_Sides){
 				_renderConvolution(super,m_Views[side],side,size);
@@ -1191,8 +1191,7 @@ class LightProbe::impl{
             for (uint m = 0; m < maxMipLevels; ++m){
                 uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
                 
-                //Renderer::setViewport(0,0,mipSize,mipSize);
-				//m_FBO->resize(mipSize,mipSize);
+				m_FBO->resize(mipSize,mipSize);
 
                 float roughness = (float)m/(float)(maxMipLevels-1);
                 Renderer::sendUniform1f("roughness",roughness);

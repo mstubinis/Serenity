@@ -633,7 +633,7 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
 		sendUniform1fSafe("gamma",RendererInfo::GeneralInfo::gamma);
 
 		SkyboxEmpty* skybox = s->getSkybox();
-		/*
+
         if(s->m_LightProbes.size() > 0){
 			for(auto probe:s->m_LightProbes){
 				LightProbe* p = probe.second;
@@ -643,14 +643,14 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
 				break;
 			}
         }
-		*/
 
+		/*
         if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
             bindTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
             bindTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
             bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
         }
-
+		*/
 		renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 		for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }
 		unbindTextureCubemap(3);
@@ -764,6 +764,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 	}
 
     //to try and see what the lightprobe is outputting
+	/*
     Renderer::unbindFBO();
     Settings::clear();
     LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
@@ -772,13 +773,13 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
         glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));
         Renderer::sendUniformMatrix4f("VP",camera->getProjection() * view);
-		GLuint address = pr->getPrefilterMap();
+		GLuint address = pr->getEnvMap();
 		Renderer::bindTexture("Texture",address,0,GL_TEXTURE_CUBE_MAP);
         Skybox::bindMesh();
         Renderer::unbindTextureCubemap(0);
         p->unbind();
     }
-
+	*/
     Settings::enableDepthTest();
     Settings::enableDepthMask();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
