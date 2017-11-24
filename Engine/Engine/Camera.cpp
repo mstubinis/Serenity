@@ -52,7 +52,7 @@ void Camera::_constructFrustrum(){
     m_Planes[4] = glm::normalize(rowW + rowZ);
     m_Planes[5] = glm::normalize(rowW - rowZ);
 
-    for(unsigned int i = 0; i < 6; i++){
+    for(uint i = 0; i < 6; i++){
         glm::vec3 normal(m_Planes[i].x, m_Planes[i].y, m_Planes[i].z);
         m_Planes[i] = -m_Planes[i] / glm::length(normal);
     }

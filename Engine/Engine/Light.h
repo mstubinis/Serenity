@@ -109,7 +109,6 @@ class LightProbe: public Camera{
         LightProbe(std::string = "Light Probe", uint envMapWidth = 128,glm::vec3 = glm::vec3(0),bool onlyOnce = false,Scene* = nullptr,uint sidesPerFrame = 6);
         ~LightProbe();
 
-        void update(float);
         void renderCubemap();
 
         GLuint getEnvMap();

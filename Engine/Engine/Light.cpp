@@ -1019,12 +1019,12 @@ class LightProbe::impl{
             Camera* c = Resources::getActiveCamera();
             if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, c->getNear(), c->getFar());
             else             super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, 0.001f, 99999999.0f);
-            m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-            m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-            m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
-            m_Views[3] = glm::lookAt(pos, pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
-            m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-            m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+            m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1, 0, 0), glm::vec3(0,-1, 0));
+            m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0,-1, 0));
+            m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0, 1, 0), glm::vec3(0, 0, 1));
+            m_Views[3] = glm::lookAt(pos, pos + glm::vec3( 0,-1, 0), glm::vec3(0, 0,-1));
+            m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0, 0, 1), glm::vec3(0,-1, 0));
+            m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0, 0,-1), glm::vec3(0,-1, 0));
 
             m_FBO = new FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
         }
@@ -1036,34 +1036,28 @@ class LightProbe::impl{
             glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             SAFE_DELETE(m_FBO);
         }
-        void _update(float dt,LightProbe* super){
-            if(super->m_Parent != nullptr){ 
-				super->setPosition(super->m_Parent->getPosition());
+        void _update(float dt,LightProbe* super,glm::mat4& viewMatrix){
+            super->m_View = viewMatrix;
+			super->m_Orientation = glm::conjugate(glm::quat_cast(super->m_View));
+			super->m_Forward = Engine::Math::getForward(super->m_Orientation);
+			super->m_Up = Engine::Math::getUp(super->m_Orientation);
+			super->m_Right = glm::normalize(glm::cross(super->m_Forward,super->m_Up));
+
+            if(super->m_Parent != nullptr){
 				super->m_Model = super->m_Parent->getModel(); 
 			}
             else{
-				super->m_Model = glm::mat4(1.0f); 
+				super->m_Model = glm::mat4(1.0f);
 			}
 			glm::mat4 translationMatrix = glm::translate(super->getPosition());
             glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);
 
             super->m_Model = translationMatrix * rotationMatrix * super->m_Model;
-
-            glm::vec3 pos = super->getPosition();
-            m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-            m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-            m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
-            m_Views[3] = glm::lookAt(pos, pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
-            m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-            m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
 			super->_constructFrustrum();
         }
 		void _renderScene(LightProbe* super,glm::mat4& viewMatrix,uint& i){
 			m_FBO->bind();
-            super->m_View = viewMatrix;
-
-			_update(0,super);
-
+			_update(0,super,viewMatrix);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureEnvMap,0);
 			Renderer::Settings::clear();
 			Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
@@ -1071,7 +1065,7 @@ class LightProbe::impl{
 		}
 		void _renderConvolution(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& size){
 			//glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,size,size);
-            glm::mat4 vp = super->m_Projection * viewMatrix;
+            glm::mat4 vp = super->m_Projection * glm::mat4(glm::mat3(viewMatrix));
             Renderer::sendUniformMatrix4f("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureConvolutionMap,0);
             Renderer::Settings::clear(true,true,false);
@@ -1079,7 +1073,7 @@ class LightProbe::impl{
 		}
 		void _renderPrefilter(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& m,uint& mipSize){
 			//glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,mipSize,mipSize);
-            glm::mat4 vp = super->m_Projection * viewMatrix;
+            glm::mat4 vp = super->m_Projection * glm::mat4(glm::mat3(viewMatrix));
             Renderer::sendUniformMatrix4f("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TexturePrefilterMap,m);
             Renderer::Settings::clear(true,true,false);
@@ -1123,10 +1117,30 @@ class LightProbe::impl{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
             }
 			Camera* old = Resources::getActiveCamera();
-			Renderer::unbindFBO(); //this might not be needed
-			//super->setPosition(old->getPosition());
-            _update(0,super); //this might not be needed
 			Resources::setActiveCamera(super);
+
+
+            if(super->m_Parent != nullptr){
+				super->m_Model = super->m_Parent->getModel(); 
+			}
+            else{
+				super->m_Model = glm::mat4(1.0f);
+			}
+			glm::mat4 translationMatrix = glm::translate(super->getPosition());
+            glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);
+            super->m_Model = translationMatrix * rotationMatrix * super->m_Model;
+			super->_constructFrustrum();
+
+
+            glm::vec3 pos = super->getPosition();
+            m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1, 0, 0), glm::vec3(0,-1, 0));
+            m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0,-1, 0));
+            m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0, 1, 0), glm::vec3(0, 0, 1));
+            m_Views[3] = glm::lookAt(pos, pos + glm::vec3( 0,-1, 0), glm::vec3(0, 0,-1));
+            m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0, 0, 1), glm::vec3(0,-1, 0));
+            m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0, 0,-1), glm::vec3(0,-1, 0));
+
+
 			for(auto side:m_Sides){
 				_renderScene(super,m_Views[side],side);
 			}
@@ -1221,7 +1235,6 @@ LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Sce
 LightProbe::~LightProbe(){
     m_i->_destruct();
 }
-void LightProbe::update(float dt){ m_i->_update(dt,this); }
 void LightProbe::renderCubemap(){ m_i->_render(this); }
 const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }
 GLuint LightProbe::getEnvMap(){ return m_i->m_TextureEnvMap; }
