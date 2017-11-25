@@ -1153,8 +1153,8 @@ class LightProbe::impl{
             if(m_TexturesMade == 1){
                 glGenTextures(1,&m_TextureConvolutionMap); glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear); //this line is causing the first loading to not work...
-				Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				std::vector<GLubyte> testData(size * size * 256, 155);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, &testData[0]);
@@ -1175,12 +1175,11 @@ class LightProbe::impl{
 				_renderConvolution(super,m_Views[side],side,size);
 			}
             p->unbind();
-			m_FBO->unbind();
 			#pragma endregion
 
 			#pragma region RenderPrefilter
             //now gen EnvPrefilterMap for specular IBL.
-            size = m_EnvMapSize/4;
+            size = m_EnvMapSize/8;
             if(m_TexturesMade == 2){
                 glGenTextures(1, &m_TexturePrefilterMap); glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
 				std::vector<GLubyte> testData(size * size * 256, 255);
@@ -1188,8 +1187,8 @@ class LightProbe::impl{
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,&testData[0]);
                 }
                 Texture::setWrapping(GL_TEXTURE_CUBE_MAP,TextureWrap::ClampToEdge);
-                Texture::setMinFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear_Mipmap_Linear);
-                Texture::setMaxFilter(GL_TEXTURE_CUBE_MAP,TextureFilter::Linear);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                 glGenerateMipmap(GL_TEXTURE_CUBE_MAP); m_TexturesMade++;
             }
             else{
@@ -1201,7 +1200,6 @@ class LightProbe::impl{
             Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((m_EnvMapSize * m_EnvMapSize)*6));
             Renderer::sendUniform1i("NUM_SAMPLES",32);
             uint maxMipLevels = 5;
-			m_FBO->bind();
             for (uint m = 0; m < maxMipLevels; ++m){
                 uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
                 

@@ -204,7 +204,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship("Miranda","Miranda",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
                     getPlayerCamera()->follow(getPlayer());
 
@@ -260,7 +260,7 @@ void SolarSystem::_loadFromFile(string filename){
     player->translate(0,0,2);
 
 
-	LightProbe* lightP = new LightProbe("MainLightProbe",1024,glm::vec3(0),true,this);
+	LightProbe* lightP = new LightProbe("MainLightProbe",1024,glm::vec3(0),false,this,1);
 	player->addChild(lightP);
 }
 void SolarSystem::_loadRandomly(){

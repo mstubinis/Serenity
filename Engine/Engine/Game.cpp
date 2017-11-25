@@ -77,8 +77,8 @@ void Game::initLogic(){
     Engine::getWindow()->setMouseCursorVisible(false);
     Engine::getWindow()->setKeyRepeatEnabled(false);
 	//apparently these 2 should not be used together, but i have not found any issues with it so far
-	Engine::getWindow()->setVerticalSyncEnabled(true);
-	Engine::getWindow()->setFramerateLimit(60);
+	//Engine::getWindow()->setVerticalSyncEnabled(true);
+	//Engine::getWindow()->setFramerateLimit(60);
 
     //Resources::Settings::enableDynamicMemory();
 
