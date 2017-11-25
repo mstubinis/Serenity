@@ -170,6 +170,8 @@ namespace Engine{
 
         float remainder(float,float);
 
+		void removeMatrixPosition(glm::mat4&);
+
         void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
         void recalculateForwardRightUp(const btRigidBody*,glm::vec3&,glm::vec3&,glm::vec3&);
 

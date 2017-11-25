@@ -27,6 +27,12 @@ float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 float Math::remainder(float x,float y){ return x - (glm::round(x/y)*y); }
 
+void Math::removeMatrixPosition(glm::mat4& m){
+	m[3][0] = 0;
+	m[3][1] = 0;
+	m[3][2] = 0;
+}
+
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
     point.x += 0.0001f;// forced protection against NaN if vectors happen to be equal
     glm::vec3 diff = glm::normalize(point - conePos);

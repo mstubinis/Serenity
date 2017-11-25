@@ -100,7 +100,9 @@ void Skybox::draw(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
 
     Camera* c = Resources::getActiveCamera();
-    glm::mat4 view = glm::mat4(glm::mat3(c->getView()));
+    glm::mat4 view = c->getView();
+	Engine::Math::removeMatrixPosition(view);
+
     Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
 
     Renderer::bindTexture("Texture",m_Texture->address(0),0,GL_TEXTURE_CUBE_MAP);
