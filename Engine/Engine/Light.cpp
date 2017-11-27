@@ -1009,8 +1009,8 @@ class LightProbe::impl{
         void _init(uint envMapSize,LightProbe* super,bool onlyOnce,Scene* scene,uint sidesPerFrame){
 			m_SecondFrame = false;
             m_TexturesMade = 0;
-			if(sidesPerFrame > 6) sidesPerFrame = 6;
-			else if(sidesPerFrame < 1) sidesPerFrame = 1;
+			if(sidesPerFrame >= 7) sidesPerFrame = 6;
+			else if(sidesPerFrame <= 0) sidesPerFrame = 1;
 			m_SidesPerFrame = sidesPerFrame;
 			m_CurrentSide = 0;
 			m_EnvMapSize = envMapSize;
@@ -1018,7 +1018,7 @@ class LightProbe::impl{
             glm::vec3 pos = super->getPosition();
             Camera* c = Resources::getActiveCamera();
             if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, c->getNear(), c->getFar());
-            else             super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, 0.001f, 99999999.0f);
+            else             super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, 0.001f, 9999999999.0f);
             m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1, 0, 0), glm::vec3(0,-1, 0));
             m_Views[1] = glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0,-1, 0));
             m_Views[2] = glm::lookAt(pos, pos + glm::vec3( 0, 1, 0), glm::vec3(0, 0, 1));
@@ -1027,6 +1027,7 @@ class LightProbe::impl{
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0, 0,-1), glm::vec3(0,-1, 0));
 
             m_FBO = new FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
+			m_FBO->check();
         }
         void _destruct(){
 			glDeleteTextures(1,&m_TextureEnvMap);
@@ -1067,7 +1068,7 @@ class LightProbe::impl{
 			Engine::Math::removeMatrixPosition(viewMatrix);
             glm::mat4 vp = super->m_Projection * viewMatrix;
             Renderer::sendUniformMatrix4f("VP", vp);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TextureConvolutionMap,0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureConvolutionMap,0);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
 		}
@@ -1075,7 +1076,7 @@ class LightProbe::impl{
 			Engine::Math::removeMatrixPosition(viewMatrix);
             glm::mat4 vp = super->m_Projection * viewMatrix;
             Renderer::sendUniformMatrix4f("VP", vp);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,m_TexturePrefilterMap,m);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TexturePrefilterMap,m);
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
 		}
@@ -1102,15 +1103,25 @@ class LightProbe::impl{
 
 			#pragma region RenderScene
             Renderer::Detail::RenderManagement::m_gBuffer->resize(m_EnvMapSize,m_EnvMapSize);
+			
             if(m_TexturesMade == 0){
-                glGenTextures(1,&m_TextureEnvMap); glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
-				std::vector<GLubyte> testData(m_EnvMapSize * m_EnvMapSize * 256, 128);
+                glGenTextures(1,&m_TextureEnvMap);
+				glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
+				vector<GLubyte> testData(m_EnvMapSize * m_EnvMapSize * 256, 128);
                 for (uint i = 0; i < 6; i++){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA8,m_EnvMapSize,m_EnvMapSize,0,GL_RGBA,GL_UNSIGNED_BYTE,&testData[0]);
                 }
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0); 
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); 
 				m_TexturesMade++;
+				glBindTexture(GL_TEXTURE_CUBE_MAP,0);
             }
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
@@ -1136,7 +1147,7 @@ class LightProbe::impl{
             m_Views[3] = glm::lookAt(pos, pos + glm::vec3( 0,-1, 0), glm::vec3(0, 0,-1));
             m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0, 0, 1), glm::vec3(0,-1, 0));
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0, 0,-1), glm::vec3(0,-1, 0));
-
+			
 			for(auto side:m_Sides){
 				_renderScene(super,m_Views[side],side);
 			}
@@ -1147,14 +1158,23 @@ class LightProbe::impl{
 			#pragma region RenderConvolution
             uint size = 32;
             if(m_TexturesMade == 1){
-                glGenTextures(1,&m_TextureConvolutionMap); glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
-				std::vector<GLubyte> testData(size * size * 256, 155);
+                glGenTextures(1,&m_TextureConvolutionMap);
+				glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
+				vector<GLubyte> testData(size * size * 256, 155);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, &testData[0]);
                 }
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0); 
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); 
 				m_TexturesMade++;
+				glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 			}
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
@@ -1176,14 +1196,21 @@ class LightProbe::impl{
             //now gen EnvPrefilterMap for specular IBL.
             size = m_EnvMapSize/8;
             if(m_TexturesMade == 2){
-                glGenTextures(1, &m_TexturePrefilterMap); glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
-				std::vector<GLubyte> testData(size * size * 256, 255);
+                glGenTextures(1, &m_TexturePrefilterMap);
+				glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
+				vector<GLubyte> testData(size * size * 256, 255);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,&testData[0]);
                 }
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                glGenerateMipmap(GL_TEXTURE_CUBE_MAP); m_TexturesMade++;
+
+                glGenerateMipmap(GL_TEXTURE_CUBE_MAP); 
+				m_TexturesMade++;
             }
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
@@ -1205,9 +1232,9 @@ class LightProbe::impl{
 					_renderPrefilter(super,m_Views[side],side,m,mipSize);
 				}
             }
+
 			m_FBO->unbind();
 			#pragma endregion
-
             Renderer::bindReadFBO(prevReadBuffer);
             Renderer::bindDrawFBO(prevDrawBuffer);
             m_DidFirst = true;

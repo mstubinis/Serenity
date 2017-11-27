@@ -767,7 +767,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 	/*
     Renderer::unbindFBO();
     Settings::clear();
-    LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("MainLightProbe"));
+    LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("CapsuleLightProbe"));
     Skybox* skybox = static_cast<Skybox*>(s->getSkybox());
     if(pr != nullptr){
         ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();

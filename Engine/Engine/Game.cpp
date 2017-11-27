@@ -83,17 +83,14 @@ void Game::initLogic(){
     //Resources::Settings::enableDynamicMemory();
 
     new SolarSystem("Sol","data/Systems/Sol.txt");
-    //new SolarSystem("Sol","");
     new CapsuleSpace();
 
-
-    Resources::setCurrentScene("Sol");
+	Resources::setCurrentScene("Sol");
+    //Resources::setCurrentScene("CapsuleSpace");
     Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     m_HUD = new HUD();
 }
 void Game::update(float dt){
-    SolarSystem* s = static_cast<SolarSystem*>(Resources::getScene("Sol"));
-
     if(Events::Keyboard::isKeyDown("esc")){
         Engine::stop();
     }

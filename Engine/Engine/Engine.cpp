@@ -75,9 +75,9 @@ void Engine::Detail::EngineClass::update(){
     Game::onPostUpdate(dt);
 }
 void Engine::Detail::EngineClass::render(){
-    Game::render();
-    Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),
-		Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
+
+    Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),x,y);
 
     Resources::getWindow()->display();
 }

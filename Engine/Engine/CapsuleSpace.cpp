@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "Engine_Renderer.h"
 #include "Texture.h"
+#include "GameSkybox.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -72,7 +73,10 @@ void CapsuleRibbon::unbind(){
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
-    setSkybox(nullptr);
+	GameSkybox* box = new GameSkybox("data/Textures/Skyboxes/Skybox2",0,this);
+    setSkybox(box);
+
+	//setSkybox(nullptr);
     setBackgroundColor(255.0f,0,0);
 
     PointLight* l = new PointLight("Capsule_Static_Light",glm::vec3(0,1.7f,0),this);
@@ -132,7 +136,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         if(i % 3 == 0){
             spawnLight = true;
         }
-        m_CapsuleStars.push_back(new CapsuleStar(50,pos,"AAAF_Star_" + boost::lexical_cast<string>(i),this,spawnLight));
+        m_CapsuleStars.push_back(new CapsuleStar(50,pos,"AAAF_Star_" + to_string(i),this,spawnLight));
         step -= 6.0f;
     }
     //this to just test. should set player / camera dynamically
@@ -140,6 +144,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setPlayer(dread);
     setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
     getPlayerCamera()->follow(getPlayer());
+
+	centerSceneToObject(dread);
 
     LightProbe* lp = new LightProbe("CapsuleLightProbe",1024,glm::vec3(0.0f),false,this,1);
     dread->addChild(lp);
@@ -184,8 +190,7 @@ void CapsuleSpace::update(float dt){
     for(auto item:getPlayer()->getDisplayItems()){
         item->setPosition(glm::vec3(x*1.2f,-y,0));
         item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
-        
-        //double check this (this is the light probe)
-        //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
     }
+    //double check this (this is the light probe)
+    //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
 }
