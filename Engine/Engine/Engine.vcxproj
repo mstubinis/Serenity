@@ -115,6 +115,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine_Events.cpp" />
     <ClCompile Include="Engine_ResourceBasic.cpp" />
     <ClCompile Include="Engine_Sounds.cpp" />
+    <ClCompile Include="Engine_Time.cpp" />
     <ClCompile Include="Engine_Window.cpp" />
     <ClCompile Include="FramebufferObject.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -135,6 +136,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine_Resources.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="MeshInstance.cpp" />
+    <ClCompile Include="ReubixCube.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Ship.cpp" />
@@ -160,6 +162,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_Events.h" />
     <ClInclude Include="Engine_ResourceBasic.h" />
     <ClInclude Include="Engine_Sounds.h" />
+    <ClInclude Include="Engine_Time.h" />
     <ClInclude Include="Engine_Window.h" />
     <ClInclude Include="FramebufferObject.h" />
     <ClInclude Include="GameCamera.h" />
@@ -178,6 +181,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_Resources.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="MeshInstance.h" />
+    <ClInclude Include="ReubixCube.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Engine_BuiltInShaders.h" />

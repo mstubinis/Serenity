@@ -24,8 +24,6 @@
 #include <iostream>
 #endif
 
-sf::Clock Engine::Detail::EngineClass::clock = sf::Clock();
-
 void Engine::Detail::EngineClass::init(const char* name,uint w,uint h){
     Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,w,h);
     initGame();
@@ -65,21 +63,31 @@ void Engine::Detail::EngineClass::RESET_EVENTS(){
     Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1.0f-Resources::dt());
 }
 void Engine::Detail::EngineClass::update(){
-    float dt = Resources::dt();
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_update();
+
+    float dt = Engine::Resources::Detail::ResourceManagement::m_Time.dt();
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
-    Physics::Detail::PhysicsManagement::update(dt);
     Events::Mouse::MouseProcessing::m_Difference *= (0.975f);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
+
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_update();
+}
+void Engine::Detail::EngineClass::updatePhysics(){
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_physics();
+	Physics::Detail::PhysicsManagement::update(Resources::dt());
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_physics();
 }
 void Engine::Detail::EngineClass::render(){
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_render();
+
     Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
-
     Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),x,y);
-
     Resources::getWindow()->display();
+
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_render();
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
@@ -167,28 +175,36 @@ void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(tr
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
 void Engine::stop(){ Resources::getWindow()->close(); }
 void Engine::setFullScreen(bool b){ Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b); }
+
+void Engine::Detail::EngineClass::handleEvents(){
+	sf::Event e;
+    while(Resources::getWindow()->getSFMLHandle()->pollEvent(e)){
+        switch (e.type){
+            case sf::Event::Closed:               EVENT_CLOSE();break;
+            case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(e.key.code);break;
+            case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(e.key.code);break;
+            case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
+            case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
+            case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
+            case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
+            case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
+            case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(e.mouseMove);break;
+            case sf::Event::Resized:              EVENT_RESIZE(e.size.width,e.size.height);break;
+            case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(e.text);break;
+            default:                              break;
+        }
+    }
+}
+
 void Engine::Detail::EngineClass::run(){
     while(Resources::getWindow()->isOpen()){
-        sf::Event e;
-        Resources::Detail::ResourceManagement::m_DeltaTime = clock.restart().asSeconds();
-        Resources::Detail::ResourceManagement::m_ApplicationTime += Resources::Detail::ResourceManagement::m_DeltaTime;
-        while(Resources::getWindow()->getSFMLHandle()->pollEvent(e)){
-            switch (e.type){
-                case sf::Event::Closed:               EVENT_CLOSE();break;
-                case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(e.key.code);break;
-                case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(e.key.code);break;
-                case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
-                case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
-                case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
-                case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
-                case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
-                case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(e.mouseMove);break;
-                case sf::Event::Resized:              EVENT_RESIZE(e.size.width,e.size.height);break;
-                case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(e.text);break;
-                default:                              break;
-            }
-        }
+
+		handleEvents();
+
         update();
+		updatePhysics();
         render();
+		
+		Engine::Resources::Detail::ResourceManagement::m_Time.calculate();
     }
 }

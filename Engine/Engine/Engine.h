@@ -44,8 +44,8 @@ namespace Engine{
 
                 static void RESET_EVENTS();
 
-                static sf::Clock clock;
-
+				static void handleEvents();
+				static void updatePhysics();
                 static void update();
                 static void render();
 

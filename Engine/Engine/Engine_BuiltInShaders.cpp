@@ -44,6 +44,7 @@ string Shaders::Detail::ShadersManagement::fxaa_frag = "";
 string Shaders::Detail::ShadersManagement::deferred_frag = "";
 string Shaders::Detail::ShadersManagement::deferred_frag_hud = "";
 string Shaders::Detail::ShadersManagement::deferred_frag_skybox = "";
+string Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = "";
 string Shaders::Detail::ShadersManagement::copy_depth_frag = "";
 string Shaders::Detail::ShadersManagement::cubemap_convolude_frag = "";
 string Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = "";
@@ -1344,6 +1345,20 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
     "}";
 #pragma endregion
 
+#pragma region DeferredFragSkyboxFake
+Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = Shaders::Detail::ShadersManagement::version + 
+    "\n"
+    "uniform vec4 Color;\n"
+    "varying vec3 UV;\n"
+    "varying vec3 WorldPosition;\n"
+    "void main(void){\n"
+	"    gl_FragData[0].rgba = Color;\n"
+    "    gl_FragData[1].rg = vec2(1.0);\n"
+    "    gl_FragData[2].r = 0.0;\n"
+    "    gl_FragData[2].b = 0.0;\n"
+    "}";
+#pragma endregion
+
 #pragma region CopyDepthFrag
 Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -2045,6 +2060,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     convertShaderCode(deferred_frag);
     convertShaderCode(deferred_frag_hud);
     convertShaderCode(deferred_frag_skybox);
+	convertShaderCode(deferred_frag_skybox_fake);
     convertShaderCode(copy_depth_frag);
     convertShaderCode(cubemap_convolude_frag);
     convertShaderCode(cubemap_prefilter_envmap_frag);

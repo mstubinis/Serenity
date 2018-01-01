@@ -260,8 +260,8 @@ void SolarSystem::_loadFromFile(string filename){
     player->translate(0,0,2);
 
 
-	LightProbe* lightP = new LightProbe("MainLightProbe",1024,glm::vec3(0),false,this,1);
-	player->addChild(lightP);
+	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
+	//player->addChild(lightP);
 }
 void SolarSystem::_loadRandomly(){
     #pragma region Skybox
@@ -269,7 +269,7 @@ void SolarSystem::_loadRandomly(){
     vector<std::string> folders;
     string path = "data/Textures/Skyboxes/";
     if ( boost::filesystem::exists( path ) ) {
-        boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
+        boost::filesystem::directory_iterator end_itr;
         for ( boost::filesystem::directory_iterator itr( path );itr != end_itr;++itr ){
             if ( boost::filesystem::is_directory(itr->status()) ){
                 string path_name = to_string(itr->path());

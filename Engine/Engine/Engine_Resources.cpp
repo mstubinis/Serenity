@@ -23,8 +23,8 @@ using namespace Engine;
 using namespace Engine::Resources;
 using namespace std;
 
-float Detail::ResourceManagement::m_DeltaTime = 1;
-float Detail::ResourceManagement::m_ApplicationTime = 0;
+EngineTime Detail::ResourceManagement::m_Time = EngineTime();
+
 Engine_Window* Detail::ResourceManagement::m_Window;
 Scene* Detail::ResourceManagement::m_CurrentScene;
 boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
@@ -197,6 +197,7 @@ void Resources::initResources(){
     Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,ShaderType::Fragment,false);
     Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,ShaderType::Fragment,false);
     Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,ShaderType::Fragment,false);
+	Shader* deferredFragSkyboxFake = new Shader("deferred_frag_skybox_fake",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake,ShaderType::Fragment,false);
     Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,ShaderType::Fragment,false);
     Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,ShaderType::Fragment,false);
     Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
@@ -233,6 +234,7 @@ void Resources::initResources(){
     addShaderProgram("Deferred_Final",fullscreenVertexShader,finalFrag,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_FXAA",fullscreenVertexShader,fxaa,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Skybox",vertexSkybox,deferredFragSkybox,ShaderRenderPass::Geometry);
+	addShaderProgram("Deferred_Skybox_Fake",vertexSkybox,deferredFragSkyboxFake,ShaderRenderPass::Geometry);
     addShaderProgram("Copy_Depth",fullscreenVertexShader,copyDepth,ShaderRenderPass::Postprocess);
     addShaderProgram("Deferred_Light",fullscreenVertexShader,lightingFrag,ShaderRenderPass::Lighting);
     addShaderProgram("Deferred_Light_GI",fullscreenVertexShader,lightingFragGI,ShaderRenderPass::Lighting);

@@ -80,8 +80,6 @@ void Game::initLogic(){
 	//Engine::getWindow()->setVerticalSyncEnabled(true);
 	//Engine::getWindow()->setFramerateLimit(60);
 
-    //Resources::Settings::enableDynamicMemory();
-
     new SolarSystem("Sol","data/Systems/Sol.txt");
     new CapsuleSpace();
 

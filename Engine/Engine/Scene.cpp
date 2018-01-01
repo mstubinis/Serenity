@@ -61,7 +61,23 @@ void Scene::update(float dt){
     if(m_Skybox != nullptr) m_Skybox->update();
 }
 void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
-void Scene::renderSkybox(){ if(m_Skybox != nullptr) m_Skybox->draw(); }
+void Scene::renderSkybox(){ 
+	if(m_Skybox != nullptr) 
+		m_Skybox->draw(); 
+	else{
+		//render a fake skybox.
+		Skybox::initMesh();
+		ShaderP* p = Resources::getShaderProgram("Deferred_Skybox_Fake"); p->bind();
+		Camera* c = Resources::getActiveCamera();
+		glm::mat4 view = c->getView();
+		Engine::Math::removeMatrixPosition(view);
+		Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
+		Renderer::sendUniform4f("Color",m_BackgroundColor.r,m_BackgroundColor.g,m_BackgroundColor.b,1.0f);
+		Skybox::bindMesh();
+		Renderer::unbindTextureCubemap(0);//yes, this is needed.
+		p->unbind();
+	}
+}
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }

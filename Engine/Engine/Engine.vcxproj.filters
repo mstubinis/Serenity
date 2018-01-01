@@ -234,6 +234,12 @@
     <ClCompile Include="GLImageConstants.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="ReubixCube.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_Time.cpp">
+      <Filter>Source Files\Engine\Engine_Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -364,6 +370,12 @@
     </ClInclude>
     <ClInclude Include="SMAA_LUT.h">
       <Filter>Header Files\Engine\Rendering\BuiltInShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ReubixCube.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_Time.h">
+      <Filter>Header Files\Engine\Engine_Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

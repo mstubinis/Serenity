@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "Engine_Physics.h"
+#include "Engine_Time.h"
 #include "ShaderProgram.h"
 
 #include <unordered_map>
@@ -67,8 +68,7 @@ namespace Engine{
                     }
                     static Scene* m_CurrentScene;
 
-                    static float m_DeltaTime;
-                    static float m_ApplicationTime;
+					static EngineTime m_Time;
 
                     static boost::weak_ptr<Camera> m_ActiveCamera;
 
@@ -105,9 +105,8 @@ namespace Engine{
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
 
-        static float getDeltaTime(){ return Detail::ResourceManagement::m_DeltaTime; }
-        static float dt(){ return Detail::ResourceManagement::m_DeltaTime; }
-        static float applicationTime(){ return Detail::ResourceManagement::m_ApplicationTime; }
+        static float dt(){ return Detail::ResourceManagement::m_Time.dt(); }
+        static float applicationTime(){ return Detail::ResourceManagement::m_Time.applicationTime(); }
 
         Engine_Window* getWindow();
         sf::Vector2u getWindowSize();

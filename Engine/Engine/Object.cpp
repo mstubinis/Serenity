@@ -141,7 +141,7 @@ void ObjectBasic::translate(float x,float y,float z,bool local){
 }
 void ObjectBasic::translate(glm::vec3 translation,bool local){ ObjectBasic::translate(translation.x,translation.y,translation.z,local); }
 void ObjectBasic::scale(float x, float y, float z){
-    float dt = Resources::Detail::ResourceManagement::m_DeltaTime;
+    float dt = Resources::dt();
     m_Scale.x += x * dt; m_Scale.y += y * dt; m_Scale.z += z * dt;
 }
 void ObjectBasic::scale(glm::vec3 scl){ ObjectBasic::scale(scl.x,scl.y,scl.z); }

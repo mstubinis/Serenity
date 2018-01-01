@@ -26,6 +26,25 @@ SkyboxEmpty::~SkyboxEmpty(){
 }
         
 Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
+	Skybox::initMesh();
+    glActiveTexture(GL_TEXTURE0);
+
+    string front = name + "/Right.jpg";
+    string back = name + "/Left.jpg";
+    string left = name + "/Top.jpg";
+    string right = name + "/Bottom.jpg";
+    string top = name + "/Front.jpg";
+    string bottom = name + "/Back.jpg";
+    string names[6] = {front,back,left,right,top,bottom};
+
+    m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
+    m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
+}
+Skybox::~Skybox(){
+}
+void Skybox::update(){
+}
+void Skybox::initMesh(){
     if(Skybox::m_Vertices.size() == 0){
         vector<glm::vec3> temp;
         temp.push_back(glm::vec3(-1,1,1));//1
@@ -72,22 +91,6 @@ Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
         glBindBuffer(GL_ARRAY_BUFFER, Skybox::m_Buffer );
         glBufferData(GL_ARRAY_BUFFER, Skybox::m_Vertices.size() * sizeof(glm::vec3),&Skybox::m_Vertices[0], GL_STATIC_DRAW );
     }
-    glActiveTexture(GL_TEXTURE0);
-
-    string front = name + "/Right.jpg";
-    string back = name + "/Left.jpg";
-    string left = name + "/Top.jpg";
-    string right = name + "/Bottom.jpg";
-    string top = name + "/Front.jpg";
-    string bottom = name + "/Back.jpg";
-    string names[6] = {front,back,left,right,top,bottom};
-
-    m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
-    m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
-}
-Skybox::~Skybox(){
-}
-void Skybox::update(){
 }
 void Skybox::bindMesh(){
     glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);

@@ -643,13 +643,13 @@ void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fb
 				break;
 			}
         }
-
-
-        //if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
-        //    bindTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
-        //    bindTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-        //    bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
-        //}
+		else{
+			if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
+				bindTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
+				bindTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
+				bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+			}
+		}
 
 		renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 		for(uint i = 0; i < 3; i++){ unbindTexture2D(i); }

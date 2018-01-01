@@ -73,16 +73,13 @@ void CapsuleRibbon::unbind(){
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
-	GameSkybox* box = new GameSkybox("data/Textures/Skyboxes/Skybox2",0,this);
-    setSkybox(box);
-
-	//setSkybox(nullptr);
+	setSkybox(nullptr);
     setBackgroundColor(255.0f,0,0);
 
-    PointLight* l = new PointLight("Capsule_Static_Light",glm::vec3(0,1.7f,0),this);
+    //PointLight* l = new PointLight("Capsule_Static_Light",glm::vec3(0,1.7f,0),this);
 
-    l->setColor(255,225,235,255);
-    l->setSpecularIntensity(0.0f);
+    //l->setColor(255,225,235,255);
+    //l->setSpecularIntensity(0.0f);
 
     if(!Resources::getMaterial("CapsuleTunnel")){
         Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
@@ -147,7 +144,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
 
 	centerSceneToObject(dread);
 
-    LightProbe* lp = new LightProbe("CapsuleLightProbe",1024,glm::vec3(0.0f),false,this,1);
+    LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),true,this);
     dread->addChild(lp);
 }
 CapsuleSpace::~CapsuleSpace(){}

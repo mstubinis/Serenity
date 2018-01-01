@@ -47,6 +47,7 @@ namespace Engine{
                     static std::string deferred_frag;
                     static std::string deferred_frag_hud;
                     static std::string deferred_frag_skybox;
+					static std::string deferred_frag_skybox_fake;
 
                     static std::string copy_depth_frag;
                     static std::string cubemap_convolude_frag;

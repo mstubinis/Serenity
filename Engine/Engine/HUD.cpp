@@ -38,7 +38,7 @@ void HUD::update(float dt){
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
-				scene->getPlayer()->setTarget(p.second);
+                scene->getPlayer()->setTarget(p.second);
                 break;
             }
             a++;
@@ -52,7 +52,7 @@ void HUD::update(float dt){
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
-				scene->getPlayer()->setTarget(p.second);
+                scene->getPlayer()->setTarget(p.second);
                 break;
             }
             a++;
@@ -74,7 +74,6 @@ void HUD::render(){
     if(player->getTarget() != nullptr){
         glm::vec3 pos = player->getTarget()->getScreenCoordinates();
         float scl = glm::max(0.5f,player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getActiveCamera()));
-
         if(pos.z == 1){
             Resources::getTexture("data/Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
@@ -94,25 +93,17 @@ void HUD::render(){
 
             float angle = 0;
             if(pos.y > 2 && pos.y < winSize.y - 2)
-                if(pos.x < 2)
-                    angle = 45;
-                else
-                    angle = 225;
+                if(pos.x < 2)                      angle = 45;
+                else                               angle = 225;
             else if(pos.y <= 1){
-                if(pos.x <= 1)
-                    angle = 0;
-                else if(pos.x > winSize.x - 2)
-                    angle = -90;
-                else 
-                    angle = -45;
+                if(pos.x <= 1)                     angle = 0;
+                else if(pos.x > winSize.x - 2)     angle = -90;
+                else                               angle = -45;
             }
             else{
-                if(pos.x < 2)
-                    angle = 90;
-                else if(pos.x > winSize.x - 2)
-                    angle = 180;
-                else
-                    angle = 135;
+                if(pos.x < 2)                      angle = 90;
+                else if(pos.x > winSize.x - 2)     angle = 180;
+                else                               angle = 135;
             }
             Resources::getTexture("data/Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
         }
@@ -121,13 +112,12 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-    m_Font->renderText("Delta Time: " + to_string(Resources::dt()) +
-                        "\nFPS: " + to_string(uint(1.0f/Resources::dt())) + 
-                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
-						"\nExposure: " + to_string(Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure) + 
-						"\nGamma: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::gamma) +
-						"\nStencil: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::stencil),
-                        glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
+	m_Font->renderText(Engine::Resources::Detail::ResourceManagement::m_Time.reportTime() + 
+                       "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
+                       "\nExposure: " + to_string(Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure) + 
+                       "\nGamma: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::gamma) +
+                       "\nStencil: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::stencil),
+                       glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion
 }
