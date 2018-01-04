@@ -1,6 +1,8 @@
 #include "Engine_Time.h"
 #include "Engine_Resources.h"
 #include <SFML/Window.hpp>
+#include <iomanip>
+#include <sstream>
 
 class EngineTime::impl{
     public:
@@ -11,6 +13,7 @@ class EngineTime::impl{
         float deltaTime;
         uint output_frame_delay;
         uint output_frame;
+		uint decimals;
         std::string currOutput;
         std::string prevOutput;
 
@@ -23,7 +26,7 @@ class EngineTime::impl{
 
             output_frame_delay = 4;
             output_frame = 0;
-
+			decimals = 6;
             std::string currOutput = "";
             std::string prevOutput = "";
         }
@@ -50,14 +53,23 @@ float EngineTime::applicationTime(){ return m_i->applicationTime; }
 float EngineTime::updateTime(){ return m_i->updateTime; }
 float EngineTime::physicsTime(){ return m_i->physicsTime; }
 float EngineTime::renderTime(){ return m_i->renderTime; }
-std::string& EngineTime::reportTime(){
+std::string& EngineTime::reportTime(){ return EngineTime::reportTime(m_i->decimals); }
+std::string& EngineTime::reportTime(uint decimals){
+	m_i->decimals = decimals;
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){
 		uint fps = uint(1.0f/m_i->deltaTime);
-        m_i->currOutput = "Update Time: " + to_string(m_i->updateTime) +
-                          "\nPhysics Time: " + to_string(m_i->physicsTime) +
-                          "\nRender Time: " + to_string(m_i->renderTime) +
-                          "\nDelta Time: " + to_string(m_i->deltaTime) +
+		std::stringstream stream1;std::stringstream stream2;std::stringstream stream3;std::stringstream stream4;
+		stream1 << std::fixed << std::setprecision(decimals) << m_i->updateTime;
+		stream2 << std::fixed << std::setprecision(decimals) << m_i->physicsTime;
+		stream3 << std::fixed << std::setprecision(decimals) << m_i->renderTime;
+		stream4 << std::fixed << std::setprecision(decimals) << m_i->deltaTime;
+		std::string s1 = stream1.str(); std::string s2 = stream2.str(); std::string s3 = stream3.str(); std::string s4 = stream4.str();
+
+        m_i->currOutput =   "Update Time:  " + s1 +
+                          "\nPhysics Time: " + s2 +
+                          "\nRender Time:  " + s3 +
+                          "\nDelta Time:   " + s4 +
                           "\nFPS: " + to_string(fps);
         m_i->prevOutput = m_i->currOutput;
         return m_i->currOutput;

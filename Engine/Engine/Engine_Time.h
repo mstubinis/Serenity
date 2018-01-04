@@ -32,6 +32,7 @@ class EngineTime{
 		float renderTime();
 
 		std::string& reportTime();
+		std::string& reportTime(uint decimals);
 };
 
 #endif
