@@ -240,6 +240,9 @@
     <ClCompile Include="Engine_Time.cpp">
       <Filter>Source Files\Engine\Engine_Core</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_SoundQueue.cpp">
+      <Filter>Source Files\Engine\Engine_Sounds</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -376,6 +379,9 @@
     </ClInclude>
     <ClInclude Include="Engine_Time.h">
       <Filter>Header Files\Engine\Engine_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_SoundQueue.h">
+      <Filter>Header Files\Engine\Engine_Sounds</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

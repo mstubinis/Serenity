@@ -18,10 +18,12 @@ class EngineTime{
 
 		void stop_update();
 		void stop_physics();
+		void stop_sounds();
 		void stop_render();
 
 		void calculate_update();
 		void calculate_physics();
+		void calculate_sounds();
 		void calculate_render();
 
 		float dt();
@@ -29,6 +31,7 @@ class EngineTime{
 
 		float updateTime();
 		float physicsTime();
+		float soundsTime();
 		float renderTime();
 
 		std::string& reportTime();

@@ -1725,7 +1725,7 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "        //lighting = lighting + rays;\n"
 	"        lighting = (lighting*1.1) + (rays * godRaysExposure);\n"
     "    }\n"
-    "    gl_FragColor = vec4(lighting,1.0);\n"
+	"    gl_FragColor = (vec4(lighting,1.0));\n"
     "}";
 
 #pragma endregion

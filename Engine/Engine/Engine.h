@@ -46,6 +46,7 @@ namespace Engine{
 
 				static void handleEvents();
 				static void updatePhysics();
+				static void updateSounds();
                 static void update();
                 static void render();
 

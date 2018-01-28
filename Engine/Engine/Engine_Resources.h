@@ -26,9 +26,6 @@ class Mesh;
 class Material;
 class Object;
 class SunLight;
-class SoundEffectBasic;
-class SoundEffect;
-class SoundMusic;
 class MeshInstance;
 
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
@@ -76,7 +73,6 @@ namespace Engine{
 
                     static std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
                     static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
-                    static std::unordered_map<std::string,boost::shared_ptr<SoundEffectBasic>> m_Sounds;
                     static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
                     static std::unordered_map<std::string,boost::shared_ptr<Camera>> m_Cameras;
                     static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
@@ -117,9 +113,6 @@ namespace Engine{
         void setActiveCamera(std::string name);
 
         Scene* getScene(std::string n);
-        SoundEffectBasic* getSound(std::string n);
-        SoundMusic* getSoundAsMusic(std::string n);
-        SoundEffect* getSoundAsEffect(std::string n);
 
         boost::shared_ptr<Object>& getObjectPtr(std::string);
         boost::shared_ptr<Camera>& getCameraPtr(std::string);
@@ -152,13 +145,6 @@ namespace Engine{
         void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         void addShaderProgram(std::string name, std::string vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-
-
-        void addSound(std::string name, std::string file,bool asEffect = true);
-        void addSoundAsEffect(std::string name, std::string file);
-        void addSoundAsMusic(std::string name, std::string file);
-
-        void removeSound(std::string name);
 
         void initResources();
     };

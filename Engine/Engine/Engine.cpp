@@ -80,6 +80,11 @@ void Engine::Detail::EngineClass::updatePhysics(){
 	Physics::Detail::PhysicsManagement::update(Resources::dt());
 	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_physics();
 }
+void Engine::Detail::EngineClass::updateSounds(){
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_sounds();
+	Sound::Detail::SoundManagement::update(Resources::dt());
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_sounds();
+}
 void Engine::Detail::EngineClass::render(){
 	Engine::Resources::Detail::ResourceManagement::m_Time.stop_render();
 
@@ -203,6 +208,7 @@ void Engine::Detail::EngineClass::run(){
 
         update();
 		updatePhysics();
+		updateSounds();
         render();
 		
 		Engine::Resources::Detail::ResourceManagement::m_Time.calculate();

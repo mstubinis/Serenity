@@ -4,116 +4,123 @@
 using namespace Engine;
 using namespace std;
 
-sf::SoundBuffer* Sound::Detail::SoundManagement::m_Buffer = NULL;
+std::unordered_map<std::string,boost::shared_ptr<SoundData>> Sound::Detail::SoundManagement::m_SoundData;
 
-void Sound::Detail::SoundManagement::init(){
-    m_Buffer = new sf::SoundBuffer();
+class SoundData::impl{
+    public:
+		sf::SoundBuffer* m_Buffer;
+		std::string m_File;
+
+		void init(){
+			m_Buffer = new sf::SoundBuffer();
+			m_File = "";
+		}
+		void loadFromFile(string file){
+			init();
+			m_Buffer->loadFromFile(file);
+			m_File = file;
+		}
+
+};
+SoundData::SoundData():m_i(new impl){
+	m_i->init();
 }
-void Sound::Detail::SoundManagement::destruct(){
-    SAFE_DELETE(m_Buffer);
+SoundData::SoundData(string file):m_i(new impl){
+	m_i->loadFromFile(file);
 }
-bool Sound::Detail::SoundManagement::isStopped(sf::SoundSource::Status status){
-    if(status == sf::SoundSource::Status::Stopped) return true; return false;
+SoundData::~SoundData(){
+
 }
-bool Sound::Detail::SoundManagement::isPlaying(sf::SoundSource::Status status){
-    if(status == sf::SoundSource::Status::Playing) return true; return false;
-}
-bool Sound::Detail::SoundManagement::isPaused(sf::SoundSource::Status status){
-    if(status == sf::SoundSource::Status::Paused) return true; return false;
-}
-SoundEffectBasic::SoundEffectBasic(string& name,string file):EngineResource(name){ 
-    s = nullptr;
-}
-SoundEffectBasic::~SoundEffectBasic(){
-    SAFE_DELETE(s);
-}
-glm::vec3 SoundEffectBasic::getPosition(){ sf::Vector3f v = s->getPosition(); return glm::vec3(v.x,v.y,v.z); }
-float SoundEffectBasic::getAttenuation(){ return s->getAttenuation(); }
-float SoundEffectBasic::getPitch(){ return s->getPitch(); }
-float SoundEffectBasic::getVolume(){ return s->getVolume(); }
-float SoundEffectBasic::getMinDistance(){ return s->getMinDistance(); }
-void SoundEffectBasic::setPosition(float x,float y,float z){ s->setPosition(x,y,z); }
-void SoundEffectBasic::setPosition(glm::vec3 pos){ SoundEffectBasic::setPosition(pos.x,pos.y,pos.z); }
-void SoundEffectBasic::setAttenuation(float a){ s->setAttenuation(a); }
-void SoundEffectBasic::setVolume(float volume){ s->setVolume(volume); }
-void SoundEffectBasic::setRelativeToListener(bool b){ s->setRelativeToListener(b); }
-void SoundEffectBasic::setMinDistance(float d){ s->setMinDistance(d); }
-SoundEffect::SoundEffect(string& name,string file,bool loop, glm::vec3 sourceOrigin):SoundEffectBasic(name,file){
-    Sound::Detail::SoundManagement::m_Buffer->loadFromFile(file);
-    s = new sf::Sound(*Sound::Detail::SoundManagement::m_Buffer);
-    static_cast<sf::Sound*>(s)->setLoop(loop);
-    static_cast<sf::Sound*>(s)->setPosition(sf::Vector3f(sourceOrigin.x,sourceOrigin.y,sourceOrigin.z));
+sf::SoundBuffer* SoundData::getBuffer(){ return m_i->m_Buffer; }
+std::string SoundData::getFilename(){ return m_i->m_File; }
+
+
+
+class SoundBaseClass::impl{
+    public:
+		sf::SoundSource* m_SoundSource;
+};
+SoundBaseClass::SoundBaseClass():m_i(new impl){}
+SoundBaseClass::~SoundBaseClass(){}
+sf::SoundSource* SoundBaseClass::getPtr(){ return m_i->m_SoundSource; }
+void SoundBaseClass::setPtr(sf::SoundSource* s){ m_i->m_SoundSource = s; }
+void SoundBaseClass::play(){}
+void SoundBaseClass::pause(){}
+void SoundBaseClass::stop(){}
+
+class SoundEffect::impl{
+    public:
+		sf::Sound* m_SoundEffect;
+};
+SoundEffect::SoundEffect():SoundBaseClass(),m_i(new impl){
+	m_i->m_SoundEffect = new sf::Sound();
+	setPtr(m_i->m_SoundEffect);
 }
 SoundEffect::~SoundEffect(){
+	delete m_i->m_SoundEffect;
+	m_i->m_SoundEffect = nullptr;
 }
-void SoundEffect::play(){ static_cast<sf::Sound*>(s)->play(); }
-void SoundEffect::pause(){ static_cast<sf::Sound*>(s)->pause(); }
-void SoundEffect::playAt(float seconds){ static_cast<sf::Sound*>(s)->setPlayingOffset(sf::seconds(seconds)); }
-void SoundEffect::stop(){ static_cast<sf::Sound*>(s)->stop(); }
-void SoundEffect::loop(bool loop){ static_cast<sf::Sound*>(s)->setLoop(loop); }
-sf::SoundSource::Status SoundEffect::getStatus(){ return static_cast<sf::Sound*>(s)->getStatus(); }
-bool SoundEffect::isStopped(){ return Sound::Detail::SoundManagement::isStopped(this->getStatus()); }
-bool SoundEffect::isPlaying(){ return Sound::Detail::SoundManagement::isPlaying(this->getStatus()); }
-bool SoundEffect::isPaused(){ return Sound::Detail::SoundManagement::isPaused(this->getStatus()); }
-bool SoundEffect::isLooping(){ return static_cast<sf::Sound*>(s)->getLoop(); }
-SoundMusic::SoundMusic(string& name,string file,bool loop):SoundEffectBasic(name,file){
-    s = new sf::Music();
-    static_cast<sf::Music*>(s)->openFromFile(file);
-    static_cast<sf::Music*>(s)->setLoop(loop);
+void SoundEffect::loadFromFile(string file){
+	if(!Sound::Detail::SoundManagement::m_SoundData.count(file)){
+		Sound::Detail::SoundManagement::addSoundDataFromFile(file);
+	}
+	m_i->m_SoundEffect->setBuffer( *(Sound::Detail::SoundManagement::m_SoundData.at(file).get()->getBuffer()) );
+}
+void SoundEffect::play(){
+	m_i->m_SoundEffect->play();
+}
+void SoundEffect::pause(){
+	m_i->m_SoundEffect->pause();
+}
+void SoundEffect::stop(){
+	m_i->m_SoundEffect->stop();
+}
+
+
+
+class SoundMusic::impl{
+    public:
+		sf::Music* m_SoundEffect;
+};
+SoundMusic::SoundMusic():SoundBaseClass(),m_i(new impl){
+	m_i->m_SoundEffect = new sf::Music();
+	setPtr(m_i->m_SoundEffect);
 }
 SoundMusic::~SoundMusic(){
+	delete m_i->m_SoundEffect;
+	m_i->m_SoundEffect = nullptr;
 }
-void SoundMusic::play(){ static_cast<sf::Music*>(s)->play(); }
-void SoundMusic::pause(){ static_cast<sf::Music*>(s)->pause(); }
-void SoundMusic::playAt(float seconds){ static_cast<sf::Music*>(s)->setPlayingOffset(sf::seconds(seconds)); }
-void SoundMusic::stop(){ static_cast<sf::Music*>(s)->stop(); }
-void SoundMusic::loop(bool doLoop){ static_cast<sf::Music*>(s)->setLoop(doLoop); }
-sf::SoundSource::Status SoundMusic::getStatus(){ return static_cast<sf::Music*>(s)->getStatus(); }
-bool SoundMusic::isStopped(){ return Sound::Detail::SoundManagement::isStopped(this->getStatus()); }
-bool SoundMusic::isPlaying(){ return Sound::Detail::SoundManagement::isPlaying(this->getStatus()); }
-bool SoundMusic::isPaused(){ return Sound::Detail::SoundManagement::isPaused(this->getStatus()); }
-bool SoundMusic::isLooping(){ return static_cast<sf::Music*>(s)->getLoop(); }
-unsigned int SoundMusic::getChannelCount(){ return static_cast<sf::Music*>(s)->getChannelCount(); }
-bool SoundMusic::isMono(){ if(getChannelCount() == 1) return true; return false; }
-bool SoundMusic::isStereo(){ if(getChannelCount() == 2) return true; return false; }
-void Sound::stop(string music){
-    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->stop();
+void SoundMusic::loadFromFile(string file){
+	if (!m_i->m_SoundEffect->openFromFile(file)){
+		// error...
+	}
 }
-void Sound::play(string music, bool loop){
-    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->play();
-    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+void SoundMusic::play(){
+	m_i->m_SoundEffect->play();
 }
-void Sound::playAt(string music, float seconds,bool loop){
-    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->playAt(seconds);
-    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+void SoundMusic::pause(){
+	m_i->m_SoundEffect->pause();
 }
-void Sound::loop(string music, bool loop){
-    Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get()->loop(loop);
+void SoundMusic::stop(){
+	m_i->m_SoundEffect->stop();
 }
-void Sound::setCurrentMusicAndPlay(string music){
-    for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
-        SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());
-        if(music != NULL){
-            if(music->isPlaying()){
-                music->stop();
-            }
-        }
-    }
-    dynamic_cast<SoundMusic*>(Engine::Resources::Detail::ResourceManagement::m_Sounds[music].get())->play();
+
+
+void Sound::Detail::SoundManagement::init(){
+
 }
-void Sound::setMasterMusicVolume(float volume){
-    for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
-        SoundMusic* music = dynamic_cast<SoundMusic*>(sound.second.get());
-        if(music != NULL){
-            music->setVolume(volume);
-        }
-    }
+void Sound::Detail::SoundManagement::destruct(){
+	for (auto it = m_SoundData.begin();it != m_SoundData.end(); ++it ) it->second.reset();
 }
-void Sound::setMasterEffectVolume(float volume){
-    for(auto sound:Engine::Resources::Detail::ResourceManagement::m_Sounds){
-        SoundEffect* effect = dynamic_cast<SoundEffect*>(sound.second.get());
-        if(effect != NULL){
-            effect->setVolume(volume);
-        }
-    }
+void Sound::Detail::SoundManagement::update(float dt){
+}
+void Sound::Detail::SoundManagement::addSoundDataFromFile(string file){
+	if(!m_SoundData.count(file)){
+		m_SoundData.emplace(file,boost::make_shared<SoundData>(file));
+	}
+}
+void Sound::Detail::SoundManagement::addSoundDataFromFile(string name,string file){
+	if(!m_SoundData.count(name)){
+		m_SoundData.emplace(name,boost::make_shared<SoundData>(file));
+	}
 }

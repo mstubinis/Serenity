@@ -2,83 +2,65 @@
 #ifndef ENGINE_ENGINE_SOUNDS_H
 #define ENGINE_ENGINE_SOUNDS_H
 
-#include "Engine_ResourceBasic.h"
 
 #include <SFML/Audio.hpp>
 #include <glm/vec3.hpp>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
-class SoundEffectBasic: public EngineResource{
-    protected:
-        sf::SoundSource* s;
-    public:
-        SoundEffectBasic(std::string& name,std::string file);
-        virtual ~SoundEffectBasic();
 
-        glm::vec3 getPosition();
-        float getAttenuation();
-        float getPitch();
-        float getVolume();
-        float getMinDistance();
+class SoundData{
+	private:
+		class impl; std::unique_ptr<impl> m_i;
+	public:
+		SoundData();
+		SoundData(std::string);
+		~SoundData();
 
-        virtual void play(){}
-        virtual void pause(){}
-        virtual void playAt(float seconds){}
-        virtual void stop(){}
-        virtual void loop(bool = true){}
-
-        virtual void setPosition(float,float,float);
-        virtual void setPosition(glm::vec3);
-        virtual void setVolume(float);
-        virtual void setAttenuation(float);
-        virtual void setRelativeToListener(bool);
-        virtual void setMinDistance(float);
-
-        virtual bool isStopped(){ return false; }
-        virtual bool isPlaying(){ return false; }
-        virtual bool isPaused(){ return false; }
-        virtual bool isLooping(){ return false; }
-
-        virtual unsigned int getChannelCount(){ return 0; }
-        virtual bool isMono(){ return false; }
-        virtual bool isStereo(){ return false; }
+		sf::SoundBuffer* getBuffer();
+		std::string getFilename();
 };
-class SoundEffect: public SoundEffectBasic{
-    public:
-        SoundEffect(std::string& name,std::string file, bool loop = false, glm::vec3 sourceOrigin = glm::vec3(0));
-        virtual ~SoundEffect();
 
-        virtual void play();
-        virtual void pause();
-        virtual void playAt(float seconds);
-        virtual void stop();
-        virtual void loop(bool = true);
 
-        virtual sf::SoundSource::Status getStatus();
-        virtual bool isStopped();
-        virtual bool isPlaying();
-        virtual bool isPaused();
-        virtual bool isLooping();
+class SoundBaseClass{
+	private:
+		class impl; std::unique_ptr<impl> m_i;
+	public:
+		SoundBaseClass();
+		~SoundBaseClass();
+
+		sf::SoundSource* getPtr();
+		void setPtr(sf::SoundSource*);
+		virtual void play();
+		virtual void pause();
+		virtual void stop();
 };
-class SoundMusic: public SoundEffectBasic{
-    public:
-        SoundMusic(std::string& name,std::string file, bool loop = true);
-        virtual ~SoundMusic();
+class SoundEffect: public SoundBaseClass{
+	private:
+		class impl; std::unique_ptr<impl> m_i;
+	public:
+		SoundEffect();
+		~SoundEffect();
 
-        virtual void play();
-        virtual void pause();
-        virtual void playAt(float seconds);
-        virtual void stop();
-        virtual void loop(bool = true);
+		void loadFromFile(std::string);
+		void play();
+		void pause();
+		void stop();
+};
+class SoundMusic: public SoundBaseClass{
+	private:
+		class impl; std::unique_ptr<impl> m_i;
+	public:
+		SoundMusic();
+		~SoundMusic();
 
-        virtual sf::SoundSource::Status getStatus();
-        virtual bool isStopped();
-        virtual bool isPlaying();
-        virtual bool isPaused();
-        virtual bool isLooping();
-
-        virtual unsigned int getChannelCount();
-        virtual bool isMono();
-        virtual bool isStereo();
+		void loadFromFile(std::string);
+		void play();
+		void pause();
+		void stop();
 };
 
 namespace Engine{
@@ -86,23 +68,17 @@ namespace Engine{
         namespace Detail{
             class SoundManagement final{
                 public:
-                    static sf::SoundBuffer* m_Buffer;
+					static std::unordered_map<std::string,boost::shared_ptr<SoundData>> m_SoundData;
 
                     static void init();
                     static void destruct();
+					static void update(float dt);
 
-                    static bool isStopped(sf::SoundSource::Status);
-                    static bool isPlaying(sf::SoundSource::Status);
-                    static bool isPaused(sf::SoundSource::Status);
+					static void addSoundDataFromFile(std::string file);
+					static void addSoundDataFromFile(std::string name, std::string file);
+
             };
         };
-        void stop(std::string music);
-        void play(std::string music, bool loop = true);
-        void playAt(std::string music, float seconds,bool loop = true);
-        void loop(std::string music, bool loop = true);
-        void setCurrentMusicAndPlay(std::string music);
-        void setMasterMusicVolume(float volume);
-        void setMasterEffectVolume(float volume);
     };
 };
 

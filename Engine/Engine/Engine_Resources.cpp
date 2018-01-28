@@ -32,7 +32,6 @@ bool Detail::ResourceManagement::m_DynamicMemory = false;
 
 unordered_map<string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_MeshInstances;
 unordered_map<string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
-unordered_map<string,boost::shared_ptr<SoundEffectBasic>> Detail::ResourceManagement::m_Sounds;
 unordered_map<string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
 unordered_map<string,boost::shared_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
 unordered_map<string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
@@ -52,7 +51,6 @@ void Resources::Detail::ResourceManagement::destruct(){
     for (auto it = m_Shaders.begin();it != m_Shaders.end(); ++it )               it->second.reset();
     for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
     for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
-    for (auto it = m_Sounds.begin();it != m_Sounds.end(); ++it )                 it->second.reset();
     for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
     SAFE_DELETE(Detail::ResourceManagement::m_Window);
 }
@@ -68,7 +66,6 @@ boost::shared_ptr<Camera>& Resources::getCameraPtr(string n){return Detail::Reso
 boost::shared_ptr<Texture>& Resources::getTexturePtr(string n){return Detail::ResourceManagement::m_Textures.at(n);}
 
 Scene* Resources::getScene(string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
-SoundEffectBasic* Resources::getSound(string n){return static_cast<SoundEffectBasic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
 Object* Resources::getObject(string n){return static_cast<Object*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Objects,n));}
 Camera* Resources::getCamera(string n){return static_cast<Camera*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Cameras,n));}
 Font* Resources::getFont(string n){return static_cast<Font*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Fonts,n));}
@@ -120,19 +117,9 @@ void Resources::addShaderProgram(string n, string v, Shader* f, ShaderRenderPass
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
 
-void Resources::addSound(string n, string f, bool b){
-    if(b){Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundEffect>(n,f));}
-    else{Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Sounds,n,boost::make_shared<SoundMusic>(n,f));}
-}
-void Resources::addSoundAsEffect(string n, string f){ addSound(n,f,true); }
-void Resources::addSoundAsMusic(string n, string f){ addSound(n,f,false); }
-
-SoundMusic* Resources::getSoundAsMusic(string n){return static_cast<SoundMusic*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
-SoundEffect* Resources::getSoundAsEffect(string n){ return static_cast<SoundEffect*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Sounds,n));}
 
 void Resources::removeMesh(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Meshes,n);}
 void Resources::removeMaterial(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Materials,n);}
-void Resources::removeSound(string n){Detail::ResourceManagement::_removeFromContainer(Detail::ResourceManagement::m_Sounds,n);}
 
 void Resources::initResources(){
     Engine::Shaders::Detail::ShadersManagement::init();

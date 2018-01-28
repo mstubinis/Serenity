@@ -416,7 +416,8 @@ class Mesh::impl{
                     }
                 }
                 #pragma endregion
-                _calculateTBN(data);
+                //_calculateTBN(data);
+				_calculateTBNAssimp(data);
                 //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
             }
             for(uint i = 0; i < node->mNumChildren; i++){
@@ -452,9 +453,9 @@ class Mesh::impl{
                 b = glm::cross(n, t);
 
                 //handedness
-                //if (glm::dot(glm::cross(n, t), b) < 0.0f){
-                //     t = t * -1.0f;
-                //}
+                if (glm::dot(glm::cross(n, t), b) < 0.0f){
+					 t *= -1.0f;
+                }
             }
         }
         void _calculateTBN(ImportedMeshData& data){

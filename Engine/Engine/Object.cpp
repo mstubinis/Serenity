@@ -27,7 +27,7 @@ Object::Object(string n,Scene* scene, bool isNotCamera){
             scene = Resources::getCurrentScene();
         }
         setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, name()));
-        Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
+		Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
 
         scene->objects().emplace(name(),this);
     }
