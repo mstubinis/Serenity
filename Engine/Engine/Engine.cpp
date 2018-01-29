@@ -91,7 +91,7 @@ void Engine::Detail::EngineClass::render(){
     Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
     Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),x,y);
     Resources::getWindow()->display();
-
+	
 	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_render();
 }
 #pragma region Event Handler Methods

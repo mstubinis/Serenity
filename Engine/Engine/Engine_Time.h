@@ -26,6 +26,25 @@ class EngineTime{
 		void calculate_sounds();
 		void calculate_render();
 
+
+		void stop_rendering_geometry();
+		void stop_rendering_lighting();
+		void stop_rendering_ssao();
+		void stop_rendering_aa();
+		void stop_rendering_godrays();
+
+		void calculate_rendering_geometry();
+		void calculate_rendering_lighting();
+		void calculate_rendering_ssao();
+		void calculate_rendering_aa();
+		void calculate_rendering_godrays();
+
+		float rendering_geometryTime();
+		float rendering_lightingTime();
+		float rendering_ssaoTime();
+		float rendering_aaTime();
+		float rendering_godraysTime();
+
 		float dt();
 		float applicationTime();
 
@@ -36,6 +55,9 @@ class EngineTime{
 
 		std::string& reportTime();
 		std::string& reportTime(uint decimals);
+
+		std::string& reportTimeRendering();
+		std::string& reportTimeRendering(uint decimals);
 };
 
 #endif

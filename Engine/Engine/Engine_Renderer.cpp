@@ -674,8 +674,11 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
     if(doGodRays == false) Renderer::Settings::GodRays::disable();
     if(doAA == false) Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::None;
 
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_geometry();
     _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_geometry();
 
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_godrays();
     if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays){
         gbuffer->start(GBufferType::GodRays,"RGBA",false);
         Object* o = Resources::getObject("Sun");
@@ -691,14 +694,13 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 
         _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
     }
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_godrays();
 
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_lighting();
 	glDisable(GL_BLEND);
-
 	_passStencil(gbuffer,camera,fboWidth,fboHeight);
-
     glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is equal to 1 (0xFF == 255)
     glStencilMask(0x00); // disable writing to the stencil buffer
-
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
@@ -711,7 +713,9 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
     //_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
 
 	glDisable(GL_STENCIL_TEST);
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_lighting();
 
+	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_ssao();
     string _channels;
     bool isdoingssao = false;
     if(doSSAO && RendererInfo::SSAOInfo::ssao){ isdoingssao = true; _channels = "RGBA"; }
@@ -725,15 +729,20 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         gbuffer->start(GBufferType::Bloom,_channels,false);
         _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
     }
-
+	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_ssao();
     gbuffer->start(GBufferType::Misc);
     _passHDR(gbuffer,camera,fboWidth,fboHeight);
 
 
+	
     bool doingaa = false;
     if(doAA && RendererInfo::GeneralInfo::aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
 
     if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None || !doingaa){
+		//no aa so simulate 0 ms
+		Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_aa();
+		Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_aa();
+
         gbuffer->stop(fbo,rbo);
         _passFinal(gbuffer,camera,fboWidth,fboHeight);
     }
@@ -744,12 +753,16 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         //_passEdgeCanny(gbuffer,camera,fboWidth,fboHeight,GBufferType::Lighting);
 
         gbuffer->stop(fbo,rbo);
+		Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_aa();
         _passFXAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
+		Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_aa();
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && doingaa){
         gbuffer->start(GBufferType::Lighting);
         _passFinal(gbuffer,camera,fboWidth,fboHeight);
+		Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_aa();
         _passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
+		Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_aa();
     }
 
     _passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
@@ -780,6 +793,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         p->unbind();
     }
 	*/
+	
     Settings::enableDepthTest();
     Settings::enableDepthMask();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -795,6 +809,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 		vector_clear(m_FontsToBeRendered);
 		vector_clear(m_TexturesToBeRendered);
 	}
+	
 }
 void Detail::RenderManagement::_passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_SSAO"); p->bind();
