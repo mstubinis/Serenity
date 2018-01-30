@@ -107,6 +107,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_AnimationProcessor.cpp" />
     <ClCompile Include="Engine_BuiltInShaders.cpp" />
+    <ClCompile Include="Engine_GLStateMachine.cpp" />
     <ClCompile Include="Engine_Math.cpp" />
     <ClCompile Include="Engine_Networking.cpp" />
     <ClCompile Include="Engine_Noise.cpp" />
@@ -155,6 +156,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Constraint.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Engine_AnimationProcessor.h" />
+    <ClInclude Include="Engine_GLStateMachine.h" />
     <ClInclude Include="Engine_Math.h" />
     <ClInclude Include="Engine_Networking.h" />
     <ClInclude Include="Engine_Noise.h" />

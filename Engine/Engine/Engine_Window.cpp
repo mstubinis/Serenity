@@ -60,9 +60,10 @@ class Engine_Window::impl{
             //move these 2 functions elsewhere like renderer::init() or engine::init() ?
             glewExperimental = GL_TRUE;
             glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
-            glEnable(GL_TEXTURE_2D);//is this really needed?
 
-            Renderer::Settings::enableCullFace();
+			Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
+
+			Renderer::GLEnable(GLState::CULL_FACE);
             Renderer::Settings::cullFace(GL_BACK);
 
             SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
@@ -83,8 +84,8 @@ class Engine_Window::impl{
             SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
             m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
 
-            glEnable(GL_TEXTURE_2D);//is this really needed?
-            Renderer::Settings::enableCullFace();
+            Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
+            Renderer::GLEnable(GLState::CULL_FACE);
             Renderer::Settings::cullFace(GL_BACK);
 
             Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);

@@ -8,8 +8,7 @@ typedef unsigned int uint;
 
 class EngineTime{
 	private:
-		class impl;
-		std::unique_ptr<impl> m_i;
+		class impl; std::unique_ptr<impl> m_i;
 	public:
 		EngineTime();
 		~EngineTime();
@@ -32,18 +31,21 @@ class EngineTime{
 		void stop_rendering_ssao();
 		void stop_rendering_aa();
 		void stop_rendering_godrays();
+		void stop_rendering_display();
 
 		void calculate_rendering_geometry();
 		void calculate_rendering_lighting();
 		void calculate_rendering_ssao();
 		void calculate_rendering_aa();
 		void calculate_rendering_godrays();
+		void calculate_rendering_display();
 
 		float rendering_geometryTime();
 		float rendering_lightingTime();
 		float rendering_ssaoTime();
 		float rendering_aaTime();
 		float rendering_godraysTime();
+		float rendering_displayTime();
 
 		float dt();
 		float applicationTime();

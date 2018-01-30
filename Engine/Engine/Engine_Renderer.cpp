@@ -59,13 +59,9 @@ float Detail::RendererInfo::SMAAInfo::SMAA_AREATEX_SUBTEX_SIZE = 0.14285714285f;
 
 
 float Detail::RendererInfo::GeneralInfo::gamma = 2.2f;
-bool Detail::RendererInfo::GeneralInfo::alpha_test = false;
-bool Detail::RendererInfo::GeneralInfo::depth_test = true;
-bool Detail::RendererInfo::GeneralInfo::depth_mask = true;
 ShaderP* Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
 string Detail::RendererInfo::GeneralInfo::current_bound_material = "";
 unsigned char Detail::RendererInfo::GeneralInfo::cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
-bool Detail::RendererInfo::GeneralInfo::cull_face_enabled = false; //its disabled by default
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_read_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo = 0;
 GLuint Detail::RendererInfo::GeneralInfo::current_bound_rbo = 0;
@@ -153,20 +149,15 @@ void Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorit
     }
 }
 void Settings::enableCullFace(bool b){
-    if(b == true && Detail::RendererInfo::GeneralInfo::cull_face_enabled == false){
-        glEnable(GL_CULL_FACE);
-        Detail::RendererInfo::GeneralInfo::cull_face_enabled = true;
+    if(b){
+		GLEnable(GLState::CULL_FACE);
     }
-    else if(b == false && Detail::RendererInfo::GeneralInfo::cull_face_enabled == true){
-        glDisable(GL_CULL_FACE);
-        Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
+    else{
+		GLDisable(GLState::CULL_FACE);
     }
 }
 void Settings::disableCullFace(){
-    if(Detail::RendererInfo::GeneralInfo::cull_face_enabled == true){
-        glDisable(GL_CULL_FACE);
-        Detail::RendererInfo::GeneralInfo::cull_face_enabled = false;
-    }
+	GLDisable(GLState::CULL_FACE);
 }
 void Settings::cullFace(uint s){
     //0 = back | 1 = front | 2 = front and back
@@ -210,52 +201,37 @@ void Settings::clear(bool color, bool depth, bool stencil){
 		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 void Settings::enableAlphaTest(bool b){
-    if(b == true && Renderer::Detail::RendererInfo::GeneralInfo::alpha_test == false){
-        glEnable(GL_ALPHA_TEST);
-        Detail::RendererInfo::GeneralInfo::alpha_test = true;
+    if(b){
+		GLEnable(GLState::ALPHA_TEST);
     }
-    else if(b == false && Detail::RendererInfo::GeneralInfo::alpha_test == true){
-        glDisable(GL_ALPHA_TEST);
-        Detail::RendererInfo::GeneralInfo::alpha_test = false;
+    else{
+		GLDisable(GLState::ALPHA_TEST);
     }
 }
 void Settings::disableAlphaTest(){
-    if(Detail::RendererInfo::GeneralInfo::alpha_test == true){
-        glDisable(GL_ALPHA_TEST);
-        Detail::RendererInfo::GeneralInfo::alpha_test = false;
-    }
+	GLDisable(GLState::ALPHA_TEST);
 }
 void Settings::enableDepthTest(bool b){
-    if(b == true && Detail::RendererInfo::GeneralInfo::depth_test == false){
-        glEnable(GL_DEPTH_TEST);
-        Detail::RendererInfo::GeneralInfo::depth_test = true;
+    if(b){
+		GLEnable(GLState::DEPTH_TEST);
     }
-    else if(b == false && Detail::RendererInfo::GeneralInfo::depth_test == true){
-        glDisable(GL_DEPTH_TEST);
-        Detail::RendererInfo::GeneralInfo::depth_test = false;
+    else{
+		GLDisable(GLState::DEPTH_TEST);
     }
 }
 void Settings::disableDepthTest(){
-    if(Detail::RendererInfo::GeneralInfo::depth_test == true){
-        glDisable(GL_DEPTH_TEST);
-        Detail::RendererInfo::GeneralInfo::depth_test = false;
-    }
+	GLDisable(GLState::DEPTH_TEST);
 }
 void Settings::enableDepthMask(bool b){
-    if(b == true && Detail::RendererInfo::GeneralInfo::depth_mask == false){
-        glDepthMask(GL_TRUE);
-        Detail::RendererInfo::GeneralInfo::depth_mask = true;
+    if(b){
+		GLEnable(GLState::DEPTH_MASK);
     }
-    else if(b == false && Detail::RendererInfo::GeneralInfo::depth_mask == true){
-        glDepthMask(GL_FALSE);
-        Detail::RendererInfo::GeneralInfo::depth_mask = false;
+    else{
+		GLDisable(GLState::DEPTH_MASK);
     }
 }
 void Settings::disableDepthMask(){
-    if(Detail::RendererInfo::GeneralInfo::depth_mask == true){
-        glDepthMask(GL_FALSE);
-        Detail::RendererInfo::GeneralInfo::depth_mask = false;
-    }
+	GLDisable(GLState::DEPTH_MASK);
 }
 void Settings::enableDrawPhysicsInfo(bool b){ Detail::RendererInfo::GeneralInfo::draw_physics_debug = b; }
 void Settings::disableDrawPhysicsInfo(){ Detail::RendererInfo::GeneralInfo::draw_physics_debug = false; }
@@ -377,7 +353,7 @@ void Detail::RenderManagement::init(){
     glBindTexture(GL_TEXTURE_2D,0);
 
     glClearStencil(0);
-	glDisable(GL_STENCIL_TEST);
+	GLDisable(GLState::STENCIL_TEST);
 }
 void Detail::RenderManagement::postInit(){
     _generateBRDFLUTCookTorrance(512);
@@ -471,7 +447,7 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* camera,uin
 
     Settings::clear();
     glDepthFunc(GL_LEQUAL);
-    glDisable(GL_BLEND); //disable blending on all mrts
+	GLDisable(GLState::BLEND);//disable blending on all mrts
 
     Scene* scene = Resources::getCurrentScene();
     glm::vec3 clear = scene->getBackgroundColor();
@@ -697,11 +673,13 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_godrays();
 
 	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_lighting();
-	glDisable(GL_BLEND);
+
+	GLDisable(GLState::BLEND);
 	_passStencil(gbuffer,camera,fboWidth,fboHeight);
     glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is equal to 1 (0xFF == 255)
     glStencilMask(0x00); // disable writing to the stencil buffer
-    glEnable(GL_BLEND);
+
+	GLEnable(GLState::BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
     if(RendererInfo::LightingInfo::lighting == true && s->lights().size() > 0){
@@ -709,10 +687,10 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
         Renderer::Settings::clear(true,false,false);//this is needed for godrays
         _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
     }
-    glDisable(GL_BLEND);
+	GLDisable(GLState::BLEND);
     //_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
 
-	glDisable(GL_STENCIL_TEST);
+	GLDisable(GLState::STENCIL_TEST);
 	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_lighting();
 
 	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_ssao();
@@ -767,7 +745,7 @@ void Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,uint fboWi
 
     _passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
 
-    glEnable(GL_BLEND);
+	GLEnable(GLState::BLEND);
     Settings::disableDepthTest();
     Settings::disableDepthMask();
 	if(mainRenderFunc){
@@ -855,7 +833,7 @@ void Detail::RenderManagement::_passStencil(GBuffer* gbuffer,Camera* c,uint& fbu
 
 	gbuffer->getMainFBO()->bind();
 
-    glEnable(GL_STENCIL_TEST);
+	GLEnable(GLState::STENCIL_TEST);
     glStencilMask(0xFF); //all 8 bits are modified
     glStencilFunc(GL_NEVER, 1, 0xFF);//stencil test never passes
     glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
@@ -1008,7 +986,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
 
 	ShaderP* p;
 	if(Detail::RendererInfo::GeneralInfo::stencil){
-		glEnable(GL_STENCIL_TEST);
+		GLEnable(GLState::STENCIL_TEST);
 		#pragma region PassEdgeStencil
 		glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 		gbuffer->getMainFBO()->bind();
@@ -1032,10 +1010,10 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
 		glStencilMask(0x00); // disable writing to the stencil buffer
 		glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is equal to 1 (0x01 should be the value in the stencil buffer now)
 		#pragma endregion
-		glDisable(GL_STENCIL_TEST);
+		GLDisable(GLState::STENCIL_TEST);
 	}
 	if(Detail::RendererInfo::GeneralInfo::stencil){
-		glEnable(GL_STENCIL_TEST);
+		GLEnable(GLState::STENCIL_TEST);
 	}
 	#pragma region PassEdge
 	gbuffer->start(GBufferType::Misc);
@@ -1060,10 +1038,10 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     p->unbind();
 	#pragma endregion
 	if(Detail::RendererInfo::GeneralInfo::stencil){
-		glDisable(GL_STENCIL_TEST);
+		GLDisable(GLState::STENCIL_TEST);
 	}
 	if(Detail::RendererInfo::GeneralInfo::stencil){
-	    glEnable(GL_STENCIL_TEST);
+		GLEnable(GLState::STENCIL_TEST);
 	}
 	#pragma region PassBlend
     gbuffer->start(GBufferType::Normal);
@@ -1092,7 +1070,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     p->unbind();
 	#pragma endregion
 	if(Detail::RendererInfo::GeneralInfo::stencil){
-        glDisable(GL_STENCIL_TEST);
+		GLDisable(GLState::STENCIL_TEST);
 	}
 	#pragma region PassNeighbor
     //gbuffer->start(GBufferType::Misc);

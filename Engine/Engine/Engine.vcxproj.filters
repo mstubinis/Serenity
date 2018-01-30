@@ -243,6 +243,9 @@
     <ClCompile Include="Engine_SoundQueue.cpp">
       <Filter>Source Files\Engine\Engine_Sounds</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_GLStateMachine.cpp">
+      <Filter>Source Files\Engine\Engine_Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -382,6 +385,9 @@
     </ClInclude>
     <ClInclude Include="Engine_SoundQueue.h">
       <Filter>Header Files\Engine\Engine_Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_GLStateMachine.h">
+      <Filter>Header Files\Engine\Engine_Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

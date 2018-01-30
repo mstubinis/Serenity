@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace std;
+
 class EngineTime::impl{
     public:
         sf::Clock update_clock;  sf::Clock physics_clock;  sf::Clock render_clock;   sf::Clock sounds_clock;
@@ -15,14 +17,15 @@ class EngineTime::impl{
 		sf::Clock rendering_ssao_clock;     double rendering_ssao_Time;
 		sf::Clock rendering_godrays_clock;  double rendering_godrays_Time;
 		sf::Clock rendering_aa_clock;       double rendering_aa_Time;
+		sf::Clock rendering_display_clock;  double rendering_display_Time;
 
         float applicationTime;
         float deltaTime;
         uint output_frame_delay;
         uint output_frame;
 		uint decimals;
-        std::string currOutput;
-        std::string prevOutput;
+        string currOutput;
+        string prevOutput;
 
         void _init(){
             update_clock = sf::Clock();  physics_clock = sf::Clock();  render_clock = sf::Clock();  sounds_clock = sf::Clock();
@@ -34,6 +37,7 @@ class EngineTime::impl{
 			rendering_ssao_clock = sf::Clock();      rendering_ssao_Time = 0;
 			rendering_godrays_clock = sf::Clock();   rendering_godrays_Time = 0;
 			rendering_aa_clock = sf::Clock();        rendering_aa_Time = 0;
+			rendering_display_clock = sf::Clock();   rendering_display_Time = 0;
 
 
             applicationTime = 0;
@@ -42,8 +46,8 @@ class EngineTime::impl{
             output_frame_delay = 4;
             output_frame = 0;
 			decimals = 6;
-            std::string currOutput = "";
-            std::string prevOutput = "";
+            string currOutput = "";
+            string prevOutput = "";
         }
 };
 EngineTime::EngineTime():m_i(new impl){m_i->_init();}
@@ -79,19 +83,21 @@ void EngineTime::stop_rendering_lighting(){ m_i->rendering_lighting_clock.restar
 void EngineTime::stop_rendering_ssao(){ m_i->rendering_ssao_clock.restart(); }
 void EngineTime::stop_rendering_aa(){ m_i->rendering_aa_clock.restart(); }
 void EngineTime::stop_rendering_godrays(){ m_i->rendering_godrays_clock.restart(); }
+void EngineTime::stop_rendering_display(){ m_i->rendering_display_clock.restart(); }
 
 void EngineTime::calculate_rendering_geometry(){ m_i->rendering_geometry_Time = m_i->rendering_geometry_clock.restart().asSeconds(); }
 void EngineTime::calculate_rendering_lighting(){ m_i->rendering_lighting_Time = m_i->rendering_lighting_clock.restart().asSeconds(); }
 void EngineTime::calculate_rendering_ssao(){ m_i->rendering_ssao_Time = m_i->rendering_ssao_clock.restart().asSeconds(); }
 void EngineTime::calculate_rendering_aa(){ m_i->rendering_aa_Time = m_i->rendering_aa_clock.restart().asSeconds(); }
 void EngineTime::calculate_rendering_godrays(){ m_i->rendering_godrays_Time = m_i->rendering_godrays_clock.restart().asSeconds(); }
+void EngineTime::calculate_rendering_display(){ m_i->rendering_display_Time = m_i->rendering_display_clock.restart().asSeconds(); }
 
 float EngineTime::rendering_geometryTime(){ return m_i->rendering_geometry_Time; }
 float EngineTime::rendering_lightingTime(){ return m_i->rendering_lighting_Time; }
 float EngineTime::rendering_ssaoTime(){ return m_i->rendering_ssao_Time; }
 float EngineTime::rendering_aaTime(){ return m_i->rendering_aa_Time; }
 float EngineTime::rendering_godraysTime(){ return m_i->rendering_godrays_Time; }
-
+float EngineTime::rendering_displayTime(){ return m_i->rendering_display_Time; }
 
 
 std::string& EngineTime::reportTime(){ return EngineTime::reportTime(m_i->decimals); }
@@ -100,13 +106,13 @@ std::string& EngineTime::reportTime(uint decimals){
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){
 		uint fps = uint(1.0f/m_i->deltaTime);
-		std::stringstream stream1;std::stringstream stream2;std::stringstream stream3;std::stringstream stream4;std::stringstream stream5;
-		stream1 << std::fixed << std::setprecision(decimals) << m_i->updateTime;
-		stream2 << std::fixed << std::setprecision(decimals) << m_i->physicsTime;
-		stream5 << std::fixed << std::setprecision(decimals) << m_i->soundTime;
-		stream3 << std::fixed << std::setprecision(decimals) << m_i->renderTime;
-		stream4 << std::fixed << std::setprecision(decimals) << m_i->deltaTime;
-		std::string s1 = stream1.str(); std::string s2 = stream2.str(); std::string s3 = stream3.str(); std::string s4 = stream4.str(); std::string s5 = stream5.str();
+		stringstream st1, st2, st3, st4, st5;
+		st1 << std::fixed << std::setprecision(decimals) << m_i->updateTime;
+		st2 << std::fixed << std::setprecision(decimals) << m_i->physicsTime;
+		st5 << std::fixed << std::setprecision(decimals) << m_i->soundTime;
+		st3 << std::fixed << std::setprecision(decimals) << m_i->renderTime;
+		st4 << std::fixed << std::setprecision(decimals) << m_i->deltaTime;
+		string s1=st1.str(); string s2=st2.str(); string s3=st3.str(); string s4=st4.str(); string s5=st5.str();
 
         m_i->currOutput =   "Update Time:  " + s1 +
                           "\nPhysics Time: " + s2 +
@@ -125,20 +131,22 @@ std::string& EngineTime::reportTimeRendering(uint decimals){
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){
 		uint fps = uint(1.0f/m_i->deltaTime);
-		std::stringstream stream1;std::stringstream stream2;std::stringstream stream3;std::stringstream stream4;std::stringstream stream5;std::stringstream stream6;
-		stream1 << std::fixed << std::setprecision(decimals) << m_i->rendering_geometry_Time;
-		stream2 << std::fixed << std::setprecision(decimals) << m_i->rendering_lighting_Time;
-		stream3 << std::fixed << std::setprecision(decimals) << m_i->rendering_godrays_Time;
-		stream4 << std::fixed << std::setprecision(decimals) << m_i->rendering_ssao_Time;
-		stream5 << std::fixed << std::setprecision(decimals) << m_i->rendering_aa_Time;
-		stream6 << std::fixed << std::setprecision(decimals) << m_i->renderTime;
-		std::string s1 = stream1.str(); std::string s2 = stream2.str(); std::string s3 = stream3.str(); std::string s4 = stream4.str(); std::string s5 = stream5.str();std::string s6 = stream6.str();
+		stringstream st1, st2, st3, st4, st5, st6, st7;
+		st1 << std::fixed << std::setprecision(decimals) << m_i->rendering_geometry_Time;
+		st2 << std::fixed << std::setprecision(decimals) << m_i->rendering_lighting_Time;
+		st3 << std::fixed << std::setprecision(decimals) << m_i->rendering_godrays_Time;
+		st4 << std::fixed << std::setprecision(decimals) << m_i->rendering_ssao_Time;
+		st5 << std::fixed << std::setprecision(decimals) << m_i->rendering_aa_Time;
+		st6 << std::fixed << std::setprecision(decimals) << m_i->renderTime;
+		st7 << std::fixed << std::setprecision(decimals) << m_i->rendering_display_Time;
+		string s1=st1.str(); string s2=st2.str(); string s3=st3.str(); string s4=st4.str(); string s5=st5.str(); string s6=st6.str(); string s7=st7.str();
 
         m_i->currOutput =   "Geometry Time: " + s1 +
                           "\nLighting Time: " + s2 +
                           "\nGodRays Time:  " + s3 +
                           "\nSSAO Time:     " + s4 +
                           "\nAA Time:       " + s5 +
+                          "\nDisplay Time:  " + s7 +
                           "\nRender Time:   " + s6 +
                           "\nFPS: " + to_string(fps);
         m_i->prevOutput = m_i->currOutput;

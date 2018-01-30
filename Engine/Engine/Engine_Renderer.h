@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_RENDERER_H
 
 #include "Engine_Math.h"
+#include "Engine_GLStateMachine.h"
 #include "ShaderProgram.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -59,9 +60,6 @@ namespace Engine{
             struct RendererInfo final{
                 struct GeneralInfo final{
                     static float gamma;
-                    static bool alpha_test;
-                    static bool depth_mask;
-                    static bool depth_test;
                     static ShaderP* current_shader_program;
                     static std::string current_bound_material;
                     static GLuint current_bound_read_fbo;
@@ -70,7 +68,6 @@ namespace Engine{
                     static AntiAliasingAlgorithm::Algorithm aa_algorithm;
                     static glm::uvec4 gl_viewport_data;
 
-                    static bool cull_face_enabled;
                     static bool draw_physics_debug;
                     static unsigned char cull_face_status;
 
