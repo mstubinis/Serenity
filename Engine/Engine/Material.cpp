@@ -29,8 +29,8 @@ GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Num
     "ReflectionTexture",
     "RefractionTexture",
 };
-void Material::setAllDiffuseModels(DiffuseModel::Model m){ for(auto material:Resources::Detail::ResourceManagement::m_Materials){ material.second->setDiffuseModel(m); } }
-void Material::setAllSpecularModels(SpecularModel::Model m){ for(auto material:Resources::Detail::ResourceManagement::m_Materials){ material.second->setSpecularModel(m); } }
+void Material::setAllDiffuseModels(DiffuseModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setDiffuseModel(m); } }
+void Material::setAllSpecularModels(SpecularModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setSpecularModel(m); } }
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = static_cast<Material*>(r);
     glm::vec3 first(0.0f); glm::vec3 second(0.0f); glm::vec3 third(0.0f);

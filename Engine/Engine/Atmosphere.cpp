@@ -1,5 +1,6 @@
 #include "Atmosphere.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Mesh.h"
@@ -1977,7 +1978,7 @@ void Atmosphere::render(bool godsRays){
     Camera* cam = Resources::getActiveCamera();
     SunLight* sun = static_cast<SunLight*>(Resources::getObject("Sun Light"));
     glUseProgram(shader);
-    glEnable(GL_BLEND);
+	Renderer::GLEnable(GLState::BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glm::vec3 earthPosition = getPosition();
@@ -2027,8 +2028,8 @@ void Atmosphere::render(bool godsRays){
     if(godsRays){ glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 1); }
     else{         glUniform1i(glGetUniformLocation(shader, "HasGodsRays"), 0); }
 
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
+	Renderer::GLDisable(GLState::DEPTH_MASK);
+	Renderer::GLDisable(GLState::DEPTH_TEST);
     glCullFace(GL_FRONT);
 
     m_Mesh->bind();
@@ -2036,6 +2037,6 @@ void Atmosphere::render(bool godsRays){
     m_Mesh->unbind();
 
     glCullFace(GL_BACK);
-    glDisable(GL_BLEND);
+	Renderer::GLDisable(GLState::BLEND);
     glUseProgram(0);
 }

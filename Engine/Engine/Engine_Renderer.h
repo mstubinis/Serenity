@@ -70,8 +70,6 @@ namespace Engine{
 
                     static bool draw_physics_debug;
                     static unsigned char cull_face_status;
-
-					static bool stencil;
                 };
                 struct SMAAInfo final{
                     static float SMAA_THRESHOLD;
@@ -190,19 +188,10 @@ namespace Engine{
             float getGamma();
 
             void clear(bool color = true, bool depth = true, bool stencil = true);
-
-            void enableCullFace(bool b = true);
-            void disableCullFace();
             void cullFace(uint state);
 
             void setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm);
 
-            void enableAlphaTest(bool b = true);
-            void disableAlphaTest();
-            void enableDepthTest(bool b = true);
-            void disableDepthTest();
-            void enableDepthMask(bool b = true);
-            void disableDepthMask();
             void enableDrawPhysicsInfo(bool b = true);
             void disableDrawPhysicsInfo();
             namespace SMAA{

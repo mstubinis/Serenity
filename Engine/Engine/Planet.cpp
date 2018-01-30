@@ -105,7 +105,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         else                                                             Renderer::sendUniform1i("HasGodsRays",0);
 
         Renderer::Settings::cullFace(GL_FRONT);
-        glEnable(GL_BLEND);
+		Renderer::GLEnable(GLState::BLEND);
         mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod = glm::scale(mod,obj->getScale());
@@ -145,7 +145,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform1f("fExposure",2.0f);
         i->mesh()->render();
         Renderer::Settings::cullFace(GL_BACK);
-        glDisable(GL_BLEND);
+        Renderer::GLDisable(GLState::BLEND);
     }
     else{
         //Ground should be currently binded

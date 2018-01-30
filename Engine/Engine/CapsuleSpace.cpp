@@ -62,14 +62,14 @@ CapsuleRibbon::CapsuleRibbon(float tunnelRadius, string name, string material, S
 }
 CapsuleRibbon::~CapsuleRibbon(){}
 void CapsuleRibbon::bind(){
-    Renderer::Settings::disableDepthTest();
-    Renderer::Settings::disableDepthMask();
+	Renderer::GLDisable(GLState::DEPTH_TEST);
+	Renderer::GLDisable(GLState::DEPTH_MASK);
     BindableResource::bind();
 }
 void CapsuleRibbon::unbind(){
     BindableResource::unbind();
-    Renderer::Settings::enableDepthTest();
-    Renderer::Settings::enableDepthMask();
+	Renderer::GLEnable(GLState::DEPTH_TEST);
+	Renderer::GLEnable(GLState::DEPTH_MASK);
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){

@@ -5,15 +5,17 @@
 #include <unordered_map>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <functional>
+
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 typedef unsigned int uint;
-typedef std::function<void()> F;
+typedef boost::function<void()> BF;
 
 struct GLStateT{
 	bool enabled; 
-	F enableFunc, disableFunc;
-	GLStateT(const bool& b, const F& en, const F& dis){
+	BF enableFunc, disableFunc;
+	GLStateT(const bool& b, const BF& en, const BF& dis){
 		enabled = b;
 		enableFunc = en;
 		disableFunc = dis;
@@ -31,16 +33,10 @@ class GLState{
 namespace Engine{
 	namespace Renderer{
 		inline void GLEnable(const GLState::State& s){
-			GLStateT& t=GLState::SM.at(s);
-			if(t.enabled) return;
-			t.enableFunc();
-			t.enabled=1;
+			GLStateT& t=GLState::SM.at(s);if(t.enabled) return;t.enableFunc();t.enabled=1;
 		}
 		inline void GLDisable(const GLState::State& s){ 
-			GLStateT& t=GLState::SM.at(s);
-			if(!t.enabled) return;
-			t.disableFunc();
-			t.enabled=0;
+			GLStateT& t=GLState::SM.at(s);if(!t.enabled) return;t.disableFunc();t.enabled=0;
 		}
 		inline bool GLEnabled(const GLState::State& s){
 			GLStateT& t=GLState::SM.at(s);return t.enabled;
@@ -49,13 +45,7 @@ namespace Engine{
 			GLStateT& t=GLState::SM.at(s);return !t.enabled;
 		}
 		inline void RestoreGLState(){
-			for(auto a:GLState::SM){
-				GLStateT& t=a.second;
-				if(t.enabled)
-					t.enableFunc();
-				else
-					t.disableFunc();
-			}
+			for(auto a:GLState::SM){GLStateT& t=a.second;if(t.enabled)t.enableFunc();else t.disableFunc();}
 		}
 	};
 };

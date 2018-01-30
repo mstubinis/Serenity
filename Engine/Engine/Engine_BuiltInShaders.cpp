@@ -709,13 +709,6 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
     "\n";
 
 
-
-
-
-
-
-
-
 Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"//edge vert
     "\n"
