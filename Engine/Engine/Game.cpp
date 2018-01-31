@@ -6,6 +6,7 @@
 #include "Engine_Window.h"
 #include "Engine_Noise.h"
 #include "Engine_Networking.h"
+#include "Engine_SoundQueue.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
@@ -72,6 +73,7 @@ void Game::initResources(){
 
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
     Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
+
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -105,6 +107,13 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
+
+	if(Events::Keyboard::isKeyDownOnce("space")){ 
+		SoundQueue* q = new SoundQueue(); //memory leak for some reason
+		q->enqueueEffect("data/Sounds/Effects/pbc.ogg");
+		q->enqueueEffect("data/Sounds/Effects/heavy_pbc.ogg");
+		q->enqueueEffect("data/Sounds/Effects/snipercannon.ogg");
+	}
 
     if(Events::Keyboard::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);

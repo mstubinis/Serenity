@@ -65,7 +65,7 @@ namespace Engine{
                     }
                     static Scene* m_CurrentScene;
 
-					static EngineTime m_Time;
+                    static EngineTime m_Time;
 
                     static boost::weak_ptr<Camera> m_ActiveCamera;
 

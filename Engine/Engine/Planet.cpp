@@ -174,13 +174,13 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     /*
     shader = Resources::getShaderProgram("Deferred")->program();
     glUseProgram(shader);
-    glEnable(GL_BLEND);
+    GLEnable(GLState::BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for(auto ring:m_Rings)
         ring->draw(shader);
 
-    glDisable(GL_BLEND);
+    GLDisable(GLState::BLEND);
     glUseProgram(0);
     */
 }};

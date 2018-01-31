@@ -30,10 +30,10 @@ void Engine::Detail::EngineClass::init(const char* name,uint w,uint h){
 }
 void Engine::Detail::EngineClass::destruct(){
     Game::cleanup();
+	Engine::Sound::Detail::SoundManagement::destruct();
     Engine::Resources::Detail::ResourceManagement::destruct();
     Engine::Physics::Detail::PhysicsManagement::destruct();
     Engine::Renderer::Detail::RenderManagement::destruct();
-    Engine::Sound::Detail::SoundManagement::destruct();
 }
 void Engine::Detail::EngineClass::initGame(){
     Events::Mouse::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));

@@ -416,8 +416,8 @@ class Mesh::impl{
                     }
                 }
                 #pragma endregion
-                //_calculateTBN(data);
-				_calculateTBNAssimp(data);
+                _calculateTBN(data);
+				//_calculateTBNAssimp(data);
                 //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
             }
             for(uint i = 0; i < node->mNumChildren; i++){
