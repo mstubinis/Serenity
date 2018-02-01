@@ -141,6 +141,8 @@ namespace Engine{
 
         void addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
 
+		void addSound(std::string file,std::string name = "");
+
         void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);

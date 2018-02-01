@@ -74,6 +74,8 @@ void Game::initResources(){
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
     Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
 
+	Resources::addSound("data/Sounds/Effects/pbc.ogg","pbc");
+
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -109,10 +111,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
 
 	if(Events::Keyboard::isKeyDownOnce("space")){ 
-		SoundQueue* q = new SoundQueue(); //memory leak for some reason
-		q->enqueueEffect("data/Sounds/Effects/pbc.ogg");
-		q->enqueueEffect("data/Sounds/Effects/heavy_pbc.ogg");
-		q->enqueueEffect("data/Sounds/Effects/snipercannon.ogg");
+		
 	}
 
     if(Events::Keyboard::isKeyDown("z")){

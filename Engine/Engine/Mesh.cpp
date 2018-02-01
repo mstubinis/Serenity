@@ -416,8 +416,8 @@ class Mesh::impl{
                     }
                 }
                 #pragma endregion
-                _calculateTBN(data);
-				//_calculateTBNAssimp(data);
+                //_calculateTBN(data);
+				_calculateTBNAssimp(data);
                 //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
             }
             for(uint i = 0; i < node->mNumChildren; i++){
@@ -507,7 +507,7 @@ class Mesh::impl{
 
                 float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
                 // when t1, t2, t3 in same position in UV space, just use default UV direction.
-                //if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ) {
+                //if ( 0 == sx && 0 == sy && 0 == tx && 0 == ty ) {
                 if ( sx * ty == sy * tx ){
                     sx = 0.0; sy = 1.0;
                     tx = 1.0; ty = 0.0;
@@ -592,8 +592,8 @@ class Mesh::impl{
                     out_indices.push_back(index);
 
                     //average out TBN. I think this does more harm than good though
-                    temp_binormals.at(index) += data.binormals.at(i);
-                    temp_tangents.at(index) += data.tangents.at(i);
+                    //temp_binormals.at(index) += data.binormals.at(i);
+                    //temp_tangents.at(index) += data.tangents.at(i);
                 }
                 else{
                     if(m_Skeleton != nullptr){

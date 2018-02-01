@@ -268,3 +268,16 @@ void Resources::setCurrentScene(Scene* scene){
 void Resources::setCurrentScene(string s){
     Resources::setCurrentScene(static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,s))); 
 }
+
+void Resources::addSound(string file,string name){
+	if (name == ""){
+		if(!Sound::Detail::SoundManagement::m_SoundData.count(file)){
+			Sound::Detail::SoundManagement::addSoundDataFromFile(file,file,false);
+		}
+	}
+	else{
+		if(!Sound::Detail::SoundManagement::m_SoundData.count(name)){
+			Sound::Detail::SoundManagement::addSoundDataFromFile(name,file,false);
+		}
+	}
+}

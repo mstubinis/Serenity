@@ -13,8 +13,8 @@ class SoundQueue final{
 		SoundQueue(float delay = 0.5f);
 		~SoundQueue();
 
-		void enqueueEffect(std::string);
-		void enqueueMusic(std::string);
+		void enqueueEffect(std::string,uint loops = 1);
+		void enqueueMusic(std::string,uint loops = 1);
 		void dequeue();
 		void update(float dt);
 		void clear();

@@ -3,12 +3,14 @@
 #include "Engine_Resources.h"
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 using namespace std;
 using namespace Engine;
 
 class SoundQueue::impl{
     public:
-		vector<SoundBaseClass*> m_Queue;
+		vector< boost::shared_ptr<SoundBaseClass> > m_Queue;
 		float m_DelayInSeconds;
 		float m_DelayTimer;
 		bool m_IsDelayProcess;
@@ -19,8 +21,10 @@ class SoundQueue::impl{
 			m_IsDelayProcess = false;
 		}
 		void _clear(){
-			for(auto s:m_Queue){
-				SAFE_DELETE(s);
+			vector< boost::shared_ptr<SoundBaseClass> >::iterator it1;
+			for(it1 = m_Queue.begin(); it1 != m_Queue.end();){
+				(*it1).reset();
+				it1 = m_Queue.erase(it1);
 			}
 			vector_clear(m_Queue);
 		}
@@ -30,7 +34,7 @@ class SoundQueue::impl{
 		void _dequeue(){
 			if(m_Queue.size() > 0){
 				auto it = m_Queue.begin();
-				SAFE_DELETE( (*it) );
+				(*it).reset();
 				m_Queue.erase(it);
 				m_IsDelayProcess = true;
 				//do we need to manually delete? i think so
@@ -46,10 +50,10 @@ class SoundQueue::impl{
 			}
 			else{
 				if(m_Queue.size() > 0){
-					vector<SoundBaseClass*>::iterator it1;
+					vector< boost::shared_ptr<SoundBaseClass> >::iterator it1;
 					uint count = 0;
 					for(it1 = m_Queue.begin(); it1 != m_Queue.end();){
-						SoundBaseClass* s = (*it1);
+						SoundBaseClass* s = (*it1).get();
 						const SoundStatus::Status& stat = s->status();
 						if(stat == SoundStatus::Fresh && count == 0){
 							//play it
@@ -62,11 +66,16 @@ class SoundQueue::impl{
 							++it1;
 						}
 						else if(stat == SoundStatus::Stopped && count == 0){
-							//this sound has finished, remove it from the queue and start the delay process
-							//do we need to manually delete? i think so
-							SAFE_DELETE(s);
-  							it1 = m_Queue.erase(it1);
-							m_IsDelayProcess = true;
+							if(s->getLoopsLeft() == 0){
+								//this sound has finished, remove it from the queue and start the delay process
+								//do we need to manually delete? i think so
+								(*it1).reset();
+  								it1 = m_Queue.erase(it1);
+								m_IsDelayProcess = true;
+							}
+							else{
+								++it1;
+							}
 						}
 						else{
 							++it1;
@@ -86,11 +95,11 @@ SoundQueue::~SoundQueue(){
 	m_i->_destruct();
 	SAFE_DELETE(m_i);
 }
-void SoundQueue::enqueueEffect(string file){
-	m_i->m_Queue.push_back(new SoundEffect(file,true));
+void SoundQueue::enqueueEffect(string file,uint loops){
+	m_i->m_Queue.push_back( boost::make_shared<SoundEffect>(file,loops,true) );
 }
-void SoundQueue::enqueueMusic(string file){
-	m_i->m_Queue.push_back(new SoundMusic(file,true));
+void SoundQueue::enqueueMusic(string file,uint loops){
+	m_i->m_Queue.push_back( boost::make_shared<SoundMusic>(file,loops,true) );
 }
 void SoundQueue::dequeue(){
 	m_i->_dequeue();
