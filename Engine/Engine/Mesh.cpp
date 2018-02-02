@@ -426,8 +426,16 @@ class Mesh::impl{
         }
         bool _is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
         bool _is_special_float(float f){
-            if(boost::math::isnan(f)) return true;
-            if(boost::math::isinf(f)) return true;
+            if(boost::math::isnan(f)) return true; if(boost::math::isinf(f)) return true;
+            return false;
+        }
+        bool _is_special_float(glm::vec2 v){
+            if(boost::math::isnan(v.x) || boost::math::isnan(v.y) ) return true; if(boost::math::isinf(v.x) || boost::math::isinf(v.y) ) return true;
+            return false;
+        }
+        bool _is_special_float(glm::vec3 v){
+            if(boost::math::isnan(v.x) || boost::math::isnan(v.y) || boost::math::isnan(v.z) ) return true;
+            if(boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z) ) return true;
             return false;
         }
         bool _getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<MeshVertexData>& out_vertices,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
@@ -476,7 +484,7 @@ class Mesh::impl{
                 glm::vec3 bitangent = r * (deltaUV1.x * deltaPos2 - deltaUV2.x * deltaPos1);
                 tangent = glm::normalize(tangent); bitangent = glm::normalize(bitangent);
 
-                glm::vec3 t1 = tangent; glm::vec3 t2 = tangent; glm::vec3 t3 = tangent;
+                glm::vec3 t1 = tangent;   glm::vec3 t2 = tangent;   glm::vec3 t3 = tangent;
                 glm::vec3 b1 = bitangent; glm::vec3 b2 = bitangent; glm::vec3 b3 = bitangent;
                 //do we even need these next 6 lines?
                 t1 = glm::normalize(tangent - data.normals.at(p0) * glm::dot(data.normals.at(p0), tangent));
@@ -493,17 +501,37 @@ class Mesh::impl{
         }
         void _calculateTBNAssimp(ImportedMeshData& data){
             if(data.normals.size() == 0) return;
-            for(uint i=0; i < data.points.size(); i+=3){
-                uint p0 = i + 0; uint p1 = i + 1; uint p2 = i + 2;
+			uint dataSize = data.points.size();
+            for(uint i=0; i < dataSize; i+=3){
+                uint p0 = i+0; uint p1 = i+1; uint p2 = i+2;
 
-                glm::vec3 v = data.points[p1] - data.points[p0];
-                glm::vec3 w = data.points[p2] - data.points[p0];
+				glm::vec3 dataP0,dataP1,dataP2;
+				glm::vec2 uvP0,uvP1,uvP2;
+
+				uint uvSize = data.uvs.size();
+
+				if(dataSize > p0) dataP0 = data.points.at(p0);
+				else              dataP0 = glm::vec3(0.0f);
+				if(dataSize > p1) dataP1 = data.points.at(p1);
+				else              dataP1 = glm::vec3(0.0f);
+				if(dataSize > p2) dataP2 = data.points.at(p2);
+				else              dataP2 = glm::vec3(0.0f);
+
+				if(uvSize > p0)   uvP0 = data.uvs.at(p0);
+				else              uvP0 = glm::vec2(0.0f);
+				if(uvSize > p1)   uvP1 = data.uvs.at(p1);
+				else              uvP1 = glm::vec2(0.0f);
+				if(uvSize > p2)   uvP2 = data.uvs.at(p2);
+				else              uvP2 = glm::vec2(0.0f);
+
+                glm::vec3 v = dataP1 - dataP0;
+                glm::vec3 w = dataP2 - dataP0;
 
                 // texture offset p1->p2 and p1->p3
-                float sx = data.uvs[p1].x - data.uvs[p0].x;
-                float sy = data.uvs[p1].y - data.uvs[p0].y;
-                float tx = data.uvs[p2].x - data.uvs[p0].x;
-                float ty = data.uvs[p2].y - data.uvs[p0].y;
+                float sx = uvP1.x - uvP0.x;
+                float sy = uvP1.y - uvP0.y;
+                float tx = uvP2.x - uvP0.x;
+                float ty = uvP2.y - uvP0.y;
 
                 float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
                 // when t1, t2, t3 in same position in UV space, just use default UV direction.
@@ -512,12 +540,14 @@ class Mesh::impl{
                     sx = 0.0; sy = 1.0;
                     tx = 1.0; ty = 0.0;
                 }
+
                 // tangent points in the direction where to positive X axis of the texture coord's would point in model space
                 // bitangent's points along the positive Y axis of the texture coord's, respectively
-                glm::vec3 tangent; glm::vec3 bitangent;
-                tangent.x = (w.x * sy - v.x * ty) * dirCorrection;
-                tangent.y = (w.y * sy - v.y * ty) * dirCorrection;
-                tangent.z = (w.z * sy - v.z * ty) * dirCorrection;
+                glm::vec3 tangent;
+				glm::vec3 bitangent;
+                tangent.x   = (w.x * sy - v.x * ty) * dirCorrection;
+                tangent.y   = (w.y * sy - v.y * ty) * dirCorrection;
+                tangent.z   = (w.z * sy - v.z * ty) * dirCorrection;
                 bitangent.x = (w.x * sx - v.x * tx) * dirCorrection;
                 bitangent.y = (w.y * sx - v.y * tx) * dirCorrection;
                 bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
@@ -525,25 +555,26 @@ class Mesh::impl{
                 // store for every vertex of that face
                 for( uint b = 0; b < 3; ++b ) {
                     uint p;
+					glm::vec3 normal;
                     if(b==0)      p = p0;
                     else if(b==1) p = p1;
                     else          p = p2;
 
+					if(data.normals.size() > p) normal = data.normals.at(p);
+					else                        normal = glm::vec3(0.0f);
+
                     // project tangent and bitangent into the plane formed by the vertex' normal
-                    glm::vec3 localTangent = tangent - data.normals[p] * (tangent * data.normals[p]);
-                    glm::vec3 localBitangent = bitangent - data.normals[p] * (bitangent * data.normals[p]);
-                    localTangent = glm::normalize(localTangent);
+                    glm::vec3 localTangent   = tangent   - normal * (tangent   * normal);
+                    glm::vec3 localBitangent = bitangent - normal * (bitangent * normal);
+                    localTangent   = glm::normalize(localTangent);
                     localBitangent = glm::normalize(localBitangent);
 
                     // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-                    bool invalid_tangent = _is_special_float(localTangent.x) || _is_special_float(localTangent.y) || _is_special_float(localTangent.z);
-                    bool invalid_bitangent = _is_special_float(localBitangent.x) || _is_special_float(localBitangent.y) || _is_special_float(localBitangent.z);
-                    if (invalid_tangent != invalid_bitangent) {
-                        if (invalid_tangent) {
-                            localTangent = glm::normalize(glm::cross(data.normals[p],localBitangent));
-                        } else {
-                            localBitangent = glm::normalize(glm::cross(localTangent,data.normals[p]));
-                        }
+                    bool invalid_tangent   = _is_special_float(localTangent);
+                    bool invalid_bitangent = _is_special_float(localBitangent);
+                    if (invalid_tangent != invalid_bitangent){
+                        if (invalid_tangent) localTangent   = glm::normalize(glm::cross(normal,localBitangent));
+                        else                 localBitangent = glm::normalize(glm::cross(localTangent,normal));
                     }
                     data.tangents.push_back(localTangent);
                     data.binormals.push_back(localBitangent);

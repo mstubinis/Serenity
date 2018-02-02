@@ -3,12 +3,13 @@
 #define ENGINE_SOUNDQUEUE_H
 
 #include <string>
+#include <memory>
 
 typedef unsigned int uint;
 
 class SoundQueue final{
     private:
-		class impl; impl* m_i;
+		class impl; std::unique_ptr<impl> m_i;
     public:
 		SoundQueue(float delay = 0.5f);
 		~SoundQueue();

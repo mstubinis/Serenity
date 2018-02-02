@@ -26,8 +26,7 @@ void Sound::Detail::SoundManagement::destruct(){
 	vector_clear(m_CurrentlyPlayingSounds);
 }
 void Sound::Detail::SoundManagement::update(float dt){
-    vector<boost::shared_ptr<SoundBaseClass>>::iterator it;
-    for(it = m_CurrentlyPlayingSounds.begin(); it != m_CurrentlyPlayingSounds.end();){
+    for(auto it = m_CurrentlyPlayingSounds.begin(); it != m_CurrentlyPlayingSounds.end();){
 		SoundBaseClass* s = (*it).get();
 		s->update(dt);
         if(s->status() == SoundStatus::Stopped){
@@ -37,8 +36,7 @@ void Sound::Detail::SoundManagement::update(float dt){
             ++it;
         }
     }
-    vector<boost::shared_ptr<SoundQueue>>::iterator it1;
-    for(it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();){
+    for(auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();){
 		SoundQueue* s = (*it1).get();
 		s->update(dt);
 		if(s->empty()){
@@ -89,10 +87,10 @@ class SoundData::impl{
         }
 
 };
-SoundData::SoundData(bool music):m_i(new impl()){
+SoundData::SoundData(bool music):m_i(new impl){
     m_i->_init(music);
 }
-SoundData::SoundData(string file,bool music):m_i(new impl()){
+SoundData::SoundData(string file,bool music):m_i(new impl){
     m_i->_loadFromFile(file,music);
 }
 SoundData::~SoundData(){
@@ -123,7 +121,7 @@ class SoundBaseClass::impl{
 			m_Status = SoundStatus::Stopped;
 		}
 };
-SoundBaseClass::SoundBaseClass(uint loops):m_i(new impl()){
+SoundBaseClass::SoundBaseClass(uint loops):m_i(new impl){
     m_i->_init(loops);
 }
 SoundBaseClass::~SoundBaseClass(){
@@ -190,10 +188,10 @@ class SoundEffect::impl{
 			m_Sound.stop();
 		}
 };
-SoundEffect::SoundEffect(string file,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl()){
+SoundEffect::SoundEffect(string file,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){
     m_i->_init(this,file,queue);
 }
-SoundEffect::SoundEffect(SoundData* buffer,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl()){
+SoundEffect::SoundEffect(SoundData* buffer,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){
     m_i->_init(this,buffer,queue);
 }
 SoundEffect::~SoundEffect(){
@@ -285,7 +283,7 @@ class SoundMusic::impl{
 			m_Sound.stop();
 		}
 };
-SoundMusic::SoundMusic(string file,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl()){
+SoundMusic::SoundMusic(string file,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){
     m_i->_init(this,file,queue);
 }
 SoundMusic::~SoundMusic(){
@@ -370,12 +368,10 @@ void Sound::Detail::SoundManagement::_updateSoundStatus(SoundBaseClass* sound,So
 				//sound->restart();
 			}
 			else{
-				sound->m_i->m_CurrentLoop = 0;
 				sound->stop();
 			}
 		}
 		else if(sound->m_i->m_Loops == 1){//only once
-			sound->m_i->m_CurrentLoop = 0;
 			sound->stop();
 		}
 		else{//endless loop (sound will have to be stoped manually by the user to end an endless loop)
