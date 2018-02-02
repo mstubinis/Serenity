@@ -110,10 +110,7 @@ void Game::update(float dt){
     if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
 
-	if(Events::Keyboard::isKeyDownOnce("space")){ 
-		SoundQueue* q = new SoundQueue(2.0f);
-		q->enqueueEffect("pbc",3);
-		q->enqueueEffect("sniper",2);
+	if(Events::Keyboard::isKeyDownOnce("space")){
 	}
 
     if(Events::Keyboard::isKeyDown("z")){

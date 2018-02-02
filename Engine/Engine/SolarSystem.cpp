@@ -22,6 +22,11 @@ using namespace Engine;
 using namespace Engine::Events;
 using namespace std;
 
+
+//6,371 km - radius of the earth
+//408 km - orbit height of the ISS
+//6779 km - orbit height of the ISS from earth's center point
+
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
     Resources::setActiveCamera(playerCamera);
