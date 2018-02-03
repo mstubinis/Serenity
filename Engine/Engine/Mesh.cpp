@@ -21,12 +21,12 @@
 using namespace std;
 
 enum LoadWhat{
-    LOAD_POINTS = 0x01,
-    LOAD_UVS = 0x02,
+    LOAD_POINTS  = 0x01,
+    LOAD_UVS     = 0x02,
     LOAD_NORMALS = 0x04,
-    LOAD_FACES = 0x08,
-    LOAD_TBN = 0x10
-    // = 0x20
+    LOAD_FACES   = 0x08,
+    LOAD_TBN     = 0x16
+               //= 0x32
 };
 
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnimatedFormatMap(){
@@ -42,6 +42,49 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnima
     return m;
 }
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
+
+class MeshSkeleton::impl{
+    public:
+        std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
+        uint m_NumBones;
+        std::vector<BoneInfo> m_BoneInfo;
+        glm::mat4 m_GlobalInverseTransform;
+        std::unordered_map<std::string,AnimationData*> m_AnimationData;
+        std::vector<glm::vec4> m_BoneIDs;
+        std::vector<glm::vec4> m_BoneWeights;
+
+		void _fill(ImportedMeshData& data){
+			for(auto bone:data.m_Bones){
+				VertexBoneData& b = bone.second;
+				m_BoneIDs    .push_back(glm::vec4(b.IDs[0],    b.IDs[1],    b.IDs[2],    b.IDs[3]));
+				m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
+			}
+		}
+		void _clear(){
+			for(auto animationData:m_AnimationData){
+				delete animationData.second;
+			}
+			m_AnimationData.clear();
+			m_NumBones = 0;
+			m_BoneMapping.clear();
+			m_BoneInfo.clear();
+			m_BoneIDs.clear();
+			m_BoneWeights.clear();
+		}
+};
+MeshSkeleton::MeshSkeleton():m_i(new impl){
+    clear();
+}
+MeshSkeleton::MeshSkeleton(ImportedMeshData& data):m_i(new impl){
+    fill(data);
+}
+void MeshSkeleton::fill(ImportedMeshData& data){ m_i->_fill(data); }
+void MeshSkeleton::clear(){ m_i->_clear(); }
+MeshSkeleton::~MeshSkeleton(){
+    clear();
+}
+uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
+
 
 class Mesh::impl{
     public:
@@ -66,13 +109,23 @@ class Mesh::impl{
         vector<MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
 
-        void _init(Mesh* super,string& name,btHeightfieldTerrainShape* heightfield,float threshold){//heightmap
-            m_File = "";
-            m_SaveMeshData = false;
-            m_threshold = threshold;
+		void _initGlobal(float threshold){
+			m_File = "";
+			m_SaveMeshData = true;
             m_Collision = nullptr;
             m_Skeleton = nullptr;
-            ImportedMeshData d;
+			m_threshold = threshold;
+		}
+		void _initGlobalTwo(Mesh* super,ImportedMeshData& data,float threshold){
+            _loadData(super,data,threshold);
+            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+            super->load();
+		}
+		
+        void _init(Mesh* super,string& name,btHeightfieldTerrainShape* heightfield,float threshold){//heightmap
+			ImportedMeshData d;
+			_initGlobal(threshold);
             uint width = heightfield->getHeightStickWidth();
             uint length = heightfield->getHeightStickLength();
             for(uint i = 0; i < width-1; i++){
@@ -114,18 +167,11 @@ class Mesh::impl{
                     _calculateTBN(d);
                 }
             }
-            _loadData(super,d,threshold);
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
+			_initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
-            m_File = "";
-            m_threshold = threshold;
-            m_SaveMeshData = false;
-            m_Collision = nullptr;
-            m_Skeleton = nullptr;
-            ImportedMeshData d;
+			ImportedMeshData d;
+			_initGlobal(threshold);  
             for(uint i = 0; i < width-1; i++){
                 for(uint j = 0; j < length-1; j++){
                     string key1 = to_string(i) + "," + to_string(j);
@@ -164,25 +210,18 @@ class Mesh::impl{
                     _calculateTBN(d);
                 }
             }
-            _loadData(super,d,threshold);
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
+			_initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,float x, float y,float width, float height,float threshold){//plane with offset uvs
-            m_File = "";
-            m_threshold = threshold;
-            m_SaveMeshData = false;
-            m_Collision = nullptr;
-            m_Skeleton = nullptr;
-            ImportedMeshData d;
-            d.points.push_back(glm::vec3(0,0,0));
+			ImportedMeshData d;
+			_initGlobal(threshold);
+            d.points.push_back(glm::vec3(0));
             d.points.push_back(glm::vec3(width,height,0));
             d.points.push_back(glm::vec3(0,height,0));
 
             d.points.push_back(glm::vec3(width,0,0));
             d.points.push_back(glm::vec3(width,height,0));
-            d.points.push_back(glm::vec3(0,0,0));
+            d.points.push_back(glm::vec3(0));
 
             float uv_topLeft_x = float(x/256.0f);
             float uv_topLeft_y = float(y/256.0f);
@@ -204,22 +243,15 @@ class Mesh::impl{
             d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
             d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-            d.normals.resize(6,glm::vec3(1,1,1));
-            d.binormals.resize(6,glm::vec3(1,1,1));
-            d.tangents.resize(6,glm::vec3(1,1,1));
+            d.normals.resize(6,glm::vec3(1));
+            d.binormals.resize(6,glm::vec3(1));
+            d.tangents.resize(6,glm::vec3(1));
 
-            _loadData(super,d,threshold);
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
+			_initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,float width, float height,float threshold){//plane
-            m_File = "";
-            m_threshold = threshold;
-            m_SaveMeshData = false;
-            m_Collision = nullptr;
-            m_Skeleton = nullptr;
-            ImportedMeshData d;
+			ImportedMeshData d;
+			_initGlobal(threshold);
             d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
             d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
             d.points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
@@ -248,24 +280,17 @@ class Mesh::impl{
             d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
             d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-            d.normals.resize(6,glm::vec3(1,1,1));
-            d.binormals.resize(6,glm::vec3(1,1,1));
-            d.tangents.resize(6,glm::vec3(1,1,1));
+            d.normals.resize(6,glm::vec3(1));
+            d.binormals.resize(6,glm::vec3(1));
+            d.tangents.resize(6,glm::vec3(1));
 
-            _loadData(super,d,threshold);
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
+			_initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& name,string filename,CollisionType type,bool notMemory,float threshold){//from file / data
-            m_File = "";
-            m_SaveMeshData = false;
-            m_Collision = nullptr;
-            m_Skeleton = nullptr;
+        void _init(Mesh* super,string& name,string& filename,CollisionType type,bool notMemory,float threshold){//from file / data
+			_initGlobal(threshold);
+			m_Type = type;
             if(notMemory){
                 m_File = filename;
-                m_Type = type;
-                m_threshold = threshold;
             }
             else{
                 _loadFromOBJMemory(super,type,threshold,LOAD_FACES | LOAD_UVS | LOAD_NORMALS | LOAD_TBN,filename);
@@ -280,7 +305,7 @@ class Mesh::impl{
                 SAFE_DELETE(m_Skeleton);
             }
         }
-        void _loadInternal(Mesh* mesh,ImportedMeshData& data,string file){
+        void _loadInternal(Mesh* mesh,ImportedMeshData& data,string& file){
             m_aiScene = m_Importer.ReadFile(file,aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace); 
             if(!m_aiScene || m_aiScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_aiScene->mRootNode){
                 return;
@@ -291,7 +316,7 @@ class Mesh::impl{
             bool doOther = false;
             if(m_aiScene->mAnimations && m_aiScene->mNumAnimations > 0 && mesh->skeleton() == nullptr){
                 m_Skeleton = new MeshSkeleton();
-                m_Skeleton->m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
+                m_Skeleton->m_i->m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(m);
                 doOther = true;
             }
             _processNode(mesh,data,m_aiScene->mRootNode,m_aiScene);
@@ -381,18 +406,18 @@ class Mesh::impl{
                     for (uint i = 0; i < aimesh->mNumBones; i++) { 
                         uint BoneIndex = 0; 
                         string BoneName(aimesh->mBones[i]->mName.data);
-                        if(!mesh->skeleton()->m_BoneMapping.count(BoneName)) {
-                            BoneIndex = mesh->skeleton()->m_NumBones;
-                            mesh->skeleton()->m_NumBones++; 
+                        if(!mesh->skeleton()->m_i->m_BoneMapping.count(BoneName)) {
+                            BoneIndex = mesh->skeleton()->m_i->m_NumBones;
+                            mesh->skeleton()->m_i->m_NumBones++; 
                             BoneInfo bi;
-                            mesh->skeleton()->m_BoneInfo.push_back(bi);
+                            mesh->skeleton()->m_i->m_BoneInfo.push_back(bi);
                         }
                         else{
-                            BoneIndex = mesh->skeleton()->m_BoneMapping.at(BoneName);
+                            BoneIndex = mesh->skeleton()->m_i->m_BoneMapping.at(BoneName);
                         }
-                        mesh->skeleton()->m_BoneMapping.emplace(BoneName,BoneIndex);
+                        mesh->skeleton()->m_i->m_BoneMapping.emplace(BoneName,BoneIndex);
                         aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
-                        mesh->skeleton()->m_BoneInfo.at(BoneIndex).BoneOffset = Engine::Math::assimpToGLMMat4(n);
+                        mesh->skeleton()->m_i->m_BoneInfo.at(BoneIndex).BoneOffset = Engine::Math::assimpToGLMMat4(n);
                         for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
                             uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
                             float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
@@ -407,11 +432,11 @@ class Mesh::impl{
                          aiAnimation* anim = scene->mAnimations[i];
                          string key(anim->mName.C_Str());
                          if(key == ""){
-                             key = "Animation " + to_string(mesh->skeleton()->m_AnimationData.size());
+                             key = "Animation " + to_string(mesh->skeleton()->m_i->m_AnimationData.size());
                          }
-                         if(!mesh->skeleton()->m_AnimationData.count(key)){
+                         if(!mesh->skeleton()->m_i->m_AnimationData.count(key)){
                             AnimationData* animData = new AnimationData(mesh,anim);
-                            mesh->skeleton()->m_AnimationData.emplace(key,animData);
+                            mesh->skeleton()->m_i->m_AnimationData.emplace(key,animData);
                          }
                     }
                 }
@@ -813,7 +838,7 @@ class Mesh::impl{
             }
             _loadData(super,d,threshold);
             if(type == CollisionType::None){
-                m_Collision = new Collision(new btEmptyShape());
+                m_Collision = new Collision(new btEmptyShape);
             }
             else{
                 m_Collision = new Collision(d,type);
@@ -834,10 +859,10 @@ class Mesh::impl{
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
                 std::vector<MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < m_Skeleton->m_BoneIDs.size(); i++){
-                    MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(m_Vertices.at(i));
-                    vert.boneIDs = m_Skeleton->m_BoneIDs.at(i);
-                    vert.boneWeights = m_Skeleton->m_BoneWeights.at(i);
+                for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); i++){
+                    MeshVertexDataAnimated& vert = (MeshVertexDataAnimated)m_Vertices.at(i);
+                    vert.boneIDs = m_Skeleton->m_i->m_BoneIDs.at(i);
+                    vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
                     temp.push_back(vert);
                 }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataAnimated),&temp[0], GL_STATIC_DRAW );
@@ -878,7 +903,7 @@ class Mesh::impl{
         }
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-    Mesh* mesh = static_cast<Mesh*>(r);
+    Mesh* mesh = (Mesh*)r;
     if(mesh->m_i->m_Skeleton != nullptr){
         glBindBuffer(GL_ARRAY_BUFFER, mesh->m_i->m_buffers.at(0));
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
@@ -897,7 +922,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_i->m_buffers.at(1));
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    Mesh* mesh = static_cast<Mesh*>(r);
+    Mesh* mesh = (Mesh*)r;
     if(mesh->m_i->m_Skeleton != nullptr){
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){ glDisableVertexAttribArray(i); }
     }else{
@@ -927,7 +952,7 @@ Mesh::~Mesh(){
     m_i->_clearData(this);
 }
 Collision* Mesh::getCollision() const { return m_i->m_Collision; }
-unordered_map<string,AnimationData*>& Mesh::animationData(){ return m_i->m_Skeleton->m_AnimationData; }
+unordered_map<string,AnimationData*>& Mesh::animationData(){ return m_i->m_Skeleton->m_i->m_AnimationData; }
 const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }
 MeshSkeleton* Mesh::skeleton(){ return m_i->m_Skeleton; }
@@ -935,7 +960,7 @@ void Mesh::render(GLuint mode){
     glDrawElements(mode,m_i->m_Indices.size(),GL_UNSIGNED_SHORT,0);
 }
 void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){
-    m_i->m_Skeleton->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
+    m_i->m_Skeleton->m_i->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
 }
 void Mesh::load(){
     if(!isLoaded()){
@@ -1026,10 +1051,10 @@ void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, c
         }
     }
     glm::mat4 Transform = ParentTransform * NodeTransform;
-    if(m_Mesh->m_i->m_Skeleton->m_BoneMapping.count(BoneName)){
-        uint BoneIndex = m_Mesh->m_i->m_Skeleton->m_BoneMapping.at(BoneName);
-        glm::mat4& Final = m_Mesh->m_i->m_Skeleton->m_BoneInfo.at(BoneIndex).FinalTransform;
-        Final = m_Mesh->m_i->m_Skeleton->m_GlobalInverseTransform * Transform * m_Mesh->m_i->m_Skeleton->m_BoneInfo.at(BoneIndex).BoneOffset;
+    if(m_Mesh->m_i->m_Skeleton->m_i->m_BoneMapping.count(BoneName)){
+        uint BoneIndex = m_Mesh->m_i->m_Skeleton->m_i->m_BoneMapping.at(BoneName);
+        glm::mat4& Final = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(BoneIndex).FinalTransform;
+        Final = m_Mesh->m_i->m_Skeleton->m_i->m_GlobalInverseTransform * Transform * m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(BoneIndex).BoneOffset;
         //this line allows for animation combinations. only works when additional animations start off in their resting places...
         Final = Transforms.at(BoneIndex) * Final;
     }
@@ -1043,38 +1068,11 @@ void AnimationData::_BoneTransform(const string& animationName,float TimeInSecon
     float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
     glm::mat4 Identity = glm::mat4(1.0f);
     _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
-    for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_NumBones; i++){
-        Transforms.at(i) = m_Mesh->m_i->m_Skeleton->m_BoneInfo.at(i).FinalTransform;
+    for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_i->m_NumBones; i++){
+        Transforms.at(i) = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(i).FinalTransform;
     }
 }
 float AnimationData::duration(){
     float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
     return float(float(m_DurationInTicks) / TicksPerSecond);
-}
-MeshSkeleton::MeshSkeleton(){
-    clear();
-}
-MeshSkeleton::MeshSkeleton(ImportedMeshData& data){
-    fill(data);
-}
-void MeshSkeleton::fill(ImportedMeshData& data){
-    for(auto bone:data.m_Bones){
-        VertexBoneData& b = bone.second;
-        m_BoneIDs    .push_back(glm::vec4(b.IDs[0],    b.IDs[1],    b.IDs[2],    b.IDs[3]));
-        m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
-    }
-}
-void MeshSkeleton::clear(){
-    for(auto animationData:m_AnimationData){
-        delete animationData.second;
-    }
-    m_AnimationData.clear();
-    m_NumBones = 0;
-    m_BoneMapping.clear();
-    m_BoneInfo.clear();
-    m_BoneIDs.clear();
-    m_BoneWeights.clear();
-}
-MeshSkeleton::~MeshSkeleton(){
-    clear();
 }

@@ -150,19 +150,15 @@ class MeshSkeleton final{
     friend struct DefaultMeshBindFunctor;
     friend struct DefaultMeshUnbindFunctor;
     private:
-        std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
-        uint m_NumBones;
-        std::vector<BoneInfo> m_BoneInfo;
-        glm::mat4 m_GlobalInverseTransform;
-        std::unordered_map<std::string,AnimationData*> m_AnimationData;
-        std::vector<glm::vec4> m_BoneIDs;
-        std::vector<glm::vec4> m_BoneWeights;
+		class impl; std::unique_ptr<impl> m_i;
     public:
         MeshSkeleton();
         MeshSkeleton(ImportedMeshData&);
+        ~MeshSkeleton();
+
         void fill(ImportedMeshData&);
         void clear();
-        ~MeshSkeleton();
+		uint numBones();
 };
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
@@ -173,8 +169,7 @@ class Mesh final: public BindableResource{
     friend class MeshSkeleton;
     friend class AnimationProcessor;
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Mesh(std::string& name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string& name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
@@ -192,8 +187,7 @@ class Mesh final: public BindableResource{
         void load();
         void unload();
 
-        //Specify wether or not to save the mesh data after loading the data into the OpenGL buffers. By default mesh data is NOT saved. Saving data is useful
-        //if you plan on modifying the buffer data manually later on. Mesh data takes up alot of memory space so only save the data if you really need it.
+        //Specify wether or not to save the mesh data after loading the data into the OpenGL buffers. By default mesh data is saved.
         void saveMeshData(bool);
 
         void render(GLuint mode = GL_TRIANGLES);
