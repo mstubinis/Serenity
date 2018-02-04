@@ -13,7 +13,7 @@
 using namespace Engine;
 
 struct DefaultObjectDisplayBindFunctor{void operator()(BindableResource* r) const {
-    ObjectDisplay* o = static_cast<ObjectDisplay*>(r);
+    ObjectDisplay* o = (ObjectDisplay*)r;
 
     Renderer::sendUniform4fSafe("Object_Color",o->getColor());
     Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
@@ -73,10 +73,10 @@ void ObjectDisplay::calculateRadius(){
     m_Radius = Engine::Math::Max(m_BoundingBoxRadius);
 }
 
-void ObjectDisplay::setMesh(Mesh* mesh){ for(auto entry:this->getDisplayItems()){ entry->setMesh(mesh); } }
-void ObjectDisplay::setMesh(const std::string& mesh){ for(auto entry:this->getDisplayItems()){ entry->setMesh(Resources::getMesh(mesh)); } }
-void ObjectDisplay::setMaterial(Material* material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(material); } }
-void ObjectDisplay::setMaterial(const std::string& material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(Resources::getMaterial(material)); } }
+void ObjectDisplay::setMesh(Mesh* mesh){ for(auto entry:m_DisplayItems){ entry->setMesh(mesh); } }
+void ObjectDisplay::setMesh(const std::string& mesh){ for(auto entry:m_DisplayItems){ entry->setMesh(Resources::getMesh(mesh)); } }
+void ObjectDisplay::setMaterial(Material* material){ for(auto entry:m_DisplayItems){ entry->setMaterial(material); } }
+void ObjectDisplay::setMaterial(const std::string& material){ for(auto entry:m_DisplayItems){ entry->setMaterial(Resources::getMaterial(material)); } }
 
 void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
 void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }
@@ -120,7 +120,7 @@ void ObjectDisplay::playAnimation(const std::string& animName,float startTime,fl
     }
 }
 void ObjectDisplay::suspend(){
-    for(auto renderedItem:this->m_DisplayItems){
+    for(auto renderedItem:m_DisplayItems){
         if(renderedItem->mesh() != nullptr){
             renderedItem->mesh()->decrementUseCount();
             if(renderedItem->mesh()->useCount() == 0){
@@ -136,7 +136,7 @@ void ObjectDisplay::suspend(){
     }
 }
 void ObjectDisplay::resume(){
-    for(auto renderedItem:this->m_DisplayItems){
+    for(auto renderedItem:m_DisplayItems){
         if(renderedItem->mesh() != nullptr){
             renderedItem->mesh()->incrementUseCount();
             renderedItem->mesh()->load();

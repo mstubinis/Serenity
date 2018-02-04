@@ -19,6 +19,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace Engine;
 
 enum LoadWhat{
     LOAD_POINTS  = 0x01,
@@ -28,13 +29,37 @@ enum LoadWhat{
     LOAD_TBN     = 0x16
                //= 0x32
 };
-
+struct MeshVertexData{
+    glm::vec3 position;
+    //float uv;
+    glm::vec2 uv;
+    GLuint normal;
+    GLuint binormal;
+    GLuint tangent;
+    MeshVertexData(){ }
+    MeshVertexData(const MeshVertexData& c){
+        position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
+    }
+    ~MeshVertexData(){ }
+};
+struct MeshVertexDataAnimated: public MeshVertexData{
+    glm::vec4 boneIDs;
+    glm::vec4 boneWeights;
+    MeshVertexDataAnimated():MeshVertexData(){ }
+    MeshVertexDataAnimated(const MeshVertexData& c){
+        position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
+    }
+    MeshVertexDataAnimated(const MeshVertexDataAnimated& c){    
+        position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent; boneIDs=c.boneIDs; boneWeights=c.boneWeights;
+    }
+    ~MeshVertexDataAnimated(){ }
+};
 unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnimatedFormatMap(){
     unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
     m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
-    //m[VertexFormatAnimated::UV]          = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+    //m[VertexFormatAnimated::UV]        = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
     m[VertexFormatAnimated::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-	m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
+    m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
     m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
     m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
     m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
@@ -45,47 +70,31 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORM
 
 class MeshSkeleton::impl{
     public:
-        std::unordered_map<std::string,uint> m_BoneMapping; // maps a bone name to its index
+        unordered_map<string,uint> m_BoneMapping; // maps a bone name to its index
         uint m_NumBones;
-        std::vector<BoneInfo> m_BoneInfo;
+        vector<BoneInfo> m_BoneInfo;
         glm::mat4 m_GlobalInverseTransform;
-        std::unordered_map<std::string,AnimationData*> m_AnimationData;
-        std::vector<glm::vec4> m_BoneIDs;
-        std::vector<glm::vec4> m_BoneWeights;
+        unordered_map<string,AnimationData*> m_AnimationData;
+        vector<glm::vec4> m_BoneIDs;
+        vector<glm::vec4> m_BoneWeights;
 
-		void _fill(ImportedMeshData& data){
-			for(auto bone:data.m_Bones){
-				VertexBoneData& b = bone.second;
-				m_BoneIDs    .push_back(glm::vec4(b.IDs[0],    b.IDs[1],    b.IDs[2],    b.IDs[3]));
-				m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
-			}
-		}
-		void _clear(){
-			for(auto animationData:m_AnimationData){
-				delete animationData.second;
-			}
-			m_AnimationData.clear();
-			m_NumBones = 0;
-			m_BoneMapping.clear();
-			m_BoneInfo.clear();
-			m_BoneIDs.clear();
-			m_BoneWeights.clear();
-		}
+        void _fill(ImportedMeshData& data){
+            for(auto bone:data.m_Bones){
+                VertexBoneData& b = bone.second;
+                m_BoneIDs    .push_back(glm::vec4(b.IDs[0],    b.IDs[1],    b.IDs[2],    b.IDs[3]));
+                m_BoneWeights.push_back(glm::vec4(b.Weights[0],b.Weights[1],b.Weights[2],b.Weights[3]));
+            }
+        }
+        void _clear(){
+            for(auto animationData:m_AnimationData){ delete animationData.second; }
+            m_NumBones = 0;
+            m_AnimationData.clear();
+            m_BoneMapping.clear();
+            vector_clear(m_BoneInfo);
+            vector_clear(m_BoneIDs);
+            vector_clear(m_BoneWeights);
+        }
 };
-MeshSkeleton::MeshSkeleton():m_i(new impl){
-    clear();
-}
-MeshSkeleton::MeshSkeleton(ImportedMeshData& data):m_i(new impl){
-    fill(data);
-}
-void MeshSkeleton::fill(ImportedMeshData& data){ m_i->_fill(data); }
-void MeshSkeleton::clear(){ m_i->_clear(); }
-MeshSkeleton::~MeshSkeleton(){
-    clear();
-}
-uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
-
-
 class Mesh::impl{
     public:
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
@@ -109,23 +118,23 @@ class Mesh::impl{
         vector<MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
 
-		void _initGlobal(float threshold){
-			m_File = "";
-			m_SaveMeshData = true;
+        void _initGlobal(float threshold){
+            m_File = "";
+            m_SaveMeshData = true;
             m_Collision = nullptr;
             m_Skeleton = nullptr;
-			m_threshold = threshold;
-		}
-		void _initGlobalTwo(Mesh* super,ImportedMeshData& data,float threshold){
+            m_threshold = threshold;
+        }
+        void _initGlobalTwo(Mesh* super,ImportedMeshData& data,float threshold){
             _loadData(super,data,threshold);
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super->load();
-		}
-		
+        }
+        
         void _init(Mesh* super,string& name,btHeightfieldTerrainShape* heightfield,float threshold){//heightmap
-			ImportedMeshData d;
-			_initGlobal(threshold);
+            ImportedMeshData d;
+            _initGlobal(threshold);
             uint width = heightfield->getHeightStickWidth();
             uint length = heightfield->getHeightStickLength();
             for(uint i = 0; i < width-1; i++){
@@ -167,11 +176,11 @@ class Mesh::impl{
                     _calculateTBN(d);
                 }
             }
-			_initGlobalTwo(super,d,threshold);
+            _initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
-			ImportedMeshData d;
-			_initGlobal(threshold);  
+            ImportedMeshData d;
+            _initGlobal(threshold);  
             for(uint i = 0; i < width-1; i++){
                 for(uint j = 0; j < length-1; j++){
                     string key1 = to_string(i) + "," + to_string(j);
@@ -210,11 +219,11 @@ class Mesh::impl{
                     _calculateTBN(d);
                 }
             }
-			_initGlobalTwo(super,d,threshold);
+            _initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,float x, float y,float width, float height,float threshold){//plane with offset uvs
-			ImportedMeshData d;
-			_initGlobal(threshold);
+            ImportedMeshData d;
+            _initGlobal(threshold);
             d.points.push_back(glm::vec3(0));
             d.points.push_back(glm::vec3(width,height,0));
             d.points.push_back(glm::vec3(0,height,0));
@@ -247,11 +256,11 @@ class Mesh::impl{
             d.binormals.resize(6,glm::vec3(1));
             d.tangents.resize(6,glm::vec3(1));
 
-			_initGlobalTwo(super,d,threshold);
+            _initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,float width, float height,float threshold){//plane
-			ImportedMeshData d;
-			_initGlobal(threshold);
+            ImportedMeshData d;
+            _initGlobal(threshold);
             d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
             d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
             d.points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
@@ -284,11 +293,11 @@ class Mesh::impl{
             d.binormals.resize(6,glm::vec3(1));
             d.tangents.resize(6,glm::vec3(1));
 
-			_initGlobalTwo(super,d,threshold);
+            _initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,string& filename,CollisionType type,bool notMemory,float threshold){//from file / data
-			_initGlobal(threshold);
-			m_Type = type;
+            _initGlobal(threshold);
+            m_Type = type;
             if(notMemory){
                 m_File = filename;
             }
@@ -442,7 +451,7 @@ class Mesh::impl{
                 }
                 #pragma endregion
                 //_calculateTBN(data);
-				_calculateTBNAssimp(data);
+                _calculateTBNAssimp(data);
                 //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
             }
             for(uint i = 0; i < node->mNumChildren; i++){
@@ -487,7 +496,7 @@ class Mesh::impl{
 
                 //handedness
                 if (glm::dot(glm::cross(n, t), b) < 0.0f){
-					 t *= -1.0f;
+                     t *= -1.0f;
                 }
             }
         }
@@ -526,28 +535,28 @@ class Mesh::impl{
         }
         void _calculateTBNAssimp(ImportedMeshData& data){
             if(data.normals.size() == 0) return;
-			uint dataSize = data.points.size();
+            uint dataSize = data.points.size();
             for(uint i=0; i < dataSize; i+=3){
                 uint p0 = i+0; uint p1 = i+1; uint p2 = i+2;
 
-				glm::vec3 dataP0,dataP1,dataP2;
-				glm::vec2 uvP0,uvP1,uvP2;
+                glm::vec3 dataP0,dataP1,dataP2;
+                glm::vec2 uvP0,uvP1,uvP2;
 
-				uint uvSize = data.uvs.size();
+                uint uvSize = data.uvs.size();
 
-				if(dataSize > p0) dataP0 = data.points.at(p0);
-				else              dataP0 = glm::vec3(0.0f);
-				if(dataSize > p1) dataP1 = data.points.at(p1);
-				else              dataP1 = glm::vec3(0.0f);
-				if(dataSize > p2) dataP2 = data.points.at(p2);
-				else              dataP2 = glm::vec3(0.0f);
+                if(dataSize > p0) dataP0 = data.points.at(p0);
+                else              dataP0 = glm::vec3(0.0f);
+                if(dataSize > p1) dataP1 = data.points.at(p1);
+                else              dataP1 = glm::vec3(0.0f);
+                if(dataSize > p2) dataP2 = data.points.at(p2);
+                else              dataP2 = glm::vec3(0.0f);
 
-				if(uvSize > p0)   uvP0 = data.uvs.at(p0);
-				else              uvP0 = glm::vec2(0.0f);
-				if(uvSize > p1)   uvP1 = data.uvs.at(p1);
-				else              uvP1 = glm::vec2(0.0f);
-				if(uvSize > p2)   uvP2 = data.uvs.at(p2);
-				else              uvP2 = glm::vec2(0.0f);
+                if(uvSize > p0)   uvP0 = data.uvs.at(p0);
+                else              uvP0 = glm::vec2(0.0f);
+                if(uvSize > p1)   uvP1 = data.uvs.at(p1);
+                else              uvP1 = glm::vec2(0.0f);
+                if(uvSize > p2)   uvP2 = data.uvs.at(p2);
+                else              uvP2 = glm::vec2(0.0f);
 
                 glm::vec3 v = dataP1 - dataP0;
                 glm::vec3 w = dataP2 - dataP0;
@@ -569,7 +578,7 @@ class Mesh::impl{
                 // tangent points in the direction where to positive X axis of the texture coord's would point in model space
                 // bitangent's points along the positive Y axis of the texture coord's, respectively
                 glm::vec3 tangent;
-				glm::vec3 bitangent;
+                glm::vec3 bitangent;
                 tangent.x   = (w.x * sy - v.x * ty) * dirCorrection;
                 tangent.y   = (w.y * sy - v.y * ty) * dirCorrection;
                 tangent.z   = (w.z * sy - v.z * ty) * dirCorrection;
@@ -580,13 +589,13 @@ class Mesh::impl{
                 // store for every vertex of that face
                 for( uint b = 0; b < 3; ++b ) {
                     uint p;
-					glm::vec3 normal;
+                    glm::vec3 normal;
                     if(b==0)      p = p0;
                     else if(b==1) p = p1;
                     else          p = p2;
 
-					if(data.normals.size() > p) normal = data.normals.at(p);
-					else                        normal = glm::vec3(0.0f);
+                    if(data.normals.size() > p) normal = data.normals.at(p);
+                    else                        normal = glm::vec3(0.0f);
 
                     // project tangent and bitangent into the plane formed by the vertex' normal
                     glm::vec3 localTangent   = tangent   - normal * (tangent   * normal);
@@ -614,7 +623,7 @@ class Mesh::impl{
                         MeshVertexDataAnimated vert;
                         vert.position = pt;
                         //vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
-						vert.uv = data.uvs.at(c);
+                        vert.uv = data.uvs.at(c);
                         vert.normal = Engine::Math::pack3NormalsInto32Int(data.normals.at(c));
                         if(c <= data.binormals.size()-1)
                             vert.binormal = Engine::Math::pack3NormalsInto32Int(data.binormals.at(c));
@@ -626,7 +635,7 @@ class Mesh::impl{
                         MeshVertexData vert;
                         vert.position = pt;
                         //vert.uv = Engine::Math::pack2FloatsInto1Float(data.uvs.at(c));
-						vert.uv = data.uvs.at(c);
+                        vert.uv = data.uvs.at(c);
                         vert.normal = Engine::Math::pack3NormalsInto32Int(data.normals.at(c));
                         vert.binormal = Engine::Math::pack3NormalsInto32Int(data.binormals.at(c));
                         vert.tangent = Engine::Math::pack3NormalsInto32Int(data.tangents.at(c));
@@ -675,7 +684,7 @@ class Mesh::impl{
                 if(m_Skeleton != nullptr){
                     MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(out_vertices.at(i));
                     //vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
-					vert.uv = temp_uvs.at(i);
+                    vert.uv = temp_uvs.at(i);
                     vert.normal = Engine::Math::pack3NormalsInto32Int(temp_normals.at(i));
                     vert.binormal = Engine::Math::pack3NormalsInto32Int(temp_binormals.at(i));
                     vert.tangent = Engine::Math::pack3NormalsInto32Int(temp_tangents.at(i));
@@ -683,7 +692,7 @@ class Mesh::impl{
                 else{
                     MeshVertexData& vert = out_vertices.at(i);
                     //vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
-					vert.uv = temp_uvs.at(i);
+                    vert.uv = temp_uvs.at(i);
                     vert.normal = Engine::Math::pack3NormalsInto32Int(temp_normals.at(i));
                     vert.binormal = Engine::Math::pack3NormalsInto32Int(temp_binormals.at(i));
                     vert.tangent = Engine::Math::pack3NormalsInto32Int(temp_tangents.at(i));
@@ -904,15 +913,14 @@ class Mesh::impl{
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = (Mesh*)r;
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->m_i->m_buffers.at(0));
     if(mesh->m_i->m_Skeleton != nullptr){
-        glBindBuffer(GL_ARRAY_BUFFER, mesh->m_i->m_buffers.at(0));
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
             boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(),sizeof(MeshVertexDataAnimated),(void*)format.get<3>());
         }
-    }else{
-        glBindBuffer(GL_ARRAY_BUFFER, mesh->m_i->m_buffers.at(0));
+    }else{     
         for(uint i = 0; i < VertexFormat::EnumTotal; i++){
             boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
@@ -931,6 +939,131 @@ struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
 }};
 DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMeshUnbindFunctor Mesh::impl::DEFAULT_UNBIND_FUNCTOR;
+
+class AnimationData::impl{
+    public:
+        Mesh* m_Mesh;
+        double m_TicksPerSecond;
+        double m_DurationInTicks;
+        unordered_map<string,aiNodeAnim*> m_KeyframeData;
+
+        void _init(Mesh* mesh,aiAnimation* anim){
+            m_Mesh = mesh;
+            m_TicksPerSecond = anim->mTicksPerSecond;
+            m_DurationInTicks = anim->mDuration;
+            for(uint i = 0; i < anim->mNumChannels; i++){
+                string key = (anim->mChannels[i]->mNodeName.data);
+                m_KeyframeData.emplace(key,anim->mChannels[i]);
+            }
+        }
+
+        void _ReadNodeHeirarchy(const string& animationName,float time, const aiNode* n,glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){
+            string BoneName(n->mName.data);
+            glm::mat4 NodeTransform = Engine::Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(n->mTransformation));
+            if(m_KeyframeData.count(BoneName)){
+                const aiNodeAnim* keyframes = m_KeyframeData.at(BoneName);
+                if(keyframes){
+                    glm::vec3 s; _CalcInterpolatedScaling(s, time, keyframes);
+                    aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
+                    glm::mat4 rotation = glm::mat4(Engine::Math::assimpToGLMMat3(q.GetMatrix()));
+                    glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
+                    NodeTransform = glm::mat4(1.0f);
+                    NodeTransform = glm::translate(NodeTransform,t);
+                    NodeTransform *= rotation;
+                    NodeTransform = glm::scale(NodeTransform,s);
+                }
+            }
+            glm::mat4 Transform = ParentTransform * NodeTransform;
+            if(m_Mesh->m_i->m_Skeleton->m_i->m_BoneMapping.count(BoneName)){
+                uint BoneIndex = m_Mesh->m_i->m_Skeleton->m_i->m_BoneMapping.at(BoneName);
+                glm::mat4& Final = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(BoneIndex).FinalTransform;
+                Final = m_Mesh->m_i->m_Skeleton->m_i->m_GlobalInverseTransform * Transform * m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(BoneIndex).BoneOffset;
+                //this line allows for animation combinations. only works when additional animations start off in their resting places...
+                Final = Transforms.at(BoneIndex) * Final;
+            }
+            for(uint i = 0; i < n->mNumChildren; i++){
+                _ReadNodeHeirarchy(animationName,time,n->mChildren[i],Transform,Transforms);
+            }
+        }
+        void _BoneTransform(const string& animationName,float TimeInSeconds, vector<glm::mat4>& Transforms){
+            float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
+            float TimeInTicks = TimeInSeconds * TicksPerSecond;
+            float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
+            glm::mat4 Identity = glm::mat4(1.0f);
+            _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
+            for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_i->m_NumBones; i++){
+                Transforms.at(i) = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(i).FinalTransform;
+            }
+        }
+        void _CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
+            if (node->mNumPositionKeys == 1) {
+                Out = Math::assimpToGLMVec3(node->mPositionKeys[0].mValue); return;
+            }
+            uint PositionIndex = _FindPosition(AnimationTime,node);
+            uint NextIndex = PositionIndex + 1;
+            float DeltaTime = (float)(node->mPositionKeys[NextIndex].mTime - node->mPositionKeys[PositionIndex].mTime);
+            float Factor = (AnimationTime - (float)node->mPositionKeys[PositionIndex].mTime) / DeltaTime;
+            glm::vec3 Start = Math::assimpToGLMVec3(node->mPositionKeys[PositionIndex].mValue);
+            glm::vec3 End = Math::assimpToGLMVec3(node->mPositionKeys[NextIndex].mValue);
+            glm::vec3 Delta = End - Start;
+            Out = Start + Factor * Delta;
+        }
+        void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* node){
+            if (node->mNumRotationKeys == 1) {
+                Out = node->mRotationKeys[0].mValue; return;
+            }
+            uint RotationIndex = _FindRotation(AnimationTime, node);
+            uint NextIndex = RotationIndex + 1;
+            float DeltaTime = (float)(node->mRotationKeys[NextIndex].mTime - node->mRotationKeys[RotationIndex].mTime);
+            float Factor = (AnimationTime - (float)node->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+            const aiQuaternion& StartRotationQ = node->mRotationKeys[RotationIndex].mValue;
+            const aiQuaternion& EndRotationQ   = node->mRotationKeys[NextIndex].mValue;    
+            aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+            Out = Out.Normalize();
+        }
+        void _CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
+            if (node->mNumScalingKeys == 1) {
+                Out = Math::assimpToGLMVec3(node->mScalingKeys[0].mValue); return;
+            }
+            uint ScalingIndex = _FindScaling(AnimationTime, node);
+            uint NextIndex = ScalingIndex + 1;
+            float DeltaTime = (float)(node->mScalingKeys[NextIndex].mTime - node->mScalingKeys[ScalingIndex].mTime);
+            float Factor = (AnimationTime - (float)node->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+            glm::vec3 Start = Math::assimpToGLMVec3(node->mScalingKeys[ScalingIndex].mValue);
+            glm::vec3 End   = Math::assimpToGLMVec3(node->mScalingKeys[NextIndex].mValue);
+            glm::vec3 Delta = End - Start;
+            Out = Start + Factor * Delta;
+        }
+        uint _FindPosition(float AnimationTime, const aiNodeAnim* node){
+            for(uint i=0;i<node->mNumPositionKeys-1;i++){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
+        }
+        uint _FindRotation(float AnimationTime, const aiNodeAnim* node){
+            for(uint i=0;i<node->mNumRotationKeys-1;i++){if(AnimationTime<(float)node->mRotationKeys[i+1].mTime){return i;}}return 0;
+        }
+        uint _FindScaling(float AnimationTime, const aiNodeAnim* node){
+            for(uint i=0;i<node->mNumScalingKeys-1;i++){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
+        }
+        float _Duration(){
+            float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
+            return float(float(m_DurationInTicks) / TicksPerSecond);
+        }
+};
+
+
+MeshSkeleton::MeshSkeleton():m_i(new impl){
+    clear();
+}
+MeshSkeleton::MeshSkeleton(ImportedMeshData& data):m_i(new impl){
+    fill(data);
+}
+void MeshSkeleton::fill(ImportedMeshData& data){ m_i->_fill(data); }
+void MeshSkeleton::clear(){ m_i->_clear(); }
+MeshSkeleton::~MeshSkeleton(){
+    clear();
+}
+uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
+
+
 
 Mesh::Mesh(string& name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,heightfield,threshold);
@@ -960,7 +1093,7 @@ void Mesh::render(GLuint mode){
     glDrawElements(mode,m_i->m_Indices.size(),GL_UNSIGNED_SHORT,0);
 }
 void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){
-    m_i->m_Skeleton->m_i->m_AnimationData[animationName]->_BoneTransform(animationName,time, transforms);
+    m_i->m_Skeleton->m_i->m_AnimationData[animationName]->m_i->_BoneTransform(animationName,time, transforms);
 }
 void Mesh::load(){
     if(!isLoaded()){
@@ -975,104 +1108,8 @@ void Mesh::unload(){
     }
 }
 void Mesh::saveMeshData(bool save){ m_i->m_SaveMeshData = save; }
-AnimationData::AnimationData(Mesh* mesh,aiAnimation* anim){
-    m_Mesh = mesh;
-    m_TicksPerSecond = anim->mTicksPerSecond;
-    m_DurationInTicks = anim->mDuration;
-    for(uint i = 0; i < anim->mNumChannels; i++){
-        string key = (anim->mChannels[i]->mNodeName.data);
-        m_KeyframeData.emplace(key,anim->mChannels[i]);
-    }
-}
-AnimationData::~AnimationData(){
-}
-uint AnimationData::_FindPosition(float AnimationTime, const aiNodeAnim* node){    
-    for(uint i=0;i<node->mNumPositionKeys-1;i++){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
-}
-uint AnimationData::_FindRotation(float AnimationTime, const aiNodeAnim* node){
-    for(uint i=0;i<node->mNumRotationKeys-1;i++){if(AnimationTime<(float)node->mRotationKeys[i+1].mTime){return i;}}return 0;
-}
-uint AnimationData::_FindScaling(float AnimationTime, const aiNodeAnim* node){  
-    for(uint i=0;i<node->mNumScalingKeys-1;i++){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
-}
-void AnimationData::_CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
-    if (node->mNumPositionKeys == 1) {
-        Out = Engine::Math::assimpToGLMVec3(node->mPositionKeys[0].mValue); return;
-    }
-    uint PositionIndex = _FindPosition(AnimationTime,node);
-    uint NextPositionIndex = (PositionIndex + 1);
-    float DeltaTime = (float)(node->mPositionKeys[NextPositionIndex].mTime - node->mPositionKeys[PositionIndex].mTime);
-    float Factor = (AnimationTime - (float)node->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-    glm::vec3 Start = Engine::Math::assimpToGLMVec3(node->mPositionKeys[PositionIndex].mValue);
-    glm::vec3 End = Engine::Math::assimpToGLMVec3(node->mPositionKeys[NextPositionIndex].mValue);
-    glm::vec3 Delta = End - Start;
-    Out = Start + Factor * Delta;
-}
-void AnimationData::_CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* node){
-    if (node->mNumRotationKeys == 1) {
-        Out = node->mRotationKeys[0].mValue; return;
-    }
-    uint RotationIndex = _FindRotation(AnimationTime, node);
-    uint NextRotationIndex = (RotationIndex + 1);
-    float DeltaTime = (float)(node->mRotationKeys[NextRotationIndex].mTime - node->mRotationKeys[RotationIndex].mTime);
-    float Factor = (AnimationTime - (float)node->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-    const aiQuaternion& StartRotationQ = node->mRotationKeys[RotationIndex].mValue;
-    const aiQuaternion& EndRotationQ   = node->mRotationKeys[NextRotationIndex].mValue;    
-    aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
-    Out = Out.Normalize();
-}
-void AnimationData::_CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const aiNodeAnim* node){
-    if (node->mNumScalingKeys == 1) {
-        Out = Engine::Math::assimpToGLMVec3(node->mScalingKeys[0].mValue); return;
-    }
-    uint ScalingIndex = _FindScaling(AnimationTime, node);
-    uint NextScalingIndex = (ScalingIndex + 1);
-    float DeltaTime = (float)(node->mScalingKeys[NextScalingIndex].mTime - node->mScalingKeys[ScalingIndex].mTime);
-    float Factor = (AnimationTime - (float)node->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
-    glm::vec3 Start = Engine::Math::assimpToGLMVec3(node->mScalingKeys[ScalingIndex].mValue);
-    glm::vec3 End   = Engine::Math::assimpToGLMVec3(node->mScalingKeys[NextScalingIndex].mValue);
-    glm::vec3 Delta = End - Start;
-    Out = Start + Factor * Delta;
-}
-void AnimationData::_ReadNodeHeirarchy(const string& animationName,float time, const aiNode* n, glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){    
-    string BoneName(n->mName.data);
-    glm::mat4 NodeTransform = Engine::Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(n->mTransformation));
-    if(m_KeyframeData.count(BoneName)){
-        const aiNodeAnim* keyframes = m_KeyframeData.at(BoneName);
-        if(keyframes){
-            glm::vec3 s; _CalcInterpolatedScaling(s, time, keyframes);
-            aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
-            glm::mat4 rotation = glm::mat4(Engine::Math::assimpToGLMMat3(q.GetMatrix()));
-            glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
-            NodeTransform = glm::mat4(1.0f);
-            NodeTransform = glm::translate(NodeTransform,t);
-            NodeTransform *= rotation;
-            NodeTransform = glm::scale(NodeTransform,s);
-        }
-    }
-    glm::mat4 Transform = ParentTransform * NodeTransform;
-    if(m_Mesh->m_i->m_Skeleton->m_i->m_BoneMapping.count(BoneName)){
-        uint BoneIndex = m_Mesh->m_i->m_Skeleton->m_i->m_BoneMapping.at(BoneName);
-        glm::mat4& Final = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(BoneIndex).FinalTransform;
-        Final = m_Mesh->m_i->m_Skeleton->m_i->m_GlobalInverseTransform * Transform * m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(BoneIndex).BoneOffset;
-        //this line allows for animation combinations. only works when additional animations start off in their resting places...
-        Final = Transforms.at(BoneIndex) * Final;
-    }
-    for(uint i = 0; i < n->mNumChildren; i++){
-        _ReadNodeHeirarchy(animationName,time,n->mChildren[i],Transform,Transforms);
-    }
-}
-void AnimationData::_BoneTransform(const string& animationName,float TimeInSeconds,vector<glm::mat4>& Transforms){   
-    float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
-    float TimeInTicks = TimeInSeconds * TicksPerSecond;
-    float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
-    glm::mat4 Identity = glm::mat4(1.0f);
-    _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
-    for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_i->m_NumBones; i++){
-        Transforms.at(i) = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(i).FinalTransform;
-    }
-}
-float AnimationData::duration(){
-    float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
-    return float(float(m_DurationInTicks) / TicksPerSecond);
-}
+
+
+AnimationData::AnimationData(Mesh* m,aiAnimation* a):m_i(new impl){ m_i->_init(m,a); }
+AnimationData::~AnimationData(){ }
+float AnimationData::duration(){ return m_i->_Duration(); }

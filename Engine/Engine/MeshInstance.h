@@ -1,37 +1,31 @@
 #pragma once
-#ifndef MESH_INSTANCE_H
-#define MESH_INSTANCE_H
+#ifndef ENGINE_MESH_INSTANCE_H
+#define ENGINE_MESH_INSTANCE_H
 
 #include "Engine_Math.h"
 #include "BindableResource.h"
 
 class Mesh;
 class Material;
-class Object;
 
-class MeshInstanceAnimation{
-    friend class AnimationProcessor;
+struct DefaultMeshInstanceBindFunctor;
+struct DefaultMeshInstanceUnbindFunctor;
+
+class MeshInstanceAnimation final{
+	friend struct DefaultMeshInstanceBindFunctor;
     private:
-        uint currentLoops;
-        uint requestedLoops;
-        float currentTime;
-        float startTime;
-        float endTime;
-        std::string animName;
-        Mesh* mesh;
+		class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstanceAnimation(Mesh*,std::string _animName,float _startTime,float _duration);
-        MeshInstanceAnimation(Mesh*,std::string _animName,float _startTime,float _endTime,uint requestedLoops);
+        MeshInstanceAnimation(Mesh*,const std::string& animName,float startTime,float endTime,uint requestedLoops = 1);
         ~MeshInstanceAnimation();
 };
 
 class MeshInstance final: public BindableResource{
     private:
-        class impl;
-        std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstance(std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        MeshInstance(std::string& parentName,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(const std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(const std::string& parentName,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         ~MeshInstance();
 
         Mesh* mesh();
@@ -42,7 +36,7 @@ class MeshInstance final: public BindableResource{
         glm::vec3& getScale();
         Object* parent();
 
-        std::vector<MeshInstanceAnimation>& animationQueue();
+        std::vector<MeshInstanceAnimation*>& animationQueue();
         void playAnimation(const std::string& animName,float startTime);
         void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 

@@ -213,9 +213,6 @@
     <ClCompile Include="BindableResource.cpp">
       <Filter>Source Files\Engine\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Engine_AnimationProcessor.cpp">
-      <Filter>Source Files\Engine\Engine_Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Constraint.cpp">
       <Filter>Source Files\Engine\Engine_Physics</Filter>
     </ClCompile>
@@ -352,9 +349,6 @@
     </ClInclude>
     <ClInclude Include="BindableResource.h">
       <Filter>Header Files\Engine\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine_AnimationProcessor.h">
-      <Filter>Header Files\Engine\Engine_Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Constraint.h">
       <Filter>Header Files\Engine\Engine_Physics</Filter>

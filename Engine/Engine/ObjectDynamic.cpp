@@ -21,7 +21,7 @@ using namespace Engine;
 using namespace std;
 
 struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) const {
-    ObjectDynamic* o = static_cast<ObjectDynamic*>(r);
+    ObjectDynamic* o = (ObjectDynamic*)r;
 
     Renderer::sendUniform4f("Object_Color",o->getColor());
     Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
@@ -450,7 +450,7 @@ glm::mat4& ObjectDynamic::getModel(){ return m_Model; }
 
 void ObjectDynamic::suspend(){
     Physics::removeRigidBody(this);
-    for(auto renderedItem:this->m_DisplayItems){
+    for(auto renderedItem:m_DisplayItems){
         if(renderedItem->mesh() != nullptr){
             renderedItem->mesh()->decrementUseCount();
             if(renderedItem->mesh()->useCount() == 0){
@@ -467,7 +467,7 @@ void ObjectDynamic::suspend(){
 }
 void ObjectDynamic::resume(){
     Physics::addRigidBody(this);
-    for(auto renderedItem:this->m_DisplayItems){
+    for(auto renderedItem:m_DisplayItems){
         if(renderedItem->mesh() != nullptr){
             renderedItem->mesh()->incrementUseCount();
             renderedItem->mesh()->load();
@@ -481,7 +481,7 @@ void ObjectDynamic::resume(){
 
 void ObjectDynamic::setMesh(Mesh* mesh){
     Physics::removeRigidBody(this);
-    for(auto entry:this->getDisplayItems()){ 
+    for(auto entry:m_DisplayItems){ 
         entry->setMesh(mesh); 
     } 
     if(m_DisplayItems.size() > 0){
@@ -506,7 +506,7 @@ void ObjectDynamic::setMesh(Mesh* mesh){
 }
 void ObjectDynamic::setMesh(const string& mesh){ 
     Physics::removeRigidBody(this);
-    for(auto entry:this->getDisplayItems()){ 
+    for(auto entry:m_DisplayItems){ 
         entry->setMesh(Resources::getMesh(mesh)); 
     }
     if(m_DisplayItems.size() > 0){
@@ -529,5 +529,5 @@ void ObjectDynamic::setMesh(const string& mesh){
     }
     Physics::addRigidBody(this);
 }
-void ObjectDynamic::setMaterial(Material* material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(material); } }
-void ObjectDynamic::setMaterial(const string& material){ for(auto entry:this->getDisplayItems()){ entry->setMaterial(Resources::getMaterial(material)); } }
+void ObjectDynamic::setMaterial(Material* material){ for(auto entry:m_DisplayItems){ entry->setMaterial(material); } }
+void ObjectDynamic::setMaterial(const string& material){ for(auto entry:m_DisplayItems){ entry->setMaterial(Resources::getMaterial(material)); } }

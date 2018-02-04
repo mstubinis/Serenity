@@ -20,7 +20,7 @@ class SoundStatus final{public: enum Status{
 };};
 
 class SoundData final{
-	friend class ::Engine::Sound::Detail::SoundManagement;
+    friend class ::Engine::Sound::Detail::SoundManagement;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -28,14 +28,14 @@ class SoundData final{
         SoundData(std::string,bool music = false);
         ~SoundData();
 
-		void buildBuffer();
+        void buildBuffer();
         sf::SoundBuffer* getBuffer();
         std::string getFilename();
-		float getVolume();
-		void setVolume(float);
+        float getVolume();
+        void setVolume(float);
 };
 class SoundBaseClass{
-	friend class ::Engine::Sound::Detail::SoundManagement;
+    friend class ::Engine::Sound::Detail::SoundManagement;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -45,87 +45,87 @@ class SoundBaseClass{
         SoundStatus::Status status();
         virtual void update(float dt);
         virtual void play(uint loop);
-		virtual void play();
+        virtual void play();
         virtual void pause();
         virtual void stop();
-		virtual void restart();
-		uint getLoopsLeft();
+        virtual void restart();
+        uint getLoopsLeft();
 
-		virtual float getAttenuation();
-		virtual glm::vec3 getPosition();
-		virtual void setPosition(float,float,float);
-		virtual void setPosition(glm::vec3);
-		virtual float getVolume();
-		virtual void setVolume(float);
-		virtual float getPitch();
-		virtual void setPitch(float);
+        virtual float getAttenuation();
+        virtual glm::vec3 getPosition();
+        virtual void setPosition(float,float,float);
+        virtual void setPosition(glm::vec3);
+        virtual float getVolume();
+        virtual void setVolume(float);
+        virtual float getPitch();
+        virtual void setPitch(float);
 };
 class SoundEffect: public SoundBaseClass{
     friend class ::Engine::Sound::Detail::SoundManagement;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-		SoundEffect(std::string = "",uint loops = 1,bool = false);
-		SoundEffect(SoundData*,uint loops = 1,bool = false);
+        SoundEffect(std::string = "",uint loops = 1,bool = false);
+        SoundEffect(SoundData*,uint loops = 1,bool = false);
         ~SoundEffect();
 
         void loadFromFile(std::string);
         void update(float dt);
         void play(uint loop);
-		void play();
+        void play();
         void pause();
         void stop();
-		void restart();
+        void restart();
 
-		float getAttenuation();
-		glm::vec3 getPosition();
-		void setPosition(float,float,float);
-		void setPosition(glm::vec3);
-		float getVolume();
-	    void setVolume(float);
-		float getPitch();
-		void setPitch(float);
+        float getAttenuation();
+        glm::vec3 getPosition();
+        void setPosition(float,float,float);
+        void setPosition(glm::vec3);
+        float getVolume();
+        void setVolume(float);
+        float getPitch();
+        void setPitch(float);
 };
 class SoundMusic: public SoundBaseClass{
-	friend class ::Engine::Sound::Detail::SoundManagement;
+    friend class ::Engine::Sound::Detail::SoundManagement;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-		SoundMusic(std::string = "",uint loops = 1,bool = false);
+        SoundMusic(std::string = "",uint loops = 1,bool = false);
         ~SoundMusic();
 
         void loadFromFile(std::string);
         void update(float dt);
         void play(uint loop);
-		void play();
+        void play();
         void pause();
         void stop();
-		void restart();
+        void restart();
 
-		float getAttenuation();
-		glm::vec3 getPosition();
-		void setPosition(float,float,float);
-		void setPosition(glm::vec3);
-		float getVolume();
-	    void setVolume(float);
-		float getPitch();
-		void setPitch(float);
+        float getAttenuation();
+        glm::vec3 getPosition();
+        void setPosition(float,float,float);
+        void setPosition(glm::vec3);
+        float getVolume();
+        void setVolume(float);
+        float getPitch();
+        void setPitch(float);
 };
 namespace Engine{
     namespace Sound{
         namespace Detail{
             class SoundManagement final{
-				friend class ::SoundBaseClass::impl;
-				friend class ::SoundMusic::impl;
-				friend class ::SoundEffect::impl;
-				friend class ::SoundBaseClass;
-				friend class ::SoundMusic;
-				friend class ::SoundEffect;
+                friend class ::SoundBaseClass::impl;
+                friend class ::SoundMusic::impl;
+                friend class ::SoundEffect::impl;
+                friend class ::SoundBaseClass;
+                friend class ::SoundMusic;
+                friend class ::SoundEffect;
                 public:
-					static void _updateSoundStatus(SoundBaseClass*,SoundStatus::Status,sf::SoundSource::Status);
+                    static void _updateSoundStatus(SoundBaseClass*,SoundStatus::Status,sf::SoundSource::Status);
 
-					static std::vector<boost::shared_ptr<SoundBaseClass>> m_CurrentlyPlayingSounds;
-					static std::vector<boost::shared_ptr<SoundQueue>> m_SoundQueues;
+                    static std::vector<boost::shared_ptr<SoundBaseClass>> m_CurrentlyPlayingSounds;
+                    static std::vector<boost::shared_ptr<SoundQueue>> m_SoundQueues;
 
                     static std::unordered_map<std::string,boost::shared_ptr<SoundData>> m_SoundData;
 
@@ -137,10 +137,10 @@ namespace Engine{
                     static void addSoundDataFromFile(std::string name, std::string file,bool music = false);
             };
         };
-		SoundData* getSound(std::string nameOrFile);
-		void addSound(std::string file,std::string name = "");
-		void playEffect(std::string,uint loops = 1);
-		void playMusic(std::string,uint loops = 1);
+        SoundData* getSound(std::string nameOrFile);
+        void addSound(std::string file,std::string name = "");
+        void playEffect(std::string,uint loops = 1);
+        void playMusic(std::string,uint loops = 1);
     };
 };
 
