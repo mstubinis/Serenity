@@ -54,8 +54,8 @@ struct MeshVertexDataAnimated: public MeshVertexData{
     }
     ~MeshVertexDataAnimated(){ }
 };
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnimatedFormatMap(){
-    unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
+unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = [](){
+	unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
     m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
     //m[VertexFormatAnimated::UV]        = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
     m[VertexFormatAnimated::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
@@ -64,9 +64,8 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> _populateVertexAnima
     m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
     m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
     m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
-    return m;
-}
-unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = _populateVertexAnimatedFormatMap();
+	return m;
+}();
 
 class MeshSkeleton::impl{
     public:

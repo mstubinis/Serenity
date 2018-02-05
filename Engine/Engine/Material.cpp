@@ -32,7 +32,7 @@ GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Num
 void Material::setAllDiffuseModels(DiffuseModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setDiffuseModel(m); } }
 void Material::setAllSpecularModels(SpecularModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setSpecularModel(m); } }
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-    Material* material = static_cast<Material*>(r);
+    Material* material = (Material*)r;
     glm::vec3 first(0.0f); glm::vec3 second(0.0f); glm::vec3 third(0.0f);
     for(uint i = 0; i < MaterialComponentType::Number; i++){
         if(material->getComponents().count(i)){
@@ -69,26 +69,26 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Renderer::sendUniform3fSafe("ThirdConditionals",third.x,third.y,third.z);
 }};
 struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
-    //Material* m = static_cast<Material*>(r);
+    //Material* m = (Material*)r;
 }};
 struct srtKey{inline bool operator()(MaterialMeshEntry* _1,MaterialMeshEntry* _2){return(_1->mesh()->name()<_2->mesh()->name());}};
 
-unordered_map<uint,vector<uint>> _populateTextureSlotMap(){
-    unordered_map<uint,vector<uint>> texture_slot_map;
-    texture_slot_map[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
-    texture_slot_map[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
-    texture_slot_map[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
-    texture_slot_map[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
-    texture_slot_map[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
-    texture_slot_map[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
-    texture_slot_map[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
-    texture_slot_map[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
-    texture_slot_map[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
-    texture_slot_map[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
-    texture_slot_map[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
-    return texture_slot_map;
-}
-unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMaterialProperties(){
+unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
+    unordered_map<uint,vector<uint>> m;
+    m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
+    m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
+    m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
+    m[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
+    m[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
+    m[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
+    m[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
+    m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
+    m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
+    m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
+    m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
+    return m;
+}();
+unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
     unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
     //Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
     m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
@@ -118,9 +118,7 @@ unordered_map<uint,boost::tuple<float,float,float,float,float>> _populateMateria
     m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,           0.9f,           1.0f);
     m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
     return m;
-}
-unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = _populateTextureSlotMap();
-unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = _populateMaterialProperties();
+}();
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (MaterialComponentType::Type)type;

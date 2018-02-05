@@ -9,7 +9,7 @@
 using namespace Engine;
 using namespace std;
 
-unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> _populateGBufferTypesInfo(){
+unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
     unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
                                        //winSizeRatio   //internFormat                 //pxl_components                   //pxl_format
     m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
@@ -22,8 +22,7 @@ unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelForm
     m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;
-}
-unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = _populateGBufferTypesInfo();
+}();
 
 class GBuffer::impl final{
     public:

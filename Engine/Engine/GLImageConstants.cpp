@@ -2,7 +2,7 @@
 
 using namespace std;
 
-unordered_map<uint,GLuint> _populateImageFormatMap(){
+unordered_map<uint,GLuint> ImageInternalFormat::IMAGE_INTERNAL_FORMAT_MAP = [](){
     unordered_map<uint,GLuint> m;
     
     m.emplace(uint(ImageInternalFormat::Depth16), GL_DEPTH_COMPONENT16);
@@ -53,8 +53,28 @@ unordered_map<uint,GLuint> _populateImageFormatMap(){
     m.emplace(uint(ImageInternalFormat::RG8), GL_RG8);
     
     return m;
-}
-unordered_map<uint,GLuint> _populateImagePixelTypeMap(){
+}();
+unordered_map<uint,GLuint> ImagePixelFormat::IMAGE_PIXEL_FORMAT_MAP = [](){
+    unordered_map<uint,GLuint> m;
+
+    m.emplace(uint(ImagePixelFormat::RED),GL_RED);
+    m.emplace(uint(ImagePixelFormat::RG),GL_RG);
+    m.emplace(uint(ImagePixelFormat::RGB),GL_RGB);
+    m.emplace(uint(ImagePixelFormat::RGBA),GL_RGBA);
+    m.emplace(uint(ImagePixelFormat::BGRA),GL_BGRA);
+    m.emplace(uint(ImagePixelFormat::RED_INTEGER),GL_RED_INTEGER);
+    m.emplace(uint(ImagePixelFormat::RG_INTEGER),GL_RG_INTEGER);
+    m.emplace(uint(ImagePixelFormat::RGB_INTEGER),GL_RGB_INTEGER);
+    m.emplace(uint(ImagePixelFormat::BGR_INTEGER),GL_BGR_INTEGER);
+    m.emplace(uint(ImagePixelFormat::RGBA_INTEGER),GL_RGBA_INTEGER);
+    m.emplace(uint(ImagePixelFormat::BGRA_INTEGER),GL_BGRA_INTEGER);
+    m.emplace(uint(ImagePixelFormat::STENCIL_INDEX),GL_STENCIL_INDEX);
+    m.emplace(uint(ImagePixelFormat::DEPTH_COMPONENT),GL_DEPTH_COMPONENT);
+    m.emplace(uint(ImagePixelFormat::DEPTH_STENCIL),GL_DEPTH_STENCIL);
+
+    return m;
+}();
+unordered_map<uint,GLuint> ImagePixelType::IMAGE_PIXEL_TYPE_MAP = [](){
     unordered_map<uint,GLuint> m;
 
     m.emplace(uint(ImagePixelType::UNSIGNED_BYTE),GL_UNSIGNED_BYTE);
@@ -79,28 +99,8 @@ unordered_map<uint,GLuint> _populateImagePixelTypeMap(){
 	m.emplace(uint(ImagePixelType::UNSIGNED_INT_24_8),GL_UNSIGNED_INT_24_8);
 
     return m;
-}
-unordered_map<uint,GLuint> _populateImagePixelFormatMap(){
-    unordered_map<uint,GLuint> m;
-
-    m.emplace(uint(ImagePixelFormat::RED),GL_RED);
-    m.emplace(uint(ImagePixelFormat::RG),GL_RG);
-    m.emplace(uint(ImagePixelFormat::RGB),GL_RGB);
-    m.emplace(uint(ImagePixelFormat::RGBA),GL_RGBA);
-    m.emplace(uint(ImagePixelFormat::BGRA),GL_BGRA);
-    m.emplace(uint(ImagePixelFormat::RED_INTEGER),GL_RED_INTEGER);
-    m.emplace(uint(ImagePixelFormat::RG_INTEGER),GL_RG_INTEGER);
-    m.emplace(uint(ImagePixelFormat::RGB_INTEGER),GL_RGB_INTEGER);
-    m.emplace(uint(ImagePixelFormat::BGR_INTEGER),GL_BGR_INTEGER);
-    m.emplace(uint(ImagePixelFormat::RGBA_INTEGER),GL_RGBA_INTEGER);
-    m.emplace(uint(ImagePixelFormat::BGRA_INTEGER),GL_BGRA_INTEGER);
-    m.emplace(uint(ImagePixelFormat::STENCIL_INDEX),GL_STENCIL_INDEX);
-    m.emplace(uint(ImagePixelFormat::DEPTH_COMPONENT),GL_DEPTH_COMPONENT);
-    m.emplace(uint(ImagePixelFormat::DEPTH_STENCIL),GL_DEPTH_STENCIL);
-
-    return m;
-}        
-unordered_map<uint,GLuint> _populateGLAttatchmentMap(){
+}();
+unordered_map<uint,GLuint> FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP = [](){
     unordered_map<uint,GLuint> m;
 
     m.emplace(uint(FramebufferAttatchment::Color_0), GL_COLOR_ATTACHMENT0);
@@ -117,8 +117,4 @@ unordered_map<uint,GLuint> _populateGLAttatchmentMap(){
     m.emplace(uint(FramebufferAttatchment::DepthAndStencil), GL_DEPTH_STENCIL_ATTACHMENT);
 
     return m;
-}
-unordered_map<uint,GLuint> ImageInternalFormat::IMAGE_INTERNAL_FORMAT_MAP = _populateImageFormatMap();
-unordered_map<uint,GLuint> ImagePixelFormat::IMAGE_PIXEL_FORMAT_MAP = _populateImagePixelFormatMap();
-unordered_map<uint,GLuint> ImagePixelType::IMAGE_PIXEL_TYPE_MAP = _populateImagePixelTypeMap();
-unordered_map<uint,GLuint> FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP = _populateGLAttatchmentMap();
+}();
