@@ -1,8 +1,5 @@
 #include "Engine_Renderer.h"
-#include "Engine_Resources.h"
-#include "Engine_Physics.h"
 #include "Engine_Window.h"
-#include "ShaderProgram.h"
 #include "GBuffer.h"
 #include "Camera.h"
 #include "Light.h"
@@ -427,23 +424,23 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* camera,uin
 	GLEnable(GLState::DEPTH_MASK);
 
     //RENDER NORMAL OBJECTS HERE
-    for(auto shaderProgram:m_GeometryPassShaderPrograms){
-        vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); 
+    for(auto shader:m_GeometryPassShaderPrograms){
+        vector<Material*>& shaderMaterials = shader->getMaterials(); 
 		if(shaderMaterials.size() > 0){
-			shaderProgram->bind();
+			shader->bind();
 			for(auto material:shaderMaterials){
 				vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); 
 				if(materialMeshes.size() > 0){
 					material->bind();
-					for(auto meshEntry:materialMeshes){
-						meshEntry->mesh()->bind();
-						for(auto instance:meshEntry->meshInstances()){
-							boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
+					for(auto materialMeshEntry:materialMeshes){
+						materialMeshEntry->mesh()->bind();
+						for(auto meshInstance:materialMeshEntry->meshInstances()){
+							boost::weak_ptr<Object> o = Resources::getObjectPtr(meshInstance.first);
 							Object* object = o.lock().get();
 							if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
 								if(object->checkRender(camera)){ //culling check
 									object->bind();
-									for(auto meshInstance:instance.second){
+									for(auto meshInstance:meshInstance.second){
 										meshInstance->bind(); //render also
 										meshInstance->unbind();
 									}
@@ -451,17 +448,17 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* camera,uin
 								}
 							}
 							//protect against any custom changes by restoring to the regular shader and material
-							if(Detail::RendererInfo::GeneralInfo::current_shader_program != shaderProgram){
-								shaderProgram->bind();
+							if(Detail::RendererInfo::GeneralInfo::current_shader_program != shader){
+								shader->bind();
 								material->bind();
 							}
 						}
-						meshEntry->mesh()->unbind();
+						materialMeshEntry->mesh()->unbind();
 					}
 					material->unbind();
 				}
 			}
-			shaderProgram->unbind();
+			shader->unbind();
 		}
     }
 	GLDisable(GLState::DEPTH_TEST);

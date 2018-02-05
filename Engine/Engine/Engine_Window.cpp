@@ -5,11 +5,7 @@
 #include "Texture.h"
 #include "GBuffer.h"
 
-#include <SFML/Window.hpp>
-#include <SFML/System.hpp>
-
 using namespace Engine;
-
 
 class Engine_Window::impl{
     public:

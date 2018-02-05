@@ -3,8 +3,11 @@
 #define ENGINE_WINDOW_H
 
 #include <memory>
-namespace sf{ class Window; };
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
+
 typedef unsigned int uint;
+
 class Engine_Window final{
     private:
         class impl; std::unique_ptr<impl> m_i;

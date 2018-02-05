@@ -194,6 +194,39 @@ void MaterialComponentRefraction::bind(){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
+class MaterialMeshEntry::impl final{
+    public:
+	    Mesh* m_Mesh;
+        unordered_map<string,vector<MeshInstance*>> m_MeshInstances;
+
+		void _init(Mesh* mesh){
+			m_Mesh = mesh;
+		}
+		void _addEntry(const string& objectName,MeshInstance* meshInstance){
+			if(!m_MeshInstances.count(objectName)){
+				vector<MeshInstance*> vector;
+				vector.push_back(meshInstance);
+				m_MeshInstances.emplace(objectName,vector);
+			}
+			else{
+				m_MeshInstances.at(objectName).push_back(meshInstance);
+			}
+		}
+		void _removeEntry(const string& objectName,MeshInstance* meshInstance){
+			if(m_MeshInstances.count(objectName)){
+				vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
+				auto it = vector.begin();
+				while(it != vector.end()) {
+					MeshInstance* instance = (*it);
+					if(instance ==  meshInstance) {
+						//do not delete the instance here
+						it = vector.erase(it);
+					}
+					else ++it;
+				}
+			}
+		}
+};
 class Material::impl final{
     public:
         static DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
@@ -351,6 +384,23 @@ class Material::impl final{
 DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
+
+MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
+    m_i->_init(mesh);
+}
+MaterialMeshEntry::~MaterialMeshEntry(){
+}
+void MaterialMeshEntry::addMeshInstance(const string& objectName,MeshInstance* meshInstance){
+	m_i->_addEntry(objectName,meshInstance);
+}
+void MaterialMeshEntry::removeMeshInstance(const string& objectName,MeshInstance* meshInstance){
+	m_i->_removeEntry(objectName,meshInstance);
+}
+Mesh* MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
+unordered_map<string,vector<MeshInstance*>>& MaterialMeshEntry::meshInstances(){ return m_i->m_MeshInstances; }
+
+
+
 Material::Material(string name,string diffuse,string normal,string glow,string specular,string program):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
@@ -359,10 +409,10 @@ Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Te
 }
 Material::~Material(){
     m_i->_destruct();
-    for(auto entry:m_i->m_Meshes){
-        SAFE_DELETE(entry);
+    for(auto materialMeshEntry:m_i->m_Meshes){
+        SAFE_DELETE(materialMeshEntry);
     }
-    m_i->m_Meshes.clear();
+	vector_clear(m_i->m_Meshes);
 }
 void Material::addComponentDiffuse(Texture* texture){
     m_i->_addComponentDiffuse(texture);
@@ -494,8 +544,9 @@ void Material::addMeshEntry(string objectName){
 void Material::removeMeshEntry(string objectName){
     bool did = false;
     for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
-        if( (*it)->mesh()->name() == objectName){
-            delete (*it);
+		MaterialMeshEntry* entry = (*it);
+        if(entry->mesh()->name() == objectName){
+            SAFE_DELETE(entry); //do we need this?
             m_i->m_Meshes.erase(it++);
             did = true;
         }
@@ -503,7 +554,6 @@ void Material::removeMeshEntry(string objectName){
     }
     if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey()); }
 }
-vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
 void Material::bind(){
     string _name = name();
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
@@ -531,31 +581,4 @@ void Material::unload(){
         EngineResource::unload();
     }
 }
-MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh){
-    m_Mesh = mesh;
-}
-MaterialMeshEntry::~MaterialMeshEntry(){
-}
-void MaterialMeshEntry::addMeshInstance(const string objectName,MeshInstance* meshInstance){
-    if(!m_MeshInstances.count(objectName)){
-        vector<MeshInstance*> vector;
-        vector.push_back(meshInstance);
-        m_MeshInstances.emplace(objectName,vector);
-    }
-    else{
-        m_MeshInstances.at(objectName).push_back(meshInstance);
-    }
-}
-void MaterialMeshEntry::removeMeshInstance(const string objectName,MeshInstance* meshInstance){
-    if(m_MeshInstances.count(objectName)){
-        vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
-        std::vector<MeshInstance*>::iterator it = vector.begin();
-        while(it != vector.end()) {
-            MeshInstance* instance = static_cast<MeshInstance*>((*it));
-            if(instance ==  meshInstance) {
-                it = vector.erase(it);
-            }
-            else ++it;
-        }
-    }
-}
+vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }

@@ -184,9 +184,9 @@ void CapsuleSpace::update(float dt){
     float roll = glm::sin(m_Timer*2.4f)*5.0f;
     float pitch = glm::sin(m_Timer*2.4f)*0.7f;
 
-    for(auto item:getPlayer()->getDisplayItems()){
-        item->setPosition(glm::vec3(x*1.2f,-y,0));
-        item->setOrientation(glm::radians(pitch),0,glm::radians(roll));
+	for(auto meshInstance:getPlayer()->getMeshInstances()){
+        meshInstance->setPosition(glm::vec3(x*1.2f,-y,0));
+        meshInstance->setOrientation(glm::radians(pitch),0,glm::radians(roll));
     }
     //double check this (this is the light probe)
     //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));

@@ -131,10 +131,10 @@ class ObjectBasic: public Object{
         virtual glm::vec3 getForward();
         virtual glm::vec3 getRight();
         virtual glm::vec3 getUp();
-        virtual glm::vec3 getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
-        virtual glm::vec3 getScale(){ return m_Scale; }
-        virtual glm::mat4& getModel(){ return m_Model; }
-        virtual glm::quat& getOrientation(){ return m_Orientation; }
+		virtual glm::vec3 getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
+		virtual glm::vec3 getScale(){ return m_Scale; }
+		virtual glm::mat4& getModel(){ return m_Model; }
+		virtual glm::quat& getOrientation(){ return m_Orientation; }
         virtual void setOrientation(glm::quat);
 
         virtual void lookAt(glm::vec3,glm::vec3,glm::vec3);

@@ -67,7 +67,7 @@ unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORM
 	return m;
 }();
 
-class MeshSkeleton::impl{
+class MeshSkeleton::impl final{
     public:
         unordered_map<string,uint> m_BoneMapping; // maps a bone name to its index
         uint m_NumBones;
@@ -94,7 +94,7 @@ class MeshSkeleton::impl{
             vector_clear(m_BoneWeights);
         }
 };
-class Mesh::impl{
+class Mesh::impl final{
     public:
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
@@ -915,15 +915,15 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ARRAY_BUFFER, mesh->m_i->m_buffers.at(0));
     if(mesh->m_i->m_Skeleton != nullptr){
         for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
-            boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            boost::tuple<uint,GLuint,GLuint,GLuint>& d = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(),sizeof(MeshVertexDataAnimated),(void*)format.get<3>());
+            glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(MeshVertexDataAnimated),(void*)d.get<3>());
         }
     }else{     
         for(uint i = 0; i < VertexFormat::EnumTotal; i++){
-            boost::tuple<uint,GLuint,GLuint,GLuint>& format = VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            boost::tuple<uint,GLuint,GLuint,GLuint>& d = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,format.get<0>(),format.get<1>(),format.get<2>(),sizeof(MeshVertexData),(void*)format.get<3>());
+            glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(MeshVertexData),(void*)d.get<3>());
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_i->m_buffers.at(1));

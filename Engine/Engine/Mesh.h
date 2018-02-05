@@ -18,9 +18,6 @@ namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;
 class MeshInstance;
-struct ImportedMeshData;
-struct BoneInfo;
-struct VertexBoneData;
 struct aiAnimation;
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -87,7 +84,7 @@ struct ImportedMeshData final{
         vector_clear(file_points); vector_clear(file_uvs); vector_clear(file_normals); vector_clear(file_triangles);
         vector_clear(points); vector_clear(uvs); vector_clear(normals); vector_clear(binormals); vector_clear(tangents); vector_clear(indices);
     }
-    ImportedMeshData(){ clear(); }
+    ImportedMeshData(){ }
     ~ImportedMeshData(){ clear(); }
 };
 class AnimationData{
@@ -115,8 +112,6 @@ class MeshSkeleton final{
         void clear();
         uint numBones();
 };
-struct DefaultMeshBindFunctor;
-struct DefaultMeshUnbindFunctor;
 class Mesh final: public BindableResource{
     friend struct DefaultMeshBindFunctor;
     friend struct DefaultMeshUnbindFunctor;

@@ -192,7 +192,7 @@ Planet::Planet(string mat,PlanetType type,glm::vec3 pos,float scl,string name,fl
     m_RotationInfo = nullptr;
     if(type != PLANET_TYPE_STAR){
         AtmosphericScatteringMeshInstanceBindFunctor f;
-        m_DisplayItems.at(0)->setCustomBindFunctor(f);
+        m_MeshInstances.at(0)->setCustomBindFunctor(f);
     }
 }
 Planet::~Planet(){

@@ -33,10 +33,10 @@ class GLState{
 namespace Engine{
 	namespace Renderer{
 		inline void GLEnable(const GLState::State& s){
-			GLStateT& t=GLState::SM.at(s);if(t.enabled) return;t.enableFunc();t.enabled=1;
+			GLStateT& t=GLState::SM.at(s);if(t.enabled)return;t.enableFunc();t.enabled=1;
 		}
 		inline void GLDisable(const GLState::State& s){ 
-			GLStateT& t=GLState::SM.at(s);if(!t.enabled) return;t.disableFunc();t.enabled=0;
+			GLStateT& t=GLState::SM.at(s);if(!t.enabled)return;t.disableFunc();t.enabled=0;
 		}
 		inline bool GLEnabled(const GLState::State& s){
 			GLStateT& t=GLState::SM.at(s);return t.enabled;

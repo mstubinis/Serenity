@@ -131,17 +131,16 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
 
 class MaterialMeshEntry{
     private:
-        Mesh* m_Mesh;
-        std::unordered_map<std::string,std::vector<MeshInstance*>> m_MeshInstances;
+		class impl; std::unique_ptr<impl> m_i;
     public:
         MaterialMeshEntry(Mesh*);
         ~MaterialMeshEntry();
 
-        Mesh* mesh(){ return m_Mesh; }
-        std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances(){ return m_MeshInstances; }
+        Mesh* mesh();
+        std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances();
 
-        void addMeshInstance(const std::string objectName,MeshInstance*);
-        void removeMeshInstance(const std::string objectName,MeshInstance*);
+        void addMeshInstance(const std::string& objectName,MeshInstance*);
+        void removeMeshInstance(const std::string& objectName,MeshInstance*);
 };
 
 class Material final: public BindableResource{

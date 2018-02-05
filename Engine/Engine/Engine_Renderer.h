@@ -17,7 +17,6 @@ class GBuffer;
 class Object;
 class ObjectDisplay;
 class ObjectDynamic;
-class RenderedItem;
 class Camera;
 class FramebufferObject;
 class RenderbufferObject;

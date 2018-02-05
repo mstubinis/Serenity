@@ -17,16 +17,13 @@ enum COLLISION_GROUPS {
     COLLISION_GROUP_EVERYTHING = BIT(0),
 };
 */
-struct DefaultObjectDynamicBindFunctor; struct DefaultObjectDynamicUnbindFunctor;
+struct DefaultObjectDynamicBindFunctor; 
+struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
-    public: 
-        static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
-
         glm::vec3 m_Forward, m_Right, m_Up;
         bool m_Visible;
-        std::vector<MeshInstance*> m_DisplayItems;
+        std::vector<MeshInstance*> m_MeshInstances;
         glm::vec4 m_Color;
         glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
@@ -39,6 +36,9 @@ class ObjectDynamic: public Object{
         btRigidBody* m_RigidBody;
         btDefaultMotionState* m_MotionState;
     public:
+        static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
+        static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+
         virtual void collisionResponse(ObjectDynamic* other);
 
         ObjectDynamic( 
@@ -59,7 +59,7 @@ class ObjectDynamic: public Object{
 
         bool checkRender(Camera*);
 
-        std::vector<MeshInstance*>&  getDisplayItems(){ return m_DisplayItems; }
+        std::vector<MeshInstance*>&  getMeshInstances(){ return m_MeshInstances; }
 
         virtual void setPosition(float,float,float); 
         virtual void setPosition(glm::vec3);

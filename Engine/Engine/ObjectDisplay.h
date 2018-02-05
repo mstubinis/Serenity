@@ -5,20 +5,21 @@
 #include "Object.h"
 #include "MeshInstance.h"
 
-struct DefaultObjectDisplayBindFunctor; struct DefaultObjectDisplayUnbindFunctor;
+struct DefaultObjectDisplayBindFunctor; 
+struct DefaultObjectDisplayUnbindFunctor;
 class ObjectDisplay: public ObjectBasic{
-    public: 
-        static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     protected:
         bool m_Shadeless;
         bool m_Visible;
-        std::vector<MeshInstance*> m_DisplayItems;
+        std::vector<MeshInstance*> m_MeshInstances;
         glm::vec4 m_Color;
         glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
     public:
+        static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
+        static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+
         ObjectDisplay(
             std::string = "",
             std::string = "",
@@ -57,7 +58,7 @@ class ObjectDisplay: public ObjectBasic{
 
         glm::vec4& getColor(){ return m_Color; }
         glm::vec3& getGodsRaysColor(){ return m_GodsRaysColor; }
-        std::vector<MeshInstance*>&  getDisplayItems(){ return m_DisplayItems; }
+        std::vector<MeshInstance*>&  getMeshInstances(){ return m_MeshInstances; }
 
         virtual void setVisible(bool b);
 

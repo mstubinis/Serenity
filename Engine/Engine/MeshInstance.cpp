@@ -15,7 +15,6 @@
 using namespace Engine;
 using namespace std;
 
-
 class MeshInstanceAnimation::impl{
     public:
         uint m_CurrentLoops, m_RequestedLoops;
@@ -35,9 +34,9 @@ class MeshInstanceAnimation::impl{
 };
 class MeshInstance::impl{
     public:
+		static DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-        static DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
-
+        
         vector<MeshInstanceAnimation*> m_AnimationQueue;
 
         Mesh* m_Mesh;
@@ -63,8 +62,8 @@ class MeshInstance::impl{
             n = Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_MeshInstances,n);      
 
             super->setName(n);
-            super->setCustomBindFunctor(MeshInstance::impl::DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR);
+            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){
             _removeMeshFromInstance(super);
@@ -130,9 +129,9 @@ class MeshInstance::impl{
             }
         }
         void _removeMeshInstanceFromMaterial(MeshInstance* super){
-            for(auto meshEntry:m_Material->getMeshEntries()){
-                if(meshEntry->mesh() == m_Mesh){
-                    meshEntry->removeMeshInstance(m_Parent->name(),super);
+            for(auto materialMeshEntry:m_Material->getMeshEntries()){
+                if(materialMeshEntry->mesh() == m_Mesh){
+                    materialMeshEntry->removeMeshInstance(m_Parent->name(),super);
                     break;
                 }
             }
@@ -228,7 +227,7 @@ struct DefaultMeshInstanceBindFunctor{friend class MeshInstanceAnimation;void op
     Renderer::sendUniformMatrix4f("Model",model);
     i->render();
 }};
-struct DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+struct DefaultMeshInstanceUnbindFunctor{friend class MeshInstanceAnimation;void operator()(EngineResource* r) const {
 }};
 DefaultMeshInstanceBindFunctor MeshInstance::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMeshInstanceUnbindFunctor MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR;

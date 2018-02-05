@@ -60,18 +60,18 @@ ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 sc
     m_BoundingBoxRadius = glm::vec3(0.0f);
     if(mesh != "" && mat != ""){
         MeshInstance* item = new MeshInstance(name(),mesh,mat);
-        m_DisplayItems.push_back(item);
+        m_MeshInstances.push_back(item);
     }
     m_Collision = col;
     calculateRadius();
     m_Mass = 0.5f * m_Radius;
     if(m_Collision == nullptr){
-        if(m_DisplayItems.size() > 0){
+        if(m_MeshInstances.size() > 0){
             btCompoundShape* shape = new btCompoundShape();
-            for(auto item:m_DisplayItems){
+            for(auto meshInstance:m_MeshInstances){
                 btTransform t;
-                t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
-                shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
+                t.setFromOpenGLMatrix(glm::value_ptr(meshInstance->model()));
+                shape->addChildShape(t,meshInstance->mesh()->getCollision()->getCollisionShape());
             }
             m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
         }
@@ -142,8 +142,8 @@ void ObjectDynamic::update(float dt){
     if(m_Parent != nullptr){
         m_Model =  m_Parent->getModel() * m_Model;
     }
-    for(auto renderedItem:m_DisplayItems){
-        renderedItem->update(dt);
+    for(auto meshInstance:m_MeshInstances){
+        meshInstance->update(dt);
     }
 }
 bool ObjectDynamic::checkRender(Camera* c){
@@ -405,17 +405,17 @@ bool ObjectDynamic::rayIntersectSphere(Camera* c){
     return c->rayIntersectSphere(this);
 }
 void ObjectDynamic::calculateRadius(){
-    if(m_DisplayItems.size() == 0){
+	if(m_MeshInstances.size() == 0){
         m_BoundingBoxRadius = glm::vec3(0.0f);
         m_Radius = 0;
         return;
     }
     float maxLength = 0;
-    for(auto item:m_DisplayItems){
+    for(auto meshInstance:m_MeshInstances){
         float length = 0;
-        glm::mat4 m = item->model();
+        glm::mat4 m = meshInstance->model();
         glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
-        length = glm::length(localPosition) + item->mesh()->getRadius() * Engine::Math::Max(item->getScale());
+        length = glm::length(localPosition) + meshInstance->mesh()->getRadius() * Engine::Math::Max(meshInstance->getScale());
         if(length > maxLength){
             maxLength = length;
         }
@@ -450,51 +450,51 @@ glm::mat4& ObjectDynamic::getModel(){ return m_Model; }
 
 void ObjectDynamic::suspend(){
     Physics::removeRigidBody(this);
-    for(auto renderedItem:m_DisplayItems){
-        if(renderedItem->mesh() != nullptr){
-            renderedItem->mesh()->decrementUseCount();
-            if(renderedItem->mesh()->useCount() == 0){
-                renderedItem->mesh()->unload();
+    for(auto meshInstance:m_MeshInstances){
+        if(meshInstance->mesh() != nullptr){
+            meshInstance->mesh()->decrementUseCount();
+            if(meshInstance->mesh()->useCount() == 0){
+                meshInstance->mesh()->unload();
             }
         }
-        if(renderedItem->material() != nullptr){
-            renderedItem->material()->decrementUseCount();
-            if(renderedItem->material()->useCount() == 0){
-                renderedItem->material()->unload();
+        if(meshInstance->material() != nullptr){
+            meshInstance->material()->decrementUseCount();
+            if(meshInstance->material()->useCount() == 0){
+                meshInstance->material()->unload();
             }
         }
     }
 }
 void ObjectDynamic::resume(){
     Physics::addRigidBody(this);
-    for(auto renderedItem:m_DisplayItems){
-        if(renderedItem->mesh() != nullptr){
-            renderedItem->mesh()->incrementUseCount();
-            renderedItem->mesh()->load();
+    for(auto meshInstance:m_MeshInstances){
+        if(meshInstance->mesh() != nullptr){
+            meshInstance->mesh()->incrementUseCount();
+            meshInstance->mesh()->load();
         }
-        if(renderedItem->material() != nullptr){
-            renderedItem->material()->incrementUseCount();
-            renderedItem->material()->load();
+        if(meshInstance->material() != nullptr){
+            meshInstance->material()->incrementUseCount();
+            meshInstance->material()->load();
         }
     }
 }
 
 void ObjectDynamic::setMesh(Mesh* mesh){
     Physics::removeRigidBody(this);
-    for(auto entry:m_DisplayItems){ 
-        entry->setMesh(mesh); 
+    for(auto meshInstance:m_MeshInstances){ 
+        meshInstance->setMesh(mesh); 
     } 
-    if(m_DisplayItems.size() > 0){
+    if(m_MeshInstances.size() > 0){
         if(m_Collision != nullptr){
             vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
             collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
             SAFE_DELETE(m_Collision);
         }
         btCompoundShape* shape = new btCompoundShape();
-        for(auto item:m_DisplayItems){
+        for(auto meshInstance:m_MeshInstances){
             btTransform t;
-            t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
-            shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
+            t.setFromOpenGLMatrix(glm::value_ptr(meshInstance->model()));
+            shape->addChildShape(t,meshInstance->mesh()->getCollision()->getCollisionShape());
         }
         calculateRadius();
         m_Mass = 0.5f * m_Radius;
@@ -506,20 +506,20 @@ void ObjectDynamic::setMesh(Mesh* mesh){
 }
 void ObjectDynamic::setMesh(const string& mesh){ 
     Physics::removeRigidBody(this);
-    for(auto entry:m_DisplayItems){ 
-        entry->setMesh(Resources::getMesh(mesh)); 
+    for(auto meshInstance:m_MeshInstances){ 
+        meshInstance->setMesh(Resources::getMesh(mesh)); 
     }
-    if(m_DisplayItems.size() > 0){
+    if(m_MeshInstances.size() > 0){
         if(m_Collision != nullptr){
             vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
             collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
             SAFE_DELETE(m_Collision);
         }
         btCompoundShape* shape = new btCompoundShape();
-        for(auto item:m_DisplayItems){
+        for(auto meshInstance:m_MeshInstances){
             btTransform t;
-            t.setFromOpenGLMatrix(glm::value_ptr(item->model()));
-            shape->addChildShape(t,item->mesh()->getCollision()->getCollisionShape());
+            t.setFromOpenGLMatrix(glm::value_ptr(meshInstance->model()));
+            shape->addChildShape(t,meshInstance->mesh()->getCollision()->getCollisionShape());
         }
         calculateRadius();
         m_Mass = 0.5f * m_Radius;
@@ -529,5 +529,13 @@ void ObjectDynamic::setMesh(const string& mesh){
     }
     Physics::addRigidBody(this);
 }
-void ObjectDynamic::setMaterial(Material* material){ for(auto entry:m_DisplayItems){ entry->setMaterial(material); } }
-void ObjectDynamic::setMaterial(const string& material){ for(auto entry:m_DisplayItems){ entry->setMaterial(Resources::getMaterial(material)); } }
+void ObjectDynamic::setMaterial(Material* material){ 
+	for(auto meshInstance:m_MeshInstances){ 
+		meshInstance->setMaterial(material);
+	} 
+}
+void ObjectDynamic::setMaterial(const string& material){ 
+	for(auto meshInstance:m_MeshInstances){ 
+		meshInstance->setMaterial(Resources::getMaterial(material)); 
+	}
+}

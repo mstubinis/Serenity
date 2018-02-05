@@ -42,8 +42,8 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
     );
 
     if(material != ""){
-        MeshInstance* item = new MeshInstance(name(),name(),material);
-        m_DisplayItems.push_back(item);
+        MeshInstance* meshInstance = new MeshInstance(name(),name(),material);
+        m_MeshInstances.push_back(meshInstance);
     }
 
     if(Resources::getCurrentScene() == scene)

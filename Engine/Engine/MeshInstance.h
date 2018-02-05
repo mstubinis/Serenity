@@ -7,19 +7,15 @@
 
 class Mesh;
 class Material;
-
-struct DefaultMeshInstanceBindFunctor;
-struct DefaultMeshInstanceUnbindFunctor;
-
 class MeshInstanceAnimation final{
 	friend struct DefaultMeshInstanceBindFunctor;
+	friend struct DefaultMeshInstanceUnbindFunctor;
     private:
 		class impl; std::unique_ptr<impl> m_i;
     public:
         MeshInstanceAnimation(Mesh*,const std::string& animName,float startTime,float endTime,uint requestedLoops = 1);
         ~MeshInstanceAnimation();
 };
-
 class MeshInstance final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
