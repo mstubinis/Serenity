@@ -36,7 +36,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     uint numberSamples = 2;
     //uint numberSamples = 8;
     
-    glm::mat4 rot = glm::mat4(1.0f);
+    glm::mat4 rot = Renderer::Detail::RenderManagement::m_IdentityMat4;
     rot *= glm::mat4_cast(orientation);
     
     glm::vec3 lightDir = Resources::getCurrentScene()->lights().begin()->second->getPosition() - pos;
@@ -77,7 +77,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
     if(atmosphereHeight > 0){
         //Ground should be currently binded
-        glm::mat4 mod = glm::mat4(1.0f);
+        glm::mat4 mod = Renderer::Detail::RenderManagement::m_IdentityMat4;
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
         mod = glm::scale(mod,obj->getScale());
@@ -106,7 +106,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         Renderer::Settings::cullFace(GL_FRONT);
 		Renderer::GLEnable(GLState::BLEND);
-        mod = glm::mat4(1.0f);
+        mod = Renderer::Detail::RenderManagement::m_IdentityMat4;
         mod = glm::translate(mod,pos);
         mod = glm::scale(mod,obj->getScale());
         mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
@@ -158,7 +158,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform1f("fScale",fScale);
         Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
 
-        glm::mat4 mod = glm::mat4(1.0f);
+        glm::mat4 mod = Renderer::Detail::RenderManagement::m_IdentityMat4;
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
         mod = glm::scale(mod,obj->getScale());

@@ -160,6 +160,8 @@ namespace Engine{
                     static void _passCopyDepth(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                     static void _passStencil(GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
                 public:
+					static glm::mat4 m_IdentityMat4;
+					static glm::mat3 m_IdentityMat3;
                     static GBuffer* m_gBuffer;
                     static glm::mat4 m_2DProjectionMatrix;
 

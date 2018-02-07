@@ -163,7 +163,7 @@ class MeshInstance::impl{
         }
         void _updateModelMatrix(){
             if(m_NeedsUpdate){
-                m_Model = glm::mat4(1.0f);
+                m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
                 glm::mat4 translationMatrix = glm::translate(m_Position);
                 glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
                 glm::mat4 scaleMatrix = glm::scale(m_Scale);
@@ -194,7 +194,7 @@ struct DefaultMeshInstanceBindFunctor{friend class MeshInstanceAnimation;void op
 			if(a->m_i->m_Mesh == i->mesh()){
 				a->m_i->m_CurrentTime += Resources::dt();
 				if(transforms.size() == 0){
-					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
+					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),Renderer::Detail::RenderManagement::m_IdentityMat4);
 				}
 				a->m_i->m_Mesh->playAnimation(transforms,a->m_i->m_AnimName,a->m_i->m_CurrentTime);
 				if(a->m_i->m_CurrentTime >= a->m_i->m_EndTime){

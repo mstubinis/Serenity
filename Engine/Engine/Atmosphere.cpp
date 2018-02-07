@@ -18,7 +18,7 @@ using namespace Engine;
 
 Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEmpty(name,scene){
     m_Atmosphere = AtmosphereInformation();
-    m_Model = glm::mat4(1.0f);
+	m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
     m_Scale = glm::vec3(1.0f);
     m_FollowCamera = followCamera;
 

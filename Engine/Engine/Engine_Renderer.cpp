@@ -109,6 +109,9 @@ vector<TextureRenderInfo> Detail::RenderManagement::m_TexturesToBeRendered;
 vector<ShaderP*> Detail::RenderManagement::m_GeometryPassShaderPrograms;
 vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 
+glm::mat4 Detail::RenderManagement::m_IdentityMat4;
+glm::mat3 Detail::RenderManagement::m_IdentityMat3;
+
 void _generateBRDFLUTCookTorrance(uint brdfSize){
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
@@ -249,6 +252,8 @@ void Renderer::unbindTextureCubemap(uint s){
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 }
 void Detail::RenderManagement::init(){
+	m_IdentityMat4 = glm::mat4(1.0f);
+	m_IdentityMat3 = glm::mat3(1.0f);
     uniform_real_distribution<float> randFloats(0.0f,1.0f);
     default_random_engine gen;
     vector<glm::vec3> kernels;
@@ -340,7 +345,7 @@ void Detail::RenderManagement::_renderTextures(GBuffer* gbuffer,Camera* c,uint& 
         }
         sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
 
-        glm::mat4 model = glm::mat4(1);
+        glm::mat4 model = Renderer::Detail::RenderManagement::m_IdentityMat4;
         model = glm::translate(model, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
         model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
         if(item.texture != "")
@@ -374,7 +379,7 @@ void Detail::RenderManagement::_renderText(GBuffer* gbuffer,Camera* c,uint& fbuf
             else{
                 FontGlyph* glyph = font->getFontData()->getGlyphData(c);
 
-                glyph->m_Model = glm::mat4(1);
+                glyph->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
                 glyph->m_Model = glm::translate(glyph->m_Model, glm::vec3(x + glyph->xoffset ,item.pos.y - (glyph->height + glyph->yoffset) - y_offset,-0.001f - item.depth));
                 glyph->m_Model = glm::rotate(glyph->m_Model, item.rot,glm::vec3(0,0,1));
                 glyph->m_Model = glm::scale(glyph->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
@@ -1059,12 +1064,11 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
+	//NOTE: use renderFullscreenTriangle() instead, see comments in its function
     float w2 = float(width)/2.0f;
     float h2 = float(height)/2.0f;
-    glm::mat4 m(1.0f);
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
-    sendUniformMatrix4f("Model",m);
-    sendUniformMatrix4f("VP",p);
+    sendUniformMatrix4f("MVP",p);
     setViewport(0,0,width,height);
 
     glBegin(GL_QUADS);
@@ -1077,12 +1081,11 @@ void Detail::renderFullscreenQuad(uint width,uint height){
 void Detail::renderFullscreenTriangle(uint width,uint height){
     float w2 = float(width)/2.0f;
     float h2 = float(height)/2.0f;
-    glm::mat4 m(1.0f);
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
-    sendUniformMatrix4f("Model",m);
-    sendUniformMatrix4f("VP",p);
+    sendUniformMatrix4f("MVP",p);
     setViewport(0,0,width,height);
-	//apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice
+	//apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice,
+	//and culling out the unseen geometry from the oversized triangle (opengl does this automatically) is alot cheaper than the alternative render diagonal pixels twice
     glBegin(GL_TRIANGLES);
         glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
         glTexCoord2f(2.5f, 0.0f);  glVertex2f( w2*4.0f, -h2);

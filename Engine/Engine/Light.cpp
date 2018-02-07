@@ -628,7 +628,7 @@ void PointLight::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = glm::mat4(1.0f);
+        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_CullingRadius));
@@ -647,8 +647,7 @@ void PointLight::lighten(){
     Renderer::sendUniform4f("LightDataC", m_Exp,pos.x,pos.y,pos.z);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
 
-    Renderer::sendUniformMatrix4f("Model",m_Model);
-    Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+    Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_Model);
 
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
@@ -767,7 +766,7 @@ void SpotLight::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = glm::mat4(1.0f);
+        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
@@ -789,8 +788,7 @@ void SpotLight::lighten(){
     Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     Renderer::sendUniform1fSafe("SpotLight",1.0f);
 
-    Renderer::sendUniformMatrix4f("Model",m_Model);
-    Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+    Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_Model);
 
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
@@ -949,7 +947,7 @@ void RodLight::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = glm::mat4(1.0f);
+        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
@@ -975,8 +973,7 @@ void RodLight::lighten(){
     Renderer::sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
 
-    Renderer::sendUniformMatrix4f("Model",m_Model);
-    Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+    Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_Model);
 
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
         Renderer::Settings::cullFace(GL_FRONT);
@@ -1048,7 +1045,7 @@ class LightProbe::impl{
 				super->m_Model = super->m_Parent->getModel(); 
 			}
             else{
-				super->m_Model = glm::mat4(1.0f);
+				super->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
 			}
 			glm::mat4 translationMatrix = glm::translate(super->getPosition());
             glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);
@@ -1133,7 +1130,7 @@ class LightProbe::impl{
 				super->m_Model = super->m_Parent->getModel(); 
 			}
             else{
-				super->m_Model = glm::mat4(1.0f);
+				super->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
 			}
 			glm::mat4 translationMatrix = glm::translate(super->getPosition());
             glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);

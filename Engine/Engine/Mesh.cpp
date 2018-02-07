@@ -966,7 +966,7 @@ class AnimationData::impl{
                     aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
                     glm::mat4 rotation = glm::mat4(Engine::Math::assimpToGLMMat3(q.GetMatrix()));
                     glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
-                    NodeTransform = glm::mat4(1.0f);
+                    NodeTransform = Renderer::Detail::RenderManagement::m_IdentityMat4;
                     NodeTransform = glm::translate(NodeTransform,t);
                     NodeTransform *= rotation;
                     NodeTransform = glm::scale(NodeTransform,s);
@@ -988,7 +988,7 @@ class AnimationData::impl{
             float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
             float TimeInTicks = TimeInSeconds * TicksPerSecond;
             float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
-            glm::mat4 Identity = glm::mat4(1.0f);
+            glm::mat4 Identity = Renderer::Detail::RenderManagement::m_IdentityMat4;
             _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
             for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_i->m_NumBones; i++){
                 Transforms.at(i) = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(i).FinalTransform;

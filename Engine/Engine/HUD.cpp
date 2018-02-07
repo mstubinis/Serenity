@@ -112,7 +112,7 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-	m_Font->renderText(Engine::Resources::Detail::ResourceManagement::m_Time.reportTime() + 
+	m_Font->renderText(Engine::Resources::Detail::ResourceManagement::m_Time.reportTimeRendering() + 
                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
                        "\nExposure: " + to_string(Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure) + 
                        "\nGamma: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::gamma),

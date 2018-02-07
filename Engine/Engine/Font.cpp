@@ -49,7 +49,7 @@ void FontData::_loadTextFile(string& filename){
                 else if(key == "yoffset")  f->yoffset = stoi(value);
                 else if(key == "xadvance") f->xadvance = stoi(value);
             }
-            f->m_Model = glm::mat4(1.0f);
+			f->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
             string name = filename.substr(0,filename.size()-4);
             Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
             f->char_mesh = Resources::getMesh(name+"_"+to_string(f->id));
