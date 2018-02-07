@@ -81,8 +81,8 @@ class ShaderP::impl final{
             }
             super->setName(name);
 
-            super->setCustomBindFunctor(ShaderP::impl::DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(ShaderP::impl::DEFAULT_UNBIND_FUNCTOR);
+            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
         }
         void _construct(string& name, string& vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){

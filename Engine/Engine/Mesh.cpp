@@ -360,7 +360,6 @@ class Mesh::impl final{
                         norm.x = aimesh->mNormals[i].x;
                         norm.y = aimesh->mNormals[i].y;
                         norm.z = aimesh->mNormals[i].z;
-                        //norm = glm::normalize(norm);
                         data.normals.push_back(norm);
 
                         //tangent
@@ -368,7 +367,6 @@ class Mesh::impl final{
                         tangent.x = aimesh->mTangents[i].x;
                         tangent.y = aimesh->mTangents[i].y;
                         tangent.z = aimesh->mTangents[i].z;
-                        //tangent = glm::normalize(tangent);
                         //data.tangents.push_back(tangent);
 
                         //binorm
@@ -376,7 +374,6 @@ class Mesh::impl final{
                         binorm.x = aimesh->mBitangents[i].x;
                         binorm.y = aimesh->mBitangents[i].y;
                         binorm.z = aimesh->mBitangents[i].z;
-                        //binorm = glm::normalize(binorm);
                         //data.binormals.push_back(binorm);
                     }
                 }
@@ -490,12 +487,11 @@ class Mesh::impl final{
                 glm::vec3& t = binormals.at(i);
                 glm::vec3& b = tangents.at(i);
                 // Gram-Schmidt orthogonalize
-                t = glm::normalize(t - glm::dot(t, n) * n);
-                b = glm::cross(n, t);
+                t = glm::normalize(t - n * glm::dot(n, t));
 
                 //handedness
                 if (glm::dot(glm::cross(n, t), b) < 0.0f){
-                     t *= -1.0f;
+                     t = t * -1.0f;
                 }
             }
         }

@@ -21,45 +21,45 @@ GLSL Version      OpenGL Version
 
 #pragma region Declarations
 string Shaders::Detail::ShadersManagement::version = "#version 120\n";
-string Shaders::Detail::ShadersManagement::conditional_functions = "";
-string Shaders::Detail::ShadersManagement::float_into_2_floats = "";
-string Shaders::Detail::ShadersManagement::determinent_mat3 = "";
-string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = "";
-string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = "";
-string Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = "";
-string Shaders::Detail::ShadersManagement::vertex_basic = "";
-string Shaders::Detail::ShadersManagement::vertex_hud = "";
-string Shaders::Detail::ShadersManagement::vertex_skybox = "";
-string Shaders::Detail::ShadersManagement::stencil_passover = "";
-string Shaders::Detail::ShadersManagement::smaa_common = "";
-string Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = "";
-string Shaders::Detail::ShadersManagement::smaa_vertex_1 = "";
-string Shaders::Detail::ShadersManagement::smaa_frag_1 = "";
-string Shaders::Detail::ShadersManagement::smaa_vertex_2 = "";
-string Shaders::Detail::ShadersManagement::smaa_frag_2 = "";
-string Shaders::Detail::ShadersManagement::smaa_vertex_3 = "";
-string Shaders::Detail::ShadersManagement::smaa_frag_3 = "";
-string Shaders::Detail::ShadersManagement::smaa_vertex_4 = "";
-string Shaders::Detail::ShadersManagement::smaa_frag_4 = "";
-string Shaders::Detail::ShadersManagement::fxaa_frag = "";
-string Shaders::Detail::ShadersManagement::deferred_frag = "";
-string Shaders::Detail::ShadersManagement::deferred_frag_hud = "";
-string Shaders::Detail::ShadersManagement::deferred_frag_skybox = "";
-string Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = "";
-string Shaders::Detail::ShadersManagement::copy_depth_frag = "";
-string Shaders::Detail::ShadersManagement::cubemap_convolude_frag = "";
-string Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = "";
-string Shaders::Detail::ShadersManagement::brdf_precompute = "";
-string Shaders::Detail::ShadersManagement::ssao_frag = "";
-string Shaders::Detail::ShadersManagement::hdr_frag = "";
-string Shaders::Detail::ShadersManagement::godRays_frag = "";
-string Shaders::Detail::ShadersManagement::blur_frag = "";
-string Shaders::Detail::ShadersManagement::greyscale_frag = "";
-string Shaders::Detail::ShadersManagement::edge_canny_frag = "";
-string Shaders::Detail::ShadersManagement::edge_canny_blur = "";
-string Shaders::Detail::ShadersManagement::final_frag = "";
-string Shaders::Detail::ShadersManagement::lighting_frag = "";
-string Shaders::Detail::ShadersManagement::lighting_frag_gi = "";
+string Shaders::Detail::ShadersManagement::conditional_functions;
+string Shaders::Detail::ShadersManagement::float_into_2_floats;
+string Shaders::Detail::ShadersManagement::determinent_mat3;
+string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
+string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
+string Shaders::Detail::ShadersManagement::fullscreen_quad_vertex;
+string Shaders::Detail::ShadersManagement::vertex_basic;
+string Shaders::Detail::ShadersManagement::vertex_hud;
+string Shaders::Detail::ShadersManagement::vertex_skybox;
+string Shaders::Detail::ShadersManagement::stencil_passover;
+string Shaders::Detail::ShadersManagement::smaa_common;
+string Shaders::Detail::ShadersManagement::smaa_frag_1_stencil;
+string Shaders::Detail::ShadersManagement::smaa_vertex_1;
+string Shaders::Detail::ShadersManagement::smaa_frag_1;
+string Shaders::Detail::ShadersManagement::smaa_vertex_2;
+string Shaders::Detail::ShadersManagement::smaa_frag_2;
+string Shaders::Detail::ShadersManagement::smaa_vertex_3;
+string Shaders::Detail::ShadersManagement::smaa_frag_3;
+string Shaders::Detail::ShadersManagement::smaa_vertex_4;
+string Shaders::Detail::ShadersManagement::smaa_frag_4;
+string Shaders::Detail::ShadersManagement::fxaa_frag;
+string Shaders::Detail::ShadersManagement::deferred_frag;
+string Shaders::Detail::ShadersManagement::deferred_frag_hud;
+string Shaders::Detail::ShadersManagement::deferred_frag_skybox;
+string Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake;
+string Shaders::Detail::ShadersManagement::copy_depth_frag;
+string Shaders::Detail::ShadersManagement::cubemap_convolude_frag;
+string Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag;
+string Shaders::Detail::ShadersManagement::brdf_precompute;
+string Shaders::Detail::ShadersManagement::ssao_frag;
+string Shaders::Detail::ShadersManagement::hdr_frag;
+string Shaders::Detail::ShadersManagement::godRays_frag;
+string Shaders::Detail::ShadersManagement::blur_frag;
+string Shaders::Detail::ShadersManagement::greyscale_frag;
+string Shaders::Detail::ShadersManagement::edge_canny_frag;
+string Shaders::Detail::ShadersManagement::edge_canny_blur;
+string Shaders::Detail::ShadersManagement::final_frag;
+string Shaders::Detail::ShadersManagement::lighting_frag;
+string Shaders::Detail::ShadersManagement::lighting_frag_gi;
 #pragma endregion
 
 void Shaders::Detail::ShadersManagement::convertShaderCode(string& code){
@@ -115,8 +115,6 @@ Shaders::Detail::ShadersManagement::conditional_functions =
 	"//float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
 	"float not(float a) { return 1.0 - a; }\n"
 	"\n";
-
-
 
 Shaders::Detail::ShadersManagement::float_into_2_floats = 
     "\n"
@@ -208,23 +206,23 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);\n"
     "}\n"
     "vec2 sign_not_zero(vec2 v) {\n"
-    "    return vec2(v.x >= 0 ? 1.0 : -1.0,v.y >= 0 ? 1.0 : -1.0);\n"
+    "    return vec2(v.x >= 0 ? 1.0 : -1.0, v.y >= 0 ? 1.0 : -1.0);\n"
     "}\n"
     "vec2 EncodeOctahedron(vec3 v) {\n"
-    "    if(v.r > 0.9999 && v.g > 0.9999 && v.b > 0.9999)\n"
+	"    if(distance(v,vec3(1.0)) < 0.01)\n"
     "        return vec2(1.0);\n"
     "	 v.xy /= dot(abs(v), vec3(1.0));\n"
     "	 return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));\n"
     "}\n"
     "vec3 DecodeOctahedron(vec2 n) {\n"
-    "    if(n.r > 0.9999 && n.g > 0.9999)\n"
+	"    if(distance(n,vec2(1.0)) < 0.01)\n"
     "        return vec3(1.0);\n"
     "	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
     "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);\n"
     "	 return normalize(v);\n"
     "}\n"
     "vec2 EncodeSpherical(vec3 n){\n"
-    "    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)\n"
+    "    if(distance(n,vec3(1.0)) < 0.01)\n"
     "        return vec2(1.0);\n"
     "    vec2 encN;\n"
     "    encN.x = atan( n.x, n.y ) * 1.0 / 3.1415926535898;\n"
@@ -233,7 +231,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    return encN;\n"
     "}\n"
     "vec3 DecodeSpherical(vec2 encN){\n"
-    "    if(encN.r > 0.9999 && encN.g > 0.9999)\n"
+    "    if(distance(encN,vec2(1.0)) < 0.01)\n"
     "        return vec3(1.0);\n"
     "    vec2 ang = encN * 2.0 - 1.0;\n"
     "    vec2 scth;\n"
@@ -248,19 +246,19 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    return normalize(n);\n"
     "}\n"
     "vec2 EncodeStereographic(vec3 n){\n"
-    "    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999)\n"
+    "    if(distance(n,vec3(1.0)) < 0.01)\n"
     "        return vec2(1.0);\n"
     "    float scale = 1.7777777777;\n"
-    "    vec2 enc = n.xy / (n.z+1.0);\n"
+    "    vec2 enc = n.xy / (n.z + 1.0);\n"
     "    enc /= scale;\n"
-    "    enc = enc*0.5+0.5;\n"
+    "    enc = enc * 0.5 + 0.5;\n"
     "    return enc;\n"
     "}\n"
     "vec3 DecodeStereographic(vec2 enc){\n"
-    "    if(enc.r > 0.9999 && enc.g > 0.9999)\n"
+    "    if(distance(enc,vec2(1.0)) < 0.01)\n"
     "        return vec3(1.0);\n"
     "    float scale = 1.7777777777;\n"
-    "    vec3 nn = vec3(enc.xy,1.0)*vec3(2.0*scale,2.0*scale,0.0) + vec3(-scale,-scale,1.0);\n"
+    "    vec3 nn = vec3(enc.xy,1.0) * vec3(2.0 * scale,2.0 * scale,0.0) + vec3(-scale,-scale,1.0);\n"
     "    float g = 2.0 / dot(nn.xyz,nn.xyz);\n"
     "    vec3 n;\n"
     "    n.xy = g*nn.xy;\n"
@@ -268,7 +266,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    return normalize(n);\n"
     "}\n"
     "vec2 EncodeXYRestoreZ(vec3 n){\n"
-    "    if(n.r > 0.9999 && n.g > 0.9999 && n.b > 0.9999){\n"
+    "    if(distance(n,vec3(1.0)) < 0.01){\n"
     "        return vec2(1.0);\n"
     "    }\n"
     "    vec2 enc = vec2(0.0);\n"
@@ -277,7 +275,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    return enc;\n"
     "}\n"
     "vec3 DecodeXYRestoreZ(vec2 n){\n"
-    "    if(n.r > 0.9999 && n.g > 0.9999){\n"
+    "    if(distance(n,vec2(1.0)) < 0.01){\n"
     "        return vec3(1.0);\n"
     "    }\n"
     "    vec3 enc = vec3(0.0);\n"
@@ -364,16 +362,16 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "\n"
     "    gl_Position = MVP * PosTrans;\n"
     "\n"
-    "    Normals = (NormalMatrix * NormalTrans);\n"
+    "           Normals = (NormalMatrix * NormalTrans);\n"
     "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"
-    "    vec3 Tangents = (NormalMatrix * TangentTrans);\n"
-    "\n"
+    "    vec3  Tangents = (NormalMatrix * TangentTrans);\n"
     "    TBN = (mat3(Tangents,Binormals,Normals));\n"
     "\n"
     "    WorldPosition = (Model * PosTrans).xyz;\n"
     "\n"
     "    //UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
+	"\n"
     "    logz_f = 1.0 + gl_Position.w;\n"
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
     "    FC_2_f = fcoeff * 0.5;\n"
@@ -397,7 +395,7 @@ Shaders::Detail::ShadersManagement::vertex_hud +=
     "    //UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
     "    gl_Position = MVP * vec4(position, 1.0);\n"
-    "    gl_TexCoord[6] = gl_Position;\n"
+    "    //gl_TexCoord[6] = gl_Position;\n"
     "}";
 #pragma endregion
 
@@ -436,7 +434,7 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
     "            nrSamples++;\n"
     "        }\n"
     "    }\n"
-    "    irradiance = PI * irradiance * (1.0 / float(nrSamples));\n"
+    "    irradiance = PI * irradiance * (1.0 / nrSamples);\n"
     "    gl_FragColor = vec4(irradiance, 1.0);\n"
     "}\n";
 #pragma endregion
@@ -459,7 +457,7 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
     "const float PI = 3.14159265;\n"
     "const float PI2 = 6.283185;\n"
     "float DistributionGGX(vec3 Half){\n"
-    "    float NdotH2 = Half.z*Half.z;\n"
+    "    float NdotH2 = Half.z * Half.z;\n"
     "    float denom = (NdotH2 * (a2 - 1.0) + 1.0);\n"
     "    denom = PI * denom * denom;\n"
     "    return a2 / denom;\n"
@@ -472,8 +470,8 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
     "        if(n > 0){\n"
     "            denom = mod(float(n), 2.0);\n"
     "            result += denom * invBase;\n"
-    "            invBase = invBase / 2.0;\n"
-    "            n = int(float(n) / 2.0);\n"
+    "            invBase = invBase * 0.5;\n"
+    "            n = int(float(n) * 0.5);\n"
     "        }\n"
     "    }\n"
     "    return result;\n"
@@ -653,19 +651,22 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
     "   }\n"
     "}";
 #pragma endregion
-	
+
+#pragma region LightingStencilPass
+
 Shaders::Detail::ShadersManagement::stencil_passover = Shaders::Detail::ShadersManagement::version + 
 Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions +
     "\n"
 	"const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "uniform sampler2D gNormalMap;\n"
     "void main(){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
-	"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,uv).rg);\n"
+	"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,gl_TexCoord[0].st).rg);\n"
 	"    if(distance(normal,comparison) < 0.01){\n"
     "        discard;\n"//this is where the magic happens with the stencil buffer.
     "    }\n"
     "}";
+
+#pragma endregion
 
 #pragma region SMAA
    
@@ -771,14 +772,12 @@ Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersMana
     "\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
-    "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
+    "uniform mat4 MVP;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset[3];\n"
     "\n"
     "void main(){\n"
-    "    mat4 MVP = VP * Model;\n"
     "    uv = gl_MultiTexCoord0.xy;\n"
     "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)),uv.xyxy);\n"
     "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)),uv.xyxy);\n"
@@ -899,8 +898,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "\n";
 Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"//blend vert
-    "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
+    "uniform mat4 MVP;\n"
     "\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
@@ -912,7 +910,6 @@ Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersMana
     "flat varying vec4 _SMAA_PIXEL_SIZE;\n"
     "\n"
     "void main(){\n"
-    "    mat4 MVP = VP * Model;\n"
     "    uv = gl_MultiTexCoord0.xy;\n"
     "    pixCoord = uv * SMAA_PIXEL_SIZE.zw;\n"
     "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.25,API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)),uv.xyxy);\n"
@@ -1166,8 +1163,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "\n";
 Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"//neightbor vert
-    "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
+    "uniform mat4 MVP;\n"
     "\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
@@ -1177,7 +1173,6 @@ Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersMana
     "flat varying vec4 _SMAA_PIXEL_SIZE;\n"
     "\n"
     "void main(){\n"
-    "    mat4 MVP = VP * Model;\n"
     "    uv = gl_MultiTexCoord0.xy;\n"
     "    _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0,0.0,0.0,API_V_DIR(1.0)),uv.xyxy);\n"
     "    gl_Position = MVP * gl_Vertex;\n"
@@ -1222,14 +1217,12 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
 //vertex & frag 4 are optional passes
 Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"
-    "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
+    "uniform mat4 MVP;\n"
     "void SMAAResolveVS(inout vec2 uv){\n"
     "}\n"
     "void SMAASeparateVS(inout vec2 uv){\n"
     "}\n"
     "void main(){\n"
-    "    mat4 MVP = VP * Model;\n"
     "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
     "    gl_Position = MVP * gl_Vertex;\n"
     "}";
@@ -1316,9 +1309,9 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "    r = PaintersAlgorithm(r,d);\n"
     "    return r;\n"
     "}\n"
-    "vec3 CalcBumpedNormal(void){\n"
+    "vec3 CalcBumpedNormal(){\n"
     "    vec3 normTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;\n"
-    "    return TBN * normalize(normTexture);\n"
+	"    return normalize(TBN * normTexture);\n"
     "}\n"
     "void main(){\n"
     "    gl_FragData[0] = Object_Color;\n"
