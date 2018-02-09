@@ -21,6 +21,7 @@ GLSL Version      OpenGL Version
 
 #pragma region Declarations
 string Shaders::Detail::ShadersManagement::version = "#version 120\n";
+string Shaders::Detail::ShadersManagement::constants;
 string Shaders::Detail::ShadersManagement::conditional_functions;
 string Shaders::Detail::ShadersManagement::float_into_2_floats;
 string Shaders::Detail::ShadersManagement::determinent_mat3;
@@ -66,6 +67,23 @@ void Shaders::Detail::ShadersManagement::convertShaderCode(string& code){
 }
 
 void Shaders::Detail::ShadersManagement::init(){
+
+#pragma region Constants
+Shaders::Detail::ShadersManagement::constants = 
+	"\n"
+	"const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n"
+	"const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n"
+	"\n"
+	"const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);\n"
+	"const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);\n"
+	"\n"
+	"const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
+	"const vec2 ConstantZeroVec2 = vec2(0.0,0.0);\n"
+	"\n"
+	"const float KPI = 3.1415926535898;\n"
+	"const float StereoConst = 1.7777777777;\n"
+	"\n";
+#pragma endregion
 
 #pragma region Functions
 
@@ -143,7 +161,7 @@ Shaders::Detail::ShadersManagement::float_into_2_floats =
     "vec2 UnpackFloat16Into2Floats(float i){\n"
     "    vec2 res;\n"
     "    res.y = i - floor(i);\n"
-    "    res.x = (i - res.y) / 100.0;\n"
+    "    res.x = (i - res.y) * 0.01;\n"
     "    res.x = (res.x - 0.5) * 2.0;\n"
     "    res.y = (res.y - 0.5) * 2.0;\n"
     "    return res;\n"
@@ -158,7 +176,7 @@ Shaders::Detail::ShadersManagement::float_into_2_floats =
     "vec2 UnpackFloat32Into2Floats(float i){\n"
     "    vec2 res;\n"
     "    res.y = i - floor(i);\n"
-    "    res.x = (i - res.y) / 1000.0;\n"
+    "    res.x = (i - res.y) * 0.001;\n"
     "    res.x = (res.x - 0.5) * 2.0;\n"
     "    res.y = (res.y - 0.5) * 2.0;\n"
     "    return res;\n"
@@ -200,7 +218,7 @@ Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions =
     "}\n"
     "\n";
 
-Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = 
+Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = Shaders::Detail::ShadersManagement::constants +
     "\n"
     "float Round(float x){\n"
     "    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);\n"
@@ -208,34 +226,34 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "vec2 sign_not_zero(vec2 v) {\n"
     "    return vec2(v.x >= 0 ? 1.0 : -1.0, v.y >= 0 ? 1.0 : -1.0);\n"
     "}\n"
-    "vec2 EncodeOctahedron(vec3 v) {\n"
-	"    if(distance(v,vec3(1.0)) < 0.01)\n"
-    "        return vec2(1.0);\n"
-    "	 v.xy /= dot(abs(v), vec3(1.0));\n"
-    "	 return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));\n"
+    "vec2 EncodeOctahedron(vec3 n) {\n"
+	"    if(   all(greaterThan(n,ConstantAlmostOneVec3))   )\n"
+    "        return ConstantOneVec2;\n"
+    "	 n.xy /= dot(abs(n), ConstantOneVec3);\n"
+    "	 return mix(n.xy, (1.0 - abs(n.yx)) * sign_not_zero(n.xy), step(n.z, 0.0));\n"
     "}\n"
     "vec3 DecodeOctahedron(vec2 n) {\n"
-	"    if(distance(n,vec2(1.0)) < 0.01)\n"
-    "        return vec3(1.0);\n"
+	"    if(    all(greaterThan(n,ConstantAlmostOneVec2))    )\n"
+    "        return ConstantOneVec3;\n"
     "	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
     "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);\n"
     "	 return normalize(v);\n"
     "}\n"
     "vec2 EncodeSpherical(vec3 n){\n"
-    "    if(distance(n,vec3(1.0)) < 0.01)\n"
-    "        return vec2(1.0);\n"
+    "    if(    all(greaterThan(n,ConstantAlmostOneVec3))    )\n"
+    "        return ConstantOneVec2;\n"
     "    vec2 encN;\n"
-    "    encN.x = atan( n.x, n.y ) * 1.0 / 3.1415926535898;\n"
+    "    encN.x = atan( n.x, n.y ) * 1.0 / KPI;\n"
     "    encN.y = n.z;\n"
     "    encN = encN * 0.5 + 0.5;\n"
     "    return encN;\n"
     "}\n"
     "vec3 DecodeSpherical(vec2 encN){\n"
-    "    if(distance(encN,vec2(1.0)) < 0.01)\n"
-    "        return vec3(1.0);\n"
+    "    if(    all(greaterThan(encN,ConstantAlmostOneVec2))    )\n"
+    "        return ConstantOneVec3;\n"
     "    vec2 ang = encN * 2.0 - 1.0;\n"
     "    vec2 scth;\n"
-    "    float ang2 = ang.x * 3.1415926535898;\n"
+    "    float ang2 = ang.x * KPI;\n"
     "    scth.x = sin(ang2);\n"
     "    scth.y = cos(ang2);\n"
     "    vec2 scphi = vec2( sqrt( 1.0 - ang.y * ang.y ), ang.y );\n"
@@ -246,39 +264,39 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions =
     "    return normalize(n);\n"
     "}\n"
     "vec2 EncodeStereographic(vec3 n){\n"
-    "    if(distance(n,vec3(1.0)) < 0.01)\n"
-    "        return vec2(1.0);\n"
-    "    float scale = 1.7777777777;\n"
+    "    if(    all(greaterThan(n,ConstantAlmostOneVec3))    )\n"
+    "        return ConstantOneVec2;\n"
+    "    float scale = StereoConst;\n"
     "    vec2 enc = n.xy / (n.z + 1.0);\n"
     "    enc /= scale;\n"
     "    enc = enc * 0.5 + 0.5;\n"
     "    return enc;\n"
     "}\n"
     "vec3 DecodeStereographic(vec2 enc){\n"
-    "    if(distance(enc,vec2(1.0)) < 0.01)\n"
-    "        return vec3(1.0);\n"
-    "    float scale = 1.7777777777;\n"
+    "    if(    all(greaterThan(enc,ConstantAlmostOneVec2))    )\n"
+    "        return ConstantOneVec3;\n"
+    "    float scale = StereoConst;\n"
     "    vec3 nn = vec3(enc.xy,1.0) * vec3(2.0 * scale,2.0 * scale,0.0) + vec3(-scale,-scale,1.0);\n"
     "    float g = 2.0 / dot(nn.xyz,nn.xyz);\n"
     "    vec3 n;\n"
-    "    n.xy = g*nn.xy;\n"
-    "    n.z = g-1.0;\n"
+    "    n.xy = g * nn.xy;\n"
+    "    n.z = g - 1.0;\n"
     "    return normalize(n);\n"
     "}\n"
     "vec2 EncodeXYRestoreZ(vec3 n){\n"
-    "    if(distance(n,vec3(1.0)) < 0.01){\n"
-    "        return vec2(1.0);\n"
+    "    if(    all(greaterThan(n,ConstantAlmostOneVec3))    ){\n"
+    "        return ConstantOneVec2;\n"
     "    }\n"
-    "    vec2 enc = vec2(0.0);\n"
-    "    enc = vec2(0.5) * n.xy + vec2( 1.0, 1.0 );\n"
+    "    vec2 enc = ConstantZeroVec2;\n"
+    "    enc = vec2(0.5) * n.xy + ConstantOneVec2;\n"
     "    enc.x *= n.z < 0.0 ? -1.0 : 1.0;\n"
     "    return enc;\n"
     "}\n"
     "vec3 DecodeXYRestoreZ(vec2 n){\n"
-    "    if(distance(n,vec2(1.0)) < 0.01){\n"
-    "        return vec3(1.0);\n"
+    "    if(    all(greaterThan(n,ConstantAlmostOneVec2))    ){\n"
+    "        return ConstantOneVec3;\n"
     "    }\n"
-    "    vec3 enc = vec3(0.0);\n"
+    "    vec3 enc = ConstantZeroVec3;\n"
     "    enc.x = 2.0 * abs(n.r) - 1.0;\n"
     "    enc.y = 2.0 * abs(n.g) - 1.0;\n"
     "    enc.z = n.r < 0.0 ? -1.0 : 1.0;\n"
@@ -1351,7 +1369,7 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "        }\n"
     "    }\n"
     "    else{\n"
-    "        gl_FragData[1].rg = vec2(1.0); \n"
+    "        gl_FragData[1].rg = ConstantOneVec2; \n"
     "    }\n"
     "    if(HasGodsRays == 1){\n"
     "        gl_FragData[3] = (texture2D(DiffuseTexture, UV) * vec4(Gods_Rays_Color,1.0))*0.5;\n"
@@ -1443,11 +1461,9 @@ Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManageme
     "uniform mat4 invP;\n"
     "uniform float nearz;\n"
     "uniform float farz;\n"
-	"\n"
-	"const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "\n";
-Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
 Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
+Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
 Shaders::Detail::ShadersManagement::ssao_frag +=
     "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
     "    vec3 diff = reconstruct_world_pos(uv + offsetUV,nearz,farz) - origin;\n"
@@ -1465,7 +1481,7 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
     "    float radius = max(0.05,SSAOInfo.x / _distance);\n"
     "\n"
     "    if(doSSAO == 1){\n"
-    "        if(distance(normal,comparison) < 0.01){ gl_FragColor.a = 1.0; }\n"
+    "        if(distance(normal,ConstantOneVec3) < 0.01){ gl_FragColor.a = 1.0; }\n"
     "        else{\n"
     "            float o = 0.0;\n"
     "            for (int i = 0; i < Samples; ++i) {\n"
@@ -1497,7 +1513,7 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
     "        }\n"
     "    }\n"
     "    else{\n"
-    "        gl_FragColor.rgb = vec3(0.0);\n"
+    "        gl_FragColor.rgb = ConstantZeroVec3;\n"
     "    }\n"
     "}";
 #pragma endregion
@@ -1513,8 +1529,6 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
     "\n"
     "uniform vec4 HDRInfo; // exposure | HasHDR | HasBloom | HDRAlgorithm\n"
 	"\n"
-	"const vec3 comparison = vec3(1.0,1.0,1.0);\n"
-    "\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
     "    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);\n"
     "}\n"
@@ -1528,7 +1542,7 @@ Shaders::Detail::ShadersManagement::hdr_frag +=
     "    vec3 bloom = texture2D(bloomBuffer, uv).rgb;\n"
     "    vec3 normals = DecodeOctahedron(texture2D(gNormalMap,uv).rg);\n"
     "\n"
-    "    if(distance(normals,comparison) < 0.01 || HasLighting == 0){\n"
+    "    if(distance(normals,ConstantOneVec3) < 0.01 || HasLighting == 0){\n"
     "        lighting = diffuse;\n"
     "    }\n"
     "    else if(HDRInfo.z == 1.0){\n"
@@ -1536,17 +1550,17 @@ Shaders::Detail::ShadersManagement::hdr_frag +=
     "    }\n"
     "\n"
     "    if(HDRInfo.y == 1.0){\n"
-    "        if(HDRInfo.w == 0.0){ // Reinhard tone mapping\n"
-    "            lighting = lighting / (lighting + vec3(1.0));\n"
+    "        if(HDRInfo.w == 0.0){\n"// Reinhard tone mapping
+    "            lighting = lighting / (lighting + ConstantOneVec3);\n"
     "        }\n"
-    "        else if(HDRInfo.w == 1.0){ //Filmic tone mapping\n"
+    "        else if(HDRInfo.w == 1.0){\n"// Filmic tone mapping
     "            vec3 x = max(vec3(0), lighting - vec3(0.004));\n"
     "            lighting = (x * (vec3(6.2) * x + vec3(0.5))) / (x * (vec3(6.2) * x + vec3(1.7)) + vec3(0.06));\n"
     "        }\n"
-    "        else if(HDRInfo.w == 2.0){ // Exposure tone mapping\n"
-    "            lighting = vec3(1.0) - exp(-lighting * HDRInfo.x);\n"
+    "        else if(HDRInfo.w == 2.0){\n"// Exposure tone mapping
+    "            lighting = ConstantOneVec3 - exp(-lighting * HDRInfo.x);\n"
     "        }\n"
-    "        else if(HDRInfo.w == 3.0){ // Uncharted tone mapping\n"
+    "        else if(HDRInfo.w == 3.0){\n"// Uncharted tone mapping
     "            float A = 0.15; float B = 0.5; float C = 0.1; float D = 0.2; float E = 0.02; float F = 0.3; float W = 11.2;\n"
     "            lighting = HDRInfo.x * uncharted(lighting,A,B,C,D,E,F);\n"
     "            vec3 white = 1.0 / uncharted( vec3(W),A,B,C,D,E,F );\n"
@@ -1801,31 +1815,30 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
-	"\n"
-	"const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "\n";
+Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag +=
-    "float BeckmannDist(float cos2a, float _alpha, float pi){\n"
+    "float BeckmannDist(float cos2a, float _alpha){\n"
     "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
-    "    return (exp(-b)) / (pi * _alpha * cos2a * cos2a);\n"
+    "    return (exp(-b)) / (KPI * _alpha * cos2a * cos2a);\n"
     "}\n"
-    "float GGXDist(float NdotHSquared, float alphaSquared,float pi){\n"
+    "float GGXDist(float NdotHSquared, float alphaSquared){\n"
     "    float denom = (NdotHSquared * (alphaSquared - 1.0) + 1.0);\n"
-    "    denom = pi * denom * denom;\n"
+    "    denom = KPI * denom * denom;\n"
     "    return alphaSquared / denom;\n"
     "}\n"
     "float GeometrySchlickGGX(float NdotV, float a){\n"
-    "    float k = a / 8.0;\n"
+    "    float k = a * 0.125;\n"
     "    float denom = NdotV * (1.0 - k) + k;\n"
     "    return NdotV / denom;\n"
     "}\n"
     "vec3 SchlickFrensel(float theta, vec3 _F0){\n"
-    "    vec3 ret = _F0 + (vec3(1.0) - _F0) * pow(1.0 - theta,5.0);\n"
+    "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"
     "}\n"
+	//make this a uniform if possible?
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
     "   float attenuation =  0.0;\n"
     "   if(LightDataE.z == 0.0){\n" //constant
@@ -1852,15 +1865,14 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float Glow = texture2D(gMiscMap,uv).r;\n"
     "    float SpecularStrength = texture2D(gMiscMap,uv).g;\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    if(distance(PxlNormal,comparison) < 0.01){\n"
-    "        return vec3(0.0);\n"
+    "    if(distance(PxlNormal,ConstantOneVec3) < 0.01){\n"
+    "        return ConstantZeroVec3;\n"
     "    }\n"
     "    vec3 LightDiffuseColor  = LightDataD.xyz;\n"
     "    vec3 LightSpecularColor = LightDataD.xyz * SpecularStrength;\n"
-    "    vec3 TotalLight         = vec3(0.0);\n"
-    "    vec3 SpecularFactor     = vec3(0.0);\n"
+    "    vec3 TotalLight         = ConstantZeroVec3;\n"
+    "    vec3 SpecularFactor     = ConstantZeroVec3;\n"
     "\n"
-    "    float kPi = 3.14159265;\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int index = int(floor(matIDandAO));\n"
     "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
@@ -1884,38 +1896,37 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
 	"    float MaterialTypeDiffuse = materials[index].a;\n"
 	"    float MaterialTypeSpecular = materials[index].b;\n"
 	"\n"
-    "    if(MaterialTypeDiffuse == 0.0){//this is lambert\n"
-    "    }\n"
-    "    else if(MaterialTypeDiffuse == 1.0){//this is oren-nayar\n"
+	//if MaterialTypeDiffuse == 0.0, its lambert, do nothing (color is *= ndotl at the end by default)
+    "    if(MaterialTypeDiffuse == 1.0){\n"//this is oren-nayar
     "        float LdotV = max(0.0, dot(ViewDir, LightDir));\n"
     "        float s = LdotV - NdotL * VdotN;\n"
     "        float t = mix(1.0, max(NdotL, VdotN), step(0.0, s));\n"
     "        float A = 1.0 + alpha * (LightDataA.y / (alpha + 0.13) + 0.5 / (alpha + 0.33));\n"
     "        float B = 0.45 * alpha / (alpha + 0.09);\n"
-    "        LightDiffuseColor *= (A + B * s / t) / kPi;\n"//might have to remove divide by pi here
+    "        LightDiffuseColor *= (A + B * s / t) / KPI;\n"//might have to remove divide by pi here
     "    }\n"
-    "    else if(MaterialTypeDiffuse == 2.0){//this is ashikhmin-shirley\n"
+    "    else if(MaterialTypeDiffuse == 2.0){\n"//this is ashikhmin-shirley
     "        float s = clamp(smoothness,0.01,0.76);\n" //this lighting model has to have some form of roughness in it to look good. cant be 1.0
-    "        vec3 A = (28.0 * MaterialAlbedoTexture) / vec3(23.0 * kPi);\n"
+    "        vec3 A = (28.0 * MaterialAlbedoTexture) / vec3(23.0 * KPI);\n"
     "        //float B = (1.0 - (s * LightDataA.z));\n"
     "        float B = 1.0 - s;\n"
-    "        float C = (1.0 - pow((1.0 - (NdotL / 2.0)),5.0));\n"
-    "        float D = (1.0 - pow((1.0 - (VdotN / 2.0)),5.0));\n"
+    "        float C = (1.0 - pow((1.0 - (NdotL * 0.5)),5.0));\n"
+    "        float D = (1.0 - pow((1.0 - (VdotN * 0.5)),5.0));\n"
     "        LightDiffuseColor *= (A * B * C * D);\n"
-    "        LightDiffuseColor *= kPi;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
+    "        LightDiffuseColor *= KPI;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
     "    }\n"
-    "    else if(MaterialTypeDiffuse == 3.0){//this is minneart\n"
+    "    else if(MaterialTypeDiffuse == 3.0){\n"//this is minneart
     "        LightDiffuseColor *= pow(VdotN*NdotL,smoothness);\n"
     "    }\n"
     "\n"
     "    if(MaterialTypeSpecular == 0.0){\n" // this is blinn phong (non-physical)
     "        float gloss = exp2(10.0 * smoothness + 1.0);\n"
-    "        float kS = (8.0 + gloss ) / (8.0 * kPi);\n"
+    "        float kS = (8.0 + gloss ) / (8.0 * KPI);\n"
     "        SpecularFactor = vec3(kS * pow(NdotH, gloss));\n"
     "    }\n"
     "    else if(MaterialTypeSpecular == 1.0){\n" //this is phong (non-physical)
     "        float gloss = exp2(10.0 * smoothness + 1.0);\n"
-    "        float kS = (2.0 + gloss ) / (2.0 * kPi);\n"
+    "        float kS = (2.0 + gloss ) / (2.0 * KPI);\n"
     "        vec3 Reflect = reflect(-LightDir, PxlNormal);\n"
     "        float VdotR = max(0.0, dot(ViewDir,Reflect));\n"
     "        SpecularFactor = vec3(kS * pow(VdotR, gloss));\n"
@@ -1924,15 +1935,15 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "        float LdotH = max(0.0, dot(LightDir,Half));\n"
     "        float alphaSqr = alpha * alpha;\n"
     "        float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;\n"
-    "        float D = alphaSqr / (kPi * denom * denom);\n"
+    "        float D = alphaSqr / (KPI * denom * denom);\n"
     "        Frensel = SchlickFrensel(LdotH,F0);\n"
     "        float k = 0.5 * alpha;\n"
     "        float k2 = k * k;\n"
-    "        SpecularFactor = max(vec3(0.0), (NdotL * D * Frensel / (LdotH*LdotH*(1.0-k2)+k2)) );\n"
+    "        SpecularFactor = max(ConstantZeroVec3, (NdotL * D * Frensel / (LdotH*LdotH*(1.0-k2)+k2)) );\n"
     "    }\n"
     "    else if(MaterialTypeSpecular == 3.0){\n" //this is Cook-Torrance (physical)
     "         Frensel = SchlickFrensel(VdotH,F0);\n"
-    "         float NDF = GGXDist(NdotH*NdotH,alpha*alpha,kPi);\n"
+    "         float NDF = GGXDist(NdotH*NdotH,alpha*alpha);\n"
     "         //float G = min(1.0, min(  (2.0 * NdotH * VdotN) / VdotH  ,  (2.0 * NdotH * NdotL) / VdotH  ));\n"
     "         float a = (roughness + 1.0) * (roughness + 1.0);\n"
     "         float G = GeometrySchlickGGX(VdotN,a) * GeometrySchlickGGX(NdotL,a);\n"
@@ -1946,7 +1957,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "        SpecularFactor = vec3(exp(-fin*fin));\n"
     "    }\n"
     "    else if(MaterialTypeSpecular == 5.0){\n" //this is beckmann (physical)
-    "        SpecularFactor = vec3(BeckmannDist(NdotH,alpha,kPi));\n"
+    "        SpecularFactor = vec3(BeckmannDist(NdotH,alpha));\n"
     "    }\n"
     "    else if(MaterialTypeSpecular == 6.0){\n" //this is ashikhmin-shirley (physical)
     "        //make these controllable uniforms\n"
@@ -1961,16 +1972,16 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "        float A = sqrt( (Nu + 1.0) * (Nv + 1.0) );\n"
     "        float B = pow(NdotH,((Nu * hdotT * hdotT + Nv * hDotB * hDotB) / (1.0 - (NdotH * NdotH)) ));\n"
     "        float HdotL = max(0.0, dot(Half, LightDir));\n"
-    "        float C = 8.0 * kPi * HdotL * max(NdotL,VdotN);\n"
+    "        float C = 8.0 * KPI * HdotL * max(NdotL,VdotN);\n"
     "        SpecularFactor = vec3((A * B) / C);\n"
     "    }\n"
     "    LightDiffuseColor *= LightDataA.y;\n"
     "    LightSpecularColor *= (SpecularFactor * LightDataA.z);\n"
     "\n"
     "    vec3 kS = Frensel;\n"
-    "    vec3 kD = vec3(1.0) - kS;\n"
+    "    vec3 kD = ConstantOneVec3 - kS;\n"
     "    kD *= 1.0 - metalness;\n"
-    "    TotalLight = (kD * MaterialAlbedoTexture  / kPi + LightSpecularColor) * LightDiffuseColor * NdotL;\n"
+    "    TotalLight = (kD * MaterialAlbedoTexture  / KPI + LightSpecularColor) * LightDiffuseColor * NdotL;\n"
     "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
     "}\n"
     "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
@@ -2003,7 +2014,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    vec3 PxlPosition = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "\n"
-    "    vec3 lightCalculation = vec3(0.0);\n"
+    "    vec3 lightCalculation = ConstantZeroVec3;\n"
     "    vec3 LightPosition = vec3(LightDataC.yzw);\n"
     "    vec3 LightDirection = normalize(vec3(LightDataA.w,LightDataB.x,LightDataB.y));\n"
     "\n"
@@ -2046,9 +2057,9 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
     "\n";
+Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
     "    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
@@ -2065,7 +2076,6 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    vec3 ViewDir = normalize(CamPosGamma.xyz - PxlWorldPos);\n"
     "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
-    "    float kPi = 3.14159265;\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int index = int(floor(matIDandAO));\n"
     "    float ao = fract(matIDandAO)+0.0001;\n"//the 0.0001 makes up for the clamp in material class
@@ -2078,7 +2088,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    float roughness = 1.0 - smoothness;\n"
     "    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
     "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
-    "    vec3 kD = vec3(1.0) - kS;\n"
+    "    vec3 kD = ConstantOneVec3 - kS;\n"
     "    kD *= 1.0 - metalness;\n"
     "    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
     "\n"
@@ -2094,6 +2104,8 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
 
 #pragma endregion
 
+    convertShaderCode(constants);
+    convertShaderCode(conditional_functions);
     convertShaderCode(float_into_2_floats);
     convertShaderCode(determinent_mat3);
     convertShaderCode(normals_octahedron_compression_functions);

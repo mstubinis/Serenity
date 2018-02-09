@@ -14,6 +14,7 @@ namespace Engine{
 
                     static std::string version;
 
+					static std::string constants;
 					static std::string conditional_functions;
                     static std::string float_into_2_floats;
                     static std::string determinent_mat3;
