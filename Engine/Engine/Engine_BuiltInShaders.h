@@ -67,6 +67,7 @@ namespace Engine{
 
                     static std::string final_frag;
                     static std::string lighting_frag;
+					static std::string lighting_frag_optimized;
                     static std::string lighting_frag_gi;
             };
         };

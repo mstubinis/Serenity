@@ -122,7 +122,8 @@ Shaders::Detail::ShadersManagement::conditional_functions =
 	"//vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; }\n"//this is commented out
 	"vec2 not(vec2 a) { return 1.0 - a; }\n"
 	"\n"
-	"float when_eq(float x, float y) { return 1.0 - abs(sign(x - y)); }\n"
+
+	"float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }\n"
 	"float when_neq(float x, float y) { return abs(sign(x - y)); }\n"
 	"float when_gt(float x, float y) { return max(sign(x - y), 0.0); }\n"
 	"float when_lt(float x, float y) { return max(sign(y - x), 0.0); }\n"
@@ -132,6 +133,16 @@ Shaders::Detail::ShadersManagement::conditional_functions =
 	"float or(float a, float b) { return min(a + b, 1.0); }\n"
 	"//float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
 	"float not(float a) { return 1.0 - a; }\n"
+	"\n"
+	"int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }\n"
+	"int when_ineq(int x, int y) { return abs(sign(x - y)); }\n"
+	"int when_igt(int x, int y) { return max(sign(x - y), 0); }\n"
+	"int when_ilt(int x, int y) { return max(sign(y - x), 0); }\n"
+	"int when_ige(int x, int y) { return 1 - when_ilt(x, y); }\n"
+	"int when_ile(int x, int y) { return 1 - when_igt(x, y); }\n"
+	"int iand(int a, int b) { return a * b; }\n"
+	"int ior(int a, int b) { return min(a + b, 1); }\n"
+	"int inot(int a) { return 1 - a; }\n"
 	"\n";
 
 Shaders::Detail::ShadersManagement::float_into_2_floats = 
@@ -332,7 +343,6 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::Sh
     "}";
 #pragma endregion
 
-  
 #pragma region VertexBasic
 Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -1754,11 +1764,11 @@ Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersMa
 Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
-    "uniform sampler2D gLightMap;\n"
+    //"uniform sampler2D gLightMap;\n"
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gGodsRaysMap;\n"
     "uniform sampler2D gBloomMap;\n"
-    "uniform sampler2D gNormalMap;\n"
+    //"uniform sampler2D gNormalMap;\n"
     "\n"
     "uniform int HasSSAO;\n"
     "uniform int HasLighting;\n"
@@ -1772,23 +1782,22 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "    vec2 uv = gl_TexCoord[0].st;\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, uv).rgb;\n"
     "    vec3 hdr = texture2D(gMiscMap,uv).rgb;\n"
-    "    vec3 lighting = texture2D(gLightMap, uv).rgb;\n"
-    "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
-    "    lighting = hdr;\n"
+    //"    vec3 lighting = texture2D(gLightMap, uv).rgb;\n"
+    //"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
+    //"    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
     "    float ssao = 1.0;\n"
     "    if(HasSSAO == 1){ \n"
-    "        float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));\n"
+    "        float brightness = dot(hdr, vec3(0.2126, 0.7152, 0.0722));\n"
     "        ssao = texture2D(gBloomMap,uv).a + 0.0001;\n"
     "        brightness = min(1.0,pow(brightness,0.125));\n"
-    "        lighting *= max(brightness, ssao);\n"
+    "        hdr *= max(brightness, ssao);\n"
     "    }\n"
     "    if(HasRays == 1){\n"
     "        vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
-    "        //lighting = lighting + rays;\n"
-	"        lighting = (lighting*1.1) + (rays * godRaysExposure);\n"
+    "        //hdr = hdr + rays;\n"
+	"        hdr = (hdr * 1.1) + (rays * godRaysExposure);\n"
     "    }\n"
-	"    gl_FragColor = (vec4(lighting,1.0));\n"
+	"    gl_FragColor = (vec4(hdr,1.0));\n"
     "}";
 
 #pragma endregion

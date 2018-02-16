@@ -522,7 +522,10 @@ void Detail::RenderManagement::_passCopyDepth(GBuffer* gbuffer,Camera* c,uint& f
 void Detail::RenderManagement::_passLighting(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool mainRenderFunc){
     Scene* s = Resources::getCurrentScene();
     
-    ShaderP* pNormal = Resources::getShaderProgram("Deferred_Light"); pNormal->bind();
+    ShaderP* pNormal;
+	pNormal = Resources::getShaderProgram("Deferred_Light");
+	pNormal->bind();
+
     ShaderP* pGI = Resources::getShaderProgram("Deferred_Light_GI");
     ShaderP* pSpot = Resources::getShaderProgram("Deferred_Light_Spot");
     ShaderP* p = pNormal;
@@ -1051,16 +1054,16 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
     sendUniform1iSafe("HasRays",int(Detail::RendererInfo::GodRaysInfo::godRays));
     sendUniform1fSafe("godRaysExposure",RendererInfo::GodRaysInfo::godRays_exposure);
 
-    bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0);
-    bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),1);
-    bindTextureSafe("gMiscMap",gbuffer->getTexture(GBufferType::Misc),2);
-    bindTextureSafe("gGodsRaysMap",gbuffer->getTexture(GBufferType::GodRays),3);
-    bindTextureSafe("gBloomMap",gbuffer->getTexture(GBufferType::Bloom),4);
-    bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),5);
+    bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0); 
+    bindTextureSafe("gMiscMap",gbuffer->getTexture(GBufferType::Misc),1);
+    bindTextureSafe("gGodsRaysMap",gbuffer->getTexture(GBufferType::GodRays),2);
+    bindTextureSafe("gBloomMap",gbuffer->getTexture(GBufferType::Bloom),3);
+	//bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),4);
+    //bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),5);
 
     renderFullscreenTriangle(fboWidth,fboHeight);
 
-    for(uint i = 0; i < 6; i++){ unbindTexture2D(i); }
+    for(uint i = 0; i < 4; i++){ unbindTexture2D(i); }
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
