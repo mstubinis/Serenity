@@ -396,32 +396,33 @@ void Detail::RenderManagement::_renderText(GBuffer* gbuffer,Camera* c,uint& fbuf
     p->unbind();
 }
 void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* camera,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
-    if(Detail::RendererInfo::GodRaysInfo::godRays)
+    Scene* scene = Resources::getCurrentScene();
+    glm::vec3 clear = scene->getBackgroundColor();
+    const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
+	
+	if(Detail::RendererInfo::GodRaysInfo::godRays)
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
     else
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
 
-    Settings::clear();
+    Settings::clear(true,true,true);
     glDepthFunc(GL_LEQUAL);
 	GLDisable(GLState::BLEND);//disable blending on all mrts
-
-    Scene* scene = Resources::getCurrentScene();
-    glm::vec3 clear = scene->getBackgroundColor();
-    const float colors[4] = { clear.r,clear.g,clear.b,1.0f };
 
     glClearBufferfv(GL_COLOR,0,colors);
     if(Detail::RendererInfo::GodRaysInfo::godRays){
         const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
         glClearBufferfv(GL_COLOR,3,godRays);
     }
+    glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
+    glBlendEquationi(GL_FUNC_ADD,0);
+    glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
+
+	//TODO: move skybox rendering to the last after moving planetary atmosphere to forward rendering pass
     gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
     scene->renderSkybox();
     if(Detail::RendererInfo::GodRaysInfo::godRays)
         gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
-
-    glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
-    glBlendEquationi(GL_FUNC_ADD,0);
-    glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
     //RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
@@ -466,6 +467,8 @@ void Detail::RenderManagement::_passGeometry(GBuffer* gbuffer,Camera* camera,uin
 			shader->unbind();
 		}
     }
+	//TODO: move skybox rendering here after moving planetary atmosphere to forward rendering pass
+
 	GLDisable(GLState::DEPTH_TEST);
 	GLDisable(GLState::DEPTH_MASK);
 
@@ -1058,8 +1061,8 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
     bindTextureSafe("gMiscMap",gbuffer->getTexture(GBufferType::Misc),1);
     bindTextureSafe("gGodsRaysMap",gbuffer->getTexture(GBufferType::GodRays),2);
     bindTextureSafe("gBloomMap",gbuffer->getTexture(GBufferType::Bloom),3);
-	//bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),4);
-    //bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),5);
+	//bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),4);
+    //bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),5);
 
     renderFullscreenTriangle(fboWidth,fboHeight);
 
@@ -1068,12 +1071,13 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
 	//NOTE: use renderFullscreenTriangle() instead, see comments in its function
-    float w2 = float(width)/2.0f;
-    float h2 = float(height)/2.0f;
+    float w2 = float(width) * 0.5f;
+    float h2 = float(height) * 0.5f;
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("MVP",p);
     setViewport(0,0,width,height);
 
+	//TODO: move this from fixed functionality to its own mesh and vbo (and transform vertices in vertex fullscreen quad shader)
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
         glTexCoord2f(1.0f, 0.0f);  glVertex2f( w2, -h2);
@@ -1082,14 +1086,16 @@ void Detail::renderFullscreenQuad(uint width,uint height){
     glEnd();
 }
 void Detail::renderFullscreenTriangle(uint width,uint height){
-    float w2 = float(width)/2.0f;
-    float h2 = float(height)/2.0f;
+    float w2 = float(width) * 0.5f;
+    float h2 = float(height) * 0.5f;
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("MVP",p);
     setViewport(0,0,width,height);
 	//apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice,
 	//and culling out the unseen geometry from the oversized triangle (opengl does this automatically) is alot cheaper than the alternative render diagonal pixels twice
-    glBegin(GL_TRIANGLES);
+    
+	//TODO: move this from fixed functionality to its own mesh and vbo (and transform vertices in vertex fullscreen quad shader)
+	glBegin(GL_TRIANGLES);
         glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
         glTexCoord2f(2.5f, 0.0f);  glVertex2f( w2*4.0f, -h2);
         glTexCoord2f(0.0f, 2.5f);  glVertex2f(-w2,  h2*4.0f);

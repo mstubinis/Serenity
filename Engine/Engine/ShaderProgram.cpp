@@ -4,7 +4,9 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include <boost/filesystem.hpp>
+#include <regex>
 #include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <iostream>
 #include <SFML/OpenGL.hpp>
@@ -61,6 +63,81 @@ class ShaderP::impl final{
         unordered_map<string,GLint> m_UniformLocations;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
+
+		void _insertStringAtLine(std::string& source, const std::string& newLineContent,uint lineToInsertAt){
+			std::istringstream str(source); std::string line; 
+			std::vector<std::string> lines;
+			uint count = 0;
+			while(std::getline(str,line)){
+				lines.push_back(line + "\n");
+				if(count == lineToInsertAt){
+					lines.push_back(newLineContent + "\n");
+				}
+				count++;
+			}
+			source = "";
+			for(auto line:lines){
+				source = source + line;
+			}
+		}
+        void _convertCode(std::string& _data,Shader* shader){
+			std::istringstream str(_data); std::string line; 
+			
+			//get the first line with actual content
+			while(true){
+			    std::getline(str,line);
+				if(line != "" && line != "\n"){
+				    break;
+				}
+			}
+			std::string versionNumberString = std::regex_replace(line,std::regex("([^0-9])"),"");
+			uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
+			if (line == "#version 110"){
+			}
+			else if (line == "#version 120"){
+			}
+			else if(line == "#version 130"){
+			}
+			else if(line == "#version 140"){
+			}
+			else if(line == "#version 150"){
+			}
+			else if(line == "#version 330 core"){
+			}
+			else if(line == "#version 400 core"){
+			}
+			else if(line == "#version 410 core"){
+			}
+			else if(line == "#version 420 core"){
+			}
+			else if(line == "#version 430 core"){
+			}
+			else if(line == "#version 440 core"){
+			}
+			else if(line == "#version 450 core"){
+			}
+			if(versionNumber >= 130){
+				if(shader->type() == ShaderType::Vertex){
+					boost::replace_all(_data, "varying", "out");
+				}
+				else if(shader->type() == ShaderType::Fragment){
+					boost::replace_all(_data, "varying", "in");
+
+					boost::replace_all(_data, "gl_FragColor", "FRAGMENT_OUTPUT_COLOR");
+					_insertStringAtLine(_data,"out vec4 FRAGMENT_OUTPUT_COLOR;",1);
+				}
+			}
+			if(versionNumber >= 140){
+				if(shader->type() == ShaderType::Vertex){
+				}
+				else if(shader->type() == ShaderType::Fragment){
+					boost::replace_all(_data, "textureCube(", "texture(");
+					boost::replace_all(_data, "textureCubeLod(", "textureLod(");
+					boost::replace_all(_data, "texture2DLod(", "textureLod(");
+					boost::replace_all(_data, "texture2D(", "texture(");
+				}
+			}
+		}
         void _construct(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             m_Stage = stage;
             m_VertexShader = vs;
@@ -132,6 +209,9 @@ class ShaderP::impl final{
                 for(string line; getline(str1, line, '\n');){ FragmentShaderCode += "\n" + line; }
             }
             else{ FragmentShaderCode = ps->data(); }
+
+			_convertCode(VertexShaderCode,vs);
+			_convertCode(FragmentShaderCode,ps);
 
             GLint res = GL_FALSE;
             int logLength;

@@ -4,10 +4,11 @@
 #include "Engine_Renderer.h"
 #include "Texture.h"
 #include "GBuffer.h"
+#include "Engine_BuiltInShaders.h"
 
 using namespace Engine;
 
-class Engine_Window::impl{
+class Engine_Window::impl final{
     public:
         uint m_Style;
         sf::VideoMode m_VideoMode;
@@ -19,18 +20,20 @@ class Engine_Window::impl{
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
-            _createOpenGLWindow(name,width,height);
+            const sf::ContextSettings ret = _createOpenGLWindow(name,width,height,3,3,120);
+			std::cout << "Using OpenGL: " << ret.majorVersion << "." << ret.minorVersion << ", with depth bits: " << ret.depthBits << " and stencil bits: " << ret.stencilBits << std::endl;
         }
         void _destruct(){
             SAFE_DELETE(m_SFMLWindow);
         }
-        void _createOpenGLWindow(const char* name,uint width,uint height){
+        const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion = 3, uint _minorVersion = 3,uint _glslVersion = 120){
             sf::ContextSettings settings;
             settings.depthBits = 24;
             settings.stencilBits = 8;
             settings.antialiasingLevel = 0;
-            settings.majorVersion = 3;
-            settings.minorVersion = 3;
+            settings.majorVersion = _majorVersion;
+            settings.minorVersion = _minorVersion;
+			Shaders::Detail::ShadersManagement::version = "#version " + to_string(_glslVersion) + "\n";
 
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;
@@ -64,6 +67,8 @@ class Engine_Window::impl{
 
             SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
             Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
+
+			return m_SFMLWindow->getSettings();
         }
         void _setFullScreen(bool fullscreen){
             if(m_Style == sf::Style::Fullscreen && fullscreen) return;

@@ -64,6 +64,7 @@ string Shaders::Detail::ShadersManagement::lighting_frag_gi;
 #pragma endregion
 
 void Shaders::Detail::ShadersManagement::convertShaderCode(string& code){
+
 }
 
 void Shaders::Detail::ShadersManagement::init(){
@@ -337,6 +338,9 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::Sh
     "    if(SpotLight > 0.99){\n"
     "        vert = doSpotLightStuff(vert);\n"
     "    }\n"
+	"    else{\n"
+	//"        vert = doWhatever();\n"
+	"    }\n"
 	"\n"
     "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
     "    gl_Position = MVP * vert;\n"
@@ -1411,7 +1415,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
     "varying vec3 WorldPosition;\n"
 	"const vec2 one = vec2(1.0,1.0);\n"
 	"const vec2 zero = vec2(0.0,0.0);\n"
-    "void main(void){\n"
+    "void main(){\n"
 	"    gl_FragData[0] = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rg = one;\n"
     "    gl_FragData[2].rb = zero;\n"
@@ -1798,6 +1802,7 @@ Shaders::Detail::ShadersManagement::final_frag +=
 	"        hdr = (hdr * 1.1) + (rays * godRaysExposure);\n"
     "    }\n"
 	"    gl_FragColor = (vec4(hdr,1.0));\n"
+	//"    gl_FragColor = (vec4(normal,1.0));\n"
     "}";
 
 #pragma endregion
