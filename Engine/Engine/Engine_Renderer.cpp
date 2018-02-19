@@ -827,7 +827,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     
     gbuffer->start(GBufferType::Misc);
     ShaderP* p = Resources::getShaderProgram("Greyscale_Frag"); p->bind();
-    bindTexture("texture",gbuffer->getTexture(texture),0);
+    bindTexture("textureMap",gbuffer->getTexture(texture),0);
     renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
@@ -836,7 +836,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
 
     gbuffer->start(GBufferType::Diffuse);
     p = Resources::getShaderProgram("Deferred_Edge_Canny_Blur"); p->bind();
-    bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
+    bindTexture("textureMap",gbuffer->getTexture(GBufferType::Misc),0);
     renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
@@ -844,14 +844,14 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     //blur it again
     gbuffer->start(GBufferType::Misc);
     p->bind();
-    bindTexture("texture",gbuffer->getTexture(GBufferType::Diffuse),0);
+    bindTexture("textureMap",gbuffer->getTexture(GBufferType::Diffuse),0);
     renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
     //blur it again
     gbuffer->start(GBufferType::Diffuse);
     p->bind();
-    bindTexture("texture",gbuffer->getTexture(GBufferType::Misc),0);
+    bindTexture("textureMap",gbuffer->getTexture(GBufferType::Misc),0);
     renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
@@ -860,7 +860,7 @@ void Detail::RenderManagement::_passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& f
     //misc is now the final blurred greyscale image
     gbuffer->start(GBufferType::Misc);
     p = Resources::getShaderProgram("Deferred_Edge_Canny"); p->bind();
-    bindTexture("texture",gbuffer->getTexture(GBufferType::Diffuse),0);
+    bindTexture("textureMap",gbuffer->getTexture(GBufferType::Diffuse),0);
     renderFullscreenTriangle(fboWidth,fboHeight);
     unbindTexture2D(0);
     p->unbind();
@@ -927,7 +927,7 @@ void Detail::RenderManagement::_passBlur(GBuffer* gbuffer,Camera* c,uint& fbuffe
     if(type == "H"){ sendUniform2f("HV",1.0f,0.0f); }
     else{            sendUniform2f("HV",0.0f,1.0f); }
 
-    bindTexture("texture",gbuffer->getTexture(texture),0);
+    bindTexture("textureMap",gbuffer->getTexture(texture),0);
 
     renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
@@ -972,7 +972,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
 	sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 	sendUniform1f("SMAA_THRESHOLD",RendererInfo::SMAAInfo::SMAA_THRESHOLD);
 	sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",RendererInfo::SMAAInfo::SMAA_DEPTH_THRESHOLD);
-	bindTexture("texture",gbuffer->getTexture(GBufferType::Lighting),0);
+	bindTexture("textureMap",gbuffer->getTexture(GBufferType::Lighting),0);
 	renderFullscreenTriangle(fboWidth,fboHeight);
 
 	for(uint i = 0; i < 1; i++){ unbindTexture2D(i); }
@@ -997,7 +997,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     sendUniform1fSafe("SMAA_PREDICATION_THRESHOLD",RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD);
     sendUniform1fSafe("SMAA_PREDICATION_SCALE",RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE);
     sendUniform1fSafe("SMAA_PREDICATION_STRENGTH",RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH);
-    bindTexture("texture",gbuffer->getTexture(GBufferType::Lighting),0);
+    bindTexture("textureMap",gbuffer->getTexture(GBufferType::Lighting),0);
     bindTextureSafe("texturePredication",gbuffer->getTexture(GBufferType::Diffuse),1);
     //edge pass
     renderFullscreenTriangle(fboWidth,fboHeight);
@@ -1038,7 +1038,7 @@ void Detail::RenderManagement::_passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWid
     gbuffer->stop();
     p = Resources::getShaderProgram("Deferred_SMAA_3"); p->bind();
     sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-    bindTextureSafe("texture",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
+    bindTextureSafe("textureMap",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
     bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
 
     //neighbor pass
@@ -1083,7 +1083,7 @@ void Detail::renderFullscreenQuad(uint width,uint height){
     float h2 = float(height) * 0.5f;
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("MVP",p);
-	sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
+	sendUniform2f("screenSizeDivideBy2",w2,h2);
     setViewport(0,0,width,height);
 
 	m_FullscreenQuad->render();
@@ -1093,7 +1093,7 @@ void Detail::renderFullscreenTriangle(uint width,uint height){
     float h2 = float(height) * 0.5f;
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("MVP",p);
-	sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
+	sendUniform2f("screenSizeDivideBy2",w2,h2);
     setViewport(0,0,width,height);
 	//apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice,
 	//and culling out the unseen geometry from the oversized triangle (opengl does this automatically) is alot cheaper than the alternative render diagonal pixels twice

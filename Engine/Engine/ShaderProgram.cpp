@@ -137,6 +137,18 @@ class ShaderP::impl final{
 					boost::replace_all(_data, "texture2D(", "texture(");
 				}
 			}
+			if(versionNumber >= 150){
+				if(shader->type() == ShaderType::Vertex){
+				}
+				else if(shader->type() == ShaderType::Fragment){
+				}
+			}
+			if(versionNumber >= 330){
+				if(shader->type() == ShaderType::Vertex){
+				}
+				else if(shader->type() == ShaderType::Fragment){
+				}
+			}
 		}
         void _construct(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             m_Stage = stage;

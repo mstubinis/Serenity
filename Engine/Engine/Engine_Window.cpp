@@ -20,7 +20,7 @@ class Engine_Window::impl final{
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
-            const sf::ContextSettings ret = _createOpenGLWindow(name,width,height,3,3,120);
+            const sf::ContextSettings ret = _createOpenGLWindow(name,width,height,3,3,330);
 			std::cout << "Using OpenGL: " << ret.majorVersion << "." << ret.minorVersion << ", with depth bits: " << ret.depthBits << " and stencil bits: " << ret.stencilBits << std::endl;
         }
         void _destruct(){
@@ -33,7 +33,10 @@ class Engine_Window::impl final{
             settings.antialiasingLevel = 0;
             settings.majorVersion = _majorVersion;
             settings.minorVersion = _minorVersion;
-			Shaders::Detail::ShadersManagement::version = "#version " + to_string(_glslVersion) + "\n";
+			std::string core = "";
+			if(_glslVersion >= 330)
+				core = " core";
+			Shaders::Detail::ShadersManagement::version = "#version " + to_string(_glslVersion) + core + "\n";
 
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;
