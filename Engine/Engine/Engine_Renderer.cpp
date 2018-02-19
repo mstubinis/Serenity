@@ -1,5 +1,6 @@
 #include "Engine_Renderer.h"
 #include "Engine_Window.h"
+#include "Engine_FullscreenItems.h"
 #include "GBuffer.h"
 #include "Camera.h"
 #include "Light.h"
@@ -112,6 +113,9 @@ vector<ShaderP*> Detail::RenderManagement::m_ForwardPassShaderPrograms;
 glm::mat4 Detail::RenderManagement::m_IdentityMat4;
 glm::mat3 Detail::RenderManagement::m_IdentityMat3;
 
+
+Detail::FullscreenQuad* m_FullscreenQuad = nullptr;
+Detail::FullscreenTriangle* m_FullscreenTriangle = nullptr;
 void _generateBRDFLUTCookTorrance(uint brdfSize){
     uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
     uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
@@ -310,12 +314,17 @@ void Detail::RenderManagement::init(){
 
     glClearStencil(0);
 	GLDisable(GLState::STENCIL_TEST);
+
+	m_FullscreenQuad = new Detail::FullscreenQuad();
+	m_FullscreenTriangle = new Detail::FullscreenTriangle();
 }
 void Detail::RenderManagement::postInit(){
     _generateBRDFLUTCookTorrance(512);
 }
 void Detail::RenderManagement::destruct(){
     SAFE_DELETE(RenderManagement::m_gBuffer);
+	SAFE_DELETE(m_FullscreenQuad);
+	SAFE_DELETE(m_FullscreenTriangle);
     glDeleteTextures(1,&RendererInfo::SSAOInfo::ssao_noise_texture);
     glDeleteTextures(1,&RendererInfo::SMAAInfo::SMAA_SearchTexture);
     glDeleteTextures(1,&RendererInfo::SMAAInfo::SMAA_AreaTexture);
@@ -1070,34 +1079,24 @@ void Detail::RenderManagement::_passFinal(GBuffer* gbuffer,Camera* c,uint& fboWi
     p->unbind();
 }
 void Detail::renderFullscreenQuad(uint width,uint height){
-	//NOTE: use renderFullscreenTriangle() instead, see comments in its function
     float w2 = float(width) * 0.5f;
     float h2 = float(height) * 0.5f;
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("MVP",p);
+	sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
     setViewport(0,0,width,height);
 
-	//TODO: move this from fixed functionality to its own mesh and vbo (and transform vertices in vertex fullscreen quad shader)
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
-        glTexCoord2f(1.0f, 0.0f);  glVertex2f( w2, -h2);
-        glTexCoord2f(1.0f, 1.0f);  glVertex2f( w2,  h2);
-        glTexCoord2f(0.0f, 1.0f);  glVertex2f(-w2,  h2);
-    glEnd();
+	m_FullscreenQuad->render();
 }
 void Detail::renderFullscreenTriangle(uint width,uint height){
     float w2 = float(width) * 0.5f;
     float h2 = float(height) * 0.5f;
     glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
     sendUniformMatrix4f("MVP",p);
+	sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
     setViewport(0,0,width,height);
 	//apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice,
 	//and culling out the unseen geometry from the oversized triangle (opengl does this automatically) is alot cheaper than the alternative render diagonal pixels twice
     
-	//TODO: move this from fixed functionality to its own mesh and vbo (and transform vertices in vertex fullscreen quad shader)
-	glBegin(GL_TRIANGLES);
-        glTexCoord2f(0.0f, 0.0f);  glVertex2f(-w2, -h2);
-        glTexCoord2f(2.5f, 0.0f);  glVertex2f( w2*4.0f, -h2);
-        glTexCoord2f(0.0f, 2.5f);  glVertex2f(-w2,  h2*4.0f);
-    glEnd();
+	m_FullscreenTriangle->render();
 }

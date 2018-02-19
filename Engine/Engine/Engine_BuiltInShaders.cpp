@@ -319,31 +319,35 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = S
 
 #pragma endregion
 
-
 #pragma region FullscreenQuadVertex
 Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
     "uniform float SpotLight;\n"
+	"uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
+	"\n"
+	"attribute vec3 position;\n"
+	"attribute vec2 uv;\n"
+	"\n"
+	"varying vec2 texcoords;\n"
     "\n"
-	"vec4 doSpotLightStuff(vec4 v){\n"
+	"vec3 doSpotLightStuff(vec3 v){\n"
     "    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;\n" //outerCutoff might need to be in degrees?
     "    v.xy *= vec2(opposite / VertexShaderData.y);\n" //might need to switch around x,y,z to fit GL's coordinate system
 	"    return v;\n"
 	"}\n"
     "void main(){\n"
-    "    vec4 vert = gl_Vertex;\n"
-	"\n"
+    "    vec3 vert = position;\n"
     "    if(SpotLight > 0.99){\n"
     "        vert = doSpotLightStuff(vert);\n"
     "    }\n"
 	"    else{\n"
-	//"        vert = doWhatever();\n"
+	"        vert.x *= screenSizeDivideBy2.x;\n"
+	"        vert.y *= screenSizeDivideBy2.y;\n"
 	"    }\n"
-	"\n"
-    "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
-    "    gl_Position = MVP * vert;\n"
+    "    texcoords = uv;\n"
+	"    gl_Position = MVP * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
 
@@ -479,7 +483,6 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
 // this shader is heavily modified based on optimizations in the link above. the optimizations are not complete yet, and 
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
 Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Detail::ShadersManagement::version + 
-    "\n"
     "varying vec3 UV;\n"
     "uniform samplerCube cubemap;\n"
     "uniform float roughness;\n"
@@ -552,9 +555,9 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
 #pragma region BRDFPrecompute
 
 Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersManagement::version +
-    "\n"
     "const float PI2 = 6.283185;\n"
     "uniform int NUM_SAMPLES;\n"
+	"varying vec2 texcoords;\n"
     "float VanDerCorpus(int n, int base){\n"
     "    float invBase = 1.0 / float(base);\n"
     "    float denom   = 1.0;\n"
@@ -628,7 +631,7 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
     "    return vec2(A, B);\n"
     "}\n"
     "void main(){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
+    "    vec2 uv = texcoords;\n"
     "    vec2 integratedBRDF = IntegrateBRDF(uv.x, uv.y);\n"
     "    gl_FragColor.rg = integratedBRDF;\n"
     "}";
@@ -636,7 +639,6 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
 
 #pragma region FXAA
 Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
-    "\n"
     "uniform float FXAA_REDUCE_MIN;\n"
     "uniform float FXAA_REDUCE_MUL;\n"
     "uniform float FXAA_SPAN_MAX;\n"
@@ -644,8 +646,9 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
     "//uniform sampler2D edgeTexture;\n"
     "uniform sampler2D depthTexture;\n"
     "uniform vec2 resolution;\n"
+	"varying vec2 texcoords;\n"
     "void main(){\n"
-    "   vec2 uv = gl_TexCoord[0].st;\n"
+    "   vec2 uv = texcoords;\n"
     "   float depth = texture2D(depthTexture,uv);\n"
     "   //float edge = texture2D(edgeTexture,uv).r;\n"
     "   if(depth >= 0.999){\n"
@@ -691,8 +694,9 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions +
     "\n"
 	"const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "uniform sampler2D gNormalMap;\n"
+	"varying vec2 texcoords;\n"
     "void main(){\n"
-	"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,gl_TexCoord[0].st).rg);\n"
+	"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
 	"    if(distance(normal,comparison) < 0.01){\n"
     "        discard;\n"//this is where the magic happens with the stencil buffer.
     "    }\n"
@@ -703,7 +707,6 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions +
 #pragma region SMAA
    
 Shaders::Detail::ShadersManagement::smaa_common = 
-    "\n"
     "vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }\n"
     "vec3 mad(vec3 a, vec3 b, vec3 c){ return (a * b) + c; }\n"
     "vec2 mad(vec2 a, vec2 b, vec2 c){ return (a * b) + c; }\n"
@@ -738,7 +741,6 @@ Shaders::Detail::ShadersManagement::smaa_common =
  
 Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"//edge frag
-    "\n"
     "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;\n"
@@ -801,7 +803,6 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
 
 Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"//edge vert
-    "\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "\n"
     "uniform mat4 MVP;\n"
@@ -1441,15 +1442,14 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = Shaders::Detail:
 Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gDepthMap;\n"
-    "\n"
+	"varying vec2 texcoords;\n"
     "void main(){\n"
-    "    gl_FragDepth = texture2D(gDepthMap,gl_TexCoord[0].st);\n"
+    "    gl_FragDepth = texture2D(gDepthMap,texcoords);\n"
     "}";
 #pragma endregion
 
 #pragma region SSAO
 Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManagement::version + 
-    "\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gRandomMap;\n"
     "uniform sampler2D gMiscMap;\n"
@@ -1475,6 +1475,7 @@ Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManageme
     "uniform mat4 invP;\n"
     "uniform float nearz;\n"
     "uniform float farz;\n"
+    "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
@@ -1486,7 +1487,7 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
     "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
     "}\n"
     "void main(){\n"
-    "    vec2 uv = gl_TexCoord[0].st * (1.0 / fbufferDivisor);\n"
+    "    vec2 uv = texcoords * (1.0 / fbufferDivisor);\n"
     "    vec3 worldPosition = reconstruct_world_pos(uv,nearz,farz);\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "    vec3 randomVector = normalize(texture2D(gRandomMap, gl_TexCoord[0].st / NoiseTextureSize).xyz);\n"
@@ -1540,7 +1541,7 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform int HasLighting;\n"
-    "\n"
+    "varying vec2 texcoords;\n"
     "uniform vec4 HDRInfo; // exposure | HasHDR | HasBloom | HDRAlgorithm\n"
 	"\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
@@ -1550,7 +1551,7 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
 Shaders::Detail::ShadersManagement::hdr_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::hdr_frag +=
     "void main(){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
+    "    vec2 uv = texcoords;\n"
     "    vec3 diffuse = texture2D(gDiffuseMap,uv).rgb;\n"
     "    vec3 lighting = texture2D(lightingBuffer, uv).rgb;\n"
     "    vec3 bloom = texture2D(bloomBuffer, uv).rgb;\n"
@@ -1592,7 +1593,7 @@ Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManageme
     "uniform vec4 RGBA;\n"
     "uniform vec2 HV;\n"
     "uniform float fbufferDivisor;\n"
-    "\n"
+    "varying vec2 texcoords;\n"
     "vec2 offset[14];\n"
     "\n"
     "uniform float radius;\n"
@@ -1615,7 +1616,7 @@ Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManageme
     "        offset[13-i] = vec2(weights[i] * radius * HV.x, weights[i] * radius * HV.y);\n"
     "    }\n"
     "    vec4 sum = vec4(0.0);\n"
-    "    vec2 uv = gl_TexCoord[0].st * (1.0 / fbufferDivisor);\n"
+    "    vec2 uv = texcoords * (1.0 / fbufferDivisor);\n"
     "\n"
     "    float strengthR = max(1.0, radius * strengthModifier.r);\n"
     "    float strengthG = max(1.0, radius * strengthModifier.g);\n"
@@ -1650,10 +1651,10 @@ Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManag
     "\n"
     "uniform int behind;\n"
     "uniform float alpha;\n"
-    "\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
     "    if(behind == 0){\n"
-    "        vec2 uv = gl_TexCoord[0].st * (1.0 / fbufferDivisor);\n"
+    "        vec2 uv = texcoords * (1.0 / fbufferDivisor);\n"
     "        vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
     "        deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
     "        float illuminationDecay = 1.0;\n"
@@ -1675,8 +1676,9 @@ Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManag
 Shaders::Detail::ShadersManagement::greyscale_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D texture;\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    vec4 col = texture2D(texture, gl_TexCoord[0].st);\n"
+    "    vec4 col = texture2D(texture, texcoords);\n"
     "    float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));\n"
     "    gl_FragColor = vec4(vec3(lum), 1.0);\n"
     "}";
@@ -1695,8 +1697,9 @@ Shaders::Detail::ShadersManagement::edge_canny_blur = Shaders::Detail::ShadersMa
     "vec2 bottomLeftTextureCoordinate;\n"
     "vec2 bottomRightTextureCoordinate;\n"
     "uniform sampler2D texture;\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    textureCoordinate = gl_TexCoord[0].st;\n"
+    "    textureCoordinate = texcoords;\n"
     "    leftTextureCoordinate = textureCoordinate + vec2(-1.0, 0.0);\n"
     "    rightTextureCoordinate = textureCoordinate + vec2(1.0, 0.0);\n"
     "    topTextureCoordinate = textureCoordinate + vec2(0.0, -1.0);\n"
@@ -1731,6 +1734,7 @@ Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersMa
     "const float atan45  = 2.414213;\n"  ///< Support value for atan
     "const float atan90  = -2.414213;\n" ///< Support value for atan
     "const float atan135 = -0.414213;\n" ///< Support value for atan
+    "varying vec2 texcoords;\n"
     "vec2 atanForCanny(float x) {\n"
     "    if (x < atan0 && x > atan135) { return vec2(1.0, 0.0); }\n"
     "    if (x < atan90 && x > atan45) { return vec2(0.0, 1.0); }\n"
@@ -1759,7 +1763,7 @@ Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersMa
     "    return vec4(0.0, 0.0, 0.0, 1.0);\n"
     "}\n"
     "void main(){\n"
-    "    gl_FragColor = cannyEdge(gl_TexCoord[0].st);\n"
+    "    gl_FragColor = cannyEdge(texcoords);\n"
     "}\n"
     "\n";
 #pragma endregion
@@ -1778,26 +1782,27 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "uniform int HasLighting;\n"
     "uniform int HasRays;\n"
     "uniform float godRaysExposure;\n"
+	"\n"
+    "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::final_frag +=
     "void main(){\n"
-    "    vec2 uv = gl_TexCoord[0].st;\n"
-    "    vec3 diffuse = texture2D(gDiffuseMap, uv).rgb;\n"
-    "    vec3 hdr = texture2D(gMiscMap,uv).rgb;\n"
-    //"    vec3 lighting = texture2D(gLightMap, uv).rgb;\n"
-    //"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    //"    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
+    "    vec3 diffuse = texture2D(gDiffuseMap, texcoords).rgb;\n"
+    "    vec3 hdr = texture2D(gMiscMap,texcoords).rgb;\n"
+    //"    vec3 lighting = texture2D(gLightMap, texcoords).rgb;\n"
+    //"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+    //"    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap, texcoords).a);\n"
     "    float ssao = 1.0;\n"
     "    if(HasSSAO == 1){ \n"
     "        float brightness = dot(hdr, vec3(0.2126, 0.7152, 0.0722));\n"
-    "        ssao = texture2D(gBloomMap,uv).a + 0.0001;\n"
+    "        ssao = texture2D(gBloomMap,texcoords).a + 0.0001;\n"
     "        brightness = min(1.0,pow(brightness,0.125));\n"
     "        hdr *= max(brightness, ssao);\n"
     "    }\n"
     "    if(HasRays == 1){\n"
-    "        vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
+    "        vec3 rays = texture2D(gGodsRaysMap,texcoords).rgb;\n"
     "        //hdr = hdr + rays;\n"
 	"        hdr = (hdr * 1.1) + (rays * godRaysExposure);\n"
     "    }\n"
@@ -1829,6 +1834,8 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
+	"\n"
+    "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
@@ -2046,7 +2053,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    return c;\n"
     "}\n"
     "void main(){\n"
-    "    //vec2 uv = gl_TexCoord[0].st;\n" //this cannot be used for non fullscreen quad meshes
+    //"  //vec2 uv = texcoords;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
     "    vec3 PxlPosition = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
@@ -2094,6 +2101,8 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
+	"\n"
+    "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::float_into_2_floats;
@@ -2104,7 +2113,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     "    return ret;\n"
     "}\n"
     "void main(){\n"
-    "    //vec2 uv = gl_TexCoord[0].st;\n" //this cannot be used for non fullscreen quad meshes
+    //"  //vec2 uv = texcoords;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"

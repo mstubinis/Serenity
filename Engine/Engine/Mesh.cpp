@@ -858,7 +858,7 @@ class Mesh::impl final{
             m_radius = Engine::Math::Max(m_radiusBox);
         }
         void _initRenderingContext(Mesh* super){
-            m_buffers.push_back(GLuint(0));
+            m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(0));
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
@@ -875,7 +875,7 @@ class Mesh::impl final{
             else{
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexData),&m_Vertices[0], GL_STATIC_DRAW );
             }
-            m_buffers.push_back(GLuint(0));
+            m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);

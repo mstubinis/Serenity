@@ -243,6 +243,9 @@
     <ClCompile Include="Engine_GLStateMachine.cpp">
       <Filter>Source Files\Engine\Engine_Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_FullscreenItems.cpp">
+      <Filter>Source Files\Engine\Engine_Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -381,6 +384,9 @@
       <Filter>Header Files\Engine\Engine_Sounds</Filter>
     </ClInclude>
     <ClInclude Include="Engine_GLStateMachine.h">
+      <Filter>Header Files\Engine\Engine_Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_FullscreenItems.h">
       <Filter>Header Files\Engine\Engine_Renderer</Filter>
     </ClInclude>
   </ItemGroup>
