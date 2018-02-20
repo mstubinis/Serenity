@@ -227,25 +227,23 @@ class MaterialMeshEntry::impl final{
 		void _init(Mesh* mesh){
 			m_Mesh = mesh;
 		}
-		void _addEntry(const string& objectName,MeshInstance* meshInstance){
-			if(!m_MeshInstances.count(objectName)){
-				vector<MeshInstance*> vector;
-				vector.push_back(meshInstance);
-				m_MeshInstances.emplace(objectName,vector);
+		void _addMeshInstance(const string& obj,MeshInstance* meshInstance){
+			if(!m_MeshInstances.count(obj)){
+				m_MeshInstances.emplace(obj,vector<MeshInstance*>(1,meshInstance));
 			}
 			else{
-				m_MeshInstances.at(objectName).push_back(meshInstance);
+				m_MeshInstances.at(obj).push_back(meshInstance);
 			}
 		}
-		void _removeEntry(const string& objectName,MeshInstance* meshInstance){
-			if(m_MeshInstances.count(objectName)){
-				vector<MeshInstance*>& vector = m_MeshInstances.at(objectName);
-				auto it = vector.begin();
-				while(it != vector.end()) {
+		void _removeMeshInstance(const string& obj,MeshInstance* meshInstance){
+			if(m_MeshInstances.count(obj)){
+				vector<MeshInstance*>& v = m_MeshInstances.at(obj);
+				auto it = v.begin();
+				while(it != v.end()) {
 					MeshInstance* instance = (*it);
 					if(instance ==  meshInstance) {
 						//do not delete the instance here
-						it = vector.erase(it);
+						it = v.erase(it);
 					}
 					else ++it;
 				}
@@ -422,10 +420,10 @@ MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
 MaterialMeshEntry::~MaterialMeshEntry(){
 }
 void MaterialMeshEntry::addMeshInstance(const string& objectName,MeshInstance* meshInstance){
-	m_i->_addEntry(objectName,meshInstance);
+	m_i->_addMeshInstance(objectName,meshInstance);
 }
 void MaterialMeshEntry::removeMeshInstance(const string& objectName,MeshInstance* meshInstance){
-	m_i->_removeEntry(objectName,meshInstance);
+	m_i->_removeMeshInstance(objectName,meshInstance);
 }
 Mesh* MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
 unordered_map<string,vector<MeshInstance*>>& MaterialMeshEntry::meshInstances(){ return m_i->m_MeshInstances; }
@@ -550,8 +548,9 @@ void Material::addComponentParallaxOcclusion(std::string textureFile,float heigh
 }
 const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
-const MaterialComponentReflection* Material::getComponentReflection() const { return static_cast<MaterialComponentReflection*>(m_i->m_Components.at(MaterialComponentType::Reflection)); }
-const MaterialComponentRefraction* Material::getComponentRefraction() const { return static_cast<MaterialComponentRefraction*>(m_i->m_Components.at(MaterialComponentType::Refraction)); }
+const MaterialComponentReflection* Material::getComponentReflection() const { return (MaterialComponentReflection*)(m_i->m_Components.at(MaterialComponentType::Reflection)); }
+const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components.at(MaterialComponentType::Refraction)); }
+const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { return (MaterialComponentParallaxOcclusion*)(m_i->m_Components.at(MaterialComponentType::ParallaxOcclusion)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const uint Material::id() const { return m_i->m_ID; }
@@ -594,7 +593,7 @@ void Material::removeMeshEntry(string objectName){
     if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey()); }
 }
 void Material::bind(){
-    string _name = name();
+    string& _name = name();
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
         BindableResource::bind(); //bind custom data
         Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = _name;
