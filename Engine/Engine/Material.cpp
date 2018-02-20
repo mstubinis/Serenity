@@ -28,26 +28,30 @@ GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Num
     "SmoothnessTexture",
     "ReflectionTexture",
     "RefractionTexture",
+	"HeightmapTexture",
 };
 void Material::setAllDiffuseModels(DiffuseModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setDiffuseModel(m); } }
 void Material::setAllSpecularModels(SpecularModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setSpecularModel(m); } }
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = (Material*)r;
-    glm::vec3 first(0.0f); glm::vec3 second(0.0f); glm::vec3 third(0.0f);
+    glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
     for(uint i = 0; i < MaterialComponentType::Number; i++){
         if(material->getComponents().count(i)){
             MaterialComponent* component = material->getComponents().at(i);
             if(component->texture() != nullptr && component->texture()->address() != 0){
                 //enable
-                if     (i == 0){ first.x = 1.0f; }
-                else if(i == 1){ first.y = 1.0f; }
-                else if(i == 2){ first.z = 1.0f; }
-                else if(i == 3){ second.x = 1.0f; }
-                else if(i == 4){ second.y = 1.0f; }
-                else if(i == 5){ second.z = 1.0f; }
-                else if(i == 6){ third.x = 1.0f; }
-                else if(i == 7){ third.y = 1.0f; }
-                else if(i == 8){ third.z = 1.0f; }
+                if     (i == 0) { first.x = 1.0f; }
+                else if(i == 1) { first.y = 1.0f; }
+                else if(i == 2) { first.z = 1.0f; }
+                else if(i == 3) { first.w = 1.0f; }
+                else if(i == 4) { second.x = 1.0f; }
+                else if(i == 5) { second.y = 1.0f; }
+                else if(i == 6) { second.z = 1.0f; }
+                else if(i == 7) { second.w = 1.0f; }
+                else if(i == 8) { third.x = 1.0f; }
+				else if(i == 9) { third.y = 1.0f; }
+				else if(i == 10){ third.z = 1.0f; }
+				else if(i == 11){ third.w = 1.0f; }
                 component->bind();
             }
             else{ 
@@ -56,17 +60,13 @@ struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
         }
     }
     Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
-    Renderer::sendUniform1fSafe("BaseGlow",material->glow());
 
-    Renderer::sendUniform1fSafe("BaseAO",material->ao());
-    Renderer::sendUniform1fSafe("BaseMetalness",material->metalness());
-    Renderer::sendUniform1fSafe("BaseSmoothness",material->smoothness());
+	Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material->glow(),material->ao(),material->metalness(),material->smoothness());
 
-    float id = float(material->id());
-    Renderer::sendUniform1fSafe("matID",id);
-    Renderer::sendUniform3fSafe("FirstConditionals", first.x,first.y,first.z);
-    Renderer::sendUniform3fSafe("SecondConditionals",second.x,second.y,second.z);
-    Renderer::sendUniform3fSafe("ThirdConditionals",third.x,third.y,third.z);
+    Renderer::sendUniform1fSafe("matID",float(material->id()));
+    Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
+    Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
+    Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
 }};
 struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
     //Material* m = (Material*)r;
@@ -86,6 +86,7 @@ unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
     m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
     m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
     m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
+    m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
     return m;
 }();
 unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
@@ -194,6 +195,30 @@ void MaterialComponentRefraction::bind(){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
+
+MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
+    setHeightScale(heightScale);
+}
+MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(string& map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
+    setHeightScale(heightScale);
+}
+MaterialComponentParallaxOcclusion::~MaterialComponentParallaxOcclusion(){
+    MaterialComponent::~MaterialComponent();
+}
+void MaterialComponentParallaxOcclusion::setHeightScale(float factor){
+    m_HeightScale = factor;
+}
+void MaterialComponentParallaxOcclusion::bind(){
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    Renderer::sendUniform1fSafe("ParallaxHeightScale",m_HeightScale);
+    Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+}
+void MaterialComponentParallaxOcclusion::unbind(){
+    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    Renderer::unbindTexture2D(slots.at(0));
+}
+
 class MaterialMeshEntry::impl final{
     public:
 	    Mesh* m_Mesh;
@@ -361,6 +386,12 @@ class Material::impl final{
                 return;
             m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
         }
+        void _addComponentParallaxOcclusion(Texture* map,float heightScale){
+			uint type = MaterialComponentType::ParallaxOcclusion;
+            if((m_Components.count(type) && m_Components.at(type) != nullptr) || (map == nullptr))
+                return;
+            m_Components.emplace(type,new MaterialComponentParallaxOcclusion(map,heightScale));
+        }
         void _setF0Color(float r, float g, float b){
             m_F0Color.r = glm::clamp(r,0.001f,0.999f); 
             m_F0Color.g = glm::clamp(g,0.001f,0.999f); 
@@ -508,6 +539,14 @@ void Material::addComponentRefraction(string cubemapName,string mapFile,float re
     Texture* map = Resources::getTexture(mapFile); 
     if(map == nullptr && mapFile != "") map = new Texture(mapFile);
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
+}
+void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale){
+    m_i->_addComponentParallaxOcclusion(texture,heightScale);
+}
+void Material::addComponentParallaxOcclusion(std::string textureFile,float heightScale){
+    Texture* texture = Resources::getTexture(textureFile); 
+    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+    m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
 const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }

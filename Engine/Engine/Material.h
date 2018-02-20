@@ -25,6 +25,7 @@ class MaterialComponentType{public: enum Type{
     Smoothness,  
     Reflection,
     Refraction,
+	ParallaxOcclusion,
 
     Number,
 };};
@@ -40,6 +41,7 @@ class MaterialComponentTextureSlot{public: enum Slot{
     Reflection_CUBEMAP_MAP,
     Refraction_CUBEMAP,
     Refraction_CUBEMAP_MAP,
+	Heightmap,
 };};
 class MaterialPhysics{public: enum Physics{
     Water,
@@ -128,7 +130,20 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
         void setRefractionIndex(float);
         const float refractionIndex() const { return m_RefractionIndex; }
 };
+class MaterialComponentParallaxOcclusion: public MaterialComponent{
+    protected:
+        float m_HeightScale;
+    public:
+        MaterialComponentParallaxOcclusion(Texture* map,float heightScale = 1.0f);
+        MaterialComponentParallaxOcclusion(std::string& map,float heightScale = 1.0f);
+        ~MaterialComponentParallaxOcclusion();
 
+        void bind();
+        void unbind();
+        void setHeightScale(float);
+
+        const float heightScale() const { return m_HeightScale; }
+};
 class MaterialMeshEntry{
     private:
 		class impl; std::unique_ptr<impl> m_i;
@@ -160,6 +175,7 @@ class Material final: public BindableResource{
 
         const MaterialComponentReflection* getComponentReflection() const;
         const MaterialComponentRefraction* getComponentRefraction() const;
+        const MaterialComponentParallaxOcclusion* getComponentParallaxOcclusion() const;
 
         void addComponent(uint type, Texture* texture);
 
@@ -191,6 +207,9 @@ class Material final: public BindableResource{
         void addComponentRefraction(Texture* cubeMap,Texture* map,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
         void addComponentRefraction(std::string cubeMapName,std::string mapFile,float refractiveIndex = 1.0f, float mixFactor = 1.0f);
         void addComponentRefraction(std::string cubeMapTextureFiles[],std::string mapFile,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
+
+        void addComponentParallaxOcclusion(Texture* texture,float heightScale = 1.0f);
+        void addComponentParallaxOcclusion(std::string textureFile,float heightScale = 1.0f);
 
         const uint id() const;
     
