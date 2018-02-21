@@ -15,7 +15,6 @@
 #include <glm/vec4.hpp>
 
 using namespace Engine;
-using namespace Engine::Events;
 using namespace std;
 
 HUD::HUD(){
@@ -32,7 +31,7 @@ void HUD::setColor(glm::vec3 c){ m_Color = c; }
 
 uint _count = 0;
 void HUD::update(float dt){
-    if(Keyboard::isKeyDownOnce(",")){
+    if(Engine::isKeyDownOnce(",")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
         unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
@@ -46,7 +45,7 @@ void HUD::update(float dt){
         _count++;
         if (_count > scene->getPlanets().size()-1){ _count = 0; }
     }
-    else if(Keyboard::isKeyDownOnce(".")){
+    else if(Engine::isKeyDownOnce(".")){
         SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
         unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
@@ -112,7 +111,7 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-	m_Font->renderText(Engine::Resources::Detail::ResourceManagement::m_Time.reportTimeRendering() + 
+	m_Font->renderText(Engine::Data::reportTimeRendering() + 
                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()) + 
                        "\nExposure: " + to_string(Renderer::Detail::RendererInfo::HDRInfo::hdr_exposure) + 
                        "\nGamma: " + to_string(Renderer::Detail::RendererInfo::GeneralInfo::gamma),

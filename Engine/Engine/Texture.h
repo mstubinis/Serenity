@@ -3,7 +3,7 @@
 #define ENGINE_TEXTURE_H
 
 #include "Engine_ResourceBasic.h"
-#include "Engine_Math.h"
+#include <glm/fwd.hpp>
 #include "GLImageConstants.h"
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>

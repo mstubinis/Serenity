@@ -1,31 +1,27 @@
 #version 120
 
 uniform float fExposure;
-uniform float BaseGlow;
 
 uniform sampler2D DiffuseTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D GlowTexture;
 uniform sampler2D SpecularTexture;
-
 uniform sampler2D AOTexture;
 uniform sampler2D MetalnessTexture;
 uniform sampler2D SmoothnessTexture;
-uniform float     BaseAO;
-uniform float     BaseMetalness;
-uniform float     BaseSmoothness;
-
 uniform samplerCube ReflectionTexture;
 uniform sampler2D   ReflectionTextureMap;
-uniform float       CubemapMixFactor;
-
 uniform samplerCube RefractionTexture;
 uniform sampler2D   RefractionTextureMap;
-uniform float       RefractionRatio;
+uniform sampler2D HeightmapTexture;
 
-uniform vec3 FirstConditionals;  //x = diffuse  y = normals    z = glow
-uniform vec3 SecondConditionals; //x = specular y = ao z = metalness
-uniform vec3 ThirdConditionals; //x = smoothness y = reflection z = refraction
+uniform vec4 MaterialBasePropertiesOne;//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+uniform float CubemapMixFactor;
+uniform float RefractionRatio;
+
+uniform vec4 FirstConditionals; //x = diffuse  y = normals    z = glow w = specular
+uniform vec4 SecondConditionals; //x = ao y = metal z = smoothness w = reflection
+uniform vec4 ThirdConditionals; //x = refraction y = heightmap z = UNUSED w = UNUSED
 
 uniform int HasGodsRays;
 
@@ -64,19 +60,19 @@ vec3 DecodeOctahedron(vec2 n) {
 	if (v.z < 0.0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);
 	return normalize(v);
 }
-vec3 CalcBumpedNormal(void){
+vec3 CalcBumpedNormal(){
     vec3 normalTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;
     mat3 TBN = mat3(Tangents, Binormals, Normals);
     return TBN * normalize(normalTexture);
 }
-void main(void){
+void main(){
     if(HasAtmosphere == 1){
         if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
             vec3 HDR = (1.0-exp(-fExposure*(c0+diffuse.rgb)*c1));
-            gl_FragData[0].rgb = max(vec3(0.05,0.05,0.05)*diffuse.rgb,HDR);    
+            gl_FragData[0].rgb = max(vec3(0.05)*diffuse.rgb,HDR);    
             if(FirstConditionals.z > 0.5){
-                vec3 lightIntensity = max(vec3(0.05,0.05,0.05)*vec3(1.0),(1.0 - exp( -fExposure * ((c0+vec3(1.0)) * c1) )));
+                vec3 lightIntensity = max(vec3(0.05)*vec3(1.0),(1.0 - exp( -fExposure * ((c0+vec3(1.0)) * c1) )));
                 gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0-lightIntensity)*texture2D(GlowTexture, UV).rgb);
             }
             gl_FragData[0].a = diffuse.a;
@@ -107,13 +103,13 @@ void main(void){
         }
 
         if(FirstConditionals.z > 0.5){
-            gl_FragData[2].r = texture2D(GlowTexture, UV).r + BaseGlow;
+            gl_FragData[2].r = texture2D(GlowTexture, UV).r + MaterialBasePropertiesOne.x;
         }
         else{
-            gl_FragData[2].r = BaseGlow;
+            gl_FragData[2].r = MaterialBasePropertiesOne.x;
         }
 
-        if(SecondConditionals.x > 0.5){
+        if(FirstConditionals.w > 0.5){
             gl_FragData[2].g = texture2D(SpecularTexture, UV).r;
         }
         else{

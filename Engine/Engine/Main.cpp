@@ -8,8 +8,6 @@
 #include <vld.h>
 #endif
 
-using namespace Engine;
-
 int main(){
     srand((unsigned)time(0));
     #ifdef _WIN32
@@ -20,9 +18,8 @@ int main(){
         #endif
     #endif
 
-    Detail::EngineClass::init("Engine",1024,768);
-    Detail::EngineClass::run();
-    Detail::EngineClass::destruct();
+    Engine::init("Engine",1024,768);
+    Engine::run();
 
     #ifdef _WIN32
         FreeConsole();

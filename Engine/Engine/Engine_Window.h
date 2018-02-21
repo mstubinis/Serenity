@@ -3,8 +3,8 @@
 #define ENGINE_WINDOW_H
 
 #include <memory>
+#include <glm/fwd.hpp>
 #include <SFML/Window.hpp>
-#include <SFML/System.hpp>
 
 typedef unsigned int uint;
 
@@ -15,7 +15,7 @@ class Engine_Window final{
         Engine_Window(const char* name,uint width,uint height);
         ~Engine_Window();
         const char* name() const;
-        sf::Vector2u getSize();
+        glm::uvec2 getSize();
         void setName(const char* name);
         void setSize(uint w, uint h);
         void setIcon(Texture* texture);

@@ -3,7 +3,6 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "Engine_Physics.h"
-#include "Engine_Time.h"
 #include "ShaderProgram.h"
 
 #include <unordered_map>
@@ -35,6 +34,25 @@ template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vect
 template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
 
 namespace Engine{
+	namespace impl{
+		class ResourceManager final{
+		    private:
+				class impl;
+		    public:
+				std::unique_ptr<impl> m_i;
+
+				ResourceManager(const char* name,uint width,uint height);
+				~ResourceManager();
+		};
+	};
+	namespace Data{
+		std::string reportTime();
+		std::string reportTimeRendering();
+	};
+
+
+
+
     namespace Resources{
         namespace Detail{
             class ResourceManagement final{
@@ -65,11 +83,7 @@ namespace Engine{
                     }
                     static Scene* m_CurrentScene;
 
-                    static EngineTime m_Time;
-
                     static boost::weak_ptr<Camera> m_ActiveCamera;
-
-                    static Engine_Window* m_Window;
 
                     static std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
                     static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
@@ -101,11 +115,11 @@ namespace Engine{
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
 
-        static float dt(){ return Detail::ResourceManagement::m_Time.dt(); }
-        static float applicationTime(){ return Detail::ResourceManagement::m_Time.applicationTime(); }
+        float dt();
+        float applicationTime();
 
         Engine_Window* getWindow();
-        sf::Vector2u getWindowSize();
+        glm::uvec2 getWindowSize();
 
         Camera* getActiveCamera();
         boost::weak_ptr<Camera>& getActiveCameraPtr();

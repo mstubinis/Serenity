@@ -1,3 +1,5 @@
+#include "Engine.h"
+#include "Engine_Time.h"
 #include "Engine_Resources.h"
 #include "Engine_Sounds.h"
 #include "Engine_Window.h"
@@ -20,26 +22,53 @@
 #include <iostream>
 
 using namespace Engine;
-using namespace Engine::Resources;
 using namespace std;
 
-EngineTime Detail::ResourceManagement::m_Time = EngineTime();
+class Engine::impl::ResourceManager::impl final{
+    public:
+		Engine_Window* m_Window;
 
-Engine_Window* Detail::ResourceManagement::m_Window;
-Scene* Detail::ResourceManagement::m_CurrentScene;
-boost::weak_ptr<Camera> Detail::ResourceManagement::m_ActiveCamera;
-bool Detail::ResourceManagement::m_DynamicMemory = false;
+		void _init(const char* name,const uint& width,const uint& height){
+			m_Window = new Engine_Window(name,width,height);
+		}
+		void _destruct(){
+			delete m_Window;
+		}
+};
+Engine::impl::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
+	m_i->_init(name,width,height);
+}
+Engine::impl::ResourceManager::~ResourceManager(){
+	m_i->_destruct();
+}
+string Engine::Data::reportTime(){
+	return Engine::impl::CEngine::m_Engine->m_TimeManager->reportTime();
+}
+string Engine::Data::reportTimeRendering(){
+	return Engine::impl::CEngine::m_Engine->m_TimeManager->reportTimeRendering();
+}
+float Engine::Resources::dt(){ return Engine::impl::CEngine::m_Engine->m_TimeManager->dt(); }
+float Engine::Resources::applicationTime(){ return Engine::impl::CEngine::m_Engine->m_TimeManager->applicationTime(); }
 
-unordered_map<string,boost::shared_ptr<MeshInstance>> Detail::ResourceManagement::m_MeshInstances;
-unordered_map<string,boost::shared_ptr<Scene>> Detail::ResourceManagement::m_Scenes;
-unordered_map<string,boost::shared_ptr<Object>> Detail::ResourceManagement::m_Objects;
-unordered_map<string,boost::shared_ptr<Camera>> Detail::ResourceManagement::m_Cameras;
-unordered_map<string,boost::shared_ptr<Font>> Detail::ResourceManagement::m_Fonts;
-unordered_map<string,boost::shared_ptr<Mesh>> Detail::ResourceManagement::m_Meshes;
-unordered_map<string,boost::shared_ptr<Texture>> Detail::ResourceManagement::m_Textures;
-unordered_map<string,boost::shared_ptr<Material>> Detail::ResourceManagement::m_Materials;
-unordered_map<string,boost::shared_ptr<Shader>> Detail::ResourceManagement::m_Shaders;
-unordered_map<string,boost::shared_ptr<ShaderP>> Detail::ResourceManagement::m_ShaderPrograms;
+
+
+
+
+
+Scene* Resources::Detail::ResourceManagement::m_CurrentScene;
+boost::weak_ptr<Camera> Resources::Detail::ResourceManagement::m_ActiveCamera;
+bool Resources::Detail::ResourceManagement::m_DynamicMemory = false;
+
+unordered_map<string,boost::shared_ptr<MeshInstance>> Resources::Detail::ResourceManagement::m_MeshInstances;
+unordered_map<string,boost::shared_ptr<Scene>> Resources::Detail::ResourceManagement::m_Scenes;
+unordered_map<string,boost::shared_ptr<Object>> Resources::Detail::ResourceManagement::m_Objects;
+unordered_map<string,boost::shared_ptr<Camera>> Resources::Detail::ResourceManagement::m_Cameras;
+unordered_map<string,boost::shared_ptr<Font>> Resources::Detail::ResourceManagement::m_Fonts;
+unordered_map<string,boost::shared_ptr<Mesh>> Resources::Detail::ResourceManagement::m_Meshes;
+unordered_map<string,boost::shared_ptr<Texture>> Resources::Detail::ResourceManagement::m_Textures;
+unordered_map<string,boost::shared_ptr<Material>> Resources::Detail::ResourceManagement::m_Materials;
+unordered_map<string,boost::shared_ptr<Shader>> Resources::Detail::ResourceManagement::m_Shaders;
+unordered_map<string,boost::shared_ptr<ShaderP>> Resources::Detail::ResourceManagement::m_ShaderPrograms;
 
 void Resources::Detail::ResourceManagement::destruct(){
     for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
@@ -52,10 +81,9 @@ void Resources::Detail::ResourceManagement::destruct(){
     for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
     for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
     for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
-    SAFE_DELETE(Detail::ResourceManagement::m_Window);
 }
-Engine_Window* Resources::getWindow(){ return Detail::ResourceManagement::m_Window; }
-sf::Vector2u Resources::getWindowSize(){ return Detail::ResourceManagement::m_Window->getSize(); }
+Engine_Window* Resources::getWindow(){ return Engine::impl::CEngine::m_Engine->m_ResourceManager->m_i->m_Window; }
+glm::uvec2 Resources::getWindowSize(){ return Engine::impl::CEngine::m_Engine->m_ResourceManager->m_i->m_Window->getSize(); }
 Camera* Resources::getActiveCamera(){ return Detail::ResourceManagement::m_ActiveCamera.lock().get(); }
 boost::weak_ptr<Camera>& Resources::getActiveCameraPtr(){ return Detail::ResourceManagement::m_ActiveCamera; }
 void Resources::setActiveCamera(Camera* c){ Detail::ResourceManagement::m_ActiveCamera = Detail::ResourceManagement::m_Cameras.at(c->name()); }
@@ -65,16 +93,16 @@ boost::shared_ptr<Object>& Resources::getObjectPtr(string n){return Detail::Reso
 boost::shared_ptr<Camera>& Resources::getCameraPtr(string n){return Detail::ResourceManagement::m_Cameras.at(n);}
 boost::shared_ptr<Texture>& Resources::getTexturePtr(string n){return Detail::ResourceManagement::m_Textures.at(n);}
 
-Scene* Resources::getScene(string n){return static_cast<Scene*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
-Object* Resources::getObject(string n){return static_cast<Object*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Objects,n));}
-Camera* Resources::getCamera(string n){return static_cast<Camera*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Cameras,n));}
-Font* Resources::getFont(string n){return static_cast<Font*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Fonts,n));}
-Texture* Resources::getTexture(string n){return static_cast<Texture*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Textures,n));}
-Mesh* Resources::getMesh(string n){return static_cast<Mesh*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Meshes,n));}
-Material* Resources::getMaterial(string n){return static_cast<Material*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
-Shader* Resources::getShader(string n){return static_cast<Shader*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
-ShaderP* Resources::getShaderProgram(string n){return static_cast<ShaderP*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
-MeshInstance* Resources::getMeshInstance(string n){return static_cast<MeshInstance*>(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_MeshInstances,n)); }
+Scene* Resources::getScene(string n){return (Scene*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Scenes,n));}
+Object* Resources::getObject(string n){return (Object*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Objects,n));}
+Camera* Resources::getCamera(string n){return (Camera*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Cameras,n));}
+Font* Resources::getFont(string n){return (Font*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Fonts,n));}
+Texture* Resources::getTexture(string n){return (Texture*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Textures,n));}
+Mesh* Resources::getMesh(string n){return (Mesh*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Meshes,n));}
+Material* Resources::getMaterial(string n){return (Material*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Materials,n));}
+Shader* Resources::getShader(string n){return (Shader*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_Shaders,n));}
+ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_ShaderPrograms,n));}
+MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(Detail::ResourceManagement::_getFromContainer(Detail::ResourceManagement::m_MeshInstances,n)); }
 
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
     Detail::ResourceManagement::_addToContainer(Detail::ResourceManagement::m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));

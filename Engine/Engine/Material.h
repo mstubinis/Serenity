@@ -134,8 +134,8 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
     protected:
         float m_HeightScale;
     public:
-        MaterialComponentParallaxOcclusion(Texture* map,float heightScale = 1.0f);
-        MaterialComponentParallaxOcclusion(std::string& map,float heightScale = 1.0f);
+        MaterialComponentParallaxOcclusion(Texture* map,float heightScale);
+        MaterialComponentParallaxOcclusion(std::string& map,float heightScale);
         ~MaterialComponentParallaxOcclusion();
 
         void bind();
@@ -208,8 +208,8 @@ class Material final: public BindableResource{
         void addComponentRefraction(std::string cubeMapName,std::string mapFile,float refractiveIndex = 1.0f, float mixFactor = 1.0f);
         void addComponentRefraction(std::string cubeMapTextureFiles[],std::string mapFile,float refractiveIndex = 1.0f,float mixFactor = 1.0f);
 
-        void addComponentParallaxOcclusion(Texture* texture,float heightScale = 1.0f);
-        void addComponentParallaxOcclusion(std::string textureFile,float heightScale = 1.0f);
+        void addComponentParallaxOcclusion(Texture* texture,float heightScale = 0.1f);
+        void addComponentParallaxOcclusion(std::string textureFile,float heightScale = 0.1f);
 
         const uint id() const;
     

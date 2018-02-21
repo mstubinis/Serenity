@@ -2,11 +2,15 @@
 #ifndef ENGINE_GBUFFER_H
 #define ENGINE_GBUFFER_H
 
-#include "Texture.h"
+#include <GL/glew.h>
+#include <SFML/OpenGL.hpp>
+#include <memory>
 #include <unordered_map>
 
+class Texture;
 class FramebufferTexture;
 class FramebufferObject;
+typedef unsigned int uint;
 class GBufferType{public: enum Type{
     Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Free2, Depth,
 

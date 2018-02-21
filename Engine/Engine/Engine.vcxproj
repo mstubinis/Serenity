@@ -199,8 +199,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Vehicle.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\Shaders\AS_groundFromAtmosphere_frag.glsl" />
-    <None Include="data\Shaders\AS_groundFromAtmosphere_vert.glsl" />
     <None Include="data\Shaders\AS_groundFromSpace_frag.glsl" />
     <None Include="data\Shaders\AS_groundFromSpace_vert.glsl" />
     <None Include="data\Shaders\AS_skyFromAtmosphere_frag.glsl" />

@@ -4,60 +4,50 @@
 
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include "Engine_Math.h"
 
 typedef unsigned int uint;
 
-namespace Engine{namespace Events{
-    namespace Mouse{
-        class MouseProcessing final{
-            private:
-                static std::unordered_map<std::string,uint> m_MouseMap;
-            public:
-                static float m_Delta;
-                static uint m_currentButton;
-                static uint m_previousButton;
-                static std::unordered_map<uint,bool> m_MouseStatus;
+namespace Engine{
+	namespace impl{
+		class EventManager final{
+		    private:
+				class impl;
+		    public:
+				std::unique_ptr<impl> m_i;
 
-                static glm::vec2 m_Position, m_Position_Previous,m_Difference;
+				EventManager();
+				~EventManager();
 
-                static bool _IsMouseButtonDown(std::string str);
-                static bool _IsMouseButtonDownOnce(std::string str);
-                static void _SetMousePositionInternal(float x, float y);
-        };
-        const glm::vec2& getMouseDifference();
-        const glm::vec2& getMousePositionPrevious();
-        const glm::vec2& getMousePosition();
-        const float getMouseWheelDelta();
-        bool isMouseButtonDown(std::string str);
-        bool isMouseButtonDownOnce(std::string str);
+				void _onEventKeyPressed(uint& key);
+				void _onEventKeyReleased(uint& key);
+				void _onEventMouseButtonPressed(uint mouseButton);
+				void _onEventMouseButtonReleased(uint mouseButton);
+				void _onEventMouseWheelMoved(int& delta);
+				void _onResetEvents();
+				void _onUpdate(float dt);
+				void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
+		};
+	};
 
-        void setMousePosition(float x,float y);
-        void setMousePosition(glm::vec2);
-        void setMousePosition(glm::uvec2);
-    };
-    namespace Keyboard{
-        class KeyProcessing final{
-            private:
-                static std::unordered_map<std::string,uint> m_KeyMap;
-            public:
-                static uint m_currentKey;
-                static uint m_previousKey;
-                static std::unordered_map<uint,bool> m_KeyStatus;
-
-                static bool _IsKeyDown(std::string str);
-                static bool _IsKeyUp(std::string str);
-                static bool _IsKeyDownOnce(std::string str);
-        };
-        bool isKeyDown(std::string str);
-        bool isKeyDownOnce(std::string str);
-        bool isKeyUp(std::string str);
-    };
+	//keyboard functions
     bool isKeyDown(std::string str);
     bool isKeyDownOnce(std::string str);
     bool isKeyUp(std::string str);
 
+	//mouse functions
+    bool isMouseButtonDown(std::string str);
+    bool isMouseButtonDownOnce(std::string str);
+    const glm::vec2& getMouseDifference();
+    const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();
+    const float getMouseWheelDelta();
+    void setMousePosition(float x,float y,bool resetDifference = false,bool resetPreviousPosition = false);
+    void setMousePosition(glm::vec2,bool resetDifference = false,bool resetPreviousPosition = false);
+    void setMousePosition(glm::uvec2,bool resetDifference = false,bool resetPreviousPosition = false);
+	const glm::vec2& getMousePosition();
+};
 
-};};
+
 #endif

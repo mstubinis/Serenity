@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class EngineTime::impl{
+class Engine::impl::TimeManager::impl{
     public:
         sf::Clock update_clock;  sf::Clock physics_clock;  sf::Clock render_clock;   sf::Clock sounds_clock;
         double updateTime;        double physicsTime;        double renderTime;      double soundTime;
@@ -50,9 +50,9 @@ class EngineTime::impl{
             string prevOutput = "";
         }
 };
-EngineTime::EngineTime():m_i(new impl){m_i->_init();}
-EngineTime::~EngineTime(){}
-void EngineTime::calculate(){
+Engine::impl::TimeManager::TimeManager():m_i(new impl){m_i->_init();}
+Engine::impl::TimeManager::~TimeManager(){}
+void Engine::impl::TimeManager::calculate(){
     m_i->deltaTime = float(m_i->updateTime + m_i->physicsTime + m_i->renderTime);
     m_i->applicationTime += m_i->deltaTime;
 
@@ -61,47 +61,47 @@ void EngineTime::calculate(){
         m_i->output_frame = 0;
     }
 }
-void EngineTime::stop_update(){ m_i->update_clock.restart(); }
-void EngineTime::stop_physics(){ m_i->physics_clock.restart(); }
-void EngineTime::stop_sounds(){ m_i->sounds_clock.restart(); }
-void EngineTime::stop_render(){ m_i->render_clock.restart(); }
-void EngineTime::calculate_update(){ m_i->updateTime = m_i->update_clock.restart().asSeconds(); }
-void EngineTime::calculate_physics(){ m_i->physicsTime = m_i->physics_clock.restart().asSeconds(); }
-void EngineTime::calculate_sounds(){ m_i->soundTime = m_i->sounds_clock.restart().asSeconds(); }
-void EngineTime::calculate_render(){ m_i->renderTime = m_i->render_clock.restart().asSeconds(); }
-float EngineTime::dt(){ return m_i->deltaTime; }
-float EngineTime::applicationTime(){ return m_i->applicationTime; }
-float EngineTime::updateTime(){ return m_i->updateTime; }
-float EngineTime::physicsTime(){ return m_i->physicsTime; }
-float EngineTime::renderTime(){ return m_i->renderTime; }
-float EngineTime::soundsTime(){ return m_i->soundTime; }
+void Engine::impl::TimeManager::stop_update(){ m_i->update_clock.restart(); }
+void Engine::impl::TimeManager::stop_physics(){ m_i->physics_clock.restart(); }
+void Engine::impl::TimeManager::stop_sounds(){ m_i->sounds_clock.restart(); }
+void Engine::impl::TimeManager::stop_render(){ m_i->render_clock.restart(); }
+void Engine::impl::TimeManager::calculate_update(){ m_i->updateTime = m_i->update_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_physics(){ m_i->physicsTime = m_i->physics_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_sounds(){ m_i->soundTime = m_i->sounds_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_render(){ m_i->renderTime = m_i->render_clock.restart().asSeconds(); }
+float Engine::impl::TimeManager::dt(){ return m_i->deltaTime; }
+float Engine::impl::TimeManager::applicationTime(){ return m_i->applicationTime; }
+float Engine::impl::TimeManager::updateTime(){ return m_i->updateTime; }
+float Engine::impl::TimeManager::physicsTime(){ return m_i->physicsTime; }
+float Engine::impl::TimeManager::renderTime(){ return m_i->renderTime; }
+float Engine::impl::TimeManager::soundsTime(){ return m_i->soundTime; }
 
 
 
-void EngineTime::stop_rendering_geometry(){ m_i->rendering_geometry_clock.restart(); }
-void EngineTime::stop_rendering_lighting(){ m_i->rendering_lighting_clock.restart(); }
-void EngineTime::stop_rendering_ssao(){ m_i->rendering_ssao_clock.restart(); }
-void EngineTime::stop_rendering_aa(){ m_i->rendering_aa_clock.restart(); }
-void EngineTime::stop_rendering_godrays(){ m_i->rendering_godrays_clock.restart(); }
-void EngineTime::stop_rendering_display(){ m_i->rendering_display_clock.restart(); }
+void Engine::impl::TimeManager::stop_rendering_geometry(){ m_i->rendering_geometry_clock.restart(); }
+void Engine::impl::TimeManager::stop_rendering_lighting(){ m_i->rendering_lighting_clock.restart(); }
+void Engine::impl::TimeManager::stop_rendering_ssao(){ m_i->rendering_ssao_clock.restart(); }
+void Engine::impl::TimeManager::stop_rendering_aa(){ m_i->rendering_aa_clock.restart(); }
+void Engine::impl::TimeManager::stop_rendering_godrays(){ m_i->rendering_godrays_clock.restart(); }
+void Engine::impl::TimeManager::stop_rendering_display(){ m_i->rendering_display_clock.restart(); }
 
-void EngineTime::calculate_rendering_geometry(){ m_i->rendering_geometry_Time = m_i->rendering_geometry_clock.restart().asSeconds(); }
-void EngineTime::calculate_rendering_lighting(){ m_i->rendering_lighting_Time = m_i->rendering_lighting_clock.restart().asSeconds(); }
-void EngineTime::calculate_rendering_ssao(){ m_i->rendering_ssao_Time = m_i->rendering_ssao_clock.restart().asSeconds(); }
-void EngineTime::calculate_rendering_aa(){ m_i->rendering_aa_Time = m_i->rendering_aa_clock.restart().asSeconds(); }
-void EngineTime::calculate_rendering_godrays(){ m_i->rendering_godrays_Time = m_i->rendering_godrays_clock.restart().asSeconds(); }
-void EngineTime::calculate_rendering_display(){ m_i->rendering_display_Time = m_i->rendering_display_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_rendering_geometry(){ m_i->rendering_geometry_Time = m_i->rendering_geometry_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_rendering_lighting(){ m_i->rendering_lighting_Time = m_i->rendering_lighting_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_rendering_ssao(){ m_i->rendering_ssao_Time = m_i->rendering_ssao_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_rendering_aa(){ m_i->rendering_aa_Time = m_i->rendering_aa_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_rendering_godrays(){ m_i->rendering_godrays_Time = m_i->rendering_godrays_clock.restart().asSeconds(); }
+void Engine::impl::TimeManager::calculate_rendering_display(){ m_i->rendering_display_Time = m_i->rendering_display_clock.restart().asSeconds(); }
 
-float EngineTime::rendering_geometryTime(){ return m_i->rendering_geometry_Time; }
-float EngineTime::rendering_lightingTime(){ return m_i->rendering_lighting_Time; }
-float EngineTime::rendering_ssaoTime(){ return m_i->rendering_ssao_Time; }
-float EngineTime::rendering_aaTime(){ return m_i->rendering_aa_Time; }
-float EngineTime::rendering_godraysTime(){ return m_i->rendering_godrays_Time; }
-float EngineTime::rendering_displayTime(){ return m_i->rendering_display_Time; }
+float Engine::impl::TimeManager::rendering_geometryTime(){ return m_i->rendering_geometry_Time; }
+float Engine::impl::TimeManager::rendering_lightingTime(){ return m_i->rendering_lighting_Time; }
+float Engine::impl::TimeManager::rendering_ssaoTime(){ return m_i->rendering_ssao_Time; }
+float Engine::impl::TimeManager::rendering_aaTime(){ return m_i->rendering_aa_Time; }
+float Engine::impl::TimeManager::rendering_godraysTime(){ return m_i->rendering_godrays_Time; }
+float Engine::impl::TimeManager::rendering_displayTime(){ return m_i->rendering_display_Time; }
 
 
-std::string& EngineTime::reportTime(){ return EngineTime::reportTime(m_i->decimals); }
-std::string& EngineTime::reportTime(uint decimals){
+std::string& Engine::impl::TimeManager::reportTime(){ return Engine::impl::TimeManager::reportTime(m_i->decimals); }
+std::string& Engine::impl::TimeManager::reportTime(uint decimals){
 	m_i->decimals = decimals;
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){
@@ -125,8 +125,8 @@ std::string& EngineTime::reportTime(uint decimals){
     }
     return m_i->prevOutput;
 }
-std::string& EngineTime::reportTimeRendering(){ return EngineTime::reportTimeRendering(m_i->decimals); }
-std::string& EngineTime::reportTimeRendering(uint decimals){
+std::string& Engine::impl::TimeManager::reportTimeRendering(){ return Engine::impl::TimeManager::reportTimeRendering(m_i->decimals); }
+std::string& Engine::impl::TimeManager::reportTimeRendering(uint decimals){
 	m_i->decimals = decimals;
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){

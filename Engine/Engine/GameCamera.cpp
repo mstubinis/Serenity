@@ -30,7 +30,7 @@ GameCamera::~GameCamera()
 void GameCamera::update(float dt){
     switch(m_State){
         case CAMERA_STATE_FOLLOW:{
-            m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * 0.02f);
+            m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
@@ -45,7 +45,7 @@ void GameCamera::update(float dt){
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
-            m_OrbitRadius += (Engine::Events::Mouse::getMouseWheelDelta() * 0.02f);
+            m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
@@ -58,11 +58,11 @@ void GameCamera::update(float dt){
             break;
         }
         case CAMERA_STATE_ORBIT:{
-            m_OrbitRadius += Engine::Events::Mouse::getMouseWheelDelta() * 0.01f;
+            m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;
             if( m_OrbitRadius < 0) m_OrbitRadius = 0;
             else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
 
-            rotate(-Events::Mouse::getMouseDifference().y*0.02f,-Events::Mouse::getMouseDifference().x*0.02f,0);
+            rotate(-Engine::getMouseDifference().y*0.02f,-Engine::getMouseDifference().x*0.02f,0);
 
             glm::vec3 pos = (glm::vec3(0,0,1)*glm::length(m_Target->getRadius())*0.37f) + (glm::vec3(0,0,1)*glm::length(m_Target->getRadius() * (1.0f + m_OrbitRadius)));
 

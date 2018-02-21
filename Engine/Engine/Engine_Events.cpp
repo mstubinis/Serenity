@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Engine_Events.h"
 #include "Engine_Resources.h"
 #include "Engine_Window.h"
@@ -6,319 +7,404 @@
 
 #include <glm/vec2.hpp>
 
-using namespace Engine::Events;
+
 using namespace std;
 
-unordered_map<string,uint> Keyboard::KeyProcessing::m_KeyMap = [](){
-    unordered_map<string,uint> k;
-    k["a"] = sf::Keyboard::A;
-    k["add"] = sf::Keyboard::Add;
-    k["b"] = sf::Keyboard::B;
-    k["backslash"] = sf::Keyboard::BackSlash;
-    k["back slash"] = sf::Keyboard::BackSlash;
-    k["bslash"] = sf::Keyboard::BackSlash;
-    k["b slash"] = sf::Keyboard::BackSlash;
-    k["\\"] = sf::Keyboard::BackSlash;
-    k["backspace"] = sf::Keyboard::BackSpace;
-    k["back space"] = sf::Keyboard::BackSpace;
-    k["bspace"] = sf::Keyboard::BackSpace;
-    k["b space"] = sf::Keyboard::BackSpace;
-    k["c"] = sf::Keyboard::C;
-    k["comma"] = sf::Keyboard::Comma;
-    k[","] = sf::Keyboard::Comma;
-    k["d"] = sf::Keyboard::D;
-    k["dash"] = sf::Keyboard::Dash;
-    k["-"] = sf::Keyboard::Dash;
-    k["delete"] = sf::Keyboard::Delete;
-    k["del"] = sf::Keyboard::Delete;
-    k["divide"] = sf::Keyboard::Divide;
-    k["down"] = sf::Keyboard::Down;
-    k["down arrow"] = sf::Keyboard::Down;
-    k["downarrow"] = sf::Keyboard::Down;
-    k["darrow"] = sf::Keyboard::Down;
-    k["d arrow"] = sf::Keyboard::Down;
-    k["e"] = sf::Keyboard::E;
-    k["end"] = sf::Keyboard::End;
-    k["equal"] = sf::Keyboard::Equal;
-    k["="] = sf::Keyboard::Equal;
-    k["esc"] = sf::Keyboard::Escape;
-    k["escape"] = sf::Keyboard::Escape;
-    k["f"] = sf::Keyboard::F;
+class Engine::impl::EventManager::impl final{
+    public:
+		unordered_map<string,uint> m_KeyMap, m_MouseMap;
+		unordered_map<uint,bool> m_KeyStatus, m_MouseStatus;
 
-    k["f1"] = sf::Keyboard::F1;
-    k["f2"] = sf::Keyboard::F2;
-    k["f3"] = sf::Keyboard::F3;
-    k["f4"] = sf::Keyboard::F4;
-    k["f5"] = sf::Keyboard::F5;
-    k["f6"] = sf::Keyboard::F6;
-    k["f7"] = sf::Keyboard::F7;
-    k["f8"] = sf::Keyboard::F8;
-    k["f9"] = sf::Keyboard::F9;
-    k["f10"] = sf::Keyboard::F10;
-    k["f11"] = sf::Keyboard::F11;
-    k["f12"] = sf::Keyboard::F12;
+		float m_Delta;
+		glm::vec2 m_Position, m_Position_Previous, m_Difference;
 
-    k["g"] = sf::Keyboard::G;
-    k["h"] = sf::Keyboard::H;
-    k["home"] = sf::Keyboard::Home;
-    k["i"] = sf::Keyboard::I;
-    k["insert"] = sf::Keyboard::Insert;
-    k["j"] = sf::Keyboard::J;
-    k["k"] = sf::Keyboard::K;
-    k["l"] = sf::Keyboard::L;
+		uint m_currentKey, m_previousKey;
+		uint m_currentButton, m_previousButton;
 
-    k["lalt"] = sf::Keyboard::LAlt;
-    k["leftalt"] = sf::Keyboard::LAlt;
-    k["left alt"] = sf::Keyboard::LAlt;
-    k["l alt"] = sf::Keyboard::LAlt;
+		void _init(){
+			_initVars();
+			_initKeyMap();
+			_initMouseMap();
+		}
+		void _initVars(){
+			m_Delta = 0;
+			m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
 
-    k["lbracket"] = sf::Keyboard::LBracket;
-    k["l bracket"] = sf::Keyboard::LBracket;
-    k["leftbracket"] = sf::Keyboard::LBracket;
-    k["left bracket"] = sf::Keyboard::LBracket;
-    k["["] = sf::Keyboard::LBracket;
+		    m_currentKey = m_previousKey = sf::Keyboard::Unknown;
+		    m_currentButton = m_previousButton = 100;  //we will use 100 as the "none" key
+		}
+		void _initKeyMap(){
+			if (m_KeyMap.size() > 0) return;
+			m_KeyMap["a"] = sf::Keyboard::A;
+			m_KeyMap["add"] = sf::Keyboard::Add;
+			m_KeyMap["b"] = sf::Keyboard::B;
+			m_KeyMap["backslash"] = sf::Keyboard::BackSlash;
+			m_KeyMap["back slash"] = sf::Keyboard::BackSlash;
+			m_KeyMap["bslash"] = sf::Keyboard::BackSlash;
+			m_KeyMap["b slash"] = sf::Keyboard::BackSlash;
+			m_KeyMap["\\"] = sf::Keyboard::BackSlash;
+			m_KeyMap["backspace"] = sf::Keyboard::BackSpace;
+			m_KeyMap["back space"] = sf::Keyboard::BackSpace;
+			m_KeyMap["bspace"] = sf::Keyboard::BackSpace;
+			m_KeyMap["b space"] = sf::Keyboard::BackSpace;
+			m_KeyMap["c"] = sf::Keyboard::C;
+			m_KeyMap["comma"] = sf::Keyboard::Comma;
+			m_KeyMap[","] = sf::Keyboard::Comma;
+			m_KeyMap["d"] = sf::Keyboard::D;
+			m_KeyMap["dash"] = sf::Keyboard::Dash;
+			m_KeyMap["-"] = sf::Keyboard::Dash;
+			m_KeyMap["delete"] = sf::Keyboard::Delete;
+			m_KeyMap["del"] = sf::Keyboard::Delete;
+			m_KeyMap["divide"] = sf::Keyboard::Divide;
+			m_KeyMap["down"] = sf::Keyboard::Down;
+			m_KeyMap["down arrow"] = sf::Keyboard::Down;
+			m_KeyMap["downarrow"] = sf::Keyboard::Down;
+			m_KeyMap["darrow"] = sf::Keyboard::Down;
+			m_KeyMap["d arrow"] = sf::Keyboard::Down;
+			m_KeyMap["e"] = sf::Keyboard::E;
+			m_KeyMap["end"] = sf::Keyboard::End;
+			m_KeyMap["equal"] = sf::Keyboard::Equal;
+			m_KeyMap["="] = sf::Keyboard::Equal;
+			m_KeyMap["esc"] = sf::Keyboard::Escape;
+			m_KeyMap["escape"] = sf::Keyboard::Escape;
+			m_KeyMap["f"] = sf::Keyboard::F;
 
-    k["lcontrol"] = sf::Keyboard::LControl;
-    k["l control"] = sf::Keyboard::LControl;
-    k["leftcontrol"] = sf::Keyboard::LControl;
-    k["left control"] = sf::Keyboard::LControl;
+			m_KeyMap["f1"] = sf::Keyboard::F1;
+			m_KeyMap["f2"] = sf::Keyboard::F2;
+			m_KeyMap["f3"] = sf::Keyboard::F3;
+			m_KeyMap["f4"] = sf::Keyboard::F4;
+			m_KeyMap["f5"] = sf::Keyboard::F5;
+			m_KeyMap["f6"] = sf::Keyboard::F6;
+			m_KeyMap["f7"] = sf::Keyboard::F7;
+			m_KeyMap["f8"] = sf::Keyboard::F8;
+			m_KeyMap["f9"] = sf::Keyboard::F9;
+			m_KeyMap["f10"] = sf::Keyboard::F10;
+			m_KeyMap["f11"] = sf::Keyboard::F11;
+			m_KeyMap["f12"] = sf::Keyboard::F12;
 
-    k["left"] = sf::Keyboard::Left;
-    k["larrow"] = sf::Keyboard::Left;
-    k["l arrow"] = sf::Keyboard::Left;
-    k["leftarrow"] = sf::Keyboard::Left;
-    k["left arrow"] = sf::Keyboard::Left;
+			m_KeyMap["g"] = sf::Keyboard::G;
+			m_KeyMap["h"] = sf::Keyboard::H;
+			m_KeyMap["home"] = sf::Keyboard::Home;
+			m_KeyMap["i"] = sf::Keyboard::I;
+			m_KeyMap["insert"] = sf::Keyboard::Insert;
+			m_KeyMap["j"] = sf::Keyboard::J;
+			m_KeyMap["k"] = sf::Keyboard::K;
+			m_KeyMap["l"] = sf::Keyboard::L;
 
-    k["lshift"] = sf::Keyboard::LShift;
-    k["l shift"] = sf::Keyboard::LShift;
-    k["leftshift"] = sf::Keyboard::LShift;
-    k["left shift"] = sf::Keyboard::LShift;
+			m_KeyMap["lalt"] = sf::Keyboard::LAlt;
+			m_KeyMap["leftalt"] = sf::Keyboard::LAlt;
+			m_KeyMap["left alt"] = sf::Keyboard::LAlt;
+			m_KeyMap["l alt"] = sf::Keyboard::LAlt;
 
-    k["lsystem"] = sf::Keyboard::LSystem;
-    k["l system"] = sf::Keyboard::LSystem;
-    k["leftsystem"] = sf::Keyboard::LSystem;
-    k["left system"] = sf::Keyboard::LSystem;
+			m_KeyMap["lbracket"] = sf::Keyboard::LBracket;
+			m_KeyMap["l bracket"] = sf::Keyboard::LBracket;
+			m_KeyMap["leftbracket"] = sf::Keyboard::LBracket;
+			m_KeyMap["left bracket"] = sf::Keyboard::LBracket;
+			m_KeyMap["["] = sf::Keyboard::LBracket;
 
-    k["m"] = sf::Keyboard::M;
-    k["menu"] = sf::Keyboard::Menu;
-    k["multiply"] = sf::Keyboard::Multiply;
+			m_KeyMap["lcontrol"] = sf::Keyboard::LControl;
+			m_KeyMap["l control"] = sf::Keyboard::LControl;
+			m_KeyMap["leftcontrol"] = sf::Keyboard::LControl;
+			m_KeyMap["left control"] = sf::Keyboard::LControl;
 
-    k["n"] = sf::Keyboard::N;
-    k["num0"] = sf::Keyboard::Num0;
-    k["num1"] = sf::Keyboard::Num1;
-    k["num2"] = sf::Keyboard::Num2;
-    k["num3"] = sf::Keyboard::Num3;
-    k["num4"] = sf::Keyboard::Num4;
-    k["num5"] = sf::Keyboard::Num5;
-    k["num6"] = sf::Keyboard::Num6;
-    k["num7"] = sf::Keyboard::Num7;
-    k["num8"] = sf::Keyboard::Num8;
-    k["num9"] = sf::Keyboard::Num9;
-    k["0"] = sf::Keyboard::Num0;
-    k["1"] = sf::Keyboard::Num1;
-    k["2"] = sf::Keyboard::Num2;
-    k["3"] = sf::Keyboard::Num3;
-    k["4"] = sf::Keyboard::Num4;
-    k["5"] = sf::Keyboard::Num5;
-    k["6"] = sf::Keyboard::Num6;
-    k["7"] = sf::Keyboard::Num7;
-    k["8"] = sf::Keyboard::Num8;
-    k["9"] = sf::Keyboard::Num9;
-    k["numpad0"] = sf::Keyboard::Numpad0;
-    k["numpad1"] = sf::Keyboard::Numpad1;
-    k["numpad2"] = sf::Keyboard::Numpad2;
-    k["numpad3"] = sf::Keyboard::Numpad3;
-    k["numpad4"] = sf::Keyboard::Numpad4;
-    k["numpad5"] = sf::Keyboard::Numpad5;
-    k["numpad6"] = sf::Keyboard::Numpad6;
-    k["numpad7"] = sf::Keyboard::Numpad7;
-    k["numpad8"] = sf::Keyboard::Numpad8;
-    k["numpad9"] = sf::Keyboard::Numpad9;
-    k["o"] = sf::Keyboard::O;
+			m_KeyMap["left"] = sf::Keyboard::Left;
+			m_KeyMap["larrow"] = sf::Keyboard::Left;
+			m_KeyMap["l arrow"] = sf::Keyboard::Left;
+			m_KeyMap["leftarrow"] = sf::Keyboard::Left;
+			m_KeyMap["left arrow"] = sf::Keyboard::Left;
 
-    k["p"] = sf::Keyboard::P;
-    k["pagedown"] = sf::Keyboard::PageDown;
-    k["page down"] = sf::Keyboard::PageDown;
-    k["pdown"] = sf::Keyboard::PageDown;
-    k["p down"] = sf::Keyboard::PageDown;
+			m_KeyMap["lshift"] = sf::Keyboard::LShift;
+			m_KeyMap["l shift"] = sf::Keyboard::LShift;
+			m_KeyMap["leftshift"] = sf::Keyboard::LShift;
+			m_KeyMap["left shift"] = sf::Keyboard::LShift;
 
-    k["pageup"] = sf::Keyboard::PageUp;
-    k["page up"] = sf::Keyboard::PageUp;
-    k["pup"] = sf::Keyboard::PageUp;
-    k["p up"] = sf::Keyboard::PageUp;
+			m_KeyMap["lsystem"] = sf::Keyboard::LSystem;
+			m_KeyMap["l system"] = sf::Keyboard::LSystem;
+			m_KeyMap["leftsystem"] = sf::Keyboard::LSystem;
+			m_KeyMap["left system"] = sf::Keyboard::LSystem;
 
-    k["pause"] = sf::Keyboard::Pause;
-    k["period"] = sf::Keyboard::Period;
-    k["."] = sf::Keyboard::Period;
+			m_KeyMap["m"] = sf::Keyboard::M;
+			m_KeyMap["menu"] = sf::Keyboard::Menu;
+			m_KeyMap["multiply"] = sf::Keyboard::Multiply;
 
-    k["q"] = sf::Keyboard::Q;
-    k["quote"] = sf::Keyboard::Quote;
-    k["'"] = sf::Keyboard::Quote;
-    k["\""] = sf::Keyboard::Quote;
+			m_KeyMap["n"] = sf::Keyboard::N;
+			m_KeyMap["num0"] = sf::Keyboard::Num0;
+			m_KeyMap["num1"] = sf::Keyboard::Num1;
+			m_KeyMap["num2"] = sf::Keyboard::Num2;
+			m_KeyMap["num3"] = sf::Keyboard::Num3;
+			m_KeyMap["num4"] = sf::Keyboard::Num4;
+			m_KeyMap["num5"] = sf::Keyboard::Num5;
+			m_KeyMap["num6"] = sf::Keyboard::Num6;
+			m_KeyMap["num7"] = sf::Keyboard::Num7;
+			m_KeyMap["num8"] = sf::Keyboard::Num8;
+			m_KeyMap["num9"] = sf::Keyboard::Num9;
+			m_KeyMap["0"] = sf::Keyboard::Num0;
+			m_KeyMap["1"] = sf::Keyboard::Num1;
+			m_KeyMap["2"] = sf::Keyboard::Num2;
+			m_KeyMap["3"] = sf::Keyboard::Num3;
+			m_KeyMap["4"] = sf::Keyboard::Num4;
+			m_KeyMap["5"] = sf::Keyboard::Num5;
+			m_KeyMap["6"] = sf::Keyboard::Num6;
+			m_KeyMap["7"] = sf::Keyboard::Num7;
+			m_KeyMap["8"] = sf::Keyboard::Num8;
+			m_KeyMap["9"] = sf::Keyboard::Num9;
+			m_KeyMap["numpad0"] = sf::Keyboard::Numpad0;
+			m_KeyMap["numpad1"] = sf::Keyboard::Numpad1;
+			m_KeyMap["numpad2"] = sf::Keyboard::Numpad2;
+			m_KeyMap["numpad3"] = sf::Keyboard::Numpad3;
+			m_KeyMap["numpad4"] = sf::Keyboard::Numpad4;
+			m_KeyMap["numpad5"] = sf::Keyboard::Numpad5;
+			m_KeyMap["numpad6"] = sf::Keyboard::Numpad6;
+			m_KeyMap["numpad7"] = sf::Keyboard::Numpad7;
+			m_KeyMap["numpad8"] = sf::Keyboard::Numpad8;
+			m_KeyMap["numpad9"] = sf::Keyboard::Numpad9;
+			m_KeyMap["o"] = sf::Keyboard::O;
 
-    k["r"] = sf::Keyboard::R;
-    k["ralt"] = sf::Keyboard::RAlt;
-    k["r alt"] = sf::Keyboard::RAlt;
-    k["rightalt"] = sf::Keyboard::RAlt;
-    k["right alt"] = sf::Keyboard::RAlt;
+			m_KeyMap["p"] = sf::Keyboard::P;
+			m_KeyMap["pagedown"] = sf::Keyboard::PageDown;
+			m_KeyMap["page down"] = sf::Keyboard::PageDown;
+			m_KeyMap["pdown"] = sf::Keyboard::PageDown;
+			m_KeyMap["p down"] = sf::Keyboard::PageDown;
 
-    k["rbracket"] = sf::Keyboard::RBracket;
-    k["r bracket"] = sf::Keyboard::RBracket;
-    k["rightbracket"] = sf::Keyboard::RBracket;
-    k["right bracket"] = sf::Keyboard::RBracket;
-    k["]"] = sf::Keyboard::RBracket;
+			m_KeyMap["pageup"] = sf::Keyboard::PageUp;
+			m_KeyMap["page up"] = sf::Keyboard::PageUp;
+			m_KeyMap["pup"] = sf::Keyboard::PageUp;
+			m_KeyMap["p up"] = sf::Keyboard::PageUp;
 
-    k["rcontrol"] = sf::Keyboard::RControl;
-    k["r control"] = sf::Keyboard::RControl;
-    k["rightcontrol"] = sf::Keyboard::RControl;
-    k["right control"] = sf::Keyboard::RControl;
+			m_KeyMap["pause"] = sf::Keyboard::Pause;
+			m_KeyMap["period"] = sf::Keyboard::Period;
+			m_KeyMap["."] = sf::Keyboard::Period;
 
-    k["return"] = sf::Keyboard::Return;
-    k["enter"] = sf::Keyboard::Return;
+			m_KeyMap["q"] = sf::Keyboard::Q;
+			m_KeyMap["quote"] = sf::Keyboard::Quote;
+			m_KeyMap["'"] = sf::Keyboard::Quote;
+			m_KeyMap["\""] = sf::Keyboard::Quote;
 
-    k["right"] = sf::Keyboard::Right;
-    k["rarrow"] = sf::Keyboard::Right;
-    k["r arrow"] = sf::Keyboard::Right;
-    k["rightarrow"] = sf::Keyboard::Right;
-    k["right arrow"] = sf::Keyboard::Right;
+			m_KeyMap["r"] = sf::Keyboard::R;
+			m_KeyMap["ralt"] = sf::Keyboard::RAlt;
+			m_KeyMap["r alt"] = sf::Keyboard::RAlt;
+			m_KeyMap["rightalt"] = sf::Keyboard::RAlt;
+			m_KeyMap["right alt"] = sf::Keyboard::RAlt;
 
-    k["rshift"] = sf::Keyboard::RShift;
-    k["r shift"] = sf::Keyboard::RShift;
-    k["rightshift"] = sf::Keyboard::RShift;
-    k["right shift"] = sf::Keyboard::RShift;
+			m_KeyMap["rbracket"] = sf::Keyboard::RBracket;
+			m_KeyMap["r bracket"] = sf::Keyboard::RBracket;
+			m_KeyMap["rightbracket"] = sf::Keyboard::RBracket;
+			m_KeyMap["right bracket"] = sf::Keyboard::RBracket;
+			m_KeyMap["]"] = sf::Keyboard::RBracket;
 
-    k["rsystem"] = sf::Keyboard::RSystem;
-    k["r system"] = sf::Keyboard::RSystem;
-    k["rightsystem"] = sf::Keyboard::RSystem;
-    k["right system"] = sf::Keyboard::RSystem;
+			m_KeyMap["rcontrol"] = sf::Keyboard::RControl;
+			m_KeyMap["r control"] = sf::Keyboard::RControl;
+			m_KeyMap["rightcontrol"] = sf::Keyboard::RControl;
+			m_KeyMap["right control"] = sf::Keyboard::RControl;
 
-    k["s"] = sf::Keyboard::S;
-    k["semicolon"] = sf::Keyboard::SemiColon;
-    k["semi-colon"] = sf::Keyboard::SemiColon;
-    k["scolon"] = sf::Keyboard::SemiColon;
-    k["semi colon"] = sf::Keyboard::SemiColon;
-    k["s colon"] = sf::Keyboard::SemiColon;
+			m_KeyMap["return"] = sf::Keyboard::Return;
+			m_KeyMap["enter"] = sf::Keyboard::Return;
 
-    k["slash"] = sf::Keyboard::Slash;
-    k["/"] = sf::Keyboard::Slash;
-    k[" "] = sf::Keyboard::Space;
-    k["space"] = sf::Keyboard::Space;
-    k["subtract"] = sf::Keyboard::Subtract;
-    k["-"] = sf::Keyboard::Subtract;
-    k["minus"] = sf::Keyboard::Subtract;
+			m_KeyMap["right"] = sf::Keyboard::Right;
+			m_KeyMap["rarrow"] = sf::Keyboard::Right;
+			m_KeyMap["r arrow"] = sf::Keyboard::Right;
+			m_KeyMap["rightarrow"] = sf::Keyboard::Right;
+			m_KeyMap["right arrow"] = sf::Keyboard::Right;
 
-    k["t"] = sf::Keyboard::T;
-    k["tab"] = sf::Keyboard::Tab;
-    k["tilde"] = sf::Keyboard::Tilde;
-    k["`"] = sf::Keyboard::Tilde;
+			m_KeyMap["rshift"] = sf::Keyboard::RShift;
+			m_KeyMap["r shift"] = sf::Keyboard::RShift;
+			m_KeyMap["rightshift"] = sf::Keyboard::RShift;
+			m_KeyMap["right shift"] = sf::Keyboard::RShift;
 
-    k["u"] = sf::Keyboard::U;
-    k["unknown"] = sf::Keyboard::Unknown;
+			m_KeyMap["rsystem"] = sf::Keyboard::RSystem;
+			m_KeyMap["r system"] = sf::Keyboard::RSystem;
+			m_KeyMap["rightsystem"] = sf::Keyboard::RSystem;
+			m_KeyMap["right system"] = sf::Keyboard::RSystem;
 
-    k["up"] = sf::Keyboard::Up;
-    k["uarrow"] = sf::Keyboard::Up;
-    k["u arrow"] = sf::Keyboard::Up;
-    k["uparrow"] = sf::Keyboard::Up;
-    k["up arrow"] = sf::Keyboard::Up;
+			m_KeyMap["s"] = sf::Keyboard::S;
+			m_KeyMap["semicolon"] = sf::Keyboard::SemiColon;
+			m_KeyMap["semi-colon"] = sf::Keyboard::SemiColon;
+			m_KeyMap["scolon"] = sf::Keyboard::SemiColon;
+			m_KeyMap["semi colon"] = sf::Keyboard::SemiColon;
+			m_KeyMap["s colon"] = sf::Keyboard::SemiColon;
 
-    k["v"] = sf::Keyboard::V;
-    k["w"] = sf::Keyboard::W;
-    k["x"] = sf::Keyboard::X;
-    k["y"] = sf::Keyboard::Y;
-    k["z"] = sf::Keyboard::Z;
-    return k;
-}();
-unordered_map<string,uint> Mouse::MouseProcessing::m_MouseMap = [](){
-    unordered_map<string,uint> m;
+			m_KeyMap["slash"] = sf::Keyboard::Slash;
+			m_KeyMap["/"] = sf::Keyboard::Slash;
+			m_KeyMap[" "] = sf::Keyboard::Space;
+			m_KeyMap["space"] = sf::Keyboard::Space;
+			m_KeyMap["subtract"] = sf::Keyboard::Subtract;
+			m_KeyMap["-"] = sf::Keyboard::Subtract;
+			m_KeyMap["minus"] = sf::Keyboard::Subtract;
 
-    m["l"] = sf::Mouse::Button::Left;
-    m["left"] = sf::Mouse::Button::Left;
-    m["left button"] = sf::Mouse::Button::Left;
-    m["leftbutton"] = sf::Mouse::Button::Left;
+			m_KeyMap["t"] = sf::Keyboard::T;
+			m_KeyMap["tab"] = sf::Keyboard::Tab;
+			m_KeyMap["tilde"] = sf::Keyboard::Tilde;
+			m_KeyMap["`"] = sf::Keyboard::Tilde;
 
-    m["r"] = sf::Mouse::Button::Right;
-    m["right"] = sf::Mouse::Button::Right;
-    m["right button"] = sf::Mouse::Button::Right;
-    m["rightbutton"] = sf::Mouse::Button::Right;
+			m_KeyMap["u"] = sf::Keyboard::U;
+			m_KeyMap["unknown"] = sf::Keyboard::Unknown;
 
-    m["m"] = sf::Mouse::Button::Middle;
-    m["middle"] = sf::Mouse::Button::Middle;
-    m["middle button"] = sf::Mouse::Button::Middle;
-    m["middlebutton"] = sf::Mouse::Button::Middle;
+			m_KeyMap["up"] = sf::Keyboard::Up;
+			m_KeyMap["uarrow"] = sf::Keyboard::Up;
+			m_KeyMap["u arrow"] = sf::Keyboard::Up;
+			m_KeyMap["uparrow"] = sf::Keyboard::Up;
+			m_KeyMap["up arrow"] = sf::Keyboard::Up;
 
-    m["none"] = uint(5);
-    return m;
-}();
-unordered_map<uint,bool> Keyboard::KeyProcessing::m_KeyStatus;
-unordered_map<uint,bool> Mouse::MouseProcessing::m_MouseStatus;
-float Mouse::MouseProcessing::m_Delta = 0;
-glm::vec2 Mouse::MouseProcessing::m_Position = glm::vec2(0.0f);
-glm::vec2 Mouse::MouseProcessing::m_Position_Previous = glm::vec2(0.0f);
-glm::vec2 Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f);
+			m_KeyMap["v"] = sf::Keyboard::V;
+			m_KeyMap["w"] = sf::Keyboard::W;
+			m_KeyMap["x"] = sf::Keyboard::X;
+			m_KeyMap["y"] = sf::Keyboard::Y;
+			m_KeyMap["z"] = sf::Keyboard::Z;
+		}
+		void _initMouseMap(){
+			if(m_MouseMap.size() > 0) return;
+			m_MouseMap["l"] = sf::Mouse::Button::Left;
+			m_MouseMap["left"] = sf::Mouse::Button::Left;
+			m_MouseMap["left button"] = sf::Mouse::Button::Left;
+			m_MouseMap["leftbutton"] = sf::Mouse::Button::Left;
 
-//init prev / current variables
-uint Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-uint Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-uint Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
-uint Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
+			m_MouseMap["r"] = sf::Mouse::Button::Right;
+			m_MouseMap["right"] = sf::Mouse::Button::Right;
+			m_MouseMap["right button"] = sf::Mouse::Button::Right;
+			m_MouseMap["rightbutton"] = sf::Mouse::Button::Right;
 
-bool Mouse::MouseProcessing::_IsMouseButtonDown(string str){
-    boost::algorithm::to_lower(str);
-    uint& key = MouseProcessing::m_MouseMap.at(str);
-    if(MouseProcessing::m_MouseStatus[key]) return true; return false;
+			m_MouseMap["m"] = sf::Mouse::Button::Middle;
+			m_MouseMap["middle"] = sf::Mouse::Button::Middle;
+			m_MouseMap["middle button"] = sf::Mouse::Button::Middle;
+			m_MouseMap["middlebutton"] = sf::Mouse::Button::Middle;
+
+			m_MouseMap["none"] = uint(5);
+		}
+		void _destruct(){
+			m_KeyStatus.clear();
+			m_MouseStatus.clear();
+			m_KeyMap.clear();
+			m_MouseMap.clear();
+		}
+		bool _isMouseButtonDown(string& str){
+			boost::algorithm::to_lower(str);
+			if(m_MouseStatus[m_MouseMap.at(str)]) return true; return false;
+		}
+		bool _isMouseButtonDownOnce(string& str){
+			bool res = _isMouseButtonDown(str);
+			if(res && m_currentButton == m_MouseMap.at(str) && (m_currentButton != m_previousButton)) return true; return false;
+		}
+		void _setMousePositionInternal(float x,float y,bool& resetDifference,bool& resetPrevious){
+			glm::vec2 newPos = glm::vec2(x,y);
+			if(resetPrevious == true) m_Position_Previous = newPos;
+			else                      m_Position_Previous = m_Position;
+			m_Position = newPos;
+			m_Difference.x += (m_Position.x - m_Position_Previous.x);
+			m_Difference.y += (m_Position.y - m_Position_Previous.y);
+			if(resetDifference == true) m_Difference = glm::vec2(0.0f);
+		}
+		bool _isKeyDown(string& str){
+			boost::algorithm::to_lower(str);
+			if(m_KeyStatus[m_KeyMap.at(str)]) return true; return false;
+		}
+		bool _isKeyUp(string& str){
+			boost::algorithm::to_lower(str);
+			if(!m_KeyStatus[m_KeyMap.at(str)]) return true; return false;
+		}
+		bool _isKeyDownOnce(string& str){
+			bool res = _isKeyDown(str);
+			if(res && m_currentKey == m_KeyMap.at(str) && (m_currentKey != m_previousKey)) return true; return false;
+		}
+		void _onEventKeyPressed(uint& key){
+			m_previousKey = m_currentKey;
+			m_currentKey = key;
+			m_KeyStatus[key] = true;
+		}
+		void _onEventKeyReleased(uint& key){
+			m_previousKey = sf::Keyboard::Unknown;
+			m_currentKey = sf::Keyboard::Unknown;
+			m_KeyStatus[key] = false;
+		}
+		void _onEventMouseWheelMoved(int& delta){
+            m_Delta += (delta * 10);
+		}
+		void _onEventMouseButtonPressed(uint& mouseButton){
+			m_previousButton = m_currentButton;
+			m_currentButton = mouseButton;
+			m_MouseStatus[mouseButton] = true;
+		}
+		void _onEventMouseButtonReleased(uint& mouseButton){
+			m_previousButton = 100; //we will use 100 as the "none" key
+			m_currentButton = 100;  //we will use 100 as the "none" key
+			m_MouseStatus[mouseButton] = false;
+		}
+		void _onResetEvents(){
+			m_previousKey = sf::Keyboard::Unknown;
+			m_currentKey = sf::Keyboard::Unknown;
+			for(auto iterator:m_KeyStatus){ iterator.second = false; }
+			for(auto iterator:m_MouseStatus){ iterator.second = false; }
+			m_Delta *= 0.97f * (1.0f-Resources::dt());
+		}
+		void _onUpdate(float& dt){
+			m_Difference *= (0.975f);
+		}
+};
+Engine::impl::EventManager::EventManager():m_i(new impl){
+	m_i->_init();
 }
-bool Mouse::MouseProcessing::_IsMouseButtonDownOnce(string str){
-    bool res = MouseProcessing::_IsMouseButtonDown(str);
-    uint& key = MouseProcessing::m_MouseMap.at(str);
-    if(res && m_currentButton == key && (m_currentButton != m_previousButton)) return true; return false;
+Engine::impl::EventManager::~EventManager(){
+	m_i->_destruct();
 }
-void Mouse::MouseProcessing::_SetMousePositionInternal(float x, float y){
-    m_Position_Previous = m_Position;
-    m_Position = glm::vec2(x,y);
-    m_Difference.x += (m_Position.x - m_Position_Previous.x);
-    m_Difference.y += (m_Position.y - m_Position_Previous.y);
+void Engine::impl::EventManager::_onEventKeyPressed(uint& key){
+	m_i->_onEventKeyPressed(key);
 }
-bool Keyboard::KeyProcessing::_IsKeyDown(string str){
-    boost::algorithm::to_lower(str);
-    uint& key = KeyProcessing::m_KeyMap.at(str);
-    if(KeyProcessing::m_KeyStatus[key]) return true; return false;
+void Engine::impl::EventManager::_onEventKeyReleased(uint& key){
+	m_i->_onEventKeyReleased(key);
 }
-bool Keyboard::KeyProcessing::_IsKeyUp(string str){
-    boost::algorithm::to_lower(str);
-    uint& key = KeyProcessing::m_KeyMap.at(str);
-    if(!KeyProcessing::m_KeyStatus[key]) return true; return false;
+void Engine::impl::EventManager::_onEventMouseButtonPressed(uint mouseButton){
+	m_i->_onEventMouseButtonPressed(mouseButton);
 }
-bool Keyboard::KeyProcessing::_IsKeyDownOnce(string str){
-    bool res = KeyProcessing::_IsKeyDown(str);
-    uint& key = KeyProcessing::m_KeyMap.at(str);
-    if(res && m_currentKey == key && (m_currentKey != m_previousKey)) return true; return false;
+void Engine::impl::EventManager::_onEventMouseButtonReleased(uint mouseButton){
+	m_i->_onEventMouseButtonReleased(mouseButton);
 }
-const glm::vec2& Mouse::getMouseDifference(){ return MouseProcessing::m_Difference; }
-const glm::vec2& Mouse::getMousePositionPrevious(){ return MouseProcessing::m_Position_Previous; }
-const glm::vec2& Mouse::getMousePosition(){ return MouseProcessing::m_Position; }
-const float Mouse::getMouseWheelDelta(){ return MouseProcessing::m_Delta; }
-bool Mouse::isMouseButtonDown(string str){ return MouseProcessing::_IsMouseButtonDown(str); }
-bool Mouse::isMouseButtonDownOnce(string str){ return MouseProcessing::_IsMouseButtonDownOnce(str); }
-
-void Mouse::setMousePosition(float x,float y){ 
-    sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
-    Mouse::MouseProcessing::_SetMousePositionInternal(x,y);
+void Engine::impl::EventManager::_onEventMouseWheelMoved(int& delta){
+	m_i->_onEventMouseWheelMoved(delta);
 }
-void Mouse::setMousePosition(glm::vec2 pos){ 
-    sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
-    Mouse::MouseProcessing::_SetMousePositionInternal(pos.x,pos.y);
+void Engine::impl::EventManager::_onResetEvents(){
+	m_i->_onResetEvents();
 }
-void Mouse::setMousePosition(glm::uvec2 pos){ 
-    sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
-    Mouse::MouseProcessing::_SetMousePositionInternal(float(pos.x),float(pos.y));
+void Engine::impl::EventManager::_onUpdate(float dt){
+	m_i->_onUpdate(dt);
 }
-
-bool Keyboard::isKeyDown(string str){ return KeyProcessing::_IsKeyDown(str); }
-bool Keyboard::isKeyDownOnce(string str){ return KeyProcessing::_IsKeyDownOnce(str); }
-bool Keyboard::isKeyUp(string str){ return KeyProcessing::_IsKeyUp(str); }
-
-bool Engine::Events::isKeyDown(string str){ return Keyboard::KeyProcessing::_IsKeyDown(str); }
-bool Engine::Events::isKeyDownOnce(string str){ return Keyboard::KeyProcessing::_IsKeyDownOnce(str); }
-bool Engine::Events::isKeyUp(string str){ return Keyboard::KeyProcessing::_IsKeyUp(str); }
-
-const glm::vec2& Engine::Events::getMousePosition(){ return Mouse::MouseProcessing::m_Position; }
+void Engine::impl::EventManager::_setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
+	m_i->_setMousePositionInternal(x,y,resetDifference,resetPreviousPosition);
+}
+bool Engine::isKeyDown(string str){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->_isKeyDown(str);
+}
+bool Engine::isKeyDownOnce(string str){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->_isKeyDownOnce(str);
+}
+bool Engine::isKeyUp(string str){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->_isKeyUp(str);
+}
+bool Engine::isMouseButtonDown(string str){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->_isMouseButtonDown(str);
+}
+bool Engine::isMouseButtonDownOnce(string str){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->_isMouseButtonDownOnce(str);
+}
+const glm::vec2& Engine::getMouseDifference(){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->m_Difference;
+}
+const glm::vec2& Engine::getMousePositionPrevious(){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->m_Position_Previous;
+}
+const glm::vec2& Engine::getMousePosition(){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->m_Position;
+}
+const float Engine::getMouseWheelDelta(){
+	return impl::CEngine::m_Engine->m_EventManager->m_i->m_Delta;
+}
+void Engine::setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
+	sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
+	impl::CEngine::m_Engine->m_EventManager->_setMousePosition(x,y,resetDifference,resetPreviousPosition);
+}
+void Engine::setMousePosition(glm::vec2 pos,bool resetDifference,bool resetPreviousPosition){
+	sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
+	impl::CEngine::m_Engine->m_EventManager->_setMousePosition(pos.x,pos.y,resetDifference,resetPreviousPosition);
+}
+void Engine::setMousePosition(glm::uvec2 pos,bool resetDifference,bool resetPreviousPosition){
+	sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
+	impl::CEngine::m_Engine->m_EventManager->_setMousePosition((float)pos.x,(float)pos.y,resetDifference,resetPreviousPosition);
+}

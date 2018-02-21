@@ -16,7 +16,7 @@ uniform int HasGodsRays;
 varying float FC_2_f;
 varying float logz_f;
 
-void main(void){
+void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
     float fRayleighPhase = 0.75 * (1.0 + (fCos*fCos));
     float fMiePhase = 1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos*fCos) / pow(1.0 + g2 - 2.0*g*fCos, 1.5);

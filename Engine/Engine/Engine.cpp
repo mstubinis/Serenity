@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Engine_Time.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_Sounds.h"
@@ -24,20 +25,45 @@
 #include <iostream>
 #endif
 
-void Engine::Detail::EngineClass::init(const char* name,uint w,uint h){
-    Resources::Detail::ResourceManagement::m_Window = new Engine_Window(name,w,h);
-    initGame();
+class Engine::impl::CEngine::impl final{
+    public:
+		void _init(){
+		}
+		void _destruct(){
+		}
+};
+
+
+Engine::impl::CEngine* Engine::impl::CEngine::m_Engine = nullptr;
+Engine::impl::CEngine::CEngine(const char* name,uint width,uint height):m_i(new impl){
+	m_EventManager = new Engine::impl::EventManager();
+	m_ResourceManager = new Engine::impl::ResourceManager(name,width,height);
+	m_TimeManager = new Engine::impl::TimeManager();
+	m_i->_init();
 }
-void Engine::Detail::EngineClass::destruct(){
+Engine::impl::CEngine::~CEngine(){
+	delete m_EventManager;
+	delete m_ResourceManager;
+	delete m_TimeManager;
+	m_i->_destruct();
+}
+
+void Engine::init(const char* name,uint w,uint h){
+	Engine::impl::CEngine::m_Engine = new Engine::impl::CEngine(name,w,h);
+
+    Detail::EngineClass::initGame();
+}
+void Engine::destruct(){
     Game::cleanup();
 	Engine::Sound::Detail::SoundManagement::destruct();
     Engine::Resources::Detail::ResourceManagement::destruct();
     Engine::Physics::Detail::PhysicsManagement::destruct();
     Engine::Renderer::Detail::RenderManagement::destruct();
+
+	delete Engine::impl::CEngine::m_Engine;
 }
 void Engine::Detail::EngineClass::initGame(){
-    Events::Mouse::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
-    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f); //see if this stops initial kickback
+    Engine::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
 
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
     Renderer::Detail::RenderManagement::init();
@@ -54,48 +80,42 @@ void Engine::Detail::EngineClass::initGame(){
         new Scene("Default");
 }
 void Engine::Detail::EngineClass::RESET_EVENTS(){
-    Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-    Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-
-    for(auto iterator:Engine::Events::Keyboard::KeyProcessing::m_KeyStatus){ iterator.second = false; }
-    for(auto iterator:Engine::Events::Mouse::MouseProcessing::m_MouseStatus){ iterator.second = false; }
-
-    Events::Mouse::MouseProcessing::m_Delta *= 0.97f * (1.0f-Resources::dt());
+    impl::CEngine::m_Engine->m_EventManager->_onResetEvents();
 }
 void Engine::Detail::EngineClass::update(){
-	Engine::Resources::Detail::ResourceManagement::m_Time.stop_update();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_update();
 
-    float dt = Engine::Resources::Detail::ResourceManagement::m_Time.dt();
+	float dt = Engine::impl::CEngine::m_Engine->m_TimeManager->dt();
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
-    Events::Mouse::MouseProcessing::m_Difference *= (0.975f);
+    impl::CEngine::m_Engine->m_EventManager->_onUpdate(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 
-	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_update();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_update();
 }
 void Engine::Detail::EngineClass::updatePhysics(){
-	Engine::Resources::Detail::ResourceManagement::m_Time.stop_physics();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_physics();
 	Physics::Detail::PhysicsManagement::update(Resources::dt());
-	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_physics();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_physics();
 }
 void Engine::Detail::EngineClass::updateSounds(){
-	Engine::Resources::Detail::ResourceManagement::m_Time.stop_sounds();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_sounds();
 	Sound::Detail::SoundManagement::update(Resources::dt());
-	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_sounds();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_sounds();
 }
 void Engine::Detail::EngineClass::render(){
-	Engine::Resources::Detail::ResourceManagement::m_Time.stop_render();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_render();
 
     Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
     Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),x,y);
 
-	Engine::Resources::Detail::ResourceManagement::m_Time.stop_rendering_display();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_display();
     Resources::getWindow()->display();
-	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_rendering_display();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_display();
 
-	Engine::Resources::Detail::ResourceManagement::m_Time.calculate_render();
+	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_render();
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
@@ -116,42 +136,34 @@ void Engine::Detail::EngineClass::EVENT_LOST_FOCUS(){
 void Engine::Detail::EngineClass::EVENT_GAINED_FOCUS(){
     Game::onGainedFocus();
 }
-void Engine::Detail::EngineClass::EVENT_TEXT_ENTERED(sf::Event::TextEvent text){
-    Game::onTextEntered(text);
+void Engine::Detail::EngineClass::EVENT_TEXT_ENTERED(uint unicode){
+    Game::onTextEntered(unicode);
 }
 void Engine::Detail::EngineClass::EVENT_KEY_PRESSED(uint key){
-    Events::Keyboard::KeyProcessing::m_previousKey = Events::Keyboard::KeyProcessing::m_currentKey;
-    Events::Keyboard::KeyProcessing::m_currentKey = key;
-    Events::Keyboard::KeyProcessing::m_KeyStatus[key] = true;
+	impl::CEngine::m_Engine->m_EventManager->_onEventKeyPressed(key);
     Game::onKeyPressed(key);
 }
 void Engine::Detail::EngineClass::EVENT_KEY_RELEASED(uint key){
-    Events::Keyboard::KeyProcessing::m_previousKey = sf::Keyboard::Unknown;
-    Events::Keyboard::KeyProcessing::m_currentKey = sf::Keyboard::Unknown;
-    Events::Keyboard::KeyProcessing::m_KeyStatus[key] = false;
+    impl::CEngine::m_Engine->m_EventManager->_onEventKeyReleased(key);
     Game::onKeyReleased(key);
 }
-void Engine::Detail::EngineClass::EVENT_MOUSE_WHEEL_MOVED(sf::Event::MouseWheelEvent mouseWheel){
-    Events::Mouse::MouseProcessing::m_Delta += (mouseWheel.delta * 10);
-    Game::onMouseWheelMoved(mouseWheel);
+void Engine::Detail::EngineClass::EVENT_MOUSE_WHEEL_MOVED(int delta){
+    impl::CEngine::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
+    Game::onMouseWheelMoved(delta);
 }
-void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(sf::Event::MouseButtonEvent mouseButton){
-    Events::Mouse::MouseProcessing::m_previousButton = Engine::Events::Mouse::MouseProcessing::m_currentButton;
-    Events::Mouse::MouseProcessing::m_currentButton = mouseButton.button;
-    Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = true;
+void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
+	impl::CEngine::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(mouseButton);
 }
-void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(sf::Event::MouseButtonEvent mouseButton){
-    Events::Mouse::MouseProcessing::m_previousButton = 100; //we will use 100 as the "none" key
-    Events::Mouse::MouseProcessing::m_currentButton = 100;  //we will use 100 as the "none" key
-    Events::Mouse::MouseProcessing::m_MouseStatus[mouseButton.button] = false;
+void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
+	impl::CEngine::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(mouseButton);
 }
-void Engine::Detail::EngineClass::EVENT_MOUSE_MOVED(sf::Event::MouseMoveEvent mouse){
+void Engine::Detail::EngineClass::EVENT_MOUSE_MOVED(float mouseX, float mouseY){
     if(Resources::getWindow()->hasFocus()){
-        Events::Mouse::MouseProcessing::_SetMousePositionInternal(float(mouse.x),float(mouse.y));
+        impl::CEngine::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
     }
-    Game::onMouseMoved(mouse);
+    Game::onMouseMoved(mouseX,mouseY);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_ENTERED(){
     Game::onMouseEntered();
@@ -176,13 +188,13 @@ void Engine::Detail::EngineClass::EVENT_JOYSTICK_DISCONNECTED(){
 }
 #pragma endregion
 const float Engine::getFPS(){ return 1.0f / Resources::dt(); }
-Engine_Window* Engine::getWindow(){ return Resources::Detail::ResourceManagement::m_Window; }
-const sf::Vector2u& Engine::getWindowSize(){ return Resources::Detail::ResourceManagement::m_Window->getSize(); }
+Engine_Window* Engine::getWindow(){ return Engine::Resources::getWindow(); }
+const glm::uvec2 Engine::getWindowSize(){ return Engine::Resources::getWindowSize(); }
 void Engine::setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture); }
 void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
 void Engine::stop(){ Resources::getWindow()->close(); }
-void Engine::setFullScreen(bool b){ Engine::Resources::Detail::ResourceManagement::m_Window->setFullScreen(b); }
+void Engine::setFullScreen(bool b){ Engine::Resources::getWindow()->setFullScreen(b); }
 
 void Engine::Detail::EngineClass::handleEvents(){
 	sf::Event e;
@@ -191,29 +203,30 @@ void Engine::Detail::EngineClass::handleEvents(){
             case sf::Event::Closed:               EVENT_CLOSE();break;
             case sf::Event::KeyReleased:          EVENT_KEY_RELEASED(e.key.code);break;
             case sf::Event::KeyPressed:           EVENT_KEY_PRESSED(e.key.code);break;
-            case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton);break;
-            case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton);break;
+            case sf::Event::MouseButtonPressed:   EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton.button);break;
+            case sf::Event::MouseButtonReleased:  EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton.button);break;
             case sf::Event::MouseEntered:         EVENT_MOUSE_ENTERED();break;
             case sf::Event::MouseLeft:            EVENT_MOUSE_LEFT();break;
-            case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel);break;
-            case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(e.mouseMove);break;
+			case sf::Event::MouseWheelMoved:      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel.delta);break;
+			case sf::Event::MouseMoved:           EVENT_MOUSE_MOVED(e.mouseMove.x,e.mouseMove.y);break;
             case sf::Event::Resized:              EVENT_RESIZE(e.size.width,e.size.height);break;
-            case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(e.text);break;
+            case sf::Event::TextEntered:          EVENT_TEXT_ENTERED(e.text.unicode);break;
             default:                              break;
         }
     }
 }
 
-void Engine::Detail::EngineClass::run(){
+void Engine::run(){
     while(Resources::getWindow()->isOpen()){
 
-		handleEvents();
+		Detail::EngineClass::handleEvents();
 
-        update();
-		updatePhysics();
-		updateSounds();
-        render();
+        Detail::EngineClass::update();
+		Detail::EngineClass::updatePhysics();
+		Detail::EngineClass::updateSounds();
+        Detail::EngineClass::render();
 		
-		Engine::Resources::Detail::ResourceManagement::m_Time.calculate();
+		Engine::impl::CEngine::m_Engine->m_TimeManager->calculate();
     }
+	Engine::destruct();
 }

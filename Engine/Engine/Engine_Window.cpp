@@ -128,7 +128,7 @@ Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new im
 Engine_Window::~Engine_Window(){
     m_i->_destruct();
 }
-sf::Vector2u Engine_Window::getSize(){return m_i->m_SFMLWindow->getSize();}
+glm::uvec2 Engine_Window::getSize(){ sf::Vector2u size = m_i->m_SFMLWindow->getSize(); return glm::uvec2(size.x,size.y); }
 void Engine_Window::setIcon(Texture* texture){m_i->_setIcon(texture);}
 void Engine_Window::setIcon(const char* file){m_i->_setIcon(file);}
 const char* Engine_Window::name() const {return m_i->m_WindowName;}

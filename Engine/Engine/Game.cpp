@@ -48,6 +48,7 @@ void Game::initResources(){
     Resources::addMesh("Ring","data/Models/ring.obj");
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
 	Resources::addMesh("Venerex","data/Models/venerex.obj",CollisionType::ConvexHull);
+	Resources::addMesh("Plane2","data/Models/plane.obj");
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
@@ -66,10 +67,6 @@ void Game::initResources(){
     Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","","Deferred_HUD");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
-
-    Resources::addMaterial("Iron","data/Textures/iron_diffuse.png","data/Textures/iron_normal.png");
-    Resources::getMaterial("Iron")->addComponentMetalness("data/Textures/iron_metallic.png");
-    Resources::getMaterial("Iron")->addComponentSmoothness("data/Textures/iron_smoothness.png");
 
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
     Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
@@ -94,39 +91,39 @@ void Game::initLogic(){
     m_HUD = new HUD();
 }
 void Game::update(float dt){
-    if(Events::Keyboard::isKeyDown("esc")){
+    if(Engine::isKeyDown("esc")){
         Engine::stop();
     }
-    if(Events::Keyboard::isKeyDownOnce("f4")){
+    if(Engine::isKeyDownOnce("f4")){
         Resources::setCurrentScene("Sol");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f5")){
+    if(Engine::isKeyDownOnce("f5")){
         Resources::setCurrentScene("CapsuleSpace");
         Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
     }
-    if(Events::Keyboard::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
-    if(Events::Keyboard::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
-    if(Events::Keyboard::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if(Events::Keyboard::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
+    if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
+    if(Engine::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
+    if(Engine::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
+    if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
 
-	if(Events::Keyboard::isKeyDownOnce("space")){
+	if(Engine::isKeyDownOnce("space")){
 	}
 
-    if(Events::Keyboard::isKeyDown("z")){
+    if(Engine::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
     }
-    else if(Events::Keyboard::isKeyDown("x")){
+    else if(Engine::isKeyDown("x")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.03f);
     }
-    if(Events::Keyboard::isKeyDown("c")){
+    if(Engine::isKeyDown("c")){
         Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.02f);
     }
-    else if(Events::Keyboard::isKeyDown("k")){
+    else if(Engine::isKeyDown("k")){
         Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.02f);
     }
 
-    if(Events::Keyboard::isKeyDown("n")){
+    if(Engine::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
 		Resources::getMaterial("DefiantShark")->setMetalness(Resources::getMaterial("DefiantShark")->metalness() - 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
@@ -134,7 +131,7 @@ void Game::update(float dt){
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() - 0.02f);
 		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
     }
-    else if(Events::Keyboard::isKeyDown("m")){
+    else if(Engine::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
 		Resources::getMaterial("DefiantShark")->setMetalness(Resources::getMaterial("DefiantShark")->metalness() + 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
@@ -142,7 +139,7 @@ void Game::update(float dt){
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() + 0.02f);
 		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
     }
-    if(Events::Keyboard::isKeyDown("v")){
+    if(Engine::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
 		Resources::getMaterial("DefiantShark")->setSmoothness(Resources::getMaterial("DefiantShark")->smoothness() - 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
@@ -150,7 +147,7 @@ void Game::update(float dt){
 		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() - 0.02f);
 		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
     }
-    else if(Events::Keyboard::isKeyDown("b")){
+    else if(Engine::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
 		Resources::getMaterial("DefiantShark")->setSmoothness(Resources::getMaterial("DefiantShark")->smoothness() + 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
@@ -178,22 +175,22 @@ void Game::onGainedFocus(){
     //Engine::getWindow()->setMouseCursorVisible(false);
     const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
-    Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
-    Events::Mouse::MouseProcessing::m_Difference = glm::vec2(0.0f);
+
+	Engine::setMousePosition(halfRes,true);
 }
-void Game::onTextEntered(sf::Event::TextEvent textEvent){
+void Game::onTextEntered(uint unicode){
 }
 void Game::onKeyPressed(uint key){
 }
 void Game::onKeyReleased(uint key){
 }
-void Game::onMouseWheelMoved(sf::Event::MouseWheelEvent mwEvent){
+void Game::onMouseWheelMoved(int delta){
 }
-void Game::onMouseButtonPressed(sf::Event::MouseButtonEvent mbEvent){
+void Game::onMouseButtonPressed(uint button){
 }
-void Game::onMouseButtonReleased(sf::Event::MouseButtonEvent mbEvent){
+void Game::onMouseButtonReleased(uint button){
 }
-void Game::onMouseMoved(sf::Event::MouseMoveEvent mmEvent){
+void Game::onMouseMoved(float mouseX,float mouseY){
 }
 void Game::onMouseEntered(){
     Engine::getWindow()->requestFocus();
@@ -209,11 +206,13 @@ void Game::onPreUpdate(float dt){
 void Game::onPostUpdate(float dt){
     const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     if(Resources::getWindow()->hasFocus()){
-        glm::vec2 mousePos = Events::Mouse::getMousePosition();
+        glm::vec2 mousePos = Engine::getMousePosition();
         float mouseDistFromCenter = glm::distance(mousePos,halfRes);
         if(mouseDistFromCenter > 1.0f){
             sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
-            Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
+
+			Engine::setMousePosition(halfRes,false,true);
+            //Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
         }
     }
 }

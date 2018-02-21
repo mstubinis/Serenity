@@ -19,7 +19,6 @@
 #include <boost/algorithm/string.hpp>
 
 using namespace Engine;
-using namespace Engine::Events;
 using namespace std;
 
 
