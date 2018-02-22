@@ -14,6 +14,8 @@
 #include <memory>
 #include <map>
 
+#include <glm/glm.hpp>
+
 namespace sf{ class Image; };
 
 class btHeightfieldTerrainShape;

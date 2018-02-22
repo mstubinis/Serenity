@@ -2,14 +2,13 @@
 #ifndef ENGINE_ENGINE_PHYSICS_H
 #define ENGINE_ENGINE_PHYSICS_H
 
-#include "Engine_Math.h"
+#include <glm/fwd.hpp>
+#include <vector>
+#include <memory>
 
 class Object;
 class ObjectDynamic;
-class btBroadphaseInterface;
-class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
-class btSequentialImpulseConstraintSolver;
 class btDynamicsWorld;
 class btDiscreteDynamicsWorld;
 class GLDebugDrawer;
@@ -51,32 +50,29 @@ class Collision final{
 };
 
 namespace Engine{
+	namespace epriv{
+		class PhysicsManager final{
+		    private:
+				class impl;
+		    public:
+				std::unique_ptr<impl> m_i;
+
+				PhysicsManager();
+				~PhysicsManager();
+
+				void _update(float dt,int maxSteps = 1,float = 0.0166666f);
+				void _render();
+
+				void _removeCollision(Collision*);
+				const btDiscreteDynamicsWorld* _world() const;
+		};
+	};
+
+
+
+
+
     namespace Physics{
-        namespace Detail{
-            class PhysicsManagement final{
-                private:
-                    static void _preTicCallback(btDynamicsWorld* world, btScalar timeStep);
-                    static void _postTicCallback(btDynamicsWorld* world, btScalar timeStep);
-                public:
-                    static btBroadphaseInterface* m_broadphase;
-                    static btDefaultCollisionConfiguration* m_collisionConfiguration;
-                    static btCollisionDispatcher* m_dispatcher;
-                    static btSequentialImpulseConstraintSolver* m_solver;
-                    static btDiscreteDynamicsWorld* m_world;
-
-                    static GLDebugDrawer* m_debugDrawer;
-
-                    static void init();
-                    static void destruct();
-                    static void update(float dt,int maxSteps = 1,float = 0.0166666f);
-                    static void render();
-
-                    static std::vector<glm::vec3> rayCastInternal(const btVector3& start, const btVector3& end);
-
-                    static std::vector<Collision*> m_Collisions;
-            };
-        };
-
         // vector[0] = end point, vector[1] = hit normal
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*>& ignoredObjects);

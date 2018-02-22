@@ -724,7 +724,7 @@ void Renderer::Detail::RenderManagement::render(epriv::GBuffer* gbuffer,Camera* 
 	GLDisable(GLState::DEPTH_MASK);
 	if(mainRenderFunc){
 		if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && camera == s->getActiveCamera()){
-			Physics::Detail::PhysicsManagement::render();
+			epriv::Core::m_Engine->m_PhysicsManager->_render();
 		}
 	}
 
@@ -732,8 +732,8 @@ void Renderer::Detail::RenderManagement::render(epriv::GBuffer* gbuffer,Camera* 
 	/*
     Renderer::unbindFBO();
     Settings::clear();
-    LightProbe* pr  = static_cast<LightProbe*>(Resources::getCamera("CapsuleLightProbe"));
-    Skybox* skybox = static_cast<Skybox*>(s->getSkybox());
+    LightProbe* pr  = (LightProbe*)(Resources::getCamera("CapsuleLightProbe"));
+    Skybox* skybox = (Skybox*)(s->getSkybox());
     if(pr != nullptr){
         ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
         glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));

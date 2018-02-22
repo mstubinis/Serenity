@@ -42,6 +42,7 @@ epriv::Core::Core(const char* name,uint w,uint h):m_i(new impl){
 	m_ResourceManager = new epriv::ResourceManager(name,w,h);
 	m_TimeManager = new epriv::TimeManager();
 	m_SoundManager = new epriv::SoundManager();
+	m_PhysicsManager = new epriv::PhysicsManager();
 	m_i->_init();
 }
 epriv::Core::~Core(){
@@ -49,6 +50,7 @@ epriv::Core::~Core(){
 	SAFE_DELETE(m_SoundManager);
 	SAFE_DELETE(m_ResourceManager);
 	SAFE_DELETE(m_TimeManager);
+	SAFE_DELETE(m_PhysicsManager);
 	m_i->_destruct();
 }
 
@@ -59,7 +61,6 @@ void Engine::init(const char* name,uint w,uint h){
 
 void Engine::Detail::EngineClass::initGame(const char* name,uint w,uint h){
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
-    Physics::Detail::PhysicsManagement::init();
 	Resources::initResources(name,w,h);
     Renderer::Detail::RenderManagement::init();
 
@@ -75,10 +76,9 @@ void Engine::Detail::EngineClass::initGame(const char* name,uint w,uint h){
 void Engine::Detail::EngineClass::RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
 }
-void Engine::Detail::EngineClass::update(){
+void Engine::Detail::EngineClass::update(float dt){
 	epriv::Core::m_Engine->m_TimeManager->stop_update();
 
-	float dt = epriv::Core::m_Engine->m_TimeManager->dt();
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
@@ -89,15 +89,17 @@ void Engine::Detail::EngineClass::update(){
 
 	epriv::Core::m_Engine->m_TimeManager->calculate_update();
 }
-void Engine::Detail::EngineClass::updatePhysics(){
+void Engine::Detail::EngineClass::updatePhysics(float dt){
 	epriv::Core::m_Engine->m_TimeManager->stop_physics();
-	Physics::Detail::PhysicsManagement::update(Resources::dt());
+
+	epriv::Core::m_Engine->m_PhysicsManager->_update(dt);
+
 	epriv::Core::m_Engine->m_TimeManager->calculate_physics();
 }
-void Engine::Detail::EngineClass::updateSounds(){
+void Engine::Detail::EngineClass::updateSounds(float dt){
 	epriv::Core::m_Engine->m_TimeManager->stop_sounds();
 
-	epriv::Core::m_Engine->m_SoundManager->_update( Resources::dt() );
+	epriv::Core::m_Engine->m_SoundManager->_update(dt);
 
 	epriv::Core::m_Engine->m_TimeManager->calculate_sounds();
 }
@@ -214,12 +216,13 @@ void Engine::Detail::EngineClass::handleEvents(){
 
 void Engine::run(){
     while(Resources::getWindow()->isOpen()){
-
 		Detail::EngineClass::handleEvents();
 
-        Detail::EngineClass::update();
-		Detail::EngineClass::updatePhysics();
-		Detail::EngineClass::updateSounds();
+		float dt = epriv::Core::m_Engine->m_TimeManager->dt();
+        Detail::EngineClass::update(dt);
+		Detail::EngineClass::updatePhysics(dt);
+		Detail::EngineClass::updateSounds(dt);
+
         Detail::EngineClass::render();
 		
 		epriv::Core::m_Engine->m_TimeManager->calculate();
@@ -227,6 +230,5 @@ void Engine::run(){
 	//destruct the engine here
     Game::cleanup();
 	SAFE_DELETE(epriv::Core::m_Engine);
-	Engine::Physics::Detail::PhysicsManagement::destruct();
     Engine::Renderer::Detail::RenderManagement::destruct();
 }

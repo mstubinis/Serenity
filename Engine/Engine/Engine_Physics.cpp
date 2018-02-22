@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Engine_Physics.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -25,92 +26,129 @@
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Engine;
-using namespace Engine::Physics;
 using namespace std;
 
-btBroadphaseInterface* Physics::Detail::PhysicsManagement::m_broadphase = nullptr;
-btDefaultCollisionConfiguration* Physics::Detail::PhysicsManagement::m_collisionConfiguration = nullptr;
-btCollisionDispatcher* Physics::Detail::PhysicsManagement::m_dispatcher = nullptr;
-btSequentialImpulseConstraintSolver* Physics::Detail::PhysicsManagement::m_solver = nullptr;
-btDiscreteDynamicsWorld* Physics::Detail::PhysicsManagement::m_world = nullptr;
-GLDebugDrawer* Physics::Detail::PhysicsManagement::m_debugDrawer = nullptr;
 
-std::vector<Collision*> Physics::Detail::PhysicsManagement::m_Collisions;
-
-void Detail::PhysicsManagement::_preTicCallback(btDynamicsWorld* world, btScalar timeStep){
+void _preTicCallback(btDynamicsWorld* world, btScalar timeStep){
 }
-void Detail::PhysicsManagement::_postTicCallback(btDynamicsWorld* world, btScalar timeStep){
+void _postTicCallback(btDynamicsWorld* world, btScalar timeStep){
 }
 
-void Detail::PhysicsManagement::init(){
-    m_broadphase = new btDbvtBroadphase();
-    m_collisionConfiguration = new btDefaultCollisionConfiguration();
-    m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
-    m_solver = new btSequentialImpulseConstraintSolver;
-    m_world = new btDiscreteDynamicsWorld(m_dispatcher,m_broadphase,m_solver,m_collisionConfiguration);
+class epriv::PhysicsManager::impl final{
+    public:
+        btBroadphaseInterface* m_Broadphase;
+        btDefaultCollisionConfiguration* m_CollisionConfiguration;
+        btCollisionDispatcher* m_Dispatcher;
+        btSequentialImpulseConstraintSolver* m_Solver;
+        btDiscreteDynamicsWorld* m_World;
+		GLDebugDrawer* m_DebugDrawer;
 
-    m_debugDrawer = new GLDebugDrawer();
-    m_debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE );
-    m_world->setDebugDrawer(m_debugDrawer);
-    m_world->setGravity(btVector3(0.0f,0.0f,0.0f));
+		vector<Collision*> m_CollisionObjects;
 
-    btGImpactCollisionAlgorithm::registerAlgorithm(m_dispatcher);
+		void _init(){
+			m_Broadphase = new btDbvtBroadphase();
+			m_CollisionConfiguration = new btDefaultCollisionConfiguration();
+			m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
+			m_Solver = new btSequentialImpulseConstraintSolver;
+			m_World = new btDiscreteDynamicsWorld(m_Dispatcher,m_Broadphase,m_Solver,m_CollisionConfiguration);
 
-    m_world->setInternalTickCallback(Detail::PhysicsManagement::_preTicCallback, static_cast<void*>(m_world),true);
-    m_world->setInternalTickCallback(Detail::PhysicsManagement::_postTicCallback, static_cast<void*>(m_world),false);
+			m_DebugDrawer = new GLDebugDrawer();
+			m_DebugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
+			m_World->setDebugDrawer(m_DebugDrawer);
+			m_World->setGravity(btVector3(0.0f,0.0f,0.0f));
+
+			btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
+
+			m_World->setInternalTickCallback(_preTicCallback,(void*)m_World,true);
+			m_World->setInternalTickCallback(_postTicCallback,(void*)m_World,false);
+		}
+		void _destruct(){
+			SAFE_DELETE(m_DebugDrawer);
+			SAFE_DELETE(m_World);
+			SAFE_DELETE(m_Solver);
+			SAFE_DELETE(m_Dispatcher);
+			SAFE_DELETE(m_CollisionConfiguration);
+			SAFE_DELETE(m_Broadphase);
+			for(auto collision:m_CollisionObjects)
+				SAFE_DELETE(collision);
+		}
+		void _update(float& dt, int& maxSteps, float& other){
+			m_World->stepSimulation(dt,maxSteps,other);
+			uint numManifolds = m_World->getDispatcher()->getNumManifolds();
+			for (uint i = 0; i < numManifolds; i++){
+				btPersistentManifold* contactManifold =  m_World->getDispatcher()->getManifoldByIndexInternal(i);
+				btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
+				btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
+				for (int j = 0; j < contactManifold->getNumContacts(); j++){
+					btManifoldPoint& pt = contactManifold->getContactPoint(j);
+					if (pt.getDistance() < 0.0f){
+						const btVector3& ptA = pt.getPositionWorldOnA();
+						const btVector3& ptB = pt.getPositionWorldOnB();
+						const btVector3& normalOnB = pt.m_normalWorldOnB;
+
+						ObjectDynamic* a = (ObjectDynamic*)(obA->getUserPointer());
+						ObjectDynamic* b = (ObjectDynamic*)(obB->getUserPointer());
+
+						a->collisionResponse(b);
+						b->collisionResponse(a);
+					}
+				}
+			}
+		}
+		void _render(){
+			glMatrixMode(GL_PROJECTION); glPushMatrix();
+			Camera* c = Resources::getCurrentScene()->getActiveCamera();
+			glLoadMatrixf(glm::value_ptr(c->getProjection()));
+			glMatrixMode(GL_MODELVIEW); glPushMatrix();
+			glLoadMatrixf(glm::value_ptr(c->getView()));
+			m_World->debugDrawWorld();
+			glMatrixMode(GL_PROJECTION); glPopMatrix();
+			glMatrixMode(GL_MODELVIEW); glPopMatrix();
+		}
+		void _removeCollision(Collision* collisionObject){
+			m_CollisionObjects.erase(std::remove(m_CollisionObjects.begin(), m_CollisionObjects.end(), collisionObject), m_CollisionObjects.end());
+            SAFE_DELETE(collisionObject);
+		}
+};
+vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end){
+    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+    epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->rayTest(start, end, RayCallback);
+    vector<glm::vec3> result;
+    if(RayCallback.hasHit()){
+        glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
+        glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
+        result.push_back(res1);
+        result.push_back(res2);
+    }
+    return result;
 }
-void Detail::PhysicsManagement::destruct(){
-    SAFE_DELETE(m_debugDrawer);
-    SAFE_DELETE(m_world);
-    SAFE_DELETE(m_solver);
-    SAFE_DELETE(m_dispatcher);
-    SAFE_DELETE(m_collisionConfiguration);
-    SAFE_DELETE(m_broadphase);
-    for(auto collision:m_Collisions)
-        SAFE_DELETE(collision);
-}
 
-void Physics::setGravity(float x,float y,float z){ Physics::Detail::PhysicsManagement::m_world->setGravity(btVector3(x,y,z)); }
+epriv::PhysicsManager::PhysicsManager():m_i(new impl){ m_i->_init(); }
+epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
+void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
+void epriv::PhysicsManager::_render(){ m_i->_render(); }
+void epriv::PhysicsManager::_removeCollision(Collision* collisionObject){ m_i->_removeCollision(collisionObject); }
+const btDiscreteDynamicsWorld* epriv::PhysicsManager::_world() const{ return m_i->m_World; }
+
+void Physics::setGravity(float x,float y,float z){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ Physics::Detail::PhysicsManagement::m_world->addRigidBody(rigidBody,group,mask); }
+void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(rigidBody,group,mask); }
 void Physics::addRigidBody(ObjectDynamic* obj){ Physics::addRigidBody(obj->getRigidBody()); }
-void Physics::addRigidBody(btRigidBody* body){ Physics::Detail::PhysicsManagement::m_world->addRigidBody(body); }
-void Physics::removeRigidBody(btRigidBody* body){ Physics::Detail::PhysicsManagement::m_world->removeRigidBody(body); }
+void Physics::addRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(body); }
+void Physics::removeRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(body); }
 void Physics::removeRigidBody(ObjectDynamic* obj){ Physics::removeRigidBody(obj->getRigidBody()); }
 
-void Detail::PhysicsManagement::update(float dt,int maxSteps,float other){ 
-    m_world->stepSimulation(dt,maxSteps,other);
-    uint numManifolds = m_world->getDispatcher()->getNumManifolds();
-    for (uint i = 0; i < numManifolds; i++){
-        btPersistentManifold* contactManifold =  m_world->getDispatcher()->getManifoldByIndexInternal(i);
-        btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
-        btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-        for (uint j = 0; j < uint(contactManifold->getNumContacts()); j++){
-            btManifoldPoint& pt = contactManifold->getContactPoint(j);
-            if (pt.getDistance() < 0.0f){
-                const btVector3& ptA = pt.getPositionWorldOnA();
-                const btVector3& ptB = pt.getPositionWorldOnB();
-                const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-                ObjectDynamic* a = static_cast<ObjectDynamic*>(obA->getUserPointer());
-                ObjectDynamic* b = static_cast<ObjectDynamic*>(obB->getUserPointer());
-
-                a->collisionResponse(b);
-                b->collisionResponse(a);
-            }
-        }
-    }
-}
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
-    if(ignored != nullptr) Detail::PhysicsManagement::m_world->removeRigidBody(ignored);
-    vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
-    if(ignored != nullptr) Detail::PhysicsManagement::m_world->addRigidBody(ignored);
+    if(ignored != nullptr) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(ignored);
+    vector<glm::vec3> result = _rayCastInternal(s,e);
+    if(ignored != nullptr) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(ignored);
     return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
-    for(auto object:ignored) Detail::PhysicsManagement::m_world->removeRigidBody(object);
-    vector<glm::vec3> result = Detail::PhysicsManagement::rayCastInternal(s,e);
-    for(auto object:ignored) Detail::PhysicsManagement::m_world->addRigidBody(object);
+    for(auto object:ignored) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(object);
+    vector<glm::vec3> result = _rayCastInternal(s,e);
+    for(auto object:ignored) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(object);
     return result;
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Object* ignored){
@@ -130,31 +168,6 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
-vector<glm::vec3> Physics::Detail::PhysicsManagement::rayCastInternal(const btVector3& start, const btVector3& end){
-    btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    Detail::PhysicsManagement::m_world->rayTest(start, end, RayCallback);
-    vector<glm::vec3> result;
-    if(RayCallback.hasHit()){
-        glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
-        glm::vec3 res2 = glm::vec3(RayCallback.m_hitNormalWorld.x(),RayCallback.m_hitNormalWorld.y(),RayCallback.m_hitNormalWorld.z());
-        result.push_back(res1);
-        result.push_back(res2);
-    }
-    return result;
-}
-void Detail::PhysicsManagement::render(){
-    glMatrixMode(GL_PROJECTION); glPushMatrix();
-	Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glLoadMatrixf(glm::value_ptr(c->getProjection()));
-
-    glMatrixMode(GL_MODELVIEW); glPushMatrix();
-    glLoadMatrixf(glm::value_ptr(c->getView()));
-
-    m_world->debugDrawWorld();
-
-    glMatrixMode(GL_PROJECTION); glPopMatrix();
-    glMatrixMode(GL_MODELVIEW); glPopMatrix();
-}
 Collision::Collision(btCollisionShape* shape,CollisionType type, float mass){
     m_CollisionShape = shape;
     m_CollisionType = type;
@@ -172,7 +185,7 @@ void Collision::_init(CollisionType type, float mass){
         m_Inertia->setX(0.0f);m_Inertia->setY(0.0f);m_Inertia->setZ(0.0f);
     }
     setMass(mass);
-    Detail::PhysicsManagement::m_Collisions.push_back(this);
+    epriv::Core::m_Engine->m_PhysicsManager->m_i->m_CollisionObjects.push_back(this);
 }
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);

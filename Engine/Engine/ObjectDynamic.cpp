@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "ObjectDynamic.h"
 #include "ObjectDisplay.h"
 #include "ShaderProgram.h"
@@ -487,9 +488,7 @@ void ObjectDynamic::setMesh(Mesh* mesh){
     } 
     if(m_MeshInstances.size() > 0){
         if(m_Collision != nullptr){
-            vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
-            collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
-            SAFE_DELETE(m_Collision);
+			epriv::Core::m_Engine->m_PhysicsManager->_removeCollision(m_Collision);
         }
         btCompoundShape* shape = new btCompoundShape();
         for(auto meshInstance:m_MeshInstances){
@@ -506,29 +505,7 @@ void ObjectDynamic::setMesh(Mesh* mesh){
     Physics::addRigidBody(this);
 }
 void ObjectDynamic::setMesh(const string& mesh){ 
-    Physics::removeRigidBody(this);
-    for(auto meshInstance:m_MeshInstances){ 
-        meshInstance->setMesh(Resources::getMesh(mesh)); 
-    }
-    if(m_MeshInstances.size() > 0){
-        if(m_Collision != nullptr){
-            vector<Collision*>& collisions = Physics::Detail::PhysicsManagement::m_Collisions;
-            collisions.erase(std::remove(collisions.begin(), collisions.end(), m_Collision), collisions.end());
-            SAFE_DELETE(m_Collision);
-        }
-        btCompoundShape* shape = new btCompoundShape();
-        for(auto meshInstance:m_MeshInstances){
-            btTransform t;
-            t.setFromOpenGLMatrix(glm::value_ptr(meshInstance->model()));
-            shape->addChildShape(t,meshInstance->mesh()->getCollision()->getCollisionShape());
-        }
-        calculateRadius();
-        m_Mass = 0.5f * m_Radius;
-        m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
-        m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
-        setMass(m_Mass);
-    }
-    Physics::addRigidBody(this);
+	ObjectDynamic::setMesh(Resources::getMesh(mesh));
 }
 void ObjectDynamic::setMaterial(Material* material){ 
 	for(auto meshInstance:m_MeshInstances){ 

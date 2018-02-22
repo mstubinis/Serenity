@@ -1,11 +1,13 @@
+#include "Engine.h"
 #include "Vehicle.h"
 #include "Engine_Physics.h"
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
 using namespace Engine;
+using namespace std;
 
-Wheel::Wheel(std::string mesh,std::string mat,glm::vec3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Wheel::Wheel(string mesh,string mat,glm::vec3 pos,glm::vec3 scl,string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
 }
 Wheel::~Wheel(){
 }
@@ -16,9 +18,9 @@ void Wheel::on_setLinearVelocity(float,float,float,bool local){
 void Wheel::on_setAngularVelocity(float,float,float,bool local){
 }
 
-Vehicle::Vehicle(std::string mesh,std::string mat,glm::vec3 pos,glm::vec3 scl,std::string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Vehicle::Vehicle(string mesh,string mat,glm::vec3 pos,glm::vec3 scl,string name,Collision* collision,Scene* scene):ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
     m_Tuning = new btRaycastVehicle::btVehicleTuning();
-    m_Raycaster = new btDefaultVehicleRaycaster(Physics::Detail::PhysicsManagement::m_world);
+	m_Raycaster = new btDefaultVehicleRaycaster(const_cast<btDiscreteDynamicsWorld*>(epriv::Core::m_Engine->m_PhysicsManager->_world()));
     m_Vehicle = new btRaycastVehicle(*m_Tuning,m_RigidBody,m_Raycaster);
 }
 Vehicle::~Vehicle(){
@@ -91,7 +93,7 @@ void Vehicle::setAngularVelocityZ(float z, bool l){
     Vehicle::setAngularVelocity(v.x(),v.y(),z,l); 
 }
 void Vehicle::update(float dt){
-    m_Vehicle->updateAction(Physics::Detail::PhysicsManagement::m_world,dt);
+    m_Vehicle->updateAction(const_cast<btDiscreteDynamicsWorld*>(epriv::Core::m_Engine->m_PhysicsManager->_world()),dt);
     m_Vehicle->updateFriction(dt);
     m_Vehicle->updateSuspension(dt);
     m_Vehicle->updateVehicle(dt);

@@ -2,6 +2,8 @@
 #include "Engine_Sounds.h"
 #include "Engine_Resources.h"
 
+#include <glm/glm.hpp>
+
 using namespace Engine;
 using namespace std;
 
