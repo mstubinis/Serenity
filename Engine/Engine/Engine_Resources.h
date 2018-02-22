@@ -44,20 +44,20 @@ namespace Engine{
 				ResourceManager(const char* name,uint width,uint height);
 				~ResourceManager();
 
-				bool _hasMaterial(std::string);
-				std::string _buildMeshInstanceName(std::string);
-				std::string _buildObjectName(std::string);
-				std::string _buildTextureName(std::string);
-				void _addMesh(Mesh*);
-				void _addShader(Shader*);
-				void _addObject(Object*);
-				void _addMeshInstance(MeshInstance*);
-				void _addTexture(Texture*);
-				void _addScene(Scene*);
-				void _addCamera(Camera*);
-				void _removeCamera(std::string);
-				void _removeObject(std::string);
-				void _addFont(Font*);
+				bool _hasMaterial(std::string);      void _addMaterial(Material*);          std::string _buildMaterialName(std::string);
+				bool _hasMesh(std::string);          void _addMesh(Mesh*);                  std::string _buildMeshName(std::string);
+				bool _hasTexture(std::string);       void _addTexture(Texture*);            std::string _buildTextureName(std::string);
+				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
+				bool _hasFont(std::string);          void _addFont(Font*);                  std::string _buildFontName(std::string);
+				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
+				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
+				bool _hasCamera(std::string);        void _addCamera(Camera*);              std::string _buildCameraName(std::string);
+				bool _hasShader(std::string);        void _addShader(Shader*);              std::string _buildShaderName(std::string);
+
+				void _remCamera(std::string);
+				void _remObject(std::string);
+
+
 				void _resizeCameras(uint w,uint h);
 				uint _numScenes();
 		};
@@ -70,48 +70,12 @@ namespace Engine{
 
 
 
+
+
     namespace Resources{
-        namespace Detail{
-            class ResourceManagement final{
-                public:
-                    template<class V,class S> static S _incrementName(std::unordered_map<S,V>& m,const S n){
-                        S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
-                    }
-                    template<class V,class S> static S _incrementName(std::map<S,V>& m,const S n){
-                        S r = n;if(m.size() > 0){uint c = 0;while(m.count(r)){r = n + " " + boost::lexical_cast<S>(c);c++;}}return r;
-                    }
-                    template<class V, class O,class S> static void _addToContainer(std::map<S,V>& m,const S& n,O& o){
-                        if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
-                    }
-                    template<class V, class O,class S> static void _addToContainer(std::unordered_map<S,V>& m,const S& n,O& o){
-                        if(m.size() > 0 && m.count(n)){o.reset();return;}m.emplace(n,o);
-                    }
-                    template<class V,class S> static void* _getFromContainer(std::map<S,V>& m,const S& n){
-                        if(!m.count(n))return nullptr; return m.at(n).get();
-                    }
-                    template<class V,class S> static void* _getFromContainer(std::unordered_map<S,V>& m,const S& n){
-                        if(!m.count(n)) return nullptr; return m.at(n).get();
-                    }
-                    template<class V,class S> static void _removeFromContainer(std::map<S,V>& m,const S& n){
-                        if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
-                    }
-                    template<class V,class S> static void _removeFromContainer(std::unordered_map<S,V>& m,const S& n){
-                        if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
-                    }
-
-                    static void destruct();
-
-                    static bool m_DynamicMemory;
-            };
-        };
-
         namespace Settings{
-            static void enableDynamicMemory(bool b = true){
-                Resources::Detail::ResourceManagement::m_DynamicMemory = b;
-            }
-            static void disableDynamicMemory(){
-                Resources::Detail::ResourceManagement::m_DynamicMemory = false;
-            }
+            void enableDynamicMemory(bool b = true);
+            void disableDynamicMemory();
         }
 
         Scene* getCurrentScene();

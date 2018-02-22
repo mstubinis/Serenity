@@ -14,10 +14,10 @@ using namespace std;
 Scene::Scene(string name){
     m_Skybox = nullptr;
     m_BackgroundColor = glm::vec3(0.0f);
-
+	name = impl::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
     setName(name);
 
-	Engine::impl::Core::m_Engine->m_ResourceManager->_addScene(this);
+	impl::Core::m_Engine->m_ResourceManager->_addScene(this);
 
     if(Resources::getCurrentScene() == nullptr){
 		Resources::setCurrentScene(this);
@@ -44,7 +44,7 @@ Scene::~Scene(){
 void Scene::update(float dt){
     for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
         if (it->second->isDestroyed()){
-            Engine::impl::Core::m_Engine->m_ResourceManager->_removeObject(it->second->name());
+            impl::Core::m_Engine->m_ResourceManager->_remObject(it->second->name());
             m_Objects.erase(it++);
         }
         else{
@@ -53,7 +53,7 @@ void Scene::update(float dt){
     }//create a scene specific container for cameras?
     for (auto it = m_Cameras.cbegin(); it != m_Cameras.cend();){
         if (it->second->isDestroyed()){
-			Engine::impl::Core::m_Engine->m_ResourceManager->_removeCamera(it->second->name());
+			impl::Core::m_Engine->m_ResourceManager->_remCamera(it->second->name());
         }
         else{
             if(it->second->getScene() == this){ 
@@ -64,7 +64,7 @@ void Scene::update(float dt){
     }
     if(m_Skybox != nullptr) m_Skybox->update();
 }
-void Scene::setBackgroundColor(float r, float g, float b){ Engine::Math::setColor(m_BackgroundColor,r,g,b); }
+void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
 void Scene::renderSkybox(){ 
 	if(m_Skybox != nullptr) 
 		m_Skybox->draw(); 
@@ -74,7 +74,7 @@ void Scene::renderSkybox(){
 		ShaderP* p = Resources::getShaderProgram("Deferred_Skybox_Fake"); p->bind();
 		Camera* c = Resources::getActiveCamera();
 		glm::mat4 view = c->getView();
-		Engine::Math::removeMatrixPosition(view);
+		Math::removeMatrixPosition(view);
 		Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
 		Renderer::sendUniform4f("Color",m_BackgroundColor.r,m_BackgroundColor.g,m_BackgroundColor.b,1.0f);
 		Skybox::bindMesh();

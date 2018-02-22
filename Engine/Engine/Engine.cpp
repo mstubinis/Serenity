@@ -55,7 +55,6 @@ void Engine::init(const char* name,uint w,uint h){
 void Engine::destruct(){
     Game::cleanup();
 	delete Engine::impl::Core::m_Engine;
-	Engine::Resources::Detail::ResourceManagement::destruct();
 	Engine::Physics::Detail::PhysicsManagement::destruct();
 	Engine::Sound::Detail::SoundManagement::destruct();
     Engine::Renderer::Detail::RenderManagement::destruct();
