@@ -6,7 +6,6 @@
 #include "Engine_Window.h"
 #include "Engine_Noise.h"
 #include "Engine_Networking.h"
-#include "Engine_SoundQueue.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
@@ -69,8 +68,8 @@ void Game::initResources(){
     Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
     Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
 
-	Resources::addSound("data/Sounds/Effects/pbc.ogg","pbc");
-	Resources::addSound("data/Sounds/Effects/snipercannon.ogg","sniper");
+	Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
+	Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 }
 void Game::initLogic(){
     Engine::getWindow()->keepMouseInWindow(true);
@@ -85,7 +84,7 @@ void Game::initLogic(){
 
 	Resources::setCurrentScene("Sol");
     //Resources::setCurrentScene("CapsuleSpace");
-    Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+    Resources::setActiveCamera(((SolarSystem*)Resources::getCurrentScene())->getPlayerCamera());
     m_HUD = new HUD();
 }
 void Game::update(float dt){
@@ -94,11 +93,11 @@ void Game::update(float dt){
     }
     if(Engine::isKeyDownOnce("f4")){
         Resources::setCurrentScene("Sol");
-        Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+        Resources::setActiveCamera(((SolarSystem*)Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Engine::isKeyDownOnce("f5")){
         Resources::setCurrentScene("CapsuleSpace");
-        Resources::setActiveCamera(static_cast<SolarSystem*>(Resources::getCurrentScene())->getPlayerCamera());
+        Resources::setActiveCamera(((SolarSystem*)Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if(Engine::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
@@ -123,7 +122,6 @@ void Game::update(float dt){
 
     if(Engine::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
-		Resources::getMaterial("DefiantShark")->setMetalness(Resources::getMaterial("DefiantShark")->metalness() - 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
 		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() - 0.02f);
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() - 0.02f);
@@ -131,7 +129,6 @@ void Game::update(float dt){
     }
     else if(Engine::isKeyDown("m")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
-		Resources::getMaterial("DefiantShark")->setMetalness(Resources::getMaterial("DefiantShark")->metalness() + 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
 		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() + 0.02f);
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() + 0.02f);
@@ -139,7 +136,6 @@ void Game::update(float dt){
     }
     if(Engine::isKeyDown("v")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
-		Resources::getMaterial("DefiantShark")->setSmoothness(Resources::getMaterial("DefiantShark")->smoothness() - 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
 		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() - 0.02f);
 		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() - 0.02f);
@@ -147,7 +143,6 @@ void Game::update(float dt){
     }
     else if(Engine::isKeyDown("b")){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
-		Resources::getMaterial("DefiantShark")->setSmoothness(Resources::getMaterial("DefiantShark")->smoothness() + 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
 		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() + 0.02f);
 		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() + 0.02f);

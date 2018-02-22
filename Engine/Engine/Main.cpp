@@ -1,11 +1,13 @@
 #include "Engine.h"
-#include "Engine_Resources.h"
-#include "Engine_Window.h"
-#include <iostream>
+#include <time.h>
 
-//TODO: remove this header, it's only used to track memory leaks
-#ifdef _DEBUG
-#include <vld.h>
+#ifdef _WIN32
+    #include <windows.h>
+    #include <windowsx.h>
+#endif
+
+#ifdef _DEBUG 
+    #include <vld.h> //TODO: remove this header eventually, it's only used to track memory leaks in debug mode
 #endif
 
 int main(){

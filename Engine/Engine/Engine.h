@@ -12,9 +12,7 @@ typedef unsigned int uint;
 
 namespace Engine{
 	namespace impl{
-		class EventManager;
-		class ResourceManager;
-		class TimeManager;
+		class EventManager;  class ResourceManager;  class TimeManager;  class SoundManager;
 		class Core final{
 		    private:
 				class impl; std::unique_ptr<impl> m_i;
@@ -24,6 +22,7 @@ namespace Engine{
 				Engine::impl::EventManager* m_EventManager;
 				Engine::impl::ResourceManager* m_ResourceManager;
 				Engine::impl::TimeManager* m_TimeManager;
+				Engine::impl::SoundManager* m_SoundManager;
 
 				Core(const char* name,uint width,uint height);
 				~Core();
@@ -32,7 +31,6 @@ namespace Engine{
 
 
     void init(const char* name,uint width=0,uint height=0);
-    void destruct();
     void run();
     namespace Detail{
          class EngineClass final{

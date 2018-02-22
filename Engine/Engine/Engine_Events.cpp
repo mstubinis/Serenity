@@ -335,7 +335,7 @@ class Engine::impl::EventManager::impl final{
 			for(auto iterator:m_MouseStatus){ iterator.second = false; }
 			m_Delta *= 0.97f * (1.0f-Resources::dt());
 		}
-		void _onUpdate(float& dt){
+		void _update(float& dt){
 			m_Difference *= (0.975f);
 		}
 };
@@ -363,8 +363,8 @@ void Engine::impl::EventManager::_onEventMouseWheelMoved(int& delta){
 void Engine::impl::EventManager::_onResetEvents(){
 	m_i->_onResetEvents();
 }
-void Engine::impl::EventManager::_onUpdate(float dt){
-	m_i->_onUpdate(dt);
+void Engine::impl::EventManager::_update(float dt){
+	m_i->_update(dt);
 }
 void Engine::impl::EventManager::_setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
 	m_i->_setMousePositionInternal(x,y,resetDifference,resetPreviousPosition);

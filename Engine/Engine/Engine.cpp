@@ -39,12 +39,14 @@ Engine::impl::Core::Core(const char* name,uint w,uint h):m_i(new impl){
 	m_EventManager = new Engine::impl::EventManager();
 	m_ResourceManager = new Engine::impl::ResourceManager(name,w,h);
 	m_TimeManager = new Engine::impl::TimeManager();
+	m_SoundManager = new Engine::impl::SoundManager();
 	m_i->_init();
 }
 Engine::impl::Core::~Core(){
-	delete m_EventManager;
-	delete m_ResourceManager;
-	delete m_TimeManager;
+	SAFE_DELETE(m_EventManager);
+	SAFE_DELETE(m_SoundManager);
+	SAFE_DELETE(m_ResourceManager);
+	SAFE_DELETE(m_TimeManager);
 	m_i->_destruct();
 }
 
@@ -52,17 +54,10 @@ void Engine::init(const char* name,uint w,uint h){
 	Engine::impl::Core::m_Engine = new Engine::impl::Core(name,w,h);
 	Detail::EngineClass::initGame(name,w,h);
 }
-void Engine::destruct(){
-    Game::cleanup();
-	delete Engine::impl::Core::m_Engine;
-	Engine::Physics::Detail::PhysicsManagement::destruct();
-	Engine::Sound::Detail::SoundManagement::destruct();
-    Engine::Renderer::Detail::RenderManagement::destruct();
-}
+
 void Engine::Detail::EngineClass::initGame(const char* name,uint w,uint h){
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
     Physics::Detail::PhysicsManagement::init();
-    Sound::Detail::SoundManagement::init();
 	Resources::initResources(name,w,h);
     Renderer::Detail::RenderManagement::init();
 
@@ -85,7 +80,8 @@ void Engine::Detail::EngineClass::update(){
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
-    impl::Core::m_Engine->m_EventManager->_onUpdate(dt);
+
+    impl::Core::m_Engine->m_EventManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 
@@ -98,7 +94,9 @@ void Engine::Detail::EngineClass::updatePhysics(){
 }
 void Engine::Detail::EngineClass::updateSounds(){
 	Engine::impl::Core::m_Engine->m_TimeManager->stop_sounds();
-	Sound::Detail::SoundManagement::update(Resources::dt());
+
+	impl::Core::m_Engine->m_SoundManager->_update( Resources::dt() );
+
 	Engine::impl::Core::m_Engine->m_TimeManager->calculate_sounds();
 }
 void Engine::Detail::EngineClass::render(){
@@ -224,5 +222,9 @@ void Engine::run(){
 		
 		Engine::impl::Core::m_Engine->m_TimeManager->calculate();
     }
-	Engine::destruct();
+	//destruct the engine here
+    Game::cleanup();
+	SAFE_DELETE(Engine::impl::Core::m_Engine);
+	Engine::Physics::Detail::PhysicsManagement::destruct();
+    Engine::Renderer::Detail::RenderManagement::destruct();
 }

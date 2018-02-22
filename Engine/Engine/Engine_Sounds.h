@@ -2,25 +2,18 @@
 #ifndef ENGINE_ENGINE_SOUNDS_H
 #define ENGINE_ENGINE_SOUNDS_H
 
+#include "Engine_ResourceBasic.h"
 #include <SFML/Audio.hpp>
 #include <glm/vec3.hpp>
 #include <memory>
-#include <string>
-#include <unordered_map>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 typedef unsigned int uint;
 
-namespace Engine{ namespace Sound{ namespace Detail{ class SoundManagement; };};};
-
-class SoundQueue;
 class SoundStatus final{public: enum Status{
     Playing,PlayingLooped,Paused,Stopped,Fresh
 };};
 
-class SoundData final{
-    friend class ::Engine::Sound::Detail::SoundManagement;
+class SoundData final: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -35,7 +28,7 @@ class SoundData final{
         void setVolume(float);
 };
 class SoundBaseClass{
-    friend class ::Engine::Sound::Detail::SoundManagement;
+    friend class ::Engine::impl::SoundManager;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -61,7 +54,6 @@ class SoundBaseClass{
         virtual void setPitch(float);
 };
 class SoundEffect: public SoundBaseClass{
-    friend class ::Engine::Sound::Detail::SoundManagement;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -87,7 +79,6 @@ class SoundEffect: public SoundBaseClass{
         void setPitch(float);
 };
 class SoundMusic: public SoundBaseClass{
-    friend class ::Engine::Sound::Detail::SoundManagement;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -111,37 +102,39 @@ class SoundMusic: public SoundBaseClass{
         float getPitch();
         void setPitch(float);
 };
+class SoundQueue final{
+    private:
+        class impl; std::unique_ptr<impl> m_i;
+    public:
+        SoundQueue(float delay = 0.5f);
+        ~SoundQueue();
+
+        void enqueueEffect(std::string,uint loops = 1);
+        void enqueueMusic(std::string,uint loops = 1);
+        void dequeue();
+        void update(float dt);
+        void clear();
+        bool empty();
+};
+
 namespace Engine{
+	namespace impl{
+		class SoundManager final{
+            friend class ::SoundBaseClass;  friend class ::SoundBaseClass::impl;
+		    private:
+				class impl;
+		    public:
+				std::unique_ptr<impl> m_i;
+
+				SoundManager();
+				~SoundManager();
+
+				void _update(float dt);
+		};
+	};
     namespace Sound{
-        namespace Detail{
-            class SoundManagement final{
-                friend class ::SoundBaseClass::impl;
-                friend class ::SoundMusic::impl;
-                friend class ::SoundEffect::impl;
-                friend class ::SoundBaseClass;
-                friend class ::SoundMusic;
-                friend class ::SoundEffect;
-                public:
-                    static void _updateSoundStatus(SoundBaseClass*,SoundStatus::Status,sf::SoundSource::Status);
-
-                    static std::vector<boost::shared_ptr<SoundBaseClass>> m_CurrentlyPlayingSounds;
-                    static std::vector<boost::shared_ptr<SoundQueue>> m_SoundQueues;
-
-                    static std::unordered_map<std::string,boost::shared_ptr<SoundData>> m_SoundData;
-
-                    static void init();
-                    static void destruct();
-                    static void update(float dt);
-
-                    static void addSoundDataFromFile(std::string file,bool music = false);
-                    static void addSoundDataFromFile(std::string name, std::string file,bool music = false);
-            };
-        };
-        SoundData* getSound(std::string nameOrFile);
-        void addSound(std::string file,std::string name = "");
         void playEffect(std::string,uint loops = 1);
         void playMusic(std::string,uint loops = 1);
     };
 };
-
 #endif

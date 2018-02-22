@@ -115,7 +115,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine_Events.cpp" />
     <ClCompile Include="Engine_ResourceBasic.cpp" />
-    <ClCompile Include="Engine_SoundQueue.cpp" />
     <ClCompile Include="Engine_Sounds.cpp" />
     <ClCompile Include="Engine_Time.cpp" />
     <ClCompile Include="Engine_Window.cpp" />
@@ -164,7 +163,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine_Events.h" />
     <ClInclude Include="Engine_ResourceBasic.h" />
-    <ClInclude Include="Engine_SoundQueue.h" />
     <ClInclude Include="Engine_Sounds.h" />
     <ClInclude Include="Engine_Time.h" />
     <ClInclude Include="Engine_Window.h" />

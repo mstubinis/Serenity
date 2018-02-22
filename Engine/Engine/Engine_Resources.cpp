@@ -50,6 +50,7 @@ class Engine::impl::ResourceManager::impl final{
         unordered_map<string,boost::shared_ptr<Material>> m_Materials;
         unordered_map<string,boost::shared_ptr<Shader>> m_Shaders;
         unordered_map<string,boost::shared_ptr<ShaderP>> m_ShaderPrograms;
+		unordered_map<string,boost::shared_ptr<SoundData>> m_SoundDatas;
 
 		void _init(const char* name,const uint& width,const uint& height){
 			m_CurrentScene = nullptr;
@@ -66,6 +67,7 @@ class Engine::impl::ResourceManager::impl final{
 			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
 			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
+			for (auto it = m_SoundDatas.begin();it != m_SoundDatas.end(); ++it )         it->second.reset();
 			SAFE_DELETE(m_Window);
 		}
 };
@@ -98,6 +100,7 @@ bool impl::ResourceManager::_hasScene(string n){ return Core::m_Engine->m_Resour
 bool impl::ResourceManager::_hasMeshInstance(string n){ return Core::m_Engine->m_ResourceManager->m_i->m_MeshInstances.count(n); }
 bool impl::ResourceManager::_hasCamera(string n){ return Core::m_Engine->m_ResourceManager->m_i->m_Cameras.count(n); }
 bool impl::ResourceManager::_hasShader(string n){ return Core::m_Engine->m_ResourceManager->m_i->m_Shaders.count(n); }
+bool impl::ResourceManager::_hasSoundData(string n){ return Core::m_Engine->m_ResourceManager->m_i->m_SoundDatas.count(n); }
 void impl::ResourceManager::_addScene(Scene* s){
 	_addToContainer(Core::m_Engine->m_ResourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }
@@ -125,6 +128,9 @@ void impl::ResourceManager::_addMeshInstance(MeshInstance* m){
 void impl::ResourceManager::_addMesh(Mesh* m){
     _addToContainer(Core::m_Engine->m_ResourceManager->m_i->m_Meshes,m->name(),boost::shared_ptr<Mesh>(m));
 }
+void impl::ResourceManager::_addSoundData(SoundData* s){
+    _addToContainer(Core::m_Engine->m_ResourceManager->m_i->m_SoundDatas,s->name(),boost::shared_ptr<SoundData>(s));
+}
 string impl::ResourceManager::_buildMeshInstanceName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_MeshInstances,n);}
 string impl::ResourceManager::_buildObjectName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_Objects,n);}
 string impl::ResourceManager::_buildTextureName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_Textures,n);}
@@ -134,6 +140,7 @@ string impl::ResourceManager::_buildMeshName(string n){return _incrementName(Cor
 string impl::ResourceManager::_buildMaterialName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_Materials,n);}
 string impl::ResourceManager::_buildCameraName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_Cameras,n);}
 string impl::ResourceManager::_buildShaderName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_Shaders,n);}
+string impl::ResourceManager::_buildSoundDataName(string n){return _incrementName(Core::m_Engine->m_ResourceManager->m_i->m_SoundDatas,n);}
 
 void impl::ResourceManager::_remCamera(string n){_removeFromContainer(Core::m_Engine->m_ResourceManager->m_i->m_Cameras,n);}
 void impl::ResourceManager::_remObject(string n){_removeFromContainer(Core::m_Engine->m_ResourceManager->m_i->m_Objects,n);}
@@ -169,6 +176,7 @@ Material* Resources::getMaterial(string n){return (Material*)(_getFromContainer(
 Shader* Resources::getShader(string n){return (Shader*)(_getFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_Shaders,n));}
 ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(_getFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_ShaderPrograms,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_MeshInstances,n)); }
+SoundData* Resources::getSoundData(string n){return (SoundData*)(_getFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_SoundDatas,n)); }
 
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
     _addToContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
@@ -210,7 +218,10 @@ void Resources::addShaderProgram(string n, Shader* v, string f, ShaderRenderPass
 void Resources::addShaderProgram(string n, string v, Shader* f, ShaderRenderPass::Pass s){
     _addToContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
-
+void Resources::addSoundData(string file,string n,bool music){
+	if (n == ""){ n = file; }
+	_addToContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_SoundDatas,n,boost::make_shared<SoundData>(file,music));
+}
 
 void Resources::removeMesh(string n){_removeFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_Meshes,n);}
 void Resources::removeMaterial(string n){_removeFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_Materials,n);}
@@ -370,16 +381,3 @@ void Resources::setCurrentScene(Scene* scene){
     }
 }
 void Resources::setCurrentScene(string s){Resources::setCurrentScene((Scene*)(_getFromContainer(impl::Core::m_Engine->m_ResourceManager->m_i->m_Scenes,s)));}
-
-void Resources::addSound(string file,string name){
-	if (name == ""){
-		if(!Sound::Detail::SoundManagement::m_SoundData.count(file)){
-			Sound::Detail::SoundManagement::addSoundDataFromFile(file,file,false);
-		}
-	}
-	else{
-		if(!Sound::Detail::SoundManagement::m_SoundData.count(name)){
-			Sound::Detail::SoundManagement::addSoundDataFromFile(name,file,false);
-		}
-	}
-}

@@ -26,6 +26,7 @@ class Material;
 class Object;
 class SunLight;
 class MeshInstance;
+class SoundData;
 
 #define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
 #define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
@@ -53,6 +54,7 @@ namespace Engine{
 				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
 				bool _hasCamera(std::string);        void _addCamera(Camera*);              std::string _buildCameraName(std::string);
 				bool _hasShader(std::string);        void _addShader(Shader*);              std::string _buildShaderName(std::string);
+				bool _hasSoundData(std::string);     void _addSoundData(SoundData*);        std::string _buildSoundDataName(std::string);
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
@@ -99,15 +101,16 @@ namespace Engine{
         boost::shared_ptr<Camera>& getCameraPtr(std::string);
         boost::shared_ptr<Texture>& getTexturePtr(std::string);
 
-        Object* getObject(std::string n);
-        Camera* getCamera(std::string n);
-        Font* getFont(std::string n);
-        Texture* getTexture(std::string n);
-        Mesh* getMesh(std::string n);
-        Material* getMaterial(std::string n);
-        Shader* getShader(std::string n);
-        ShaderP* getShaderProgram(std::string n);
-        MeshInstance* getMeshInstance(std::string n);
+        Object* getObject(std::string);
+        Camera* getCamera(std::string);
+        Font* getFont(std::string);
+        Texture* getTexture(std::string);
+        Mesh* getMesh(std::string);
+        Material* getMaterial(std::string);
+        Shader* getShader(std::string);
+        ShaderP* getShaderProgram(std::string);
+        MeshInstance* getMeshInstance(std::string);
+		SoundData* getSoundData(std::string);
 
         void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         void addMesh(std::string file, CollisionType = CollisionType::None,float threshhold = 0.0005f);
@@ -122,7 +125,7 @@ namespace Engine{
 
         void addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
 
-		void addSound(std::string file,std::string name = "");
+		void addSoundData(std::string file,std::string name = "",bool music = false);
 
         void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
