@@ -32,7 +32,7 @@ void HUD::setColor(glm::vec3 c){ m_Color = c; }
 uint _count = 0;
 void HUD::update(float dt){
     if(Engine::isKeyDownOnce(",")){
-        SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
+        SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
         for(auto p:planets){
@@ -46,7 +46,7 @@ void HUD::update(float dt){
         if (_count > scene->getPlanets().size()-1){ _count = 0; }
     }
     else if(Engine::isKeyDownOnce(".")){
-        SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
+        SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
         for(auto p:planets){
@@ -62,7 +62,7 @@ void HUD::update(float dt){
 }
 void HUD::render(){
     //render hud stuff
-    SolarSystem* scene = static_cast<SolarSystem*>(Resources::getCurrentScene());
+    SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
     Ship* player = scene->getPlayer();
     glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
 

@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "ShaderProgram.h"
 #include "Material.h"
 #include "Camera.h"
@@ -24,7 +25,7 @@ class Shader::impl final{
             m_Type = type;
             m_FromFile = fromFile;
             super->setName(name);
-            Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Shaders,name,boost::shared_ptr<Shader>(super));
+			Engine::impl::Core::m_Engine->m_ResourceManager->_addShader(super);
         }
 };
 Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
@@ -329,7 +330,7 @@ void ShaderP::unbind(){
     }
 }
 void ShaderP::addMaterial(const string& materialName){
-    if(materialName == "" || !Resources::Detail::ResourceManagement::m_Materials.count(materialName)){
+	if(materialName == "" || !Engine::impl::Core::m_Engine->m_ResourceManager->_hasMaterial(materialName)){
         cout << "Material : '" << materialName << "' does not exist (ShaderP::addMaterial()) Returning..." << endl;
         return;
     }

@@ -159,9 +159,7 @@ class MaterialMeshEntry{
 };
 
 class Material final: public BindableResource{
-    public: 
-        static void setAllDiffuseModels(DiffuseModel::Model);
-        static void setAllSpecularModels(SpecularModel::Model);
+    public:
         static std::vector<glm::vec4> m_MaterialProperities;
     private:
         class impl; std::unique_ptr<impl> m_i;

@@ -43,6 +43,23 @@ namespace Engine{
 
 				ResourceManager(const char* name,uint width,uint height);
 				~ResourceManager();
+
+				bool _hasMaterial(std::string);
+				std::string _buildMeshInstanceName(std::string);
+				std::string _buildObjectName(std::string);
+				std::string _buildTextureName(std::string);
+				void _addMesh(Mesh*);
+				void _addShader(Shader*);
+				void _addObject(Object*);
+				void _addMeshInstance(MeshInstance*);
+				void _addTexture(Texture*);
+				void _addScene(Scene*);
+				void _addCamera(Camera*);
+				void _removeCamera(std::string);
+				void _removeObject(std::string);
+				void _addFont(Font*);
+				void _resizeCameras(uint w,uint h);
+				uint _numScenes();
 		};
 	};
 	namespace Data{
@@ -81,20 +98,6 @@ namespace Engine{
                     template<class V,class S> static void _removeFromContainer(std::unordered_map<S,V>& m,const S& n){
                         if (m.size() > 0 && m.count(n)){m.at(n).reset();m.erase(n);}
                     }
-                    static Scene* m_CurrentScene;
-
-                    static boost::weak_ptr<Camera> m_ActiveCamera;
-
-                    static std::unordered_map<std::string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
-                    static std::unordered_map<std::string,boost::shared_ptr<Scene>> m_Scenes;
-                    static std::unordered_map<std::string,boost::shared_ptr<Object>> m_Objects;
-                    static std::unordered_map<std::string,boost::shared_ptr<Camera>> m_Cameras;
-                    static std::unordered_map<std::string,boost::shared_ptr<Font>> m_Fonts;
-                    static std::unordered_map<std::string,boost::shared_ptr<Mesh>> m_Meshes;
-                    static std::unordered_map<std::string,boost::shared_ptr<Texture>> m_Textures;
-                    static std::unordered_map<std::string,boost::shared_ptr<Material>> m_Materials;
-                    static std::unordered_map<std::string,boost::shared_ptr<Shader>> m_Shaders;
-                    static std::unordered_map<std::string,boost::shared_ptr<ShaderP>> m_ShaderPrograms;
 
                     static void destruct();
 
@@ -111,7 +114,7 @@ namespace Engine{
             }
         }
 
-        static Scene* getCurrentScene(){ return Detail::ResourceManagement::m_CurrentScene; }
+        Scene* getCurrentScene();
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
 
@@ -162,7 +165,7 @@ namespace Engine{
         void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         void addShaderProgram(std::string name, std::string vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
-        void initResources();
+        void initResources(const char* name,uint width,uint height);
     };
     //TODO: Move this somewhere else
     template<typename T>

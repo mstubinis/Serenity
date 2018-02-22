@@ -22,6 +22,7 @@ class Scene: public EngineResource{
         std::unordered_map<std::string,Object*> m_Objects;
         std::unordered_map<std::string,SunLight*> m_Lights;
         std::unordered_map<std::string,LightProbe*> m_LightProbes;
+		std::unordered_map<std::string,Camera*> m_Cameras;
 
         glm::vec3 m_BackgroundColor;
     public:
@@ -32,9 +33,11 @@ class Scene: public EngineResource{
 
         std::unordered_map<std::string,Object*>& objects();
         std::unordered_map<std::string,SunLight*>& lights();
+        std::unordered_map<std::string,Camera*>& cameras();
 
         Object* getObject(std::string&);
         SunLight* getLight(std::string&);
+        Camera* getCamera(std::string&);
 
         glm::vec3 getBackgroundColor();
         void setBackgroundColor(float,float,float);

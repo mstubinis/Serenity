@@ -15,18 +15,18 @@ namespace Engine{
 		class EventManager;
 		class ResourceManager;
 		class TimeManager;
-		class CEngine final{
+		class Core final{
 		    private:
 				class impl; std::unique_ptr<impl> m_i;
 		    public:
-				static Engine::impl::CEngine* m_Engine;
+				static Engine::impl::Core* m_Engine;
 
 				Engine::impl::EventManager* m_EventManager;
 				Engine::impl::ResourceManager* m_ResourceManager;
 				Engine::impl::TimeManager* m_TimeManager;
 
-				CEngine(const char* name,uint width,uint height);
-				~CEngine();
+				Core(const char* name,uint width,uint height);
+				~Core();
 		};
 	};
 
@@ -37,7 +37,7 @@ namespace Engine{
     namespace Detail{
          class EngineClass final{
             public:
-                static void initGame();
+                static void initGame(const char* name,uint w,uint h);
 
                 #pragma region Event Handlers
                 static void EVENT_RESIZE(uint width, uint height,bool saveSize = true);

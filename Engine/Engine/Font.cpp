@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Font.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -60,7 +61,7 @@ void FontData::_loadTextFile(string& filename){
 
 Font::Font(string filename):EngineResource(filename){
     m_FontData = new FontData(filename);
-    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Fonts,name(),boost::shared_ptr<Font>(this));
+	Engine::impl::Core::m_Engine->m_ResourceManager->_addFont(this);
 }
 Font::~Font(){
     SAFE_DELETE(m_FontData);

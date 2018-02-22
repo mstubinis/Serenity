@@ -345,7 +345,7 @@ void Renderer::Detail::RenderManagement::_renderTextures(GBuffer* gbuffer,Camera
     for(auto item:m_TexturesToBeRendered){
         Texture* texture = nullptr;
         if(item.texture != ""){
-            texture = Resources::Detail::ResourceManagement::m_Textures.at(item.texture).get();
+            texture = Resources::getTexture(item.texture);
             bindTexture("DiffuseTexture",texture,0);
             sendUniform1i("DiffuseTextureEnabled",1);
         }
@@ -373,7 +373,7 @@ void Renderer::Detail::RenderManagement::_renderTextures(GBuffer* gbuffer,Camera
 void Renderer::Detail::RenderManagement::_renderText(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
     ShaderP* p = Resources::getShaderProgram("Deferred_HUD"); p->bind();
     for(auto item:m_FontsToBeRendered){
-        Font* font = Resources::Detail::ResourceManagement::m_Fonts.at(item.texture).get();
+        Font* font = Resources::getFont(item.texture);
 
         bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
         sendUniform1i("DiffuseTextureEnabled",1);
@@ -622,11 +622,11 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
     if(doGodRays == false) Renderer::Settings::GodRays::disable();
     if(doAA == false) Renderer::Detail::RendererInfo::GeneralInfo::aa_algorithm = AntiAliasingAlgorithm::None;
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_geometry();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_geometry();
     _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_geometry();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_geometry();
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_godrays();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_godrays();
     if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays){
         gbuffer->start(GBufferType::GodRays,"RGBA",false);
         Object* o = Resources::getObject("Sun");
@@ -642,9 +642,9 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
 
         _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f-alpha);
     }
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_godrays();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_godrays();
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_lighting();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_lighting();
 
 	GLDisable(GLState::BLEND);
 
@@ -665,9 +665,9 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
     //_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
 
 	GLDisable(GLState::STENCIL_TEST);
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_lighting();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_lighting();
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_ssao();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_ssao();
     string _channels;
     bool isdoingssao = false;
     if(doSSAO && RendererInfo::SSAOInfo::ssao){ isdoingssao = true; _channels = "RGBA"; }
@@ -681,7 +681,7 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
         gbuffer->start(GBufferType::Bloom,_channels,false);
         _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
     }
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_ssao();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_ssao();
     gbuffer->start(GBufferType::Misc);
     _passHDR(gbuffer,camera,fboWidth,fboHeight);
 
@@ -692,8 +692,8 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
 
     if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::None || !doingaa){
 		//no aa so simulate 0 ms
-		Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_aa();
-		Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_aa();
+		Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_aa();
+		Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_aa();
 
         gbuffer->stop(fbo,rbo);
         _passFinal(gbuffer,camera,fboWidth,fboHeight);
@@ -705,16 +705,16 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
         //_passEdgeCanny(gbuffer,camera,fboWidth,fboHeight,GBufferType::Lighting);
 
         gbuffer->stop(fbo,rbo);
-		Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_aa();
+		Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_aa();
         _passFXAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
-		Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_aa();
+		Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_aa();
     }
     else if(RendererInfo::GeneralInfo::aa_algorithm == AntiAliasingAlgorithm::SMAA && doingaa){
         gbuffer->start(GBufferType::Lighting);
         _passFinal(gbuffer,camera,fboWidth,fboHeight);
-		Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_aa();
+		Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_aa();
         _passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
-		Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_aa();
+		Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_aa();
     }
 
     _passCopyDepth(gbuffer,camera,fboWidth,fboHeight);

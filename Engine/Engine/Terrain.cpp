@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Terrain.h"
 #include "Mesh.h"
 #include "Engine_Resources.h"
@@ -12,8 +13,9 @@
 #include <boost/make_shared.hpp>
 
 using namespace Engine;
+using namespace std;
 
-Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* scene):ObjectDynamic("",material,glm::vec3(0),glm::vec3(1),n,nullptr,scene){
+Terrain::Terrain(string n, sf::Image& image,string material,Scene* scene):ObjectDynamic("",material,glm::vec3(0),glm::vec3(1),n,nullptr,scene){
     for(unsigned int i = 0; i < image.getSize().x; i++){
         for(unsigned int j = 0; j < image.getSize().y; j++){
             float pixel(image.getPixel(i,j).r / 255.0f);
@@ -37,9 +39,7 @@ Terrain::Terrain(std::string n, sf::Image& image,std::string material,Scene* sce
     btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
     m_RigidBody = new btRigidBody(rigidBodyCI);
 
-    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Meshes,name(),
-        boost::make_shared<Mesh>(name(),static_cast<btHeightfieldTerrainShape*>(m_Collision->getCollisionShape()),0.0005f)
-    );
+	Engine::impl::Core::m_Engine->m_ResourceManager->_addMesh(new Mesh(name(),(btHeightfieldTerrainShape*)(m_Collision->getCollisionShape()),0.0005f));
 
     if(material != ""){
         MeshInstance* meshInstance = new MeshInstance(name(),name(),material);

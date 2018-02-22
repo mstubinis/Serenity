@@ -1,3 +1,5 @@
+#include "Engine.h"
+#include "Scene.h"
 #include "Camera.h"
 #include "ObjectDisplay.h"
 #include "ObjectDynamic.h"
@@ -24,7 +26,8 @@ Camera::Camera(string n, float angle, float aspectRatio, float _near, float _far
     setPerspectiveProjection();
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
-    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
+	Engine::impl::Core::m_Engine->m_ResourceManager->_addCamera(this);
+	scene->cameras().emplace(name(),this);
 }
 Camera::Camera(string n, float left, float right, float bottom, float top, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;
@@ -36,7 +39,8 @@ Camera::Camera(string n, float left, float right, float bottom, float top, float
     setOrthoProjection(left,right,bottom,top);
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
-    Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Cameras,name(),boost::shared_ptr<Camera>(this));
+    Engine::impl::Core::m_Engine->m_ResourceManager->_addCamera(this);
+	scene->cameras().emplace(name(),this);
 }
 void Camera::_constructFrustrum(){
     glm::mat4 vp = m_Projection * m_View;

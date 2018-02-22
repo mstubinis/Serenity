@@ -25,7 +25,7 @@
 #include <iostream>
 #endif
 
-class Engine::impl::CEngine::impl final{
+class Engine::impl::Core::impl final{
     public:
 		void _init(){
 		}
@@ -34,14 +34,14 @@ class Engine::impl::CEngine::impl final{
 };
 
 
-Engine::impl::CEngine* Engine::impl::CEngine::m_Engine = nullptr;
-Engine::impl::CEngine::CEngine(const char* name,uint width,uint height):m_i(new impl){
+Engine::impl::Core* Engine::impl::Core::m_Engine = nullptr;
+Engine::impl::Core::Core(const char* name,uint w,uint h):m_i(new impl){
 	m_EventManager = new Engine::impl::EventManager();
-	m_ResourceManager = new Engine::impl::ResourceManager(name,width,height);
+	m_ResourceManager = new Engine::impl::ResourceManager(name,w,h);
 	m_TimeManager = new Engine::impl::TimeManager();
 	m_i->_init();
 }
-Engine::impl::CEngine::~CEngine(){
+Engine::impl::Core::~Core(){
 	delete m_EventManager;
 	delete m_ResourceManager;
 	delete m_TimeManager;
@@ -49,78 +49,75 @@ Engine::impl::CEngine::~CEngine(){
 }
 
 void Engine::init(const char* name,uint w,uint h){
-	Engine::impl::CEngine::m_Engine = new Engine::impl::CEngine(name,w,h);
-
-    Detail::EngineClass::initGame();
+	Engine::impl::Core::m_Engine = new Engine::impl::Core(name,w,h);
+	Detail::EngineClass::initGame(name,w,h);
 }
 void Engine::destruct(){
     Game::cleanup();
+	delete Engine::impl::Core::m_Engine;
+	Engine::Resources::Detail::ResourceManagement::destruct();
+	Engine::Physics::Detail::PhysicsManagement::destruct();
 	Engine::Sound::Detail::SoundManagement::destruct();
-    Engine::Resources::Detail::ResourceManagement::destruct();
-    Engine::Physics::Detail::PhysicsManagement::destruct();
     Engine::Renderer::Detail::RenderManagement::destruct();
-
-	delete Engine::impl::CEngine::m_Engine;
 }
-void Engine::Detail::EngineClass::initGame(){
-    Engine::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
-
+void Engine::Detail::EngineClass::initGame(const char* name,uint w,uint h){
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
-    Renderer::Detail::RenderManagement::init();
     Physics::Detail::PhysicsManagement::init();
     Sound::Detail::SoundManagement::init();
+	Resources::initResources(name,w,h);
+    Renderer::Detail::RenderManagement::init();
 
-    Resources::initResources();
     Renderer::Detail::RenderManagement::postInit();
+	Engine::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
     Game::initResources();
     Game::initLogic();
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
-    if(Resources::Detail::ResourceManagement::m_Scenes.size() == 0)
+	if(Engine::impl::Core::m_Engine->m_ResourceManager->_numScenes() == 0)
         new Scene("Default");
 }
 void Engine::Detail::EngineClass::RESET_EVENTS(){
-    impl::CEngine::m_Engine->m_EventManager->_onResetEvents();
+    impl::Core::m_Engine->m_EventManager->_onResetEvents();
 }
 void Engine::Detail::EngineClass::update(){
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_update();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_update();
 
-	float dt = Engine::impl::CEngine::m_Engine->m_TimeManager->dt();
+	float dt = Engine::impl::Core::m_Engine->m_TimeManager->dt();
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
-    impl::CEngine::m_Engine->m_EventManager->_onUpdate(dt);
+    impl::Core::m_Engine->m_EventManager->_onUpdate(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_update();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_update();
 }
 void Engine::Detail::EngineClass::updatePhysics(){
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_physics();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_physics();
 	Physics::Detail::PhysicsManagement::update(Resources::dt());
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_physics();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_physics();
 }
 void Engine::Detail::EngineClass::updateSounds(){
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_sounds();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_sounds();
 	Sound::Detail::SoundManagement::update(Resources::dt());
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_sounds();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_sounds();
 }
 void Engine::Detail::EngineClass::render(){
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_render();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_render();
 
     Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
     Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),x,y);
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->stop_rendering_display();
+	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_display();
     Resources::getWindow()->display();
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_rendering_display();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_display();
 
-	Engine::impl::CEngine::m_Engine->m_TimeManager->calculate_render();
+	Engine::impl::Core::m_Engine->m_TimeManager->calculate_render();
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
-    for(auto camera:Resources::Detail::ResourceManagement::m_Cameras){ camera.second.get()->resize(w,h); }
+	Engine::impl::Core::m_Engine->m_ResourceManager->_resizeCameras(w,h);
     Renderer::setViewport(0,0,w,h);
     Renderer::Detail::RenderManagement::m_gBuffer->resize(w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
@@ -140,28 +137,28 @@ void Engine::Detail::EngineClass::EVENT_TEXT_ENTERED(uint unicode){
     Game::onTextEntered(unicode);
 }
 void Engine::Detail::EngineClass::EVENT_KEY_PRESSED(uint key){
-	impl::CEngine::m_Engine->m_EventManager->_onEventKeyPressed(key);
+	impl::Core::m_Engine->m_EventManager->_onEventKeyPressed(key);
     Game::onKeyPressed(key);
 }
 void Engine::Detail::EngineClass::EVENT_KEY_RELEASED(uint key){
-    impl::CEngine::m_Engine->m_EventManager->_onEventKeyReleased(key);
+    impl::Core::m_Engine->m_EventManager->_onEventKeyReleased(key);
     Game::onKeyReleased(key);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_WHEEL_MOVED(int delta){
-    impl::CEngine::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
+    impl::Core::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
     Game::onMouseWheelMoved(delta);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
-	impl::CEngine::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
+	impl::Core::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(mouseButton);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
-	impl::CEngine::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
+	impl::Core::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(mouseButton);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_MOVED(float mouseX, float mouseY){
     if(Resources::getWindow()->hasFocus()){
-        impl::CEngine::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
+        impl::Core::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
     }
     Game::onMouseMoved(mouseX,mouseY);
 }
@@ -226,7 +223,7 @@ void Engine::run(){
 		Detail::EngineClass::updateSounds();
         Detail::EngineClass::render();
 		
-		Engine::impl::CEngine::m_Engine->m_TimeManager->calculate();
+		Engine::impl::Core::m_Engine->m_TimeManager->calculate();
     }
 	Engine::destruct();
 }

@@ -48,7 +48,6 @@ void Game::initResources(){
     Resources::addMesh("Ring","data/Models/ring.obj");
     Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
 	Resources::addMesh("Venerex","data/Models/venerex.obj",CollisionType::ConvexHull);
-	Resources::addMesh("Plane2","data/Models/plane.obj");
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
@@ -57,7 +56,6 @@ void Game::initResources(){
     Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","","AS_GroundFromSpace");
     Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
-	Resources::addMaterial("DefiantShark","data/Textures/defiant_Shark.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
     Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");

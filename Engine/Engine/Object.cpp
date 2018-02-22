@@ -20,14 +20,16 @@ Object::Object(string n,Scene* scene, bool isNotCamera){
     m_Radius = 0;
     m_Parent = nullptr;
     m_IsToBeDestroyed = false;
+
     setName(n);
 
     if(isNotCamera){
         if(scene == nullptr){
             scene = Resources::getCurrentScene();
         }
-        setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Objects, name()));
-		Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Objects,name(),boost::shared_ptr<Object>(this));
+		n = Engine::impl::Core::m_Engine->m_ResourceManager->_buildObjectName(n);
+        setName(n);
+		Engine::impl::Core::m_Engine->m_ResourceManager->_addObject(this);
 
         scene->objects().emplace(name(),this);
     }

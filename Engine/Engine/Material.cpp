@@ -30,8 +30,7 @@ GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Num
     "RefractionTexture",
 	"HeightmapTexture",
 };
-void Material::setAllDiffuseModels(DiffuseModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setDiffuseModel(m); } }
-void Material::setAllSpecularModels(SpecularModel::Model m){ for(auto mat:Resources::Detail::ResourceManagement::m_Materials){ mat.second->setSpecularModel(m); } }
+
 struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
     Material* material = (Material*)r;
     glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);

@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Texture.h"
 #include "Mesh.h"
 #include "Skybox.h"
@@ -58,8 +59,9 @@ class Texture::impl final{
                 vector<uchar> p(pxls,pxls+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
-            super->setName(Resources::Detail::ResourceManagement::_incrementName(Resources::Detail::ResourceManagement::m_Textures,n));
-            Resources::Detail::ResourceManagement::_addToContainer(Resources::Detail::ResourceManagement::m_Textures,super->name(),boost::shared_ptr<Texture>(super));
+			n = Engine::impl::Core::m_Engine->m_ResourceManager->_buildTextureName(n);
+            super->setName(n);
+            Engine::impl::Core::m_Engine->m_ResourceManager->_addTexture(super);
         }
         void _load(Texture* super){
             if(m_TextureAddress.size() == 0)
