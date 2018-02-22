@@ -15,6 +15,7 @@
 #include <iostream>
 
 typedef unsigned int uint;
+typedef std::uint32_t uint32;
 
 class Engine_Window;
 class Scene;
@@ -34,6 +35,55 @@ class SoundData;
 template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
 template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
 
+class ResourceType{public: enum Type{
+	Texture,
+	Mesh,
+	Material,
+	Sound,
+	MeshInstance,
+	Object,
+	Font,
+	Camera,
+	Shader,
+	SoundData,
+	Scene,
+};};
+
+struct Handle final{
+	uint32 m_index : 12;
+	uint32 m_counter : 15;
+	uint32 m_type : 5;
+	Handle(){
+		m_index = 0; m_counter = 0; m_type = 0;
+	}
+	Handle(uint32 index, uint32 counter, uint32 type){
+		m_index = index; m_counter = counter; m_type = type;
+	}
+	inline operator uint32() const{
+		return m_type << 27 | m_counter << 12 | m_index;
+	}
+};
+struct HandleEntry final{
+	uint32 m_nextFreeIndex : 12;
+	uint32 m_counter : 15;
+	uint32 m_active : 1;
+	uint32 m_endOfList : 1;
+	EngineResource*  m_resource;
+	HandleEntry(){
+		m_nextFreeIndex = 0; init();
+	}
+	void init(){
+		m_counter = 1;
+		m_active, m_endOfList = 0;
+		m_resource = nullptr;
+	}
+	explicit HandleEntry(uint32 nextFreeIndex){
+		m_nextFreeIndex = nextFreeIndex; init();
+	}
+};
+typedef EngineResource* BaseR;
+//typedef void* BaseR;
+
 namespace Engine{
 	namespace impl{
 		class ResourceManager final{
@@ -44,6 +94,11 @@ namespace Engine{
 
 				ResourceManager(const char* name,uint width,uint height);
 				~ResourceManager();
+
+				void _addResource(BaseR,ResourceType::Type);
+
+
+
 
 				bool _hasMaterial(std::string);      void _addMaterial(Material*);          std::string _buildMaterialName(std::string);
 				bool _hasMesh(std::string);          void _addMesh(Mesh*);                  std::string _buildMeshName(std::string);
@@ -89,11 +144,6 @@ namespace Engine{
 
         Engine_Window* getWindow();
         glm::uvec2 getWindowSize();
-
-        Camera* getActiveCamera();
-        boost::weak_ptr<Camera>& getActiveCameraPtr();
-        void setActiveCamera(Camera* c);
-        void setActiveCamera(std::string name);
 
         Scene* getScene(std::string n);
 

@@ -22,7 +22,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
 
     Planet* obj = static_cast<Planet*>(o.lock().get());
-    Camera* c = Resources::getActiveCamera();
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
     float atmosphereHeight = obj->getAtmosphereHeight();
     ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
@@ -321,7 +321,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
 void Ring::update(float dt){
 }
 void Ring::draw(GLuint shader){
-    Camera* activeCamera = Resources::getActiveCamera();
+    Camera* activeCamera = Resources::getCurrentScene()->getActiveCamera();
     glm::mat4 model = m_Parent->getModel();
     Mesh* mesh = Resources::getMesh("Ring");
     float radius = mesh->getRadius() * m_Parent->getScale().x;

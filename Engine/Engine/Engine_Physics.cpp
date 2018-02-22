@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "ObjectDynamic.h"
 #include "Mesh.h"
+#include "Scene.h"
 
 #include <bullet/BulletCollision/CollisionShapes/btShapeHull.h>
 #include <bullet/btBulletDynamicsCommon.h>
@@ -143,10 +144,11 @@ vector<glm::vec3> Physics::Detail::PhysicsManagement::rayCastInternal(const btVe
 }
 void Detail::PhysicsManagement::render(){
     glMatrixMode(GL_PROJECTION); glPushMatrix();
-    glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getProjection()));
+	Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    glLoadMatrixf(glm::value_ptr(c->getProjection()));
 
     glMatrixMode(GL_MODELVIEW); glPushMatrix();
-    glLoadMatrixf(glm::value_ptr(Resources::getActiveCamera()->getView()));
+    glLoadMatrixf(glm::value_ptr(c->getView()));
 
     m_world->debugDrawWorld();
 

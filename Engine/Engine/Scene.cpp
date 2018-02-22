@@ -13,6 +13,7 @@ using namespace std;
 
 Scene::Scene(string name){
     m_Skybox = nullptr;
+	m_ActiveCamera = nullptr;
     m_BackgroundColor = glm::vec3(0.0f);
 	name = impl::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
     setName(name);
@@ -22,10 +23,13 @@ Scene::Scene(string name){
     if(Resources::getCurrentScene() == nullptr){
 		Resources::setCurrentScene(this);
     }
-    if(!exists(Resources::getActiveCameraPtr())){
-        new Camera("Default_" + name,45.0f,1.0f,0.1f,100.0f,this);
-        Resources::setActiveCamera("Default_" + name);
-    }
+}
+Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
+void Scene::setActiveCamera(Camera* c){
+	m_ActiveCamera = c;
+}
+void Scene::setActiveCamera(string s){
+	m_ActiveCamera = Resources::getCamera(s);
 }
 void Scene::centerSceneToObject(Object* center){
     glm::vec3 offset = -(center->getPosition());
@@ -50,16 +54,13 @@ void Scene::update(float dt){
         else{
             it->second->update(dt); ++it;
         }
-    }//create a scene specific container for cameras?
+    }
     for (auto it = m_Cameras.cbegin(); it != m_Cameras.cend();){
         if (it->second->isDestroyed()){
 			impl::Core::m_Engine->m_ResourceManager->_remCamera(it->second->name());
         }
         else{
-            if(it->second->getScene() == this){ 
-				it->second->update(dt); 
-			} 
-			++it;
+			it->second->update(dt); ++it;
         }
     }
     if(m_Skybox != nullptr) m_Skybox->update();
@@ -72,7 +73,7 @@ void Scene::renderSkybox(){
 		//render a fake skybox.
 		Skybox::initMesh();
 		ShaderP* p = Resources::getShaderProgram("Deferred_Skybox_Fake"); p->bind();
-		Camera* c = Resources::getActiveCamera();
+		Camera* c = Resources::getCurrentScene()->getActiveCamera();
 		glm::mat4 view = c->getView();
 		Math::removeMatrixPosition(view);
 		Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);

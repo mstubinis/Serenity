@@ -7,6 +7,7 @@
 #include "Engine_Math.h"
 #include "Engine_Renderer.h"
 #include "Engine_Window.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,8 +16,9 @@
 #include <glm/vec3.hpp>
 
 using namespace Engine;
+using namespace std;
 
-GameSkybox::GameSkybox(std::string name, uint numFlares, Scene* scene):Skybox(name,scene){
+GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene){
     if(numFlares > 0){
         for(uint i = 0; i < numFlares; i++){
             SkyboxSunFlare flare;
@@ -49,7 +51,7 @@ void GameSkybox::draw(){
     if(m_SunFlares.size() > 0){
         Texture* texture = Resources::getTexture("data/Textures/Skyboxes/StarFlare.png");
         for(auto flare:m_SunFlares){
-            glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getActiveCamera()->getPosition()) - flare.position,false);
+            glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getCurrentScene()->getActiveCamera()->getPosition()) - flare.position,false);
             glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
             glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
             texture->render(glm::vec2(pos.x,pos.y),col,0,scl,0.5f);

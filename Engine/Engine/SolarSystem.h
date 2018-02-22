@@ -20,7 +20,6 @@ class SolarSystem: public Scene{
         std::unordered_map<std::string,Star*> m_Stars;
 
         Ship* player;
-        GameCamera* playerCamera;
 
         void _loadRandomly();
         void _loadFromFile(std::string);
@@ -32,8 +31,6 @@ class SolarSystem: public Scene{
 
         Ship* getPlayer(){ return player; }
         void setPlayer(Ship* p){ player = p; }
-        GameCamera* getPlayerCamera(){ return playerCamera; }
-        void setPlayerCamera(GameCamera* c){ playerCamera = c; }
 
         std::unordered_map<std::string,Lagrange*>& getLagrangePoints() { return m_LagrangePoints; }
         std::unordered_map<std::string,Planet*>& getPlanets() { return m_Planets; }

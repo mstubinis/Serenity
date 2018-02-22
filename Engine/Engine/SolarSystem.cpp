@@ -27,8 +27,8 @@ using namespace std;
 //6779 km - orbit height of the ISS from earth's center point
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
-    Resources::setActiveCamera(playerCamera);
+    GameCamera* playerCamera = new GameCamera("PlayerCamera_" + name(),45,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
+    this->setActiveCamera(playerCamera);
 
     if(file != "NULL"){
         if(file == ""){
@@ -209,9 +209,8 @@ void SolarSystem::_loadFromFile(string filename){
                         zPos += parentZ;
                     }
                     setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
-                    setPlayerCamera(static_cast<GameCamera*>(Resources::getActiveCamera()));
-                    getPlayerCamera()->follow(getPlayer());
-
+					GameCamera* playerCamera = (GameCamera*)getActiveCamera();
+					playerCamera->follow(getPlayer());
                 }
                 else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
@@ -530,8 +529,8 @@ void SolarSystem::_loadRandomly(){
     //Then load moons. Generally the number of moons depends on the type of planet. Gas Giants have more moons than normal planets, etc..
 
     player = new Ship("Akira","Akira",true,"USS Thunderchild",glm::vec3(0),glm::vec3(1),nullptr,this);
-    playerCamera = static_cast<GameCamera*>(Resources::getActiveCamera());
-    playerCamera->follow(player);
+	GameCamera* playerCamera = (GameCamera*)getActiveCamera();
+	playerCamera->follow(getPlayer());
     centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){

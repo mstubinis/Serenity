@@ -2,6 +2,7 @@
 #include "Engine_Resources.h"
 #include "Camera.h"
 #include "ObjectDynamic.h"
+#include "Scene.h"
 
 #include <math.h>
 
@@ -50,9 +51,10 @@ bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVecto
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
     glm::vec4 viewport = glm::vec4(0,0,winSize.x,winSize.y);
-    glm::vec3 screen = glm::project(objPos,Resources::getActiveCamera()->getView(),Resources::getActiveCamera()->getProjection(),viewport);
+	Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    glm::vec3 screen = glm::project(objPos,c->getView(),c->getProjection(),viewport);
     //check if point is behind
-    float dot = glm::dot(Resources::getActiveCamera()->getViewVector(),objPos - Resources::getActiveCamera()->getPosition());
+    float dot = glm::dot(c->getViewVector(),objPos - c->getPosition());
     float resX = screen.x;
     float resY = screen.y;
     uint inBounds = 1;

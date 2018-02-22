@@ -103,7 +103,7 @@ void Engine::Detail::EngineClass::render(){
 	Engine::impl::Core::m_Engine->m_TimeManager->stop_render();
 
     Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
-    Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getActiveCamera(),x,y);
+	Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getCurrentScene()->getActiveCamera(),x,y);
 
 	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_display();
     Resources::getWindow()->display();

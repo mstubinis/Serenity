@@ -723,7 +723,7 @@ void Renderer::Detail::RenderManagement::render(GBuffer* gbuffer,Camera* camera,
 	GLDisable(GLState::DEPTH_TEST);
 	GLDisable(GLState::DEPTH_MASK);
 	if(mainRenderFunc){
-		if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && camera == Resources::getActiveCamera()){
+		if(Detail::RendererInfo::GeneralInfo::draw_physics_debug && camera == s->getActiveCamera()){
 			Physics::Detail::PhysicsManagement::render();
 		}
 	}

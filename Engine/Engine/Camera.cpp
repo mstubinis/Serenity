@@ -28,6 +28,9 @@ Camera::Camera(string n, float angle, float aspectRatio, float _near, float _far
 
 	Engine::impl::Core::m_Engine->m_ResourceManager->_addCamera(this);
 	scene->cameras().emplace(name(),this);
+	if(!scene->getActiveCamera()){
+		scene->setActiveCamera(this);
+	}
 }
 Camera::Camera(string n, float left, float right, float bottom, float top, float _near, float _far,Scene* scene):ObjectBasic(glm::vec3(0),glm::vec3(1),n,scene,false){//create an orthographic camera
     m_Angle = 45.0f;
@@ -41,6 +44,9 @@ Camera::Camera(string n, float left, float right, float bottom, float top, float
 
     Engine::impl::Core::m_Engine->m_ResourceManager->_addCamera(this);
 	scene->cameras().emplace(name(),this);
+	if(!scene->getActiveCamera()){
+		scene->setActiveCamera(this);
+	}
 }
 void Camera::_constructFrustrum(){
     glm::mat4 vp = m_Projection * m_View;

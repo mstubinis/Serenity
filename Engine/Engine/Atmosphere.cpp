@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "Light.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,8 +16,9 @@
 #include <GL/glew.h>
 
 using namespace Engine;
+using namespace std;
 
-Atmosphere::Atmosphere(std::string name,Scene* scene,bool followCamera):SkyboxEmpty(name,scene){
+Atmosphere::Atmosphere(string name,Scene* scene,bool followCamera):SkyboxEmpty(name,scene){
     m_Atmosphere = AtmosphereInformation();
 	m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
     m_Scale = glm::vec3(1.0f);
@@ -1963,7 +1965,7 @@ Atmosphere::~Atmosphere(){
 }
 void Atmosphere::update(){
     if(m_FollowCamera){
-        glm::vec3 cameraPos = Resources::getActiveCamera()->getPosition();
+        glm::vec3 cameraPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
         m_Model[3][0] = float(cameraPos.x + m_Position.x);
         m_Model[3][1] = float(cameraPos.y + m_Position.y);
         m_Model[3][2] = float(cameraPos.z + m_Position.z);
@@ -1975,7 +1977,7 @@ float Atmosphere::getRadius(){
 glm::vec3 Atmosphere::getPosition(){ return glm::vec3(m_Model[3][0],m_Model[3][1],m_Model[3][2]); }
 void Atmosphere::render(bool godsRays){
     GLuint shader = Resources::getShaderProgram("AS_SkyFromAtmosphere")->program();
-    Camera* cam = Resources::getActiveCamera();
+    Camera* cam = Resources::getCurrentScene()->getActiveCamera();
     SunLight* sun = static_cast<SunLight*>(Resources::getObject("Sun Light"));
     glUseProgram(shader);
 	Renderer::GLEnable(GLState::BLEND);

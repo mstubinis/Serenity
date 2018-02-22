@@ -35,9 +35,95 @@ template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S
 
 class Engine::impl::ResourceManager::impl final{
     public:
+		//TODO: convert to this resource system --------------------------------------------
+		static const uint MAX_ENTRIES = 8192;
+		HandleEntry m_Resources[MAX_ENTRIES];
+		int m_activeEntryCount;
+		uint32 m_firstFreeEntry;
+
+		void _Reset(){
+			m_activeEntryCount = 0;
+			m_firstFreeEntry = 0;
+			for (int i = 0; i < MAX_ENTRIES - 1; ++i){
+				m_Resources[i] = HandleEntry(i + 1);
+			}
+			m_Resources[MAX_ENTRIES - 1] = HandleEntry();
+			m_Resources[MAX_ENTRIES - 1].m_endOfList = true;
+		}
+		Handle _Add(BaseR p, uint32 type){
+			assert(m_activeEntryCount < MAX_ENTRIES - 1);
+			assert(type >= 0 && type <= 31);
+
+			const int newIndex = m_firstFreeEntry;
+			assert(newIndex < MAX_ENTRIES);
+			assert(m_Resources[newIndex].m_active == false);
+			assert(!m_Resources[newIndex].m_endOfList);
+
+			m_firstFreeEntry = m_Resources[newIndex].m_nextFreeIndex;
+			m_Resources[newIndex].m_nextFreeIndex = 0;
+			m_Resources[newIndex].m_counter = m_Resources[newIndex].m_counter + 1;
+			if (m_Resources[newIndex].m_counter == 0){
+				m_Resources[newIndex].m_counter = 1;
+			}
+			m_Resources[newIndex].m_active = true;
+			m_Resources[newIndex].m_resource = p;
+
+			++m_activeEntryCount;
+			return Handle (newIndex, m_Resources[newIndex].m_counter, type);
+		}
+		void _Visualize(){
+			std::cout << "--------- Visualizing Resource Array ---------" << std::endl;
+			for (int i = 0; i < MAX_ENTRIES - 1; ++i){
+				HandleEntry& e = m_Resources[i];
+
+				if(e.m_resource){
+					std::cout << i << ": Active: " << e.m_active << " , Counter: " << e.m_counter << " , Name: " << e.m_resource->name() << std::endl;
+				}
+			}
+			std::cout << "----------------------------------------------" << std::endl;
+		}
+		void _Update(Handle h, BaseR p){
+			const int index = h.m_index;
+			assert(m_entries[index].m_counter == h.m_counter);
+			assert(m_entries[index].m_active == true);
+
+			m_Resources[index].m_resource = p;
+		}
+		void _Remove(const Handle h){
+			const uint32 index = h.m_index;
+			assert(m_entries[index].m_counter == h.m_counter);
+			assert(m_entries[index].m_active == true);
+
+			m_Resources[index].m_nextFreeIndex = m_firstFreeEntry;
+			m_Resources[index].m_active = 0;
+			m_firstFreeEntry = index;
+
+			--m_activeEntryCount;
+		}
+		BaseR _Get(Handle h) const{
+			BaseR p = NULL;
+			if (!_Get(h, p)) return NULL;
+			return p;
+		}
+		bool _Get(const Handle h, BaseR& out) const{
+			const int index = h.m_index;
+			if (m_Resources[index].m_counter != h.m_counter || m_Resources[index].m_active == false)
+				return false;
+			out = m_Resources[index].m_resource;
+			return true;
+		}
+		template<typename T> inline bool _GetAs(Handle h, T*& out) const {
+			EngineResource* _void;
+			const bool rv = _Get(h,_void);
+			//out = union_cast<T>(_void);
+			out = (T*)_void;
+			return rv;
+		}
+		//-----------------------------------------------------------------------------------------------
+
+
 		Engine_Window* m_Window;
         Scene* m_CurrentScene;
-        boost::weak_ptr<Camera> m_ActiveCamera;
 		bool m_DynamicMemory;
 
         unordered_map<string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
@@ -57,6 +143,11 @@ class Engine::impl::ResourceManager::impl final{
 			m_DynamicMemory = false;
 		}
 		void _destruct(){
+			for(uint i = 0; i < MAX_ENTRIES; ++i){
+				SAFE_DELETE(m_Resources[i].m_resource); 
+			}
+
+
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
 			for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
 			for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
@@ -71,6 +162,21 @@ class Engine::impl::ResourceManager::impl final{
 			SAFE_DELETE(m_Window);
 		}
 };
+
+
+
+
+void impl::ResourceManager::_addResource(BaseR r,ResourceType::Type t){
+	Engine::impl::Core::m_Engine->m_ResourceManager->m_i->_Add(r,(uint)t);
+}
+
+
+
+
+
+
+
+
 Engine::impl::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
 	m_i->_init(name,width,height);
 }
@@ -86,10 +192,6 @@ string Engine::Data::reportTimeRendering(){
 float Engine::Resources::dt(){ return impl::Core::m_Engine->m_TimeManager->dt(); }
 float Engine::Resources::applicationTime(){ return impl::Core::m_Engine->m_TimeManager->applicationTime(); }
 Scene* Engine::Resources::getCurrentScene(){ return impl::Core::m_Engine->m_ResourceManager->m_i->m_CurrentScene; }
-Camera* Engine::Resources::getActiveCamera(){ return impl::Core::m_Engine->m_ResourceManager->m_i->m_ActiveCamera.lock().get(); }
-boost::weak_ptr<Camera>& Engine::Resources::getActiveCameraPtr(){ return impl::Core::m_Engine->m_ResourceManager->m_i->m_ActiveCamera; }
-void Engine::Resources::setActiveCamera(Camera* c){ impl::Core::m_Engine->m_ResourceManager->m_i->m_ActiveCamera = Engine::impl::Core::m_Engine->m_ResourceManager->m_i->m_Cameras.at(c->name()); }
-void Engine::Resources::setActiveCamera(string name){ impl::Core::m_Engine->m_ResourceManager->m_i->m_ActiveCamera = Engine::impl::Core::m_Engine->m_ResourceManager->m_i->m_Cameras.at(name); }
 
 bool impl::ResourceManager::_hasMaterial(string n){ return Core::m_Engine->m_ResourceManager->m_i->m_Materials.count(n); }
 bool impl::ResourceManager::_hasMesh(string n){ return Core::m_Engine->m_ResourceManager->m_i->m_Meshes.count(n); }

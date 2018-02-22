@@ -8,6 +8,7 @@
 #include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
 using namespace Engine;
+using namespace std;
 
 #pragma region ShipSystem
 ShipSystem::ShipSystem(unsigned int _type, Ship* _ship){
@@ -210,7 +211,7 @@ void ShipSystemSensors::update(float dt){
 }
 #pragma endregion
 
-Ship::Ship(std::string mesh, std::string mat, bool player, std::string name,glm::vec3 pos, glm::vec3 scl, Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Ship::Ship(string mesh,string mat, bool player,string name,glm::vec3 pos, glm::vec3 scl, Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
     m_WarpFactor = 0;
     m_IsPlayer = player;
     m_IsWarping = false;
@@ -218,7 +219,7 @@ Ship::Ship(std::string mesh, std::string mat, bool player, std::string name,glm:
     m_PlayerCamera = nullptr;
 
     if(player){
-        m_PlayerCamera = static_cast<GameCamera*>(Resources::getActiveCamera());
+        m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
     }
 
     for(unsigned int i = 0; i < SHIP_SYSTEM_NUMBER; i++){
@@ -245,7 +246,7 @@ void Ship::update(float dt){
             float speed = (m_WarpFactor * 1.0f/0.46f)*2.0f;
             glm::vec3 s = (getForward() * glm::pow(speed,15.0f))/getMass();
             for(auto obj:Resources::getCurrentScene()->objects()){
-                if((obj.second->name().find("Camera") == std::string::npos) && obj.second != this && obj.second->getParent() == nullptr){
+                if((obj.second->name().find("Camera") == string::npos) && obj.second != this && obj.second->getParent() == nullptr){
                     obj.second->setPosition(obj.second->getPosition() + (s * dt));
                 }
             }

@@ -9,6 +9,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/matrix_operation.hpp>
@@ -401,7 +402,7 @@ void ObjectDynamic::clearAllForces(){
     ObjectDynamic::setAngularVelocity(0,0,0);
 }
 bool ObjectDynamic::rayIntersectSphere(Camera* c){
-    if(c == nullptr) c = Resources::getActiveCamera();
+    if(c == nullptr) c = Resources::getCurrentScene()->getActiveCamera();
     return c->rayIntersectSphere(this);
 }
 void ObjectDynamic::calculateRadius(){

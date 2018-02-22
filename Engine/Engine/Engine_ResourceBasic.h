@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_RESOURCEBASIC_H
-#define ENGINE_RESOURCEBASIC_H
+#ifndef ENGINE_RESOURCE_BASIC_H
+#define ENGINE_RESOURCE_BASIC_H
 
 #include <string>
 #include <vector>

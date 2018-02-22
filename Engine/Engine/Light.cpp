@@ -10,6 +10,7 @@
 #include "GBuffer.h"
 #include "FramebufferObject.h"
 #include "Engine_Window.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -636,7 +637,7 @@ void PointLight::update(float dt){
 }
 void PointLight::lighten(){
     if(!m_Active) return;
-    Camera* c = Resources::getActiveCamera();
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 pos = getPosition();
     if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
         return;
@@ -775,7 +776,7 @@ void SpotLight::update(float dt){
 }
 void SpotLight::lighten(){
     if(!m_Active) return;
-    Camera* c = Resources::getActiveCamera();
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 pos = getPosition();
     if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(this) > Object::m_VisibilityThreshold * m_CullingRadius))
         return;
@@ -956,7 +957,7 @@ void RodLight::update(float dt){
 }
 void RodLight::lighten(){
     if(!m_Active) return;
-    Camera* c = Resources::getActiveCamera();
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 pos = getPosition();
     float cullingDistance = m_RodLength+(m_CullingRadius*2.0f);
     if(!c->sphereIntersectTest(pos,cullingDistance) || (c->getDistance(this) > Object::m_VisibilityThreshold * cullingDistance))
@@ -1013,7 +1014,7 @@ class LightProbe::impl{
 			m_EnvMapSize = envMapSize;
             m_OnlyOnce = onlyOnce;
             glm::vec3 pos = super->getPosition();
-            Camera* c = Resources::getActiveCamera();
+            Camera* c = Resources::getCurrentScene()->getActiveCamera();
             if(c != nullptr) super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, c->getNear(), c->getFar());
             else             super->m_Projection = glm::perspective(glm::radians(90.0f),1.0f, 0.001f, 9999999999.0f);
             m_Views[0] = glm::lookAt(pos, pos + glm::vec3( 1, 0, 0), glm::vec3(0,-1, 0));
@@ -1123,8 +1124,8 @@ class LightProbe::impl{
             else{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
             }
-			Camera* old = Resources::getActiveCamera();
-			Resources::setActiveCamera(super);
+			Camera* old = Resources::getCurrentScene()->getActiveCamera();
+			Resources::getCurrentScene()->setActiveCamera(super);
 
             if(super->m_Parent != nullptr){
 				super->m_Model = super->m_Parent->getModel(); 
@@ -1148,7 +1149,7 @@ class LightProbe::impl{
 			for(auto side:m_Sides){
 				_renderScene(super,m_Views[side],side);
 			}
-			Resources::setActiveCamera(old);
+			Resources::getCurrentScene()->setActiveCamera(old);
             /////////////////////////////////////////////////////////////////
 			#pragma endregion
 

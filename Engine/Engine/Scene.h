@@ -18,6 +18,7 @@ class Scene: public EngineResource{
     friend class Engine::Renderer::Detail::RenderManagement;
     private:
         SkyboxEmpty* m_Skybox;
+		Camera* m_ActiveCamera;
     protected:
         std::unordered_map<std::string,Object*> m_Objects;
         std::unordered_map<std::string,SunLight*> m_Lights;
@@ -38,6 +39,7 @@ class Scene: public EngineResource{
         Object* getObject(std::string&);
         SunLight* getLight(std::string&);
         Camera* getCamera(std::string&);
+		Camera* getActiveCamera();
 
         glm::vec3 getBackgroundColor();
         void setBackgroundColor(float,float,float);
@@ -46,5 +48,7 @@ class Scene: public EngineResource{
         void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Object*);
         void renderSkybox();
+		void setActiveCamera(Camera*);
+		void setActiveCamera(std::string);
 };
 #endif

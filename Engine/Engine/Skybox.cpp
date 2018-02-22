@@ -102,7 +102,7 @@ void Skybox::bindMesh(){
 void Skybox::draw(){
     ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
 
-    Camera* c = Resources::getActiveCamera();
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::mat4 view = c->getView();
 	Engine::Math::removeMatrixPosition(view);
 

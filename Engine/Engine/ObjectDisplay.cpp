@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "ShaderProgram.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -97,7 +98,7 @@ void ObjectDisplay::scale(float x, float y,float z){
 }
 void ObjectDisplay::scale(glm::vec3 s){ ObjectDisplay::scale(s.x,s.y,s.z); }
 bool ObjectDisplay::rayIntersectSphere(Camera* c){
-    if(c == nullptr) c = Resources::getActiveCamera();
+    if(c == nullptr) c = Resources::getCurrentScene()->getActiveCamera();
     return c->rayIntersectSphere(this);
 }
 bool ObjectDisplay::rayIntersectSphere(glm::vec3 A, glm::vec3 rayVector){

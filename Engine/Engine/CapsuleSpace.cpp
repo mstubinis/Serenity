@@ -39,14 +39,14 @@ void CapsuleStar::update(float dt){
     }
     if(m_Light != nullptr){
         m_Light->setPosition(pos * 0.015f);
-        if(glm::distance(m_Light->getPosition(),Resources::getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
+		if(glm::distance(m_Light->getPosition(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
             m_Light->deactivate();
         }
         else{
             m_Light->activate();
         }
     }
-    this->m_Orientation = Resources::getActiveCamera()->getOrientation();
+    this->m_Orientation = Resources::getCurrentScene()->getActiveCamera()->getOrientation();
     ObjectDisplay::update(dt);
 }
 
@@ -139,8 +139,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     //this to just test. should set player / camera dynamically
     Ship* dread = new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
     setPlayer(dread);
-    setPlayerCamera((GameCamera*)(Resources::getActiveCamera()));
-    getPlayerCamera()->follow(getPlayer());
+	GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
+	playerCamera->follow(dread);
 
 	centerSceneToObject(dread);
 

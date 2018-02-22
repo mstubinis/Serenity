@@ -79,12 +79,11 @@ void Game::initLogic(){
 	//Engine::getWindow()->setVerticalSyncEnabled(true);
 	//Engine::getWindow()->setFramerateLimit(60);
 
-    new SolarSystem("Sol","data/Systems/Sol.txt");
-    new CapsuleSpace();
+    SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
+    CapsuleSpace* cap = new CapsuleSpace();
 
 	Resources::setCurrentScene("Sol");
     //Resources::setCurrentScene("CapsuleSpace");
-    Resources::setActiveCamera(((SolarSystem*)Resources::getCurrentScene())->getPlayerCamera());
     m_HUD = new HUD();
 }
 void Game::update(float dt){
@@ -93,11 +92,9 @@ void Game::update(float dt){
     }
     if(Engine::isKeyDownOnce("f4")){
         Resources::setCurrentScene("Sol");
-        Resources::setActiveCamera(((SolarSystem*)Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Engine::isKeyDownOnce("f5")){
         Resources::setCurrentScene("CapsuleSpace");
-        Resources::setActiveCamera(((SolarSystem*)Resources::getCurrentScene())->getPlayerCamera());
     }
     if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if(Engine::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }

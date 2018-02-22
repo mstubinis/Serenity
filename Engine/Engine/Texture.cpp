@@ -257,7 +257,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     }
     uint size = convoludeTextureSize;
     if(m_i->m_TextureAddress.size() == 1){
-        m_i->m_TextureAddress.push_back(GLuint(0));
+        m_i->m_TextureAddress.push_back(0);
         glGenTextures(1, &m_i->m_TextureAddress.at(1));
         glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
         for (uint i = 0; i < 6; ++i){
@@ -303,7 +303,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     size = preEnvFilterSize;
     if(m_i->m_TextureAddress.size() == 2){
         glBindTexture(m_i->m_Type,0);
-        m_i->m_TextureAddress.push_back(GLuint(0));
+        m_i->m_TextureAddress.push_back(0);
         glGenTextures(1, &m_i->m_TextureAddress.at(2));
         glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
         for (uint i = 0; i < 6; ++i){
