@@ -25,7 +25,9 @@
 #include <iostream>
 #endif
 
-class Engine::impl::Core::impl final{
+using namespace Engine;
+
+class epriv::Core::impl final{
     public:
 		void _init(){
 		}
@@ -34,15 +36,15 @@ class Engine::impl::Core::impl final{
 };
 
 
-Engine::impl::Core* Engine::impl::Core::m_Engine = nullptr;
-Engine::impl::Core::Core(const char* name,uint w,uint h):m_i(new impl){
-	m_EventManager = new Engine::impl::EventManager();
-	m_ResourceManager = new Engine::impl::ResourceManager(name,w,h);
-	m_TimeManager = new Engine::impl::TimeManager();
-	m_SoundManager = new Engine::impl::SoundManager();
+epriv::Core* epriv::Core::m_Engine = nullptr;
+epriv::Core::Core(const char* name,uint w,uint h):m_i(new impl){
+	m_EventManager = new epriv::EventManager();
+	m_ResourceManager = new epriv::ResourceManager(name,w,h);
+	m_TimeManager = new epriv::TimeManager();
+	m_SoundManager = new epriv::SoundManager();
 	m_i->_init();
 }
-Engine::impl::Core::~Core(){
+epriv::Core::~Core(){
 	SAFE_DELETE(m_EventManager);
 	SAFE_DELETE(m_SoundManager);
 	SAFE_DELETE(m_ResourceManager);
@@ -51,7 +53,7 @@ Engine::impl::Core::~Core(){
 }
 
 void Engine::init(const char* name,uint w,uint h){
-	Engine::impl::Core::m_Engine = new Engine::impl::Core(name,w,h);
+	epriv::Core::m_Engine = new epriv::Core(name,w,h);
 	Detail::EngineClass::initGame(name,w,h);
 }
 
@@ -67,54 +69,54 @@ void Engine::Detail::EngineClass::initGame(const char* name,uint w,uint h){
     Game::initLogic();
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
-	if(Engine::impl::Core::m_Engine->m_ResourceManager->_numScenes() == 0)
+	if(epriv::Core::m_Engine->m_ResourceManager->_numScenes() == 0)
         new Scene("Default");
 }
 void Engine::Detail::EngineClass::RESET_EVENTS(){
-    impl::Core::m_Engine->m_EventManager->_onResetEvents();
+    epriv::Core::m_Engine->m_EventManager->_onResetEvents();
 }
 void Engine::Detail::EngineClass::update(){
-	Engine::impl::Core::m_Engine->m_TimeManager->stop_update();
+	epriv::Core::m_Engine->m_TimeManager->stop_update();
 
-	float dt = Engine::impl::Core::m_Engine->m_TimeManager->dt();
+	float dt = epriv::Core::m_Engine->m_TimeManager->dt();
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
 
-    impl::Core::m_Engine->m_EventManager->_update(dt);
+    epriv::Core::m_Engine->m_EventManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 
-	Engine::impl::Core::m_Engine->m_TimeManager->calculate_update();
+	epriv::Core::m_Engine->m_TimeManager->calculate_update();
 }
 void Engine::Detail::EngineClass::updatePhysics(){
-	Engine::impl::Core::m_Engine->m_TimeManager->stop_physics();
+	epriv::Core::m_Engine->m_TimeManager->stop_physics();
 	Physics::Detail::PhysicsManagement::update(Resources::dt());
-	Engine::impl::Core::m_Engine->m_TimeManager->calculate_physics();
+	epriv::Core::m_Engine->m_TimeManager->calculate_physics();
 }
 void Engine::Detail::EngineClass::updateSounds(){
-	Engine::impl::Core::m_Engine->m_TimeManager->stop_sounds();
+	epriv::Core::m_Engine->m_TimeManager->stop_sounds();
 
-	impl::Core::m_Engine->m_SoundManager->_update( Resources::dt() );
+	epriv::Core::m_Engine->m_SoundManager->_update( Resources::dt() );
 
-	Engine::impl::Core::m_Engine->m_TimeManager->calculate_sounds();
+	epriv::Core::m_Engine->m_TimeManager->calculate_sounds();
 }
 void Engine::Detail::EngineClass::render(){
-	Engine::impl::Core::m_Engine->m_TimeManager->stop_render();
+	epriv::Core::m_Engine->m_TimeManager->stop_render();
 
     Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
 	Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getCurrentScene()->getActiveCamera(),x,y);
 
-	Engine::impl::Core::m_Engine->m_TimeManager->stop_rendering_display();
+	epriv::Core::m_Engine->m_TimeManager->stop_rendering_display();
     Resources::getWindow()->display();
-	Engine::impl::Core::m_Engine->m_TimeManager->calculate_rendering_display();
+	epriv::Core::m_Engine->m_TimeManager->calculate_rendering_display();
 
-	Engine::impl::Core::m_Engine->m_TimeManager->calculate_render();
+	epriv::Core::m_Engine->m_TimeManager->calculate_render();
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
     Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
-	Engine::impl::Core::m_Engine->m_ResourceManager->_resizeCameras(w,h);
+	epriv::Core::m_Engine->m_ResourceManager->_resizeCameras(w,h);
     Renderer::setViewport(0,0,w,h);
     Renderer::Detail::RenderManagement::m_gBuffer->resize(w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
@@ -134,28 +136,28 @@ void Engine::Detail::EngineClass::EVENT_TEXT_ENTERED(uint unicode){
     Game::onTextEntered(unicode);
 }
 void Engine::Detail::EngineClass::EVENT_KEY_PRESSED(uint key){
-	impl::Core::m_Engine->m_EventManager->_onEventKeyPressed(key);
+	epriv::Core::m_Engine->m_EventManager->_onEventKeyPressed(key);
     Game::onKeyPressed(key);
 }
 void Engine::Detail::EngineClass::EVENT_KEY_RELEASED(uint key){
-    impl::Core::m_Engine->m_EventManager->_onEventKeyReleased(key);
+    epriv::Core::m_Engine->m_EventManager->_onEventKeyReleased(key);
     Game::onKeyReleased(key);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_WHEEL_MOVED(int delta){
-    impl::Core::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
+    epriv::Core::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
     Game::onMouseWheelMoved(delta);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
-	impl::Core::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
+	epriv::Core::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(mouseButton);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
-	impl::Core::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
+	epriv::Core::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(mouseButton);
 }
 void Engine::Detail::EngineClass::EVENT_MOUSE_MOVED(float mouseX, float mouseY){
     if(Resources::getWindow()->hasFocus()){
-        impl::Core::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
+        epriv::Core::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
     }
     Game::onMouseMoved(mouseX,mouseY);
 }
@@ -220,11 +222,11 @@ void Engine::run(){
 		Detail::EngineClass::updateSounds();
         Detail::EngineClass::render();
 		
-		Engine::impl::Core::m_Engine->m_TimeManager->calculate();
+		epriv::Core::m_Engine->m_TimeManager->calculate();
     }
 	//destruct the engine here
     Game::cleanup();
-	SAFE_DELETE(Engine::impl::Core::m_Engine);
+	SAFE_DELETE(epriv::Core::m_Engine);
 	Engine::Physics::Detail::PhysicsManagement::destruct();
     Engine::Renderer::Detail::RenderManagement::destruct();
 }

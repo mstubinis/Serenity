@@ -11,18 +11,18 @@ class Engine_Window;
 typedef unsigned int uint;
 
 namespace Engine{
-	namespace impl{
+	namespace epriv{
 		class EventManager;  class ResourceManager;  class TimeManager;  class SoundManager;
 		class Core final{
 		    private:
 				class impl; std::unique_ptr<impl> m_i;
 		    public:
-				static Engine::impl::Core* m_Engine;
+				static Core* m_Engine;
 
-				Engine::impl::EventManager* m_EventManager;
-				Engine::impl::ResourceManager* m_ResourceManager;
-				Engine::impl::TimeManager* m_TimeManager;
-				Engine::impl::SoundManager* m_SoundManager;
+				EventManager* m_EventManager;
+				ResourceManager* m_ResourceManager;
+				TimeManager* m_TimeManager;
+				SoundManager* m_SoundManager;
 
 				Core(const char* name,uint width,uint height);
 				~Core();

@@ -7,7 +7,7 @@
 typedef unsigned int uint;
 
 namespace Engine{
-	namespace impl{
+	namespace epriv{
 		class TimeManager{
 			private:
 				class impl; std::unique_ptr<impl> m_i;

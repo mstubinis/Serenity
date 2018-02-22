@@ -27,9 +27,9 @@ Object::Object(string n,Scene* scene, bool isNotCamera){
         if(scene == nullptr){
             scene = Resources::getCurrentScene();
         }
-		n = Engine::impl::Core::m_Engine->m_ResourceManager->_buildObjectName(n);
+		n = epriv::Core::m_Engine->m_ResourceManager->_buildObjectName(n);
         setName(n);
-		Engine::impl::Core::m_Engine->m_ResourceManager->_addObject(this);
+		epriv::Core::m_Engine->m_ResourceManager->_addObject(this);
 
         scene->objects().emplace(name(),this);
     }

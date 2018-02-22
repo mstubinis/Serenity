@@ -69,7 +69,7 @@ class Engine_Window::impl final{
             Renderer::Settings::cullFace(GL_BACK);
 
             SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(m_Width,m_Height);
+            Renderer::Detail::RenderManagement::m_gBuffer = new epriv::GBuffer(m_Width,m_Height);
 
 			return m_SFMLWindow->getSettings();
         }
@@ -92,7 +92,7 @@ class Engine_Window::impl final{
             Renderer::GLEnable(GLState::CULL_FACE);
             Renderer::Settings::cullFace(GL_BACK);
 
-            Renderer::Detail::RenderManagement::m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+            Renderer::Detail::RenderManagement::m_gBuffer = new epriv::GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
             Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
         }
         void _setStyle(uint style){

@@ -8,38 +8,43 @@
 #include <unordered_map>
 
 class Texture;
-class FramebufferTexture;
-class FramebufferObject;
 typedef unsigned int uint;
-class GBufferType{public: enum Type{
-    Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Free2, Depth,
 
-    EnumTotal
-};};
+namespace Engine{
+	namespace epriv{
+		class FramebufferTexture;
+		class FramebufferObject;
+		class GBufferType{public: enum Type{
+			Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Free2, Depth,
 
-class GBuffer final{
-    private:
-        class impl; std::unique_ptr<impl> m_i;
-    public:
-        GBuffer(uint w,uint h);
-        ~GBuffer();
+			EnumTotal
+		};};
 
-        void resize(uint w,uint h);
+		class GBuffer final{
+			private:
+				class impl; std::unique_ptr<impl> m_i;
+			public:
+				GBuffer(uint w,uint h);
+				~GBuffer();
 
-        void start(std::vector<uint>&,std::string = "RGBA",bool = true);
-        void start(uint,std::string = "RGBA",bool = true);
-        void start(uint,uint,std::string = "RGBA",bool = true);
-        void start(uint,uint,uint,std::string = "RGBA",bool = true);
-        void start(uint,uint,uint,uint,std::string = "RGBA",bool = true);
-        void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
-        void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
-        void stop(GLuint fbo = 0,GLuint rbo = 0);
+				void resize(uint w,uint h);
 
-        const std::unordered_map<uint,FramebufferTexture*>& getBuffers() const;
-        FramebufferTexture* getBuffer(uint);
-        Texture* getTexture(uint);
+				void start(std::vector<uint>&,std::string = "RGBA",bool = true);
+				void start(uint,std::string = "RGBA",bool = true);
+				void start(uint,uint,std::string = "RGBA",bool = true);
+				void start(uint,uint,uint,std::string = "RGBA",bool = true);
+				void start(uint,uint,uint,uint,std::string = "RGBA",bool = true);
+				void start(uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
+				void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
+				void stop(GLuint fbo = 0,GLuint rbo = 0);
 
-        FramebufferObject* getMainFBO();
-        FramebufferObject* getSmallFBO();
+				const std::unordered_map<uint,FramebufferTexture*>& getBuffers() const;
+				FramebufferTexture* getBuffer(uint);
+				Texture* getTexture(uint);
+
+				FramebufferObject* getMainFBO();
+				FramebufferObject* getSmallFBO();
+		};
+	};
 };
 #endif

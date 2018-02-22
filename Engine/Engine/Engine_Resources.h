@@ -85,7 +85,7 @@ typedef EngineResource* BaseR;
 //typedef void* BaseR;
 
 namespace Engine{
-	namespace impl{
+	namespace epriv{
 		class ResourceManager final{
 		    private:
 				class impl;

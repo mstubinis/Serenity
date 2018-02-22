@@ -26,7 +26,7 @@ Camera::Camera(string n, float angle, float aspectRatio, float _near, float _far
     setPerspectiveProjection();
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
-	Engine::impl::Core::m_Engine->m_ResourceManager->_addCamera(this);
+	epriv::Core::m_Engine->m_ResourceManager->_addCamera(this);
 	scene->cameras().emplace(name(),this);
 	if(!scene->getActiveCamera()){
 		scene->setActiveCamera(this);
@@ -42,7 +42,7 @@ Camera::Camera(string n, float left, float right, float bottom, float top, float
     setOrthoProjection(left,right,bottom,top);
     lookAt(getPosition(),getPosition() + getForward(), getUp());
 
-    Engine::impl::Core::m_Engine->m_ResourceManager->_addCamera(this);
+    epriv::Core::m_Engine->m_ResourceManager->_addCamera(this);
 	scene->cameras().emplace(name(),this);
 	if(!scene->getActiveCamera()){
 		scene->setActiveCamera(this);

@@ -60,7 +60,7 @@ class MeshInstance::impl{
             m_NeedsUpdate = false;
 
             string n = m_Mesh->name() + "_" + m_Material->name();
-			n = Engine::impl::Core::m_Engine->m_ResourceManager->_buildMeshInstanceName(n);
+			n = epriv::Core::m_Engine->m_ResourceManager->_buildMeshInstanceName(n);
 
             super->setName(n);
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -235,13 +235,13 @@ DefaultMeshInstanceUnbindFunctor MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR;
 
 MeshInstance::MeshInstance(const string& parentName, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,parentName);
-	Engine::impl::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+	epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
 }
 MeshInstance::MeshInstance(const string& parentName,string mesh,string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
-    Engine::impl::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
 void MeshInstance::setPosition(float x, float y, float z){ m_i->_setPosition(x,y,z); }

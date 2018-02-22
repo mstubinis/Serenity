@@ -10,7 +10,7 @@
 typedef unsigned int uint;
 
 namespace Engine{
-	namespace impl{
+	namespace epriv{
 		class EventManager final{
 		    private:
 				class impl;

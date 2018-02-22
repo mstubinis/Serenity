@@ -28,7 +28,7 @@ class SoundData final: public EngineResource{
         void setVolume(float);
 };
 class SoundBaseClass{
-    friend class ::Engine::impl::SoundManager;
+    friend class ::Engine::epriv::SoundManager;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -118,7 +118,7 @@ class SoundQueue final{
 };
 
 namespace Engine{
-	namespace impl{
+	namespace epriv{
 		class SoundManager final{
             friend class ::SoundBaseClass;  friend class ::SoundBaseClass::impl;
 		    private:

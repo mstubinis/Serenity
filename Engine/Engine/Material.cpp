@@ -594,7 +594,7 @@ void Material::removeMeshEntry(string objectName){
 void Material::bind(){
     string& _name = name();
     if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
-        BindableResource::bind(); //bind custom data
+        BindableResource::bind();
         Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = _name;
     }
 }

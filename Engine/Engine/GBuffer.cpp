@@ -13,19 +13,19 @@ using namespace std;
 unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
     unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
                                        //winSizeRatio   //internFormat                 //pxl_components                   //pxl_format
-    m[GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
-    m[GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m[GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m[GBufferType::Lighting] = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
-    m[GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
-    m[GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m[GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m[GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
+    m[epriv::GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
+    m[epriv::GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
+    m[epriv::GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
+    m[epriv::GBufferType::Lighting] = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
+    m[epriv::GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
+    m[epriv::GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
+    m[epriv::GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
+    m[epriv::GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;
 }();
 
-class GBuffer::impl final{
+class epriv::GBuffer::impl final{
     public:
         FramebufferObject* m_FBO;
         FramebufferObject* m_SmallFBO;
@@ -144,25 +144,25 @@ class GBuffer::impl final{
             glClear(GL_COLOR_BUFFER_BIT);
         }
 };
-GBuffer::GBuffer(uint width,uint height):m_i(new impl){
+epriv::GBuffer::GBuffer(uint width,uint height):m_i(new impl){
     m_i->_init(width,height);
 }
-GBuffer::~GBuffer(){
+epriv::GBuffer::~GBuffer(){
     m_i->_destruct();
 }
-void GBuffer::resize(uint width, uint height){
+void epriv::GBuffer::resize(uint width, uint height){
     m_i->_resize(width,height);
 }
-void GBuffer::start(vector<uint>& t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
-void GBuffer::start(uint t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
-void GBuffer::start(uint t,uint t1,string c,bool mainFBO){m_i->_start(t,t1,c,mainFBO);}
-void GBuffer::start(uint t,uint t1,uint t2,string c,bool mainFBO){m_i->_start(t,t1,t2,c,mainFBO);}
-void GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,c,mainFBO);}
-void GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
-void GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,uint t5,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,t5,c,mainFBO);}
-void GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
-const unordered_map<uint,FramebufferTexture*>& GBuffer::getBuffers() const{ return m_i->m_Buffers; }
-Texture* GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t)->texture();}
-FramebufferTexture* GBuffer::getBuffer(uint t){ return m_i->m_Buffers.at(t); }
-FramebufferObject* GBuffer::getMainFBO(){ return m_i->m_FBO; }
-FramebufferObject* GBuffer::getSmallFBO(){ return m_i->m_SmallFBO; }
+void epriv::GBuffer::start(vector<uint>& t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
+void epriv::GBuffer::start(uint t,string c,bool mainFBO){m_i->_start(t,c,mainFBO);}
+void epriv::GBuffer::start(uint t,uint t1,string c,bool mainFBO){m_i->_start(t,t1,c,mainFBO);}
+void epriv::GBuffer::start(uint t,uint t1,uint t2,string c,bool mainFBO){m_i->_start(t,t1,t2,c,mainFBO);}
+void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,c,mainFBO);}
+void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
+void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,uint t5,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,t5,c,mainFBO);}
+void epriv::GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
+const unordered_map<uint,epriv::FramebufferTexture*>& epriv::GBuffer::getBuffers() const{ return m_i->m_Buffers; }
+Texture* epriv::GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t)->texture();}
+epriv::FramebufferTexture* epriv::GBuffer::getBuffer(uint t){ return m_i->m_Buffers.at(t); }
+epriv::FramebufferObject* epriv::GBuffer::getMainFBO(){ return m_i->m_FBO; }
+epriv::FramebufferObject* epriv::GBuffer::getSmallFBO(){ return m_i->m_SmallFBO; }

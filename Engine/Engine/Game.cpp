@@ -55,6 +55,7 @@ void Game::initResources(){
     Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","","AS_GroundFromSpace");
     Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
+
     Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
     Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
@@ -83,7 +84,6 @@ void Game::initLogic(){
     CapsuleSpace* cap = new CapsuleSpace();
 
 	Resources::setCurrentScene("Sol");
-    //Resources::setCurrentScene("CapsuleSpace");
     m_HUD = new HUD();
 }
 void Game::update(float dt){

@@ -27,7 +27,7 @@ class Shader::impl final{
             m_Type = type;
             m_FromFile = fromFile;
             super->setName(name);
-			Engine::impl::Core::m_Engine->m_ResourceManager->_addShader(super);
+			epriv::Core::m_Engine->m_ResourceManager->_addShader(super);
         }
 };
 Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
@@ -67,9 +67,9 @@ class ShaderP::impl final{
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
 
-		void _insertStringAtLine(std::string& source, const std::string& newLineContent,uint lineToInsertAt){
-			std::istringstream str(source); std::string line; 
-			std::vector<std::string> lines;
+		void _insertStringAtLine(string& source, const string& newLineContent,uint lineToInsertAt){
+			istringstream str(source); string line; 
+			vector<string> lines;
 			uint count = 0;
 			while(std::getline(str,line)){
 				lines.push_back(line + "\n");
@@ -83,17 +83,17 @@ class ShaderP::impl final{
 				source = source + line;
 			}
 		}
-        void _convertCode(std::string& _data,Shader* shader){
-			std::istringstream str(_data); std::string line; 
+        void _convertCode(string& _data,Shader* shader){
+			istringstream str(_data); string line; 
 			
 			//get the first line with actual content
 			while(true){
-			    std::getline(str,line);
+			    getline(str,line);
 				if(line != "" && line != "\n"){
 				    break;
 				}
 			}
-			std::string versionNumberString = std::regex_replace(line,std::regex("([^0-9])"),"");
+			string versionNumberString = regex_replace(line,regex("([^0-9])"),"");
 			uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
 			if (line == "#version 110"){
 			}
@@ -332,7 +332,7 @@ void ShaderP::unbind(){
     }
 }
 void ShaderP::addMaterial(const string& materialName){
-	if(materialName == "" || !Engine::impl::Core::m_Engine->m_ResourceManager->_hasMaterial(materialName)){
+	if(materialName == "" || !epriv::Core::m_Engine->m_ResourceManager->_hasMaterial(materialName)){
         cout << "Material : '" << materialName << "' does not exist (ShaderP::addMaterial()) Returning..." << endl;
         return;
     }

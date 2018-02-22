@@ -13,7 +13,11 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 namespace sf{ class Image; }
-class FramebufferTexture;
+namespace Engine{
+	namespace epriv{
+		class FramebufferTexture;
+	};
+};
 class TextureWrap{public: enum Wrap{
     Repeat,
     RepeatMirrored,
@@ -47,7 +51,7 @@ class Texture: public EngineResource{
         uint numAddresses();
         ushort mipmapLevels();
         bool mipmapped();
-        void resize(FramebufferTexture*,uint width,uint height);
+        void resize(Engine::epriv::FramebufferTexture*,uint width,uint height);
 
         ImageInternalFormat::Format internalFormat();
         ImagePixelFormat::Format pixelFormat();

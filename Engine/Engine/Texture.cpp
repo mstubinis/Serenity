@@ -59,9 +59,9 @@ class Texture::impl final{
                 vector<uchar> p(pxls,pxls+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
-			n = Engine::impl::Core::m_Engine->m_ResourceManager->_buildTextureName(n);
+			n = epriv::Core::m_Engine->m_ResourceManager->_buildTextureName(n);
             super->setName(n);
-            Engine::impl::Core::m_Engine->m_ResourceManager->_addTexture(super);
+            epriv::Core::m_Engine->m_ResourceManager->_addTexture(super);
         }
         void _load(Texture* super){
             if(m_TextureAddress.size() == 0)
@@ -163,7 +163,7 @@ class Texture::impl final{
                 else if(filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
             }
         }
-        void _resize(FramebufferTexture* t,uint w, uint h){
+        void _resize(epriv::FramebufferTexture* t,uint w, uint h){
             if(m_Files.size() == 0 || (m_Files.size() == 1 && m_Files.at(0) != "FRAMEBUFFER")){
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
@@ -270,7 +270,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
         glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
     }
     Renderer::unbindFBO();
-    FramebufferObject* fbo = new FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
+    epriv::FramebufferObject* fbo = new epriv::FramebufferObject(this->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
     fbo->bind();
 
     
@@ -343,7 +343,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     fbo->unbind();
     delete fbo;
 }
-void Texture::resize(FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
+void Texture::resize(epriv::FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
 uchar* Texture::pixels(){ return m_i->_getPixels(); }

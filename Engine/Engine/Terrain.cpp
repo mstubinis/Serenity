@@ -39,7 +39,7 @@ Terrain::Terrain(string n, sf::Image& image,string material,Scene* scene):Object
     btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
     m_RigidBody = new btRigidBody(rigidBodyCI);
 
-	Engine::impl::Core::m_Engine->m_ResourceManager->_addMesh(new Mesh(name(),(btHeightfieldTerrainShape*)(m_Collision->getCollisionShape()),0.0005f));
+	epriv::Core::m_Engine->m_ResourceManager->_addMesh(new Mesh(name(),(btHeightfieldTerrainShape*)(m_Collision->getCollisionShape()),0.0005f));
 
     if(material != ""){
         MeshInstance* meshInstance = new MeshInstance(name(),name(),material);

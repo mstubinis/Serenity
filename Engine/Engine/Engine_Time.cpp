@@ -4,9 +4,10 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace Engine;
 using namespace std;
 
-class Engine::impl::TimeManager::impl{
+class epriv::TimeManager::impl{
     public:
         sf::Clock update_clock;  sf::Clock physics_clock;  sf::Clock render_clock;   sf::Clock sounds_clock;
         double updateTime;        double physicsTime;        double renderTime;      double soundTime;
@@ -50,9 +51,9 @@ class Engine::impl::TimeManager::impl{
             string prevOutput = "";
         }
 };
-Engine::impl::TimeManager::TimeManager():m_i(new impl){m_i->_init();}
-Engine::impl::TimeManager::~TimeManager(){}
-void Engine::impl::TimeManager::calculate(){
+epriv::TimeManager::TimeManager():m_i(new impl){m_i->_init();}
+epriv::TimeManager::~TimeManager(){}
+void epriv::TimeManager::calculate(){
     m_i->deltaTime = float(m_i->updateTime + m_i->physicsTime + m_i->renderTime);
     m_i->applicationTime += m_i->deltaTime;
 
@@ -61,47 +62,47 @@ void Engine::impl::TimeManager::calculate(){
         m_i->output_frame = 0;
     }
 }
-void Engine::impl::TimeManager::stop_update(){ m_i->update_clock.restart(); }
-void Engine::impl::TimeManager::stop_physics(){ m_i->physics_clock.restart(); }
-void Engine::impl::TimeManager::stop_sounds(){ m_i->sounds_clock.restart(); }
-void Engine::impl::TimeManager::stop_render(){ m_i->render_clock.restart(); }
-void Engine::impl::TimeManager::calculate_update(){ m_i->updateTime = m_i->update_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_physics(){ m_i->physicsTime = m_i->physics_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_sounds(){ m_i->soundTime = m_i->sounds_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_render(){ m_i->renderTime = m_i->render_clock.restart().asSeconds(); }
-float Engine::impl::TimeManager::dt(){ return m_i->deltaTime; }
-float Engine::impl::TimeManager::applicationTime(){ return m_i->applicationTime; }
-float Engine::impl::TimeManager::updateTime(){ return m_i->updateTime; }
-float Engine::impl::TimeManager::physicsTime(){ return m_i->physicsTime; }
-float Engine::impl::TimeManager::renderTime(){ return m_i->renderTime; }
-float Engine::impl::TimeManager::soundsTime(){ return m_i->soundTime; }
+void epriv::TimeManager::stop_update(){ m_i->update_clock.restart(); }
+void epriv::TimeManager::stop_physics(){ m_i->physics_clock.restart(); }
+void epriv::TimeManager::stop_sounds(){ m_i->sounds_clock.restart(); }
+void epriv::TimeManager::stop_render(){ m_i->render_clock.restart(); }
+void epriv::TimeManager::calculate_update(){ m_i->updateTime = m_i->update_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_physics(){ m_i->physicsTime = m_i->physics_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_sounds(){ m_i->soundTime = m_i->sounds_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_render(){ m_i->renderTime = m_i->render_clock.restart().asSeconds(); }
+float epriv::TimeManager::dt(){ return m_i->deltaTime; }
+float epriv::TimeManager::applicationTime(){ return m_i->applicationTime; }
+float epriv::TimeManager::updateTime(){ return m_i->updateTime; }
+float epriv::TimeManager::physicsTime(){ return m_i->physicsTime; }
+float epriv::TimeManager::renderTime(){ return m_i->renderTime; }
+float epriv::TimeManager::soundsTime(){ return m_i->soundTime; }
 
 
 
-void Engine::impl::TimeManager::stop_rendering_geometry(){ m_i->rendering_geometry_clock.restart(); }
-void Engine::impl::TimeManager::stop_rendering_lighting(){ m_i->rendering_lighting_clock.restart(); }
-void Engine::impl::TimeManager::stop_rendering_ssao(){ m_i->rendering_ssao_clock.restart(); }
-void Engine::impl::TimeManager::stop_rendering_aa(){ m_i->rendering_aa_clock.restart(); }
-void Engine::impl::TimeManager::stop_rendering_godrays(){ m_i->rendering_godrays_clock.restart(); }
-void Engine::impl::TimeManager::stop_rendering_display(){ m_i->rendering_display_clock.restart(); }
+void epriv::TimeManager::stop_rendering_geometry(){ m_i->rendering_geometry_clock.restart(); }
+void epriv::TimeManager::stop_rendering_lighting(){ m_i->rendering_lighting_clock.restart(); }
+void epriv::TimeManager::stop_rendering_ssao(){ m_i->rendering_ssao_clock.restart(); }
+void epriv::TimeManager::stop_rendering_aa(){ m_i->rendering_aa_clock.restart(); }
+void epriv::TimeManager::stop_rendering_godrays(){ m_i->rendering_godrays_clock.restart(); }
+void epriv::TimeManager::stop_rendering_display(){ m_i->rendering_display_clock.restart(); }
 
-void Engine::impl::TimeManager::calculate_rendering_geometry(){ m_i->rendering_geometry_Time = m_i->rendering_geometry_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_rendering_lighting(){ m_i->rendering_lighting_Time = m_i->rendering_lighting_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_rendering_ssao(){ m_i->rendering_ssao_Time = m_i->rendering_ssao_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_rendering_aa(){ m_i->rendering_aa_Time = m_i->rendering_aa_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_rendering_godrays(){ m_i->rendering_godrays_Time = m_i->rendering_godrays_clock.restart().asSeconds(); }
-void Engine::impl::TimeManager::calculate_rendering_display(){ m_i->rendering_display_Time = m_i->rendering_display_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_rendering_geometry(){ m_i->rendering_geometry_Time = m_i->rendering_geometry_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_rendering_lighting(){ m_i->rendering_lighting_Time = m_i->rendering_lighting_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_rendering_ssao(){ m_i->rendering_ssao_Time = m_i->rendering_ssao_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_rendering_aa(){ m_i->rendering_aa_Time = m_i->rendering_aa_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_rendering_godrays(){ m_i->rendering_godrays_Time = m_i->rendering_godrays_clock.restart().asSeconds(); }
+void epriv::TimeManager::calculate_rendering_display(){ m_i->rendering_display_Time = m_i->rendering_display_clock.restart().asSeconds(); }
 
-float Engine::impl::TimeManager::rendering_geometryTime(){ return m_i->rendering_geometry_Time; }
-float Engine::impl::TimeManager::rendering_lightingTime(){ return m_i->rendering_lighting_Time; }
-float Engine::impl::TimeManager::rendering_ssaoTime(){ return m_i->rendering_ssao_Time; }
-float Engine::impl::TimeManager::rendering_aaTime(){ return m_i->rendering_aa_Time; }
-float Engine::impl::TimeManager::rendering_godraysTime(){ return m_i->rendering_godrays_Time; }
-float Engine::impl::TimeManager::rendering_displayTime(){ return m_i->rendering_display_Time; }
+float epriv::TimeManager::rendering_geometryTime(){ return m_i->rendering_geometry_Time; }
+float epriv::TimeManager::rendering_lightingTime(){ return m_i->rendering_lighting_Time; }
+float epriv::TimeManager::rendering_ssaoTime(){ return m_i->rendering_ssao_Time; }
+float epriv::TimeManager::rendering_aaTime(){ return m_i->rendering_aa_Time; }
+float epriv::TimeManager::rendering_godraysTime(){ return m_i->rendering_godrays_Time; }
+float epriv::TimeManager::rendering_displayTime(){ return m_i->rendering_display_Time; }
 
 
-std::string& Engine::impl::TimeManager::reportTime(){ return Engine::impl::TimeManager::reportTime(m_i->decimals); }
-std::string& Engine::impl::TimeManager::reportTime(uint decimals){
+string& epriv::TimeManager::reportTime(){ return epriv::TimeManager::reportTime(m_i->decimals); }
+string& epriv::TimeManager::reportTime(uint decimals){
 	m_i->decimals = decimals;
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){
@@ -125,8 +126,8 @@ std::string& Engine::impl::TimeManager::reportTime(uint decimals){
     }
     return m_i->prevOutput;
 }
-std::string& Engine::impl::TimeManager::reportTimeRendering(){ return Engine::impl::TimeManager::reportTimeRendering(m_i->decimals); }
-std::string& Engine::impl::TimeManager::reportTimeRendering(uint decimals){
+string& epriv::TimeManager::reportTimeRendering(){ return epriv::TimeManager::reportTimeRendering(m_i->decimals); }
+string& epriv::TimeManager::reportTimeRendering(uint decimals){
 	m_i->decimals = decimals;
     m_i->prevOutput = m_i->currOutput;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){

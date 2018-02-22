@@ -22,7 +22,7 @@
 using namespace Engine;
 using namespace std;
 
-unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
+unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = [](){
     unordered_map<uint,boost::tuple<float,float,float>> m;
 
     m[LightRange::_7] = boost::make_tuple(1.0f, 0.7f, 1.8f);
@@ -39,8 +39,7 @@ unordered_map<uint,boost::tuple<float,float,float>> _populateLightRanges(){
     m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
 
     return m;
-}
-unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = _populateLightRanges();
+}();
 
 SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1.0f),n,scene){
     m_Type = type;
@@ -991,7 +990,7 @@ float RodLight::rodLength(){ return m_RodLength; }
 class LightProbe::impl{
     public:
         uint m_EnvMapSize;
-        FramebufferObject* m_FBO;
+        epriv::FramebufferObject* m_FBO;
 
 		GLuint m_TextureEnvMap;
 		GLuint m_TextureConvolutionMap;
@@ -1024,7 +1023,7 @@ class LightProbe::impl{
             m_Views[4] = glm::lookAt(pos, pos + glm::vec3( 0, 0, 1), glm::vec3(0,-1, 0));
             m_Views[5] = glm::lookAt(pos, pos + glm::vec3( 0, 0,-1), glm::vec3(0,-1, 0));
 
-            m_FBO = new FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
+            m_FBO = new epriv::FramebufferObject(super->name() + " _ProbeFBO",m_EnvMapSize,m_EnvMapSize,ImageInternalFormat::Depth16);
 			m_FBO->check();
         }
         void _destruct(){
@@ -1083,7 +1082,7 @@ class LightProbe::impl{
 			if(m_SecondFrame == false){ m_SecondFrame = true; return; }
             if(m_DidFirst == true && m_OnlyOnce == true) return;
 			//determine which cube faces to render this frame
-			std::vector<uint> m_Sides;
+			vector<uint> m_Sides;
 			if(m_SidesPerFrame == 6){ for(uint i = 0; i < 6; i++){ m_Sides.push_back(i); } }
 			else{ uint _count = 0;
 				for(uint i = 0; i < 6; i++){

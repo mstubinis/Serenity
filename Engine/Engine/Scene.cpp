@@ -15,10 +15,10 @@ Scene::Scene(string name){
     m_Skybox = nullptr;
 	m_ActiveCamera = nullptr;
     m_BackgroundColor = glm::vec3(0.0f);
-	name = impl::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
+	name = epriv::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
     setName(name);
 
-	impl::Core::m_Engine->m_ResourceManager->_addScene(this);
+	epriv::Core::m_Engine->m_ResourceManager->_addScene(this);
 
     if(Resources::getCurrentScene() == nullptr){
 		Resources::setCurrentScene(this);
@@ -48,7 +48,7 @@ Scene::~Scene(){
 void Scene::update(float dt){
     for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
         if (it->second->isDestroyed()){
-            impl::Core::m_Engine->m_ResourceManager->_remObject(it->second->name());
+            epriv::Core::m_Engine->m_ResourceManager->_remObject(it->second->name());
             m_Objects.erase(it++);
         }
         else{
@@ -57,7 +57,7 @@ void Scene::update(float dt){
     }
     for (auto it = m_Cameras.cbegin(); it != m_Cameras.cend();){
         if (it->second->isDestroyed()){
-			impl::Core::m_Engine->m_ResourceManager->_remCamera(it->second->name());
+			epriv::Core::m_Engine->m_ResourceManager->_remCamera(it->second->name());
         }
         else{
 			it->second->update(dt); ++it;
