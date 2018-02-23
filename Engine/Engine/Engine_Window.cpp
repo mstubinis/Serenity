@@ -15,13 +15,16 @@ class Engine_Window::impl final{
         const char* m_WindowName;
         sf::Window* m_SFMLWindow;
         uint m_Width; uint m_Height;
+		bool m_MouseCursorVisible;
+		sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
+			m_MouseCursorVisible = true;
             m_WindowName = name;
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
-            const sf::ContextSettings ret = _createOpenGLWindow(name,width,height,3,3,330);
-			std::cout << "Using OpenGL: " << ret.majorVersion << "." << ret.minorVersion << ", with depth bits: " << ret.depthBits << " and stencil bits: " << ret.stencilBits << std::endl;
+            m_SFContextSettings = _createOpenGLWindow(name,width,height,3,3,330);
+			std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
         }
         void _destruct(){
             SAFE_DELETE(m_SFMLWindow);
@@ -75,8 +78,20 @@ class Engine_Window::impl final{
                 m_VideoMode.width = m_Width;
                 m_VideoMode.height = m_Height;
             }
-			epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style);
-            Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
+			epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
+
+			glm::uvec2 winSize = Engine::getWindowSize();
+
+			//basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
+			epriv::Core::m_Engine->m_RenderManager->_resize(winSize.x,winSize.y);
+			epriv::Core::m_Engine->m_ResourceManager->_resizeCameras(winSize.x,winSize.y);
+			Renderer::setViewport(0,0,winSize.x,winSize.y);
+			Engine::Resources::getWindow()->setSize(winSize.x,winSize.y);
+			Game::onResize(winSize.x,winSize.y);
+			//
+
+			//for some reason the mouse is shown even if it was hidden at first
+			m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
         }
         void _setStyle(uint style){
             if(m_Style == style) return;
@@ -103,6 +118,12 @@ class Engine_Window::impl final{
         void _setIcon(Texture* texture){
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }
+		void _setMouseCursorVisible(bool& visible){
+			if(m_MouseCursorVisible != visible){
+			    m_SFMLWindow->setMouseCursorVisible(visible);
+				m_MouseCursorVisible = visible;
+			}
+		}
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
@@ -118,7 +139,7 @@ const char* Engine_Window::name() const {return m_i->m_WindowName;}
 void Engine_Window::setName(const char* name){m_i->_setName(name);}
 void Engine_Window::setVerticalSyncEnabled(bool enabled){m_i->m_SFMLWindow->setVerticalSyncEnabled(enabled);}
 void Engine_Window::setKeyRepeatEnabled(bool enabled){m_i->m_SFMLWindow->setKeyRepeatEnabled(enabled);}
-void Engine_Window::setMouseCursorVisible(bool visible){m_i->m_SFMLWindow->setMouseCursorVisible(visible);}
+void Engine_Window::setMouseCursorVisible(bool visible){ m_i->_setMouseCursorVisible(visible); }
 void Engine_Window::requestFocus(){m_i->m_SFMLWindow->requestFocus();}
 void Engine_Window::close(){m_i->m_SFMLWindow->close();}
 bool Engine_Window::hasFocus(){return m_i->m_SFMLWindow->hasFocus();}

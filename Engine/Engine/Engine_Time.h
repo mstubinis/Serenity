@@ -12,8 +12,10 @@ namespace Engine{
 			private:
 				class impl; std::unique_ptr<impl> m_i;
 			public:
-				TimeManager();
+				TimeManager(const char* name,uint w,uint h);
 				~TimeManager();
+
+				void _init(const char* name,uint w,uint h);
 
 				void calculate();
 

@@ -239,7 +239,7 @@ class epriv::RenderManager::impl final{
 			m_IdentityMat3 = glm::mat3(1.0f);
 			#pragma endregion
 		}
-		void _postInit(uint& width,uint& height){
+		void _postInit(const char* name,uint& width,uint& height){
 			m_FullscreenQuad = new FullscreenQuad();
 	        m_FullscreenTriangle = new FullscreenTriangle();
 
@@ -312,15 +312,14 @@ class epriv::RenderManager::impl final{
 			m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
 			m_gBuffer->resize(w,h);
 		}
-		void _onFullscreen(sf::Window* sfWindow,sf::VideoMode& videoMode,const char* winName,uint& style){
+		void _onFullscreen(sf::Window* sfWindow,sf::VideoMode& videoMode,const char* winName,uint& style,sf::ContextSettings& settings){
             SAFE_DELETE(m_gBuffer);
-            sfWindow->create(videoMode,winName,style,sfWindow->getSettings());
-
-            Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
-            Renderer::GLEnable(GLState::CULL_FACE);
-            Renderer::Settings::cullFace(GL_BACK);
+            sfWindow->create(videoMode,winName,style,settings);
 
             m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+
+			//oh yea the opengl context is lost, gotta restore the state machine
+			Renderer::RestoreGLState();
 		}
 		void _onOpenGLContextCreation(uint& width,uint& height){
             glewExperimental = GL_TRUE;
@@ -1178,12 +1177,12 @@ class epriv::RenderManager::impl final{
 };
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
-void epriv::RenderManager::_init(uint w,uint h){ m_i->_postInit(w,h); }
+void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(g,c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
 void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(Core::m_Engine->m_RenderManager->m_i->m_gBuffer,c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ Core::m_Engine->m_RenderManager->m_i->m_gBuffer->resize(w,h); }
-void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s){ m_i->_onFullscreen(w,m,n,s); }
+void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h){ m_i->_onOpenGLContextCreation(w,h); }
 void epriv::RenderManager::_renderText(string name,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
 	Core::m_Engine->m_RenderManager->m_i->m_FontsToBeRendered.push_back(FontRenderInfo(name,text,pos,color,scl,angle,depth));

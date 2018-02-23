@@ -21,10 +21,12 @@ class epriv::EventManager::impl final{
 		uint m_currentKey, m_previousKey;
 		uint m_currentButton, m_previousButton;
 
-		void _init(){
+		void _init(const char* name,uint& w,uint& h){
 			_initVars();
 			_initKeyMap();
 			_initMouseMap();
+		}
+		void _postInit(const char* name,uint& w,uint& h){
 		}
 		void _initVars(){
 			m_Delta = 0;
@@ -339,11 +341,14 @@ class epriv::EventManager::impl final{
 			m_Difference *= (0.975f);
 		}
 };
-epriv::EventManager::EventManager():m_i(new impl){
-	m_i->_init();
+epriv::EventManager::EventManager(const char* name,uint w,uint h):m_i(new impl){
+	m_i->_init(name,w,h);
 }
 epriv::EventManager::~EventManager(){
 	m_i->_destruct();
+}
+void epriv::EventManager::_init(const char* name,uint w,uint h){
+	m_i->_postInit(name,w,h);
 }
 void epriv::EventManager::_onEventKeyPressed(uint& key){
 	m_i->_onEventKeyPressed(key);

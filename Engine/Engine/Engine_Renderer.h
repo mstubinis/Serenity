@@ -43,7 +43,7 @@ namespace Engine{
 				RenderManager(const char* name,uint w,uint h);
 				~RenderManager();
 
-				void _init(uint width,uint height);
+				void _init(const char* name,uint w,uint h);
 				void _resize(uint width, uint height);
 				void _resizeGbuffer(uint width,uint height);
 
@@ -57,7 +57,7 @@ namespace Engine{
                     bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
                     Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                 );
-				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style);
+				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
 				void _onOpenGLContextCreation(uint width,uint height);
 				void _renderText(std::string name,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
 				void _renderTexture(std::string name,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);

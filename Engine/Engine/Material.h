@@ -6,29 +6,33 @@
 #include <unordered_map>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-
 #include <glm/vec4.hpp>
+
+typedef unsigned int uint;
 
 class MeshInstance;
 class Texture;
 class ShaderP;
 class Mesh;
-typedef unsigned int uint;
 
-class MaterialComponentType{public: enum Type{
-    Diffuse,
-    Normal,
-    Glow,
-    Specular,
-    AO,
-    Metalness,
-    Smoothness,  
-    Reflection,
-    Refraction,
-	ParallaxOcclusion,
+namespace Engine{
+	namespace epriv{
+		class MaterialComponentType{public: enum Type{
+			Diffuse,
+			Normal,
+			Glow,
+			Specular,
+			AO,
+			Metalness,
+			Smoothness,  
+			Reflection,
+			Refraction,
+			ParallaxOcclusion,
 
-    Number,
-};};
+			Number,
+		};};
+	};
+};
 class MaterialPhysics{public: enum Physics{
     Water,
     Plastic_Or_Glass_Low,
@@ -75,7 +79,7 @@ class SpecularModel{public: enum Model{
 class MaterialComponent{
     protected:
         Texture* m_Texture;
-        MaterialComponentType::Type m_ComponentType;
+        Engine::epriv::MaterialComponentType::Type m_ComponentType;
     public:
         MaterialComponent(uint type,Texture*);
         MaterialComponent(uint type,std::string& texture);
@@ -85,7 +89,7 @@ class MaterialComponent{
         virtual void unbind();
 
         Texture* texture() const { return m_Texture; }
-        const MaterialComponentType::Type type() const { return static_cast<MaterialComponentType::Type>(m_ComponentType); }
+        const Engine::epriv::MaterialComponentType::Type type() const { return (Engine::epriv::MaterialComponentType::Type)(m_ComponentType); }
 };
 class MaterialComponentReflection: public MaterialComponent{
     protected:

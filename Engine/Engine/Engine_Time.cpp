@@ -28,7 +28,7 @@ class epriv::TimeManager::impl{
         string currOutput;
         string prevOutput;
 
-        void _init(){
+        void _init(const char* name,uint& w,uint& h){
             update_clock = sf::Clock();  physics_clock = sf::Clock();  render_clock = sf::Clock();  sounds_clock = sf::Clock();
             updateTime = 0;              physicsTime = 0;              renderTime = 0;              soundTime = 0;
 
@@ -50,9 +50,12 @@ class epriv::TimeManager::impl{
             string currOutput = "";
             string prevOutput = "";
         }
+		void _postInit(const char* name,uint& w,uint& h){
+		}
 };
-epriv::TimeManager::TimeManager():m_i(new impl){m_i->_init();}
+epriv::TimeManager::TimeManager(const char* name,uint w,uint h):m_i(new impl){m_i->_init(name,w,h);}
 epriv::TimeManager::~TimeManager(){}
+void epriv::TimeManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::TimeManager::calculate(){
     m_i->deltaTime = float(m_i->updateTime + m_i->physicsTime + m_i->renderTime);
     m_i->applicationTime += m_i->deltaTime;

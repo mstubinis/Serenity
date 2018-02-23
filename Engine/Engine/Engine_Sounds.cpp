@@ -118,7 +118,9 @@ class Engine::epriv::SoundManager::impl final{
         vector<boost::shared_ptr<SoundBaseClass>> m_CurrentlyPlayingSounds;
         vector<boost::shared_ptr<SoundQueue>> m_SoundQueues;
 
-		void _init(){
+		void _init(const char* name,uint& w,uint& h){
+		}
+		void _postInit(const char* name,uint& w,uint& h){
 		}
 		void _destruct(){
 			for(auto q:m_SoundQueues){ 
@@ -392,9 +394,9 @@ void SoundQueue::update(float dt){ m_i->_update(dt); }
 void SoundQueue::clear(){ m_i->_clear(); }
 bool SoundQueue::empty(){ if(m_i->m_Queue.size() > 0) return false; return true; }
 
-
-epriv::SoundManager::SoundManager():m_i(new impl){ m_i->_init(); }
+epriv::SoundManager::SoundManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::SoundManager::~SoundManager(){ m_i->_destruct(); }
+void epriv::SoundManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::SoundManager::_update(float dt){ m_i->_update(dt); }
 
 void Engine::Sound::playEffect(string nameOrFile,uint loops){

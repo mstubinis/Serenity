@@ -45,7 +45,7 @@ class epriv::PhysicsManager::impl final{
 
 		vector<Collision*> m_CollisionObjects;
 
-		void _init(){
+		void _init(const char* name,uint& w,uint& h){
 			m_Broadphase = new btDbvtBroadphase();
 			m_CollisionConfiguration = new btDefaultCollisionConfiguration();
 			m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
@@ -61,6 +61,8 @@ class epriv::PhysicsManager::impl final{
 
 			m_World->setInternalTickCallback(_preTicCallback,(void*)m_World,true);
 			m_World->setInternalTickCallback(_postTicCallback,(void*)m_World,false);
+		}
+		void _postInit(const char* name,uint w,uint h){
 		}
 		void _destruct(){
 			SAFE_DELETE(m_DebugDrawer);
@@ -123,8 +125,9 @@ vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end)
     return result;
 }
 
-epriv::PhysicsManager::PhysicsManager():m_i(new impl){ m_i->_init(); }
+epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
+void epriv::PhysicsManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
 void epriv::PhysicsManager::_render(){ m_i->_render(); }
 void epriv::PhysicsManager::_removeCollision(Collision* collisionObject){ m_i->_removeCollision(collisionObject); }

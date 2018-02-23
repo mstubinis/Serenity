@@ -57,8 +57,10 @@ namespace Engine{
 		    public:
 				std::unique_ptr<impl> m_i;
 
-				PhysicsManager();
+				PhysicsManager(const char* name,uint w,uint h);
 				~PhysicsManager();
+
+				void _init(const char* name,uint w,uint h);
 
 				void _update(float dt,int maxSteps = 1,float = 0.0166666f);
 				void _render();

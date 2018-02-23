@@ -103,7 +103,7 @@ void Game::update(float dt){
 
 	if(Engine::isKeyDownOnce("space")){
 	}
-
+	/*
     if(Engine::isKeyDown("z")){
         Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
     }
@@ -116,7 +116,7 @@ void Game::update(float dt){
     else if(Engine::isKeyDown("k")){
         Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.02f);
     }
-
+	*/
     if(Engine::isKeyDown("n")){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
@@ -200,9 +200,7 @@ void Game::onPostUpdate(float dt){
         float mouseDistFromCenter = glm::distance(mousePos,halfRes);
         if(mouseDistFromCenter > 1.0f){
             sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
-
 			Engine::setMousePosition(halfRes,false,true);
-            //Events::Mouse::MouseProcessing::m_Position = Events::Mouse::MouseProcessing::m_Position_Previous = halfRes;
         }
     }
 }

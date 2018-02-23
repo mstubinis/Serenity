@@ -126,9 +126,10 @@ namespace Engine{
 		    public:
 				std::unique_ptr<impl> m_i;
 
-				SoundManager();
+				SoundManager(const char* name,uint w,uint h);
 				~SoundManager();
 
+				void _init(const char* name,uint w,uint h);
 				void _update(float dt);
 		};
 	};

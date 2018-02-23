@@ -142,11 +142,11 @@ namespace Engine{
 
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
-    m_ComponentType = (MaterialComponentType::Type)type;
+    m_ComponentType = (epriv::MaterialComponentType::Type)type;
     m_Texture = t;
 }
 MaterialComponent::MaterialComponent(uint type,string& t){
-    m_ComponentType = (MaterialComponentType::Type)type;
+    m_ComponentType = (epriv::MaterialComponentType::Type)type;
     m_Texture = Resources::getTexture(t); 
     if(m_Texture == nullptr && t != "") m_Texture = new Texture(t);
 }
@@ -195,10 +195,10 @@ void MaterialComponentReflection::unbind(){
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
 }
-MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(MaterialComponentType::Refraction,cubemap,map,mix){
+MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(epriv::MaterialComponentType::Refraction,cubemap,map,mix){
     m_RefractionIndex = i;
 }
-MaterialComponentRefraction::MaterialComponentRefraction(string& cubemap,string& map,float i,float mix):MaterialComponentReflection(MaterialComponentType::Refraction,cubemap,map,mix){
+MaterialComponentRefraction::MaterialComponentRefraction(string& cubemap,string& map,float i,float mix):MaterialComponentReflection(epriv::MaterialComponentType::Refraction,cubemap,map,mix){
     m_RefractionIndex = i;
 }
 MaterialComponentRefraction::~MaterialComponentRefraction(){
@@ -216,10 +216,10 @@ void MaterialComponentRefraction::bind(){
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 
-MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
+MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(epriv::MaterialComponentType::ParallaxOcclusion,map){
     setHeightScale(heightScale);
 }
-MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(string& map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
+MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(string& map,float heightScale):MaterialComponent(epriv::MaterialComponentType::ParallaxOcclusion,map){
     setHeightScale(heightScale);
 }
 MaterialComponentParallaxOcclusion::~MaterialComponentParallaxOcclusion(){
@@ -274,22 +274,15 @@ class MaterialMeshEntry::impl final{
 };
 class Material::impl final{
     public:
+
         unordered_map<uint,MaterialComponent*> m_Components;
         vector<MaterialMeshEntry*> m_Meshes;
-    
-        uint m_DiffuseModel;
-        uint m_SpecularModel;
-  
+        uint m_DiffuseModel, m_SpecularModel;
         bool m_Shadeless;
-        float m_BaseGlow;
-    
         glm::vec3 m_F0Color;
-
-        float m_BaseSmoothness;
-        float m_BaseMetalness;
-        float m_BaseAO;
-
+        float m_BaseGlow, m_BaseAO, m_BaseMetalness, m_BaseSmoothness;
         uint m_ID;
+
         void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
             _addComponentDiffuse(diffuse);
             _addComponentNormal(normal);
@@ -358,58 +351,37 @@ class Material::impl final{
             for(auto component:m_Components)
                 delete component.second;
         }
-        void _addComponentDiffuse(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Diffuse) && m_Components.at(MaterialComponentType::Diffuse) != nullptr) || texture == nullptr)
+		void _addComponentGeneric(Texture* texture,epriv::MaterialComponentType::Type type){
+            if((m_Components.count(type) && m_Components.at(type) != nullptr) || texture == nullptr)
                 return;
-            m_Components.emplace(MaterialComponentType::Diffuse,new MaterialComponent(MaterialComponentType::Diffuse,texture));
-        }
-        void _addComponentNormal(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Normal) && m_Components.at(MaterialComponentType::Normal) != nullptr) || texture == nullptr)
+            m_Components.emplace(type,new MaterialComponent(type,texture));
+		}
+        void _addComponentDiffuse(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::Diffuse); }
+        void _addComponentNormal(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::Normal); }
+        void _addComponentGlow(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::Glow); }
+        void _addComponentSpecular(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::Specular); }
+        void _addComponentAO(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::AO); }
+        void _addComponentMetalness(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::Metalness); }
+        void _addComponentSmoothness(Texture* texture){ _addComponentGeneric(texture,epriv::MaterialComponentType::Smoothness); }
+        void _addComponentReflection(Texture* texture,Texture* map,float& mixFactor){
+			uint type = epriv::MaterialComponentType::Reflection;
+            if((m_Components.count(type) && m_Components.at(type) != nullptr) || (texture == nullptr || map == nullptr))
                 return;
-            m_Components.emplace(MaterialComponentType::Normal,new MaterialComponent(MaterialComponentType::Normal,texture));
+            m_Components.emplace(type,new MaterialComponentReflection(type,texture,map,mixFactor));
         }
-        void _addComponentGlow(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Glow) && m_Components.at(MaterialComponentType::Glow) != nullptr) || texture == nullptr)
+        void _addComponentRefraction(Texture* texture,Texture* map,float& refractiveIndex,float& mixFactor){
+			uint type = epriv::MaterialComponentType::Refraction;
+            if((m_Components.count(type) && m_Components.at(type) != nullptr) || (texture == nullptr || map == nullptr))
                 return;
-            m_Components.emplace(MaterialComponentType::Glow,new MaterialComponent(MaterialComponentType::Glow,texture));
+            m_Components.emplace(type,new MaterialComponentRefraction(texture,map,refractiveIndex,mixFactor));
         }
-        void _addComponentSpecular(Texture* texture){
-            if((m_Components.count(MaterialComponentType::Specular) && m_Components.at(MaterialComponentType::Specular) != nullptr) || texture == nullptr)
+        void _addComponentParallaxOcclusion(Texture* texture,float& heightScale){
+			uint type = epriv::MaterialComponentType::ParallaxOcclusion;
+            if((m_Components.count(type) && m_Components.at(type) != nullptr) || (texture == nullptr))
                 return;
-            m_Components.emplace(MaterialComponentType::Specular,new MaterialComponent(MaterialComponentType::Specular,texture));
+            m_Components.emplace(type,new MaterialComponentParallaxOcclusion(texture,heightScale));
         }
-        void _addComponentAO(Texture* map){
-            if((m_Components.count(MaterialComponentType::AO) && m_Components.at(MaterialComponentType::AO) != nullptr) || (map == nullptr))
-                return;
-            m_Components.emplace(MaterialComponentType::AO,new MaterialComponent(MaterialComponentType::AO,map));
-        }
-        void _addComponentMetalness(Texture* map){
-            if((m_Components.count(MaterialComponentType::Metalness) && m_Components.at(MaterialComponentType::Metalness) != nullptr) || (map == nullptr))
-                return;
-            m_Components.emplace(MaterialComponentType::Metalness,new MaterialComponent(MaterialComponentType::Metalness,map));
-        }
-        void _addComponentSmoothness(Texture* map){
-            if((m_Components.count(MaterialComponentType::Smoothness) && m_Components.at(MaterialComponentType::Smoothness) != nullptr) || (map == nullptr))
-                return;
-            m_Components.emplace(MaterialComponentType::Smoothness,new MaterialComponent(MaterialComponentType::Smoothness,map));
-        }
-        void _addComponentReflection(Texture* text,Texture* map,float mixFactor){
-            if((m_Components.count(MaterialComponentType::Reflection) && m_Components.at(MaterialComponentType::Reflection) != nullptr) || (text == nullptr || map == nullptr))
-                return;
-            m_Components.emplace(MaterialComponentType::Reflection,new MaterialComponentReflection(MaterialComponentType::Reflection,text,map,mixFactor));
-        }
-        void _addComponentRefraction(Texture* text,Texture* map,float refractiveIndex,float mixFactor){
-            if((m_Components.count(MaterialComponentType::Refraction) && m_Components.at(MaterialComponentType::Refraction) != nullptr) || (text == nullptr || map == nullptr))
-                return;
-            m_Components.emplace(MaterialComponentType::Refraction,new MaterialComponentRefraction(text,map,refractiveIndex,mixFactor));
-        }
-        void _addComponentParallaxOcclusion(Texture* map,float heightScale){
-			uint type = MaterialComponentType::ParallaxOcclusion;
-            if((m_Components.count(type) && m_Components.at(type) != nullptr) || (map == nullptr))
-                return;
-            m_Components.emplace(type,new MaterialComponentParallaxOcclusion(map,heightScale));
-        }
-        void _setF0Color(float r, float g, float b){
+        void _setF0Color(float r,float g,float b){
             m_F0Color.r = glm::clamp(r,0.001f,0.999f); 
             m_F0Color.g = glm::clamp(g,0.001f,0.999f); 
             m_F0Color.b = glm::clamp(b,0.001f,0.999f);
@@ -565,9 +537,9 @@ void Material::addComponentParallaxOcclusion(std::string textureFile,float heigh
 }
 const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(uint index) const { return m_i->m_Components.at(index); }
-const MaterialComponentReflection* Material::getComponentReflection() const { return (MaterialComponentReflection*)(m_i->m_Components.at(MaterialComponentType::Reflection)); }
-const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components.at(MaterialComponentType::Refraction)); }
-const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { return (MaterialComponentParallaxOcclusion*)(m_i->m_Components.at(MaterialComponentType::ParallaxOcclusion)); }
+const MaterialComponentReflection* Material::getComponentReflection() const { return (MaterialComponentReflection*)(m_i->m_Components.at(epriv::MaterialComponentType::Reflection)); }
+const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components.at(epriv::MaterialComponentType::Refraction)); }
+const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { return (MaterialComponentParallaxOcclusion*)(m_i->m_Components.at(epriv::MaterialComponentType::ParallaxOcclusion)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const uint Material::id() const { return m_i->m_ID; }
