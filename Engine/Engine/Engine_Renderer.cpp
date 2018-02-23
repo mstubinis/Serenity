@@ -274,10 +274,9 @@ class epriv::RenderManager::impl final{
 			glDepthFunc(GL_LEQUAL);
 			glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
-			//recommended for specular IBL. but causes HUGE fps drops 
-			//(prob because the gpu might not support it or glew is not loading it). investigate this...
-			//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-    
+			//ideal for specular IBL but causes INSANE fps drops (prob because the gpu might not support it or glew is not loading it). investigate this
+			//GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS);
+
 			// Create SMAA lookup textures
 			//area
 			glGenTextures(1,&SMAA_AreaTexture);
@@ -320,6 +319,8 @@ class epriv::RenderManager::impl final{
 
 			//oh yea the opengl context is lost, gotta restore the state machine
 			Renderer::RestoreGLState();
+			glClearStencil(0);
+			glDepthFunc(GL_LEQUAL);
 		}
 		void _onOpenGLContextCreation(uint& width,uint& height){
             glewExperimental = GL_TRUE;

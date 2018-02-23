@@ -16,9 +16,11 @@ class Engine_Window::impl final{
         sf::Window* m_SFMLWindow;
         uint m_Width; uint m_Height;
 		bool m_MouseCursorVisible;
+		bool m_Fullscreen;
 		sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
 			m_MouseCursorVisible = true;
+			m_Fullscreen = false;
             m_WindowName = name;
             m_Width = width;
             m_Height = height;
@@ -67,6 +69,7 @@ class Engine_Window::impl final{
 			return m_SFMLWindow->getSettings();
         }
         void _setFullScreen(bool fullscreen){
+			if(m_Fullscreen == fullscreen) return;
             if(m_Style == sf::Style::Fullscreen && fullscreen) return;
             if(m_Style != sf::Style::Fullscreen && !fullscreen) return;
             if(!m_SFMLWindow->hasFocus()) return;
@@ -86,12 +89,13 @@ class Engine_Window::impl final{
 			epriv::Core::m_Engine->m_RenderManager->_resize(winSize.x,winSize.y);
 			epriv::Core::m_Engine->m_ResourceManager->_resizeCameras(winSize.x,winSize.y);
 			Renderer::setViewport(0,0,winSize.x,winSize.y);
-			Engine::Resources::getWindow()->setSize(winSize.x,winSize.y);
 			Game::onResize(winSize.x,winSize.y);
-			//
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			//for some reason the mouse is shown even if it was hidden at first
 			m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
+
+			m_Fullscreen = fullscreen;
         }
         void _setStyle(uint style){
             if(m_Style == style) return;
@@ -144,6 +148,7 @@ void Engine_Window::requestFocus(){m_i->m_SFMLWindow->requestFocus();}
 void Engine_Window::close(){m_i->m_SFMLWindow->close();}
 bool Engine_Window::hasFocus(){return m_i->m_SFMLWindow->hasFocus();}
 bool Engine_Window::isOpen(){return m_i->m_SFMLWindow->isOpen();}
+bool Engine_Window::isFullscreen(){return m_i->m_Fullscreen;}
 void Engine_Window::display(){m_i->m_SFMLWindow->display();}
 void Engine_Window::setActive(bool active){m_i->m_SFMLWindow->setActive(active);}
 void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
