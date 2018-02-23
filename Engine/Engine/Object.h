@@ -4,6 +4,9 @@
 
 #include "BindableResource.h"
 #include "Engine_Math.h"
+#include "Engine.h"
+#include "Engine_EventDispatcher.h"
+#include "Engine_EventEnums.h"
 
 class Mesh;
 class Material;
@@ -14,8 +17,15 @@ typedef unsigned int GLuint;
 
 template <typename T> bool exists(const boost::weak_ptr<T>& t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
+
+
+
 class IObject: public BindableResource{
     public:
+		virtual void registerEvent(EventType::Type type){}
+		virtual void unregisterEvent(EventType::Type type){}
+		virtual void onEvent(const Event& e){}
+
         virtual void update(float) = 0;
 
         virtual void setPosition(float,float,float) = 0;
@@ -63,6 +73,15 @@ class Object: public IObject{
             bool = true               //This is not a camera
         );
         virtual ~Object();
+
+		void registerEvent(EventType::Type type){
+			Engine::epriv::Core::m_Engine->m_EventDispatcher->_registerObject(this,type);
+		}
+		void unregisterEvent(EventType::Type type){
+			Engine::epriv::Core::m_Engine->m_EventDispatcher->_unregisterObject(this,type);
+		}
+		virtual void onEvent(const Event& e){}
+
 
         void destroy(){ m_IsToBeDestroyed = true; }
         bool isDestroyed(){ return m_IsToBeDestroyed; }

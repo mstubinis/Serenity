@@ -87,13 +87,13 @@ void Game::initLogic(){
     m_HUD = new HUD();
 }
 void Game::update(float dt){
-    if(Engine::isKeyDown("esc")){
+	if(Engine::isKeyDown(KeyboardKey::Escape)){
         Engine::stop();
     }
-    if(Engine::isKeyDownOnce("f4")){
+	if(Engine::isKeyDownOnce(KeyboardKey::F4)){
         Resources::setCurrentScene("Sol");
     }
-    if(Engine::isKeyDownOnce("f5")){
+	if(Engine::isKeyDownOnce(KeyboardKey::F5)){
         Resources::setCurrentScene("CapsuleSpace");
     }
     if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
@@ -117,28 +117,28 @@ void Game::update(float dt){
         Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.02f);
     }
 	*/
-    if(Engine::isKeyDown("n")){
+	if(Engine::isKeyDown(KeyboardKey::N)){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
 		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() - 0.02f);
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() - 0.02f);
 		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
     }
-    else if(Engine::isKeyDown("m")){
+	else if(Engine::isKeyDown(KeyboardKey::M)){
         Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
         Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
 		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() + 0.02f);
 		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() + 0.02f);
 		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
     }
-    if(Engine::isKeyDown("v")){
+	if(Engine::isKeyDown(KeyboardKey::V)){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
 		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() - 0.02f);
 		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() - 0.02f);
 		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
     }
-    else if(Engine::isKeyDown("b")){
+	else if(Engine::isKeyDown(KeyboardKey::B)){
         Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
         Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
 		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() + 0.02f);

@@ -270,21 +270,16 @@ class epriv::EventManager::impl final{
 			m_MouseMap["middle button"] = sf::Mouse::Button::Middle;
 			m_MouseMap["middlebutton"] = sf::Mouse::Button::Middle;
 
-			m_MouseMap["none"] = uint(5);
+			m_MouseMap["XButton1"] = sf::Mouse::Button::XButton1;
+            m_MouseMap["XButton2"] = sf::Mouse::Button::XButton2;
+
+			//m_MouseMap["none"] = 100;
 		}
 		void _destruct(){
 			m_KeyStatus.clear();
 			m_MouseStatus.clear();
 			m_KeyMap.clear();
 			m_MouseMap.clear();
-		}
-		bool _isMouseButtonDown(string& str){
-			boost::algorithm::to_lower(str);
-			if(m_MouseStatus[m_MouseMap.at(str)]) return true; return false;
-		}
-		bool _isMouseButtonDownOnce(string& str){
-			bool res = _isMouseButtonDown(str);
-			if(res && m_currentButton == m_MouseMap.at(str) && (m_currentButton != m_previousButton)) return true; return false;
 		}
 		void _setMousePositionInternal(float x,float y,bool& resetDifference,bool& resetPrevious){
 			glm::vec2 newPos = glm::vec2(x,y);
@@ -307,6 +302,36 @@ class epriv::EventManager::impl final{
 			bool res = _isKeyDown(str);
 			if(res && m_currentKey == m_KeyMap.at(str) && (m_currentKey != m_previousKey)) return true; return false;
 		}
+
+
+		bool _isKeyDown(KeyboardKey::Key& key){
+			if(m_KeyStatus[key]) return true; return false;
+		}
+		bool _isKeyUp(KeyboardKey::Key& key){
+			if(!m_KeyStatus[key]) return true; return false;
+		}
+		bool _isKeyDownOnce(KeyboardKey::Key& key){
+			bool res = _isKeyDown(key);
+			if(res && m_currentKey == key && (m_currentKey != m_previousKey)) return true; return false;
+		}
+
+		bool _isMouseButtonDown(string& str){
+			boost::algorithm::to_lower(str);
+			if(m_MouseStatus[m_MouseMap.at(str)]) return true; return false;
+		}
+		bool _isMouseButtonDownOnce(string& str){
+			bool res = _isMouseButtonDown(str);
+			if(res && m_currentButton == m_MouseMap.at(str) && (m_currentButton != m_previousButton)) return true; return false;
+		}
+
+		bool _isMouseButtonDown(MouseButton::Button& button){
+			if(m_MouseStatus[button]) return true; return false;
+		}
+		bool _isMouseButtonDownOnce(MouseButton::Button& button){
+			bool res = _isMouseButtonDown(button);
+			if(res && m_currentButton == button && (m_currentButton != m_previousButton)) return true; return false;
+		}
+
 		void _onEventKeyPressed(uint& key){
 			m_previousKey = m_currentKey;
 			m_currentKey = key;
@@ -383,12 +408,30 @@ bool Engine::isKeyDownOnce(string str){
 bool Engine::isKeyUp(string str){
 	return epriv::Core::m_Engine->m_EventManager->m_i->_isKeyUp(str);
 }
+bool Engine::isKeyDown(KeyboardKey::Key key){
+	return epriv::Core::m_Engine->m_EventManager->m_i->_isKeyDown(key);
+}
+bool Engine::isKeyDownOnce(KeyboardKey::Key key){
+	return epriv::Core::m_Engine->m_EventManager->m_i->_isKeyDownOnce(key);
+}
+bool Engine::isKeyUp(KeyboardKey::Key key){
+	return epriv::Core::m_Engine->m_EventManager->m_i->_isKeyUp(key);
+}
+
 bool Engine::isMouseButtonDown(string str){
 	return epriv::Core::m_Engine->m_EventManager->m_i->_isMouseButtonDown(str);
 }
 bool Engine::isMouseButtonDownOnce(string str){
 	return epriv::Core::m_Engine->m_EventManager->m_i->_isMouseButtonDownOnce(str);
 }
+bool Engine::isMouseButtonDown(MouseButton::Button button){
+	return epriv::Core::m_Engine->m_EventManager->m_i->_isMouseButtonDown(button);
+}
+bool Engine::isMouseButtonDownOnce(MouseButton::Button button){
+	return epriv::Core::m_Engine->m_EventManager->m_i->_isMouseButtonDownOnce(button);
+}
+
+
 const glm::vec2& Engine::getMouseDifference(){
 	return epriv::Core::m_Engine->m_EventManager->m_i->m_Difference;
 }

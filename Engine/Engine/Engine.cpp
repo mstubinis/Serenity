@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Engine_Time.h"
+#include "Engine_EventDispatcher.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_Sounds.h"
@@ -29,6 +30,8 @@ using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
 
+bool m_IsKeyDown = false;
+
 epriv::Core::Core(const char* name,uint w,uint h){
 	m_EventManager = new epriv::EventManager(name,w,h);
 	m_ResourceManager = new epriv::ResourceManager(name,w,h);
@@ -36,6 +39,7 @@ epriv::Core::Core(const char* name,uint w,uint h){
 	m_SoundManager = new epriv::SoundManager(name,w,h);
 	m_PhysicsManager = new epriv::PhysicsManager(name,w,h);
 	m_RenderManager = new epriv::RenderManager(name,w,h);
+	m_EventDispatcher = new epriv::EventDispatcher(name,w,h);
 }
 epriv::Core::~Core(){
 	SAFE_DELETE(m_EventManager);
@@ -55,6 +59,7 @@ void Engine::init(const char* name,uint w,uint h){
 	epriv::Core::m_Engine->m_TimeManager->_init(name,w,h);
 	epriv::Core::m_Engine->m_SoundManager->_init(name,w,h);
 	epriv::Core::m_Engine->m_PhysicsManager->_init(name,w,h);
+	epriv::Core::m_Engine->m_EventDispatcher->_init(name,w,h);
 
 	//init the game here
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
@@ -111,49 +116,148 @@ void EVENT_RESIZE(uint w, uint h,bool saveSize){
     Renderer::setViewport(0,0,w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
     Game::onResize(w,h);
+
+	Event::EventWindowResized e;  e.width = w; e.height = h;
+	Event ev; ev.eventWindowResized = e; ev.type = EventType::WindowResized;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowResized,ev);
 }
 void EVENT_CLOSE(){
     Resources::getWindow()->close();
     Game::onClose();
+
+	Event e; e.type = EventType::WindowClosed;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowClosed,e);
 }
 void EVENT_LOST_FOCUS(){
     Game::onLostFocus();
+
+	Event e; e.type = EventType::WindowLostFocus;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowLostFocus,e);
 }
-void EVENT_GAINED_FOCUS(){ Game::onGainedFocus(); }
-void EVENT_TEXT_ENTERED(uint unicode){ Game::onTextEntered(unicode); }
+void EVENT_GAINED_FOCUS(){ 
+	Game::onGainedFocus();
+
+	Event e; e.type = EventType::WindowGainedFocus;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowGainedFocus,e);
+}
+void EVENT_TEXT_ENTERED(uint unicode){ 
+	Game::onTextEntered(unicode); 
+
+	Event::EventTextEntered e;  e.unicode = unicode;
+	Event ev;  ev.eventTextEntered = e; ev.type = EventType::TextEntered;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::TextEntered,ev);
+}
 void EVENT_KEY_PRESSED(uint key){
 	epriv::Core::m_Engine->m_EventManager->_onEventKeyPressed(key);
     Game::onKeyPressed(key);
+
+	Event::EventKeyboard e;  e.key = (KeyboardKey::Key)key;
+	if(Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl))  e.control = true;
+	if(Engine::isKeyDown(KeyboardKey::LeftAlt) || Engine::isKeyDown(KeyboardKey::RightAlt))          e.alt = true;
+	if(Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift))      e.shift = true;
+	if(Engine::isKeyDown(KeyboardKey::LeftSystem) || Engine::isKeyDown(KeyboardKey::RightSystem))    e.system = true;
+	Event ev;  ev.eventKeyboard = e; ev.type = EventType::KeyPressed;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::KeyPressed,ev);
 }
 void EVENT_KEY_RELEASED(uint key){
     epriv::Core::m_Engine->m_EventManager->_onEventKeyReleased(key);
     Game::onKeyReleased(key);
+
+	Event::EventKeyboard e;  e.key = (KeyboardKey::Key)key;
+	if(Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl))  e.control = true;
+	if(Engine::isKeyDown(KeyboardKey::LeftAlt) || Engine::isKeyDown(KeyboardKey::RightAlt))          e.alt = true;
+	if(Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift))      e.shift = true;
+	if(Engine::isKeyDown(KeyboardKey::LeftSystem) || Engine::isKeyDown(KeyboardKey::RightSystem))    e.system = true;
+	Event ev;  ev.eventKeyboard = e; ev.type = EventType::KeyReleased;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::KeyReleased,ev);
 }
 void EVENT_MOUSE_WHEEL_MOVED(int delta){
     epriv::Core::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
     Game::onMouseWheelMoved(delta);
+
+	Event::EventMouseWheel e;  e.delta = delta;
+	Event ev;  ev.eventMouseWheel = e; ev.type = EventType::MouseWheelMoved;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseWheelMoved,ev);
 }
 void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
 	epriv::Core::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(mouseButton);
+
+	const glm::uvec2 mpos = Engine::getMousePosition();
+	Event::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = mpos.x;  e.y = mpos.y;
+	Event ev; ev.eventMouseButton = e; ev.type = EventType::MouseButtonPressed;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseButtonPressed,ev);
 }
 void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
 	epriv::Core::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(mouseButton);
+
+	const glm::uvec2 mpos = Engine::getMousePosition();
+	Event::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = mpos.x;  e.y = mpos.y;
+	Event ev; ev.eventMouseButton = e; ev.type = EventType::MouseButtonReleased;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseButtonReleased,ev);
 }
 void EVENT_MOUSE_MOVED(float mouseX, float mouseY){
     if(Resources::getWindow()->hasFocus()){
         epriv::Core::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
     }
     Game::onMouseMoved(mouseX,mouseY);
+
+	Event::EventMouseMove e;  e.x = mouseX;  e.y = mouseY;
+	Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseMoved;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseMoved,ev);
 }
-void EVENT_MOUSE_ENTERED(){ Game::onMouseEntered(); }
-void EVENT_MOUSE_LEFT(){ Game::onMouseLeft(); }
-void EVENT_JOYSTICK_BUTTON_PRESSED(){ Game::onJoystickButtonPressed(); }
-void EVENT_JOYSTICK_BUTTON_RELEASED(){ Game::onJoystickButtonReleased(); }
-void EVENT_JOYSTICK_MOVED(){ Game::onJoystickMoved(); }
-void EVENT_JOYSTICK_CONNECTED(){ Game::onJoystickConnected(); }
-void EVENT_JOYSTICK_DISCONNECTED(){ Game::onJoystickDisconnected(); }
+void EVENT_MOUSE_ENTERED(){ 
+	Game::onMouseEntered(); 
+
+	const glm::uvec2 mpos = Engine::getMousePosition();
+	Event::EventMouseMove e;  e.x = mpos.x;  e.y = mpos.y;
+	Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseEnteredWindow;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseEnteredWindow,ev);
+}
+void EVENT_MOUSE_LEFT(){ 
+	Game::onMouseLeft(); 
+
+	const glm::uvec2 mpos = Engine::getMousePosition();
+	Event::EventMouseMove e;  e.x = mpos.x;  e.y = mpos.y;
+	Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseLeftWindow;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseLeftWindow,ev);
+}
+void EVENT_JOYSTICK_BUTTON_PRESSED(uint& button, uint& id){ 
+	Game::onJoystickButtonPressed();
+
+	Event::EventJoystickButton e;  e.button = button;  e.joystickID = id;
+	Event ev; ev.eventJoystickButton = e; ev.type = EventType::JoystickButtonPressed;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickButtonPressed,ev);
+}
+void EVENT_JOYSTICK_BUTTON_RELEASED(uint& button, uint& id){ 
+	Game::onJoystickButtonReleased();
+
+	Event::EventJoystickButton e;  e.button = button;  e.joystickID = id;
+	Event ev; ev.eventJoystickButton = e; ev.type = EventType::JoystickButtonReleased;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickButtonReleased,ev);
+}
+void EVENT_JOYSTICK_MOVED(uint& id,float& position,uint axis){
+	Game::onJoystickMoved();
+
+	Event::EventJoystickMoved e;  e.axis = (JoystickAxis::Axis)axis;  e.joystickID = id;  e.position = position;
+	Event ev; ev.eventJoystickMoved = e; ev.type = EventType::JoystickMoved;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickMoved,ev);
+}
+void EVENT_JOYSTICK_CONNECTED(uint& id){ 
+	Game::onJoystickConnected(); 
+
+	Event::EventJoystickConnection e;  e.joystickID = id;
+	Event ev; ev.eventJoystickConnection = e; ev.type = EventType::JoystickConnected;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickConnected,ev);
+}
+void EVENT_JOYSTICK_DISCONNECTED(uint& id){ 
+	Game::onJoystickDisconnected(); 
+
+	Event::EventJoystickConnection e;  e.joystickID = id;
+	Event ev; ev.eventJoystickConnection = e; ev.type = EventType::JoystickDisconnected;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickDisconnected,ev);
+}
 
 const float Engine::getFPS(){ return 1.0f / Resources::dt(); }
 Engine_Window* Engine::getWindow(){ return Engine::Resources::getWindow(); }
@@ -168,18 +272,25 @@ void handleEvents(){
 	sf::Event e;
     while(Resources::getWindow()->getSFMLHandle()->pollEvent(e)){
         switch(e.type){
-		    case sf::Event::Closed:{               EVENT_CLOSE();break;}
-			case sf::Event::KeyReleased:{          EVENT_KEY_RELEASED(e.key.code);break;}
-			case sf::Event::KeyPressed:{           EVENT_KEY_PRESSED(e.key.code);break;}
-			case sf::Event::MouseButtonPressed:{   EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton.button);break;}
-			case sf::Event::MouseButtonReleased:{  EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton.button);break;}
-			case sf::Event::MouseEntered:{         EVENT_MOUSE_ENTERED();break;}
-			case sf::Event::MouseLeft:{            EVENT_MOUSE_LEFT();break;}
-			case sf::Event::MouseWheelMoved:{      EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel.delta);break;}
-			case sf::Event::MouseMoved:{           EVENT_MOUSE_MOVED(e.mouseMove.x,e.mouseMove.y);break;}
-			case sf::Event::Resized:{              EVENT_RESIZE(e.size.width,e.size.height,true);break;}
-			case sf::Event::TextEntered:{          EVENT_TEXT_ENTERED(e.text.unicode);break;}
-			default:{                              break;}
+		    case sf::Event::Closed:{                    EVENT_CLOSE();break;}
+			case sf::Event::KeyReleased:{               EVENT_KEY_RELEASED(e.key.code);break;}
+			case sf::Event::KeyPressed:{                EVENT_KEY_PRESSED(e.key.code);break;}
+			case sf::Event::MouseButtonPressed:{        EVENT_MOUSE_BUTTON_PRESSED(e.mouseButton.button);break;}
+			case sf::Event::MouseButtonReleased:{       EVENT_MOUSE_BUTTON_RELEASED(e.mouseButton.button);break;}
+			case sf::Event::MouseEntered:{              EVENT_MOUSE_ENTERED();break;}
+			case sf::Event::MouseLeft:{                 EVENT_MOUSE_LEFT();break;}
+			case sf::Event::MouseWheelMoved:{           EVENT_MOUSE_WHEEL_MOVED(e.mouseWheel.delta);break;}
+			case sf::Event::MouseMoved:{                EVENT_MOUSE_MOVED(e.mouseMove.x,e.mouseMove.y);break;}
+			case sf::Event::Resized:{                   EVENT_RESIZE(e.size.width,e.size.height,true);break;}
+			case sf::Event::TextEntered:{               EVENT_TEXT_ENTERED(e.text.unicode);break;}
+
+			case sf::Event::JoystickButtonPressed:{     EVENT_JOYSTICK_BUTTON_PRESSED(e.joystickButton.button,e.joystickButton.joystickId);break;}
+			case sf::Event::JoystickButtonReleased:{    EVENT_JOYSTICK_BUTTON_RELEASED(e.joystickButton.button,e.joystickButton.joystickId);break;}
+			case sf::Event::JoystickConnected:{         EVENT_JOYSTICK_CONNECTED(e.joystickConnect.joystickId);break;}
+			case sf::Event::JoystickDisconnected:{      EVENT_JOYSTICK_DISCONNECTED(e.joystickConnect.joystickId);break;}
+			case sf::Event::JoystickMoved:{             EVENT_JOYSTICK_MOVED(e.joystickMove.joystickId,e.joystickMove.position,e.joystickMove.axis);break;}
+
+			default:{                                   break;}
         }
     }
 }

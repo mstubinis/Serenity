@@ -243,6 +243,12 @@
     <ClCompile Include="Engine_FullscreenItems.cpp">
       <Filter>Source Files\Engine\Engine_Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_EventDispatcher.cpp">
+      <Filter>Source Files\Engine\Engine_Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_EventObject.cpp">
+      <Filter>Source Files\Engine\Engine_Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -382,6 +388,15 @@
     </ClInclude>
     <ClInclude Include="Engine_FullscreenItems.h">
       <Filter>Header Files\Engine\Engine_Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_EventDispatcher.h">
+      <Filter>Header Files\Engine\Engine_Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_EventObject.h">
+      <Filter>Header Files\Engine\Engine_Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_EventEnums.h">
+      <Filter>Header Files\Engine\Engine_Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

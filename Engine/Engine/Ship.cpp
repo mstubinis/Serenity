@@ -306,3 +306,6 @@ void Ship::setTarget(Object* target){
 void Ship::setTarget(std::string target){
     Ship::setTarget(Resources::getObject(target));
 }
+void Ship::onEvent(const Event& e){
+
+}

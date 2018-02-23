@@ -6,8 +6,7 @@
 #include <unordered_map>
 #include <memory>
 #include "Engine_Math.h"
-
-typedef unsigned int uint;
+#include "Engine_EventEnums.h"
 
 namespace Engine{
 	namespace epriv{
@@ -38,10 +37,16 @@ namespace Engine{
     bool isKeyDown(std::string str);
     bool isKeyDownOnce(std::string str);
     bool isKeyUp(std::string str);
+    bool isKeyDown(KeyboardKey::Key);
+    bool isKeyDownOnce(KeyboardKey::Key);
+    bool isKeyUp(KeyboardKey::Key);
 
 	//mouse functions
     bool isMouseButtonDown(std::string str);
     bool isMouseButtonDownOnce(std::string str);
+    bool isMouseButtonDown(MouseButton::Button);
+    bool isMouseButtonDownOnce(MouseButton::Button);
+
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();

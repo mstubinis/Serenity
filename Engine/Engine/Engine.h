@@ -12,7 +12,8 @@ typedef unsigned int uint;
 
 namespace Engine{
 	namespace epriv{
-		class EventManager;  class ResourceManager;  class TimeManager;  class SoundManager;  class PhysicsManager;  class RenderManager;
+		class EventManager;     class SoundManager;  class RenderManager;
+		class ResourceManager;  class TimeManager;   class PhysicsManager;   class EventDispatcher;
 		class Core final{
 		    public:
 				static Core* m_Engine;
@@ -23,6 +24,7 @@ namespace Engine{
 				SoundManager* m_SoundManager;
 				PhysicsManager* m_PhysicsManager;
 				RenderManager* m_RenderManager;
+				EventDispatcher* m_EventDispatcher;
 
 				Core(const char* name,uint width,uint height);
 				~Core();
