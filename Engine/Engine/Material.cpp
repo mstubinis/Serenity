@@ -19,107 +19,127 @@ using namespace Engine;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
-GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
-    "DiffuseTexture",
-    "NormalTexture",
-    "GlowTexture",
-    "SpecularTexture",
-    "AOTexture",
-    "MetalnessTexture",
-    "SmoothnessTexture",
-    "ReflectionTexture",
-    "RefractionTexture",
-	"HeightmapTexture",
+
+namespace Engine{
+	namespace epriv{
+		class MaterialComponentTextureSlot{public: enum Slot{
+			Diffuse,
+			Normal,
+			Glow,
+			Specular,
+			AO,
+			Metalness,
+			Smoothness,
+			Reflection_CUBEMAP,
+			Reflection_CUBEMAP_MAP,
+			Refraction_CUBEMAP,
+			Refraction_CUBEMAP_MAP,
+			Heightmap,
+		};};
+		GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
+			"DiffuseTexture",
+			"NormalTexture",
+			"GlowTexture",
+			"SpecularTexture",
+			"AOTexture",
+			"MetalnessTexture",
+			"SmoothnessTexture",
+			"ReflectionTexture",
+			"RefractionTexture",
+			"HeightmapTexture",
+		};
+		struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
+			Material* material = (Material*)r;
+			glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
+			for(uint i = 0; i < MaterialComponentType::Number; i++){
+				if(material->getComponents().count(i)){
+					MaterialComponent* component = material->getComponents().at(i);
+					if(component->texture() != nullptr && component->texture()->address() != 0){
+						//enable
+						if     (i == 0) { first.x = 1.0f; }
+						else if(i == 1) { first.y = 1.0f; }
+						else if(i == 2) { first.z = 1.0f; }
+						else if(i == 3) { first.w = 1.0f; }
+						else if(i == 4) { second.x = 1.0f; }
+						else if(i == 5) { second.y = 1.0f; }
+						else if(i == 6) { second.z = 1.0f; }
+						else if(i == 7) { second.w = 1.0f; }
+						else if(i == 8) { third.x = 1.0f; }
+						else if(i == 9) { third.y = 1.0f; }
+						else if(i == 10){ third.z = 1.0f; }
+						else if(i == 11){ third.w = 1.0f; }
+						component->bind();
+					}
+					else{ 
+						component->unbind(); 
+					}
+				}
+			}
+			Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
+
+			Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material->glow(),material->ao(),material->metalness(),material->smoothness());
+
+			Renderer::sendUniform1fSafe("matID",float(material->id()));
+			Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
+			Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
+			Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
+		}};
+		struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
+			//Material* m = (Material*)r;
+		}};
+		struct srtKey{inline bool operator()(MaterialMeshEntry* _1,MaterialMeshEntry* _2){return(_1->mesh()->name()<_2->mesh()->name());}};
+
+		unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
+			unordered_map<uint,vector<uint>> m;
+			m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
+			m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
+			m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
+			m[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
+			m[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
+			m[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
+			m[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
+			m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
+			m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
+			m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
+			m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
+			m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
+			return m;
+		}();
+		unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
+			unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
+			//Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
+			m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
+			m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
+			m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f,    0.98f,          0.0f);
+			m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.0773f,0.0773f,0.0773f,       0.98f,          0.0f);
+			m[MaterialPhysics::Gold]                 = boost::make_tuple(1.022f,0.7655f,0.336f,         0.9f,           1.0f);
+			m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,             0.5f,           1.0f);
+			m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,             0.92f,          0.0f);
+			m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,             0.965f,         0.0f);
+			m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,             0.94f,          1.0f);
+			m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,             0.5f,           0.0f);
+			m[MaterialPhysics::Skin]                 = boost::make_tuple(0.028f,0.028f,0.028f,          0.1f,           0.0f);
+			m[MaterialPhysics::Quartz]               = boost::make_tuple(0.045594f,0.045594f,0.04554f,  0.8f,           0.0f);
+			m[MaterialPhysics::Crystal]              = boost::make_tuple(0.11111f,0.11111f,0.11111f,    0.9f,           0.0f);
+			m[MaterialPhysics::Alcohol]              = boost::make_tuple(0.01995f,0.01995f,0.01995f,    0.8f,           0.0f);
+			m[MaterialPhysics::Milk]                 = boost::make_tuple(0.02218f,0.02218f,0.02218f,    0.6f,           0.0f);
+			m[MaterialPhysics::Glass]                = boost::make_tuple(0.04f,0.04f,0.04f,             0.97f,          0.0f);
+			m[MaterialPhysics::Titanium]             = boost::make_tuple(0.5419f,0.4967f,0.4494f,       0.91f,          1.0f);
+			m[MaterialPhysics::Platinum]             = boost::make_tuple(0.6724f,0.6373f,0.5854f,       0.91f,          1.0f);
+			m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597f,0.6086f,0.5256f,       0.95f,          1.0f);    
+			m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,          0.45f,          0.0f);
+			m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,             0.32f,          0.0f);
+			m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,          0.8f,           1.0f);
+			m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,             0.92f,          0.0f);
+			m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,             0.35f,          0.0f);
+			m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,           0.9f,           1.0f);
+			m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
+			return m;
+		}();
+	};
 };
 
-struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-    Material* material = (Material*)r;
-    glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
-    for(uint i = 0; i < MaterialComponentType::Number; i++){
-        if(material->getComponents().count(i)){
-            MaterialComponent* component = material->getComponents().at(i);
-            if(component->texture() != nullptr && component->texture()->address() != 0){
-                //enable
-                if     (i == 0) { first.x = 1.0f; }
-                else if(i == 1) { first.y = 1.0f; }
-                else if(i == 2) { first.z = 1.0f; }
-                else if(i == 3) { first.w = 1.0f; }
-                else if(i == 4) { second.x = 1.0f; }
-                else if(i == 5) { second.y = 1.0f; }
-                else if(i == 6) { second.z = 1.0f; }
-                else if(i == 7) { second.w = 1.0f; }
-                else if(i == 8) { third.x = 1.0f; }
-				else if(i == 9) { third.y = 1.0f; }
-				else if(i == 10){ third.z = 1.0f; }
-				else if(i == 11){ third.w = 1.0f; }
-                component->bind();
-            }
-            else{ 
-                component->unbind(); 
-            }
-        }
-    }
-    Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
 
-	Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material->glow(),material->ao(),material->metalness(),material->smoothness());
-
-    Renderer::sendUniform1fSafe("matID",float(material->id()));
-    Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
-    Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
-    Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
-}};
-struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
-    //Material* m = (Material*)r;
-}};
-struct srtKey{inline bool operator()(MaterialMeshEntry* _1,MaterialMeshEntry* _2){return(_1->mesh()->name()<_2->mesh()->name());}};
-
-unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
-    unordered_map<uint,vector<uint>> m;
-    m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
-    m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
-    m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
-    m[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
-    m[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
-    m[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
-    m[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
-    m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
-    m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
-    m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
-    m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
-    m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
-    return m;
-}();
-unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
-    unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
-    //Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
-    m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
-    m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
-    m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f,    0.98f,          0.0f);
-    m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.0773f,0.0773f,0.0773f,       0.98f,          0.0f);
-    m[MaterialPhysics::Gold]                 = boost::make_tuple(1.022f,0.7655f,0.336f,         0.9f,           1.0f);
-    m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,             0.5f,           1.0f);
-    m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,             0.92f,          0.0f);
-    m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,             0.965f,         0.0f);
-    m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,             0.94f,          1.0f);
-    m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,             0.5f,           0.0f);
-    m[MaterialPhysics::Skin]                 = boost::make_tuple(0.028f,0.028f,0.028f,          0.1f,           0.0f);
-    m[MaterialPhysics::Quartz]               = boost::make_tuple(0.045594f,0.045594f,0.04554f,  0.8f,           0.0f);
-    m[MaterialPhysics::Crystal]              = boost::make_tuple(0.11111f,0.11111f,0.11111f,    0.9f,           0.0f);
-    m[MaterialPhysics::Alcohol]              = boost::make_tuple(0.01995f,0.01995f,0.01995f,    0.8f,           0.0f);
-    m[MaterialPhysics::Milk]                 = boost::make_tuple(0.02218f,0.02218f,0.02218f,    0.6f,           0.0f);
-    m[MaterialPhysics::Glass]                = boost::make_tuple(0.04f,0.04f,0.04f,             0.97f,          0.0f);
-    m[MaterialPhysics::Titanium]             = boost::make_tuple(0.5419f,0.4967f,0.4494f,       0.91f,          1.0f);
-    m[MaterialPhysics::Platinum]             = boost::make_tuple(0.6724f,0.6373f,0.5854f,       0.91f,          1.0f);
-    m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597f,0.6086f,0.5256f,       0.95f,          1.0f);    
-    m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,          0.45f,          0.0f);
-    m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,             0.32f,          0.0f);
-    m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,          0.8f,           1.0f);
-    m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,             0.92f,          0.0f);
-    m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,             0.35f,          0.0f);
-    m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,           0.9f,           1.0f);
-    m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
-    return m;
-}();
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (MaterialComponentType::Type)type;
@@ -133,14 +153,14 @@ MaterialComponent::MaterialComponent(uint type,string& t){
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); i++){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     for(uint i = 0; i < slots.size(); i++){
         Renderer::unbindTexture2D(slots.at(i));
     }
@@ -161,8 +181,8 @@ void MaterialComponentReflection::setMixFactor(float factor){
     m_MixFactor = glm::clamp(factor,0.0f,1.0f);
 }
 void MaterialComponentReflection::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     if(m_Texture == nullptr)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
@@ -171,7 +191,7 @@ void MaterialComponentReflection::bind(){
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     Renderer::unbindTexture2D(slots.at(0));
     Renderer::unbindTextureCubemap(slots.at(1));
 }
@@ -185,8 +205,8 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
 void MaterialComponentRefraction::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
     if(m_Texture == nullptr)
@@ -209,16 +229,18 @@ void MaterialComponentParallaxOcclusion::setHeightScale(float factor){
     m_HeightScale = factor;
 }
 void MaterialComponentParallaxOcclusion::bind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    string textureTypeName = MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("ParallaxHeightScale",m_HeightScale);
     Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
 }
 void MaterialComponentParallaxOcclusion::unbind(){
-    vector<uint>& slots = MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     Renderer::unbindTexture2D(slots.at(0));
 }
 
+epriv::DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
+epriv::DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class MaterialMeshEntry::impl final{
     public:
 	    Mesh* m_Mesh;
@@ -252,9 +274,6 @@ class MaterialMeshEntry::impl final{
 };
 class Material::impl final{
     public:
-        static DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
         unordered_map<uint,MaterialComponent*> m_Components;
         vector<MaterialMeshEntry*> m_Meshes;
     
@@ -290,8 +309,8 @@ class Material::impl final{
             m_Shadeless = false;
             m_BaseGlow = 0.0f;
 
-            super->setCustomBindFunctor(Material::impl::DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(Material::impl::DEFAULT_UNBIND_FUNCTOR);
+            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super->load();
         }
         void _init(string& name,string& diffuse,string& normal,string& glow,string& specular,Material* super){
@@ -410,8 +429,6 @@ class Material::impl final{
         void _setAO(float a){                            m_BaseAO = glm::clamp(a,0.001f,0.999f);         _updateGlobalMaterialPool(); }
         void _setMetalness(float m){                     m_BaseMetalness = glm::clamp(m,0.001f,0.999f);  _updateGlobalMaterialPool(); }
 };
-DefaultMaterialBindFunctor Material::impl::DEFAULT_BIND_FUNCTOR;
-DefaultMaterialUnbindFunctor Material::impl::DEFAULT_UNBIND_FUNCTOR;
 
 
 MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
@@ -564,7 +581,7 @@ void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setF0Color(glm::vec3 color){ Material::setF0Color(color.r, color.g, color.b); }
 void Material::setF0Color(float r, float g, float b){ m_i->_setF0Color(r, g, b); }
 void Material::setMaterialPhysics(MaterialPhysics::Physics c){
-    boost::tuple<float, float, float, float, float>& t = MATERIAL_PROPERTIES.at(c);
+    boost::tuple<float, float, float, float, float>& t = epriv::MATERIAL_PROPERTIES.at(c);
     m_i->_setMaterialProperties( t.get<0>(), t.get<1>(), t.get<2>(), t.get<3>(), t.get<4>() );
 }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
@@ -577,7 +594,7 @@ void Material::addMeshEntry(string objectName){
         if(entry->mesh() == Resources::getMesh(objectName)){ return; }
     }
     m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
-    sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey());
+    sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),epriv::srtKey());
 }
 void Material::removeMeshEntry(string objectName){
     bool did = false;
@@ -590,7 +607,7 @@ void Material::removeMeshEntry(string objectName){
         }
         else ++it;
     }
-    if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey()); }
+    if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),epriv::srtKey()); }
 }
 void Material::bind(){
 	bool res = epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this);

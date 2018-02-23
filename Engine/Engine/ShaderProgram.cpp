@@ -17,6 +17,27 @@
 using namespace Engine;
 using namespace std;
 
+namespace Engine{
+	namespace epriv{
+		struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
+			Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
+			Camera* c = s->getActiveCamera();        if(c == nullptr) return;
+			Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
+			Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+
+			glm::vec3 camPos = c->getPosition();
+			Renderer::sendUniform3fSafe("CameraPosition",camPos);
+
+			if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
+			else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
+		}};
+		struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
+		}};
+		struct srtKey{inline bool operator() ( Material* _1,  Material* _2){return (_1->name() < _2->name());}};
+	};
+};
+
+
 class Shader::impl final{
     public:
         ShaderType::Type m_Type;
@@ -39,27 +60,10 @@ ShaderType::Type Shader::type(){ return m_i->m_Type; }
 string Shader::data(){ return m_i->m_Data; }
 bool Shader::fromFile(){ return m_i->m_FromFile; }
 
-struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
-	Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
-    Camera* c = s->getActiveCamera();        if(c == nullptr) return;
-    Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
-    Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
-
-    glm::vec3 camPos = c->getPosition();
-    Renderer::sendUniform3fSafe("CameraPosition",camPos);
-
-	if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
-    else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
-}};
-struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
-}};
-struct srtKey{inline bool operator() ( Material* _1,  Material* _2){return (_1->name() < _2->name());}};
-
+epriv::DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
+epriv::DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class ShaderP::impl final{
     public:
-        static DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultShaderUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
         ShaderRenderPass::Pass m_Stage;
         GLuint m_ShaderProgram;
         vector<Material*> m_Materials;
@@ -292,9 +296,6 @@ class ShaderP::impl final{
             return pid;
         }
 };
-DefaultShaderBindFunctor ShaderP::impl::DEFAULT_BIND_FUNCTOR;
-DefaultShaderUnbindFunctor ShaderP::impl::DEFAULT_UNBIND_FUNCTOR;
-
 ShaderP::ShaderP(string& n, string& vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
 ShaderP::ShaderP(string& n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
 ShaderP::ShaderP(string& n, Shader* vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
@@ -312,7 +313,6 @@ void ShaderP::bind(){
 }
 void ShaderP::unbind(){
     BindableResource::unbind();
-	epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram();
 }
 void ShaderP::addMaterial(const string& materialName){
 	if(materialName == "" || !epriv::Core::m_Engine->m_ResourceManager->_hasMaterial(materialName)){
@@ -321,6 +321,6 @@ void ShaderP::addMaterial(const string& materialName){
     }
     Material* mat = Resources::getMaterial(materialName);
     m_i->m_Materials.push_back(mat);
-    sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),srtKey());
+    sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),epriv::srtKey());
 }
 const unordered_map<string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }

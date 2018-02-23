@@ -19,34 +19,10 @@ class ObjectDisplay;
 class ObjectDynamic;
 class Camera;
 
-
-struct TextureRenderInfo{
-    std::string texture;
-    glm::vec2 pos;
-    glm::vec4 col;
-    glm::vec2 scl;
-    float rot;
-    float depth;
-    TextureRenderInfo(){
-        texture = ""; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
-    }
-    TextureRenderInfo(std::string _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
-        texture = _texture; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
-    }
-};
-struct FontRenderInfo final: public TextureRenderInfo{
-    std::string text;
-    FontRenderInfo():TextureRenderInfo(){
-        text = "";
-    }
-    FontRenderInfo(std::string _font, std::string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth):TextureRenderInfo(_font,_pos,_col,_scl,_rot,_depth){
-        text = _text;
-    }
-};
 class SMAAQualityLevel{public: enum Level{
     Low,Medium,High,Ultra
 };};
-class HDRToneMapAlgorithm{public: enum Algorithm{
+class HDRAlgorithm{public: enum Algorithm{
     REINHARD,FILMIC,EXPOSURE,UNCHARTED
 };};
 class AntiAliasingAlgorithm{public: enum Algorithm{
@@ -67,8 +43,9 @@ namespace Engine{
 				RenderManager(const char* name,uint w,uint h);
 				~RenderManager();
 
-				void _resize(uint w, uint h);
-				void _resizeGbuffer(uint w,uint h);
+				void _init(uint width,uint height);
+				void _resize(uint width, uint height);
+				void _resizeGbuffer(uint width,uint height);
 
                 void _render(
                     epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
@@ -86,12 +63,9 @@ namespace Engine{
 				void _renderTexture(std::string name,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
 				void _addShaderToStage(ShaderP*,uint stage);
 				void _bindShaderProgram(ShaderP*);
-				void _unbindShaderProgram();
 				bool _bindMaterial(Material*);
 				bool _unbindMaterial();
-				void _init();
 		};
-
 	};
     namespace Renderer{
         namespace Settings{
@@ -128,9 +102,10 @@ namespace Engine{
                 void setSpanMax(float r);     float getSpanMax();
             };
             namespace HDR{
+				bool enabled();
                 void enable(bool b = true);   void disable();
                 float getExposure();          void setExposure(float e);
-                void setAlgorithm(HDRToneMapAlgorithm::Algorithm a);
+                void setAlgorithm(HDRAlgorithm::Algorithm a);
             };
             namespace Bloom{
                 void enable(bool b = true);   void disable();

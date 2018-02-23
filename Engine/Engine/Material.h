@@ -29,20 +29,6 @@ class MaterialComponentType{public: enum Type{
 
     Number,
 };};
-class MaterialComponentTextureSlot{public: enum Slot{
-    Diffuse,
-    Normal,
-    Glow,
-    Specular,
-    AO,
-    Metalness,
-    Smoothness,
-    Reflection_CUBEMAP,
-    Reflection_CUBEMAP_MAP,
-    Refraction_CUBEMAP,
-    Refraction_CUBEMAP_MAP,
-	Heightmap,
-};};
 class MaterialPhysics{public: enum Physics{
     Water,
     Plastic_Or_Glass_Low,

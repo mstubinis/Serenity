@@ -22,7 +22,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
 
-    Planet* obj = static_cast<Planet*>(o.lock().get());
+    Planet* obj = (Planet*)(o.lock().get());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
     float atmosphereHeight = obj->getAtmosphereHeight();
@@ -90,8 +90,6 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
         i->mesh()->render();
-
-		epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); //program is nullptr, and getting the current program requires a forward method
 
         if(camHeight > outerRadius){ 
             program = Resources::getShaderProgram("AS_SkyFromSpace"); 
@@ -171,8 +169,6 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
         i->mesh()->render();
-
-        epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); //program is nullptr, and getting the current program requires a forward method
     }
     /*
     shader = Resources::getShaderProgram("Deferred")->program();

@@ -60,7 +60,7 @@ void Engine::init(const char* name,uint w,uint h){
 	epriv::Core::m_Engine = new epriv::Core(name,w,h);
 
 	epriv::Core::m_Engine->m_ResourceManager->_init(name,w,h);
-	epriv::Core::m_Engine->m_RenderManager->_init();
+	epriv::Core::m_Engine->m_RenderManager->_init(w,h);
 	
 	Detail::EngineClass::initGame(name,w,h);
 }
