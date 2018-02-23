@@ -8,6 +8,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <SFML/Window.hpp>
 
 typedef unsigned int uint;
 
@@ -56,256 +57,117 @@ namespace Engine{
 		class GBuffer;
 		class FramebufferObject;
         class RenderbufferObject;
+
+		class RenderManager final{
+		    private:
+				class impl;
+		    public:
+				std::unique_ptr<impl> m_i;
+
+				RenderManager(const char* name,uint w,uint h);
+				~RenderManager();
+
+				void _resize(uint w, uint h);
+				void _resizeGbuffer(uint w,uint h);
+
+                void _render(
+                    epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
+                    bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+                    Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                );
+                void _render(
+                    Camera*,uint fboWidth,uint fboHeight,
+                    bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+                    Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                );
+				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style);
+				void _onOpenGLContextCreation(uint width,uint height);
+				void _renderText(std::string name,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+				void _renderTexture(std::string name,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+				void _addShaderToStage(ShaderP*,uint stage);
+				void _bindShaderProgram(ShaderP*);
+				void _unbindShaderProgram();
+				bool _bindMaterial(Material*);
+				bool _unbindMaterial();
+				void _init();
+		};
+
 	};
     namespace Renderer{
-        namespace Detail{
-            struct RendererInfo final{
-                struct GeneralInfo final{
-                    static float gamma;
-                    static ShaderP* current_shader_program;
-                    static std::string current_bound_material;
-                    static GLuint current_bound_read_fbo;
-                    static GLuint current_bound_draw_fbo;
-                    static GLuint current_bound_rbo;
-                    static AntiAliasingAlgorithm::Algorithm aa_algorithm;
-                    static glm::uvec4 gl_viewport_data;
-
-                    static bool draw_physics_debug;
-                    static unsigned char cull_face_status;
-                };
-                struct SMAAInfo final{
-                    static float SMAA_THRESHOLD;
-                    static uint SMAA_MAX_SEARCH_STEPS;
-                    static uint SMAA_MAX_SEARCH_STEPS_DIAG;
-                    static uint SMAA_CORNER_ROUNDING;
-                    static float SMAA_DEPTH_THRESHOLD;
-                    static float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;
-
-                    static bool SMAA_PREDICATION;
-                    static float SMAA_PREDICATION_THRESHOLD;
-                    static float SMAA_PREDICATION_SCALE;
-                    static float SMAA_PREDICATION_STRENGTH;
-
-                    static bool SMAA_REPROJECTION;
-                    static float SMAA_REPROJECTION_WEIGHT_SCALE;
-
-                    static uint SMAA_AREATEX_MAX_DISTANCE;
-                    static uint SMAA_AREATEX_MAX_DISTANCE_DIAG;
-                    static glm::vec2 SMAA_AREATEX_PIXEL_SIZE;
-                    static float SMAA_AREATEX_SUBTEX_SIZE;
-
-                    static GLuint SMAA_AreaTexture;
-                    static GLuint SMAA_SearchTexture;
-                };
-                struct FXAAInfo final{
-                    static float FXAA_REDUCE_MIN;
-                    static float FXAA_REDUCE_MUL;
-                    static float FXAA_SPAN_MAX;
-                };
-                struct LightingInfo final{
-                    static bool lighting;
-                };
-                struct BloomInfo final{
-                    static bool bloom;
-                    static float bloom_radius;
-                    static float bloom_strength;
-                };
-                struct HDRInfo final{
-                    static bool hdr;
-                    static float hdr_exposure;
-                    static HDRToneMapAlgorithm::Algorithm hdr_algorithm;
-                };
-                struct GodRaysInfo final{
-                    static bool godRays;
-                    static float godRays_exposure;
-                    static float godRays_decay;
-                    static float godRays_density;
-                    static float godRays_weight;
-                    static uint godRays_samples;
-                    static float godRays_fovDegrees;
-                    static float godRays_alphaFalloff;
-                };
-                struct SSAOInfo final{
-                    static bool ssao;
-                    static bool ssao_do_blur;
-                    static float ssao_blur_strength;
-                    static uint ssao_samples;
-                    static float ssao_bias;
-                    static float ssao_scale;
-                    static float ssao_radius;
-                    static float ssao_intensity;
-
-                    static const int SSAO_KERNEL_COUNT = 32;
-                    static const int SSAO_NORMALMAP_SIZE = 128;
-                    static glm::vec3 ssao_Kernels[SSAO_KERNEL_COUNT];
-                    static GLuint ssao_noise_texture;
-                    static uint ssao_noise_texture_size;
-                };
-            };
-            class RenderManagement final{
-                private:
-                    static std::vector<FontRenderInfo> m_FontsToBeRendered;
-                    static std::vector<TextureRenderInfo> m_TexturesToBeRendered;
-
-                    static void _renderText(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _renderTextures(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passGodsRays(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,glm::vec2,bool,float);
-                    static void _passHDR(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passGeometry(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,Object* ignore);
-                    static void _passForwardRendering(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,Object* ignore);
-                    static void _passLighting(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool mainFunc);
-                    static void _passSSAO(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passEdgeCanny(epriv::GBuffer*,Camera*,uint& fboWidth,uint& fboHeight,GLuint texture);
-                    static void _passBlur(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,std::string type,GLuint texture,std::string channels = "RGBA");
-                    static void _passFinal(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passFXAA(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
-                    static void _passSMAA(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight,bool renderAA);
-                    static void _passCopyDepth(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                    static void _passStencil(epriv::GBuffer*,Camera*,uint& fbufferWidth, uint& fbufferHeight);
-                public:
-					static glm::mat4 m_IdentityMat4;
-					static glm::mat3 m_IdentityMat3;
-                    static epriv::GBuffer* m_gBuffer;
-                    static glm::mat4 m_2DProjectionMatrix;
-
-                    static void render(
-                        epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
-                        bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-                        Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
-                    );
-
-                    static void init();
-                    static void postInit();
-                    static void destruct();
-
-                    static std::vector<ShaderP*> m_GeometryPassShaderPrograms;
-                    static std::vector<ShaderP*> m_ForwardPassShaderPrograms;
-
-                    static std::vector<FontRenderInfo>& getFontRenderQueue(){ return m_FontsToBeRendered; }
-                    static std::vector<TextureRenderInfo>& getTextureRenderQueue(){ return m_TexturesToBeRendered; }
-            };
-            void renderFullscreenQuad(uint width, uint height);
-			void renderFullscreenTriangle(uint width,uint height);
-        };
         namespace Settings{
-            void setGamma(float g);
-            float getGamma();
+
+            void setGamma(float g);  float getGamma();
 
             void clear(bool color = true, bool depth = true, bool stencil = true);
             void cullFace(uint state);
 
             void setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm);
 
-            void enableDrawPhysicsInfo(bool b = true);
-            void disableDrawPhysicsInfo();
+            void enableDrawPhysicsInfo(bool b = true);   void disableDrawPhysicsInfo();
+
             namespace SMAA{
-                static void setThreshold(float f){ Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = f; }
-                static void setSearchSteps(uint s){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = s; }
-                static void disableCornerDetection(){ Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 0; }
-                static void enableCornerDetection(uint c = 25){ Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = c; }
-                static void disableDiagonalDetection(){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
-                static void enableDiagonalDetection(uint d = 8){ Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = d; }
-                static void setQuality(SMAAQualityLevel::Level l){
-                    if(l == SMAAQualityLevel::Low){
-                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.15f;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 4;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
-                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 0;
-                    }
-                    else if(l == SMAAQualityLevel::Medium){
-                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 8;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 0;
-                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 0;
-                    }
-                    else if(l == SMAAQualityLevel::High){
-                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.1f;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 16;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 8;
-                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 25;
-                    }
-                    else if(l == SMAAQualityLevel::Ultra){
-                        Detail::RendererInfo::SMAAInfo::SMAA_THRESHOLD = 0.05f;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS = 32;
-                        Detail::RendererInfo::SMAAInfo::SMAA_MAX_SEARCH_STEPS_DIAG = 16;
-                        Detail::RendererInfo::SMAAInfo::SMAA_CORNER_ROUNDING = 25;
-                    }
-                }
-                static void setPredicationThreshold(float f){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_THRESHOLD = f; }
-                static void setPredicationScale(float f){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_SCALE = f; }
-                static void setPredicationStrength(float s){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION_STRENGTH = s; }
-                static void setReprojectionScale(float s){ Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION_WEIGHT_SCALE = s; }
-                static void enablePredication(bool b = true){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = b; }
-                static void disablePredication(){ Detail::RendererInfo::SMAAInfo::SMAA_PREDICATION = false; }
-                static void enableReprojection(bool b = true){ Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = b; }
-                static void disableReprojection(){ Detail::RendererInfo::SMAAInfo::SMAA_REPROJECTION = false; }
+                void setThreshold(float f);
+                void setSearchSteps(uint s);
+                void disableCornerDetection();
+                void enableCornerDetection(uint c = 25);
+                void disableDiagonalDetection();
+                void enableDiagonalDetection(uint d = 8);
+                void setQuality(SMAAQualityLevel::Level l);
+                void setPredicationThreshold(float f);
+                void setPredicationScale(float f);
+                void setPredicationStrength(float s);
+                void setReprojectionScale(float s);
+                void enablePredication(bool b = true);
+                void disablePredication();
+                void enableReprojection(bool b = true);
+                void disableReprojection();
             };
             namespace FXAA{
-                static void setReduceMin(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN = glm::max(0.0f,r); }
-                static void setReduceMul(float r){ Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL = glm::max(0.0f,r); }
-                static void setSpanMax(float r){ Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX = glm::max(0.0f,r); }
-                static float getReduceMin(){ return Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MIN; }
-                static float getReduceMul(){ return Detail::RendererInfo::FXAAInfo::FXAA_REDUCE_MUL; }
-                static float getSpanMax(){ return Detail::RendererInfo::FXAAInfo::FXAA_SPAN_MAX; }
+                void setReduceMin(float r);   float getReduceMin();
+                void setReduceMul(float r);   float getReduceMul();
+                void setSpanMax(float r);     float getSpanMax();
             };
             namespace HDR{
-                static void enable(bool b = true){ Detail::RendererInfo::HDRInfo::hdr = b; }
-                static void disable(){ Detail::RendererInfo::HDRInfo::hdr = false; }
-                static float getExposure(){ return Detail::RendererInfo::HDRInfo::hdr_exposure; }
-                static void setExposure(float e){ Detail::RendererInfo::HDRInfo::hdr_exposure = e; }
-                static void setAlgorithm(HDRToneMapAlgorithm::Algorithm a){ Detail::RendererInfo::HDRInfo::hdr_algorithm = a; }
+                void enable(bool b = true);   void disable();
+                float getExposure();          void setExposure(float e);
+                void setAlgorithm(HDRToneMapAlgorithm::Algorithm a);
             };
             namespace Bloom{
-                static void enable(bool b = true){ Detail::RendererInfo::BloomInfo::bloom = b; }
-                static void disable(){ Detail::RendererInfo::BloomInfo::bloom = false; }
-                static float getRadius(){ return Detail::RendererInfo::BloomInfo::bloom_radius; }
-                static float getStrength(){ return Detail::RendererInfo::BloomInfo::bloom_strength; }
-                static void setRadius(float r){ Detail::RendererInfo::BloomInfo::bloom_radius = glm::max(0.0f,r); }
-                static void setStrength(float r){ Detail::RendererInfo::BloomInfo::bloom_strength = glm::max(0.0f,r); }
+                void enable(bool b = true);   void disable();
+                float getRadius();            void setRadius(float r);
+                float getStrength();          void setStrength(float r);
             };
             namespace GodRays{
-                static void enable(bool b = true){ Detail::RendererInfo::GodRaysInfo::godRays = b; }
-                static void disable(){ Detail::RendererInfo::GodRaysInfo::godRays = false; }
-                static float getExposure(){ return Detail::RendererInfo::GodRaysInfo::godRays_exposure; }
-                static float getDecay(){ return Detail::RendererInfo::GodRaysInfo::godRays_decay; }
-                static float getDensity(){ return Detail::RendererInfo::GodRaysInfo::godRays_density; }
-                static float getWeight(){ return Detail::RendererInfo::GodRaysInfo::godRays_weight; }
-                static uint getSamples(){ return Detail::RendererInfo::GodRaysInfo::godRays_samples; }
-                static float getFOVDegrees(){ return Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees; }
-                static float getAlphaFalloff(){ return Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff; }
-                static void setExposure(float e){ Detail::RendererInfo::GodRaysInfo::godRays_exposure = e; }
-                static void setDecay(float d){ Detail::RendererInfo::GodRaysInfo::godRays_decay = d; }
-                static void setDensity(float d){ Detail::RendererInfo::GodRaysInfo::godRays_density = d; }
-                static void setWeight(float w){ Detail::RendererInfo::GodRaysInfo::godRays_weight = w; }
-                static void setSamples(uint s){ Detail::RendererInfo::GodRaysInfo::godRays_samples = s; }
-                static void setFOVDegrees(float d){ Detail::RendererInfo::GodRaysInfo::godRays_fovDegrees = d; }
-                static void setAlphaFalloff(float a){ Detail::RendererInfo::GodRaysInfo::godRays_alphaFalloff = a; }
+				bool enabled();
+                void enable(bool b);      void disable();
+                float getExposure();      void setExposure(float e);
+                float getDecay();         void setDecay(float d);
+                float getDensity();       void setDensity(float d);
+                float getWeight();        void setWeight(float w);
+                uint getSamples();        void setSamples(uint s);
+                float getFOVDegrees();    void setFOVDegrees(float d);
+                float getAlphaFalloff();  void setAlphaFalloff(float a);
             };
             namespace SSAO{
-                static void enable(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao = b;  }
-                static void disable(){ Detail::RendererInfo::SSAOInfo::ssao = false;  }
-                static void enableBlur(bool b = true){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = b;  }
-                static void disableBlur(){ Detail::RendererInfo::SSAOInfo::ssao_do_blur = false;  }
-                static float getBlurStrength(){ return Detail::RendererInfo::SSAOInfo::ssao_blur_strength; }
-                static float getIntensity(){ return Detail::RendererInfo::SSAOInfo::ssao_intensity; }
-                static float getRadius(){ return Detail::RendererInfo::SSAOInfo::ssao_radius; }
-                static float getScale(){ return Detail::RendererInfo::SSAOInfo::ssao_scale; }
-                static float getBias(){ return Detail::RendererInfo::SSAOInfo::ssao_bias; }
-                static uint getSamples(){ return Detail::RendererInfo::SSAOInfo::ssao_samples; }
-                static void setBlurStrength(float s){ Detail::RendererInfo::SSAOInfo::ssao_blur_strength = glm::max(0.0f,s); }
-                static void setIntensity(float i){ Detail::RendererInfo::SSAOInfo::ssao_intensity = glm::max(0.0f,i); }
-                static void setRadius(float r){ Detail::RendererInfo::SSAOInfo::ssao_radius = glm::max(0.0f,r); }
-                static void setScale(float s){ Detail::RendererInfo::SSAOInfo::ssao_scale = glm::max(0.0f,s); }
-                static void setBias(float b){ Detail::RendererInfo::SSAOInfo::ssao_bias = b; }
-                static void setSamples(uint s){ Detail::RendererInfo::SSAOInfo::ssao_samples = s; }
+				bool enabled();
+                void enable(bool b = true);       void disable();
+                void enableBlur(bool b = true);   void disableBlur();
+                float getBlurStrength();          void setBlurStrength(float s);
+                float getIntensity();             void setIntensity(float i);
+                float getRadius();                void setRadius(float r);
+                float getScale();                 void setScale(float s);
+                float getBias();                  void setBias(float b);
+                uint getSamples();                void setSamples(uint s);
             };
             namespace Lighting{
-                static void enable(bool b = true){ Detail::RendererInfo::LightingInfo::lighting = b; }
-                static void disable(){ Detail::RendererInfo::LightingInfo::lighting = false; }
+                void enable(bool b = true);    void disable();
             };
         };
-        inline const GLint getUniformLoc(const char* location){ const std::unordered_map<std::string,GLint>& m = Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms();if(!m.count(location))return-1;return m.at(location); }
-        inline const GLint& getUniformLocUnsafe(const char* location){ return Detail::RendererInfo::GeneralInfo::current_shader_program->uniforms().at(location); }
+        void renderFullscreenQuad(uint width, uint height);
+		void renderFullscreenTriangle(uint width,uint height);
+
+        inline const GLint getUniformLoc(const char* location);
+        inline const GLint& getUniformLocUnsafe(const char* location);
 
         void setViewport(uint x, uint y, uint width, uint height);
         void bindFBO(GLuint);

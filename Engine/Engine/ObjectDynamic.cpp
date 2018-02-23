@@ -80,7 +80,7 @@ ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 sc
     }
 
     btTransform tr;
-    m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+    m_Model = glm::mat4(1.0f);
     m_Model = glm::translate(m_Model,pos);
     m_Model *= glm::mat4_cast(glm::quat());
     m_Model = glm::scale(m_Model,glm::vec3(1.0f));
@@ -130,7 +130,7 @@ void ObjectDynamic::setColor(float r, float g, float b, float a){ Math::setColor
 void ObjectDynamic::setColor(glm::vec4 color){ ObjectDynamic::setColor(color.r,color.g,color.b,color.a); }
 void ObjectDynamic::translate(glm::vec3 t,bool l){ ObjectDynamic::translate(t.x,t.y,t.z,l); }
 void ObjectDynamic::update(float dt){
-    m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+    m_Model = glm::mat4(1.0f);
 
     btTransform tr;
     m_RigidBody->getMotionState()->getWorldTransform(tr);

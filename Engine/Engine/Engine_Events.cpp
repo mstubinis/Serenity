@@ -400,6 +400,10 @@ void Engine::setMousePosition(float x,float y,bool resetDifference,bool resetPre
 	sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
 	epriv::Core::m_Engine->m_EventManager->_setMousePosition(x,y,resetDifference,resetPreviousPosition);
 }
+void Engine::setMousePosition(uint x,uint y,bool resetDifference,bool resetPreviousPosition){
+	sf::Mouse::setPosition(sf::Vector2i(x,y),*Resources::getWindow()->getSFMLHandle());
+	epriv::Core::m_Engine->m_EventManager->_setMousePosition((float)x,(float)y,resetDifference,resetPreviousPosition);
+}
 void Engine::setMousePosition(glm::vec2 pos,bool resetDifference,bool resetPreviousPosition){
 	sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
 	epriv::Core::m_Engine->m_EventManager->_setMousePosition(pos.x,pos.y,resetDifference,resetPreviousPosition);

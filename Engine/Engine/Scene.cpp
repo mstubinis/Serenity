@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Light.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
 #include "Camera.h"
 #include "Skybox.h"
 #include <boost/shared_ptr.hpp>
@@ -87,6 +88,7 @@ glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }
 unordered_map<string,Camera*>& Scene::cameras() { return m_Cameras; }
+unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
 Object* Scene::getObject(string& name){ return m_Objects.at(name); }
 SunLight* Scene::getLight(string& name){ return m_Lights.at(name); }
 Camera* Scene::getCamera(string& name){ return m_Cameras.at(name); }

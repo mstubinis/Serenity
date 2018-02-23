@@ -12,7 +12,7 @@ typedef unsigned int uint;
 
 namespace Engine{
 	namespace epriv{
-		class EventManager;  class ResourceManager;  class TimeManager;  class SoundManager;  class PhysicsManager;
+		class EventManager;  class ResourceManager;  class TimeManager;  class SoundManager;  class PhysicsManager;  class RenderManager;
 		class Core final{
 		    private:
 				class impl; std::unique_ptr<impl> m_i;
@@ -24,6 +24,7 @@ namespace Engine{
 				TimeManager* m_TimeManager;
 				SoundManager* m_SoundManager;
 				PhysicsManager* m_PhysicsManager;
+				RenderManager* m_RenderManager;
 
 				Core(const char* name,uint width,uint height);
 				~Core();

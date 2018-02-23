@@ -50,7 +50,7 @@ void FontData::_loadTextFile(string& filename){
                 else if(key == "yoffset")  f->yoffset = stoi(value);
                 else if(key == "xadvance") f->xadvance = stoi(value);
             }
-			f->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+			f->m_Model = glm::mat4(1.0f);
             string name = filename.substr(0,filename.size()-4);
             Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
             f->char_mesh = Resources::getMesh(name+"_"+to_string(f->id));
@@ -67,5 +67,5 @@ Font::~Font(){
     SAFE_DELETE(m_FontData);
 }
 void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-    Engine::Renderer::Detail::RenderManagement::getFontRenderQueue().push_back(FontRenderInfo(name(),text,pos,color,scl,angle,depth));
+	epriv::Core::m_Engine->m_RenderManager->_renderText(name(),text,pos,color,scl,angle,depth);
 }

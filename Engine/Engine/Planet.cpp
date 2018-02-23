@@ -1,4 +1,5 @@
-﻿#include "Engine_Resources.h"
+﻿#include "Engine.h"
+#include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Light.h"
 #include "Planet.h"
@@ -17,7 +18,7 @@ using namespace Engine;
 using namespace std;
 
 struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance* i = static_cast<MeshInstance*>(r);
+    MeshInstance* i = (MeshInstance*)r;
 
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
 
@@ -25,7 +26,6 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
     float atmosphereHeight = obj->getAtmosphereHeight();
-    ShaderP* program = Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program;
 
     glm::vec3& pos = obj->getPosition();
     glm::quat& orientation = obj->getOrientation();
@@ -36,7 +36,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     uint numberSamples = 2;
     //uint numberSamples = 8;
     
-    glm::mat4 rot = Renderer::Detail::RenderManagement::m_IdentityMat4;
+    glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
     glm::vec3 lightDir = Resources::getCurrentScene()->lights().begin()->second->getPosition() - pos;
@@ -75,9 +75,11 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
     Renderer::sendUniform1f("fScale",fScale);
     Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+
+	ShaderP* program;
     if(atmosphereHeight > 0){
         //Ground should be currently binded
-        glm::mat4 mod = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
         mod = glm::scale(mod,obj->getScale());
@@ -89,7 +91,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         i->mesh()->render();
 
-        program->unbind();
+		epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); //program is nullptr, and getting the current program requires a forward method
 
         if(camHeight > outerRadius){ 
             program = Resources::getShaderProgram("AS_SkyFromSpace"); 
@@ -101,12 +103,12 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         }
         program->bind();
 
-        if(Engine::Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1i("HasGodsRays",1);
-        else                                                             Renderer::sendUniform1i("HasGodsRays",0);
+		if(Engine::Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1i("HasGodsRays",1);
+        else                                               Renderer::sendUniform1i("HasGodsRays",0);
 
         Renderer::Settings::cullFace(GL_FRONT);
 		Renderer::GLEnable(GLState::BLEND);
-        mod = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod = glm::scale(mod,obj->getScale());
         mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
@@ -158,7 +160,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform1f("fScale",fScale);
         Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
 
-        glm::mat4 mod = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
         mod = glm::scale(mod,obj->getScale());
@@ -169,7 +171,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
         i->mesh()->render();
-        program->unbind();
+
+        epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram(); //program is nullptr, and getting the current program requires a forward method
     }
     /*
     shader = Resources::getShaderProgram("Deferred")->program();

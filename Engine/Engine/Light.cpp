@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "Light.h"
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
@@ -65,7 +66,8 @@ void SunLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
-    Renderer::Detail::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
+
+    Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 float SunLight::getAmbientIntensity(){ return m_AmbientIntensity; }
 void SunLight::setAmbientIntensity(float a){ m_AmbientIntensity = a; }
@@ -90,7 +92,7 @@ void DirectionalLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_AmbientIntensity,m_DiffuseIntensity,m_SpecularIntensity,m_Forward.x);
     Renderer::sendUniform4f("LightDataB", m_Forward.y,m_Forward.z,0.0f, 0.0f);
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
-    Renderer::Detail::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
 PointLight::PointLight(string name, glm::vec3 pos,Scene* scene): SunLight(pos,name,LightType::Point,scene){
@@ -628,7 +630,7 @@ void PointLight::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        m_Model = glm::mat4(1.0f);
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 scaleMatrix = glm::scale(glm::vec3(m_CullingRadius));
@@ -766,7 +768,7 @@ void SpotLight::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        m_Model = glm::mat4(1.0f);
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
@@ -947,7 +949,7 @@ void RodLight::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        m_Model = glm::mat4(1.0f);
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
@@ -1045,7 +1047,7 @@ class LightProbe::impl{
 				super->m_Model = super->m_Parent->getModel(); 
 			}
             else{
-				super->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+				super->m_Model = glm::mat4(1.0f);
 			}
 			glm::mat4 translationMatrix = glm::translate(super->getPosition());
             glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);
@@ -1058,7 +1060,7 @@ class LightProbe::impl{
 			_update(0,super,viewMatrix);
             glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,m_TextureEnvMap,0);
 			Renderer::Settings::clear();
-			Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
+			epriv::Core::m_Engine->m_RenderManager->_render(super,m_EnvMapSize,m_EnvMapSize,false,false,false,false,super->m_Parent,false,m_FBO->address(),0);
 			m_FBO->unbind();
 		}
 		void _renderConvolution(LightProbe* super,glm::mat4& viewMatrix,uint& i,uint& size){
@@ -1095,11 +1097,11 @@ class LightProbe::impl{
 			#pragma endregion
 
 			//render the scene into a cubemap. this will be VERY expensive... (and now it works!)
-            uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
-            uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
+            //uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
+            //uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
 
 			#pragma region RenderScene
-            Renderer::Detail::RenderManagement::m_gBuffer->resize(m_EnvMapSize,m_EnvMapSize);
+			epriv::Core::m_Engine->m_RenderManager->_resizeGbuffer(m_EnvMapSize,m_EnvMapSize);
 			
             if(m_TexturesMade == 0){
                 glGenTextures(1,&m_TextureEnvMap);
@@ -1130,7 +1132,7 @@ class LightProbe::impl{
 				super->m_Model = super->m_Parent->getModel(); 
 			}
             else{
-				super->m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+				super->m_Model = glm::mat4(1.0f);
 			}
 			glm::mat4 translationMatrix = glm::translate(super->getPosition());
             glm::mat4 rotationMatrix = glm::mat4_cast(super->m_Orientation);
@@ -1232,8 +1234,8 @@ class LightProbe::impl{
 
 			m_FBO->unbind();
 			#pragma endregion
-            Renderer::bindReadFBO(prevReadBuffer);
-            Renderer::bindDrawFBO(prevDrawBuffer);
+            //Renderer::bindReadFBO(prevReadBuffer);
+            //Renderer::bindDrawFBO(prevDrawBuffer);
             m_DidFirst = true;
         }
 };

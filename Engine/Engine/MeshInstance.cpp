@@ -164,7 +164,7 @@ class MeshInstance::impl{
         }
         void _updateModelMatrix(){
             if(m_NeedsUpdate){
-                m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+                m_Model = glm::mat4(1.0f);
                 glm::mat4 translationMatrix = glm::translate(m_Position);
                 glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
                 glm::mat4 scaleMatrix = glm::scale(m_Scale);
@@ -195,7 +195,7 @@ struct DefaultMeshInstanceBindFunctor{friend class MeshInstanceAnimation;void op
 			if(a->m_i->m_Mesh == i->mesh()){
 				a->m_i->m_CurrentTime += Resources::dt();
 				if(transforms.size() == 0){
-					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),Renderer::Detail::RenderManagement::m_IdentityMat4);
+					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
 				}
 				a->m_i->m_Mesh->playAnimation(transforms,a->m_i->m_AnimName,a->m_i->m_CurrentTime);
 				if(a->m_i->m_CurrentTime >= a->m_i->m_EndTime){
@@ -268,7 +268,7 @@ void MeshInstance::setOrientation(glm::quat& o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
     if(abs(x) < Object::m_RotationThreshold && abs(y) < Object::m_RotationThreshold && abs(z) < Object::m_RotationThreshold)
         return;
-    if(abs(x) > Object::m_RotationThreshold) m_i->m_Orientation = (glm::angleAxis(-x, glm::vec3(1,0,0)));                     //pitch
+    if(abs(x) > Object::m_RotationThreshold) m_i->m_Orientation =                      (glm::angleAxis(-x, glm::vec3(1,0,0)));//pitch
     if(abs(y) > Object::m_RotationThreshold) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));//yaw
     if(abs(z) > Object::m_RotationThreshold) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));//roll
     m_i->_updateModelMatrix();

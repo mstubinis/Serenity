@@ -59,17 +59,7 @@ class Engine_Window::impl final{
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
 
-            //move these 2 functions elsewhere like renderer::init() or engine::init() ?
-            glewExperimental = GL_TRUE;
-            glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
-
-			Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
-
-			Renderer::GLEnable(GLState::CULL_FACE);
-            Renderer::Settings::cullFace(GL_BACK);
-
-            SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-            Renderer::Detail::RenderManagement::m_gBuffer = new epriv::GBuffer(m_Width,m_Height);
+			epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height);
 
 			return m_SFMLWindow->getSettings();
         }
@@ -85,14 +75,7 @@ class Engine_Window::impl final{
                 m_VideoMode.width = m_Width;
                 m_VideoMode.height = m_Height;
             }
-            SAFE_DELETE(Renderer::Detail::RenderManagement::m_gBuffer);
-            m_SFMLWindow->create(m_VideoMode,m_WindowName,m_Style,m_SFMLWindow->getSettings());
-
-            Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
-            Renderer::GLEnable(GLState::CULL_FACE);
-            Renderer::Settings::cullFace(GL_BACK);
-
-            Renderer::Detail::RenderManagement::m_gBuffer = new epriv::GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
+			epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style);
             Detail::EngineClass::EVENT_RESIZE(Resources::getWindowSize().x,Resources::getWindowSize().y,false);
         }
         void _setStyle(uint style){

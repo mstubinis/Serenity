@@ -3,7 +3,6 @@
 #define ENGINE_SCENE_H
 
 #include "Engine_ResourceBasic.h"
-#include "Engine_Renderer.h"
 #include <unordered_map>
 #include <glm/glm.hpp>
 
@@ -15,7 +14,6 @@ class LightProbe;
 
 class Scene: public EngineResource{
     friend class LightProbe;
-    friend class Engine::Renderer::Detail::RenderManagement;
     private:
         SkyboxEmpty* m_Skybox;
 		Camera* m_ActiveCamera;
@@ -35,6 +33,7 @@ class Scene: public EngineResource{
         std::unordered_map<std::string,Object*>& objects();
         std::unordered_map<std::string,SunLight*>& lights();
         std::unordered_map<std::string,Camera*>& cameras();
+		std::unordered_map<std::string,LightProbe*>& lightProbes();
 
         Object* getObject(std::string&);
         SunLight* getLight(std::string&);

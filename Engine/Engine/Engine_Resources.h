@@ -95,6 +95,8 @@ namespace Engine{
 				ResourceManager(const char* name,uint width,uint height);
 				~ResourceManager();
 
+				void _init(const char* name,uint width,uint height);
+
 				void _addResource(BaseR,ResourceType::Type);
 
 

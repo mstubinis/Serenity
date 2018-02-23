@@ -43,6 +43,7 @@ epriv::Core::Core(const char* name,uint w,uint h):m_i(new impl){
 	m_TimeManager = new epriv::TimeManager();
 	m_SoundManager = new epriv::SoundManager();
 	m_PhysicsManager = new epriv::PhysicsManager();
+	m_RenderManager = new epriv::RenderManager(name,w,h);
 	m_i->_init();
 }
 epriv::Core::~Core(){
@@ -51,21 +52,23 @@ epriv::Core::~Core(){
 	SAFE_DELETE(m_ResourceManager);
 	SAFE_DELETE(m_TimeManager);
 	SAFE_DELETE(m_PhysicsManager);
+	SAFE_DELETE(m_RenderManager);
 	m_i->_destruct();
 }
 
 void Engine::init(const char* name,uint w,uint h){
 	epriv::Core::m_Engine = new epriv::Core(name,w,h);
+
+	epriv::Core::m_Engine->m_ResourceManager->_init(name,w,h);
+	epriv::Core::m_Engine->m_RenderManager->_init();
+	
 	Detail::EngineClass::initGame(name,w,h);
 }
 
 void Engine::Detail::EngineClass::initGame(const char* name,uint w,uint h){
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
-	Resources::initResources(name,w,h);
-    Renderer::Detail::RenderManagement::init();
-
-    Renderer::Detail::RenderManagement::postInit();
-	Engine::setMousePosition(glm::uvec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2));
+	
+	Engine::setMousePosition(w/2,h/2);
     Game::initResources();
     Game::initLogic();
 
@@ -106,8 +109,9 @@ void Engine::Detail::EngineClass::updateSounds(float dt){
 void Engine::Detail::EngineClass::render(){
 	epriv::Core::m_Engine->m_TimeManager->stop_render();
 
-    Game::render(); uint x = Resources::getWindowSize().x; uint y = Resources::getWindowSize().y;
-	Renderer::Detail::RenderManagement::render(Renderer::Detail::RenderManagement::m_gBuffer,Resources::getCurrentScene()->getActiveCamera(),x,y);
+    Game::render();
+	glm::uvec2 winSize = Resources::getWindowSize();
+	epriv::Core::m_Engine->m_RenderManager->_render(Resources::getCurrentScene()->getActiveCamera(),winSize.x,winSize.y);
 
 	epriv::Core::m_Engine->m_TimeManager->stop_rendering_display();
     Resources::getWindow()->display();
@@ -117,10 +121,10 @@ void Engine::Detail::EngineClass::render(){
 }
 #pragma region Event Handler Methods
 void Engine::Detail::EngineClass::EVENT_RESIZE(uint w, uint h,bool saveSize){
-    Renderer::Detail::RenderManagement::m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
+	epriv::Core::m_Engine->m_RenderManager->_resize(w,h);
+
 	epriv::Core::m_Engine->m_ResourceManager->_resizeCameras(w,h);
     Renderer::setViewport(0,0,w,h);
-    Renderer::Detail::RenderManagement::m_gBuffer->resize(w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
     Game::onResize(w,h);
 }
@@ -230,5 +234,4 @@ void Engine::run(){
 	//destruct the engine here
     Game::cleanup();
 	SAFE_DELETE(epriv::Core::m_Engine);
-    Engine::Renderer::Detail::RenderManagement::destruct();
 }

@@ -213,8 +213,8 @@ Texture::~Texture(){
     unload();
 }
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
-    if(m_i->m_Files.size() != 1)return;
-    Engine::Renderer::Detail::RenderManagement::getTextureRenderQueue().push_back(TextureRenderInfo(name(),pos,color,scl,angle,depth));
+    if(m_i->m_Files.size() != 1) return;
+	epriv::Core::m_Engine->m_RenderManager->_renderTexture(name(),pos,color,scl,angle,depth);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }

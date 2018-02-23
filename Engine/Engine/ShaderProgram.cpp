@@ -48,8 +48,8 @@ struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
     glm::vec3 camPos = c->getPosition();
     Renderer::sendUniform3fSafe("CameraPosition",camPos);
 
-    if(Renderer::Detail::RendererInfo::GodRaysInfo::godRays) Renderer::sendUniform1iSafe("HasGodsRays",1);
-    else                                                     Renderer::sendUniform1iSafe("HasGodsRays",0);
+	if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
+    else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
 }};
 struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
 }};
@@ -159,18 +159,7 @@ class ShaderP::impl final{
             m_FragmentShader = fs;
             m_UniformLocations.clear();
 
-            if(stage == ShaderRenderPass::Geometry){
-                Renderer::Detail::RenderManagement::m_GeometryPassShaderPrograms.push_back(super);
-            }
-            else if(stage == ShaderRenderPass::Forward){
-                Renderer::Detail::RenderManagement::m_ForwardPassShaderPrograms.push_back(super);
-            }
-            else if(stage == ShaderRenderPass::Lighting){
-            }
-            else if(stage == ShaderRenderPass::Postprocess){
-            }
-            else{
-            }
+			epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
             super->setName(name);
 
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -318,18 +307,12 @@ ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::bind(){
-    if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != this){
-        glUseProgram(m_i->m_ShaderProgram);
-        Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = this;
-    }
+	epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this);
     BindableResource::bind();
 }
 void ShaderP::unbind(){
     BindableResource::unbind();
-    if(Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program != nullptr){
-        glUseProgram(0);
-        Engine::Renderer::Detail::RendererInfo::GeneralInfo::current_shader_program = nullptr;
-    }
+	epriv::Core::m_Engine->m_RenderManager->_unbindShaderProgram();
 }
 void ShaderP::addMaterial(const string& materialName){
 	if(materialName == "" || !epriv::Core::m_Engine->m_ResourceManager->_hasMaterial(materialName)){

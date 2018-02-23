@@ -45,6 +45,7 @@ namespace Engine{
     const glm::vec2& getMousePosition();
     const float getMouseWheelDelta();
     void setMousePosition(float x,float y,bool resetDifference = false,bool resetPreviousPosition = false);
+	void setMousePosition(uint x,uint y,bool resetDifference = false,bool resetPreviousPosition = false);
     void setMousePosition(glm::vec2,bool resetDifference = false,bool resetPreviousPosition = false);
     void setMousePosition(glm::uvec2,bool resetDifference = false,bool resetPreviousPosition = false);
 	const glm::vec2& getMousePosition();

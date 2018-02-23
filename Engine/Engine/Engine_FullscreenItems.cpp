@@ -5,22 +5,25 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
-using namespace Engine::Renderer::Detail;
+using namespace Engine;
 using namespace std;
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-struct MeshVertexDataFullscreen final{
-    public:
-		glm::vec3 position;
-		glm::vec2 uv;
+namespace Engine{
+	namespace epriv{
+		struct MeshVertexDataFullscreen final{
+			public:
+				glm::vec3 position;
+				glm::vec2 uv;
 
-		MeshVertexDataFullscreen(){}
-		~MeshVertexDataFullscreen(){}
+				MeshVertexDataFullscreen(){}
+				~MeshVertexDataFullscreen(){}
+		};
+	};
 };
-
-class FullscreenTriangle::impl final{
+class epriv::FullscreenTriangle::impl final{
     public:
 		vector<ushort> m_Indices;
 		vector<MeshVertexDataFullscreen> m_Vertices;
@@ -64,7 +67,7 @@ class FullscreenTriangle::impl final{
 			glDisableVertexAttribArray(1);
 		}
 };
-class FullscreenQuad::impl final{
+class epriv::FullscreenQuad::impl final{
     public:
 		vector<ushort> m_Indices;
 		vector<MeshVertexDataFullscreen> m_Vertices;
@@ -110,21 +113,21 @@ class FullscreenQuad::impl final{
 		}
 };
 
-FullscreenTriangle::FullscreenTriangle():m_i(new impl){
+epriv::FullscreenTriangle::FullscreenTriangle():m_i(new impl){
 	m_i->_init();
 }
-FullscreenTriangle::~FullscreenTriangle(){
+epriv::FullscreenTriangle::~FullscreenTriangle(){
 	m_i->_destruct();
 }
-void FullscreenTriangle::render(){
+void epriv::FullscreenTriangle::render(){
 	m_i->_render();
 }
-FullscreenQuad::FullscreenQuad():m_i(new impl){
+epriv::FullscreenQuad::FullscreenQuad():m_i(new impl){
 	m_i->_init();
 }
-FullscreenQuad::~FullscreenQuad(){
+epriv::FullscreenQuad::~FullscreenQuad(){
 	m_i->_destruct();
 }
-void FullscreenQuad::render(){
+void epriv::FullscreenQuad::render(){
 	m_i->_render();
 }

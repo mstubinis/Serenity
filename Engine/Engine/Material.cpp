@@ -1,3 +1,4 @@
+#include "Engine.h"
 #include "ObjectDynamic.h"
 #include "ObjectDisplay.h"
 #include "Mesh.h"
@@ -592,17 +593,12 @@ void Material::removeMeshEntry(string objectName){
     if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),srtKey()); }
 }
 void Material::bind(){
-    string& _name = name();
-    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != _name){
-        BindableResource::bind();
-        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = _name;
-    }
+	bool res = epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this);
+	if(res) BindableResource::bind();
 }
 void Material::unbind(){
-    if(Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material != "NONE"){
-        BindableResource::unbind();
-        Renderer::Detail::RendererInfo::GeneralInfo::current_bound_material = "NONE";
-    }
+	bool res = epriv::Core::m_Engine->m_RenderManager->_unbindMaterial();
+	if(res) BindableResource::unbind();
 }
 void Material::load(){
     if(!isLoaded()){

@@ -99,7 +99,7 @@ void Game::update(float dt){
     if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if(Engine::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Engine::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Detail::RendererInfo::SSAOInfo::ssao); }
+	if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
 	if(Engine::isKeyDownOnce("space")){
 	}

@@ -142,6 +142,137 @@ class epriv::ResourceManager::impl final{
 			m_CurrentScene = nullptr;
 			m_DynamicMemory = false;
 		}
+		void _postInit(const char* name,uint width,uint height){
+			m_Window = new Engine_Window(name,width,height);
+
+			Engine::Shaders::Detail::ShadersManagement::init();
+
+			//add a basic cube mesh
+			#pragma region MeshData
+			string cubeMesh =  
+				"v 1.0 -1.0 -1.0\n"
+				"v 1.0 -1.0 1.0\n"
+				"v -1.0 -1.0 1.0\n"
+				"v -1.0 -1.0 -1.0\n"
+				"v 1.0 1.0 -1.0\n"
+				"v 1.0 1.0 1.0\n"
+				"v -1.0 1.0 1.0\n"
+				"v -1.0 1.0 -1.0\n"
+				"vt 1.0 0.0\n"
+				"vt 0.0 1.0\n"
+				"vt 0.0 0.0\n"
+				"vt 1.0 0.0\n"
+				"vt 0.0 1.0\n"
+				"vt 0.0 0.0\n"
+				"vt 1.0 0.0\n"
+				"vt 0.0 1.0\n"
+				"vt 1.0 0.0\n"
+				"vt 0.0 1.0\n"
+				"vt 0.0 0.0\n"
+				"vt 0.0 0.0\n"
+				"vt 1.0 1.0\n"
+				"vt 1.0 0.0\n"
+				"vt 0.0 1.0\n"
+				"vt 1.0 1.0\n"
+				"vt 1.0 1.0\n"
+				"vt 1.0 1.0\n"
+				"vt 1.0 0.0\n"
+				"vt 1.0 1.0\n"
+				"vn 0.0 -1.0 0.0\n"
+				"vn 0.0 1.0 0.0\n"
+				"vn 1.0 -0.0 0.0\n"
+				"vn 0.0 -0.0 1.0\n"
+				"vn -1.0 -0.0 -0.0\n"
+				"vn 0.0 0.0 -1.0\n"
+				"f 2/1/1 4/2/1 1/3/1\n"
+				"f 8/4/2 6/5/2 5/6/2\n"
+				"f 5/7/3 2/8/3 1/3/3\n"
+				"f 6/9/4 3/10/4 2/11/4\n"
+				"f 3/12/5 8/13/5 4/2/5\n"
+				"f 1/14/6 8/15/6 5/6/6\n"
+				"f 2/1/1 3/16/1 4/2/1\n"
+				"f 8/4/2 7/17/2 6/5/2\n"
+				"f 5/7/3 6/18/3 2/8/3\n"
+				"f 6/9/4 7/17/4 3/10/4\n"
+				"f 3/12/5 7/19/5 8/13/5\n"
+				"f 1/14/6 4/20/6 8/15/6";
+			#pragma endregion
+			Resources::addMesh("Cube",cubeMesh,CollisionType::None,false);
+
+			#pragma region Shaders
+			Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
+			Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
+			Shader* vertexBasic = new Shader("vert_basic",Engine::Shaders::Detail::ShadersManagement::vertex_basic,ShaderType::Vertex,false);
+			Shader* vertexHUD = new Shader("vert_hud",Engine::Shaders::Detail::ShadersManagement::vertex_hud,ShaderType::Vertex,false);
+			Shader* vertexSkybox = new Shader("vert_skybox",Engine::Shaders::Detail::ShadersManagement::vertex_skybox,ShaderType::Vertex,false);
+			Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,ShaderType::Fragment,false);
+			Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,ShaderType::Fragment,false);
+			Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,ShaderType::Fragment,false);
+			Shader* deferredFragSkyboxFake = new Shader("deferred_frag_skybox_fake",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake,ShaderType::Fragment,false);
+			Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,ShaderType::Fragment,false);
+			Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,ShaderType::Fragment,false);
+			Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
+			Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,ShaderType::Fragment,false);
+			Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,ShaderType::Fragment,false);
+			Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
+			Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
+
+			Shader* lightingFragGI = new Shader("lighting_frag_gi",Engine::Shaders::Detail::ShadersManagement::lighting_frag_gi,ShaderType::Fragment,false);
+			Shader* cubemapConvolude = new Shader("cubemap_convolude_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_convolude_frag,ShaderType::Fragment,false);
+			Shader* cubemapPrefilterEnv = new Shader("cubemap_prefilterEnv_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
+			Shader* brdfPrecompute = new Shader("brdf_precompute_frag",Engine::Shaders::Detail::ShadersManagement::brdf_precompute,ShaderType::Fragment,false);
+			Shader* greyscale = new Shader("greyscale_frag",Engine::Shaders::Detail::ShadersManagement::greyscale_frag,ShaderType::Fragment,false);
+			Shader* edgeCannyBlur = new Shader("edge_canny_blur",Engine::Shaders::Detail::ShadersManagement::edge_canny_blur,ShaderType::Fragment,false);
+			Shader* edgeCannyFrag = new Shader("edge_canny_frag",Engine::Shaders::Detail::ShadersManagement::edge_canny_frag,ShaderType::Fragment,false);
+			Shader* stencilPass = new Shader("stencil_pass",Engine::Shaders::Detail::ShadersManagement::stencil_passover,ShaderType::Fragment,false);
+    
+			Shader* smaa_vert_1 = new Shader("smaa_vert_1",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_1,ShaderType::Vertex,false);
+			Shader* smaa_vert_2 = new Shader("smaa_vert_2",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_2,ShaderType::Vertex,false);
+			Shader* smaa_vert_3 = new Shader("smaa_vert_3",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_3,ShaderType::Vertex,false);
+			Shader* smaa_vert_4 = new Shader("smaa_vert_4",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_4,ShaderType::Vertex,false);
+			Shader* smaa_frag_1_stencil = new Shader("smaa_frag_1_stencil",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1_stencil,ShaderType::Fragment,false);
+			Shader* smaa_frag_1 = new Shader("smaa_frag_1",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1,ShaderType::Fragment,false);
+			Shader* smaa_frag_2 = new Shader("smaa_frag_2",Engine::Shaders::Detail::ShadersManagement::smaa_frag_2,ShaderType::Fragment,false);
+			Shader* smaa_frag_3 = new Shader("smaa_frag_3",Engine::Shaders::Detail::ShadersManagement::smaa_frag_3,ShaderType::Fragment,false);
+			Shader* smaa_frag_4 = new Shader("smaa_frag_4",Engine::Shaders::Detail::ShadersManagement::smaa_frag_4,ShaderType::Fragment,false);
+			#pragma endregion
+
+			#pragma region ShaderPrograms
+			Resources::addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
+			Resources::addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
+			Resources::addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_Blur",fullscreenVertexShader,blur,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_HDR",fullscreenVertexShader,hdr,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_SSAO",fullscreenVertexShader,ssao,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_Final",fullscreenVertexShader,finalFrag,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_FXAA",fullscreenVertexShader,fxaa,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_Skybox",vertexSkybox,deferredFragSkybox,ShaderRenderPass::Geometry);
+			Resources::addShaderProgram("Deferred_Skybox_Fake",vertexSkybox,deferredFragSkyboxFake,ShaderRenderPass::Geometry);
+			Resources::addShaderProgram("Copy_Depth",fullscreenVertexShader,copyDepth,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_Light",fullscreenVertexShader,lightingFrag,ShaderRenderPass::Lighting);
+			Resources::addShaderProgram("Deferred_Light_GI",fullscreenVertexShader,lightingFragGI,ShaderRenderPass::Lighting);
+			Resources::addShaderProgram("Cubemap_Convolude",vertexSkybox,cubemapConvolude,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("BRDF_Precompute_CookTorrance",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Greyscale_Frag",fullscreenVertexShader,greyscale,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_Edge_Canny_Blur",fullscreenVertexShader,edgeCannyBlur,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_Edge_Canny",fullscreenVertexShader,edgeCannyFrag,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Stencil_Pass",fullscreenVertexShader,stencilPass,ShaderRenderPass::Postprocess);
+
+			Resources::addShaderProgram("Deferred_SMAA_1_Stencil",smaa_vert_1,smaa_frag_1_stencil,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_SMAA_1",smaa_vert_1,smaa_frag_1,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_SMAA_2",smaa_vert_2,smaa_frag_2,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_SMAA_3",smaa_vert_3,smaa_frag_3,ShaderRenderPass::Postprocess);
+			Resources::addShaderProgram("Deferred_SMAA_4",smaa_vert_4,smaa_frag_4,ShaderRenderPass::Postprocess);
+			#pragma endregion
+
+			Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
+			brdfCook->setWrapping(TextureWrap::ClampToEdge);
+
+			Resources::addMaterial("Default","","","","","Deferred");
+
+			Resources::addMesh("Plane",1.0f,1.0f);
+		}
 		void _destruct(){
 			for(uint i = 0; i < MAX_ENTRIES; ++i){
 				SAFE_DELETE(m_Resources[i].m_resource); 
@@ -162,7 +293,9 @@ class epriv::ResourceManager::impl final{
 			SAFE_DELETE(m_Window);
 		}
 };
-
+void epriv::ResourceManager::_init(const char* n,uint w,uint h){
+	m_i->_postInit(n,w,h);
+}
 
 
 
@@ -328,137 +461,6 @@ void Resources::addSoundData(string file,string n,bool music){
 void Resources::removeMesh(string n){_removeFromContainer(epriv::Core::m_Engine->m_ResourceManager->m_i->m_Meshes,n);}
 void Resources::removeMaterial(string n){_removeFromContainer(epriv::Core::m_Engine->m_ResourceManager->m_i->m_Materials,n);}
 
-void Resources::initResources(const char* name,uint width,uint height){
-    epriv::Core::m_Engine->m_ResourceManager->m_i->m_Window = new Engine_Window(name,width,height);
-
-	Engine::Shaders::Detail::ShadersManagement::init();
-
-    //add a basic cube mesh
-    #pragma region MeshData
-    string cubeMesh =  
-        "v 1.0 -1.0 -1.0\n"
-        "v 1.0 -1.0 1.0\n"
-        "v -1.0 -1.0 1.0\n"
-        "v -1.0 -1.0 -1.0\n"
-        "v 1.0 1.0 -1.0\n"
-        "v 1.0 1.0 1.0\n"
-        "v -1.0 1.0 1.0\n"
-        "v -1.0 1.0 -1.0\n"
-        "vt 1.0 0.0\n"
-        "vt 0.0 1.0\n"
-        "vt 0.0 0.0\n"
-        "vt 1.0 0.0\n"
-        "vt 0.0 1.0\n"
-        "vt 0.0 0.0\n"
-        "vt 1.0 0.0\n"
-        "vt 0.0 1.0\n"
-        "vt 1.0 0.0\n"
-        "vt 0.0 1.0\n"
-        "vt 0.0 0.0\n"
-        "vt 0.0 0.0\n"
-        "vt 1.0 1.0\n"
-        "vt 1.0 0.0\n"
-        "vt 0.0 1.0\n"
-        "vt 1.0 1.0\n"
-        "vt 1.0 1.0\n"
-        "vt 1.0 1.0\n"
-        "vt 1.0 0.0\n"
-        "vt 1.0 1.0\n"
-        "vn 0.0 -1.0 0.0\n"
-        "vn 0.0 1.0 0.0\n"
-        "vn 1.0 -0.0 0.0\n"
-        "vn 0.0 -0.0 1.0\n"
-        "vn -1.0 -0.0 -0.0\n"
-        "vn 0.0 0.0 -1.0\n"
-        "f 2/1/1 4/2/1 1/3/1\n"
-        "f 8/4/2 6/5/2 5/6/2\n"
-        "f 5/7/3 2/8/3 1/3/3\n"
-        "f 6/9/4 3/10/4 2/11/4\n"
-        "f 3/12/5 8/13/5 4/2/5\n"
-        "f 1/14/6 8/15/6 5/6/6\n"
-        "f 2/1/1 3/16/1 4/2/1\n"
-        "f 8/4/2 7/17/2 6/5/2\n"
-        "f 5/7/3 6/18/3 2/8/3\n"
-        "f 6/9/4 7/17/4 3/10/4\n"
-        "f 3/12/5 7/19/5 8/13/5\n"
-        "f 1/14/6 4/20/6 8/15/6";
-    #pragma endregion
-    addMesh("Cube",cubeMesh,CollisionType::None,false);
-
-    #pragma region Shaders
-    Shader* fullscreenVertexShader = new Shader("vert_fullscreenQuad",Engine::Shaders::Detail::ShadersManagement::fullscreen_quad_vertex,ShaderType::Vertex,false);
-    Shader* fxaa = new Shader("frag_fxaa",Engine::Shaders::Detail::ShadersManagement::fxaa_frag,ShaderType::Fragment,false);
-    Shader* vertexBasic = new Shader("vert_basic",Engine::Shaders::Detail::ShadersManagement::vertex_basic,ShaderType::Vertex,false);
-    Shader* vertexHUD = new Shader("vert_hud",Engine::Shaders::Detail::ShadersManagement::vertex_hud,ShaderType::Vertex,false);
-    Shader* vertexSkybox = new Shader("vert_skybox",Engine::Shaders::Detail::ShadersManagement::vertex_skybox,ShaderType::Vertex,false);
-    Shader* deferredFrag = new Shader("deferred_frag",Engine::Shaders::Detail::ShadersManagement::deferred_frag,ShaderType::Fragment,false);
-    Shader* deferredFragHUD = new Shader("deferred_frag_hud",Engine::Shaders::Detail::ShadersManagement::deferred_frag_hud,ShaderType::Fragment,false);
-    Shader* deferredFragSkybox = new Shader("deferred_frag_skybox",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox,ShaderType::Fragment,false);
-	Shader* deferredFragSkyboxFake = new Shader("deferred_frag_skybox_fake",Engine::Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake,ShaderType::Fragment,false);
-    Shader* copyDepth = new Shader("copy_depth_frag",Engine::Shaders::Detail::ShadersManagement::copy_depth_frag,ShaderType::Fragment,false);
-    Shader* ssao = new Shader("ssao_frag",Engine::Shaders::Detail::ShadersManagement::ssao_frag,ShaderType::Fragment,false);
-    Shader* hdr = new Shader("hdr_frag",Engine::Shaders::Detail::ShadersManagement::hdr_frag,ShaderType::Fragment,false);
-    Shader* blur = new Shader("blur_frag",Engine::Shaders::Detail::ShadersManagement::blur_frag,ShaderType::Fragment,false);
-    Shader* godrays = new Shader("godrays_frag",Engine::Shaders::Detail::ShadersManagement::godRays_frag,ShaderType::Fragment,false);
-    Shader* finalFrag = new Shader("final_frag",Engine::Shaders::Detail::ShadersManagement::final_frag,ShaderType::Fragment,false);
-    Shader* lightingFrag = new Shader("lighting_frag",Engine::Shaders::Detail::ShadersManagement::lighting_frag,ShaderType::Fragment,false);
-
-    Shader* lightingFragGI = new Shader("lighting_frag_gi",Engine::Shaders::Detail::ShadersManagement::lighting_frag_gi,ShaderType::Fragment,false);
-    Shader* cubemapConvolude = new Shader("cubemap_convolude_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_convolude_frag,ShaderType::Fragment,false);
-    Shader* cubemapPrefilterEnv = new Shader("cubemap_prefilterEnv_frag",Engine::Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
-    Shader* brdfPrecompute = new Shader("brdf_precompute_frag",Engine::Shaders::Detail::ShadersManagement::brdf_precompute,ShaderType::Fragment,false);
-    Shader* greyscale = new Shader("greyscale_frag",Engine::Shaders::Detail::ShadersManagement::greyscale_frag,ShaderType::Fragment,false);
-    Shader* edgeCannyBlur = new Shader("edge_canny_blur",Engine::Shaders::Detail::ShadersManagement::edge_canny_blur,ShaderType::Fragment,false);
-    Shader* edgeCannyFrag = new Shader("edge_canny_frag",Engine::Shaders::Detail::ShadersManagement::edge_canny_frag,ShaderType::Fragment,false);
-    Shader* stencilPass = new Shader("stencil_pass",Engine::Shaders::Detail::ShadersManagement::stencil_passover,ShaderType::Fragment,false);
-    
-    Shader* smaa_vert_1 = new Shader("smaa_vert_1",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_1,ShaderType::Vertex,false);
-    Shader* smaa_vert_2 = new Shader("smaa_vert_2",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_2,ShaderType::Vertex,false);
-    Shader* smaa_vert_3 = new Shader("smaa_vert_3",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_3,ShaderType::Vertex,false);
-    Shader* smaa_vert_4 = new Shader("smaa_vert_4",Engine::Shaders::Detail::ShadersManagement::smaa_vertex_4,ShaderType::Vertex,false);
-	Shader* smaa_frag_1_stencil = new Shader("smaa_frag_1_stencil",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1_stencil,ShaderType::Fragment,false);
-    Shader* smaa_frag_1 = new Shader("smaa_frag_1",Engine::Shaders::Detail::ShadersManagement::smaa_frag_1,ShaderType::Fragment,false);
-    Shader* smaa_frag_2 = new Shader("smaa_frag_2",Engine::Shaders::Detail::ShadersManagement::smaa_frag_2,ShaderType::Fragment,false);
-    Shader* smaa_frag_3 = new Shader("smaa_frag_3",Engine::Shaders::Detail::ShadersManagement::smaa_frag_3,ShaderType::Fragment,false);
-    Shader* smaa_frag_4 = new Shader("smaa_frag_4",Engine::Shaders::Detail::ShadersManagement::smaa_frag_4,ShaderType::Fragment,false);
-    #pragma endregion
-
-    #pragma region ShaderPrograms
-    addShaderProgram("Deferred",vertexBasic,deferredFrag,ShaderRenderPass::Geometry);
-    addShaderProgram("Deferred_HUD",vertexHUD,deferredFragHUD,ShaderRenderPass::Geometry);
-    addShaderProgram("Deferred_GodsRays",fullscreenVertexShader,godrays,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Blur",fullscreenVertexShader,blur,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_HDR",fullscreenVertexShader,hdr,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_SSAO",fullscreenVertexShader,ssao,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Final",fullscreenVertexShader,finalFrag,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_FXAA",fullscreenVertexShader,fxaa,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Skybox",vertexSkybox,deferredFragSkybox,ShaderRenderPass::Geometry);
-	addShaderProgram("Deferred_Skybox_Fake",vertexSkybox,deferredFragSkyboxFake,ShaderRenderPass::Geometry);
-    addShaderProgram("Copy_Depth",fullscreenVertexShader,copyDepth,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Light",fullscreenVertexShader,lightingFrag,ShaderRenderPass::Lighting);
-    addShaderProgram("Deferred_Light_GI",fullscreenVertexShader,lightingFragGI,ShaderRenderPass::Lighting);
-    addShaderProgram("Cubemap_Convolude",vertexSkybox,cubemapConvolude,ShaderRenderPass::Postprocess);
-    addShaderProgram("Cubemap_Prefilter_Env",vertexSkybox,cubemapPrefilterEnv,ShaderRenderPass::Postprocess);
-    addShaderProgram("BRDF_Precompute_CookTorrance",fullscreenVertexShader,brdfPrecompute,ShaderRenderPass::Postprocess);
-    addShaderProgram("Greyscale_Frag",fullscreenVertexShader,greyscale,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Edge_Canny_Blur",fullscreenVertexShader,edgeCannyBlur,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_Edge_Canny",fullscreenVertexShader,edgeCannyFrag,ShaderRenderPass::Postprocess);
-    addShaderProgram("Stencil_Pass",fullscreenVertexShader,stencilPass,ShaderRenderPass::Postprocess);
-
-	addShaderProgram("Deferred_SMAA_1_Stencil",smaa_vert_1,smaa_frag_1_stencil,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_SMAA_1",smaa_vert_1,smaa_frag_1,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_SMAA_2",smaa_vert_2,smaa_frag_2,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_SMAA_3",smaa_vert_3,smaa_frag_3,ShaderRenderPass::Postprocess);
-    addShaderProgram("Deferred_SMAA_4",smaa_vert_4,smaa_frag_4,ShaderRenderPass::Postprocess);
-    #pragma endregion
-
-    Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
-    brdfCook->setWrapping(TextureWrap::ClampToEdge);
-
-    addMaterial("Default","","","","","Deferred");
-
-    addMesh("Plane",1.0f,1.0f);
-}
 void Resources::setCurrentScene(Scene* scene){
 	if(epriv::Core::m_Engine->m_ResourceManager->m_i->m_CurrentScene == nullptr){
 		epriv::Core::m_Engine->m_ResourceManager->m_i->m_CurrentScene = scene;

@@ -48,7 +48,7 @@ ObjectBasic::ObjectBasic(glm::vec3 pos,glm::vec3 scl,string name,Scene* scene,bo
     m_Forward = glm::vec3(0,0,-1);
     m_Right = glm::vec3(1,0,0);
     m_Up = glm::vec3(0,1,0);
-    m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+    m_Model = glm::mat4(1.0f);
     m_Orientation = glm::quat();
     ObjectBasic::setScale(scl);
     ObjectBasic::setPosition(pos);
@@ -60,7 +60,7 @@ void ObjectBasic::update(float dt){
         m_Model = m_Parent->getModel();
     }
     else{
-        m_Model = Renderer::Detail::RenderManagement::m_IdentityMat4;
+        m_Model = glm::mat4(1.0f);
     }
     glm::mat4 translationMatrix = glm::translate(m_Position);
     glm::mat4 rotationMatrix = glm::mat4_cast(m_Orientation);
