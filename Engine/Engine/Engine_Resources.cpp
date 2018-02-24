@@ -33,6 +33,48 @@ template<class V,class S>void* _getFromContainer(unordered_map<S,V>& m,const S& 
 template<class V,class S>void _removeFromContainer(map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
 template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
 
+/*
+//something else i read up on
+//
+// https://gamedev.stackexchange.com/a/33918
+//
+
+fixed size array (linear memory)
+with internal free list (O(1) alloc/free, stable indicies)
+with weak reference keys (reuse of slot invalidates key)
+zero overhead dereferences (when known-valid)
+
+//
+template<typename T> struct DataArray<T> final{
+	void Init(int count); // allocs items (max 64k), then Clear()
+	void Dispose();       // frees items
+	void Clear();         // resets data members, (runs destructors* on outstanding items, *optional)
+
+	T &Alloc();           // alloc (memclear* and/or construct*, *optional) an item from freeList or items[maxUsed++], sets id to (nextKey++ << 16) | index
+	void Free(T &);       // puts entry on free list (uses id to store next)
+
+	int GetID(T &);       // accessor to the id part if Item
+
+	T &Get(id)            // return item[id & 0xFFFF]; 
+	T *TryToGet(id);      // validates id, then returns item, returns null if invalid.  for cases like AI references and others where 'the thing might have been deleted out from under me'
+
+	bool Next(T *&);      // return next item where id & 0xFFFF0000 != 0 (ie items not on free list)
+
+	struct Item final{
+	T item;
+	int id;             // (key << 16 | index) for alloced entries, (0 | nextFreeIndex) for free list entries
+	};
+
+	Item* items;
+	int maxSize;          // total size
+	int maxUsed;          // highest index ever alloced
+	int count;            // num alloced items
+	int nextKey;          // [1 .. 65536] (don't let == 0)
+	int freeHead;         // index of first free entry
+};
+*/
+
+
 namespace Engine{
 	namespace epriv{
 		struct HandleEntry final{
@@ -50,6 +92,10 @@ namespace Engine{
 		};
 	};
 };
+
+
+
+
 
 class epriv::ResourceManager::impl final{
     public:
@@ -86,13 +132,13 @@ class epriv::ResourceManager::impl final{
 			m_Resources[MAX_ENTRIES - 1].m_endOfList = true;
 		}
 		Handle _Add(BaseR p, ResourceType::Type& type){
-			assert(m_activeEntryCount < MAX_ENTRIES - 1);
-			assert(type >= 0 && type <= 31); //what exactly is 31 here? is it the bit amount or number amount? also type is not needed if data is stored in a base class... (hint hint)
+			//assert(m_activeEntryCount < MAX_ENTRIES - 1);
+			//assert(type >= 0 && type <= 31); //what exactly is 31 here? is it the bit amount or number amount? also type is not needed if data is stored in a base class... (hint hint)
 
 			const int newIndex = m_firstFreeEntry;
-			assert(newIndex < MAX_ENTRIES);
-			assert(m_Resources[newIndex].m_active == false);
-			assert(!m_Resources[newIndex].m_endOfList);
+			//assert(newIndex < MAX_ENTRIES);
+			//assert(m_Resources[newIndex].m_active == false);
+			//assert(!m_Resources[newIndex].m_endOfList);
 
 			m_firstFreeEntry = m_Resources[newIndex].m_nextFreeIndex;
 			m_Resources[newIndex].m_nextFreeIndex = 0;
@@ -120,22 +166,25 @@ class epriv::ResourceManager::impl final{
 		}
 		void _Update(Handle& h, BaseR p){
 			const int index = h.m_index;
-			assert(m_entries[index].m_counter == h.m_counter);
-			assert(m_entries[index].m_active == true);
-
-			m_Resources[index].m_resource = p;
+			if(m_Resources[index].m_counter == h.m_counter && m_Resources[index].m_active == true){
+				m_Resources[index].m_resource = p;
+			}
+			else{
+				std::cout << "Error: could not update ID: " << index << " , to resource: " << ((EngineResource*)p)->name() << std::endl;
+			}
 		}
 		void _Remove(const Handle& h){
 			const uint32 index = h.m_index;
-			assert(m_entries[index].m_counter == h.m_counter);
-			assert(m_entries[index].m_active == true);
-
-			m_Resources[index].m_nextFreeIndex = m_firstFreeEntry;
-			//m_Resources[index].m_active = 0; //im sure this works just as fine as the line below
-			m_Resources[index].m_active = false;
-			m_firstFreeEntry = index;
-
-			--m_activeEntryCount;
+			if(m_Resources[index].m_counter == h.m_counter && m_Resources[index].m_active == true){
+				m_Resources[index].m_nextFreeIndex = m_firstFreeEntry;
+				//m_Resources[index].m_active = 0; //im sure this works just as fine as the line below
+				m_Resources[index].m_active = false;
+				m_firstFreeEntry = index;
+				--m_activeEntryCount;
+			}
+			else{
+				std::cout << "Error: could not remove ID: " << index << " , resource: " << ((EngineResource*)m_Resources[index].m_resource)->name() << std::endl;
+			}
 		}
 		BaseR _Get(Handle& h) const{
 			BaseR p = NULL;
@@ -157,6 +206,8 @@ class epriv::ResourceManager::impl final{
 			return rv;
 		}
 		//-----------------------------------------------------------------------------------------------
+
+
 
 
 		Engine_Window* m_Window;
