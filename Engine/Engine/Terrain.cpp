@@ -16,8 +16,8 @@ using namespace Engine;
 using namespace std;
 
 Terrain::Terrain(string n, sf::Image& image,string material,Scene* scene):ObjectDynamic("",material,glm::vec3(0),glm::vec3(1),n,nullptr,scene){
-    for(unsigned int i = 0; i < image.getSize().x; i++){
-        for(unsigned int j = 0; j < image.getSize().y; j++){
+    for(unsigned int i = 0; i < image.getSize().x; ++i){
+        for(unsigned int j = 0; j < image.getSize().y; ++j){
             float pixel(image.getPixel(i,j).r / 255.0f);
             m_Pixels.push_back(pixel);
         }

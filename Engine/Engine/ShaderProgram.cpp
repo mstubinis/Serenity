@@ -48,7 +48,6 @@ class Shader::impl final{
             m_Type = type;
             m_FromFile = fromFile;
             super->setName(name);
-			epriv::Core::m_Engine->m_ResourceManager->_addShader(super);
         }
 };
 Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
@@ -80,7 +79,7 @@ class ShaderP::impl final{
 				if(count == lineToInsertAt){
 					lines.push_back(newLineContent + "\n");
 				}
-				count++;
+				++count;
 			}
 			source = "";
 			for(auto line:lines){
@@ -169,34 +168,6 @@ class ShaderP::impl final{
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             m_ShaderProgram = _compileOGL(m_VertexShader,m_FragmentShader,name);
-        }
-        void _construct(string& name, string& vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
-            Shader* _vs = Resources::getShader(vs); Shader* _fs = Resources::getShader(fs);
-            if(_vs == nullptr){
-                new Shader(vs,vs,ShaderType::Vertex,true);
-                _vs = Resources::getShader(vs);
-            }
-            if(_fs == nullptr){
-                new Shader(fs,fs,ShaderType::Fragment,true);
-                _fs = Resources::getShader(fs);
-            }
-            _construct(name,_vs,_fs,stage,super);
-        }
-        void _construct(string& name, Shader* vs, string& fs, ShaderRenderPass::Pass stage,ShaderP* super){
-            Shader* _fs = Resources::getShader(fs);
-            if(_fs == nullptr){
-                new Shader(fs,fs,ShaderType::Fragment,true);
-                _fs = Resources::getShader(fs);
-            }
-            _construct(name,vs,_fs,stage,super);
-        }
-        void _construct(string& name, string& vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
-            Shader* _vs = Resources::getShader(vs);
-            if(_vs == nullptr){
-                new Shader(vs,vs,ShaderType::Vertex,true);
-                _vs = Resources::getShader(vs);
-            }
-            _construct(name,_vs,fs,stage,super);
         }
         void _destruct(){
             glDeleteShader(m_ShaderProgram);
@@ -296,10 +267,7 @@ class ShaderP::impl final{
             return pid;
         }
 };
-ShaderP::ShaderP(string& n, string& vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
-ShaderP::ShaderP(string& n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
-ShaderP::ShaderP(string& n, Shader* vs, string& fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
-ShaderP::ShaderP(string& n, string& vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
+ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_construct(n,vs,fs,s,this); }
 ShaderP::~ShaderP(){
     m_i->_destruct();
 }

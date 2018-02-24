@@ -132,7 +132,7 @@ void SolarSystem::_loadFromFile(string filename){
                     string extention;
 
                     //get file extension
-                    for(uint i = TEXTURE.length() - 4; i < TEXTURE.length(); i++) extention += tolower(TEXTURE.at(i));
+                    for(uint i = TEXTURE.length() - 4; i < TEXTURE.length(); ++i) extention += tolower(TEXTURE.at(i));
 
                     string normFile = TEXTURE.substr(0,TEXTURE.size()-4);
                     normFile += "_Normal" + extention;
@@ -231,7 +231,7 @@ void SolarSystem::_loadFromFile(string filename){
                 }
             }
         }
-        count++;
+        ++count;
     }
 
     //add planetary rings
@@ -297,7 +297,7 @@ void SolarSystem::_loadRandomly(){
     else if(percent >= 750 && percent < 850) numberOfStars = 2;
 
 
-    for(uint i = 0; i < numberOfStars; i++){
+    for(uint i = 0; i < numberOfStars; ++i){
         Star* star = nullptr;
         //star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
         float radius = float(97412.0f + (rand() % 1252440000))*10.0f;
@@ -346,7 +346,7 @@ void SolarSystem::_loadRandomly(){
     }
 
     float numerator1 = 0, numerator2 = 0;
-    for(uint i = 0; i < starMasses.size(); i++){
+    for(uint i = 0; i < starMasses.size(); ++i){
         numerator1 += (starMasses.at(i) * starPositions.at(i).x);
         numerator2 += (starMasses.at(i) * starPositions.at(i).z);
     }
@@ -416,7 +416,7 @@ void SolarSystem::_loadRandomly(){
 
     for(auto star:m_Stars){
         uint numberOfPlanets = uint(1 + rand() % 100);
-        for(uint i = 0; i < numberOfPlanets; i++){
+        for(uint i = 0; i < numberOfPlanets; ++i){
             Planet* planet = nullptr;
 
             float maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
@@ -496,7 +496,7 @@ void SolarSystem::_loadRandomly(){
                 uint numRings = rand() % 20;
                 uint chance = rand() % 100;
                 if(chance <= 20){
-                    for(uint i = 0; i < numRings; i++){
+                    for(uint i = 0; i < numRings; ++i){
                         uint randSize = (rand() % 200 + 3);
                         uint randPos = (randSize + 1 ) + (rand() % (1024 - ((randSize + 1)*2)));
 

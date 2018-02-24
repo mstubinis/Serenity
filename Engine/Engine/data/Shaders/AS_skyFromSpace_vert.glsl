@@ -73,7 +73,7 @@ void main(){
     vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;
 
     vec3 v3FrontColor = vec3(0);
-    for(int i = 0; i < nSamples; i++) {
+    for(int i = 0; i < nSamples; ++i) {
         float fHeight = length(v3SamplePoint);
         float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));
         float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight;

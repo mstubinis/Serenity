@@ -1085,11 +1085,11 @@ class LightProbe::impl{
             if(m_DidFirst == true && m_OnlyOnce == true) return;
 			//determine which cube faces to render this frame
 			vector<uint> m_Sides;
-			if(m_SidesPerFrame == 6){ for(uint i = 0; i < 6; i++){ m_Sides.push_back(i); } }
+			if(m_SidesPerFrame == 6){ for(uint i = 0; i < 6; ++i){ m_Sides.push_back(i); } }
 			else{ uint _count = 0;
-				for(uint i = 0; i < 6; i++){
+				for(uint i = 0; i < 6; ++i){
 					if(_count >= m_SidesPerFrame) break;
-					if(i == m_CurrentSide){ m_Sides.push_back(m_CurrentSide); m_CurrentSide++; _count++; }
+					if(i == m_CurrentSide){ m_Sides.push_back(m_CurrentSide); m_CurrentSide++; ++_count; }
 					if(m_CurrentSide >= 6) m_CurrentSide = 0;
 				}
 			}
@@ -1107,7 +1107,7 @@ class LightProbe::impl{
                 glGenTextures(1,&m_TextureEnvMap);
 				glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
 				vector<GLubyte> testData(m_EnvMapSize * m_EnvMapSize * 256, 128);
-                for (uint i = 0; i < 6; i++){
+                for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA8,m_EnvMapSize,m_EnvMapSize,0,GL_RGBA,GL_UNSIGNED_BYTE,&testData[0]);
                 }
 				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);

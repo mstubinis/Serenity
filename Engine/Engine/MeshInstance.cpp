@@ -190,7 +190,7 @@ struct DefaultMeshInstanceBindFunctor{friend class MeshInstanceAnimation;void op
         vector<glm::mat4> transforms;
 
 		//process the animation here
-		for(uint j = 0; j < q.size(); j++){
+		for(uint j = 0; j < q.size(); ++j){
 			MeshInstanceAnimation* a = q.at(j);
 			if(a->m_i->m_Mesh == i->mesh()){
 				a->m_i->m_CurrentTime += Resources::dt();

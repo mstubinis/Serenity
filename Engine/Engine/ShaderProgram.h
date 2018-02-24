@@ -39,11 +39,7 @@ class ShaderP final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        ShaderP(std::string& name, std::string& vertexShader,std::string& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-        ShaderP(std::string& name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-
-        ShaderP(std::string& name, Shader* vertexShader,std::string& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-        ShaderP(std::string& name, std::string& vertexShader,Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
         ~ShaderP();
 

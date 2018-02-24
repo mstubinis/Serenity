@@ -190,7 +190,7 @@ void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
     Game::onMouseButtonPressed(mouseButton);
 
 	const glm::uvec2 mpos = Engine::getMousePosition();
-	epriv::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = mpos.x;  e.y = mpos.y;
+	epriv::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
 	Event ev; ev.eventMouseButton = e; ev.type = EventType::MouseButtonPressed;
 	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseButtonPressed,ev);
 }
@@ -199,17 +199,18 @@ void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
     Game::onMouseButtonReleased(mouseButton);
 
 	const glm::uvec2 mpos = Engine::getMousePosition();
-	epriv::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = mpos.x;  e.y = mpos.y;
+	epriv::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
 	Event ev; ev.eventMouseButton = e; ev.type = EventType::MouseButtonReleased;
 	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseButtonReleased,ev);
 }
-void EVENT_MOUSE_MOVED(float mouseX, float mouseY){
+void EVENT_MOUSE_MOVED(int mouseX, int mouseY){
+	float mX = (float)mouseX; float mY = (float)mouseY;
     if(Resources::getWindow()->hasFocus()){
-        epriv::Core::m_Engine->m_EventManager->_setMousePosition(mouseX,mouseY,false,false);
+        epriv::Core::m_Engine->m_EventManager->_setMousePosition(mX,mY,false,false);
     }
-    Game::onMouseMoved(mouseX,mouseY);
+    Game::onMouseMoved(mX,mY);
 
-	epriv::EventMouseMove e;  e.x = mouseX;  e.y = mouseY;
+	epriv::EventMouseMove e;  e.x = mX;  e.y = mY;
 	Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseMoved;
 	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseMoved,ev);
 }
@@ -217,7 +218,7 @@ void EVENT_MOUSE_ENTERED(){
 	Game::onMouseEntered(); 
 
 	const glm::uvec2 mpos = Engine::getMousePosition();
-	epriv::EventMouseMove e;  e.x = mpos.x;  e.y = mpos.y;
+	epriv::EventMouseMove e;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
 	Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseEnteredWindow;
 	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseEnteredWindow,ev);
 }
@@ -225,7 +226,7 @@ void EVENT_MOUSE_LEFT(){
 	Game::onMouseLeft(); 
 
 	const glm::uvec2 mpos = Engine::getMousePosition();
-	epriv::EventMouseMove e;  e.x = mpos.x;  e.y = mpos.y;
+	epriv::EventMouseMove e;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
 	Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseLeftWindow;
 	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseLeftWindow,ev);
 }

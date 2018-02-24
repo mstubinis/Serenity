@@ -248,7 +248,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
         glm::vec4 pC = glm::vec4(ringInfo.color.r/255.0f,ringInfo.color.g/255.0f,ringInfo.color.b/255.0f,1.0f);
         uint alphaChangeRange = ringInfo.size - ringInfo.alphaBreakpoint;
         uint newI = 0;
-        for(uint i = 0; i < ringInfo.size; i++){
+        for(uint i = 0; i < ringInfo.size; ++i){
             if(i > ringInfo.alphaBreakpoint){
                 uint numerator = alphaChangeRange - newI;
                 pC.a = float(numerator/(alphaChangeRange));
@@ -311,7 +311,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
                 }
             }
         }
-        count++;
+        ++count;
     }
     Texture* diffuse = new Texture(ringImage,parent->name()+"RingsDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
     Resources::addMaterial(parent->name()+"Rings",diffuse,nullptr,nullptr,nullptr,nullptr);

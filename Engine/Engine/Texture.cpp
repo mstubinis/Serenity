@@ -87,7 +87,7 @@ class Texture::impl final{
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() > 1){//cubemap
-                for(uint k = 0; k < m_Files.size(); k++){
+                for(uint k = 0; k < m_Files.size(); ++k){
                     sf::Image i;i.loadFromFile(m_Files[k].c_str());
                     _generateFromImage(i,super);
                     _buildTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+k,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
@@ -109,7 +109,7 @@ class Texture::impl final{
             glTexImage2D(targetType,0,internal,w,h,0,pxlFormat,pxlType,NULL);
         }
         void _unload(){
-            for(uint i = 0; i < m_TextureAddress.size(); i++){
+            for(uint i = 0; i < m_TextureAddress.size(); ++i){
                 glDeleteTextures(1,&m_TextureAddress.at(i));
             }
             glBindTexture(m_Type,0);

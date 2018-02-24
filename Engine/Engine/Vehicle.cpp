@@ -97,7 +97,7 @@ void Vehicle::update(float dt){
     m_Vehicle->updateFriction(dt);
     m_Vehicle->updateSuspension(dt);
     m_Vehicle->updateVehicle(dt);
-    for(int i = 0; i < m_Vehicle->getNumWheels(); i++)
+    for(int i = 0; i < m_Vehicle->getNumWheels(); ++i)
         m_Vehicle->updateWheelTransform(i);
     ObjectDynamic::update(dt);
 }

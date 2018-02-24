@@ -77,11 +77,11 @@ class epriv::PhysicsManager::impl final{
 		void _update(float& dt, int& maxSteps, float& other){
 			m_World->stepSimulation(dt,maxSteps,other);
 			uint numManifolds = m_World->getDispatcher()->getNumManifolds();
-			for (uint i = 0; i < numManifolds; i++){
+			for (uint i = 0; i < numManifolds; ++i){
 				btPersistentManifold* contactManifold =  m_World->getDispatcher()->getManifoldByIndexInternal(i);
 				btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
 				btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-				for (int j = 0; j < contactManifold->getNumContacts(); j++){
+				for (int j = 0; j < contactManifold->getNumContacts(); ++j){
 					btManifoldPoint& pt = contactManifold->getContactPoint(j);
 					if (pt.getDistance() < 0.0f){
 						const btVector3& ptA = pt.getPositionWorldOnA();
@@ -210,7 +210,7 @@ void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
             delete shape;
             const btVector3* ptsArray = hull->getVertexPointer();
             shape = new btConvexHullShape();
-            for(int i = 0; i < hull->numVertices(); i++){
+            for(int i = 0; i < hull->numVertices(); ++i){
                 ((btConvexHullShape*)shape)->addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
             }
             m_CollisionShape = shape;
@@ -302,7 +302,7 @@ void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVec
     int longs = 5;
 
     int i, j;
-    for(i = 0; i <= lats; i++) {
+    for(i = 0; i <= lats; ++i) {
         btScalar lat0 = SIMD_PI * (-btScalar(0.5) + (btScalar) (i - 1) / lats);
         btScalar z0  = radius*glm::sin(lat0);
         btScalar zr0 =  radius*glm::cos(lat0);
@@ -312,7 +312,7 @@ void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVec
         btScalar zr1 = radius*glm::cos(lat1);
 
         glBegin(GL_QUAD_STRIP);
-        for(j = 0; j <= longs; j++) {
+        for(j = 0; j <= longs; ++j) {
             btScalar lng = 2 * SIMD_PI * (btScalar) (j - 1) / longs;
             btScalar x = glm::cos(lng);
             btScalar y = glm::sin(lng);

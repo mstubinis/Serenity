@@ -53,7 +53,7 @@ struct VertexBoneData final{
     }
     void AddBoneData(uint BoneID, float Weight){
         uint size = sizeof(IDs) / sizeof(IDs[0]);
-        for (uint i = 0; i < size; i++) {
+        for (uint i = 0; i < size; ++i) {
             if (Weights[i] == 0.0) {
                 IDs[i] = float(BoneID); Weights[i] = Weight; return;
             } 

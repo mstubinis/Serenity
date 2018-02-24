@@ -50,22 +50,19 @@ class ResourceType final{public: enum Type{
 };};
 
 struct Handle final{
-	uint32 m_index : 12;
-	uint32 m_counter : 15;
-	uint32 m_type : 5;
+	uint32 index : 12;
+	uint32 counter : 15;
+	uint32 type : 5;
 	Handle(){
-		m_index = 0; m_counter = 0; m_type = 0;
+		index = 0; counter = 0; type = 0;
 	}
-	Handle(uint32 index, uint32 counter, uint32 type){
-		m_index = index; m_counter = counter; m_type = type;
+	Handle(uint32 _index, uint32 _counter, uint32 _type){
+		index = _index; counter = _counter; type = _type;
 	}
 	inline operator uint32() const{
-		return m_type << 27 | m_counter << 12 | m_index;
+		return type << 27 | counter << 12 | index;
 	}
 };
-
-//typedef EngineResource* BaseR;
-typedef void* BaseR;
 
 namespace Engine{
 	namespace epriv{
@@ -80,7 +77,7 @@ namespace Engine{
 
 				void _init(const char* name,uint width,uint height);
 
-				Handle& _addResource(BaseR,ResourceType::Type);
+				Handle _addResource(EngineResource*,ResourceType::Type);
 
 
 
@@ -93,7 +90,7 @@ namespace Engine{
 				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
 				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
 				bool _hasCamera(std::string);        void _addCamera(Camera*);              std::string _buildCameraName(std::string);
-				bool _hasShader(std::string);        void _addShader(Shader*);              std::string _buildShaderName(std::string);
+				bool _hasShader(std::string);        Handle _addShader(Shader*);            std::string _buildShaderName(std::string);
 				bool _hasSoundData(std::string);     void _addSoundData(SoundData*);        std::string _buildSoundDataName(std::string);
 
 				void _remCamera(std::string);
@@ -142,7 +139,10 @@ namespace Engine{
         Texture* getTexture(std::string);
         Mesh* getMesh(std::string);
         Material* getMaterial(std::string);
-        Shader* getShader(std::string);
+
+        void getShader(Handle& inHandle,Shader*& outPtr);
+		Shader* getShader(Handle& inHandle);
+
         ShaderP* getShaderProgram(std::string);
         MeshInstance* getMeshInstance(std::string);
 		SoundData* getSoundData(std::string);
@@ -158,14 +158,12 @@ namespace Engine{
         void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         void removeMaterial(std::string name);
 
-        void addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
+        Handle addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
 
 		void addSoundData(std::string file,std::string name = "",bool music = false);
 
         void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-        void addShaderProgram(std::string name, std::string vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-        void addShaderProgram(std::string name, Shader* vertexShader, std::string fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-        void addShaderProgram(std::string name, std::string vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+		void addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
         void initResources(const char* name,uint width,uint height);
     };

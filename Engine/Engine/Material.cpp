@@ -51,7 +51,7 @@ namespace Engine{
 		struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
 			Material* material = (Material*)r;
 			glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
-			for(uint i = 0; i < MaterialComponentType::Number; i++){
+			for(uint i = 0; i < MaterialComponentType::Number; ++i){
 				if(material->getComponents().count(i)){
 					MaterialComponent* component = material->getComponents().at(i);
 					if(component->texture() != nullptr && component->texture()->address() != 0){
@@ -155,13 +155,13 @@ MaterialComponent::~MaterialComponent(){
 void MaterialComponent::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    for(uint i = 0; i < slots.size(); i++){
+    for(uint i = 0; i < slots.size(); ++i){
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    for(uint i = 0; i < slots.size(); i++){
+    for(uint i = 0; i < slots.size(); ++i){
         Renderer::unbindTexture2D(slots.at(i));
     }
 }

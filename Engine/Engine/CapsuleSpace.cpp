@@ -123,7 +123,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     m_Ribbon->setPosition(0,300,0);
 
     float step = -10.0f;
-    for(uint i = 0; i < 300; i++){
+    for(uint i = 0; i < 300; ++i){
         float x = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(x > 0) x += 1.5f; if(x < 0) x -= 1.5f;
         float y = float(((rand() % 200) - 100)/100.0f) * 3.7f; if(y > 0) y += 1.5f; if(y < 0) y -= 1.5f;
 

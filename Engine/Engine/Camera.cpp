@@ -62,7 +62,7 @@ void Camera::_constructFrustrum(){
     m_Planes[4] = glm::normalize(rowW + rowZ);
     m_Planes[5] = glm::normalize(rowW - rowZ);
 
-    for(uint i = 0; i < 6; i++){
+    for(uint i = 0; i < 6; ++i){
         glm::vec3 normal(m_Planes[i].x, m_Planes[i].y, m_Planes[i].z);
         m_Planes[i] = -m_Planes[i] / glm::length(normal);
     }
@@ -109,7 +109,7 @@ void Camera::update(float dt){
 bool Camera::sphereIntersectTest(Object* obj){return sphereIntersectTest(obj->getPosition(),obj->getRadius());}
 bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
     if(radius <= 0) return false;
-    for (unsigned int i = 0; i < 6; i++){
+    for (unsigned int i = 0; i < 6; ++i){
         float dist = m_Planes[i].x * pos.x + m_Planes[i].y * pos.y + m_Planes[i].z * pos.z + m_Planes[i].w - radius;
         if (dist > 0) return false;
     }

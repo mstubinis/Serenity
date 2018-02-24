@@ -222,7 +222,7 @@ Ship::Ship(string mesh,string mat, bool player,string name,glm::vec3 pos, glm::v
         m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
     }
 
-    for(unsigned int i = 0; i < SHIP_SYSTEM_NUMBER; i++){
+    for(unsigned int i = 0; i < SHIP_SYSTEM_NUMBER; ++i){
         ShipSystem* system = nullptr;
         if(i == 0)       system = new ShipSystemReactor(this,1000);
         else if(i == 1)  system = new ShipSystemPitchThrusters(this);

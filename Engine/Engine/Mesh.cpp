@@ -136,8 +136,8 @@ class Mesh::impl final{
             _initGlobal(threshold);
             uint width = heightfield->getHeightStickWidth();
             uint length = heightfield->getHeightStickLength();
-            for(uint i = 0; i < width-1; i++){
-                for(uint j = 0; j < length-1; j++){
+            for(uint i = 0; i < width-1; ++i){
+                for(uint j = 0; j < length-1; ++j){
                     btVector3 vert1,vert2,vert3,vert4;
                     heightfield->getVertex1(i,  j,  vert1);
                     heightfield->getVertex1(i+1,j,  vert2);
@@ -180,8 +180,8 @@ class Mesh::impl final{
         void _init(Mesh* super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
             ImportedMeshData d;
             _initGlobal(threshold);  
-            for(uint i = 0; i < width-1; i++){
-                for(uint j = 0; j < length-1; j++){
+            for(uint i = 0; i < width-1; ++i){
+                for(uint j = 0; j < length-1; ++j){
                     string key1 = to_string(i) + "," + to_string(j);
                     string key2 = to_string(i+1) + "," + to_string(j);
                     string key3 = to_string(i) + "," + to_string(j+1);
@@ -333,10 +333,10 @@ class Mesh::impl final{
             }
         }
         void _processNode(Mesh* mesh,ImportedMeshData& data,aiNode* node, const aiScene* scene){
-            for(uint i = 0; i < node->mNumMeshes; i++){
+            for(uint i = 0; i < node->mNumMeshes; ++i){
                 aiMesh* aimesh = scene->mMeshes[node->mMeshes[i]];
                 #pragma region vertices
-                for(uint i = 0; i < aimesh->mNumVertices; i++){
+                for(uint i = 0; i < aimesh->mNumVertices; ++i){
                     //pos
                     glm::vec3 pos;
                     pos.x = aimesh->mVertices[i].x;
@@ -380,10 +380,10 @@ class Mesh::impl final{
                 #pragma endregion
                 // Process indices
                 #pragma region indices
-                for(uint i = 0; i < aimesh->mNumFaces; i++){
+                for(uint i = 0; i < aimesh->mNumFaces; ++i){
                     aiFace face = aimesh->mFaces[i];
                     Triangle t;
-                    for(uint j = 0; j < face.mNumIndices; j++){
+                    for(uint j = 0; j < face.mNumIndices; ++j){
                         ushort index = (ushort)face.mIndices[j];
                         data.indices.push_back(index);
                         if(j == 0){
@@ -408,7 +408,7 @@ class Mesh::impl final{
                 //bones
                 #pragma region Skeleton
                 if(aimesh->mNumBones > 0){
-                    for (uint i = 0; i < aimesh->mNumBones; i++) { 
+                    for (uint i = 0; i < aimesh->mNumBones; ++i) { 
                         uint BoneIndex = 0; 
                         string BoneName(aimesh->mBones[i]->mName.data);
                         if(!mesh->skeleton()->m_i->m_BoneMapping.count(BoneName)) {
@@ -423,7 +423,7 @@ class Mesh::impl final{
                         mesh->skeleton()->m_i->m_BoneMapping.emplace(BoneName,BoneIndex);
                         aiMatrix4x4 n = aimesh->mBones[i]->mOffsetMatrix;
                         mesh->skeleton()->m_i->m_BoneInfo.at(BoneIndex).BoneOffset = Engine::Math::assimpToGLMMat4(n);
-                        for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; j++) {
+                        for (uint j = 0; j < aimesh->mBones[i]->mNumWeights; ++j) {
                             uint VertexID = aimesh->mBones[i]->mWeights[j].mVertexId;
                             float Weight = aimesh->mBones[i]->mWeights[j].mWeight; 
                             VertexBoneData d;
@@ -433,7 +433,7 @@ class Mesh::impl final{
                     }
                 }
                 if(scene->mAnimations && scene->mNumAnimations > 0){
-                    for(uint i = 0; i < scene->mNumAnimations; i++){
+                    for(uint i = 0; i < scene->mNumAnimations; ++i){
                          aiAnimation* anim = scene->mAnimations[i];
                          string key(anim->mName.C_Str());
                          if(key == ""){
@@ -450,7 +450,7 @@ class Mesh::impl final{
                 _calculateTBNAssimp(data);
                 //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
             }
-            for(uint i = 0; i < node->mNumChildren; i++){
+            for(uint i = 0; i < node->mNumChildren; ++i){
                 _processNode(mesh,data,node->mChildren[i], scene);
             }
         }
@@ -469,7 +469,7 @@ class Mesh::impl final{
             return false;
         }
         bool _getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<MeshVertexData>& out_vertices,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
-            for (uint i=0; i < out_vertices.size(); i++ ){
+            for (uint i=0; i < out_vertices.size(); ++i ){
                 if (_is_near( in_pos.x , out_vertices.at(i).position.x ,threshold) && _is_near( in_pos.y , out_vertices.at(i).position.y ,threshold) &&
                     _is_near( in_pos.z , out_vertices.at(i).position.z ,threshold) && _is_near( in_uv.x  , uvs.at(i).x      ,threshold) &&
                     _is_near( in_uv.y  , uvs.at(i).y      ,threshold) && _is_near( in_norm.x , norms.at(i).x ,threshold) &&
@@ -482,7 +482,7 @@ class Mesh::impl final{
             return false;
         }
         void _calculateGramSchmidt(vector<glm::vec3>& points,vector<glm::vec3>& normals,vector<glm::vec3>& binormals,vector<glm::vec3>& tangents){
-            for(uint i=0; i < points.size(); i++){
+            for(uint i=0; i < points.size(); ++i){
                 glm::vec3& n = normals.at(i);
                 glm::vec3& t = binormals.at(i);
                 glm::vec3& b = tangents.at(i);
@@ -645,7 +645,7 @@ class Mesh::impl final{
             vector<glm::vec3> temp_normals;
             vector<glm::vec3> temp_binormals;
             vector<glm::vec3> temp_tangents;
-            for (uint i=0; i < data.points.size(); i++){
+            for (uint i=0; i < data.points.size(); ++i){
                 ushort index;
                 bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_vertices,temp_uvs,temp_normals, index,threshold);
                 if (found){
@@ -675,7 +675,7 @@ class Mesh::impl final{
                     out_indices.push_back((ushort)out_vertices.size() - 1);
                 }
             }
-            for(uint i = 0; i < out_vertices.size(); i++){
+            for(uint i = 0; i < out_vertices.size(); ++i){
                 if(m_Skeleton != nullptr){
                     MeshVertexDataAnimated& vert = static_cast<MeshVertexDataAnimated>(out_vertices.at(i));
                     //vert.uv = Engine::Math::pack2FloatsInto1Float(temp_uvs.at(i));
@@ -705,7 +705,7 @@ class Mesh::impl final{
             _indexVBO(super,data,m_Indices,m_Vertices,m_threshold);
         }
         void _loadFromFile(Mesh* super,string file,CollisionType type,float threshold){
-            string extention; for(uint i = m_File.length() - 4; i < m_File.length(); i++)extention += tolower(m_File.at(i));
+            string extention; for(uint i = m_File.length() - 4; i < m_File.length(); ++i)extention += tolower(m_File.at(i));
             ImportedMeshData d;
             _loadInternal(super,d,m_File);
             m_threshold = threshold; //this is needed
@@ -727,7 +727,7 @@ class Mesh::impl final{
         void _loadDataIntoTriangles(ImportedMeshData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,unsigned char _flags){
             uint count = 0;
             Triangle triangle;
-            for(uint i=0; i < _pi.size(); i++ ){
+            for(uint i=0; i < _pi.size(); ++i ){
                 glm::vec3 pos  = glm::vec3(0,0,0);
                 glm::vec2 uv   = glm::vec2(0,0);
                 glm::vec3 norm = glm::vec3(1,1,1);
@@ -743,7 +743,7 @@ class Mesh::impl final{
                     norm = data.file_normals.at(_ni[i]-1);
                     data.normals.push_back(norm);
                 }
-                count++;
+                ++count;
                 if(count == 1){
                     triangle.v1.position = pos;
                     triangle.v1.uv = uv;
@@ -863,7 +863,7 @@ class Mesh::impl final{
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
                 std::vector<MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); i++){
+                for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
                     MeshVertexDataAnimated& vert = (MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = m_Skeleton->m_i->m_BoneIDs.at(i);
                     vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
@@ -886,7 +886,7 @@ class Mesh::impl final{
             }
         }
         void _cleanupRenderingContext(Mesh* super){
-            for(uint i = 0; i < m_buffers.size(); i++){
+            for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
         }
@@ -910,13 +910,13 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = (Mesh*)r;
     glBindBuffer(GL_ARRAY_BUFFER, mesh->m_i->m_buffers.at(0));
     if(mesh->m_i->m_Skeleton != nullptr){
-        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; ++i){
             boost::tuple<uint,GLuint,GLuint,GLuint>& d = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(MeshVertexDataAnimated),(void*)d.get<3>());
         }
     }else{     
-        for(uint i = 0; i < VertexFormat::EnumTotal; i++){
+        for(uint i = 0; i < VertexFormat::EnumTotal; ++i){
             boost::tuple<uint,GLuint,GLuint,GLuint>& d = VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(MeshVertexData),(void*)d.get<3>());
@@ -927,9 +927,9 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
     Mesh* mesh = (Mesh*)r;
     if(mesh->m_i->m_Skeleton != nullptr){
-        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; i++){ glDisableVertexAttribArray(i); }
+        for(uint i = 0; i < VertexFormatAnimated::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
     }else{
-        for(uint i = 0; i < VertexFormat::EnumTotal; i++){ glDisableVertexAttribArray(i); }
+        for(uint i = 0; i < VertexFormat::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
     }
 }};
 DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
@@ -946,7 +946,7 @@ class AnimationData::impl{
             m_Mesh = mesh;
             m_TicksPerSecond = anim->mTicksPerSecond;
             m_DurationInTicks = anim->mDuration;
-            for(uint i = 0; i < anim->mNumChannels; i++){
+            for(uint i = 0; i < anim->mNumChannels; ++i){
                 string key = (anim->mChannels[i]->mNodeName.data);
                 m_KeyframeData.emplace(key,anim->mChannels[i]);
             }
@@ -976,7 +976,7 @@ class AnimationData::impl{
                 //this line allows for animation combinations. only works when additional animations start off in their resting places...
                 Final = Transforms.at(BoneIndex) * Final;
             }
-            for(uint i = 0; i < n->mNumChildren; i++){
+            for(uint i = 0; i < n->mNumChildren; ++i){
                 _ReadNodeHeirarchy(animationName,time,n->mChildren[i],Transform,Transforms);
             }
         }
@@ -986,7 +986,7 @@ class AnimationData::impl{
             float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
             glm::mat4 Identity = glm::mat4(1.0f);
             _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
-            for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_i->m_NumBones; i++){
+            for(uint i = 0; i < m_Mesh->m_i->m_Skeleton->m_i->m_NumBones; ++i){
                 Transforms.at(i) = m_Mesh->m_i->m_Skeleton->m_i->m_BoneInfo.at(i).FinalTransform;
             }
         }
@@ -1030,13 +1030,13 @@ class AnimationData::impl{
             Out = Start + Factor * Delta;
         }
         uint _FindPosition(float AnimationTime, const aiNodeAnim* node){
-            for(uint i=0;i<node->mNumPositionKeys-1;i++){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
+            for(uint i=0;i<node->mNumPositionKeys-1;++i){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
         }
         uint _FindRotation(float AnimationTime, const aiNodeAnim* node){
-            for(uint i=0;i<node->mNumRotationKeys-1;i++){if(AnimationTime<(float)node->mRotationKeys[i+1].mTime){return i;}}return 0;
+            for(uint i=0;i<node->mNumRotationKeys-1;++i){if(AnimationTime<(float)node->mRotationKeys[i+1].mTime){return i;}}return 0;
         }
         uint _FindScaling(float AnimationTime, const aiNodeAnim* node){
-            for(uint i=0;i<node->mNumScalingKeys-1;i++){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
+            for(uint i=0;i<node->mNumScalingKeys-1;++i){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
         }
         float _Duration(){
             float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);

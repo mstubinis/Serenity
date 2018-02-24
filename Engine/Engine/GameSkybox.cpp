@@ -20,7 +20,7 @@ using namespace std;
 
 GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene){
     if(numFlares > 0){
-        for(uint i = 0; i < numFlares; i++){
+        for(uint i = 0; i < numFlares; ++i){
             SkyboxSunFlare flare;
 
             float x = (((rand() % 100) - 50.0f) / 100.0f); x*=999999;

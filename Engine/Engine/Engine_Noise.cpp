@@ -83,7 +83,7 @@ void Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long seed){
     Noise::Detail::MathNoiseManagement::perm.clear(); Noise::Detail::MathNoiseManagement::perm.resize(256);
     Noise::Detail::MathNoiseManagement::permGradIndex3D.clear(); Noise::Detail::MathNoiseManagement::permGradIndex3D.resize(256);
     vector<short> source; source.resize(256);
-    for (short i = 0; i < 256; i++)
+    for (short i = 0; i < 256; ++i)
         source[i] = i;
     seed = seed * (6364136223846793005LL) + (1442695040888963407LL);
     seed = seed * (6364136223846793005LL) + (1442695040888963407LL);

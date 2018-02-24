@@ -75,10 +75,10 @@ void epriv::TimeManager::calculate_sounds(){ m_i->soundTime = m_i->sounds_clock.
 void epriv::TimeManager::calculate_render(){ m_i->renderTime = m_i->render_clock.restart().asSeconds(); }
 float epriv::TimeManager::dt(){ return m_i->deltaTime; }
 float epriv::TimeManager::applicationTime(){ return m_i->applicationTime; }
-float epriv::TimeManager::updateTime(){ return m_i->updateTime; }
-float epriv::TimeManager::physicsTime(){ return m_i->physicsTime; }
-float epriv::TimeManager::renderTime(){ return m_i->renderTime; }
-float epriv::TimeManager::soundsTime(){ return m_i->soundTime; }
+float epriv::TimeManager::updateTime(){ return (float)m_i->updateTime; }
+float epriv::TimeManager::physicsTime(){ return (float)m_i->physicsTime; }
+float epriv::TimeManager::renderTime(){ return (float)m_i->renderTime; }
+float epriv::TimeManager::soundsTime(){ return (float)m_i->soundTime; }
 
 
 
@@ -96,12 +96,12 @@ void epriv::TimeManager::calculate_rendering_aa(){ m_i->rendering_aa_Time = m_i-
 void epriv::TimeManager::calculate_rendering_godrays(){ m_i->rendering_godrays_Time = m_i->rendering_godrays_clock.restart().asSeconds(); }
 void epriv::TimeManager::calculate_rendering_display(){ m_i->rendering_display_Time = m_i->rendering_display_clock.restart().asSeconds(); }
 
-float epriv::TimeManager::rendering_geometryTime(){ return m_i->rendering_geometry_Time; }
-float epriv::TimeManager::rendering_lightingTime(){ return m_i->rendering_lighting_Time; }
-float epriv::TimeManager::rendering_ssaoTime(){ return m_i->rendering_ssao_Time; }
-float epriv::TimeManager::rendering_aaTime(){ return m_i->rendering_aa_Time; }
-float epriv::TimeManager::rendering_godraysTime(){ return m_i->rendering_godrays_Time; }
-float epriv::TimeManager::rendering_displayTime(){ return m_i->rendering_display_Time; }
+float epriv::TimeManager::rendering_geometryTime(){ return (float)m_i->rendering_geometry_Time; }
+float epriv::TimeManager::rendering_lightingTime(){ return (float)m_i->rendering_lighting_Time; }
+float epriv::TimeManager::rendering_ssaoTime(){ return (float)m_i->rendering_ssao_Time; }
+float epriv::TimeManager::rendering_aaTime(){ return (float)m_i->rendering_aa_Time; }
+float epriv::TimeManager::rendering_godraysTime(){ return (float)m_i->rendering_godrays_Time; }
+float epriv::TimeManager::rendering_displayTime(){ return (float)m_i->rendering_display_Time; }
 
 
 string& epriv::TimeManager::reportTime(){ return epriv::TimeManager::reportTime(m_i->decimals); }

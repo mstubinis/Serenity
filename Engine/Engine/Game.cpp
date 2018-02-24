@@ -31,9 +31,23 @@ void Game::cleanup(){
 void Game::initResources(){
     Resources::getWindow()->setIcon("data/Textures/icon.png");
 
-    Resources::addShaderProgram("AS_GroundFromSpace","data/Shaders/AS_groundFromSpace_vert.glsl","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderRenderPass::Geometry);
-    Resources::addShaderProgram("AS_SkyFromSpace","data/Shaders/AS_skyFromSpace_vert.glsl","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderRenderPass::None);
-    Resources::addShaderProgram("AS_SkyFromAtmosphere","data/Shaders/AS_skyFromAtmosphere_vert.glsl","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderRenderPass::None);
+	Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
+	Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
+	Shader* s1 = Resources::getShader(skyFromSpaceVert);
+	Shader* s2 = Resources::getShader(skyFromSpaceFrag);
+    Resources::addShaderProgram("AS_SkyFromSpace",s1,s2,ShaderRenderPass::Geometry);
+
+	Handle skyFromAtVert = Resources::addShader("AS_SkyFromAtmosphere_Vert","data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
+	Handle skyFromAtFrag = Resources::addShader("AS_SkyFromAtmosphere_Frag","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
+	s1 = Resources::getShader(skyFromAtVert);
+	s2 = Resources::getShader(skyFromAtFrag);
+    Resources::addShaderProgram("AS_SkyFromAtmosphere",s1,s2,ShaderRenderPass::Geometry);
+
+	Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
+	Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
+	s1 = Resources::getShader(groundFromSpaceVert);
+	s2 = Resources::getShader(groundFromSpaceFrag);
+    Resources::addShaderProgram("AS_GroundFromSpace",s1,s2,ShaderRenderPass::Geometry);
 
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 

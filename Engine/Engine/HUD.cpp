@@ -40,9 +40,9 @@ void HUD::update(float dt){
                 scene->getPlayer()->setTarget(p.second);
                 break;
             }
-            a++;
+            ++a;
         }
-        _count++;
+        ++_count;
         if (_count > scene->getPlanets().size()-1){ _count = 0; }
     }
     else if(Engine::isKeyDownOnce(".")){
@@ -54,9 +54,9 @@ void HUD::update(float dt){
                 scene->getPlayer()->setTarget(p.second);
                 break;
             }
-            a++;
+            ++a;
         }
-        _count--;
+        --_count;
         if (_count <= 0){ _count = scene->getPlanets().size()-1; }
     }
 }

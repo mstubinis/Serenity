@@ -72,7 +72,7 @@ void Skybox::initMesh(){
         temp.push_back(glm::vec3(-1,1,-1));//23
         temp.push_back(glm::vec3(1,1,-1));//24
 
-        for(uint i = 0; i < 6; i++){
+        for(uint i = 0; i < 6; ++i){
             glm::vec3 v1,v2,v3,v4;
             v1 = temp[ 0 + (i*4) ];
             v2 = temp[ 1 + (i*4) ];
