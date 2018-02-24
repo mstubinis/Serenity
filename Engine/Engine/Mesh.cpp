@@ -1060,19 +1060,19 @@ uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
 
 
-Mesh::Mesh(string& name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
+Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,heightfield,threshold);
 }
-Mesh::Mesh(string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
+Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,grid,width,length,threshold);
 }
-Mesh::Mesh(string& name,float x, float y,float width, float height,float threshold):BindableResource(name),m_i(new impl){
+Mesh::Mesh(string name,float x, float y,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,x,y,width,height,threshold);
 }
-Mesh::Mesh(string& name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
+Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,width,height,threshold);
 }
-Mesh::Mesh(string& name,string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name),m_i(new impl){
+Mesh::Mesh(string name,string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,filename,type,notMemory,threshold);
 }
 Mesh::~Mesh(){

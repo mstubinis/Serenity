@@ -5,13 +5,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
+#include <vector>
 
 typedef unsigned int uint;
 
 class Object;
-
+class Mesh;
+class Material;
 namespace Engine{
 	namespace epriv{
+		struct MeshMaterialPair;
 		class ComponentManager final{
 		    private:
 				class impl;
@@ -23,11 +26,13 @@ namespace Engine{
 
 				void _init(const char* name, uint w, uint h);
 				void _update(float&);
+				void _render();
 		};
 
 
 
 		class ComponentBaseClass{
+			friend class ::Engine::epriv::ComponentManager;
 		    protected:
 				Object* m_Owner;
 		    public:
@@ -35,25 +40,30 @@ namespace Engine{
 				virtual ~ComponentBaseClass();
 
 				void setOwner(Object*);
-
-				virtual void update(float&);
-
 		};
+
 	};
+};
+
+class ComponentModel: public Engine::epriv::ComponentBaseClass{
+	friend class ::Engine::epriv::ComponentManager;
+    private:
+		std::vector<Engine::epriv::MeshMaterialPair> models;
+    public:
+		ComponentModel(Mesh*,Material*,Object* = nullptr);
+		~ComponentModel();
 };
 
 
 class ComponentTransform: public Engine::epriv::ComponentBaseClass{
+	friend class ::Engine::epriv::ComponentManager;
     private:
-		glm::mat4 model;
+		glm::mat4 modelMatrix;
 		glm::vec3 position, scale;
 		glm::quat rotation;
     public:
 		ComponentTransform(Object* = nullptr);
 		~ComponentTransform();
-
-		void update(float&);
 };
-
 
 #endif

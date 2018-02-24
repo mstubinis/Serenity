@@ -77,7 +77,7 @@ class epriv::ResourceManager::impl final{
 				HandleEntry& e = m_Resources[i];
 
 				if(e.m_resource){
-					std::cout << i << ": Active: " << e.m_active << " , Counter: " << e.m_counter << " , Name: " << e.m_resource->name() << std::endl;
+					std::cout << i << ": Active: " << e.m_active << " , Counter: " << e.m_counter << " , Name: " << ((EngineResource*)e.m_resource)->name() << std::endl;
 				}
 			}
 			std::cout << "----------------------------------------------" << std::endl;
@@ -95,7 +95,8 @@ class epriv::ResourceManager::impl final{
 			assert(m_entries[index].m_active == true);
 
 			m_Resources[index].m_nextFreeIndex = m_firstFreeEntry;
-			m_Resources[index].m_active = 0;
+			//m_Resources[index].m_active = 0; //im sure this works just as fine as the line below
+			m_Resources[index].m_active = false;
 			m_firstFreeEntry = index;
 
 			--m_activeEntryCount;
@@ -113,7 +114,7 @@ class epriv::ResourceManager::impl final{
 			return true;
 		}
 		template<typename T> inline bool _GetAs(Handle h, T*& out) const {
-			EngineResource* _void;
+			BaseR _void;
 			const bool rv = _Get(h,_void);
 			//out = union_cast<T>(_void);
 			out = (T*)_void;

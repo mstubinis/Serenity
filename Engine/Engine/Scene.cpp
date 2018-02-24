@@ -36,11 +36,11 @@ void Scene::centerSceneToObject(Object* center){
     glm::vec3 offset = -(center->getPosition());
     for(auto object:m_Objects){
         Object* obj = object.second;
-        if(obj != center && obj->getParent() == nullptr){
+        if(obj != center && obj->parent() == nullptr){
             obj->setPosition(obj->getPosition() + offset);
         }
     }
-    if(center->getParent() == nullptr)
+    if(center->parent() == nullptr)
         center->setPosition(0.0f,0.0f,0.0f);
 }
 Scene::~Scene(){

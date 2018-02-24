@@ -107,7 +107,7 @@ class Object: public IObject{
         virtual void update(float){}
         virtual float getRadius(){ return m_Radius; }
 
-        virtual Object* getParent(){ return m_Parent; }
+        virtual Object* parent(){ return m_Parent; }
         virtual std::vector<Object*>& getChildren(){ return m_Children; }
 
         virtual bool visible(){ return false; }

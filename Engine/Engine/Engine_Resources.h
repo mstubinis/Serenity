@@ -35,12 +35,12 @@ class SoundData;
 template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
 template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
 
-class ResourceType{public: enum Type{
+class ResourceType final{public: enum Type{
 	Texture,
 	Mesh,
 	Material,
 	Sound,
-	MeshInstance,
+	MeshInstance,//we will most likely not need this anymore once component system is in place
 	Object,
 	Font,
 	Camera,
@@ -63,12 +63,16 @@ struct Handle final{
 		return m_type << 27 | m_counter << 12 | m_index;
 	}
 };
+
+//typedef EngineResource* BaseR;
+typedef void* BaseR;
+
 struct HandleEntry final{
 	uint32 m_nextFreeIndex : 12;
 	uint32 m_counter : 15;
 	uint32 m_active : 1;
 	uint32 m_endOfList : 1;
-	EngineResource*  m_resource;
+	BaseR  m_resource;
 	HandleEntry(){
 		m_nextFreeIndex = 0; init();
 	}
@@ -81,8 +85,6 @@ struct HandleEntry final{
 		m_nextFreeIndex = nextFreeIndex; init();
 	}
 };
-typedef EngineResource* BaseR;
-//typedef void* BaseR;
 
 namespace Engine{
 	namespace epriv{
