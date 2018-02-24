@@ -18,10 +18,11 @@ varying float logz_f;
 
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
-    float fRayleighPhase = 0.75 * (1.0 + (fCos*fCos));
-    float fMiePhase = 1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos*fCos) / pow(1.0 + g2 - 2.0*g*fCos, 1.5);
+	float fCos2 = fCos * fCos;
+    float fRayleighPhase = 0.75 * (1.0 + (fCos2));
+    float fMiePhase = 1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos2) / pow(1.0 + g2 - 2.0 * g * fCos, 1.5);
     
-    float sun = 2.0*((1.0 - 0.2) / (2.0 + 0.2)) * (1.0 + fCos*fCos) / pow(1.0 + 0.2 - 2.0*(-0.2)*fCos, 1.0);
+	float sun = 0.727272 * (1.0 + fCos2) / pow(1.2 + 0.4 * fCos, 1.0);
     
     vec4 f4Ambient = (sun * Depth )*vec4(0.05, 0.05, 0.1,1.0);
     

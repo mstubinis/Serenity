@@ -56,12 +56,12 @@ vec2 UnpackFloat32Into2Floats(float i){
 }
 float scale(float fCos) {   
     float x = 1.0 - fCos;   
-    return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25)))); 
+    return fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25)))); 
 }
 float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
     float B = 2.0 * dot(_p, _r);
     float C = _d2 - _r2;
-    float fDet = max(0.0, B*B - 4.0 * C);
+    float fDet = max(0.0, B * B - 4.0 * C);
     return 0.5 * (-B - sqrt(fDet));
 }
 void main(){

@@ -46,7 +46,7 @@ uniform float fcoeff;
 
 float scale(float fCos){
     float x = 1.0 - fCos;
-    return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
+    return fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
 void main(){
     mat4 MVP = VP * Model;
@@ -69,8 +69,8 @@ void main(){
     vec3 v3SampleRay = v3Ray * fSampleLength;
     vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;
 
-    vec3 v3FrontColor = vec3(0);
-    vec3 v3Attenuate = vec3(0);
+    vec3 v3FrontColor = vec3(0.0);
+    vec3 v3Attenuate = vec3(0.0);
     for(int i = 0; i < nSamples; i++) {
         float fHeight = length(v3SamplePoint);
         float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));

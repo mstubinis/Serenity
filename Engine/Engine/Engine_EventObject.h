@@ -35,13 +35,6 @@ struct EventType final{enum Type{
 
 namespace Engine{
 	namespace epriv{
-	};
-};
-
-class Event final{
-    public:
-		EventType::Type type;
-
 		struct EventWindowResized final{ uint width,height; };
 		struct EventKeyboard final{ KeyboardKey::Key key; bool alt; bool control; bool shift; bool system; };
 		struct EventTextEntered final{ std::uint32_t unicode; };
@@ -51,17 +44,23 @@ class Event final{
 		struct EventJoystickMoved final{ uint joystickID; JoystickAxis::Axis axis; float position; };
 		struct EventJoystickButton final{ uint joystickID; uint button; };
 		struct EventJoystickConnection final{ uint joystickID; };
+	};
+};
+
+class Event final{
+    public:
+		EventType::Type type;
 
 		union{
-			EventWindowResized eventWindowResized;
-			EventKeyboard eventKeyboard;
-			EventTextEntered eventTextEntered;
-			EventMouseButton eventMouseButton;
-			EventMouseMove eventMouseMoved;
-			EventMouseWheel eventMouseWheel;
-			EventJoystickMoved eventJoystickMoved;
-			EventJoystickButton eventJoystickButton;
-			EventJoystickConnection eventJoystickConnection;
+			Engine::epriv::EventWindowResized eventWindowResized;
+			Engine::epriv::EventKeyboard eventKeyboard;
+			Engine::epriv::EventTextEntered eventTextEntered;
+			Engine::epriv::EventMouseButton eventMouseButton;
+			Engine::epriv::EventMouseMove eventMouseMoved;
+			Engine::epriv::EventMouseWheel eventMouseWheel;
+			Engine::epriv::EventJoystickMoved eventJoystickMoved;
+			Engine::epriv::EventJoystickButton eventJoystickButton;
+			Engine::epriv::EventJoystickConnection eventJoystickConnection;
 		};
 };
 

@@ -33,7 +33,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight*camHeight;
 
-    uint numberSamples = 2;
+    uint numberSamples = 1;
     //uint numberSamples = 8;
     
     glm::mat4 rot = glm::mat4(1.0f);

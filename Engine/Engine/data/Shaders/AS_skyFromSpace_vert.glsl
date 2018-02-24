@@ -42,12 +42,12 @@ uniform float fcoeff;
 
 float scale(float fCos){
     float x = 1.0 - fCos;
-    return fScaleDepth * exp(-0.00287 + x*(0.459 + x*(3.83 + x*(-6.80 + x*5.25))));
+    return fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
 float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadius2){
     float B = 2.0 * dot(v3Pos, v3Ray);
     float C = fDistance2 - fRadius2;
-    float fDet = max(0.0, B*B - 4.0 * C);
+    float fDet = max(0.0, B * B - 4.0 * C);
     return 0.5 * (-B - sqrt(fDet));
 }
 void main(){

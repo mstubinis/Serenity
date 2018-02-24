@@ -44,18 +44,26 @@ varying vec3 Tangents;
 varying float FC_2_f;
 varying float logz_f;
 
+const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
+
+const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
+const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);
+
+const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
+const vec2 ConstantOneVec2 = vec2(1.0,1.0);
+
 vec2 sign_not_zero(vec2 v) {
     return vec2(v.x >= 0 ? 1.0 : -1.0,v.y >= 0 ? 1.0 : -1.0);
 }
 vec2 EncodeOctahedron(vec3 v) {
-    if(v.r > 0.9999 && v.g > 0.9999 && v.b > 0.9999)
-        return vec2(1.0);
-	v.xy /= dot(abs(v), vec3(1.0));
+    if(  all(greaterThan(v,ConstantAlmostOneVec3))  )
+        return ConstantOneVec2;
+	v.xy /= dot(abs(v), ConstantOneVec3);
 	return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
 }
 vec3 DecodeOctahedron(vec2 n) {
-    if(n.r > 0.9999 && n.g > 0.9999)
-        return vec3(1.0);
+    if(  all(greaterThan(n,ConstantAlmostOneVec2))  )
+        return ConstantOneVec3;
 	vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));
 	if (v.z < 0.0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);
 	return normalize(v);
@@ -69,18 +77,18 @@ void main(){
     if(HasAtmosphere == 1){
         if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-            vec3 HDR = (1.0-exp(-fExposure*(c0+diffuse.rgb)*c1));
-            gl_FragData[0].rgb = max(vec3(0.05)*diffuse.rgb,HDR);    
+            vec3 HDR = (1.0 - exp(-fExposure * (c0 + diffuse.rgb) * c1));
+            gl_FragData[0].rgb = max( vec3(0.05) * diffuse.rgb, HDR);    
             if(FirstConditionals.z > 0.5){
-                vec3 lightIntensity = max(vec3(0.05)*vec3(1.0),(1.0 - exp( -fExposure * ((c0+vec3(1.0)) * c1) )));
-                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0-lightIntensity)*texture2D(GlowTexture, UV).rgb);
+                vec3 lightIntensity = max(vec3(0.05) * ConstantOneVec3,(1.0 - exp( -fExposure * ( (c0 + ConstantOneVec3 ) * c1) )));
+                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0 - lightIntensity) * texture2D(GlowTexture, UV).rgb);
             }
             gl_FragData[0].a = diffuse.a;
         }
         else{
-            gl_FragData[0] = vec4(0.0);
+            gl_FragData[0] = ConstantZeroVec4;
         }
-        gl_FragData[1].rg = vec2(1.0);
+        gl_FragData[1].rg = ConstantOneVec2;
 
         gl_FragData[2].r = 0.0;
         gl_FragData[2].g = 1.0;
@@ -90,7 +98,7 @@ void main(){
             gl_FragData[0] = texture2D(DiffuseTexture, UV) * Object_Color;
         }
         else{
-            gl_FragData[0] = vec4(0.0);
+            gl_FragData[0] = ConstantZeroVec4;
         }
 
         if(FirstConditionals.y > 0.5){
