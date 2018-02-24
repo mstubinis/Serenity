@@ -98,6 +98,7 @@ class epriv::PhysicsManager::impl final{
 			}
 		}
 		void _render(){
+			glUseProgram(0); //this is important
 			glMatrixMode(GL_PROJECTION); glPushMatrix();
 			Camera* c = Resources::getCurrentScene()->getActiveCamera();
 			glLoadMatrixf(glm::value_ptr(c->getProjection()));
