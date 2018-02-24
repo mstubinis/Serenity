@@ -33,26 +33,61 @@ template<class V,class S>void* _getFromContainer(unordered_map<S,V>& m,const S& 
 template<class V,class S>void _removeFromContainer(map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
 template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
 
+namespace Engine{
+	namespace epriv{
+		struct HandleEntry final{
+			uint32 m_nextFreeIndex : 12;
+			uint32 m_counter : 15;
+			uint32 m_active : 1;
+			uint32 m_endOfList : 1;
+			BaseR  m_resource;
+			HandleEntry(){
+				m_counter = 1; m_nextFreeIndex, m_active, m_endOfList = 0; m_resource = nullptr;
+			}
+			explicit HandleEntry(uint32 nextFreeIndex){
+				m_nextFreeIndex = nextFreeIndex; m_counter = 1; m_active, m_endOfList = 0; m_resource = nullptr;
+			}
+		};
+	};
+};
+
 class epriv::ResourceManager::impl final{
     public:
 		//TODO: convert to this resource system --------------------------------------------
+
+		//HandleEntry is essentially a custom smart pointer to a resource with some fancy stuff
+		//Handle returns a weak pointer basically, and is used to access the resource pool
+
+		//http://gamesfromwithin.com/managing-data-relationships
+
 		static const uint MAX_ENTRIES = 8192;
 		HandleEntry m_Resources[MAX_ENTRIES];
 		int m_activeEntryCount;
 		uint32 m_firstFreeEntry;
 
+		//create seperate containers for each resource type (mesh material etc)? vector.resize(8192) ?
+		//
+		// then store the object (as a pointer) to the vector's index corresponding to the handle id
+		//    OR
+		// store the object as it's handle ID to the vector's index corresponding to the handle id
+		// then retrieve the actual resource object via m_Resources[ vector.at(id) ] and cast it to it's actual type?
+		// this will come with a performance cost
+
+		//experiment making some of these pointers references when passed around...
+
 		void _Reset(){
 			m_activeEntryCount = 0;
 			m_firstFreeEntry = 0;
 			for (int i = 0; i < MAX_ENTRIES - 1; ++i){
+				// possibly delete the resouce here?
 				m_Resources[i] = HandleEntry(i + 1);
 			}
 			m_Resources[MAX_ENTRIES - 1] = HandleEntry();
 			m_Resources[MAX_ENTRIES - 1].m_endOfList = true;
 		}
-		Handle _Add(BaseR p, uint32 type){
+		Handle _Add(BaseR p, ResourceType::Type& type){
 			assert(m_activeEntryCount < MAX_ENTRIES - 1);
-			assert(type >= 0 && type <= 31);
+			assert(type >= 0 && type <= 31); //what exactly is 31 here? is it the bit amount or number amount? also type is not needed if data is stored in a base class... (hint hint)
 
 			const int newIndex = m_firstFreeEntry;
 			assert(newIndex < MAX_ENTRIES);
@@ -61,7 +96,8 @@ class epriv::ResourceManager::impl final{
 
 			m_firstFreeEntry = m_Resources[newIndex].m_nextFreeIndex;
 			m_Resources[newIndex].m_nextFreeIndex = 0;
-			m_Resources[newIndex].m_counter = m_Resources[newIndex].m_counter + 1;
+			//m_Resources[newIndex].m_counter = m_Resources[newIndex].m_counter + 1;
+			m_Resources[newIndex].m_counter += 1; //surely this will work just as well as the above line...
 			if (m_Resources[newIndex].m_counter == 0){
 				m_Resources[newIndex].m_counter = 1;
 			}
@@ -82,14 +118,14 @@ class epriv::ResourceManager::impl final{
 			}
 			std::cout << "----------------------------------------------" << std::endl;
 		}
-		void _Update(Handle h, BaseR p){
+		void _Update(Handle& h, BaseR p){
 			const int index = h.m_index;
 			assert(m_entries[index].m_counter == h.m_counter);
 			assert(m_entries[index].m_active == true);
 
 			m_Resources[index].m_resource = p;
 		}
-		void _Remove(const Handle h){
+		void _Remove(const Handle& h){
 			const uint32 index = h.m_index;
 			assert(m_entries[index].m_counter == h.m_counter);
 			assert(m_entries[index].m_active == true);
@@ -101,22 +137,22 @@ class epriv::ResourceManager::impl final{
 
 			--m_activeEntryCount;
 		}
-		BaseR _Get(Handle h) const{
+		BaseR _Get(Handle& h) const{
 			BaseR p = NULL;
 			if (!_Get(h, p)) return NULL;
 			return p;
 		}
-		bool _Get(const Handle h, BaseR& out) const{
+		bool _Get(const Handle& h, BaseR& out) const{
 			const int index = h.m_index;
 			if (m_Resources[index].m_counter != h.m_counter || m_Resources[index].m_active == false)
 				return false;
 			out = m_Resources[index].m_resource;
 			return true;
 		}
-		template<typename T> inline bool _GetAs(Handle h, T*& out) const {
+		template<typename T> inline bool _GetAs(Handle& h, T*& out) const {
 			BaseR _void;
 			const bool rv = _Get(h,_void);
-			//out = union_cast<T>(_void);
+			//out = union_cast<T>(_void); //i cannot find union_cast anywhere, lets pray a standard C-style cast works
 			out = (T*)_void;
 			return rv;
 		}
@@ -300,8 +336,9 @@ void epriv::ResourceManager::_init(const char* n,uint w,uint h){
 
 
 
-void epriv::ResourceManager::_addResource(BaseR r,ResourceType::Type t){
-	epriv::Core::m_Engine->m_ResourceManager->m_i->_Add(r,(uint)t);
+Handle& epriv::ResourceManager::_addResource(BaseR r,ResourceType::Type t){
+	Handle& h = epriv::Core::m_Engine->m_ResourceManager->m_i->_Add(r,t);
+	return h;
 }
 
 

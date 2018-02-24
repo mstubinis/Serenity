@@ -67,25 +67,6 @@ struct Handle final{
 //typedef EngineResource* BaseR;
 typedef void* BaseR;
 
-struct HandleEntry final{
-	uint32 m_nextFreeIndex : 12;
-	uint32 m_counter : 15;
-	uint32 m_active : 1;
-	uint32 m_endOfList : 1;
-	BaseR  m_resource;
-	HandleEntry(){
-		m_nextFreeIndex = 0; init();
-	}
-	void init(){
-		m_counter = 1;
-		m_active, m_endOfList = 0;
-		m_resource = nullptr;
-	}
-	explicit HandleEntry(uint32 nextFreeIndex){
-		m_nextFreeIndex = nextFreeIndex; init();
-	}
-};
-
 namespace Engine{
 	namespace epriv{
 		class ResourceManager final{
@@ -99,7 +80,7 @@ namespace Engine{
 
 				void _init(const char* name,uint width,uint height);
 
-				void _addResource(BaseR,ResourceType::Type);
+				Handle& _addResource(BaseR,ResourceType::Type);
 
 
 
