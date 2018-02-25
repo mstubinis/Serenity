@@ -103,7 +103,6 @@ namespace Engine{
 	};
 	namespace Data{
 		std::string reportTime();
-		std::string reportTimeRendering();
 	};
 
 

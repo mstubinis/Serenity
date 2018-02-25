@@ -33,21 +33,15 @@ void Game::initResources(){
 
 	Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
 	Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
-	Shader* s1 = Resources::getShader(skyFromSpaceVert);
-	Shader* s2 = Resources::getShader(skyFromSpaceFrag);
-    Resources::addShaderProgram("AS_SkyFromSpace",s1,s2,ShaderRenderPass::Geometry);
+    Resources::addShaderProgram("AS_SkyFromSpace",skyFromSpaceVert,skyFromSpaceFrag,ShaderRenderPass::Geometry);
 
 	Handle skyFromAtVert = Resources::addShader("AS_SkyFromAtmosphere_Vert","data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
 	Handle skyFromAtFrag = Resources::addShader("AS_SkyFromAtmosphere_Frag","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
-	s1 = Resources::getShader(skyFromAtVert);
-	s2 = Resources::getShader(skyFromAtFrag);
-    Resources::addShaderProgram("AS_SkyFromAtmosphere",s1,s2,ShaderRenderPass::Geometry);
+    Resources::addShaderProgram("AS_SkyFromAtmosphere",skyFromAtVert,skyFromAtFrag,ShaderRenderPass::Geometry);
 
 	Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
 	Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
-	s1 = Resources::getShader(groundFromSpaceVert);
-	s2 = Resources::getShader(groundFromSpaceFrag);
-    Resources::addShaderProgram("AS_GroundFromSpace",s1,s2,ShaderRenderPass::Geometry);
+    Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
@@ -75,8 +69,8 @@ void Game::initResources(){
     Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
-	Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","","Deferred_HUD");
-    Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","","Deferred_HUD");
+	Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
+    Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
 
@@ -92,7 +86,7 @@ void Game::initLogic(){
     Engine::getWindow()->setKeyRepeatEnabled(false);
 	//apparently these 2 should not be used together, but i have not found any issues with it so far
 	//Engine::getWindow()->setVerticalSyncEnabled(true);
-	//Engine::getWindow()->setFramerateLimit(60);
+	Engine::getWindow()->setFramerateLimit(60);
 
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();

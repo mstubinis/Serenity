@@ -1,3 +1,18 @@
+#include <boost/thread/thread.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
+
+/*
+1>  Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:
+1>  - add -D_WIN32_WINNT=0x0501 to the compiler command line; or
+1>  - add _WIN32_WINNT=0x0501 to your project's Preprocessor Definitions.
+1>  Assuming _WIN32_WINNT=0x0501 (i.e. Windows XP target).
+
+   //i get this when including the boost threading files at the top
+
+*/
+
 #include "Engine.h"
 #include "Engine_Time.h"
 #include "Engine_Resources.h"
@@ -14,8 +29,6 @@
 #include "Texture.h"
 #include "Font.h"
 #include "Scene.h"
-
-#include <boost/make_shared.hpp>
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -110,10 +123,13 @@ class epriv::ResourceManager::impl final{
     public:
 		//TODO: convert to this resource system --------------------------------------------
 
-		//HandleEntry is essentially a custom smart pointer to a resource with some fancy stuff
-		//Handle returns a weak pointer basically, and is used to access the resource pool
-
 		//http://gamesfromwithin.com/managing-data-relationships
+
+
+		//threading service for loading resources
+		boost::asio::io_service   ioService;
+        boost::thread_group       threadpool;
+
 
 		static const uint MAX_ENTRIES = 8192;
 		HandleEntry m_Resources[MAX_ENTRIES];
@@ -141,18 +157,15 @@ class epriv::ResourceManager::impl final{
 			m_Resources[MAX_ENTRIES - 1].endOfList = true;
 		}
 		Handle _Add(EngineResource*& p, ResourceType::Type& type){ //remove the pointer reference here?
-			//assert(m_activeEntryCount < MAX_ENTRIES - 1);
-			//assert(type >= 0 && type <= 31); //what exactly is 31 here? is it the bit amount or number amount? also type is not needed if data is stored in a base class... (hint hint)
+			//assert(m_activeEntryCount < MAX_ENTRIES - 1); assert(type >= 0 && type <= 31); //what exactly is 31 here? is it the bit amount or number amount? also type is not needed if data is stored in a base class... (hint hint)
 
 			const int newIndex = m_firstFreeEntry;
-			//assert(newIndex < MAX_ENTRIES);
-			//assert(m_Resources[newIndex].active == false);
-			//assert(!m_Resources[newIndex].endOfList);
+			//assert(newIndex < MAX_ENTRIES); assert(m_Resources[newIndex].active == false); assert(!m_Resources[newIndex].endOfList);
 
 			m_firstFreeEntry = m_Resources[newIndex].nextFreeIndex;
 			m_Resources[newIndex].nextFreeIndex = 0;
 			//m_Resources[newIndex].counter = m_Resources[newIndex].m_counter + 1;
-			++m_Resources[newIndex].counter; //surely this will work just as well as the above line...
+			++m_Resources[newIndex].counter;
 			if (m_Resources[newIndex].counter == 0){
 				m_Resources[newIndex].counter = 1;
 			}
@@ -235,6 +248,12 @@ class epriv::ResourceManager::impl final{
         unordered_map<string,boost::shared_ptr<Camera>> m_Cameras;
 
 		void _init(const char* name,const uint& width,const uint& height){
+			boost::asio::io_service::work work(ioService);
+
+			for(uint i = 0; i < boost::thread::hardware_concurrency(); ++i){
+				threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &ioService));
+			}
+
 			m_CurrentScene = nullptr;
 			m_DynamicMemory = false;
 			_Reset();//this is needed
@@ -300,6 +319,9 @@ class epriv::ResourceManager::impl final{
 			Resources::addMesh("Plane",1.0f,1.0f);
 		}
 		void _destruct(){
+			ioService.stop();
+			threadpool.join_all();
+
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
 			for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
 			for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
@@ -347,9 +369,6 @@ Handle epriv::ResourceManager::_addResource(EngineResource* r,ResourceType::Type
 
 string Engine::Data::reportTime(){
 	return epriv::Core::m_Engine->m_TimeManager->reportTime();
-}
-string Engine::Data::reportTimeRendering(){
-	return epriv::Core::m_Engine->m_TimeManager->reportTimeRendering();
 }
 float Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 float Engine::Resources::applicationTime(){ return epriv::Core::m_Engine->m_TimeManager->applicationTime(); }
@@ -435,16 +454,18 @@ Font* Resources::getFont(string n){return (Font*)(_getFromContainer(resourceMana
 Texture* Resources::getTexture(string n){return (Texture*)(_getFromContainer(resourceManager->m_i->m_Textures,n));}
 Mesh* Resources::getMesh(string n){return (Mesh*)(_getFromContainer(resourceManager->m_i->m_Meshes,n));}
 Material* Resources::getMaterial(string n){return (Material*)(_getFromContainer(resourceManager->m_i->m_Materials,n));}
-void Resources::getShader(Handle& h,Shader*& s){
-	resourceManager->m_i->_GetAs(h,s);
-}
-Shader* Resources::getShader(Handle& h){
-	Shader* s; resourceManager->m_i->_GetAs(h,s); return s;
-}
+
+void Resources::getShader(Handle& h,Shader*& s){ resourceManager->m_i->_GetAs(h,s); }
+Shader* Resources::getShader(Handle& h){ Shader* s; resourceManager->m_i->_GetAs(h,s); return s; }
+
 ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(_getFromContainer(resourceManager->m_i->m_ShaderPrograms,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 SoundData* Resources::getSoundData(string n){return (SoundData*)(_getFromContainer(resourceManager->m_i->m_SoundDatas,n)); }
 
+
+void addMeshFunctor(string n,string f, CollisionType t, bool b,float threshhold){
+	_addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
+}
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
     _addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
 }

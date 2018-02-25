@@ -841,6 +841,7 @@ class epriv::RenderManager::impl final{
 				unbindTexture2D(5);
 				m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI)->unbind();
 			}
+			GLDisable(GLState::STENCIL_TEST);
 		}
 		void _passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->bind();
@@ -885,20 +886,23 @@ class epriv::RenderManager::impl final{
 
 			gbuffer->getMainFBO()->bind();
 
-			GLEnable(GLState::STENCIL_TEST);
-			glStencilMask(0xFF); //all 8 bits are modified
-			glStencilFunc(GL_NEVER, 1, 0xFF);//stencil test never passes
-			glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
 			Settings::clear(false,false,true); //stencil is completely filled with 0's
+			glStencilMask(0xFFFFFFFF);
+			glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
+			glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
+			GLEnable(GLState::STENCIL_TEST);
 
 			bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
 			_renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
-			//if normals are white, then that area of the buffer is 0. otherwise the area is now 1.
-    
+			glStencilMask(0xFFFFFFFF);
+			glStencilFunc(GL_EQUAL, 0x1, 0x1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
+
 			for(uint i = 0; i < 1; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass)->unbind();
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+
 		}
 		void _passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
     
@@ -1030,19 +1034,19 @@ class epriv::RenderManager::impl final{
 		}
 		void _passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
 			if(!renderAA) return;
-
 			glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
-			GLEnable(GLState::STENCIL_TEST);
-			#pragma region PassEdgeStencil
+			/*
+			#pragma region StencilEdgePass
 			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-			gbuffer->getMainFBO()->bind();
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil)->bind();
-	
-			glStencilFunc(GL_NEVER, 1, 0xFF);//stencil test never passes, non discarded pixels are now 1 in the stencil buffer
-			glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-			glStencilMask(0xFF); //all 8 bits are modified
-			glClear(GL_STENCIL_BUFFER_BIT);
+			gbuffer->getMainFBO()->bind();
+
+			Settings::clear(false,false,true); //stencil is completely filled with 0's
+			glStencilMask(0xFFFFFFFF);
+			glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
+			glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
+			GLEnable(GLState::STENCIL_TEST);
 
 			sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 			sendUniform1f("SMAA_THRESHOLD",SMAA_THRESHOLD);
@@ -1050,19 +1054,28 @@ class epriv::RenderManager::impl final{
 			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Lighting),0);
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
+			glStencilMask(0xFFFFFFFF);
+			glStencilFunc(GL_EQUAL, 0x1, 0x1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
+
 			for(uint i = 0; i < 1; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil)->unbind();
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
-			glStencilMask(0x00); // disable writing to the stencil buffer
-			glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is equal to 1 (0x01 should be the value in the stencil buffer now)
 			#pragma endregion
+			*/
 
 			#pragma region PassEdge
 			gbuffer->start(GBufferType::Misc);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->bind();
 
-			Settings::clear(true,false,false);
+			Settings::clear(true,false,true); 
+			//Settings::clear(false,false,true);
+
+			glStencilMask(0xFFFFFFFF);
+			glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
+			glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
+			GLEnable(GLState::STENCIL_TEST);
 
 			sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 			sendUniform1f("SMAA_THRESHOLD",SMAA_THRESHOLD);
@@ -1074,8 +1087,12 @@ class epriv::RenderManager::impl final{
 			sendUniform1fSafe("SMAA_PREDICATION_STRENGTH",SMAA_PREDICATION_STRENGTH);
 			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Lighting),0);
 			bindTextureSafe("texturePredication",gbuffer->getTexture(GBufferType::Diffuse),1);
-			//edge pass
+
 			_renderFullscreenTriangle(fboWidth,fboHeight);
+
+			glStencilMask(0xFFFFFFFF);
+			glStencilFunc(GL_EQUAL, 0x1, 0x1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 
 			for(uint i = 0; i < 2; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->unbind();
@@ -1083,7 +1100,7 @@ class epriv::RenderManager::impl final{
 	
 			#pragma region PassBlend
 			gbuffer->start(GBufferType::Normal);
-			Settings::clear(true,false,false);
+			Settings::clear(true,false,false); //clear color only
 
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2)->bind();
 			sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
@@ -1101,13 +1118,14 @@ class epriv::RenderManager::impl final{
 			sendUniform1iSafe("SMAA_CORNER_ROUNDING",SMAA_CORNER_ROUNDING);
 			sendUniform1fSafe("SMAA_CORNER_ROUNDING_NORM",(float(SMAA_CORNER_ROUNDING) / 100.0f));
 
-			//blend pass
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
 			for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2)->unbind();
 			#pragma endregion
+
 			GLDisable(GLState::STENCIL_TEST);
+
 			#pragma region PassNeighbor
 			//gbuffer->start(GBufferType::Misc);
 			gbuffer->stop();
@@ -1116,13 +1134,12 @@ class epriv::RenderManager::impl final{
 			bindTextureSafe("textureMap",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
 			bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
 
-			//neighbor pass
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
 			for(uint i = 0; i < 2; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3)->unbind();
 			#pragma endregion
-			////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			#pragma region PassFinalCustom
 			/*
 			//this pass is optional. lets skip it for now
@@ -1190,11 +1207,8 @@ class epriv::RenderManager::impl final{
 			if(doGodRays == false) Renderer::Settings::GodRays::disable();
 			if(doAA == false) aa_algorithm = AntiAliasingAlgorithm::None;
 
-			Core::m_Engine->m_TimeManager->stop_rendering_geometry();
 			_passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
-			Core::m_Engine->m_TimeManager->calculate_rendering_geometry();
 
-			Core::m_Engine->m_TimeManager->stop_rendering_godrays();
 			if(godRays){
 				gbuffer->start(GBufferType::GodRays,"RGBA",false);
 				Object* o = Resources::getObject("Sun");
@@ -1210,16 +1224,10 @@ class epriv::RenderManager::impl final{
 
 				_passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
 			}
-			Core::m_Engine->m_TimeManager->calculate_rendering_godrays();
-
-			Core::m_Engine->m_TimeManager->stop_rendering_lighting();
-
 			GLDisable(GLState::BLEND);
 
 			//confirm, stencil rejection does help
 			_passStencil(gbuffer,camera,fboWidth,fboHeight);
-			glStencilFunc(GL_EQUAL, 1, 0xFF); //only operate on fragments where stencil is equal to 1 (0xFF == 255)
-			glStencilMask(0x00); // disable writing to the stencil buffer
 
 			GLEnable(GLState::BLEND);
 			glBlendEquation(GL_FUNC_ADD);
@@ -1233,9 +1241,7 @@ class epriv::RenderManager::impl final{
 			//_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
 
 			GLDisable(GLState::STENCIL_TEST);
-			Core::m_Engine->m_TimeManager->calculate_rendering_lighting();
 
-			Core::m_Engine->m_TimeManager->stop_rendering_ssao();
 			string _channels;
 			bool isdoingssao = false;
 			if(doSSAO && ssao){ isdoingssao = true; _channels = "RGBA"; }
@@ -1249,20 +1255,14 @@ class epriv::RenderManager::impl final{
 				gbuffer->start(GBufferType::Bloom,_channels,false);
 				_passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
 			}
-			Core::m_Engine->m_TimeManager->calculate_rendering_ssao();
 			gbuffer->start(GBufferType::Misc);
 			_passHDR(gbuffer,camera,fboWidth,fboHeight);
-
 
 	
 			bool doingaa = false;
 			if(doAA && aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
 
 			if(aa_algorithm == AntiAliasingAlgorithm::None || !doingaa){
-				//no aa so simulate 0 ms
-				Core::m_Engine->m_TimeManager->stop_rendering_aa();
-				Core::m_Engine->m_TimeManager->calculate_rendering_aa();
-
 				gbuffer->stop(fbo,rbo);
 				_passFinal(gbuffer,camera,fboWidth,fboHeight);
 			}
@@ -1273,16 +1273,12 @@ class epriv::RenderManager::impl final{
 				//_passEdgeCanny(gbuffer,camera,fboWidth,fboHeight,GBufferType::Lighting);
 
 				gbuffer->stop(fbo,rbo);
-				Core::m_Engine->m_TimeManager->stop_rendering_aa();
 				_passFXAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
-				Core::m_Engine->m_TimeManager->calculate_rendering_aa();
 			}
 			else if(aa_algorithm == AntiAliasingAlgorithm::SMAA && doingaa){
 				gbuffer->start(GBufferType::Lighting);
 				_passFinal(gbuffer,camera,fboWidth,fboHeight);
-				Core::m_Engine->m_TimeManager->stop_rendering_aa();
 				_passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
-			    Core::m_Engine->m_TimeManager->calculate_rendering_aa();
 			}
 
 			_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);

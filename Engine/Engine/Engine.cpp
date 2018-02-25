@@ -24,15 +24,12 @@
 #include <SFML/System.hpp>
 
 #ifdef _DEBUG
-#include <iostream>
+    #include <iostream>
 #endif
 
 using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
-
-bool m_IsKeyDown = false;
-
 epriv::Core::Core(const char* name,uint w,uint h){
 	m_EventManager = new epriv::EventManager(name,w,h);
 	m_ResourceManager = new epriv::ResourceManager(name,w,h);
@@ -301,13 +298,11 @@ void handleEvents(){
 }
 
 void Engine::run(){
-    while(Resources::getWindow()->isOpen()){
+	while(Resources::getWindow()->isOpen()){
 		handleEvents();
-
 		float dt = epriv::Core::m_Engine->m_TimeManager->dt();
-        update(dt);
-        render();
-		
+		update(dt);
+		render();
 		epriv::Core::m_Engine->m_TimeManager->calculate();
     }
 	//destruct the engine here

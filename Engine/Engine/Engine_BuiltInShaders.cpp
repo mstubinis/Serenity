@@ -801,9 +801,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
 	"    }\n"
     "}\n"
     "void main(){\n"
-    "    SMAAColorEdgeDetectionPS(uv, _offset, textureMap);\n"
-    "    //SMAADepthEdgeDetectionPS(uv, _offset, textureMap);\n"
-    "    //SMAALumaEdgeDetectionPS(uv, _offset, textureMap);\n"
+    //"    SMAAColorEdgeDetectionPS(uv, _offset, textureMap);\n"
+    //"    SMAADepthEdgeDetectionPS(uv, _offset, textureMap);\n"
+    "    SMAALumaEdgeDetectionPS(uv, _offset, textureMap);\n"
     "}\n"
     "\n";
 
@@ -937,9 +937,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "    return edges;\n"
     "}\n"
     "void main(){\n"
-    "    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
-    "    //gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
-    "    //gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
+    //"    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
+    //"    gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
+    "    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     "}\n"
     "\n";
 Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
