@@ -185,7 +185,7 @@ void MaterialComponentReflection::bind(){
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     if(m_Texture == nullptr)
-        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
+        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
@@ -210,7 +210,7 @@ void MaterialComponentRefraction::bind(){
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
     if(m_Texture == nullptr)
-        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->getSkybox()->texture(),slots.at(0));
+        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
     Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
@@ -495,7 +495,7 @@ void Material::addComponentSmoothness(string textureFile,float baseValue){
     setSmoothness(baseValue);
 }
 void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFactor){
-    if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->getSkybox()->texture();
+    if(cubemap == nullptr) cubemap = Resources::getCurrentScene()->skybox()->texture();
     m_i->_addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentReflection(string textureFiles[],string mapFile,float mixFactor){

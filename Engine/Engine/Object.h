@@ -111,7 +111,8 @@ class Object: public IObject{
         virtual std::vector<Object*>& getChildren(){ return m_Children; }
 
         virtual bool visible(){ return false; }
-        virtual bool checkRender(Camera*){ return false; }
+        virtual void checkRender(Camera*){}
+		virtual bool passedRenderCheck(){return false;}
         virtual bool rayIntersectSphere(Camera* = nullptr){return false;}
         virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector){return false;}
 };

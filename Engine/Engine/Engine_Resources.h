@@ -120,7 +120,7 @@ namespace Engine{
         void setCurrentScene(Scene* s);
         void setCurrentScene(std::string s);
 
-        float dt();
+        float& dt();
         float applicationTime();
 
         Engine_Window* getWindow();

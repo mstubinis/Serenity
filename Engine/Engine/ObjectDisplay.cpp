@@ -27,6 +27,7 @@ DefaultObjectDisplayUnbindFunctor ObjectDisplay::DEFAULT_UNBIND_FUNCTOR;
 
 ObjectDisplay::ObjectDisplay(string mesh, string mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
+	m_PassedRenderCheck = false;
     m_Visible = true;
     m_Shadeless = false;
     m_BoundingBoxRadius = glm::vec3(0);
@@ -49,11 +50,12 @@ void ObjectDisplay::update(float dt){
         meshInstance->update(dt);
     }
 }
-bool ObjectDisplay::checkRender(Camera* camera){
+void ObjectDisplay::checkRender(Camera* camera){
     if(!m_Visible || !camera->sphereIntersectTest(getPosition(),m_Radius) || camera->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
-        return false;
+        m_PassedRenderCheck = false;
+		return;
     }
-    return true;
+    m_PassedRenderCheck = true;
 }
 void ObjectDisplay::calculateRadius(){
     if(m_MeshInstances.size() == 0){

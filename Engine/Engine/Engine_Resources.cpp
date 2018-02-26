@@ -1,17 +1,4 @@
-#include <boost/thread/thread.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
-
-/*
-1>  Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:
-1>  - add -D_WIN32_WINNT=0x0501 to the compiler command line; or
-1>  - add _WIN32_WINNT=0x0501 to your project's Preprocessor Definitions.
-1>  Assuming _WIN32_WINNT=0x0501 (i.e. Windows XP target).
-
-   //i get this when including the boost threading files at the top
-
-*/
 
 #include "Engine.h"
 #include "Engine_Time.h"
@@ -125,12 +112,6 @@ class epriv::ResourceManager::impl final{
 
 		//http://gamesfromwithin.com/managing-data-relationships
 
-
-		//threading service for loading resources
-		boost::asio::io_service   ioService;
-        boost::thread_group       threadpool;
-
-
 		static const uint MAX_ENTRIES = 8192;
 		HandleEntry m_Resources[MAX_ENTRIES];
 		int m_activeEntryCount;
@@ -209,8 +190,8 @@ class epriv::ResourceManager::impl final{
 			}
 		}
 		EngineResource* _Get(Handle& h) const{
-			EngineResource* p = NULL;
-			if (!_Get(h, p)) return NULL;
+			EngineResource* p = nullptr;
+			if (!_Get(h, p)) return nullptr;
 			return p;
 		}
 		bool _Get(const Handle& h, EngineResource*& out) const{
@@ -225,6 +206,12 @@ class epriv::ResourceManager::impl final{
 			const bool rv = _Get(h,_void);
 			out = (T*)_void; //use union_cast ? was in the original source
 			return rv;
+		}
+		template<typename T> inline T* _GetAsFast(Handle& h) const { //see if we can directly return the resource only (last line) and dont need the if check
+			const int index = h.index;
+			if (m_Resources[index].counter != h.counter || m_Resources[index].active == false)
+				return nullptr;
+			return (T*)m_Resources[index].resource;
 		}
 		//-----------------------------------------------------------------------------------------------
 
@@ -248,12 +235,6 @@ class epriv::ResourceManager::impl final{
         unordered_map<string,boost::shared_ptr<Camera>> m_Cameras;
 
 		void _init(const char* name,const uint& width,const uint& height){
-			boost::asio::io_service::work work(ioService);
-
-			for(uint i = 0; i < boost::thread::hardware_concurrency(); ++i){
-				threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &ioService));
-			}
-
 			m_CurrentScene = nullptr;
 			m_DynamicMemory = false;
 			_Reset();//this is needed
@@ -319,9 +300,6 @@ class epriv::ResourceManager::impl final{
 			Resources::addMesh("Plane",1.0f,1.0f);
 		}
 		void _destruct(){
-			ioService.stop();
-			threadpool.join_all();
-
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
 			for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
 			for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
@@ -370,7 +348,7 @@ Handle epriv::ResourceManager::_addResource(EngineResource* r,ResourceType::Type
 string Engine::Data::reportTime(){
 	return epriv::Core::m_Engine->m_TimeManager->reportTime();
 }
-float Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
+float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 float Engine::Resources::applicationTime(){ return epriv::Core::m_Engine->m_TimeManager->applicationTime(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
 
@@ -463,9 +441,6 @@ MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFr
 SoundData* Resources::getSoundData(string n){return (SoundData*)(_getFromContainer(resourceManager->m_i->m_SoundDatas,n)); }
 
 
-void addMeshFunctor(string n,string f, CollisionType t, bool b,float threshhold){
-	_addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
-}
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
     _addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
 }
@@ -505,18 +480,6 @@ void Resources::addShaderProgram(string n, Handle& v, Handle& f, ShaderRenderPas
 	_addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,vS,fS,s));
 }
 
-
-/*
-void Resources::addShaderProgram(string n, string v, string f, ShaderRenderPass::Pass s){
-    _addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
-}
-void Resources::addShaderProgram(string n, Shader* v, string f, ShaderRenderPass::Pass s){
-    _addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
-}
-void Resources::addShaderProgram(string n, string v, Shader* f, ShaderRenderPass::Pass s){
-    _addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
-}
-*/
 void Resources::addSoundData(string file,string n,bool music){
 	if (n == ""){ n = file; }
 	_addToContainer(resourceManager->m_i->m_SoundDatas,n,boost::make_shared<SoundData>(file,music));

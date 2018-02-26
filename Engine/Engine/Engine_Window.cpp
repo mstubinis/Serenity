@@ -17,6 +17,7 @@ class Engine_Window::impl final{
         uint m_Width; uint m_Height;
 		bool m_MouseCursorVisible;
 		bool m_Fullscreen;
+		bool m_Active;
 		sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
 			m_MouseCursorVisible = true;
@@ -25,6 +26,7 @@ class Engine_Window::impl final{
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
+			_setActive(true);
             m_SFContextSettings = _createOpenGLWindow(name,width,height,3,3,330);
 			std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
         }
@@ -128,6 +130,10 @@ class Engine_Window::impl final{
 				m_MouseCursorVisible = visible;
 			}
 		}
+		void _setActive(bool active){
+			m_Active = active;
+			m_SFMLWindow->setActive(active);
+		}
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
@@ -148,9 +154,10 @@ void Engine_Window::requestFocus(){m_i->m_SFMLWindow->requestFocus();}
 void Engine_Window::close(){m_i->m_SFMLWindow->close();}
 bool Engine_Window::hasFocus(){return m_i->m_SFMLWindow->hasFocus();}
 bool Engine_Window::isOpen(){return m_i->m_SFMLWindow->isOpen();}
+bool Engine_Window::isActive(){ return m_i->m_Active; }
 bool Engine_Window::isFullscreen(){return m_i->m_Fullscreen;}
 void Engine_Window::display(){m_i->m_SFMLWindow->display();}
-void Engine_Window::setActive(bool active){m_i->m_SFMLWindow->setActive(active);}
+void Engine_Window::setActive(bool active){m_i->_setActive(active);}
 void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
 void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
 void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }

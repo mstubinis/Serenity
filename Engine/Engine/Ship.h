@@ -115,7 +115,7 @@ class Ship: public ObjectDynamic{
 
 		void onEvent(const Event&);
 
-        void translateWarp(float);
+        void translateWarp(float amount,float dt);
         void toggleWarp(){
             m_IsWarping = !m_IsWarping;
             m_WarpFactor = 0;

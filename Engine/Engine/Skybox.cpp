@@ -18,13 +18,12 @@ vector<glm::vec3> Skybox::m_Vertices;
 
 SkyboxEmpty::SkyboxEmpty(string name,Scene* scene){
     if(scene == nullptr) scene = Resources::getCurrentScene();
-    if(scene->getSkybox() == nullptr)
+    if(scene->skybox() == nullptr)
         scene->setSkybox(this);
 }
 SkyboxEmpty::~SkyboxEmpty(){
 
-}
-        
+}   
 Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
 	Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
@@ -41,8 +40,6 @@ Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
 }
 Skybox::~Skybox(){
-}
-void Skybox::update(){
 }
 void Skybox::initMesh(){
     if(Skybox::m_Vertices.size() == 0){
@@ -98,20 +95,4 @@ void Skybox::bindMesh(){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
     glDisableVertexAttribArray(0);
-}
-void Skybox::draw(){
-    ShaderP* p = Resources::getShaderProgram("Deferred_Skybox"); p->bind();
-
-    Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::mat4 view = c->getView();
-	Engine::Math::removeMatrixPosition(view);
-
-    Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
-
-    Renderer::bindTexture("Texture",m_Texture->address(0),0,GL_TEXTURE_CUBE_MAP);
-
-    Skybox::bindMesh();
-
-    Renderer::unbindTextureCubemap(0);
-    p->unbind();
 }

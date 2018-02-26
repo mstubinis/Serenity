@@ -75,15 +75,15 @@ namespace Engine{
 		struct EngineInternalShaderPrograms final{
 			enum Program{
 				//Deferred,
-				//DeferredHUD,
+				DeferredHUD,
 				DeferredGodRays,
 				DeferredBlur,
 				DeferredHDR,
 				DeferredSSAO,
 				DeferredFinal,
 				DeferredFXAA,
-				//DeferredSkybox,
-				//DeferredSkyboxFake,
+				DeferredSkybox,
+				DeferredSkyboxFake,
 				CopyDepth,
 				DeferredLighting,
 				DeferredLightingGI,
@@ -364,17 +364,16 @@ class epriv::RenderManager::impl final{
 
 			#pragma region ShaderPrograms
 
-
 			Resources::addShaderProgram("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
-			Resources::addShaderProgram("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur) = new ShaderP("Deferred_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BlurFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR) = new ShaderP("Deferred_HDR",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::HDRFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO) = new ShaderP("Deferred_SSAO",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::SSAOFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal) = new ShaderP("Deferred_Final",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::FinalFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA) = new ShaderP("Deferred_FXAA",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::FXAAFrag),ShaderRenderPass::Postprocess);
-			Resources::addShaderProgram("Deferred_Skybox",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::DeferredFragSkybox),ShaderRenderPass::Geometry);
-			Resources::addShaderProgram("Deferred_Skybox_Fake",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::DeferredFragSkyboxFake),ShaderRenderPass::Geometry);
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox) = new ShaderP("Deferred_Skybox",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::DeferredFragSkybox),ShaderRenderPass::Geometry);
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake) = new ShaderP("Deferred_Skybox_Fake",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::DeferredFragSkyboxFake),ShaderRenderPass::Geometry);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth) = new ShaderP("Copy_Depth",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::CopyDepthFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting) = new ShaderP("Deferred_Light",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::LightingFrag),ShaderRenderPass::Lighting);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI) = new ShaderP("Deferred_Light_GI",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::LightingGIFrag),ShaderRenderPass::Lighting);
@@ -468,6 +467,30 @@ class epriv::RenderManager::impl final{
 			glDeleteTextures(1,&ssao_noise_texture);
 			glDeleteTextures(1,&SMAA_SearchTexture);
 			glDeleteTextures(1,&SMAA_AreaTexture);
+		}
+		void _renderSkybox(SkyboxEmpty* s){
+			Scene* scene = Resources::getCurrentScene();
+			Camera* c = scene->getActiveCamera();
+			glm::mat4 view = c->getView();
+			Math::removeMatrixPosition(view);
+			if(s != nullptr){
+				m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->bind();
+				Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
+				Renderer::bindTexture("Texture",s->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
+				Skybox::bindMesh();
+				Renderer::unbindTextureCubemap(0);//yes, this is needed.
+				m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
+			}
+			else{//render a fake skybox.
+				Skybox::initMesh();
+				m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->bind();
+				glm::vec3 bgColor = scene->getBackgroundColor();
+				Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
+				Renderer::sendUniform4f("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
+				Skybox::bindMesh();
+				Renderer::unbindTextureCubemap(0);//yes, this is needed.
+				m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->unbind();
+			}
 		}
 		void _resize(uint& w, uint& h){
 			m_2DProjectionMatrix = glm::ortho(0.0f,(float)w,0.0f,(float)h,0.005f,1000.0f);
@@ -581,7 +604,7 @@ class epriv::RenderManager::impl final{
 			}
 		}
 		void _renderTextures(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
-			ShaderP* p = Resources::getShaderProgram("Deferred_HUD"); p->bind();
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
 			Resources::getMesh("Plane")->bind();
 			for(auto item:m_TexturesToBeRendered){
 				Texture* texture = nullptr;
@@ -609,10 +632,10 @@ class epriv::RenderManager::impl final{
 				Resources::getMesh("Plane")->render();
 			}
 			Resources::getMesh("Plane")->unbind();
-			p->unbind();
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->unbind();
 		}
 		void _renderText(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
-			ShaderP* p = Resources::getShaderProgram("Deferred_HUD"); p->bind();
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
 			for(auto item:m_FontsToBeRendered){
 				Font* font = Resources::getFont(item.texture);
 
@@ -644,9 +667,9 @@ class epriv::RenderManager::impl final{
 					}
 				}
 			}
-			p->unbind();
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->unbind();
 		}
-		void _passGeometry(GBuffer* gbuffer,Camera* camera,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
+		void _passGeometry(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
 			Scene* scene = Resources::getCurrentScene();
 			glm::vec3 clear = scene->getBackgroundColor();
 			const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
@@ -671,7 +694,9 @@ class epriv::RenderManager::impl final{
 
 			//TODO: move skybox rendering to the last after moving planetary atmosphere to forward rendering pass
 			gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
-			scene->renderSkybox();
+			_renderSkybox(scene->skybox());
+
+
 			if(godRays)
 				gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 
@@ -695,7 +720,7 @@ class epriv::RenderManager::impl final{
 									boost::weak_ptr<Object> o = Resources::getObjectPtr(meshInstance.first);
 									Object* object = o.lock().get();
 									if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
-										if(object->checkRender(camera)){ //culling check
+										if(object->passedRenderCheck()){ //culling check
 											object->bind();
 											for(auto meshInstance:meshInstance.second){
 												meshInstance->bind(); //render also
@@ -727,6 +752,7 @@ class epriv::RenderManager::impl final{
 		}
 		void _passForwardRendering(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
 			Scene* scene = Resources::getCurrentScene();
+
 			for(auto shaderProgram:m_ForwardPassShaderPrograms){
 				vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
 				shaderProgram->bind();   
@@ -739,7 +765,7 @@ class epriv::RenderManager::impl final{
 							boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
 							Object* object = o.lock().get();
 							if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
-								if(object->checkRender(c)){ //culling check
+								if(object->passedRenderCheck()){ //culling check
 									object->bind();
 									for(auto meshInstance:instance.second){
 										meshInstance->bind(); //render also
@@ -815,7 +841,7 @@ class epriv::RenderManager::impl final{
 				bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),1);
 				bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),2);
 
-				SkyboxEmpty* skybox = s->getSkybox();
+				SkyboxEmpty* skybox = s->skybox();
 
 				if(s->lightProbes().size() > 0){
 					for(auto probe:s->lightProbes()){
@@ -1337,6 +1363,7 @@ void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ Core::m_Engine->m_RenderManager->m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h){ m_i->_onOpenGLContextCreation(w,h); }
+
 void epriv::RenderManager::_renderText(string name,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
 	Core::m_Engine->m_RenderManager->m_i->m_FontsToBeRendered.push_back(FontRenderInfo(name,text,pos,color,scl,angle,depth));
 }

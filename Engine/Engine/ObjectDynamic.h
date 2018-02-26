@@ -23,6 +23,7 @@ class ObjectDynamic: public Object{
     protected:
         glm::vec3 m_Forward, m_Right, m_Up;
         bool m_Visible;
+		bool m_PassedRenderCheck;
         std::vector<MeshInstance*> m_MeshInstances;
         glm::vec4 m_Color;
         glm::vec3 m_GodsRaysColor;
@@ -57,7 +58,8 @@ class ObjectDynamic: public Object{
         virtual void suspend();
         virtual void resume();
 
-        bool checkRender(Camera*);
+		bool passedRenderCheck(){return m_PassedRenderCheck;}
+        void checkRender(Camera*);
 
         std::vector<MeshInstance*>&  getMeshInstances(){ return m_MeshInstances; }
 

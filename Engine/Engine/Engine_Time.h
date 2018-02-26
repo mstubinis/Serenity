@@ -33,7 +33,7 @@ namespace Engine{
 				void calculate_rendering_display();
 				float rendering_displayTime();
 
-				float dt();
+				float& dt();
 				float applicationTime();
 
 				float updateTime();

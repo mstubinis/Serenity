@@ -47,43 +47,33 @@ Scene::~Scene(){
     SAFE_DELETE(m_Skybox);
 }
 void Scene::update(float dt){
+	Camera* active = getActiveCamera();
     for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
-        if (it->second->isDestroyed()){
-            epriv::Core::m_Engine->m_ResourceManager->_remObject(it->second->name());
+		Object* obj = it->second;
+        if (obj->isDestroyed()){
+            epriv::Core::m_Engine->m_ResourceManager->_remObject(obj->name());
             m_Objects.erase(it++);
         }
         else{
-            it->second->update(dt); ++it;
+			obj->checkRender(active); //consider batch culling using the thread pool
+            obj->update(dt); 
+			++it;
         }
     }
     for (auto it = m_Cameras.cbegin(); it != m_Cameras.cend();){
-        if (it->second->isDestroyed()){
-			epriv::Core::m_Engine->m_ResourceManager->_remCamera(it->second->name());
+		Camera* cam = it->second;
+        if (cam->isDestroyed()){
+			epriv::Core::m_Engine->m_ResourceManager->_remCamera(cam->name());
         }
         else{
-			it->second->update(dt); ++it;
+			cam->update(dt); 
+			++it;
         }
     }
     if(m_Skybox != nullptr) m_Skybox->update();
 }
 void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
-void Scene::renderSkybox(){ 
-	if(m_Skybox != nullptr) 
-		m_Skybox->draw(); 
-	else{
-		//render a fake skybox.
-		Skybox::initMesh();
-		ShaderP* p = Resources::getShaderProgram("Deferred_Skybox_Fake"); p->bind();
-		Camera* c = Resources::getCurrentScene()->getActiveCamera();
-		glm::mat4 view = c->getView();
-		Math::removeMatrixPosition(view);
-		Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
-		Renderer::sendUniform4f("Color",m_BackgroundColor.r,m_BackgroundColor.g,m_BackgroundColor.b,1.0f);
-		Skybox::bindMesh();
-		Renderer::unbindTextureCubemap(0);//yes, this is needed.
-		p->unbind();
-	}
-}
+
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }
@@ -92,5 +82,5 @@ unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
 Object* Scene::getObject(string& name){ return m_Objects.at(name); }
 SunLight* Scene::getLight(string& name){ return m_Lights.at(name); }
 Camera* Scene::getCamera(string& name){ return m_Cameras.at(name); }
-SkyboxEmpty* Scene::getSkybox() const { return m_Skybox; }
+SkyboxEmpty* Scene::skybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

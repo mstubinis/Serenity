@@ -879,7 +879,6 @@ class Mesh::impl final{
             glGenBuffers(1, &m_buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
-
             //cannot clear indices buffer. just dont do it. ;)
             if(m_SaveMeshData == false){
                 vector_clear(m_Vertices);

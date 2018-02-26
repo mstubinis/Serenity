@@ -11,6 +11,7 @@ class ObjectDisplay: public ObjectBasic{
     protected:
         bool m_Shadeless;
         bool m_Visible;
+		bool m_PassedRenderCheck;
         std::vector<MeshInstance*> m_MeshInstances;
         glm::vec4 m_Color;
         glm::vec3 m_GodsRaysColor;
@@ -31,7 +32,7 @@ class ObjectDisplay: public ObjectBasic{
         virtual ~ObjectDisplay();
 
         virtual void update(float);
-        bool checkRender(Camera*);
+        void checkRender(Camera*);
 
         virtual void suspend();
         virtual void resume();
@@ -61,7 +62,7 @@ class ObjectDisplay: public ObjectBasic{
         std::vector<MeshInstance*>&  getMeshInstances(){ return m_MeshInstances; }
 
         virtual void setVisible(bool b);
-
+		bool passedRenderCheck(){return m_PassedRenderCheck;}
         virtual bool visible() { return m_Visible; }
         virtual bool rayIntersectSphere(Camera* = nullptr);
         virtual bool rayIntersectSphere(glm::vec3 origin, glm::vec3 vector);

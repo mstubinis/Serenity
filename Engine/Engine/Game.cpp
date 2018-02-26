@@ -6,6 +6,7 @@
 #include "Engine_Window.h"
 #include "Engine_Noise.h"
 #include "Engine_Networking.h"
+#include "Engine_ThreadManager.h"
 #include "SolarSystem.h"
 #include "HUD.h"
 #include "Ship.h"
@@ -19,8 +20,8 @@
 
 #include <unordered_map>
 #include <iostream>
-
 #include <glm/vec2.hpp>
+
 
 using namespace Engine;
 
@@ -28,8 +29,14 @@ HUD* m_HUD;
 void Game::cleanup(){
     delete m_HUD;
 }
+
+void jobAddMesh(std::string name, std::string file,CollisionType type, bool fromFile,float threshold){
+	Resources::addMesh(name,file,type,fromFile,threshold);
+}
+
 void Game::initResources(){
-    Resources::getWindow()->setIcon("data/Textures/icon.png");
+	Engine_Window& window = *Resources::getWindow();
+    window.setIcon("data/Textures/icon.png");
 
 	Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
 	Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
@@ -42,6 +49,8 @@ void Game::initResources(){
 	Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
 	Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
+
+	//epriv::threading::addJob(&jobAddMesh,"Test","data/Models/1911.fbx",CollisionType::None,true,0.0005f);
 
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
@@ -94,6 +103,7 @@ void Game::initLogic(){
 	Resources::setCurrentScene("Sol");
     m_HUD = new HUD();
 }
+
 void Game::update(float dt){
 	if(Engine::isKeyDown(KeyboardKey::Escape)){
         Engine::stop();

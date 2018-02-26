@@ -56,7 +56,7 @@ void ObjectDynamic::collisionResponse(ObjectDynamic* other){
 
 ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 scl,string n,Collision* col,Scene* scene): Object(n,scene){
     m_Forward = glm::vec3(0,0,-1); m_Right = glm::vec3(1,0,0); m_Up = glm::vec3(0,1,0); m_Color = glm::vec4(1); m_GodsRaysColor = glm::vec3(0);
-
+	m_PassedRenderCheck = false;
     m_Radius = 0;
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0.0f);
@@ -148,11 +148,12 @@ void ObjectDynamic::update(float dt){
         meshInstance->update(dt);
     }
 }
-bool ObjectDynamic::checkRender(Camera* c){
+void ObjectDynamic::checkRender(Camera* c){
     if(!m_Visible || !c->sphereIntersectTest(getPosition(),m_Radius) || c->getDistance(this) > m_Radius * Object::m_VisibilityThreshold){
-        return false;
+        m_PassedRenderCheck = false;
+		return;
     }
-    return true;
+    m_PassedRenderCheck = true;
 }
 glm::vec3 ObjectDynamic::getPosition(){
     glm::mat4 m(1);

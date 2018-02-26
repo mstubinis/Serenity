@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Engine_Time.h"
 #include "Engine_EventDispatcher.h"
+#include "Engine_ThreadManager.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Engine_Sounds.h"
@@ -39,8 +40,10 @@ epriv::Core::Core(const char* name,uint w,uint h){
 	m_RenderManager = new epriv::RenderManager(name,w,h);
 	m_EventDispatcher = new epriv::EventDispatcher(name,w,h);
 	m_ComponentManager = new epriv::ComponentManager(name,w,h);
+	m_ThreadManager = new epriv::ThreadManager(name,w,h);
 }
 epriv::Core::~Core(){
+	SAFE_DELETE(m_ThreadManager);
 	SAFE_DELETE(m_EventManager);
 	SAFE_DELETE(m_SoundManager);
 	SAFE_DELETE(m_ResourceManager);
@@ -62,6 +65,7 @@ void Engine::init(const char* name,uint w,uint h){
 	epriv::Core::m_Engine->m_PhysicsManager->_init(name,w,h);
 	epriv::Core::m_Engine->m_EventDispatcher->_init(name,w,h);
 	epriv::Core::m_Engine->m_ComponentManager->_init(name,w,h);
+	epriv::Core::m_Engine->m_ThreadManager->_init(name,w,h);
 
 	//init the game here
     Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
@@ -87,18 +91,17 @@ void update(float dt){
     Game::onPostUpdate(dt);
 
 	epriv::Core::m_Engine->m_TimeManager->calculate_update();
-
 	// update physics //////////////////////////////////////////
 	epriv::Core::m_Engine->m_TimeManager->stop_physics();
 	epriv::Core::m_Engine->m_PhysicsManager->_update(dt);
 	epriv::Core::m_Engine->m_TimeManager->calculate_physics();
-	////////////////////////////////////////////////////////////
 	// update sounds ///////////////////////////////////////////
 	epriv::Core::m_Engine->m_TimeManager->stop_sounds();
 	epriv::Core::m_Engine->m_SoundManager->_update(dt);
 	epriv::Core::m_Engine->m_TimeManager->calculate_sounds();
 	////////////////////////////////////////////////////////////
 }
+
 void render(){
 	epriv::Core::m_Engine->m_TimeManager->stop_render();
 
@@ -298,9 +301,10 @@ void handleEvents(){
 }
 
 void Engine::run(){
-	while(Resources::getWindow()->isOpen()){
-		handleEvents();
+	Engine_Window* window = Resources::getWindow();
+	while(window->isOpen()){
 		float dt = epriv::Core::m_Engine->m_TimeManager->dt();
+		handleEvents();
 		update(dt);
 		render();
 		epriv::Core::m_Engine->m_TimeManager->calculate();

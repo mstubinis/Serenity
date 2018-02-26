@@ -186,10 +186,10 @@ void ShipSystemWarpDrive::update(float dt){
             }
             if(m_Ship->IsWarping()){
                 if(Engine::isKeyDown("w")){
-                    m_Ship->translateWarp(0.1f);
+                    m_Ship->translateWarp(0.1f,dt);
                 }
                 else if(Engine::isKeyDown("s")){
-                    m_Ship->translateWarp(-0.1f);
+                    m_Ship->translateWarp(-0.1f,dt);
                 }
             }
         }
@@ -294,10 +294,10 @@ void Ship::update(float dt){
 
     ObjectDynamic::update(dt);
 }
-void Ship::translateWarp(float amount){
+void Ship::translateWarp(float amount,float dt){
     float amountToAdd = amount * (1.0f / 0.5f);
     if((amount > 0 && m_WarpFactor + amount < 1) || (amount < 0 && m_WarpFactor > 0)){
-        m_WarpFactor += amountToAdd * Resources::dt();
+        m_WarpFactor += amountToAdd * dt;
     }
 }
 void Ship::setTarget(Object* target){

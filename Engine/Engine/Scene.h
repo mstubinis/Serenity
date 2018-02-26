@@ -43,10 +43,9 @@ class Scene: public EngineResource{
         glm::vec3 getBackgroundColor();
         void setBackgroundColor(float,float,float);
 
-        SkyboxEmpty* getSkybox() const;
+        SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Object*);
-        void renderSkybox();
 		void setActiveCamera(Camera*);
 		void setActiveCamera(std::string);
 };

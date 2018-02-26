@@ -45,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\bullet;C:\boost164\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -75,7 +75,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\bullet;C:\boost164\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -119,6 +119,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine_Events.cpp" />
     <ClCompile Include="Engine_ResourceBasic.cpp" />
     <ClCompile Include="Engine_Sounds.cpp" />
+    <ClCompile Include="Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine_Time.cpp" />
     <ClCompile Include="Engine_Window.cpp" />
     <ClCompile Include="FramebufferObject.cpp" />
@@ -171,6 +172,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_Events.h" />
     <ClInclude Include="Engine_ResourceBasic.h" />
     <ClInclude Include="Engine_Sounds.h" />
+    <ClInclude Include="Engine_ThreadManager.h" />
     <ClInclude Include="Engine_Time.h" />
     <ClInclude Include="Engine_Window.h" />
     <ClInclude Include="FramebufferObject.h" />

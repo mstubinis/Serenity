@@ -30,6 +30,7 @@ class Engine_Window final{
         bool hasFocus();
         bool isOpen();
 		bool isFullscreen();
+		bool isActive();
         void setFullScreen(bool);
         void setStyle(uint style);
         void display();

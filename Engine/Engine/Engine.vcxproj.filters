@@ -258,6 +258,9 @@
     <ClCompile Include="Components.cpp">
       <Filter>Source Files\Engine\Engine_Components</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_ThreadManager.cpp">
+      <Filter>Source Files\Engine\Engine_Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -409,6 +412,9 @@
     </ClInclude>
     <ClInclude Include="Components.h">
       <Filter>Header Files\Engine\Engine_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine_ThreadManager.h">
+      <Filter>Header Files\Engine\Engine_Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

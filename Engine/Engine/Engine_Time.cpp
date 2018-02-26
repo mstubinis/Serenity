@@ -61,7 +61,7 @@ void epriv::TimeManager::calculate_update(){ m_i->updateTime = m_i->update_clock
 void epriv::TimeManager::calculate_physics(){ m_i->physicsTime = m_i->physics_clock.restart().asSeconds(); }
 void epriv::TimeManager::calculate_sounds(){ m_i->soundTime = m_i->sounds_clock.restart().asSeconds(); }
 void epriv::TimeManager::calculate_render(){ m_i->renderTime = m_i->render_clock.restart().asSeconds(); }
-float epriv::TimeManager::dt(){ return m_i->deltaTime; }
+float& epriv::TimeManager::dt(){ return m_i->deltaTime; }
 float epriv::TimeManager::applicationTime(){ return m_i->applicationTime; }
 float epriv::TimeManager::updateTime(){ return (float)m_i->updateTime; }
 float epriv::TimeManager::physicsTime(){ return (float)m_i->physicsTime; }
