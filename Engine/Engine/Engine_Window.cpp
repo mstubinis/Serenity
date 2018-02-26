@@ -14,12 +14,13 @@ class Engine_Window::impl final{
         sf::VideoMode m_VideoMode;
         const char* m_WindowName;
         sf::Window* m_SFMLWindow;
-        uint m_Width; uint m_Height;
+        uint m_Width, m_Height, m_FramerateLimit;
 		bool m_MouseCursorVisible;
 		bool m_Fullscreen;
 		bool m_Active;
 		sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
+			m_FramerateLimit = 0;
 			m_MouseCursorVisible = true;
 			m_Fullscreen = false;
             m_WindowName = name;
@@ -134,6 +135,10 @@ class Engine_Window::impl final{
 			m_Active = active;
 			m_SFMLWindow->setActive(active);
 		}
+		void _setFramerateLimit(uint& limit){
+			m_SFMLWindow->setFramerateLimit(limit);
+			m_FramerateLimit = limit;
+		}
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
@@ -162,6 +167,7 @@ void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
 void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
 void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }
 void Engine_Window::keepMouseInWindow(bool keep){ m_i->m_SFMLWindow->setMouseCursorGrabbed(keep); }
-void Engine_Window::setFramerateLimit(uint limit){ m_i->m_SFMLWindow->setFramerateLimit(limit); }
+void Engine_Window::setFramerateLimit(uint limit){ m_i->_setFramerateLimit(limit); }
 sf::Window* Engine_Window::getSFMLHandle() const { return m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }
+uint Engine_Window::getFramerateLimit() const{ return m_i->m_FramerateLimit; }

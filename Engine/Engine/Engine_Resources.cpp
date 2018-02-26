@@ -349,7 +349,6 @@ string Engine::Data::reportTime(){
 	return epriv::Core::m_Engine->m_TimeManager->reportTime();
 }
 float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
-float Engine::Resources::applicationTime(){ return epriv::Core::m_Engine->m_TimeManager->applicationTime(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
 
 bool epriv::ResourceManager::_hasMaterial(string n){ if(resourceManager->m_i->m_Materials.count(n)) return true; return false; }

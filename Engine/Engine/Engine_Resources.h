@@ -121,7 +121,6 @@ namespace Engine{
         void setCurrentScene(std::string s);
 
         float& dt();
-        float applicationTime();
 
         Engine_Window* getWindow();
         glm::uvec2 getWindowSize();

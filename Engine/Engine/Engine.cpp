@@ -80,8 +80,25 @@ void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
 }
 void update(float dt){
-	epriv::Core::m_Engine->m_TimeManager->stop_update();
+	// update physics //////////////////////////////////////////
+	epriv::Core::m_Engine->m_TimeManager->stop_clock();
 
+	//It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time.
+	//dt < maxSubSteps * fixedTimeStep
+
+	float minStep = 0.0166666f; // == 0.0166666 at 1 fps
+	uint maxSubSteps = 0;
+	while(true){
+		++maxSubSteps;
+		if(dt < (maxSubSteps * minStep)) break;
+	}
+
+	epriv::Core::m_Engine->m_PhysicsManager->_update(dt,maxSubSteps,minStep);
+	epriv::Core::m_Engine->m_TimeManager->calculate_physics();
+	////////////////////////////////////////////////////////////
+
+	// update logic   //////////////////////////////////////////
+	epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Game::onPreUpdate(dt);
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
@@ -90,30 +107,27 @@ void update(float dt){
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 
-	epriv::Core::m_Engine->m_TimeManager->calculate_update();
-	// update physics //////////////////////////////////////////
-	epriv::Core::m_Engine->m_TimeManager->stop_physics();
-	epriv::Core::m_Engine->m_PhysicsManager->_update(dt);
-	epriv::Core::m_Engine->m_TimeManager->calculate_physics();
+	epriv::Core::m_Engine->m_TimeManager->calculate_logic();
+	////////////////////////////////////////////////////////////
 	// update sounds ///////////////////////////////////////////
-	epriv::Core::m_Engine->m_TimeManager->stop_sounds();
+	epriv::Core::m_Engine->m_TimeManager->stop_clock();
 	epriv::Core::m_Engine->m_SoundManager->_update(dt);
 	epriv::Core::m_Engine->m_TimeManager->calculate_sounds();
 	////////////////////////////////////////////////////////////
 }
 
 void render(){
-	epriv::Core::m_Engine->m_TimeManager->stop_render();
-
+	//render
+	epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Game::render();
 	glm::uvec2 winSize = Resources::getWindowSize();
 	epriv::Core::m_Engine->m_RenderManager->_render(Resources::getCurrentScene()->getActiveCamera(),winSize.x,winSize.y);
-
-	epriv::Core::m_Engine->m_TimeManager->stop_rendering_display();
-    Resources::getWindow()->display();
-	epriv::Core::m_Engine->m_TimeManager->calculate_rendering_display();
-
 	epriv::Core::m_Engine->m_TimeManager->calculate_render();
+
+	//display
+	epriv::Core::m_Engine->m_TimeManager->stop_clock();
+    Resources::getWindow()->display();
+	epriv::Core::m_Engine->m_TimeManager->calculate_display();	
 }
 void EVENT_RESIZE(uint w, uint h,bool saveSize){
 	epriv::Core::m_Engine->m_RenderManager->_resize(w,h);

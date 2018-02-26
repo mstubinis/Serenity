@@ -50,8 +50,6 @@ void Game::initResources(){
 	Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
-	//epriv::threading::addJob(&jobAddMesh,"Test","data/Models/1911.fbx",CollisionType::None,true,0.0005f);
-
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
     Resources::addMesh("Planet","data/Models/planet.obj");
@@ -90,12 +88,13 @@ void Game::initResources(){
 	Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 }
 void Game::initLogic(){
-    Engine::getWindow()->keepMouseInWindow(true);
-    Engine::getWindow()->setMouseCursorVisible(false);
-    Engine::getWindow()->setKeyRepeatEnabled(false);
+	Engine_Window& window = *Resources::getWindow();
+    window.keepMouseInWindow(true);
+    window.setMouseCursorVisible(false);
+    window.setKeyRepeatEnabled(false);
 	//apparently these 2 should not be used together, but i have not found any issues with it so far
-	//Engine::getWindow()->setVerticalSyncEnabled(true);
-	Engine::getWindow()->setFramerateLimit(60);
+	//window.setVerticalSyncEnabled(true);
+	//window.setFramerateLimit(60);
 
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();

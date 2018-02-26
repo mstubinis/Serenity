@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_TIME_CLASS
-#define ENGINE_TIME_CLASS
+#ifndef ENGINE_TIME_CLASS_H
+#define ENGINE_TIME_CLASS_H
 
 #include <memory>
 #include <string>
@@ -19,27 +19,21 @@ namespace Engine{
 
 				void calculate();
 
-				void stop_update();
-				void stop_physics();
-				void stop_sounds();
-				void stop_render();
+				void stop_clock();
 
-				void calculate_update();
+				void calculate_logic();
 				void calculate_physics();
 				void calculate_sounds();
 				void calculate_render();
+				void calculate_display();
 
-				void stop_rendering_display();
-				void calculate_rendering_display();
-				float rendering_displayTime();
+				float& dt() const;
 
-				float& dt();
-				float applicationTime();
-
-				float updateTime();
-				float physicsTime();
-				float soundsTime();
-				float renderTime();
+				const float& logicTime() const;
+				const float& physicsTime() const;
+				const float& soundsTime() const;
+				const float& renderTime() const;
+				const float& displayTime() const;
 
 				std::string& reportTime();
 				std::string& reportTime(uint decimals);
