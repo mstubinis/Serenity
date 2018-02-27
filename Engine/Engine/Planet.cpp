@@ -39,7 +39,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightDir = Resources::getCurrentScene()->lights().begin()->second->getPosition() - pos;
+	glm::vec3 lightPos = Resources::getCurrentScene()->lights().begin()->second->getPosition();
+    glm::vec3 lightDir = lightPos - pos;
     lightDir = glm::normalize(lightDir);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -65,7 +66,6 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1f("fKmESun", Km * ESun);
     Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
     Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
-    Renderer::sendUniform1i("hasAtmosphere",1);
     Renderer::sendUniform1i("HasAtmosphere",1);   
     Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
     Renderer::sendUniform1fSafe("fExposure", 2.0f);
@@ -149,14 +149,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     }
     else{
         //Ground should be currently binded
-        atmosphereHeight = 0.025f;
-
-        outerRadius = innerRadius + (innerRadius * atmosphereHeight);
-        fScale = 1.0f / (outerRadius - innerRadius);
-        Renderer::sendUniform1f("fOuterRadius", outerRadius);
-        Renderer::sendUniform1f("fOuterRadius2", outerRadius*outerRadius);
-        Renderer::sendUniform1f("fScale",fScale);
-        Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+		Renderer::sendUniform1i("HasAtmosphere",0);   
 
         glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
@@ -167,7 +160,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
         glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f));
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
-
+		Renderer::sendUniform3f("v3LightPos", lightPos);
         i->mesh()->render();
     }
     /*

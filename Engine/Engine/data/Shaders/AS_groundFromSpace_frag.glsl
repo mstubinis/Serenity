@@ -32,6 +32,7 @@ varying vec3 c0;
 varying vec3 c1;
 
 uniform int HasAtmosphere;
+uniform vec3 v3LightPos;
 
 varying vec3 WorldPosition;
 varying vec3 CameraPosition;
@@ -40,6 +41,8 @@ varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;
 varying vec3 Tangents;
+
+flat varying float HasAtmo;
 
 varying float FC_2_f;
 varying float logz_f;
@@ -73,8 +76,20 @@ vec3 CalcBumpedNormal(){
     mat3 TBN = mat3(Tangents, Binormals, Normals);
     return TBN * normalize(normalTexture);
 }
+float minnaert(float _NdotL, float _VdotN){
+    const float smoothness = 1.1;
+    return pow(_VdotN * _NdotL,smoothness)*1.3;
+}
+float orenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN){
+     float roughness = 0.1;
+     float _alpha = roughness * roughness;
+     float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);
+     float B = 0.45 * _alpha / (_alpha + 0.09);
+     float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);
+     return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));
+}
 void main(){
-    if(HasAtmosphere == 1){
+    if(HasAtmo > 0.99){
         if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
             vec3 HDR = (1.0 - exp(-fExposure * (c0 + diffuse.rgb) * c1));
@@ -95,12 +110,19 @@ void main(){
     }
     else{
         if(FirstConditionals.x > 0.5){
-            gl_FragData[0] = texture2D(DiffuseTexture, UV) * Object_Color;
+		    vec3 PxlNormal = normalize(Normals);
+		    vec3 ViewDir = normalize(CameraPosition - WorldPosition);
+			vec3 LightDir = normalize(v3LightPos - WorldPosition);
+			float NdotL = max(0.0,dot(PxlNormal,LightDir ));
+			float VdotN = max(0.0,dot(PxlNormal,ViewDir ));
+            //gl_FragData[0].rgb = (texture2D(DiffuseTexture, UV).rgb * Object_Color.rgb) * vec3(minnaert(NdotL,VdotN));
+			gl_FragData[0].rgb = (texture2D(DiffuseTexture, UV).rgb * Object_Color.rgb) * vec3(orenNayar(ViewDir,LightDir,NdotL,VdotN)) * NdotL * 1.6;
+			gl_FragData[0].a = 1.0;
         }
         else{
             gl_FragData[0] = ConstantZeroVec4;
         }
-
+		/*
         if(FirstConditionals.y > 0.5){
             gl_FragData[1].rg = EncodeOctahedron(CalcBumpedNormal());
             gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
@@ -109,6 +131,9 @@ void main(){
             gl_FragData[1].rg = EncodeOctahedron(normalize(Normals));
             gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
         }
+		*/
+        gl_FragData[1].rg = EncodeOctahedron(vec3(1.0));
+        gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
 
         if(FirstConditionals.z > 0.5){
             gl_FragData[2].r = texture2D(GlowTexture, UV).r + MaterialBasePropertiesOne.x;

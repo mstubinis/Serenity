@@ -7,7 +7,7 @@ attribute vec4 normal;
 attribute vec4 binormal;
 attribute vec4 tangent;
 
-uniform int hasAtmosphere;
+uniform int HasAtmosphere;
 
 uniform mat4 VP;
 uniform mat4 Model;
@@ -36,11 +36,14 @@ varying vec3 c1;
 
 varying vec2 UV;
 
+
 varying vec3 WorldPosition;
 varying vec3 CameraPosition;
 varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
+
+flat varying float HasAtmo;
 
 varying float logz_f;
 varying float FC_2_f;
@@ -66,9 +69,26 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 }
 void main(){
     mat4 MVP = VP * Model;
-    if(hasAtmosphere == 1){
-        vec3 test = (Rot * vec4(position,1.0)).xyz;
-        vec3 v3Pos = test * fInnerRadius;
+	WorldPosition = (Model * vec4(position,1.0)).xyz;
+    Normals = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    Binormals = (Model * vec4(binormal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    Tangents = (Model * vec4(tangent.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+	UV = uv;
+
+    gl_Position = MVP * vec4(position, 1.0);
+
+    //UV = UnpackFloat32Into2Floats(uv);
+    CameraPosition = v3CameraPos;
+
+	HasAtmo = HasAtmosphere;
+
+    logz_f = 1.0 + gl_Position.w;
+    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
+    FC_2_f = fcoeff * 0.5;
+
+    if(HasAtmosphere == 1){
+		vec3 test = (Rot * vec4(position,1.0)).xyz;
+		vec3 v3Pos = test * fInnerRadius;
         vec3 v3Ray = v3Pos - v3CameraPos;
         float fFar = length(v3Ray);
         v3Ray /= fFar;  
@@ -83,10 +103,10 @@ void main(){
             v3Start = v3CameraPos;
         }
         
-        vec3 normal = normalize(v3Pos);
+        vec3 normalSphere = normalize(v3Pos);
         float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);    
-        float fCameraAngle = dot(-v3Ray, normal);
-        float fLightAngle = dot(v3LightDir, normal);
+        float fCameraAngle = dot(-v3Ray, normalSphere);
+        float fLightAngle = dot(v3LightDir, normalSphere);
         float fCameraScale = scale(fCameraAngle);
         float fLightScale = scale(fLightAngle);
         float fCameraOffset = fDepth*fCameraScale;
@@ -110,19 +130,4 @@ void main(){
         c0 = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);  
         c1 = v3Attenuate;
     }
-    gl_Position = MVP * vec4(position, 1.0);
-
-    //UV = UnpackFloat32Into2Floats(uv);
-    UV = uv;
-    CameraPosition = v3CameraPos;
-
-    Normals = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    Binormals = (Model * vec4(binormal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    Tangents = (Model * vec4(tangent.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
-
-    WorldPosition = (Model * vec4(position,1.0)).xyz;
-
-    logz_f = 1.0 + gl_Position.w;
-    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
-    FC_2_f = fcoeff * 0.5;
 }

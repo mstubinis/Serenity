@@ -119,6 +119,12 @@ void Game::update(float dt){
 	if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
 	if(Engine::isKeyDownOnce("space")){
+		if(Resources::getMaterial("Defiant")->diffuseModel() == DiffuseModel::Lambert){
+			Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Minnaert);
+		}
+		else{
+			Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Lambert);
+		}
 	}
 	/*
     if(Engine::isKeyDown("z")){

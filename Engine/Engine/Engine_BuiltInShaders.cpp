@@ -1905,6 +1905,12 @@ Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersMan
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
 Shaders::Detail::ShadersManagement::lighting_frag +=
+	"float azimuth(vec3 vector){\n"
+	"    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
+	"}\n"
+	"float polar(vec3 vector){\n"
+	"    return acos(vector.z / length(vector));\n"
+	"}\n"
     "float BeckmannDist(float cos2a, float _alpha){\n"
     "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
     "    return (exp(-b)) / (KPI * _alpha * cos2a * cos2a);\n"
@@ -1946,13 +1952,11 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "   }\n"
     "   return attenuation;\n"
     "}\n"
-	"float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha){\n"
-    "    float LdotV = max(0.0, dot(_ViewDir, _LightDir));\n"
-    "    float s = LdotV - _NdotL * _VdotN;\n"
-    "    float t = mix(1.0, max(_NdotL, _VdotN), step(0.0, s));\n"
-    "    float A = 1.0 + _alpha * (LightDataA.y / (_alpha + 0.13) + 0.5 / (_alpha + 0.33));\n"
-    "    float B = 0.45 * _alpha / (_alpha + 0.09);\n"
-    "    return (A + B * s / t) / KPI;\n"//might have to remove divide by pi here
+	"float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
+	"     float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);\n"
+	"     float B = 0.45 * _alpha / (_alpha + 0.09);\n"
+	"     float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);\n"
+	"     return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));\n"
     "}\n"
 	"vec3 DiffuseAshikhminShirley(float _smoothness,vec3 _MaterialAlbedoTexture,float _NdotL,float _VdotN){\n"
 	"    vec3 ret;\n"
@@ -2054,7 +2058,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
 	"\n"
 	//if MaterialTypeDiffuse == 0.0, its lambert, do nothing (color is *= ndotl at the end by default)
     "    if(MaterialTypeDiffuse == 1.0){\n"
-    "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha);\n"
+    "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha,PxlNormal);\n"
     "    }\n"
     "    else if(MaterialTypeDiffuse == 2.0){\n"
     "        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness,MaterialAlbedoTexture,NdotL,VdotN);\n"
@@ -2090,7 +2094,8 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    vec3 kS = Frensel;\n"
     "    vec3 kD = ConstantOneVec3 - kS;\n"
     "    kD *= 1.0 - metalness;\n"
-    "    TotalLight = (kD * MaterialAlbedoTexture  / KPI + LightSpecularColor) * LightDiffuseColor * NdotL;\n"
+	"    vec3 DiffuseComponent = (kD * MaterialAlbedoTexture * LightDiffuseColor * NdotL) / KPI;\n"
+	"    TotalLight = DiffuseComponent + LightSpecularColor;\n"
     "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
     "}\n"
     "vec3 CalcPointLight(vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){\n"
