@@ -65,6 +65,7 @@ namespace Engine{
 				void _bindShaderProgram(ShaderP*);
 				bool _bindMaterial(Material*);
 				bool _unbindMaterial();
+				void _genPBREnvMapData(Texture*,uint,uint);
 		};
 	};
     namespace Renderer{

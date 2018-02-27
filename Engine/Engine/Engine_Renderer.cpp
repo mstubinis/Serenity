@@ -87,8 +87,8 @@ namespace Engine{
 				CopyDepth,
 				DeferredLighting,
 				DeferredLightingGI,
-				//CubemapConvolude,
-				//CubemapPrefilterEnv,
+				CubemapConvolude,
+				CubemapPrefilterEnv,
 				BRDFPrecomputeCookTorrance,
 				Grayscale,
 				EdgeCannyBlur,
@@ -361,9 +361,6 @@ class epriv::RenderManager::impl final{
 			m_InternalShaders.at(EngineInternalShaders::SMAAFrag3) = new Shader("smaa_frag_3",Shaders::Detail::ShadersManagement::smaa_frag_3,ShaderType::Fragment,false);
 			m_InternalShaders.at(EngineInternalShaders::SMAAFrag4) = new Shader("smaa_frag_4",Shaders::Detail::ShadersManagement::smaa_frag_4,ShaderType::Fragment,false);
 
-
-			#pragma region ShaderPrograms
-
 			Resources::addShaderProgram("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
@@ -377,8 +374,8 @@ class epriv::RenderManager::impl final{
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth) = new ShaderP("Copy_Depth",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::CopyDepthFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting) = new ShaderP("Deferred_Light",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::LightingFrag),ShaderRenderPass::Lighting);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI) = new ShaderP("Deferred_Light_GI",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::LightingGIFrag),ShaderRenderPass::Lighting);
-			Resources::addShaderProgram("Cubemap_Convolude",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapConvoludeFrag),ShaderRenderPass::Postprocess);
-			Resources::addShaderProgram("Cubemap_Prefilter_Env",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapPrefilterEnvFrag),ShaderRenderPass::Postprocess);
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude) = new ShaderP("Cubemap_Convolude",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapConvoludeFrag),ShaderRenderPass::Postprocess);
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv) = new ShaderP("Cubemap_Prefilter_Env",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapPrefilterEnvFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance) = new ShaderP("BRDF_Precompute_CookTorrance",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BRDFPrecomputeFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::Grayscale) = new ShaderP("Greyscale_Frag",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GrayscaleFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur) = new ShaderP("Deferred_Edge_Canny_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::EdgeCannyBlurFrag),ShaderRenderPass::Postprocess);
@@ -389,11 +386,7 @@ class epriv::RenderManager::impl final{
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2) = new ShaderP("Deferred_SMAA_2",m_InternalShaders.at(EngineInternalShaders::SMAAVertex2),m_InternalShaders.at(EngineInternalShaders::SMAAFrag2),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3) = new ShaderP("Deferred_SMAA_3",m_InternalShaders.at(EngineInternalShaders::SMAAVertex3),m_InternalShaders.at(EngineInternalShaders::SMAAFrag3),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA4) = new ShaderP("Deferred_SMAA_4",m_InternalShaders.at(EngineInternalShaders::SMAAVertex4),m_InternalShaders.at(EngineInternalShaders::SMAAFrag4),ShaderRenderPass::Postprocess);
-
-			Resources::addMaterial("Default","","","","","Deferred"); //yes this needs to be here
 			#pragma endregion
-
-
 
 			m_FullscreenQuad = new FullscreenQuad();
 	        m_FullscreenTriangle = new FullscreenTriangle();
@@ -459,9 +452,7 @@ class epriv::RenderManager::impl final{
 			SAFE_DELETE(m_FullscreenQuad);
 			SAFE_DELETE(m_FullscreenTriangle);
 
-			//shader programs
 			for(auto program:m_InternalShaderPrograms) SAFE_DELETE(program);
-			//individual shaders
 			for(auto shader:m_InternalShaders) SAFE_DELETE(shader);
 
 			glDeleteTextures(1,&ssao_noise_texture);
@@ -515,6 +506,73 @@ class epriv::RenderManager::impl final{
             Renderer::Settings::cullFace(GL_BACK);
             SAFE_DELETE(m_gBuffer);
             m_gBuffer = new GBuffer(width,height);
+		}
+		void _generatePBREnvMapData(Texture* texture,uint& convoludeTextureSize, uint& preEnvFilterSize){
+			uint texType = texture->type();
+			if(texType != GL_TEXTURE_CUBE_MAP){
+				cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
+			}
+			uint size = convoludeTextureSize;
+			glBindTexture(texType, texture->address(1));
+			Renderer::unbindFBO();
+			epriv::FramebufferObject* fbo = new epriv::FramebufferObject(texture->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
+			fbo->bind();
+    
+			//make these 2 variables global in the renderer class?
+			glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000000.0f);
+			glm::mat4 captureViews[] = {
+				glm::lookAt(glm::vec3(0.0f),glm::vec3( 1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+				glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+				glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
+				glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
+				glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+				glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
+			};
+    
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude)->bind();
+
+			Renderer::bindTexture("cubemap",texture->address(),0,texType);
+			Renderer::setViewport(0,0,size,size);
+			for (uint i = 0; i < 6; ++i){
+				glm::mat4 vp = captureProjection*captureViews[i];
+				Renderer::sendUniformMatrix4f("VP",vp);
+				glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture->address(1),0);
+				Renderer::Settings::clear(true,true,false);
+				Skybox::bindMesh();
+			}
+			cout << "---- " + texture->name() + " (Cubemap): convolution done ----" << endl;
+			Resources::getWindow()->display(); //prevent opengl & windows timeout
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude)->unbind();
+
+			//now gen EnvPrefilterMap for specular IBL
+			size = preEnvFilterSize;
+			glBindTexture(texType, texture->address(2));
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv)->bind();
+			Renderer::bindTexture("cubemap",texture->address(),0,texType);
+			Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((texture->width() * texture->width())*6));
+			Renderer::sendUniform1i("NUM_SAMPLES",32);
+			uint maxMipLevels = 5;
+			for (uint m = 0; m < maxMipLevels; ++m){
+				uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
+				fbo->resize(mipSize,mipSize);
+				float roughness = (float)m/(float)(maxMipLevels-1);
+				Renderer::sendUniform1f("roughness",roughness);
+				float a = roughness * roughness;
+				Renderer::sendUniform1f("a2",a*a);
+				for (uint i = 0; i < 6; ++i){
+					glm::mat4 vp = captureProjection * captureViews[i];
+					Renderer::sendUniformMatrix4f("VP", vp);
+					glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture->address(2),m);
+					Renderer::Settings::clear(true,true,false);
+					Skybox::bindMesh();
+				}
+			}
+			cout << "---- " + texture->name() + " (Cubemap): prefilter done ----" << endl;
+			Resources::getWindow()->display(); //prevent opengl & windows timeout
+
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv)->unbind();
+			fbo->unbind();
+			delete fbo;
 		}
 		void _generateBRDFLUTCookTorrance(uint brdfSize){
 			uint& prevReadBuffer = current_bound_read_fbo;
@@ -1404,7 +1462,9 @@ bool epriv::RenderManager::_unbindMaterial(){
     }
 	return false;
 }
-
+void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint size2){
+	m_i->_generatePBREnvMapData(texture,size1,size2);
+}
 
 void Renderer::Settings::FXAA::setReduceMin(float r){ epriv::Core::m_Engine->m_RenderManager->m_i->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
 void Renderer::Settings::FXAA::setReduceMul(float r){ epriv::Core::m_Engine->m_RenderManager->m_i->FXAA_REDUCE_MUL = glm::max(0.0f,r); }

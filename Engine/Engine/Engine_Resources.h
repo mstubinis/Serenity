@@ -2,6 +2,7 @@
 #ifndef ENGINE_ENGINE_RESOURCES_H
 #define ENGINE_ENGINE_RESOURCES_H
 
+#include "Engine_ResourceHandle.h"
 #include "Engine_Physics.h"
 #include "ShaderProgram.h"
 
@@ -29,40 +30,11 @@ class SunLight;
 class MeshInstance;
 class SoundData;
 
-#define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
-#define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
-
 template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
 template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
 
-class ResourceType final{public: enum Type{
-	Texture,
-	Mesh,
-	Material,
-	Sound,
-	MeshInstance,//we will most likely not need this anymore once component system is in place
-	Object,
-	Font,
-	Camera,
-	Shader,
-	SoundData,
-	Scene,
-};};
-
-struct Handle final{
-	uint32 index : 12;
-	uint32 counter : 15;
-	uint32 type : 5;
-	Handle(){
-		index = 0; counter = 0; type = 0;
-	}
-	Handle(uint32 _index, uint32 _counter, uint32 _type){
-		index = _index; counter = _counter; type = _type;
-	}
-	inline operator uint32() const{
-		return type << 27 | counter << 12 | index;
-	}
-};
+#define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
+#define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
 
 namespace Engine{
 	namespace epriv{
