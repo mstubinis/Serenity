@@ -38,6 +38,19 @@ template <typename E> std::string to_string(E t){ return boost::lexical_cast<std
 
 namespace Engine{
 	namespace epriv{
+		struct HandleEntry final{
+			uint32 nextFreeIndex : 12;
+			uint32 counter : 15;
+			uint32 active : 1;
+			uint32 endOfList : 1;
+			EngineResource* resource;
+			HandleEntry(){
+				counter = 1; nextFreeIndex, active, endOfList = 0; resource = nullptr;
+			}
+			explicit HandleEntry(uint32 _nextFreeIndex){
+				nextFreeIndex = _nextFreeIndex; counter = 1; active, endOfList = 0; resource = nullptr;
+			}
+		};
 		class ResourceManager final{
 		    private:
 				class impl;
@@ -109,15 +122,19 @@ namespace Engine{
         Texture* getTexture(std::string);
         Mesh* getMesh(std::string);
         Material* getMaterial(std::string);
-
-        void getShader(Handle& inHandle,Shader*& outPtr);
-		Shader* getShader(Handle& inHandle);
-        void getSoundData(Handle& inHandle,SoundData*& outPtr);
-		SoundData* getSoundData(Handle& inHandle);
-
-
         ShaderP* getShaderProgram(std::string);
         MeshInstance* getMeshInstance(std::string);
+
+        void getShader(Handle& inHandle,Shader*& outPtr);         Shader* getShader(Handle& inHandle);
+        void getSoundData(Handle& inHandle,SoundData*& outPtr);   SoundData* getSoundData(Handle& inHandle);
+		void getObject(Handle& inHandle,Object*& outPtr);         Object* getObject(Handle& inHandle);
+        void getCamera(Handle& inHandle,Camera*& outPtr);         Camera* getCamera(Handle& inHandle);
+        void getFont(Handle& inHandle,Font*& outPtr);             Font* getFont(Handle& inHandle);
+        void getTexture(Handle& inHandle,Texture*& outPtr);       Texture* getTexture(Handle& inHandle);
+        void getMesh(Handle& inHandle,Mesh*& outPtr);             Mesh* getMesh(Handle& inHandle);
+        void getMaterial(Handle& inHandle,Material*& outPtr);     Material* getMaterial(Handle& inHandle);
+
+
 
         void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         void addMesh(std::string file, CollisionType = CollisionType::None,float threshhold = 0.0005f);

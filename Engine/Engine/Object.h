@@ -18,8 +18,6 @@ typedef unsigned int GLuint;
 template <typename T> bool exists(const boost::weak_ptr<T>& t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
 
-
-
 class IObject: public BindableResource{
     public:
 		virtual void registerEvent(EventType::Type type){}
@@ -59,12 +57,12 @@ class Object: public IObject{
     private:
         bool m_IsToBeDestroyed;
     protected:
-        static float m_VisibilityThreshold;
-        static float m_RotationThreshold;
         Object* m_Parent;
         float m_Radius;
         std::vector<Object*> m_Children;
     public:
+        static float m_VisibilityThreshold;
+        static float m_RotationThreshold;
         static void setGlobalRotationThreshold(float t){ m_RotationThreshold = t; }
         static void setGlobalVisibilityThreshold(float t){ m_VisibilityThreshold = t; }
         Object(

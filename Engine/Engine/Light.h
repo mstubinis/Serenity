@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 class Scene;
+class ShaderP;
 class LightType{public: enum Type{
     Sun,Point,Directional,Spot,Rod
 };};
@@ -109,7 +110,7 @@ class LightProbe: public Camera{
         LightProbe(std::string = "Light Probe", uint envMapWidth = 128,glm::vec3 = glm::vec3(0),bool onlyOnce = false,Scene* = nullptr,uint sidesPerFrame = 6);
         ~LightProbe();
 
-        void renderCubemap();
+        void renderCubemap(ShaderP* convolude,ShaderP* prefilter);
 
         GLuint getEnvMap();
         GLuint getIrriadianceMap();

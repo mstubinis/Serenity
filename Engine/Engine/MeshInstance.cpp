@@ -33,11 +33,59 @@ class MeshInstanceAnimation::impl{
 			m_Mesh = _mesh;
 		}
 };
+struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance* i = (MeshInstance*)r;
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
+    Object* parent = o.lock().get();
+    vector<MeshInstanceAnimation*>& q = i->animationQueue();
+    if(q.size() > 0){
+        vector<glm::mat4> transforms;
+
+		//process the animation here
+		for(uint j = 0; j < q.size(); ++j){
+			MeshInstanceAnimation* a = q.at(j);
+			if(a->m_i->m_Mesh == i->mesh()){
+				a->m_i->m_CurrentTime += Resources::dt();
+				if(transforms.size() == 0){
+					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
+				}
+				a->m_i->m_Mesh->playAnimation(transforms,a->m_i->m_AnimName,a->m_i->m_CurrentTime);
+				if(a->m_i->m_CurrentTime >= a->m_i->m_EndTime){
+					a->m_i->m_CurrentTime = 0;
+					a->m_i->m_CurrentLoops++;
+				}
+			}
+		}
+		Renderer::sendUniform1iSafe("AnimationPlaying",1);
+		Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+
+		//cleanup the animation queue
+		for (auto it = q.cbegin(); it != q.cend();){
+			MeshInstanceAnimation* a = (*it);
+			if (a->m_i->m_RequestedLoops > 0 && (a->m_i->m_CurrentLoops >= a->m_i->m_RequestedLoops)){
+				SAFE_DELETE(a); //do we need this?
+				it = q.erase(it);
+			}
+			else{ ++it; }
+		}
+    }
+    else{
+        Renderer::sendUniform1iSafe("AnimationPlaying",0);
+    }
+    
+    glm::mat4 model = parent->getModel() * i->model(); //might need to reverse this order.
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    
+    Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
+    Renderer::sendUniformMatrix4f("Model",model);
+    i->render();
+}};
+struct DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+}};
+DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
+DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class MeshInstance::impl{
-    public:
-		static DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-        
+    public:  
         vector<MeshInstanceAnimation*> m_AnimationQueue;
 
         Mesh* m_Mesh;
@@ -180,58 +228,6 @@ MeshInstanceAnimation::MeshInstanceAnimation(Mesh* m,const string& a,float s,flo
 }
 MeshInstanceAnimation::~MeshInstanceAnimation(){
 }
-
-struct DefaultMeshInstanceBindFunctor{friend class MeshInstanceAnimation;void operator()(EngineResource* r) const {
-    MeshInstance* i = (MeshInstance*)r;
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
-    Object* parent = o.lock().get();
-    vector<MeshInstanceAnimation*>& q = i->animationQueue();
-    if(q.size() > 0){
-        vector<glm::mat4> transforms;
-
-		//process the animation here
-		for(uint j = 0; j < q.size(); ++j){
-			MeshInstanceAnimation* a = q.at(j);
-			if(a->m_i->m_Mesh == i->mesh()){
-				a->m_i->m_CurrentTime += Resources::dt();
-				if(transforms.size() == 0){
-					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
-				}
-				a->m_i->m_Mesh->playAnimation(transforms,a->m_i->m_AnimName,a->m_i->m_CurrentTime);
-				if(a->m_i->m_CurrentTime >= a->m_i->m_EndTime){
-					a->m_i->m_CurrentTime = 0;
-					a->m_i->m_CurrentLoops++;
-				}
-			}
-		}
-		Renderer::sendUniform1iSafe("AnimationPlaying",1);
-		Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
-
-		//cleanup the animation queue
-		for (auto it = q.cbegin(); it != q.cend();){
-			MeshInstanceAnimation* a = (*it);
-			if (a->m_i->m_RequestedLoops > 0 && (a->m_i->m_CurrentLoops >= a->m_i->m_RequestedLoops)){
-				SAFE_DELETE(a); //do we need this?
-				it = q.erase(it);
-			}
-			else{ ++it; }
-		}
-    }
-    else{
-        Renderer::sendUniform1iSafe("AnimationPlaying",0);
-    }
-    
-    glm::mat4 model = parent->getModel() * i->model(); //might need to reverse this order.
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-    
-    Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
-    Renderer::sendUniformMatrix4f("Model",model);
-    i->render();
-}};
-struct DefaultMeshInstanceUnbindFunctor{friend class MeshInstanceAnimation;void operator()(EngineResource* r) const {
-}};
-DefaultMeshInstanceBindFunctor MeshInstance::impl::DEFAULT_BIND_FUNCTOR;
-DefaultMeshInstanceUnbindFunctor MeshInstance::impl::DEFAULT_UNBIND_FUNCTOR;
 
 MeshInstance::MeshInstance(const string& parentName, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,parentName);

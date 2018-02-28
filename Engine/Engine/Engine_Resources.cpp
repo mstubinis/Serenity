@@ -34,24 +34,6 @@ template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S
 
 epriv::ResourceManager* resourceManager;
 
-namespace Engine{
-	namespace epriv{
-		struct HandleEntry final{
-			uint32 nextFreeIndex : 12;
-			uint32 counter : 15;
-			uint32 active : 1;
-			uint32 endOfList : 1;
-			EngineResource* resource;
-			HandleEntry(){
-				counter = 1; nextFreeIndex, active, endOfList = 0; resource = nullptr;
-			}
-			explicit HandleEntry(uint32 _nextFreeIndex){
-				nextFreeIndex = _nextFreeIndex; counter = 1; active, endOfList = 0; resource = nullptr;
-			}
-		};
-	};
-};
-
 class epriv::ResourceManager::impl final{
     public:
 		//TODO: convert to this resource system --------------------------------------------
@@ -366,11 +348,22 @@ Material* Resources::getMaterial(string n){return (Material*)(_getFromContainer(
 ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(_getFromContainer(resourceManager->m_i->m_ShaderPrograms,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
-void Resources::getShader(Handle& h,Shader*& s){ resourceManager->m_i->_GetAs(h,s); }
-Shader* Resources::getShader(Handle& h){ Shader* s; resourceManager->m_i->_GetAs(h,s); return s; }
-void Resources::getSoundData(Handle& h,SoundData*& s){ resourceManager->m_i->_GetAs(h,s); }
-SoundData* Resources::getSoundData(Handle& h){ SoundData* s; resourceManager->m_i->_GetAs(h,s); return s; }
-
+void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->_GetAs(h,p); }
+Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getSoundData(Handle& h,SoundData*& p){ resourceManager->m_i->_GetAs(h,p); }
+SoundData* Resources::getSoundData(Handle& h){ SoundData* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getObject(Handle& h,Object*& p){ resourceManager->m_i->_GetAs(h,p); }
+Object* Resources::getObject(Handle& h){ Object* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getCamera(Handle& h,Camera*& p){ resourceManager->m_i->_GetAs(h,p); }
+Camera* Resources::getCamera(Handle& h){ Camera* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getFont(Handle& h,Font*& p){ resourceManager->m_i->_GetAs(h,p); }
+Font* Resources::getFont(Handle& h){ Font* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getTexture(Handle& h,Texture*& p){ resourceManager->m_i->_GetAs(h,p); }
+Texture* Resources::getTexture(Handle& h){ Texture* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getMesh(Handle& h,Mesh*& p){ resourceManager->m_i->_GetAs(h,p); }
+Mesh* Resources::getMesh(Handle& h){ Mesh* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getMaterial(Handle& h,Material*& p){ resourceManager->m_i->_GetAs(h,p); }
+Material* Resources::getMaterial(Handle& h){ Material* p; resourceManager->m_i->_GetAs(h,p); return p; }
 
 
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){

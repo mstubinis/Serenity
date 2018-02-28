@@ -29,10 +29,10 @@ struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) cons
     Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
 }};
 struct DefaultObjectDynamicUnbindFunctor{void operator()(BindableResource* r) const {
-
+	//ObjectDynamic* o = (ObjectDynamic*)r;
 }};
-DefaultObjectDynamicBindFunctor ObjectDynamic::DEFAULT_BIND_FUNCTOR;
-DefaultObjectDynamicUnbindFunctor ObjectDynamic::DEFAULT_UNBIND_FUNCTOR;
+DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
+DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 void ObjectDynamic::setDynamic(bool dynamic){
     if(dynamic){
@@ -112,8 +112,8 @@ ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 sc
     m_Collision->getCollisionShape()->setUserPointer(this);
     m_RigidBody->setUserPointer(this);
 
-    setCustomBindFunctor(ObjectDynamic::DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(ObjectDynamic::DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);

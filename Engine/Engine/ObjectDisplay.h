@@ -5,8 +5,6 @@
 #include "Object.h"
 #include "MeshInstance.h"
 
-struct DefaultObjectDisplayBindFunctor; 
-struct DefaultObjectDisplayUnbindFunctor;
 class ObjectDisplay: public ObjectBasic{
     protected:
         bool m_Shadeless;
@@ -18,9 +16,6 @@ class ObjectDisplay: public ObjectBasic{
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
     public:
-        static DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
         ObjectDisplay(
             std::string = "",
             std::string = "",

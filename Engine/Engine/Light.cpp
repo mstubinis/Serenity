@@ -1079,7 +1079,7 @@ class LightProbe::impl{
             Renderer::Settings::clear(true,true,false);
             Skybox::bindMesh();
 		}
-        void _render(LightProbe* super){
+        void _render(LightProbe* super,ShaderP* convolude,ShaderP* prefilter){
 			#pragma region FindOutWhatToRender
 			if(m_SecondFrame == false){ m_SecondFrame = true; return; }
             if(m_DidFirst == true && m_OnlyOnce == true) return;
@@ -1097,9 +1097,6 @@ class LightProbe::impl{
 			#pragma endregion
 
 			//render the scene into a cubemap. this will be VERY expensive... (and now it works!)
-            //uint& prevReadBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_read_fbo;
-            //uint& prevDrawBuffer = Renderer::Detail::RendererInfo::GeneralInfo::current_bound_draw_fbo;
-
 			#pragma region RenderScene
 			epriv::Core::m_Engine->m_RenderManager->_resizeGbuffer(m_EnvMapSize,m_EnvMapSize);
 			
@@ -1180,7 +1177,7 @@ class LightProbe::impl{
             }
 			m_FBO->bind();
             
-            ShaderP* p = Resources::getShaderProgram("Cubemap_Convolude"); p->bind();
+            convolude->bind();
             Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
 
 			m_FBO->resize(size,size);
@@ -1188,7 +1185,6 @@ class LightProbe::impl{
 			for(auto side:m_Sides){
 				_renderConvolution(super,m_Views[side],side,size);
 			}
-            p->unbind();
 			#pragma endregion
 
 			#pragma region RenderPrefilter
@@ -1215,7 +1211,7 @@ class LightProbe::impl{
                 glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
             }
 
-            p = Resources::getShaderProgram("Cubemap_Prefilter_Env"); p->bind();
+            prefilter->bind();
             Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
             Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((m_EnvMapSize * m_EnvMapSize)*6));
             Renderer::sendUniform1i("NUM_SAMPLES",32);
@@ -1234,8 +1230,6 @@ class LightProbe::impl{
 
 			m_FBO->unbind();
 			#pragma endregion
-            //Renderer::bindReadFBO(prevReadBuffer);
-            //Renderer::bindDrawFBO(prevDrawBuffer);
             m_DidFirst = true;
         }
 };
@@ -1251,7 +1245,7 @@ LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Sce
 LightProbe::~LightProbe(){
     m_i->_destruct();
 }
-void LightProbe::renderCubemap(){ m_i->_render(this); }
+void LightProbe::renderCubemap(ShaderP* convolude,ShaderP* prefilter){ m_i->_render(this,convolude,prefilter); }
 const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }
 GLuint LightProbe::getEnvMap(){ return m_i->m_TextureEnvMap; }
 GLuint LightProbe::getIrriadianceMap(){ return m_i->m_TextureConvolutionMap; }

@@ -22,8 +22,8 @@ struct DefaultObjectDisplayBindFunctor{void operator()(BindableResource* r) cons
 }};
 struct DefaultObjectDisplayUnbindFunctor{void operator()(BindableResource* r) const {
 }};
-DefaultObjectDisplayBindFunctor ObjectDisplay::DEFAULT_BIND_FUNCTOR;
-DefaultObjectDisplayUnbindFunctor ObjectDisplay::DEFAULT_UNBIND_FUNCTOR;
+DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
+DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 ObjectDisplay::ObjectDisplay(string mesh, string mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
@@ -39,8 +39,8 @@ ObjectDisplay::ObjectDisplay(string mesh, string mat, glm::vec3 pos, glm::vec3 s
     m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
 
-    setCustomBindFunctor(ObjectDisplay::DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(ObjectDisplay::DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDisplay::~ObjectDisplay(){
 }

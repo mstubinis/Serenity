@@ -1281,7 +1281,10 @@ class epriv::RenderManager::impl final{
 			if(mainRenderFunc){
 				if(s->lightProbes().size() > 0){
 					for(auto lightProbe:s->lightProbes()){
-						lightProbe.second->renderCubemap();
+						lightProbe.second->renderCubemap(
+							m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude),
+							m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv)
+						);
 					}
 					m_gBuffer->resize(fboWidth,fboHeight);
 				}

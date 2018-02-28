@@ -17,8 +17,6 @@ enum COLLISION_GROUPS {
     COLLISION_GROUP_EVERYTHING = BIT(0),
 };
 */
-struct DefaultObjectDynamicBindFunctor; 
-struct DefaultObjectDynamicUnbindFunctor;
 class ObjectDynamic: public Object{
     protected:
         glm::vec3 m_Forward, m_Right, m_Up;
@@ -37,15 +35,12 @@ class ObjectDynamic: public Object{
         btRigidBody* m_RigidBody;
         btDefaultMotionState* m_MotionState;
     public:
-        static DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
-        static DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
         virtual void collisionResponse(ObjectDynamic* other);
 
         ObjectDynamic( 
             std::string = "",
             std::string = "",
-            glm::vec3 = glm::vec3(0),            //Position
+            glm::vec3 = glm::vec3(0),        //Position
             glm::vec3 = glm::vec3(1),        //Scale
             std::string = "Dynamic Object",  //Object
             Collision* = nullptr,            //Bullet Collision Shape
