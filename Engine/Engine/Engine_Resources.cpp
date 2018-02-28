@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "Engine_Time.h"
 #include "Engine_Resources.h"
+#include "Engine_ObjectPool.h"
 #include "Engine_Sounds.h"
 #include "Engine_Window.h"
 #include "ShaderProgram.h"
@@ -40,99 +41,8 @@ class epriv::ResourceManager::impl final{
 
 		//http://gamesfromwithin.com/managing-data-relationships
 
-		static const uint MAX_ENTRIES = 8192;
-		HandleEntry m_Resources[MAX_ENTRIES];
-		int m_activeEntryCount;
-		uint32 m_firstFreeEntry;
+		ObjectPool<EngineResource>* m_Resources;
 
-		//create seperate containers for each resource type (mesh material etc)? vector.resize(8192) ?
-		//
-		// then store the object (as a pointer) to the vector's index corresponding to the handle id
-		//    OR
-		// store the object as it's handle ID to the vector's index corresponding to the handle id
-		// then retrieve the actual resource object via m_Resources[ vector.at(id) ] and cast it to it's actual type?
-		// this will come with a performance cost
-
-		//experiment making some of these pointers references when passed around...
-
-		void _Reset(){
-			m_activeEntryCount = 0;
-			m_firstFreeEntry = 0;
-			for (int i = 0; i < MAX_ENTRIES - 1; ++i){
-				// possibly delete the resouce here?
-				m_Resources[i] = HandleEntry(i + 1);
-			}
-			m_Resources[MAX_ENTRIES - 1] = HandleEntry();
-			m_Resources[MAX_ENTRIES - 1].endOfList = true;
-		}
-		Handle _Add(EngineResource*& p, ResourceType::Type& type){ //remove the pointer reference here?
-			const int newIndex = m_firstFreeEntry;
-			if(newIndex >= MAX_ENTRIES) return Handle(); //null handle
-			m_firstFreeEntry = m_Resources[newIndex].nextFreeIndex;
-			m_Resources[newIndex].nextFreeIndex = 0;
-			++m_Resources[newIndex].counter;
-			if (m_Resources[newIndex].counter == 0){
-				m_Resources[newIndex].counter = 1;
-			}
-			m_Resources[newIndex].active = true;
-			m_Resources[newIndex].resource = p;
-			++m_activeEntryCount;
-			return Handle (newIndex, m_Resources[newIndex].counter, type);
-		}
-		void _Visualize(){
-			std::cout << "--------- Visualizing Resource Array ---------" << std::endl;
-			for (int i = 0; i < MAX_ENTRIES - 1; ++i){
-				HandleEntry& e = m_Resources[i];
-
-				if(e.resource){
-					std::cout << i << ": Active: " << e.active << " , Counter: " << e.counter << " , Name: " << e.resource->name() << std::endl;
-				}
-			}
-			std::cout << "----------------------------------------------" << std::endl;
-		}
-		void _Update(Handle& h, EngineResource* p){
-			const int index = h.index;
-			if(m_Resources[index].counter == h.counter && m_Resources[index].active == true){
-				m_Resources[index].resource = p;
-			}
-			else{
-				std::cout << "Error: could not update ID: " << index << " , to resource: " << p->name() << std::endl;
-			}
-		}
-		void _Remove(const Handle& h){
-			const uint32 index = h.index;
-			if(m_Resources[index].counter == h.counter && m_Resources[index].active == true){
-				m_Resources[index].nextFreeIndex = m_firstFreeEntry;
-				m_Resources[index].active = false;
-				m_firstFreeEntry = index;
-				--m_activeEntryCount;
-			}
-			else{
-				std::cout << "Error: could not remove ID: " << index << " , resource: " << m_Resources[index].resource->name() << std::endl;
-			}
-		}
-		EngineResource* _Get(Handle& h) const{
-			EngineResource* p = nullptr;
-			if (!_Get(h, p)) return nullptr;
-			return p;
-		}
-		bool _Get(const Handle& h, EngineResource*& out) const{
-			const int index = h.index;
-			if (m_Resources[index].counter != h.counter || m_Resources[index].active == false)
-				return false;
-			out = m_Resources[index].resource;
-			return true;
-		}
-		template<typename T> inline bool _GetAs(Handle& h, T*& out) const {
-			EngineResource* _void;
-			const bool rv = _Get(h,_void);
-			out = (T*)_void; //use union_cast ? was in the original source
-			return rv;
-		}
-		template<typename T> inline T* _GetAsFast(Handle& h) const {
-			const int index = h.index;
-			return (T*)m_Resources[index].resource;
-		}
 		//-----------------------------------------------------------------------------------------------
 
 
@@ -154,7 +64,8 @@ class epriv::ResourceManager::impl final{
 		void _init(const char* name,const uint& width,const uint& height){
 			m_CurrentScene = nullptr;
 			m_DynamicMemory = false;
-			_Reset();//this is needed
+
+			m_Resources = new ObjectPool<EngineResource>(8192);
 		}
 		void _postInit(const char* name,uint width,uint height){
 			m_Window = new Engine_Window(name,width,height);
@@ -227,13 +138,9 @@ class epriv::ResourceManager::impl final{
 			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
 
-			_Visualize(); //remove this eventually
-
-			for(uint i = 0; i < MAX_ENTRIES; ++i){
-				SAFE_DELETE(m_Resources[i].resource);
-			}
-
+			SAFE_DELETE(m_Resources);
 			SAFE_DELETE(m_Window);
+
 		}
 };
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
@@ -247,10 +154,8 @@ void epriv::ResourceManager::_init(const char* n,uint w,uint h){
 	m_i->_postInit(n,w,h);
 }
 
-
-
 Handle epriv::ResourceManager::_addResource(EngineResource* r,ResourceType::Type t){
-	return resourceManager->m_i->_Add(r,t);
+	return resourceManager->m_i->m_Resources->add(r,(uint)t);
 }
 
 
@@ -348,22 +253,22 @@ Material* Resources::getMaterial(string n){return (Material*)(_getFromContainer(
 ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(_getFromContainer(resourceManager->m_i->m_ShaderPrograms,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
-void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->_GetAs(h,p); }
-Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getSoundData(Handle& h,SoundData*& p){ resourceManager->m_i->_GetAs(h,p); }
-SoundData* Resources::getSoundData(Handle& h){ SoundData* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getObject(Handle& h,Object*& p){ resourceManager->m_i->_GetAs(h,p); }
-Object* Resources::getObject(Handle& h){ Object* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getCamera(Handle& h,Camera*& p){ resourceManager->m_i->_GetAs(h,p); }
-Camera* Resources::getCamera(Handle& h){ Camera* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getFont(Handle& h,Font*& p){ resourceManager->m_i->_GetAs(h,p); }
-Font* Resources::getFont(Handle& h){ Font* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getTexture(Handle& h,Texture*& p){ resourceManager->m_i->_GetAs(h,p); }
-Texture* Resources::getTexture(Handle& h){ Texture* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getMesh(Handle& h,Mesh*& p){ resourceManager->m_i->_GetAs(h,p); }
-Mesh* Resources::getMesh(Handle& h){ Mesh* p; resourceManager->m_i->_GetAs(h,p); return p; }
-void Resources::getMaterial(Handle& h,Material*& p){ resourceManager->m_i->_GetAs(h,p); }
-Material* Resources::getMaterial(Handle& h){ Material* p; resourceManager->m_i->_GetAs(h,p); return p; }
+void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getSoundData(Handle& h,SoundData*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+SoundData* Resources::getSoundData(Handle& h){ SoundData* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getObject(Handle& h,Object*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Object* Resources::getObject(Handle& h){ Object* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getCamera(Handle& h,Camera*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Camera* Resources::getCamera(Handle& h){ Camera* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getFont(Handle& h,Font*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Font* Resources::getFont(Handle& h){ Font* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getTexture(Handle& h,Texture*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Texture* Resources::getTexture(Handle& h){ Texture* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getMesh(Handle& h,Mesh*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Mesh* Resources::getMesh(Handle& h){ Mesh* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
+void Resources::getMaterial(Handle& h,Material*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
+Material* Resources::getMaterial(Handle& h){ Material* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
 
 
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
@@ -400,8 +305,8 @@ void Resources::addShaderProgram(string n, Shader* v, Shader* f, ShaderRenderPas
     _addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,v,f,s));
 }
 void Resources::addShaderProgram(string n, Handle& v, Handle& f, ShaderRenderPass::Pass s){
-	Shader* vS = nullptr; resourceManager->m_i->_GetAs(v,vS);
-	Shader* fS = nullptr; resourceManager->m_i->_GetAs(f,fS);
+	Shader* vS = nullptr; resourceManager->m_i->m_Resources->getAs(v,vS);
+	Shader* fS = nullptr; resourceManager->m_i->m_Resources->getAs(f,fS);
 	_addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,vS,fS,s));
 }
 

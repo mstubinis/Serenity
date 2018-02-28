@@ -79,9 +79,9 @@ void Camera::setPerspectiveProjection(float angle,float aspectRatio,float _near,
 	m_AspectRatio = aspectRatio;
 	m_Near = _near;
 	m_Far = _far;
-	m_Projection = glm::perspective(angle,aspectRatio,_near,_far);
+	m_Projection = glm::perspective(glm::radians(angle),aspectRatio,_near,_far);
 }
-void Camera::setPerspectiveProjection(){m_Projection = glm::perspective(m_Angle,m_AspectRatio,m_Near,m_Far);}
+void Camera::setPerspectiveProjection(){m_Projection = glm::perspective(glm::radians(m_Angle),m_AspectRatio,m_Near,m_Far);}
 void Camera::setOrthoProjection(float l, float r, float b, float t){m_Projection = glm::ortho(l,r,b,t,m_Near,m_Far);}
 void Camera::setAspectRatio(float ratio){ 
     m_AspectRatio = ratio;

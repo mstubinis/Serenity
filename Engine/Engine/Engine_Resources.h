@@ -38,19 +38,6 @@ template <typename E> std::string to_string(E t){ return boost::lexical_cast<std
 
 namespace Engine{
 	namespace epriv{
-		struct HandleEntry final{
-			uint32 nextFreeIndex : 12;
-			uint32 counter : 15;
-			uint32 active : 1;
-			uint32 endOfList : 1;
-			EngineResource* resource;
-			HandleEntry(){
-				counter = 1; nextFreeIndex, active, endOfList = 0; resource = nullptr;
-			}
-			explicit HandleEntry(uint32 _nextFreeIndex){
-				nextFreeIndex = _nextFreeIndex; counter = 1; active, endOfList = 0; resource = nullptr;
-			}
-		};
 		class ResourceManager final{
 		    private:
 				class impl;
