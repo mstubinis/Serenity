@@ -76,7 +76,7 @@ namespace Engine{
 				}
 			}
 			Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
-
+			Renderer::sendUniform3fSafe("Material_F0",material->f0().r,material->f0().g,material->f0().b);
 			Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material->glow(),material->ao(),material->metalness(),material->smoothness());
 
 			Renderer::sendUniform1fSafe("matID",float(material->id()));
@@ -112,7 +112,7 @@ namespace Engine{
 			m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
 			m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f,    0.98f,          0.0f);
 			m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.0773f,0.0773f,0.0773f,       0.98f,          0.0f);
-			m[MaterialPhysics::Gold]                 = boost::make_tuple(1.022f,0.7655f,0.336f,         0.9f,           1.0f);
+			m[MaterialPhysics::Gold]                 = boost::make_tuple(0.929f,0.6549f,0.0f,           0.9f,           1.0f);
 			m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,             0.5f,           1.0f);
 			m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,             0.92f,          0.0f);
 			m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,             0.965f,         0.0f);
@@ -145,11 +145,6 @@ MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (epriv::MaterialComponentType::Type)type;
     m_Texture = t;
 }
-MaterialComponent::MaterialComponent(uint type,string& t){
-    m_ComponentType = (epriv::MaterialComponentType::Type)type;
-    m_Texture = Resources::getTexture(t); 
-    if(m_Texture == nullptr && t != "") m_Texture = new Texture(t);
-}
 MaterialComponent::~MaterialComponent(){
 }
 void MaterialComponent::bind(){
@@ -168,11 +163,6 @@ void MaterialComponent::unbind(){
 MaterialComponentReflection::MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor):MaterialComponent(type,cubemap){
     setMixFactor(mixFactor);
     m_Map = map;
-}
-MaterialComponentReflection::MaterialComponentReflection(uint type,string& cubemap,string& map,float mixFactor):MaterialComponent(type,cubemap){
-    setMixFactor(mixFactor);
-    m_Map = Resources::getTexture(map); 
-    if(m_Map == nullptr && map != "") m_Map = new Texture(map);
 }
 MaterialComponentReflection::~MaterialComponentReflection(){
     MaterialComponent::~MaterialComponent();
@@ -198,9 +188,6 @@ void MaterialComponentReflection::unbind(){
 MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(epriv::MaterialComponentType::Refraction,cubemap,map,mix){
     m_RefractionIndex = i;
 }
-MaterialComponentRefraction::MaterialComponentRefraction(string& cubemap,string& map,float i,float mix):MaterialComponentReflection(epriv::MaterialComponentType::Refraction,cubemap,map,mix){
-    m_RefractionIndex = i;
-}
 MaterialComponentRefraction::~MaterialComponentRefraction(){
     MaterialComponentReflection::~MaterialComponentReflection();
 }
@@ -217,9 +204,6 @@ void MaterialComponentRefraction::bind(){
 }
 
 MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(epriv::MaterialComponentType::ParallaxOcclusion,map){
-    setHeightScale(heightScale);
-}
-MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(string& map,float heightScale):MaterialComponent(epriv::MaterialComponentType::ParallaxOcclusion,map){
     setHeightScale(heightScale);
 }
 MaterialComponentParallaxOcclusion::~MaterialComponentParallaxOcclusion(){
@@ -437,7 +421,7 @@ void Material::addComponentDiffuse(Texture* texture){
 }
 void Material::addComponentDiffuse(string textureFile){
     Texture* texture = Resources::getTexture(textureFile); 
-    if(texture == nullptr && textureFile != "") texture = new Texture(textureFile);
+	if(texture == nullptr && textureFile != "") texture = new Texture(textureFile,"",GL_TEXTURE_2D,true,ImageInternalFormat::SRGB8_ALPHA8);
     m_i->_addComponentDiffuse(texture);
 }
 void Material::addComponentNormal(Texture* texture){
@@ -541,6 +525,7 @@ const MaterialComponentReflection* Material::getComponentReflection() const { re
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components.at(epriv::MaterialComponentType::Refraction)); }
 const MaterialComponentParallaxOcclusion* Material::getComponentParallaxOcclusion() const { return (MaterialComponentParallaxOcclusion*)(m_i->m_Components.at(epriv::MaterialComponentType::ParallaxOcclusion)); }
 const bool Material::shadeless() const { return m_i->m_Shadeless; }
+const glm::vec3 Material::f0() const{ return m_i->m_F0Color; }
 const float Material::glow() const { return m_i->m_BaseGlow; }
 const uint Material::id() const { return m_i->m_ID; }
 const uint Material::diffuseModel() const { return m_i->m_DiffuseModel; }

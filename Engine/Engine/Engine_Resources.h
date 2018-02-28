@@ -63,7 +63,7 @@ namespace Engine{
 				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
 				bool _hasCamera(std::string);        void _addCamera(Camera*);              std::string _buildCameraName(std::string);
 				bool _hasShader(std::string);        Handle _addShader(Shader*);            std::string _buildShaderName(std::string);
-				bool _hasSoundData(std::string);     void _addSoundData(SoundData*);        std::string _buildSoundDataName(std::string);
+				                                     Handle _addSoundData(SoundData*);
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
@@ -112,10 +112,12 @@ namespace Engine{
 
         void getShader(Handle& inHandle,Shader*& outPtr);
 		Shader* getShader(Handle& inHandle);
+        void getSoundData(Handle& inHandle,SoundData*& outPtr);
+		SoundData* getSoundData(Handle& inHandle);
+
 
         ShaderP* getShaderProgram(std::string);
         MeshInstance* getMeshInstance(std::string);
-		SoundData* getSoundData(std::string);
 
         void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         void addMesh(std::string file, CollisionType = CollisionType::None,float threshhold = 0.0005f);
@@ -129,8 +131,7 @@ namespace Engine{
         void removeMaterial(std::string name);
 
         Handle addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
-
-		void addSoundData(std::string file,std::string name = "",bool music = false);
+		Handle addSoundData(std::string file,std::string name = "",bool music = false);
 
         void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 		void addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);

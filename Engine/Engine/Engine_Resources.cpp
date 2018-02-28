@@ -34,56 +34,6 @@ template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S
 
 epriv::ResourceManager* resourceManager;
 
-/*
-//something else i read up on
-//
-// https://gamedev.stackexchange.com/a/33918
-//
-
-fixed size array (linear memory)
-with internal free list (O(1) alloc/free, stable indicies)
-with weak reference keys (reuse of slot invalidates key)
-zero overhead dereferences (when known-valid)
-
-//
-template<typename T> struct DataArray<T> final{
-	struct Item final{
-	    T item;
-	    int id;           // (key << 16 | index) for alloced entries, (0 | nextFreeIndex) for free list entries
-	};
-
-	Item* items;
-	int maxSize;          // total size
-	int maxUsed;          // highest index ever alloced
-	int count;            // num alloced items
-	int nextKey;          // [1 .. 65536] (don't let == 0)
-	int freeHead;         // index of first free entry
-
-	void Init(int count){ // allocs items (max 64k), then Clear()
-	    items = new Item[8192];
-		Clear();
-	}
-	void Dispose(){ // frees items
-	    delete[] items;
-	}
-	void Clear(){   // resets data members, (runs destructors* on outstanding items, *optional)
-	    for(uint i = 0; i < 8192; ++i){
-		}
-	};         
-
-	T &Alloc();           // alloc (memclear* and/or construct*, *optional) an item from freeList or items[maxUsed++], sets id to (nextKey++ << 16) | index
-	void Free(T &);       // puts entry on free list (uses id to store next)
-
-	int GetID(T &);       // accessor to the id part if Item
-
-	T &Get(id)            // return item[id & 0xFFFF]; 
-	T *TryToGet(id);      // validates id, then returns item, returns null if invalid.  for cases like AI references and others where 'the thing might have been deleted out from under me'
-
-	bool Next(T *&);      // return next item where id & 0xFFFF0000 != 0 (ie items not on free list)
-};
-*/
-
-
 namespace Engine{
 	namespace epriv{
 		struct HandleEntry final{
@@ -101,10 +51,6 @@ namespace Engine{
 		};
 	};
 };
-
-
-
-
 
 class epriv::ResourceManager::impl final{
     public:
@@ -138,21 +84,16 @@ class epriv::ResourceManager::impl final{
 			m_Resources[MAX_ENTRIES - 1].endOfList = true;
 		}
 		Handle _Add(EngineResource*& p, ResourceType::Type& type){ //remove the pointer reference here?
-			//assert(m_activeEntryCount < MAX_ENTRIES - 1); assert(type >= 0 && type <= 31); //what exactly is 31 here? is it the bit amount or number amount? also type is not needed if data is stored in a base class... (hint hint)
-
 			const int newIndex = m_firstFreeEntry;
-			//assert(newIndex < MAX_ENTRIES); assert(m_Resources[newIndex].active == false); assert(!m_Resources[newIndex].endOfList);
-
+			if(newIndex >= MAX_ENTRIES) return Handle(); //null handle
 			m_firstFreeEntry = m_Resources[newIndex].nextFreeIndex;
 			m_Resources[newIndex].nextFreeIndex = 0;
-			//m_Resources[newIndex].counter = m_Resources[newIndex].m_counter + 1;
 			++m_Resources[newIndex].counter;
 			if (m_Resources[newIndex].counter == 0){
 				m_Resources[newIndex].counter = 1;
 			}
 			m_Resources[newIndex].active = true;
 			m_Resources[newIndex].resource = p;
-
 			++m_activeEntryCount;
 			return Handle (newIndex, m_Resources[newIndex].counter, type);
 		}
@@ -180,7 +121,6 @@ class epriv::ResourceManager::impl final{
 			const uint32 index = h.index;
 			if(m_Resources[index].counter == h.counter && m_Resources[index].active == true){
 				m_Resources[index].nextFreeIndex = m_firstFreeEntry;
-				//m_Resources[index].active = 0; //im sure this works just as fine as the line below
 				m_Resources[index].active = false;
 				m_firstFreeEntry = index;
 				--m_activeEntryCount;
@@ -216,8 +156,6 @@ class epriv::ResourceManager::impl final{
 		//-----------------------------------------------------------------------------------------------
 
 
-
-
 		Engine_Window* m_Window;
         Scene* m_CurrentScene;
 		bool m_DynamicMemory;
@@ -228,7 +166,6 @@ class epriv::ResourceManager::impl final{
         unordered_map<string,boost::shared_ptr<Texture>> m_Textures;
         unordered_map<string,boost::shared_ptr<Material>> m_Materials;
         unordered_map<string,boost::shared_ptr<ShaderP>> m_ShaderPrograms;
-		unordered_map<string,boost::shared_ptr<SoundData>> m_SoundDatas;
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         unordered_map<string,boost::shared_ptr<Object>> m_Objects;
@@ -309,7 +246,6 @@ class epriv::ResourceManager::impl final{
 			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
 			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
-			for (auto it = m_SoundDatas.begin();it != m_SoundDatas.end(); ++it )         it->second.reset();
 
 			_Visualize(); //remove this eventually
 
@@ -359,7 +295,6 @@ bool epriv::ResourceManager::_hasFont(string n){ if(resourceManager->m_i->m_Font
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasMeshInstance(string n){ if(resourceManager->m_i->m_MeshInstances.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasCamera(string n){ if(resourceManager->m_i->m_Cameras.count(n)) return true; return false; }
-bool epriv::ResourceManager::_hasSoundData(string n){ if(resourceManager->m_i->m_SoundDatas.count(n)) return true; return false; }
 void epriv::ResourceManager::_addScene(Scene* s){
 	_addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }
@@ -387,8 +322,8 @@ void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
 void epriv::ResourceManager::_addMesh(Mesh* m){
     _addToContainer(resourceManager->m_i->m_Meshes,m->name(),boost::shared_ptr<Mesh>(m));
 }
-void epriv::ResourceManager::_addSoundData(SoundData* s){
-    _addToContainer(resourceManager->m_i->m_SoundDatas,s->name(),boost::shared_ptr<SoundData>(s));
+Handle epriv::ResourceManager::_addSoundData(SoundData* s){
+    return resourceManager->_addResource(s,ResourceType::SoundData);
 }
 string epriv::ResourceManager::_buildMeshInstanceName(string n){return _incrementName(resourceManager->m_i->m_MeshInstances,n);}
 string epriv::ResourceManager::_buildObjectName(string n){return _incrementName(resourceManager->m_i->m_Objects,n);}
@@ -398,7 +333,6 @@ string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(r
 string epriv::ResourceManager::_buildMeshName(string n){return _incrementName(resourceManager->m_i->m_Meshes,n);}
 string epriv::ResourceManager::_buildMaterialName(string n){return _incrementName(resourceManager->m_i->m_Materials,n);}
 string epriv::ResourceManager::_buildCameraName(string n){return _incrementName(resourceManager->m_i->m_Cameras,n);}
-string epriv::ResourceManager::_buildSoundDataName(string n){return _incrementName(resourceManager->m_i->m_SoundDatas,n);}
 
 void epriv::ResourceManager::_remCamera(string n){_removeFromContainer(resourceManager->m_i->m_Cameras,n);}
 void epriv::ResourceManager::_remObject(string n){_removeFromContainer(resourceManager->m_i->m_Objects,n);}
@@ -431,13 +365,14 @@ Font* Resources::getFont(string n){return (Font*)(_getFromContainer(resourceMana
 Texture* Resources::getTexture(string n){return (Texture*)(_getFromContainer(resourceManager->m_i->m_Textures,n));}
 Mesh* Resources::getMesh(string n){return (Mesh*)(_getFromContainer(resourceManager->m_i->m_Meshes,n));}
 Material* Resources::getMaterial(string n){return (Material*)(_getFromContainer(resourceManager->m_i->m_Materials,n));}
+ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(_getFromContainer(resourceManager->m_i->m_ShaderPrograms,n));}
+MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
 void Resources::getShader(Handle& h,Shader*& s){ resourceManager->m_i->_GetAs(h,s); }
 Shader* Resources::getShader(Handle& h){ Shader* s; resourceManager->m_i->_GetAs(h,s); return s; }
+void Resources::getSoundData(Handle& h,SoundData*& s){ resourceManager->m_i->_GetAs(h,s); }
+SoundData* Resources::getSoundData(Handle& h){ SoundData* s; resourceManager->m_i->_GetAs(h,s); return s; }
 
-ShaderP* Resources::getShaderProgram(string n){return (ShaderP*)(_getFromContainer(resourceManager->m_i->m_ShaderPrograms,n));}
-MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
-SoundData* Resources::getSoundData(string n){return (SoundData*)(_getFromContainer(resourceManager->m_i->m_SoundDatas,n)); }
 
 
 void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
@@ -479,9 +414,9 @@ void Resources::addShaderProgram(string n, Handle& v, Handle& f, ShaderRenderPas
 	_addToContainer(resourceManager->m_i->m_ShaderPrograms,n,boost::make_shared<ShaderP>(n,vS,fS,s));
 }
 
-void Resources::addSoundData(string file,string n,bool music){
-	if (n == ""){ n = file; }
-	_addToContainer(resourceManager->m_i->m_SoundDatas,n,boost::make_shared<SoundData>(file,music));
+Handle Resources::addSoundData(string file,string n,bool music){
+	SoundData* soundData = new SoundData(file,music);
+	return resourceManager->_addResource(soundData,ResourceType::SoundData);
 }
 
 void Resources::removeMesh(string n){_removeFromContainer(resourceManager->m_i->m_Meshes,n);}

@@ -283,10 +283,6 @@ void ShaderP::unbind(){
     BindableResource::unbind();
 }
 void ShaderP::addMaterial(const string& materialName){
-	if(materialName == "" || !epriv::Core::m_Engine->m_ResourceManager->_hasMaterial(materialName)){
-        cout << "Material : '" << materialName << "' does not exist (ShaderP::addMaterial()) Returning..." << endl;
-        return;
-    }
     Material* mat = Resources::getMaterial(materialName);
     m_i->m_Materials.push_back(mat);
     sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),epriv::srtKey());

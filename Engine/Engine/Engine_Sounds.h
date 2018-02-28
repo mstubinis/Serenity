@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_SOUNDS_H
 
 #include "Engine_ResourceBasic.h"
+#include "Engine_ResourceHandle.h"
 #include <SFML/Audio.hpp>
 #include <glm/vec3.hpp>
 #include <memory>
@@ -57,11 +58,10 @@ class SoundEffect: public SoundBaseClass{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        SoundEffect(std::string = "",uint loops = 1,bool = false);
+        SoundEffect(Handle&,uint loops = 1,bool = false);
         SoundEffect(SoundData*,uint loops = 1,bool = false);
         ~SoundEffect();
 
-        void loadFromFile(std::string);
         void update(float dt);
         void play(uint loop);
         void play();
@@ -82,10 +82,9 @@ class SoundMusic: public SoundBaseClass{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        SoundMusic(std::string = "",uint loops = 1,bool = false);
+        SoundMusic(Handle&,uint loops = 1,bool = false);
         ~SoundMusic();
 
-        void loadFromFile(std::string);
         void update(float dt);
         void play(uint loop);
         void play();
@@ -109,8 +108,8 @@ class SoundQueue final{
         SoundQueue(float delay = 0.5f);
         ~SoundQueue();
 
-        void enqueueEffect(std::string,uint loops = 1);
-        void enqueueMusic(std::string,uint loops = 1);
+        void enqueueEffect(Handle&,uint loops = 1);
+        void enqueueMusic(Handle&,uint loops = 1);
         void dequeue();
         void update(float dt);
         void clear();
@@ -134,8 +133,8 @@ namespace Engine{
 		};
 	};
     namespace Sound{
-        void playEffect(std::string,uint loops = 1);
-        void playMusic(std::string,uint loops = 1);
+        void playEffect(Handle&,uint loops = 1);
+        void playMusic(Handle&,uint loops = 1);
     };
 };
 #endif

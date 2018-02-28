@@ -26,6 +26,8 @@
 using namespace Engine;
 
 HUD* m_HUD;
+Handle pbcSound;
+Handle sniperSound;
 void Game::cleanup(){
     delete m_HUD;
 }
@@ -81,11 +83,11 @@ void Game::initResources(){
     Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial("SunFlare")->setShadeless(true);
 
-    Resources::addMaterial("Gold","data/Textures/gold.png","data/Textures/gold_Normal.png");
+    Resources::addMaterial("Gold","");
     Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
 
-	Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
-	Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
+	pbcSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
+	sniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 }
 void Game::initLogic(){
 	Engine_Window& window = *Resources::getWindow();
@@ -119,12 +121,7 @@ void Game::update(float dt){
 	if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
 	if(Engine::isKeyDownOnce("space")){
-		if(Resources::getMaterial("Defiant")->diffuseModel() == DiffuseModel::Lambert){
-			Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Minnaert);
-		}
-		else{
-			Resources::getMaterial("Defiant")->setDiffuseModel(DiffuseModel::Lambert);
-		}
+
 	}
 	/*
     if(Engine::isKeyDown("z")){

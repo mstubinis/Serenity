@@ -50,7 +50,7 @@ class SoundBaseClass::impl final{
 };
 class SoundQueue::impl final{
     public:
-        vector< boost::shared_ptr<SoundBaseClass> > m_Queue;
+        vector<SoundBaseClass*> m_Queue;
         float m_DelayInSeconds;
         float m_DelayTimer;
         bool m_IsDelayProcess;
@@ -62,7 +62,7 @@ class SoundQueue::impl final{
         }
         void _clear(){
             for(auto it1 = m_Queue.begin(); it1 != m_Queue.end();){
-                (*it1).reset();
+                delete (*it1);
                 it1 = m_Queue.erase(it1);
             }
             vector_clear(m_Queue);
@@ -73,7 +73,7 @@ class SoundQueue::impl final{
         void _dequeue(){
             if(m_Queue.size() > 0){
                 auto it = m_Queue.begin();
-                (*it).reset();
+                delete (*it);
                 it = m_Queue.erase(it);
                 m_IsDelayProcess = true;
                 //do we need to manually delete? i dont think so
@@ -90,7 +90,7 @@ class SoundQueue::impl final{
             else{
                 if(m_Queue.size() > 0){
                     auto it = m_Queue.begin();
-                    SoundBaseClass* s = it->get();
+                    SoundBaseClass* s = (*it);
                     const SoundStatus::Status& stat = s->status();
                     if(stat == SoundStatus::Fresh){
                         //play it
@@ -103,8 +103,7 @@ class SoundQueue::impl final{
                     else if(stat == SoundStatus::Stopped){
                         if(s->getLoopsLeft() <= 1){
                             //this sound has finished, remove it from the queue and start the delay process
-                            //do we need to manually delete? i dont think so
-                            (*it).reset();
+                            delete (*it);
                             it = m_Queue.erase(it);
                             m_IsDelayProcess = true;
                         }
@@ -115,20 +114,16 @@ class SoundQueue::impl final{
 };
 class Engine::epriv::SoundManager::impl final{
     public:
-        vector<boost::shared_ptr<SoundBaseClass>> m_CurrentlyPlayingSounds;
-        vector<boost::shared_ptr<SoundQueue>> m_SoundQueues;
+        vector<SoundBaseClass*> m_CurrentlyPlayingSounds;
+        vector<SoundQueue*> m_SoundQueues;
 
 		void _init(const char* name,uint& w,uint& h){
 		}
 		void _postInit(const char* name,uint& w,uint& h){
 		}
 		void _destruct(){
-			for(auto q:m_SoundQueues){ 
-				q.reset();
-			}
-			for(auto s:m_CurrentlyPlayingSounds){ 
-				s.reset();
-			}
+			for(auto q:m_SoundQueues){ delete q; }
+			for(auto s:m_CurrentlyPlayingSounds){ delete s; }
 			vector_clear(m_SoundQueues);
 			vector_clear(m_CurrentlyPlayingSounds);
 		}
@@ -154,7 +149,7 @@ class Engine::epriv::SoundManager::impl final{
 		}
 		void _update(float dt){
 			for(auto it = m_CurrentlyPlayingSounds.begin(); it != m_CurrentlyPlayingSounds.end();){
-				SoundBaseClass* s = (*it).get();
+				SoundBaseClass* s = (*it);
 				s->update(dt);
 				if(s->status() == SoundStatus::Stopped){
 					it = m_CurrentlyPlayingSounds.erase(it);
@@ -164,7 +159,7 @@ class Engine::epriv::SoundManager::impl final{
 				}
 			}
 			for(auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();){
-				SoundQueue* s = (*it1).get();
+				SoundQueue* s = (*it1);
 				s->update(dt);
 				if(s->empty()){
 					it1 = m_SoundQueues.erase(it1);
@@ -179,30 +174,22 @@ class SoundEffect::impl final{
     public:	
         sf::Sound m_Sound;
 
-        void _init(SoundBaseClass* s,string file,bool queue){
-            if(file != "") _loadFromFile(s,file);
-            if(queue == false){
-				epriv::Core::m_Engine->m_SoundManager->m_i->m_CurrentlyPlayingSounds.push_back( boost::shared_ptr<SoundBaseClass>(s) );
-                s->play();
-            }
+        void _init(SoundBaseClass* s,Handle& handle,bool queue){
+			SoundData* data = Engine::Resources::getSoundData(handle);
+			_init(s,data,queue);
         }
-        void _init(SoundBaseClass* s,SoundData* buffer,bool queue){
-            m_Sound.setBuffer( *(buffer->getBuffer()) );
-            if(queue == false){
-                epriv::Core::m_Engine->m_SoundManager->m_i->m_CurrentlyPlayingSounds.push_back( boost::shared_ptr<SoundBaseClass>(s) );
-                s->play();
-            }
-        }
-        void _loadFromFile(SoundBaseClass* s,string& file){
-            if(!epriv::Core::m_Engine->m_ResourceManager->_hasSoundData(file)){
-                Engine::Resources::addSoundData(file,file,false);
-            }
-			SoundData* data = Engine::Resources::getSoundData(file);
+        void _init(SoundBaseClass* s,SoundData* data,bool queue){
             if(data->getBuffer() == nullptr){
                 data->buildBuffer();
             }
             m_Sound.setBuffer( *(data->getBuffer()) );
             s->setVolume( data->getVolume() );
+
+            m_Sound.setBuffer( *(data->getBuffer()) );
+            if(queue == false){
+                epriv::Core::m_Engine->m_SoundManager->m_i->m_CurrentlyPlayingSounds.push_back(s);
+                s->play();
+            }
         }
         void _update(float dt,SoundBaseClass* super){
             epriv::Core::m_Engine->m_SoundManager->m_i->_updateSoundStatus(super,m_Sound.getStatus());
@@ -220,26 +207,17 @@ class SoundEffect::impl final{
 class SoundMusic::impl final{
     public:
         sf::Music m_Sound;
-        string m_File;
-        void _init(SoundBaseClass* s,string file,bool queue){
-            m_File = "";
-            if(file != "") _loadFromFile(s,file);
-            if(queue == false){ 
-                epriv::Core::m_Engine->m_SoundManager->m_i->m_CurrentlyPlayingSounds.push_back( boost::shared_ptr<SoundBaseClass>(s) );
-                s->play();
-            }
-        }
-        void _loadFromFile(SoundBaseClass* s,string& file){
-            if (!m_Sound.openFromFile(file)){
+        void _init(SoundBaseClass* s,Handle& handle,bool queue){
+			SoundData* data = Resources::getSoundData(handle);
+			if (!m_Sound.openFromFile(data->name())){
                 // error...
             }
             else{
-                if(!epriv::Core::m_Engine->m_ResourceManager->_hasSoundData(file)){
-					Engine::Resources::addSoundData(file,file,true);
-                }
-				SoundData* data = (Resources::getSoundData(file));
                 s->setVolume( data->getVolume() );
-                m_File = file;
+            }
+            if(queue == false){ 
+                epriv::Core::m_Engine->m_SoundManager->m_i->m_CurrentlyPlayingSounds.push_back(s);
+                s->play();
             }
         }
         void _update(float dt,SoundBaseClass* super){
@@ -255,8 +233,6 @@ class SoundMusic::impl final{
             m_Sound.stop();
         }
 };
-
-
 SoundData::SoundData(bool music):m_i(new impl){ m_i->_init(music); }
 SoundData::SoundData(string file,bool music):m_i(new impl){ m_i->_loadFromFile(file,music); }
 SoundData::~SoundData(){ m_i->_destruct(); }
@@ -287,10 +263,9 @@ float SoundBaseClass::getPitch(){ return 0; }
 void SoundBaseClass::setPitch(float p){}
 
 
-SoundEffect::SoundEffect(string file,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,file,queue); }
+SoundEffect::SoundEffect(Handle& handle,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,handle,queue); }
 SoundEffect::SoundEffect(SoundData* buffer,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,buffer,queue); }
 SoundEffect::~SoundEffect(){}
-void SoundEffect::loadFromFile(string file){ m_i->_loadFromFile(this,file); }
 void SoundEffect::play(uint loop){
     SoundBaseClass::play(loop);
     m_i->_play(this);
@@ -334,11 +309,8 @@ float SoundEffect::getPitch(){ return m_i->m_Sound.getPitch(); }
 void SoundEffect::setPitch(float p){ m_i->m_Sound.setPitch(p); }
 
 
-SoundMusic::SoundMusic(string file,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,file,queue); }
+SoundMusic::SoundMusic(Handle& handle,uint loops,bool queue):SoundBaseClass(loops),m_i(new impl){ m_i->_init(this,handle,queue); }
 SoundMusic::~SoundMusic(){}
-void SoundMusic::loadFromFile(string file){
-    m_i->_loadFromFile(this,file);
-}
 void SoundMusic::play(uint loop){
     SoundBaseClass::play(loop);
     m_i->_play(this);
@@ -384,11 +356,11 @@ void SoundMusic::setPitch(float p){ m_i->m_Sound.setPitch(p); }
 
 SoundQueue::SoundQueue(float _delay):m_i(new impl){
     m_i->_init(_delay);
-    epriv::Core::m_Engine->m_SoundManager->m_i->m_SoundQueues.push_back( boost::shared_ptr<SoundQueue>(this) );
+    epriv::Core::m_Engine->m_SoundManager->m_i->m_SoundQueues.push_back(this);
 }
 SoundQueue::~SoundQueue(){ m_i->_destruct(); }
-void SoundQueue::enqueueEffect(string file,uint loops){ m_i->m_Queue.push_back( boost::make_shared<SoundEffect>(file,loops,true) ); }
-void SoundQueue::enqueueMusic(string file,uint loops){ m_i->m_Queue.push_back( boost::make_shared<SoundMusic>(file,loops,true) ); }
+void SoundQueue::enqueueEffect(Handle& handle,uint loops){ m_i->m_Queue.push_back( new SoundEffect(handle,loops,true) ); }
+void SoundQueue::enqueueMusic(Handle& handle,uint loops){ m_i->m_Queue.push_back( new SoundMusic(handle,loops,true) ); }
 void SoundQueue::dequeue(){ m_i->_dequeue(); }
 void SoundQueue::update(float dt){ m_i->_update(dt); }
 void SoundQueue::clear(){ m_i->_clear(); }
@@ -399,9 +371,9 @@ epriv::SoundManager::~SoundManager(){ m_i->_destruct(); }
 void epriv::SoundManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::SoundManager::_update(float dt){ m_i->_update(dt); }
 
-void Engine::Sound::playEffect(string nameOrFile,uint loops){
-    SoundEffect* e = new SoundEffect(nameOrFile,loops,false);
+void Engine::Sound::playEffect(Handle& handle,uint loops){
+    SoundEffect* e = new SoundEffect(handle,loops,false);
 }
-void Engine::Sound::playMusic(string nameOrFile,uint loops){
-    SoundMusic* e = new SoundMusic(nameOrFile,loops,false);
+void Engine::Sound::playMusic(Handle& handle,uint loops){
+    SoundMusic* e = new SoundMusic(handle,loops,false);
 }

@@ -82,7 +82,6 @@ class MaterialComponent{
         Engine::epriv::MaterialComponentType::Type m_ComponentType;
     public:
         MaterialComponent(uint type,Texture*);
-        MaterialComponent(uint type,std::string& texture);
         virtual ~MaterialComponent();
 
         virtual void bind();
@@ -97,7 +96,6 @@ class MaterialComponentReflection: public MaterialComponent{
         float m_MixFactor;
     public:
         MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor);
-        MaterialComponentReflection(uint type,std::string& cubemap,std::string& map,float mixFactor);
         ~MaterialComponentReflection();
 
         virtual void bind();
@@ -112,7 +110,6 @@ class MaterialComponentRefraction: public MaterialComponentReflection{
         float m_RefractionIndex;
     public:
         MaterialComponentRefraction(Texture* cubemap,Texture* map,float mixFactor,float ratio);
-        MaterialComponentRefraction(std::string& cubemap,std::string& map,float mixFactor,float ratio);
         ~MaterialComponentRefraction();
 
         void bind();
@@ -125,7 +122,6 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
         float m_HeightScale;
     public:
         MaterialComponentParallaxOcclusion(Texture* map,float heightScale);
-        MaterialComponentParallaxOcclusion(std::string& map,float heightScale);
         ~MaterialComponentParallaxOcclusion();
 
         void bind();
@@ -202,6 +198,7 @@ class Material final: public BindableResource{
         const uint id() const;
     
         const bool shadeless() const;
+		const glm::vec3 f0() const;
         const float glow() const;
         const float smoothness() const;
         const float metalness() const;
