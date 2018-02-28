@@ -147,10 +147,8 @@ class epriv::ResourceManager::impl final{
 			out = (T*)_void; //use union_cast ? was in the original source
 			return rv;
 		}
-		template<typename T> inline T* _GetAsFast(Handle& h) const { //see if we can directly return the resource only (last line) and dont need the if check
+		template<typename T> inline T* _GetAsFast(Handle& h) const {
 			const int index = h.index;
-			if (m_Resources[index].counter != h.counter || m_Resources[index].active == false)
-				return nullptr;
 			return (T*)m_Resources[index].resource;
 		}
 		//-----------------------------------------------------------------------------------------------
