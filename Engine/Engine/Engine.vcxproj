@@ -100,7 +100,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Atmosphere.cpp" />
     <ClCompile Include="BindableResource.cpp" />
     <ClCompile Include="CapsuleSpace.cpp" />
     <ClCompile Include="Components.cpp" />
@@ -141,6 +140,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine_Resources.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="MeshInstance.cpp" />
+    <ClCompile Include="ResourceManifest.cpp" />
     <ClCompile Include="ReubixCube.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
@@ -153,7 +153,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Vehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Atmosphere.h" />
     <ClInclude Include="BindableResource.h" />
     <ClInclude Include="CapsuleSpace.h" />
     <ClInclude Include="Components.h" />
@@ -195,6 +194,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_Resources.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="MeshInstance.h" />
+    <ClInclude Include="ResourceManifest.h" />
     <ClInclude Include="ReubixCube.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />

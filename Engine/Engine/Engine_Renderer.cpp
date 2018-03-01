@@ -31,9 +31,11 @@ using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
 
-Mesh* epriv::InternalMeshes::PointLightBounds;
-Mesh* epriv::InternalMeshes::RodLightBounds;
-Mesh* epriv::InternalMeshes::SpotLightBounds;
+Mesh* epriv::InternalMeshes::PointLightBounds = nullptr;
+Mesh* epriv::InternalMeshes::RodLightBounds = nullptr;
+Mesh* epriv::InternalMeshes::SpotLightBounds = nullptr;
+
+ShaderP* epriv::InternalShaderPrograms::Deferred = nullptr;
 
 
 namespace Engine{
@@ -79,7 +81,7 @@ namespace Engine{
 		};
 		struct EngineInternalShaderPrograms final{
 			enum Program{
-				//Deferred,
+				//Deferred, //using the internal resource static one instead
 				DeferredHUD,
 				DeferredGodRays,
 				DeferredBlur,
@@ -366,7 +368,7 @@ class epriv::RenderManager::impl final{
 			m_InternalShaders.at(EngineInternalShaders::SMAAFrag3) = new Shader("smaa_frag_3",Shaders::Detail::ShadersManagement::smaa_frag_3,ShaderType::Fragment,false);
 			m_InternalShaders.at(EngineInternalShaders::SMAAFrag4) = new Shader("smaa_frag_4",Shaders::Detail::ShadersManagement::smaa_frag_4,ShaderType::Fragment,false);
 
-			Resources::addShaderProgram("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
+			epriv::InternalShaderPrograms::Deferred = new ShaderP("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur) = new ShaderP("Deferred_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BlurFrag),ShaderRenderPass::Postprocess);
@@ -1214,6 +1216,7 @@ class epriv::RenderManager::impl final{
 			SAFE_DELETE(epriv::InternalMeshes::SpotLightBounds);
 			SAFE_DELETE(Mesh::Plane);
 			SAFE_DELETE(Mesh::Cube);
+			SAFE_DELETE(epriv::InternalShaderPrograms::Deferred);
 
 			for(auto program:m_InternalShaderPrograms) SAFE_DELETE(program);
 			for(auto shader:m_InternalShaders) SAFE_DELETE(shader);

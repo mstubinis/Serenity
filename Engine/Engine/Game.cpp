@@ -22,6 +22,8 @@
 #include <iostream>
 #include <glm/vec2.hpp>
 
+#include "ResourceManifest.h"
+
 
 using namespace Engine;
 
@@ -40,17 +42,8 @@ void Game::initResources(){
 	Engine_Window& window = *Resources::getWindow();
     window.setIcon("data/Textures/icon.png");
 
-	Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
-	Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
-    Resources::addShaderProgram("AS_SkyFromSpace",skyFromSpaceVert,skyFromSpaceFrag,ShaderRenderPass::Geometry);
 
-	Handle skyFromAtVert = Resources::addShader("AS_SkyFromAtmosphere_Vert","data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
-	Handle skyFromAtFrag = Resources::addShader("AS_SkyFromAtmosphere_Frag","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
-    Resources::addShaderProgram("AS_SkyFromAtmosphere",skyFromAtVert,skyFromAtFrag,ShaderRenderPass::Geometry);
-
-	Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
-	Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
-    Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
+	ResourceManifest::init();
 
     Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
 
@@ -66,10 +59,10 @@ void Game::initResources(){
 	Resources::addMesh("Venerex","data/Models/venerex.obj",CollisionType::ConvexHull);
 
     Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
-    Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","","");
+    Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","");
     Resources::getMaterial("Star")->setShadeless(true);
     Resources::getMaterial("Star")->setGlow(0.21f);
-    Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","","AS_GroundFromSpace");
+    Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","",ResourceManifest::groundFromSpace);
     Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
     Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
 

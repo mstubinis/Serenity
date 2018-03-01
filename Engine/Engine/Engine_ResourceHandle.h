@@ -18,6 +18,7 @@ class ResourceType final{public: enum Type{
 	Font,
 	Camera,
 	Shader,
+	ShaderProgram,
 	SoundData,
 	Scene,
 };};

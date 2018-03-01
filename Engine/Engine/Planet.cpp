@@ -14,6 +14,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "ResourceManifest.h"
+
 using namespace Engine;
 using namespace std;
 
@@ -92,11 +94,11 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         i->mesh()->render();
 
         if(camHeight > outerRadius){ 
-            program = Resources::getShaderProgram("AS_SkyFromSpace"); 
+			program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
             glBlendFunc(GL_ONE, GL_ONE);
         }
         else{
-            program = Resources::getShaderProgram("AS_SkyFromAtmosphere");
+			program = Resources::getShaderProgram(ResourceManifest::skyFromAtmosphere);
             glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         }
         program->bind();

@@ -3,6 +3,7 @@
 #define ENGINE_MATERIAL_H
 
 #include "BindableResource.h"
+#include "Engine_ResourceHandle.h"
 #include <unordered_map>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
@@ -150,7 +151,7 @@ class Material final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="",std::string shader = "");
+        Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="",Handle shaderProgramHandle = Handle());
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         ~Material();
 

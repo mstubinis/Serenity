@@ -403,10 +403,10 @@ unordered_map<string,vector<MeshInstance*>>& MaterialMeshEntry::meshInstances(){
 
 
 
-Material::Material(string name,string diffuse,string normal,string glow,string specular,string program):m_i(new impl),BindableResource(name){
+Material::Material(string name,string diffuse,string normal,string glow,string specular,Handle shaderProgramHandle):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
-Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* program):m_i(new impl),BindableResource(name){
+Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* shaderProgram):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){

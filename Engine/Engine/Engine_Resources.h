@@ -64,6 +64,7 @@ namespace Engine{
 				bool _hasCamera(std::string);        void _addCamera(Camera*);              std::string _buildCameraName(std::string);
 				bool _hasShader(std::string);        Handle _addShader(Shader*);            std::string _buildShaderName(std::string);
 				                                     Handle _addSoundData(SoundData*);
+													 Handle _addShaderProgram(ShaderP*);
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
@@ -109,7 +110,6 @@ namespace Engine{
         Texture* getTexture(std::string);
         Mesh* getMesh(std::string);
         Material* getMaterial(std::string);
-        ShaderP* getShaderProgram(std::string);
         MeshInstance* getMeshInstance(std::string);
 
         void getShader(Handle& inHandle,Shader*& outPtr);         Shader* getShader(Handle& inHandle);
@@ -120,7 +120,7 @@ namespace Engine{
         void getTexture(Handle& inHandle,Texture*& outPtr);       Texture* getTexture(Handle& inHandle);
         void getMesh(Handle& inHandle,Mesh*& outPtr);             Mesh* getMesh(Handle& inHandle);
         void getMaterial(Handle& inHandle,Material*& outPtr);     Material* getMaterial(Handle& inHandle);
-
+        void getShaderProgram(Handle& inHandle,ShaderP*& outPtr); ShaderP* getShaderProgram(Handle& inHandle);
 
 
         void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
@@ -130,15 +130,14 @@ namespace Engine{
         void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
         void removeMesh(std::string name);
 
-        void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",std::string shader = "");
+        void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
         void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
         void removeMaterial(std::string name);
 
         Handle addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
 		Handle addSoundData(std::string file,std::string name = "",bool music = false);
-
-        void addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-		void addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+		Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 
         void initResources(const char* name,uint width,uint height);
     };

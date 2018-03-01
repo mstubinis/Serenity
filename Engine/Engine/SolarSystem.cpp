@@ -1,6 +1,7 @@
 #include "Engine_Events.h"
 #include "SolarSystem.h"
 #include "Engine_Resources.h"
+#include "ResourceManifest.h"
 #include "Planet.h"
 #include "Lagrange.h"
 #include "GameCamera.h"
@@ -8,7 +9,6 @@
 #include "GameSkybox.h"
 #include "Light.h"
 #include "Terrain.h"
-#include "Atmosphere.h"
 
 #include <algorithm>
 #include <sstream>
@@ -145,7 +145,7 @@ void SolarSystem::_loadFromFile(string filename){
                         glowFile = gloFile;
                     }
                     if(Resources::getMaterial(MATERIAL_NAME) == nullptr){
-                        Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"","AS_GroundFromSpace");
+                        Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
                     }
                 }
                 if(line[0] == 'S'){//Sun
