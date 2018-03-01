@@ -546,18 +546,18 @@ void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(
 void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }
 void Material::setAO(float a){ m_i->_setAO(a); }
 void Material::setMetalness(float m){ m_i->_setMetalness(m); }
-void Material::addMeshEntry(string objectName){
+void Material::addMeshEntry(Mesh* mesh){
     for(auto entry:m_i->m_Meshes){
-        if(entry->mesh() == Resources::getMesh(objectName)){ return; }
+        if(entry->mesh() == mesh){ return; }
     }
-    m_i->m_Meshes.push_back(new MaterialMeshEntry(Resources::getMesh(objectName)));
+    m_i->m_Meshes.push_back(new MaterialMeshEntry(mesh));
     sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),epriv::srtKey());
 }
-void Material::removeMeshEntry(string objectName){
+void Material::removeMeshEntry(Mesh* mesh){
     bool did = false;
     for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
 		MaterialMeshEntry* entry = (*it);
-        if(entry->mesh()->name() == objectName){
+        if(entry->mesh() == mesh){
             SAFE_DELETE(entry); //do we need this?
             m_i->m_Meshes.erase(it++);
             did = true;

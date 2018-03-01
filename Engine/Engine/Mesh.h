@@ -122,6 +122,10 @@ class Mesh final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
+		//loaded in renderer
+		static Mesh* Plane;
+		static Mesh* Cube;
+
         Mesh(std::string name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);

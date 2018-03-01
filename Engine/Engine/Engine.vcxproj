@@ -159,6 +159,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Components.h" />
     <ClInclude Include="Constraint.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Engine_BuiltInResources.h" />
     <ClInclude Include="Engine_EventDispatcher.h" />
     <ClInclude Include="Engine_EventObject.h" />
     <ClInclude Include="Engine_FullscreenItems.h" />

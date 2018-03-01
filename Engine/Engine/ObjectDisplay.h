@@ -17,6 +17,14 @@ class ObjectDisplay: public ObjectBasic{
         virtual void calculateRadius();
     public:
         ObjectDisplay(
+            Mesh*,
+            Material*,
+            glm::vec3 = glm::vec3(0.0f),
+            glm::vec3 = glm::vec3(1.0f),
+            std::string = "Visible Object",
+            Scene* = nullptr
+        );
+        ObjectDisplay(
             std::string = "",
             std::string = "",
             glm::vec3 = glm::vec3(0.0f),

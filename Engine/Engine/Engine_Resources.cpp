@@ -70,62 +70,8 @@ class epriv::ResourceManager::impl final{
 		void _postInit(const char* name,uint width,uint height){
 			m_Window = new Engine_Window(name,width,height);
 
-			//add a basic cube mesh
-			#pragma region MeshData
-			string cubeMesh =  
-				"v 1.0 -1.0 -1.0\n"
-				"v 1.0 -1.0 1.0\n"
-				"v -1.0 -1.0 1.0\n"
-				"v -1.0 -1.0 -1.0\n"
-				"v 1.0 1.0 -1.0\n"
-				"v 1.0 1.0 1.0\n"
-				"v -1.0 1.0 1.0\n"
-				"v -1.0 1.0 -1.0\n"
-				"vt 1.0 0.0\n"
-				"vt 0.0 1.0\n"
-				"vt 0.0 0.0\n"
-				"vt 1.0 0.0\n"
-				"vt 0.0 1.0\n"
-				"vt 0.0 0.0\n"
-				"vt 1.0 0.0\n"
-				"vt 0.0 1.0\n"
-				"vt 1.0 0.0\n"
-				"vt 0.0 1.0\n"
-				"vt 0.0 0.0\n"
-				"vt 0.0 0.0\n"
-				"vt 1.0 1.0\n"
-				"vt 1.0 0.0\n"
-				"vt 0.0 1.0\n"
-				"vt 1.0 1.0\n"
-				"vt 1.0 1.0\n"
-				"vt 1.0 1.0\n"
-				"vt 1.0 0.0\n"
-				"vt 1.0 1.0\n"
-				"vn 0.0 -1.0 0.0\n"
-				"vn 0.0 1.0 0.0\n"
-				"vn 1.0 -0.0 0.0\n"
-				"vn 0.0 -0.0 1.0\n"
-				"vn -1.0 -0.0 -0.0\n"
-				"vn 0.0 0.0 -1.0\n"
-				"f 2/1/1 4/2/1 1/3/1\n"
-				"f 8/4/2 6/5/2 5/6/2\n"
-				"f 5/7/3 2/8/3 1/3/3\n"
-				"f 6/9/4 3/10/4 2/11/4\n"
-				"f 3/12/5 8/13/5 4/2/5\n"
-				"f 1/14/6 8/15/6 5/6/6\n"
-				"f 2/1/1 3/16/1 4/2/1\n"
-				"f 8/4/2 7/17/2 6/5/2\n"
-				"f 5/7/3 6/18/3 2/8/3\n"
-				"f 6/9/4 7/17/4 3/10/4\n"
-				"f 3/12/5 7/19/5 8/13/5\n"
-				"f 1/14/6 4/20/6 8/15/6";
-			#pragma endregion
-			Resources::addMesh("Cube",cubeMesh,CollisionType::None,false);
-
 			Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
-			brdfCook->setWrapping(TextureWrap::ClampToEdge);
-
-			Resources::addMesh("Plane",1.0f,1.0f);
+			brdfCook->setWrapping(TextureWrap::ClampToEdge);	
 		}
 		void _destruct(){
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();

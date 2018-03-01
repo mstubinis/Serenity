@@ -25,6 +25,23 @@ struct DefaultObjectDisplayUnbindFunctor{void operator()(BindableResource* r) co
 DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
 DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
+ObjectDisplay::ObjectDisplay(Mesh* mesh, Material* mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
+    m_Radius = 0;
+	m_PassedRenderCheck = false;
+    m_Visible = true;
+    m_Shadeless = false;
+    m_BoundingBoxRadius = glm::vec3(0);
+    if(mesh && mat){
+        MeshInstance* item = new MeshInstance(name(),mesh,mat);
+        m_MeshInstances.push_back(item);
+    }
+    m_Color = glm::vec4(1);
+    m_GodsRaysColor = glm::vec3(0);
+    calculateRadius();
+
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
 ObjectDisplay::ObjectDisplay(string mesh, string mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
 	m_PassedRenderCheck = false;

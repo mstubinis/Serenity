@@ -225,8 +225,8 @@ class Material final: public BindableResource{
         void load();
         void unload();
 
-        void addMeshEntry(std::string meshName);
-        void removeMeshEntry(std::string meshName);
+		void addMeshEntry(Mesh*);
+        void removeMeshEntry(Mesh*);
         std::vector<MaterialMeshEntry*>& getMeshEntries();
 };
 #endif

@@ -134,7 +134,7 @@ class MeshInstance::impl{
             m_Mesh = mesh;
             if(mesh != nullptr){
                 m_Mesh->incrementUseCount();
-                m_Material->addMeshEntry(m_Mesh->name());
+                m_Material->addMeshEntry(m_Mesh);
                 for(auto meshEntry:m_Material->getMeshEntries()){
                     if(meshEntry->mesh() == m_Mesh){
                         meshEntry->addMeshInstance(m_Parent->name(),super);
@@ -155,7 +155,7 @@ class MeshInstance::impl{
             if(mat != nullptr){
                 mat->incrementUseCount();
                 if(m_Mesh != nullptr){
-                    mat->addMeshEntry(m_Mesh->name()); //this checks if theres an entry already
+                    mat->addMeshEntry(m_Mesh); //this checks if theres an entry already
                     for(auto entry:mat->getMeshEntries()){
                         if(entry->mesh() == m_Mesh){
                             bool add = true;
@@ -192,7 +192,7 @@ class MeshInstance::impl{
                     del = false; break;
                 }
             }
-            if(del){ m_Material->removeMeshEntry(m_Mesh->name()); }
+            if(del){ m_Material->removeMeshEntry(m_Mesh); }
         }		  
         void _destruct(MeshInstance* super){
 			for(auto queue:m_AnimationQueue) SAFE_DELETE(queue);

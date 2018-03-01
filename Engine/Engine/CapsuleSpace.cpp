@@ -8,17 +8,18 @@
 #include "Engine_Renderer.h"
 #include "Texture.h"
 #include "GameSkybox.h"
+#include "Mesh.h"
 
 #include <boost/lexical_cast.hpp>
 
 using namespace Engine;
 using namespace std;
 
-CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay("Plane","Capsule_D",pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
+CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay(Mesh::Plane,Resources::getMaterial("Capsule_D"),pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
 CapsuleEnd::~CapsuleEnd(){}
 void CapsuleEnd::update(float dt){ObjectDisplay::update(dt);}
 
-CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay("Plane","SunFlare",pos,glm::vec3(size),name,scene){
+CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay(Mesh::Plane,Resources::getMaterial("SunFlare"),pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/float(100),scene);

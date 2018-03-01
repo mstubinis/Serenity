@@ -422,6 +422,9 @@
     <ClInclude Include="Engine_ObjectPool.h">
       <Filter>Header Files\Engine\Engine_Core</Filter>
     </ClInclude>
+    <ClInclude Include="Engine_BuiltInResources.h">
+      <Filter>Header Files\Engine\Engine_Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Shaders\AS_skyFromSpace_vert.glsl">

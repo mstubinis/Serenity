@@ -21,6 +21,9 @@
 using namespace std;
 using namespace Engine;
 
+Mesh* Mesh::Plane = nullptr;
+Mesh* Mesh::Cube = nullptr;
+
 enum LoadWhat{
     LOAD_POINTS  = 0x01,
     LOAD_UVS     = 0x02,
@@ -42,7 +45,7 @@ struct MeshVertexData{
     }
     ~MeshVertexData(){ }
 };
-struct MeshVertexDataAnimated: public MeshVertexData{
+struct MeshVertexDataAnimated final: public MeshVertexData{
     glm::vec4 boneIDs;
     glm::vec4 boneWeights;
     MeshVertexDataAnimated():MeshVertexData(){ }
