@@ -297,14 +297,14 @@ class Mesh::impl final{
 
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& name,string& filename,CollisionType type,bool notMemory,float threshold){//from file / data
+        void _init(Mesh* super,string& fileOrData,CollisionType type,bool notMemory,float threshold){//from file / data
             _initGlobal(threshold);
             m_Type = type;
             if(notMemory){
-                m_File = filename;
+                m_File = fileOrData;
             }
             else{
-                _loadFromOBJMemory(super,type,threshold,LOAD_FACES | LOAD_UVS | LOAD_NORMALS | LOAD_TBN,filename);
+                _loadFromOBJMemory(super,type,threshold,LOAD_FACES | LOAD_UVS | LOAD_NORMALS | LOAD_TBN,fileOrData);
             }
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
@@ -1074,8 +1074,9 @@ Mesh::Mesh(string name,float x, float y,float width, float height,float threshol
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,width,height,threshold);
 }
-Mesh::Mesh(string name,string filename,CollisionType type,bool notMemory,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(this,name,filename,type,notMemory,threshold);
+Mesh::Mesh(string fileOrData,CollisionType type,bool notMemory,float threshold):BindableResource(fileOrData),m_i(new impl){
+	if(!notMemory) setName("CustomMesh");
+    m_i->_init(this,fileOrData,type,notMemory,threshold);
 }
 Mesh::~Mesh(){
     this->unload();

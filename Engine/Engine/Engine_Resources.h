@@ -51,11 +51,6 @@ namespace Engine{
 
 				Handle _addResource(EngineResource*,ResourceType::Type);
 
-
-
-
-				bool _hasMaterial(std::string);      void _addMaterial(Material*);          std::string _buildMaterialName(std::string);
-				bool _hasMesh(std::string);          void _addMesh(Mesh*);                  std::string _buildMeshName(std::string);
 				bool _hasTexture(std::string);       void _addTexture(Texture*);            std::string _buildTextureName(std::string);
 				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
 				bool _hasFont(std::string);          void _addFont(Font*);                  std::string _buildFontName(std::string);
@@ -65,6 +60,8 @@ namespace Engine{
 				bool _hasShader(std::string);        Handle _addShader(Shader*);            std::string _buildShaderName(std::string);
 				                                     Handle _addSoundData(SoundData*);
 													 Handle _addShaderProgram(ShaderP*);
+													 Handle _addMesh(Mesh*);
+													 Handle _addMaterial(Material*);
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
@@ -108,8 +105,6 @@ namespace Engine{
         Camera* getCamera(std::string);
         Font* getFont(std::string);
         Texture* getTexture(std::string);
-        Mesh* getMesh(std::string);
-        Material* getMaterial(std::string);
         MeshInstance* getMeshInstance(std::string);
 
         void getShader(Handle& inHandle,Shader*& outPtr);         Shader* getShader(Handle& inHandle);
@@ -123,16 +118,13 @@ namespace Engine{
         void getShaderProgram(Handle& inHandle,ShaderP*& outPtr); ShaderP* getShaderProgram(Handle& inHandle);
 
 
-        void addMesh(std::string name,std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
-        void addMesh(std::string file, CollisionType = CollisionType::None,float threshhold = 0.0005f);
-        void addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
-        void addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
-        void addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
-        void removeMesh(std::string name);
+        Handle addMesh(std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
+        Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
+        Handle addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
+        Handle addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
 
-        void addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
-        void addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
-        void removeMaterial(std::string name);
+        Handle addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
+        Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
 
         Handle addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
 		Handle addSoundData(std::string file,std::string name = "",bool music = false);

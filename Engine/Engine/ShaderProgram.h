@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
+struct Handle;
 class Material;
 typedef unsigned int uint;
 
@@ -50,7 +51,8 @@ class ShaderP final: public BindableResource{
         ShaderRenderPass::Pass stage();
         std::vector<Material*>& getMaterials();
 
-        void addMaterial(const std::string&);
+        void addMaterial(Handle& materialHandle);
+		void addMaterial(Material*);
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };
 

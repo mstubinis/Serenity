@@ -282,9 +282,11 @@ void ShaderP::bind(){
 void ShaderP::unbind(){
     BindableResource::unbind();
 }
-void ShaderP::addMaterial(const string& materialName){
-    Material* mat = Resources::getMaterial(materialName);
-    m_i->m_Materials.push_back(mat);
+void ShaderP::addMaterial(Handle& materialHandle){
+	ShaderP::addMaterial(Resources::getMaterial(materialHandle));
+}
+void ShaderP::addMaterial(Material* material){
+    m_i->m_Materials.push_back(material);
     sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),epriv::srtKey());
 }
 const unordered_map<string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }

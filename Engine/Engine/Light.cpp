@@ -43,7 +43,7 @@ unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = [](){
     return m;
 }();
 
-SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay("","",pos,glm::vec3(1.0f),n,scene){
+SunLight::SunLight(glm::vec3 pos,string n,uint type,Scene* scene):ObjectDisplay(Handle(),Handle(),pos,glm::vec3(1.0f),n,scene){
     m_Type = type;
     m_Active = true;
     m_AmbientIntensity = 0.005f;

@@ -10,16 +10,18 @@
 #include "GameSkybox.h"
 #include "Mesh.h"
 
+#include "ResourceManifest.h"
+
 #include <boost/lexical_cast.hpp>
 
 using namespace Engine;
 using namespace std;
 
-CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay(Mesh::Plane,Resources::getMaterial("Capsule_D"),pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
+CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay(Mesh::Plane,Resources::getMaterial(ResourceManifest::CapsuleD),pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
 CapsuleEnd::~CapsuleEnd(){}
 void CapsuleEnd::update(float dt){ObjectDisplay::update(dt);}
 
-CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay(Mesh::Plane,Resources::getMaterial("SunFlare"),pos,glm::vec3(size),name,scene){
+CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay(Mesh::Plane,Resources::getMaterial(ResourceManifest::SunFlareMaterial),pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(name + " Light",pos/float(100),scene);
@@ -51,13 +53,13 @@ void CapsuleStar::update(float dt){
     ObjectDisplay::update(dt);
 }
 
-CapsuleTunnel::CapsuleTunnel(float tunnelRadius, string name, string material, Scene* scene):ObjectDisplay("CapsuleTunnel",material,glm::vec3(0),glm::vec3(1),name,scene){
+CapsuleTunnel::CapsuleTunnel(float tunnelRadius, string name, Handle& material, Scene* scene):ObjectDisplay(ResourceManifest::CapsuleTunnelMesh,material,glm::vec3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
-CapsuleRibbon::CapsuleRibbon(float tunnelRadius, string name, string material, Scene* scene):ObjectDisplay("CapsuleRibbon",material,glm::vec3(0),glm::vec3(1),name,scene){
+CapsuleRibbon::CapsuleRibbon(float tunnelRadius, string name, Handle& material, Scene* scene):ObjectDisplay(ResourceManifest::CapsuleRibbonMesh,material,glm::vec3(0),glm::vec3(1),name,scene){
     m_TunnelRadius = tunnelRadius;
     setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
@@ -82,33 +84,9 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     //l->setColor(255,225,235,255);
     //l->setSpecularIntensity(0.0f);
 
-    if(!Resources::getMaterial("CapsuleTunnel")){
-        Resources::addMesh("CapsuleTunnel","data/Models/capsuleTunnel.obj",CollisionType::None);
-    }
-    if(!Resources::getMaterial("CapsuleRibbon")){
-        Resources::addMesh("CapsuleRibbon","data/Models/capsuleRibbon.obj",CollisionType::None);
-    }
-    if(!Resources::getMaterial("Capsule_A")){
-        Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");
-        Resources::getMaterial("Capsule_A")->setShadeless(true);
-    }
-    if(!Resources::getMaterial("Capsule_B")){
-        Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.png");
-        Resources::getMaterial("Capsule_B")->setShadeless(true);
-    }
-    if(!Resources::getMaterial("Capsule_C")){
-        Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
-        Resources::getMaterial("Capsule_C")->setShadeless(true);
-        Resources::getMaterial("Capsule_C")->setGlow(0.01f);
-    }
-    if(!Resources::getMaterial("Capsule_D")){
-        Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
-        Resources::getMaterial("Capsule_D")->setShadeless(true);
-    }
-
-    m_TunnelA = new CapsuleTunnel(5000,"AAAA","Capsule_A",this);
-    m_TunnelB = new CapsuleTunnel(5000,"AAAB","Capsule_B",this);
-    m_Ribbon = new CapsuleRibbon(5000,"AAAC","Capsule_C",this);
+	m_TunnelA = new CapsuleTunnel(5000,"AAAA",ResourceManifest::CapsuleA,this);
+    m_TunnelB = new CapsuleTunnel(5000,"AAAB",ResourceManifest::CapsuleB,this);
+    m_Ribbon = new CapsuleRibbon(5000,"AAAC",ResourceManifest::CapsuleC,this);
 
     m_FrontEnd = new CapsuleEnd(2250,glm::vec3(0,0,-25000),glm::vec3(1),"AAAD",this);
     m_BackEnd = new CapsuleEnd(1650,glm::vec3(0,0,25000),glm::vec3(0),"AAAE",this);
@@ -138,7 +116,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         step -= 6.0f;
     }
     //this to just test. should set player / camera dynamically
-    Ship* dread = new Ship("Dreadnaught","Dreadnaught",true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
+	Ship* dread = new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
     setPlayer(dread);
 	GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
 	playerCamera->follow(dread);

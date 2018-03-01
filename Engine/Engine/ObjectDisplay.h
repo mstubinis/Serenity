@@ -5,6 +5,8 @@
 #include "Object.h"
 #include "MeshInstance.h"
 
+struct Handle;
+
 class ObjectDisplay: public ObjectBasic{
     protected:
         bool m_Shadeless;
@@ -25,8 +27,8 @@ class ObjectDisplay: public ObjectBasic{
             Scene* = nullptr
         );
         ObjectDisplay(
-            std::string = "",
-            std::string = "",
+            Handle meshHandle,
+            Handle materialHandle,
             glm::vec3 = glm::vec3(0.0f),
             glm::vec3 = glm::vec3(1.0f),
             std::string = "Visible Object",
@@ -53,10 +55,10 @@ class ObjectDisplay: public ObjectBasic{
         virtual void scale(glm::vec3);
 
         void setMesh(Mesh*);
-        void setMesh(const std::string& mesh);
+        void setMesh(Handle& meshHandle);
 
         void setMaterial(Material*);
-        void setMaterial(const std::string& material);
+        void setMaterial(Handle& materialHandle);
 
         virtual glm::vec3& getRadiusBox(){ return m_BoundingBoxRadius; }
 

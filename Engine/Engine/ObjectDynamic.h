@@ -5,6 +5,8 @@
 #include "Object.h"
 #include "MeshInstance.h"
 
+struct Handle;
+
 class Collision;
 class btRigidBody;
 struct btDefaultMotionState;
@@ -38,8 +40,17 @@ class ObjectDynamic: public Object{
         virtual void collisionResponse(ObjectDynamic* other);
 
         ObjectDynamic( 
-            std::string = "",
-            std::string = "",
+            Handle meshHandle,
+            Handle materialHandle,
+            glm::vec3 = glm::vec3(0),        //Position
+            glm::vec3 = glm::vec3(1),        //Scale
+            std::string = "Dynamic Object",  //Object
+            Collision* = nullptr,            //Bullet Collision Shape
+            Scene* = nullptr
+        );
+        ObjectDynamic( 
+            Mesh*,
+            Material*,
             glm::vec3 = glm::vec3(0),        //Position
             glm::vec3 = glm::vec3(1),        //Scale
             std::string = "Dynamic Object",  //Object
@@ -141,10 +152,10 @@ class ObjectDynamic: public Object{
         virtual void clearAllForces();
 
         void setMesh(Mesh*);
-        void setMesh(const std::string& mesh);
+        void setMesh(Handle& meshHandle);
 
         void setMaterial(Material*);
-        void setMaterial(const std::string& material);
+        void setMaterial(Handle& materialHandle);
 
         virtual void update(float);
 

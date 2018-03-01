@@ -28,59 +28,15 @@
 using namespace Engine;
 
 HUD* m_HUD;
-Handle pbcSound;
-Handle sniperSound;
 void Game::cleanup(){
     delete m_HUD;
-}
-
-void jobAddMesh(std::string name, std::string file,CollisionType type, bool fromFile,float threshold){
-	Resources::addMesh(name,file,type,fromFile,threshold);
 }
 
 void Game::initResources(){
 	Engine_Window& window = *Resources::getWindow();
     window.setIcon("data/Textures/icon.png");
 
-
 	ResourceManifest::init();
-
-    Resources::addMesh("Test","data/Models/1911.fbx",CollisionType::None,true,0.0f);
-
-    Resources::addMesh("Planet","data/Models/planet.obj");
-    Resources::addMesh("Defiant","data/Models/defiant.obj",CollisionType::ConvexHull);
-    Resources::addMesh("Akira","data/Models/akira.obj",CollisionType::ConvexHull);
-    Resources::addMesh("Miranda","data/Models/miranda.obj",CollisionType::ConvexHull);
-    Resources::addMesh("Intrepid","data/Models/intrepid.obj",CollisionType::ConvexHull);
-    Resources::addMesh("Norway","data/Models/norway.obj",CollisionType::ConvexHull);
-    Resources::addMesh("Starbase","data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
-    Resources::addMesh("Ring","data/Models/ring.obj");
-    Resources::addMesh("Dreadnaught","data/Models/dreadnaught.obj",CollisionType::ConvexHull);
-	Resources::addMesh("Venerex","data/Models/venerex.obj",CollisionType::ConvexHull);
-
-    Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
-    Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","");
-    Resources::getMaterial("Star")->setShadeless(true);
-    Resources::getMaterial("Star")->setGlow(0.21f);
-    Resources::addMaterial("Earth","data/Textures/Planets/Earth.jpg","","data/Textures/Planets/EarthNight.jpg","",ResourceManifest::groundFromSpace);
-    Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
-    Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
-
-    Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
-    Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
-    Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
-    Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
-    Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
-	Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
-    Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
-    Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
-    Resources::getMaterial("SunFlare")->setShadeless(true);
-
-    Resources::addMaterial("Gold","");
-    Resources::getMaterial("Gold")->setMaterialPhysics(MaterialPhysics::Gold);
-
-	pbcSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
-	sniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 }
 void Game::initLogic(){
 	Engine_Window& window = *Resources::getWindow();
@@ -130,34 +86,6 @@ void Game::update(float dt){
         Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.02f);
     }
 	*/
-	if(Engine::isKeyDown(KeyboardKey::N)){
-        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() - 0.02f);
-        Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() - 0.02f);
-		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() - 0.02f);
-		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() - 0.02f);
-		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() - 0.02f);
-    }
-	else if(Engine::isKeyDown(KeyboardKey::M)){
-        Resources::getMaterial("Defiant")->setMetalness(Resources::getMaterial("Defiant")->metalness() + 0.02f);
-        Resources::getMaterial("Intrepid")->setMetalness(Resources::getMaterial("Intrepid")->metalness() + 0.02f);
-		Resources::getMaterial("Venerex")->setMetalness(Resources::getMaterial("Venerex")->metalness() + 0.02f);
-		Resources::getMaterial("Miranda")->setMetalness(Resources::getMaterial("Miranda")->metalness() + 0.02f);
-		Resources::getMaterial("Dreadnaught")->setMetalness(Resources::getMaterial("Dreadnaught")->metalness() + 0.02f);
-    }
-	if(Engine::isKeyDown(KeyboardKey::V)){
-        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() - 0.02f);
-        Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() - 0.02f);
-		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() - 0.02f);
-		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() - 0.02f);
-		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() - 0.02f);
-    }
-	else if(Engine::isKeyDown(KeyboardKey::B)){
-        Resources::getMaterial("Defiant")->setSmoothness(Resources::getMaterial("Defiant")->smoothness() + 0.02f);
-        Resources::getMaterial("Intrepid")->setSmoothness(Resources::getMaterial("Intrepid")->smoothness() + 0.02f);
-		Resources::getMaterial("Venerex")->setSmoothness(Resources::getMaterial("Venerex")->smoothness() + 0.02f);
-		Resources::getMaterial("Miranda")->setSmoothness(Resources::getMaterial("Miranda")->smoothness() + 0.02f);
-		Resources::getMaterial("Dreadnaught")->setSmoothness(Resources::getMaterial("Dreadnaught")->smoothness() + 0.02f);
-    }
     m_HUD->update(dt);
 }
 void Game::render(){

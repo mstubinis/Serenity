@@ -8,7 +8,6 @@
 #include "Ship.h"
 #include "GameSkybox.h"
 #include "Light.h"
-#include "Terrain.h"
 
 #include <algorithm>
 #include <sstream>
@@ -42,6 +41,8 @@ void SolarSystem::_loadFromFile(string filename){
     uint count = 0;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     unordered_map<string,std::vector<RingInfo>> planetRings;
+
+	unordered_map<string,Handle> loadedMaterials;
 
     string skybox;
     for(string line; getline(str, line, '\n');){
@@ -144,9 +145,10 @@ void SolarSystem::_loadFromFile(string filename){
                     if(boost::filesystem::exists(gloFile)){
                         glowFile = gloFile;
                     }
-                    if(Resources::getMaterial(MATERIAL_NAME) == nullptr){
-                        Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
-                    }
+					if(!loadedMaterials.count(MATERIAL_NAME)){
+						Handle handle = Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
+						loadedMaterials.emplace(MATERIAL_NAME,handle);
+					}
                 }
                 if(line[0] == 'S'){//Sun
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(0),(float)RADIUS,NAME,this);
@@ -162,7 +164,7 @@ void SolarSystem::_loadFromFile(string filename){
                     else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
                     else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
                     else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-                    planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
+                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
                         Object* parent = objects().at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -183,7 +185,7 @@ void SolarSystem::_loadFromFile(string filename){
                     else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
                     else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
                     else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
-                    planetoid = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
+                    planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
                         Object* parent = objects().at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
@@ -204,7 +206,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship("Defiant","Defiant",true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+					setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
 					GameCamera* playerCamera = (GameCamera*)getActiveCamera();
 					playerCamera->follow(getPlayer());
                 }
@@ -215,7 +217,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    new Ship("Akira","Akira",false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
+                    new Ship(ResourceManifest::AkiraMesh,ResourceManifest::AkiraMaterial,false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
                     if(PARENT != ""){
@@ -244,18 +246,12 @@ void SolarSystem::_loadFromFile(string filename){
     float xPos = Resources::getObject("Valiant")->getPosition().x;
     float zPos = Resources::getObject("Valiant")->getPosition().z;
 
-    ObjectDisplay* _s = new ObjectDisplay("Test","Miranda",glm::vec3(xPos+4,0,zPos-2),glm::vec3(1.0f),"TestObject1",nullptr);
+    ObjectDisplay* _s = new ObjectDisplay(ResourceManifest::TestMesh,ResourceManifest::MirandaMaterial,glm::vec3(xPos+4,0,zPos-2),glm::vec3(1.0f),"TestObject1",nullptr);
     _s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
-    new Ship("Defiant","Defiant",false,"Defiant 1",glm::vec3(xPos+3,0,zPos-3),glm::vec3(1),nullptr,this);
-    new Ship("Intrepid","Intrepid",false,"Intrepid 2",glm::vec3(xPos-3,0,zPos+3),glm::vec3(1),nullptr,this);
-    new Ship("Defiant","Defiant",false,"Defiant 3",glm::vec3(xPos+2,0+2,zPos+2),glm::vec3(1),nullptr,this);
-    new Ship("Intrepid","Intrepid",false,"Intrepid 4",glm::vec3(xPos-2,0-2,zPos-2),glm::vec3(1),nullptr,this);
-    new Ship("Norway","Norway",false,"Norway 5",glm::vec3(xPos+4,0+4,zPos+4),glm::vec3(1),nullptr,this);
-    new Ship("Norway","Norway",false,"Norway 6",glm::vec3(xPos+4,0-4,zPos+4),glm::vec3(1),nullptr,this);
-    new Ship("Starbase","Starbase",false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
-	new ObjectDisplay("Planet","Gold",glm::vec3(0,5,2),glm::vec3(2));
+    new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
+	new ObjectDisplay(ResourceManifest::PlanetMesh,ResourceManifest::GoldMaterial,glm::vec3(0,5,2),glm::vec3(2));
     player->translate(0,0,2);
 
 
@@ -266,6 +262,7 @@ void SolarSystem::_loadRandomly(){
     #pragma region Skybox
     //get random skybox folder from the skybox directory
     vector<std::string> folders;
+	unordered_map<string,Handle> loadedMaterials;
     string path = "data/Textures/Skyboxes/";
     if ( boost::filesystem::exists( path ) ) {
         boost::filesystem::directory_iterator end_itr;
@@ -481,9 +478,10 @@ void SolarSystem::_loadRandomly(){
             if(boost::filesystem::exists(gloFile)){ glowFile = gloFile; }
 
             if(boost::filesystem::exists(diffuseFile)){
-                Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
+                Handle h = Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
+				loadedMaterials.emplace(MATERIAL_NAME,h);
                 string pName = "Planet " + to_string(i + 1);
-                planet = new Planet(MATERIAL_NAME,PLANET_TYPE,glm::vec3(posX,0,posZ),RADIUS,pName,ATMOSPHERE_HEIGHT,this);
+                planet = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(posX,0,posZ),RADIUS,pName,ATMOSPHERE_HEIGHT,this);
 
                 float R = (rand() % 1000)/1000.0f;
                 float G = (rand() % 1000)/1000.0f;
@@ -524,7 +522,7 @@ void SolarSystem::_loadRandomly(){
     }
     //Then load moons. Generally the number of moons depends on the type of planet. Gas Giants have more moons than normal planets, etc..
 
-    player = new Ship("Akira","Akira",true,"USS Thunderchild",glm::vec3(0),glm::vec3(1),nullptr,this);
+	player = new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,"USS Defiant",glm::vec3(0),glm::vec3(1),nullptr,this);
 	GameCamera* playerCamera = (GameCamera*)getActiveCamera();
 	playerCamera->follow(getPlayer());
     centerSceneToObject(player);

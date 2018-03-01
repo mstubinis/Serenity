@@ -179,7 +179,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     */
 }};
 
-Planet::Planet(string mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):ObjectDisplay("Planet",mat,pos,glm::vec3(scl),name,scene){
+Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):ObjectDisplay(ResourceManifest::PlanetMesh,mat,pos,glm::vec3(scl),name,scene){
     m_AtmosphereHeight = atmosphere;
     m_Type = type;
     m_OrbitInfo = nullptr;
@@ -217,7 +217,7 @@ void Planet::setRotation(RotationInfo* r){
     rotate(0.0f,0.0f,glm::radians(-m_RotationInfo->tilt),false);
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet("Star",PLANET_TYPE_STAR,pos,scl,name,0.0f,scene){
+Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PLANET_TYPE_STAR,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),name + " Light",LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     setColor(starColor.x,starColor.y,starColor.z,1);
@@ -309,15 +309,15 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
         ++count;
     }
     Texture* diffuse = new Texture(ringImage,parent->name()+"RingsDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
-    Resources::addMaterial(parent->name()+"Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
-    this->material = Resources::getMaterial(parent->name()+"Rings");
+    Handle h = Resources::addMaterial(parent->name()+"Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
+    this->material = Resources::getMaterial(h);
 }
 void Ring::update(float dt){
 }
 void Ring::draw(GLuint shader){
     Camera* activeCamera = Resources::getCurrentScene()->getActiveCamera();
     glm::mat4 model = m_Parent->getModel();
-    Mesh* mesh = Resources::getMesh("Ring");
+	Mesh* mesh = Resources::getMesh(ResourceManifest::RingMesh);
     float radius = mesh->getRadius() * m_Parent->getScale().x;
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));

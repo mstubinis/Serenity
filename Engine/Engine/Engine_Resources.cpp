@@ -53,9 +53,7 @@ class epriv::ResourceManager::impl final{
 
         unordered_map<string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
         unordered_map<string,boost::shared_ptr<Font>> m_Fonts;
-        unordered_map<string,boost::shared_ptr<Mesh>> m_Meshes;
         unordered_map<string,boost::shared_ptr<Texture>> m_Textures;
-        unordered_map<string,boost::shared_ptr<Material>> m_Materials;
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         unordered_map<string,boost::shared_ptr<Object>> m_Objects;
@@ -75,10 +73,8 @@ class epriv::ResourceManager::impl final{
 		}
 		void _destruct(){
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
-			for (auto it = m_Meshes.begin();it != m_Meshes.end(); ++it )                 it->second.reset();
 			for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
 			for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                   it->second.reset();
-			for (auto it = m_Materials.begin();it != m_Materials.end(); ++it )           it->second.reset();
 			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
 			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
@@ -117,8 +113,6 @@ string Engine::Data::reportTime(){
 float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
 
-bool epriv::ResourceManager::_hasMaterial(string n){ if(resourceManager->m_i->m_Materials.count(n)) return true; return false; }
-bool epriv::ResourceManager::_hasMesh(string n){ if(resourceManager->m_i->m_Meshes.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasTexture(string n){ if(resourceManager->m_i->m_Textures.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasObject(string n){ if(resourceManager->m_i->m_Objects.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasFont(string n){ if(resourceManager->m_i->m_Fonts.count(n)) return true; return false; }
@@ -143,11 +137,11 @@ Handle epriv::ResourceManager::_addSoundData(SoundData* s){
 Handle epriv::ResourceManager::_addShaderProgram(ShaderP* s){
     return resourceManager->_addResource(s,ResourceType::ShaderProgram);
 }
+Handle epriv::ResourceManager::_addMesh(Mesh* m){
+    return resourceManager->_addResource(m,ResourceType::Mesh);
+}
 void epriv::ResourceManager::_addTexture(Texture* t){
 	_addToContainer(resourceManager->m_i->m_Textures,t->name(),boost::shared_ptr<Texture>(t));
-}
-void epriv::ResourceManager::_addMaterial(Material* m){
-	_addToContainer(resourceManager->m_i->m_Materials,m->name(),boost::shared_ptr<Material>(m));
 }
 void epriv::ResourceManager::_addObject(Object* o){
 	_addToContainer(resourceManager->m_i->m_Objects,o->name(),boost::shared_ptr<Object>(o));
@@ -155,16 +149,11 @@ void epriv::ResourceManager::_addObject(Object* o){
 void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
 	_addToContainer(resourceManager->m_i->m_MeshInstances,m->name(),boost::shared_ptr<MeshInstance>(m));
 }
-void epriv::ResourceManager::_addMesh(Mesh* m){
-    _addToContainer(resourceManager->m_i->m_Meshes,m->name(),boost::shared_ptr<Mesh>(m));
-}
 string epriv::ResourceManager::_buildMeshInstanceName(string n){return _incrementName(resourceManager->m_i->m_MeshInstances,n);}
 string epriv::ResourceManager::_buildObjectName(string n){return _incrementName(resourceManager->m_i->m_Objects,n);}
 string epriv::ResourceManager::_buildTextureName(string n){return _incrementName(resourceManager->m_i->m_Textures,n);}
 string epriv::ResourceManager::_buildFontName(string n){return _incrementName(resourceManager->m_i->m_Fonts,n);}
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(resourceManager->m_i->m_Scenes,n);}
-string epriv::ResourceManager::_buildMeshName(string n){return _incrementName(resourceManager->m_i->m_Meshes,n);}
-string epriv::ResourceManager::_buildMaterialName(string n){return _incrementName(resourceManager->m_i->m_Materials,n);}
 string epriv::ResourceManager::_buildCameraName(string n){return _incrementName(resourceManager->m_i->m_Cameras,n);}
 
 void epriv::ResourceManager::_remCamera(string n){_removeFromContainer(resourceManager->m_i->m_Cameras,n);}
@@ -196,8 +185,6 @@ Object* Resources::getObject(string n){return (Object*)(_getFromContainer(resour
 Camera* Resources::getCamera(string n){return (Camera*)(_getFromContainer(resourceManager->m_i->m_Cameras,n));}
 Font* Resources::getFont(string n){return (Font*)(_getFromContainer(resourceManager->m_i->m_Fonts,n));}
 Texture* Resources::getTexture(string n){return (Texture*)(_getFromContainer(resourceManager->m_i->m_Textures,n));}
-Mesh* Resources::getMesh(string n){return (Mesh*)(_getFromContainer(resourceManager->m_i->m_Meshes,n));}
-Material* Resources::getMaterial(string n){return (Material*)(_getFromContainer(resourceManager->m_i->m_Materials,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
@@ -220,21 +207,24 @@ void Resources::getShaderProgram(Handle& h,ShaderP*& p){ resourceManager->m_i->m
 ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
 
 
-void Resources::addMesh(string n,string f, CollisionType t, bool b,float threshhold){
-    _addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,f,t,b,threshhold));
+Handle Resources::addMesh(string f, CollisionType t, bool b,float threshhold){
+	Mesh* m = new Mesh(f,t,b,threshhold);
+    return resourceManager->_addResource(m,ResourceType::Mesh);
 }
-void Resources::addMesh(string n,float x,float y,float w,float h,float threshhold){
-    _addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,x,y,w,h,threshhold));
+Handle Resources::addMesh(string n,float x,float y,float w,float h,float threshhold){
+	Mesh* m = new Mesh(n,x,y,w,h,threshhold);
+    return resourceManager->_addResource(m,ResourceType::Mesh);
 }
-void Resources::addMesh(string n,float w,float h,float threshhold){
-    _addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,w,h,threshhold));
+Handle Resources::addMesh(string n,float w,float h,float threshhold){
+	Mesh* m = new Mesh(n,w,h,threshhold);
+    return resourceManager->_addResource(m,ResourceType::Mesh);
 }
-void Resources::addMesh(string f, CollisionType t,float threshhold){string n = f.substr(0, f.size()-4);Resources::addMesh(n,f,t,true,threshhold);}
-void Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
-    _addToContainer(resourceManager->m_i->m_Meshes,n,boost::make_shared<Mesh>(n,g,w,l,threshhold));
+Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
+	Mesh* m = new Mesh(n,g,w,l,threshhold);
+    return resourceManager->_addResource(m,ResourceType::Mesh);
 }
 
-void Resources::addMaterial(string n, string d, string nm , string g, string s,Handle programHandle){
+Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
 	ShaderP* program = nullptr;
     if(programHandle.null()){ 
 		program = epriv::InternalShaderPrograms::Deferred;
@@ -242,13 +232,15 @@ void Resources::addMaterial(string n, string d, string nm , string g, string s,H
 	else{
 		program = Resources::getShaderProgram(programHandle);
 	}
-	_addToContainer(resourceManager->m_i->m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,programHandle));
-    program->addMaterial(n);
+	Material* material = new Material(name,diffuse,normal,glow,specular,programHandle);
+    program->addMaterial(material);
+	return resourceManager->_addResource(material,ResourceType::Material);
 }
-void Resources::addMaterial(string n, Texture* d, Texture* nm, Texture* g, Texture* s,ShaderP* program){
-    _addToContainer(resourceManager->m_i->m_Materials,n,boost::make_shared<Material>(n,d,nm,g,s,program));
+Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
     if(program == nullptr) program = epriv::InternalShaderPrograms::Deferred;
-    program->addMaterial(n);
+	Material* material = new Material(name,diffuse,normal,glow,specular,program);
+    program->addMaterial(material);
+	return resourceManager->_addResource(material,ResourceType::Material);
 }
 
 Handle Resources::addShader(string name, string fileOrData, ShaderType::Type type, bool fromFile){
@@ -271,9 +263,6 @@ Handle Resources::addSoundData(string file,string n,bool music){
 	SoundData* soundData = new SoundData(file,music);
 	return resourceManager->_addResource(soundData,ResourceType::SoundData);
 }
-
-void Resources::removeMesh(string n){_removeFromContainer(resourceManager->m_i->m_Meshes,n);}
-void Resources::removeMaterial(string n){_removeFromContainer(resourceManager->m_i->m_Materials,n);}
 
 void Resources::setCurrentScene(Scene* scene){
 	if(resourceManager->m_i->m_CurrentScene == nullptr){

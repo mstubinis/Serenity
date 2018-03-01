@@ -102,8 +102,8 @@ class Ship: public ObjectDynamic{
         Object* m_Target;
     public:
         Ship(
-            std::string,              //Mesh
-            std::string,              //Material
+            Handle& meshHandle,       //Mesh
+            Handle& materialHandle,   //Material
             bool = false,             //Player Ship?
             std::string = "Ship",     //Name
             glm::vec3 = glm::vec3(0), //Position

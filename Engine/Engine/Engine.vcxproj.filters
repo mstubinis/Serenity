@@ -201,12 +201,6 @@
     <ClCompile Include="Engine_Window.cpp">
       <Filter>Source Files\Engine\Engine_Core</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Vehicle.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine_Noise.cpp">
       <Filter>Source Files\Engine\Engine_Math</Filter>
     </ClCompile>
@@ -349,12 +343,6 @@
     </ClInclude>
     <ClInclude Include="Engine_Window.h">
       <Filter>Header Files\Engine\Engine_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Vehicle.h">
-      <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine_Noise.h">
       <Filter>Header Files\Engine\Engine_Math</Filter>

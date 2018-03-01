@@ -233,7 +233,7 @@ MeshInstance::MeshInstance(const string& parentName, Mesh* mesh,Material* mat,gl
     m_i->_init(mesh,mat,pos,rot,scl,this,parentName);
 	epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
 }
-MeshInstance::MeshInstance(const string& parentName,string mesh,string mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
+MeshInstance::MeshInstance(const string& parentName,Handle mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
@@ -256,9 +256,9 @@ glm::vec3& MeshInstance::position(){ return m_i->m_Position; }
 glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
-void MeshInstance::setMesh(const string& n){ m_i->_setMesh(Resources::getMesh(n),this); }
+void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(Resources::getMesh(meshHandle),this); }
 void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
-void MeshInstance::setMaterial(const string& n){ m_i->_setMaterial(Resources::getMaterial(n),this); }
+void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(Resources::getMaterial(materialHandle),this); }
 void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
 void MeshInstance::setOrientation(glm::quat& o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 

@@ -6,6 +6,7 @@
 #include "ObjectDisplay.h"
 
 class PointLight;
+struct Handle;
 
 class CapsuleEnd final: public ObjectDisplay{
     public:
@@ -24,7 +25,7 @@ class CapsuleTunnel final: public ObjectDisplay{
     private:
         float m_TunnelRadius;
     public:
-        CapsuleTunnel(float tunnelRadius, std::string name, std::string material, Scene* = nullptr);
+        CapsuleTunnel(float tunnelRadius, std::string name, Handle& material, Scene* = nullptr);
         ~CapsuleTunnel();
         float getTunnelRadius(){ return m_TunnelRadius; }
 };
@@ -32,7 +33,7 @@ class CapsuleRibbon final: public ObjectDisplay{
     private:
         float m_TunnelRadius;
     public:
-        CapsuleRibbon(float tunnelRadius, std::string name, std::string material, Scene* = nullptr);
+        CapsuleRibbon(float tunnelRadius, std::string name, Handle& material, Scene* = nullptr);
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }

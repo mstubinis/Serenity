@@ -25,6 +25,7 @@ struct DefaultObjectDisplayUnbindFunctor{void operator()(BindableResource* r) co
 DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
 DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
+
 ObjectDisplay::ObjectDisplay(Mesh* mesh, Material* mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
 	m_PassedRenderCheck = false;
@@ -42,13 +43,13 @@ ObjectDisplay::ObjectDisplay(Mesh* mesh, Material* mat, glm::vec3 pos, glm::vec3
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-ObjectDisplay::ObjectDisplay(string mesh, string mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
+ObjectDisplay::ObjectDisplay(Handle mesh, Handle mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
 	m_PassedRenderCheck = false;
     m_Visible = true;
     m_Shadeless = false;
     m_BoundingBoxRadius = glm::vec3(0);
-    if(mesh != "" && mat != ""){
+	if(!mesh.null() && !mat.null()){
         MeshInstance* item = new MeshInstance(name(),mesh,mat);
         m_MeshInstances.push_back(item);
     }
@@ -95,9 +96,9 @@ void ObjectDisplay::calculateRadius(){
 }
 
 void ObjectDisplay::setMesh(Mesh* mesh){ for(auto entry:m_MeshInstances){ entry->setMesh(mesh); } }
-void ObjectDisplay::setMesh(const string& mesh){ for(auto entry:m_MeshInstances){ entry->setMesh(Resources::getMesh(mesh)); } }
+void ObjectDisplay::setMesh(Handle& meshHandle){ for(auto entry:m_MeshInstances){ entry->setMesh(Resources::getMesh(meshHandle)); } }
 void ObjectDisplay::setMaterial(Material* material){ for(auto entry:m_MeshInstances){ entry->setMaterial(material); } }
-void ObjectDisplay::setMaterial(const string& material){ for(auto entry:m_MeshInstances){ entry->setMaterial(Resources::getMaterial(material)); } }
+void ObjectDisplay::setMaterial(Handle& material){ for(auto entry:m_MeshInstances){ entry->setMaterial(Resources::getMaterial(material)); } }
 
 void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
 void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }

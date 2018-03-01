@@ -54,13 +54,13 @@ void ObjectDynamic::collisionResponse(ObjectDynamic* other){
     // if this collides with other, execute this function
 }
 
-ObjectDynamic::ObjectDynamic(string mesh,string mat, glm::vec3 pos, glm::vec3 scl,string n,Collision* col,Scene* scene): Object(n,scene){
+ObjectDynamic::ObjectDynamic(Handle mesh,Handle mat, glm::vec3 pos, glm::vec3 scl,string n,Collision* col,Scene* scene):Object(n,scene){
     m_Forward = glm::vec3(0,0,-1); m_Right = glm::vec3(1,0,0); m_Up = glm::vec3(0,1,0); m_Color = glm::vec4(1); m_GodsRaysColor = glm::vec3(0);
 	m_PassedRenderCheck = false;
     m_Radius = 0;
     m_Visible = true;
     m_BoundingBoxRadius = glm::vec3(0.0f);
-    if(mesh != "" && mat != ""){
+	if(!mesh.null() && !mat.null()){
         MeshInstance* item = new MeshInstance(name(),mesh,mat);
         m_MeshInstances.push_back(item);
     }
@@ -505,15 +505,15 @@ void ObjectDynamic::setMesh(Mesh* mesh){
     }
     Physics::addRigidBody(this);
 }
-void ObjectDynamic::setMesh(const string& mesh){ 
-	ObjectDynamic::setMesh(Resources::getMesh(mesh));
+void ObjectDynamic::setMesh(Handle& meshHandle){ 
+	ObjectDynamic::setMesh(Resources::getMesh(meshHandle));
 }
 void ObjectDynamic::setMaterial(Material* material){ 
 	for(auto meshInstance:m_MeshInstances){ 
 		meshInstance->setMaterial(material);
 	} 
 }
-void ObjectDynamic::setMaterial(const string& material){ 
+void ObjectDynamic::setMaterial(Handle& material){ 
 	for(auto meshInstance:m_MeshInstances){ 
 		meshInstance->setMaterial(Resources::getMaterial(material)); 
 	}

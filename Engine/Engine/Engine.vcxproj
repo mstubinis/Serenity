@@ -147,10 +147,8 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
-    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Font.cpp" />
-    <ClCompile Include="Vehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BindableResource.h" />
@@ -203,10 +201,8 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SMAA_LUT.h" />
     <ClInclude Include="SolarSystem.h" />
-    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Font.h" />
-    <ClInclude Include="Vehicle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Shaders\AS_groundFromSpace_frag.glsl" />

@@ -52,8 +52,8 @@ void FontData::_loadTextFile(string& filename){
             }
 			f->m_Model = glm::mat4(1.0f);
             string name = filename.substr(0,filename.size()-4);
-            Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
-            f->char_mesh = Resources::getMesh(name+"_"+to_string(f->id));
+            Handle h = Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
+            f->char_mesh = Resources::getMesh(h);
             m_FontGlyphs.emplace(f->id,f);
         }
     }

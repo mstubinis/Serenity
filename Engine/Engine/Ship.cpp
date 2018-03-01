@@ -211,7 +211,7 @@ void ShipSystemSensors::update(float dt){
 }
 #pragma endregion
 
-Ship::Ship(string mesh,string mat, bool player,string name,glm::vec3 pos, glm::vec3 scl, Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
+Ship::Ship(Handle& mesh,Handle& mat, bool player,string name,glm::vec3 pos, glm::vec3 scl, Collision* collision,Scene* scene): ObjectDynamic(mesh,mat,pos,scl,name,collision,scene){
     m_WarpFactor = 0;
     m_IsPlayer = player;
     m_IsWarping = false;

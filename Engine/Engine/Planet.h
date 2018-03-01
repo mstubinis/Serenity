@@ -61,7 +61,7 @@ class Planet: public ObjectDisplay{
         float m_AtmosphereHeight;
     public:
         Planet(
-            std::string = "",               //Material
+            Handle& materialHandle,         //Material
             PlanetType = PLANET_TYPE_ROCKY, //Type
             glm::vec3 = glm::vec3(0),       //Position
             float = 1,                      //Radius

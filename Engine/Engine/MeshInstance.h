@@ -7,6 +7,8 @@
 
 class Mesh;
 class Material;
+struct Handle;
+
 class MeshInstanceAnimation final{
 	friend struct DefaultMeshInstanceBindFunctor;
 	friend struct DefaultMeshInstanceUnbindFunctor;
@@ -21,7 +23,7 @@ class MeshInstance final: public BindableResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         MeshInstance(const std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        MeshInstance(const std::string& parentName,std::string mesh,std::string mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(const std::string& parentName,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         ~MeshInstance();
 
         Mesh* mesh();
@@ -39,9 +41,9 @@ class MeshInstance final: public BindableResource{
         void setOrientation(glm::quat&);
         void setOrientation(float x,float y,float z);
 
-        void setMesh(const std::string&);
+        void setMesh(Handle& meshHandle);
         void setMesh(Mesh*);
-        void setMaterial(const std::string&);
+        void setMaterial(Handle& materialHandle);
         void setMaterial(Material*);
 
         void setPosition(float x,float y,float z);

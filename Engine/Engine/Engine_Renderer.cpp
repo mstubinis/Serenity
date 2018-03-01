@@ -1143,12 +1143,12 @@ class epriv::RenderManager::impl final{
 				"f 12 10 16";
             #pragma endregion
 
-			epriv::InternalMeshes::PointLightBounds = new Mesh("PointLightBounds",pointLightMesh,CollisionType::None,false,0.0005f);
-			epriv::InternalMeshes::RodLightBounds = new Mesh("RodLightBounds",rodLightData,CollisionType::None,false,0.0005f);
-			epriv::InternalMeshes::SpotLightBounds = new Mesh("SpotLightBounds",spotLightData,CollisionType::None,false,0.0005f);
+			epriv::InternalMeshes::PointLightBounds = new Mesh(pointLightMesh,CollisionType::None,false,0.0005f);
+			epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,CollisionType::None,false,0.0005f);
+			epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,CollisionType::None,false,0.0005f);
 
 			Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
-			Mesh::Cube = new Mesh("Cube",cubeMesh,CollisionType::None,false,0.0005f);
+			Mesh::Cube = new Mesh(cubeMesh,CollisionType::None,false,0.0005f);
 
             #pragma endregion
 
