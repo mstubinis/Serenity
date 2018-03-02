@@ -140,7 +140,6 @@ glm::vec2 Math::unpack2FloatsInto1Float(float i){
 }
 void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
     if(local){
-        btTransform t;
         btQuaternion q = obj->getRigidBody()->getWorldTransform().getRotation();
         q = q.normalize();
         vec = vec.rotate(q.getAxis(),q.getAngle());

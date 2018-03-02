@@ -7,6 +7,7 @@
 #include "Engine.h"
 #include "Engine_EventDispatcher.h"
 #include "Engine_EventEnums.h"
+#include "Components.h"
 
 class Mesh;
 class Material;
@@ -18,11 +19,41 @@ typedef unsigned int GLuint;
 template <typename T> bool exists(const boost::weak_ptr<T>& t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
 
+class EntityType{public: enum Type{
+	Basic,
+
+
+_TOTAL,};};
+
+class Entity{
+	friend class ::Scene;
+	friend class ::Engine::epriv::ResourceManager;
+    private:
+		uint m_ParentID, m_ID;
+		uint* m_Components;
+    public:
+		Entity();
+		virtual ~Entity();
+
+        Entity* parent();
+
+		void addChild(Entity* child);
+		void addComponent(ComponentTransform* component);
+};
+
+
+
+
+
+
+
+
 class IObject: public BindableResource{
     public:
 		virtual void registerEvent(EventType::Type type){}
 		virtual void unregisterEvent(EventType::Type type){}
 		virtual void onEvent(const Event& e){}
+
 
         virtual void update(float) = 0;
 

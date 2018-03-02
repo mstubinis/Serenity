@@ -172,16 +172,16 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
-Collision::Collision(btCollisionShape* shape,CollisionType type, float mass){
+Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mass){
     m_CollisionShape = shape;
     m_CollisionType = type;
     _init(type,mass);
 }
-Collision::Collision(ImportedMeshData& data,CollisionType type, float mass){ 
+Collision::Collision(ImportedMeshData& data,CollisionType::Type type, float mass){ 
     _load(data,type);
     _init(type,mass);
 }
-void Collision::_init(CollisionType type, float mass){
+void Collision::_init(CollisionType::Type type, float mass){
     if(m_Inertia == nullptr){
         m_Inertia = new btVector3(0.0f,0.0f,0.0f);
     }
@@ -197,7 +197,7 @@ Collision::~Collision(){
     SAFE_DELETE(m_CollisionShape);
     m_CollisionType = CollisionType::None;
 }
-void Collision::_load(ImportedMeshData& data, CollisionType collisionType){
+void Collision::_load(ImportedMeshData& data, CollisionType::Type collisionType){
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
     m_CollisionType = collisionType;

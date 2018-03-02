@@ -14,6 +14,43 @@
 using namespace Engine;
 using namespace std;
 
+
+
+
+
+Entity::Entity(){
+	m_ParentID, m_ID = -1;
+	m_Components = new uint[ComponentType::_TOTAL];
+	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
+		m_Components[i] = -1; //apparently assigning -1 to an unsigned int gives it it's max value and can be used to denote an empty component
+	}
+}
+Entity::~Entity(){
+
+}
+Entity* Entity::parent(){
+	return epriv::Core::m_Engine->m_ResourceManager->_getEntity(m_ParentID);
+}
+void Entity::addChild(Entity* child){
+	child->m_ParentID = this->m_ID;
+}
+void Entity::addComponent(ComponentTransform* component){
+	if(m_Components[ComponentType::Transform] != -1) return;
+	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Transform);
+	m_Components[ComponentType::Transform] = handle.index;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 float Object::m_RotationThreshold = 0.0f;
 float Object::m_VisibilityThreshold = 1100.0f;
 Object::Object(string n,Scene* scene, bool isNotCamera){

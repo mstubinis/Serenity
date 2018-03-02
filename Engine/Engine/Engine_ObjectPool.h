@@ -97,14 +97,36 @@ namespace Engine{
 					outPtr = m_Pool[index].resource;
 					return true;
 				}
+				bool get(const uint& index, T*& outPtr){
+					outPtr = m_Pool[index].resource;
+					return true;
+				}
 				template<typename U> inline bool getAs(Handle& handle, U*& outPtr){
 					T* _void;
 					const bool rv = get(handle,_void);
 					outPtr = (U*)_void; //use union_cast ? was in the original source
 					return rv;
 				}
+				template<typename U> inline bool getAs(uint& index, U*& outPtr){
+					T* _void;
+					const bool rv = get(index,_void);
+					outPtr = (U*)_void; //use union_cast ? was in the original source
+					return rv;
+				}
+				template<typename U> inline void getAsFast(Handle& handle, U*& outPtr){
+					//T* _void = m_Pool[handle.index].resource;
+					outPtr = (U*)m_Pool[handle.index].resource;
+				}
+				template<typename U> inline void getAsFast(uint& index, U*& outPtr){
+					//T* _void = m_Pool[index].resource;
+					outPtr = (U*)m_Pool[index].resource;
+				}
+
 				template<typename U> inline U* getAsFast(Handle& handle){
 					return (U*)m_Pool[handle.index].resource;
+				}
+				template<typename U> inline U* getAsFast(uint& index){
+					return (U*)m_Pool[index].resource;
 				}
 		};
 	};

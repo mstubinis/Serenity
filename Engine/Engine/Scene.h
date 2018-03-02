@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
+class Entity;
 class Object;
 class Camera;
 class SunLight;
@@ -18,6 +19,8 @@ class Scene: public EngineResource{
         SkyboxEmpty* m_Skybox;
 		Camera* m_ActiveCamera;
     protected:
+		std::vector<uint> m_Entities;
+
         std::unordered_map<std::string,Object*> m_Objects;
         std::unordered_map<std::string,SunLight*> m_Lights;
         std::unordered_map<std::string,LightProbe*> m_LightProbes;
@@ -27,6 +30,8 @@ class Scene: public EngineResource{
     public:
         Scene(std::string name);
         virtual ~Scene();
+
+		void addEntity(Entity*);
 
         virtual void update(float);
 

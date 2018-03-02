@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "Engine_ResourceHandle.h"
+#include "Object.h"
 #include "Engine_Physics.h"
 #include "ShaderProgram.h"
 
@@ -25,7 +26,6 @@ class Texture;
 class Camera;
 class Mesh;
 class Material;
-class Object;
 class SunLight;
 class MeshInstance;
 class SoundData;
@@ -50,6 +50,7 @@ namespace Engine{
 				void _init(const char* name,uint width,uint height);
 
 				Handle _addResource(EngineResource*,ResourceType::Type);
+				Handle _addEntity(Entity*,EntityType::Type);
 
 				bool _hasTexture(std::string);       void _addTexture(Texture*);            std::string _buildTextureName(std::string);
 				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
@@ -65,6 +66,8 @@ namespace Engine{
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
+
+				Entity* _getEntity(uint id);
 
 
 				void _resizeCameras(uint w,uint h);
@@ -118,7 +121,7 @@ namespace Engine{
         void getShaderProgram(Handle& inHandle,ShaderP*& outPtr); ShaderP* getShaderProgram(Handle& inHandle);
 
 
-        Handle addMesh(std::string file, CollisionType = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
+        Handle addMesh(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
         Handle addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);

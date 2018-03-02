@@ -9,6 +9,8 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include "Object.h"
+
 using namespace Engine;
 using namespace std;
 
@@ -24,6 +26,12 @@ Scene::Scene(string name){
     if(Resources::getCurrentScene() == nullptr){
 		Resources::setCurrentScene(this);
     }
+}
+void Scene::addEntity(Entity* entity){
+	for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return; } //rethink this maybe use a fixed size array?
+	Handle entityHandle = epriv::Core::m_Engine->m_ResourceManager->_addEntity(entity,EntityType::Basic);
+	uint entityID = entityHandle.index;
+	m_Entities.push_back(entityID);
 }
 Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
 void Scene::setActiveCamera(Camera* c){

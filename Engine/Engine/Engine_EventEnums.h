@@ -110,8 +110,7 @@ class KeyboardKey final{public: enum Key{
     F15,
     Pause,
 
-    KeyCount,
-};};
+KeyCount,};};
 class MouseButton final{public: enum Button{
     Left,
     Right,
@@ -119,8 +118,7 @@ class MouseButton final{public: enum Button{
     XButton1,
     XButton2,
 
-    ButtonCount,
-};};
+ButtonCount,};};
 
 class MouseWheel final{public: enum Wheel{
     VerticalWheel,

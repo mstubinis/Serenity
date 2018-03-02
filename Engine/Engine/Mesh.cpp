@@ -115,7 +115,7 @@ class Mesh::impl final{
         float m_radius;
         float m_threshold;
         bool m_SaveMeshData;
-        CollisionType m_Type;
+        CollisionType::Type m_Type;
 
         vector<MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
@@ -297,7 +297,7 @@ class Mesh::impl final{
 
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& fileOrData,CollisionType type,bool notMemory,float threshold){//from file / data
+        void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold){//from file / data
             _initGlobal(threshold);
             m_Type = type;
             if(notMemory){
@@ -707,7 +707,7 @@ class Mesh::impl final{
 
             _indexVBO(super,data,m_Indices,m_Vertices,m_threshold);
         }
-        void _loadFromFile(Mesh* super,string file,CollisionType type,float threshold){
+        void _loadFromFile(Mesh* super,string file,CollisionType::Type type,float threshold){
             string extention; for(uint i = m_File.length() - 4; i < m_File.length(); ++i)extention += tolower(m_File.at(i));
             ImportedMeshData d;
             _loadInternal(super,d,m_File);
@@ -823,7 +823,7 @@ class Mesh::impl final{
                 }
             }
         }
-        void _loadFromOBJMemory(Mesh* super,CollisionType type,float threshold,unsigned char _flags,string input){
+        void _loadFromOBJMemory(Mesh* super,CollisionType::Type type,float threshold,unsigned char _flags,string input){
             ImportedMeshData d;
 
             vector<uint> positionIndices;
@@ -1074,7 +1074,7 @@ Mesh::Mesh(string name,float x, float y,float width, float height,float threshol
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,width,height,threshold);
 }
-Mesh::Mesh(string fileOrData,CollisionType type,bool notMemory,float threshold):BindableResource(fileOrData),m_i(new impl){
+Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold):BindableResource(fileOrData),m_i(new impl){
 	if(!notMemory) setName("CustomMesh");
     m_i->_init(this,fileOrData,type,notMemory,threshold);
 }
