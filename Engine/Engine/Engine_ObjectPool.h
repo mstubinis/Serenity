@@ -75,6 +75,15 @@ namespace Engine{
 					++m_activeEntryCount;
 					return Handle(newIndex, m_Pool[newIndex].counter, type);
 				}
+				void remove(uint& index){
+					if(m_Pool[index].active == true){
+						m_Pool[index].nextFreeIndex = m_firstFreeEntry;
+						m_Pool[index].active = false;
+						m_firstFreeEntry = index;
+						--m_activeEntryCount;
+						SAFE_DELETE(m_Pool[index].resource);
+					}
+				}
 				void remove(Handle& handle){
 					const uint32 index = handle.index;
 					if(m_Pool[index].counter == handle.counter && m_Pool[index].active == true){
@@ -82,6 +91,7 @@ namespace Engine{
 						m_Pool[index].active = false;
 						m_firstFreeEntry = index;
 						--m_activeEntryCount;
+						SAFE_DELETE(m_Pool[index].resource);
 					}
 				}
 				T* get(Handle& handle){

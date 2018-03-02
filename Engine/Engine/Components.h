@@ -41,6 +41,8 @@ namespace Engine{
 				void _render();
 
 				Handle _addComponent(ComponentBaseClass* component,uint type);
+				ComponentBaseClass* _getComponent(uint index);
+				void _removeComponent(uint index);
 		};
 	};
 };

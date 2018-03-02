@@ -1,4 +1,3 @@
-#include "Engine.h"
 #include "Engine_Resources.h"
 #include "Math.h"
 #include "Camera.h"
@@ -15,9 +14,6 @@ using namespace Engine;
 using namespace std;
 
 
-
-
-
 Entity::Entity(){
 	m_ParentID, m_ID = -1;
 	m_Components = new uint[ComponentType::_TOTAL];
@@ -26,6 +22,11 @@ Entity::Entity(){
 	}
 }
 Entity::~Entity(){
+	m_ParentID, m_ID = -1;
+	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
+		epriv::Core::m_Engine->m_ComponentManager->_removeComponent(m_Components[i]);
+	}
+	delete[] m_Components;
 
 }
 Entity* Entity::parent(){
@@ -39,7 +40,17 @@ void Entity::addComponent(ComponentTransform* component){
 	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Transform);
 	m_Components[ComponentType::Transform] = handle.index;
 }
-
+ComponentTransform* Entity::getComponent(ComponentTransform* component){
+	return (ComponentTransform*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Transform]);
+}
+void Entity::addComponent(ComponentModel* component){
+	if(m_Components[ComponentType::Model] != -1) return;
+	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Model);
+	m_Components[ComponentType::Model] = handle.index;
+}
+ComponentModel* Entity::getComponent(ComponentModel* component){
+	return (ComponentModel*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Model]);
+}
 
 
 

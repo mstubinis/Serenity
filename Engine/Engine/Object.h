@@ -38,7 +38,8 @@ class Entity{
         Entity* parent();
 
 		void addChild(Entity* child);
-		void addComponent(ComponentTransform* component);
+		void addComponent(ComponentTransform* component); ComponentTransform* getComponent(ComponentTransform* = nullptr);
+		void addComponent(ComponentModel* component); ComponentModel* getComponent(ComponentModel* = nullptr);
 };
 
 

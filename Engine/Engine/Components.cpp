@@ -88,7 +88,7 @@ class epriv::ComponentManager::impl final{
 		    //unbind shader
 
 		void _init(const char* name, uint& w, uint& h){
-			m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES);
+			m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
 		}
 		void _postInit(const char* name, uint& w, uint& h){
 		}
@@ -144,8 +144,12 @@ void epriv::ComponentManager::_update(float& dt){ m_i->_update(dt); }
 Handle epriv::ComponentManager::_addComponent(ComponentBaseClass* component,uint type){
 	return m_i->_addComponent(component,type);
 }
-
-
+ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
+	ComponentBaseClass* c; m_i->m_ComponentPool->getAsFast(index,c); return c;
+}
+void epriv::ComponentManager::_removeComponent(uint index){
+	m_i->m_ComponentPool->remove(index);
+}
 
 
 ComponentBaseClass::ComponentBaseClass(Entity* owner){
