@@ -11,6 +11,9 @@
 #include "Planet.h"
 #include "Engine_Window.h"
 #include "Engine_Math.h"
+#include "Material.h"
+
+#include "ResourceManifest.h"
 
 #include <glm/vec4.hpp>
 
@@ -74,7 +77,8 @@ void HUD::render(){
         glm::vec3 pos = player->getTarget()->getScreenCoordinates();
         float scl = glm::max(0.5f,player->getTarget()->getRadius()*35/player->getTarget()->getDistance(Resources::getCurrentScene()->getActiveCamera()));
         if(pos.z == 1){
-            Resources::getTexture("data/Textures/HUD/Crosshair.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
+			Material* crosshair = Resources::getMaterial(ResourceManifest::CrosshairMaterial);
+            crosshair->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
             string stringRepresentation = "";
             if(distanceInKm > 0){
@@ -87,6 +91,7 @@ void HUD::render(){
             m_Font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
         else{
+			Material* crosshairArrow = Resources::getMaterial(ResourceManifest::CrosshairArrowMaterial);
             glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
             scl = 1;
 
@@ -104,7 +109,7 @@ void HUD::render(){
                 else if(pos.x > winSize.x - 2)     angle = 180;
                 else                               angle = 135;
             }
-            Resources::getTexture("data/Textures/HUD/CrosshairArrow.png")->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
+			crosshairArrow->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
         }
     }
     #pragma endregion

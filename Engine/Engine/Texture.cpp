@@ -59,9 +59,7 @@ class Texture::impl final{
                 vector<uchar> p(pxls,pxls+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
-			n = epriv::Core::m_Engine->m_ResourceManager->_buildTextureName(n);
             super->setName(n);
-            epriv::Core::m_Engine->m_ResourceManager->_addTexture(super);
         }
         void _load(Texture* super){
             if(m_TextureAddress.size() == 0)
@@ -196,11 +194,10 @@ Texture::Texture(const sf::Image& i,string n,GLuint t,bool genMipMaps,ImageInter
     m_i->m_Files.push_back("PIXELS");
     m_i->_init(t,this,n,i,internalFormat,genMipMaps);
 }
-Texture::Texture(string file,string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //image file
+Texture::Texture(string file,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //image file
     m_i->m_Files.push_back(file);
     const sf::Image i;
-    if(n == "") n = file;
-    m_i->_init(t,this,n,i,internalFormat,genMipMaps);
+    m_i->_init(t,this,file,i,internalFormat,genMipMaps);
 }
 Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //cubemap images
     for(uint q = 0; q < 6; q++){ 
@@ -214,7 +211,7 @@ Texture::~Texture(){
 }
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
     if(m_i->m_Files.size() != 1) return;
-	epriv::Core::m_Engine->m_RenderManager->_renderTexture(name(),pos,color,scl,angle,depth);
+	epriv::Core::m_Engine->m_RenderManager->_renderTexture(this,pos,color,scl,angle,depth);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }

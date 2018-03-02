@@ -74,6 +74,7 @@ class epriv::FramebufferTexture::impl{
             m_Divisor = divisor;
         }
         void _destruct(FramebufferTexture* super){
+			SAFE_DELETE(m_Texture);
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);

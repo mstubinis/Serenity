@@ -16,24 +16,22 @@ class Texture;
 class ShaderP;
 class Mesh;
 
-namespace Engine{
-	namespace epriv{
-		class MaterialComponentType{public: enum Type{
-			Diffuse,
-			Normal,
-			Glow,
-			Specular,
-			AO,
-			Metalness,
-			Smoothness,  
-			Reflection,
-			Refraction,
-			ParallaxOcclusion,
 
-			Number,
-		};};
-	};
-};
+class MaterialComponentType{public: enum Type{
+	Diffuse,
+	Normal,
+	Glow,
+	Specular,
+	AO,
+	Metalness,
+	Smoothness,  
+	Reflection,
+	Refraction,
+	ParallaxOcclusion,
+
+	Number,
+};};
+
 class MaterialPhysics{public: enum Physics{
     Water,
     Plastic_Or_Glass_Low,
@@ -80,7 +78,7 @@ class SpecularModel{public: enum Model{
 class MaterialComponent{
     protected:
         Texture* m_Texture;
-        Engine::epriv::MaterialComponentType::Type m_ComponentType;
+        MaterialComponentType::Type m_ComponentType;
     public:
         MaterialComponent(uint type,Texture*);
         virtual ~MaterialComponent();
@@ -89,7 +87,7 @@ class MaterialComponent{
         virtual void unbind();
 
         Texture* texture() const { return m_Texture; }
-        const Engine::epriv::MaterialComponentType::Type type() const { return (Engine::epriv::MaterialComponentType::Type)(m_ComponentType); }
+        const MaterialComponentType::Type type() const { return m_ComponentType; }
 };
 class MaterialComponentReflection: public MaterialComponent{
     protected:
@@ -156,7 +154,7 @@ class Material final: public BindableResource{
         ~Material();
 
         const std::unordered_map<uint,MaterialComponent*>& getComponents() const;
-        const MaterialComponent* getComponent(uint type) const;
+        const MaterialComponent* getComponent(MaterialComponentType::Type) const;
 
         const MaterialComponentReflection* getComponentReflection() const;
         const MaterialComponentRefraction* getComponentRefraction() const;

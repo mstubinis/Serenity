@@ -9,6 +9,9 @@
 #include "Engine_Window.h"
 #include "Scene.h"
 
+#include "ResourceManifest.h"
+#include "Material.h"
+
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -49,7 +52,8 @@ void GameSkybox::update(){
 void GameSkybox::draw(){
     Skybox::draw();
     if(m_SunFlares.size() > 0){
-        Texture* texture = Resources::getTexture("data/Textures/Skyboxes/StarFlare.png");
+		Material* sunFlareMat = Resources::getMaterial(ResourceManifest::SunFlareMaterial);
+		Texture* texture = sunFlareMat->getComponent(MaterialComponentType::Diffuse)->texture();
         for(auto flare:m_SunFlares){
             glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getCurrentScene()->getActiveCamera()->getPosition()) - flare.position,false);
             glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);

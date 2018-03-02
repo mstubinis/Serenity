@@ -61,7 +61,7 @@ namespace Engine{
 						m_Pool[index].resource = ptr;
 					}
 				}
-				Handle add(T*& ptr,uint type){
+				Handle add(T* ptr,uint type){
 					const uint newIndex = m_firstFreeEntry;
 					if(newIndex >= MAX_ENTRIES) return Handle(); //null handle
 					m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;

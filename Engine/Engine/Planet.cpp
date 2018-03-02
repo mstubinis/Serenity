@@ -309,6 +309,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
         ++count;
     }
     Texture* diffuse = new Texture(ringImage,parent->name()+"RingsDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+	epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
     Handle h = Resources::addMaterial(parent->name()+"Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
     this->material = Resources::getMaterial(h);
 }

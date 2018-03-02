@@ -49,20 +49,16 @@ namespace Engine{
 
 				void _init(const char* name,uint width,uint height);
 
-				Handle _addResource(EngineResource*,ResourceType::Type);
 				Handle _addEntity(Entity*,EntityType::Type);
 
-				bool _hasTexture(std::string);       void _addTexture(Texture*);            std::string _buildTextureName(std::string);
+				Handle _addTexture(Texture*);
+
+				//bool _hasTexture(std::string);       void _addTexture(Texture*);            std::string _buildTextureName(std::string);
 				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
 				bool _hasFont(std::string);          void _addFont(Font*);                  std::string _buildFontName(std::string);
 				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
 				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
-				bool _hasCamera(std::string);        void _addCamera(Camera*);              std::string _buildCameraName(std::string);
-				bool _hasShader(std::string);        Handle _addShader(Shader*);            std::string _buildShaderName(std::string);
-				                                     Handle _addSoundData(SoundData*);
-													 Handle _addShaderProgram(ShaderP*);
-													 Handle _addMesh(Mesh*);
-													 Handle _addMaterial(Material*);
+				                                     void _addCamera(Camera*);              std::string _buildCameraName(std::string);
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
@@ -102,7 +98,7 @@ namespace Engine{
 
         boost::shared_ptr<Object>& getObjectPtr(std::string);
         boost::shared_ptr<Camera>& getCameraPtr(std::string);
-        boost::shared_ptr<Texture>& getTexturePtr(std::string);
+        //boost::shared_ptr<Texture>& getTexturePtr(std::string);
 
         Object* getObject(std::string);
         Camera* getCamera(std::string);
@@ -119,7 +115,6 @@ namespace Engine{
         void getMesh(Handle& inHandle,Mesh*& outPtr);             Mesh* getMesh(Handle& inHandle);
         void getMaterial(Handle& inHandle,Material*& outPtr);     Material* getMaterial(Handle& inHandle);
         void getShaderProgram(Handle& inHandle,ShaderP*& outPtr); ShaderP* getShaderProgram(Handle& inHandle);
-
 
         Handle addMesh(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);

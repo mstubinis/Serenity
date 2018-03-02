@@ -20,7 +20,8 @@ FontData::FontData(string& filename){
     _loadTextFile(filename);
     string file = filename.substr(0,filename.size()-4);
     file += ".png";
-    m_FontTexture = new Texture(file,"",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+    m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+	epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
 }
 FontData::~FontData(){
     for(auto glyph:m_FontGlyphs){
@@ -67,5 +68,5 @@ Font::~Font(){
     SAFE_DELETE(m_FontData);
 }
 void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-	epriv::Core::m_Engine->m_RenderManager->_renderText(name(),text,pos,color,scl,angle,depth);
+	epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
 }

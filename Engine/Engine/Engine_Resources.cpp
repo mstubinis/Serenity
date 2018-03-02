@@ -53,7 +53,7 @@ class epriv::ResourceManager::impl final{
 
         unordered_map<string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
         unordered_map<string,boost::shared_ptr<Font>> m_Fonts;
-        unordered_map<string,boost::shared_ptr<Texture>> m_Textures;
+        //unordered_map<string,boost::shared_ptr<Texture>> m_Textures;
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         unordered_map<string,boost::shared_ptr<Object>> m_Objects;
@@ -68,13 +68,10 @@ class epriv::ResourceManager::impl final{
 		}
 		void _postInit(const char* name,uint width,uint height){
 			m_Window = new Engine_Window(name,width,height);
-
-			Texture* brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
-			brdfCook->setWrapping(TextureWrap::ClampToEdge);	
 		}
 		void _destruct(){
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
-			for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
+			//for (auto it = m_Textures.begin();it != m_Textures.end(); ++it )             it->second.reset();
 			for (auto it = m_Fonts.begin();it != m_Fonts.end(); ++it )                   it->second.reset();
 			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
 			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
@@ -100,9 +97,6 @@ Handle epriv::ResourceManager::_addEntity(Entity* entity,EntityType::Type t){
 	entity->m_ID = handle.index;
 	return handle;
 }
-Handle epriv::ResourceManager::_addResource(EngineResource* r,ResourceType::Type t){
-	return resourceManager->m_i->m_Resources->add(r,(uint)t);
-}
 Entity* epriv::ResourceManager::_getEntity(uint id){
 	Entity* e; resourceManager->m_i->m_Entities->getAsFast(id,e); return e;
 }
@@ -121,12 +115,12 @@ string Engine::Data::reportTime(){
 float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
 
-bool epriv::ResourceManager::_hasTexture(string n){ if(resourceManager->m_i->m_Textures.count(n)) return true; return false; }
+//bool epriv::ResourceManager::_hasTexture(string n){ if(resourceManager->m_i->m_Textures.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasObject(string n){ if(resourceManager->m_i->m_Objects.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasFont(string n){ if(resourceManager->m_i->m_Fonts.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasMeshInstance(string n){ if(resourceManager->m_i->m_MeshInstances.count(n)) return true; return false; }
-bool epriv::ResourceManager::_hasCamera(string n){ if(resourceManager->m_i->m_Cameras.count(n)) return true; return false; }
+
 void epriv::ResourceManager::_addScene(Scene* s){
 	_addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }
@@ -136,20 +130,8 @@ void epriv::ResourceManager::_addCamera(Camera* c){
 void epriv::ResourceManager::_addFont(Font* f){
 	_addToContainer(resourceManager->m_i->m_Fonts,f->name(),boost::shared_ptr<Font>(f));
 }
-Handle epriv::ResourceManager::_addShader(Shader* s){
-	return resourceManager->_addResource(s,ResourceType::Shader);
-}
-Handle epriv::ResourceManager::_addSoundData(SoundData* s){
-    return resourceManager->_addResource(s,ResourceType::SoundData);
-}
-Handle epriv::ResourceManager::_addShaderProgram(ShaderP* s){
-    return resourceManager->_addResource(s,ResourceType::ShaderProgram);
-}
-Handle epriv::ResourceManager::_addMesh(Mesh* m){
-    return resourceManager->_addResource(m,ResourceType::Mesh);
-}
-void epriv::ResourceManager::_addTexture(Texture* t){
-	_addToContainer(resourceManager->m_i->m_Textures,t->name(),boost::shared_ptr<Texture>(t));
+Handle epriv::ResourceManager::_addTexture(Texture* t){
+	return resourceManager->m_i->m_Resources->add(t,ResourceType::Texture);
 }
 void epriv::ResourceManager::_addObject(Object* o){
 	_addToContainer(resourceManager->m_i->m_Objects,o->name(),boost::shared_ptr<Object>(o));
@@ -159,7 +141,7 @@ void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
 }
 string epriv::ResourceManager::_buildMeshInstanceName(string n){return _incrementName(resourceManager->m_i->m_MeshInstances,n);}
 string epriv::ResourceManager::_buildObjectName(string n){return _incrementName(resourceManager->m_i->m_Objects,n);}
-string epriv::ResourceManager::_buildTextureName(string n){return _incrementName(resourceManager->m_i->m_Textures,n);}
+//string epriv::ResourceManager::_buildTextureName(string n){return _incrementName(resourceManager->m_i->m_Textures,n);}
 string epriv::ResourceManager::_buildFontName(string n){return _incrementName(resourceManager->m_i->m_Fonts,n);}
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(resourceManager->m_i->m_Scenes,n);}
 string epriv::ResourceManager::_buildCameraName(string n){return _incrementName(resourceManager->m_i->m_Cameras,n);}
@@ -186,13 +168,13 @@ glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_i->m_Window->ge
 
 boost::shared_ptr<Object>& Resources::getObjectPtr(string n){return resourceManager->m_i->m_Objects.at(n);}
 boost::shared_ptr<Camera>& Resources::getCameraPtr(string n){return resourceManager->m_i->m_Cameras.at(n);}
-boost::shared_ptr<Texture>& Resources::getTexturePtr(string n){return resourceManager->m_i->m_Textures.at(n);}
+//boost::shared_ptr<Texture>& Resources::getTexturePtr(string n){return resourceManager->m_i->m_Textures.at(n);}
 
 Scene* Resources::getScene(string n){return (Scene*)(_getFromContainer(resourceManager->m_i->m_Scenes,n));}
 Object* Resources::getObject(string n){return (Object*)(_getFromContainer(resourceManager->m_i->m_Objects,n));}
 Camera* Resources::getCamera(string n){return (Camera*)(_getFromContainer(resourceManager->m_i->m_Cameras,n));}
 Font* Resources::getFont(string n){return (Font*)(_getFromContainer(resourceManager->m_i->m_Fonts,n));}
-Texture* Resources::getTexture(string n){return (Texture*)(_getFromContainer(resourceManager->m_i->m_Textures,n));}
+//Texture* Resources::getTexture(string n){return (Texture*)(_getFromContainer(resourceManager->m_i->m_Textures,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
@@ -216,20 +198,16 @@ ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_
 
 
 Handle Resources::addMesh(string f, CollisionType::Type t, bool b,float threshhold){
-	Mesh* m = new Mesh(f,t,b,threshhold);
-    return resourceManager->_addResource(m,ResourceType::Mesh);
+    return resourceManager->m_i->m_Resources->add(new Mesh(f,t,b,threshhold),ResourceType::Mesh);
 }
 Handle Resources::addMesh(string n,float x,float y,float w,float h,float threshhold){
-	Mesh* m = new Mesh(n,x,y,w,h,threshhold);
-    return resourceManager->_addResource(m,ResourceType::Mesh);
+    return resourceManager->m_i->m_Resources->add(new Mesh(n,x,y,w,h,threshhold),ResourceType::Mesh);
 }
 Handle Resources::addMesh(string n,float w,float h,float threshhold){
-	Mesh* m = new Mesh(n,w,h,threshhold);
-    return resourceManager->_addResource(m,ResourceType::Mesh);
+	return resourceManager->m_i->m_Resources->add(new Mesh(n,w,h,threshhold),ResourceType::Mesh);
 }
 Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
-	Mesh* m = new Mesh(n,g,w,l,threshhold);
-    return resourceManager->_addResource(m,ResourceType::Mesh);
+    return resourceManager->m_i->m_Resources->add(new Mesh(n,g,w,l,threshhold),ResourceType::Mesh);
 }
 
 Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
@@ -242,34 +220,30 @@ Handle Resources::addMaterial(string name, string diffuse, string normal,string 
 	}
 	Material* material = new Material(name,diffuse,normal,glow,specular,programHandle);
     program->addMaterial(material);
-	return resourceManager->_addResource(material,ResourceType::Material);
+	return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
     if(program == nullptr) program = epriv::InternalShaderPrograms::Deferred;
 	Material* material = new Material(name,diffuse,normal,glow,specular,program);
     program->addMaterial(material);
-	return resourceManager->_addResource(material,ResourceType::Material);
+	return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 
 Handle Resources::addShader(string name, string fileOrData, ShaderType::Type type, bool fromFile){
-	Shader* shader = new Shader(name,fileOrData,type,fromFile);
-	return resourceManager->_addResource(shader,ResourceType::Shader);
+	return resourceManager->m_i->m_Resources->add(new Shader(name,fileOrData,type,fromFile),ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){
-	ShaderP* program = new ShaderP(n,v,f,s);
-	return resourceManager->_addResource(program,ResourceType::ShaderProgram);
+	return resourceManager->m_i->m_Resources->add(new ShaderP(n,v,f,s),ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(string n, Handle& v, Handle& f, ShaderRenderPass::Pass s){
 	Shader* vS = nullptr; resourceManager->m_i->m_Resources->getAs(v,vS);
 	Shader* fS = nullptr; resourceManager->m_i->m_Resources->getAs(f,fS);
-	ShaderP* program = new ShaderP(n,vS,fS,s);
-	return resourceManager->_addResource(program,ResourceType::ShaderProgram);
+	return resourceManager->m_i->m_Resources->add(new ShaderP(n,vS,fS,s),ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(string file,string n,bool music){
-	SoundData* soundData = new SoundData(file,music);
-	return resourceManager->_addResource(soundData,ResourceType::SoundData);
+	return resourceManager->m_i->m_Resources->add(new SoundData(file,music),ResourceType::SoundData);
 }
 
 void Resources::setCurrentScene(Scene* scene){

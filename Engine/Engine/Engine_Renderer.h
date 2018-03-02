@@ -59,8 +59,8 @@ namespace Engine{
                 );
 				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
 				void _onOpenGLContextCreation(uint width,uint height);
-				void _renderText(std::string name,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-				void _renderTexture(std::string name,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+				void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+				void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
 				void _addShaderToStage(ShaderP*,uint stage);
 				void _bindShaderProgram(ShaderP*);
 				bool _bindMaterial(Material*);

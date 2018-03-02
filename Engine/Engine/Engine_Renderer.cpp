@@ -114,26 +114,30 @@ namespace Engine{
 
 
 
-		struct TextureRenderInfo{
-			std::string texture;
-			glm::vec2 pos;
+		struct TextureRenderInfo final{
+			Texture* texture;
+			glm::vec2 pos, scl;
 			glm::vec4 col;
-			glm::vec2 scl;
-			float rot;
-			float depth;
+			float rot, depth;
 			TextureRenderInfo(){
-				texture = ""; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
+				texture = nullptr; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
 			}
-			TextureRenderInfo(std::string _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
+			TextureRenderInfo(Texture* _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
 				texture = _texture; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
 			}
 		};
-		struct FontRenderInfo final: public TextureRenderInfo{
+		struct FontRenderInfo final{
+			Font* font;
+			glm::vec2 pos, scl;
+			glm::vec4 col;
+			float rot, depth;
 			std::string text;
-			FontRenderInfo():TextureRenderInfo(){
+			FontRenderInfo(){
+				font = nullptr; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
 				text = "";
 			}
-			FontRenderInfo(std::string _font, std::string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth):TextureRenderInfo(_font,_pos,_col,_scl,_rot,_depth){
+			FontRenderInfo(Font* _font, std::string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
+				font = _font; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
 				text = _text;
 			}
 		};
@@ -213,6 +217,7 @@ class epriv::RenderManager::impl final{
 
 		#pragma region GeneralInfo
 		float gamma;
+		Texture* brdfCook;
 		ShaderP* current_shader_program;
 		Material* current_bound_material;
 		unsigned char cull_face_status;
@@ -307,6 +312,7 @@ class epriv::RenderManager::impl final{
 
 			#pragma region GeneralInfo
 			gamma = 2.2f;
+			brdfCook = nullptr;
 			current_shader_program = nullptr;
 			current_bound_material = nullptr;
 			cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
@@ -1150,6 +1156,9 @@ class epriv::RenderManager::impl final{
 			Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
 			Mesh::Cube = new Mesh(cubeMesh,CollisionType::None,false,0.0005f);
 
+			brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
+			brdfCook->setWrapping(TextureWrap::ClampToEdge);	
+
             #pragma endregion
 
 			m_FullscreenQuad = new FullscreenQuad();
@@ -1347,13 +1356,11 @@ class epriv::RenderManager::impl final{
 			FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize,ImageInternalFormat::Depth16);
 			fbo->bind();
 
-			Texture* t = Resources::getTexture("BRDFCookTorrance");
-
-			glBindTexture(GL_TEXTURE_2D, t->address());
+			glBindTexture(GL_TEXTURE_2D, brdfCook->address());
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
 			Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
 			Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,t->address(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,brdfCook->address(), 0);
 
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance)->bind();
 			Renderer::sendUniform1i("NUM_SAMPLES",256);
@@ -1431,10 +1438,8 @@ class epriv::RenderManager::impl final{
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
 			Mesh::Plane->bind();
 			for(auto item:m_TexturesToBeRendered){
-				Texture* texture = nullptr;
-				if(item.texture != ""){
-					texture = Resources::getTexture(item.texture);
-					bindTexture("DiffuseTexture",texture,0);
+				if(item.texture != nullptr){
+					bindTexture("DiffuseTexture",item.texture,0);
 					sendUniform1i("DiffuseTextureEnabled",1);
 				}
 				else{
@@ -1446,8 +1451,8 @@ class epriv::RenderManager::impl final{
 				glm::mat4 model = m_IdentityMat4;
 				model = glm::translate(model, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
 				model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
-				if(item.texture != "")
-					model = glm::scale(model, glm::vec3(texture->width(),texture->height(),1));
+				if(item.texture != nullptr)
+					model = glm::scale(model, glm::vec3(item.texture->width(),item.texture->height(),1));
 				model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
 
 				sendUniformMatrix4f("VP",m_2DProjectionMatrix);
@@ -1461,9 +1466,7 @@ class epriv::RenderManager::impl final{
 		void _renderText(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
 			for(auto item:m_FontsToBeRendered){
-				Font* font = Resources::getFont(item.texture);
-
-				bindTexture("DiffuseTexture",font->getFontData()->getGlyphTexture(),0);
+				bindTexture("DiffuseTexture",item.font->getFontData()->getGlyphTexture(),0);
 				sendUniform1i("DiffuseTextureEnabled",1);
 				sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
 
@@ -1471,11 +1474,11 @@ class epriv::RenderManager::impl final{
 				float x = item.pos.x;
 				for(auto c:item.text){
 					if(c == '\n'){
-						y_offset += (font->getFontData()->getGlyphData('X')->height+6) * item.scl.y;
+						y_offset += (item.font->getFontData()->getGlyphData('X')->height+6) * item.scl.y;
 						x = item.pos.x;
 					}
 					else{
-						FontGlyph* chr = font->getFontData()->getGlyphData(c);
+						FontGlyph* chr = item.font->getFontData()->getGlyphData(c);
 
 						chr->m_Model = m_IdentityMat4;
 						chr->m_Model = glm::translate(chr->m_Model, glm::vec3(x + chr->xoffset ,item.pos.y - (chr->height + chr->yoffset) - y_offset,-0.001f - item.depth));
@@ -1674,7 +1677,7 @@ class epriv::RenderManager::impl final{
 						LightProbe* p = probe.second;
 						bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
 						bindTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
-						bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+						bindTextureSafe("brdfLUT",brdfCook,5);
 						break;
 					}
 				}
@@ -1682,7 +1685,7 @@ class epriv::RenderManager::impl final{
 					if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
 						bindTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
 						bindTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-						bindTextureSafe("brdfLUT",Resources::getTexture("BRDFCookTorrance"),5);
+						bindTextureSafe("brdfLUT",brdfCook,5);
 					}
 				}
 
@@ -2193,11 +2196,11 @@ void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ Core::m_Engine->m_Rend
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h){ m_i->_onOpenGLContextCreation(w,h); }
 
-void epriv::RenderManager::_renderText(string name,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
-	Core::m_Engine->m_RenderManager->m_i->m_FontsToBeRendered.push_back(FontRenderInfo(name,text,pos,color,scl,angle,depth));
+void epriv::RenderManager::_renderText(Font* font,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
+	Core::m_Engine->m_RenderManager->m_i->m_FontsToBeRendered.push_back(FontRenderInfo(font,text,pos,color,scl,angle,depth));
 }
-void epriv::RenderManager::_renderTexture(string name,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
-	Core::m_Engine->m_RenderManager->m_i->m_TexturesToBeRendered.push_back(TextureRenderInfo(name,pos,color,scl,angle,depth));
+void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
+	Core::m_Engine->m_RenderManager->m_i->m_TexturesToBeRendered.push_back(TextureRenderInfo(texture,pos,color,scl,angle,depth));
 }
 void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     if(stage == ShaderRenderPass::Geometry){
@@ -2367,7 +2370,7 @@ void Renderer::unbindTextureCubemap(uint s){
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 }
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
-	epriv::Core::m_Engine->m_RenderManager->m_i->m_TexturesToBeRendered.push_back(epriv::TextureRenderInfo("",pos,col,glm::vec2(w,h),angle,depth));
+	epriv::Core::m_Engine->m_RenderManager->m_i->m_TexturesToBeRendered.push_back(epriv::TextureRenderInfo(nullptr,pos,col,glm::vec2(w,h),angle,depth));
 }
 void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth){
     texture->render(pos,col,angle,scl,depth);

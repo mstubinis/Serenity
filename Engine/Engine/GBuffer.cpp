@@ -69,8 +69,7 @@ class epriv::GBuffer::impl final{
         }
         void _constructFramebuffer(FramebufferObject* fbo,string n,uint t,uint w,uint h){
             boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>& i = GBUFFER_TYPE_DATA.at(t);
-            Texture* texture = new Texture(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),GL_TEXTURE_2D,i.get<0>());
-            m_Buffers.emplace(t,fbo->attatchTexture(texture,i.get<4>(),i.get<0>()));
+            m_Buffers.emplace(t,fbo->attatchTexture(new Texture(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),GL_TEXTURE_2D,i.get<0>()),i.get<4>(),i.get<0>()));
         }
         void _destruct(){
             m_Width = m_Height = 0;
