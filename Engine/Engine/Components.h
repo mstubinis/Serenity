@@ -120,6 +120,7 @@ class ComponentPhysics: public ComponentBaseClass{
     private:
 		Collision* _collision;
 		btRigidBody* _rigidBody;
+		btDefaultMotionState* _motionState;
 		float _mass;
     public:
 		ComponentPhysics(Entity* owner);
@@ -128,8 +129,16 @@ class ComponentPhysics: public ComponentBaseClass{
 		void setDynamic(bool dynamic);
 		void setMass(float mass);
 
-		void setLinearVelocity(float x,float y,float z,bool local = true); void setLinearVelocity(glm::vec3 velocity,bool local = true);
-		void setAngularVelocity(float x,float y,float z,bool local = true); void setAngularVelocity(glm::vec3 velocity,bool local = true);
+		void clearLinearForces();
+        void clearAngularForces();
+		void clearAllForces();
+
+		void setLinearVelocity(float x,float y,float z,bool local = true);   void setLinearVelocity(glm::vec3 velocity,bool local = true);
+		void setAngularVelocity(float x,float y,float z,bool local = true);  void setAngularVelocity(glm::vec3 velocity,bool local = true);
+		void applyForce(float x,float y,float z,bool local=true);            void applyForce(glm::vec3 force,glm::vec3 origin = glm::vec3(0),bool local=true);
+		void applyImpulse(float x,float y,float z,bool local=true);          void applyImpulse(glm::vec3 impulse,glm::vec3 origin = glm::vec3(0),bool local=true);
+		void applyTorque(float x,float y,float z,bool local=true);           void applyTorque(glm::vec3 torque,bool local=true);
+		void applyTorqueImpulse(float x,float y,float z,bool local=true);    void applyTorqueImpulse(glm::vec3 torqueImpulse,bool local=true);
 };
 
 

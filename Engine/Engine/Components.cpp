@@ -306,11 +306,14 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 ComponentPhysics::ComponentPhysics(Entity* owner):ComponentBaseClass(owner){
 	_collision = nullptr;
 	_rigidBody = nullptr;
+	_motionState = nullptr;
 	_mass = 1.0f;
 }
 ComponentPhysics::~ComponentPhysics(){
+    Physics::removeRigidBody(_rigidBody);
+    SAFE_DELETE(_rigidBody);
+    SAFE_DELETE(_motionState);
 }
-
 void ComponentPhysics::setDynamic(bool dynamic){
     if(dynamic){
         Physics::removeRigidBody(_rigidBody);
@@ -322,20 +325,12 @@ void ComponentPhysics::setDynamic(bool dynamic){
         Physics::removeRigidBody(_rigidBody);
         _rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
 
-		//clear all forces ///////////////////
-		_rigidBody->setActivationState(0);
-		_rigidBody->activate();
-		btVector3 vec = btVector3(0,0,0);
-		_rigidBody->setLinearVelocity(vec); 
-        _rigidBody->setAngularVelocity(vec); 
-		//////////////////////////////////////
+		ComponentPhysics::clearAllForces();
 
         Physics::addRigidBody(_rigidBody);
         _rigidBody->activate();
     }
 }
-
-
 void ComponentPhysics::setLinearVelocity(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
@@ -356,6 +351,79 @@ void ComponentPhysics::setAngularVelocity(float x,float y,float z,bool local){
     _rigidBody->setAngularVelocity(vec); 
 }
 void ComponentPhysics::setAngularVelocity(glm::vec3 velocity,bool local){ ComponentPhysics::setAngularVelocity(velocity.x,velocity.y,velocity.z,local); }
+void ComponentPhysics::applyForce(float x,float y,float z,bool local){
+    _rigidBody->activate();
+    btVector3 vec = btVector3(x,y,z);
+    if(local){
+		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
+        vec = vec.rotate(q.getAxis(),q.getAngle());
+	}
+    _rigidBody->applyCentralForce(vec); 
+}
+void ComponentPhysics::applyForce(glm::vec3 force,glm::vec3 origin = glm::vec3(0),bool local){
+    _rigidBody->activate();
+    btVector3 vec = btVector3(force.x,force.y,force.z);
+    if(local){
+		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
+        vec = vec.rotate(q.getAxis(),q.getAngle());
+	}
+    _rigidBody->applyForce(vec,btVector3(origin.x,origin.y,origin.z)); 
+}
+void ComponentPhysics::applyImpulse(float x,float y,float z,bool local){
+    _rigidBody->activate();
+    btVector3 vec = btVector3(x,y,z);
+    if(local){
+		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
+        vec = vec.rotate(q.getAxis(),q.getAngle());
+	}
+    _rigidBody->applyCentralImpulse(vec);
+}
+void ComponentPhysics::applyImpulse(glm::vec3 impulse,glm::vec3 origin = glm::vec3(0),bool local){
+    _rigidBody->activate();
+    btVector3 vec = btVector3(impulse.x,impulse.y,impulse.z);
+    if(local){
+		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
+        vec = vec.rotate(q.getAxis(),q.getAngle());
+	}
+    _rigidBody->applyImpulse(vec,btVector3(origin.x,origin.y,origin.z));
+}
+void ComponentPhysics::applyTorque(float x,float y,float z,bool local){
+    _rigidBody->activate();
+    btVector3 t(x,y,z);
+    if(local){
+        t = _rigidBody->getInvInertiaTensorWorld().inverse() * (_rigidBody->getWorldTransform().getBasis() * t);
+    }
+    _rigidBody->applyTorque(t);
+}
+void ComponentPhysics::applyTorque(glm::vec3 torque,bool local){ ComponentPhysics::applyTorque(torque.x,torque.y,torque.z,local); }
+void ComponentPhysics::applyTorqueImpulse(float x,float y,float z,bool local){
+    _rigidBody->activate();
+    btVector3 t(x,y,z);
+    if(local){
+        t = _rigidBody->getInvInertiaTensorWorld().inverse() * (_rigidBody->getWorldTransform().getBasis() * t);
+    }
+    _rigidBody->applyTorqueImpulse(t);
+}
+void ComponentPhysics::applyTorqueImpulse(glm::vec3 torqueImpulse,bool local){ ComponentPhysics::applyTorqueImpulse(torqueImpulse.x,torqueImpulse.y,torqueImpulse.z,local); }
+void ComponentPhysics::clearLinearForces(){
+    _rigidBody->setActivationState(0);
+	_rigidBody->activate();
+	btVector3 vec = btVector3(0,0,0);
+	_rigidBody->setLinearVelocity(vec); 
+}
+void ComponentPhysics::clearAngularForces(){
+    _rigidBody->setActivationState(0);
+	_rigidBody->activate();
+    btVector3 vec = btVector3(0,0,0);
+	_rigidBody->setAngularVelocity(vec); 
+}
+void ComponentPhysics::clearAllForces(){
+	_rigidBody->setActivationState(0);
+	_rigidBody->activate();
+	btVector3 vec = btVector3(0,0,0);
+	_rigidBody->setLinearVelocity(vec); 
+    _rigidBody->setAngularVelocity(vec); 
+}
 void ComponentPhysics::setMass(float mass){
     _mass = mass;
 	if(_collision){
