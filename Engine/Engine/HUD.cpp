@@ -21,7 +21,7 @@ using namespace Engine;
 using namespace std;
 
 HUD::HUD(){
-    m_Font = new Font("data/Fonts/consolas.fnt");
+	m_Font = Resources::addFont("data/Fonts/consolas.fnt");
     Engine::Math::setColor(m_Color,255,255,0);
     m_TargetIterator = 0;
     m_WarpIndicatorSize = glm::vec2(30,115);
@@ -72,6 +72,8 @@ void HUD::render(){
     // render warp drive
     //Engine::Renderer::renderRectangle(glm::vec2(winSize.x/2 - 100,winSize.y - m_WarpIndicatorSize.y/2),glm::vec4(m_Color.x,m_Color.y,m_Color.z,0.3f),m_WarpIndicatorSize.x,m_WarpIndicatorSize.y,0,0);
 
+	Font* font = Resources::getFont(m_Font);
+
     #pragma region renderCrossHairAndOtherInfo
     if(player->getTarget() != nullptr){
         glm::vec3 pos = player->getTarget()->getScreenCoordinates();
@@ -88,7 +90,7 @@ void HUD::render(){
                 float distanceInm = (player->getTarget()->getDistance(player))*100.0f;
                 stringRepresentation = to_string(uint(distanceInm)) + " m";
             }
-            m_Font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
+            font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
         else{
 			Material* crosshairArrow = Resources::getMaterial(ResourceManifest::CrosshairArrowMaterial);
@@ -116,7 +118,7 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-	m_Font->renderText(Engine::Data::reportTime() + 
+	font->renderText(Engine::Data::reportTime() + 
                        "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()),
                        glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 

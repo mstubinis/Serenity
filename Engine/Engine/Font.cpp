@@ -62,7 +62,6 @@ void FontData::_loadTextFile(string& filename){
 
 Font::Font(string filename):EngineResource(filename){
     m_FontData = new FontData(filename);
-	epriv::Core::m_Engine->m_ResourceManager->_addFont(this);
 }
 Font::~Font(){
     SAFE_DELETE(m_FontData);

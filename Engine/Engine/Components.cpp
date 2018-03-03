@@ -360,7 +360,7 @@ void ComponentPhysics::applyForce(float x,float y,float z,bool local){
 	}
     _rigidBody->applyCentralForce(vec); 
 }
-void ComponentPhysics::applyForce(glm::vec3 force,glm::vec3 origin = glm::vec3(0),bool local){
+void ComponentPhysics::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(force.x,force.y,force.z);
     if(local){
@@ -378,7 +378,7 @@ void ComponentPhysics::applyImpulse(float x,float y,float z,bool local){
 	}
     _rigidBody->applyCentralImpulse(vec);
 }
-void ComponentPhysics::applyImpulse(glm::vec3 impulse,glm::vec3 origin = glm::vec3(0),bool local){
+void ComponentPhysics::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(impulse.x,impulse.y,impulse.z);
     if(local){

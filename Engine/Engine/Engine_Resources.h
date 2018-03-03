@@ -53,9 +53,7 @@ namespace Engine{
 
 				Handle _addTexture(Texture*);
 
-				//bool _hasTexture(std::string);       void _addTexture(Texture*);            std::string _buildTextureName(std::string);
 				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
-				bool _hasFont(std::string);          void _addFont(Font*);                  std::string _buildFontName(std::string);
 				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
 				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
 				                                     void _addCamera(Camera*);              std::string _buildCameraName(std::string);
@@ -65,20 +63,10 @@ namespace Engine{
 
 				Entity* _getEntity(uint id);
 
-
 				void _resizeCameras(uint w,uint h);
 				uint _numScenes();
 		};
 	};
-	namespace Data{
-		std::string reportTime();
-	};
-
-
-
-
-
-
     namespace Resources{
         namespace Settings{
             void enableDynamicMemory(bool b = true);
@@ -98,12 +86,10 @@ namespace Engine{
 
         boost::shared_ptr<Object>& getObjectPtr(std::string);
         boost::shared_ptr<Camera>& getCameraPtr(std::string);
-        //boost::shared_ptr<Texture>& getTexturePtr(std::string);
 
         Object* getObject(std::string);
         Camera* getCamera(std::string);
         Font* getFont(std::string);
-        Texture* getTexture(std::string);
         MeshInstance* getMeshInstance(std::string);
 
         void getShader(Handle& inHandle,Shader*& outPtr);         Shader* getShader(Handle& inHandle);
@@ -115,6 +101,8 @@ namespace Engine{
         void getMesh(Handle& inHandle,Mesh*& outPtr);             Mesh* getMesh(Handle& inHandle);
         void getMaterial(Handle& inHandle,Material*& outPtr);     Material* getMaterial(Handle& inHandle);
         void getShaderProgram(Handle& inHandle,ShaderP*& outPtr); ShaderP* getShaderProgram(Handle& inHandle);
+
+		Handle addFont(std::string filename);
 
         Handle addMesh(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
@@ -131,6 +119,9 @@ namespace Engine{
 
         void initResources(const char* name,uint width,uint height);
     };
+	namespace Data{
+		std::string reportTime();
+	};
     //TODO: Move this somewhere else
     template<typename T>
     static std::string convertNumToNumWithCommas(T n){

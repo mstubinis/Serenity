@@ -5,6 +5,7 @@
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include "Engine_ResourceHandle.h"
 
 class Font;
 class Object;
@@ -14,7 +15,7 @@ class HUD final{
     private:
         unsigned int m_TargetIterator;
         glm::vec3 m_Color;
-        Font* m_Font;
+        Handle m_Font;
         void _renderCrosshair(Object*);
 
         glm::vec2 m_WarpIndicatorSize;

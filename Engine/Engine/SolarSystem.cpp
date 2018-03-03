@@ -198,6 +198,7 @@ void SolarSystem::_loadFromFile(string filename){
                         }
                     }
                     m_Moons.emplace(NAME,planetoid);
+					
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
@@ -238,7 +239,7 @@ void SolarSystem::_loadFromFile(string filename){
 
     //add planetary rings
     for(auto rings:planetRings){
-        new Ring(rings.second,static_cast<Planet*>(m_Objects.at(rings.first)));
+        new Ring(rings.second,(Planet*)(m_Objects.at(rings.first)));
     }
 
     centerSceneToObject(player);
@@ -253,6 +254,8 @@ void SolarSystem::_loadFromFile(string filename){
     new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 	new ObjectDisplay(ResourceManifest::PlanetMesh,ResourceManifest::GoldMaterial,glm::vec3(0,5,2),glm::vec3(2));
     player->translate(0,0,2);
+
+	new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Luna Starbase",m_Moons.at("Moon")->getPosition() + glm::vec3(16000,0,16000),glm::vec3(1),nullptr,this);
 
 
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
