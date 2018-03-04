@@ -69,20 +69,20 @@ namespace Engine{
 	};
     namespace Resources{
         namespace Settings{
-            void enableDynamicMemory(bool b = true);
+            void enableDynamicMemory(bool enable = true);
             void disableDynamicMemory();
         }
 
         Scene* getCurrentScene();
-        void setCurrentScene(Scene* s);
-        void setCurrentScene(std::string s);
+        void setCurrentScene(Scene* scene);
+        void setCurrentScene(std::string sceneName);
 
         float& dt();
 
         Engine_Window* getWindow();
         glm::uvec2 getWindowSize();
 
-        Scene* getScene(std::string n);
+        Scene* getScene(std::string sceneName);
 
         boost::shared_ptr<Object>& getObjectPtr(std::string);
         boost::shared_ptr<Camera>& getCameraPtr(std::string);
@@ -116,8 +116,6 @@ namespace Engine{
 		Handle addSoundData(std::string file,std::string name = "",bool music = false);
         Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 		Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-
-        void initResources(const char* name,uint width,uint height);
     };
 	namespace Data{
 		std::string reportTime();

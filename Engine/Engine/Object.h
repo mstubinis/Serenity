@@ -38,8 +38,17 @@ class Entity{
         Entity* parent();
 
 		void addChild(Entity* child);
-		void addComponent(ComponentTransform* component); ComponentTransform* getComponent(ComponentTransform* = nullptr);
-		void addComponent(ComponentModel* component); ComponentModel* getComponent(ComponentModel* = nullptr);
+
+		void addComponent(ComponentTransform* component); 
+		void addComponent(ComponentRigidBody* component); 
+		void addComponent(ComponentModel* component); 
+		void addComponent(ComponentCamera* component); 
+
+		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
+		ComponentTransform* getComponent(ComponentTransform* = nullptr);
+		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
+		ComponentModel* getComponent(ComponentModel* = nullptr);
+		ComponentCamera* getComponent(ComponentCamera* = nullptr);
 };
 
 

@@ -36,23 +36,41 @@ void Entity::addChild(Entity* child){
 	child->m_ParentID = this->m_ID;
 }
 void Entity::addComponent(ComponentTransform* component){
-	if(m_Components[ComponentType::Transform] != -1) return;
-	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Transform);
-	m_Components[ComponentType::Transform] = handle.index;
+	if(m_Components[ComponentType::Body] != -1) return;
+	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Body);
+	m_Components[ComponentType::Body] = handle.index;
 }
-ComponentTransform* Entity::getComponent(ComponentTransform* component){
-	return (ComponentTransform*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Transform]);
+void Entity::addComponent(ComponentRigidBody* component){
+	if(m_Components[ComponentType::Body] != -1) return;
+	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Body);
+	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentModel* component){
 	if(m_Components[ComponentType::Model] != -1) return;
 	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Model);
 	m_Components[ComponentType::Model] = handle.index;
 }
+void Entity::addComponent(ComponentCamera* component){
+	if(m_Components[ComponentType::Camera] != -1) return;
+	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Camera);
+	m_Components[ComponentType::Camera] = handle.index;
+}
+
+Engine::epriv::ComponentBodyBaseClass* Entity::getComponent(Engine::epriv::ComponentBodyBaseClass* component){
+	return (Engine::epriv::ComponentBodyBaseClass*)(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+}
+ComponentTransform* Entity::getComponent(ComponentTransform* component){
+	return dynamic_cast<ComponentTransform*>(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+}
 ComponentModel* Entity::getComponent(ComponentModel* component){
 	return (ComponentModel*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Model]);
 }
-
-
+ComponentRigidBody* Entity::getComponent(ComponentRigidBody* component){
+	return dynamic_cast<ComponentRigidBody*>(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+}
+ComponentCamera* Entity::getComponent(ComponentCamera* component){
+	return (ComponentCamera*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Camera]);
+}
 
 
 

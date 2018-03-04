@@ -21,6 +21,8 @@ struct Handle;
 
 class ComponentCamera;
 class ComponentBaseClass;
+class ComponentTransform;
+class ComponentRigidBody;
 
 namespace Engine{
 	namespace epriv{
@@ -44,15 +46,29 @@ namespace Engine{
 				ComponentBaseClass* _getComponent(uint index);
 				void _removeComponent(uint index);
 		};
+		class ComponentBodyType{public:enum Type{
+			Transform,
+			RigidBody,
+
+			_TOTAL,
+		};};
+
+
+		class ComponentBodyBaseClass{
+			protected:
+				ComponentBodyType::Type _type;
+			public:
+				ComponentBodyBaseClass(ComponentBodyType::Type);
+				virtual ~ComponentBodyBaseClass();
+				ComponentBodyType::Type getBodyType();
+		};
 	};
 };
 
 class ComponentType{public:enum Type{
-	Transform,
+	Body, //Can contain: ComponentRigidBody,ComponentTransform
 	Model,
-	Physics,
 	Camera,
-	Collision,
 
 	_TOTAL,
 };};
@@ -61,6 +77,7 @@ class ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	protected:
 		Entity* m_Owner; //eventually make this an entity ID instead?
+
 	public:
 		ComponentBaseClass(Entity* = nullptr);
 		ComponentBaseClass(uint entityID);
@@ -76,6 +93,7 @@ class ComponentModel: public ComponentBaseClass{
     private:
 		std::vector<Engine::epriv::MeshMaterialPair> models;
 		float _radius;
+		class impl; std::unique_ptr<impl> m_i;
     public:
 		ComponentModel(Entity* owner,Mesh*,Material*);
 		~ComponentModel();
@@ -92,19 +110,23 @@ class ComponentModel: public ComponentBaseClass{
 		void setModelMaterial(Material*,uint index);
 		void setModelMaterial(Handle& materialHandle,uint index);
 
-		bool rayIntersectSphere(ComponentCamera*);
+		bool rayIntersectSphere(ComponentCamera* camera);
 };
 
 
-class ComponentTransform: public ComponentBaseClass{
+class ComponentTransform: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
+	friend class ::ComponentModel;
     private:
 		glm::mat4 _modelMatrix;
 		glm::vec3 _position, _scale, _forward, _right, _up;
 		glm::quat _rotation;
+		Engine::epriv::ComponentBodyType::Type _type;
     public:
 		ComponentTransform(Entity* owner);
 		~ComponentTransform();
+
+		glm::vec3 position();
 
 		void translate(glm::vec3& translation); void translate(float x,float y,float z);
 		void rotate(glm::vec3& rotation); void rotate(float pitch,float yaw,float roll);
@@ -115,16 +137,19 @@ class ComponentTransform: public ComponentBaseClass{
 		void setScale(glm::vec3& newScale); void setScale(float x,float y,float z);
 };
 
-class ComponentPhysics: public ComponentBaseClass{
+class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
     private:
 		Collision* _collision;
 		btRigidBody* _rigidBody;
 		btDefaultMotionState* _motionState;
 		float _mass;
+		Engine::epriv::ComponentBodyType::Type _type;
     public:
-		ComponentPhysics(Entity* owner);
-		~ComponentPhysics();
+		ComponentRigidBody(Entity* owner);
+		~ComponentRigidBody();
+
+		glm::vec3 position();
 
 		void setDynamic(bool dynamic);
 		void setMass(float mass);
@@ -144,7 +169,9 @@ class ComponentPhysics: public ComponentBaseClass{
 
 class ComponentCamera: public ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
+	friend class ::ComponentModel;
     private:
+		glm::vec3 _eye,_up;
 		glm::mat4 _viewMatrix,  _projectionMatrix;
 		glm::vec4 _planes[6];
 		float _nearPlane,  _farPlane,  _bottom,  _top;
