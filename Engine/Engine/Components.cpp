@@ -6,6 +6,8 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Scene.h"
+#include "Camera.h"
+#include "Skybox.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -70,12 +72,11 @@ class epriv::ComponentManager::impl final{
 
 		ObjectPool<ComponentBaseClass>* m_ComponentPool;
 
-
-		vector<ComponentBasicBody*> m_ComponentBasicBodies;
-		vector<ComponentRigidBody*> m_ComponentRigidBodies;
-
-		vector<ComponentModel*>     m_ComponentModels;
-		vector<ComponentCamera*>     m_ComponentCameras;
+		//  TOTAL                                                    //Current Scene Only
+		vector<ComponentBasicBody*> m_ComponentBasicBodies;       vector<ComponentBasicBody*> m_CurrentSceneComponentBasicBodies;
+		vector<ComponentRigidBody*> m_ComponentRigidBodies;       vector<ComponentRigidBody*> m_CurrentSceneComponentRigidBodies;
+		vector<ComponentModel*>     m_ComponentModels;            vector<ComponentModel*>     m_CurrentSceneComponentModels;
+		vector<ComponentCamera*>    m_ComponentCameras;           vector<ComponentCamera*>    m_CurrentSceneComponentCameras;
 
 		//implement this workflow somehow with ComponentModels
 
@@ -121,16 +122,16 @@ class epriv::ComponentManager::impl final{
 			modelMatrix = translationMat * rotationMat * scaleMat * modelMatrix;
 		}
 		void _updateComponentBaseBodies(float& dt){
-			for(auto c:m_ComponentBasicBodies){
+			for(auto c:m_CurrentSceneComponentBasicBodies){
 				_performTransformation(c->m_Owner->parent(),c->_position,c->_rotation,c->_scale,c->_modelMatrix);
 			}
 		}
 		void _updateComponentRigidBodies(float& dt){
-			for(auto c:m_ComponentRigidBodies){
+			for(auto c:m_CurrentSceneComponentRigidBodies){
 			}
 		}
 		void _updateComponentModels(float& dt){
-			for(auto c:m_ComponentModels){ 
+			for(auto c:m_CurrentSceneComponentModels){ 
 				for(auto model:c->models){
 					if(model._mesh != nullptr){
 						_performTransformation(c->m_Owner->parent(),model._position,model._rotation,model._scale,model._modelMatrix);
@@ -139,10 +140,47 @@ class epriv::ComponentManager::impl final{
 			}
 		}
 		void _updateComponentCameras(float& dt){
-			for(auto c:m_ComponentCameras){ 
+			for(auto c:m_CurrentSceneComponentCameras){ 
 			}
 		}
+		void _updateCurrentScene(float& dt){
+			Scene* currentScene = Resources::getCurrentScene();
+			for(auto entityID:currentScene->m_Entities){
+				Entity* e = epriv::Core::m_Engine->m_ResourceManager->_getEntity(entityID);
+				e->update(dt);
+			}
+
+
+
+			Camera* active = currentScene->getActiveCamera();
+			for (auto it = currentScene->m_Objects.cbegin(); it != currentScene->m_Objects.cend();){
+				Object* obj = it->second;
+				if (obj->isDestroyed()){
+					epriv::Core::m_Engine->m_ResourceManager->_remObject(obj->name());
+					currentScene->m_Objects.erase(it++);
+				}
+				else{
+					obj->checkRender(active); //consider batch culling using the thread pool
+					obj->update(dt); 
+					++it;
+				}
+			}
+			for (auto it = currentScene->m_Cameras.cbegin(); it != currentScene->m_Cameras.cend();){
+				Camera* cam = it->second;
+				if (cam->isDestroyed()){
+					epriv::Core::m_Engine->m_ResourceManager->_remCamera(cam->name());
+				}
+				else{
+					cam->update(dt); 
+					++it;
+				}
+			}
+			if(currentScene->m_Skybox != nullptr) currentScene->m_Skybox->update();
+		}
 		void _update(float& dt){
+
+			_updateCurrentScene(dt);
+
 			_updateComponentBaseBodies(dt);
 			_updateComponentRigidBodies(dt);
 			_updateComponentModels(dt);
@@ -175,14 +213,14 @@ ComponentBaseClass::ComponentBaseClass(Entity* owner){
 	m_Owner = owner;
 }
 ComponentBaseClass::ComponentBaseClass(uint entityID){
-	//m_Owner = owner;
+	m_Owner = epriv::Core::m_Engine->m_ResourceManager->_getEntity(entityID);
 }
 ComponentBaseClass::~ComponentBaseClass(){}
 void ComponentBaseClass::setOwner(Entity* owner){
 	m_Owner = owner;
 }
 void ComponentBaseClass::setOwner(uint entityID){
-	//m_Owner = owner;
+	m_Owner = epriv::Core::m_Engine->m_ResourceManager->_getEntity(entityID);
 }
 
 

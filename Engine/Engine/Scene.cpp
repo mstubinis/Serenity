@@ -55,30 +55,6 @@ Scene::~Scene(){
     SAFE_DELETE(m_Skybox);
 }
 void Scene::update(float dt){
-	Camera* active = getActiveCamera();
-    for (auto it = m_Objects.cbegin(); it != m_Objects.cend();){
-		Object* obj = it->second;
-        if (obj->isDestroyed()){
-            epriv::Core::m_Engine->m_ResourceManager->_remObject(obj->name());
-            m_Objects.erase(it++);
-        }
-        else{
-			obj->checkRender(active); //consider batch culling using the thread pool
-            obj->update(dt); 
-			++it;
-        }
-    }
-    for (auto it = m_Cameras.cbegin(); it != m_Cameras.cend();){
-		Camera* cam = it->second;
-        if (cam->isDestroyed()){
-			epriv::Core::m_Engine->m_ResourceManager->_remCamera(cam->name());
-        }
-        else{
-			cam->update(dt); 
-			++it;
-        }
-    }
-    if(m_Skybox != nullptr) m_Skybox->update();
 }
 void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
 

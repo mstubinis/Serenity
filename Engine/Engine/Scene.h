@@ -3,6 +3,7 @@
 #define ENGINE_SCENE_H
 
 #include "Engine_ResourceBasic.h"
+#include "Components.h"
 #include <unordered_map>
 #include <glm/glm.hpp>
 
@@ -15,6 +16,7 @@ class LightProbe;
 
 class Scene: public EngineResource{
     friend class LightProbe;
+	friend class ::Engine::epriv::ComponentManager;
     private:
         SkyboxEmpty* m_Skybox;
 		Camera* m_ActiveCamera;

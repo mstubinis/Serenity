@@ -37,6 +37,7 @@ class Entity{
 
 		virtual void registerEvent(EventType::Type type){}
 		virtual void unregisterEvent(EventType::Type type){}
+		virtual void update(const float& dt){}
 		virtual void onEvent(const Event& e){}
 
         Entity* parent();
