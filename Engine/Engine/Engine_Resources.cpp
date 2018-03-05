@@ -43,7 +43,6 @@ class epriv::ResourceManager::impl final{
 		//http://gamesfromwithin.com/managing-data-relationships
 
 		ObjectPool<EngineResource>* m_Resources;
-		ObjectPool<Entity>*         m_Entities;
 		//-----------------------------------------------------------------------------------------------
 
 
@@ -62,7 +61,6 @@ class epriv::ResourceManager::impl final{
 			m_DynamicMemory = false;
 
 			m_Resources = new ObjectPool<EngineResource>(8192);
-			m_Entities = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 		}
 		void _postInit(const char* name,uint width,uint height){
 			m_Window = new Engine_Window(name,width,height);
@@ -73,7 +71,6 @@ class epriv::ResourceManager::impl final{
 			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
 
-			SAFE_DELETE(m_Entities);
 			SAFE_DELETE(m_Resources);
 			SAFE_DELETE(m_Window);
 		}
@@ -88,15 +85,6 @@ void epriv::ResourceManager::_init(const char* n,uint w,uint h){
 	resourceManager = epriv::Core::m_Engine->m_ResourceManager;
 	m_i->_postInit(n,w,h);
 }
-Handle epriv::ResourceManager::_addEntity(Entity* entity,EntityType::Type t){
-	Handle handle = resourceManager->m_i->m_Entities->add(entity,t);
-	entity->m_ID = handle.index;
-	return handle;
-}
-Entity* epriv::ResourceManager::_getEntity(uint id){
-	Entity* e; resourceManager->m_i->m_Entities->getAsFast(id,e); return e;
-}
-
 
 
 

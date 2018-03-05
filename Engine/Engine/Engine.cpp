@@ -41,6 +41,7 @@ epriv::Core::Core(const char* name,uint w,uint h){
 	m_EventDispatcher = new epriv::EventDispatcher(name,w,h);
 	m_ComponentManager = new epriv::ComponentManager(name,w,h);
 	m_ThreadManager = new epriv::ThreadManager(name,w,h);
+	m_NoiseManager = new epriv::NoiseManager(name,w,h);
 }
 epriv::Core::~Core(){
 	SAFE_DELETE(m_ThreadManager);
@@ -52,6 +53,7 @@ epriv::Core::~Core(){
 	SAFE_DELETE(m_RenderManager);
 	SAFE_DELETE(m_EventDispatcher);
 	SAFE_DELETE(m_ComponentManager);
+	SAFE_DELETE(m_NoiseManager);
 }
 
 void Engine::init(const char* name,uint w,uint h){
@@ -66,9 +68,9 @@ void Engine::init(const char* name,uint w,uint h){
 	epriv::Core::m_Engine->m_EventDispatcher->_init(name,w,h);
 	epriv::Core::m_Engine->m_ComponentManager->_init(name,w,h);
 	epriv::Core::m_Engine->m_ThreadManager->_init(name,w,h);
+	epriv::Core::m_Engine->m_NoiseManager->_init(name,w,h);
 
 	//init the game here
-    Math::Noise::Detail::MathNoiseManagement::_initFromSeed(unsigned long long(time(0)));
 	Engine::setMousePosition(w/2,h/2);
     Game::initResources();
     Game::initLogic();

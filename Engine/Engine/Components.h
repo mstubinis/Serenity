@@ -6,10 +6,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
 #include <vector>
+#include "Engine_EventObject.h"
 
 typedef unsigned int uint;
 
 class Entity;
+class Scene;
 class Object;
 class Mesh;
 class Material;
@@ -24,6 +26,20 @@ class ComponentRigidBody;
 
 class ComponentCamera;
 class ComponentBaseClass;
+
+class EntityType{public: enum Type{
+	Basic,
+
+
+_TOTAL,};};
+class ComponentType{public:enum Type{
+	Body, //Can contain: ComponentRigidBody, ComponentBasicBody, maybe more...
+	Model,
+	Camera,
+
+	_TOTAL,
+};};
+
 
 namespace Engine{
 	namespace epriv{
@@ -42,6 +58,12 @@ namespace Engine{
 				void _init(const char* name, uint w, uint h);
 				void _update(float&);
 				void _render();
+
+				void _deleteEntityImmediately(Entity*);
+				void _addEntityToBeDestroyed(uint id);
+				void _addEntityToBeDestroyed(Entity*);
+				Handle _addEntity(Entity*,EntityType::Type);
+				Entity* _getEntity(uint id);
 
 				Handle _addComponent(ComponentBaseClass* component,uint type);
 				ComponentBaseClass* _getComponent(uint index);
@@ -67,15 +89,6 @@ namespace Engine{
 		};
 	};
 };
-
-class ComponentType{public:enum Type{
-	Body, //Can contain: ComponentRigidBody,ComponentTransform
-	Model,
-	Camera,
-
-	_TOTAL,
-};};
-
 class ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	protected:
@@ -189,6 +202,43 @@ class ComponentCamera: public ComponentBaseClass{
 		void lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up);
 		glm::vec3 viewVector();
 };
+
+
+
+
+
+class Entity{
+	friend class ::Scene;
+	friend class ::Engine::epriv::ComponentManager;
+    private:
+		uint m_ParentID, m_ID;
+		uint* m_Components;
+    public:
+		Entity();
+		virtual ~Entity();
+
+		virtual void registerEvent(EventType::Type type){}
+		virtual void unregisterEvent(EventType::Type type){}
+		virtual void update(const float& dt){}
+		virtual void onEvent(const Event& e){}
+
+		void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the frame before rendering logic, but can be overrided to be deleted immediately after the call
+        Entity* parent();
+
+		void addChild(Entity* child);
+
+		void addComponent(ComponentBasicBody* component); 
+		void addComponent(ComponentRigidBody* component); 
+		void addComponent(ComponentModel* component); 
+		void addComponent(ComponentCamera* component); 
+
+		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
+		ComponentBasicBody* getComponent(ComponentBasicBody* = nullptr);
+		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
+		ComponentModel* getComponent(ComponentModel* = nullptr);
+		ComponentCamera* getComponent(ComponentCamera* = nullptr);
+};
+
 
 
 #endif

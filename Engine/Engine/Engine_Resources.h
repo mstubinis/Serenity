@@ -48,8 +48,7 @@ namespace Engine{
 				~ResourceManager();
 
 				void _init(const char* name,uint width,uint height);
-
-				Handle _addEntity(Entity*,EntityType::Type);
+		
 
 				Handle _addTexture(Texture*);
 
@@ -60,8 +59,6 @@ namespace Engine{
 
 				void _remCamera(std::string);
 				void _remObject(std::string);
-
-				Entity* _getEntity(uint id);
 
 				void _resizeCameras(uint w,uint h);
 				uint _numScenes();

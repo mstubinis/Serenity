@@ -79,9 +79,9 @@ namespace Engine{
 					if(m_Pool[index].active == true){
 						m_Pool[index].nextFreeIndex = m_firstFreeEntry;
 						m_Pool[index].active = false;
-						m_firstFreeEntry = index;
-						--m_activeEntryCount;
 						SAFE_DELETE(m_Pool[index].resource);
+						m_firstFreeEntry = index;
+						--m_activeEntryCount;		
 					}
 				}
 				void remove(Handle& handle){
@@ -89,9 +89,9 @@ namespace Engine{
 					if(m_Pool[index].counter == handle.counter && m_Pool[index].active == true){
 						m_Pool[index].nextFreeIndex = m_firstFreeEntry;
 						m_Pool[index].active = false;
-						m_firstFreeEntry = index;
-						--m_activeEntryCount;
 						SAFE_DELETE(m_Pool[index].resource);
+						m_firstFreeEntry = index;
+						--m_activeEntryCount;		
 					}
 				}
 				T* get(Handle& handle){
