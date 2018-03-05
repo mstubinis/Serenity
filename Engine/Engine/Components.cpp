@@ -70,8 +70,12 @@ class epriv::ComponentManager::impl final{
 
 		ObjectPool<ComponentBaseClass>* m_ComponentPool;
 
-		vector<ComponentTransform*> m_ComponentTransforms;
+
+		vector<ComponentBasicBody*> m_ComponentBasicBodies;
+		vector<ComponentRigidBody*> m_ComponentRigidBodies;
+
 		vector<ComponentModel*>     m_ComponentModels;
+		vector<ComponentCamera*>     m_ComponentCameras;
 
 		//implement this workflow somehow with ComponentModels
 
@@ -95,8 +99,10 @@ class epriv::ComponentManager::impl final{
 		void _postInit(const char* name, uint& w, uint& h){
 		}
 		void _destruct(){
-			for(auto c:m_ComponentTransforms) SAFE_DELETE(c);
-			for(auto c:m_ComponentModels)     SAFE_DELETE(c);
+			for(auto c:m_ComponentBasicBodies) SAFE_DELETE(c);
+			for(auto c:m_ComponentRigidBodies) SAFE_DELETE(c);
+			for(auto c:m_ComponentModels)      SAFE_DELETE(c);
+			for(auto c:m_ComponentCameras)     SAFE_DELETE(c);
 
 			SAFE_DELETE(m_ComponentPool);
 		}
@@ -106,16 +112,21 @@ class epriv::ComponentManager::impl final{
 				modelMatrix = glm::mat4(1.0f);
 			}
 			else{
-				//modelMatrix = parent->addComponent(ComponentType::Transform)->model();
+				ComponentBodyBaseClass* baseBody = nullptr; baseBody = parent->getComponent(baseBody);
+				modelMatrix = baseBody->modelMatrix();
 			}
 			glm::mat4 translationMat = glm::translate(position);
 			glm::mat4 rotationMat = glm::mat4_cast(rotation);
 			glm::mat4 scaleMat = glm::scale(scale);
 			modelMatrix = translationMat * rotationMat * scaleMat * modelMatrix;
 		}
-		void _updateComponentTransforms(float& dt){
-			for(auto c:m_ComponentTransforms){
+		void _updateComponentBaseBodies(float& dt){
+			for(auto c:m_ComponentBasicBodies){
 				_performTransformation(c->m_Owner->parent(),c->_position,c->_rotation,c->_scale,c->_modelMatrix);
+			}
+		}
+		void _updateComponentRigidBodies(float& dt){
+			for(auto c:m_ComponentRigidBodies){
 			}
 		}
 		void _updateComponentModels(float& dt){
@@ -127,9 +138,15 @@ class epriv::ComponentManager::impl final{
 				}
 			}
 		}
+		void _updateComponentCameras(float& dt){
+			for(auto c:m_ComponentCameras){ 
+			}
+		}
 		void _update(float& dt){
-			_updateComponentTransforms(dt);
+			_updateComponentBaseBodies(dt);
+			_updateComponentRigidBodies(dt);
 			_updateComponentModels(dt);
+			_updateComponentCameras(dt);
 		}
 		void _render(){
 			
@@ -177,27 +194,27 @@ epriv::ComponentBodyType::Type epriv::ComponentBodyBaseClass::getBodyType(){ ret
 
 
 
-ComponentTransform::ComponentTransform(Entity* owner):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::Transform){
-	_type = epriv::ComponentBodyType::Transform;
+ComponentBasicBody::ComponentBasicBody(Entity* owner):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::BasicBody){
 	_position = glm::vec3(0.0f);
 	_scale = glm::vec3(1.0f);
 	_rotation = glm::quat();
 	_modelMatrix = glm::mat4(1.0f);
 	Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
-ComponentTransform::~ComponentTransform(){
+ComponentBasicBody::~ComponentBasicBody(){
 }
-glm::vec3 ComponentTransform::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
-void ComponentTransform::translate(glm::vec3& translation){ ComponentTransform::translate(translation.x,translation.y,translation.z); }
-void ComponentTransform::translate(float x,float y,float z){
+glm::vec3 ComponentBasicBody::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
+glm::mat4 ComponentBasicBody::modelMatrix(){ return _modelMatrix; }
+void ComponentBasicBody::translate(glm::vec3& translation){ ComponentBasicBody::translate(translation.x,translation.y,translation.z); }
+void ComponentBasicBody::translate(float x,float y,float z){
 	_position.x += x; _position.y += y; _position.z += z;
 }
-void ComponentTransform::setPosition(glm::vec3& newPosition){ ComponentTransform::setPosition(newPosition.x,newPosition.y,newPosition.z); }
-void ComponentTransform::setPosition(float x,float y,float z){
+void ComponentBasicBody::setPosition(glm::vec3& newPosition){ ComponentBasicBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
+void ComponentBasicBody::setPosition(float x,float y,float z){
 	_position.x = x; _position.y = y; _position.z = z;
 }
-void ComponentTransform::rotate(glm::vec3& rotation){ ComponentTransform::rotate(rotation.x,rotation.y,rotation.z); }
-void ComponentTransform::rotate(float pitch,float yaw,float roll){
+void ComponentBasicBody::rotate(glm::vec3& rotation){ ComponentBasicBody::rotate(rotation.x,rotation.y,rotation.z); }
+void ComponentBasicBody::rotate(float pitch,float yaw,float roll){
     if(abs(pitch) < Object::m_RotationThreshold && abs(yaw) < Object::m_RotationThreshold && abs(roll) < Object::m_RotationThreshold)
         return;
     if(abs(pitch) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
@@ -205,18 +222,18 @@ void ComponentTransform::rotate(float pitch,float yaw,float roll){
     if(abs(roll) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(roll,  glm::vec3(0,0,1)));   //roll
     Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
-void ComponentTransform::scale(glm::vec3& amount){ ComponentTransform::scale(amount.x,amount.y,amount.z); }
-void ComponentTransform::scale(float x,float y,float z){
+void ComponentBasicBody::scale(glm::vec3& amount){ ComponentBasicBody::scale(amount.x,amount.y,amount.z); }
+void ComponentBasicBody::scale(float x,float y,float z){
 	_scale.x += x; _scale.y += y; _scale.z += z;
 }
-void ComponentTransform::setRotation(glm::quat& newRotation){
+void ComponentBasicBody::setRotation(glm::quat& newRotation){
     newRotation = glm::normalize(newRotation);
     _rotation = newRotation;
     Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
-void ComponentTransform::setRotation(float x,float y,float z,float w){ ComponentTransform::setRotation(glm::quat(w,x,y,z)); }
-void ComponentTransform::setScale(glm::vec3& newScale){ ComponentTransform::setScale(newScale.x,newScale.y,newScale.z); }
-void ComponentTransform::setScale(float x,float y,float z){
+void ComponentBasicBody::setRotation(float x,float y,float z,float w){ ComponentBasicBody::setRotation(glm::quat(w,x,y,z)); }
+void ComponentBasicBody::setScale(glm::vec3& newScale){ ComponentBasicBody::setScale(newScale.x,newScale.y,newScale.z); }
+void ComponentBasicBody::setScale(float x,float y,float z){
 	_scale.x = x; _scale.y = y; _scale.z = z;
 }
 
@@ -333,8 +350,8 @@ void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ Compon
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 	epriv::ComponentBodyBaseClass* baseBody = m_Owner->getComponent(baseBody);
 	epriv::ComponentBodyType::Type type = baseBody->getBodyType();
-	if(type == epriv::ComponentBodyType::Transform){
-		return Engine::Math::rayIntersectSphere(  ((ComponentTransform*)baseBody)->position(),_radius,camera->_eye,camera->viewVector()  );
+	if(type == epriv::ComponentBodyType::BasicBody){
+		return Engine::Math::rayIntersectSphere(  ((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->viewVector()  );
 	}
 	else if(type == epriv::ComponentBodyType::RigidBody){
 		return Engine::Math::rayIntersectSphere(  ((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->viewVector()  );
@@ -344,7 +361,6 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 
 
 ComponentRigidBody::ComponentRigidBody(Entity* owner):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
-	_type = epriv::ComponentBodyType::RigidBody;
 	_collision = nullptr;
 	_rigidBody = nullptr;
 	_motionState = nullptr;
@@ -356,10 +372,18 @@ ComponentRigidBody::~ComponentRigidBody(){
     SAFE_DELETE(_motionState);
 }
 glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
-    glm::mat4 m(1);
-    btTransform tr; _rigidBody->getMotionState()->getWorldTransform(tr);
+    glm::mat4 m(1.0f);
+    btTransform tr;  _rigidBody->getMotionState()->getWorldTransform(tr);
     tr.getOpenGLMatrix(glm::value_ptr(m));
     return glm::vec3(m[3][0],m[3][1],m[3][2]);
+}
+glm::mat4 ComponentRigidBody::modelMatrix(){ //theres prob a better way to do this
+    glm::mat4 m(1.0f);
+    btTransform tr;  _rigidBody->getMotionState()->getWorldTransform(tr);
+    tr.getOpenGLMatrix(glm::value_ptr(m));
+    //btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
+    //m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
+	return m;
 }
 void ComponentRigidBody::setDynamic(bool dynamic){
     if(dynamic){

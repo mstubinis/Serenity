@@ -35,7 +35,7 @@ Entity* Entity::parent(){
 void Entity::addChild(Entity* child){
 	child->m_ParentID = this->m_ID;
 }
-void Entity::addComponent(ComponentTransform* component){
+void Entity::addComponent(ComponentBasicBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
 	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Body);
 	m_Components[ComponentType::Body] = handle.index;
@@ -59,8 +59,8 @@ void Entity::addComponent(ComponentCamera* component){
 Engine::epriv::ComponentBodyBaseClass* Entity::getComponent(Engine::epriv::ComponentBodyBaseClass* component){
 	return (Engine::epriv::ComponentBodyBaseClass*)(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
 }
-ComponentTransform* Entity::getComponent(ComponentTransform* component){
-	return dynamic_cast<ComponentTransform*>(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+ComponentBasicBody* Entity::getComponent(ComponentBasicBody* component){
+	return dynamic_cast<ComponentBasicBody*>(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
 }
 ComponentModel* Entity::getComponent(ComponentModel* component){
 	return (ComponentModel*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Model]);

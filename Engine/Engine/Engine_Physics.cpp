@@ -207,27 +207,23 @@ void Collision::_load(ImportedMeshData& data, CollisionType::Type collisionType)
             for(auto vertex:data.points){ ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z)); }
             btShapeHull* hull =  new btShapeHull((btConvexHullShape*)shape);
             hull->buildHull(shape->getMargin());
-            delete shape;
+            SAFE_DELETE(shape);
             const btVector3* ptsArray = hull->getVertexPointer();
             shape = new btConvexHullShape();
             for(int i = 0; i < hull->numVertices(); ++i){
                 ((btConvexHullShape*)shape)->addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
             }
             m_CollisionShape = shape;
-            delete hull;
+            SAFE_DELETE(hull);
             break;
         }
         case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-                glm::vec3 v1,v2,v3;
-                v1 = triangle.v1.position;
-                v2 = triangle.v2.position;
-                v3 = triangle.v3.position;
-                btVector3 bv1 = btVector3(v1.x,v1.y,v1.z);
-                btVector3 bv2 = btVector3(v2.x,v2.y,v2.z);
-                btVector3 bv3 = btVector3(v3.x,v3.y,v3.z);
-                m_InternalMeshData->addTriangle(bv1, bv2, bv3,true);
+				btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
+				btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
+				btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
+                m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btGImpactMeshShape(m_InternalMeshData);
             ((btGImpactMeshShape*)shape)->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
@@ -239,13 +235,9 @@ void Collision::_load(ImportedMeshData& data, CollisionType::Type collisionType)
         case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-                glm::vec3 v1Pos,v2Pos,v3Pos;
-                v1Pos = triangle.v1.position;
-                v2Pos = triangle.v2.position;
-                v3Pos = triangle.v3.position;
-                btVector3 v1 = btVector3(v1Pos.x,v1Pos.y,v1Pos.z);
-                btVector3 v2 = btVector3(v2Pos.x,v2Pos.y,v2Pos.z);
-                btVector3 v3 = btVector3(v3Pos.x,v3Pos.y,v3Pos.z);
+				btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
+				btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
+				btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
@@ -254,6 +246,18 @@ void Collision::_load(ImportedMeshData& data, CollisionType::Type collisionType)
             m_CollisionShape = shape;
             break;
         }
+		case CollisionType::Sphere:{
+			float radius = 0;
+			for(auto vertex:data.points){
+				float length = glm::length(vertex);
+				if(length > radius){
+					radius = length;
+				}
+			}
+			shape = new btSphereShape(radius);
+			m_CollisionShape = shape;
+			break;
+		};
         case CollisionType::Box:{
             glm::vec3 max = glm::vec3(0.0f);
             for(auto vertex:data.file_points){
@@ -376,9 +380,6 @@ void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }
 #include <GL/glut.h>
 #endif
 #endif
-
-#include <stdio.h>
-#include <string.h> //for memset
 
 void GLDebugResetFont(int screenWidth,int screenHeight){}
 #define USE_ARRAYS 1

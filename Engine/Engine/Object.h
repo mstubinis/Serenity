@@ -35,17 +35,21 @@ class Entity{
 		Entity();
 		virtual ~Entity();
 
+		virtual void registerEvent(EventType::Type type){}
+		virtual void unregisterEvent(EventType::Type type){}
+		virtual void onEvent(const Event& e){}
+
         Entity* parent();
 
 		void addChild(Entity* child);
 
-		void addComponent(ComponentTransform* component); 
+		void addComponent(ComponentBasicBody* component); 
 		void addComponent(ComponentRigidBody* component); 
 		void addComponent(ComponentModel* component); 
 		void addComponent(ComponentCamera* component); 
 
 		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
-		ComponentTransform* getComponent(ComponentTransform* = nullptr);
+		ComponentBasicBody* getComponent(ComponentBasicBody* = nullptr);
 		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
 		ComponentModel* getComponent(ComponentModel* = nullptr);
 		ComponentCamera* getComponent(ComponentCamera* = nullptr);

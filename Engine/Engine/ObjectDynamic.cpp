@@ -75,7 +75,7 @@ ObjectDynamic::ObjectDynamic(Handle mesh,Handle mat, glm::vec3 pos, glm::vec3 sc
                 t.setFromOpenGLMatrix(glm::value_ptr(meshInstance->model()));
                 shape->addChildShape(t,meshInstance->mesh()->getCollision()->getCollisionShape());
             }
-            m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
+            m_Collision = new Collision(shape,CollisionType::Compound, m_Mass);
         }
     }
 
@@ -499,7 +499,7 @@ void ObjectDynamic::setMesh(Mesh* mesh){
         }
         calculateRadius();
         m_Mass = 0.5f * m_Radius;
-        m_Collision = new Collision(shape,CollisionType::Compund, m_Mass);
+        m_Collision = new Collision(shape,CollisionType::Compound, m_Mass);
         m_RigidBody->setCollisionShape(m_Collision->getCollisionShape());
         setMass(m_Mass);
     }

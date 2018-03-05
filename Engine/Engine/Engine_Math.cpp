@@ -28,6 +28,9 @@ float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 float Math::remainder(float x,float y){ return x - (glm::round(x/y)*y); }
 
+glm::vec3 Math::btVectorToGLM(btVector3& bt){ return glm::vec3(bt.x(),bt.y(),bt.z()); }
+btVector3 Math::btVectorFromGLM(glm::vec3& v){ return btVector3(v.x,v.y,v.z); }
+
 void Math::removeMatrixPosition(glm::mat4& m){
 	m[3][0] = 0;
 	m[3][1] = 0;

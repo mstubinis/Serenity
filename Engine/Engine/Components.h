@@ -19,10 +19,11 @@ struct btDefaultMotionState;
 class btVector3;
 struct Handle;
 
+class ComponentBasicBody;
+class ComponentRigidBody;
+
 class ComponentCamera;
 class ComponentBaseClass;
-class ComponentTransform;
-class ComponentRigidBody;
 
 namespace Engine{
 	namespace epriv{
@@ -47,7 +48,7 @@ namespace Engine{
 				void _removeComponent(uint index);
 		};
 		class ComponentBodyType{public:enum Type{
-			Transform,
+			BasicBody,
 			RigidBody,
 
 			_TOTAL,
@@ -61,6 +62,8 @@ namespace Engine{
 				ComponentBodyBaseClass(ComponentBodyType::Type);
 				virtual ~ComponentBodyBaseClass();
 				ComponentBodyType::Type getBodyType();
+				virtual glm::vec3 position(){return glm::vec3(0.0f);}
+				virtual glm::mat4 modelMatrix(){return glm::mat4(1.0f);}
 		};
 	};
 };
@@ -77,7 +80,6 @@ class ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	protected:
 		Entity* m_Owner; //eventually make this an entity ID instead?
-
 	public:
 		ComponentBaseClass(Entity* = nullptr);
 		ComponentBaseClass(uint entityID);
@@ -114,19 +116,19 @@ class ComponentModel: public ComponentBaseClass{
 };
 
 
-class ComponentTransform: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
+class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentModel;
     private:
 		glm::mat4 _modelMatrix;
 		glm::vec3 _position, _scale, _forward, _right, _up;
 		glm::quat _rotation;
-		Engine::epriv::ComponentBodyType::Type _type;
     public:
-		ComponentTransform(Entity* owner);
-		~ComponentTransform();
+		ComponentBasicBody(Entity* owner);
+		~ComponentBasicBody();
 
 		glm::vec3 position();
+		glm::mat4 modelMatrix();
 
 		void translate(glm::vec3& translation); void translate(float x,float y,float z);
 		void rotate(glm::vec3& rotation); void rotate(float pitch,float yaw,float roll);
@@ -144,12 +146,12 @@ class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::Compo
 		btRigidBody* _rigidBody;
 		btDefaultMotionState* _motionState;
 		float _mass;
-		Engine::epriv::ComponentBodyType::Type _type;
     public:
 		ComponentRigidBody(Entity* owner);
 		~ComponentRigidBody();
 
 		glm::vec3 position();
+		glm::mat4 modelMatrix();
 
 		void setDynamic(bool dynamic);
 		void setMass(float mass);

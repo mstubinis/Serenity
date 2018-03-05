@@ -25,8 +25,9 @@ class CollisionType{public: enum Type{
     ConvexHull, 
     TriangleShape,
     TriangleShapeStatic,
-    Compund,
+    Compound,
     Box,
+	Sphere,
     None,
 
 _TOTAL,};};
