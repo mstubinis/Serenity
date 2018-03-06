@@ -72,20 +72,6 @@ void Game::update(float dt){
 	if(Engine::isKeyDownOnce("space")){
 
 	}
-	/*
-    if(Engine::isKeyDown("z")){
-        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() - 0.03f);
-    }
-    else if(Engine::isKeyDown("x")){
-        Renderer::Settings::HDR::setExposure(Renderer::Settings::HDR::getExposure() + 0.03f);
-    }
-    if(Engine::isKeyDown("c")){
-        Renderer::Settings::setGamma(Renderer::Settings::getGamma() - 0.02f);
-    }
-    else if(Engine::isKeyDown("k")){
-        Renderer::Settings::setGamma(Renderer::Settings::getGamma() + 0.02f);
-    }
-	*/
     m_HUD->update(dt);
 }
 void Game::render(){

@@ -79,7 +79,8 @@ namespace Engine{
 					if(m_Pool[index].active == true){
 						m_Pool[index].nextFreeIndex = m_firstFreeEntry;
 						m_Pool[index].active = false;
-						SAFE_DELETE(m_Pool[index].resource);
+						delete(m_Pool[index].resource);
+						m_Pool[index].resource = nullptr;
 						m_firstFreeEntry = index;
 						--m_activeEntryCount;		
 					}
@@ -89,7 +90,8 @@ namespace Engine{
 					if(m_Pool[index].counter == handle.counter && m_Pool[index].active == true){
 						m_Pool[index].nextFreeIndex = m_firstFreeEntry;
 						m_Pool[index].active = false;
-						SAFE_DELETE(m_Pool[index].resource);
+						delete(m_Pool[index].resource);
+						m_Pool[index].resource = nullptr;
 						m_firstFreeEntry = index;
 						--m_activeEntryCount;		
 					}

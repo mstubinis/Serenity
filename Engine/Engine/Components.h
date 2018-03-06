@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include "Engine_EventObject.h"
+#include "Engine_ObjectPool.h"
 
 typedef unsigned int uint;
 
@@ -49,6 +50,8 @@ namespace Engine{
 		class ComponentManager final{
 		    private:
 				class impl;
+				ObjectPool<Entity>*             m_EntityPool;
+				ObjectPool<ComponentBaseClass>* m_ComponentPool;
 		    public:
 				std::unique_ptr<impl> m_i;
 
@@ -224,6 +227,7 @@ class Entity{
 
 		void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the frame before rendering logic, but can be overrided to be deleted immediately after the call
         Entity* parent();
+
 
 		void addChild(Entity* child);
 

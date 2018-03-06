@@ -1,6 +1,5 @@
 #include "Components.h"
 #include "Engine_Resources.h"
-#include "Engine_ObjectPool.h"
 #include "Engine.h"
 #include "Mesh.h"
 #include "Material.h"
@@ -19,6 +18,8 @@
 
 using namespace Engine;
 using namespace std;
+
+epriv::ComponentManager* componentManager = nullptr;
 
 struct epriv::MeshMaterialPair final{
 	Mesh* _mesh;
@@ -67,10 +68,8 @@ struct epriv::MeshMaterialPair final{
 
 
 class epriv::ComponentManager::impl final{
-    public:
-		ObjectPool<Entity>*             m_EntityPool;
-		vector<Entity*>                 m_EntitiesToBeDestroyed;
-		ObjectPool<ComponentBaseClass>* m_ComponentPool;
+    public:	
+		vector<Entity*>             m_EntitiesToBeDestroyed;
 
 		//  TOTAL                                                    //Current Scene Only
 		vector<ComponentBasicBody*> m_ComponentBasicBodies;       vector<ComponentBasicBody*> m_CurrentSceneComponentBasicBodies;
@@ -94,20 +93,21 @@ class epriv::ComponentManager::impl final{
 		       //unbind material
 		    //unbind shader
 
-		void _init(const char* name, uint& w, uint& h){
-			m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
-			m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
+		void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
+			super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
+			super->m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 		}
 		void _postInit(const char* name, uint& w, uint& h){
+			componentManager = epriv::Core::m_Engine->m_ComponentManager;
 		}
-		void _destruct(){
+		void _destruct(epriv::ComponentManager* super){
 			for(auto c:m_ComponentBasicBodies) SAFE_DELETE(c);
 			for(auto c:m_ComponentRigidBodies) SAFE_DELETE(c);
 			for(auto c:m_ComponentModels)      SAFE_DELETE(c);
 			for(auto c:m_ComponentCameras)     SAFE_DELETE(c);
 
-			SAFE_DELETE(m_ComponentPool);
-			SAFE_DELETE(m_EntityPool);
+			SAFE_DELETE(super->m_ComponentPool);
+			SAFE_DELETE(super->m_EntityPool);
 		}
 
 		void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
@@ -148,7 +148,7 @@ class epriv::ComponentManager::impl final{
 		void _updateCurrentScene(float& dt){
 			Scene* currentScene = Resources::getCurrentScene();
 			for(auto entityID:currentScene->m_Entities){
-				Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+				Entity* e = componentManager->_getEntity(entityID);
 				e->update(dt);
 			}
 
@@ -198,12 +198,9 @@ class epriv::ComponentManager::impl final{
 		void _render(){
 			
 		}
-		Handle _addComponent(ComponentBaseClass* component,uint& type){
-			return m_ComponentPool->add(component,type);
-		}
 };
-epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h); }
-epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(); }
+epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); }
+epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 
 void epriv::ComponentManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h); }
 void epriv::ComponentManager::_update(float& dt){ m_i->_update(dt,this); }
@@ -229,29 +226,29 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
 		std::remove(m_i->m_ComponentCameras.begin(),m_i->m_ComponentCameras.end(),cam);
 		std::remove(m_i->m_CurrentSceneComponentCameras.begin(),m_i->m_CurrentSceneComponentCameras.end(),cam);
 	}
-	m_i->m_EntityPool->remove(e->m_ID);
+	m_EntityPool->remove(e->m_ID);
 }
-void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ Entity* e; m_i->m_EntityPool->getAsFast(id,e); _addEntityToBeDestroyed(e); }
+void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ Entity* e; m_EntityPool->getAsFast(id,e); _addEntityToBeDestroyed(e); }
 void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* e){
 	for(auto entity:m_i->m_EntitiesToBeDestroyed){ if(entity->m_ID == e->m_ID){ return; } }
 	m_i->m_EntitiesToBeDestroyed.push_back(e);
 }
 Handle epriv::ComponentManager::_addEntity(Entity* entity,EntityType::Type t){
-	Handle handle = m_i->m_EntityPool->add(entity,t);
+	Handle handle = m_EntityPool->add(entity,t);
 	entity->m_ID = handle.index;
 	return handle;
 }
 Entity* epriv::ComponentManager::_getEntity(uint id){
-	Entity* e; m_i->m_EntityPool->getAsFast(id,e); return e;
+	Entity* e; m_EntityPool->getAsFast(id,e); return e;
 }
 Handle epriv::ComponentManager::_addComponent(ComponentBaseClass* component,uint type){
-	return m_i->_addComponent(component,type);
+	return m_ComponentPool->add(component,type);
 }
 ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
-	ComponentBaseClass* c; m_i->m_ComponentPool->getAsFast(index,c); return c;
+	ComponentBaseClass* c; m_ComponentPool->getAsFast(index,c); return c;
 }
 void epriv::ComponentManager::_removeComponent(uint index){
-	m_i->m_ComponentPool->remove(index);
+	m_ComponentPool->remove(index);
 }
 
 
@@ -259,14 +256,14 @@ ComponentBaseClass::ComponentBaseClass(Entity* owner){
 	m_Owner = owner;
 }
 ComponentBaseClass::ComponentBaseClass(uint entityID){
-	m_Owner = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+	m_Owner = componentManager->_getEntity(entityID);
 }
 ComponentBaseClass::~ComponentBaseClass(){}
 void ComponentBaseClass::setOwner(Entity* owner){
 	m_Owner = owner;
 }
 void ComponentBaseClass::setOwner(uint entityID){
-	m_Owner = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+	m_Owner = componentManager->_getEntity(entityID);
 }
 
 
@@ -605,7 +602,7 @@ Entity::Entity(){
 Entity::~Entity(){
 	m_ParentID, m_ID = -1;
 	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-		epriv::Core::m_Engine->m_ComponentManager->_removeComponent(m_Components[i]);
+		componentManager->_removeComponent(m_Components[i]);
 	}
 	delete[] m_Components;
 
@@ -613,53 +610,53 @@ Entity::~Entity(){
 void Entity::destroy(bool immediate){
 	if(!immediate){
 		//add to the deletion queue
-		epriv::Core::m_Engine->m_ComponentManager->_addEntityToBeDestroyed(m_ID);
+		componentManager->_addEntityToBeDestroyed(m_ID);
 	}
 	else{
 		//delete immediately
-		epriv::Core::m_Engine->m_ComponentManager->_deleteEntityImmediately(this);
+		componentManager->_deleteEntityImmediately(this);
 	}
 }
 Entity* Entity::parent(){
-	return epriv::Core::m_Engine->m_ComponentManager->_getEntity(m_ParentID);
+	return componentManager->_getEntity(m_ParentID);
 }
 void Entity::addChild(Entity* child){
 	child->m_ParentID = this->m_ID;
 }
 void Entity::addComponent(ComponentBasicBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
-	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Body);
+	Handle handle = componentManager->_addComponent(component,ComponentType::Body);
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentRigidBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
-	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Body);
+	Handle handle = componentManager->_addComponent(component,ComponentType::Body);
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentModel* component){
 	if(m_Components[ComponentType::Model] != -1) return;
-	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Model);
+	Handle handle = componentManager->_addComponent(component,ComponentType::Model);
 	m_Components[ComponentType::Model] = handle.index;
 }
 void Entity::addComponent(ComponentCamera* component){
 	if(m_Components[ComponentType::Camera] != -1) return;
-	Handle handle = epriv::Core::m_Engine->m_ComponentManager->_addComponent(component,ComponentType::Camera);
+	Handle handle = componentManager->_addComponent(component,ComponentType::Camera);
 	m_Components[ComponentType::Camera] = handle.index;
 }
 
 Engine::epriv::ComponentBodyBaseClass* Entity::getComponent(Engine::epriv::ComponentBodyBaseClass* component){
-	return (Engine::epriv::ComponentBodyBaseClass*)(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+	return (Engine::epriv::ComponentBodyBaseClass*)(componentManager->_getComponent(m_Components[ComponentType::Body]));
 }
 ComponentBasicBody* Entity::getComponent(ComponentBasicBody* component){
-	return dynamic_cast<ComponentBasicBody*>(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+	return static_cast<ComponentBasicBody*>(componentManager->_getComponent(m_Components[ComponentType::Body])); //might have to be dynamic cast
 }
 ComponentModel* Entity::getComponent(ComponentModel* component){
-	return (ComponentModel*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Model]);
+	return (ComponentModel*)componentManager->_getComponent(m_Components[ComponentType::Model]);
 }
 ComponentRigidBody* Entity::getComponent(ComponentRigidBody* component){
-	return dynamic_cast<ComponentRigidBody*>(epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Body]));
+	return static_cast<ComponentRigidBody*>(componentManager->_getComponent(m_Components[ComponentType::Body])); //might have to be dynamic cast
 }
 ComponentCamera* Entity::getComponent(ComponentCamera* component){
-	return (ComponentCamera*)epriv::Core::m_Engine->m_ComponentManager->_getComponent(m_Components[ComponentType::Camera]);
+	return (ComponentCamera*)componentManager->_getComponent(m_Components[ComponentType::Camera]);
 }
 

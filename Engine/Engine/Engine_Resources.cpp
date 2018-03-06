@@ -1,14 +1,11 @@
 #include <boost/make_shared.hpp>
 
-#include "Engine.h"
 #include "Engine_Time.h"
 #include "Engine_Resources.h"
 #include "Engine_ObjectPool.h"
 #include "Engine_BuiltInResources.h"
 #include "Engine_Sounds.h"
 #include "Engine_Window.h"
-#include "ShaderProgram.h"
-#include "Object.h"
 #include "Light.h"
 #include "ObjectDynamic.h"
 #include "Skybox.h"
@@ -20,7 +17,6 @@
 #include "Scene.h"
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 using namespace Engine;
 using namespace std;
