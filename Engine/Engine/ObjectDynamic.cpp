@@ -85,21 +85,18 @@ ObjectDynamic::ObjectDynamic(Handle mesh,Handle mat, glm::vec3 pos, glm::vec3 sc
     m_Model *= glm::mat4_cast(glm::quat());
     m_Model = glm::scale(m_Model,glm::vec3(1.0f));
 
-    tr.setFromOpenGLMatrix(glm::value_ptr(glm::mat4(m_Model)));
+    tr.setFromOpenGLMatrix(glm::value_ptr(m_Model));
 
     m_MotionState = new btDefaultMotionState(tr);
 
     calculateRadius();
     m_Mass = 0.5f * m_Radius;
-    if(m_Collision != nullptr){
-        btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
-        m_RigidBody = new btRigidBody(rigidBodyCI);
+    if(m_Collision == nullptr){
+		m_Collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
     }
-    else{
-        m_Collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
-        btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
-        m_RigidBody = new btRigidBody(rigidBodyCI);
-    }
+    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_Mass,m_MotionState,m_Collision->getCollisionShape(),*(m_Collision->getInertia()));
+    m_RigidBody = new btRigidBody(rigidBodyCI);
+
     m_RigidBody->setSleepingThresholds(0.015f,0.015f);
     m_RigidBody->setFriction(0.3f);
     m_RigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction

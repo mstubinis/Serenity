@@ -441,17 +441,115 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 
 
 
-ComponentRigidBody::ComponentRigidBody(Entity* owner):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
-	_collision = nullptr;
+ComponentRigidBody::ComponentRigidBody(Entity* owner,Collision* collision):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
 	_rigidBody = nullptr;
 	_motionState = nullptr;
-	_mass = 1.0f;
+
+	setCollision(collision);
+
+
+	//motion state/////////////////////////////////////
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix *= glm::mat4_cast(glm::quat());
+    modelMatrix = glm::scale(modelMatrix,glm::vec3(1.0f));
+    btTransform tr; tr.setFromOpenGLMatrix(glm::value_ptr(modelMatrix));
+    _motionState = new btDefaultMotionState(tr);
+	///////////////////////////////////////////////////
+    btRigidBody::btRigidBodyConstructionInfo CI(_mass,_motionState,_collision->getCollisionShape(),*(_collision->getInertia()));
+    _rigidBody = new btRigidBody(CI);
+
+    _rigidBody->setSleepingThresholds(0.015f,0.015f);
+    _rigidBody->setFriction(0.3f);
+    _rigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
+	_rigidBody->setUserPointer(this);
+
+	
+	setMass(1.0f);
+
+    Physics::addRigidBody(_rigidBody);
 }
 ComponentRigidBody::~ComponentRigidBody(){
     Physics::removeRigidBody(_rigidBody);
     SAFE_DELETE(_rigidBody);
     SAFE_DELETE(_motionState);
 }
+void ComponentRigidBody::setCollision(Collision* collision){
+	_collision = collision;
+	if(_collision == nullptr){
+        _collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
+	}
+	_collision->getCollisionShape()->setUserPointer(this);
+}
+
+
+void ComponentRigidBody::translate(glm::vec3& translation,bool local){ ComponentRigidBody::translate(translation.x,translation.y,translation.z,local); }
+void ComponentRigidBody::translate(float x,float y,float z,bool local){
+    _rigidBody->activate();
+    btVector3 vec = btVector3(x,y,z);
+    if(local){
+		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
+        vec = vec.rotate(q.getAxis(),q.getAngle());
+	}
+    setPosition(position() + glm::vec3(vec.x(),vec.y(),vec.z()));
+}
+void ComponentRigidBody::rotate(glm::vec3& rotation,bool local){ ComponentRigidBody::rotate(rotation.x,rotation.y,rotation.z,local); }
+void ComponentRigidBody::rotate(float pitch,float yaw,float roll,bool local){
+    if(abs(pitch) < Object::m_RotationThreshold && abs(yaw) < Object::m_RotationThreshold && abs(roll) < Object::m_RotationThreshold)
+        return;
+
+	btQuaternion quat = _rigidBody->getWorldTransform().getRotation().normalize();
+	glm::quat glmquat = glm::quat(quat.w(),quat.x(),quat.y(),quat.z());
+
+    if(abs(pitch) >= Object::m_RotationThreshold) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
+    if(abs(yaw) >= Object::m_RotationThreshold) glmquat = glmquat * (glm::angleAxis(-yaw, glm::vec3(0,1,0)));   //yaw
+    if(abs(roll) >= Object::m_RotationThreshold) glmquat = glmquat * (glm::angleAxis(roll,  glm::vec3(0,0,1)));   //roll
+
+	quat = btQuaternion(glmquat.x,glmquat.y,glmquat.z,glmquat.w);
+	_rigidBody->getWorldTransform().setRotation(quat);
+}
+void ComponentRigidBody::scale(glm::vec3& amount){ ComponentRigidBody::scale(amount.x,amount.y,amount.z); }
+void ComponentRigidBody::scale(float x,float y,float z){
+     btVector3 localScale = _collision->getCollisionShape()->getLocalScaling();
+     _collision->getCollisionShape()->setLocalScaling(btVector3(localScale.x()+x,localScale.y()+y,localScale.z()+z));
+    //this->calculateRadius();
+}
+
+void ComponentRigidBody::setPosition(glm::vec3& newPosition){ ComponentRigidBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
+void ComponentRigidBody::setPosition(float x,float y,float z){
+    btTransform tr; tr.setOrigin(btVector3(x,y,z));
+    tr.setRotation(_rigidBody->getOrientation());
+    _motionState->setWorldTransform(tr);
+    if(_collision->getCollisionType() == CollisionType::TriangleShapeStatic){
+		//there must be a better way to do this
+        Physics::removeRigidBody(_rigidBody);
+        SAFE_DELETE(_rigidBody);
+        btRigidBody::btRigidBodyConstructionInfo CI(0,_motionState,_collision->getCollisionShape(),*_collision->getInertia());
+        _rigidBody = new btRigidBody(CI);
+        _rigidBody->setUserPointer(this);
+        Physics::addRigidBody(_rigidBody);
+    }
+    _rigidBody->setWorldTransform(tr);
+    _rigidBody->setCenterOfMassTransform(tr);
+}
+void ComponentRigidBody::setRotation(glm::quat& newRotation){ ComponentRigidBody::setRotation(newRotation.x,newRotation.y,newRotation.z,newRotation.w); }
+void ComponentRigidBody::setRotation(float x,float y,float z,float w){
+    btQuaternion quat(x,y,z,w);
+    quat = quat.normalize();
+
+    btTransform tr; tr.setOrigin(_rigidBody->getWorldTransform().getOrigin());
+    tr.setRotation(quat);
+
+    _rigidBody->setWorldTransform(tr);
+    _rigidBody->setCenterOfMassTransform(tr);
+	_motionState->setWorldTransform(tr);
+
+    clearAngularForces();
+}
+void ComponentRigidBody::setScale(glm::vec3& newScale){ ComponentRigidBody::setScale(newScale.x,newScale.y,newScale.z); }
+void ComponentRigidBody::setScale(float x,float y,float z){
+    _collision->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
+    //this->calculateRadius();
+}  
 glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     glm::mat4 m(1.0f);
     btTransform tr;  _rigidBody->getMotionState()->getWorldTransform(tr);
@@ -462,8 +560,10 @@ glm::mat4 ComponentRigidBody::modelMatrix(){ //theres prob a better way to do th
     glm::mat4 m(1.0f);
     btTransform tr;  _rigidBody->getMotionState()->getWorldTransform(tr);
     tr.getOpenGLMatrix(glm::value_ptr(m));
-    //btVector3 localScale = m_Collision->getCollisionShape()->getLocalScaling();
-    //m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
+	if(_collision != nullptr){
+		btVector3 localScale = _collision->getCollisionShape()->getLocalScaling();
+		m = glm::scale(m,glm::vec3(localScale.x(),localScale.y(),localScale.z()));
+	}
 	return m;
 }
 void ComponentRigidBody::setDynamic(bool dynamic){
