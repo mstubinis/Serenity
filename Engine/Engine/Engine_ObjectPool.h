@@ -126,14 +126,11 @@ namespace Engine{
 					return rv;
 				}
 				template<typename U> inline void getAsFast(Handle& handle, U*& outPtr){
-					//T* _void = m_Pool[handle.index].resource;
 					outPtr = (U*)m_Pool[handle.index].resource;
 				}
 				template<typename U> inline void getAsFast(uint& index, U*& outPtr){
-					//T* _void = m_Pool[index].resource;
 					outPtr = (U*)m_Pool[index].resource;
 				}
-
 				template<typename U> inline U* getAsFast(Handle& handle){
 					return (U*)m_Pool[handle.index].resource;
 				}

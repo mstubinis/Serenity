@@ -19,6 +19,9 @@
 using namespace Engine;
 using namespace std;
 
+std::unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_Map;
+epriv::ObjectPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
+
 epriv::ComponentManager* componentManager = nullptr;
 
 struct epriv::MeshMaterialPair final{
@@ -69,6 +72,8 @@ struct epriv::MeshMaterialPair final{
 
 class epriv::ComponentManager::impl final{
     public:	
+		ComponentTypeRegistry       m_TypeRegistry;
+
 		vector<Entity*>             m_EntitiesToBeDestroyed;
 
 		//  TOTAL                                                    //Current Scene Only
@@ -96,6 +101,13 @@ class epriv::ComponentManager::impl final{
 		void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
 			super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
 			super->m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
+
+			m_TypeRegistry = ComponentTypeRegistry();
+
+			m_TypeRegistry.emplace<ComponentBasicBody>();
+			m_TypeRegistry.emplace<ComponentRigidBody>();
+			m_TypeRegistry.emplace<ComponentModel>();
+			m_TypeRegistry.emplace<ComponentCamera>();
 		}
 		void _postInit(const char* name, uint& w, uint& h){
 			componentManager = epriv::Core::m_Engine->m_ComponentManager;
@@ -429,7 +441,7 @@ void ComponentModel::setModelMaterial(Material* material,uint index){
 }
 void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ ComponentModel::setModelMaterial(Resources::getMaterial(materialHandle),index); }
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
-	epriv::ComponentBodyBaseClass* baseBody = m_Owner->getComponent(baseBody);
+	epriv::ComponentBodyBaseClass* baseBody = nullptr; baseBody = m_Owner->getComponent(baseBody);
 	epriv::ComponentBodyType::Type type = baseBody->getBodyType();
 	if(type == epriv::ComponentBodyType::BasicBody){
 		return Engine::Math::rayIntersectSphere(  ((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->viewVector()  );
@@ -450,8 +462,6 @@ ComponentRigidBody::ComponentRigidBody(Entity* owner,Collision* collision):Compo
 
 	//motion state/////////////////////////////////////
     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix *= glm::mat4_cast(glm::quat());
-    modelMatrix = glm::scale(modelMatrix,glm::vec3(1.0f));
     btTransform tr; tr.setFromOpenGLMatrix(glm::value_ptr(modelMatrix));
     _motionState = new btDefaultMotionState(tr);
 	///////////////////////////////////////////////////
@@ -511,7 +521,10 @@ void ComponentRigidBody::scale(glm::vec3& amount){ ComponentRigidBody::scale(amo
 void ComponentRigidBody::scale(float x,float y,float z){
      btVector3 localScale = _collision->getCollisionShape()->getLocalScaling();
      _collision->getCollisionShape()->setLocalScaling(btVector3(localScale.x()+x,localScale.y()+y,localScale.z()+z));
-    //this->calculateRadius();
+	 ComponentModel* models = nullptr; models = m_Owner->getComponent(models);
+	 if(models){
+		 models->m_i->calculateRadius(models);
+	 }
 }
 
 void ComponentRigidBody::setPosition(glm::vec3& newPosition){ ComponentRigidBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
@@ -548,7 +561,10 @@ void ComponentRigidBody::setRotation(float x,float y,float z,float w){
 void ComponentRigidBody::setScale(glm::vec3& newScale){ ComponentRigidBody::setScale(newScale.x,newScale.y,newScale.z); }
 void ComponentRigidBody::setScale(float x,float y,float z){
     _collision->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
-    //this->calculateRadius();
+	 ComponentModel* models = nullptr; models = m_Owner->getComponent(models);
+	 if(models){
+		 models->m_i->calculateRadius(models);
+	 }
 }  
 glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     glm::mat4 m(1.0f);
@@ -743,7 +759,6 @@ void Entity::addComponent(ComponentCamera* component){
 	Handle handle = componentManager->_addComponent(component,ComponentType::Camera);
 	m_Components[ComponentType::Camera] = handle.index;
 }
-
 Engine::epriv::ComponentBodyBaseClass* Entity::getComponent(Engine::epriv::ComponentBodyBaseClass* component){
 	return (Engine::epriv::ComponentBodyBaseClass*)(componentManager->_getComponent(m_Components[ComponentType::Body]));
 }

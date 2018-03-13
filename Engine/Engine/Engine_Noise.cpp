@@ -266,7 +266,7 @@ class epriv::NoiseManager::impl final{
 		}
 		double _noiseOpenSimplex2D(double& x, double& y, unsigned long long& seed){
 			_initFromSeed(seed);
-			_noiseOpenSimplex2D(x,y);
+			return _noiseOpenSimplex2D(x,y);
 		}
 		double _noiseOpenSimplex3D(double& x, double& y, double& z){
 			double stretchOffset = (x + y + z) * m_Constants[2];
@@ -737,7 +737,7 @@ class epriv::NoiseManager::impl final{
 		}
 		double _noiseOpenSimplex3D(double& x, double& y, double& z, unsigned long long& seed){
 			_initFromSeed(seed);
-			_noiseOpenSimplex3D(x,y,z);
+			return _noiseOpenSimplex3D(x,y,z);
 		}
 		double _noiseOpenSimplex4D(double& x, double& y, double& z, double& w){
 			double stretchOffset = (x + y + z + w) * m_Constants[4];
@@ -1869,7 +1869,7 @@ class epriv::NoiseManager::impl final{
 		}
 		double _noiseOpenSimplex4D(double& x, double& y, double& z, double& w, unsigned long long& seed){
 			_initFromSeed(seed);
-			_noiseOpenSimplex4D(x,y,z,w);
+			return _noiseOpenSimplex4D(x,y,z,w);
 		}
 };
 

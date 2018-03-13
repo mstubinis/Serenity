@@ -9,6 +9,10 @@
 #include "Engine_EventObject.h"
 #include "Engine_ObjectPool.h"
 
+#include <typeinfo>
+#include <typeindex>
+#include <unordered_map>
+
 typedef unsigned int uint;
 
 class Entity;
@@ -47,11 +51,30 @@ namespace Engine{
 		const uint MAX_NUM_ENTITIES = 32768;
 
 		struct MeshMaterialPair;
+
+		class ComponentTypeRegistry final{
+			private:
+				static std::unordered_map<std::type_index,uint> m_Map;
+				uint m_NextIndex;
+			public:
+				ComponentTypeRegistry(){
+					m_NextIndex = 0;
+				}
+				~ComponentTypeRegistry(){
+				}
+
+				template<typename T> void emplace(){
+					m_Map.emplace(std::type_index(typeid(T)),m_NextIndex);
+					++m_NextIndex;
+				}
+		};
+
+
 		class ComponentManager final{
 		    private:
 				class impl;
-				ObjectPool<Entity>*             m_EntityPool;
-				ObjectPool<ComponentBaseClass>* m_ComponentPool;
+				ObjectPool<Entity>*                    m_EntityPool;
+				static ObjectPool<ComponentBaseClass>* m_ComponentPool;
 		    public:
 				std::unique_ptr<impl> m_i;
 
@@ -108,6 +131,7 @@ class ComponentBaseClass{
 
 class ComponentModel: public ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
+	friend class ::ComponentRigidBody;
     private:
 		std::vector<Engine::epriv::MeshMaterialPair> models;
 		float _radius;
@@ -251,6 +275,11 @@ class Entity{
 		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
 		ComponentModel* getComponent(ComponentModel* = nullptr);
 		ComponentCamera* getComponent(ComponentCamera* = nullptr);
+
+		template<typename T> T* getComponent(){
+			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[std::type_index(typeid(T))];
+			T* c = nullptr; Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(m_Components[index],c); return c;
+		}
 };
 
 
