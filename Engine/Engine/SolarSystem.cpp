@@ -257,6 +257,14 @@ void SolarSystem::_loadFromFile(string filename){
 
 	new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Luna Starbase",m_Moons.at("Moon")->getPosition() + glm::vec3(16000,0,16000),glm::vec3(1),nullptr,this);
 
+	//entity testing
+	Entity* test = new Entity();
+	ComponentBasicBody* basicBody = new ComponentBasicBody(test);
+	basicBody->setPosition(xPos+2,0,zPos-3);
+	ComponentModel* model = new ComponentModel(test,ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial);
+	test->addComponent(basicBody);
+	test->addComponent(model);
+	////////////////////////////////
 
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
 	//player->addChild(lightP);

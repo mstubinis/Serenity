@@ -8,10 +8,9 @@
 #include "BindableResource.h"
 #include "Engine_Physics.h"
 #include "Engine_Resources.h"
-#include <unordered_map>
+#include "Components.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <memory>
 #include <map>
 
 #include <glm/glm.hpp>
@@ -115,16 +114,13 @@ class MeshSkeleton final{
         uint numBones();
 };
 class Mesh final: public BindableResource{
-    friend struct DefaultMeshBindFunctor;
-    friend struct DefaultMeshUnbindFunctor;
-    friend class AnimationData;
-    friend class MeshSkeleton;
+    friend struct ::DefaultMeshBindFunctor; friend struct ::DefaultMeshUnbindFunctor;
+    friend class ::AnimationData; friend class ::MeshSkeleton;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
 		//loaded in renderer
-		static Mesh* Plane;
-		static Mesh* Cube;
+		static Mesh* Plane;  static Mesh* Cube;
 
         Mesh(std::string name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);

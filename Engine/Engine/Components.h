@@ -42,8 +42,8 @@ class ComponentType{public:enum Type{
 	Model,
 	Camera,
 
-	_TOTAL,
-};};
+
+_TOTAL,};};
 
 
 namespace Engine{
@@ -71,6 +71,8 @@ namespace Engine{
 
 
 		class ComponentManager final{
+			friend class ::Entity;
+			friend class ::Scene;
 		    private:
 				class impl;
 				ObjectPool<Entity>*                    m_EntityPool;
@@ -88,19 +90,15 @@ namespace Engine{
 				void _deleteEntityImmediately(Entity*);
 				void _addEntityToBeDestroyed(uint id);
 				void _addEntityToBeDestroyed(Entity*);
-				Handle _addEntity(Entity*,EntityType::Type);
 				Entity* _getEntity(uint id);
 
-				Handle _addComponent(ComponentBaseClass* component,uint type);
 				ComponentBaseClass* _getComponent(uint index);
-				void _removeComponent(uint index);
 		};
 		class ComponentBodyType{public:enum Type{
 			BasicBody,
 			RigidBody,
 
-			_TOTAL,
-		};};
+		_TOTAL,};};
 
 
 		class ComponentBodyBaseClass{
@@ -137,6 +135,7 @@ class ComponentModel: public ComponentBaseClass{
 		float _radius;
 		class impl; std::unique_ptr<impl> m_i;
     public:
+		ComponentModel(Entity* owner,Handle& meshHandle,Handle& materialHandle);
 		ComponentModel(Entity* owner,Mesh*,Material*);
 		~ComponentModel();
 
@@ -170,13 +169,13 @@ class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::Compo
 		glm::vec3 position();
 		glm::mat4 modelMatrix();
 
-		void translate(glm::vec3& translation); void translate(float x,float y,float z);
-		void rotate(glm::vec3& rotation); void rotate(float pitch,float yaw,float roll);
-		void scale(glm::vec3& amount); void scale(float x,float y,float z);
+		void translate(glm::vec3& translation);     void translate(float x,float y,float z);
+		void rotate(glm::vec3& rotation);           void rotate(float pitch,float yaw,float roll);
+		void scale(glm::vec3& amount);              void scale(float x,float y,float z);
 
-		void setPosition(glm::vec3& newPosition); void setPosition(float x,float y,float z);
-		void setRotation(glm::quat& newRotation); void setRotation(float x,float y,float z,float w);
-		void setScale(glm::vec3& newScale); void setScale(float x,float y,float z);
+		void setPosition(glm::vec3& newPosition);   void setPosition(float x,float y,float z);
+		void setRotation(glm::quat& newRotation);   void setRotation(float x,float y,float z,float w);
+		void setScale(glm::vec3& newScale);         void setScale(float x,float y,float z);
 };
 
 class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
@@ -190,13 +189,13 @@ class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::Compo
 		ComponentRigidBody(Entity* owner,Collision* = nullptr);
 		~ComponentRigidBody();
 
-		void translate(glm::vec3& translation,bool local = true); void translate(float x,float y,float z,bool local = true);
-		void rotate(glm::vec3& rotation,bool local = true); void rotate(float pitch,float yaw,float roll,bool local = true);
-		void scale(glm::vec3& amount); void scale(float x,float y,float z);
+		void translate(glm::vec3& translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
+		void rotate(glm::vec3& rotation,bool local = true);         void rotate(float pitch,float yaw,float roll,bool local = true);
+		void scale(glm::vec3& amount);                              void scale(float x,float y,float z);
 
-		void setPosition(glm::vec3& newPosition); void setPosition(float x,float y,float z);
-		void setRotation(glm::quat& newRotation); void setRotation(float x,float y,float z,float w);
-		void setScale(glm::vec3& newScale); void setScale(float x,float y,float z);
+		void setPosition(glm::vec3& newPosition);                   void setPosition(float x,float y,float z);
+		void setRotation(glm::quat& newRotation);                   void setRotation(float x,float y,float z,float w);
+		void setScale(glm::vec3& newScale);                         void setScale(float x,float y,float z);
 
 		glm::vec3 position();
 		glm::mat4 modelMatrix();
@@ -237,7 +236,14 @@ class ComponentCamera: public ComponentBaseClass{
 
 		void update();
 		void lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up);
-		glm::vec3 viewVector();
+
+        glm::mat4 getViewProjectionInverse();
+        glm::mat4 getProjection();
+        glm::mat4 getView();
+		glm::mat4 getViewInverse();
+		glm::mat4 getProjectionInverse();
+        glm::mat4 getViewProjection();
+        glm::vec3 getViewVector();
 };
 
 
@@ -276,8 +282,20 @@ class Entity{
 		ComponentModel* getComponent(ComponentModel* = nullptr);
 		ComponentCamera* getComponent(ComponentCamera* = nullptr);
 
+
+		//test this out
+		template<typename T> void addComponent(T* component){
+			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
+			if(m_Components[index] != -1) return;
+			Handle handle = Engine::epriv::ComponentManager::m_ComponentPool->add(component,index);
+			m_Components[index] = handle.index;
+			component->m_Owner = this;
+
+		}
+
+		//this wont work for body components i think. test this out
 		template<typename T> T* getComponent(){
-			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[std::type_index(typeid(T))];
+			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
 			T* c = nullptr; Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(m_Components[index],c); return c;
 		}
 };

@@ -35,6 +35,11 @@ struct epriv::MeshMaterialPair final{
 		_position = glm::vec3(0.0f); _rotation = glm::quat(); _scale = glm::vec3(1.0f);
 		Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 	}
+	MeshMaterialPair(Handle& mesh,Handle& material){
+		_mesh = Resources::getMesh(mesh); _material = Resources::getMaterial(material); _modelMatrix = glm::mat4(1.0f);
+		_position = glm::vec3(0.0f); _rotation = glm::quat(); _scale = glm::vec3(1.0f);
+		Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
+	}
 
 	void translate(glm::vec3& translation){ translate(translation.x,translation.y,translation.z); }
 	void translate(float x,float y,float z){
@@ -103,9 +108,7 @@ class epriv::ComponentManager::impl final{
 			super->m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 
 			m_TypeRegistry = ComponentTypeRegistry();
-
-			m_TypeRegistry.emplace<ComponentBasicBody>();
-			m_TypeRegistry.emplace<ComponentRigidBody>();
+			m_TypeRegistry.emplace<ComponentBodyBaseClass>();
 			m_TypeRegistry.emplace<ComponentModel>();
 			m_TypeRegistry.emplace<ComponentCamera>();
 		}
@@ -245,22 +248,12 @@ void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* e){
 	for(auto entity:m_i->m_EntitiesToBeDestroyed){ if(entity->m_ID == e->m_ID){ return; } }
 	m_i->m_EntitiesToBeDestroyed.push_back(e);
 }
-Handle epriv::ComponentManager::_addEntity(Entity* entity,EntityType::Type t){
-	Handle handle = m_EntityPool->add(entity,t);
-	entity->m_ID = handle.index;
-	return handle;
-}
+
 Entity* epriv::ComponentManager::_getEntity(uint id){
 	Entity* e; m_EntityPool->getAsFast(id,e); return e;
 }
-Handle epriv::ComponentManager::_addComponent(ComponentBaseClass* component,uint type){
-	return m_ComponentPool->add(component,type);
-}
 ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
 	ComponentBaseClass* c; m_ComponentPool->getAsFast(index,c); return c;
-}
-void epriv::ComponentManager::_removeComponent(uint index){
-	m_ComponentPool->remove(index);
 }
 
 
@@ -381,8 +374,13 @@ void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
 	_viewMatrix = glm::lookAt(_eye,forward,_up);
 	ComponentCamera::update();
 }
-glm::vec3 ComponentCamera::viewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
-
+glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
+glm::mat4 ComponentCamera::getProjection(){ return _projectionMatrix; }
+glm::mat4 ComponentCamera::getProjectionInverse(){ return glm::inverse(_projectionMatrix); }
+glm::mat4 ComponentCamera::getView(){ return _viewMatrix; }
+glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
+glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
+glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
 
 
 class ComponentModel::impl final{
@@ -404,6 +402,12 @@ class ComponentModel::impl final{
 };
 
 
+ComponentModel::ComponentModel(Entity* owner,Handle& meshHandle,Handle& materialHandle):ComponentBaseClass(owner),m_i(new impl){
+	if(!meshHandle.null() && !materialHandle.null()){
+		models.push_back( epriv::MeshMaterialPair(meshHandle,materialHandle) );
+	}
+	m_i->calculateRadius(this);
+}
 ComponentModel::ComponentModel(Entity* owner,Mesh* mesh,Material* material):ComponentBaseClass(owner),m_i(new impl){
 	if(mesh && material){
 		models.push_back( epriv::MeshMaterialPair(mesh,material) );
@@ -444,10 +448,10 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 	epriv::ComponentBodyBaseClass* baseBody = nullptr; baseBody = m_Owner->getComponent(baseBody);
 	epriv::ComponentBodyType::Type type = baseBody->getBodyType();
 	if(type == epriv::ComponentBodyType::BasicBody){
-		return Engine::Math::rayIntersectSphere(  ((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->viewVector()  );
+		return Engine::Math::rayIntersectSphere(  ((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector()  );
 	}
 	else if(type == epriv::ComponentBodyType::RigidBody){
-		return Engine::Math::rayIntersectSphere(  ((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->viewVector()  );
+		return Engine::Math::rayIntersectSphere(  ((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector()  );
 	}
 }
 
@@ -718,7 +722,7 @@ Entity::Entity(){
 Entity::~Entity(){
 	m_ParentID, m_ID = -1;
 	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-		componentManager->_removeComponent(m_Components[i]);
+		componentManager->m_ComponentPool->remove(m_Components[i]);
 	}
 	delete[] m_Components;
 
@@ -741,24 +745,26 @@ void Entity::addChild(Entity* child){
 }
 void Entity::addComponent(ComponentBasicBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
-	Handle handle = componentManager->_addComponent(component,ComponentType::Body);
+	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentRigidBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
-	Handle handle = componentManager->_addComponent(component,ComponentType::Body);
+	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentModel* component){
 	if(m_Components[ComponentType::Model] != -1) return;
-	Handle handle = componentManager->_addComponent(component,ComponentType::Model);
+	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Model);
 	m_Components[ComponentType::Model] = handle.index;
 }
 void Entity::addComponent(ComponentCamera* component){
 	if(m_Components[ComponentType::Camera] != -1) return;
-	Handle handle = componentManager->_addComponent(component,ComponentType::Camera);
+	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Camera);
 	m_Components[ComponentType::Camera] = handle.index;
 }
+
+
 Engine::epriv::ComponentBodyBaseClass* Entity::getComponent(Engine::epriv::ComponentBodyBaseClass* component){
 	return (Engine::epriv::ComponentBodyBaseClass*)(componentManager->_getComponent(m_Components[ComponentType::Body]));
 }
@@ -774,4 +780,3 @@ ComponentRigidBody* Entity::getComponent(ComponentRigidBody* component){
 ComponentCamera* Entity::getComponent(ComponentCamera* component){
 	return (ComponentCamera*)componentManager->_getComponent(m_Components[ComponentType::Camera]);
 }
-

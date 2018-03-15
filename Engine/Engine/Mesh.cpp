@@ -102,6 +102,10 @@ class Mesh::impl final{
         static DefaultMeshBindFunctor DEFAULT_BIND_FUNCTOR;
         static DefaultMeshUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
+
+		//component logic
+		vector<ComponentModel*> m_ComponentModels;
+
         vector<GLuint> m_buffers;
         Collision* m_Collision;
 
@@ -1111,3 +1115,4 @@ void Mesh::saveMeshData(bool save){ m_i->m_SaveMeshData = save; }
 AnimationData::AnimationData(Mesh* m,aiAnimation* a):m_i(new impl){ m_i->_init(m,a); }
 AnimationData::~AnimationData(){ }
 float AnimationData::duration(){ return m_i->_Duration(); }
+

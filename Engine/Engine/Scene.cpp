@@ -29,9 +29,9 @@ Scene::Scene(string name){
 }
 void Scene::addEntity(Entity* entity){
 	for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return; } //rethink this maybe use a fixed size array?
-	Handle entityHandle = epriv::Core::m_Engine->m_ComponentManager->_addEntity(entity,EntityType::Basic);
-	uint entityID = entityHandle.index;
-	m_Entities.push_back(entityID);
+	Handle entityHandle = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(entity,EntityType::Basic);
+	entity->m_ID = entityHandle.index;
+	m_Entities.push_back(entityHandle.index);
 }
 Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
 void Scene::setActiveCamera(Camera* c){

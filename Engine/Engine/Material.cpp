@@ -259,6 +259,11 @@ class MaterialMeshEntry::impl final{
 class Material::impl final{
     public:
 
+		//component logic
+		vector<Mesh*> m_MeshesThatUseThisMaterial;
+
+
+
         unordered_map<uint,MaterialComponent*> m_Components;
         vector<MaterialMeshEntry*> m_Meshes;
         uint m_DiffuseModel, m_SpecularModel;

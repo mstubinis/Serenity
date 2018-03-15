@@ -29,8 +29,7 @@ class MaterialComponentType{public: enum Type{
 	Refraction,
 	ParallaxOcclusion,
 
-	Number,
-};};
+Number,};};
 
 class MaterialPhysics{public: enum Physics{
     Water,
@@ -129,6 +128,7 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
 
         const float heightScale() const { return m_HeightScale; }
 };
+
 class MaterialMeshEntry{
     private:
 		class impl; std::unique_ptr<impl> m_i;
