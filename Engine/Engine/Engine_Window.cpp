@@ -2,6 +2,7 @@
 #include "Engine_Window.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
+#include "Components.h"
 #include "Texture.h"
 #include "GBuffer.h"
 #include "Engine_BuiltInShaders.h"
@@ -90,7 +91,7 @@ class Engine_Window::impl final{
 
 			//basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
 			epriv::Core::m_Engine->m_RenderManager->_resize(winSize.x,winSize.y);
-			epriv::Core::m_Engine->m_ResourceManager->_resizeCameras(winSize.x,winSize.y);
+			epriv::Core::m_Engine->m_ComponentManager->_resize(winSize.x,winSize.y);
 			Renderer::setViewport(0,0,winSize.x,winSize.y);
 			Game::onResize(winSize.x,winSize.y);
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////

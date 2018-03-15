@@ -279,7 +279,7 @@ void RodLight::lighten(){
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
 }
 float RodLight::rodLength(){ return m_RodLength; }
-
+/*
 class LightProbe::impl{
     public:
         uint m_EnvMapSize;
@@ -525,7 +525,7 @@ class LightProbe::impl{
         }
 };
 
-LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene,uint sidesPerFrame):Camera(n,glm::radians(90.0f),1.0f,0.01f,9999999.0f,scene),m_i(new impl){
+LightProbe::LightProbe(string n, uint envMapSize,glm::vec3 pos,bool onlyOnce,Scene* scene,uint sidesPerFrame):Camera(glm::radians(90.0f),1.0f,0.01f,9999999.0f,scene),m_i(new impl){
     this->setPosition(pos);
 	m_i->_init(envMapSize,this,onlyOnce,scene,sidesPerFrame);    
     if(scene == nullptr){
@@ -541,3 +541,4 @@ const uint LightProbe::getEnvMapSize() const{ return m_i->m_EnvMapSize; }
 GLuint LightProbe::getEnvMap(){ return m_i->m_TextureEnvMap; }
 GLuint LightProbe::getIrriadianceMap(){ return m_i->m_TextureConvolutionMap; }
 GLuint LightProbe::getPrefilterMap(){ return m_i->m_TexturePrefilterMap; }
+*/

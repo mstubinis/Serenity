@@ -1633,7 +1633,7 @@ class epriv::RenderManager::impl final{
     
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
 
-			glm::mat4 invVP = c->getViewProjInverted();
+			glm::mat4 invVP = c->getViewProjectionInverse();
 			glm::mat4 invP = glm::inverse(c->getProjection());
 			glm::vec3 campos = c->getPosition();
 			float cNear = c->getNear(); float cFar = c->getFar();
@@ -1673,6 +1673,7 @@ class epriv::RenderManager::impl final{
 				SkyboxEmpty* skybox = s->skybox();
 
 				if(s->lightProbes().size() > 0){
+					/*
 					for(auto probe:s->lightProbes()){
 						LightProbe* p = probe.second;
 						bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
@@ -1680,6 +1681,7 @@ class epriv::RenderManager::impl final{
 						bindTextureSafe("brdfLUT",brdfCook,5);
 						break;
 					}
+					*/
 				}
 				else{
 					if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
@@ -1707,7 +1709,7 @@ class epriv::RenderManager::impl final{
 			glm::vec3 camPos = c->getPosition();
 			sendUniformMatrix4fSafe("View",c->getView());
 			sendUniformMatrix4fSafe("Projection",c->getProjection());
-			sendUniformMatrix4fSafe("invVP",c->getViewProjInverted());
+			sendUniformMatrix4fSafe("invVP",c->getViewProjectionInverse());
 			sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
 			sendUniform1fSafe("nearz",c->getNear());
 			sendUniform1fSafe("farz",c->getFar());
@@ -2051,12 +2053,14 @@ class epriv::RenderManager::impl final{
 			Scene* s = Resources::getCurrentScene();
 			if(mainRenderFunc){
 				if(s->lightProbes().size() > 0){
+					/*
 					for(auto lightProbe:s->lightProbes()){
 						lightProbe.second->renderCubemap(
 							m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude),
 							m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv)
 						);
 					}
+					*/
 					m_gBuffer->resize(fboWidth,fboHeight);
 				}
 			}

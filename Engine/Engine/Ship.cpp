@@ -111,7 +111,7 @@ void ShipSystemPitchThrusters::update(float dt){
         m_Ship->getRigidBody()->setAngularVelocity(velocity);
         if(m_Ship->IsPlayer()){
             if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
-                m_Ship->applyTorqueX(-Engine::getMouseDifference().y*0.002f*(1/(m_Ship->getMass()*3)));
+                m_Ship->applyTorqueX(-Engine::getMouseDifference().y * 0.002f * (1.0f / (m_Ship->getMass()*3.0f)));
             }
         }
     }

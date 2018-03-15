@@ -16,6 +16,8 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
+#include <limits>
+
 using namespace Engine;
 using namespace std;
 
@@ -81,11 +83,11 @@ class epriv::ComponentManager::impl final{
 
 		vector<Entity*>             m_EntitiesToBeDestroyed;
 
-		//  TOTAL                                                    //Current Scene Only
-		vector<ComponentBasicBody*> m_ComponentBasicBodies;       vector<ComponentBasicBody*> m_CurrentSceneComponentBasicBodies;
-		vector<ComponentRigidBody*> m_ComponentRigidBodies;       vector<ComponentRigidBody*> m_CurrentSceneComponentRigidBodies;
-		vector<ComponentModel*>     m_ComponentModels;            vector<ComponentModel*>     m_CurrentSceneComponentModels;
-		vector<ComponentCamera*>    m_ComponentCameras;           vector<ComponentCamera*>    m_CurrentSceneComponentCameras;
+		//  TOTAL                                                    //Current Scene Only - implement this later
+		vector<ComponentBasicBody*> m_ComponentBasicBodies;       //vector<ComponentBasicBody*> m_CurrentSceneComponentBasicBodies;
+		vector<ComponentRigidBody*> m_ComponentRigidBodies;       //vector<ComponentRigidBody*> m_CurrentSceneComponentRigidBodies;
+		vector<ComponentModel*>     m_ComponentModels;            //vector<ComponentModel*>     m_CurrentSceneComponentModels;
+		vector<ComponentCamera*>    m_ComponentCameras;           //vector<ComponentCamera*>    m_CurrentSceneComponentCameras;
 
 		//implement this workflow somehow with ComponentModels
 
@@ -138,17 +140,17 @@ class epriv::ComponentManager::impl final{
 			glm::mat4 scaleMat = glm::scale(scale);
 			modelMatrix = translationMat * rotationMat * scaleMat * modelMatrix;
 		}
-		void _updateComponentBaseBodies(float& dt){
-			for(auto c:m_CurrentSceneComponentBasicBodies){
+		void _updateComponentBaseBodies(const float& dt){
+			for(auto c:m_ComponentBasicBodies){
 				_performTransformation(c->m_Owner->parent(),c->_position,c->_rotation,c->_scale,c->_modelMatrix);
 			}
 		}
-		void _updateComponentRigidBodies(float& dt){
-			for(auto c:m_CurrentSceneComponentRigidBodies){
+		void _updateComponentRigidBodies(const float& dt){
+			for(auto c:m_ComponentRigidBodies){
 			}
 		}
-		void _updateComponentModels(float& dt){
-			for(auto c:m_CurrentSceneComponentModels){ 
+		void _updateComponentModels(const float& dt){
+			for(auto c:m_ComponentModels){ 
 				for(auto model:c->models){
 					if(model._mesh != nullptr){
 						_performTransformation(c->m_Owner->parent(),model._position,model._rotation,model._scale,model._modelMatrix);
@@ -156,15 +158,18 @@ class epriv::ComponentManager::impl final{
 				}
 			}
 		}
-		void _updateComponentCameras(float& dt){
-			for(auto c:m_CurrentSceneComponentCameras){ 
+		void _updateComponentCameras(const float& dt){
+			for(auto c:m_ComponentCameras){
+				c->update();
 			}
 		}
-		void _updateCurrentScene(float& dt){
+		void _updateCurrentScene(const float& dt){
 			Scene* currentScene = Resources::getCurrentScene();
 			for(auto entityID:currentScene->m_Entities){
 				Entity* e = componentManager->_getEntity(entityID);
-				e->update(dt);
+				if(e){//should not need this...
+				    e->update(dt);
+				}
 			}
 
 
@@ -182,16 +187,6 @@ class epriv::ComponentManager::impl final{
 					++it;
 				}
 			}
-			for (auto it = currentScene->m_Cameras.cbegin(); it != currentScene->m_Cameras.cend();){
-				Camera* cam = it->second;
-				if (cam->isDestroyed()){
-					epriv::Core::m_Engine->m_ResourceManager->_remCamera(cam->name());
-				}
-				else{
-					cam->update(dt); 
-					++it;
-				}
-			}
 			if(currentScene->m_Skybox != nullptr) currentScene->m_Skybox->update();
 		}
 		void _destroyQueuedEntities(epriv::ComponentManager* super){
@@ -199,12 +194,12 @@ class epriv::ComponentManager::impl final{
 				super->_deleteEntityImmediately(e);
 			}
 		}
-		void _update(float& dt,epriv::ComponentManager* super){
+		void _update(const float& dt,epriv::ComponentManager* super){
+			_updateComponentRigidBodies(dt);
+			_updateComponentBaseBodies(dt);
 
 			_updateCurrentScene(dt);
 
-			_updateComponentBaseBodies(dt);
-			_updateComponentRigidBodies(dt);
 			_updateComponentModels(dt);
 			_updateComponentCameras(dt);
 
@@ -219,6 +214,9 @@ epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 
 void epriv::ComponentManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h); }
 void epriv::ComponentManager::_update(float& dt){ m_i->_update(dt,this); }
+void epriv::ComponentManager::_resize(uint width,uint height){
+	for(auto camera:m_i->m_ComponentCameras){ camera->resize(width,height); }
+}
 void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
 	//obviously try to improve this performance wise
 	ComponentBasicBody* basicBody = nullptr; basicBody = e->getComponent(basicBody);
@@ -227,19 +225,19 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
 	ComponentCamera* cam = nullptr; cam = e->getComponent(cam);
 	if(basicBody){
 		std::remove(m_i->m_ComponentBasicBodies.begin(),m_i->m_ComponentBasicBodies.end(),basicBody);
-		std::remove(m_i->m_CurrentSceneComponentBasicBodies.begin(),m_i->m_ComponentBasicBodies.end(),basicBody);
+		//std::remove(m_i->m_CurrentSceneComponentBasicBodies.begin(),m_i->m_ComponentBasicBodies.end(),basicBody);
 	}
 	if(rigidBody){
 		std::remove(m_i->m_ComponentRigidBodies.begin(),m_i->m_ComponentRigidBodies.end(),rigidBody);
-		std::remove(m_i->m_CurrentSceneComponentRigidBodies.begin(),m_i->m_CurrentSceneComponentRigidBodies.end(),rigidBody);
+		//std::remove(m_i->m_CurrentSceneComponentRigidBodies.begin(),m_i->m_CurrentSceneComponentRigidBodies.end(),rigidBody);
 	}
 	if(model){
 		std::remove(m_i->m_ComponentModels.begin(),m_i->m_ComponentModels.end(),model);
-		std::remove(m_i->m_CurrentSceneComponentModels.begin(),m_i->m_CurrentSceneComponentModels.end(),model);
+		//std::remove(m_i->m_CurrentSceneComponentModels.begin(),m_i->m_CurrentSceneComponentModels.end(),model);
 	}
 	if(cam){
 		std::remove(m_i->m_ComponentCameras.begin(),m_i->m_ComponentCameras.end(),cam);
-		std::remove(m_i->m_CurrentSceneComponentCameras.begin(),m_i->m_CurrentSceneComponentCameras.end(),cam);
+		//std::remove(m_i->m_CurrentSceneComponentCameras.begin(),m_i->m_CurrentSceneComponentCameras.end(),cam);
 	}
 	m_EntityPool->remove(e->m_ID);
 }
@@ -290,6 +288,9 @@ ComponentBasicBody::ComponentBasicBody(Entity* owner):ComponentBaseClass(owner),
 ComponentBasicBody::~ComponentBasicBody(){
 }
 glm::vec3 ComponentBasicBody::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
+glm::vec3 ComponentBasicBody::forward(){ return _forward; }
+glm::vec3 ComponentBasicBody::right(){ return _right; }
+glm::vec3 ComponentBasicBody::up(){ return _up; }
 glm::mat4 ComponentBasicBody::modelMatrix(){ return _modelMatrix; }
 void ComponentBasicBody::translate(glm::vec3& translation){ ComponentBasicBody::translate(translation.x,translation.y,translation.z); }
 void ComponentBasicBody::translate(float x,float y,float z){
@@ -333,18 +334,21 @@ ComponentCamera::ComponentCamera(Entity* owner){
 	_nearPlane = 0.1f; _farPlane = 3000.0f;
 	_projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
 	_viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
+	_type = Type::Perspective;
 }
 ComponentCamera::ComponentCamera(Entity* owner,float angle,float aspectRatio,float nearPlane,float farPlane){
 	_eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
 	_angle = glm::radians(angle); _aspectRatio = aspectRatio; _nearPlane = nearPlane; _farPlane = farPlane;
 	_projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
 	_viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
+	_type = Type::Perspective;
 }
 ComponentCamera::ComponentCamera(Entity* owner,float left,float right,float bottom,float top,float nearPlane,float farPlane){
 	_eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
 	_left = left; _right = right; _bottom = bottom; _top = top; _nearPlane = nearPlane; _farPlane = farPlane;
 	_projectionMatrix = glm::ortho(_left,_right,_bottom,_top,_nearPlane,_farPlane);
 	_viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
+	_type = Type::Orthographic;
 }
 ComponentCamera::~ComponentCamera(){
 }
@@ -367,6 +371,21 @@ void ComponentCamera::update(){
         glm::vec3 normal(_planes[i].x, _planes[i].y, _planes[i].z);
         _planes[i] = -_planes[i] / glm::length(normal);
     }
+}
+void ComponentCamera::resize(uint width, uint height){
+    if(_type == Type::Perspective){
+		_projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
+	}
+    else{
+		_projectionMatrix = glm::ortho(_left,_right,_bottom,_top,_nearPlane,_farPlane);
+	}
+}
+bool ComponentCamera::sphereIntersectTest(glm::vec3 position,float radius){
+    if(radius <= 0) return false;
+    for (uint i = 0; i < 6; ++i){
+        if (_planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w - radius > 0) return false;
+    }
+    return true;
 }
 void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
 	_eye = eye;
@@ -713,14 +732,14 @@ void ComponentRigidBody::setMass(float mass){
 
 
 Entity::Entity(){
-	m_ParentID, m_ID = -1;
+	m_ParentID = m_ID = std::numeric_limits<uint>::max();
 	m_Components = new uint[ComponentType::_TOTAL];
 	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-		m_Components[i] = -1; //apparently assigning -1 to an unsigned int gives it it's max value and can be used to denote an empty component
+		m_Components[i] = std::numeric_limits<uint>::max();
 	}
 }
 Entity::~Entity(){
-	m_ParentID, m_ID = -1;
+	m_ParentID = m_ID = std::numeric_limits<uint>::max();
 	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
 		componentManager->m_ComponentPool->remove(m_Components[i]);
 	}
@@ -738,6 +757,9 @@ void Entity::destroy(bool immediate){
 	}
 }
 Entity* Entity::parent(){
+	uint max = std::numeric_limits<uint>::max();
+	if(m_ParentID == max)
+		return nullptr;
 	return componentManager->_getEntity(m_ParentID);
 }
 void Entity::addChild(Entity* child){
@@ -746,21 +768,25 @@ void Entity::addChild(Entity* child){
 void Entity::addComponent(ComponentBasicBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
+	componentManager->m_i->m_ComponentBasicBodies.push_back(component);
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentRigidBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
+	componentManager->m_i->m_ComponentRigidBodies.push_back(component);
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentModel* component){
 	if(m_Components[ComponentType::Model] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Model);
+	componentManager->m_i->m_ComponentModels.push_back(component);
 	m_Components[ComponentType::Model] = handle.index;
 }
 void Entity::addComponent(ComponentCamera* component){
 	if(m_Components[ComponentType::Camera] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Camera);
+	componentManager->m_i->m_ComponentCameras.push_back(component);
 	m_Components[ComponentType::Camera] = handle.index;
 }
 

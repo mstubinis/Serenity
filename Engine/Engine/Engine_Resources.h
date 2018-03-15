@@ -49,15 +49,12 @@ namespace Engine{
 
 				void _init(const char* name,uint width,uint height);
 		
-
 				Handle _addTexture(Texture*);
 
 				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
 				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
 				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
-				                                     void _addCamera(Camera*);              std::string _buildCameraName(std::string);
 
-				void _remCamera(std::string);
 				void _remObject(std::string);
 
 				void _resizeCameras(uint w,uint h);
@@ -82,10 +79,8 @@ namespace Engine{
         Scene* getScene(std::string sceneName);
 
         boost::shared_ptr<Object>& getObjectPtr(std::string);
-        boost::shared_ptr<Camera>& getCameraPtr(std::string);
 
         Object* getObject(std::string);
-        Camera* getCamera(std::string);
         Font* getFont(std::string);
         MeshInstance* getMeshInstance(std::string);
 

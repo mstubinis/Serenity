@@ -50,7 +50,6 @@ class epriv::ResourceManager::impl final{
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         unordered_map<string,boost::shared_ptr<Object>> m_Objects;
-        unordered_map<string,boost::shared_ptr<Camera>> m_Cameras;
 
 		void _init(const char* name,const uint& width,const uint& height){
 			m_CurrentScene = nullptr;
@@ -64,7 +63,6 @@ class epriv::ResourceManager::impl final{
 		void _destruct(){
 			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
 			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
-			for (auto it = m_Cameras.begin();it != m_Cameras.end(); ++it )               it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
 
 			SAFE_DELETE(m_Resources);
@@ -83,9 +81,6 @@ void epriv::ResourceManager::_init(const char* n,uint w,uint h){
 }
 
 
-
-
-
 string Engine::Data::reportTime(){
 	return epriv::Core::m_Engine->m_TimeManager->reportTime();
 }
@@ -99,9 +94,6 @@ bool epriv::ResourceManager::_hasMeshInstance(string n){ if(resourceManager->m_i
 void epriv::ResourceManager::_addScene(Scene* s){
 	_addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }
-void epriv::ResourceManager::_addCamera(Camera* c){
-	_addToContainer(resourceManager->m_i->m_Cameras,c->name(),boost::shared_ptr<Camera>(c));
-}
 void epriv::ResourceManager::_addObject(Object* o){
 	_addToContainer(resourceManager->m_i->m_Objects,o->name(),boost::shared_ptr<Object>(o));
 }
@@ -111,12 +103,9 @@ void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
 string epriv::ResourceManager::_buildMeshInstanceName(string n){return _incrementName(resourceManager->m_i->m_MeshInstances,n);}
 string epriv::ResourceManager::_buildObjectName(string n){return _incrementName(resourceManager->m_i->m_Objects,n);}
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(resourceManager->m_i->m_Scenes,n);}
-string epriv::ResourceManager::_buildCameraName(string n){return _incrementName(resourceManager->m_i->m_Cameras,n);}
 
-void epriv::ResourceManager::_remCamera(string n){_removeFromContainer(resourceManager->m_i->m_Cameras,n);}
 void epriv::ResourceManager::_remObject(string n){_removeFromContainer(resourceManager->m_i->m_Objects,n);}
 
-void epriv::ResourceManager::_resizeCameras(uint w,uint h){for(auto c:resourceManager->m_i->m_Cameras){c.second.get()->resize(w,h);}}
 uint epriv::ResourceManager::_numScenes(){return resourceManager->m_i->m_Scenes.size();}
 
 void Resources::Settings::enableDynamicMemory(bool b){ resourceManager->m_i->m_DynamicMemory = b; }
@@ -134,11 +123,9 @@ Engine_Window* Resources::getWindow(){ return resourceManager->m_i->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_i->m_Window->getSize(); }
 
 boost::shared_ptr<Object>& Resources::getObjectPtr(string n){return resourceManager->m_i->m_Objects.at(n);}
-boost::shared_ptr<Camera>& Resources::getCameraPtr(string n){return resourceManager->m_i->m_Cameras.at(n);}
 
 Scene* Resources::getScene(string n){return (Scene*)(_getFromContainer(resourceManager->m_i->m_Scenes,n));}
 Object* Resources::getObject(string n){return (Object*)(_getFromContainer(resourceManager->m_i->m_Objects,n));}
-Camera* Resources::getCamera(string n){return (Camera*)(_getFromContainer(resourceManager->m_i->m_Cameras,n));}
 MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
@@ -229,14 +216,12 @@ void Resources::setCurrentScene(Scene* scene){
             //mark game object resources to minus use count
             for(auto obj:resourceManager->m_i->m_CurrentScene->objects()){ obj.second->suspend(); }
             for(auto obj:resourceManager->m_i->m_CurrentScene->lights()){ obj.second->suspend(); }
-			for(auto obj:resourceManager->m_i->m_CurrentScene->cameras()){ obj.second->suspend(); }
         }
 		resourceManager->m_i->m_CurrentScene = scene;
         if(resourceManager->m_i->m_DynamicMemory){
             //mark game object resources to add use count
             for(auto obj:scene->objects()){ obj.second->resume(); }
             for(auto obj:scene->lights()){ obj.second->resume(); }
-			for(auto obj:scene->cameras()){ obj.second->resume(); }
         }
         cout << "-------- Scene Change ended --------" << endl;
     }

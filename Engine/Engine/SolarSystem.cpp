@@ -22,7 +22,7 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    GameCamera* playerCamera = new GameCamera("PlayerCamera_" + name(),60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
+    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
     this->setActiveCamera(playerCamera);
 
     if(file != "NULL"){

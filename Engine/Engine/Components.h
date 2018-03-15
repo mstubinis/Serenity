@@ -17,6 +17,7 @@ typedef unsigned int uint;
 
 class Entity;
 class Scene;
+class Camera;
 class Object;
 class Mesh;
 class Material;
@@ -86,6 +87,7 @@ namespace Engine{
 				void _init(const char* name, uint w, uint h);
 				void _update(float&);
 				void _render();
+				void _resize(uint width,uint height);
 
 				void _deleteEntityImmediately(Entity*);
 				void _addEntityToBeDestroyed(uint id);
@@ -158,6 +160,7 @@ class ComponentModel: public ComponentBaseClass{
 class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentModel;
+	friend class ::Camera;
     private:
 		glm::mat4 _modelMatrix;
 		glm::vec3 _position, _scale, _forward, _right, _up;
@@ -167,6 +170,9 @@ class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::Compo
 		~ComponentBasicBody();
 
 		glm::vec3 position();
+		glm::vec3 forward();
+		glm::vec3 right();
+		glm::vec3 up();
 		glm::mat4 modelMatrix();
 
 		void translate(glm::vec3& translation);     void translate(float x,float y,float z);
@@ -221,7 +227,11 @@ class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::Compo
 class ComponentCamera: public ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentModel;
+	friend class ::Camera;
     private:
+
+		enum Type{ Perspective, Orthographic, };
+		Type _type;
 		glm::vec3 _eye,_up;
 		glm::mat4 _viewMatrix,  _projectionMatrix;
 		glm::vec4 _planes[6];
@@ -235,6 +245,7 @@ class ComponentCamera: public ComponentBaseClass{
 		~ComponentCamera();
 
 		void update();
+		void resize(uint width,uint height);
 		void lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up);
 
         glm::mat4 getViewProjectionInverse();
@@ -244,6 +255,8 @@ class ComponentCamera: public ComponentBaseClass{
 		glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
+
+		bool sphereIntersectTest(glm::vec3 position,float radius);
 };
 
 

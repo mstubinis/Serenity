@@ -37,9 +37,6 @@ Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
 void Scene::setActiveCamera(Camera* c){
 	m_ActiveCamera = c;
 }
-void Scene::setActiveCamera(string s){
-	m_ActiveCamera = Resources::getCamera(s);
-}
 void Scene::centerSceneToObject(Object* center){
     glm::vec3 offset = -(center->getPosition());
     for(auto object:m_Objects){
@@ -61,10 +58,8 @@ void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_Back
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }
-unordered_map<string,Camera*>& Scene::cameras() { return m_Cameras; }
 unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
 Object* Scene::getObject(string& name){ return m_Objects.at(name); }
 SunLight* Scene::getLight(string& name){ return m_Lights.at(name); }
-Camera* Scene::getCamera(string& name){ return m_Cameras.at(name); }
 SkyboxEmpty* Scene::skybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

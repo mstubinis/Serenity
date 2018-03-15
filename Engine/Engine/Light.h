@@ -103,6 +103,7 @@ class RodLight: public PointLight{
         float rodLength();
         void setRodLength(float);
 };
+/*
 class LightProbe: public Camera{
     private:
         class impl; std::unique_ptr<impl> m_i;
@@ -118,4 +119,5 @@ class LightProbe: public Camera{
 
         const uint getEnvMapSize() const;
 };
+*/
 #endif
