@@ -13,6 +13,8 @@ class GameCamera: public Camera{
         Object* m_Target;
         Object* m_Player;
         float m_OrbitRadius;
+		ComponentBasicBody* m_Body;
+		ComponentCamera* m_Camera;
     public:
         GameCamera(float angle, float aspectRatio, float clipStart, float clipEnd,Scene* = nullptr);                   // Perspective camera Constructor
         GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor

@@ -54,6 +54,7 @@ namespace Engine{
 		struct MeshMaterialPair;
 
 		class ComponentTypeRegistry final{
+			friend class ::Entity;
 			private:
 				static std::unordered_map<std::type_index,uint> m_Map;
 				uint m_NextIndex;

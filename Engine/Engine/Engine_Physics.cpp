@@ -177,7 +177,7 @@ Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mas
     m_CollisionType = type;
     _init(type,mass);
 }
-Collision::Collision(ImportedMeshData& data,CollisionType::Type type, float mass){ 
+Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass){ 
     _load(data,type);
     _init(type,mass);
 }
@@ -197,7 +197,7 @@ Collision::~Collision(){
     SAFE_DELETE(m_CollisionShape);
     m_CollisionType = CollisionType::None;
 }
-void Collision::_load(ImportedMeshData& data, CollisionType::Type collisionType){
+void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisionType){
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
     m_CollisionType = collisionType;

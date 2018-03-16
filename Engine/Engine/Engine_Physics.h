@@ -16,8 +16,11 @@ class btCollisionShape;
 class btRigidBody;
 class btVector3;
 class btTriangleMesh;
-struct ImportedMeshData;
-
+namespace Engine{
+	namespace epriv{
+		struct ImportedMeshData;
+	};
+};
 typedef float btScalar;
 typedef unsigned int uint;
 
@@ -38,10 +41,10 @@ class Collision final{
         uint m_CollisionType;
         btCollisionShape* m_CollisionShape;
         void _init(CollisionType::Type = CollisionType::None, float mass = 0);
-        void _load(ImportedMeshData&, CollisionType::Type);
+        void _load(Engine::epriv::ImportedMeshData&, CollisionType::Type);
     public:
         Collision(btCollisionShape* shape = nullptr,CollisionType::Type = CollisionType::None, float mass = 0);
-        Collision(ImportedMeshData&,CollisionType::Type = CollisionType::None, float mass = 0);
+        Collision(Engine::epriv::ImportedMeshData&,CollisionType::Type = CollisionType::None, float mass = 0);
         ~Collision();
 
         void setMass(float mass);
