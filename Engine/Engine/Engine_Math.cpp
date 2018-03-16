@@ -220,13 +220,7 @@ float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     if(degrees) angle *= 57.2958f;
     return angle;
 }
-void Math::alignToX(glm::quat& o,Object* origin, Object* target,float speed){
-}
-void Math::alignToY(glm::quat& o,Object* origin, Object* target,float speed){
-}
-void Math::alignToZ(glm::quat& o,Object* origin, Object* target,float speed){
-}
-void Math::alignTo(glm::quat& o,Object* origin, glm::vec3& direction,float speed){
+void Math::alignTo(glm::quat& o,glm::vec3& direction,float speed){
     glm::quat original(o);
     direction = glm::normalize(direction);
     glm::vec3 xaxis = glm::normalize(glm::cross(glm::vec3(0.0f,1.0f,0.0f), direction));

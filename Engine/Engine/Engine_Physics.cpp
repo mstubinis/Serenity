@@ -88,11 +88,11 @@ class epriv::PhysicsManager::impl final{
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-						ObjectDynamic* a = (ObjectDynamic*)(obA->getUserPointer());
-						ObjectDynamic* b = (ObjectDynamic*)(obB->getUserPointer());
+						ComponentRigidBody* a = (ComponentRigidBody*)(obA->getUserPointer());
+						ComponentRigidBody* b = (ComponentRigidBody*)(obB->getUserPointer());
 
-						a->collisionResponse(b);
-						b->collisionResponse(a);
+						//a->collisionResponse(b);
+						//b->collisionResponse(a);
 					}
 				}
 			}

@@ -31,6 +31,7 @@ class Camera: public Entity{
 		glm::quat getOrientation();
 
 		float getDistance(Object*);
+		float getDistance(glm::vec3);
 
         float getNear();
         float getFar();

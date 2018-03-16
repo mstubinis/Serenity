@@ -57,9 +57,8 @@ void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_Back
 
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
-unordered_map<string,SunLight*>& Scene::lights() { return m_Lights; }
+vector<SunLight*>& Scene::lights() { return m_Lights; }
 unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
 Object* Scene::getObject(string& name){ return m_Objects.at(name); }
-SunLight* Scene::getLight(string& name){ return m_Lights.at(name); }
 SkyboxEmpty* Scene::skybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

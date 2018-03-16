@@ -24,7 +24,7 @@ class Scene: public EngineResource{
 		std::vector<uint> m_Entities;
 
         std::unordered_map<std::string,Object*> m_Objects;
-        std::unordered_map<std::string,SunLight*> m_Lights;
+        std::vector<SunLight*> m_Lights;
         std::unordered_map<std::string,LightProbe*> m_LightProbes;
 
         glm::vec3 m_BackgroundColor;
@@ -37,11 +37,10 @@ class Scene: public EngineResource{
         virtual void update(float);
 
         std::unordered_map<std::string,Object*>& objects();
-        std::unordered_map<std::string,SunLight*>& lights();
+        std::vector<SunLight*>& lights();
 		std::unordered_map<std::string,LightProbe*>& lightProbes();
 
         Object* getObject(std::string&);
-        SunLight* getLight(std::string&);
 		Camera* getActiveCamera();
 
         glm::vec3 getBackgroundColor();

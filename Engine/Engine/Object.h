@@ -161,8 +161,5 @@ class ObjectBasic: public Object{
 
         virtual void alignTo(glm::vec3,float speed=0);
         virtual void alignTo(Object*,float speed=0);
-        virtual void alignToX(Object*,float speed=0);
-        virtual void alignToY(Object*,float speed=0);
-        virtual void alignToZ(Object*,float speed=0);
 };
 #endif

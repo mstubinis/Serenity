@@ -287,6 +287,10 @@ ComponentBasicBody::ComponentBasicBody(Entity* owner):ComponentBaseClass(owner),
 }
 ComponentBasicBody::~ComponentBasicBody(){
 }
+void ComponentBasicBody::alignTo(glm::vec3 direction,float speed){
+    Engine::Math::alignTo(_rotation,direction,speed);
+    Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
+}
 glm::vec3 ComponentBasicBody::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
 glm::vec3 ComponentBasicBody::forward(){ return _forward; }
 glm::vec3 ComponentBasicBody::right(){ return _right; }

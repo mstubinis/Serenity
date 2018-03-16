@@ -74,6 +74,9 @@ glm::vec3 Camera::up(){ return m_i->m_BasicBody->up(); }
 float Camera::getDistance(Object* obj){
 	return glm::distance(obj->getPosition(),getPosition());
 }
+float Camera::getDistance(glm::vec3 objPos){
+	return glm::distance(objPos,getPosition());
+}
 bool Camera::sphereIntersectTest(Object* obj){
 	return m_i->m_Camera->sphereIntersectTest(obj->getPosition(),obj->getRadius());
 }

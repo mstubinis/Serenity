@@ -20,16 +20,17 @@ class LightAttenuation{public:enum Model{
     Distance_Squared,
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
-    Spherical_Quadratic
 };};
-class SunLight: public ObjectDisplay{
+class SunLight: public Entity{
     protected:
+		ComponentBasicBody* m_Body;
+		glm::vec4 m_Color;
         uint m_Type;
         bool m_Active;
         float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
         void sendGenericAttributesToShader();
     public:
-        SunLight(glm::vec3 = glm::vec3(0.0f),std::string = "Sun Light",uint=LightType::Sun,Scene* = nullptr);
+        SunLight(glm::vec3 = glm::vec3(0.0f),uint=LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
 
         virtual void lighten();
@@ -40,6 +41,11 @@ class SunLight: public ObjectDisplay{
         float getSpecularIntensity();
         void setSpecularIntensity(float s);
 
+		glm::vec3 position();
+		void setColor(float,float,float,float);
+		void setColor(glm::vec4);
+		void setPosition(float,float,float);
+		void setPosition(glm::vec3);
         void activate(bool=true);
         void deactivate();
         bool isActive();
@@ -47,7 +53,7 @@ class SunLight: public ObjectDisplay{
 };
 class DirectionalLight: public SunLight{
     public:
-        DirectionalLight(std::string = "Directional Light",glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), Scene* = nullptr);
+        DirectionalLight(glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), Scene* = nullptr);
         virtual ~DirectionalLight();
 
         virtual void lighten();
@@ -56,10 +62,10 @@ class PointLight: public SunLight{
     protected:
         float m_Constant, m_Linear, m_Exp;
         float m_CullingRadius;
-        float calculateCullingRadius();
+        virtual float calculateCullingRadius();
         LightAttenuation::Model m_AttenuationModel;
     public:
-        PointLight(std::string = "Point Light",glm::vec3 = glm::vec3(0.0f), Scene* = nullptr);
+        PointLight(glm::vec3 = glm::vec3(0.0f), Scene* = nullptr);
         virtual ~PointLight();
 
         void setConstant(float c);
@@ -74,7 +80,6 @@ class PointLight: public SunLight{
         float getLinear();
         float getExponent();
 
-        virtual void update(float);
         virtual void lighten();
 };
 class SpotLight: public PointLight{
@@ -82,10 +87,9 @@ class SpotLight: public PointLight{
         float m_Cutoff;
         float m_OuterCutoff;
     public:
-        SpotLight(std::string = "Spot Light",glm::vec3 = glm::vec3(0.0f), glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), float = 11.0f, float = 13.0f,Scene* = nullptr);
+        SpotLight(glm::vec3 = glm::vec3(0.0f), glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), float = 11.0f, float = 13.0f,Scene* = nullptr);
         virtual ~SpotLight();
 
-        void update(float);
         void lighten();
         void setCutoff(float);
         void setCutoffOuter(float);
@@ -93,8 +97,9 @@ class SpotLight: public PointLight{
 class RodLight: public PointLight{
     private:
         float m_RodLength;
+		float calculateCullingRadius();
     public:
-        RodLight(std::string = "Rod Light",glm::vec3 = glm::vec3(0.0f), float = 2.0f,Scene* = nullptr);
+        RodLight(glm::vec3 = glm::vec3(0.0f), float = 2.0f,Scene* = nullptr);
         virtual ~RodLight();
 
         void update(float);
@@ -108,7 +113,7 @@ class LightProbe: public Camera{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        LightProbe(std::string = "Light Probe", uint envMapWidth = 128,glm::vec3 = glm::vec3(0),bool onlyOnce = false,Scene* = nullptr,uint sidesPerFrame = 6);
+        LightProbe(uint envMapWidth = 128,glm::vec3 = glm::vec3(0),bool onlyOnce = false,Scene* = nullptr,uint sidesPerFrame = 6);
         ~LightProbe();
 
         void renderCubemap(ShaderP* convolude,ShaderP* prefilter);

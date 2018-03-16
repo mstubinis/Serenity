@@ -81,9 +81,6 @@ class ObjectDynamic: public Object{
 
         virtual void alignTo(glm::vec3,float speed=0);
         virtual void alignTo(Object*,float speed=0);
-        virtual void alignToX(Object*,float speed=0);
-        virtual void alignToY(Object*,float speed=0);
-        virtual void alignToZ(Object*,float speed=0);
 
         virtual void scale(float,float,float);
         virtual void scale(glm::vec3);

@@ -1951,9 +1951,6 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "   else if(LightDataE.z == 4.0){\n" //distance radius squared
     "       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
     "   }\n"
-    "   else if(LightDataE.z == 5.0){\n" //spherical quadratic
-    "       attenuation = 1.0 / max(1.0 ,1.0 + ((2.0 / LightRadius) * Dist) + (1.0 / (LightRadius*LightRadius))*(Dist*Dist) );\n"
-    "   }\n"
     "   return attenuation;\n"
     "}\n"
 	"float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"

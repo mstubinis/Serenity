@@ -176,6 +176,8 @@ class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::Compo
 		glm::vec3 up();
 		glm::mat4 modelMatrix();
 
+		void alignTo(glm::vec3 direction,float speed = 0);
+
 		void translate(glm::vec3& translation);     void translate(float x,float y,float z);
 		void rotate(glm::vec3& rotation);           void rotate(float pitch,float yaw,float roll);
 		void scale(glm::vec3& amount);              void scale(float x,float y,float z);

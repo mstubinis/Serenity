@@ -1653,7 +1653,7 @@ class epriv::RenderManager::impl final{
 			bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),3);
 
 			for (auto light:s->lights()){
-				light.second->lighten();
+				light->lighten();
 			}
 			for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->unbind();

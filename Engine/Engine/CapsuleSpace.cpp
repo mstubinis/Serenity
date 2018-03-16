@@ -24,7 +24,7 @@ void CapsuleEnd::update(float dt){ObjectDisplay::update(dt);}
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay(Mesh::Plane,Resources::getMaterial(ResourceManifest::SunFlareMaterial),pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
-        m_Light = new PointLight(name + " Light",pos/float(100),scene);
+        m_Light = new PointLight(pos/float(100),scene);
         m_Light->setAttenuation(LightRange::_65);
         m_Light->setColor(255,124,27,255);
     }
@@ -42,7 +42,7 @@ void CapsuleStar::update(float dt){
     }
     if(m_Light != nullptr){
         m_Light->setPosition(pos * 0.015f);
-		if(glm::distance(m_Light->getPosition(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
+		if(glm::distance(m_Light->position(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
             m_Light->deactivate();
         }
         else{

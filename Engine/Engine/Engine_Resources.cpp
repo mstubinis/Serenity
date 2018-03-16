@@ -215,13 +215,11 @@ void Resources::setCurrentScene(Scene* scene){
         if(epriv::Core::m_Engine->m_ResourceManager->m_i->m_DynamicMemory){
             //mark game object resources to minus use count
             for(auto obj:resourceManager->m_i->m_CurrentScene->objects()){ obj.second->suspend(); }
-            for(auto obj:resourceManager->m_i->m_CurrentScene->lights()){ obj.second->suspend(); }
         }
 		resourceManager->m_i->m_CurrentScene = scene;
         if(resourceManager->m_i->m_DynamicMemory){
             //mark game object resources to add use count
             for(auto obj:scene->objects()){ obj.second->resume(); }
-            for(auto obj:scene->lights()){ obj.second->resume(); }
         }
         cout << "-------- Scene Change ended --------" << endl;
     }
