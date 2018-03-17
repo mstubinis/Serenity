@@ -1,5 +1,7 @@
 #include "Components.h"
 #include "Engine_Resources.h"
+#include "Engine_Renderer.h"
+#include "Engine_BuiltInResources.h"
 #include "Engine.h"
 #include "Mesh.h"
 #include "Material.h"
@@ -83,11 +85,11 @@ class epriv::ComponentManager::impl final{
 
 		vector<Entity*>             m_EntitiesToBeDestroyed;
 
-		//  TOTAL                                                    //Current Scene Only - implement this later
-		vector<ComponentBasicBody*> m_ComponentBasicBodies;       //vector<ComponentBasicBody*> m_CurrentSceneComponentBasicBodies;
-		vector<ComponentRigidBody*> m_ComponentRigidBodies;       //vector<ComponentRigidBody*> m_CurrentSceneComponentRigidBodies;
-		vector<ComponentModel*>     m_ComponentModels;            //vector<ComponentModel*>     m_CurrentSceneComponentModels;
-		vector<ComponentCamera*>    m_ComponentCameras;           //vector<ComponentCamera*>    m_CurrentSceneComponentCameras;
+		//  TOTAL                                                                //Current Scene Only - implement this later
+		vector<ComponentBasicBody*>        m_ComponentBasicBodies;       //vector<ComponentBasicBody*> m_CurrentSceneComponentBasicBodies;
+		vector<ComponentRigidBody*>        m_ComponentRigidBodies;       //vector<ComponentRigidBody*> m_CurrentSceneComponentRigidBodies;
+		vector<ComponentModel*>            m_ComponentModels;            //vector<ComponentModel*>     m_CurrentSceneComponentModels;
+		vector<ComponentCamera*>           m_ComponentCameras;           //vector<ComponentCamera*>    m_CurrentSceneComponentCameras;
 
 		//implement this workflow somehow with ComponentModels
 
@@ -277,6 +279,7 @@ epriv::ComponentBodyBaseClass::~ComponentBodyBaseClass(){}
 epriv::ComponentBodyType::Type epriv::ComponentBodyBaseClass::getBodyType(){ return _type; }
 
 
+#pragma region BasicBody
 
 ComponentBasicBody::ComponentBasicBody(Entity* owner):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::BasicBody){
 	_position = glm::vec3(0.0f);
@@ -328,9 +331,9 @@ void ComponentBasicBody::setScale(float x,float y,float z){
 	_scale.x = x; _scale.y = y; _scale.z = z;
 }
 
+#pragma endregion
 
-
-
+#pragma region Camera
 
 ComponentCamera::ComponentCamera(Entity* owner){
 	_eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
@@ -405,6 +408,9 @@ glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
 glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
 glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
 
+#pragma endregion
+
+#pragma region Model
 
 class ComponentModel::impl final{
     public:
@@ -478,7 +484,9 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 	}
 }
 
+#pragma endregion
 
+#pragma region RigidBody
 
 ComponentRigidBody::ComponentRigidBody(Entity* owner,Collision* collision):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
 	_rigidBody = nullptr;
@@ -728,9 +736,7 @@ void ComponentRigidBody::setMass(float mass){
 }
 
 
-
-
-
+#pragma endregion
 
 
 
@@ -761,8 +767,7 @@ void Entity::destroy(bool immediate){
 	}
 }
 Entity* Entity::parent(){
-	uint max = std::numeric_limits<uint>::max();
-	if(m_ParentID == max)
+	if(m_ParentID == std::numeric_limits<uint>::max())
 		return nullptr;
 	return componentManager->_getEntity(m_ParentID);
 }
@@ -795,8 +800,9 @@ void Entity::addComponent(ComponentCamera* component){
 }
 
 
-Engine::epriv::ComponentBodyBaseClass* Entity::getComponent(Engine::epriv::ComponentBodyBaseClass* component){
-	return (Engine::epriv::ComponentBodyBaseClass*)(componentManager->_getComponent(m_Components[ComponentType::Body]));
+
+epriv::ComponentBodyBaseClass* Entity::getComponent(epriv::ComponentBodyBaseClass* component){
+	return (epriv::ComponentBodyBaseClass*)(componentManager->_getComponent(m_Components[ComponentType::Body]));
 }
 ComponentBasicBody* Entity::getComponent(ComponentBasicBody* component){
 	return static_cast<ComponentBasicBody*>(componentManager->_getComponent(m_Components[ComponentType::Body])); //might have to be dynamic cast

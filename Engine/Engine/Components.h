@@ -27,11 +27,18 @@ struct btDefaultMotionState;
 class btVector3;
 struct Handle;
 
+class ComponentBaseClass;
+
 class ComponentBasicBody;
 class ComponentRigidBody;
-
+class ComponentModel;
 class ComponentCamera;
-class ComponentBaseClass;
+
+namespace Engine{
+	namespace epriv{
+		class ComponentManager;
+	};
+};
 
 class EntityType{public: enum Type{
 	Basic,
@@ -42,10 +49,20 @@ class ComponentType{public:enum Type{
 	Body, //Can contain: ComponentRigidBody, ComponentBasicBody, maybe more...
 	Model,
 	Camera,
-
-
 _TOTAL,};};
 
+class ComponentBaseClass{
+	friend class ::Engine::epriv::ComponentManager;
+	protected:
+		Entity* m_Owner; //eventually make this an entity ID instead?
+	public:
+		ComponentBaseClass(Entity* = nullptr);
+		ComponentBaseClass(uint entityID);
+		virtual ~ComponentBaseClass();
+
+		void setOwner(Entity*);
+		void setOwner(uint entityID);
+};
 
 namespace Engine{
 	namespace epriv{
@@ -102,8 +119,6 @@ namespace Engine{
 			RigidBody,
 
 		_TOTAL,};};
-
-
 		class ComponentBodyBaseClass{
 			protected:
 				ComponentBodyType::Type _type;
@@ -116,18 +131,7 @@ namespace Engine{
 		};
 	};
 };
-class ComponentBaseClass{
-	friend class ::Engine::epriv::ComponentManager;
-	protected:
-		Entity* m_Owner; //eventually make this an entity ID instead?
-	public:
-		ComponentBaseClass(Entity* = nullptr);
-		ComponentBaseClass(uint entityID);
-		virtual ~ComponentBaseClass();
 
-		void setOwner(Entity*);
-		void setOwner(uint entityID);
-};
 
 
 class ComponentModel: public ComponentBaseClass{
@@ -264,8 +268,6 @@ class ComponentCamera: public ComponentBaseClass{
 
 
 
-
-
 class Entity{
 	friend class ::Scene;
 	friend class ::Engine::epriv::ComponentManager;
@@ -290,14 +292,14 @@ class Entity{
 		void addComponent(ComponentBasicBody* component); 
 		void addComponent(ComponentRigidBody* component); 
 		void addComponent(ComponentModel* component); 
-		void addComponent(ComponentCamera* component); 
+		void addComponent(ComponentCamera* component);
 
 		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
+
 		ComponentBasicBody* getComponent(ComponentBasicBody* = nullptr);
 		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
 		ComponentModel* getComponent(ComponentModel* = nullptr);
 		ComponentCamera* getComponent(ComponentCamera* = nullptr);
-
 
 		//test this out
 		template<typename T> void addComponent(T* component){
@@ -308,7 +310,6 @@ class Entity{
 			component->m_Owner = this;
 
 		}
-
 		//this wont work for body components i think. test this out
 		template<typename T> T* getComponent(){
 			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
