@@ -53,15 +53,12 @@ _TOTAL,};};
 
 class ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
+	friend class ::Entity;
 	protected:
 		Entity* m_Owner; //eventually make this an entity ID instead?
 	public:
-		ComponentBaseClass(Entity* = nullptr);
-		ComponentBaseClass(uint entityID);
+		ComponentBaseClass();
 		virtual ~ComponentBaseClass();
-
-		void setOwner(Entity*);
-		void setOwner(uint entityID);
 };
 
 namespace Engine{
@@ -142,8 +139,8 @@ class ComponentModel: public ComponentBaseClass{
 		float _radius;
 		class impl; std::unique_ptr<impl> m_i;
     public:
-		ComponentModel(Entity* owner,Handle& meshHandle,Handle& materialHandle);
-		ComponentModel(Entity* owner,Mesh*,Material*);
+		ComponentModel(Handle& meshHandle,Handle& materialHandle);
+		ComponentModel(Mesh*,Material*);
 		~ComponentModel();
 
 		uint addModel(Handle& meshHandle, Handle& materialHandle);
@@ -171,7 +168,7 @@ class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::Compo
 		glm::vec3 _position, _scale, _forward, _right, _up;
 		glm::quat _rotation;
     public:
-		ComponentBasicBody(Entity* owner);
+		ComponentBasicBody();
 		~ComponentBasicBody();
 
 		glm::vec3 position();
@@ -199,7 +196,7 @@ class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::Compo
 		btDefaultMotionState* _motionState;
 		float _mass;
     public:
-		ComponentRigidBody(Entity* owner,Collision* = nullptr);
+		ComponentRigidBody(Collision* = nullptr);
 		~ComponentRigidBody();
 
 		void translate(glm::vec3& translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
@@ -246,9 +243,9 @@ class ComponentCamera: public ComponentBaseClass{
 		union{ float _angle;        float _left;  };
 		union{ float _aspectRatio;  float _right; };
     public:
-		ComponentCamera(Entity* owner);
-		ComponentCamera(Entity* owner,float angle,float aspectRatio,float nearPlane,float farPlane);
-		ComponentCamera(Entity* owner,float left,float right,float bottom,float top,float nearPlane,float farPlane);
+		ComponentCamera();
+		ComponentCamera(float angle,float aspectRatio,float nearPlane,float farPlane);
+		ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane);
 		~ComponentCamera();
 
 		void update();

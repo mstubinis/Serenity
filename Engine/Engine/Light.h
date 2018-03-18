@@ -22,32 +22,23 @@ class LightAttenuation{public:enum Model{
     Distance_Radius_Squared,
 };};
 class SunLight: public Entity{
+    private:
+		class impl;
     protected:
-		ComponentBasicBody* m_Body;
-		glm::vec4 m_Color;
-        uint m_Type;
-        bool m_Active;
-        float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
-        void sendGenericAttributesToShader();
+		std::unique_ptr<impl> m_i;
     public:
-        SunLight(glm::vec3 = glm::vec3(0.0f),uint=LightType::Sun,Scene* = nullptr);
+        SunLight(glm::vec3 = glm::vec3(0.0f),LightType::Type = LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
 
         virtual void lighten();
-        float getAmbientIntensity();
-        void setAmbientIntensity(float a);
-        float getDiffuseIntensity();
-        void setDiffuseIntensity(float d);
-        float getSpecularIntensity();
-        void setSpecularIntensity(float s);
+        float getAmbientIntensity();     void setAmbientIntensity(float a);
+        float getDiffuseIntensity();     void setDiffuseIntensity(float d);
+        float getSpecularIntensity();    void setSpecularIntensity(float s);
 
 		glm::vec3 position();
-		void setColor(float,float,float,float);
-		void setColor(glm::vec4);
-		void setPosition(float,float,float);
-		void setPosition(glm::vec3);
-        void activate(bool=true);
-        void deactivate();
+		void setColor(float,float,float,float);  void setColor(glm::vec4);
+		void setPosition(float,float,float);     void setPosition(glm::vec3);
+        void activate(bool=true);                void deactivate();
         bool isActive();
         uint type();
 };
@@ -60,7 +51,7 @@ class DirectionalLight: public SunLight{
 };
 class PointLight: public SunLight{
     protected:
-        float m_Constant, m_Linear, m_Exp;
+        float m_C, m_L, m_E;
         float m_CullingRadius;
         virtual float calculateCullingRadius();
         LightAttenuation::Model m_AttenuationModel;
@@ -84,8 +75,7 @@ class PointLight: public SunLight{
 };
 class SpotLight: public PointLight{
     private:
-        float m_Cutoff;
-        float m_OuterCutoff;
+        float m_Cutoff,  m_OuterCutoff;
     public:
         SpotLight(glm::vec3 = glm::vec3(0.0f), glm::vec3 = glm::vec3(0.0f,0.0f,-1.0f), float = 11.0f, float = 13.0f,Scene* = nullptr);
         virtual ~SpotLight();

@@ -21,9 +21,8 @@ class Camera::impl final{
 		ComponentBasicBody* m_BasicBody;
 		ComponentCamera* m_Camera;
 		Scene* m_Scene;
-		void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
-			m_BasicBody = new ComponentBasicBody(super);
-			m_Camera = new ComponentCamera(super,angle,aspectRatio,_near,_far);
+		void _baseInit(Scene* scene, Camera* super){
+			m_BasicBody = new ComponentBasicBody();
 			m_Camera->lookAt(m_BasicBody->position(),m_BasicBody->position() + m_BasicBody->forward(),m_BasicBody->up());
 			if(scene == nullptr)
 				scene = Resources::getCurrentScene();
@@ -34,18 +33,13 @@ class Camera::impl final{
 
 			m_Scene->addEntity(super);
 		}
-		void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera* super){
-			m_BasicBody = new ComponentBasicBody(super);
-			m_Camera = new ComponentCamera(super,left,right,bottom,top,_near,_far);
-			m_Camera->lookAt(m_BasicBody->position(),m_BasicBody->position() + m_BasicBody->forward(),m_BasicBody->up());
-			if(scene == nullptr)
-				scene = Resources::getCurrentScene();
-			m_Scene = scene;
-
-			super->addComponent(m_BasicBody);
-			super->addComponent(m_Camera);
-
-			m_Scene->addEntity(super);
+		void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
+			m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
+			_baseInit(scene,super);
+		}
+		void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera* super){		
+			m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
+            _baseInit(scene,super);
 		}
 };
 

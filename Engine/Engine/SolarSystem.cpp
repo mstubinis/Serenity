@@ -259,9 +259,9 @@ void SolarSystem::_loadFromFile(string filename){
 
 	//entity testing
 	Entity* test = new Entity();
-	ComponentBasicBody* basicBody = new ComponentBasicBody(test);
+	ComponentBasicBody* basicBody = new ComponentBasicBody();
 	basicBody->setPosition(xPos+2,0,zPos-3);
-	ComponentModel* model = new ComponentModel(test,ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial);
+	ComponentModel* model = new ComponentModel(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial);
 	test->addComponent(basicBody);
 	test->addComponent(model);
 	////////////////////////////////

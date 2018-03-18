@@ -162,7 +162,28 @@ class epriv::ComponentManager::impl final{
 		}
 		void _updateComponentCameras(const float& dt){
 			for(auto c:m_ComponentCameras){
+				_defaultUpdateCameraComponent(dt,*c);
 				c->update();
+			}
+		}
+		void _defaultUpdateCameraComponent(const float& dt,ComponentCamera& cameraComponent){
+			//update view frustrum
+			glm::mat4 vp = cameraComponent._projectionMatrix * cameraComponent._viewMatrix;
+			glm::vec4 rowX = glm::row(vp, 0);
+			glm::vec4 rowY = glm::row(vp, 1);
+			glm::vec4 rowZ = glm::row(vp, 2);
+			glm::vec4 rowW = glm::row(vp, 3);
+
+			cameraComponent._planes[0] = glm::normalize(rowW + rowX);
+			cameraComponent._planes[1] = glm::normalize(rowW - rowX);
+			cameraComponent._planes[2] = glm::normalize(rowW + rowY);
+			cameraComponent._planes[3] = glm::normalize(rowW - rowY);
+			cameraComponent._planes[4] = glm::normalize(rowW + rowZ);
+			cameraComponent._planes[5] = glm::normalize(rowW - rowZ);
+
+			for(uint i = 0; i < 6; ++i){
+				glm::vec3 normal(cameraComponent._planes[i].x, cameraComponent._planes[i].y, cameraComponent._planes[i].z);
+				cameraComponent._planes[i] = -cameraComponent._planes[i] / glm::length(normal);
 			}
 		}
 		void _updateCurrentScene(const float& dt){
@@ -257,22 +278,8 @@ ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
 }
 
 
-ComponentBaseClass::ComponentBaseClass(Entity* owner){
-	m_Owner = owner;
-}
-ComponentBaseClass::ComponentBaseClass(uint entityID){
-	m_Owner = componentManager->_getEntity(entityID);
-}
+ComponentBaseClass::ComponentBaseClass(){}
 ComponentBaseClass::~ComponentBaseClass(){}
-void ComponentBaseClass::setOwner(Entity* owner){
-	m_Owner = owner;
-}
-void ComponentBaseClass::setOwner(uint entityID){
-	m_Owner = componentManager->_getEntity(entityID);
-}
-
-
-
 
 epriv::ComponentBodyBaseClass::ComponentBodyBaseClass(epriv::ComponentBodyType::Type type){ _type = type; }
 epriv::ComponentBodyBaseClass::~ComponentBodyBaseClass(){}
@@ -281,7 +288,7 @@ epriv::ComponentBodyType::Type epriv::ComponentBodyBaseClass::getBodyType(){ ret
 
 #pragma region BasicBody
 
-ComponentBasicBody::ComponentBasicBody(Entity* owner):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::BasicBody){
+ComponentBasicBody::ComponentBasicBody():ComponentBaseClass(),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::BasicBody){
 	_position = glm::vec3(0.0f);
 	_scale = glm::vec3(1.0f);
 	_rotation = glm::quat();
@@ -335,7 +342,7 @@ void ComponentBasicBody::setScale(float x,float y,float z){
 
 #pragma region Camera
 
-ComponentCamera::ComponentCamera(Entity* owner){
+ComponentCamera::ComponentCamera():ComponentBaseClass(){
 	_eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
 	_angle = glm::radians(60.0f); _aspectRatio = Resources::getWindowSize().x/(float)Resources::getWindowSize().y;
 	_nearPlane = 0.1f; _farPlane = 3000.0f;
@@ -343,14 +350,14 @@ ComponentCamera::ComponentCamera(Entity* owner){
 	_viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
 	_type = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(Entity* owner,float angle,float aspectRatio,float nearPlane,float farPlane){
+ComponentCamera::ComponentCamera(float angle,float aspectRatio,float nearPlane,float farPlane):ComponentBaseClass(){
 	_eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
 	_angle = glm::radians(angle); _aspectRatio = aspectRatio; _nearPlane = nearPlane; _farPlane = farPlane;
 	_projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
 	_viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
 	_type = Type::Perspective;
 }
-ComponentCamera::ComponentCamera(Entity* owner,float left,float right,float bottom,float top,float nearPlane,float farPlane){
+ComponentCamera::ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane):ComponentBaseClass(){
 	_eye = glm::vec3(0.0f); _up = glm::vec3(0.0f,1.0f,0.0f);
 	_left = left; _right = right; _bottom = bottom; _top = top; _nearPlane = nearPlane; _farPlane = farPlane;
 	_projectionMatrix = glm::ortho(_left,_right,_bottom,_top,_nearPlane,_farPlane);
@@ -360,24 +367,6 @@ ComponentCamera::ComponentCamera(Entity* owner,float left,float right,float bott
 ComponentCamera::~ComponentCamera(){
 }
 void ComponentCamera::update(){
-	//update view frustrum
-    glm::mat4 vp = _projectionMatrix * _viewMatrix;
-    glm::vec4 rowX = glm::row(vp, 0);
-    glm::vec4 rowY = glm::row(vp, 1);
-    glm::vec4 rowZ = glm::row(vp, 2);
-    glm::vec4 rowW = glm::row(vp, 3);
-
-    _planes[0] = glm::normalize(rowW + rowX);
-    _planes[1] = glm::normalize(rowW - rowX);
-    _planes[2] = glm::normalize(rowW + rowY);
-    _planes[3] = glm::normalize(rowW - rowY);
-    _planes[4] = glm::normalize(rowW + rowZ);
-    _planes[5] = glm::normalize(rowW - rowZ);
-
-    for(uint i = 0; i < 6; ++i){
-        glm::vec3 normal(_planes[i].x, _planes[i].y, _planes[i].z);
-        _planes[i] = -_planes[i] / glm::length(normal);
-    }
 }
 void ComponentCamera::resize(uint width, uint height){
     if(_type == Type::Perspective){
@@ -431,13 +420,13 @@ class ComponentModel::impl final{
 };
 
 
-ComponentModel::ComponentModel(Entity* owner,Handle& meshHandle,Handle& materialHandle):ComponentBaseClass(owner),m_i(new impl){
+ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle):ComponentBaseClass(),m_i(new impl){
 	if(!meshHandle.null() && !materialHandle.null()){
 		models.push_back( epriv::MeshMaterialPair(meshHandle,materialHandle) );
 	}
 	m_i->calculateRadius(this);
 }
-ComponentModel::ComponentModel(Entity* owner,Mesh* mesh,Material* material):ComponentBaseClass(owner),m_i(new impl){
+ComponentModel::ComponentModel(Mesh* mesh,Material* material):ComponentBaseClass(),m_i(new impl){
 	if(mesh && material){
 		models.push_back( epriv::MeshMaterialPair(mesh,material) );
 	}
@@ -488,7 +477,7 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 
 #pragma region RigidBody
 
-ComponentRigidBody::ComponentRigidBody(Entity* owner,Collision* collision):ComponentBaseClass(owner),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
+ComponentRigidBody::ComponentRigidBody(Collision* collision):ComponentBaseClass(),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
 	_rigidBody = nullptr;
 	_motionState = nullptr;
 
@@ -740,7 +729,6 @@ void ComponentRigidBody::setMass(float mass){
 
 
 
-
 Entity::Entity(){
 	m_ParentID = m_ID = std::numeric_limits<uint>::max();
 	m_Components = new uint[ComponentType::_TOTAL];
@@ -778,24 +766,28 @@ void Entity::addComponent(ComponentBasicBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
 	componentManager->m_i->m_ComponentBasicBodies.push_back(component);
+	component->m_Owner = this;
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentRigidBody* component){
 	if(m_Components[ComponentType::Body] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
 	componentManager->m_i->m_ComponentRigidBodies.push_back(component);
+	component->m_Owner = this;
 	m_Components[ComponentType::Body] = handle.index;
 }
 void Entity::addComponent(ComponentModel* component){
 	if(m_Components[ComponentType::Model] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Model);
 	componentManager->m_i->m_ComponentModels.push_back(component);
+	component->m_Owner = this;
 	m_Components[ComponentType::Model] = handle.index;
 }
 void Entity::addComponent(ComponentCamera* component){
 	if(m_Components[ComponentType::Camera] != -1) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Camera);
 	componentManager->m_i->m_ComponentCameras.push_back(component);
+	component->m_Owner = this;
 	m_Components[ComponentType::Camera] = handle.index;
 }
 
