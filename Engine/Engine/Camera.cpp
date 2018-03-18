@@ -18,27 +18,23 @@ using namespace std;
 
 class Camera::impl final{
     public:
-		ComponentBasicBody* m_BasicBody;
-		ComponentCamera* m_Camera;
-		Scene* m_Scene;
 		void _baseInit(Scene* scene, Camera* super){
-			m_BasicBody = new ComponentBasicBody();
-			m_Camera->lookAt(m_BasicBody->position(),m_BasicBody->position() + m_BasicBody->forward(),m_BasicBody->up());
+			super->m_BasicBody = new ComponentBasicBody();
+			super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
 			if(scene == nullptr)
 				scene = Resources::getCurrentScene();
-			m_Scene = scene;
 
-			super->addComponent(m_BasicBody);
-			super->addComponent(m_Camera);
+			super->addComponent(super->m_BasicBody);
+			super->addComponent(super->m_Camera);
 
-			m_Scene->addEntity(super);
+			scene->addEntity(super);
 		}
 		void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
-			m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
+			super->m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
 			_baseInit(scene,super);
 		}
 		void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera* super){		
-			m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
+			super->m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
             _baseInit(scene,super);
 		}
 };
@@ -51,20 +47,20 @@ Camera::Camera(float left, float right, float bottom, float top, float _near, fl
 }
 Camera::~Camera(){ 
 }
-glm::vec3 Camera::getPosition(){ return m_i->m_BasicBody->position(); }
-glm::quat Camera::getOrientation(){ return m_i->m_BasicBody->_rotation; }
-float Camera::getNear(){ return m_i->m_Camera->_nearPlane; }
-float Camera::getFar(){ return m_i->m_Camera->_farPlane; }
-glm::mat4 Camera::getViewProjectionInverse(){ return m_i->m_Camera->getViewProjectionInverse(); }
-glm::mat4 Camera::getProjection(){ return m_i->m_Camera->getProjection(); }
-glm::mat4 Camera::getView(){ return m_i->m_Camera->getView(); }
-glm::mat4 Camera::getViewInverse(){ return m_i->m_Camera->getViewInverse(); }
-glm::mat4 Camera::getProjectionInverse(){ return m_i->m_Camera->getProjectionInverse(); }
-glm::mat4 Camera::getViewProjection(){ return m_i->m_Camera->getViewProjection(); }
-glm::vec3 Camera::getViewVector(){ return m_i->m_Camera->getViewVector(); }
-glm::vec3 Camera::forward(){ return m_i->m_BasicBody->forward(); }
-glm::vec3 Camera::right(){ return m_i->m_BasicBody->right(); }
-glm::vec3 Camera::up(){ return m_i->m_BasicBody->up(); }
+glm::vec3 Camera::getPosition(){ return m_BasicBody->position(); }
+glm::quat Camera::getOrientation(){ return m_BasicBody->_rotation; }
+float Camera::getNear(){ return m_Camera->_nearPlane; }
+float Camera::getFar(){ return m_Camera->_farPlane; }
+glm::mat4 Camera::getViewProjectionInverse(){ return m_Camera->getViewProjectionInverse(); }
+glm::mat4 Camera::getProjection(){ return m_Camera->getProjection(); }
+glm::mat4 Camera::getView(){ return m_Camera->getView(); }
+glm::mat4 Camera::getViewInverse(){ return m_Camera->getViewInverse(); }
+glm::mat4 Camera::getProjectionInverse(){ return m_Camera->getProjectionInverse(); }
+glm::mat4 Camera::getViewProjection(){ return m_Camera->getViewProjection(); }
+glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
+glm::vec3 Camera::forward(){ return m_BasicBody->forward(); }
+glm::vec3 Camera::right(){ return m_BasicBody->right(); }
+glm::vec3 Camera::up(){ return m_BasicBody->up(); }
 float Camera::getDistance(Object* obj){
 	return glm::distance(obj->getPosition(),getPosition());
 }
@@ -72,11 +68,11 @@ float Camera::getDistance(glm::vec3 objPos){
 	return glm::distance(objPos,getPosition());
 }
 bool Camera::sphereIntersectTest(Object* obj){
-	return m_i->m_Camera->sphereIntersectTest(obj->getPosition(),obj->getRadius());
+	return m_Camera->sphereIntersectTest(obj->getPosition(),obj->getRadius());
 }
 bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
-	return m_i->m_Camera->sphereIntersectTest(pos,radius);
+	return m_Camera->sphereIntersectTest(pos,radius);
 }
 bool Camera::rayIntersectSphere(Object* obj){
-	return obj->rayIntersectSphere(m_i->m_BasicBody->position(),m_i->m_Camera->getViewVector());
+	return obj->rayIntersectSphere(m_BasicBody->position(),m_Camera->getViewVector());
 }

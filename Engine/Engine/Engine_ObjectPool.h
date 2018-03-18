@@ -41,8 +41,10 @@ namespace Engine{
 
 				void destruct(){
 					for(uint i = 0; i < MAX_ENTRIES; ++i){
-						delete(m_Pool[i].resource);
-						m_Pool[i].resource = nullptr;
+						if(m_Pool[i].resource){
+						    delete(m_Pool[i].resource);
+						    m_Pool[i].resource = nullptr;
+						}
 					}
 					delete[] m_Pool;
 				}
@@ -79,8 +81,10 @@ namespace Engine{
 					if(m_Pool[index].active == true){
 						m_Pool[index].nextFreeIndex = m_firstFreeEntry;
 						m_Pool[index].active = false;
-						delete(m_Pool[index].resource);
-						m_Pool[index].resource = nullptr;
+						if(m_Pool[index].resource != nullptr){
+						    delete(m_Pool[index].resource);
+						    m_Pool[index].resource = nullptr;
+						}
 						m_firstFreeEntry = index;
 						--m_activeEntryCount;		
 					}

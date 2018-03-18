@@ -82,6 +82,7 @@ void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
 }
 void update(float dt){
+
 	// update physics //////////////////////////////////////////
 	epriv::Core::m_Engine->m_TimeManager->stop_clock();
 
@@ -103,8 +104,8 @@ void update(float dt){
 	epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Game::onPreUpdate(dt);
     Game::update(dt);
+	Resources::getCurrentScene()->update(dt);
 	epriv::Core::m_Engine->m_ComponentManager->_update(dt);
-    Resources::getCurrentScene()->update(dt);
     epriv::Core::m_Engine->m_EventManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);

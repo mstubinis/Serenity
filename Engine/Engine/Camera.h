@@ -19,6 +19,9 @@ class Camera: public Entity{
     friend class LightProbe;
     private:
 		class impl; std::unique_ptr<impl> m_i;
+    protected:
+		ComponentBasicBody* m_BasicBody;
+		ComponentCamera* m_Camera;
     public:
         Camera(float,float,float,float,Scene* = nullptr);             // Perspective camera Constructor
         Camera(float,float,float,float,float,float,Scene* = nullptr); // Orthographic camera Constructor

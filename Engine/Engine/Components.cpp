@@ -18,8 +18,6 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
-#include <limits>
-
 using namespace Engine;
 using namespace std;
 
@@ -27,6 +25,18 @@ std::unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_Map;
 epriv::ObjectPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
 
 epriv::ComponentManager* componentManager = nullptr;
+
+template<typename E,typename B> void removeFromVector(std::vector<B*>& vector,E* element){
+	for(auto it = vector.begin(); it != vector.end();){
+		B* c = (*it);
+		if(c == element){
+			it = vector.erase(it);
+		}
+		else{
+			++it;
+		}
+	}
+}
 
 struct epriv::MeshMaterialPair final{
 	Mesh* _mesh;
@@ -120,13 +130,16 @@ class epriv::ComponentManager::impl final{
 			componentManager = epriv::Core::m_Engine->m_ComponentManager;
 		}
 		void _destruct(epriv::ComponentManager* super){
+			SAFE_DELETE(super->m_ComponentPool);
+			SAFE_DELETE(super->m_EntityPool);
+
+			//all components should be nuked when deleted from the component pool anyways
+			/*
 			for(auto c:m_ComponentBasicBodies) SAFE_DELETE(c);
 			for(auto c:m_ComponentRigidBodies) SAFE_DELETE(c);
 			for(auto c:m_ComponentModels)      SAFE_DELETE(c);
 			for(auto c:m_ComponentCameras)     SAFE_DELETE(c);
-
-			SAFE_DELETE(super->m_ComponentPool);
-			SAFE_DELETE(super->m_EntityPool);
+			*/
 		}
 
 		void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
@@ -163,7 +176,7 @@ class epriv::ComponentManager::impl final{
 		void _updateComponentCameras(const float& dt){
 			for(auto c:m_ComponentCameras){
 				_defaultUpdateCameraComponent(dt,*c);
-				c->update();
+				c->update(dt);
 			}
 		}
 		void _defaultUpdateCameraComponent(const float& dt,ComponentCamera& cameraComponent){
@@ -188,12 +201,7 @@ class epriv::ComponentManager::impl final{
 		}
 		void _updateCurrentScene(const float& dt){
 			Scene* currentScene = Resources::getCurrentScene();
-			for(auto entityID:currentScene->m_Entities){
-				Entity* e = componentManager->_getEntity(entityID);
-				if(e){//should not need this...
-				    e->update(dt);
-				}
-			}
+
 
 
 
@@ -210,18 +218,30 @@ class epriv::ComponentManager::impl final{
 					++it;
 				}
 			}
+
+
+			for(auto entityID:currentScene->m_Entities){
+				Entity* e = componentManager->_getEntity(entityID);
+				if(e){//should not need this...
+				    e->update(dt);
+				}
+			}
+
+
+
 			if(currentScene->m_Skybox != nullptr) currentScene->m_Skybox->update();
 		}
 		void _destroyQueuedEntities(epriv::ComponentManager* super){
 			for(auto e:m_EntitiesToBeDestroyed){
 				super->_deleteEntityImmediately(e);
 			}
+			vector_clear(m_EntitiesToBeDestroyed);
 		}
 		void _update(const float& dt,epriv::ComponentManager* super){
-			_updateComponentRigidBodies(dt);
-			_updateComponentBaseBodies(dt);
-
 			_updateCurrentScene(dt);
+			
+			_updateComponentBaseBodies(dt);
+	        _updateComponentRigidBodies(dt);
 
 			_updateComponentModels(dt);
 			_updateComponentCameras(dt);
@@ -247,20 +267,20 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
 	ComponentModel* model = nullptr; model = e->getComponent(model);
 	ComponentCamera* cam = nullptr; cam = e->getComponent(cam);
 	if(basicBody){
-		std::remove(m_i->m_ComponentBasicBodies.begin(),m_i->m_ComponentBasicBodies.end(),basicBody);
-		//std::remove(m_i->m_CurrentSceneComponentBasicBodies.begin(),m_i->m_ComponentBasicBodies.end(),basicBody);
+		removeFromVector(m_i->m_ComponentBasicBodies,basicBody);
+		//removeFromVector(m_i->m_CurrentSceneComponentBasicBodies,basicBody);
 	}
 	if(rigidBody){
-		std::remove(m_i->m_ComponentRigidBodies.begin(),m_i->m_ComponentRigidBodies.end(),rigidBody);
-		//std::remove(m_i->m_CurrentSceneComponentRigidBodies.begin(),m_i->m_CurrentSceneComponentRigidBodies.end(),rigidBody);
+		removeFromVector(m_i->m_ComponentRigidBodies,rigidBody);
+		//removeFromVector(m_i->m_CurrentSceneComponentRigidBodies,rigidBody);
 	}
 	if(model){
-		std::remove(m_i->m_ComponentModels.begin(),m_i->m_ComponentModels.end(),model);
-		//std::remove(m_i->m_CurrentSceneComponentModels.begin(),m_i->m_CurrentSceneComponentModels.end(),model);
+		removeFromVector(m_i->m_ComponentModels,model);
+		//removeFromVector(m_i->m_CurrentSceneComponentModels,model);
 	}
 	if(cam){
-		std::remove(m_i->m_ComponentCameras.begin(),m_i->m_ComponentCameras.end(),cam);
-		//std::remove(m_i->m_CurrentSceneComponentCameras.begin(),m_i->m_CurrentSceneComponentCameras.end(),cam);
+		removeFromVector(m_i->m_ComponentCameras,cam);
+		//removeFromVector(m_i->m_CurrentSceneComponentCameras,cam);
 	}
 	m_EntityPool->remove(e->m_ID);
 }
@@ -276,7 +296,31 @@ Entity* epriv::ComponentManager::_getEntity(uint id){
 ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
 	ComponentBaseClass* c; m_ComponentPool->getAsFast(index,c); return c;
 }
-
+void epriv::ComponentManager::_removeComponent(uint componentID){
+	ComponentBaseClass* component = nullptr;
+	m_ComponentPool->getAsFast(componentID,component);
+    epriv::ComponentManager::_removeComponent(component);
+}
+void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
+	if(component){
+		ComponentBasicBody* basicBody = dynamic_cast<ComponentBasicBody*>(component);
+		ComponentRigidBody* rigidBody = dynamic_cast<ComponentRigidBody*>(component);
+		ComponentModel* model = dynamic_cast<ComponentModel*>(component);
+		ComponentCamera* cam = dynamic_cast<ComponentCamera*>(component);
+		if(basicBody){
+			removeFromVector(m_i->m_ComponentBasicBodies,basicBody);
+		}
+		if(rigidBody){
+			removeFromVector(m_i->m_ComponentRigidBodies,rigidBody);
+		}
+		if(model){
+			removeFromVector(m_i->m_ComponentModels,model);
+		}
+		if(cam){
+			removeFromVector(m_i->m_ComponentCameras,cam);
+		}
+	}
+}
 
 ComponentBaseClass::ComponentBaseClass(){}
 ComponentBaseClass::~ComponentBaseClass(){}
@@ -306,6 +350,7 @@ glm::vec3 ComponentBasicBody::forward(){ return _forward; }
 glm::vec3 ComponentBasicBody::right(){ return _right; }
 glm::vec3 ComponentBasicBody::up(){ return _up; }
 glm::mat4 ComponentBasicBody::modelMatrix(){ return _modelMatrix; }
+glm::quat ComponentBasicBody::rotation(){ return _rotation; }
 void ComponentBasicBody::translate(glm::vec3& translation){ ComponentBasicBody::translate(translation.x,translation.y,translation.z); }
 void ComponentBasicBody::translate(float x,float y,float z){
 	_position.x += x; _position.y += y; _position.z += z;
@@ -366,7 +411,7 @@ ComponentCamera::ComponentCamera(float left,float right,float bottom,float top,f
 }
 ComponentCamera::~ComponentCamera(){
 }
-void ComponentCamera::update(){
+void ComponentCamera::update(const float& dt){
 }
 void ComponentCamera::resize(uint width, uint height){
     if(_type == Type::Perspective){
@@ -387,7 +432,6 @@ void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
 	_eye = eye;
 	_up = up;
 	_viewMatrix = glm::lookAt(_eye,forward,_up);
-	ComponentCamera::update();
 }
 glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
 glm::mat4 ComponentCamera::getProjection(){ return _projectionMatrix; }
@@ -763,33 +807,74 @@ void Entity::addChild(Entity* child){
 	child->m_ParentID = this->m_ID;
 }
 void Entity::addComponent(ComponentBasicBody* component){
-	if(m_Components[ComponentType::Body] != -1) return;
+	uint& componentID = m_Components[ComponentType::Body];
+	if(componentID != std::numeric_limits<uint>::max()) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
 	componentManager->m_i->m_ComponentBasicBodies.push_back(component);
 	component->m_Owner = this;
-	m_Components[ComponentType::Body] = handle.index;
+	componentID = handle.index;
 }
 void Entity::addComponent(ComponentRigidBody* component){
-	if(m_Components[ComponentType::Body] != -1) return;
+	uint& componentID = m_Components[ComponentType::Body];
+	if(componentID != std::numeric_limits<uint>::max()) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Body);
 	componentManager->m_i->m_ComponentRigidBodies.push_back(component);
 	component->m_Owner = this;
-	m_Components[ComponentType::Body] = handle.index;
+	componentID = handle.index;
 }
 void Entity::addComponent(ComponentModel* component){
-	if(m_Components[ComponentType::Model] != -1) return;
+	uint& componentID = m_Components[ComponentType::Model];
+	if(componentID != std::numeric_limits<uint>::max()) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Model);
 	componentManager->m_i->m_ComponentModels.push_back(component);
 	component->m_Owner = this;
-	m_Components[ComponentType::Model] = handle.index;
+	componentID = handle.index;
 }
 void Entity::addComponent(ComponentCamera* component){
-	if(m_Components[ComponentType::Camera] != -1) return;
+	uint& componentID = m_Components[ComponentType::Camera];
+	if(componentID != std::numeric_limits<uint>::max()) return;
 	Handle handle = componentManager->m_ComponentPool->add(component,ComponentType::Camera);
 	componentManager->m_i->m_ComponentCameras.push_back(component);
 	component->m_Owner = this;
-	m_Components[ComponentType::Camera] = handle.index;
+	componentID = handle.index;
 }
+
+
+
+void Entity::removeComponent(ComponentBasicBody* component){
+	uint& componentID = m_Components[ComponentType::Body];
+	if(componentID == std::numeric_limits<uint>::max()) return;
+	component->m_Owner = nullptr;
+	removeFromVector(componentManager->m_i->m_ComponentBasicBodies,component);
+	componentManager->m_ComponentPool->remove(componentID);
+	componentID = std::numeric_limits<uint>::max();
+}
+void Entity::removeComponent(ComponentRigidBody* component){
+	uint& componentID = m_Components[ComponentType::Body];
+	if(componentID == std::numeric_limits<uint>::max()) return;
+	component->m_Owner = nullptr;
+	removeFromVector(componentManager->m_i->m_ComponentRigidBodies,component);
+	componentManager->m_ComponentPool->remove(componentID);
+	componentID = std::numeric_limits<uint>::max();
+}
+void Entity::removeComponent(ComponentModel* component){
+	uint& componentID = m_Components[ComponentType::Model];
+	if(componentID == std::numeric_limits<uint>::max()) return;
+	component->m_Owner = nullptr;
+	removeFromVector(componentManager->m_i->m_ComponentModels,component);
+	componentManager->m_ComponentPool->remove(componentID);
+	componentID = std::numeric_limits<uint>::max();
+}
+void Entity::removeComponent(ComponentCamera* component){
+	uint& componentID = m_Components[ComponentType::Camera];
+	if(componentID == std::numeric_limits<uint>::max()) return;
+	component->m_Owner = nullptr;
+	removeFromVector(componentManager->m_i->m_ComponentCameras,component);
+	componentManager->m_ComponentPool->remove(componentID);
+	componentID = std::numeric_limits<uint>::max();
+}
+
+
 
 
 

@@ -12,6 +12,7 @@
 #include <typeinfo>
 #include <typeindex>
 #include <unordered_map>
+#include <limits>
 
 typedef unsigned int uint;
 
@@ -110,6 +111,8 @@ namespace Engine{
 				Entity* _getEntity(uint id);
 
 				ComponentBaseClass* _getComponent(uint index);
+				void _removeComponent(uint componentID);
+				void _removeComponent(ComponentBaseClass* component);
 		};
 		class ComponentBodyType{public:enum Type{
 			BasicBody,
@@ -176,6 +179,7 @@ class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::Compo
 		glm::vec3 right();
 		glm::vec3 up();
 		glm::mat4 modelMatrix();
+		glm::quat rotation();
 
 		void alignTo(glm::vec3 direction,float speed = 0);
 
@@ -233,7 +237,6 @@ class ComponentCamera: public ComponentBaseClass{
 	friend class ::ComponentModel;
 	friend class ::Camera;
     private:
-
 		enum Type{ Perspective, Orthographic, };
 		Type _type;
 		glm::vec3 _eye,_up;
@@ -248,7 +251,7 @@ class ComponentCamera: public ComponentBaseClass{
 		ComponentCamera(float left,float right,float bottom,float top,float nearPlane,float farPlane);
 		~ComponentCamera();
 
-		void update();
+		virtual void update(const float& dt);
 		void resize(uint width,uint height);
 		void lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up);
 
@@ -291,27 +294,43 @@ class Entity{
 		void addComponent(ComponentModel* component); 
 		void addComponent(ComponentCamera* component);
 
-		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
+		void removeComponent(ComponentBasicBody* component); 
+		void removeComponent(ComponentRigidBody* component); 
+		void removeComponent(ComponentModel* component); 
+		void removeComponent(ComponentCamera* component);
 
+		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
 		ComponentBasicBody* getComponent(ComponentBasicBody* = nullptr);
 		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
 		ComponentModel* getComponent(ComponentModel* = nullptr);
 		ComponentCamera* getComponent(ComponentCamera* = nullptr);
-
+		/*
 		//test this out
 		template<typename T> void addComponent(T* component){
-			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
-			if(m_Components[index] != -1) return;
-			Handle handle = Engine::epriv::ComponentManager::m_ComponentPool->add(component,index);
-			m_Components[index] = handle.index;
+			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
+			if(m_Components[type] != std::numeric_limits<uint>::max()) return;
+			Handle handle = Engine::epriv::ComponentManager::m_ComponentPool->add(component,type);
 			component->m_Owner = this;
-
+			m_Components[type] = handle.index;
 		}
+		*/
 		//this wont work for body components i think. test this out
 		template<typename T> T* getComponent(){
-			uint index = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
-			T* c = nullptr; Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(m_Components[index],c); return c;
+			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
+			T* c = nullptr; Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(m_Components[type],c); return c;
 		}
+		//this wont work for body components i think. test this out
+		/*
+		template<typename T> void removeComponent(T* component){
+			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
+			if(m_Components[type] == std::numeric_limits<uint>::max()) return;
+			uint componentID = m_Components[type];
+			component->m_Owner = nullptr;
+			Engine::epriv::ComponentManager::_removeComponent(componentID);
+			Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
+			m_Components[type] = std::numeric_limits<uint>::max();
+		}
+		*/
 };
 
 
