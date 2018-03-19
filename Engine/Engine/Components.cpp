@@ -282,6 +282,9 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
 		removeFromVector(m_i->m_ComponentCameras,cam);
 		//removeFromVector(m_i->m_CurrentSceneComponentCameras,cam);
 	}
+	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
+		m_ComponentPool->remove(e->m_Components[i]);
+	}
 	m_EntityPool->remove(e->m_ID);
 }
 void epriv::ComponentManager::_addEntityToBeDestroyed(uint id){ Entity* e; m_EntityPool->getAsFast(id,e); _addEntityToBeDestroyed(e); }
@@ -782,11 +785,7 @@ Entity::Entity(){
 }
 Entity::~Entity(){
 	m_ParentID = m_ID = std::numeric_limits<uint>::max();
-	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-		componentManager->m_ComponentPool->remove(m_Components[i]);
-	}
 	delete[] m_Components;
-
 }
 void Entity::destroy(bool immediate){
 	if(!immediate){

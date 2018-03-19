@@ -38,12 +38,16 @@ void GameCameraComponent::update(const float& dt){
             float targetRadius = m_Target->getRadius();
 
 
-			glm::vec3 pos = m_Target->getPosition() + ((m_Target->getForward()*glm::length(targetRadius)*1.7f)+ m_Target->getUp()*glm::length(targetRadius)*0.3f)*(1.0f + m_OrbitRadius);
+			glm::vec3 pos = m_Target->getPosition() + ((m_Target->getForward() * glm::length(targetRadius) * 1.7f)+ m_Target->getUp() * glm::length(targetRadius) * 0.3f) * (1.0f + m_OrbitRadius);
 			pos -= glm::vec3(-0.00001f,-0.00001f,0.00001f);//for some reason this is needed to remove lighting bugs...
 
 			m_Body->setPosition(pos);
 
-            this->lookAt(m_Body->position(),m_Target->getPosition()-(m_Target->getForward()*50.0f),m_Target->getUp());
+            lookAt(
+				pos,
+				m_Target->getPosition() - m_Target->getForward() * 50.0f,
+				m_Target->getUp()
+			);
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
@@ -56,9 +60,15 @@ void GameCameraComponent::update(const float& dt){
                 ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*2.7f)* (1.0f + m_OrbitRadius))
                 - m_Player->getUp() * glm::length(m_Player->getRadius())*0.3f));
 
-			m_Body->setPosition(model[3][0],model[3][1],model[3][2]);
+			glm::vec3 pos(model[3][0],model[3][1],model[3][2]);
 
-            this->lookAt(m_Body->position(),m_Target->getPosition(),m_Player->getUp());
+			m_Body->setPosition(pos);
+
+            lookAt(
+				pos,
+				m_Target->getPosition(),
+				m_Player->getUp()
+			);
             break;
         }
         case CAMERA_STATE_ORBIT:{
@@ -68,20 +78,26 @@ void GameCameraComponent::update(const float& dt){
 
             m_Body->rotate(-Engine::getMouseDifference().y * 0.02f * dt, -Engine::getMouseDifference().x * 0.02f * dt,0);
 
-            glm::vec3 pos = (glm::vec3(0,0,1)*glm::length(m_Target->getRadius())*0.37f) + (glm::vec3(0,0,1)*glm::length(m_Target->getRadius() * (1.0f + m_OrbitRadius)));
+            glm::vec3 pos = (glm::vec3(0,0,1) * glm::length(m_Target->getRadius()) * 0.37f) + (glm::vec3(0,0,1) * glm::length(m_Target->getRadius() * (1.0f + m_OrbitRadius)));
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model,m_Target->getPosition());
             model *= glm::mat4_cast(m_Body->rotation());
             model = glm::translate(model,pos);
 
-			m_Body->setPosition(model[3][0],model[3][1],model[3][2]);
+			pos = glm::vec3(model[3][0],model[3][1],model[3][2]);
 
-            this->lookAt(m_Body->position(),m_Target->getPosition(),m_Body->up());
+			m_Body->setPosition(pos);
+
+            lookAt(
+				pos,
+				m_Target->getPosition(),
+				m_Body->up()
+			);
             break;
         }
         case CAMERA_STATE_FREEFORM:{
-            this->lookAt(m_Body->position(),m_Body->position() + m_Body->forward(), m_Body->up());
+            lookAt(m_Body->position(),m_Body->position() + m_Body->forward(), m_Body->up());
             break;
         }
     }
