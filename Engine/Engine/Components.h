@@ -40,10 +40,8 @@ namespace Engine{
 		class ComponentManager;
 	};
 };
-
 class EntityType{public: enum Type{
 	Basic,
-
 
 _TOTAL,};};
 class ComponentType{public:enum Type{
@@ -61,6 +59,17 @@ class ComponentBaseClass{
 		ComponentBaseClass();
 		virtual ~ComponentBaseClass();
 };
+template<typename E,typename B> void removeFromVector(std::vector<B*>& vector,E* element){
+	for(auto it = vector.begin(); it != vector.end();){
+		B* c = (*it);
+		if(c == element){
+			it = vector.erase(it);
+		}
+		else{
+			++it;
+		}
+	}
+}
 
 namespace Engine{
 	namespace epriv{
@@ -70,6 +79,7 @@ namespace Engine{
 
 		class ComponentTypeRegistry final{
 			friend class ::Entity;
+			friend class ::Engine::epriv::ComponentManager;
 			private:
 				static std::unordered_map<std::type_index,uint> m_Map;
 				uint m_NextIndex;
@@ -79,21 +89,24 @@ namespace Engine{
 				}
 				~ComponentTypeRegistry(){
 				}
-
 				template<typename T> void emplace(){
 					m_Map.emplace(std::type_index(typeid(T)),m_NextIndex);
 					++m_NextIndex;
 				}
+				template<typename T> void emplaceVector(){
+					std::vector<ComponentBaseClass*> v;
+					ComponentManager::m_ComponentVectors.emplace(std::type_index(typeid(T)),v);
+				}
 		};
-
-
 		class ComponentManager final{
 			friend class ::Entity;
 			friend class ::Scene;
+			friend class ::Engine::epriv::ComponentTypeRegistry;
 		    private:
 				class impl;
 				ObjectPool<Entity>*                    m_EntityPool;
 				static ObjectPool<ComponentBaseClass>* m_ComponentPool;
+				static std::unordered_map<std::type_index, std::vector<ComponentBaseClass*>> m_ComponentVectors;
 		    public:
 				std::unique_ptr<impl> m_i;
 
@@ -132,8 +145,6 @@ namespace Engine{
 	};
 };
 
-
-
 class ComponentModel: public ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentRigidBody;
@@ -160,7 +171,6 @@ class ComponentModel: public ComponentBaseClass{
 
 		bool rayIntersectSphere(ComponentCamera* camera);
 };
-
 
 class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
@@ -231,7 +241,6 @@ class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::Compo
 		void applyTorqueImpulse(float x,float y,float z,bool local=true);    void applyTorqueImpulse(glm::vec3 torqueImpulse,bool local=true);
 };
 
-
 class ComponentCamera: public ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentModel;
@@ -266,8 +275,6 @@ class ComponentCamera: public ComponentBaseClass{
 		bool sphereIntersectTest(glm::vec3 position,float radius);
 };
 
-
-
 class Entity{
 	friend class ::Scene;
 	friend class ::Engine::epriv::ComponentManager;
@@ -285,54 +292,36 @@ class Entity{
 
 		void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the frame before rendering logic, but can be overrided to be deleted immediately after the call
         Entity* parent();
-
-
 		void addChild(Entity* child);
 
-		void addComponent(ComponentBasicBody* component); 
-		void addComponent(ComponentRigidBody* component); 
-		void addComponent(ComponentModel* component); 
-		void addComponent(ComponentCamera* component);
-
-		void removeComponent(ComponentBasicBody* component); 
-		void removeComponent(ComponentRigidBody* component); 
-		void removeComponent(ComponentModel* component); 
-		void removeComponent(ComponentCamera* component);
-
-		Engine::epriv::ComponentBodyBaseClass* getComponent(Engine::epriv::ComponentBodyBaseClass* = nullptr);
-		ComponentBasicBody* getComponent(ComponentBasicBody* = nullptr);
-		ComponentRigidBody* getComponent(ComponentRigidBody* = nullptr);
-		ComponentModel* getComponent(ComponentModel* = nullptr);
-		ComponentCamera* getComponent(ComponentCamera* = nullptr);
-		/*
-		//test this out
-		template<typename T> void addComponent(T* component){
-			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
-			if(m_Components[type] != std::numeric_limits<uint>::max()) return;
-			Handle handle = Engine::epriv::ComponentManager::m_ComponentPool->add(component,type);
-			component->m_Owner = this;
-			m_Components[type] = handle.index;
-		}
-		*/
-		//this wont work for body components i think. test this out
 		template<typename T> T* getComponent(){
-			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
-			T* c = nullptr; Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(m_Components[type],c); return c;
+			std::type_index typeIndex = std::type_index(typeid(T));
+			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[typeIndex];
+			T* c = nullptr;
+			Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(m_Components[type],c);
+			return c;
 		}
-		//this wont work for body components i think. test this out
-		/*
+		template<typename T> void addComponent(T* component){
+			std::type_index typeIndex = std::type_index(typeid(T));
+			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[typeIndex];
+			uint& componentID = m_Components[type];
+			if(componentID != std::numeric_limits<uint>::max()) return;
+			Handle handle = Engine::epriv::ComponentManager::m_ComponentPool->add(component,type);
+			std::vector<ComponentBaseClass*>& v = Engine::epriv::ComponentManager::m_ComponentVectors[typeIndex];
+			v.push_back(component);
+			component->m_Owner = this;
+			componentID = handle.index;
+		}
 		template<typename T> void removeComponent(T* component){
-			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[  std::type_index(typeid(T))  ];
-			if(m_Components[type] == std::numeric_limits<uint>::max()) return;
-			uint componentID = m_Components[type];
+			std::type_index typeIndex = std::type_index(typeid(T));
+			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[typeIndex];
+			uint& componentID = m_Components[type];
+			if(componentID == std::numeric_limits<uint>::max()) return;
 			component->m_Owner = nullptr;
-			Engine::epriv::ComponentManager::_removeComponent(componentID);
+			std::vector<ComponentBaseClass*>& v = Engine::epriv::ComponentManager::m_ComponentVectors[typeIndex];
+			removeFromVector(v,component);
 			Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
-			m_Components[type] = std::numeric_limits<uint>::max();
+			componentID = std::numeric_limits<uint>::max();
 		}
-		*/
 };
-
-
-
 #endif
