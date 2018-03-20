@@ -49,11 +49,11 @@ namespace Engine{
 			"HeightmapTexture",
 		};
 		struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-			Material* material = (Material*)r;
+			Material& material = *((Material*)r);
 			glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
 			for(uint i = 0; i < MaterialComponentType::Number; ++i){
-				if(material->getComponents().count(i)){
-					MaterialComponent* component = material->getComponents().at(i);
+				if(material.getComponents().count(i)){
+					MaterialComponent* component = material.getComponents().at(i);
 					if(component->texture() != nullptr && component->texture()->address() != 0){
 						//enable
 						if     (i == 0) { first.x = 1.0f; }
@@ -75,11 +75,11 @@ namespace Engine{
 					}
 				}
 			}
-			Renderer::sendUniform1iSafe("Shadeless",int(material->shadeless()));
-			Renderer::sendUniform3fSafe("Material_F0",material->f0().r,material->f0().g,material->f0().b);
-			Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material->glow(),material->ao(),material->metalness(),material->smoothness());
+			Renderer::sendUniform1iSafe("Shadeless",int(material.shadeless()));
+			Renderer::sendUniform3fSafe("Material_F0",material.f0().r,material.f0().g,material.f0().b);
+			Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
 
-			Renderer::sendUniform1fSafe("matID",float(material->id()));
+			Renderer::sendUniform1fSafe("matID",float(material.id()));
 			Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
 			Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
 			Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);

@@ -20,9 +20,9 @@ using namespace Engine;
 using namespace std;
 
 struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance* i = (MeshInstance*)r;
+    MeshInstance& i = *((MeshInstance*)r);
 
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(i.parent()->name());
 
     Planet* obj = (Planet*)(o.lock().get());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
@@ -58,8 +58,8 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     else{
         Renderer::sendUniform1i("fromAtmosphere", 0);
     }
-    Renderer::sendUniform4fSafe("Object_Color",i->color());
-    Renderer::sendUniform3fSafe("Gods_Rays_Color",i->godRaysColor());
+    Renderer::sendUniform4fSafe("Object_Color",i.color());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
 
     Renderer::sendUniform1i("nSamples", numberSamples);
     Renderer::sendUniform1f("fSamples", float(numberSamples));   
@@ -93,7 +93,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 
-        i->mesh()->render();
+        i.mesh()->render();
 
         if(camHeight > outerRadius){ 
 			program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
@@ -147,7 +147,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         Renderer::sendUniform1f("g",g);
         Renderer::sendUniform1f("g2", g*g);
         Renderer::sendUniform1f("fExposure",2.0f);
-        i->mesh()->render();
+        i.mesh()->render();
         Renderer::Settings::cullFace(GL_BACK);
         Renderer::GLDisable(GLState::BLEND);
     }
@@ -165,7 +165,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f));
         Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
 		Renderer::sendUniform3f("v3LightPos", lightPos);
-        i->mesh()->render();
+        i.mesh()->render();
     }
     /*
     shader = Resources::getShaderProgram("Deferred")->program();

@@ -81,8 +81,8 @@ void Engine::init(const char* name,uint w,uint h){
 void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
 }
-void update(float dt){
 
+void updatePhysics(float dt){
 	// update physics //////////////////////////////////////////
 	epriv::Core::m_Engine->m_TimeManager->stop_clock();
 
@@ -95,11 +95,11 @@ void update(float dt){
 		++maxSubSteps;
 		if(dt < (maxSubSteps * minStep)) break;
 	}
-
 	epriv::Core::m_Engine->m_PhysicsManager->_update(dt,maxSubSteps,minStep);
 	epriv::Core::m_Engine->m_TimeManager->calculate_physics();
 	////////////////////////////////////////////////////////////
-
+}
+void updateLogic(float dt){
 	// update logic   //////////////////////////////////////////
 	epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Game::onPreUpdate(dt);
@@ -112,11 +112,25 @@ void update(float dt){
 
 	epriv::Core::m_Engine->m_TimeManager->calculate_logic();
 	////////////////////////////////////////////////////////////
+}
+void updateSounds(float dt){
 	// update sounds ///////////////////////////////////////////
 	epriv::Core::m_Engine->m_TimeManager->stop_clock();
 	epriv::Core::m_Engine->m_SoundManager->_update(dt);
 	epriv::Core::m_Engine->m_TimeManager->calculate_sounds();
 	////////////////////////////////////////////////////////////
+}
+void update(float dt){
+	/*
+	epriv::threading::addJob(&updatePhysics,dt);
+	epriv::threading::addJob(&updateLogic,dt);
+	epriv::threading::addJob(&updateSounds,dt);
+	epriv::threading::waitForAll();
+	*/
+	updatePhysics(dt);
+	updateLogic(dt);
+	updateSounds(dt);
+
 }
 
 void render(){

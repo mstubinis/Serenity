@@ -1434,7 +1434,7 @@ class epriv::RenderManager::impl final{
 				current_bound_rbo = r;
 			}
 		}
-		void _renderTextures(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+		void _renderTextures(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
 			Mesh::Plane->bind();
 			for(auto item:m_TexturesToBeRendered){
@@ -1463,7 +1463,7 @@ class epriv::RenderManager::impl final{
 			Mesh::Plane->unbind();
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->unbind();
 		}
-		void _renderText(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+		void _renderText(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
 			for(auto item:m_FontsToBeRendered){
 				bindTexture("DiffuseTexture",item.font->getFontData()->getGlyphTexture(),0);
@@ -1496,15 +1496,15 @@ class epriv::RenderManager::impl final{
 			}
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->unbind();
 		}
-		void _passGeometry(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
+		void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
 			Scene* scene = Resources::getCurrentScene();
 			glm::vec3 clear = scene->getBackgroundColor();
 			const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
 	
 			if(godRays)
-				gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+				gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 			else
-				gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+				gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
 
 			Settings::clear(true,true,true);
 			glDepthFunc(GL_LEQUAL);
@@ -1520,12 +1520,12 @@ class epriv::RenderManager::impl final{
 			glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
 			//TODO: move skybox rendering to the last after moving planetary atmosphere to forward rendering pass
-			gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+			gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
 			_renderSkybox(scene->skybox());
 
 
 			if(godRays)
-				gbuffer->start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+				gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 
 			//RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
@@ -1577,7 +1577,7 @@ class epriv::RenderManager::impl final{
 
 			//RENDER FOREGROUND OBJECTS HERE
 		}
-		void _passForwardRendering(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
+		void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
 			Scene* scene = Resources::getCurrentScene();
 
 			for(auto shaderProgram:m_ForwardPassShaderPrograms){
@@ -1612,11 +1612,11 @@ class epriv::RenderManager::impl final{
 				shaderProgram->unbind();}
 			}
 		}
-		void _passCopyDepth(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+		void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
 			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth)->bind();
 
-			bindTexture("gDepthMap",gbuffer->getTexture(GBufferType::Depth),0);
+			bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),0);
 
 			_renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
@@ -1624,17 +1624,17 @@ class epriv::RenderManager::impl final{
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth)->unbind();
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 		}
-		void _passLighting(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,bool mainRenderFunc){
+		void _passLighting(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,bool mainRenderFunc){
 			Scene* s = Resources::getCurrentScene();
     
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
 
-			glm::mat4 invVP = c->getViewProjectionInverse();
-			glm::mat4 invP = glm::inverse(c->getProjection());
-			glm::vec3 campos = c->getPosition();
-			float cNear = c->getNear(); float cFar = c->getFar();
+			glm::mat4 invVP = c.getViewProjectionInverse();
+			glm::mat4 invP = glm::inverse(c.getProjection());
+			glm::vec3 campos = c.getPosition();
+			float cNear = c.getNear(); float cFar = c.getFar();
     
-			sendUniformMatrix4fSafe("VP",c->getViewProjection());
+			sendUniformMatrix4fSafe("VP",c.getViewProjection());
 			sendUniformMatrix4fSafe("invVP",invVP);
 			sendUniformMatrix4fSafe("invP",invP);
 			sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,gamma);
@@ -1643,10 +1643,10 @@ class epriv::RenderManager::impl final{
 
 			sendUniform4fSafe("ScreenData",cNear,cFar,(float)fbufferWidth,(float)fbufferHeight);
 
-			bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0);
-			bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),1);
-			bindTextureSafe("gMiscMap",gbuffer->getTexture(GBufferType::Misc),2);
-			bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),3);
+			bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
+			bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
+			bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
+			bindTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
 
 			for (auto light:s->lights()){
 				light->lighten();
@@ -1662,9 +1662,9 @@ class epriv::RenderManager::impl final{
 				sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 				sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,gamma);
 				sendUniform4fSafe("ScreenData",cNear,cFar,float(fbufferWidth),float(fbufferHeight));
-				bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0);
-				bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),1);
-				bindTextureSafe("gDepthMap",gbuffer->getTexture(GBufferType::Depth),2);
+				bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
+				bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
+				bindTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
 
 				SkyboxEmpty* skybox = s->skybox();
 
@@ -1696,19 +1696,19 @@ class epriv::RenderManager::impl final{
 			}
 			GLDisable(GLState::STENCIL_TEST);
 		}
-		void _passSSAO(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
+		void _passSSAO(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->bind();
 
 			sendUniform1iSafe("doSSAO",int(ssao));
 			sendUniform1iSafe("doBloom",int(bloom));
 
-			glm::vec3 camPos = c->getPosition();
-			sendUniformMatrix4fSafe("View",c->getView());
-			sendUniformMatrix4fSafe("Projection",c->getProjection());
-			sendUniformMatrix4fSafe("invVP",c->getViewProjectionInverse());
-			sendUniformMatrix4fSafe("invP",glm::inverse(c->getProjection()));
-			sendUniform1fSafe("nearz",c->getNear());
-			sendUniform1fSafe("farz",c->getFar());
+			glm::vec3 camPos = c.getPosition();
+			sendUniformMatrix4fSafe("View",c.getView());
+			sendUniformMatrix4fSafe("Projection",c.getProjection());
+			sendUniformMatrix4fSafe("invVP",c.getViewProjectionInverse());
+			sendUniformMatrix4fSafe("invP",glm::inverse(c.getProjection()));
+			sendUniform1fSafe("nearz",c.getNear());
+			sendUniform1fSafe("farz",c.getFar());
 
 			sendUniform3fSafe("CameraPosition",camPos.x,camPos.y,camPos.z);
     
@@ -1717,27 +1717,27 @@ class epriv::RenderManager::impl final{
 			sendUniform1iSafe("Samples",ssao_samples);
 			sendUniform1iSafe("NoiseTextureSize",SSAO_NORMALMAP_SIZE);
     
-			float _divisor = gbuffer->getBuffer(GBufferType::Bloom)->divisor();
+			float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
 			sendUniform1fSafe("fbufferDivisor",_divisor);
     
 			sendUniform3fvSafe("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
-			bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
+			bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
 			bindTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);
-			bindTexture("gMiscMap",gbuffer->getTexture(GBufferType::Misc),2);
-			bindTexture("gLightMap",gbuffer->getTexture(GBufferType::Lighting),3);
-			bindTexture("gDepthMap",gbuffer->getTexture(GBufferType::Depth),4);
+			bindTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
+			bindTexture("gLightMap",gbuffer.getTexture(GBufferType::Lighting),3);
+			bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),4);
 
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
 			for(uint i = 0; i < 5; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->unbind();
 		}
-		void _passStencil(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+		void _passStencil(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
 			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass)->bind();
 
-			gbuffer->getMainFBO()->bind();
+			gbuffer.getMainFBO()->bind();
 
 			Settings::clear(false,false,true); //stencil is completely filled with 0's
 			glStencilMask(0xFFFFFFFF);
@@ -1745,7 +1745,7 @@ class epriv::RenderManager::impl final{
 			glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
 			GLEnable(GLState::STENCIL_TEST);
 
-			bindTexture("gNormalMap",gbuffer->getTexture(GBufferType::Normal),0);
+			bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
 			_renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
 			glStencilMask(0xFFFFFFFF);
@@ -1757,52 +1757,52 @@ class epriv::RenderManager::impl final{
 			glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
 		}
-		void _passEdgeCanny(GBuffer* gbuffer,Camera* c,uint& fboWidth,uint& fboHeight,GLuint texture){
+		void _passEdgeCanny(GBuffer& gbuffer,Camera& c,uint& fboWidth,uint& fboHeight,GLuint texture){
     
 			//texture is the lighting buffer which is the final pass results
     
-			gbuffer->start(GBufferType::Misc);
+			gbuffer.start(GBufferType::Misc);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->bind();
-			bindTexture("textureMap",gbuffer->getTexture(texture),0);
+			bindTexture("textureMap",gbuffer.getTexture(texture),0);
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->unbind();
     
 			//misc is now greyscale scene. lighting is still final scene
 
-			gbuffer->start(GBufferType::Diffuse);
+			gbuffer.start(GBufferType::Diffuse);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->bind();
-			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Misc),0);
+			bindTexture("textureMap",gbuffer.getTexture(GBufferType::Misc),0);
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->unbind();
 			/*
 			//blur it again
-			gbuffer->start(epriv::GBufferType::Misc);
+			gbuffer.start(epriv::GBufferType::Misc);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->bind();
-			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Diffuse),0);
+			bindTexture("textureMap",gbuffer.getTexture(GBufferType::Diffuse),0);
 			renderFullscreenTriangle(fboWidth,fboHeight);
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->unbind();
 			//blur it again
-			gbuffer->start(GBufferType::Diffuse);
+			gbuffer.start(GBufferType::Diffuse);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->bind();
-			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Misc),0);
+			bindTexture("textureMap",gbuffer.getTexture(GBufferType::Misc),0);
 			renderFullscreenTriangle(fboWidth,fboHeight);
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->unbind();
 			*/
 
 			//misc is now the final blurred greyscale image
-			gbuffer->start(GBufferType::Misc);
+			gbuffer.start(GBufferType::Misc);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->bind();
-			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Diffuse),0);
+			bindTexture("textureMap",gbuffer.getTexture(GBufferType::Diffuse),0);
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->unbind();
 			//diffuse is the end result of the edge program. lighting is the final pass that we still need
 		}
-		void _passGodsRays(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
+		void _passGodsRays(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
 			Settings::clear(true,false,false);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays)->bind();
 
@@ -1814,39 +1814,39 @@ class epriv::RenderManager::impl final{
 			sendUniform1i("behind",int(behind));
 			sendUniform1f("alpha",alpha);
 
-			float _divisor = gbuffer->getBuffer(GBufferType::GodRays)->divisor();
+			float _divisor = gbuffer.getBuffer(GBufferType::GodRays)->divisor();
 			sendUniform1f("fbufferDivisor",_divisor);
 
-			bindTexture("firstPass",gbuffer->getTexture(GBufferType::Lighting),0);
+			bindTexture("firstPass",gbuffer.getTexture(GBufferType::Lighting),0);
 
 			_renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays)->unbind();
 		}
-		void _passHDR(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight){
+		void _passHDR(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->bind();
 
 			sendUniform4f("HDRInfo",hdr_exposure,float(int(hdr)),float(int(bloom)),float(int(hdr_algorithm)));
 
 			sendUniform1iSafe("HasLighting",int(lighting));
 
-			bindTextureSafe("lightingBuffer",gbuffer->getTexture(GBufferType::Lighting),0);
-			bindTextureSafe("bloomBuffer",gbuffer->getTexture(GBufferType::Bloom),1);
-			bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),2);
-			bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),3);
+			bindTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
+			bindTextureSafe("bloomBuffer",gbuffer.getTexture(GBufferType::Bloom),1);
+			bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),2);
+			bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),3);
 			_renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
 			for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->unbind();
 		}
-		void _passBlur(GBuffer* gbuffer,Camera* c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
+		void _passBlur(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->bind();
 
 			sendUniform1f("radius",bloom_radius);
 			sendUniform4f("strengthModifier",bloom_strength,bloom_strength,bloom_strength,ssao_blur_strength);
 
-			float _divisor = gbuffer->getBuffer(GBufferType::Bloom)->divisor();
+			float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
 			sendUniform1f("fbufferDivisor",_divisor);
 
 			glm::vec4 rgba(0.0f);
@@ -1860,14 +1860,14 @@ class epriv::RenderManager::impl final{
 			if(type == "H"){ sendUniform2f("HV",1.0f,0.0f); }
 			else{            sendUniform2f("HV",0.0f,1.0f); }
 
-			bindTexture("textureMap",gbuffer->getTexture(texture),0);
+			bindTexture("textureMap",gbuffer.getTexture(texture),0);
 
 			_renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
 			unbindTexture2D(0);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->unbind();
 		}
-		void _passFXAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
+		void _passFXAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
 			if(!renderAA) return;
 
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA)->bind();
@@ -1877,15 +1877,15 @@ class epriv::RenderManager::impl final{
 			sendUniform1f("FXAA_SPAN_MAX",FXAA_SPAN_MAX);
 
 			sendUniform2f("resolution",float(fboWidth),float(fboHeight));
-			bindTexture("sampler0",gbuffer->getTexture(GBufferType::Lighting),0);
-			bindTextureSafe("edgeTexture",gbuffer->getTexture(GBufferType::Misc),1);
-			bindTexture("depthTexture",gbuffer->getTexture(GBufferType::Depth),2);
+			bindTexture("sampler0",gbuffer.getTexture(GBufferType::Lighting),0);
+			bindTextureSafe("edgeTexture",gbuffer.getTexture(GBufferType::Misc),1);
+			bindTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
 			for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA)->unbind();
 		}
-		void _passSMAA(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight,bool renderAA){
+		void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
 			if(!renderAA) return;
 			glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(float(1.0f / float(fboWidth)), float(1.0f / float(fboHeight)), float(fboWidth), float(fboHeight));
 
@@ -1893,7 +1893,7 @@ class epriv::RenderManager::impl final{
 			#pragma region StencilEdgePass
 			glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil)->bind();
-			gbuffer->getMainFBO()->bind();
+			gbuffer.getMainFBO()->bind();
 
 			Settings::clear(false,false,true); //stencil is completely filled with 0's
 			glStencilMask(0xFFFFFFFF);
@@ -1904,7 +1904,7 @@ class epriv::RenderManager::impl final{
 			sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 			sendUniform1f("SMAA_THRESHOLD",SMAA_THRESHOLD);
 			sendUniform1fSafe("SMAA_DEPTH_THRESHOLD",SMAA_DEPTH_THRESHOLD);
-			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Lighting),0);
+			bindTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
 			glStencilMask(0xFFFFFFFF);
@@ -1919,7 +1919,7 @@ class epriv::RenderManager::impl final{
 			*/
 
 			#pragma region PassEdge
-			gbuffer->start(GBufferType::Misc);
+			gbuffer.start(GBufferType::Misc);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->bind();
 
 			Settings::clear(true,false,true); 
@@ -1938,8 +1938,8 @@ class epriv::RenderManager::impl final{
 			sendUniform1fSafe("SMAA_PREDICATION_THRESHOLD",SMAA_PREDICATION_THRESHOLD);
 			sendUniform1fSafe("SMAA_PREDICATION_SCALE",SMAA_PREDICATION_SCALE);
 			sendUniform1fSafe("SMAA_PREDICATION_STRENGTH",SMAA_PREDICATION_STRENGTH);
-			bindTexture("textureMap",gbuffer->getTexture(GBufferType::Lighting),0);
-			bindTextureSafe("texturePredication",gbuffer->getTexture(GBufferType::Diffuse),1);
+			bindTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
+			bindTextureSafe("texturePredication",gbuffer.getTexture(GBufferType::Diffuse),1);
 
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
@@ -1952,14 +1952,14 @@ class epriv::RenderManager::impl final{
 			#pragma endregion
 	
 			#pragma region PassBlend
-			gbuffer->start(GBufferType::Normal);
+			gbuffer.start(GBufferType::Normal);
 			Settings::clear(true,false,false); //clear color only
 
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2)->bind();
 			sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 			sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",SMAA_MAX_SEARCH_STEPS);
 
-			bindTexture("edge_tex",gbuffer->getTexture(GBufferType::Misc),0);
+			bindTexture("edge_tex",gbuffer.getTexture(GBufferType::Misc),0);
 			bindTexture("area_tex",SMAA_AreaTexture,1,GL_TEXTURE_2D);
 			bindTexture("search_tex",SMAA_SearchTexture,2,GL_TEXTURE_2D);
 
@@ -1980,12 +1980,12 @@ class epriv::RenderManager::impl final{
 			GLDisable(GLState::STENCIL_TEST);
 
 			#pragma region PassNeighbor
-			//gbuffer->start(GBufferType::Misc);
-			gbuffer->stop();
+			//gbuffer.start(GBufferType::Misc);
+			gbuffer.stop();
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3)->bind();
 			sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-			bindTextureSafe("textureMap",gbuffer->getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
-			bindTextureSafe("blend_tex",gbuffer->getTexture(GBufferType::Normal),1);
+			bindTextureSafe("textureMap",gbuffer.getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
+			bindTextureSafe("blend_tex",gbuffer.getTexture(GBufferType::Normal),1);
 
 			_renderFullscreenTriangle(fboWidth,fboHeight);
 
@@ -1996,25 +1996,25 @@ class epriv::RenderManager::impl final{
 			#pragma region PassFinalCustom
 			/*
 			//this pass is optional. lets skip it for now
-			//gbuffer->start(GBufferType::Lighting);
-			gbuffer->stop();
+			//gbuffer.start(GBufferType::Lighting);
+			gbuffer.stop();
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA4)->bind();
 			renderFullscreenTriangle(fboWidth,fboHeight);
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA4)->unbind();
 			*/  
 			#pragma endregion
 		}
-		void _passFinal(GBuffer* gbuffer,Camera* c,uint& fboWidth, uint& fboHeight){
+		void _passFinal(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->bind();
 
 			sendUniform1iSafe("HasSSAO",int(ssao));
 			sendUniform1iSafe("HasRays",int(godRays));
 			sendUniform1fSafe("godRaysExposure",godRays_exposure);
 
-			bindTextureSafe("gDiffuseMap",gbuffer->getTexture(GBufferType::Diffuse),0); 
-			bindTextureSafe("gMiscMap",gbuffer->getTexture(GBufferType::Misc),1);
-			bindTextureSafe("gGodsRaysMap",gbuffer->getTexture(GBufferType::GodRays),2);
-			bindTextureSafe("gBloomMap",gbuffer->getTexture(GBufferType::Bloom),3);
+			bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
+			bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
+			bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),2);
+			bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),3);
 			//bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),4);
 			//bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),5);
 
@@ -2045,7 +2045,7 @@ class epriv::RenderManager::impl final{
     
 			m_FullscreenTriangle->render();
 		}
-		void _render(GBuffer* gbuffer,Camera* camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Object* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
+		void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Object* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
 			Scene* s = Resources::getCurrentScene();
 			if(mainRenderFunc){
 				if(s->lightProbes().size() > 0){
@@ -2068,12 +2068,12 @@ class epriv::RenderManager::impl final{
 			_passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
 			if(godRays){
-				gbuffer->start(GBufferType::GodRays,"RGBA",false);
+				gbuffer.start(GBufferType::GodRays,"RGBA",false);
 				Object* o = Resources::getObject("Sun");
 				glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
-				glm::vec3 camPos = camera->getPosition();
+				glm::vec3 camPos = camera.getPosition();
 				glm::vec3 oPos = o->getPosition();
-				glm::vec3 camVec = camera->getViewVector();
+				glm::vec3 camVec = camera.getViewVector();
 				bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
 				float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
 
@@ -2091,7 +2091,7 @@ class epriv::RenderManager::impl final{
 			glBlendEquation(GL_FUNC_ADD);
 			glBlendFunc(GL_ONE, GL_ONE);
 			if(lighting == true && s->lights().size() > 0){
-				gbuffer->start(GBufferType::Lighting,"RGB");
+				gbuffer.start(GBufferType::Lighting,"RGB");
 				Renderer::Settings::clear(true,false,false);//this is needed for godrays
 				_passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
 			}
@@ -2105,15 +2105,15 @@ class epriv::RenderManager::impl final{
 			if(doSSAO && ssao){ isdoingssao = true; _channels = "RGBA"; }
 			else{                                   _channels = "RGB";  }
 
-			gbuffer->start(GBufferType::Bloom,_channels,false);
+			gbuffer.start(GBufferType::Bloom,_channels,false);
 			_passSSAO(gbuffer,camera,fboWidth,fboHeight); //ssao AND bloom
 			if(ssao_do_blur || bloom){
-				gbuffer->start(GBufferType::Free2,_channels,false);
+				gbuffer.start(GBufferType::Free2,_channels,false);
 				_passBlur(gbuffer,camera,fboWidth,fboHeight,"H",GBufferType::Bloom,_channels);
-				gbuffer->start(GBufferType::Bloom,_channels,false);
+				gbuffer.start(GBufferType::Bloom,_channels,false);
 				_passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
 			}
-			gbuffer->start(GBufferType::Misc);
+			gbuffer.start(GBufferType::Misc);
 			_passHDR(gbuffer,camera,fboWidth,fboHeight);
 
 	
@@ -2121,20 +2121,20 @@ class epriv::RenderManager::impl final{
 			if(doAA && aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
 
 			if(aa_algorithm == AntiAliasingAlgorithm::None || !doingaa){
-				gbuffer->stop(fbo,rbo);
+				gbuffer.stop(fbo,rbo);
 				_passFinal(gbuffer,camera,fboWidth,fboHeight);
 			}
 			else if(aa_algorithm == AntiAliasingAlgorithm::FXAA && doingaa){
-				gbuffer->start(GBufferType::Lighting);
+				gbuffer.start(GBufferType::Lighting);
 				_passFinal(gbuffer,camera,fboWidth,fboHeight);
 
 				//_passEdgeCanny(gbuffer,camera,fboWidth,fboHeight,GBufferType::Lighting);
 
-				gbuffer->stop(fbo,rbo);
+				gbuffer.stop(fbo,rbo);
 				_passFXAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
 			}
 			else if(aa_algorithm == AntiAliasingAlgorithm::SMAA && doingaa){
-				gbuffer->start(GBufferType::Lighting);
+				gbuffer.start(GBufferType::Lighting);
 				_passFinal(gbuffer,camera,fboWidth,fboHeight);
 				_passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
 			}
@@ -2145,7 +2145,7 @@ class epriv::RenderManager::impl final{
 			GLDisable(GLState::DEPTH_TEST);
 			GLDisable(GLState::DEPTH_MASK);
 			if(mainRenderFunc){
-				if(draw_physics_debug && camera == s->getActiveCamera()){
+				if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
 					Core::m_Engine->m_PhysicsManager->_render();
 				}
 			}
@@ -2189,8 +2189,8 @@ class epriv::RenderManager::impl final{
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(g,c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
-void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(Core::m_Engine->m_RenderManager->m_i->m_gBuffer,c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
+void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*Core::m_Engine->m_RenderManager->m_i->m_gBuffer,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ Core::m_Engine->m_RenderManager->m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }

@@ -34,19 +34,19 @@ class MeshInstanceAnimation::impl{
 		}
 };
 struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance* i = ((MeshInstance*)r);
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
+    MeshInstance& i = *((MeshInstance*)r);
+    boost::weak_ptr<Object> o = Resources::getObjectPtr(i.parent()->name());
     Object* parent = o.lock().get();
-    vector<MeshInstanceAnimation*>& q = i->animationQueue();
-    Renderer::sendUniform4fSafe("Object_Color",i->color());
-    Renderer::sendUniform3fSafe("Gods_Rays_Color",i->godRaysColor());
+    vector<MeshInstanceAnimation*>& q = i.animationQueue();
+    Renderer::sendUniform4fSafe("Object_Color",i.color());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
     if(q.size() > 0){
         vector<glm::mat4> transforms;
 
 		//process the animation here
 		for(uint j = 0; j < q.size(); ++j){
 			MeshInstanceAnimation* a = q.at(j);
-			if(a->m_i->m_Mesh == i->mesh()){
+			if(a->m_i->m_Mesh == i.mesh()){
 				a->m_i->m_CurrentTime += Resources::dt();
 				if(transforms.size() == 0){
 					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
@@ -75,12 +75,12 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
     
-    glm::mat4 model = parent->getModel() * i->model(); //might need to reverse this order.
+    glm::mat4 model = parent->getModel() * i.model(); //might need to reverse this order.
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
     Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
     Renderer::sendUniformMatrix4f("Model",model);
-    i->render();
+    i.render();
 }};
 struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};
