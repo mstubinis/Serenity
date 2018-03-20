@@ -25,8 +25,6 @@ class ObjectDynamic: public Object{
         bool m_Visible;
 		bool m_PassedRenderCheck;
         std::vector<MeshInstance*> m_MeshInstances;
-        glm::vec4 m_Color;
-        glm::vec3 m_GodsRaysColor;
         glm::vec3 m_BoundingBoxRadius;
         virtual void calculateRadius();
         glm::mat4 m_Model;
@@ -73,8 +71,6 @@ class ObjectDynamic: public Object{
         virtual void setPosition(glm::vec3);
         virtual void setScale(float,float,float); 
         virtual void setScale(glm::vec3);
-        virtual void setColor(float,float,float,float);
-        virtual void setColor(glm::vec4);
 
         virtual void lookAt(glm::vec3,glm::vec3,glm::vec3);
         virtual void lookAt(Object*);
@@ -127,8 +123,6 @@ class ObjectDynamic: public Object{
         virtual void setAngularVelocityY(float,bool local=true);
         virtual void setAngularVelocityZ(float,bool local=true);
 
-        virtual glm::vec4 getColor(){ return m_Color; }
-        virtual glm::vec3 getGodsRaysColor(){ return m_GodsRaysColor; }
         virtual glm::vec3 getForward();
         virtual glm::vec3 getRight();
         virtual glm::vec3 getUp();

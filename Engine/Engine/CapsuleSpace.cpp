@@ -17,10 +17,14 @@
 using namespace Engine;
 using namespace std;
 
-CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay(Mesh::Plane,Resources::getMaterial(ResourceManifest::CapsuleD),pos,glm::vec3(size),name,scene){setColor(color.x,color.y,color.z,1);}
-CapsuleEnd::~CapsuleEnd(){}
-void CapsuleEnd::update(float dt){ObjectDisplay::update(dt);}
-
+CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* scene):ObjectDisplay(Mesh::Plane,Resources::getMaterial(ResourceManifest::CapsuleD),pos,glm::vec3(size),name,scene){
+	//setColor(color.x,color.y,color.z,1);
+}
+CapsuleEnd::~CapsuleEnd(){
+}
+void CapsuleEnd::update(float dt){
+	ObjectDisplay::update(dt);
+}
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene,bool makeLight):ObjectDisplay(Mesh::Plane,Resources::getMaterial(ResourceManifest::SunFlareMaterial),pos,glm::vec3(size),name,scene){
     m_Light = nullptr;
     if(makeLight){
@@ -28,7 +32,7 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos, std::string name,Scene* scene
         m_Light->setAttenuation(LightRange::_65);
         m_Light->setColor(255,124,27,255);
     }
-    setColor(255,235,206,255);
+    //setColor(255,235,206,255);
     this->m_Shadeless = true;
 }
 CapsuleStar::~CapsuleStar(){}
@@ -67,10 +71,8 @@ CapsuleRibbon::~CapsuleRibbon(){}
 void CapsuleRibbon::bind(){
 	Renderer::GLDisable(GLState::DEPTH_TEST);
 	Renderer::GLDisable(GLState::DEPTH_MASK);
-    BindableResource::bind();
 }
 void CapsuleRibbon::unbind(){
-    BindableResource::unbind();
 	Renderer::GLEnable(GLState::DEPTH_TEST);
 	Renderer::GLEnable(GLState::DEPTH_MASK);
 }

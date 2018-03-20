@@ -1550,12 +1550,10 @@ class epriv::RenderManager::impl final{
 									Object* object = o.lock().get();
 									if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
 										if(object->passedRenderCheck()){ //culling check
-											object->bind();
 											for(auto meshInstance:meshInstance.second){
 												meshInstance->bind(); //render also
 												meshInstance->unbind();
 											}
-											object->unbind();
 										}
 									}
 									//protect against any custom changes by restoring to the regular shader and material
@@ -1595,12 +1593,10 @@ class epriv::RenderManager::impl final{
 							Object* object = o.lock().get();
 							if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
 								if(object->passedRenderCheck()){ //culling check
-									object->bind();
 									for(auto meshInstance:instance.second){
 										meshInstance->bind(); //render also
 										meshInstance->unbind();
 									}
-									object->unbind();
 								}
 							}
 							//protect against any custom changes by restoring to the regular shader and material

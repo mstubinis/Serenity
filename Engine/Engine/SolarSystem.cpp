@@ -497,7 +497,7 @@ void SolarSystem::_loadRandomly(){
                 float R = (rand() % 1000)/1000.0f;
                 float G = (rand() % 1000)/1000.0f;
                 float B = (rand() % 1000)/1000.0f;
-                planet->setColor(R,G,B,1);
+                //planet->setColor(R,G,B,1);
                 m_Planets[pName] = planet;
 
                 //rings

@@ -58,7 +58,9 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     else{
         Renderer::sendUniform1i("fromAtmosphere", 0);
     }
-    
+    Renderer::sendUniform4fSafe("Object_Color",i->color());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i->godRaysColor());
+
     Renderer::sendUniform1i("nSamples", numberSamples);
     Renderer::sendUniform1f("fSamples", float(numberSamples));   
     Renderer::sendUniform3f("v3CameraPos", camPos);
@@ -220,8 +222,8 @@ void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PLANET_TYPE_STAR,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
-    setColor(starColor.x,starColor.y,starColor.z,1);
-    setGodsRaysColor(starColor.x,starColor.y,starColor.z);
+    //setColor(starColor.x,starColor.y,starColor.z,1);
+    //setGodsRaysColor(starColor.x,starColor.y,starColor.z);
     //addChild(m_Light);
 	m_Light->setPosition(pos);
 }
@@ -324,8 +326,7 @@ void Ring::draw(GLuint shader){
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
     glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(model));
-    glm::vec4 color = m_Parent->getColor();
-    glUniform4f(glGetUniformLocation(shader, "Object_Color"),color.x,color.y,color.z,color.w);
+
     glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(material->shadeless()));
     glUniform1f(glGetUniformLocation(shader, "matID"),float(float(material->id())/255.0f));
 
@@ -341,7 +342,7 @@ OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float 
     eccentricity = _eccentricity;
     days = _days;
     majorRadius = _majorRadius;
-    minorRadius = glm::sqrt(majorRadius*majorRadius*(1 - (eccentricity*eccentricity))); //b² = a²(1 - e²)
+    minorRadius = glm::sqrt(majorRadius * majorRadius*(1 - (eccentricity * eccentricity))); //b² = a²(1 - e²)
     parent = Engine::Resources::getObjectPtr(_parent);
 }
 glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Object* thisPlanet){

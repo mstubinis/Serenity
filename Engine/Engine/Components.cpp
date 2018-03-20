@@ -119,16 +119,7 @@ class epriv::ComponentManager::impl final{
 		void _destruct(epriv::ComponentManager* super){
 			SAFE_DELETE(super->m_ComponentPool);
 			SAFE_DELETE(super->m_EntityPool);
-
-			//all components should be nuked when deleted from the component pool anyways
-			/*
-			for(auto c:m_ComponentBasicBodies) SAFE_DELETE(c);
-			for(auto c:m_ComponentRigidBodies) SAFE_DELETE(c);
-			for(auto c:m_ComponentModels)      SAFE_DELETE(c);
-			for(auto c:m_ComponentCameras)     SAFE_DELETE(c);
-			*/
 		}
-
 		void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
 			if(parent == nullptr){
 				modelMatrix = glm::mat4(1.0f);

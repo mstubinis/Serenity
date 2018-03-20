@@ -33,11 +33,13 @@ class MeshInstanceAnimation::impl{
 			m_Mesh = _mesh;
 		}
 };
-struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance* i = (MeshInstance*)r;
+struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance* i = ((MeshInstance*)r);
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i->parent()->name());
     Object* parent = o.lock().get();
     vector<MeshInstanceAnimation*>& q = i->animationQueue();
+    Renderer::sendUniform4fSafe("Object_Color",i->color());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i->godRaysColor());
     if(q.size() > 0){
         vector<glm::mat4> transforms;
 
@@ -80,10 +82,10 @@ struct DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     Renderer::sendUniformMatrix4f("Model",model);
     i->render();
 }};
-struct DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};
-DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
-DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+epriv::DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
+epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class MeshInstance::impl{
     public:  
         vector<MeshInstanceAnimation*> m_AnimationQueue;
@@ -96,6 +98,11 @@ class MeshInstance::impl{
         glm::mat4 m_Model;
         bool m_NeedsUpdate;
         Object* m_Parent;
+
+		glm::vec4 m_Color;
+		glm::vec3 m_GodRaysColor;
+
+
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,const string& parentName){
             m_Parent = Resources::getObject(parentName);
             _setMaterial(mat,super);
@@ -109,6 +116,9 @@ class MeshInstance::impl{
 
             string n = m_Mesh->name() + "_" + m_Material->name();
 			n = epriv::Core::m_Engine->m_ResourceManager->_buildMeshInstanceName(n);
+
+			m_Color = glm::vec4(1.0f);
+			m_GodRaysColor = glm::vec3(0.0f);
 
             super->setName(n);
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -223,6 +233,8 @@ class MeshInstance::impl{
 };
 
 
+
+
 MeshInstanceAnimation::MeshInstanceAnimation(Mesh* m,const string& a,float s,float e,uint l):m_i(new impl){
     m_i->_init(m,a,s,e,l);
 }
@@ -254,6 +266,8 @@ glm::mat4& MeshInstance::model(){ return m_i->m_Model; }
 glm::vec3& MeshInstance::getScale(){ return m_i->m_Scale; }
 glm::vec3& MeshInstance::position(){ return m_i->m_Position; }
 glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
+glm::vec4 MeshInstance::color(){ return m_i->m_Color; }
+glm::vec3 MeshInstance::godRaysColor(){ return m_i->m_GodRaysColor; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
 void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(Resources::getMesh(meshHandle),this); }

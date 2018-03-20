@@ -14,17 +14,6 @@
 using namespace Engine;
 using namespace std;
 
-struct DefaultObjectDisplayBindFunctor{void operator()(BindableResource* r) const {
-    ObjectDisplay* o = (ObjectDisplay*)r;
-
-    Renderer::sendUniform4fSafe("Object_Color",o->getColor());
-    Renderer::sendUniform3fSafe("Gods_Rays_Color",o->getGodsRaysColor());
-}};
-struct DefaultObjectDisplayUnbindFunctor{void operator()(BindableResource* r) const {
-}};
-DefaultObjectDisplayBindFunctor DEFAULT_BIND_FUNCTOR;
-DefaultObjectDisplayUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
 
 ObjectDisplay::ObjectDisplay(Mesh* mesh, Material* mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
@@ -36,12 +25,7 @@ ObjectDisplay::ObjectDisplay(Mesh* mesh, Material* mat, glm::vec3 pos, glm::vec3
         MeshInstance* item = new MeshInstance(name(),mesh,mat);
         m_MeshInstances.push_back(item);
     }
-    m_Color = glm::vec4(1);
-    m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
-
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDisplay::ObjectDisplay(Handle mesh, Handle mat, glm::vec3 pos, glm::vec3 scl, string n,Scene* scene):ObjectBasic(pos,scl,n,scene){
     m_Radius = 0;
@@ -53,12 +37,7 @@ ObjectDisplay::ObjectDisplay(Handle mesh, Handle mat, glm::vec3 pos, glm::vec3 s
         MeshInstance* item = new MeshInstance(name(),mesh,mat);
         m_MeshInstances.push_back(item);
     }
-    m_Color = glm::vec4(1);
-    m_GodsRaysColor = glm::vec3(0);
     calculateRadius();
-
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDisplay::~ObjectDisplay(){
 }
@@ -100,10 +79,6 @@ void ObjectDisplay::setMesh(Handle& meshHandle){ for(auto entry:m_MeshInstances)
 void ObjectDisplay::setMaterial(Material* material){ for(auto entry:m_MeshInstances){ entry->setMaterial(material); } }
 void ObjectDisplay::setMaterial(Handle& material){ for(auto entry:m_MeshInstances){ entry->setMaterial(Resources::getMaterial(material)); } }
 
-void ObjectDisplay::setColor(float r, float g, float b,float a){ Engine::Math::setColor(m_Color,r,g,b,a); }
-void ObjectDisplay::setColor(glm::vec4 c){ setColor(c.x,c.y,c.z,c.w); }
-void ObjectDisplay::setGodsRaysColor(float r, float g, float b){ Engine::Math::setColor(m_GodsRaysColor,r,g,b); }
-void ObjectDisplay::setGodsRaysColor(glm::vec3 c){ setGodsRaysColor(c.x,c.y,c.z); }
 void ObjectDisplay::setVisible(bool v){ m_Visible = v; }
 
 void ObjectDisplay::setScale(float x,float y,float z){

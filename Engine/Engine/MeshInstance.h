@@ -9,9 +9,16 @@ class Mesh;
 class Material;
 struct Handle;
 
+namespace Engine{
+	namespace epriv{
+		struct DefaultMeshInstanceBindFunctor;
+		struct DefaultMeshInstanceUnbindFunctor;
+	};
+};
+
 class MeshInstanceAnimation final{
-	friend struct DefaultMeshInstanceBindFunctor;
-	friend struct DefaultMeshInstanceUnbindFunctor;
+	friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
+	friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
 		class impl; std::unique_ptr<impl> m_i;
     public:
@@ -19,6 +26,8 @@ class MeshInstanceAnimation final{
         ~MeshInstanceAnimation();
 };
 class MeshInstance final: public BindableResource{
+	friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
+	friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -33,6 +42,8 @@ class MeshInstance final: public BindableResource{
         glm::quat& orientation();
         glm::vec3& getScale();
         Object* parent();
+		glm::vec4 color();
+		glm::vec3 godRaysColor();
 
         std::vector<MeshInstanceAnimation*>& animationQueue();
         void playAnimation(const std::string& animName,float startTime);

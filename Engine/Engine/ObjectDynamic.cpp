@@ -22,17 +22,6 @@
 using namespace Engine;
 using namespace std;
 
-struct DefaultObjectDynamicBindFunctor{void operator()(BindableResource* r) const {
-    ObjectDynamic* o = (ObjectDynamic*)r;
-
-    Renderer::sendUniform4f("Object_Color",o->getColor());
-    Renderer::sendUniform3f("Gods_Rays_Color",o->getGodsRaysColor());
-}};
-struct DefaultObjectDynamicUnbindFunctor{void operator()(BindableResource* r) const {
-	//ObjectDynamic* o = (ObjectDynamic*)r;
-}};
-DefaultObjectDynamicBindFunctor DEFAULT_BIND_FUNCTOR;
-DefaultObjectDynamicUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 void ObjectDynamic::setDynamic(bool dynamic){
     if(dynamic){
@@ -55,7 +44,7 @@ void ObjectDynamic::collisionResponse(ObjectDynamic* other){
 }
 
 ObjectDynamic::ObjectDynamic(Handle mesh,Handle mat, glm::vec3 pos, glm::vec3 scl,string n,Collision* col,Scene* scene):Object(n,scene){
-    m_Forward = glm::vec3(0,0,-1); m_Right = glm::vec3(1,0,0); m_Up = glm::vec3(0,1,0); m_Color = glm::vec4(1); m_GodsRaysColor = glm::vec3(0);
+    m_Forward = glm::vec3(0,0,-1); m_Right = glm::vec3(1,0,0); m_Up = glm::vec3(0,1,0);
 	m_PassedRenderCheck = false;
     m_Radius = 0;
     m_Visible = true;
@@ -108,9 +97,6 @@ ObjectDynamic::ObjectDynamic(Handle mesh,Handle mat, glm::vec3 pos, glm::vec3 sc
 
     m_Collision->getCollisionShape()->setUserPointer(this);
     m_RigidBody->setUserPointer(this);
-
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 ObjectDynamic::~ObjectDynamic(){
     Physics::removeRigidBody(m_RigidBody);
@@ -123,8 +109,6 @@ void ObjectDynamic::translate(float x,float y,float z,bool local){
     Math::translate(this,vec,local);
     setPosition(getPosition() + glm::vec3(vec.x(),vec.y(),vec.z()));
 }
-void ObjectDynamic::setColor(float r, float g, float b, float a){ Math::setColor(m_Color,r,g,b,a); }
-void ObjectDynamic::setColor(glm::vec4 color){ ObjectDynamic::setColor(color.r,color.g,color.b,color.a); }
 void ObjectDynamic::translate(glm::vec3 t,bool l){ ObjectDynamic::translate(t.x,t.y,t.z,l); }
 void ObjectDynamic::update(float dt){
     m_Model = glm::mat4(1.0f);
