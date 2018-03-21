@@ -8,6 +8,7 @@
 class Mesh;
 class Material;
 struct Handle;
+class Entity;
 
 namespace Engine{
 	namespace epriv{
@@ -33,6 +34,8 @@ class MeshInstance final: public BindableResource{
     public:
         MeshInstance(const std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         MeshInstance(const std::string& parentName,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(Entity*,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         ~MeshInstance();
 
         Mesh* mesh();
@@ -49,26 +52,16 @@ class MeshInstance final: public BindableResource{
         void playAnimation(const std::string& animName,float startTime);
         void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 
-        void setOrientation(glm::quat&);
-        void setOrientation(float x,float y,float z);
+        void setMesh(Handle& meshHandle);                void setMesh(Mesh*);
+        void setMaterial(Handle& materialHandle);        void setMaterial(Material*);
 
-        void setMesh(Handle& meshHandle);
-        void setMesh(Mesh*);
-        void setMaterial(Handle& materialHandle);
-        void setMaterial(Material*);
+        void setPosition(float x,float y,float z);       void setPosition(glm::vec3&);
+        void setOrientation(glm::quat&);                 void setOrientation(float x,float y,float z);
+        void setScale(float x,float y,float z);          void setScale(glm::vec3&);
 
-        void setPosition(float x,float y,float z);
-        void setScale(float x,float y,float z);
-        void setPosition(glm::vec3&);
-        void setScale(glm::vec3&);
-
-        void translate(float x,float y,float z);
-        void rotate(float pitch,float yaw,float roll);
-        void scale(float x,float y,float z);
-
-        void translate(glm::vec3&);
-        void rotate(glm::vec3&);
-        void scale(glm::vec3&);
+        void translate(float x,float y,float z);         void translate(glm::vec3&);
+        void rotate(float pitch,float yaw,float roll);   void rotate(glm::vec3&);
+        void scale(float x,float y,float z);             void scale(glm::vec3&);
 
         void update(float dt);
         void render();

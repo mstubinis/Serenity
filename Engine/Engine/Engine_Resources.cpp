@@ -46,7 +46,7 @@ class epriv::ResourceManager::impl final{
         Scene* m_CurrentScene;
 		bool m_DynamicMemory;
 
-        unordered_map<string,boost::shared_ptr<MeshInstance>> m_MeshInstances;
+        vector<MeshInstance*> m_MeshInstances;
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
         unordered_map<string,boost::shared_ptr<Object>> m_Objects;
@@ -61,9 +61,9 @@ class epriv::ResourceManager::impl final{
 			m_Window = new Engine_Window(name,width,height);
 		}
 		void _destruct(){
-			for (auto it = m_MeshInstances.begin();it != m_MeshInstances.end(); ++it )   it->second.reset();
-			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )               it->second.reset();
-			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )                 it->second.reset();
+			for (auto it:m_MeshInstances)                                     SAFE_DELETE(it);
+			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )    it->second.reset();
+			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )      it->second.reset();
 
 			SAFE_DELETE(m_Resources);
 			SAFE_DELETE(m_Window);
@@ -89,7 +89,6 @@ Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_Curr
 
 bool epriv::ResourceManager::_hasObject(string n){ if(resourceManager->m_i->m_Objects.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
-bool epriv::ResourceManager::_hasMeshInstance(string n){ if(resourceManager->m_i->m_MeshInstances.count(n)) return true; return false; }
 
 void epriv::ResourceManager::_addScene(Scene* s){
 	_addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
@@ -98,9 +97,8 @@ void epriv::ResourceManager::_addObject(Object* o){
 	_addToContainer(resourceManager->m_i->m_Objects,o->name(),boost::shared_ptr<Object>(o));
 }
 void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
-	_addToContainer(resourceManager->m_i->m_MeshInstances,m->name(),boost::shared_ptr<MeshInstance>(m));
+	m_i->m_MeshInstances.push_back(m);
 }
-string epriv::ResourceManager::_buildMeshInstanceName(string n){return _incrementName(resourceManager->m_i->m_MeshInstances,n);}
 string epriv::ResourceManager::_buildObjectName(string n){return _incrementName(resourceManager->m_i->m_Objects,n);}
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(resourceManager->m_i->m_Scenes,n);}
 
@@ -126,7 +124,6 @@ boost::shared_ptr<Object>& Resources::getObjectPtr(string n){return resourceMana
 
 Scene* Resources::getScene(string n){return (Scene*)(_getFromContainer(resourceManager->m_i->m_Scenes,n));}
 Object* Resources::getObject(string n){return (Object*)(_getFromContainer(resourceManager->m_i->m_Objects,n));}
-MeshInstance* Resources::getMeshInstance(string n){return (MeshInstance*)(_getFromContainer(resourceManager->m_i->m_MeshInstances,n)); }
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
 Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }

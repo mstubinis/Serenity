@@ -85,10 +85,8 @@ namespace Engine{
 			Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
 		}};
 		struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
-			//Material* m = (Material*)r;
+			//Material& material = *((Material*)r);
 		}};
-		struct srtKey{inline bool operator()(MaterialMeshEntry* _1,MaterialMeshEntry* _2){return(_1->mesh()->name()<_2->mesh()->name());}};
-
 		unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
 			unordered_map<uint,vector<uint>> m;
 			m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
@@ -598,20 +596,16 @@ void Material::addMeshEntry(Mesh* mesh){
         if(entry->mesh() == mesh){ return; }
     }
     m_i->m_Meshes.push_back(new MaterialMeshEntry(mesh));
-    sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),epriv::srtKey());
 }
 void Material::removeMeshEntry(Mesh* mesh){
-    bool did = false;
     for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
 		MaterialMeshEntry* entry = (*it);
         if(entry->mesh() == mesh){
             SAFE_DELETE(entry); //do we need this?
             m_i->m_Meshes.erase(it++);
-            did = true;
         }
         else ++it;
     }
-    if(did){ sort(m_i->m_Meshes.begin(),m_i->m_Meshes.end(),epriv::srtKey()); }
 }
 void Material::bind(){
 	bool res = epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this);

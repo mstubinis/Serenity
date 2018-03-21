@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Components.h"
 #include "MeshInstance.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
@@ -98,11 +99,28 @@ class MeshInstance::impl{
         glm::mat4 m_Model;
         bool m_NeedsUpdate;
         Object* m_Parent;
+		Entity* m_Entity;
 
 		glm::vec4 m_Color;
 		glm::vec3 m_GodRaysColor;
 
+        void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,Entity* entity){
+            m_Entity = entity;
+            _setMaterial(mat,super);
+            _setMesh(mesh,super);
+            
+            m_Position = pos;
+            m_Orientation = rot;
+            m_Scale = scl;
+            _updateModelMatrix();
+            m_NeedsUpdate = false;
 
+			m_Color = glm::vec4(1.0f);
+			m_GodRaysColor = glm::vec3(0.0f);
+
+            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+        }
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,const string& parentName){
             m_Parent = Resources::getObject(parentName);
             _setMaterial(mat,super);
@@ -114,13 +132,9 @@ class MeshInstance::impl{
             _updateModelMatrix();
             m_NeedsUpdate = false;
 
-            string n = m_Mesh->name() + "_" + m_Material->name();
-			n = epriv::Core::m_Engine->m_ResourceManager->_buildMeshInstanceName(n);
-
 			m_Color = glm::vec4(1.0f);
 			m_GodRaysColor = glm::vec3(0.0f);
 
-            super->setName(n);
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
         }
@@ -133,7 +147,7 @@ class MeshInstance::impl{
             _addMaterialToInstance(mat,super);
         }
         void _removeMeshFromInstance(MeshInstance* super){
-            if(m_Mesh != nullptr && m_Material != nullptr){	
+            if(m_Mesh && m_Material){	
                 _removeMeshInstanceFromMaterial(super);
                 _removeMeshEntryFromMaterial();
                 m_Mesh->decrementUseCount();
@@ -142,7 +156,7 @@ class MeshInstance::impl{
         }
         void _addMeshToInstance(Mesh* mesh,MeshInstance* super){
             m_Mesh = mesh;
-            if(mesh != nullptr){
+            if(mesh){
                 m_Mesh->incrementUseCount();
                 m_Material->addMeshEntry(m_Mesh);
                 for(auto meshEntry:m_Material->getMeshEntries()){
@@ -154,7 +168,7 @@ class MeshInstance::impl{
             }
         }
         void _removeMaterialFromInstance(MeshInstance* super){
-            if(m_Material != nullptr){
+            if(m_Material){
                 m_Material->decrementUseCount();
                 _removeMeshInstanceFromMaterial(super);
                 m_Material = nullptr;
@@ -162,9 +176,9 @@ class MeshInstance::impl{
         }
         void _addMaterialToInstance(Material* mat,MeshInstance* super){
             m_Material = mat;
-            if(mat != nullptr){
+            if(mat){
                 mat->incrementUseCount();
-                if(m_Mesh != nullptr){
+                if(m_Mesh){
                     mat->addMeshEntry(m_Mesh); //this checks if theres an entry already
                     for(auto entry:mat->getMeshEntries()){
                         if(entry->mesh() == m_Mesh){
@@ -249,6 +263,16 @@ MeshInstance::MeshInstance(const string& parentName,Handle mesh,Handle mat,glm::
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
+    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+}
+MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
+    m_i->_init(mesh,mat,pos,rot,scl,this,entity);
+	epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+}
+MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
+    Mesh* _mesh = Resources::getMesh(mesh);
+    Material* _mat = Resources::getMaterial(mat);
+    m_i->_init(_mesh,_mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }

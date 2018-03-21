@@ -53,7 +53,7 @@ namespace Engine{
 
 				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
 				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
-				bool _hasMeshInstance(std::string);  void _addMeshInstance(MeshInstance*);  std::string _buildMeshInstanceName(std::string);
+				void _addMeshInstance(MeshInstance*);
 
 				void _remObject(std::string);
 
@@ -82,7 +82,6 @@ namespace Engine{
 
         Object* getObject(std::string);
         Font* getFont(std::string);
-        MeshInstance* getMeshInstance(std::string);
 
         void getShader(Handle& inHandle,Shader*& outPtr);         Shader* getShader(Handle& inHandle);
         void getSoundData(Handle& inHandle,SoundData*& outPtr);   SoundData* getSoundData(Handle& inHandle);
