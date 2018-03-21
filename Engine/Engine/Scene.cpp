@@ -33,6 +33,14 @@ void Scene::addEntity(Entity* entity){
 	entity->m_ID = entityHandle.index;
 	m_Entities.push_back(entityHandle.index);
 }
+bool Scene::hasEntity(Entity* entity){
+	for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return true; } //rethink this maybe use a fixed size array?
+	return false;
+}
+bool Scene::hasEntity(uint entityID){
+	for(auto entityInScene:m_Entities){if (entityID == entityInScene) return true; } //rethink this maybe use a fixed size array?
+	return false;
+}
 Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
 void Scene::setActiveCamera(Camera* c){
 	m_ActiveCamera = c;

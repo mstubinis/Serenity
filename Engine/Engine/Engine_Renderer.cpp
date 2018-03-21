@@ -1469,7 +1469,6 @@ class epriv::RenderManager::impl final{
 				bindTexture("DiffuseTexture",item.font->getFontData()->getGlyphTexture(),0);
 				sendUniform1i("DiffuseTextureEnabled",1);
 				sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
-
 				float y_offset = 0;
 				float x = item.pos.x;
 				for(auto c:item.text){
@@ -1478,19 +1477,19 @@ class epriv::RenderManager::impl final{
 						x = item.pos.x;
 					}
 					else{
-						FontGlyph* chr = item.font->getFontData()->getGlyphData(c);
+						FontGlyph& chr = *(item.font->getFontData()->getGlyphData(c));
 
-						chr->m_Model = m_IdentityMat4;
-						chr->m_Model = glm::translate(chr->m_Model, glm::vec3(x + chr->xoffset ,item.pos.y - (chr->height + chr->yoffset) - y_offset,-0.001f - item.depth));
-						chr->m_Model = glm::rotate(chr->m_Model, item.rot,glm::vec3(0,0,1));
-						chr->m_Model = glm::scale(chr->m_Model, glm::vec3(item.scl.x,item.scl.y,1));
+						chr.m_Model = m_IdentityMat4;
+						chr.m_Model = glm::translate(chr.m_Model, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
+						chr.m_Model = glm::rotate(chr.m_Model, item.rot,glm::vec3(0,0,1));
+						chr.m_Model = glm::scale(chr.m_Model, glm::vec3(item.scl.x,item.scl.y,1));
 
 						sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-						sendUniformMatrix4f("Model",chr->m_Model);
-						chr->char_mesh->bind();
-						chr->char_mesh->render();
-						chr->char_mesh->unbind();
-						x += (chr->xadvance) * item.scl.x;
+						sendUniformMatrix4f("Model",chr.m_Model);
+						chr.char_mesh->bind();
+						chr.char_mesh->render();
+						chr.char_mesh->unbind();
+						x += (chr.xadvance) * item.scl.x;
 					}
 				}
 			}

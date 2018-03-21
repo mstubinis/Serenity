@@ -33,6 +33,8 @@ class Scene: public EngineResource{
         virtual ~Scene();
 
 		void addEntity(Entity*);
+		bool hasEntity(Entity*);
+		bool hasEntity(uint entityID);
 
         virtual void update(float);
 
