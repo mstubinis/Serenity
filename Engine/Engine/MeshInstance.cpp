@@ -42,19 +42,18 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
     Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
     if(q.size() > 0){
         vector<glm::mat4> transforms;
-
 		//process the animation here
 		for(uint j = 0; j < q.size(); ++j){
-			MeshInstanceAnimation* a = q.at(j);
-			if(a->m_i->m_Mesh == i.mesh()){
-				a->m_i->m_CurrentTime += Resources::dt();
+			MeshInstanceAnimation::impl& a = *(q.at(j)->m_i.get());
+			if(a.m_Mesh == i.mesh()){
+				a.m_CurrentTime += Resources::dt();
 				if(transforms.size() == 0){
-					transforms.resize(a->m_i->m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
+					transforms.resize(a.m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
 				}
-				a->m_i->m_Mesh->playAnimation(transforms,a->m_i->m_AnimName,a->m_i->m_CurrentTime);
-				if(a->m_i->m_CurrentTime >= a->m_i->m_EndTime){
-					a->m_i->m_CurrentTime = 0;
-					a->m_i->m_CurrentLoops++;
+				a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
+				if(a.m_CurrentTime >= a.m_EndTime){
+					a.m_CurrentTime = 0;
+					++a.m_CurrentLoops;
 				}
 			}
 		}
@@ -63,9 +62,10 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
 
 		//cleanup the animation queue
 		for (auto it = q.cbegin(); it != q.cend();){
-			MeshInstanceAnimation* a = (*it);
-			if (a->m_i->m_RequestedLoops > 0 && (a->m_i->m_CurrentLoops >= a->m_i->m_RequestedLoops)){
-				SAFE_DELETE(a); //do we need this?
+			MeshInstanceAnimation* anim = (*it);
+			MeshInstanceAnimation::impl& a = *(anim->m_i.get());
+			if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
+				SAFE_DELETE(anim); //do we need this?
 				it = q.erase(it);
 			}
 			else{ ++it; }
