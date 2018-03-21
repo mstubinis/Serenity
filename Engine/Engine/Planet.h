@@ -14,7 +14,7 @@ enum PlanetType {
     PLANET_TYPE_ICE_GIANT,
     PLANET_TYPE_MOON, 
     PLANET_TYPE_STAR, 
-    PLANET_TYPE_ASTEROID 
+    PLANET_TYPE_ASTEROID,
 };
 
 struct RotationInfo final{
@@ -74,7 +74,7 @@ class Planet: public ObjectDisplay{
         glm::vec2 getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
 
         OrbitInfo* getOrbitInfo() const { return m_OrbitInfo; }
-        const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius*m_AtmosphereHeight); }
+        const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius * m_AtmosphereHeight); }
         float getDefaultRadius(){ return m_Radius; }
         float getRadius() { return m_Radius + (m_Radius * m_AtmosphereHeight); }
         float getAtmosphereHeight(){ return m_AtmosphereHeight; }

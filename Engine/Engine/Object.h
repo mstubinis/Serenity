@@ -17,8 +17,8 @@ typedef unsigned int GLuint;
 
 template <typename T> bool exists(const boost::weak_ptr<T>& t){ if(t.expired() || !t.lock().get()) return false; return true; }
 
-
-class IObject: public BindableResource{
+class IObject: public EngineResource{
+//class IObject: public BindableResource{
     public:
 		virtual void registerEvent(EventType::Type type){}
 		virtual void unregisterEvent(EventType::Type type){}
