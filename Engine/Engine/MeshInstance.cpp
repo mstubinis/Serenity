@@ -34,62 +34,13 @@ class MeshInstanceAnimation::impl{
 			m_Mesh = _mesh;
 		}
 };
-struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance& i = *((MeshInstance*)r);
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(i.parent()->name());
-    Object* parent = o.lock().get();
-    vector<MeshInstanceAnimation*>& q = i.animationQueue();
-    Renderer::sendUniform4fSafe("Object_Color",i.color());
-    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
-    if(q.size() > 0){
-        vector<glm::mat4> transforms;
-		//process the animation here
-		for(uint j = 0; j < q.size(); ++j){
-			MeshInstanceAnimation::impl& a = *(q.at(j)->m_i.get());
-			if(a.m_Mesh == i.mesh()){
-				a.m_CurrentTime += Resources::dt();
-				if(transforms.size() == 0){
-					transforms.resize(a.m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
-				}
-				a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
-				if(a.m_CurrentTime >= a.m_EndTime){
-					a.m_CurrentTime = 0;
-					++a.m_CurrentLoops;
-				}
-			}
-		}
-		Renderer::sendUniform1iSafe("AnimationPlaying",1);
-		Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
-
-		//cleanup the animation queue
-		for (auto it = q.cbegin(); it != q.cend();){
-			MeshInstanceAnimation* anim = (*it);
-			MeshInstanceAnimation::impl& a = *(anim->m_i.get());
-			if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
-				SAFE_DELETE(anim); //do we need this?
-				it = q.erase(it);
-			}
-			else{ ++it; }
-		}
-    }
-    else{
-        Renderer::sendUniform1iSafe("AnimationPlaying",0);
-    }
-    
-    glm::mat4 model = parent->getModel() * i.model(); //might need to reverse this order.
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-    
-    Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
-    Renderer::sendUniformMatrix4f("Model",model);
-    i.render();
-}};
-struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
-}};
-epriv::DefaultMeshInstanceBindFunctor DEFAULT_BIND_FUNCTOR;
-epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class MeshInstance::impl{
     public:  
         vector<MeshInstanceAnimation*> m_AnimationQueue;
+
+        Object* m_Parent;
+		Entity* m_Entity;
+
 
         Mesh* m_Mesh;
         Material* m_Material;
@@ -98,14 +49,14 @@ class MeshInstance::impl{
         glm::vec3 m_Scale;
         glm::mat4 m_Model;
         bool m_NeedsUpdate;
-        Object* m_Parent;
-		Entity* m_Entity;
+
 
 		glm::vec4 m_Color;
 		glm::vec3 m_GodRaysColor;
 
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,Entity* entity){
             m_Entity = entity;
+			m_Parent = nullptr;
             _setMaterial(mat,super);
             _setMesh(mesh,super);
             
@@ -117,12 +68,10 @@ class MeshInstance::impl{
 
 			m_Color = glm::vec4(1.0f);
 			m_GodRaysColor = glm::vec3(0.0f);
-
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
         }
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,const string& parentName){
             m_Parent = Resources::getObject(parentName);
+			m_Entity = nullptr;
             _setMaterial(mat,super);
             _setMesh(mesh,super);
             
@@ -134,9 +83,6 @@ class MeshInstance::impl{
 
 			m_Color = glm::vec4(1.0f);
 			m_GodRaysColor = glm::vec3(0.0f);
-
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){
             _removeMeshFromInstance(super);
@@ -161,7 +107,13 @@ class MeshInstance::impl{
                 m_Material->addMeshEntry(m_Mesh);
                 for(auto meshEntry:m_Material->getMeshEntries()){
                     if(meshEntry->mesh() == m_Mesh){
-                        meshEntry->addMeshInstance(m_Parent->name(),super);
+						//fix after changing to component system
+						if(m_Parent)
+                            meshEntry->addMeshInstance(m_Parent->name(),super);
+						else
+                            meshEntry->addMeshInstance(m_Entity,super);
+
+
                         break;
                     }
                 }
@@ -183,18 +135,42 @@ class MeshInstance::impl{
                     for(auto entry:mat->getMeshEntries()){
                         if(entry->mesh() == m_Mesh){
                             bool add = true;
-                            for(auto object:entry->meshInstances()){
-                                if(object.first == this->m_Parent->name()){
-                                    for(auto instance:object.second){
-                                        if(instance == super){
-                                            add = false;
-                                            break;
-                                        }
-                                    }
-                                }
+
+							//fix after changing to component system
+							if(m_Parent){
+								for(auto object:entry->meshInstances()){
+									if(object.first == m_Parent->name()){
+										for(auto instance:object.second){
+											if(instance == super){
+												add = false;
+												break;
+											}
+										}
+									}
+								}
+							}
+							else{
+								for(auto object:entry->meshInstancesEntities()){
+									if(object.first == m_Entity->id()){
+										for(auto instance:object.second){
+											if(instance == super){
+												add = false;
+												break;
+											}
+										}
+									}
+								}
+	
+
                             }
                             if(add){
-                                entry->addMeshInstance(this->m_Parent->name(),super);
+								//fix after changing to component system
+								if(m_Parent)
+                                    entry->addMeshInstance(m_Parent->name(),super);
+								else
+									entry->addMeshInstance(m_Entity,super);
+
+
                             }
                         }
                     }
@@ -202,18 +178,30 @@ class MeshInstance::impl{
             }
         }
         void _removeMeshInstanceFromMaterial(MeshInstance* super){
-            for(auto materialMeshEntry:m_Material->getMeshEntries()){
-                if(materialMeshEntry->mesh() == m_Mesh){
-                    materialMeshEntry->removeMeshInstance(m_Parent->name(),super);
-                    break;
-                }
-            }
+			//fix after changing to component system
+			if(m_Parent){
+				for(auto materialMeshEntry:m_Material->getMeshEntries()){
+					if(materialMeshEntry->mesh() == m_Mesh){
+						materialMeshEntry->removeMeshInstance(m_Parent->name(),super);
+						break;
+					}
+				}
+			}
+			else{
+				for(auto materialMeshEntry:m_Material->getMeshEntries()){
+					if(materialMeshEntry->mesh() == m_Mesh){
+						materialMeshEntry->removeMeshInstance(m_Entity,super);
+						break;
+					}
+				}
+			}
         }
         void _removeMeshEntryFromMaterial(){
             bool del = true;
             for(auto meshEntry:m_Material->getMeshEntries()){
                 if(meshEntry->mesh() == m_Mesh){
-                    del = false; break;
+                    del = false; 
+					break;
                 }
             }
             if(del){ m_Material->removeMeshEntry(m_Mesh); }
@@ -247,6 +235,75 @@ class MeshInstance::impl{
 };
 
 
+struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance::impl& i = *(((MeshInstance*)r)->m_i);
+
+	//fix this after building component system
+	glm::mat4 parentModel = glm::mat4(1.0f);
+	if(i.m_Parent){
+		Object* parent = nullptr;
+		boost::weak_ptr<Object> o = Resources::getObjectPtr(i.m_Parent->name());
+		parent = o.lock().get();
+		parentModel = parent->getModel();
+	}
+	else{
+		Entity* parent = nullptr;
+		parent = i.m_Entity;
+		epriv::ComponentBodyBaseClass& body = *(parent->getComponent<epriv::ComponentBodyBaseClass>());
+		parentModel = body.modelMatrix();
+	}
+
+    vector<MeshInstanceAnimation*>& q = i.m_AnimationQueue;
+    Renderer::sendUniform4fSafe("Object_Color",i.m_Color);
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.m_GodRaysColor);
+    if(q.size() > 0){
+        vector<glm::mat4> transforms;
+		//process the animation here
+		for(uint j = 0; j < q.size(); ++j){
+			MeshInstanceAnimation::impl& a = *(q.at(j)->m_i.get());
+			if(a.m_Mesh == i.m_Mesh){
+				a.m_CurrentTime += Resources::dt();
+				if(transforms.size() == 0){
+					transforms.resize(a.m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
+				}
+				a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
+				if(a.m_CurrentTime >= a.m_EndTime){
+					a.m_CurrentTime = 0;
+					++a.m_CurrentLoops;
+				}
+			}
+		}
+		Renderer::sendUniform1iSafe("AnimationPlaying",1);
+		Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+
+		//cleanup the animation queue
+		for (auto it = q.cbegin(); it != q.cend();){
+			MeshInstanceAnimation* anim = (*it);
+			MeshInstanceAnimation::impl& a = *(anim->m_i.get());
+			if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
+				SAFE_DELETE(anim); //do we need this?
+				it = q.erase(it);
+			}
+			else{ ++it; }
+		}
+    }
+    else{
+        Renderer::sendUniform1iSafe("AnimationPlaying",0);
+    }
+    
+    glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    
+    Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
+    Renderer::sendUniformMatrix4f("Model",model);
+    i.m_Mesh->render();
+}};
+struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+}};
+
+epriv::DefaultMeshInstanceBindFunctor   DEFAULT_BIND_FUNCTOR;
+epriv::DefaultMeshInstanceUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
+
 
 
 MeshInstanceAnimation::MeshInstanceAnimation(Mesh* m,const string& a,float s,float e,uint l):m_i(new impl){
@@ -258,22 +315,30 @@ MeshInstanceAnimation::~MeshInstanceAnimation(){
 MeshInstance::MeshInstance(const string& parentName, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,parentName);
 	epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(const string& parentName,Handle mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,parentName);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,entity);
 	epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     Mesh* _mesh = Resources::getMesh(mesh);
     Material* _mat = Resources::getMaterial(mat);
     m_i->_init(_mesh,_mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
 void MeshInstance::setPosition(float x, float y, float z){ m_i->_setPosition(x,y,z); }
@@ -286,12 +351,13 @@ void MeshInstance::setScale(glm::vec3& v){ m_i->_setScale(v.x,v.y,v.z); }
 void MeshInstance::translate(glm::vec3& v){ m_i->_translate(v.x,v.y,v.z); }
 void MeshInstance::rotate(glm::vec3& v){ m_i->_rotate(v.x,v.y,v.z); }
 void MeshInstance::scale(glm::vec3& v){ m_i->_scale(v.x,v.y,v.z); }
+Object* MeshInstance::parent(){ return m_i->m_Parent; }
+glm::vec4& MeshInstance::color(){ return m_i->m_Color; }
+glm::vec3& MeshInstance::godRaysColor(){ return m_i->m_GodRaysColor; }
 glm::mat4& MeshInstance::model(){ return m_i->m_Model; }
 glm::vec3& MeshInstance::getScale(){ return m_i->m_Scale; }
 glm::vec3& MeshInstance::position(){ return m_i->m_Position; }
 glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
-glm::vec4 MeshInstance::color(){ return m_i->m_Color; }
-glm::vec3 MeshInstance::godRaysColor(){ return m_i->m_GodRaysColor; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
 void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(Resources::getMesh(meshHandle),this); }
@@ -307,7 +373,6 @@ void MeshInstance::setOrientation(float x,float y,float z){
     if(abs(z) > Object::m_RotationThreshold) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(z,  glm::vec3(0,0,1)));//roll
     m_i->_updateModelMatrix();
 }
-Object* MeshInstance::parent(){ return m_i->m_Parent; }
 void MeshInstance::update(float dt){ m_i->_updateModelMatrix(); }
 void MeshInstance::render(){ m_i->m_Mesh->render(); }
 void MeshInstance::playAnimation(const string& animName,float startTime){

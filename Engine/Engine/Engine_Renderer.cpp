@@ -1531,6 +1531,51 @@ class epriv::RenderManager::impl final{
 			GLEnable(GLState::DEPTH_TEST);
 			GLEnable(GLState::DEPTH_MASK);
 
+
+
+			//RENDER NORMAL OBJECTS HERE
+			for(auto shader:m_GeometryPassShaderPrograms){
+				vector<Material*>& shaderMaterials = shader->getMaterials(); 
+				if(shaderMaterials.size() > 0){
+					shader->bind();
+					for(auto material:shaderMaterials){
+						vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); 
+						if(materialMeshes.size() > 0){
+							material->bind();
+							for(auto materialMeshEntry:materialMeshes){
+								MaterialMeshEntry* entry = materialMeshEntry;
+								Mesh* entryMesh = entry->mesh();
+								entryMesh->bind();
+								for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
+
+									if(scene->hasEntity(meshInstance.first)){
+										//if entity passed render check
+										ComponentModel& model = *(scene->getEntity(meshInstance.first)->getComponent<ComponentModel>());
+										if(model.passedRenderCheck()){
+											for(auto meshInstance:meshInstance.second){
+												meshInstance->bind(); //render also
+												meshInstance->unbind();
+											}
+										}
+									}
+									//protect against any custom changes by restoring to the regular shader and material
+									if(current_shader_program != shader){
+										shader->bind();
+										material->bind();
+									}
+								}
+								entryMesh->unbind();
+							}
+							material->unbind();
+						}
+					}
+					shader->unbind();
+				}
+			}
+
+
+
+
 			//RENDER NORMAL OBJECTS HERE
 			for(auto shader:m_GeometryPassShaderPrograms){
 				vector<Material*>& shaderMaterials = shader->getMaterials(); 

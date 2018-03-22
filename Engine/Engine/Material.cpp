@@ -9,6 +9,7 @@
 #include "ShaderProgram.h"
 #include "Scene.h"
 #include "Skybox.h"
+#include "Components.h"
 
 #include <unordered_map>
 #include <algorithm>
@@ -137,7 +138,7 @@ namespace Engine{
 	};
 };
 
-
+#pragma region MaterialComponents
 
 MaterialComponent::MaterialComponent(uint type,Texture* t){
     m_ComponentType = (MaterialComponentType::Type)type;
@@ -221,15 +222,43 @@ void MaterialComponentParallaxOcclusion::unbind(){
     Renderer::unbindTexture2D(slots.at(0));
 }
 
+#pragma endregion
+
 epriv::DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
 epriv::DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-class MaterialMeshEntry::impl final{
+
+#pragma region MaterialMeshEntry
+
+class epriv::MaterialMeshEntry::impl final{
     public:
 	    Mesh* m_Mesh;
         unordered_map<string,vector<MeshInstance*>> m_MeshInstances;
+		unordered_map<uint,vector<MeshInstance*>> m_MeshInstancesEntities;
 
 		void _init(Mesh* mesh){
 			m_Mesh = mesh;
+		}
+		void _addMeshInstance(Entity* obj,MeshInstance* meshInstance){
+			if(!m_MeshInstancesEntities.count(obj->id())){
+				m_MeshInstancesEntities.emplace(obj->id(),vector<MeshInstance*>(1,meshInstance));
+			}
+			else{
+				m_MeshInstancesEntities.at(obj->id()).push_back(meshInstance);
+			}
+		}
+		void _removeMeshInstance(Entity* obj,MeshInstance* meshInstance){
+			if(m_MeshInstancesEntities.count(obj->id())){
+				vector<MeshInstance*>& v = m_MeshInstancesEntities.at(obj->id());
+				auto it = v.begin();
+				while(it != v.end()) {
+					MeshInstance* instance = (*it);
+					if(instance ==  meshInstance) {
+						//do not delete the instance here
+						it = v.erase(it);
+					}
+					else ++it;
+				}
+			}
 		}
 		void _addMeshInstance(const string& obj,MeshInstance* meshInstance){
 			if(!m_MeshInstances.count(obj)){
@@ -254,16 +283,43 @@ class MaterialMeshEntry::impl final{
 			}
 		}
 };
+epriv::MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
+    m_i->_init(mesh);
+}
+epriv::MaterialMeshEntry::~MaterialMeshEntry(){
+}
+void epriv::MaterialMeshEntry::addMeshInstance(const string& objectName,MeshInstance* meshInstance){
+	m_i->_addMeshInstance(objectName,meshInstance);
+}
+void epriv::MaterialMeshEntry::removeMeshInstance(const string& objectName,MeshInstance* meshInstance){
+	m_i->_removeMeshInstance(objectName,meshInstance);
+}
+void epriv::MaterialMeshEntry::addMeshInstance(Entity* entity,MeshInstance* meshInstance){
+	m_i->_addMeshInstance(entity,meshInstance);
+}
+void epriv::MaterialMeshEntry::removeMeshInstance(Entity* entity,MeshInstance* meshInstance){
+	m_i->_removeMeshInstance(entity,meshInstance);
+}
+void epriv::MaterialMeshEntry::addMeshInstance(uint entityID,MeshInstance* meshInstance){
+	Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+	m_i->_addMeshInstance(e,meshInstance);
+}
+void epriv::MaterialMeshEntry::removeMeshInstance(uint entityID,MeshInstance* meshInstance){
+	Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+	m_i->_removeMeshInstance(e,meshInstance);
+}
+Mesh* epriv::MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
+unordered_map<string,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstances(){ return m_i->m_MeshInstances; }
+unordered_map<uint,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstancesEntities(){ return m_i->m_MeshInstancesEntities;}
+
+#pragma endregion
+
+#pragma region Material
+
 class Material::impl final{
     public:
-
-		//component logic
-		vector<Mesh*> m_MeshesThatUseThisMaterial;
-
-
-
         unordered_map<uint,MaterialComponent*> m_Components;
-        vector<MaterialMeshEntry*> m_Meshes;
+        vector<epriv::MaterialMeshEntry*> m_Meshes;
         uint m_DiffuseModel, m_SpecularModel;
         bool m_Shadeless;
         glm::vec3 m_F0Color;
@@ -399,23 +455,6 @@ class Material::impl final{
         void _setAO(float a){                            m_BaseAO = glm::clamp(a,0.001f,0.999f);         _updateGlobalMaterialPool(); }
         void _setMetalness(float m){                     m_BaseMetalness = glm::clamp(m,0.001f,0.999f);  _updateGlobalMaterialPool(); }
 };
-
-
-MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
-    m_i->_init(mesh);
-}
-MaterialMeshEntry::~MaterialMeshEntry(){
-}
-void MaterialMeshEntry::addMeshInstance(const string& objectName,MeshInstance* meshInstance){
-	m_i->_addMeshInstance(objectName,meshInstance);
-}
-void MaterialMeshEntry::removeMeshInstance(const string& objectName,MeshInstance* meshInstance){
-	m_i->_removeMeshInstance(objectName,meshInstance);
-}
-Mesh* MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
-unordered_map<string,vector<MeshInstance*>>& MaterialMeshEntry::meshInstances(){ return m_i->m_MeshInstances; }
-
-
 
 Material::Material(string name,string diffuse,string normal,string glow,string specular,Handle shaderProgramHandle):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
@@ -595,11 +634,11 @@ void Material::addMeshEntry(Mesh* mesh){
     for(auto entry:m_i->m_Meshes){
         if(entry->mesh() == mesh){ return; }
     }
-    m_i->m_Meshes.push_back(new MaterialMeshEntry(mesh));
+    m_i->m_Meshes.push_back(new epriv::MaterialMeshEntry(mesh));
 }
 void Material::removeMeshEntry(Mesh* mesh){
     for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
-		MaterialMeshEntry* entry = (*it);
+		epriv::MaterialMeshEntry* entry = (*it);
         if(entry->mesh() == mesh){
             SAFE_DELETE(entry); //do we need this?
             m_i->m_Meshes.erase(it++);
@@ -629,4 +668,6 @@ void Material::unload(){
         EngineResource::unload();
     }
 }
-vector<MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
+vector<epriv::MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
+
+#pragma endregion

@@ -27,6 +27,7 @@ class btRigidBody;
 struct btDefaultMotionState;
 class btVector3;
 struct Handle;
+class MeshInstance;
 
 class ComponentBaseClass;
 
@@ -132,7 +133,7 @@ namespace Engine{
 			RigidBody,
 
 		_TOTAL,};};
-		class ComponentBodyBaseClass{
+		class ComponentBodyBaseClass: public ComponentBaseClass{
 			protected:
 				ComponentBodyType::Type _type;
 			public:
@@ -149,13 +150,18 @@ class ComponentModel: public ComponentBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentRigidBody;
     private:
-		std::vector<Engine::epriv::MeshMaterialPair> models;
+		std::vector<MeshInstance*> models;
 		float _radius;
 		class impl; std::unique_ptr<impl> m_i;
     public:
-		ComponentModel(Handle& meshHandle,Handle& materialHandle);
-		ComponentModel(Mesh*,Material*);
+		ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity*);
+		ComponentModel(Mesh*,Material*,Entity*);
 		~ComponentModel();
+
+		bool passedRenderCheck();
+		bool visible();
+		void show();
+		void hide();
 
 		uint addModel(Handle& meshHandle, Handle& materialHandle);
 		uint addModel(Mesh*,Material*);
@@ -172,7 +178,7 @@ class ComponentModel: public ComponentBaseClass{
 		bool rayIntersectSphere(ComponentCamera* camera);
 };
 
-class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
+class ComponentBasicBody: public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
 	friend class ::ComponentModel;
 	friend class ::Camera;
@@ -202,7 +208,7 @@ class ComponentBasicBody: public ComponentBaseClass, public Engine::epriv::Compo
 		void setScale(glm::vec3& newScale);         void setScale(float x,float y,float z);
 };
 
-class ComponentRigidBody: public ComponentBaseClass, public Engine::epriv::ComponentBodyBaseClass{
+class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 	friend class ::Engine::epriv::ComponentManager;
     private:
 		Collision* _collision;
@@ -285,6 +291,7 @@ class Entity{
 		Entity();
 		virtual ~Entity();
 
+		uint id();
 		virtual void registerEvent(EventType::Type type){}
 		virtual void unregisterEvent(EventType::Type type){}
 		virtual void update(const float& dt){}

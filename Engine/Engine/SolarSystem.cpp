@@ -259,11 +259,12 @@ void SolarSystem::_loadFromFile(string filename){
 
 	//entity testing
 	Entity* test = new Entity();
+	addEntity(test);
 	ComponentBasicBody* basicBody = new ComponentBasicBody();
 	basicBody->setPosition(xPos+2,0,zPos-3);
-	ComponentModel* model = new ComponentModel(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial);
+	ComponentModel* model = new ComponentModel(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,test);
 	test->addComponent(basicBody);
-	test->addComponent(model);
+	test->addComponent(model);	
 	////////////////////////////////
 
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);

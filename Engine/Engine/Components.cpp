@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Skybox.h"
+#include "MeshInstance.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -27,54 +28,30 @@ unordered_map<std::type_index, vector<ComponentBaseClass*>> epriv::ComponentMana
 
 epriv::ComponentManager* componentManager = nullptr;
 
-struct epriv::MeshMaterialPair final{
-	Mesh* _mesh;
-	Material* _material;
-	glm::mat4 _modelMatrix;
-	glm::vec3 _position, _scale, _forward, _right, _up;
-	glm::quat _rotation;
-	MeshMaterialPair(Mesh* mesh,Material* material){
-		_mesh = mesh; _material = material; _modelMatrix = glm::mat4(1.0f);
-		_position = glm::vec3(0.0f); _rotation = glm::quat(); _scale = glm::vec3(1.0f);
-		Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
-	}
-	MeshMaterialPair(Handle& mesh,Handle& material){
-		_mesh = Resources::getMesh(mesh); _material = Resources::getMaterial(material); _modelMatrix = glm::mat4(1.0f);
-		_position = glm::vec3(0.0f); _rotation = glm::quat(); _scale = glm::vec3(1.0f);
-		Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
-	}
+class ComponentModel::impl final{
+    public:
+		bool m_PassedRenderCheck;
+		bool m_Visible;
+		void _init(){
+			m_PassedRenderCheck = false;
+			m_Visible = true;
+		}
 
-	void translate(glm::vec3& translation){ translate(translation.x,translation.y,translation.z); }
-	void translate(float x,float y,float z){
-		_position.x += x; _position.y += y; _position.z += z;
-	}
-	void setPosition(glm::vec3& newPosition){ setPosition(newPosition.x,newPosition.y,newPosition.z); }
-	void setPosition(float x,float y,float z){
-		_position.x = x; _position.y = y; _position.z = z;
-	}
-	void rotate(glm::vec3& rotation){ rotate(rotation.x,rotation.y,rotation.z); }
-	void rotate(float pitch,float yaw,float roll){
-		if(abs(pitch) < Object::m_RotationThreshold && abs(yaw) < Object::m_RotationThreshold && abs(roll) < Object::m_RotationThreshold)
-			return;
-		if(abs(pitch) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
-		if(abs(yaw) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0,1,0)));   //yaw
-		if(abs(roll) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(roll,  glm::vec3(0,0,1)));   //roll
-		Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
-	}
-	void scale(glm::vec3& amount){ scale(amount.x,amount.y,amount.z); }
-	void scale(float x,float y,float z){
-		_scale.x += x; _scale.y += y; _scale.z += z;
-	}
-	void setRotation(glm::quat& newRotation){
-		newRotation = glm::normalize(newRotation);
-		_rotation = newRotation;
-		Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
-	}
-	void setRotation(float x,float y,float z,float w){ setRotation(glm::quat(w,x,y,z)); }
-	void setScale(glm::vec3& newScale){ setScale(newScale.x,newScale.y,newScale.z); }
-	void setScale(float x,float y,float z){
-		_scale.x = x; _scale.y = y; _scale.z = z;
-	}
+		float calculateRadius(ComponentModel* super){
+			float maxLength = 0;
+			for(auto model:super->models){
+				MeshInstance& pair = *model;
+				float length = 0;
+				glm::mat4 m = pair.model();
+				glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
+				length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
+				if(length > maxLength){
+					maxLength = length;
+				}
+			}
+			super->_radius = maxLength;
+			return super->_radius;
+		}
 };
 
 
@@ -146,16 +123,30 @@ class epriv::ComponentManager::impl final{
 				ComponentRigidBody& b = *((ComponentRigidBody*)c);
 			}
 		}
+		void _calculateRenderCheck(ComponentModel& c,Camera* camera){
+			epriv::ComponentBodyBaseClass& body = *(c.m_Owner->getComponent<epriv::ComponentBodyBaseClass>());
+			glm::vec3& pos = body.position();
+			if(!c.visible() || !camera->sphereIntersectTest(pos,c._radius) || camera->getDistance(pos) > c._radius * Object::m_VisibilityThreshold){
+				c.m_i->m_PassedRenderCheck = false;
+				return;
+			}
+			c.m_i->m_PassedRenderCheck = true;
+		}
 		void _updateComponentModels(const float& dt){
+			Camera* camera = Resources::getCurrentScene()->getActiveCamera();
 			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentModel))];
 			for(auto c:v){
 				ComponentModel& modelC = *((ComponentModel*)c);
 				for(auto model:modelC.models){
-					if(model._mesh != nullptr){
-						_performTransformation(c->m_Owner->parent(),model._position,model._rotation,model._scale,model._modelMatrix);
+					if(model->mesh()){
+						MeshInstance& pair = *model;
+						_performTransformation(c->m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
+
+						_calculateRenderCheck(modelC,camera);
 					}
 				}
 			}
+
 		}
 		void _updateComponentCameras(const float& dt){
 			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentCamera))];
@@ -317,14 +308,14 @@ void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
 ComponentBaseClass::ComponentBaseClass(){}
 ComponentBaseClass::~ComponentBaseClass(){}
 
-epriv::ComponentBodyBaseClass::ComponentBodyBaseClass(epriv::ComponentBodyType::Type type){ _type = type; }
+epriv::ComponentBodyBaseClass::ComponentBodyBaseClass(epriv::ComponentBodyType::Type type):ComponentBaseClass(){ _type = type; }
 epriv::ComponentBodyBaseClass::~ComponentBodyBaseClass(){}
 epriv::ComponentBodyType::Type epriv::ComponentBodyBaseClass::getBodyType(){ return _type; }
 
 
 #pragma region BasicBody
 
-ComponentBasicBody::ComponentBasicBody():ComponentBaseClass(),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::BasicBody){
+ComponentBasicBody::ComponentBasicBody():epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::BasicBody){
 	_position = glm::vec3(0.0f);
 	_scale = glm::vec3(1.0f);
 	_rotation = glm::quat();
@@ -437,65 +428,54 @@ glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_
 
 #pragma region Model
 
-class ComponentModel::impl final{
-    public:
-		float calculateRadius(ComponentModel* super){
-			float maxLength = 0;
-			for(auto model:super->models){
-				float length = 0;
-				glm::mat4 m = model._modelMatrix;
-				glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
-				length = glm::length(localPosition) + model._mesh->getRadius() * Engine::Math::Max(model._scale);
-				if(length > maxLength){
-					maxLength = length;
-				}
-			}
-			super->_radius = maxLength;
-			return super->_radius;
-		}
-};
-
-
-ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle):ComponentBaseClass(),m_i(new impl){
+ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity* owner):ComponentBaseClass(),m_i(new impl){
+	m_i->_init();
+	m_Owner = owner;
 	if(!meshHandle.null() && !materialHandle.null()){
-		models.push_back( epriv::MeshMaterialPair(meshHandle,materialHandle) );
+		models.push_back( new MeshInstance(m_Owner,meshHandle,materialHandle) );
 	}
 	m_i->calculateRadius(this);
 }
-ComponentModel::ComponentModel(Mesh* mesh,Material* material):ComponentBaseClass(),m_i(new impl){
+ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* owner):ComponentBaseClass(),m_i(new impl){
+	m_i->_init();
+	m_Owner = owner;
 	if(mesh && material){
-		models.push_back( epriv::MeshMaterialPair(mesh,material) );
+		models.push_back( new MeshInstance(m_Owner,mesh,material) );
 	}
 	m_i->calculateRadius(this);
 }
 ComponentModel::~ComponentModel(){
 	models.clear();
 }
+bool ComponentModel::passedRenderCheck(){ return m_i->m_PassedRenderCheck; }
+bool ComponentModel::visible(){ return m_i->m_Visible; }
+void ComponentModel::show(){ m_i->m_Visible = true; }
+void ComponentModel::hide(){ m_i->m_Visible = false; }
 uint ComponentModel::addModel(Handle& meshHandle, Handle& materialHandle){ return ComponentModel::addModel(Resources::getMesh(meshHandle),Resources::getMaterial(materialHandle)); }
 uint ComponentModel::addModel(Mesh* mesh,Material* material){
-	models.push_back( epriv::MeshMaterialPair(mesh,material) );
+	models.push_back( new MeshInstance(m_Owner,mesh,material) );
 	m_i->calculateRadius(this);
 	return models.size();
 }
 
 void ComponentModel::setModel(Handle& meshHandle,Handle& materialHandle,uint index){ ComponentModel::setModel(Resources::getMesh(meshHandle),Resources::getMaterial(materialHandle), index); }
 void ComponentModel::setModel(Mesh* mesh,Material* material,uint index){
-	epriv::MeshMaterialPair& pair = models.at(index);
-	pair._mesh = mesh;
-	pair._material = material;
+	MeshInstance& pair = *(models.at(index));
+	pair.setMesh(mesh);
+	pair.setMaterial(material);
 	m_i->calculateRadius(this);
 }
 
 void ComponentModel::setModelMesh(Mesh* mesh,uint index){
-	epriv::MeshMaterialPair& pair = models.at(index);
-	pair._mesh = mesh;
+	MeshInstance& pair = *(models.at(index));
+	pair.setMesh(mesh);
 	m_i->calculateRadius(this);
 }
 void ComponentModel::setModelMesh(Handle& meshHandle, uint index){ ComponentModel::setModelMesh(Resources::getMesh(meshHandle),index); }
 		
 void ComponentModel::setModelMaterial(Material* material,uint index){
-	epriv::MeshMaterialPair& pair = models.at(index);
-	pair._material = material;
+	MeshInstance& pair = *(models.at(index));
+	pair.setMaterial(material);
 }
 void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ ComponentModel::setModelMaterial(Resources::getMaterial(materialHandle),index); }
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
@@ -513,7 +493,7 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 
 #pragma region RigidBody
 
-ComponentRigidBody::ComponentRigidBody(Collision* collision):ComponentBaseClass(),epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
+ComponentRigidBody::ComponentRigidBody(Collision* collision):epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
 	_rigidBody = nullptr;
 	_motionState = nullptr;
 
@@ -776,6 +756,7 @@ Entity::~Entity(){
 	m_ParentID = m_ID = std::numeric_limits<uint>::max();
 	delete[] m_Components;
 }
+uint Entity::id(){ return m_ID; }
 void Entity::destroy(bool immediate){
 	if(!immediate){
 		//add to the deletion queue

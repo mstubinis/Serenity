@@ -39,14 +39,14 @@ class MeshInstance final: public BindableResource{
         ~MeshInstance();
 
         Mesh* mesh();
+		Object* parent();
+		glm::vec4& color();
+		glm::vec3& godRaysColor();
         Material* material();
-        glm::mat4& model();
+		glm::mat4& model();
         glm::vec3& position();
         glm::quat& orientation();
         glm::vec3& getScale();
-        Object* parent();
-		glm::vec4 color();
-		glm::vec3 godRaysColor();
 
         std::vector<MeshInstanceAnimation*>& animationQueue();
         void playAnimation(const std::string& animName,float startTime);

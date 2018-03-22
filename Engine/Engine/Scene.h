@@ -32,6 +32,7 @@ class Scene: public EngineResource{
         Scene(std::string name);
         virtual ~Scene();
 
+		Entity* getEntity(uint entityID);
 		void addEntity(Entity*);
 		bool hasEntity(Entity*);
 		bool hasEntity(uint entityID);

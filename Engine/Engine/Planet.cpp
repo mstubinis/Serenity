@@ -21,7 +21,7 @@ using namespace std;
 
 struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *((MeshInstance*)r);
-
+	
     boost::weak_ptr<Object> o = Resources::getObjectPtr(i.parent()->name());
 
     Planet* obj = (Planet*)(o.lock().get());

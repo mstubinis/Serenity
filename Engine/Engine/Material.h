@@ -15,7 +15,7 @@ class MeshInstance;
 class Texture;
 class ShaderP;
 class Mesh;
-
+class Entity;
 
 class MaterialComponentType{public: enum Type{
 	Diffuse,
@@ -129,18 +129,24 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
         const float heightScale() const { return m_HeightScale; }
 };
 
-class MaterialMeshEntry{
-    private:
-		class impl; std::unique_ptr<impl> m_i;
-    public:
-        MaterialMeshEntry(Mesh*);
-        ~MaterialMeshEntry();
+namespace Engine{
+	namespace epriv{
+		class MaterialMeshEntry{
+			private:
+				class impl; std::unique_ptr<impl> m_i;
+			public:
+				MaterialMeshEntry(Mesh*);
+				~MaterialMeshEntry();
 
-        Mesh* mesh();
-        std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances();
+				Mesh* mesh();
+				std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances();
+				std::unordered_map<uint,std::vector<MeshInstance*>>& meshInstancesEntities();
 
-        void addMeshInstance(const std::string& objectName,MeshInstance*);
-        void removeMeshInstance(const std::string& objectName,MeshInstance*);
+				void addMeshInstance(const std::string& objectName,MeshInstance*);   void removeMeshInstance(const std::string& objectName,MeshInstance*);
+				void addMeshInstance(Entity* entity,MeshInstance*);                  void removeMeshInstance(Entity* entity,MeshInstance*);
+				void addMeshInstance(uint entityID,MeshInstance*);                   void removeMeshInstance(uint entityID,MeshInstance*);
+		};
+	};
 };
 
 class Material final: public BindableResource{
@@ -226,6 +232,6 @@ class Material final: public BindableResource{
 
 		void addMeshEntry(Mesh*);
         void removeMeshEntry(Mesh*);
-        std::vector<MaterialMeshEntry*>& getMeshEntries();
+        std::vector<Engine::epriv::MaterialMeshEntry*>& getMeshEntries();
 };
 #endif
