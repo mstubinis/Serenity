@@ -26,6 +26,7 @@ namespace Engine{
 				nextFreeIndex = _nextFreeIndex; counter = 1; active, endOfList = 0; resource = nullptr;
 			}
 		};
+		#pragma region ObjectPool
 		template<typename T>
 		class ObjectPool final{
 		    private:
@@ -142,6 +143,98 @@ namespace Engine{
 					return (U*)m_Pool[index].resource;
 				}
 		};
+		#pragma endregion
+
+
+        #pragma region EntityPool
+		template<typename T>
+		class EntityPool final{
+		    private:
+				uint MAX_ENTRIES;
+				HandleEntry<T>* m_Pool;
+				uint m_activeEntryCount;
+				uint32 m_firstFreeEntry;
+		    public:
+				EntityPool(uint numEntries){ 
+					MAX_ENTRIES = numEntries; m_Pool = new HandleEntry<T>[MAX_ENTRIES]; reset(); 
+				}
+				~EntityPool(){ destruct(); }
+
+				void destruct(){
+					for(uint i = 0; i < MAX_ENTRIES; ++i){
+						if(m_Pool[i].resource){
+						    delete(m_Pool[i].resource);
+						    m_Pool[i].resource = nullptr;
+						}
+					}
+					delete[] m_Pool;
+				}
+				void reset(){
+					m_activeEntryCount = 0;
+					m_firstFreeEntry = 0;
+					for (uint i = 0; i < MAX_ENTRIES - 1; ++i){
+						m_Pool[i] = HandleEntry<T>(i + 1);
+					}
+					m_Pool[MAX_ENTRIES - 1] = HandleEntry<T>();
+					m_Pool[MAX_ENTRIES - 1].endOfList = true;
+				}
+				void update(const uint& id,T* ptr){
+					if(m_Pool[id].active == true){
+						m_Pool[id].resource = ptr;
+					}
+				}
+				uint add(T* ptr){
+					const uint newIndex = m_firstFreeEntry;
+					if(newIndex >= MAX_ENTRIES) return uint(-1); //null entity
+					m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
+					m_Pool[newIndex].nextFreeIndex = 0;
+					++m_Pool[newIndex].counter;
+					if (m_Pool[newIndex].counter == 0){
+						m_Pool[newIndex].counter = 1;
+					}
+					m_Pool[newIndex].active = true;
+					m_Pool[newIndex].resource = ptr;
+					++m_activeEntryCount;
+					return uint(newIndex);
+				}
+				void remove(const uint& id){
+					if(m_Pool[id].active == true){
+						m_Pool[id].nextFreeIndex = m_firstFreeEntry;
+						m_Pool[id].active = false;
+						if(m_Pool[id].resource != nullptr){
+						    delete(m_Pool[id].resource);
+						    m_Pool[id].resource = nullptr;
+						}
+						m_firstFreeEntry = id;
+						--m_activeEntryCount;		
+					}
+				}
+				T* get(const uint& id){
+					T* outPtr = nullptr;
+					if (!get(id, outPtr)) return nullptr;
+					return outPtr;
+				}
+
+				bool get(const uint& id, T*& outPtr){
+					if (m_Pool[id].active == false)
+						return false;
+					outPtr = m_Pool[id].resource;
+					return true;
+				}
+				template<typename U> inline bool getAs(const uint& id, U*& outPtr){
+					T* _void;
+					const bool rv = get(id,_void);
+					outPtr = (U*)_void; //use union_cast ? was in the original source
+					return rv;
+				}
+				template<typename U> inline void getAsFast(const uint& id, U*& outPtr){
+					outPtr = (U*)m_Pool[id].resource;
+				}
+				template<typename U> inline U* getAsFast(const uint& id){
+					return (U*)m_Pool[id].resource;
+				}
+		};
+        #pragma endregion
 	};
 };
 

@@ -23,7 +23,7 @@ using namespace Engine;
 using namespace std;
 
 unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_Map;
-epriv::ObjectPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
+epriv::EntityPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
 unordered_map<std::type_index, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectors;
 
 epriv::ComponentManager* componentManager = nullptr;
@@ -60,25 +60,9 @@ class epriv::ComponentManager::impl final{
 		ComponentTypeRegistry       m_TypeRegistry;
 		vector<Entity*>             m_EntitiesToBeDestroyed;
 
-		//implement this workflow somehow with ComponentModels
-
-		//list of shaders
-		    //bind shader
-		    //list of materials
-		       //bind material
-		       //list of meshes
-		          //bind mesh
-		          //list of objects using meshes
-		              //bind object
-		              //render object
-		              //unbind object
-		          //unbind mesh
-		       //unbind material
-		    //unbind shader
-
 		void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
-			super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
-			super->m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
+			super->m_ComponentPool = new EntityPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
+			super->m_EntityPool = new EntityPool<Entity>(epriv::MAX_NUM_ENTITIES);
 
 			m_TypeRegistry = ComponentTypeRegistry();
 			m_TypeRegistry.emplace<ComponentBodyBaseClass>();
@@ -398,6 +382,7 @@ ComponentCamera::~ComponentCamera(){
 void ComponentCamera::update(const float& dt){
 }
 void ComponentCamera::resize(uint width, uint height){
+	_aspectRatio = Resources::getWindowSize().x/(float)Resources::getWindowSize().y;
     if(_type == Type::Perspective){
 		_projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
 	}

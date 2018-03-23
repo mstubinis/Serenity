@@ -105,8 +105,8 @@ namespace Engine{
 			friend class ::Engine::epriv::ComponentTypeRegistry;
 		    private:
 				class impl;
-				ObjectPool<Entity>*                    m_EntityPool;
-				static ObjectPool<ComponentBaseClass>* m_ComponentPool;
+				EntityPool<Entity>*                    m_EntityPool;
+				static EntityPool<ComponentBaseClass>* m_ComponentPool;
 				static std::unordered_map<std::type_index, std::vector<ComponentBaseClass*>> m_ComponentVectors;
 		    public:
 				std::unique_ptr<impl> m_i;
@@ -328,11 +328,11 @@ class Entity{
 			uint type = Engine::epriv::ComponentTypeRegistry::m_Map[typeIndex];
 			uint& componentID = m_Components[type];
 			if(componentID != std::numeric_limits<uint>::max()) return;
-			Handle handle = Engine::epriv::ComponentManager::m_ComponentPool->add(component,type);
+			uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
 			std::vector<ComponentBaseClass*>& v = Engine::epriv::ComponentManager::m_ComponentVectors[typeIndex];
 			v.push_back(component);
 			component->m_Owner = this;
-			componentID = handle.index;
+			componentID = generatedID;
 		}
 		template<typename T> void removeComponent(T* component){
 			std::type_index typeIndex = std::type_index(typeid(T));
