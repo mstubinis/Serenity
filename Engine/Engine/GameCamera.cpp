@@ -31,34 +31,39 @@ GameCameraComponent::~GameCameraComponent(){
 void GameCameraComponent::update(const float& dt){
     switch(m_State){
         case CAMERA_STATE_FOLLOW:{
+			epriv::ComponentBodyBaseClass& body = *(m_Target->getComponent<epriv::ComponentBodyBaseClass>());
+			ComponentModel& targetModel = *(m_Target->getComponent<ComponentModel>());
+			float targetRadius = targetModel.radius();
+
             m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if( m_OrbitRadius < 0)     m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
-            float targetRadius = m_Target->getRadius();
-
-
-			glm::vec3 pos = m_Target->getPosition() + ((m_Target->getForward() * glm::length(targetRadius) * 1.7f)+ m_Target->getUp() * glm::length(targetRadius) * 0.3f) * (1.0f + m_OrbitRadius);
+			glm::vec3 pos = body.position() + ((body.forward() * glm::length(targetRadius) * 1.7f)+ body.up() * glm::length(targetRadius) * 0.3f) * (1.0f + m_OrbitRadius);
 			pos -= glm::vec3(-0.00001f,-0.00001f,0.00001f);//for some reason this is needed to remove lighting bugs...
 
 			m_Body->setPosition(pos);
 
             lookAt(
 				pos,
-				m_Target->getPosition() - m_Target->getForward() * 50.0f,
-				m_Target->getUp()
+				body.position() - body.forward() * 50.0f,
+				body.up()
 			);
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
+			epriv::ComponentBodyBaseClass& target = *(m_Target->getComponent<epriv::ComponentBodyBaseClass>());
+			epriv::ComponentBodyBaseClass& player = *(m_Player->getComponent<epriv::ComponentBodyBaseClass>());
+			ComponentModel& playerModel = *(m_Player->getComponent<ComponentModel>());
+
             m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if( m_OrbitRadius < 0)     m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model,m_Player->getPosition() -
-                ((glm::normalize(m_Target->getPosition() - m_Player->getPosition())*(m_Player->getRadius()*2.7f)* (1.0f + m_OrbitRadius))
-                - m_Player->getUp() * glm::length(m_Player->getRadius())*0.3f));
+			model = glm::translate(model,player.position() -
+				((glm::normalize(target.position() - player.position())*(playerModel.radius() * 2.7f) * (1.0f + m_OrbitRadius))
+				- player.up() * glm::length(playerModel.radius())*0.3f));
 
 			glm::vec3 pos(model[3][0],model[3][1],model[3][2]);
 
@@ -66,22 +71,26 @@ void GameCameraComponent::update(const float& dt){
 
             lookAt(
 				pos,
-				m_Target->getPosition(),
-				m_Player->getUp()
+				target.position(),
+				player.up()
 			);
             break;
         }
         case CAMERA_STATE_ORBIT:{
+			epriv::ComponentBodyBaseClass& target = *(m_Target->getComponent<epriv::ComponentBodyBaseClass>());
+			ComponentModel& targetModel = *(m_Target->getComponent<ComponentModel>());
+
+
             m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;
             if( m_OrbitRadius < 0)      m_OrbitRadius = 0;
             else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
 
             m_Body->rotate(-Engine::getMouseDifference().y * 0.02f * dt, -Engine::getMouseDifference().x * 0.02f * dt,0);
 
-            glm::vec3 pos = (glm::vec3(0,0,1) * glm::length(m_Target->getRadius()) * 0.37f) + (glm::vec3(0,0,1) * glm::length(m_Target->getRadius() * (1.0f + m_OrbitRadius)));
+			glm::vec3 pos = (glm::vec3(0,0,1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0,0,1) * glm::length(targetModel.radius() * (1.0f + m_OrbitRadius)));
 
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model,m_Target->getPosition());
+			model = glm::translate(model,target.position());
             model *= glm::mat4_cast(m_Body->rotation());
             model = glm::translate(model,pos);
 
@@ -91,7 +100,7 @@ void GameCameraComponent::update(const float& dt){
 
             lookAt(
 				pos,
-				m_Target->getPosition(),
+				target.position(),
 				m_Body->up()
 			);
             break;
@@ -130,8 +139,9 @@ Object* GameCamera::getObjectInCenterRay(Object* exclusion){
     vector<Object*> objs;
     for(auto object:Engine::Resources::getCurrentScene()->objects()){
         if(object.second->rayIntersectSphere(this)){
-            if(object.second != exclusion)
+            if(object.second != exclusion){
                 objs.push_back(object.second);
+			}
         }
     }
     if(objs.size() == 0) return nullptr;
@@ -147,25 +157,51 @@ Object* GameCamera::getObjectInCenterRay(Object* exclusion){
     }
     return ret;
 }
+Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
+    Entity* ret = nullptr;
+    vector<Entity*> objs;
+	Scene* s = Resources::getCurrentScene();
+    for(auto id:s->entities()){
+		Entity* e = s->getEntity(id);
+        if(this->rayIntersectSphere(e)){
+            if(e != exclusion){
+                objs.push_back(e);
+			}
+        }
+    }
+    if(objs.size() == 0) return nullptr;
+    if(objs.size() == 1) return objs.at(0);
+
+    float distance = -1;
+    for(auto object:objs){
+		epriv::ComponentBodyBaseClass& body = *(object->getComponent<epriv::ComponentBodyBaseClass>());
+		float d = glm::distance(body.position(), getPosition());
+        if(distance == -1 || d < distance){
+            distance = d;
+            ret = object;
+        }
+    }
+    return ret;
+}
 void GameCamera::render(){}
-void GameCamera::follow(Object* target){
+void GameCamera::follow(Entity* target){
 	GameCameraComponent& cam = *((GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = target;
     cam.m_State = CAMERA_STATE_FOLLOW;
 }
-void GameCamera::followTarget(Object* target,Object* player){
+void GameCamera::followTarget(Entity* target,Entity* player){
 	GameCameraComponent& cam = *((GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = player;
     cam.m_State = CAMERA_STATE_FOLLOWTARGET;
 }
-void GameCamera::orbit(Object* target){
+void GameCamera::orbit(Entity* target){
 	GameCameraComponent& cam = *((GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = target;
     cam.m_State = CAMERA_STATE_ORBIT;
 }
-void GameCamera::setTarget(Object* target) { ((GameCameraComponent*)m_Camera)->m_Target = target; }
-const Object* GameCamera::getTarget() const { return ((GameCameraComponent*)m_Camera)->m_Target; }
+void GameCamera::setTarget(Entity* target) { ((GameCameraComponent*)m_Camera)->m_Target = target; }
+const Entity* GameCamera::getTarget() const { return ((GameCameraComponent*)m_Camera)->m_Target; }
 const CAMERA_STATE GameCamera::getState() const { return ((GameCameraComponent*)m_Camera)->m_State; }

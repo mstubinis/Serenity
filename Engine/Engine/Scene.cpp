@@ -50,14 +50,42 @@ void Scene::setActiveCamera(Camera* c){
 }
 void Scene::centerSceneToObject(Object* center){
     glm::vec3 offset = -(center->getPosition());
+	//fix this after implementing components
     for(auto object:m_Objects){
         Object* obj = object.second;
         if(obj != center && obj->parent() == nullptr){
             obj->setPosition(obj->getPosition() + offset);
         }
     }
+	for(auto object:m_Entities){
+		Entity* e = getEntity(object);
+		epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
+        if(e->parent() == nullptr){
+			entityBody.setPosition(entityBody.position() + offset);
+        }
+    }
     if(center->parent() == nullptr)
         center->setPosition(0.0f,0.0f,0.0f);
+}
+void Scene::centerSceneToObject(Entity* center){
+	epriv::ComponentBodyBaseClass& bodyBase = *(center->getComponent<epriv::ComponentBodyBaseClass>());
+	//fix this after implementing components
+    glm::vec3 offset = -(bodyBase.position());
+    for(auto object:m_Objects){
+        Object* obj = object.second;
+        if(obj->parent() == nullptr){
+            obj->setPosition(obj->getPosition() + offset);
+        }
+    }
+	for(auto object:m_Entities){
+		Entity* e = getEntity(object);
+		epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
+        if(e != center && e->parent() == nullptr){
+			entityBody.setPosition(entityBody.position() + offset);
+        }
+    }
+    if(center->parent() == nullptr)
+        bodyBase.setPosition(0.0f,0.0f,0.0f);
 }
 Scene::~Scene(){
     SAFE_DELETE(m_Skybox);
@@ -67,6 +95,7 @@ void Scene::update(float dt){
 void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
 
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
+std::vector<uint>& Scene::entities(){ return m_Entities; }
 unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 vector<SunLight*>& Scene::lights() { return m_Lights; }
 unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }

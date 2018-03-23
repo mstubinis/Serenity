@@ -119,6 +119,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     }
     //this to just test. should set player / camera dynamically
 	Ship* dread = new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
+	ComponentRigidBody* playerBody = dread->getComponent<ComponentRigidBody>();
+	playerBody->setCollision(nullptr,true);
     setPlayer(dread);
 	GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
 	playerCamera->follow(dread);
@@ -157,7 +159,9 @@ void CapsuleSpace::update(float dt){
     if(m_Ribbon->getPosition().z >= 20 * aRadius || m_Ribbon->getPosition().z <= -20 * aRadius){
         m_Ribbon->setPosition(0,300,0);
     }
-    getPlayer()->setPosition(0,0,0);
+	ComponentRigidBody& body = *getPlayer()->getComponent<ComponentRigidBody>();
+	ComponentModel& model = *getPlayer()->getComponent<ComponentModel>();
+    body.setPosition(0,0,0);
 
     float x = glm::sin(m_Timer*2.4f)*0.03f;
     float y = glm::cos(m_Timer*2.4f)*0.022f;
@@ -165,10 +169,13 @@ void CapsuleSpace::update(float dt){
     float roll = glm::sin(m_Timer*2.4f)*5.0f;
     float pitch = glm::sin(m_Timer*2.4f)*0.7f;
 
-	for(auto meshInstance:getPlayer()->getMeshInstances()){
+	/*
+	for(auto meshInstance:model.models){
         meshInstance->setPosition(glm::vec3(x*1.2f,-y,0));
         meshInstance->setOrientation(glm::radians(pitch),0,glm::radians(roll));
     }
+	*/
+
     //double check this (this is the light probe)
     //getPlayer()->getChildren().at(0)->setPosition(glm::vec3(x*1.2f,-y,0));
 }

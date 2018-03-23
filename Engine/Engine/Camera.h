@@ -50,5 +50,6 @@ class Camera: public Entity{
         bool sphereIntersectTest(Object*);
         bool sphereIntersectTest(glm::vec3 pos, float radius);
         bool rayIntersectSphere(Object*);
+		bool rayIntersectSphere(Entity*);
 };
 #endif

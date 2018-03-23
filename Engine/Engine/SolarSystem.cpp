@@ -213,12 +213,12 @@ void SolarSystem::_loadFromFile(string filename){
                 }
                 else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
-                        float parentX = objects().at(PARENT)->getPosition().x;
-                        float parentZ = objects().at(PARENT)->getPosition().z;
-                        xPos += parentX;
-                        zPos += parentZ;
+                        //float parentX = objects().at(PARENT)->getPosition().x;
+                        //float parentZ = objects().at(PARENT)->getPosition().z;
+                        //xPos += parentX;
+                        //zPos += parentZ;
                     }
-                    new Ship(ResourceManifest::AkiraMesh,ResourceManifest::AkiraMaterial,false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
+                    //new Ship(ResourceManifest::AkiraMesh,ResourceManifest::AkiraMaterial,false,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this);
                 }
                 else if(line[0] == 'R'){//Rings
                     if(PARENT != ""){
@@ -243,29 +243,21 @@ void SolarSystem::_loadFromFile(string filename){
     }
 
     centerSceneToObject(player);
+	ComponentRigidBody& body = *player->getComponent<ComponentRigidBody>();
+	float xPos = body.position().x;
+    float zPos = body.position().z;
 
-    float xPos = Resources::getObject("Valiant")->getPosition().x;
-    float zPos = Resources::getObject("Valiant")->getPosition().z;
-
+	/*
     ObjectDisplay* _s = new ObjectDisplay(ResourceManifest::TestMesh,ResourceManifest::MirandaMaterial,glm::vec3(xPos+4,0,zPos-2),glm::vec3(1.0f),"TestObject1",nullptr);
     _s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
+	*/
+
     new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 	new ObjectDisplay(ResourceManifest::PlanetMesh,ResourceManifest::GoldMaterial,glm::vec3(0,5,2),glm::vec3(2));
-    player->translate(0,0,2);
-
-	new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Luna Starbase",m_Moons.at("Moon")->getPosition() + glm::vec3(16000,0,16000),glm::vec3(1),nullptr,this);
-
-	//entity testing
-	Entity* test = new Entity();
-	addEntity(test);
-	ComponentBasicBody* basicBody = new ComponentBasicBody();
-	basicBody->setPosition(xPos+2,0,zPos-3);
-	ComponentModel* model = new ComponentModel(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,test);
-	test->addComponent(basicBody);
-	test->addComponent(model);	
-	////////////////////////////////
+	
+    body.translate(0,0,2);
 
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
 	//player->addChild(lightP);

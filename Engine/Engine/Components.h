@@ -142,6 +142,11 @@ namespace Engine{
 				ComponentBodyType::Type getBodyType();
 				virtual glm::vec3 position(){return glm::vec3(0.0f);}
 				virtual glm::mat4 modelMatrix(){return glm::mat4(1.0f);}
+				virtual glm::vec3 forward(){return glm::vec3(0.0f,0.0f,-1.0f);}
+				virtual glm::vec3 right(){return glm::vec3(1.0f,0.0f,0.0f);}
+				virtual glm::vec3 up(){return glm::vec3(0.0f,1.0f,0.0f);}
+				virtual void setPosition(float x,float y,float z){}
+				virtual void setPosition(glm::vec3& pos){}
 		};
 	};
 };
@@ -158,6 +163,7 @@ class ComponentModel: public ComponentBaseClass{
 		ComponentModel(Mesh*,Material*,Entity*);
 		~ComponentModel();
 
+		float radius();
 		bool passedRenderCheck();
 		bool visible();
 		void show();
@@ -214,6 +220,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 		Collision* _collision;
 		btRigidBody* _rigidBody;
 		btDefaultMotionState* _motionState;
+		glm::vec3 _forward, _right, _up;
 		float _mass;
     public:
 		ComponentRigidBody(Collision* = nullptr);
@@ -227,10 +234,17 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 		void setRotation(glm::quat& newRotation);                   void setRotation(float x,float y,float z,float w);
 		void setScale(glm::vec3& newScale);                         void setScale(float x,float y,float z);
 
+		float mass();
 		glm::vec3 position();
+		glm::vec3 forward();
+		glm::vec3 right();
+		glm::vec3 up();
+		glm::vec3 getLinearVelocity();
+		glm::vec3 getAngularVelocity();
 		glm::mat4 modelMatrix();
 
-		void setCollision(Collision*);
+		void setCollision(Collision*,bool emptyCollision = false);
+		void setDamping(float linear,float angular);
 
 		void setDynamic(bool dynamic);
 		void setMass(float mass);

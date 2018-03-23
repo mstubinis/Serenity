@@ -2,7 +2,7 @@
 #ifndef SHIP_H
 #define SHIP_H
 
-#include "ObjectDynamic.h"
+#include "Components.h"
 
 class GameCamera;
 class Ship;
@@ -92,14 +92,14 @@ class ShipSystemSensors final: public ShipSystem{
         void update(float);
 };
 
-class Ship: public ObjectDynamic{
+class Ship: public Entity{
     protected:
         std::unordered_map<uint,ShipSystem*> m_ShipSystems;
         bool m_IsPlayer;
         GameCamera* m_PlayerCamera;
         bool m_IsWarping;
         float m_WarpFactor;
-        Object* m_Target;
+        Entity* m_Target;
     public:
         Ship(
             Handle& meshHandle,       //Mesh
@@ -124,9 +124,10 @@ class Ship: public ObjectDynamic{
         bool IsPlayer(){ return m_IsPlayer; }
         bool IsWarping(){ return m_IsWarping; }
         ShipSystem* getShipSystem(uint type){ return m_ShipSystems[type]; }
-        Object* getTarget() { return m_Target; }
-        virtual void setTarget(Object*);
-        virtual void setTarget(std::string);
-        virtual void update(float);
+        Entity* getTarget() { return m_Target; }
+        virtual void setTarget(Entity*);
+        virtual void update(const float& dt);
+
+
 };
 #endif

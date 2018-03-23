@@ -11,8 +11,8 @@ class GameCameraComponent: public ComponentCamera{
     public:
 		CAMERA_STATE m_State;
 		float m_OrbitRadius;
-        Object* m_Target;
-        Object* m_Player;
+        Entity* m_Target;
+        Entity* m_Player;
 		ComponentBasicBody* m_Body;
 
 		GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
@@ -29,17 +29,18 @@ class GameCamera: public Camera{
         GameCamera(float left, float right, float bottom, float top, float clipStart, float clipEnd,Scene* = nullptr); // Orthographic camera Constructor
         virtual ~GameCamera();
 
-        void follow(Object*);
-        void followTarget(Object* target,Object* player);
-        void orbit(Object*);
+        void follow(Entity*);
+        void followTarget(Entity* target,Entity* player);
+        void orbit(Entity*);
 
         void update(const float& dt);
         void render();
 
-        void setTarget(Object* target);
-        const Object* getTarget() const;
+        void setTarget(Entity* target);
+        const Entity* getTarget() const;
         const CAMERA_STATE getState() const;
 
         Object* getObjectInCenterRay(Object* exclusion);
+		Entity* getObjectInCenterRay(Entity* exclusion);
 };
 #endif

@@ -39,6 +39,7 @@ class Scene: public EngineResource{
 
         virtual void update(float);
 
+		std::vector<uint>& entities();
         std::unordered_map<std::string,Object*>& objects();
         std::vector<SunLight*>& lights();
 		std::unordered_map<std::string,LightProbe*>& lightProbes();
@@ -52,6 +53,7 @@ class Scene: public EngineResource{
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
         void centerSceneToObject(Object*);
+		void centerSceneToObject(Entity*);
 		void setActiveCamera(Camera*);
 };
 #endif

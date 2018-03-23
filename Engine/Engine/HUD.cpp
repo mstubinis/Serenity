@@ -40,7 +40,7 @@ void HUD::update(float dt){
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
-                scene->getPlayer()->setTarget("Moon");
+                //scene->getPlayer()->setTarget("Moon");
                 break;
             }
             ++a;
@@ -54,7 +54,7 @@ void HUD::update(float dt){
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
-                scene->getPlayer()->setTarget("Moon");
+                //scene->getPlayer()->setTarget("Moon");
                 break;
             }
             ++a;
@@ -75,6 +75,7 @@ void HUD::render(){
 	Font* font = Resources::getFont(m_Font);
 
     #pragma region renderCrossHairAndOtherInfo
+	/*
     if(player->getTarget() != nullptr){
         glm::vec3 pos = player->getTarget()->getScreenCoordinates();
         float scl = glm::max(0.5f,player->getTarget()->getRadius()*35 / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
@@ -114,6 +115,7 @@ void HUD::render(){
 			crosshairArrow->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
         }
     }
+	*/
     #pragma endregion
 
     #pragma region DrawDebugStuff

@@ -96,8 +96,8 @@ bool ObjectDisplay::rayIntersectSphere(Camera* c){
     if(c == nullptr) c = Resources::getCurrentScene()->getActiveCamera();
     return c->rayIntersectSphere(this);
 }
-bool ObjectDisplay::rayIntersectSphere(glm::vec3 A, glm::vec3 rayVector){
-    return Engine::Math::rayIntersectSphere(getPosition(),getRadius(),A,rayVector);
+bool ObjectDisplay::rayIntersectSphere(glm::vec3 origin, glm::vec3 cameraViewVector){
+    return Engine::Math::rayIntersectSphere(getPosition(),getRadius(),origin,cameraViewVector);
 }
 void ObjectDisplay::playAnimation(const string& animName,float startTime){
     for(auto meshInstance:m_MeshInstances){

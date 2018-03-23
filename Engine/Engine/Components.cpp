@@ -121,6 +121,7 @@ class epriv::ComponentManager::impl final{
 			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentRigidBody))];
 			for(auto c:v){
 				ComponentRigidBody& b = *((ComponentRigidBody*)c);
+				Engine::Math::recalculateForwardRightUp(b._rigidBody,b._forward,b._right,b._up);
 			}
 		}
 		void _calculateRenderCheck(ComponentModel& c,Camera* camera){
@@ -305,7 +306,7 @@ void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
 	}
 }
 
-ComponentBaseClass::ComponentBaseClass(){}
+ComponentBaseClass::ComponentBaseClass(){ m_Owner = nullptr; }
 ComponentBaseClass::~ComponentBaseClass(){}
 
 epriv::ComponentBodyBaseClass::ComponentBodyBaseClass(epriv::ComponentBodyType::Type type):ComponentBaseClass(){ _type = type; }
@@ -451,6 +452,7 @@ bool ComponentModel::passedRenderCheck(){ return m_i->m_PassedRenderCheck; }
 bool ComponentModel::visible(){ return m_i->m_Visible; }
 void ComponentModel::show(){ m_i->m_Visible = true; }
 void ComponentModel::hide(){ m_i->m_Visible = false; }
+float ComponentModel::radius(){ return _radius; }
 uint ComponentModel::addModel(Handle& meshHandle, Handle& materialHandle){ return ComponentModel::addModel(Resources::getMesh(meshHandle),Resources::getMaterial(materialHandle)); }
 uint ComponentModel::addModel(Mesh* mesh,Material* material){
 	models.push_back( new MeshInstance(m_Owner,mesh,material) );
@@ -472,7 +474,7 @@ void ComponentModel::setModelMesh(Mesh* mesh,uint index){
 	m_i->calculateRadius(this);
 }
 void ComponentModel::setModelMesh(Handle& meshHandle, uint index){ ComponentModel::setModelMesh(Resources::getMesh(meshHandle),index); }
-		
+
 void ComponentModel::setModelMaterial(Material* material,uint index){
 	MeshInstance& pair = *(models.at(index));
 	pair.setMaterial(material);
@@ -494,10 +496,9 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 #pragma region RigidBody
 
 ComponentRigidBody::ComponentRigidBody(Collision* collision):epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
-	_rigidBody = nullptr;
-	_motionState = nullptr;
+    _forward = glm::vec3(0.0f,0.0f,-1.0f);  _right = glm::vec3(1.0f,0.0f,0.0f);  _up = glm::vec3(0.0f,1.0f,0.0f);
 
-	setCollision(collision);
+	setCollision(collision,false);
 
 
 	//motion state/////////////////////////////////////
@@ -515,6 +516,7 @@ ComponentRigidBody::ComponentRigidBody(Collision* collision):epriv::ComponentBod
 
 	
 	setMass(1.0f);
+	setScale(1.0f,1.0f,1.0f);
 
     Physics::addRigidBody(_rigidBody);
 }
@@ -523,15 +525,26 @@ ComponentRigidBody::~ComponentRigidBody(){
     SAFE_DELETE(_rigidBody);
     SAFE_DELETE(_motionState);
 }
-void ComponentRigidBody::setCollision(Collision* collision){
+void ComponentRigidBody::setCollision(Collision* collision,bool emptyCollision){
 	_collision = collision;
 	if(_collision == nullptr){
-        _collision = new Collision(new btEmptyShape(),CollisionType::None,0.0f);
+		if(m_Owner && emptyCollision == false){
+			ComponentModel* model = m_Owner->getComponent<ComponentModel>();
+			if(model && model->models.size() > 0){
+				btCompoundShape* shape = new btCompoundShape();
+				for(auto m:model->models){
+					btTransform t; t.setFromOpenGLMatrix(glm::value_ptr(m->model()));
+					shape->addChildShape(t,m->mesh()->getCollision()->getCollisionShape());
+				}
+				_collision = new Collision(shape,CollisionType::Compound, _mass);
+				_collision->getCollisionShape()->setUserPointer(this);
+				return;
+			}
+		}
 	}
+	_collision = new Collision(new btEmptyShape(),CollisionType::None,_mass);
 	_collision->getCollisionShape()->setUserPointer(this);
 }
-
-
 void ComponentRigidBody::translate(glm::vec3& translation,bool local){ ComponentRigidBody::translate(translation.x,translation.y,translation.z,local); }
 void ComponentRigidBody::translate(float x,float y,float z,bool local){
     _rigidBody->activate();
@@ -566,21 +579,22 @@ void ComponentRigidBody::scale(float x,float y,float z){
 		 models->m_i->calculateRadius(models);
 	 }
 }
-
 void ComponentRigidBody::setPosition(glm::vec3& newPosition){ ComponentRigidBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
 void ComponentRigidBody::setPosition(float x,float y,float z){
     btTransform tr; tr.setOrigin(btVector3(x,y,z));
-    tr.setRotation(_rigidBody->getOrientation());
-    _motionState->setWorldTransform(tr);
+    tr.setRotation(_rigidBody->getOrientation()); 
     if(_collision->getCollisionType() == CollisionType::TriangleShapeStatic){
-		//there must be a better way to do this
         Physics::removeRigidBody(_rigidBody);
         SAFE_DELETE(_rigidBody);
-        btRigidBody::btRigidBodyConstructionInfo CI(0,_motionState,_collision->getCollisionShape(),*_collision->getInertia());
-        _rigidBody = new btRigidBody(CI);
+    }
+    _motionState->setWorldTransform(tr);
+    if(_collision->getCollisionType() == CollisionType::TriangleShapeStatic){
+        btRigidBody::btRigidBodyConstructionInfo ci(0,_motionState,_collision->getCollisionShape(),*_collision->getInertia());
+        _rigidBody = new btRigidBody(ci);
         _rigidBody->setUserPointer(this);
         Physics::addRigidBody(_rigidBody);
     }
+	_rigidBody->setMotionState(_motionState); //is this needed?
     _rigidBody->setWorldTransform(tr);
     _rigidBody->setCenterOfMassTransform(tr);
 }
@@ -596,15 +610,19 @@ void ComponentRigidBody::setRotation(float x,float y,float z,float w){
     _rigidBody->setCenterOfMassTransform(tr);
 	_motionState->setWorldTransform(tr);
 
+	Engine::Math::recalculateForwardRightUp(_rigidBody,_forward,_right,_up);
+
     clearAngularForces();
 }
 void ComponentRigidBody::setScale(glm::vec3& newScale){ ComponentRigidBody::setScale(newScale.x,newScale.y,newScale.z); }
 void ComponentRigidBody::setScale(float x,float y,float z){
     _collision->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
-	 ComponentModel* models = m_Owner->getComponent<ComponentModel>();
-	 if(models){
-		 models->m_i->calculateRadius(models);
-	 }
+	if(m_Owner){
+		ComponentModel* models = m_Owner->getComponent<ComponentModel>();
+		if(models){
+			models->m_i->calculateRadius(models);
+		}
+	}
 }  
 glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     glm::mat4 m(1.0f);
@@ -612,6 +630,12 @@ glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     tr.getOpenGLMatrix(glm::value_ptr(m));
     return glm::vec3(m[3][0],m[3][1],m[3][2]);
 }
+glm::vec3 ComponentRigidBody::forward(){ return _forward; }
+glm::vec3 ComponentRigidBody::right(){ return _right; }
+glm::vec3 ComponentRigidBody::up(){ return _up; }
+glm::vec3 ComponentRigidBody::getLinearVelocity(){ btVector3 v = _rigidBody->getLinearVelocity(); return Engine::Math::btVectorToGLM(v); }
+glm::vec3 ComponentRigidBody::getAngularVelocity(){ btVector3 v = _rigidBody->getAngularVelocity(); return Engine::Math::btVectorToGLM(v); }
+float ComponentRigidBody::mass(){ return _mass; }
 glm::mat4 ComponentRigidBody::modelMatrix(){ //theres prob a better way to do this
     glm::mat4 m(1.0f);
     btTransform tr;  _rigidBody->getMotionState()->getWorldTransform(tr);
@@ -622,6 +646,7 @@ glm::mat4 ComponentRigidBody::modelMatrix(){ //theres prob a better way to do th
 	}
 	return m;
 }
+void ComponentRigidBody::setDamping(float linear,float angular){ _rigidBody->setDamping(linear,angular); }
 void ComponentRigidBody::setDynamic(bool dynamic){
     if(dynamic){
         Physics::removeRigidBody(_rigidBody);
@@ -736,7 +761,7 @@ void ComponentRigidBody::setMass(float mass){
     _mass = mass;
 	if(_collision){
 		_collision->setMass(_mass);
-		_rigidBody->setMassProps(_mass,*(_collision->getInertia()));
+		_rigidBody->setMassProps(  _mass, *(_collision->getInertia())   );
 	}
 }
 
@@ -775,20 +800,3 @@ Entity* Entity::parent(){
 void Entity::addChild(Entity* child){
 	child->m_ParentID = this->m_ID;
 }
-/*
-epriv::ComponentBodyBaseClass* Entity::getComponent(epriv::ComponentBodyBaseClass* component){
-	return (epriv::ComponentBodyBaseClass*)(componentManager->_getComponent(m_Components[ComponentType::Body]));
-}
-ComponentBasicBody* Entity::getComponent(ComponentBasicBody* component){
-	return static_cast<ComponentBasicBody*>(componentManager->_getComponent(m_Components[ComponentType::Body])); //might have to be dynamic cast
-}
-ComponentModel* Entity::getComponent(ComponentModel* component){
-	return (ComponentModel*)componentManager->_getComponent(m_Components[ComponentType::Model]);
-}
-ComponentRigidBody* Entity::getComponent(ComponentRigidBody* component){
-	return static_cast<ComponentRigidBody*>(componentManager->_getComponent(m_Components[ComponentType::Body])); //might have to be dynamic cast
-}
-ComponentCamera* Entity::getComponent(ComponentCamera* component){
-	return (ComponentCamera*)componentManager->_getComponent(m_Components[ComponentType::Camera]);
-}
-*/
