@@ -2,7 +2,6 @@
 #define ENGINE_CONSTRAINTS_H
 
 class Object;
-class ObjectDynamic;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;

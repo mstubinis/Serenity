@@ -15,7 +15,6 @@ class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Object;
-class ObjectDynamic;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
@@ -154,7 +153,7 @@ namespace Engine{
 
         void lookAtToQuat(glm::quat& o,glm::vec3& eye, glm::vec3& target, glm::vec3& up);
 
-        void translate(ObjectDynamic*,btVector3&,bool local);
+        void translate(btRigidBody*,btVector3&,bool local);
 
         GLuint pack3NormalsInto32Int(float x, float y, float z);
         GLuint pack3NormalsInto32Int(glm::vec3 v);

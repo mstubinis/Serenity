@@ -12,7 +12,6 @@
 #include "GBuffer.h"
 #include "Scene.h"
 #include "Texture.h"
-#include "ObjectDynamic.h"
 #include "Light.h"
 #include "Engine_Window.h"
 

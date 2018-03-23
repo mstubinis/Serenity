@@ -68,7 +68,7 @@ void ShipSystemMainThrusters::update(float dt){
 		ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getLinearVelocity();
         // apply dampening
-        body->setLinearVelocity(velocity * 0.9993f);
+        body->setLinearVelocity(velocity * 0.9993f,false);
 
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
@@ -111,7 +111,7 @@ void ShipSystemPitchThrusters::update(float dt){
         glm::vec3 velocity = body->getAngularVelocity();
         velocity.x *= 0.9985f;
         // apply dampening
-        body->setAngularVelocity(velocity);
+        body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
             if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
 				float amount = Engine::getMouseDifference().y * 0.002f * (1.0f / (body->mass() * 3.0f));
@@ -136,7 +136,7 @@ void ShipSystemYawThrusters::update(float dt){
         glm::vec3 velocity = body->getAngularVelocity();
         velocity.y *= 0.9985f;
         // apply dampening
-        body->setAngularVelocity(velocity);
+        body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
             if(m_Ship->getPlayerCamera()->getState() != CAMERA_STATE_ORBIT){
 				float amount = Engine::getMouseDifference().x * 0.002f * (1.0f / (body->mass() * 3.0f));
@@ -162,7 +162,7 @@ void ShipSystemRollThrusters::update(float dt){
         glm::vec3 velocity = body->getAngularVelocity();
         velocity.z *= 0.9985f;
         // apply dampening
-        body->setAngularVelocity(velocity);
+        body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
 			float amount = 1.0f / body->mass();
             if(Engine::isKeyDown("q")){
@@ -221,15 +221,14 @@ Ship::Ship(Handle& mesh,Handle& mat, bool player,string name,glm::vec3 pos, glm:
 	scene->addEntity(this);
 	ComponentModel* model = new ComponentModel(mesh,mat,this);
 	addComponent(model);
-	ComponentRigidBody* rigidBody = new ComponentRigidBody(collision);
+	ComponentRigidBody* rigidBody = new ComponentRigidBody(collision,this);
 	addComponent(rigidBody);
 
-	rigidBody->setCollision(collision);
-
-	rigidBody->setMass(0.5f * model->radius());
+	float radius = model->radius();
+	rigidBody->setMass(0.5f * radius);
 	rigidBody->setPosition(pos);
 	rigidBody->setScale(scl);
-
+	rigidBody->setDamping(0,0);//we dont want default dampening, we want the ship systems to manually control that
 
     m_WarpFactor = 0;
     m_IsPlayer = player;
@@ -252,8 +251,7 @@ Ship::Ship(Handle& mesh,Handle& mat, bool player,string name,glm::vec3 pos, glm:
         else if(i == 6)  system = new ShipSystemWarpDrive(this);
         else if(i == 7)  system = new ShipSystemSensors(this);
         m_ShipSystems[i] = system;
-    }
-    rigidBody->setDamping(0,0);//we dont want default dampening, we want the ship systems to manually control that
+    } 
 }
 Ship::~Ship(){
     for(auto shipSystem:m_ShipSystems) SAFE_DELETE(shipSystem.second);

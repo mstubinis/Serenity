@@ -6,8 +6,8 @@
 #include <vector>
 #include <memory>
 
+class Entity;
 class Object;
-class ObjectDynamic;
 class btCollisionDispatcher;
 class btDynamicsWorld;
 class btDiscreteDynamicsWorld;
@@ -84,16 +84,14 @@ namespace Engine{
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,btRigidBody* ignoredObject = nullptr);
         std::vector<glm::vec3> rayCast(const btVector3& start, const btVector3& end,std::vector<btRigidBody*>& ignoredObjects);
 
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,Object* ignoredObject = nullptr);
-        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Object*>& ignoredObjects);
+        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,Entity* ignoredObject = nullptr);
+        std::vector<glm::vec3> rayCast(const glm::vec3& start, const glm::vec3& end,std::vector<Entity*>& ignoredObjects);
 
         void setGravity(float,float,float); 
         void setGravity(glm::vec3&);
         void addRigidBody(btRigidBody*, short group, short mask);
-        void addRigidBody(ObjectDynamic*);
         void addRigidBody(btRigidBody*);
         void removeRigidBody(btRigidBody*);
-        void removeRigidBody(ObjectDynamic*);
     };
 };
 

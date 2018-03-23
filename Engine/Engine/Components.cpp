@@ -495,17 +495,20 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 
 #pragma region RigidBody
 
-ComponentRigidBody::ComponentRigidBody(Collision* collision):epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
+ComponentRigidBody::ComponentRigidBody(Collision* collision,Entity* owner):epriv::ComponentBodyBaseClass(epriv::ComponentBodyType::RigidBody){
     _forward = glm::vec3(0.0f,0.0f,-1.0f);  _right = glm::vec3(1.0f,0.0f,0.0f);  _up = glm::vec3(0.0f,1.0f,0.0f);
-
+	m_Owner = owner;
 	setCollision(collision,false);
-
+	setScale(1.0f,1.0f,1.0f);
 
 	//motion state/////////////////////////////////////
     glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix *= glm::mat4_cast(glm::quat());
+    modelMatrix = glm::scale(modelMatrix,glm::vec3(1.0f));
     btTransform tr; tr.setFromOpenGLMatrix(glm::value_ptr(modelMatrix));
     _motionState = new btDefaultMotionState(tr);
 	///////////////////////////////////////////////////
+	setMass(1.0f);
     btRigidBody::btRigidBodyConstructionInfo CI(_mass,_motionState,_collision->getCollisionShape(),*(_collision->getInertia()));
     _rigidBody = new btRigidBody(CI);
 
@@ -513,10 +516,7 @@ ComponentRigidBody::ComponentRigidBody(Collision* collision):epriv::ComponentBod
     _rigidBody->setFriction(0.3f);
     _rigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
 	_rigidBody->setUserPointer(this);
-
-	
-	setMass(1.0f);
-	setScale(1.0f,1.0f,1.0f);
+	_rigidBody->setMassProps(  _mass, *(_collision->getInertia())   );
 
     Physics::addRigidBody(_rigidBody);
 }
@@ -549,11 +549,8 @@ void ComponentRigidBody::translate(glm::vec3& translation,bool local){ Component
 void ComponentRigidBody::translate(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    if(local){
-		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
-	}
-    setPosition(position() + glm::vec3(vec.x(),vec.y(),vec.z()));
+    Engine::Math::translate(_rigidBody,vec,local);
+    setPosition(  position() + Engine::Math::btVectorToGLM(vec)  );
 }
 void ComponentRigidBody::rotate(glm::vec3& rotation,bool local){ ComponentRigidBody::rotate(rotation.x,rotation.y,rotation.z,local); }
 void ComponentRigidBody::rotate(float pitch,float yaw,float roll,bool local){
@@ -589,7 +586,7 @@ void ComponentRigidBody::setPosition(float x,float y,float z){
     }
     _motionState->setWorldTransform(tr);
     if(_collision->getCollisionType() == CollisionType::TriangleShapeStatic){
-        btRigidBody::btRigidBodyConstructionInfo ci(0,_motionState,_collision->getCollisionShape(),*_collision->getInertia());
+        btRigidBody::btRigidBodyConstructionInfo ci(_mass,_motionState,_collision->getCollisionShape(),*_collision->getInertia()); //use _mass instead of 0?
         _rigidBody = new btRigidBody(ci);
         _rigidBody->setUserPointer(this);
         Physics::addRigidBody(_rigidBody);
@@ -624,6 +621,7 @@ void ComponentRigidBody::setScale(float x,float y,float z){
 		}
 	}
 }  
+const btRigidBody* ComponentRigidBody::getBody() const{ return _rigidBody; }
 glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     glm::mat4 m(1.0f);
     btTransform tr;  _rigidBody->getMotionState()->getWorldTransform(tr);
@@ -667,30 +665,21 @@ void ComponentRigidBody::setDynamic(bool dynamic){
 void ComponentRigidBody::setLinearVelocity(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    if(local){
-		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
-	}
+    Engine::Math::translate(_rigidBody,vec,local);
     _rigidBody->setLinearVelocity(vec); 
 }
 void ComponentRigidBody::setLinearVelocity(glm::vec3 velocity,bool local){ ComponentRigidBody::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ComponentRigidBody::setAngularVelocity(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    if(local){
-		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
-	}
+    Engine::Math::translate(_rigidBody,vec,local);
     _rigidBody->setAngularVelocity(vec); 
 }
 void ComponentRigidBody::setAngularVelocity(glm::vec3 velocity,bool local){ ComponentRigidBody::setAngularVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ComponentRigidBody::applyForce(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    if(local){
-		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
-	}
+	Engine::Math::translate(_rigidBody,vec,local);
     _rigidBody->applyCentralForce(vec); 
 }
 void ComponentRigidBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
@@ -705,10 +694,7 @@ void ComponentRigidBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local)
 void ComponentRigidBody::applyImpulse(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    if(local){
-		btQuaternion q = _rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
-	}
+    Engine::Math::translate(_rigidBody,vec,local);
     _rigidBody->applyCentralImpulse(vec);
 }
 void ComponentRigidBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
@@ -721,10 +707,10 @@ void ComponentRigidBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool lo
     _rigidBody->applyImpulse(vec,btVector3(origin.x,origin.y,origin.z));
 }
 void ComponentRigidBody::applyTorque(float x,float y,float z,bool local){
-    _rigidBody->activate();
+	_rigidBody->activate();
     btVector3 t(x,y,z);
     if(local){
-        t = _rigidBody->getInvInertiaTensorWorld().inverse() * (_rigidBody->getWorldTransform().getBasis() * t);
+        t = _rigidBody->getInvInertiaTensorWorld().inverse()*(_rigidBody->getWorldTransform().getBasis()*t);
     }
     _rigidBody->applyTorque(t);
 }
@@ -761,7 +747,9 @@ void ComponentRigidBody::setMass(float mass){
     _mass = mass;
 	if(_collision){
 		_collision->setMass(_mass);
-		_rigidBody->setMassProps(  _mass, *(_collision->getInertia())   );
+		if(_rigidBody){
+		    _rigidBody->setMassProps(  _mass, *(_collision->getInertia())   );
+		}
 	}
 }
 

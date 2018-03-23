@@ -8,7 +8,6 @@
 
 class Scene;
 class ObjectDisplay;
-class ObjectDynamic;
 class LightProbe;
 class CameraType{public: enum Type { 
     Perspective, 

@@ -1,7 +1,6 @@
 #include "Engine_Math.h"
 #include "Engine_Resources.h"
 #include "Camera.h"
-#include "ObjectDynamic.h"
 #include "Scene.h"
 
 #include <math.h>
@@ -141,9 +140,9 @@ glm::vec2 Math::unpack2FloatsInto1Float(float i){
     res.y = (res.y - 0.5f) * 2.0f;
     return res;
 }
-void Math::translate(ObjectDynamic* obj,btVector3& vec,bool local){
+void Math::translate(btRigidBody* body,btVector3& vec,bool local){
     if(local){
-        btQuaternion q = obj->getRigidBody()->getWorldTransform().getRotation();
+        btQuaternion q = body->getWorldTransform().getRotation();
         q = q.normalize();
         vec = vec.rotate(q.getAxis(),q.getAngle());
     }

@@ -16,7 +16,6 @@ class Texture;
 class Font;
 class Object;
 class ObjectDisplay;
-class ObjectDynamic;
 class Camera;
 
 class SMAAQualityLevel{public: enum Level{

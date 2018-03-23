@@ -3,7 +3,6 @@
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
 #include "Camera.h"
-#include "ObjectDynamic.h"
 #include "Mesh.h"
 #include "Scene.h"
 
@@ -137,11 +136,8 @@ const btDiscreteDynamicsWorld* epriv::PhysicsManager::_world() const{ return m_i
 void Physics::setGravity(float x,float y,float z){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(rigidBody,group,mask); }
-void Physics::addRigidBody(ObjectDynamic* obj){ Physics::addRigidBody(obj->getRigidBody()); }
 void Physics::addRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(body); }
 void Physics::removeRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(body); }
-void Physics::removeRigidBody(ObjectDynamic* obj){ Physics::removeRigidBody(obj->getRigidBody()); }
-
 
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored != nullptr) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(ignored);
@@ -155,20 +151,24 @@ vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector
     for(auto object:ignored) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(object);
     return result;
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Object* ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Entity* ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
-    ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(ignored);
-    if(b != NULL) return Physics::rayCast(_s,_e,b->getRigidBody());
+	
+	ComponentRigidBody* body = ignored->getComponent<ComponentRigidBody>();
+
+
+    if(body) return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
+
     return Physics::rayCast(_s,_e,nullptr);
  }
-vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Object*>& ignored){
+vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Entity*>& ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     vector<btRigidBody*> objs;
     for(auto o:ignored){
-        ObjectDynamic* b = dynamic_cast<ObjectDynamic*>(o);
-        if(b != NULL) objs.push_back(b->getRigidBody());
+		ComponentRigidBody* body = o->getComponent<ComponentRigidBody>();
+        if(body) objs.push_back(const_cast<btRigidBody*>(body->getBody()));
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }

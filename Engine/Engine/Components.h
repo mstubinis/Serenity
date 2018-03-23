@@ -223,7 +223,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 		glm::vec3 _forward, _right, _up;
 		float _mass;
     public:
-		ComponentRigidBody(Collision* = nullptr);
+		ComponentRigidBody(Collision* = nullptr,Entity* owner = nullptr);
 		~ComponentRigidBody();
 
 		void translate(glm::vec3& translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
@@ -242,6 +242,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 		glm::vec3 getLinearVelocity();
 		glm::vec3 getAngularVelocity();
 		glm::mat4 modelMatrix();
+		const btRigidBody* getBody() const;
 
 		void setCollision(Collision*,bool emptyCollision = false);
 		void setDamping(float linear,float angular);

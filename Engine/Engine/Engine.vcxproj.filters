@@ -114,9 +114,6 @@
     <ClCompile Include="Object.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectDynamic.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Skybox.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -261,9 +258,6 @@
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectDynamic.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Skybox.h">
