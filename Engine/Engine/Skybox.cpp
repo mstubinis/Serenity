@@ -16,7 +16,7 @@ using namespace std;
 GLuint Skybox::m_Buffer;
 vector<glm::vec3> Skybox::m_Vertices;
 
-SkyboxEmpty::SkyboxEmpty(string name,Scene* scene){
+SkyboxEmpty::SkyboxEmpty(Scene* scene){
     if(scene == nullptr) scene = Resources::getCurrentScene();
     if(scene->skybox() == nullptr)
         scene->setSkybox(this);
@@ -24,19 +24,19 @@ SkyboxEmpty::SkyboxEmpty(string name,Scene* scene){
 SkyboxEmpty::~SkyboxEmpty(){
 
 }   
-Skybox::Skybox(string name,Scene* scene):SkyboxEmpty(name,scene){
+Skybox::Skybox(string directory,Scene* scene):SkyboxEmpty(scene){
 	Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
 
-    string front = name + "/Right.jpg";
-    string back = name + "/Left.jpg";
-    string left = name + "/Top.jpg";
-    string right = name + "/Bottom.jpg";
-    string top = name + "/Front.jpg";
-    string bottom = name + "/Back.jpg";
+    string front = directory + "/Right.jpg";
+    string back = directory + "/Left.jpg";
+    string left = directory + "/Top.jpg";
+    string right = directory + "/Bottom.jpg";
+    string top = directory + "/Front.jpg";
+    string bottom = directory + "/Back.jpg";
     string names[6] = {front,back,left,right,top,bottom};
 
-    m_Texture = new Texture(names,name+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
+    m_Texture = new Texture(names,directory+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
 }
 Skybox::~Skybox(){

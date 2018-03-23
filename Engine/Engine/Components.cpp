@@ -381,9 +381,9 @@ ComponentCamera::~ComponentCamera(){
 }
 void ComponentCamera::update(const float& dt){
 }
-void ComponentCamera::resize(uint width, uint height){
-	_aspectRatio = Resources::getWindowSize().x/(float)Resources::getWindowSize().y;
+void ComponentCamera::resize(uint width, uint height){	
     if(_type == Type::Perspective){
+		_aspectRatio = Resources::getWindowSize().x/(float)Resources::getWindowSize().y;
 		_projectionMatrix = glm::perspective(_angle,_aspectRatio,_nearPlane,_farPlane);
 	}
     else{

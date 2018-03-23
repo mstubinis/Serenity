@@ -3,7 +3,6 @@
 #include "Engine_Resources.h"
 #include "ResourceManifest.h"
 #include "Planet.h"
-#include "Lagrange.h"
 #include "GameCamera.h"
 #include "Ship.h"
 #include "GameSkybox.h"
@@ -230,7 +229,7 @@ void SolarSystem::_loadFromFile(string filename){
                     }
                 }
                 else if(line[0] == 'L'){//Lagrange Point
-                    m_LagrangePoints.emplace(NAME,new Lagrange(LAGRANGE_PLANET_1,LAGRANGE_PLANET_2,LAGRANGE__TYPE,NAME,this));
+                    
                 }
             }
         }

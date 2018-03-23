@@ -11,7 +11,6 @@
 #include "HUD.h"
 #include "Ship.h"
 #include "Planet.h"
-#include "Lagrange.h"
 #include "GameCamera.h"
 #include "CapsuleSpace.h"
 #include "Material.h"
@@ -48,7 +47,7 @@ void Game::initLogic(){
 	//window.setFramerateLimit(60);
 
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
-    //CapsuleSpace* cap = new CapsuleSpace();
+    CapsuleSpace* cap = new CapsuleSpace();
 
 	Resources::setCurrentScene("Sol");
     m_HUD = new HUD();

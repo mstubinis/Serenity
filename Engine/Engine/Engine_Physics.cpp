@@ -140,15 +140,23 @@ void Physics::addRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_PhysicsM
 void Physics::removeRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(body); }
 
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
-    if(ignored != nullptr) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(ignored);
+    if(ignored){
+		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(ignored);
+	}
     vector<glm::vec3> result = _rayCastInternal(s,e);
-    if(ignored != nullptr) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(ignored);
+    if(ignored){
+		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(ignored);
+	}
     return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
-    for(auto object:ignored) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(object);
+    for(auto object:ignored){
+		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(object);
+	}
     vector<glm::vec3> result = _rayCastInternal(s,e);
-    for(auto object:ignored) epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(object);
+    for(auto object:ignored){
+		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(object);
+	}
     return result;
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Entity* ignored){
@@ -157,9 +165,9 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Entity
 	
 	ComponentRigidBody* body = ignored->getComponent<ComponentRigidBody>();
 
-
-    if(body) return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
-
+    if(body){
+		return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
+	}
     return Physics::rayCast(_s,_e,nullptr);
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Entity*>& ignored){
@@ -168,7 +176,9 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     vector<btRigidBody*> objs;
     for(auto o:ignored){
 		ComponentRigidBody* body = o->getComponent<ComponentRigidBody>();
-        if(body) objs.push_back(const_cast<btRigidBody*>(body->getBody()));
+        if(body){
+			objs.push_back(const_cast<btRigidBody*>(body->getBody()));
+		}
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }

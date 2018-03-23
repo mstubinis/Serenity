@@ -128,7 +128,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="GLImageConstants.cpp" />
     <ClCompile Include="HUD.cpp" />
-    <ClCompile Include="Lagrange.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -180,7 +179,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GLImageConstants.h" />
     <ClInclude Include="HUD.h" />
-    <ClInclude Include="Lagrange.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />

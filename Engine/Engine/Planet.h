@@ -3,6 +3,7 @@
 #define PLANET_H
 
 #include "ObjectDisplay.h"
+#include "Components.h"
 
 class SunLight;
 class Ring;

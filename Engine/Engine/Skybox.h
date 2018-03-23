@@ -22,7 +22,7 @@ class ISkybox{
 };
 class SkyboxEmpty: public ISkybox{
     public:
-        SkyboxEmpty(std::string name,Scene* = nullptr);
+        SkyboxEmpty(Scene* = nullptr);
         virtual ~SkyboxEmpty();
         virtual void update(){}
         virtual void draw(){}
@@ -33,7 +33,7 @@ class Skybox: public SkyboxEmpty{
         static GLuint m_Buffer;
         static std::vector<glm::vec3> m_Vertices;
     public:
-        Skybox(std::string name,Scene* = nullptr);
+        Skybox(std::string directory, Scene* = nullptr);
         virtual ~Skybox();
         Texture* texture(){ return m_Texture; }
 		static void initMesh();
