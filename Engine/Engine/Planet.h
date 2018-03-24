@@ -2,11 +2,12 @@
 #ifndef PLANET_H
 #define PLANET_H
 
-#include "ObjectDisplay.h"
 #include "Components.h"
 
 class SunLight;
 class Ring;
+
+struct AtmosphericScatteringMeshInstanceBindFunctor;
 
 enum PlanetType { 
     PLANET_TYPE_ROCKY, 
@@ -46,15 +47,18 @@ struct RingInfo final{
     uint alphaBreakpoint;
     glm::uvec3 color;
     RingInfo(uint p, uint s, glm::uvec3 col,uint ab = 1){ 
-        position = p; 
+        position = p;
         size = s; 
         color = col; 
         alphaBreakpoint = ab;
     }
 };
 
-class Planet: public ObjectDisplay{
+class Planet: public Entity{
+	friend struct ::AtmosphericScatteringMeshInstanceBindFunctor;
     protected:
+		ComponentModel* m_Model;
+		ComponentBasicBody* m_Body;
         std::vector<Ring*> m_Rings;
         PlanetType m_Type;
         OrbitInfo* m_OrbitInfo;
@@ -72,20 +76,22 @@ class Planet: public ObjectDisplay{
         );
         virtual ~Planet();
 
-        glm::vec2 getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
+		glm::vec3 getPosition();
+        glm::vec2 getGravityInfo();
+        OrbitInfo* getOrbitInfo() const;
+        float getDefaultRadius();
+        float getRadius();
+        float getAtmosphereHeight();
 
-        OrbitInfo* getOrbitInfo() const { return m_OrbitInfo; }
-        const glm::vec3& getRadiusBox() const { return m_BoundingBoxRadius + (m_BoundingBoxRadius * m_AtmosphereHeight); }
-        float getDefaultRadius(){ return m_Radius; }
-        float getRadius() { return m_Radius + (m_Radius * m_AtmosphereHeight); }
-        float getAtmosphereHeight(){ return m_AtmosphereHeight; }
+		void setPosition(float x,float y,float z);
+		void setPosition(glm::vec3& pos);
 
         void addRing(Ring*);
 
         void setOrbit(OrbitInfo* o);
         void setRotation(RotationInfo* r);
 
-        void update(float);
+        void update(const float& dt);
 };
 
 class Star: public Planet{
@@ -111,8 +117,5 @@ class Ring final{
     public:
         Ring(std::vector<RingInfo>&,Planet*);
         ~Ring();
-
-        void update(float);
-        void draw(GLuint shader);
 };
 #endif

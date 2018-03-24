@@ -40,6 +40,7 @@ class MeshInstance final: public BindableResource{
 
         Mesh* mesh();
 		Object* parent();
+		Entity* entity();
 		glm::vec4& color();
 		glm::vec3& godRaysColor();
         Material* material();

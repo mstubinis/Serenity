@@ -14,6 +14,9 @@
 #include <unordered_map>
 #include <limits>
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 typedef unsigned int uint;
 
 class Entity;
@@ -182,6 +185,9 @@ class ComponentModel: public ComponentBaseClass{
 		void setModelMaterial(Handle& materialHandle,uint index);
 
 		bool rayIntersectSphere(ComponentCamera* camera);
+
+		template<class T> void setCustomBindFunctor  (T& functor,uint index = 0){ models.at(index)->setCustomBindFunctor(functor); }
+        template<class T> void setCustomUnbindFunctor(T& functor,uint index = 0){ models.at(index)->setCustomUnbindFunctor(functor); }
 };
 
 class ComponentBasicBody: public Engine::epriv::ComponentBodyBaseClass{
@@ -197,6 +203,7 @@ class ComponentBasicBody: public Engine::epriv::ComponentBodyBaseClass{
 		~ComponentBasicBody();
 
 		glm::vec3 position();
+		glm::vec3 getScale();
 		glm::vec3 forward();
 		glm::vec3 right();
 		glm::vec3 up();
@@ -205,13 +212,13 @@ class ComponentBasicBody: public Engine::epriv::ComponentBodyBaseClass{
 
 		void alignTo(glm::vec3 direction,float speed = 0);
 
-		void translate(glm::vec3& translation);     void translate(float x,float y,float z);
-		void rotate(glm::vec3& rotation);           void rotate(float pitch,float yaw,float roll);
-		void scale(glm::vec3& amount);              void scale(float x,float y,float z);
+		void translate(glm::vec3& translation,bool local = true);    void translate(float x,float y,float z,bool local = true);
+		void rotate(glm::vec3& rotation);                            void rotate(float pitch,float yaw,float roll);
+		void scale(glm::vec3& amount);                               void scale(float x,float y,float z);
 
-		void setPosition(glm::vec3& newPosition);   void setPosition(float x,float y,float z);
-		void setRotation(glm::quat& newRotation);   void setRotation(float x,float y,float z,float w);
-		void setScale(glm::vec3& newScale);         void setScale(float x,float y,float z);
+		void setPosition(glm::vec3& newPosition);                    void setPosition(float x,float y,float z);
+		void setRotation(glm::quat& newRotation);                    void setRotation(float x,float y,float z,float w);
+		void setScale(glm::vec3& newScale);                          void setScale(float x,float y,float z);
 };
 
 class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{

@@ -17,9 +17,12 @@ GLuint Skybox::m_Buffer;
 vector<glm::vec3> Skybox::m_Vertices;
 
 SkyboxEmpty::SkyboxEmpty(Scene* scene){
-    if(scene == nullptr) scene = Resources::getCurrentScene();
-    if(scene->skybox() == nullptr)
+    if(scene == nullptr){
+		scene = Resources::getCurrentScene();
+	}
+    if(scene->skybox() == nullptr){
         scene->setSkybox(this);
+	}
 }
 SkyboxEmpty::~SkyboxEmpty(){
 

@@ -2111,6 +2111,7 @@ class epriv::RenderManager::impl final{
 			_passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
 			if(godRays){
+				/*
 				gbuffer.start(GBufferType::GodRays,"RGBA",false);
 				Object* o = Resources::getObject("Sun");
 				glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
@@ -2124,6 +2125,7 @@ class epriv::RenderManager::impl final{
 				alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
 				_passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
+				*/
 			}
 			GLDisable(GLState::BLEND);
 

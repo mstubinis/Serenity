@@ -314,14 +314,20 @@ void ComponentBasicBody::alignTo(glm::vec3 direction,float speed){
     Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 glm::vec3 ComponentBasicBody::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
+glm::vec3 ComponentBasicBody::getScale(){ return _scale; }
 glm::vec3 ComponentBasicBody::forward(){ return _forward; }
 glm::vec3 ComponentBasicBody::right(){ return _right; }
 glm::vec3 ComponentBasicBody::up(){ return _up; }
 glm::mat4 ComponentBasicBody::modelMatrix(){ return _modelMatrix; }
 glm::quat ComponentBasicBody::rotation(){ return _rotation; }
-void ComponentBasicBody::translate(glm::vec3& translation){ ComponentBasicBody::translate(translation.x,translation.y,translation.z); }
-void ComponentBasicBody::translate(float x,float y,float z){
+void ComponentBasicBody::translate(glm::vec3& translation,bool local){ ComponentBasicBody::translate(translation.x,translation.y,translation.z,local); }
+void ComponentBasicBody::translate(float x,float y,float z,bool local){
 	_position.x += x; _position.y += y; _position.z += z;
+    glm::vec3 offset = glm::vec3(x,y,z);
+    if(local){
+		offset = _rotation * offset;
+    }
+    setPosition(_position + offset);
 }
 void ComponentBasicBody::setPosition(glm::vec3& newPosition){ ComponentBasicBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
 void ComponentBasicBody::setPosition(float x,float y,float z){

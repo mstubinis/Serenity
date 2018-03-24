@@ -23,15 +23,8 @@ using namespace std;
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
     this->setActiveCamera(playerCamera);
-
-    if(file != "NULL"){
-        if(file == ""){
-            SolarSystem::_loadRandomly();
-        }
-        else{
-            SolarSystem::_loadFromFile(file);
-        }
-    }
+	if(file != "NULL")
+        SolarSystem::_loadFromFile(file);
 }
 SolarSystem::~SolarSystem(){
 
@@ -154,7 +147,7 @@ void SolarSystem::_loadFromFile(string filename){
                     if(PARENT != ""){
                         star->setPosition(objects().at(PARENT)->getPosition()+glm::vec3(xPos,0,zPos));
                     }
-                    m_Stars.emplace(NAME,star);
+                    m_Planets.emplace(NAME,star);
                 }
                 else if(line[0] == 'P'){//Planet
                     PlanetType PLANET_TYPE;
@@ -165,11 +158,11 @@ void SolarSystem::_loadFromFile(string filename){
                     else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
                     planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
-                        Object* parent = objects().at(PARENT);
+                        Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,PARENT));
+                            //planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,PARENT));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
@@ -186,23 +179,23 @@ void SolarSystem::_loadFromFile(string filename){
                     else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
                     planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
-                        Object* parent = objects().at(PARENT);
+                        Planet* parent = m_Planets.at(PARENT);
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,PARENT));
+                            //planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,PARENT));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
                         }
                     }
-                    m_Moons.emplace(NAME,planetoid);
+                    m_Planets.emplace(NAME,planetoid);
 					
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
-                        float parentX = objects().at(PARENT)->getPosition().x;
-                        float parentZ = objects().at(PARENT)->getPosition().z;
+                        float parentX = m_Planets.at(PARENT)->getPosition().x;
+                        float parentZ = m_Planets.at(PARENT)->getPosition().z;
                         xPos += parentX;
                         zPos += parentZ;
                     }
@@ -238,7 +231,7 @@ void SolarSystem::_loadFromFile(string filename){
 
     //add planetary rings
     for(auto rings:planetRings){
-        new Ring(rings.second,(Planet*)(m_Objects.at(rings.first)));
+        //new Ring(rings.second,(Planet*)(m_Objects.at(rings.first)));
     }
 
     centerSceneToObject(player);
@@ -260,275 +253,6 @@ void SolarSystem::_loadFromFile(string filename){
 
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
 	//player->addChild(lightP);
-}
-void SolarSystem::_loadRandomly(){
-    #pragma region Skybox
-    //get random skybox folder from the skybox directory
-    vector<std::string> folders;
-	unordered_map<string,Handle> loadedMaterials;
-    string path = "data/Textures/Skyboxes/";
-    if ( boost::filesystem::exists( path ) ) {
-        boost::filesystem::directory_iterator end_itr;
-        for ( boost::filesystem::directory_iterator itr( path );itr != end_itr;++itr ){
-            if ( boost::filesystem::is_directory(itr->status()) ){
-                string path_name = to_string(itr->path());
-                replace(path_name.begin(),path_name.end(),'\\','/');
-                boost::erase_all(path_name,"\"");
-                path_name = path_name.substr(path.size(),path_name.size());
-                folders.push_back(path_name);
-            }
-        }
-    }
-    uint random_skybox_index = uint(rand() % folders.size());
-    string skybox = folders.at(random_skybox_index);
-    uint numFlares = rand() % 200;
-    new GameSkybox(path + skybox,numFlares,this);
-    #pragma endregion
-
-    #pragma region ConstructStars
-    uint percent = uint(rand() % 1000);
-
-    uint numberOfStars = 1;
-    if(percent < 50)                         numberOfStars = 7;
-    else if(percent >= 50 && percent < 135)  numberOfStars = 6;
-    else if(percent >= 135 && percent < 250) numberOfStars = 5;
-    else if(percent >= 250 && percent < 450) numberOfStars = 4;
-    else if(percent >= 450 && percent < 750) numberOfStars = 3;
-    else if(percent >= 750 && percent < 850) numberOfStars = 2;
-
-
-    for(uint i = 0; i < numberOfStars; ++i){
-        Star* star = nullptr;
-        //star sizes: most big: 1,800 * the sun's size, smallest: 14% the size of the sun
-        float radius = float(97412.0f + (rand() % 1252440000))*10.0f;
-        float position = float(radius * 2.0f + (rand() % 841252440000));
-
-        float R = float((rand()%100)/100.0f);
-        float G = float((rand()%100)/100.0f);
-        float B = float((rand()%100)/100.0f);
-
-        glm::vec3 starColor = glm::vec3(R,G,B);
-        glm::vec3 lightColor = glm::vec3(glm::min(1.0f,R+0.1f),glm::min(1.0f,G+0.1f),glm::min(1.0f,B+0.1f));
-        float posX, posZ;
-
-        float randomDegree = (rand() % 36000)/100.0f;
-        posX = glm::sin(randomDegree) * position;
-        posZ = glm::cos(randomDegree) * position;
-
-        star = new Star(starColor,lightColor,glm::vec3(posX,0,posZ),radius,"Star " + to_string(1 + i),this);
-        m_Stars["Star " + to_string(1 + i)] = star;
-    }
-    #pragma endregion
-
-    #pragma region CheckStarPositions
-    //check if any stars are too close to each other, and move them accordingly
-    bool allStarsGood = true;
-    glm::vec3 centerOfMassPosition;
-
-    vector<float> starMasses;
-    vector<glm::vec3> starPositions;
-    float totalMasses = 0.0;
-    float biggestRadius = 0.0;
-    for(auto star:m_Stars){
-        for(auto otherStar:m_Stars){
-            if(star != otherStar){
-                float biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
-                unsigned long long dist = star.second->getDistanceLL(otherStar.second);
-                if(dist < biggerRadius * 10.0f){
-                    allStarsGood = false;
-                }
-            }
-        }
-        biggestRadius = glm::max(float(star.second->getRadius()),biggestRadius);
-        starPositions.push_back(star.second->getPosition());
-        starMasses.push_back(star.second->getRadius());
-        totalMasses += star.second->getRadius();
-    }
-
-    float numerator1 = 0, numerator2 = 0;
-    for(uint i = 0; i < starMasses.size(); ++i){
-        numerator1 += (starMasses.at(i) * starPositions.at(i).x);
-        numerator2 += (starMasses.at(i) * starPositions.at(i).z);
-    }
-    centerOfMassPosition.x = (numerator1) / (totalMasses);
-    centerOfMassPosition.z = (numerator2) / (totalMasses);
-
-    while(!allStarsGood){
-        for(auto star:m_Stars){
-            glm::vec3 starPos = star.second->getPosition();
-            glm::vec3 offset = starPos - centerOfMassPosition;
-            glm::vec3 normOffset = glm::normalize(offset);
-            star.second->setPosition(star.second->getPosition() + (normOffset*biggestRadius*float(2.0)));
-        }
-        allStarsGood = true;
-        for(auto star:m_Stars){
-            for(auto otherStar:m_Stars){
-                if(star != otherStar){
-                    float biggerRadius = glm::max(star.second->getRadius(),otherStar.second->getRadius());
-                    unsigned long long dist = star.second->getDistanceLL(otherStar.second);
-                    if(dist < biggerRadius * 10.0f){
-                        allStarsGood = false;
-                    }
-                }
-            }
-        }
-    }
-    #pragma endregion
-
-    //Then load planets. Generally the more stars, the more planets
-
-    //First get the database of random textures to choose from
-    unordered_map<string,string> planets_folders;
-    unordered_map<string,vector<string>> planet_textures;
-    string planets_path = "data/Textures/Planets/Random/Planet";
-    if ( boost::filesystem::exists( planets_path ) ) {
-        boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-        for ( boost::filesystem::directory_iterator itr( planets_path );itr != end_itr;++itr ){
-            if ( boost::filesystem::is_directory(itr->status()) ){
-                string path_name = to_string(itr->path());
-                string folder_name = "";
-                replace(path_name.begin(),path_name.end(),'\\','/');
-                boost::erase_all(path_name,"\"");
-                string short_name = path_name.substr(planets_path.size()+1,path_name.size()-1);
-                planets_folders[short_name] = path_name;
-
-            }
-        }
-    }
-    
-    for(auto folder: planets_folders){
-        if ( boost::filesystem::exists( folder.second ) ) {
-            string key = folder.second.substr(planets_path.size() + 1,folder.second.size()-1);
-            boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-            vector<string> value;
-            for ( boost::filesystem::directory_iterator itr( folder.second );itr != end_itr;++itr ){
-                if ( boost::filesystem::is_directory(itr->status()) ){
-                    string path_name = to_string(itr->path());
-                    string folder_name = "";
-                    replace(path_name.begin(),path_name.end(),'\\','/');
-                    boost::erase_all(path_name,"\"");
-                    value.push_back(path_name);
-                }
-            }
-            planet_textures[key] = value;
-        }
-    }
-
-    for(auto star:m_Stars){
-        uint numberOfPlanets = uint(1 + rand() % 100);
-        for(uint i = 0; i < numberOfPlanets; ++i){
-            Planet* planet = nullptr;
-
-            float maxPositionAwayFromSun = glm::abs(glm::length(star.second->getPosition() - centerOfMassPosition));
-            maxPositionAwayFromSun -= (maxPositionAwayFromSun / 4.0f);
-            if(m_Stars.size() == 1)
-                maxPositionAwayFromSun = glm::abs(glm::length(star.second->getRadius()*2000.0f));
-            float minPositionAwayFromSun = star.second->getRadius() * 4.0f;
-            float positionAwayFromSun = glm::max(minPositionAwayFromSun,rand() *maxPositionAwayFromSun);
-
-            float posX,posZ;
-            float randomDegree = (rand() % 36000) / 100.0f;
-            posX = sin(randomDegree) * positionAwayFromSun;
-            posZ = cos(randomDegree) * positionAwayFromSun;
-
-            float RADIUS = (500.0f + (rand() % 85000))*10.0f;
-            PlanetType PLANET_TYPE = PLANET_TYPE_ROCKY;
-            if(RADIUS <= 15000.0f){
-                float chance = rand() % 1000 / 1000.0f;
-                if(chance > 0.85f)
-                    PLANET_TYPE = PLANET_TYPE_ICE;
-            }
-            else{
-                float chance = (rand() % 1000) / 1000.0f;
-                if(chance > 0.6f)
-                    PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
-                else
-                    PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
-            }
-
-            float ATMOSPHERE_HEIGHT = 0.0f;
-
-            //dist of earth from sun 149,600,000. radius of sun 695,800
-            //planets with atmosphere must be roughly 215 sun radius's away (Earth like) to min 155 away (Venus) and max 327 (Mars)
-            if(positionAwayFromSun > 155.0 * star.second->getRadius() && positionAwayFromSun < 327.0 * star.second->getRadius()){
-                float chance = (rand() % 1000) / 1000.0f;
-                if(chance > 0.5f)
-                    ATMOSPHERE_HEIGHT = 0.025f;
-            }
-
-            //now to get a random planet material based on a random texture based on planet type
-            string MATERIAL_NAME,FOLDER,normalFile,glowFile = "";
-            string base_name;
-            string base_path = planets_path;
-            string key = "";
-            if(PLANET_TYPE == PLANET_TYPE_ROCKY){          key = "Rocky"; }
-            else if(PLANET_TYPE == PLANET_TYPE_ICE){       key = "Ice"; }
-            else if(PLANET_TYPE == PLANET_TYPE_GAS_GIANT){ key = "GasGiant"; }
-            else if(PLANET_TYPE == PLANET_TYPE_ICE_GIANT){ key = "IceGiant"; }
-            FOLDER = planets_folders[key];
-            base_path += "/" + key + "/";
-            vector<string> textures = planet_textures[key];
-            string texture = textures.at(rand() % textures.size());
-            base_name = texture.substr(base_path.size(),texture.size()-1);
-            FOLDER += "/" + base_name;
-            MATERIAL_NAME = FOLDER;
-            FOLDER += "/";
-
-            string diffuseFile = FOLDER + base_name + ".jpg";
-            string normFile = FOLDER + base_name + "_Normal.jpg";
-            string gloFile = FOLDER + base_name + "_Glow.jpg";
-            if(boost::filesystem::exists(normFile)){ normalFile = normFile; }
-            if(boost::filesystem::exists(gloFile)){ glowFile = gloFile; }
-
-            if(boost::filesystem::exists(diffuseFile)){
-                Handle h = Resources::addMaterial(MATERIAL_NAME,diffuseFile,normalFile,glowFile);
-				loadedMaterials.emplace(MATERIAL_NAME,h);
-                string pName = "Planet " + to_string(i + 1);
-                planet = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(posX,0,posZ),RADIUS,pName,ATMOSPHERE_HEIGHT,this);
-
-                float R = (rand() % 1000)/1000.0f;
-                float G = (rand() % 1000)/1000.0f;
-                float B = (rand() % 1000)/1000.0f;
-                //planet->setColor(R,G,B,1);
-                m_Planets[pName] = planet;
-
-                //rings
-                vector<RingInfo> rings;
-                uint numRings = rand() % 20;
-                uint chance = rand() % 100;
-                if(chance <= 20){
-                    for(uint i = 0; i < numRings; ++i){
-                        uint randSize = (rand() % 200 + 3);
-                        uint randPos = (randSize + 1 ) + (rand() % (1024 - ((randSize + 1)*2)));
-
-                        uint RR = rand() % 255;
-                        uint RG = rand() % 255;
-                        uint RB = rand() % 255;
-
-                        uint randBreak = (rand() % randSize);
-                        uint chance1 = rand() % 100;
-                        uint chance2 = rand() % 100;
-
-                        if(chance1 > 25){
-                            rings.push_back(RingInfo(randPos,randSize,glm::uvec3(RR,RG,RB),randBreak));
-                        }
-                        else if(randSize < 50){
-                            if(chance2 < 20)
-                                rings.push_back(RingInfo(randPos,randSize,glm::uvec3(-1),randBreak));
-                        }
-                    }
-                    if(rings.size() > 0)
-                        new Ring(rings,planet);
-                }
-            }
-        }
-    }
-    //Then load moons. Generally the number of moons depends on the type of planet. Gas Giants have more moons than normal planets, etc..
-
-	player = new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,"USS Defiant",glm::vec3(0),glm::vec3(1),nullptr,this);
-	GameCamera* playerCamera = (GameCamera*)getActiveCamera();
-	playerCamera->follow(getPlayer());
-    centerSceneToObject(player);
 }
 void SolarSystem::update(float dt){
     Scene::update(dt);

@@ -22,15 +22,14 @@ using namespace std;
 struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *((MeshInstance*)r);
 	
-    boost::weak_ptr<Object> o = Resources::getObjectPtr(i.parent()->name());
 
-    Planet* obj = (Planet*)(o.lock().get());
+    Planet* obj = (Planet*)(i.entity());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
     float atmosphereHeight = obj->getAtmosphereHeight();
 
-    glm::vec3& pos = obj->getPosition();
-    glm::quat& orientation = obj->getOrientation();
+	glm::vec3& pos = obj->m_Body->position();
+	glm::quat& orientation = obj->m_Body->rotation();
     glm::vec3 camPos = c->getPosition() - pos;
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight*camHeight;
@@ -47,6 +46,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
+	glm::vec3 scl = obj->m_Body->getScale();
     
     float fScaledepth = 0.25f;
     float innerRadius = obj->getDefaultRadius();
@@ -86,7 +86,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
-        mod = glm::scale(mod,obj->getScale());
+		mod = glm::scale(mod,scl);
 
         Renderer::sendUniformMatrix4f("Model",mod);
 
@@ -112,7 +112,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 		Renderer::GLEnable(GLState::BLEND);
         mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
-        mod = glm::scale(mod,obj->getScale());
+		mod = glm::scale(mod,scl);
         mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
 
         Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
@@ -158,7 +158,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
         glm::mat4 mod = glm::mat4(1.0f);
         mod = glm::translate(mod,pos);
         mod *= glm::mat4_cast(orientation);
-        mod = glm::scale(mod,obj->getScale());
+		mod = glm::scale(mod,scl);
 
         Renderer::sendUniformMatrix4f("Model",mod);
 
@@ -181,15 +181,25 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     */
 }};
 
-Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):ObjectDisplay(ResourceManifest::PlanetMesh,mat,pos,glm::vec3(scl),name,scene){
+Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
+	scene->addEntity(this);
+	m_Body = new ComponentBasicBody();
+	m_Body->setScale(scl,scl,scl);
+	m_Body->setPosition(pos);
+	addComponent(m_Body);
+
+	m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
+    if(type != PLANET_TYPE_STAR){
+        AtmosphericScatteringMeshInstanceBindFunctor f;
+		m_Model->setCustomBindFunctor(f,0);
+    }
+	addComponent(m_Model);
+	
+
     m_AtmosphereHeight = atmosphere;
     m_Type = type;
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
-    if(type != PLANET_TYPE_STAR){
-        AtmosphericScatteringMeshInstanceBindFunctor f;
-        m_MeshInstances.at(0)->setCustomBindFunctor(f);
-    }
 }
 Planet::~Planet(){
     for(auto ring:m_Rings)    
@@ -197,18 +207,19 @@ Planet::~Planet(){
     SAFE_DELETE(m_OrbitInfo);
     SAFE_DELETE(m_RotationInfo);
 }
-void Planet::update(float dt){
+glm::vec3 Planet::getPosition(){ return m_Body->position(); }
+void Planet::setPosition(float x,float y,float z){ m_Body->setPosition(x,y,z); }
+void Planet::setPosition(glm::vec3& pos){ m_Body->setPosition(pos); }
+void Planet::update(const float& dt){
     if(m_RotationInfo != nullptr){
         float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
         float secondsToRotate = m_RotationInfo->days * 86400.0f;
         float finalSpeed = 1.0f / (secondsToRotate * (speed));
-        rotate(0.0f,finalSpeed,0.0f);
+        m_Body->rotate(0.0f,finalSpeed,0.0f);
     }
     if(m_OrbitInfo != nullptr){
         //m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
     }
-    for(auto ring:m_Rings)  ring->update(dt);
-    ObjectDisplay::update(dt);
 }
 void Planet::setOrbit(OrbitInfo* o){ 
     m_OrbitInfo = o; 
@@ -216,9 +227,18 @@ void Planet::setOrbit(OrbitInfo* o){
 }
 void Planet::setRotation(RotationInfo* r){ 
     m_RotationInfo = r;
-    rotate(0.0f,0.0f,glm::radians(-m_RotationInfo->tilt),false);
+    //m_Body->rotate(0.0f,0.0f,glm::radians(-m_RotationInfo->tilt),false);
+	m_Body->rotate(0.0f,0.0f,glm::radians(-m_RotationInfo->tilt));
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
+glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
+OrbitInfo* Planet::getOrbitInfo() const { return m_OrbitInfo; }
+float Planet::getDefaultRadius(){ return m_Model->radius(); }
+float Planet::getRadius() { return m_Model->radius() + (m_Model->radius() * m_AtmosphereHeight); }
+float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
+
+
+
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PLANET_TYPE_STAR,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
@@ -311,30 +331,10 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
         }
         ++count;
     }
-    Texture* diffuse = new Texture(ringImage,parent->name()+"RingsDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+    Texture* diffuse = new Texture(ringImage,"RingDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
 	epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
-    Handle h = Resources::addMaterial(parent->name()+"Rings",diffuse,nullptr,nullptr,nullptr,nullptr);
+    Handle h = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,nullptr);
     this->material = Resources::getMaterial(h);
-}
-void Ring::update(float dt){
-}
-void Ring::draw(GLuint shader){
-    Camera* activeCamera = Resources::getCurrentScene()->getActiveCamera();
-    glm::mat4 model = m_Parent->getModel();
-	Mesh* mesh = Resources::getMesh(ResourceManifest::RingMesh);
-    float radius = mesh->getRadius() * m_Parent->getScale().x;
-
-    glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, glm::value_ptr(activeCamera->getViewProjection()));
-    glUniformMatrix4fv(glGetUniformLocation(shader, "Model"), 1, GL_FALSE, glm::value_ptr(model));
-
-    glUniform1i(glGetUniformLocation(shader, "Shadeless"),int(material->shadeless()));
-    glUniform1f(glGetUniformLocation(shader, "matID"),float(float(material->id())/255.0f));
-
-    glUniform1f(glGetUniformLocation(shader, "far"),activeCamera->getFar());
-    glUniform1f(glGetUniformLocation(shader, "C"),1.0f);
-
-    material->bind();
-    mesh->render();
 }
 
 OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,string _parent){

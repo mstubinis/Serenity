@@ -352,6 +352,7 @@ void MeshInstance::translate(glm::vec3& v){ m_i->_translate(v.x,v.y,v.z); }
 void MeshInstance::rotate(glm::vec3& v){ m_i->_rotate(v.x,v.y,v.z); }
 void MeshInstance::scale(glm::vec3& v){ m_i->_scale(v.x,v.y,v.z); }
 Object* MeshInstance::parent(){ return m_i->m_Parent; }
+Entity* MeshInstance::entity(){ return m_i->m_Entity; }
 glm::vec4& MeshInstance::color(){ return m_i->m_Color; }
 glm::vec3& MeshInstance::godRaysColor(){ return m_i->m_GodRaysColor; }
 glm::mat4& MeshInstance::model(){ return m_i->m_Model; }
