@@ -120,7 +120,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     //this to just test. should set player / camera dynamically
 	Ship* dread = new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
 	ComponentRigidBody* playerBody = dread->getComponent<ComponentRigidBody>();
-	playerBody->setCollision(nullptr,true);
+
     setPlayer(dread);
 	GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
 	playerCamera->follow(dread);

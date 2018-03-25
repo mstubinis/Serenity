@@ -6,6 +6,7 @@
 
 class SunLight;
 class Ring;
+class Planet;
 
 struct AtmosphericScatteringMeshInstanceBindFunctor;
 
@@ -34,11 +35,11 @@ class OrbitInfo final{
         float days;
         float minorRadius; float majorRadius;
         float angle;
-        boost::weak_ptr<Object> parent;
-        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,std::string parent);
+        uint parent;
+        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,uint parent);
         ~OrbitInfo(){}
-        void setOrbitalPosition(float angle,Object* thisPlanet);
-        glm::vec3 getOrbitalPosition(float angle,Object* thisPlanet);
+        void setOrbitalPosition(float angle,Planet* planet);
+        glm::vec3 getOrbitalPosition(float angle,Planet* planet);
 };
 
 struct RingInfo final{

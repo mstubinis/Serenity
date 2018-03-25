@@ -44,11 +44,7 @@ void GameCameraComponent::update(const float& dt){
 
 			m_Body->setPosition(pos);
 
-            lookAt(
-				pos,
-				body.position() - body.forward() * 50.0f,
-				body.up()
-			);
+            lookAt(pos,body.position() - body.forward() * 50.0f,body.up());
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
@@ -69,11 +65,7 @@ void GameCameraComponent::update(const float& dt){
 
 			m_Body->setPosition(pos);
 
-            lookAt(
-				pos,
-				target.position(),
-				player.up()
-			);
+            lookAt(pos,target.position(),player.up());
             break;
         }
         case CAMERA_STATE_ORBIT:{
@@ -98,11 +90,7 @@ void GameCameraComponent::update(const float& dt){
 
 			m_Body->setPosition(pos);
 
-            lookAt(
-				pos,
-				target.position(),
-				m_Body->up()
-			);
+            lookAt(pos,target.position(),m_Body->up());
             break;
         }
         case CAMERA_STATE_FREEFORM:{

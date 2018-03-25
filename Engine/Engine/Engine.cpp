@@ -43,16 +43,16 @@ epriv::Core::Core(const char* name,uint w,uint h){
 	m_NoiseManager = new epriv::NoiseManager(name,w,h);
 }
 epriv::Core::~Core(){
+	SAFE_DELETE(m_ComponentManager);
 	SAFE_DELETE(m_ThreadManager);
 	SAFE_DELETE(m_EventManager);
 	SAFE_DELETE(m_SoundManager);
 	SAFE_DELETE(m_ResourceManager);
 	SAFE_DELETE(m_TimeManager);
-	SAFE_DELETE(m_PhysicsManager);
 	SAFE_DELETE(m_RenderManager);
 	SAFE_DELETE(m_EventDispatcher);
-	SAFE_DELETE(m_ComponentManager);
 	SAFE_DELETE(m_NoiseManager);
+	SAFE_DELETE(m_PhysicsManager);
 }
 
 void Engine::init(const char* name,uint w,uint h){

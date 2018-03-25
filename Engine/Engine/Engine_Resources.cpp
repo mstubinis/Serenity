@@ -203,6 +203,7 @@ Handle Resources::addSoundData(string file,string n,bool music){
 
 void Resources::setCurrentScene(Scene* scene){
 	if(resourceManager->m_i->m_CurrentScene == nullptr){
+		epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);
 		resourceManager->m_i->m_CurrentScene = scene;
 		return;
 	}
@@ -212,6 +213,7 @@ void Resources::setCurrentScene(Scene* scene){
             //mark game object resources to minus use count
             for(auto obj:resourceManager->m_i->m_CurrentScene->objects()){ obj.second->suspend(); }
         }
+		epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(resourceManager->m_i->m_CurrentScene,scene);
 		resourceManager->m_i->m_CurrentScene = scene;
         if(resourceManager->m_i->m_DynamicMemory){
             //mark game object resources to add use count

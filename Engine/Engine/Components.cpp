@@ -23,8 +23,10 @@ using namespace Engine;
 using namespace std;
 
 unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_Map;
+unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_MapScene;
 epriv::EntityPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
-unordered_map<std::type_index, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectors;
+unordered_map<uint, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectors;
+unordered_map<uint, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectorsScene;
 
 epriv::ComponentManager* componentManager = nullptr;
 
@@ -50,6 +52,13 @@ class ComponentModel::impl final{
 				}
 			}
 			super->_radius = maxLength;
+			if(super->m_Owner){
+				epriv::ComponentBodyBaseClass* body = nullptr;
+				body = super->m_Owner->getComponent<epriv::ComponentBodyBaseClass>();
+				if(body != nullptr){
+					super->_radius *= Engine::Math::Max(body->getScale());
+				}
+			}
 			return super->_radius;
 		}
 };
@@ -63,9 +72,10 @@ class epriv::ComponentManager::impl final{
 		void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
 			super->m_ComponentPool = new EntityPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
 			super->m_EntityPool = new EntityPool<Entity>(epriv::MAX_NUM_ENTITIES);
-
 			m_TypeRegistry = ComponentTypeRegistry();
-			m_TypeRegistry.emplace<ComponentBodyBaseClass>();
+
+
+			m_TypeRegistry.emplace<epriv::ComponentBodyBaseClass,ComponentBasicBody,ComponentRigidBody>();
 			m_TypeRegistry.emplace<ComponentModel>();
 			m_TypeRegistry.emplace<ComponentCamera>();
 
@@ -95,14 +105,16 @@ class epriv::ComponentManager::impl final{
 			modelMatrix = translationMat * rotationMat * scaleMat * modelMatrix;
 		}
 		void _updateComponentBaseBodies(const float& dt){
-			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentBasicBody))];
+			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentBasicBody>();
+			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
 			for(auto c:v){
 				ComponentBasicBody& b = *((ComponentBasicBody*)c);
 				_performTransformation(c->m_Owner->parent(),b._position,b._rotation,b._scale,b._modelMatrix);
 			}
 		}
 		void _updateComponentRigidBodies(const float& dt){
-			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentRigidBody))];
+			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentRigidBody>();
+			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
 			for(auto c:v){
 				ComponentRigidBody& b = *((ComponentRigidBody*)c);
 				Engine::Math::recalculateForwardRightUp(b._rigidBody,b._forward,b._right,b._up);
@@ -119,7 +131,8 @@ class epriv::ComponentManager::impl final{
 		}
 		void _updateComponentModels(const float& dt){
 			Camera* camera = Resources::getCurrentScene()->getActiveCamera();
-			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentModel))];
+			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentModel>();
+			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
 			for(auto c:v){
 				ComponentModel& modelC = *((ComponentModel*)c);
 				for(auto model:modelC.models){
@@ -134,7 +147,8 @@ class epriv::ComponentManager::impl final{
 
 		}
 		void _updateComponentCameras(const float& dt){
-			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentCamera))];
+			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
+			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
 			for(auto c:v){
 				ComponentCamera& cam = *((ComponentCamera*)c);
 				_defaultUpdateCameraComponent(dt,cam);
@@ -220,32 +234,22 @@ epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 void epriv::ComponentManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h); }
 void epriv::ComponentManager::_update(float& dt){ m_i->_update(dt,this); }
 void epriv::ComponentManager::_resize(uint width,uint height){
-	for(auto camera:ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentCamera))]){ 
+	uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
+	for(auto camera:ComponentManager::m_ComponentVectors.at(slot)){ 
 		ComponentCamera& cam = *((ComponentCamera*)camera);
 		cam.resize(width,height); 
 	}
 }
 void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
 	//obviously try to improve this performance wise
-	ComponentBasicBody* basicBody = e->getComponent<ComponentBasicBody>();
-	ComponentRigidBody* rigidBody = e->getComponent<ComponentRigidBody>();
-	ComponentModel* model = e->getComponent<ComponentModel>();
-	ComponentCamera* cam = e->getComponent<ComponentCamera>();
-	if(basicBody){
-		removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentBasicBody))],basicBody);
-		//removeFromVector(m_i->m_CurrentSceneComponentBasicBodies,basicBody);
-	}
-	if(rigidBody){
-		removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentRigidBody))],rigidBody);
-		//removeFromVector(m_i->m_CurrentSceneComponentRigidBodies,rigidBody);
-	}
-	if(model){
-		removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentModel))],model);
-		//removeFromVector(m_i->m_CurrentSceneComponentModels,model);
-	}
-	if(cam){
-		removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentCamera))],cam);
-		//removeFromVector(m_i->m_CurrentSceneComponentCameras,cam);
+	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
+		ComponentBaseClass* base = nullptr;
+		m_ComponentPool->get(e->m_Components[i],base);
+		if(base){
+			uint slot = componentManager->getIndividualComponentTypeSlot(base);
+			removeFromVector(m_ComponentVectors.at(slot),base);
+			removeFromVector(m_ComponentVectorsScene.at(slot),base);
+		}
 	}
 	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
 		m_ComponentPool->remove(e->m_Components[i]);
@@ -257,12 +261,39 @@ void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* e){
 	for(auto entity:m_i->m_EntitiesToBeDestroyed){ if(entity->m_ID == e->m_ID){ return; } }
 	m_i->m_EntitiesToBeDestroyed.push_back(e);
 }
+void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
+	for(auto type:m_ComponentVectorsScene){
+		vector<ComponentBaseClass*>& v = (type.second);
+		vector_clear(v);
+		vector<ComponentBaseClass*> n;
+		m_ComponentVectorsScene.at(type.first) = n;
+	}
+	for(auto entityID:newScene->entities()){
+		Entity* e = newScene->getEntity(entityID);
+		for(uint index = 0; index < ComponentType::_TOTAL; ++index){
+			uint componentID = e->m_Components[index];
+			if(componentID != std::numeric_limits<uint>::max()){
+				ComponentBaseClass* component = nullptr;
+				m_ComponentPool->get(componentID,component);
+				if(component){
+					uint slot = componentManager->getIndividualComponentTypeSlot(component);
+					//if(!m_ComponentVectorsScene.count(slot)){
+						
+					//}
+					//else{
+					    m_ComponentVectorsScene.at(slot).push_back(component);
+					//}
+				}
+			}
+		}
+	}
+}
 
 Entity* epriv::ComponentManager::_getEntity(uint id){
-	Entity* e; m_EntityPool->getAsFast(id,e); return e;
+	Entity* e = nullptr; m_EntityPool->getAsFast(id,e); return e;
 }
 ComponentBaseClass* epriv::ComponentManager::_getComponent(uint index){
-	ComponentBaseClass* c; m_ComponentPool->getAsFast(index,c); return c;
+	ComponentBaseClass* c = nullptr; m_ComponentPool->getAsFast(index,c); return c;
 }
 void epriv::ComponentManager::_removeComponent(uint componentID){
 	ComponentBaseClass* component = nullptr;
@@ -271,22 +302,9 @@ void epriv::ComponentManager::_removeComponent(uint componentID){
 }
 void epriv::ComponentManager::_removeComponent(ComponentBaseClass* component){
 	if(component){
-		ComponentBasicBody* basicBody = dynamic_cast<ComponentBasicBody*>(component);
-		ComponentRigidBody* rigidBody = dynamic_cast<ComponentRigidBody*>(component);
-		ComponentModel* model = dynamic_cast<ComponentModel*>(component);
-		ComponentCamera* cam = dynamic_cast<ComponentCamera*>(component);
-		if(basicBody){
-			removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentBasicBody))],basicBody);
-		}
-		if(rigidBody){
-			removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentRigidBody))],rigidBody);
-		}
-		if(model){
-			removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentModel))],model);
-		}
-		if(cam){
-			removeFromVector(ComponentManager::m_ComponentVectors[std::type_index(typeid(ComponentCamera))],cam);
-		}
+		uint slot = componentManager->getIndividualComponentTypeSlot(component);
+		removeFromVector(m_ComponentVectors.at(slot),component);
+		removeFromVector(m_ComponentVectorsScene.at(slot),component);
 	}
 }
 
@@ -345,6 +363,12 @@ void ComponentBasicBody::rotate(float pitch,float yaw,float roll){
 void ComponentBasicBody::scale(glm::vec3& amount){ ComponentBasicBody::scale(amount.x,amount.y,amount.z); }
 void ComponentBasicBody::scale(float x,float y,float z){
 	_scale.x += x; _scale.y += y; _scale.z += z;
+	if(m_Owner){
+		ComponentModel* models = m_Owner->getComponent<ComponentModel>();
+		if(models){
+			models->m_i->calculateRadius(models);
+		}
+	}
 }
 void ComponentBasicBody::setRotation(glm::quat& newRotation){
     newRotation = glm::normalize(newRotation);
@@ -355,6 +379,12 @@ void ComponentBasicBody::setRotation(float x,float y,float z,float w){ Component
 void ComponentBasicBody::setScale(glm::vec3& newScale){ ComponentBasicBody::setScale(newScale.x,newScale.y,newScale.z); }
 void ComponentBasicBody::setScale(float x,float y,float z){
 	_scale.x = x; _scale.y = y; _scale.z = z;
+	if(m_Owner){
+		ComponentModel* models = m_Owner->getComponent<ComponentModel>();
+		if(models){
+			models->m_i->calculateRadius(models);
+		}
+	}
 }
 
 #pragma endregion
@@ -509,7 +539,8 @@ ComponentRigidBody::ComponentRigidBody(Collision* collision,Entity* owner):epriv
 	_rigidBody->setUserPointer(this);
 	_rigidBody->setMassProps(  _mass, *(_collision->getInertia())   );
 
-    Physics::addRigidBody(_rigidBody);
+	if(m_Owner->scene() == Resources::getCurrentScene())
+        Physics::addRigidBody(_rigidBody);
 }
 ComponentRigidBody::~ComponentRigidBody(){
     Physics::removeRigidBody(_rigidBody);
@@ -619,6 +650,7 @@ glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     tr.getOpenGLMatrix(glm::value_ptr(m));
     return glm::vec3(m[3][0],m[3][1],m[3][2]);
 }
+glm::quat ComponentRigidBody::rotation(){ return Engine::Math::btToGLMQuat(_rigidBody->getWorldTransform().getRotation()); }
 glm::vec3 ComponentRigidBody::forward(){ return _forward; }
 glm::vec3 ComponentRigidBody::right(){ return _right; }
 glm::vec3 ComponentRigidBody::up(){ return _up; }
@@ -701,7 +733,7 @@ void ComponentRigidBody::applyTorque(float x,float y,float z,bool local){
 	_rigidBody->activate();
     btVector3 t(x,y,z);
     if(local){
-        t = _rigidBody->getInvInertiaTensorWorld().inverse()*(_rigidBody->getWorldTransform().getBasis()*t);
+        t = _rigidBody->getInvInertiaTensorWorld().inverse() * (_rigidBody->getWorldTransform().getBasis() * t);
     }
     _rigidBody->applyTorque(t);
 }
@@ -750,17 +782,24 @@ void ComponentRigidBody::setMass(float mass){
 
 
 Entity::Entity(){
-	m_ParentID = m_ID = std::numeric_limits<uint>::max();
+	uint maxValue = std::numeric_limits<uint>::max();
+	m_Scene = nullptr;
+	m_ParentID = maxValue;
+	m_ID = maxValue;
 	m_Components = new uint[ComponentType::_TOTAL];
 	for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-		m_Components[i] = std::numeric_limits<uint>::max();
+		m_Components[i] = maxValue;
 	}
 }
 Entity::~Entity(){
-	m_ParentID = m_ID = std::numeric_limits<uint>::max();
+	uint maxValue = std::numeric_limits<uint>::max();
+	m_ParentID = maxValue;
+	m_ID = maxValue;
+	m_Scene = nullptr;
 	delete[] m_Components;
 }
 uint Entity::id(){ return m_ID; }
+Scene* Entity::scene(){ return m_Scene; }
 void Entity::destroy(bool immediate){
 	if(!immediate){
 		//add to the deletion queue
@@ -772,7 +811,8 @@ void Entity::destroy(bool immediate){
 	}
 }
 Entity* Entity::parent(){
-	if(m_ParentID == std::numeric_limits<uint>::max())
+	uint maxValue = std::numeric_limits<uint>::max();
+	if(m_ParentID == maxValue)
 		return nullptr;
 	return componentManager->_getEntity(m_ParentID);
 }

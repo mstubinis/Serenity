@@ -31,6 +31,7 @@ void Scene::addEntity(Entity* entity){
 	for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return; } //rethink this maybe use a fixed size array?
 	uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(entity);
 	entity->m_ID = entityID;
+	entity->m_Scene = this;
 	m_Entities.push_back(entityID);
 }
 Entity* Scene::getEntity(uint entityID){

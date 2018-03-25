@@ -183,18 +183,17 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
 
 Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
 	scene->addEntity(this);
-	m_Body = new ComponentBasicBody();
-	m_Body->setScale(scl,scl,scl);
-	m_Body->setPosition(pos);
-	addComponent(m_Body);
-
 	m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
+	addComponent(m_Model);
     if(type != PLANET_TYPE_STAR){
         AtmosphericScatteringMeshInstanceBindFunctor f;
 		m_Model->setCustomBindFunctor(f,0);
     }
-	addComponent(m_Model);
 	
+	m_Body = new ComponentBasicBody();
+	addComponent(m_Body);
+	m_Body->setScale(scl,scl,scl);
+	m_Body->setPosition(pos);
 
     m_AtmosphereHeight = atmosphere;
     m_Type = type;
@@ -244,8 +243,8 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
     //setColor(starColor.x,starColor.y,starColor.z,1);
     //setGodsRaysColor(starColor.x,starColor.y,starColor.z);
-    //addChild(m_Light);
-	m_Light->setPosition(pos);
+    addChild(m_Light);
+	//m_Light->setPosition(pos);
 }
 Star::~Star(){
 }
@@ -337,28 +336,29 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     this->material = Resources::getMaterial(h);
 }
 
-OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,string _parent){
+OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent){
     angle = _angle;
     eccentricity = _eccentricity;
     days = _days;
     majorRadius = _majorRadius;
-    minorRadius = glm::sqrt(majorRadius * majorRadius*(1 - (eccentricity * eccentricity))); //b² = a²(1 - e²)
-    parent = Engine::Resources::getObjectPtr(_parent);
+    minorRadius = glm::sqrt(majorRadius * majorRadius * (1 - (eccentricity * eccentricity))); //b² = a²(1 - e²)
+    parent = _parent;
 }
-glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Object* thisPlanet){
+glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     glm::vec3 offset = glm::vec3(0.0f);
     glm::vec3 currentPos = thisPlanet->getPosition();
-    if(exists(parent)){
-        glm::vec3 parentPos = parent.lock().get()->getPosition();
+	Planet* parentPlanet = (Planet*)Resources::getCurrentScene()->getEntity(parent);
+    if(parentPlanet){
+		glm::vec3 parentPos = parentPlanet->getPosition();
 
-        float newX = parentPos.x - glm::cos(angle)*majorRadius;
-        float newZ = parentPos.z - glm::sin(angle)*minorRadius;
+        float newX = parentPos.x - glm::cos(angle) * majorRadius;
+        float newZ = parentPos.z - glm::sin(angle) * minorRadius;
 
         offset = glm::vec3(newX - currentPos.x,0.0f,newZ - currentPos.z);
     }
     return (currentPos + offset);
 }
-void OrbitInfo::setOrbitalPosition(float a,Object* planet){
+void OrbitInfo::setOrbitalPosition(float a,Planet* planet){
     angle += a;
     glm::vec3 nextPos = getOrbitalPosition(angle,planet);
     planet->setPosition(nextPos);

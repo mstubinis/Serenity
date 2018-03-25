@@ -109,37 +109,53 @@ namespace Engine{
 
 				bool get(const Handle& handle, T*& outPtr){
 					const uint index = handle.index;
-					if (m_Pool[index].counter != handle.counter || m_Pool[index].active == false)
+					if (m_Pool[index].counter != handle.counter || m_Pool[index].active == false){
+						outPtr = nullptr;
 						return false;
+					}
 					outPtr = m_Pool[index].resource;
 					return true;
 				}
 				bool get(const uint& index, T*& outPtr){
+					if(m_Pool[index].resource == nullptr){
+						outPtr = nullptr;
+						return false;
+					}
 					outPtr = m_Pool[index].resource;
 					return true;
 				}
 				template<typename U> inline bool getAs(Handle& handle, U*& outPtr){
-					T* _void;
+					T* _void = nullptr;
 					const bool rv = get(handle,_void);
 					outPtr = (U*)_void; //use union_cast ? was in the original source
 					return rv;
 				}
 				template<typename U> inline bool getAs(uint& index, U*& outPtr){
-					T* _void;
+					T* _void = nullptr;
 					const bool rv = get(index,_void);
 					outPtr = (U*)_void; //use union_cast ? was in the original source
 					return rv;
 				}
 				template<typename U> inline void getAsFast(Handle& handle, U*& outPtr){
+					if(m_Pool[handle.index].resource == nullptr){
+						outPtr = nullptr;
+						return;
+					}
 					outPtr = (U*)m_Pool[handle.index].resource;
 				}
 				template<typename U> inline void getAsFast(uint& index, U*& outPtr){
+					if(m_Pool[index].resource == nullptr){
+						outPtr = nullptr;
+						return;
+					}
 					outPtr = (U*)m_Pool[index].resource;
 				}
 				template<typename U> inline U* getAsFast(Handle& handle){
+					if(m_Pool[handle.index].resource == nullptr) return nullptr;
 					return (U*)m_Pool[handle.index].resource;
 				}
 				template<typename U> inline U* getAsFast(uint& index){
+					if(m_Pool[index].resource == nullptr) return nullptr;
 					return (U*)m_Pool[index].resource;
 				}
 		};
@@ -222,15 +238,19 @@ namespace Engine{
 					return true;
 				}
 				template<typename U> inline bool getAs(const uint& id, U*& outPtr){
-					T* _void;
+					T* _void = nullptr;
 					const bool rv = get(id,_void);
 					outPtr = (U*)_void; //use union_cast ? was in the original source
 					return rv;
 				}
 				template<typename U> inline void getAsFast(const uint& id, U*& outPtr){
+					if(m_Pool[id].resource == nullptr){
+						outPtr = nullptr; return;
+					}
 					outPtr = (U*)m_Pool[id].resource;
 				}
 				template<typename U> inline U* getAsFast(const uint& id){
+					if(m_Pool[id].resource == nullptr) return nullptr;
 					return (U*)m_Pool[id].resource;
 				}
 		};

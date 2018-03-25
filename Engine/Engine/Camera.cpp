@@ -18,15 +18,15 @@ using namespace std;
 class Camera::impl final{
     public:
 		void _baseInit(Scene* scene, Camera* super){
+			scene->addEntity(super);
+
 			super->m_BasicBody = new ComponentBasicBody();
 			super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
 			if(scene == nullptr)
 				scene = Resources::getCurrentScene();
 
 			super->addComponent(super->m_BasicBody);
-			super->addComponent(super->m_Camera);
-
-			scene->addEntity(super);
+			super->addComponent(super->m_Camera);	
 		}
 		void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
 			super->m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
@@ -47,7 +47,7 @@ Camera::Camera(float left, float right, float bottom, float top, float _near, fl
 Camera::~Camera(){ 
 }
 glm::vec3 Camera::getPosition(){ return m_BasicBody->position(); }
-glm::quat Camera::getOrientation(){ return m_BasicBody->_rotation; }
+glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Camera->getView()));; }
 float Camera::getNear(){ return m_Camera->_nearPlane; }
 float Camera::getFar(){ return m_Camera->_farPlane; }
 glm::mat4 Camera::getViewProjectionInverse(){ return m_Camera->getViewProjectionInverse(); }
