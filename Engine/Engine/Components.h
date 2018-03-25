@@ -41,7 +41,10 @@ class ComponentCamera;
 
 namespace Engine{
 	namespace epriv{
+		struct MeshMaterialPair;
+		class ComponentTypeRegistry;
 		class ComponentManager;
+		class ComponentBodyBaseClass;
 	};
 };
 class ComponentType{public:enum Type{
@@ -69,17 +72,18 @@ namespace Engine{
 		std::type_index baseType    = std::type_index(typeid(Base));
 		std::type_index derivedType = std::type_index(typeid(Derived));
 
-		if(epriv::ComponentTypeRegistry::m_MapScene.count(derivedType)) 
-			return;
-		uint baseClassSlot = epriv::ComponentTypeRegistry::m_MapScene.at(baseType);
-		epriv::ComponentTypeRegistry::m_MapScene.emplace(derivedType,baseClassSlot);
+		if(!epriv::ComponentTypeRegistry::m_MapScene.count(derivedType)){
+		    uint baseClassSlot = epriv::ComponentTypeRegistry::m_MapScene.at(baseType);
+		    epriv::ComponentTypeRegistry::m_MapScene.emplace(derivedType,baseClassSlot);
+		}
+		if(!epriv::ComponentTypeRegistry::m_Map.count(derivedType)){
+		    uint baseClassSlot = epriv::ComponentTypeRegistry::m_Map.at(baseType);
+		    epriv::ComponentTypeRegistry::m_Map.emplace(derivedType,baseClassSlot);
+		}
 	}
 
 	namespace epriv{
 		const uint MAX_NUM_ENTITIES = 32768;
-
-		struct MeshMaterialPair;
-		class ComponentTypeRegistry;
 
 		class ComponentManager final{
 			friend class ::Entity;
@@ -136,6 +140,10 @@ namespace Engine{
 					m_NextIndexScene = 0;
 				}
 				~ComponentTypeRegistry(){
+					m_Map.clear();
+					m_MapScene.clear();
+					m_NextIndex = 0;
+					m_NextIndexScene = 0;
 				}
 				template<typename T> void emplace(){
 					m_Map.emplace(std::type_index(typeid(T)),m_NextIndex);
@@ -285,6 +293,8 @@ class ComponentModel: public ComponentBaseClass{
 		bool visible();
 		void show();
 		void hide();
+
+		MeshInstance* getModel(uint index = 0);
 
 		uint addModel(Handle& meshHandle, Handle& materialHandle);
 		uint addModel(Mesh*,Material*);

@@ -241,10 +241,12 @@ float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PLANET_TYPE_STAR,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
-    //setColor(starColor.x,starColor.y,starColor.z,1);
-    //setGodsRaysColor(starColor.x,starColor.y,starColor.z);
-    addChild(m_Light);
-	//m_Light->setPosition(pos);
+
+	m_Model->getModel()->setColor(starColor.x,starColor.y,starColor.z,1.0f);
+	m_Model->getModel()->setGodRaysColor(starColor.x,starColor.y,starColor.z);
+
+    //addChild(m_Light);
+	m_Light->setPosition(pos);
 }
 Star::~Star(){
 }

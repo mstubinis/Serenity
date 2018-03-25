@@ -53,6 +53,12 @@ class MeshInstance final: public BindableResource{
         void playAnimation(const std::string& animName,float startTime);
         void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 
+		void setColor(float r,float g,float b,float a = 1.0f);
+		void setColor(glm::vec4& color);
+
+		void setGodRaysColor(float r,float g,float b);
+		void setGodRaysColor(glm::vec3& color);
+
         void setMesh(Handle& meshHandle);                void setMesh(Mesh*);
         void setMaterial(Handle& materialHandle);        void setMaterial(Material*);
 

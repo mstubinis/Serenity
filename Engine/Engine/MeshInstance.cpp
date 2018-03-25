@@ -341,6 +341,11 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3& pos,
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
+
+void MeshInstance::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
+void MeshInstance::setColor(glm::vec4& color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
+void MeshInstance::setGodRaysColor(float r,float g,float b){ Engine::Math::setColor(m_i->m_GodRaysColor,r,g,b); }
+void MeshInstance::setGodRaysColor(glm::vec3& color){ MeshInstance::setGodRaysColor(color.r,color.g,color.b); }
 void MeshInstance::setPosition(float x, float y, float z){ m_i->_setPosition(x,y,z); }
 void MeshInstance::setScale(float x,float y,float z){ m_i->_setScale(x,y,z); }
 void MeshInstance::translate(float x, float y, float z){ m_i->_translate(x,y,z); }

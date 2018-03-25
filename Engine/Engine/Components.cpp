@@ -350,6 +350,9 @@ void ComponentBasicBody::translate(float x,float y,float z,bool local){
 void ComponentBasicBody::setPosition(glm::vec3& newPosition){ ComponentBasicBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
 void ComponentBasicBody::setPosition(float x,float y,float z){
 	_position.x = x; _position.y = y; _position.z = z;
+	_modelMatrix[3][0] = x;
+	_modelMatrix[3][1] = y;
+	_modelMatrix[3][2] = z;
 }
 void ComponentBasicBody::rotate(glm::vec3& rotation){ ComponentBasicBody::rotate(rotation.x,rotation.y,rotation.z); }
 void ComponentBasicBody::rotate(float pitch,float yaw,float roll){
@@ -469,6 +472,7 @@ ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* owner):Comp
 ComponentModel::~ComponentModel(){
 	models.clear();
 }
+MeshInstance* ComponentModel::getModel(uint index){ return models.at(index); }
 bool ComponentModel::passedRenderCheck(){ return m_i->m_PassedRenderCheck; }
 bool ComponentModel::visible(){ return m_i->m_Visible; }
 void ComponentModel::show(){ m_i->m_Visible = true; }

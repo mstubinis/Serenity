@@ -257,16 +257,28 @@ Ship::~Ship(){
     for(auto shipSystem:m_ShipSystems) SAFE_DELETE(shipSystem.second);
 }
 void Ship::update(const float& dt){
+	Scene* currentScene = Resources::getCurrentScene();
     if(m_IsPlayer){
         #pragma region PlayerFlightControls
         if(m_IsWarping && m_WarpFactor > 0){
 			ComponentRigidBody* body = getComponent<ComponentRigidBody>();
-            float speed = (m_WarpFactor * 1.0f/0.46f)*2.0f;
-			glm::vec3 s = (body->forward() * glm::pow(speed,15.0f))/ body->mass();
-            for(auto obj:Resources::getCurrentScene()->objects()){
+            float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
+			glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
+            for(auto obj:currentScene->objects()){
                 if(obj.second->parent() == nullptr){
                     obj.second->setPosition(obj.second->getPosition() + (s * dt));
                 }
+            }
+            for(auto id:currentScene->entities()){
+				Entity* e = currentScene->getEntity(id);
+				if(e){
+					ComponentCamera* cam = e->getComponent<ComponentCamera>();
+					GameCameraComponent* camGame = (e->getComponent<GameCameraComponent>());
+					if(e != this && e->parent() == nullptr && cam == nullptr && camGame == nullptr){
+						epriv::ComponentBodyBaseClass* ebody = e->getComponent<epriv::ComponentBodyBaseClass>();
+						ebody->setPosition(ebody->position() + (s * dt));
+					}
+				}
             }
         }
 

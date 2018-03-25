@@ -35,6 +35,8 @@ void Scene::addEntity(Entity* entity){
 	m_Entities.push_back(entityID);
 }
 Entity* Scene::getEntity(uint entityID){
+	if(entityID == std::numeric_limits<uint>::max())
+		return nullptr;
 	return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
 }
 bool Scene::hasEntity(Entity* entity){
