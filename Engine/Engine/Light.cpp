@@ -58,8 +58,7 @@ class SunLight::impl final{
 			m_DiffuseIntensity = 2.0f;
 			m_SpecularIntensity = 1.0f;
 
-			m_Body = new ComponentBasicBody();
-			super->addComponent(m_Body);
+			m_Body = new ComponentBasicBody();  super->addComponent(m_Body);
 		}
 };
 
@@ -70,6 +69,8 @@ SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):Entity(),m_i
     }
 	scene->addEntity(this); //keep lights out of the global per scene entity pool?
     scene->lights().push_back(this);
+
+	m_i->m_Body->setPosition(pos);
 }
 SunLight::~SunLight(){
 }

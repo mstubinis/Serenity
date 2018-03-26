@@ -22,8 +22,8 @@
 using namespace Engine;
 using namespace std;
 
-unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_Map;
-unordered_map<std::type_index,uint> epriv::ComponentTypeRegistry::m_MapScene;
+boost::unordered_map<boost_type_index,uint> epriv::ComponentTypeRegistry::m_Map;
+boost::unordered_map<boost_type_index,uint> epriv::ComponentTypeRegistry::m_MapScene;
 epriv::EntityPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
 unordered_map<uint, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectors;
 unordered_map<uint, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectorsScene;
@@ -34,9 +34,10 @@ class ComponentModel::impl final{
     public:
 		bool m_PassedRenderCheck;
 		bool m_Visible;
-		void _init(){
+		void _init(Entity* owner,ComponentModel* super){
 			m_PassedRenderCheck = false;
 			m_Visible = true;
+			super->m_Owner = owner;
 		}
 
 		float calculateRadius(ComponentModel* super){
@@ -454,16 +455,28 @@ glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_
 #pragma region Model
 
 ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity* owner):ComponentBaseClass(),m_i(new impl){
-	m_i->_init();
-	m_Owner = owner;
+	m_i->_init(owner,this);
 	if(!meshHandle.null() && !materialHandle.null()){
 		models.push_back( new MeshInstance(m_Owner,meshHandle,materialHandle) );
 	}
 	m_i->calculateRadius(this);
 }
+ComponentModel::ComponentModel(Mesh* mesh,Handle& materialHandle,Entity* owner):ComponentBaseClass(),m_i(new impl){
+	m_i->_init(owner,this);
+	if(mesh && !materialHandle.null()){
+		models.push_back( new MeshInstance(m_Owner,mesh,materialHandle) );
+	}
+	m_i->calculateRadius(this);
+}
+ComponentModel::ComponentModel(Handle& meshHandle,Material* material,Entity* owner):ComponentBaseClass(),m_i(new impl){
+	m_i->_init(owner,this);
+	if(!meshHandle.null() && material){
+		models.push_back( new MeshInstance(m_Owner,meshHandle,material) );
+	}
+	m_i->calculateRadius(this);
+}
 ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* owner):ComponentBaseClass(),m_i(new impl){
-	m_i->_init();
-	m_Owner = owner;
+	m_i->_init(owner,this);
 	if(mesh && material){
 		models.push_back( new MeshInstance(m_Owner,mesh,material) );
 	}

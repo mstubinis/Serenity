@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "ObjectDisplay.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "Texture.h"

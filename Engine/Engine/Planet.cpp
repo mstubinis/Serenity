@@ -5,6 +5,7 @@
 #include "Planet.h"
 #include "ShaderProgram.h"
 #include "Mesh.h"
+#include "MeshInstance.h"
 #include "Material.h"
 #include "Camera.h"
 #include "Scene.h"

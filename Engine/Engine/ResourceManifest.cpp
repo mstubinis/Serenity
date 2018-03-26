@@ -103,17 +103,11 @@ void ResourceManifest::init(){
 
     CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");
     Resources::getMaterial(CapsuleA)->setShadeless(true);
-
-
     CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.png");
     Resources::getMaterial(CapsuleB)->setShadeless(true);
-
-
     CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
     Resources::getMaterial(CapsuleC)->setShadeless(true);
     Resources::getMaterial(CapsuleC)->setGlow(0.01f);
-
-
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
     Resources::getMaterial(CapsuleD)->setShadeless(true);
 

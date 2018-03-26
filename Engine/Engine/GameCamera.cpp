@@ -2,7 +2,6 @@
 #include "Engine_Events.h"
 #include "Engine_Resources.h"
 #include "Engine_Renderer.h"
-#include "ObjectDisplay.h"
 #include "Scene.h"
 
 #include <glm/gtx/transform.hpp>

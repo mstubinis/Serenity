@@ -3,37 +3,42 @@
 #define CAPSULE_SPACE_H
 
 #include "SolarSystem.h"
-#include "ObjectDisplay.h"
+#include "Components.h"
 
 class PointLight;
 struct Handle;
 
-class CapsuleEnd final: public ObjectDisplay{
+class CapsuleEnd final: public Entity{
     public:
-        CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, std::string name, Scene* = nullptr);
+		ComponentBasicBody* m_Body;
+        CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* = nullptr);
         ~CapsuleEnd();
-        void update(float);
+        void update(const float& dt);
 };
-class CapsuleStar final: public ObjectDisplay{
+class CapsuleStar final: public Entity{
+    private:
         PointLight* m_Light;
+		ComponentBasicBody* m_Body;
     public:
-        CapsuleStar(float size,glm::vec3 pos, std::string name, Scene* = nullptr,bool=true);
+        CapsuleStar(float size,glm::vec3 pos, Scene* = nullptr,bool=true);
         ~CapsuleStar();
-        void update(float);
+        void update(const float& dt);
 };
-class CapsuleTunnel final: public ObjectDisplay{
+class CapsuleTunnel final: public Entity{
     private:
         float m_TunnelRadius;
     public:
-        CapsuleTunnel(float tunnelRadius, std::string name, Handle& material, Scene* = nullptr);
+		ComponentBasicBody* m_Body;
+        CapsuleTunnel(float tunnelRadius, Handle& material, Scene* = nullptr);
         ~CapsuleTunnel();
         float getTunnelRadius(){ return m_TunnelRadius; }
 };
-class CapsuleRibbon final: public ObjectDisplay{
+class CapsuleRibbon final: public Entity{
     private:
         float m_TunnelRadius;
     public:
-        CapsuleRibbon(float tunnelRadius, std::string name, Handle& material, Scene* = nullptr);
+		ComponentBasicBody* m_Body;
+        CapsuleRibbon(float tunnelRadius, Handle& material, Scene* = nullptr);
         ~CapsuleRibbon();
 
         float getTunnelRadius(){ return m_TunnelRadius; }

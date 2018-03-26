@@ -247,8 +247,7 @@ void SolarSystem::_loadFromFile(string filename){
 	*/
 
     new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
-	new ObjectDisplay(ResourceManifest::PlanetMesh,ResourceManifest::GoldMaterial,glm::vec3(0,5,2),glm::vec3(2));
-	
+
     body.translate(0,0,2);
 
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);

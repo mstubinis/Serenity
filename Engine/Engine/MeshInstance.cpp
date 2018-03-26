@@ -340,6 +340,20 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3& pos,
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
+MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
+    Material* _mat = Resources::getMaterial(mat);
+    m_i->_init(mesh,_mat,pos,rot,scl,this,entity);
+    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
+MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
+    Mesh* _mesh = Resources::getMesh(mesh);
+    m_i->_init(_mesh,mat,pos,rot,scl,this,entity);
+    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+}
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
 
 void MeshInstance::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }

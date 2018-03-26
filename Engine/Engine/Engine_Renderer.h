@@ -15,7 +15,6 @@ typedef unsigned int uint;
 class Texture;
 class Font;
 class Object;
-class ObjectDisplay;
 class Camera;
 
 class SMAAQualityLevel{public: enum Level{

@@ -12,10 +12,10 @@
 #include "Scene.h"
 #include "Texture.h"
 #include "Mesh.h"
+#include "MeshInstance.h"
 #include "Skybox.h"
 #include "Material.h"
 #include "Object.h"
-#include "ObjectDisplay.h"
 #include "FramebufferObject.h"
 #include "SMAA_LUT.h"
 
@@ -1157,6 +1157,7 @@ class epriv::RenderManager::impl final{
 
 			brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
 			brdfCook->setWrapping(TextureWrap::ClampToEdge);	
+			epriv::Core::m_Engine->m_ResourceManager->_addTexture(brdfCook);
 
             #pragma endregion
 

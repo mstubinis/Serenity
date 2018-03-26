@@ -2,7 +2,6 @@
 #ifndef ENGINE_LIGHT_H
 #define ENGINE_LIGHT_H
 
-#include "ObjectDisplay.h"
 #include "Camera.h"
 #include <unordered_map>
 

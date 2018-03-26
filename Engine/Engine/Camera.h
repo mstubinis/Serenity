@@ -7,7 +7,6 @@
 #include "Object.h"
 
 class Scene;
-class ObjectDisplay;
 class LightProbe;
 class CameraType{public: enum Type { 
     Perspective, 

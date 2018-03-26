@@ -1,7 +1,6 @@
 #include "Engine.h"
 #include "Scene.h"
 #include "Camera.h"
-#include "ObjectDisplay.h"
 #include "Engine_Resources.h"
 
 #include <glm/gtx/transform.hpp>
