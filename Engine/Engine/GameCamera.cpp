@@ -121,29 +121,7 @@ GameCamera::~GameCamera()
 void GameCamera::update(const float& dt){
 
 }
-Object* GameCamera::getObjectInCenterRay(Object* exclusion){
-    Object* ret = nullptr;
-    vector<Object*> objs;
-    for(auto object:Engine::Resources::getCurrentScene()->objects()){
-        if(object.second->rayIntersectSphere(this)){
-            if(object.second != exclusion){
-                objs.push_back(object.second);
-			}
-        }
-    }
-    if(objs.size() == 0) return nullptr;
-    if(objs.size() == 1) return objs.at(0);
 
-    float distance = -1;
-    for(auto object:objs){
-        float d = glm::distance(object->getPosition(), getPosition());
-        if(distance == -1 || d < distance){
-            distance = d;
-            ret = object;
-        }
-    }
-    return ret;
-}
 Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
     Entity* ret = nullptr;
     vector<Entity*> objs;

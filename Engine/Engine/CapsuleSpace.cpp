@@ -151,9 +151,8 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     //dread->addChild(lp);
 }
 CapsuleSpace::~CapsuleSpace(){}
-void CapsuleSpace::update(float dt){
+void CapsuleSpace::update(const float& dt){
     m_Timer += dt;
-    SolarSystem::update(dt);
 
     float aRadius = m_TunnelA->getTunnelRadius();
     float bRadius = m_TunnelB->getTunnelRadius();
@@ -162,13 +161,13 @@ void CapsuleSpace::update(float dt){
     m_TunnelB->m_Body->translate(0,0,(8 * bRadius) * dt,false);
     m_Ribbon->m_Body->translate(0,0,(7 * aRadius) * dt,false);
 
-    float tunnelARotRand = float(rand() % 4) + 14.0f;
+    float tunnelARotRand = float(rand() % 3) + 2;
     float tunnelBRotRand = float(rand() % 2) + 2;
 
-    m_TunnelA->m_Body->rotate(0,0,glm::radians(tunnelARotRand * 0.5f));
-    m_TunnelB->m_Body->rotate(0,0,-glm::radians(tunnelBRotRand * 0.5f));
-    m_BackEnd->m_Body->rotate(0,0,0.21f);
-    m_FrontEnd->m_Body->rotate(0,0,-0.21f);
+    m_TunnelA->m_Body->rotate(0,0,glm::radians(tunnelARotRand*15.0f)*dt);
+    m_TunnelB->m_Body->rotate(0,0,-glm::radians(tunnelBRotRand*15.0f)*dt);
+    m_BackEnd->m_Body->rotate(0,0,20.0f*dt);
+    m_FrontEnd->m_Body->rotate(0,0,-20.0f*dt);
 
 	glm::vec3 aPos = m_TunnelA->m_Body->position();
 	glm::vec3 bPos = m_TunnelB->m_Body->position();
@@ -187,14 +186,14 @@ void CapsuleSpace::update(float dt){
 	ComponentModel& model = *getPlayer()->getComponent<ComponentModel>();
     body.setPosition(0,0,0);
 
-    float x = glm::sin(m_Timer*2.4f)*0.03f;
-    float y = glm::cos(m_Timer*2.4f)*0.022f;
+    float x = glm::sin(m_Timer*2.4f)*0.3f;
+    float y = glm::cos(m_Timer*2.4f)*0.22f;
 
-    float roll = glm::sin(m_Timer*2.4f)*5.0f;
+    float roll = glm::sin(m_Timer*2.4f)*1.0f;
     float pitch = glm::sin(m_Timer*2.4f)*0.7f;
 
 
-    model.getModel()->setPosition(glm::vec3(x*1.2f,-y,0));
+    model.getModel()->setPosition(glm::vec3(x * 1.2f, -y ,0));
     model.getModel()->setOrientation(glm::radians(pitch),0,glm::radians(roll));
 
 

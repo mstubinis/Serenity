@@ -132,7 +132,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Engine_Renderer.cpp" />
     <ClCompile Include="Engine_Resources.cpp" />
     <ClCompile Include="Planet.cpp" />
@@ -181,7 +180,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="Engine_Renderer.h" />
     <ClInclude Include="Engine_Resources.h" />
     <ClInclude Include="Planet.h" />

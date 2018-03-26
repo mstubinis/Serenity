@@ -5,7 +5,6 @@
 #include "Scene.h"
 
 class Star;
-class Object;
 class Ship;
 class GameCamera;
 class Planet;
@@ -21,7 +20,7 @@ class SolarSystem: public Scene{
         SolarSystem(std::string name, std::string file);
         virtual ~SolarSystem();
 
-        virtual void update(float);
+        virtual void update(const float& dt);
 
         Ship* getPlayer(){ return player; }
         void setPlayer(Ship* p){ player = p; }

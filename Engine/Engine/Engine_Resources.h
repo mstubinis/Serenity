@@ -3,7 +3,6 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 #include "Engine_ResourceHandle.h"
-#include "Object.h"
 #include "Engine_Physics.h"
 #include "ShaderProgram.h"
 
@@ -51,7 +50,6 @@ namespace Engine{
 		
 				Handle _addTexture(Texture*);
 
-				bool _hasObject(std::string);        void _addObject(Object*);              std::string _buildObjectName(std::string);
 				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
 				void _addMeshInstance(MeshInstance*);
 
@@ -78,14 +76,10 @@ namespace Engine{
 
         Scene* getScene(std::string sceneName);
 
-        boost::shared_ptr<Object>& getObjectPtr(std::string);
-
-        Object* getObject(std::string);
         Font* getFont(std::string);
 
         void getShader(Handle& inHandle,Shader*& outPtr);         Shader* getShader(Handle& inHandle);
         void getSoundData(Handle& inHandle,SoundData*& outPtr);   SoundData* getSoundData(Handle& inHandle);
-		void getObject(Handle& inHandle,Object*& outPtr);         Object* getObject(Handle& inHandle);
         void getCamera(Handle& inHandle,Camera*& outPtr);         Camera* getCamera(Handle& inHandle);
         void getFont(Handle& inHandle,Font*& outPtr);             Font* getFont(Handle& inHandle);
         void getTexture(Handle& inHandle,Texture*& outPtr);       Texture* getTexture(Handle& inHandle);

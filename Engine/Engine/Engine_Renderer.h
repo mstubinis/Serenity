@@ -14,8 +14,8 @@ typedef unsigned int uint;
 
 class Texture;
 class Font;
-class Object;
 class Camera;
+class Entity;
 
 class SMAAQualityLevel{public: enum Level{
     Low,Medium,High,Ultra
@@ -48,12 +48,12 @@ namespace Engine{
                 void _render(
                     epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
                     bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-                    Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                 );
                 void _render(
                     Camera*,uint fboWidth,uint fboHeight,
                     bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-                    Object* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                 );
 				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
 				void _onOpenGLContextCreation(uint width,uint height);

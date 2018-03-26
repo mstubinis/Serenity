@@ -10,6 +10,16 @@
 
 typedef unsigned int uint;
 
+class SoundBaseClass;
+class SoundEffect;
+class SoundMusic;
+class SoundQueue;
+namespace Engine{
+	namespace epriv{
+		class SoundManager;
+	};
+};
+
 class SoundStatus final{public: enum Status{
     Playing,PlayingLooped,Paused,Stopped,Fresh
 };};
@@ -37,7 +47,7 @@ class SoundBaseClass{
         virtual ~SoundBaseClass();
 
         SoundStatus::Status status();
-        virtual void update(float dt);
+        virtual void update(const float& dt);
         virtual void play(uint loop);
         virtual void play();
         virtual void pause();
@@ -62,7 +72,7 @@ class SoundEffect: public SoundBaseClass{
         SoundEffect(SoundData*,uint loops = 1,bool = false);
         ~SoundEffect();
 
-        void update(float dt);
+        void update(const float& dt);
         void play(uint loop);
         void play();
         void pause();
@@ -85,7 +95,7 @@ class SoundMusic: public SoundBaseClass{
         SoundMusic(Handle&,uint loops = 1,bool = false);
         ~SoundMusic();
 
-        void update(float dt);
+        void update(const float& dt);
         void play(uint loop);
         void play();
         void pause();
@@ -111,7 +121,7 @@ class SoundQueue final{
         void enqueueEffect(Handle&,uint loops = 1);
         void enqueueMusic(Handle&,uint loops = 1);
         void dequeue();
-        void update(float dt);
+        void update(const float& dt);
         void clear();
         bool empty();
 };
@@ -129,7 +139,7 @@ namespace Engine{
 				~SoundManager();
 
 				void _init(const char* name,uint w,uint h);
-				void _update(float dt);
+				void _update(const float& dt);
 		};
 	};
     namespace Sound{

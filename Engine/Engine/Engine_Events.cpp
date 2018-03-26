@@ -364,7 +364,7 @@ class epriv::EventManager::impl final{
 			for(auto iterator:m_MouseStatus){ iterator.second = false; }
 			m_Delta *= 0.97f * (1.0f-Resources::dt());
 		}
-		void _update(float& dt){
+		void _update(const float& dt){
 			m_Difference *= (0.975f);
 		}
 };
@@ -396,7 +396,7 @@ void epriv::EventManager::_onEventMouseWheelMoved(int& delta){
 void epriv::EventManager::_onResetEvents(){
 	m_i->_onResetEvents();
 }
-void epriv::EventManager::_update(float dt){
+void epriv::EventManager::_update(const float& dt){
 	m_i->_update(dt);
 }
 void epriv::EventManager::_setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){

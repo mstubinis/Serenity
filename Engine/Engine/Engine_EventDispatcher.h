@@ -5,9 +5,7 @@
 #include <memory>
 #include "Engine_EventObject.h"
 
-
-class Object;
-
+class Entity;
 namespace Engine{
 	namespace epriv{
 		class EventDispatcher final{
@@ -17,11 +15,11 @@ namespace Engine{
 				EventDispatcher(const char* name,uint w,uint h);
 				~EventDispatcher();
 
-				void _update(float);
+				void _update(const float& dt);
 				void _init(const char* name,uint w,uint h);
 
-				void _registerObject(Object*,EventType::Type);
-				void _unregisterObject(Object*,EventType::Type);
+				void _registerObject(Entity*,EventType::Type);
+				void _unregisterObject(Entity*,EventType::Type);
 				void _dispatchEvent(EventType::Type,const Event& e);
 		};
 	};

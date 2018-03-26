@@ -105,7 +105,6 @@ bool SunLight::isActive(){ return m_i->m_Active; }
 uint SunLight::type(){ return m_i->m_Type; }
 DirectionalLight::DirectionalLight(glm::vec3 dir,Scene* scene):SunLight(glm::vec3(0),LightType::Directional,scene){
 	m_i->m_Body->alignTo(dir,0);
-    //ObjectBasic::update(0);
 }
 DirectionalLight::~DirectionalLight(){
 }
@@ -160,7 +159,7 @@ void PointLight::lighten(){
     if(!isActive()) return;
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
 	glm::vec3 pos = position();
-	if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > Object::m_VisibilityThreshold * m_CullingRadius))
+	if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
     Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
@@ -180,7 +179,6 @@ void PointLight::lighten(){
 }
 SpotLight::SpotLight(glm::vec3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,scene){
     m_i->m_Body->alignTo(direction,0);
-    //ObjectBasic::update(0);
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
     m_i->m_Type = LightType::Spot;
@@ -199,7 +197,7 @@ void SpotLight::lighten(){
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
 	glm::vec3 pos = position();
 	glm::vec3 _forward = m_i->m_Body->forward();
-    if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > Object::m_VisibilityThreshold * m_CullingRadius))
+    if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
     Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
@@ -223,7 +221,6 @@ void SpotLight::lighten(){
     Renderer::sendUniform1fSafe("SpotLight",0.0f);
 }
 RodLight::RodLight(glm::vec3 pos,float rodLength,Scene* scene): PointLight(pos,scene){
-    //ObjectBasic::update(0);
     setRodLength(rodLength);
     m_i->m_Type = LightType::Rod;
 	m_i->m_Body->setScale(m_CullingRadius,m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius );
@@ -244,7 +241,7 @@ void RodLight::lighten(){
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
 	glm::vec3 pos = position();
     float cullingDistance = m_RodLength + (m_CullingRadius * 2.0f);
-    if(!c->sphereIntersectTest(pos,cullingDistance) || (c->getDistance(pos) > Object::m_VisibilityThreshold * cullingDistance))
+    if(!c->sphereIntersectTest(pos,cullingDistance) || (c->getDistance(pos) > 1100.0f * cullingDistance))
         return;
     float half = m_RodLength / 2.0f;
     glm::vec3 firstEndPt = pos + (m_i->m_Body->forward() * half);

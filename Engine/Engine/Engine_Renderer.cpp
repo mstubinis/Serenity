@@ -15,7 +15,6 @@
 #include "MeshInstance.h"
 #include "Skybox.h"
 #include "Material.h"
-#include "Object.h"
 #include "FramebufferObject.h"
 #include "SMAA_LUT.h"
 
@@ -1495,7 +1494,7 @@ class epriv::RenderManager::impl final{
 			}
 			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->unbind();
 		}
-		void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
+		void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
 			Scene* scene = Resources::getCurrentScene();
 			glm::vec3 clear = scene->getBackgroundColor();
 			const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
@@ -1573,8 +1572,15 @@ class epriv::RenderManager::impl final{
 				}
 			}
 
+			//TODO: move skybox rendering here after moving planetary atmosphere to forward rendering pass
 
+			GLDisable(GLState::DEPTH_TEST);
+			GLDisable(GLState::DEPTH_MASK);
 
+			//RENDER FOREGROUND OBJECTS HERE
+		}
+		void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
+			Scene* scene = Resources::getCurrentScene();
 
 			//RENDER NORMAL OBJECTS HERE
 			for(auto shader:m_GeometryPassShaderPrograms){
@@ -1589,11 +1595,11 @@ class epriv::RenderManager::impl final{
 								MaterialMeshEntry* entry = materialMeshEntry;
 								Mesh* entryMesh = entry->mesh();
 								entryMesh->bind();
-								for(auto meshInstance:materialMeshEntry->meshInstances()){
-									boost::weak_ptr<Object> o = Resources::getObjectPtr(meshInstance.first);
-									Object* object = o.lock().get();
-									if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
-										if(object->passedRenderCheck()){ //culling check
+								for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
+									if(scene->hasEntity(meshInstance.first)){
+										//if entity passed render check
+										ComponentModel& model = *(scene->getEntity(meshInstance.first)->getComponent<ComponentModel>());
+										if(model.passedRenderCheck()){
 											for(auto meshInstance:meshInstance.second){
 												meshInstance->bind(); //render also
 												meshInstance->unbind();
@@ -1613,47 +1619,6 @@ class epriv::RenderManager::impl final{
 					}
 					shader->unbind();
 				}
-			}
-			//TODO: move skybox rendering here after moving planetary atmosphere to forward rendering pass
-
-			GLDisable(GLState::DEPTH_TEST);
-			GLDisable(GLState::DEPTH_MASK);
-
-			//RENDER FOREGROUND OBJECTS HERE
-		}
-		void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Object* ignore){
-			Scene* scene = Resources::getCurrentScene();
-
-			for(auto shaderProgram:m_ForwardPassShaderPrograms){
-				vector<Material*>& shaderMaterials = shaderProgram->getMaterials(); if(shaderMaterials.size() > 0){
-				shaderProgram->bind();   
-				for(auto material:shaderMaterials){
-					vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); if(materialMeshes.size() > 0){
-					material->bind();
-					for(auto meshEntry:materialMeshes){
-						meshEntry->mesh()->bind();
-						for(auto instance:meshEntry->meshInstances()){
-							boost::weak_ptr<Object> o = Resources::getObjectPtr(instance.first);
-							Object* object = o.lock().get();
-							if(exists(o) && scene->objects().count(object->name()) && (object != ignore)){
-								if(object->passedRenderCheck()){ //culling check
-									for(auto meshInstance:instance.second){
-										meshInstance->bind(); //render also
-										meshInstance->unbind();
-									}
-								}
-							}
-							//protect against any custom changes by restoring to the regular shader and material
-							if(current_shader_program != shaderProgram){
-								shaderProgram->bind();
-								material->bind();
-							}
-						}
-						meshEntry->mesh()->unbind();
-					}
-					material->unbind();}
-				}
-				shaderProgram->unbind();}
 			}
 		}
 		void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
@@ -2089,7 +2054,7 @@ class epriv::RenderManager::impl final{
     
 			m_FullscreenTriangle->render();
 		}
-		void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Object* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
+		void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
 			Scene* s = Resources::getCurrentScene();
 			if(mainRenderFunc){
 				if(s->lightProbes().size() > 0){
@@ -2235,8 +2200,8 @@ class epriv::RenderManager::impl final{
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
-void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Object* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*Core::m_Engine->m_RenderManager->m_i->m_gBuffer,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
+void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*Core::m_Engine->m_RenderManager->m_i->m_gBuffer,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ Core::m_Engine->m_RenderManager->m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }

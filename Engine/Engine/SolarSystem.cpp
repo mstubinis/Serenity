@@ -145,7 +145,7 @@ void SolarSystem::_loadFromFile(string filename){
                 if(line[0] == 'S'){//Sun
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(0),(float)RADIUS,NAME,this);
                     if(PARENT != ""){
-                        star->setPosition(objects().at(PARENT)->getPosition()+glm::vec3(xPos,0,zPos));
+                        star->setPosition(m_Planets.at(PARENT)->getPosition()+glm::vec3(xPos,0,zPos));
                     }
                     m_Planets.emplace(NAME,star);
                 }
@@ -253,6 +253,6 @@ void SolarSystem::_loadFromFile(string filename){
 	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
 	//player->addChild(lightP);
 }
-void SolarSystem::update(float dt){
+void SolarSystem::update(const float& dt){
     Scene::update(dt);
 }

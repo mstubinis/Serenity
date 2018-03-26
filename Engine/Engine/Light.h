@@ -91,7 +91,6 @@ class RodLight: public PointLight{
         RodLight(glm::vec3 = glm::vec3(0.0f), float = 2.0f,Scene* = nullptr);
         virtual ~RodLight();
 
-        void update(float);
         void lighten();
 
         float rodLength();

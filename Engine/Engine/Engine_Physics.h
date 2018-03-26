@@ -7,7 +7,6 @@
 #include <memory>
 
 class Entity;
-class Object;
 class btCollisionDispatcher;
 class btDynamicsWorld;
 class btDiscreteDynamicsWorld;

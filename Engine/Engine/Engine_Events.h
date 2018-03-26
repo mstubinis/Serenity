@@ -29,7 +29,7 @@ namespace Engine{
 				void _onResetEvents();
 				void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
 
-				void _update(float dt);
+				void _update(const float& dt);
 		};
 	};
 

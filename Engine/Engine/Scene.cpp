@@ -9,8 +9,6 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/make_shared.hpp>
 
-#include "Object.h"
-
 using namespace Engine;
 using namespace std;
 
@@ -51,35 +49,10 @@ Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
 void Scene::setActiveCamera(Camera* c){
 	m_ActiveCamera = c;
 }
-void Scene::centerSceneToObject(Object* center){
-    glm::vec3 offset = -(center->getPosition());
-	//fix this after implementing components
-    for(auto object:m_Objects){
-        Object* obj = object.second;
-        if(obj != center && obj->parent() == nullptr){
-            obj->setPosition(obj->getPosition() + offset);
-        }
-    }
-	for(auto object:m_Entities){
-		Entity* e = getEntity(object);
-		epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
-        if(e->parent() == nullptr){
-			entityBody.setPosition(entityBody.position() + offset);
-        }
-    }
-    if(center->parent() == nullptr)
-        center->setPosition(0.0f,0.0f,0.0f);
-}
+
 void Scene::centerSceneToObject(Entity* center){
 	epriv::ComponentBodyBaseClass& bodyBase = *(center->getComponent<epriv::ComponentBodyBaseClass>());
-	//fix this after implementing components
     glm::vec3 offset = -(bodyBase.position());
-    for(auto object:m_Objects){
-        Object* obj = object.second;
-        if(obj->parent() == nullptr){
-            obj->setPosition(obj->getPosition() + offset);
-        }
-    }
 	for(auto object:m_Entities){
 		Entity* e = getEntity(object);
 		epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
@@ -93,15 +66,13 @@ void Scene::centerSceneToObject(Entity* center){
 Scene::~Scene(){
     SAFE_DELETE(m_Skybox);
 }
-void Scene::update(float dt){
+void Scene::update(const float& dt){
 }
 void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
 
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 std::vector<uint>& Scene::entities(){ return m_Entities; }
-unordered_map<string,Object*>& Scene::objects() { return m_Objects; }
 vector<SunLight*>& Scene::lights() { return m_Lights; }
 unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
-Object* Scene::getObject(string& name){ return m_Objects.at(name); }
 SkyboxEmpty* Scene::skybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }

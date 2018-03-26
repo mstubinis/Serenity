@@ -4,8 +4,6 @@
 
 #include "Components.h"
 
-#include "Object.h"
-
 class Scene;
 class LightProbe;
 class CameraType{public: enum Type { 
@@ -21,8 +19,8 @@ class Camera: public Entity{
 		ComponentBasicBody* m_BasicBody;
 		ComponentCamera* m_Camera;
     public:
-        Camera(float,float,float,float,Scene* = nullptr);             // Perspective camera Constructor
-        Camera(float,float,float,float,float,float,Scene* = nullptr); // Orthographic camera Constructor
+        Camera(float angle,float aspectRatio,float nearPlane,float farPlane,Scene* = nullptr);
+        Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);
         virtual ~Camera();
 
 		glm::vec3 getPosition();
@@ -31,7 +29,7 @@ class Camera: public Entity{
 		glm::vec3 up();
 		glm::quat getOrientation();
 
-		float getDistance(Object*);
+		float getDistance(Entity*);
 		float getDistance(glm::vec3);
 
         float getNear();
@@ -45,9 +43,8 @@ class Camera: public Entity{
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
 
-        bool sphereIntersectTest(Object*);
+        bool sphereIntersectTest(Entity*);
         bool sphereIntersectTest(glm::vec3 pos, float radius);
-        bool rayIntersectSphere(Object*);
 		bool rayIntersectSphere(Entity*);
 };
 #endif

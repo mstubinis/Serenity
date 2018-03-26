@@ -56,7 +56,7 @@ void Game::initLogic(){
     m_HUD = new HUD();
 }
 
-void Game::update(float dt){
+void Game::update(const float& dt){
 	if(Engine::isKeyDown(KeyboardKey::Escape)){
         Engine::stop();
     }

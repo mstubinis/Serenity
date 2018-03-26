@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Engine_Resources.h"
+#include "Engine_Math.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -59,20 +60,12 @@ glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
 glm::vec3 Camera::forward(){ return m_BasicBody->forward(); }
 glm::vec3 Camera::right(){ return m_BasicBody->right(); }
 glm::vec3 Camera::up(){ return m_BasicBody->up(); }
-float Camera::getDistance(Object* obj){
-	return glm::distance(obj->getPosition(),getPosition());
-}
+
 float Camera::getDistance(glm::vec3 objPos){
 	return glm::distance(objPos,getPosition());
 }
-bool Camera::sphereIntersectTest(Object* obj){
-	return m_Camera->sphereIntersectTest(obj->getPosition(),obj->getRadius());
-}
 bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
 	return m_Camera->sphereIntersectTest(pos,radius);
-}
-bool Camera::rayIntersectSphere(Object* obj){
-	return obj->rayIntersectSphere(m_BasicBody->position(),m_Camera->getViewVector());
 }
 bool Camera::rayIntersectSphere(Entity* entity){
 	epriv::ComponentBodyBaseClass& body = *(entity->getComponent<epriv::ComponentBodyBaseClass>());

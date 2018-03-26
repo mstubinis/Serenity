@@ -30,7 +30,7 @@ class ShipSystem{
 
         const bool isOnline() const { if(m_Health > 0 && m_Power > 0) return true; return false; }
 
-        virtual void update(float);
+        virtual void update(const float& dt);
 };
 class ShipSystemReactor final: public ShipSystem{
     private:
@@ -40,56 +40,56 @@ class ShipSystemReactor final: public ShipSystem{
         ShipSystemReactor(Ship*, float maxPower, float currentPower = -1);
         ~ShipSystemReactor();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemMainThrusters final: public ShipSystem{
     public:
         ShipSystemMainThrusters(Ship*);
         ~ShipSystemMainThrusters();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemPitchThrusters final: public ShipSystem{
     public:
         ShipSystemPitchThrusters(Ship*);
         ~ShipSystemPitchThrusters();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemYawThrusters final: public ShipSystem{
     public:
         ShipSystemYawThrusters(Ship*);
         ~ShipSystemYawThrusters();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemRollThrusters final: public ShipSystem{
     public:
         ShipSystemRollThrusters(Ship*);
         ~ShipSystemRollThrusters();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemShields final: public ShipSystem{
     public:
         ShipSystemShields(Ship*);
         ~ShipSystemShields();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemWarpDrive final: public ShipSystem{
     public:
         ShipSystemWarpDrive(Ship*);
         ~ShipSystemWarpDrive();
 
-        void update(float);
+        void update(const float& dt);
 };
 class ShipSystemSensors final: public ShipSystem{
     public:
         ShipSystemSensors(Ship*);
         ~ShipSystemSensors();
 
-        void update(float);
+        void update(const float& dt);
 };
 
 class Ship: public Entity{

@@ -24,7 +24,7 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     MeshInstance& i = *((MeshInstance*)r);
 	
 
-    Planet* obj = (Planet*)(i.entity());
+    Planet* obj = (Planet*)(i.parent());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
     float atmosphereHeight = obj->getAtmosphereHeight();

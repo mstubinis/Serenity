@@ -119,7 +119,7 @@ void updateSounds(float dt){
 	epriv::Core::m_Engine->m_TimeManager->calculate_sounds();
 	////////////////////////////////////////////////////////////
 }
-void update(float dt){
+void update(const float& dt){
 	/*
 	epriv::threading::addJob(&updatePhysics,dt);
 	epriv::threading::addJob(&updateLogic,dt);

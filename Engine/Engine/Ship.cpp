@@ -21,7 +21,7 @@ ShipSystem::~ShipSystem(){
     m_Health = 0.0f;
     m_Power = 0.0f;
 }
-void ShipSystem::update(float dt){
+void ShipSystem::update(const float& dt){
     // handle power transfers...?
 }
 #pragma endregion
@@ -39,7 +39,7 @@ ShipSystemReactor::ShipSystemReactor(Ship* _ship, float maxPower, float currentP
 ShipSystemReactor::~ShipSystemReactor(){
 
 }
-void ShipSystemReactor::update(float dt){
+void ShipSystemReactor::update(const float& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -51,7 +51,7 @@ ShipSystemShields::ShipSystemShields(Ship* _ship):ShipSystem(SHIP_SYSTEM_SHIELDS
 ShipSystemShields::~ShipSystemShields(){
 
 }
-void ShipSystemShields::update(float dt){
+void ShipSystemShields::update(const float& dt){
     ShipSystem::update(dt);
 }
 #pragma endregion
@@ -63,7 +63,7 @@ ShipSystemMainThrusters::ShipSystemMainThrusters(Ship* _ship):ShipSystem(SHIP_SY
 ShipSystemMainThrusters::~ShipSystemMainThrusters(){
 
 }
-void ShipSystemMainThrusters::update(float dt){
+void ShipSystemMainThrusters::update(const float& dt){
     if(isOnline()){
 		ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getLinearVelocity();
@@ -105,7 +105,7 @@ ShipSystemPitchThrusters::ShipSystemPitchThrusters(Ship* _ship):ShipSystem(SHIP_
 ShipSystemPitchThrusters::~ShipSystemPitchThrusters(){
 
 }
-void ShipSystemPitchThrusters::update(float dt){
+void ShipSystemPitchThrusters::update(const float& dt){
     if(isOnline()){
 		ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getAngularVelocity();
@@ -130,7 +130,7 @@ ShipSystemYawThrusters::ShipSystemYawThrusters(Ship* _ship):ShipSystem(SHIP_SYST
 ShipSystemYawThrusters::~ShipSystemYawThrusters(){
 
 }
-void ShipSystemYawThrusters::update(float dt){
+void ShipSystemYawThrusters::update(const float& dt){
     if(isOnline()){
 		ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getAngularVelocity();
@@ -156,7 +156,7 @@ ShipSystemRollThrusters::ShipSystemRollThrusters(Ship* _ship):ShipSystem(SHIP_SY
 ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 
 }
-void ShipSystemRollThrusters::update(float dt){
+void ShipSystemRollThrusters::update(const float& dt){
     if(isOnline()){
 		ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getAngularVelocity();
@@ -184,7 +184,7 @@ ShipSystemWarpDrive::ShipSystemWarpDrive(Ship* _ship):ShipSystem(SHIP_SYSTEM_WAR
 ShipSystemWarpDrive::~ShipSystemWarpDrive(){
 
 }
-void ShipSystemWarpDrive::update(float dt){
+void ShipSystemWarpDrive::update(const float& dt){
     if(isOnline()){
         if(m_Ship->IsPlayer()){
             if(Engine::isKeyDownOnce("l")){
@@ -211,7 +211,7 @@ ShipSystemSensors::ShipSystemSensors(Ship* _ship):ShipSystem(SHIP_SYSTEM_SENSORS
 ShipSystemSensors::~ShipSystemSensors(){
 
 }
-void ShipSystemSensors::update(float dt){
+void ShipSystemSensors::update(const float& dt){
 
     ShipSystem::update(dt);
 }
@@ -264,11 +264,6 @@ void Ship::update(const float& dt){
 			ComponentRigidBody* body = getComponent<ComponentRigidBody>();
             float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
 			glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
-            for(auto obj:currentScene->objects()){
-                if(obj.second->parent() == nullptr){
-                    obj.second->setPosition(obj.second->getPosition() + (s * dt));
-                }
-            }
             for(auto id:currentScene->entities()){
 				Entity* e = currentScene->getEntity(id);
 				if(e){

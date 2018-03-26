@@ -1,5 +1,5 @@
 #include <boost/make_shared.hpp>
-
+#include "Engine.h"
 #include "Engine_Time.h"
 #include "Engine_Resources.h"
 #include "Engine_ObjectPool.h"
@@ -48,7 +48,6 @@ class epriv::ResourceManager::impl final{
         vector<MeshInstance*> m_MeshInstances;
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
-        unordered_map<string,boost::shared_ptr<Object>> m_Objects;
 
 		void _init(const char* name,const uint& width,const uint& height){
 			m_CurrentScene = nullptr;
@@ -61,7 +60,6 @@ class epriv::ResourceManager::impl final{
 		}
 		void _destruct(){
 			for (auto it:m_MeshInstances)                                     SAFE_DELETE(it);
-			for (auto it = m_Objects.begin();it != m_Objects.end(); ++it )    it->second.reset();
 			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )      it->second.reset();
 
 			SAFE_DELETE(m_Resources);
@@ -79,57 +77,36 @@ void epriv::ResourceManager::_init(const char* n,uint w,uint h){
 	m_i->_postInit(n,w,h);
 }
 
-
 string Engine::Data::reportTime(){
 	return epriv::Core::m_Engine->m_TimeManager->reportTime();
 }
 float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
 
-bool epriv::ResourceManager::_hasObject(string n){ if(resourceManager->m_i->m_Objects.count(n)) return true; return false; }
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
 
 void epriv::ResourceManager::_addScene(Scene* s){
 	_addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }
-void epriv::ResourceManager::_addObject(Object* o){
-	_addToContainer(resourceManager->m_i->m_Objects,o->name(),boost::shared_ptr<Object>(o));
-}
 void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
 	m_i->m_MeshInstances.push_back(m);
 }
-string epriv::ResourceManager::_buildObjectName(string n){return _incrementName(resourceManager->m_i->m_Objects,n);}
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(resourceManager->m_i->m_Scenes,n);}
-
-void epriv::ResourceManager::_remObject(string n){_removeFromContainer(resourceManager->m_i->m_Objects,n);}
 
 uint epriv::ResourceManager::_numScenes(){return resourceManager->m_i->m_Scenes.size();}
 
 void Resources::Settings::enableDynamicMemory(bool b){ resourceManager->m_i->m_DynamicMemory = b; }
 void Resources::Settings::disableDynamicMemory(){ resourceManager->m_i->m_DynamicMemory = false; }
 
-
-
-
-
-
-
-
-
 Engine_Window* Resources::getWindow(){ return resourceManager->m_i->m_Window; }
 glm::uvec2 Resources::getWindowSize(){ return resourceManager->m_i->m_Window->getSize(); }
 
-boost::shared_ptr<Object>& Resources::getObjectPtr(string n){return resourceManager->m_i->m_Objects.at(n);}
-
 Scene* Resources::getScene(string n){return (Scene*)(_getFromContainer(resourceManager->m_i->m_Scenes,n));}
-Object* Resources::getObject(string n){return (Object*)(_getFromContainer(resourceManager->m_i->m_Objects,n));}
 
 void Resources::getShader(Handle& h,Shader*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
 Shader* Resources::getShader(Handle& h){ Shader* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
 void Resources::getSoundData(Handle& h,SoundData*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
 SoundData* Resources::getSoundData(Handle& h){ SoundData* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
-void Resources::getObject(Handle& h,Object*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
-Object* Resources::getObject(Handle& h){ Object* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
 void Resources::getCamera(Handle& h,Camera*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
 Camera* Resources::getCamera(Handle& h){ Camera* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
 void Resources::getFont(Handle& h,Font*& p){ resourceManager->m_i->m_Resources->getAs(h,p); }
@@ -211,13 +188,11 @@ void Resources::setCurrentScene(Scene* scene){
         cout << "---- Scene Change started (" << resourceManager->m_i->m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << endl;
         if(epriv::Core::m_Engine->m_ResourceManager->m_i->m_DynamicMemory){
             //mark game object resources to minus use count
-            for(auto obj:resourceManager->m_i->m_CurrentScene->objects()){ obj.second->suspend(); }
         }
 		epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(resourceManager->m_i->m_CurrentScene,scene);
 		resourceManager->m_i->m_CurrentScene = scene;
         if(resourceManager->m_i->m_DynamicMemory){
             //mark game object resources to add use count
-            for(auto obj:scene->objects()){ obj.second->resume(); }
         }
         cout << "-------- Scene Change ended --------" << endl;
     }

@@ -57,6 +57,6 @@ class CapsuleSpace final: public SolarSystem{
     public:
         CapsuleSpace();
         ~CapsuleSpace();
-        void update(float);
+        void update(const float& dt);
 };
 #endif

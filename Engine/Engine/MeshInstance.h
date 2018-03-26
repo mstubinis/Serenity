@@ -32,8 +32,6 @@ class MeshInstance final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstance(const std::string& parentName,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        MeshInstance(const std::string& parentName,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         MeshInstance(Entity*,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
 		MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
@@ -41,8 +39,7 @@ class MeshInstance final: public BindableResource{
         ~MeshInstance();
 
         Mesh* mesh();
-		Object* parent();
-		Entity* entity();
+		Entity* parent();
 		glm::vec4& color();
 		glm::vec3& godRaysColor();
         Material* material();
@@ -72,7 +69,7 @@ class MeshInstance final: public BindableResource{
         void rotate(float pitch,float yaw,float roll);   void rotate(glm::vec3&);
         void scale(float x,float y,float z);             void scale(glm::vec3&);
 
-        void update(float dt);
+        void update(const float& dt);
         void render();
 };
 #endif

@@ -49,7 +49,7 @@ namespace Engine{
 namespace Game{
     void initResources();
     void initLogic();
-    void update(float);
+    void update(const float& dt);
     void render();
     void cleanup();
 

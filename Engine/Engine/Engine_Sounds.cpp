@@ -79,7 +79,7 @@ class SoundQueue::impl final{
                 //do we need to manually delete? i dont think so
             }
         }
-        void _update(float dt){
+        void _update(const float& dt){
             if(m_IsDelayProcess == true){
                 m_DelayTimer += dt;
                 if(m_DelayTimer > m_DelayInSeconds){
@@ -147,7 +147,7 @@ class Engine::epriv::SoundManager::impl final{
 				}
 			}
 		}
-		void _update(float dt){
+		void _update(const float& dt){
 			for(auto it = m_CurrentlyPlayingSounds.begin(); it != m_CurrentlyPlayingSounds.end();){
 				SoundBaseClass* s = (*it);
 				s->update(dt);
@@ -191,7 +191,7 @@ class SoundEffect::impl final{
                 s->play();
             }
         }
-        void _update(float dt,SoundBaseClass* super){
+        void _update(const float& dt,SoundBaseClass* super){
             epriv::Core::m_Engine->m_SoundManager->m_i->_updateSoundStatus(super,m_Sound.getStatus());
         }
         void _play(SoundBaseClass* super){
@@ -220,7 +220,7 @@ class SoundMusic::impl final{
                 s->play();
             }
         }
-        void _update(float dt,SoundBaseClass* super){
+        void _update(const float& dt,SoundBaseClass* super){
             epriv::Core::m_Engine->m_SoundManager->m_i->_updateSoundStatus(super,m_Sound.getStatus());
         }
         void _play(SoundBaseClass* super){
@@ -250,7 +250,7 @@ void SoundBaseClass::play(uint loop){ if(loop != 1) m_i->m_Status = SoundStatus:
 void SoundBaseClass::play(){ if(m_i->m_Loops != 1) m_i->m_Status = SoundStatus::PlayingLooped; else m_i->m_Status = SoundStatus::Playing; }
 void SoundBaseClass::pause(){ m_i->m_Status = SoundStatus::Paused; }
 void SoundBaseClass::stop(){ m_i->m_Status = SoundStatus::Stopped; }
-void SoundBaseClass::update(float dt){}
+void SoundBaseClass::update(const float& dt){}
 float SoundBaseClass::getAttenuation(){ return 0; }
 glm::vec3 SoundBaseClass::getPosition(){ return glm::vec3(0); }
 void SoundBaseClass::setPosition(float,float,float){}
@@ -287,7 +287,7 @@ void SoundEffect::stop(){
 void SoundEffect::restart(){ 
     m_i->m_Sound.setPlayingOffset(sf::Time::Zero); 
 }
-void SoundEffect::update(float dt){
+void SoundEffect::update(const float& dt){
     m_i->_update(dt,this);
 }
 glm::vec3 SoundEffect::getPosition(){
@@ -332,7 +332,7 @@ void SoundMusic::stop(){
 void SoundMusic::restart(){ 
     m_i->m_Sound.setPlayingOffset(sf::Time::Zero);
 }
-void SoundMusic::update(float dt){
+void SoundMusic::update(const float& dt){
     m_i->_update(dt,this);
 }
 glm::vec3 SoundMusic::getPosition(){
@@ -362,14 +362,14 @@ SoundQueue::~SoundQueue(){ m_i->_destruct(); }
 void SoundQueue::enqueueEffect(Handle& handle,uint loops){ m_i->m_Queue.push_back( new SoundEffect(handle,loops,true) ); }
 void SoundQueue::enqueueMusic(Handle& handle,uint loops){ m_i->m_Queue.push_back( new SoundMusic(handle,loops,true) ); }
 void SoundQueue::dequeue(){ m_i->_dequeue(); }
-void SoundQueue::update(float dt){ m_i->_update(dt); }
+void SoundQueue::update(const float& dt){ m_i->_update(dt); }
 void SoundQueue::clear(){ m_i->_clear(); }
 bool SoundQueue::empty(){ if(m_i->m_Queue.size() > 0) return false; return true; }
 
 epriv::SoundManager::SoundManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::SoundManager::~SoundManager(){ m_i->_destruct(); }
 void epriv::SoundManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
-void epriv::SoundManager::_update(float dt){ m_i->_update(dt); }
+void epriv::SoundManager::_update(const float& dt){ m_i->_update(dt); }
 
 void Engine::Sound::playEffect(Handle& handle,uint loops){
     SoundEffect* e = new SoundEffect(handle,loops,false);

@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 
 class Entity;
-class Object;
 class Camera;
 class SunLight;
 class SkyboxEmpty;
@@ -23,7 +22,6 @@ class Scene: public EngineResource{
     protected:
 		std::vector<uint> m_Entities;
 
-        std::unordered_map<std::string,Object*> m_Objects;
         std::vector<SunLight*> m_Lights;
         std::unordered_map<std::string,LightProbe*> m_LightProbes;
 
@@ -37,14 +35,12 @@ class Scene: public EngineResource{
 		bool hasEntity(Entity*);
 		bool hasEntity(uint entityID);
 
-        virtual void update(float);
+        virtual void update(const float& dt);
 
 		std::vector<uint>& entities();
-        std::unordered_map<std::string,Object*>& objects();
         std::vector<SunLight*>& lights();
 		std::unordered_map<std::string,LightProbe*>& lightProbes();
 
-        Object* getObject(std::string&);
 		Camera* getActiveCamera();
 
         glm::vec3 getBackgroundColor();
@@ -52,7 +48,6 @@ class Scene: public EngineResource{
 
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
-        void centerSceneToObject(Object*);
 		void centerSceneToObject(Entity*);
 		void setActiveCamera(Camera*);
 };

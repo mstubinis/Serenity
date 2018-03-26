@@ -33,7 +33,7 @@ void HUD::setColor(glm::vec3 c){ m_Color = c; }
 
 
 uint _count = 0;
-void HUD::update(float dt){
+void HUD::update(const float& dt){
     if(Engine::isKeyDownOnce(",")){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
         unordered_map<string,Planet*>& planets = scene->getPlanets();
@@ -121,7 +121,7 @@ void HUD::render(){
     #pragma region DrawDebugStuff
 
 	font->renderText(Engine::Data::reportTime() + 
-                       "\nObject Count: " + to_string(Resources::getCurrentScene()->objects().size()),
+                       "\nEntity Count: " + to_string(Resources::getCurrentScene()->entities().size()),
                        glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion

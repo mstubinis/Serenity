@@ -22,7 +22,6 @@ typedef unsigned int uint;
 class Entity;
 class Scene;
 class Camera;
-class Object;
 class Mesh;
 class Material;
 class Collision;
@@ -113,7 +112,7 @@ namespace Engine{
 				~ComponentManager();
 
 				void _init(const char* name, uint w, uint h);
-				void _update(float&);
+				void _update(const float& dt);
 				void _render();
 				void _resize(uint width,uint height);
 

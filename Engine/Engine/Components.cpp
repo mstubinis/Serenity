@@ -124,7 +124,7 @@ class epriv::ComponentManager::impl final{
 		void _calculateRenderCheck(ComponentModel& c,Camera* camera){
 			epriv::ComponentBodyBaseClass& body = *(c.m_Owner->getComponent<epriv::ComponentBodyBaseClass>());
 			glm::vec3& pos = body.position();
-			if(!c.visible() || !camera->sphereIntersectTest(pos,c._radius) || camera->getDistance(pos) > c._radius * Object::m_VisibilityThreshold){
+			if(!c.visible() || !camera->sphereIntersectTest(pos,c._radius) || camera->getDistance(pos) > c._radius * 1100.0f){ //1100 is the visibility threshold
 				c.m_i->m_PassedRenderCheck = false;
 				return;
 			}
@@ -178,34 +178,13 @@ class epriv::ComponentManager::impl final{
 		}
 		void _updateCurrentScene(const float& dt){
 			Scene* currentScene = Resources::getCurrentScene();
-
-
-
-
 			Camera* active = currentScene->getActiveCamera();
-			for (auto it = currentScene->m_Objects.cbegin(); it != currentScene->m_Objects.cend();){
-				Object* obj = it->second;
-				if (obj->isDestroyed()){
-					epriv::Core::m_Engine->m_ResourceManager->_remObject(obj->name());
-					currentScene->m_Objects.erase(it++);
-				}
-				else{
-					obj->checkRender(active); //consider batch culling using the thread pool
-					obj->update(dt); 
-					++it;
-				}
-			}
-
-
 			for(auto entityID:currentScene->m_Entities){
 				Entity* e = componentManager->_getEntity(entityID);
 				if(e){//should not need this...
 				    e->update(dt);
 				}
 			}
-
-
-
 			if(currentScene->m_Skybox != nullptr) currentScene->m_Skybox->update();
 		}
 		void _destroyQueuedEntities(epriv::ComponentManager* super){
@@ -233,7 +212,7 @@ epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(
 epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 
 void epriv::ComponentManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h); }
-void epriv::ComponentManager::_update(float& dt){ m_i->_update(dt,this); }
+void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,this); }
 void epriv::ComponentManager::_resize(uint width,uint height){
 	uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
 	for(auto camera:ComponentManager::m_ComponentVectors.at(slot)){ 
@@ -357,11 +336,9 @@ void ComponentBasicBody::setPosition(float x,float y,float z){
 }
 void ComponentBasicBody::rotate(glm::vec3& rotation){ ComponentBasicBody::rotate(rotation.x,rotation.y,rotation.z); }
 void ComponentBasicBody::rotate(float pitch,float yaw,float roll){
-    if(abs(pitch) < Object::m_RotationThreshold && abs(yaw) < Object::m_RotationThreshold && abs(roll) < Object::m_RotationThreshold)
-        return;
-    if(abs(pitch) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
-    if(abs(yaw) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0,1,0)));   //yaw
-    if(abs(roll) >= Object::m_RotationThreshold) _rotation = _rotation * (glm::angleAxis(roll,  glm::vec3(0,0,1)));   //roll
+    if(abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
+    if(abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));   //yaw
+    if(abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll,   glm::vec3(0,0,1)));   //roll
     Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 void ComponentBasicBody::scale(glm::vec3& amount){ ComponentBasicBody::scale(amount.x,amount.y,amount.z); }
@@ -593,15 +570,12 @@ void ComponentRigidBody::translate(float x,float y,float z,bool local){
 }
 void ComponentRigidBody::rotate(glm::vec3& rotation,bool local){ ComponentRigidBody::rotate(rotation.x,rotation.y,rotation.z,local); }
 void ComponentRigidBody::rotate(float pitch,float yaw,float roll,bool local){
-    if(abs(pitch) < Object::m_RotationThreshold && abs(yaw) < Object::m_RotationThreshold && abs(roll) < Object::m_RotationThreshold)
-        return;
-
 	btQuaternion quat = _rigidBody->getWorldTransform().getRotation().normalize();
 	glm::quat glmquat = glm::quat(quat.w(),quat.x(),quat.y(),quat.z());
 
-    if(abs(pitch) >= Object::m_RotationThreshold) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
-    if(abs(yaw) >= Object::m_RotationThreshold) glmquat = glmquat * (glm::angleAxis(-yaw, glm::vec3(0,1,0)));   //yaw
-    if(abs(roll) >= Object::m_RotationThreshold) glmquat = glmquat * (glm::angleAxis(roll,  glm::vec3(0,0,1)));   //roll
+    if(abs(pitch) >= 0.001f) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
+    if(abs(yaw) >= 0.001f)   glmquat = glmquat * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));   //yaw
+    if(abs(roll) >= 0.001f)  glmquat = glmquat * (glm::angleAxis(roll,   glm::vec3(0,0,1)));   //roll
 
 	quat = btQuaternion(glmquat.x,glmquat.y,glmquat.z,glmquat.w);
 	_rigidBody->getWorldTransform().setRotation(quat);

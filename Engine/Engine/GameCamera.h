@@ -39,7 +39,6 @@ class GameCamera: public Camera{
         const Entity* getTarget() const;
         const CAMERA_STATE getState() const;
 
-        Object* getObjectInCenterRay(Object* exclusion);
 		Entity* getObjectInCenterRay(Entity* exclusion);
 };
 #endif
