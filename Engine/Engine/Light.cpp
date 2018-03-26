@@ -76,7 +76,7 @@ SunLight::~SunLight(){
 }
 void SunLight::lighten(){
     if(!isActive()) return;
-	glm::vec3 pos = position();
+	glm::vec3 pos = m_i->m_Body->position();
     Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
@@ -85,12 +85,8 @@ void SunLight::lighten(){
     Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 glm::vec3 SunLight::position(){ return m_i->m_Body->position(); }
-void SunLight::setColor(float r,float g,float b,float a){
-	Engine::Math::setColor(m_i->m_Color,r,g,b,a);
-}
-void SunLight::setColor(glm::vec4 col){
-	Engine::Math::setColor(m_i->m_Color,col.r,col.g,col.b,col.a);
-}
+void SunLight::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
+void SunLight::setColor(glm::vec4 col){ Engine::Math::setColor(m_i->m_Color,col.r,col.g,col.b,col.a); }
 void SunLight::setPosition(float x,float y,float z){ m_i->m_Body->setPosition(x,y,z); }
 void SunLight::setPosition(glm::vec3 pos){ m_i->m_Body->setPosition(pos); }
 float SunLight::getAmbientIntensity(){ return m_i->m_AmbientIntensity; }
@@ -153,12 +149,12 @@ void PointLight::setAttenuation(LightRange::Range range){
     PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
 }
 void PointLight::setAttenuationModel(LightAttenuation::Model model){
-    m_AttenuationModel = model;
+    m_AttenuationModel = model; m_CullingRadius = calculateCullingRadius();
 }
 void PointLight::lighten(){
     if(!isActive()) return;
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-	glm::vec3 pos = position();
+	glm::vec3 pos = m_i->m_Body->position();
 	if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
     Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
@@ -195,7 +191,7 @@ void SpotLight::setCutoffOuter(float outerCutoff){
 void SpotLight::lighten(){
     if(!isActive()) return;
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-	glm::vec3 pos = position();
+	glm::vec3 pos = m_i->m_Body->position();
 	glm::vec3 _forward = m_i->m_Body->forward();
     if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
@@ -239,7 +235,7 @@ void RodLight::setRodLength(float length){
 void RodLight::lighten(){
     if(!isActive()) return;
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-	glm::vec3 pos = position();
+	glm::vec3 pos = m_i->m_Body->position();
     float cullingDistance = m_RodLength + (m_CullingRadius * 2.0f);
     if(!c->sphereIntersectTest(pos,cullingDistance) || (c->getDistance(pos) > 1100.0f * cullingDistance))
         return;

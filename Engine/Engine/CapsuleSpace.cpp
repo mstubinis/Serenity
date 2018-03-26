@@ -99,12 +99,15 @@ void CapsuleRibbon::unbind(){
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
+	m_Timer = 0;
 	setSkybox(nullptr);
     setBackgroundColor(255.0f,0,0);
 
     PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
-    l->setColor(255,225,235,255);
+    l->setColor(255,200,215,255);
     l->setSpecularIntensity(0.0f);
+	l->setAttenuation(LightRange::_13);
+
 
 	m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);
     m_TunnelB = new CapsuleTunnel(5000,ResourceManifest::CapsuleB,this);
@@ -186,15 +189,15 @@ void CapsuleSpace::update(const float& dt){
 	ComponentModel& model = *getPlayer()->getComponent<ComponentModel>();
     body.setPosition(0,0,0);
 
-    float x = glm::sin(m_Timer*2.4f)*0.3f;
-    float y = glm::cos(m_Timer*2.4f)*0.22f;
+    float x = glm::sin(m_Timer * 2.4f) * 0.07f;
+    float y = glm::cos(m_Timer * 2.4f) * 0.05f;
 
-    float roll = glm::sin(m_Timer*2.4f)*1.0f;
-    float pitch = glm::sin(m_Timer*2.4f)*0.7f;
+    float roll  = glm::sin(m_Timer * 2.4f) * 5.0f;
+    float pitch = glm::sin(m_Timer * 2.4f) * 3.7f;
 
 
     model.getModel()->setPosition(glm::vec3(x * 1.2f, -y ,0));
-    model.getModel()->setOrientation(glm::radians(pitch),0,glm::radians(roll));
+    model.getModel()->setOrientation(  glm::radians(pitch), 0 , glm::radians(roll)  );
 
 
     //double check this (this is the light probe)
