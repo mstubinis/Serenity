@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Skybox.h"
 #include "MeshInstance.h"
+#include "Engine_ThreadManager.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -63,7 +64,6 @@ class ComponentModel::impl final{
 			return super->_radius;
 		}
 };
-
 
 class epriv::ComponentManager::impl final{
     public:	
@@ -130,22 +130,33 @@ class epriv::ComponentManager::impl final{
 			}
 			c.m_i->m_PassedRenderCheck = true;
 		}
+		static void _updateModelComponentsJob(vector<ComponentBaseClass*>& vec,Camera*& camera){
+			for(uint j = 0; j < vec.size(); ++j){
+				ComponentModel& modelComponent = *((ComponentModel*)vec.at(j));
+				for(uint i = 0; i < modelComponent.models.size(); ++i){
+					MeshInstance& pair = *modelComponent.models.at(i);
+					if(pair.mesh()){
+						Core::m_Engine->m_ComponentManager->m_i->_performTransformation(modelComponent.m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
+						Core::m_Engine->m_ComponentManager->m_i->_calculateRenderCheck(modelComponent,camera);
+					}
+				}
+			}
+		}
 		void _updateComponentModels(const float& dt){
 			Camera* camera = Resources::getCurrentScene()->getActiveCamera();
 			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentModel>();
 			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-			for(auto c:v){
-				ComponentModel& modelC = *((ComponentModel*)c);
-				for(auto model:modelC.models){
-					if(model->mesh()){
-						MeshInstance& pair = *model;
-						_performTransformation(c->m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
+			vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
 
-						_calculateRenderCheck(modelC,camera);
-					}
-				}
+			/*
+			for(auto vec:split){
+				epriv::threading::addJob(_updateModelComponentsJob,vec,camera);
 			}
-
+			epriv::threading::waitForAll();
+			*/
+			for(auto vec:split){
+				_updateModelComponentsJob(v,camera);
+			}
 		}
 		void _updateComponentCameras(const float& dt){
 			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
@@ -242,6 +253,9 @@ void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* e){
 	m_i->m_EntitiesToBeDestroyed.push_back(e);
 }
 void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
+
+	//TODO: add method to handle each component type on scene swap (like remove/add rigid body from physics world)
+
 	for(auto type:m_ComponentVectorsScene){
 		vector<ComponentBaseClass*>& v = (type.second);
 		vector_clear(v);

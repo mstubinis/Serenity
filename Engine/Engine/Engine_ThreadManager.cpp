@@ -14,19 +14,21 @@ using namespace Engine;
 using namespace std;
 
 epriv::ThreadManager* threadManager;
+emptyFunctor epriv::ThreadManager::emptyTask;
 
 class epriv::ThreadManager::impl final{
     public:
-        boost::thread_group                            m_ThreadGroup;
-		boost::asio::io_service                        m_IOService;
-		uint                                           m_NumCores;
-		//boost::atomic<uint>                          m_NumJobs;
-		boost::asio::io_service::work*                 m_WorkControl;
-		vector<boost::shared_future<void> >            m_PendingData; // vector of futures
+        boost::thread_group                 m_ThreadGroup;
+		boost::asio::io_service             m_IOService;
+		uint                                m_NumCores;
+		boost::atomic<uint>                 m_NumJobs;
+		boost::asio::io_service::work*      m_WorkControl;
+		vector<boost::shared_future<void>>  m_PendingData; // vector of futures
 
 		void _init(const char* name, uint& w, uint& h,ThreadManager* super){
 			m_NumCores = boost::thread::hardware_concurrency(); if(m_NumCores == 0) m_NumCores = 1;
 			m_WorkControl = new boost::asio::io_service::work(m_IOService);
+			m_NumJobs = 0;
 			for(uint i = 0; i < m_NumCores; ++i){
 				m_ThreadGroup.create_thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
 			}
@@ -47,13 +49,22 @@ void epriv::ThreadManager::_init(const char* name, uint w, uint h){
 	threadManager = epriv::Core::m_Engine->m_ThreadManager;
 }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_i->m_NumCores; }
-//const uint epriv::ThreadManager::numJobs() const{ return threadManager->m_i->m_NumJobs; }
+const uint epriv::ThreadManager::numJobs() const{ return threadManager->m_i->m_NumJobs; }
 
-void epriv::threading::finalizeJob(boost::shared_ptr<boost::packaged_task<void>>& task){
-	boost::shared_future<void> fut(task->get_future());
-	threadManager->m_i->m_PendingData.push_back(fut);
-	threadManager->m_i->m_IOService.post(boost::bind(&boost::packaged_task<void>::operator(), task));
+void thenTask(boost::shared_future<void> f){
+	if(threadManager->m_i->m_NumJobs > 0){
+	    --threadManager->m_i->m_NumJobs;
+	}
 }
+
+void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task){
+	boost::shared_future<void> fut = task->get_future();
+    fut.then(&thenTask);
+	threadManager->m_i->m_PendingData.push_back(fut);
+	threadManager->m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
+	++threadManager->m_i->m_NumJobs;
+}
+
 void epriv::threading::waitForAll(){
 	boost::wait_for_all(threadManager->m_i->m_PendingData.begin(), threadManager->m_i->m_PendingData.end());
 }
