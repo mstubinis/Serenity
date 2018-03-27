@@ -47,7 +47,6 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):E
         m_Light->setAttenuation(LightRange::_65);
         m_Light->setColor(255,124,27,255);
     }
-    //m_Shadeless = true;
 }
 CapsuleStar::~CapsuleStar(){}
 void CapsuleStar::update(const float& dt){
@@ -169,8 +168,8 @@ void CapsuleSpace::update(const float& dt){
 
     m_TunnelA->m_Body->rotate(0,0,glm::radians(tunnelARotRand*15.0f)*dt);
     m_TunnelB->m_Body->rotate(0,0,-glm::radians(tunnelBRotRand*15.0f)*dt);
-    m_BackEnd->m_Body->rotate(0,0,20.0f*dt);
-    m_FrontEnd->m_Body->rotate(0,0,-20.0f*dt);
+    m_BackEnd->m_Body->rotate(0,0,4.0f*dt);
+    m_FrontEnd->m_Body->rotate(0,0,-4.0f*dt);
 
 	glm::vec3 aPos = m_TunnelA->m_Body->position();
 	glm::vec3 bPos = m_TunnelB->m_Body->position();

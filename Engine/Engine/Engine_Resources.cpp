@@ -9,6 +9,7 @@
 #include "Light.h"
 #include "Skybox.h"
 #include "Mesh.h"
+#include "MeshInstance.h"
 #include "Material.h"
 #include "Camera.h"
 #include "Texture.h"

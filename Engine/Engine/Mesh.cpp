@@ -2,6 +2,7 @@
 #include "Engine_Renderer.h"
 #include "Mesh.h"
 #include "MeshInstance.h"
+#include "Engine_ThreadManager.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -866,7 +867,7 @@ class Mesh::impl final{
             m_radiusBox = glm::vec3(maxX,maxY,maxZ);
             m_radius = Engine::Math::Max(m_radiusBox);
         }
-        void _initRenderingContext(Mesh* super){
+        void _initRenderingContext(){
             m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(0));
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
@@ -898,14 +899,16 @@ class Mesh::impl final{
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
         }
-        void _load(Mesh* super){
+        void _loadIntoCPU(Mesh* super){
             if(m_File != ""){
                 _loadFromFile(super,m_File,m_Type,m_threshold);
             }
             _calculateMeshRadius(super);
-            _initRenderingContext(super);
-            cout << "(Mesh) ";  
         }
+		void _loadIntoGPU(){
+            _initRenderingContext();
+            cout << "(Mesh) ";
+		}
         void _unload(Mesh* super){
             if(m_File != ""){
                 _clearData(super);
@@ -1105,7 +1108,8 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
 }
 void Mesh::load(){
     if(!isLoaded()){
-        m_i->_load(this);
+        m_i->_loadIntoCPU(this);
+		m_i->_loadIntoGPU();
         EngineResource::load();
     }
 }

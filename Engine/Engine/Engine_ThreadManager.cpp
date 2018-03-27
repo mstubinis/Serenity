@@ -24,8 +24,6 @@ class epriv::ThreadManager::impl final{
 		boost::atomic<uint>                 m_NumJobs;
 		boost::asio::io_service::work*      m_WorkControl;
 		vector<boost::unique_future<void>>  m_Futures;
-		//vector<boost::function<void()>>   m_MainThreadCallbacks; //a vector of callbacks to be executed on the main thread after threading::waitForAll() is finished
-
 		void _init(const char* name, uint& w, uint& h,ThreadManager* super){
 			m_NumCores = boost::thread::hardware_concurrency(); if(m_NumCores == 0) m_NumCores = 1;
 			m_WorkControl = new boost::asio::io_service::work(m_IOService);
@@ -49,7 +47,7 @@ class epriv::ThreadManager::impl final{
 				} else{ ++it; } 
 			}
 		}
-		void _update(const float& dt, epriv::ThreadManager* super){	
+		void _update(const float& dt, epriv::ThreadManager* super){
 			_clearDoneFutures();
 		}
 };

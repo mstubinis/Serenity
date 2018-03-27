@@ -521,6 +521,7 @@ bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
 	else if(type == epriv::ComponentBodyType::RigidBody){
 		return Engine::Math::rayIntersectSphere(  ((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector()  );
 	}
+	return false;
 }
 
 #pragma endregion

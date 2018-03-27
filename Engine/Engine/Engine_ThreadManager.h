@@ -2,8 +2,9 @@
 #ifndef ENGINE_THREAD_MANAGER_H
 #define ENGINE_THREAD_MANAGER_H
 
-//#define BOOST_THREAD_PROVIDES_FUTURE
-//#define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+#ifndef BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+#define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+#endif
 #ifndef BOOST_RESULT_OF_USE_DECLTYPE
 #define BOOST_RESULT_OF_USE_DECLTYPE
 #endif
@@ -17,8 +18,6 @@
 #include <memory>
 
 typedef unsigned int uint;
-
-class Mesh;
 
 typedef boost::packaged_task<void> boost_packed_task;
 
@@ -135,7 +134,7 @@ namespace Engine{
 				auto lam = [](Job*& _job,U& _1, V& _2, W& _3, X& _4, Y& _5, Z& _6) -> void{
 					_job(_1,_2,_3,_4,_5,_6);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
 				};
-				boost::function<void()> j = boost::bind<void>(lam,a1,a2,a3,a4,a5,a6);
+				boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3,a4,a5,a6);
 				auto job = boost::make_shared<boost_packed_task>(j);
 				finalizeJob(job,then);
 			}
@@ -144,7 +143,7 @@ namespace Engine{
 				auto lam = [](Job*& _job,U& _1, V& _2, W& _3, X& _4, Y& _5) -> void{
 					_job(_1,_2,_3,_4,_5);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
 				};
-				boost::function<void()> j = boost::bind<void>(lam,a1,a2,a3,a4,a5);
+				boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3,a4,a5);
 				auto job = boost::make_shared<boost_packed_task>(j);		
 				finalizeJob(job,then);
 			}
@@ -153,7 +152,7 @@ namespace Engine{
 				auto lam = [](Job*& _job,U& _1, V& _2, W& _3, X& _4) -> void{
 					_job(_1,_2,_3,_4);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
 				};
-				boost::function<void()> j = boost::bind<void>(lam,a1,a2,a3,a4);
+				boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3,a4);
 				auto job = boost::make_shared<boost_packed_task>(j);	
 				finalizeJob(job,then);
 			}
@@ -162,7 +161,7 @@ namespace Engine{
 				auto lam = [](Job*& _job,U& _1, V& _2, W& _3) -> void{
 					_job(_1,_2,_3);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
 				};
-				boost::function<void()> j = boost::bind<void>(lam,a1,a2,a3);
+				boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3);
 				auto job = boost::make_shared<boost_packed_task>(j);	
 				finalizeJob(job,then);
 			}
@@ -180,7 +179,7 @@ namespace Engine{
 				auto lam = [](Job*& _job,U& _1) -> void{
 					_job(_1);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
 				};
-				boost::function<void()> j = boost::bind<void>(lam,a1);
+				boost::function<void()> j = boost::bind<void>(lam,functorJob,a1);
 				auto job = boost::make_shared<boost_packed_task>(j);	
 				finalizeJob(job,then);
 			}
@@ -189,7 +188,7 @@ namespace Engine{
 				auto lam = [](Job*& _job) -> void{
 					_job();  Core::m_Engine->m_ThreadManager->_decrementJobCount();
 				};
-				boost::function<void()> j = boost::bind<void>(lam);
+				boost::function<void()> j = boost::bind<void>(lam,functorJob);
 				auto job = boost::make_shared<boost_packed_task>(j);	
 				finalizeJob(job,then);
 			}
