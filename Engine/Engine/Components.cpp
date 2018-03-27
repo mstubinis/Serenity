@@ -105,13 +105,21 @@ class epriv::ComponentManager::impl final{
 			glm::mat4 scaleMat = glm::scale(scale);
 			modelMatrix = translationMat * rotationMat * scaleMat * modelMatrix;
 		}
+		static void _updateBaseBodiesJob(vector<ComponentBaseClass*>& vec){
+			for(uint j = 0; j < vec.size(); ++j){
+				ComponentBasicBody& b = *((ComponentBasicBody*)vec.at(j));
+				Core::m_Engine->m_ComponentManager->m_i->_performTransformation(b.m_Owner->parent(),b._position,b._rotation,b._scale,b._modelMatrix);
+			}
+		}
 		void _updateComponentBaseBodies(const float& dt){
 			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentBasicBody>();
 			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-			for(auto c:v){
-				ComponentBasicBody& b = *((ComponentBasicBody*)c);
-				_performTransformation(c->m_Owner->parent(),b._position,b._rotation,b._scale,b._modelMatrix);
+			vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
+
+			for(auto vec:split){
+				epriv::threading::addJob(_updateBaseBodiesJob,vec);
 			}
+			epriv::threading::waitForAll();
 		}
 		void _updateComponentRigidBodies(const float& dt){
 			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentRigidBody>();
@@ -148,15 +156,10 @@ class epriv::ComponentManager::impl final{
 			vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
 			vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
 
-			/*
 			for(auto vec:split){
 				epriv::threading::addJob(_updateModelComponentsJob,vec,camera);
 			}
 			epriv::threading::waitForAll();
-			*/
-			for(auto vec:split){
-				_updateModelComponentsJob(v,camera);
-			}
 		}
 		void _updateComponentCameras(const float& dt){
 			uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();

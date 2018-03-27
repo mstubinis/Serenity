@@ -7,6 +7,7 @@
 
 #include "Engine.h"
 #include "Engine_ThreadManager.h"
+#include "Engine_Utils.h"
 
 #include <iostream>
 
@@ -14,7 +15,6 @@ using namespace Engine;
 using namespace std;
 
 epriv::ThreadManager* threadManager;
-emptyFunctor epriv::ThreadManager::emptyTask;
 
 class epriv::ThreadManager::impl final{
     public:
@@ -23,7 +23,8 @@ class epriv::ThreadManager::impl final{
 		uint                                m_NumCores;
 		boost::atomic<uint>                 m_NumJobs;
 		boost::asio::io_service::work*      m_WorkControl;
-		vector<boost::shared_future<void>>  m_PendingData; // vector of futures
+		vector<boost::unique_future<void>>  m_Futures;
+		//vector<boost::function<void()>>   m_MainThreadCallbacks; //a vector of callbacks to be executed on the main thread after threading::waitForAll() is finished
 
 		void _init(const char* name, uint& w, uint& h,ThreadManager* super){
 			m_NumCores = boost::thread::hardware_concurrency(); if(m_NumCores == 0) m_NumCores = 1;
@@ -40,6 +41,17 @@ class epriv::ThreadManager::impl final{
 			m_IOService.stop();
 			m_ThreadGroup.join_all();
 		}
+		void _clearDoneFutures(){
+            for(auto it = m_Futures.begin(); it != m_Futures.end();){ 
+				boost::unique_future<void>& fut = (*it); 
+				if(fut.is_ready()){ 
+					it = m_Futures.erase(it);
+				} else{ ++it; } 
+			}
+		}
+		void _update(const float& dt, epriv::ThreadManager* super){	
+			_clearDoneFutures();
+		}
 };
 
 epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); }
@@ -48,23 +60,18 @@ void epriv::ThreadManager::_init(const char* name, uint w, uint h){
 	m_i->_postInit(name,w,h,this); 
 	threadManager = epriv::Core::m_Engine->m_ThreadManager;
 }
+void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_i->m_NumCores; }
 const uint epriv::ThreadManager::numJobs() const{ return threadManager->m_i->m_NumJobs; }
-
-void thenTask(boost::shared_future<void> f){
-	if(threadManager->m_i->m_NumJobs > 0){
-	    --threadManager->m_i->m_NumJobs;
-	}
-}
-
+void epriv::ThreadManager::_decrementJobCount(){ --threadManager->m_i->m_NumJobs; }
 void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task){
-	boost::shared_future<void> fut = task->get_future();
-    fut.then(&thenTask);
-	threadManager->m_i->m_PendingData.push_back(fut);
+	boost::unique_future<void> future = task->get_future();
+	threadManager->m_i->m_Futures.push_back(boost::move(future));
 	threadManager->m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 	++threadManager->m_i->m_NumJobs;
 }
-
-void epriv::threading::waitForAll(){
-	boost::wait_for_all(threadManager->m_i->m_PendingData.begin(), threadManager->m_i->m_PendingData.end());
+void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task, boost::function<void()>& then_task){
+    epriv::threading::finalizeJob(task);
+	task.get()->set_wait_callback(boost::bind(then_task));
 }
+void epriv::threading::waitForAll(){ boost::wait_for_all(threadManager->m_i->m_Futures.begin(), threadManager->m_i->m_Futures.end()); }

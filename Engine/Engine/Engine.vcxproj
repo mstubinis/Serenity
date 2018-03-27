@@ -170,6 +170,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClInclude Include="Engine_Sounds.h" />
     <ClInclude Include="Engine_ThreadManager.h" />
     <ClInclude Include="Engine_Time.h" />
+    <ClInclude Include="Engine_Utils.h" />
     <ClInclude Include="Engine_Window.h" />
     <ClInclude Include="FramebufferObject.h" />
     <ClInclude Include="GameCamera.h" />

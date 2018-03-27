@@ -4,6 +4,7 @@
 
 #include "Engine_ResourceHandle.h"
 #include "Engine_Physics.h"
+#include "Engine_Utils.h"
 #include "ShaderProgram.h"
 
 #include <unordered_map>
@@ -12,7 +13,6 @@
 #include <SFML/Graphics.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 
 typedef unsigned int uint;
@@ -28,12 +28,6 @@ class Material;
 class SunLight;
 class MeshInstance;
 class SoundData;
-
-template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
-template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
-
-#define SAFE_DELETE_COM(x) { if(x){ x->Release(); x = 0; } } // Convenience macro for releasing a COM object
-#define SAFE_DELETE(x) { delete x; x = nullptr; } // Convenience macro for deleting a pointer
 
 namespace Engine{
 	namespace epriv{

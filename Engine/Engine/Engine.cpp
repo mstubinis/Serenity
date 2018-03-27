@@ -106,6 +106,7 @@ void updateLogic(float dt){
 	Resources::getCurrentScene()->update(dt);
 	epriv::Core::m_Engine->m_ComponentManager->_update(dt);
     epriv::Core::m_Engine->m_EventManager->_update(dt);
+	epriv::Core::m_Engine->m_ThreadManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 
@@ -120,16 +121,9 @@ void updateSounds(float dt){
 	////////////////////////////////////////////////////////////
 }
 void update(const float& dt){
-	/*
-	epriv::threading::addJob(&updatePhysics,dt);
-	epriv::threading::addJob(&updateLogic,dt);
-	epriv::threading::addJob(&updateSounds,dt);
-	epriv::threading::waitForAll();
-	*/
 	updatePhysics(dt);
 	updateLogic(dt);
 	updateSounds(dt);
-
 }
 
 void render(){

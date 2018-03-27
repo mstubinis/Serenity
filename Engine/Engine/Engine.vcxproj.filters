@@ -389,6 +389,9 @@
     <ClInclude Include="ResourceManifest.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Engine_Utils.h">
+      <Filter>Header Files\Engine\Engine_Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Shaders\AS_skyFromSpace_vert.glsl">
