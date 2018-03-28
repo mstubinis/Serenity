@@ -138,7 +138,7 @@ class epriv::ComponentManager::impl final{
 			}
 			c.m_i->m_PassedRenderCheck = true;
 		}
-		static void _updateModelComponentsJob(vector<ComponentBaseClass*>& vec,Camera*& camera){
+		static void _updateModelComponentsJob(vector<ComponentBaseClass*>& vec,Camera* camera){
 			for(uint j = 0; j < vec.size(); ++j){
 				ComponentModel& modelComponent = *((ComponentModel*)vec.at(j));
 				for(uint i = 0; i < modelComponent.models.size(); ++i){
