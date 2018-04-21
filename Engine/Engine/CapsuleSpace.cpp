@@ -18,14 +18,14 @@ using namespace Engine;
 using namespace std;
 
 CapsuleEnd::CapsuleEnd(float size,glm::vec3 pos, glm::vec3 color, Scene* scene):Entity(){
-	scene->addEntity(this);
+    scene->addEntity(this);
 
-	ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::CapsuleD,this);  addComponent(model);
-	model->getModel()->setColor(color.x,color.y,color.z,1.0f);
-	
-	m_Body = new ComponentBasicBody();  addComponent(m_Body);
-	m_Body->setPosition(pos);
-	m_Body->setScale(size,size,size);	
+    ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::CapsuleD,this);  addComponent(model);
+    model->getModel()->setColor(color.x,color.y,color.z,1.0f);
+    
+    m_Body = new ComponentBasicBody();  addComponent(m_Body);
+    m_Body->setPosition(pos);
+    m_Body->setScale(size,size,size);	
 }
 CapsuleEnd::~CapsuleEnd(){
 }
@@ -33,15 +33,15 @@ void CapsuleEnd::update(const float& dt){
 }
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):Entity(){
     scene->addEntity(this);
-	
-	ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::SunFlareMaterial,this);  addComponent(model);
-	model->getModel()->setColor(255,235,206,255);
-	
-	m_Body = new ComponentBasicBody();  addComponent(m_Body);
-	m_Body->setPosition(pos);
-	m_Body->setScale(size,size,size);
+    
+    ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::SunFlareMaterial,this);  addComponent(model);
+    model->getModel()->setColor(255,235,206,255);
+    
+    m_Body = new ComponentBasicBody();  addComponent(m_Body);
+    m_Body->setPosition(pos);
+    m_Body->setScale(size,size,size);
 
-	m_Light = nullptr;
+    m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(pos/float(100),scene);
         m_Light->setAttenuation(LightRange::_65);
@@ -59,63 +59,63 @@ void CapsuleStar::update(const float& dt){
     }
     if(m_Light != nullptr){
         m_Light->setPosition(pos * 0.015f);
-		if(glm::distance(m_Light->position(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
+        if(glm::distance(m_Light->position(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
             m_Light->deactivate();
         }
         else{
             m_Light->activate();
         }
     }
-	m_Body->setRotation( Resources::getCurrentScene()->getActiveCamera()->getOrientation() );
+    m_Body->setRotation( Resources::getCurrentScene()->getActiveCamera()->getOrientation() );
 }
 
 CapsuleTunnel::CapsuleTunnel(float tunnelRadius,Handle& material, Scene* scene):Entity(){
     scene->addEntity(this);
-	m_TunnelRadius = tunnelRadius;
-	ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleTunnelMesh,material,this);  addComponent(model);
-	m_Body = new ComponentBasicBody();  addComponent(m_Body);
-	m_Body->setPosition(0.0f,0.0f,0.0f);
-	m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
+    m_TunnelRadius = tunnelRadius;
+    ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleTunnelMesh,material,this);  addComponent(model);
+    m_Body = new ComponentBasicBody();  addComponent(m_Body);
+    m_Body->setPosition(0.0f,0.0f,0.0f);
+    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleTunnel::~CapsuleTunnel(){}
 
 CapsuleRibbon::CapsuleRibbon(float tunnelRadius,Handle& material, Scene* scene):Entity(){
     scene->addEntity(this);
-	m_TunnelRadius = tunnelRadius;
-	ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleRibbonMesh,material,this);  addComponent(model);
-	m_Body = new ComponentBasicBody();  addComponent(m_Body);
-	m_Body->setPosition(0.0f,0.0f,0.0f);
-	m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
+    m_TunnelRadius = tunnelRadius;
+    ComponentModel* model = new ComponentModel(ResourceManifest::CapsuleRibbonMesh,material,this);  addComponent(model);
+    m_Body = new ComponentBasicBody();  addComponent(m_Body);
+    m_Body->setPosition(0.0f,0.0f,0.0f);
+    m_Body->setScale(m_TunnelRadius,m_TunnelRadius,m_TunnelRadius);
 }
 CapsuleRibbon::~CapsuleRibbon(){}
 void CapsuleRibbon::bind(){
-	Renderer::GLDisable(GLState::DEPTH_TEST);
-	Renderer::GLDisable(GLState::DEPTH_MASK);
+    Renderer::GLDisable(GLState::DEPTH_TEST);
+    Renderer::GLDisable(GLState::DEPTH_MASK);
 }
 void CapsuleRibbon::unbind(){
-	Renderer::GLEnable(GLState::DEPTH_TEST);
-	Renderer::GLEnable(GLState::DEPTH_MASK);
+    Renderer::GLEnable(GLState::DEPTH_TEST);
+    Renderer::GLEnable(GLState::DEPTH_MASK);
 }
 
 CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
-	m_Timer = 0;
-	setSkybox(nullptr);
+    m_Timer = 0;
+    setSkybox(nullptr);
     setBackgroundColor(255.0f,0,0);
 
     PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
     l->setColor(255,200,215,255);
     l->setSpecularIntensity(0.0f);
-	l->setAttenuation(LightRange::_13);
+    l->setAttenuation(LightRange::_13);
 
 
-	m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);
+    m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);
     m_TunnelB = new CapsuleTunnel(5000,ResourceManifest::CapsuleB,this);
     m_Ribbon = new CapsuleRibbon(5000,ResourceManifest::CapsuleC,this);
 
     m_FrontEnd = new CapsuleEnd(2250,glm::vec3(0,0,-25000),glm::vec3(1),this);
     m_BackEnd = new CapsuleEnd(1700,glm::vec3(0,0,25000),glm::vec3(0),this);
 
-	m_BackEnd->m_Body->rotate(0.0f,glm::radians(180.0f),0.0f);
+    m_BackEnd->m_Body->rotate(0.0f,glm::radians(180.0f),0.0f);
 
     glm::vec3 oldScale = m_TunnelB->m_Body->getScale();
     m_TunnelB->m_Body->setScale(oldScale.x-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.y-(0.62f * m_TunnelB->getTunnelRadius()),oldScale.z);
@@ -140,14 +140,14 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
         step -= 6.0f;
     }
     //this to just test. should set player / camera dynamically
-	Ship* dread = new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
-	ComponentRigidBody* playerBody = dread->getComponent<ComponentRigidBody>();
+    Ship* dread = new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,"Dreadnaught",glm::vec3(0),glm::vec3(1),nullptr,this);
+    ComponentRigidBody* playerBody = dread->getComponent<ComponentRigidBody>();
 
     setPlayer(dread);
-	GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
-	playerCamera->follow(dread);
+    GameCamera* playerCamera = (GameCamera*)this->getActiveCamera();
+    playerCamera->follow(dread);
 
-	centerSceneToObject(dread);
+    centerSceneToObject(dread);
 
     //LightProbe* lp = new LightProbe("CapsuleLightProbe",256,glm::vec3(0.0f),true,this);
     //dread->addChild(lp);
@@ -171,9 +171,9 @@ void CapsuleSpace::update(const float& dt){
     m_BackEnd->m_Body->rotate(0,0,4.0f*dt);
     m_FrontEnd->m_Body->rotate(0,0,-4.0f*dt);
 
-	glm::vec3 aPos = m_TunnelA->m_Body->position();
-	glm::vec3 bPos = m_TunnelB->m_Body->position();
-	glm::vec3 rPos = m_Ribbon->m_Body->position();
+    glm::vec3 aPos = m_TunnelA->m_Body->position();
+    glm::vec3 bPos = m_TunnelB->m_Body->position();
+    glm::vec3 rPos = m_Ribbon->m_Body->position();
 
     if(aPos.z >= 12.112 * aRadius || aPos.z <= -12.112 * aRadius){
         m_TunnelA->m_Body->setPosition(0,0,0);
@@ -184,8 +184,8 @@ void CapsuleSpace::update(const float& dt){
     if(rPos.z >= 20 * aRadius || rPos.z <= -20 * aRadius){
         m_Ribbon->m_Body->setPosition(0,300,0);
     }
-	ComponentRigidBody& body = *getPlayer()->getComponent<ComponentRigidBody>();
-	ComponentModel& model = *getPlayer()->getComponent<ComponentModel>();
+    ComponentRigidBody& body = *getPlayer()->getComponent<ComponentRigidBody>();
+    ComponentModel& model = *getPlayer()->getComponent<ComponentModel>();
     body.setPosition(0,0,0);
 
     float x = glm::sin(m_Timer * 2.4f) * 0.07f;

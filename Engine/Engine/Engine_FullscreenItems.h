@@ -5,25 +5,25 @@
 #include <memory>
 
 namespace Engine{
-	namespace epriv{
-		class FullscreenTriangle final{
-			private:
-				class impl; std::unique_ptr<impl> m_i;
-			public:
-				FullscreenTriangle();
-				~FullscreenTriangle();
+    namespace epriv{
+        class FullscreenTriangle final{
+            private:
+                class impl; std::unique_ptr<impl> m_i;
+            public:
+                FullscreenTriangle();
+                ~FullscreenTriangle();
 
-				void render();
-		};
-		class FullscreenQuad final{
-			private:
-				class impl; std::unique_ptr<impl> m_i;
-			public:
-				FullscreenQuad();
-				~FullscreenQuad();
+                void render();
+        };
+        class FullscreenQuad final{
+            private:
+                class impl; std::unique_ptr<impl> m_i;
+            public:
+                FullscreenQuad();
+                ~FullscreenQuad();
 
-				void render();
-		};
-	};
+                void render();
+        };
+    };
 };
 #endif

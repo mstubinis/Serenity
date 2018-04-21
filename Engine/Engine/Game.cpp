@@ -32,48 +32,48 @@ void Game::cleanup(){
 }
 
 void Game::initResources(){
-	Engine_Window& window = *Resources::getWindow();
+    Engine_Window& window = *Resources::getWindow();
     window.setIcon("data/Textures/icon.png");
 
-	ResourceManifest::init();
+    ResourceManifest::init();
 }
 void Game::initLogic(){
 
-	Engine::registerComponent<ComponentCamera,GameCameraComponent>();
+    Engine::registerComponent<ComponentCamera,GameCameraComponent>();
 
-	Engine_Window& window = *Resources::getWindow();
+    Engine_Window& window = *Resources::getWindow();
     window.keepMouseInWindow(true);
     window.setMouseCursorVisible(false);
     window.setKeyRepeatEnabled(false);
-	//apparently these 2 should not be used together, but i have not found any issues with it so far
-	//window.setVerticalSyncEnabled(true);
-	//window.setFramerateLimit(60);
+    //apparently these 2 should not be used together, but i have not found any issues with it so far
+    //window.setVerticalSyncEnabled(true);
+    //window.setFramerateLimit(60);
 
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();
 
-	Resources::setCurrentScene("Sol");
+    Resources::setCurrentScene("Sol");
     m_HUD = new HUD();
 }
 
 void Game::update(const float& dt){
-	if(Engine::isKeyDown(KeyboardKey::Escape)){
+    if(Engine::isKeyDown(KeyboardKey::Escape)){
         Engine::stop();
     }
-	if(Engine::isKeyDownOnce(KeyboardKey::F4)){
+    if(Engine::isKeyDownOnce(KeyboardKey::F4)){
         Resources::setCurrentScene("Sol");
     }
-	if(Engine::isKeyDownOnce(KeyboardKey::F5)){
+    if(Engine::isKeyDownOnce(KeyboardKey::F5)){
         Resources::setCurrentScene("CapsuleSpace");
     }
     if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if(Engine::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Engine::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-	if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
+    if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
-	if(Engine::isKeyDownOnce("space")){
+    if(Engine::isKeyDownOnce("space")){
 
-	}
+    }
     m_HUD->update(dt);
 }
 void Game::render(){
@@ -95,7 +95,7 @@ void Game::onGainedFocus(){
     const glm::vec2 halfRes = glm::vec2(Resources::getWindowSize().x/2,Resources::getWindowSize().y/2);
     sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
 
-	Engine::setMousePosition(halfRes,true);
+    Engine::setMousePosition(halfRes,true);
 }
 void Game::onTextEntered(uint unicode){
 }
@@ -129,7 +129,7 @@ void Game::onPostUpdate(float dt){
         float mouseDistFromCenter = glm::distance(mousePos,halfRes);
         if(mouseDistFromCenter > 1.0f){
             sf::Mouse::setPosition(sf::Vector2i(int(halfRes.x),int(halfRes.y)),*Resources::getWindow()->getSFMLHandle());
-			Engine::setMousePosition(halfRes,false,true);
+            Engine::setMousePosition(halfRes,false,true);
         }
     }
 }

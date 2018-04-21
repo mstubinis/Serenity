@@ -31,9 +31,9 @@ glm::vec3 Math::btVectorToGLM(btVector3& bt){ return glm::vec3(bt.x(),bt.y(),bt.
 btVector3 Math::btVectorFromGLM(glm::vec3& v){ return btVector3(v.x,v.y,v.z); }
 
 void Math::removeMatrixPosition(glm::mat4& m){
-	m[3][0] = 0;
-	m[3][1] = 0;
-	m[3][2] = 0;
+    m[3][0] = 0;
+    m[3][1] = 0;
+    m[3][2] = 0;
 }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
@@ -53,7 +53,7 @@ bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVecto
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
     glm::vec4 viewport = glm::vec4(0,0,winSize.x,winSize.y);
-	Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
     glm::vec3 screen = glm::project(objPos,c->getView(),c->getProjection(),viewport);
     //check if point is behind
     float dot = glm::dot(c->getViewVector(),objPos - c->getPosition());

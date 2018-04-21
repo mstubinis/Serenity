@@ -40,77 +40,77 @@ class epriv::PhysicsManager::impl final{
         btCollisionDispatcher* m_Dispatcher;
         btSequentialImpulseConstraintSolver* m_Solver;
         btDiscreteDynamicsWorld* m_World;
-		GLDebugDrawer* m_DebugDrawer;
+        GLDebugDrawer* m_DebugDrawer;
 
-		vector<Collision*> m_CollisionObjects;
+        vector<Collision*> m_CollisionObjects;
 
-		void _init(const char* name,uint& w,uint& h){
-			m_Broadphase = new btDbvtBroadphase();
-			m_CollisionConfiguration = new btDefaultCollisionConfiguration();
-			m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
-			m_Solver = new btSequentialImpulseConstraintSolver;
-			m_World = new btDiscreteDynamicsWorld(m_Dispatcher,m_Broadphase,m_Solver,m_CollisionConfiguration);
+        void _init(const char* name,uint& w,uint& h){
+            m_Broadphase = new btDbvtBroadphase();
+            m_CollisionConfiguration = new btDefaultCollisionConfiguration();
+            m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
+            m_Solver = new btSequentialImpulseConstraintSolver;
+            m_World = new btDiscreteDynamicsWorld(m_Dispatcher,m_Broadphase,m_Solver,m_CollisionConfiguration);
 
-			m_DebugDrawer = new GLDebugDrawer();
-			m_DebugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-			m_World->setDebugDrawer(m_DebugDrawer);
-			m_World->setGravity(btVector3(0.0f,0.0f,0.0f));
+            m_DebugDrawer = new GLDebugDrawer();
+            m_DebugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
+            m_World->setDebugDrawer(m_DebugDrawer);
+            m_World->setGravity(btVector3(0.0f,0.0f,0.0f));
 
-			btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
+            btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
 
-			m_World->setInternalTickCallback(_preTicCallback,(void*)m_World,true);
-			m_World->setInternalTickCallback(_postTicCallback,(void*)m_World,false);
-		}
-		void _postInit(const char* name,uint w,uint h){
-		}
-		void _destruct(){
-			SAFE_DELETE(m_DebugDrawer);
-			SAFE_DELETE(m_World);
-			SAFE_DELETE(m_Solver);
-			SAFE_DELETE(m_Dispatcher);
-			SAFE_DELETE(m_CollisionConfiguration);
-			SAFE_DELETE(m_Broadphase);
-			for(auto collision:m_CollisionObjects)
-				SAFE_DELETE(collision);
-		}
-		void _update(float& dt, int& maxSteps, float& other){
-			m_World->stepSimulation(dt,maxSteps,other);
-			uint numManifolds = m_World->getDispatcher()->getNumManifolds();
-			for (uint i = 0; i < numManifolds; ++i){
-				btPersistentManifold* contactManifold =  m_World->getDispatcher()->getManifoldByIndexInternal(i);
-				btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
-				btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-				for (int j = 0; j < contactManifold->getNumContacts(); ++j){
-					btManifoldPoint& pt = contactManifold->getContactPoint(j);
-					if (pt.getDistance() < 0.0f){
-						const btVector3& ptA = pt.getPositionWorldOnA();
-						const btVector3& ptB = pt.getPositionWorldOnB();
-						const btVector3& normalOnB = pt.m_normalWorldOnB;
+            m_World->setInternalTickCallback(_preTicCallback,(void*)m_World,true);
+            m_World->setInternalTickCallback(_postTicCallback,(void*)m_World,false);
+        }
+        void _postInit(const char* name,uint w,uint h){
+        }
+        void _destruct(){
+            SAFE_DELETE(m_DebugDrawer);
+            SAFE_DELETE(m_World);
+            SAFE_DELETE(m_Solver);
+            SAFE_DELETE(m_Dispatcher);
+            SAFE_DELETE(m_CollisionConfiguration);
+            SAFE_DELETE(m_Broadphase);
+            for(auto collision:m_CollisionObjects)
+                SAFE_DELETE(collision);
+        }
+        void _update(float& dt, int& maxSteps, float& other){
+            m_World->stepSimulation(dt,maxSteps,other);
+            uint numManifolds = m_World->getDispatcher()->getNumManifolds();
+            for (uint i = 0; i < numManifolds; ++i){
+                btPersistentManifold* contactManifold =  m_World->getDispatcher()->getManifoldByIndexInternal(i);
+                btCollisionObject* obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
+                btCollisionObject* obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
+                for (int j = 0; j < contactManifold->getNumContacts(); ++j){
+                    btManifoldPoint& pt = contactManifold->getContactPoint(j);
+                    if (pt.getDistance() < 0.0f){
+                        const btVector3& ptA = pt.getPositionWorldOnA();
+                        const btVector3& ptB = pt.getPositionWorldOnB();
+                        const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-						ComponentRigidBody* a = (ComponentRigidBody*)(obA->getUserPointer());
-						ComponentRigidBody* b = (ComponentRigidBody*)(obB->getUserPointer());
+                        ComponentRigidBody* a = (ComponentRigidBody*)(obA->getUserPointer());
+                        ComponentRigidBody* b = (ComponentRigidBody*)(obB->getUserPointer());
 
-						//a->collisionResponse(b);
-						//b->collisionResponse(a);
-					}
-				}
-			}
-		}
-		void _render(){
-			glUseProgram(0); //this is important
-			glMatrixMode(GL_PROJECTION); glPushMatrix();
-			Camera* c = Resources::getCurrentScene()->getActiveCamera();
-			glLoadMatrixf(glm::value_ptr(c->getProjection()));
-			glMatrixMode(GL_MODELVIEW); glPushMatrix();
-			glLoadMatrixf(glm::value_ptr(c->getView()));
-			m_World->debugDrawWorld();
-			glMatrixMode(GL_PROJECTION); glPopMatrix();
-			glMatrixMode(GL_MODELVIEW); glPopMatrix();
-		}
-		void _removeCollision(Collision* collisionObject){
-			m_CollisionObjects.erase(std::remove(m_CollisionObjects.begin(), m_CollisionObjects.end(), collisionObject), m_CollisionObjects.end());
+                        //a->collisionResponse(b);
+                        //b->collisionResponse(a);
+                    }
+                }
+            }
+        }
+        void _render(){
+            glUseProgram(0); //this is important
+            glMatrixMode(GL_PROJECTION); glPushMatrix();
+            Camera* c = Resources::getCurrentScene()->getActiveCamera();
+            glLoadMatrixf(glm::value_ptr(c->getProjection()));
+            glMatrixMode(GL_MODELVIEW); glPushMatrix();
+            glLoadMatrixf(glm::value_ptr(c->getView()));
+            m_World->debugDrawWorld();
+            glMatrixMode(GL_PROJECTION); glPopMatrix();
+            glMatrixMode(GL_MODELVIEW); glPopMatrix();
+        }
+        void _removeCollision(Collision* collisionObject){
+            m_CollisionObjects.erase(std::remove(m_CollisionObjects.begin(), m_CollisionObjects.end(), collisionObject), m_CollisionObjects.end());
             SAFE_DELETE(collisionObject);
-		}
+        }
 };
 vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end){
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
@@ -141,33 +141,33 @@ void Physics::removeRigidBody(btRigidBody* body){ epriv::Core::m_Engine->m_Physi
 
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){
-		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(ignored);
-	}
+        epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(ignored);
+    }
     vector<glm::vec3> result = _rayCastInternal(s,e);
     if(ignored){
-		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(ignored);
-	}
+        epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(ignored);
+    }
     return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
     for(auto object:ignored){
-		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(object);
-	}
+        epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->removeRigidBody(object);
+    }
     vector<glm::vec3> result = _rayCastInternal(s,e);
     for(auto object:ignored){
-		epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(object);
-	}
+        epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(object);
+    }
     return result;
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Entity* ignored){
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
-	
-	ComponentRigidBody* body = ignored->getComponent<ComponentRigidBody>();
+    
+    ComponentRigidBody* body = ignored->getComponent<ComponentRigidBody>();
 
     if(body){
-		return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
-	}
+        return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
+    }
     return Physics::rayCast(_s,_e,nullptr);
  }
 vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector<Entity*>& ignored){
@@ -175,10 +175,10 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     vector<btRigidBody*> objs;
     for(auto o:ignored){
-		ComponentRigidBody* body = o->getComponent<ComponentRigidBody>();
+        ComponentRigidBody* body = o->getComponent<ComponentRigidBody>();
         if(body){
-			objs.push_back(const_cast<btRigidBody*>(body->getBody()));
-		}
+            objs.push_back(const_cast<btRigidBody*>(body->getBody()));
+        }
     }
     return Engine::Physics::rayCast(_s,_e,objs);
 }
@@ -230,9 +230,9 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
         case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-				btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
-				btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
-				btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
+                btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
+                btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
+                btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btGImpactMeshShape(m_InternalMeshData);
@@ -245,9 +245,9 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
         case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-				btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
-				btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
-				btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
+                btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
+                btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
+                btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
@@ -256,18 +256,18 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
             m_CollisionShape = shape;
             break;
         }
-		case CollisionType::Sphere:{
-			float radius = 0;
-			for(auto vertex:data.points){
-				float length = glm::length(vertex);
-				if(length > radius){
-					radius = length;
-				}
-			}
-			shape = new btSphereShape(radius);
-			m_CollisionShape = shape;
-			break;
-		};
+        case CollisionType::Sphere:{
+            float radius = 0;
+            for(auto vertex:data.points){
+                float length = glm::length(vertex);
+                if(length > radius){
+                    radius = length;
+                }
+            }
+            shape = new btSphereShape(radius);
+            m_CollisionShape = shape;
+            break;
+        };
         case CollisionType::Box:{
             glm::vec3 max = glm::vec3(0.0f);
             for(auto vertex:data.file_points){

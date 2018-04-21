@@ -96,7 +96,7 @@ unordered_map<uint,GLuint> ImagePixelType::IMAGE_PIXEL_TYPE_MAP = [](){
     m.emplace(uint(ImagePixelType::UNSIGNED_INT_8_8_8_8_REV),GL_UNSIGNED_INT_8_8_8_8_REV);
     m.emplace(uint(ImagePixelType::UNSIGNED_INT_10_10_10_2),GL_UNSIGNED_INT_10_10_10_2);
     m.emplace(uint(ImagePixelType::UNSIGNED_INT_2_10_10_10_REV),GL_UNSIGNED_INT_2_10_10_10_REV);
-	m.emplace(uint(ImagePixelType::UNSIGNED_INT_24_8),GL_UNSIGNED_INT_24_8);
+    m.emplace(uint(ImagePixelType::UNSIGNED_INT_24_8),GL_UNSIGNED_INT_24_8);
 
     return m;
 }();

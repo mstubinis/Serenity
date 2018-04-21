@@ -14,50 +14,50 @@ using namespace std;
 
 Scene::Scene(string name){
     m_Skybox = nullptr;
-	m_ActiveCamera = nullptr;
+    m_ActiveCamera = nullptr;
     m_BackgroundColor = glm::vec3(0.0f);
-	name = epriv::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
+    name = epriv::Core::m_Engine->m_ResourceManager->_buildSceneName(name);
     setName(name);
 
-	epriv::Core::m_Engine->m_ResourceManager->_addScene(this);
+    epriv::Core::m_Engine->m_ResourceManager->_addScene(this);
 
     if(Resources::getCurrentScene() == nullptr){
-		Resources::setCurrentScene(this);
+        Resources::setCurrentScene(this);
     }
 }
 void Scene::addEntity(Entity* entity){
-	for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return; } //rethink this maybe use a fixed size array?
-	uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(entity);
-	entity->m_ID = entityID;
-	entity->m_Scene = this;
-	m_Entities.push_back(entityID);
+    for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return; } //rethink this maybe use a fixed size array?
+    uint entityID = epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->add(entity);
+    entity->m_ID = entityID;
+    entity->m_Scene = this;
+    m_Entities.push_back(entityID);
 }
 Entity* Scene::getEntity(uint entityID){
-	if(entityID == std::numeric_limits<uint>::max())
-		return nullptr;
-	return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
+    if(entityID == std::numeric_limits<uint>::max())
+        return nullptr;
+    return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
 }
 bool Scene::hasEntity(Entity* entity){
-	for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return true; } //rethink this maybe use a fixed size array?
-	return false;
+    for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return true; } //rethink this maybe use a fixed size array?
+    return false;
 }
 bool Scene::hasEntity(uint entityID){
-	for(auto entityInScene:m_Entities){if (entityID == entityInScene) return true; } //rethink this maybe use a fixed size array?
-	return false;
+    for(auto entityInScene:m_Entities){if (entityID == entityInScene) return true; } //rethink this maybe use a fixed size array?
+    return false;
 }
 Camera* Scene::getActiveCamera(){ return m_ActiveCamera; }
 void Scene::setActiveCamera(Camera* c){
-	m_ActiveCamera = c;
+    m_ActiveCamera = c;
 }
 
 void Scene::centerSceneToObject(Entity* center){
-	epriv::ComponentBodyBaseClass& bodyBase = *(center->getComponent<epriv::ComponentBodyBaseClass>());
+    epriv::ComponentBodyBaseClass& bodyBase = *(center->getComponent<epriv::ComponentBodyBaseClass>());
     glm::vec3 offset = -(bodyBase.position());
-	for(auto object:m_Entities){
-		Entity* e = getEntity(object);
-		epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
+    for(auto object:m_Entities){
+        Entity* e = getEntity(object);
+        epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
         if(e != center && e->parent() == nullptr){
-			entityBody.setPosition(entityBody.position() + offset);
+            entityBody.setPosition(entityBody.position() + offset);
         }
     }
     if(center->parent() == nullptr)

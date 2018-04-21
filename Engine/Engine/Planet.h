@@ -56,10 +56,10 @@ struct RingInfo final{
 };
 
 class Planet: public Entity{
-	friend struct ::AtmosphericScatteringMeshInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringMeshInstanceBindFunctor;
     protected:
-		ComponentModel* m_Model;
-		ComponentBasicBody* m_Body;
+        ComponentModel* m_Model;
+        ComponentBasicBody* m_Body;
         std::vector<Ring*> m_Rings;
         PlanetType m_Type;
         OrbitInfo* m_OrbitInfo;
@@ -77,15 +77,15 @@ class Planet: public Entity{
         );
         virtual ~Planet();
 
-		glm::vec3 getPosition();
+        glm::vec3 getPosition();
         glm::vec2 getGravityInfo();
         OrbitInfo* getOrbitInfo() const;
         float getDefaultRadius();
         float getRadius();
         float getAtmosphereHeight();
 
-		void setPosition(float x,float y,float z);
-		void setPosition(glm::vec3& pos);
+        void setPosition(float x,float y,float z);
+        void setPosition(glm::vec3& pos);
 
         void addRing(Ring*);
 

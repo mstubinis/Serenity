@@ -211,7 +211,7 @@ Texture::~Texture(){
 }
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
     if(m_i->m_Files.size() != 1) return;
-	epriv::Core::m_Engine->m_RenderManager->_renderTexture(this,pos,color,scl,angle,depth);
+    epriv::Core::m_Engine->m_RenderManager->_renderTexture(this,pos,color,scl,angle,depth);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
 void Texture::setYWrapping(TextureWrap::Wrap w){ Texture::setYWrapping(m_i->m_Type,w); }
@@ -227,10 +227,10 @@ void Texture::setZWrapping(GLuint type,TextureWrap::Wrap w){
 }
 void Texture::setWrapping(GLuint type,TextureWrap::Wrap w){ Texture::setXWrapping(type,w); Texture::setYWrapping(type,w); Texture::setZWrapping(type,w); }
 void Texture::setMinFilter(GLuint type,TextureFilter::Filter filter){ 
-	GLint g; Texture::impl::_enumFilterToGL(g,filter,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g); 
+    GLint g; Texture::impl::_enumFilterToGL(g,filter,true); glTexParameteri(type,GL_TEXTURE_MIN_FILTER,g); 
 }
 void Texture::setMaxFilter(GLuint type,TextureFilter::Filter filter){ 
-	GLint g; Texture::impl::_enumFilterToGL(g,filter,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g);  
+    GLint g; Texture::impl::_enumFilterToGL(g,filter,false); glTexParameteri(type,GL_TEXTURE_MAG_FILTER,g);  
 }
 void Texture::setFilter(GLuint type,TextureFilter::Filter f){ Texture::setMinFilter(type,f); Texture::setMaxFilter(type,f); }
 
@@ -249,30 +249,30 @@ void Texture::unload(){
     }
 }
 void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
-	if(m_i->m_TextureAddress.size() == 1){
-		m_i->m_TextureAddress.push_back(0);
-		glGenTextures(1, &m_i->m_TextureAddress.at(1));
-		glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
-		for (uint i = 0; i < 6; ++i){
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,convoludeTextureSize,convoludeTextureSize,0,GL_RGB,GL_FLOAT,NULL);
-		}
-		setWrapping(TextureWrap::ClampToEdge);
-		setFilter(TextureFilter::Linear);
-	}
-	if(m_i->m_TextureAddress.size() == 2){
-		glBindTexture(m_i->m_Type,0);
-		m_i->m_TextureAddress.push_back(0);
-		glGenTextures(1, &m_i->m_TextureAddress.at(2));
-		glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
-		for (uint i = 0; i < 6; ++i){
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,preEnvFilterSize,preEnvFilterSize,0,GL_RGB,GL_FLOAT,NULL);
-		}
-		setWrapping(TextureWrap::ClampToEdge);
-		setMinFilter(TextureFilter::Linear_Mipmap_Linear);
-		setMaxFilter(TextureFilter::Linear);
-		glGenerateMipmap(m_i->m_Type);
-	}
-	epriv::Core::m_Engine->m_RenderManager->_genPBREnvMapData(this,convoludeTextureSize,preEnvFilterSize);
+    if(m_i->m_TextureAddress.size() == 1){
+        m_i->m_TextureAddress.push_back(0);
+        glGenTextures(1, &m_i->m_TextureAddress.at(1));
+        glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(1));
+        for (uint i = 0; i < 6; ++i){
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,convoludeTextureSize,convoludeTextureSize,0,GL_RGB,GL_FLOAT,NULL);
+        }
+        setWrapping(TextureWrap::ClampToEdge);
+        setFilter(TextureFilter::Linear);
+    }
+    if(m_i->m_TextureAddress.size() == 2){
+        glBindTexture(m_i->m_Type,0);
+        m_i->m_TextureAddress.push_back(0);
+        glGenTextures(1, &m_i->m_TextureAddress.at(2));
+        glBindTexture(m_i->m_Type, m_i->m_TextureAddress.at(2));
+        for (uint i = 0; i < 6; ++i){
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,preEnvFilterSize,preEnvFilterSize,0,GL_RGB,GL_FLOAT,NULL);
+        }
+        setWrapping(TextureWrap::ClampToEdge);
+        setMinFilter(TextureFilter::Linear_Mipmap_Linear);
+        setMaxFilter(TextureFilter::Linear);
+        glGenerateMipmap(m_i->m_Type);
+    }
+    epriv::Core::m_Engine->m_RenderManager->_genPBREnvMapData(this,convoludeTextureSize,preEnvFilterSize);
 }
 void Texture::resize(epriv::FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }

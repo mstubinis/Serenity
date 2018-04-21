@@ -6,7 +6,7 @@
 #include <boost/lexical_cast.hpp>
 
 template<typename E,typename B> void removeFromVector(std::vector<B*>& vector,E* element){
-	for(auto it = vector.begin(); it != vector.end();){ B* c = (*it); if(c == element){ it = vector.erase(it); } else{ ++it; } }
+    for(auto it = vector.begin(); it != vector.end();){ B* c = (*it); if(c == element){ it = vector.erase(it); } else{ ++it; } }
 }
 
 

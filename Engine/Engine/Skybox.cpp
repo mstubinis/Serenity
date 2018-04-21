@@ -19,17 +19,17 @@ vector<glm::vec3> Skybox::m_Vertices;
 
 SkyboxEmpty::SkyboxEmpty(Scene* scene){
     if(scene == nullptr){
-		scene = Resources::getCurrentScene();
-	}
+        scene = Resources::getCurrentScene();
+    }
     if(scene->skybox() == nullptr){
         scene->setSkybox(this);
-	}
+    }
 }
 SkyboxEmpty::~SkyboxEmpty(){
 
 }   
 Skybox::Skybox(string directory,Scene* scene):SkyboxEmpty(scene){
-	Skybox::initMesh();
+    Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
 
     string front = directory + "/Right.jpg";
@@ -42,7 +42,7 @@ Skybox::Skybox(string directory,Scene* scene):SkyboxEmpty(scene){
 
     m_Texture = new Texture(names,directory+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
-	epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
+    epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
 }
 Skybox::~Skybox(){
 }

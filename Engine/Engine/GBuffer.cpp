@@ -48,7 +48,7 @@ class epriv::GBuffer::impl final{
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
-			m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
+            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
             m_SmallFBO->bind();
 
             _constructFramebuffer(m_SmallFBO,"BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);

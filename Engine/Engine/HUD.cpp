@@ -21,7 +21,7 @@ using namespace Engine;
 using namespace std;
 
 HUD::HUD(){
-	m_Font = Resources::addFont("data/Fonts/consolas.fnt");
+    m_Font = Resources::addFont("data/Fonts/consolas.fnt");
     Engine::Math::setColor(m_Color,255,255,0);
     m_TargetIterator = 0;
     m_WarpIndicatorSize = glm::vec2(30,115);
@@ -72,15 +72,15 @@ void HUD::render(){
     // render warp drive
     //Engine::Renderer::renderRectangle(glm::vec2(winSize.x/2 - 100,winSize.y - m_WarpIndicatorSize.y/2),glm::vec4(m_Color.x,m_Color.y,m_Color.z,0.3f),m_WarpIndicatorSize.x,m_WarpIndicatorSize.y,0,0);
 
-	Font* font = Resources::getFont(m_Font);
+    Font* font = Resources::getFont(m_Font);
 
     #pragma region renderCrossHairAndOtherInfo
-	/*
+    /*
     if(player->getTarget() != nullptr){
         glm::vec3 pos = player->getTarget()->getScreenCoordinates();
         float scl = glm::max(0.5f,player->getTarget()->getRadius()*35 / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
         if(pos.z == 1){
-			Material* crosshair = Resources::getMaterial(ResourceManifest::CrosshairMaterial);
+            Material* crosshair = Resources::getMaterial(ResourceManifest::CrosshairMaterial);
             crosshair->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
             string stringRepresentation = "";
@@ -94,7 +94,7 @@ void HUD::render(){
             font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
         else{
-			Material* crosshairArrow = Resources::getMaterial(ResourceManifest::CrosshairArrowMaterial);
+            Material* crosshairArrow = Resources::getMaterial(ResourceManifest::CrosshairArrowMaterial);
             glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
             scl = 1;
 
@@ -112,15 +112,15 @@ void HUD::render(){
                 else if(pos.x > winSize.x - 2)     angle = 180;
                 else                               angle = 135;
             }
-			crosshairArrow->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
+            crosshairArrow->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
         }
     }
-	*/
+    */
     #pragma endregion
 
     #pragma region DrawDebugStuff
 
-	font->renderText(Engine::Data::reportTime() + 
+    font->renderText(Engine::Data::reportTime() + 
                        "\nEntity Count: " + to_string(Resources::getCurrentScene()->entities().size()),
                        glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 

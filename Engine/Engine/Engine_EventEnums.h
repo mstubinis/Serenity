@@ -126,14 +126,14 @@ class MouseWheel final{public: enum Wheel{
 };};
 
 class JoystickAxis final{public: enum Axis{
-	X,
-	Y,
-	Z,
-	R,
-	U,
-	V,
-	PovX,
-	PovY,
+    X,
+    Y,
+    Z,
+    R,
+    U,
+    V,
+    PovX,
+    PovY,
 };};
 
 #endif

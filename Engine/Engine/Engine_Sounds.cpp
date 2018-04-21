@@ -117,66 +117,66 @@ class Engine::epriv::SoundManager::impl final{
         vector<SoundBaseClass*> m_CurrentlyPlayingSounds;
         vector<SoundQueue*> m_SoundQueues;
 
-		void _init(const char* name,uint& w,uint& h){
-		}
-		void _postInit(const char* name,uint& w,uint& h){
-		}
-		void _destruct(){
-			for(auto q:m_SoundQueues){ delete q; }
-			for(auto s:m_CurrentlyPlayingSounds){ delete s; }
-			vector_clear(m_SoundQueues);
-			vector_clear(m_CurrentlyPlayingSounds);
-		}
-		void _updateSoundStatus(SoundBaseClass* sound,sf::SoundSource::Status sfStatus){
-			if(sfStatus == sf::SoundSource::Status::Stopped){
-				if(sound->m_i->m_Loops != 1 && sound->m_i->m_Loops != 0){//handle the looping logic
-					if(sound->getLoopsLeft() >= 2){
-						sound->m_i->m_CurrentLoop++;
-						sound->play(sound->m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
-						//sound->restart();
-					}
-					else{
-						sound->stop();
-					}
-				}
-				else if(sound->m_i->m_Loops == 1){//only once
-					sound->stop();
-				}
-				else{//endless loop (sound will have to be stoped manually by the user to end an endless loop)
-					sound->play(sound->m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
-				}
-			}
-		}
-		void _update(const float& dt){
-			for(auto it = m_CurrentlyPlayingSounds.begin(); it != m_CurrentlyPlayingSounds.end();){
-				SoundBaseClass* s = (*it);
-				s->update(dt);
-				if(s->status() == SoundStatus::Stopped){
-					it = m_CurrentlyPlayingSounds.erase(it);
-				}
-				else{
-					++it;
-				}
-			}
-			for(auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();){
-				SoundQueue* s = (*it1);
-				s->update(dt);
-				if(s->empty()){
-					it1 = m_SoundQueues.erase(it1);
-				}
-				else{
-					++it1;
-				}
-			}
-		}
+        void _init(const char* name,uint& w,uint& h){
+        }
+        void _postInit(const char* name,uint& w,uint& h){
+        }
+        void _destruct(){
+            for(auto q:m_SoundQueues){ delete q; }
+            for(auto s:m_CurrentlyPlayingSounds){ delete s; }
+            vector_clear(m_SoundQueues);
+            vector_clear(m_CurrentlyPlayingSounds);
+        }
+        void _updateSoundStatus(SoundBaseClass* sound,sf::SoundSource::Status sfStatus){
+            if(sfStatus == sf::SoundSource::Status::Stopped){
+                if(sound->m_i->m_Loops != 1 && sound->m_i->m_Loops != 0){//handle the looping logic
+                    if(sound->getLoopsLeft() >= 2){
+                        sound->m_i->m_CurrentLoop++;
+                        sound->play(sound->m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
+                        //sound->restart();
+                    }
+                    else{
+                        sound->stop();
+                    }
+                }
+                else if(sound->m_i->m_Loops == 1){//only once
+                    sound->stop();
+                }
+                else{//endless loop (sound will have to be stoped manually by the user to end an endless loop)
+                    sound->play(sound->m_i->m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
+                }
+            }
+        }
+        void _update(const float& dt){
+            for(auto it = m_CurrentlyPlayingSounds.begin(); it != m_CurrentlyPlayingSounds.end();){
+                SoundBaseClass* s = (*it);
+                s->update(dt);
+                if(s->status() == SoundStatus::Stopped){
+                    it = m_CurrentlyPlayingSounds.erase(it);
+                }
+                else{
+                    ++it;
+                }
+            }
+            for(auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();){
+                SoundQueue* s = (*it1);
+                s->update(dt);
+                if(s->empty()){
+                    it1 = m_SoundQueues.erase(it1);
+                }
+                else{
+                    ++it1;
+                }
+            }
+        }
 };
 class SoundEffect::impl final{
     public:	
         sf::Sound m_Sound;
 
         void _init(SoundBaseClass* s,Handle& handle,bool queue){
-			SoundData* data = Engine::Resources::getSoundData(handle);
-			_init(s,data,queue);
+            SoundData* data = Engine::Resources::getSoundData(handle);
+            _init(s,data,queue);
         }
         void _init(SoundBaseClass* s,SoundData* data,bool queue){
             if(data->getBuffer() == nullptr){
@@ -208,8 +208,8 @@ class SoundMusic::impl final{
     public:
         sf::Music m_Sound;
         void _init(SoundBaseClass* s,Handle& handle,bool queue){
-			SoundData* data = Resources::getSoundData(handle);
-			if (!m_Sound.openFromFile(data->name())){
+            SoundData* data = Resources::getSoundData(handle);
+            if (!m_Sound.openFromFile(data->name())){
                 // error...
             }
             else{

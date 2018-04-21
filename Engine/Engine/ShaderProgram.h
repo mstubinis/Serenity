@@ -52,7 +52,7 @@ class ShaderP final: public BindableResource{
         std::vector<Material*>& getMaterials();
 
         void addMaterial(Handle& materialHandle);
-		void addMaterial(Material*);
+        void addMaterial(Material*);
         const std::unordered_map<std::string,GLint>& uniforms() const;
 };
 

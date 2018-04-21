@@ -22,9 +22,9 @@ class LightAttenuation{public:enum Model{
 };};
 class SunLight: public Entity{
     private:
-		class impl;
+        class impl;
     protected:
-		std::unique_ptr<impl> m_i;
+        std::unique_ptr<impl> m_i;
     public:
         SunLight(glm::vec3 = glm::vec3(0.0f),LightType::Type = LightType::Sun,Scene* = nullptr);
         virtual ~SunLight();
@@ -34,9 +34,9 @@ class SunLight: public Entity{
         float getDiffuseIntensity();     void setDiffuseIntensity(float d);
         float getSpecularIntensity();    void setSpecularIntensity(float s);
 
-		glm::vec3 position();
-		void setColor(float,float,float,float);  void setColor(glm::vec4);
-		void setPosition(float,float,float);     void setPosition(glm::vec3);
+        glm::vec3 position();
+        void setColor(float,float,float,float);  void setColor(glm::vec4);
+        void setPosition(float,float,float);     void setPosition(glm::vec3);
         void activate(bool=true);                void deactivate();
         bool isActive();
         uint type();
@@ -86,7 +86,7 @@ class SpotLight: public PointLight{
 class RodLight: public PointLight{
     private:
         float m_RodLength;
-		float calculateCullingRadius();
+        float calculateCullingRadius();
     public:
         RodLight(glm::vec3 = glm::vec3(0.0f), float = 2.0f,Scene* = nullptr);
         virtual ~RodLight();

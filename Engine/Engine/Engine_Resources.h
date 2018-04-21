@@ -30,29 +30,29 @@ class MeshInstance;
 class SoundData;
 
 namespace Engine{
-	namespace epriv{
-		class ResourceManager final{
-		    private:
-				class impl;
-		    public:
-				std::unique_ptr<impl> m_i;
+    namespace epriv{
+        class ResourceManager final{
+            private:
+                class impl;
+            public:
+                std::unique_ptr<impl> m_i;
 
-				ResourceManager(const char* name,uint width,uint height);
-				~ResourceManager();
+                ResourceManager(const char* name,uint width,uint height);
+                ~ResourceManager();
 
-				void _init(const char* name,uint width,uint height);
-		
-				Handle _addTexture(Texture*);
+                void _init(const char* name,uint width,uint height);
+        
+                Handle _addTexture(Texture*);
 
-				bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
-				void _addMeshInstance(MeshInstance*);
+                bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
+                void _addMeshInstance(MeshInstance*);
 
-				void _remObject(std::string);
+                void _remObject(std::string);
 
-				void _resizeCameras(uint w,uint h);
-				uint _numScenes();
-		};
-	};
+                void _resizeCameras(uint w,uint h);
+                uint _numScenes();
+        };
+    };
     namespace Resources{
         namespace Settings{
             void enableDynamicMemory(bool enable = true);
@@ -81,7 +81,7 @@ namespace Engine{
         void getMaterial(Handle& inHandle,Material*& outPtr);     Material* getMaterial(Handle& inHandle);
         void getShaderProgram(Handle& inHandle,ShaderP*& outPtr); ShaderP* getShaderProgram(Handle& inHandle);
 
-		Handle addFont(std::string filename);
+        Handle addFont(std::string filename);
 
         Handle addMesh(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
@@ -92,13 +92,13 @@ namespace Engine{
         Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
 
         Handle addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
-		Handle addSoundData(std::string file,std::string name = "",bool music = false);
+        Handle addSoundData(std::string file,std::string name = "",bool music = false);
         Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-		Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
+        Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
     };
-	namespace Data{
-		std::string reportTime();
-	};
+    namespace Data{
+        std::string reportTime();
+    };
     //TODO: Move this somewhere else
     template<typename T>
     static std::string convertNumToNumWithCommas(T n){

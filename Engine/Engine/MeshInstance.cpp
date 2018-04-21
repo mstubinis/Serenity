@@ -22,21 +22,21 @@ class MeshInstanceAnimation::impl{
         string m_AnimName;
         Mesh* m_Mesh;
 
-		void _init(Mesh* _mesh,const string& _animName,float _startTime,float _endTime,uint _requestedLoops){
-			m_CurrentLoops = 0;
-			m_RequestedLoops = _requestedLoops;
-			m_CurrentTime = 0;
-			m_StartTime = _startTime;
-			m_EndTime = _endTime;
-			m_AnimName = _animName;
-			m_Mesh = _mesh;
-		}
+        void _init(Mesh* _mesh,const string& _animName,float _startTime,float _endTime,uint _requestedLoops){
+            m_CurrentLoops = 0;
+            m_RequestedLoops = _requestedLoops;
+            m_CurrentTime = 0;
+            m_StartTime = _startTime;
+            m_EndTime = _endTime;
+            m_AnimName = _animName;
+            m_Mesh = _mesh;
+        }
 };
 class MeshInstance::impl{
     public:  
         vector<MeshInstanceAnimation*> m_AnimationQueue;
 
-		Entity* m_Entity;
+        Entity* m_Entity;
 
 
         Mesh* m_Mesh;
@@ -48,8 +48,8 @@ class MeshInstance::impl{
         bool m_NeedsUpdate;
 
 
-		glm::vec4 m_Color;
-		glm::vec3 m_GodRaysColor;
+        glm::vec4 m_Color;
+        glm::vec3 m_GodRaysColor;
 
         void _init(Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl,MeshInstance* super,Entity* entity){
             m_Entity = entity;
@@ -62,8 +62,8 @@ class MeshInstance::impl{
             _updateModelMatrix();
             m_NeedsUpdate = false;
 
-			m_Color = glm::vec4(1.0f);
-			m_GodRaysColor = glm::vec3(0.0f);
+            m_Color = glm::vec4(1.0f);
+            m_GodRaysColor = glm::vec3(0.0f);
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){
             _removeMeshFromInstance(super);
@@ -110,18 +110,18 @@ class MeshInstance::impl{
                     for(auto entry:mat->getMeshEntries()){
                         if(entry->mesh() == m_Mesh){
                             bool add = true;
-							for(auto object:entry->meshInstancesEntities()){
-								if(object.first == m_Entity->id()){
-									for(auto instance:object.second){
-										if(instance == super){
-											add = false;
-											break;
-										}
-									}
-								}
+                            for(auto object:entry->meshInstancesEntities()){
+                                if(object.first == m_Entity->id()){
+                                    for(auto instance:object.second){
+                                        if(instance == super){
+                                            add = false;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                             if(add){
-								entry->addMeshInstance(m_Entity,super);
+                                entry->addMeshInstance(m_Entity,super);
                             }
                         }
                     }
@@ -129,25 +129,25 @@ class MeshInstance::impl{
             }
         }
         void _removeMeshInstanceFromMaterial(MeshInstance* super){
-			for(auto materialMeshEntry:m_Material->getMeshEntries()){
-				if(materialMeshEntry->mesh() == m_Mesh){
-					materialMeshEntry->removeMeshInstance(m_Entity,super);
-					break;
-				}
-			}
+            for(auto materialMeshEntry:m_Material->getMeshEntries()){
+                if(materialMeshEntry->mesh() == m_Mesh){
+                    materialMeshEntry->removeMeshInstance(m_Entity,super);
+                    break;
+                }
+            }
         }
         void _removeMeshEntryFromMaterial(){
             bool del = true;
             for(auto meshEntry:m_Material->getMeshEntries()){
                 if(meshEntry->mesh() == m_Mesh){
                     del = false; 
-					break;
+                    break;
                 }
             }
             if(del){ m_Material->removeMeshEntry(m_Mesh); }
         }		  
         void _destruct(MeshInstance* super){
-			for(auto queue:m_AnimationQueue) SAFE_DELETE(queue);
+            for(auto queue:m_AnimationQueue) SAFE_DELETE(queue);
             _removeMeshFromInstance(super);
             _removeMaterialFromInstance(super);
         }
@@ -178,45 +178,45 @@ class MeshInstance::impl{
 struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance::impl& i = *(((MeshInstance*)r)->m_i);
 
-	glm::mat4 parentModel = glm::mat4(1.0f);
-	Entity* parent = nullptr;
-	parent = i.m_Entity;
-	epriv::ComponentBodyBaseClass& body = *(parent->getComponent<epriv::ComponentBodyBaseClass>());
-	parentModel = body.modelMatrix();
+    glm::mat4 parentModel = glm::mat4(1.0f);
+    Entity* parent = nullptr;
+    parent = i.m_Entity;
+    epriv::ComponentBodyBaseClass& body = *(parent->getComponent<epriv::ComponentBodyBaseClass>());
+    parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& q = i.m_AnimationQueue;
     Renderer::sendUniform4fSafe("Object_Color",i.m_Color);
     Renderer::sendUniform3fSafe("Gods_Rays_Color",i.m_GodRaysColor);
     if(q.size() > 0){
         vector<glm::mat4> transforms;
-		//process the animation here
-		for(uint j = 0; j < q.size(); ++j){
-			MeshInstanceAnimation::impl& a = *(q.at(j)->m_i.get());
-			if(a.m_Mesh == i.m_Mesh){
-				a.m_CurrentTime += Resources::dt();
-				if(transforms.size() == 0){
-					transforms.resize(a.m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
-				}
-				a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
-				if(a.m_CurrentTime >= a.m_EndTime){
-					a.m_CurrentTime = 0;
-					++a.m_CurrentLoops;
-				}
-			}
-		}
-		Renderer::sendUniform1iSafe("AnimationPlaying",1);
-		Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
+        //process the animation here
+        for(uint j = 0; j < q.size(); ++j){
+            MeshInstanceAnimation::impl& a = *(q.at(j)->m_i.get());
+            if(a.m_Mesh == i.m_Mesh){
+                a.m_CurrentTime += Resources::dt();
+                if(transforms.size() == 0){
+                    transforms.resize(a.m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
+                }
+                a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
+                if(a.m_CurrentTime >= a.m_EndTime){
+                    a.m_CurrentTime = 0;
+                    ++a.m_CurrentLoops;
+                }
+            }
+        }
+        Renderer::sendUniform1iSafe("AnimationPlaying",1);
+        Renderer::sendUniformMatrix4fvSafe("gBones[0]",transforms,transforms.size());
 
-		//cleanup the animation queue
-		for (auto it = q.cbegin(); it != q.cend();){
-			MeshInstanceAnimation* anim = (*it);
-			MeshInstanceAnimation::impl& a = *(anim->m_i.get());
-			if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
-				SAFE_DELETE(anim); //do we need this?
-				it = q.erase(it);
-			}
-			else{ ++it; }
-		}
+        //cleanup the animation queue
+        for (auto it = q.cbegin(); it != q.cend();){
+            MeshInstanceAnimation* anim = (*it);
+            MeshInstanceAnimation::impl& a = *(anim->m_i.get());
+            if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
+                SAFE_DELETE(anim); //do we need this?
+                it = q.erase(it);
+            }
+            else{ ++it; }
+        }
     }
     else{
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
@@ -245,7 +245,7 @@ MeshInstanceAnimation::~MeshInstanceAnimation(){
 
 MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,entity);
-	epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
+    epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }

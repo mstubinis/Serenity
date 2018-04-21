@@ -12,7 +12,7 @@ class epriv::TimeManager::impl{
         sf::Clock clock;
         float logicTime, physicsTime, renderTime, soundTime, displayTime, deltaTime;
         uint output_frame_delay, output_frame;
-		uint decimals;
+        uint decimals;
         string output;
 
         void _init(const char* name,uint& w,uint& h){
@@ -23,10 +23,10 @@ class epriv::TimeManager::impl{
 
             output_frame_delay = 4;
             output_frame = 0;
-			decimals = 6;
+            decimals = 6;
         }
-		void _postInit(const char* name,uint& w,uint& h){
-		}
+        void _postInit(const char* name,uint& w,uint& h){
+        }
 };
 epriv::TimeManager::TimeManager(const char* name,uint w,uint h):m_i(new impl){m_i->_init(name,w,h);}
 epriv::TimeManager::~TimeManager(){}
@@ -56,17 +56,17 @@ const float& epriv::TimeManager::displayTime() const{ return m_i->displayTime; }
 
 string& epriv::TimeManager::reportTime(){ return epriv::TimeManager::reportTime(m_i->decimals); }
 string& epriv::TimeManager::reportTime(uint decimals){
-	m_i->decimals = decimals;
+    m_i->decimals = decimals;
     if((m_i->output_frame >= m_i->output_frame_delay-1) || m_i->output_frame_delay == 0){
-		uint fps = uint(1.0f/m_i->deltaTime);
-		stringstream st1, st2, st3, st4, st5, st6;
-		st1 << std::fixed << std::setprecision(decimals) << m_i->logicTime * 1000.0f;
-		st2 << std::fixed << std::setprecision(decimals) << m_i->physicsTime * 1000.0f;
-		st5 << std::fixed << std::setprecision(decimals) << m_i->soundTime * 1000.0f;
-		st3 << std::fixed << std::setprecision(decimals) << m_i->renderTime * 1000.0f;
-		st4 << std::fixed << std::setprecision(decimals) << m_i->deltaTime * 1000.0f;
-		st6 << std::fixed << std::setprecision(decimals) << m_i->displayTime * 1000.0f;
-		string s1=st1.str(); string s2=st2.str(); string s3=st3.str(); string s4=st4.str(); string s5=st5.str(); string s6=st6.str();
+        uint fps = uint(1.0f/m_i->deltaTime);
+        stringstream st1, st2, st3, st4, st5, st6;
+        st1 << std::fixed << std::setprecision(decimals) << m_i->logicTime * 1000.0f;
+        st2 << std::fixed << std::setprecision(decimals) << m_i->physicsTime * 1000.0f;
+        st5 << std::fixed << std::setprecision(decimals) << m_i->soundTime * 1000.0f;
+        st3 << std::fixed << std::setprecision(decimals) << m_i->renderTime * 1000.0f;
+        st4 << std::fixed << std::setprecision(decimals) << m_i->deltaTime * 1000.0f;
+        st6 << std::fixed << std::setprecision(decimals) << m_i->displayTime * 1000.0f;
+        string s1=st1.str(); string s2=st2.str(); string s3=st3.str(); string s4=st4.str(); string s5=st5.str(); string s6=st6.str();
 
         m_i->output =        "Update Time:  " + s1 + " ms" + "\nPhysics Time: " + s2 + " ms" + "\nSounds Time:  " + s5 + " ms" +
                           "\nRender Time:  " + s3 + " ms" + "\nDisplay Time: " + s6 + " ms" + "\nDelta Time:   " + s4 + " ms" +

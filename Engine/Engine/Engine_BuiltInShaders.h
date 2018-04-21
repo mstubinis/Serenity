@@ -14,8 +14,8 @@ namespace Engine{
 
                     static std::string version;
 
-					static std::string constants;
-					static std::string conditional_functions;
+                    static std::string constants;
+                    static std::string conditional_functions;
                     static std::string float_into_2_floats;
                     static std::string determinent_mat3;
                     static std::string normals_octahedron_compression_functions;
@@ -49,7 +49,7 @@ namespace Engine{
                     static std::string deferred_frag;
                     static std::string deferred_frag_hud;
                     static std::string deferred_frag_skybox;
-					static std::string deferred_frag_skybox_fake;
+                    static std::string deferred_frag_skybox_fake;
 
                     static std::string copy_depth_frag;
                     static std::string cubemap_convolude_frag;
@@ -67,7 +67,7 @@ namespace Engine{
 
                     static std::string final_frag;
                     static std::string lighting_frag;
-					static std::string lighting_frag_optimized;
+                    static std::string lighting_frag_optimized;
                     static std::string lighting_frag_gi;
             };
         };

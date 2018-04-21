@@ -16,21 +16,21 @@ class Engine_Window::impl final{
         const char* m_WindowName;
         sf::Window* m_SFMLWindow;
         uint m_Width, m_Height, m_FramerateLimit;
-		bool m_MouseCursorVisible;
-		bool m_Fullscreen;
-		bool m_Active;
-		sf::ContextSettings m_SFContextSettings;
+        bool m_MouseCursorVisible;
+        bool m_Fullscreen;
+        bool m_Active;
+        sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
-			m_FramerateLimit = 0;
-			m_MouseCursorVisible = true;
-			m_Fullscreen = false;
+            m_FramerateLimit = 0;
+            m_MouseCursorVisible = true;
+            m_Fullscreen = false;
             m_WindowName = name;
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
-			_setActive(true);
+            _setActive(true);
             m_SFContextSettings = _createOpenGLWindow(name,width,height,3,3,330);
-			std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
+            std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
         }
         void _destruct(){
             SAFE_DELETE(m_SFMLWindow);
@@ -42,10 +42,10 @@ class Engine_Window::impl final{
             settings.antialiasingLevel = 0;
             settings.majorVersion = _majorVersion;
             settings.minorVersion = _minorVersion;
-			std::string core = "";
-			if(_glslVersion >= 330)
-				core = " core";
-			Shaders::Detail::ShadersManagement::version = "#version " + to_string(_glslVersion) + core + "\n";
+            std::string core = "";
+            if(_glslVersion >= 330)
+                core = " core";
+            Shaders::Detail::ShadersManagement::version = "#version " + to_string(_glslVersion) + core + "\n";
 
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;
@@ -68,12 +68,12 @@ class Engine_Window::impl final{
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
 
-			epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height);
+            epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height);
 
-			return m_SFMLWindow->getSettings();
+            return m_SFMLWindow->getSettings();
         }
         void _setFullScreen(bool fullscreen){
-			if(m_Fullscreen == fullscreen) return;
+            if(m_Fullscreen == fullscreen) return;
             if(m_Style == sf::Style::Fullscreen && fullscreen) return;
             if(m_Style != sf::Style::Fullscreen && !fullscreen) return;
             if(!m_SFMLWindow->hasFocus()) return;
@@ -85,21 +85,21 @@ class Engine_Window::impl final{
                 m_VideoMode.width = m_Width;
                 m_VideoMode.height = m_Height;
             }
-			epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
+            epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
 
-			glm::uvec2 winSize = Engine::getWindowSize();
+            glm::uvec2 winSize = Engine::getWindowSize();
 
-			//basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
-			epriv::Core::m_Engine->m_RenderManager->_resize(winSize.x,winSize.y);
-			epriv::Core::m_Engine->m_ComponentManager->_resize(winSize.x,winSize.y);
-			Renderer::setViewport(0,0,winSize.x,winSize.y);
-			Game::onResize(winSize.x,winSize.y);
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
+            epriv::Core::m_Engine->m_RenderManager->_resize(winSize.x,winSize.y);
+            epriv::Core::m_Engine->m_ComponentManager->_resize(winSize.x,winSize.y);
+            Renderer::setViewport(0,0,winSize.x,winSize.y);
+            Game::onResize(winSize.x,winSize.y);
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			//for some reason the mouse is shown even if it was hidden at first
-			m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
+            //for some reason the mouse is shown even if it was hidden at first
+            m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
 
-			m_Fullscreen = fullscreen;
+            m_Fullscreen = fullscreen;
         }
         void _setStyle(uint style){
             if(m_Style == style) return;
@@ -117,27 +117,27 @@ class Engine_Window::impl final{
             m_SFMLWindow->setTitle(m_WindowName);
         }
         void _setIcon(const char* file){ //if this is called twice using the same file, a duplicate texture will be added. possibly fix or just warn the user?
-			Texture* texture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-			epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+            Texture* texture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+            epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }
         void _setIcon(Texture* texture){
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }
-		void _setMouseCursorVisible(bool& visible){
-			if(m_MouseCursorVisible != visible){
-			    m_SFMLWindow->setMouseCursorVisible(visible);
-				m_MouseCursorVisible = visible;
-			}
-		}
-		void _setActive(bool active){
-			m_Active = active;
-			m_SFMLWindow->setActive(active);
-		}
-		void _setFramerateLimit(uint& limit){
-			m_SFMLWindow->setFramerateLimit(limit);
-			m_FramerateLimit = limit;
-		}
+        void _setMouseCursorVisible(bool& visible){
+            if(m_MouseCursorVisible != visible){
+                m_SFMLWindow->setMouseCursorVisible(visible);
+                m_MouseCursorVisible = visible;
+            }
+        }
+        void _setActive(bool active){
+            m_Active = active;
+            m_SFMLWindow->setActive(active);
+        }
+        void _setFramerateLimit(uint& limit){
+            m_SFMLWindow->setFramerateLimit(limit);
+            m_FramerateLimit = limit;
+        }
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){

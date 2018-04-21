@@ -20,120 +20,120 @@ using namespace std;
 vector<glm::vec4> Material::m_MaterialProperities;
 
 namespace Engine{
-	namespace epriv{
-		class MaterialComponentTextureSlot{public: enum Slot{
-			Diffuse,
-			Normal,
-			Glow,
-			Specular,
-			AO,
-			Metalness,
-			Smoothness,
-			Reflection_CUBEMAP,
-			Reflection_CUBEMAP_MAP,
-			Refraction_CUBEMAP,
-			Refraction_CUBEMAP_MAP,
-			Heightmap,
-		};};
-		GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
-			"DiffuseTexture",
-			"NormalTexture",
-			"GlowTexture",
-			"SpecularTexture",
-			"AOTexture",
-			"MetalnessTexture",
-			"SmoothnessTexture",
-			"ReflectionTexture",
-			"RefractionTexture",
-			"HeightmapTexture",
-		};
-		struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-			Material& material = *((Material*)r);
-			glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
-			for(uint i = 0; i < MaterialComponentType::Number; ++i){
-				if(material.getComponents().count(i)){
-					MaterialComponent* component = material.getComponents().at(i);
-					if(component->texture() != nullptr && component->texture()->address() != 0){
-						//enable
-						if     (i == 0) { first.x = 1.0f; }
-						else if(i == 1) { first.y = 1.0f; }
-						else if(i == 2) { first.z = 1.0f; }
-						else if(i == 3) { first.w = 1.0f; }
-						else if(i == 4) { second.x = 1.0f; }
-						else if(i == 5) { second.y = 1.0f; }
-						else if(i == 6) { second.z = 1.0f; }
-						else if(i == 7) { second.w = 1.0f; }
-						else if(i == 8) { third.x = 1.0f; }
-						else if(i == 9) { third.y = 1.0f; }
-						else if(i == 10){ third.z = 1.0f; }
-						else if(i == 11){ third.w = 1.0f; }
-						component->bind();
-					}
-					else{ 
-						component->unbind(); 
-					}
-				}
-			}
-			Renderer::sendUniform1iSafe("Shadeless",int(material.shadeless()));
-			Renderer::sendUniform3fSafe("Material_F0",material.f0().r,material.f0().g,material.f0().b);
-			Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
+    namespace epriv{
+        class MaterialComponentTextureSlot{public: enum Slot{
+            Diffuse,
+            Normal,
+            Glow,
+            Specular,
+            AO,
+            Metalness,
+            Smoothness,
+            Reflection_CUBEMAP,
+            Reflection_CUBEMAP_MAP,
+            Refraction_CUBEMAP,
+            Refraction_CUBEMAP_MAP,
+            Heightmap,
+        };};
+        GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
+            "DiffuseTexture",
+            "NormalTexture",
+            "GlowTexture",
+            "SpecularTexture",
+            "AOTexture",
+            "MetalnessTexture",
+            "SmoothnessTexture",
+            "ReflectionTexture",
+            "RefractionTexture",
+            "HeightmapTexture",
+        };
+        struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
+            Material& material = *((Material*)r);
+            glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
+            for(uint i = 0; i < MaterialComponentType::Number; ++i){
+                if(material.getComponents().count(i)){
+                    MaterialComponent* component = material.getComponents().at(i);
+                    if(component->texture() != nullptr && component->texture()->address() != 0){
+                        //enable
+                        if     (i == 0) { first.x = 1.0f; }
+                        else if(i == 1) { first.y = 1.0f; }
+                        else if(i == 2) { first.z = 1.0f; }
+                        else if(i == 3) { first.w = 1.0f; }
+                        else if(i == 4) { second.x = 1.0f; }
+                        else if(i == 5) { second.y = 1.0f; }
+                        else if(i == 6) { second.z = 1.0f; }
+                        else if(i == 7) { second.w = 1.0f; }
+                        else if(i == 8) { third.x = 1.0f; }
+                        else if(i == 9) { third.y = 1.0f; }
+                        else if(i == 10){ third.z = 1.0f; }
+                        else if(i == 11){ third.w = 1.0f; }
+                        component->bind();
+                    }
+                    else{ 
+                        component->unbind(); 
+                    }
+                }
+            }
+            Renderer::sendUniform1iSafe("Shadeless",int(material.shadeless()));
+            Renderer::sendUniform3fSafe("Material_F0",material.f0().r,material.f0().g,material.f0().b);
+            Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
 
-			Renderer::sendUniform1fSafe("matID",float(material.id()));
-			Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
-			Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
-			Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
-		}};
-		struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
-			//Material& material = *((Material*)r);
-		}};
-		unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
-			unordered_map<uint,vector<uint>> m;
-			m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
-			m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
-			m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
-			m[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
-			m[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
-			m[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
-			m[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
-			m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
-			m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
-			m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
-			m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
-			m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
-			return m;
-		}();
-		unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
-			unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
-			//Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
-			m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
-			m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
-			m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f,    0.98f,          0.0f);
-			m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.0773f,0.0773f,0.0773f,       0.98f,          0.0f);
-			m[MaterialPhysics::Gold]                 = boost::make_tuple(0.929f,0.6549f,0.0f,           0.9f,           1.0f);
-			m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,             0.5f,           1.0f);
-			m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,             0.92f,          0.0f);
-			m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,             0.965f,         0.0f);
-			m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,             0.94f,          1.0f);
-			m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,             0.5f,           0.0f);
-			m[MaterialPhysics::Skin]                 = boost::make_tuple(0.028f,0.028f,0.028f,          0.1f,           0.0f);
-			m[MaterialPhysics::Quartz]               = boost::make_tuple(0.045594f,0.045594f,0.04554f,  0.8f,           0.0f);
-			m[MaterialPhysics::Crystal]              = boost::make_tuple(0.11111f,0.11111f,0.11111f,    0.9f,           0.0f);
-			m[MaterialPhysics::Alcohol]              = boost::make_tuple(0.01995f,0.01995f,0.01995f,    0.8f,           0.0f);
-			m[MaterialPhysics::Milk]                 = boost::make_tuple(0.02218f,0.02218f,0.02218f,    0.6f,           0.0f);
-			m[MaterialPhysics::Glass]                = boost::make_tuple(0.04f,0.04f,0.04f,             0.97f,          0.0f);
-			m[MaterialPhysics::Titanium]             = boost::make_tuple(0.5419f,0.4967f,0.4494f,       0.91f,          1.0f);
-			m[MaterialPhysics::Platinum]             = boost::make_tuple(0.6724f,0.6373f,0.5854f,       0.91f,          1.0f);
-			m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597f,0.6086f,0.5256f,       0.95f,          1.0f);    
-			m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,          0.45f,          0.0f);
-			m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,             0.32f,          0.0f);
-			m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,          0.8f,           1.0f);
-			m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,             0.92f,          0.0f);
-			m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,             0.35f,          0.0f);
-			m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,           0.9f,           1.0f);
-			m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
-			return m;
-		}();
-	};
+            Renderer::sendUniform1fSafe("matID",float(material.id()));
+            Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
+            Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
+            Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
+        }};
+        struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
+            //Material& material = *((Material*)r);
+        }};
+        unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
+            unordered_map<uint,vector<uint>> m;
+            m[MaterialComponentType::Diffuse].push_back(MaterialComponentTextureSlot::Diffuse);
+            m[MaterialComponentType::Normal].push_back(MaterialComponentTextureSlot::Normal);
+            m[MaterialComponentType::Glow].push_back(MaterialComponentTextureSlot::Glow);
+            m[MaterialComponentType::Specular].push_back(MaterialComponentTextureSlot::Specular);
+            m[MaterialComponentType::AO].push_back(MaterialComponentTextureSlot::AO);
+            m[MaterialComponentType::Metalness].push_back(MaterialComponentTextureSlot::Metalness);
+            m[MaterialComponentType::Smoothness].push_back(MaterialComponentTextureSlot::Smoothness);
+            m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP);
+            m[MaterialComponentType::Reflection].push_back(MaterialComponentTextureSlot::Reflection_CUBEMAP_MAP);
+            m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP);
+            m[MaterialComponentType::Refraction].push_back(MaterialComponentTextureSlot::Refraction_CUBEMAP_MAP);
+            m[MaterialComponentType::ParallaxOcclusion].push_back(MaterialComponentTextureSlot::Heightmap);
+            return m;
+        }();
+        unordered_map<uint,boost::tuple<float,float,float,float,float>> MATERIAL_PROPERTIES = [](){
+            unordered_map<uint,boost::tuple<float,float,float,float,float>> m;
+            //Remember specular reflection of non metals is white!       //(F0)                         //Smoothness    //Metalness
+            m[MaterialPhysics::Aluminium]            = boost::make_tuple(0.9131f,0.9215f,0.92452f,      0.75f,          1.0f);
+            m[MaterialPhysics::Copper]               = boost::make_tuple(0.955f,0.6374f,0.5381f,        0.9f,           1.0f);
+            m[MaterialPhysics::Diamond]              = boost::make_tuple(0.17196f,0.17196f,0.17196f,    0.98f,          0.0f);
+            m[MaterialPhysics::Glass_Or_Ruby_High]   = boost::make_tuple(0.0773f,0.0773f,0.0773f,       0.98f,          0.0f);
+            m[MaterialPhysics::Gold]                 = boost::make_tuple(0.929f,0.6549f,0.0f,           0.9f,           1.0f);
+            m[MaterialPhysics::Iron]                 = boost::make_tuple(0.56f,0.57f,0.58f,             0.5f,           1.0f);
+            m[MaterialPhysics::Plastic_High]         = boost::make_tuple(0.05f,0.05f,0.05f,             0.92f,          0.0f);
+            m[MaterialPhysics::Plastic_Or_Glass_Low] = boost::make_tuple(0.03f,0.03f,0.03f,             0.965f,         0.0f);
+            m[MaterialPhysics::Silver]               = boost::make_tuple(0.95f,0.93f,0.88f,             0.94f,          1.0f);
+            m[MaterialPhysics::Water]                = boost::make_tuple(0.02f,0.02f,0.02f,             0.5f,           0.0f);
+            m[MaterialPhysics::Skin]                 = boost::make_tuple(0.028f,0.028f,0.028f,          0.1f,           0.0f);
+            m[MaterialPhysics::Quartz]               = boost::make_tuple(0.045594f,0.045594f,0.04554f,  0.8f,           0.0f);
+            m[MaterialPhysics::Crystal]              = boost::make_tuple(0.11111f,0.11111f,0.11111f,    0.9f,           0.0f);
+            m[MaterialPhysics::Alcohol]              = boost::make_tuple(0.01995f,0.01995f,0.01995f,    0.8f,           0.0f);
+            m[MaterialPhysics::Milk]                 = boost::make_tuple(0.02218f,0.02218f,0.02218f,    0.6f,           0.0f);
+            m[MaterialPhysics::Glass]                = boost::make_tuple(0.04f,0.04f,0.04f,             0.97f,          0.0f);
+            m[MaterialPhysics::Titanium]             = boost::make_tuple(0.5419f,0.4967f,0.4494f,       0.91f,          1.0f);
+            m[MaterialPhysics::Platinum]             = boost::make_tuple(0.6724f,0.6373f,0.5854f,       0.91f,          1.0f);
+            m[MaterialPhysics::Nickel]               = boost::make_tuple(0.6597f,0.6086f,0.5256f,       0.95f,          1.0f);    
+            m[MaterialPhysics::Black_Leather]        = boost::make_tuple(0.006f,0.005f,0.007f,          0.45f,          0.0f);
+            m[MaterialPhysics::Yellow_Paint_MERL]    = boost::make_tuple(0.32f,0.22f,0.05f,             0.32f,          0.0f);
+            m[MaterialPhysics::Chromium]             = boost::make_tuple(0.549f,0.556f,0.554f,          0.8f,           1.0f);
+            m[MaterialPhysics::Red_Plastic_MERL]     = boost::make_tuple(0.26f,0.05f,0.01f,             0.92f,          0.0f);
+            m[MaterialPhysics::Blue_Rubber_MERL]     = boost::make_tuple(0.05f,0.08f,0.17f,             0.35f,          0.0f);
+            m[MaterialPhysics::Zinc]                 = boost::make_tuple(0.664f,0.824f,0.85f,           0.9f,           1.0f);
+            m[MaterialPhysics::Car_Paint_Orange]     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
+            return m;
+        }();
+    };
 };
 
 #pragma region MaterialComponents
@@ -229,57 +229,57 @@ epriv::DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 class epriv::MaterialMeshEntry::impl final{
     public:
-	    Mesh* m_Mesh;
+        Mesh* m_Mesh;
         unordered_map<string,vector<MeshInstance*>> m_MeshInstances;
-		unordered_map<uint,vector<MeshInstance*>> m_MeshInstancesEntities;
+        unordered_map<uint,vector<MeshInstance*>> m_MeshInstancesEntities;
 
-		void _init(Mesh* mesh){
-			m_Mesh = mesh;
-		}
-		void _addMeshInstance(Entity* obj,MeshInstance* meshInstance){
-			if(!m_MeshInstancesEntities.count(obj->id())){
-				m_MeshInstancesEntities.emplace(obj->id(),vector<MeshInstance*>(1,meshInstance));
-			}
-			else{
-				m_MeshInstancesEntities.at(obj->id()).push_back(meshInstance);
-			}
-		}
-		void _removeMeshInstance(Entity* obj,MeshInstance* meshInstance){
-			if(m_MeshInstancesEntities.count(obj->id())){
-				vector<MeshInstance*>& v = m_MeshInstancesEntities.at(obj->id());
-				auto it = v.begin();
-				while(it != v.end()) {
-					MeshInstance* instance = (*it);
-					if(instance ==  meshInstance) {
-						//do not delete the instance here
-						it = v.erase(it);
-					}
-					else ++it;
-				}
-			}
-		}
-		void _addMeshInstance(const string& obj,MeshInstance* meshInstance){
-			if(!m_MeshInstances.count(obj)){
-				m_MeshInstances.emplace(obj,vector<MeshInstance*>(1,meshInstance));
-			}
-			else{
-				m_MeshInstances.at(obj).push_back(meshInstance);
-			}
-		}
-		void _removeMeshInstance(const string& obj,MeshInstance* meshInstance){
-			if(m_MeshInstances.count(obj)){
-				vector<MeshInstance*>& v = m_MeshInstances.at(obj);
-				auto it = v.begin();
-				while(it != v.end()) {
-					MeshInstance* instance = (*it);
-					if(instance ==  meshInstance) {
-						//do not delete the instance here
-						it = v.erase(it);
-					}
-					else ++it;
-				}
-			}
-		}
+        void _init(Mesh* mesh){
+            m_Mesh = mesh;
+        }
+        void _addMeshInstance(Entity* obj,MeshInstance* meshInstance){
+            if(!m_MeshInstancesEntities.count(obj->id())){
+                m_MeshInstancesEntities.emplace(obj->id(),vector<MeshInstance*>(1,meshInstance));
+            }
+            else{
+                m_MeshInstancesEntities.at(obj->id()).push_back(meshInstance);
+            }
+        }
+        void _removeMeshInstance(Entity* obj,MeshInstance* meshInstance){
+            if(m_MeshInstancesEntities.count(obj->id())){
+                vector<MeshInstance*>& v = m_MeshInstancesEntities.at(obj->id());
+                auto it = v.begin();
+                while(it != v.end()) {
+                    MeshInstance* instance = (*it);
+                    if(instance ==  meshInstance) {
+                        //do not delete the instance here
+                        it = v.erase(it);
+                    }
+                    else ++it;
+                }
+            }
+        }
+        void _addMeshInstance(const string& obj,MeshInstance* meshInstance){
+            if(!m_MeshInstances.count(obj)){
+                m_MeshInstances.emplace(obj,vector<MeshInstance*>(1,meshInstance));
+            }
+            else{
+                m_MeshInstances.at(obj).push_back(meshInstance);
+            }
+        }
+        void _removeMeshInstance(const string& obj,MeshInstance* meshInstance){
+            if(m_MeshInstances.count(obj)){
+                vector<MeshInstance*>& v = m_MeshInstances.at(obj);
+                auto it = v.begin();
+                while(it != v.end()) {
+                    MeshInstance* instance = (*it);
+                    if(instance ==  meshInstance) {
+                        //do not delete the instance here
+                        it = v.erase(it);
+                    }
+                    else ++it;
+                }
+            }
+        }
 };
 epriv::MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
     m_i->_init(mesh);
@@ -287,24 +287,24 @@ epriv::MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
 epriv::MaterialMeshEntry::~MaterialMeshEntry(){
 }
 void epriv::MaterialMeshEntry::addMeshInstance(const string& objectName,MeshInstance* meshInstance){
-	m_i->_addMeshInstance(objectName,meshInstance);
+    m_i->_addMeshInstance(objectName,meshInstance);
 }
 void epriv::MaterialMeshEntry::removeMeshInstance(const string& objectName,MeshInstance* meshInstance){
-	m_i->_removeMeshInstance(objectName,meshInstance);
+    m_i->_removeMeshInstance(objectName,meshInstance);
 }
 void epriv::MaterialMeshEntry::addMeshInstance(Entity* entity,MeshInstance* meshInstance){
-	m_i->_addMeshInstance(entity,meshInstance);
+    m_i->_addMeshInstance(entity,meshInstance);
 }
 void epriv::MaterialMeshEntry::removeMeshInstance(Entity* entity,MeshInstance* meshInstance){
-	m_i->_removeMeshInstance(entity,meshInstance);
+    m_i->_removeMeshInstance(entity,meshInstance);
 }
 void epriv::MaterialMeshEntry::addMeshInstance(uint entityID,MeshInstance* meshInstance){
-	Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
-	m_i->_addMeshInstance(e,meshInstance);
+    Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+    m_i->_addMeshInstance(e,meshInstance);
 }
 void epriv::MaterialMeshEntry::removeMeshInstance(uint entityID,MeshInstance* meshInstance){
-	Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
-	m_i->_removeMeshInstance(e,meshInstance);
+    Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
+    m_i->_removeMeshInstance(e,meshInstance);
 }
 Mesh* epriv::MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
 unordered_map<string,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstances(){ return m_i->m_MeshInstances; }
@@ -348,25 +348,25 @@ class Material::impl final{
             super->load();
         }
         void _init(string& name,string& diffuseFile,string& normalFile,string& glowFile,string& specularFile,Material* super){
-			//add checks to see if texture was loaded already
-			Texture *diffuseTexture,*normalTexture,*glowTexture,*specularTexture;
-			diffuseTexture = normalTexture = glowTexture = specularTexture = nullptr;
-			if(diffuseFile != ""){
+            //add checks to see if texture was loaded already
+            Texture *diffuseTexture,*normalTexture,*glowTexture,*specularTexture;
+            diffuseTexture = normalTexture = glowTexture = specularTexture = nullptr;
+            if(diffuseFile != ""){
                 diffuseTexture = new Texture(diffuseFile);
-				epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuseTexture);
-			}
-			if(normalFile != ""){
+                epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuseTexture);
+            }
+            if(normalFile != ""){
                 normalTexture = new Texture(normalFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-				epriv::Core::m_Engine->m_ResourceManager->_addTexture(normalTexture);
-			}
-			if(glowFile != ""){
+                epriv::Core::m_Engine->m_ResourceManager->_addTexture(normalTexture);
+            }
+            if(glowFile != ""){
                 glowTexture = new Texture(glowFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-				epriv::Core::m_Engine->m_ResourceManager->_addTexture(glowTexture);
-			}
-			if(specularFile != ""){
+                epriv::Core::m_Engine->m_ResourceManager->_addTexture(glowTexture);
+            }
+            if(specularFile != ""){
                 specularTexture = new Texture(specularFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-				epriv::Core::m_Engine->m_ResourceManager->_addTexture(specularTexture);
-			}
+                epriv::Core::m_Engine->m_ResourceManager->_addTexture(specularTexture);
+            }
             _init(name,diffuseTexture,normalTexture,glowTexture,specularTexture,super);
         }
         void _load(){
@@ -403,11 +403,11 @@ class Material::impl final{
             for(auto component:m_Components)
                 delete component.second;
         }
-		void _addComponentGeneric(Texture* texture,MaterialComponentType::Type type){
+        void _addComponentGeneric(Texture* texture,MaterialComponentType::Type type){
             if((m_Components.count(type) && m_Components.at(type) != nullptr) || texture == nullptr)
                 return;
             m_Components.emplace(type,new MaterialComponent(type,texture));
-		}
+        }
         void _addComponentDiffuse(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Diffuse); }
         void _addComponentNormal(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Normal); }
         void _addComponentGlow(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Glow); }
@@ -416,19 +416,19 @@ class Material::impl final{
         void _addComponentMetalness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Metalness); }
         void _addComponentSmoothness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Smoothness); }
         void _addComponentReflection(Texture* texture,Texture* map,float& mixFactor){
-			uint type = MaterialComponentType::Reflection;
+            uint type = MaterialComponentType::Reflection;
             if((m_Components.count(type) && m_Components.at(type) != nullptr) || (texture == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentReflection(type,texture,map,mixFactor));
         }
         void _addComponentRefraction(Texture* texture,Texture* map,float& refractiveIndex,float& mixFactor){
-			uint type = MaterialComponentType::Refraction;
+            uint type = MaterialComponentType::Refraction;
             if((m_Components.count(type) && m_Components.at(type) != nullptr) || (texture == nullptr || map == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentRefraction(texture,map,refractiveIndex,mixFactor));
         }
         void _addComponentParallaxOcclusion(Texture* texture,float& heightScale){
-			uint type = MaterialComponentType::ParallaxOcclusion;
+            uint type = MaterialComponentType::ParallaxOcclusion;
             if((m_Components.count(type) && m_Components.at(type) != nullptr) || (texture == nullptr))
                 return;
             m_Components.emplace(type,new MaterialComponentParallaxOcclusion(texture,heightScale));
@@ -465,15 +465,15 @@ Material::~Material(){
     for(auto materialMeshEntry:m_i->m_Meshes){
         SAFE_DELETE(materialMeshEntry);
     }
-	vector_clear(m_i->m_Meshes);
+    vector_clear(m_i->m_Meshes);
 }
 void Material::addComponentDiffuse(Texture* texture){
     m_i->_addComponentDiffuse(texture);
 }
 void Material::addComponentDiffuse(string textureFile){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,true,ImageInternalFormat::SRGB8_ALPHA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,true,ImageInternalFormat::SRGB8_ALPHA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentDiffuse(texture);
 }
@@ -481,9 +481,9 @@ void Material::addComponentNormal(Texture* texture){
     m_i->_addComponentNormal(texture);
 }
 void Material::addComponentNormal(string textureFile){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentNormal(texture);
 }
@@ -492,8 +492,8 @@ void Material::addComponentGlow(Texture* texture){
 }
 void Material::addComponentGlow(string textureFile){
     //add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentGlow(texture);
 }
@@ -501,9 +501,9 @@ void Material::addComponentSpecular(Texture* texture){
     m_i->_addComponentSpecular(texture);
 }
 void Material::addComponentSpecular(string textureFile){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentSpecular(texture);
 }
@@ -512,9 +512,9 @@ void Material::addComponentAO(Texture* texture,float baseValue){
     setAO(baseValue);
 }
 void Material::addComponentAO(string textureFile,float baseValue){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentAO(texture);
     setAO(baseValue);
@@ -524,9 +524,9 @@ void Material::addComponentMetalness(Texture* texture,float baseValue){
     setMetalness(baseValue);
 }
 void Material::addComponentMetalness(string textureFile,float baseValue){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentMetalness(texture);
     setMetalness(baseValue);
@@ -536,9 +536,9 @@ void Material::addComponentSmoothness(Texture* texture,float baseValue){
     setSmoothness(baseValue);
 }
 void Material::addComponentSmoothness(string textureFile,float baseValue){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentSmoothness(texture);
     setSmoothness(baseValue);
@@ -548,22 +548,22 @@ void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFac
     m_i->_addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentReflection(string textureFiles[],string mapFile,float mixFactor){
-	//add checks to see if texture was loaded already
-		Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
+    //add checks to see if texture was loaded already
+        Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
 
-		Texture* map = new Texture(mapFile);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
+        Texture* map = new Texture(mapFile);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentReflection(string cubemapName,string mapFile,float mixFactor){
-	//add checks to see if texture was loaded already
-		Texture* cubemap = new Texture(cubemapName);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
+    //add checks to see if texture was loaded already
+        Texture* cubemap = new Texture(cubemapName);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
 
-		Texture* map = new Texture(mapFile);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
+        Texture* map = new Texture(mapFile);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
@@ -572,22 +572,22 @@ void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refrac
 }
 void Material::addComponentRefraction(string textureFiles[],string mapFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
-		Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
+        Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
 
-		Texture* map = new Texture(mapFile);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
+        Texture* map = new Texture(mapFile);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
 void Material::addComponentRefraction(string cubemapName,string mapFile,float refractiveIndex,float mixFactor){
-	//add checks to see if texture was loaded already
-		Texture* cubemap = new Texture(cubemapName);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
+    //add checks to see if texture was loaded already
+        Texture* cubemap = new Texture(cubemapName);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
 
 
-		Texture* map = new Texture(mapFile);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
+        Texture* map = new Texture(mapFile);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
@@ -595,9 +595,9 @@ void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale)
     m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
 void Material::addComponentParallaxOcclusion(std::string textureFile,float heightScale){
-	//add checks to see if texture was loaded already
-		Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-		epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+    //add checks to see if texture was loaded already
+        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 
     m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
@@ -636,7 +636,7 @@ void Material::addMeshEntry(Mesh* mesh){
 }
 void Material::removeMeshEntry(Mesh* mesh){
     for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
-		epriv::MaterialMeshEntry* entry = (*it);
+        epriv::MaterialMeshEntry* entry = (*it);
         if(entry->mesh() == mesh){
             SAFE_DELETE(entry); //do we need this?
             m_i->m_Meshes.erase(it++);
@@ -645,12 +645,12 @@ void Material::removeMeshEntry(Mesh* mesh){
     }
 }
 void Material::bind(){
-	bool res = epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this);
-	if(res) BindableResource::bind();
+    bool res = epriv::Core::m_Engine->m_RenderManager->_bindMaterial(this);
+    if(res) BindableResource::bind();
 }
 void Material::unbind(){
-	bool res = epriv::Core::m_Engine->m_RenderManager->_unbindMaterial();
-	if(res) BindableResource::unbind();
+    bool res = epriv::Core::m_Engine->m_RenderManager->_unbindMaterial();
+    if(res) BindableResource::unbind();
 }
 void Material::load(){
     if(!isLoaded()){

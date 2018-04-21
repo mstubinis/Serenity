@@ -71,80 +71,80 @@ void Shaders::Detail::ShadersManagement::init(){
 
 #pragma region Constants
 Shaders::Detail::ShadersManagement::constants = 
-	"\n"
-	"const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n"
-	"const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n"
-	"\n"
-	"const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);\n"
-	"const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);\n"
-	"\n"
-	"const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
-	"const vec2 ConstantZeroVec2 = vec2(0.0,0.0);\n"
-	"\n"
-	"const float KPI = 3.1415926535898;\n"
-	"const float StereoConst = 1.7777777777;\n"
-	"\n";
+    "\n"
+    "const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n"
+    "const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n"
+    "\n"
+    "const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);\n"
+    "const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);\n"
+    "\n"
+    "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
+    "const vec2 ConstantZeroVec2 = vec2(0.0,0.0);\n"
+    "\n"
+    "const float KPI = 3.1415926535898;\n"
+    "const float StereoConst = 1.7777777777;\n"
+    "\n";
 #pragma endregion
 
 #pragma region Functions
 
 Shaders::Detail::ShadersManagement::conditional_functions =
-	"\n"
-	"vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }\n"
-	"vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }\n"
-	"vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }\n"
-	"vec4 when_lt(vec4 x, vec4 y) { return max(sign(y - x), 0.0); }\n"
-	"vec4 when_ge(vec4 x, vec4 y) { return 1.0 - when_lt(x, y); }\n"
-	"vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }\n"
-	"vec4 and(vec4 a, vec4 b) { return a * b; }\n"
-	"vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }\n"
-	"//vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; }\n"//this is commented out
-	"vec4 not(vec4 a) { return 1.0 - a; }\n"
-	"\n"
-	"vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }\n"
-	"vec3 when_neq(vec3 x, vec3 y) { return abs(sign(x - y)); }\n"
-	"vec3 when_gt(vec3 x, vec3 y) { return max(sign(x - y), 0.0); }\n"
-	"vec3 when_lt(vec3 x, vec3 y) { return max(sign(y - x), 0.0); }\n"
-	"vec3 when_ge(vec3 x, vec3 y) { return 1.0 - when_lt(x, y); }\n"
-	"vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }\n"
-	"vec3 and(vec3 a, vec3 b) { return a * b; }\n"
-	"vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }\n"
-	"//vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; }\n"//this is commented out
-	"vec3 not(vec3 a) { return 1.0 - a; }\n"
-	"\n"
-	"vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }\n"
-	"vec2 when_neq(vec2 x, vec2 y) { return abs(sign(x - y)); }\n"
-	"vec2 when_gt(vec2 x, vec2 y) { return max(sign(x - y), 0.0); }\n"
-	"vec2 when_lt(vec2 x, vec2 y) { return max(sign(y - x), 0.0); }\n"
-	"vec2 when_ge(vec2 x, vec2 y) { return 1.0 - when_lt(x, y); }\n"
-	"vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }\n"
-	"vec2 and(vec2 a, vec2 b) { return a * b; }\n"
-	"vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }\n"
-	"//vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; }\n"//this is commented out
-	"vec2 not(vec2 a) { return 1.0 - a; }\n"
-	"\n"
+    "\n"
+    "vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }\n"
+    "vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }\n"
+    "vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }\n"
+    "vec4 when_lt(vec4 x, vec4 y) { return max(sign(y - x), 0.0); }\n"
+    "vec4 when_ge(vec4 x, vec4 y) { return 1.0 - when_lt(x, y); }\n"
+    "vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }\n"
+    "vec4 and(vec4 a, vec4 b) { return a * b; }\n"
+    "vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }\n"
+    "//vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; }\n"//this is commented out
+    "vec4 not(vec4 a) { return 1.0 - a; }\n"
+    "\n"
+    "vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }\n"
+    "vec3 when_neq(vec3 x, vec3 y) { return abs(sign(x - y)); }\n"
+    "vec3 when_gt(vec3 x, vec3 y) { return max(sign(x - y), 0.0); }\n"
+    "vec3 when_lt(vec3 x, vec3 y) { return max(sign(y - x), 0.0); }\n"
+    "vec3 when_ge(vec3 x, vec3 y) { return 1.0 - when_lt(x, y); }\n"
+    "vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }\n"
+    "vec3 and(vec3 a, vec3 b) { return a * b; }\n"
+    "vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }\n"
+    "//vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; }\n"//this is commented out
+    "vec3 not(vec3 a) { return 1.0 - a; }\n"
+    "\n"
+    "vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }\n"
+    "vec2 when_neq(vec2 x, vec2 y) { return abs(sign(x - y)); }\n"
+    "vec2 when_gt(vec2 x, vec2 y) { return max(sign(x - y), 0.0); }\n"
+    "vec2 when_lt(vec2 x, vec2 y) { return max(sign(y - x), 0.0); }\n"
+    "vec2 when_ge(vec2 x, vec2 y) { return 1.0 - when_lt(x, y); }\n"
+    "vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }\n"
+    "vec2 and(vec2 a, vec2 b) { return a * b; }\n"
+    "vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }\n"
+    "//vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; }\n"//this is commented out
+    "vec2 not(vec2 a) { return 1.0 - a; }\n"
+    "\n"
 
-	"float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }\n"
-	"float when_neq(float x, float y) { return abs(sign(x - y)); }\n"
-	"float when_gt(float x, float y) { return max(sign(x - y), 0.0); }\n"
-	"float when_lt(float x, float y) { return max(sign(y - x), 0.0); }\n"
-	"float when_ge(float x, float y) { return 1.0 - when_lt(x, y); }\n"
-	"float when_le(float x, float y) { return 1.0 - when_gt(x, y); }\n"
-	"float and(float a, float b) { return a * b; }\n"
-	"float or(float a, float b) { return min(a + b, 1.0); }\n"
-	"//float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
-	"float not(float a) { return 1.0 - a; }\n"
-	"\n"
-	"int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }\n"
-	"int when_ineq(int x, int y) { return abs(sign(x - y)); }\n"
-	"int when_igt(int x, int y) { return max(sign(x - y), 0); }\n"
-	"int when_ilt(int x, int y) { return max(sign(y - x), 0); }\n"
-	"int when_ige(int x, int y) { return 1 - when_ilt(x, y); }\n"
-	"int when_ile(int x, int y) { return 1 - when_igt(x, y); }\n"
-	"int iand(int a, int b) { return a * b; }\n"
-	"int ior(int a, int b) { return min(a + b, 1); }\n"
-	"int inot(int a) { return 1 - a; }\n"
-	"\n";
+    "float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }\n"
+    "float when_neq(float x, float y) { return abs(sign(x - y)); }\n"
+    "float when_gt(float x, float y) { return max(sign(x - y), 0.0); }\n"
+    "float when_lt(float x, float y) { return max(sign(y - x), 0.0); }\n"
+    "float when_ge(float x, float y) { return 1.0 - when_lt(x, y); }\n"
+    "float when_le(float x, float y) { return 1.0 - when_gt(x, y); }\n"
+    "float and(float a, float b) { return a * b; }\n"
+    "float or(float a, float b) { return min(a + b, 1.0); }\n"
+    "//float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
+    "float not(float a) { return 1.0 - a; }\n"
+    "\n"
+    "int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }\n"
+    "int when_ineq(int x, int y) { return abs(sign(x - y)); }\n"
+    "int when_igt(int x, int y) { return max(sign(x - y), 0); }\n"
+    "int when_ilt(int x, int y) { return max(sign(y - x), 0); }\n"
+    "int when_ige(int x, int y) { return 1 - when_ilt(x, y); }\n"
+    "int when_ile(int x, int y) { return 1 - when_igt(x, y); }\n"
+    "int iand(int a, int b) { return a * b; }\n"
+    "int ior(int a, int b) { return min(a + b, 1); }\n"
+    "int inot(int a) { return 1 - a; }\n"
+    "\n";
 
 Shaders::Detail::ShadersManagement::float_into_2_floats = 
     "\n"
@@ -239,13 +239,13 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = S
     "    return vec2(v.x >= 0 ? 1.0 : -1.0, v.y >= 0 ? 1.0 : -1.0);\n"
     "}\n"
     "vec2 EncodeOctahedron(vec3 n) {\n"
-	"    if(   all(greaterThan(n,ConstantAlmostOneVec3))   )\n"
+    "    if(   all(greaterThan(n,ConstantAlmostOneVec3))   )\n"
     "        return ConstantOneVec2;\n"
     "	 n.xy /= dot(abs(n), ConstantOneVec3);\n"
     "	 return mix(n.xy, (1.0 - abs(n.yx)) * sign_not_zero(n.xy), step(n.z, 0.0));\n"
     "}\n"
     "vec3 DecodeOctahedron(vec2 n) {\n"
-	"    if(    all(greaterThan(n,ConstantAlmostOneVec2))    )\n"
+    "    if(    all(greaterThan(n,ConstantAlmostOneVec2))    )\n"
     "        return ConstantOneVec3;\n"
     "	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
     "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);\n"
@@ -325,29 +325,29 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::Sh
     "uniform mat4 MVP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
     "uniform float SpotLight;\n"
-	"uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
-	"\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 uv;\n"
-	"\n"
-	"varying vec2 texcoords;\n"
+    "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
     "\n"
-	"vec3 doSpotLightStuff(vec3 v){\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 uv;\n"
+    "\n"
+    "varying vec2 texcoords;\n"
+    "\n"
+    "vec3 doSpotLightStuff(vec3 v){\n"
     "    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;\n" //outerCutoff might need to be in degrees?
     "    v.xy *= vec2(opposite / VertexShaderData.y);\n" //might need to switch around x,y,z to fit GL's coordinate system
-	"    return v;\n"
-	"}\n"
+    "    return v;\n"
+    "}\n"
     "void main(){\n"
     "    vec3 vert = position;\n"
     "    if(SpotLight > 0.99){\n"
     "        vert = doSpotLightStuff(vert);\n"
     "    }\n"
-	"    else{\n"
-	"        vert.x *= screenSizeDivideBy2.x;\n"
-	"        vert.y *= screenSizeDivideBy2.y;\n"
-	"    }\n"
+    "    else{\n"
+    "        vert.x *= screenSizeDivideBy2.x;\n"
+    "        vert.y *= screenSizeDivideBy2.y;\n"
+    "    }\n"
     "    texcoords = uv;\n"
-	"    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = MVP * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
 
@@ -356,7 +356,7 @@ Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManag
     "\n"
     "attribute vec3 position;\n"
     //"//attribute float uv;\n"
-	"attribute vec2 uv;\n"
+    "attribute vec2 uv;\n"
     "attribute vec4 normal;\n" //Order is ZYXW
     "attribute vec4 binormal;\n"//Order is ZYXW
     "attribute vec4 tangent;\n"//Order is ZYXW
@@ -366,7 +366,7 @@ Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManag
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "uniform mat3 NormalMatrix;\n"
-	"uniform vec3 CameraPosition;\n"
+    "uniform vec3 CameraPosition;\n"
     "uniform int AnimationPlaying;\n"
     "uniform mat4 gBones[100];\n"
     "\n"
@@ -375,10 +375,10 @@ Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManag
     "varying vec3 Normals;\n"
     "varying vec3 WorldPosition;\n"
     "varying mat3 TBN;\n"
-	"\n"
-	"flat varying vec3 CamPosition;\n"
-	"varying vec3 TangentCameraPos;\n"
-	"varying vec3 TangentFragPos;\n"
+    "\n"
+    "flat varying vec3 CamPosition;\n"
+    "varying vec3 TangentCameraPos;\n"
+    "varying vec3 TangentFragPos;\n"
     "\n"
     "varying float logz_f;\n"
     "varying float FC_2_f;\n"
@@ -399,7 +399,7 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "    vec3 NormalTrans = (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 BinormalTrans = (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 TangentTrans = (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-	"\n"
+    "\n"
     "           Normals = (NormalMatrix * NormalTrans);\n"
     "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"
     "    vec3  Tangents = (NormalMatrix * TangentTrans);\n"
@@ -407,14 +407,14 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
     "\n"
     "    gl_Position = MVP * PosTrans;\n"
     "    WorldPosition = (Model * PosTrans).xyz;\n"
-	"\n"
-	"    CamPosition = CameraPosition;\n"
-	"    TangentCameraPos = TBN * CameraPosition;\n"
-	"    TangentFragPos = TBN * WorldPosition;\n"
+    "\n"
+    "    CamPosition = CameraPosition;\n"
+    "    TangentCameraPos = TBN * CameraPosition;\n"
+    "    TangentFragPos = TBN * WorldPosition;\n"
     "\n"
     //"    //UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
-	"\n"
+    "\n"
     "    logz_f = 1.0 + gl_Position.w;\n"
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
     "    FC_2_f = fcoeff * 0.5;\n"
@@ -564,7 +564,7 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
 Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersManagement::version +
     "const float PI2 = 6.283185;\n"
     "uniform int NUM_SAMPLES;\n"
-	"varying vec2 texcoords;\n"
+    "varying vec2 texcoords;\n"
     "float VanDerCorpus(int n, int base){\n"
     "    float invBase = 1.0 / float(base);\n"
     "    float denom   = 1.0;\n"
@@ -653,7 +653,7 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
     "//uniform sampler2D edgeTexture;\n"
     "uniform sampler2D depthTexture;\n"
     "uniform vec2 resolution;\n"
-	"varying vec2 texcoords;\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
     "   vec2 uv = texcoords;\n"
     "   float depth = texture2D(depthTexture,uv);\n"
@@ -699,12 +699,12 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
 Shaders::Detail::ShadersManagement::stencil_passover = Shaders::Detail::ShadersManagement::version + 
 Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions +
     "\n"
-	"const vec3 comparison = vec3(1.0,1.0,1.0);\n"
+    "const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "uniform sampler2D gNormalMap;\n"
-	"varying vec2 texcoords;\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
-	"    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
-	"    if(distance(normal,comparison) < 0.01){\n"
+    "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
+    "    if(distance(normal,comparison) < 0.01){\n"
     "        discard;\n"//this is where the magic happens with the stencil buffer.
     "    }\n"
     "}";
@@ -751,7 +751,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
     "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;\n"
-	"const vec2 comparison = vec2(1.0,1.0);\n"
+    "const vec2 comparison = vec2(1.0,1.0);\n"
     "\n"
     "uniform sampler2D textureMap;\n"
     "\n"
@@ -768,9 +768,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
     "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, depthTex);\n"
     "    vec2 delta = abs(neighbours.xx - vec2(neighbours.y, neighbours.z));\n"
     "    vec2 edges = step(SMAA_DEPTH_THRESHOLD, delta);\n"
-	"    if (dot(edges, comparison) == 0.0){\n"
+    "    if (dot(edges, comparison) == 0.0){\n"
     "        discard;\n"
-	"    }\n"
+    "    }\n"
     "}\n"
     "void SMAAColorEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex){\n"
     "    vec2 threshold = vec2(SMAA_THRESHOLD, SMAA_THRESHOLD);\n"
@@ -783,9 +783,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
     "    t = abs(C - Ctop);\n"
     "    delta.y = max(max(t.r, t.g), t.b);\n"
     "    vec2 edges = step(threshold, delta.xy);\n"
-	"    if (dot(edges, comparison) == 0.0){\n"
+    "    if (dot(edges, comparison) == 0.0){\n"
     "        discard;\n"
-	"    }\n"
+    "    }\n"
     "}\n"
     "void SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex) {\n"
     "    vec2 threshold = vec2(SMAA_THRESHOLD, SMAA_THRESHOLD);\n"
@@ -796,9 +796,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
     "    vec4 delta;\n"
     "    delta.xy = abs(L - vec2(Lleft, Ltop));\n"
     "    vec2 edges = step(threshold, delta.xy);\n"
-	"    if (dot(edges, comparison) == 0.0){\n"
+    "    if (dot(edges, comparison) == 0.0){\n"
     "        discard;\n"
-	"    }\n"
+    "    }\n"
     "}\n"
     "void main(){\n"
     //"    SMAAColorEdgeDetectionPS(uv, _offset, textureMap);\n"
@@ -812,23 +812,23 @@ Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersMana
     "\n"//edge vert
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform mat4 MVP;\n"
-	"uniform vec2 screenSizeDivideBy2;\n"
-	"\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 UV;\n"
+    "uniform vec2 screenSizeDivideBy2;\n"
+    "\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 UV;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset[3];\n"
     "\n"
     "void main(){\n"
     "    uv = UV;\n"
-	"    vec3 vert = position;\n"
-	"    vert.x *= screenSizeDivideBy2.x;\n"
-	"    vert.y *= screenSizeDivideBy2.y;\n"
+    "    vec3 vert = position;\n"
+    "    vert.x *= screenSizeDivideBy2.x;\n"
+    "    vert.y *= screenSizeDivideBy2.y;\n"
     "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)),uv.xyxy);\n"
     "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)),uv.xyxy);\n"
     "    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)),uv.xyxy);\n"
-	"    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = MVP * vec4(vert,1.0);\n"
     "}\n"
     "\n";  
     
@@ -842,7 +842,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "uniform float SMAA_PREDICATION_THRESHOLD;\n"
     "uniform float SMAA_PREDICATION_SCALE;\n"
     "uniform float SMAA_PREDICATION_STRENGTH;\n"
-	"const vec2 comparison = vec2(1.0,1.0);\n"
+    "const vec2 comparison = vec2(1.0,1.0);\n"
     "\n"
     "uniform sampler2D textureMap;\n"
     "uniform sampler2D texturePredication;\n"
@@ -887,7 +887,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     "    t = abs(C - Ctop);\n"
     "    delta.y = max(max(t.r, t.g), t.b);\n"
     "    vec2 edges = step(threshold, delta.xy);\n"
-	"    if (dot(edges, comparison) == 0.0)\n"
+    "    if (dot(edges, comparison) == 0.0)\n"
     "        discard;\n"
     "    vec3 Cright = texture2D(colorTex, offset[1].xy).rgb;\n"
     "    t = abs(C - Cright);\n"
@@ -947,10 +947,10 @@ Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersMana
     "uniform mat4 MVP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
-	"uniform vec2 screenSizeDivideBy2;\n"
-	"\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 UV;\n"
+    "uniform vec2 screenSizeDivideBy2;\n"
+    "\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 UV;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec2 pixCoord;\n"
@@ -960,14 +960,14 @@ Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersMana
     "\n"
     "void main(){\n"
     "    uv = UV;\n"
-	"    vec3 vert = position;\n"
-	"    vert.x *= screenSizeDivideBy2.x;\n"
-	"    vert.y *= screenSizeDivideBy2.y;\n"
+    "    vec3 vert = position;\n"
+    "    vert.x *= screenSizeDivideBy2.x;\n"
+    "    vert.y *= screenSizeDivideBy2.y;\n"
     "    pixCoord = uv * SMAA_PIXEL_SIZE.zw;\n"
     "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.25,API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)),uv.xyxy);\n"
     "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.125,API_V_DIR(-0.25),-0.125,API_V_DIR(1.25)),uv.xyxy);\n"
     "    _offset[2] = mad(SMAA_PIXEL_SIZE.xxyy,vec4(-2.0, 2.0, API_V_DIR(-2.0), API_V_DIR(2.0)) * float(SMAA_MAX_SEARCH_STEPS),vec4(_offset[0].xz, _offset[1].yw));\n"
-	"    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = MVP * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
     "}\n"
     "\n";
@@ -1151,7 +1151,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "    vec4 weights = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    vec2 e = texture2D(edgesTex, texcoord).rg;\n"
     "    if (e.g > 0.0) {\n"
-	"        if(SMAA_MAX_SEARCH_STEPS_DIAG > 0){\n"
+    "        if(SMAA_MAX_SEARCH_STEPS_DIAG > 0){\n"
     "            weights.rg = SMAACalculateDiagWeights(edgesTex,areaTex, texcoord, e, subsampleIndices);\n"
     "            if (weights.r == -weights.g) {\n"
     "                vec2 d;\n"
@@ -1217,10 +1217,10 @@ Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersMana
     "\n"//neightbor vert
     "uniform mat4 MVP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
-	"uniform vec2 screenSizeDivideBy2;\n"
-	"\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 UV;\n"
+    "uniform vec2 screenSizeDivideBy2;\n"
+    "\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 UV;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset;\n"
@@ -1229,11 +1229,11 @@ Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersMana
     "\n"
     "void main(){\n"
     "    uv = UV;\n"
-	"    vec3 vert = position;\n"
-	"    vert.x *= screenSizeDivideBy2.x;\n"
-	"    vert.y *= screenSizeDivideBy2.y;\n"
+    "    vec3 vert = position;\n"
+    "    vert.x *= screenSizeDivideBy2.x;\n"
+    "    vert.y *= screenSizeDivideBy2.y;\n"
     "    _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0,0.0,0.0,API_V_DIR(1.0)),uv.xyxy);\n"
-	"    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    gl_Position = MVP * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
     "}\n"
     "\n";
@@ -1276,24 +1276,24 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
 Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"
     "uniform mat4 MVP;\n"
-	"uniform vec2 screenSizeDivideBy2;\n"
-	"attribute vec3 position;\n"
-	"attribute vec2 UV;\n"
-	"varying vec2 uv;\n"
+    "uniform vec2 screenSizeDivideBy2;\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 UV;\n"
+    "varying vec2 uv;\n"
     "void SMAAResolveVS(inout vec2 uv){\n"
     "}\n"
     "void SMAASeparateVS(inout vec2 uv){\n"
     "}\n"
     "void main(){\n"
     "    uv = UV;\n"
-	"    vec3 vert = position;\n"
-	"    vert.x *= screenSizeDivideBy2.x;\n"
-	"    vert.y *= screenSizeDivideBy2.y;\n"
-	"    gl_Position = MVP * vec4(vert,1.0);\n"
+    "    vec3 vert = position;\n"
+    "    vert.x *= screenSizeDivideBy2.x;\n"
+    "    vert.y *= screenSizeDivideBy2.y;\n"
+    "    gl_Position = MVP * vec4(vert,1.0);\n"
     "}";
 Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
     "\n"
-	"varying vec2 uv;\n"
+    "varying vec2 uv;\n"
     "vec4 SMAAResolvePS(vec2 texcoord,sampler2D currentColorTex,sampler2D previousColorTex){\n"
     "    vec4 current = texture2D(currentColorTex, texcoord);\n"
     "    vec4 previous = texture2D(previousColorTex, texcoord);\n"
@@ -1303,7 +1303,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManage
     "    gl_FragColor = vec4(0.0,0.0,0.0,1.0);\n"
     "}";
 #pragma endregion
-	
+    
 #pragma region DeferredFrag
 Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -1319,11 +1319,11 @@ Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersMana
     "uniform samplerCube RefractionTexture;\n"
     "uniform sampler2D   RefractionTextureMap;\n"
     "uniform sampler2D HeightmapTexture;\n"
-	"\n"
+    "\n"
     "uniform vec4 MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "\n"
     "uniform float       CubemapMixFactor;\n"
-	"uniform float       ParallaxHeightScale;\n"
+    "uniform float       ParallaxHeightScale;\n"
     "uniform float       RefractiveIndex;\n"
     "\n"
     "uniform float matID;\n"
@@ -1336,7 +1336,7 @@ Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersMana
     "uniform vec4 ThirdConditionals;\n" //x = refraction y = heightmap z = UNUSED w = UNUSED
     "\n"
     "uniform vec4 Object_Color;\n"
-	"uniform vec3 Material_F0;\n"
+    "uniform vec3 Material_F0;\n"
     "uniform vec3 Gods_Rays_Color;\n"
     "\n"
     "varying vec3 WorldPosition;\n"
@@ -1344,8 +1344,8 @@ Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersMana
     "varying vec3 Normals;\n"
     "varying mat3 TBN;\n"
     "flat varying vec3 CamPosition;\n"
-	"varying vec3 TangentCameraPos;\n"
-	"varying vec3 TangentFragPos;\n"
+    "varying vec3 TangentCameraPos;\n"
+    "varying vec3 TangentFragPos;\n"
     "\n"
     "varying float FC_2_f;\n"
     "varying float logz_f;\n"
@@ -1376,21 +1376,21 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "    r = PaintersAlgorithm(r,d);\n"
     "    return r;\n"
     "}\n"
-	"vec2 ParallaxMap(vec3 _ViewDir){\n"
-	"    float minLayers = min(5.0,(5.0 * ParallaxHeightScale)+1.0);\n"
-	"    float maxLayers = min(30.0,(30.0 * ParallaxHeightScale)+1.0);\n"
+    "vec2 ParallaxMap(vec3 _ViewDir){\n"
+    "    float minLayers = min(5.0,(5.0 * ParallaxHeightScale)+1.0);\n"
+    "    float maxLayers = min(30.0,(30.0 * ParallaxHeightScale)+1.0);\n"
     "    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
     "    float layerDepth = 1.0 / numLayers;\n"// calculate the size of each layer 
     "    float currentLayerDepth = 0.0;\n"// depth of current layer  
     "    vec2 P = _ViewDir.xy * ParallaxHeightScale;\n"// the amount to shift the texture coordinates per layer (from vector P)
     "    vec2 deltaUV = P / numLayers;\n"
-	"    vec2  currentUV = UV;\n"
-	"    float currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
-	"    while(currentLayerDepth < currentDepth){\n"	
-	"    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
-	"    	currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
-	"    	currentLayerDepth += layerDepth;\n"
-	"    }\n"
+    "    vec2  currentUV = UV;\n"
+    "    float currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
+    "    while(currentLayerDepth < currentDepth){\n"	
+    "    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
+    "    	currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
+    "    	currentLayerDepth += layerDepth;\n"
+    "    }\n"
     "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
     "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
     "    float beforeDepth = texture(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
@@ -1399,11 +1399,11 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "}\n"
     "vec3 CalcBumpedNormal(vec2 _uv){\n"
     "    vec3 normTexture = texture2D(NormalTexture, _uv).xyz * 2.0 - 1.0;\n"
-	"    return normalize(TBN * normTexture);\n"
+    "    return normalize(TBN * normTexture);\n"
     "}\n"
     "void main(){\n"
-	"    vec2 uv = UV;\n"
-	"    gl_FragData[0] = Object_Color;\n"
+    "    vec2 uv = UV;\n"
+    "    gl_FragData[0] = Object_Color;\n"
     "    gl_FragData[1].rg = EncodeOctahedron(normalize(Normals));\n"
     "    gl_FragData[2].r = MaterialBasePropertiesOne.x;\n" //base glow
     "    gl_FragData[2].g = 1.0;\n"
@@ -1412,11 +1412,11 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "    float metalness = MaterialBasePropertiesOne.z;\n"
     "    float smoothness = MaterialBasePropertiesOne.w;\n"
     "\n"
-	"    if(ThirdConditionals.y > 0.5){\n"
+    "    if(ThirdConditionals.y > 0.5){\n"
     "        vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
     "        uv = ParallaxMap(ViewDir);\n"
-	"    }\n"
-	"\n"
+    "    }\n"
+    "\n"
     "    if(SecondConditionals.x > 0.5){\n"
     "        ao *= texture2D(AOTexture, uv).r;\n"
     "    }\n"
@@ -1429,13 +1429,13 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
     "    gl_FragData[1].b = matID + ao;\n"
     "    gl_FragData[1].a = Pack2FloatIntoFloat16(metalness,smoothness);\n"
     "    if(FirstConditionals.x > 0.5){\n"
-	"        gl_FragData[0] *= texture2D(DiffuseTexture, uv);\n"
+    "        gl_FragData[0] *= texture2D(DiffuseTexture, uv);\n"
     "    }\n"
-	"    else{\n"
-	"        gl_FragData[0] *= vec4(Material_F0,1.0);\n"
-	"    }\n"
+    "    else{\n"
+    "        gl_FragData[0] *= vec4(Material_F0,1.0);\n"
+    "    }\n"
     "    if(FirstConditionals.y > 0.5){\n"
-	"        gl_FragData[1].rg = EncodeOctahedron(CalcBumpedNormal(uv));\n"
+    "        gl_FragData[1].rg = EncodeOctahedron(CalcBumpedNormal(uv));\n"
     "    }\n"
     "    if(SecondConditionals.w > 0.5){\n"
     "        gl_FragData[0] = Reflection(uv,gl_FragData[0],CamPosition,gl_FragData[1].rgb,WorldPosition);\n"
@@ -1482,10 +1482,10 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
     "uniform samplerCube Texture;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
-	"const vec2 one = vec2(1.0,1.0);\n"
-	"const vec2 zero = vec2(0.0,0.0);\n"
+    "const vec2 one = vec2(1.0,1.0);\n"
+    "const vec2 zero = vec2(0.0,0.0);\n"
     "void main(){\n"
-	"    gl_FragData[0] = textureCube(Texture, UV);\n"
+    "    gl_FragData[0] = textureCube(Texture, UV);\n"
     "    gl_FragData[1].rg = one;\n"
     "    gl_FragData[2].rb = zero;\n"
     "}";
@@ -1497,10 +1497,10 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = Shaders::Detail:
     "uniform vec4 Color;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
-	"const vec2 one = vec2(1.0,1.0);\n"
-	"const vec2 zero = vec2(0.0,0.0);\n"
+    "const vec2 one = vec2(1.0,1.0);\n"
+    "const vec2 zero = vec2(0.0,0.0);\n"
     "void main(){\n"
-	"    gl_FragData[0].rgba = Color;\n"
+    "    gl_FragData[0].rgba = Color;\n"
     "    gl_FragData[1].rg = one;\n"
     "    gl_FragData[2].rb = zero;\n"
     "}";
@@ -1510,7 +1510,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = Shaders::Detail:
 Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gDepthMap;\n"
-	"varying vec2 texcoords;\n"
+    "varying vec2 texcoords;\n"
     "void main(){\n"
     "    gl_FragDepth = texture2D(gDepthMap,texcoords);\n"
     "}";
@@ -1611,7 +1611,7 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
     "uniform int HasLighting;\n"
     "varying vec2 texcoords;\n"
     "uniform vec4 HDRInfo; // exposure | HasHDR | HasBloom | HDRAlgorithm\n"
-	"\n"
+    "\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
     "    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);\n"
     "}\n"
@@ -1789,7 +1789,7 @@ Shaders::Detail::ShadersManagement::edge_canny_blur = Shaders::Detail::ShadersMa
     "    gl_FragColor = vec4(vec3(blur), 1.0);\n"
     "}";
 #pragma endregion
-	
+    
 #pragma region EdgeCannyFrag
 Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -1835,7 +1835,7 @@ Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersMa
     "}\n"
     "\n";
 #pragma endregion
-	
+    
 #pragma region FinalFrag
 Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
@@ -1850,7 +1850,7 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "uniform int HasLighting;\n"
     "uniform int HasRays;\n"
     "uniform float godRaysExposure;\n"
-	"\n"
+    "\n"
     "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
@@ -1872,10 +1872,10 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "    if(HasRays == 1){\n"
     "        vec3 rays = texture2D(gGodsRaysMap,texcoords).rgb;\n"
     "        //hdr = hdr + rays;\n"
-	"        hdr = (hdr * 1.1) + (rays * godRaysExposure);\n"
+    "        hdr = (hdr * 1.1) + (rays * godRaysExposure);\n"
     "    }\n"
-	"    gl_FragColor = (vec4(hdr,1.0));\n"
-	//"    gl_FragColor = (vec4(normal,1.0));\n"
+    "    gl_FragColor = (vec4(hdr,1.0));\n"
+    //"    gl_FragColor = (vec4(normal,1.0));\n"
     "}";
 
 #pragma endregion
@@ -1902,19 +1902,19 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
-	"\n"
+    "\n"
     "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
 Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
 Shaders::Detail::ShadersManagement::lighting_frag +=
-	"float azimuth(vec3 vector){\n"
-	"    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
-	"}\n"
-	"float polar(vec3 vector){\n"
-	"    return acos(vector.z / length(vector));\n"
-	"}\n"
+    "float azimuth(vec3 vector){\n"
+    "    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
+    "}\n"
+    "float polar(vec3 vector){\n"
+    "    return acos(vector.z / length(vector));\n"
+    "}\n"
     "float BeckmannDist(float cos2a, float _alpha){\n"
     "    float b = (1.0 - cos2a) / (cos2a * _alpha);\n"
     "    return (exp(-b)) / (KPI * _alpha * cos2a * cos2a);\n"
@@ -1933,7 +1933,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"
     "}\n"
-	//make this a uniform if possible?
+    //make this a uniform if possible?
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
     "   float attenuation =  0.0;\n"
     "   if(LightDataE.z == 0.0){\n" //constant
@@ -1953,14 +1953,14 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "   }\n"
     "   return attenuation;\n"
     "}\n"
-	"float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
-	"     float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);\n"
-	"     float B = 0.45 * _alpha / (_alpha + 0.09);\n"
-	"     float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);\n"
-	"     return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));\n"
+    "float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
+    "     float A = 1.0 - 0.5 * _alpha / (_alpha + 0.33);\n"
+    "     float B = 0.45 * _alpha / (_alpha + 0.09);\n"
+    "     float cosAzimuthSinPolarTanPolar = (dot(_LightDir, _ViewDir) - _VdotN * _NdotL) / max(_VdotN, _NdotL);\n"
+    "     return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));\n"
     "}\n"
-	"vec3 DiffuseAshikhminShirley(float _smoothness,vec3 _MaterialAlbedoTexture,float _NdotL,float _VdotN){\n"
-	"    vec3 ret;\n"
+    "vec3 DiffuseAshikhminShirley(float _smoothness,vec3 _MaterialAlbedoTexture,float _NdotL,float _VdotN){\n"
+    "    vec3 ret;\n"
     "    float s = clamp(_smoothness,0.01,0.76);\n" //this lighting model has to have some form of roughness in it to look good. cant be 1.0
     "    vec3 A = (28.0 * _MaterialAlbedoTexture) / vec3(23.0 * KPI);\n"
     //"  float B = (1.0 - (s * LightDataA.z));\n"
@@ -1969,21 +1969,21 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float D = (1.0 - pow((1.0 - (_VdotN * 0.5)),5.0));\n"
     "    ret = (A * B * C * D);\n"
     "    ret *= KPI;\n" //i know this isnt proper, but the diffuse component is *way* too dark otherwise...
-	"    return ret;\n"
+    "    return ret;\n"
     "}\n"
-	"vec3 SpecularBlinnPhong(float _smoothness,float _NdotH){\n"
+    "vec3 SpecularBlinnPhong(float _smoothness,float _NdotH){\n"
     "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
     "    float kS = (8.0 + gloss ) / (8.0 * KPI);\n"
     "    return vec3(kS * pow(_NdotH, gloss));\n"
     "}\n"
-	"vec3 SpecularPhong(float _smoothness,vec3 _LightDir,vec3 _PxlNormal,vec3 _ViewDir){\n"
+    "vec3 SpecularPhong(float _smoothness,vec3 _LightDir,vec3 _PxlNormal,vec3 _ViewDir){\n"
     "    float gloss = exp2(10.0 * _smoothness + 1.0);\n"
     "    float kS = (2.0 + gloss ) / (2.0 * KPI);\n"
     "    vec3 Reflect = reflect(-_LightDir, _PxlNormal);\n"
     "    float VdotR = max(0.0, dot(_ViewDir,Reflect));\n"
     "    return vec3(kS * pow(VdotR, gloss));\n"
     "}\n"
-	"vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _alpha,float _NdotH,vec3 _F0,float _NdotL){\n"
+    "vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _alpha,float _NdotH,vec3 _F0,float _NdotL){\n"
     "    float LdotH = max(0.0, dot(_LightDir,_Half));\n"
     "    float alphaSqr = _alpha * _alpha;\n"
     "    float denom = _NdotH * _NdotH * (alphaSqr - 1.0) + 1.0;\n"
@@ -1993,7 +1993,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float k2 = k * k;\n"
     "    return max(ConstantZeroVec3, (_NdotL * D * _Frensel / (LdotH*LdotH*(1.0-k2)+k2)) );\n"
     "}\n"
-	"vec3 SpecularCookTorrance(inout vec3 _Frensel,vec3 _F0,float _VdotH,float _NdotH,float _alpha,float _VdotN,float _roughness,float _NdotL){\n"
+    "vec3 SpecularCookTorrance(inout vec3 _Frensel,vec3 _F0,float _VdotH,float _NdotH,float _alpha,float _VdotN,float _roughness,float _NdotL){\n"
     "     _Frensel = SchlickFrensel(_VdotH,_F0);\n"
     "     float NDF = GGXDist(_NdotH * _NdotH, _alpha * _alpha);\n"
     //"   float G = min(1.0, min(  (2.0 * _NdotH * _VdotN) / _VdotH  ,  (2.0 * _NdotH * _NdotL) / _VdotH  ));\n"
@@ -2003,12 +2003,12 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "     float Bottom = max(4.0 * _VdotN * _NdotL,0.0);\n"
     "     return Top / (Bottom + 0.0001);\n"
     "}\n"
-	"vec3 SpecularGaussian(float _NdotH,float _smoothness){\n"
+    "vec3 SpecularGaussian(float _NdotH,float _smoothness){\n"
     "    float b = acos(_NdotH);\n" //this might also be cos. find out
     "    float fin = b / _smoothness;\n"
     "    return vec3(exp(-fin*fin));\n"
     "}\n"
-	"vec3 SpecularAshikhminShirley(vec3 _PxlNormal,vec3 _Half,float _NdotH,vec3 _LightDir,float _NdotL,float _VdotN){\n"
+    "vec3 SpecularAshikhminShirley(vec3 _PxlNormal,vec3 _Half,float _NdotH,vec3 _LightDir,float _NdotL,float _VdotN){\n"
     "    const float Nu = 1000.0;\n"//make these controllable uniforms
     "    const float Nv = 1000.0;\n"//make these controllable uniforms
     "    vec3 epsilon = vec3(1.0,0.0,0.0);\n"
@@ -2054,10 +2054,10 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
     "    float VdotH = max(0.0, dot(ViewDir,Half));\n"
     "\n"
-	"    float MaterialTypeDiffuse = materials[index].a;\n"
-	"    float MaterialTypeSpecular = materials[index].b;\n"
-	"\n"
-	//if MaterialTypeDiffuse == 0.0, its lambert, do nothing (color is *= ndotl at the end by default)
+    "    float MaterialTypeDiffuse = materials[index].a;\n"
+    "    float MaterialTypeSpecular = materials[index].b;\n"
+    "\n"
+    //if MaterialTypeDiffuse == 0.0, its lambert, do nothing (color is *= ndotl at the end by default)
     "    if(MaterialTypeDiffuse == 1.0){\n"
     "        LightRadiance *= DiffuseOrenNayar(ViewDir,LightDir,NdotL,VdotN,alpha,PxlNormal);\n"
     "    }\n"
@@ -2096,14 +2096,14 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
     "    vec3 kD = ConstantOneVec3 - kS;\n"
     "    kD *= 1.0 - metalness;\n"
 
-	//"    vec3 DiffuseComponent = (kD * MaterialAlbedoTexture * LightDiffuseColor * NdotL) / KPI;\n"
-	//"    TotalLight = DiffuseComponent + LightSpecularColor;\n"
+    //"    vec3 DiffuseComponent = (kD * MaterialAlbedoTexture * LightDiffuseColor * NdotL) / KPI;\n"
+    //"    TotalLight = DiffuseComponent + LightSpecularColor;\n"
     //"    TotalLight = (kD * MaterialAlbedoTexture  / KPI + LightSpecularColor) * LightRadiance * NdotL;\n"
 
     "    TotalLight = kD * MaterialAlbedoTexture;\n"
     "    TotalLight /= KPI;\n"
     "    TotalLight += LightSpecularColor;\n"
-	"    TotalLight *= (LightRadiance * NdotL);\n"
+    "    TotalLight *= (LightRadiance * NdotL);\n"
 
     "    return max(vec3(Glow) * MaterialAlbedoTexture,TotalLight);\n"
     "}\n"
@@ -2178,7 +2178,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
     "uniform mat4 invP;\n"
-	"\n"
+    "\n"
     "varying vec2 texcoords;\n"
     "\n";
 Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
@@ -2250,7 +2250,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     convertShaderCode(deferred_frag);
     convertShaderCode(deferred_frag_hud);
     convertShaderCode(deferred_frag_skybox);
-	convertShaderCode(deferred_frag_skybox_fake);
+    convertShaderCode(deferred_frag_skybox_fake);
     convertShaderCode(copy_depth_frag);
     convertShaderCode(cubemap_convolude_frag);
     convertShaderCode(cubemap_prefilter_envmap_frag);
@@ -2260,7 +2260,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     convertShaderCode(godRays_frag);
     convertShaderCode(blur_frag);
     convertShaderCode(edge_canny_blur);
-	convertShaderCode(edge_canny_frag);
+    convertShaderCode(edge_canny_frag);
     convertShaderCode(final_frag);
     convertShaderCode(lighting_frag);
     convertShaderCode(lighting_frag_gi);

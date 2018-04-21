@@ -18,16 +18,16 @@ class Mesh;
 class Entity;
 
 class MaterialComponentType{public: enum Type{
-	Diffuse,
-	Normal,
-	Glow,
-	Specular,
-	AO,
-	Metalness,
-	Smoothness,  
-	Reflection,
-	Refraction,
-	ParallaxOcclusion,
+    Diffuse,
+    Normal,
+    Glow,
+    Specular,
+    AO,
+    Metalness,
+    Smoothness,  
+    Reflection,
+    Refraction,
+    ParallaxOcclusion,
 
 Number,};};
 
@@ -130,23 +130,23 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
 };
 
 namespace Engine{
-	namespace epriv{
-		class MaterialMeshEntry{
-			private:
-				class impl; std::unique_ptr<impl> m_i;
-			public:
-				MaterialMeshEntry(Mesh*);
-				~MaterialMeshEntry();
+    namespace epriv{
+        class MaterialMeshEntry{
+            private:
+                class impl; std::unique_ptr<impl> m_i;
+            public:
+                MaterialMeshEntry(Mesh*);
+                ~MaterialMeshEntry();
 
-				Mesh* mesh();
-				std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances();
-				std::unordered_map<uint,std::vector<MeshInstance*>>& meshInstancesEntities();
+                Mesh* mesh();
+                std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances();
+                std::unordered_map<uint,std::vector<MeshInstance*>>& meshInstancesEntities();
 
-				void addMeshInstance(const std::string& objectName,MeshInstance*);   void removeMeshInstance(const std::string& objectName,MeshInstance*);
-				void addMeshInstance(Entity* entity,MeshInstance*);                  void removeMeshInstance(Entity* entity,MeshInstance*);
-				void addMeshInstance(uint entityID,MeshInstance*);                   void removeMeshInstance(uint entityID,MeshInstance*);
-		};
-	};
+                void addMeshInstance(const std::string& objectName,MeshInstance*);   void removeMeshInstance(const std::string& objectName,MeshInstance*);
+                void addMeshInstance(Entity* entity,MeshInstance*);                  void removeMeshInstance(Entity* entity,MeshInstance*);
+                void addMeshInstance(uint entityID,MeshInstance*);                   void removeMeshInstance(uint entityID,MeshInstance*);
+        };
+    };
 };
 
 class Material final: public BindableResource{
@@ -203,7 +203,7 @@ class Material final: public BindableResource{
         const uint id() const;
     
         const bool shadeless() const;
-		const glm::vec3 f0() const;
+        const glm::vec3 f0() const;
         const float glow() const;
         const float smoothness() const;
         const float metalness() const;
@@ -230,7 +230,7 @@ class Material final: public BindableResource{
         void load();
         void unload();
 
-		void addMeshEntry(Mesh*);
+        void addMeshEntry(Mesh*);
         void removeMeshEntry(Mesh*);
         std::vector<Engine::epriv::MaterialMeshEntry*>& getMeshEntries();
 };

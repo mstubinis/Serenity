@@ -15,12 +15,12 @@ class LightProbe;
 
 class Scene: public EngineResource{
     friend class LightProbe;
-	friend class ::Engine::epriv::ComponentManager;
+    friend class ::Engine::epriv::ComponentManager;
     private:
         SkyboxEmpty* m_Skybox;
-		Camera* m_ActiveCamera;
+        Camera* m_ActiveCamera;
     protected:
-		std::vector<uint> m_Entities;
+        std::vector<uint> m_Entities;
 
         std::vector<SunLight*> m_Lights;
         std::unordered_map<std::string,LightProbe*> m_LightProbes;
@@ -30,25 +30,25 @@ class Scene: public EngineResource{
         Scene(std::string name);
         virtual ~Scene();
 
-		Entity* getEntity(uint entityID);
-		void addEntity(Entity*);
-		bool hasEntity(Entity*);
-		bool hasEntity(uint entityID);
+        Entity* getEntity(uint entityID);
+        void addEntity(Entity*);
+        bool hasEntity(Entity*);
+        bool hasEntity(uint entityID);
 
         virtual void update(const float& dt);
 
-		std::vector<uint>& entities();
+        std::vector<uint>& entities();
         std::vector<SunLight*>& lights();
-		std::unordered_map<std::string,LightProbe*>& lightProbes();
+        std::unordered_map<std::string,LightProbe*>& lightProbes();
 
-		Camera* getActiveCamera();
+        Camera* getActiveCamera();
 
         glm::vec3 getBackgroundColor();
         void setBackgroundColor(float,float,float);
 
         SkyboxEmpty* skybox() const;
         void setSkybox(SkyboxEmpty*);
-		void centerSceneToObject(Entity*);
-		void setActiveCamera(Camera*);
+        void centerSceneToObject(Entity*);
+        void setActiveCamera(Camera*);
 };
 #endif

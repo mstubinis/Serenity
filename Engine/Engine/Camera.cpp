@@ -17,32 +17,32 @@ using namespace std;
 
 class Camera::impl final{
     public:
-		void _baseInit(Scene* scene, Camera* super){
-			scene->addEntity(super);
+        void _baseInit(Scene* scene, Camera* super){
+            scene->addEntity(super);
 
-			super->m_BasicBody = new ComponentBasicBody();
-			super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
-			if(scene == nullptr)
-				scene = Resources::getCurrentScene();
+            super->m_BasicBody = new ComponentBasicBody();
+            super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
+            if(scene == nullptr)
+                scene = Resources::getCurrentScene();
 
-			super->addComponent(super->m_BasicBody);
-			super->addComponent(super->m_Camera);	
-		}
-		void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
-			super->m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
-			_baseInit(scene,super);
-		}
-		void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera* super){		
-			super->m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
+            super->addComponent(super->m_BasicBody);
+            super->addComponent(super->m_Camera);	
+        }
+        void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
+            super->m_Camera = new ComponentCamera(angle,aspectRatio,_near,_far);
             _baseInit(scene,super);
-		}
+        }
+        void _init(float& left, float& right, float& bottom, float& top, float& _near, float& _far,Scene* scene,Camera* super){		
+            super->m_Camera = new ComponentCamera(left,right,bottom,top,_near,_far);
+            _baseInit(scene,super);
+        }
 };
 
 Camera::Camera(float angle, float aspectRatio, float _near, float _far,Scene* scene):Entity(),m_i(new impl){//create a perspective camera
-	m_i->_init(angle,aspectRatio,_near,_far,scene,this);
+    m_i->_init(angle,aspectRatio,_near,_far,scene,this);
 }
 Camera::Camera(float left, float right, float bottom, float top, float _near, float _far,Scene* scene):Entity(),m_i(new impl){//create an orthographic camera
-	m_i->_init(left,right,bottom,top,_near,_far,scene,this);
+    m_i->_init(left,right,bottom,top,_near,_far,scene,this);
 }
 Camera::~Camera(){ 
 }
@@ -62,13 +62,13 @@ glm::vec3 Camera::right(){ return m_BasicBody->right(); }
 glm::vec3 Camera::up(){ return m_BasicBody->up(); }
 
 float Camera::getDistance(glm::vec3 objPos){
-	return glm::distance(objPos,getPosition());
+    return glm::distance(objPos,getPosition());
 }
 bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
-	return m_Camera->sphereIntersectTest(pos,radius);
+    return m_Camera->sphereIntersectTest(pos,radius);
 }
 bool Camera::rayIntersectSphere(Entity* entity){
-	epriv::ComponentBodyBaseClass& body = *(entity->getComponent<epriv::ComponentBodyBaseClass>());
-	ComponentModel& model = *(entity->getComponent<ComponentModel>());
-	return Engine::Math::rayIntersectSphere(body.position(),model.radius(),m_BasicBody->position(),m_Camera->getViewVector());
+    epriv::ComponentBodyBaseClass& body = *(entity->getComponent<epriv::ComponentBodyBaseClass>());
+    ComponentModel& model = *(entity->getComponent<ComponentModel>());
+    return Engine::Math::rayIntersectSphere(body.position(),model.radius(),m_BasicBody->position(),m_Camera->getViewVector());
 }

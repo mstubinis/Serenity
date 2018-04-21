@@ -8,17 +8,17 @@ enum CAMERA_STATE { CAMERA_STATE_FREEFORM,CAMERA_STATE_ORBIT,CAMERA_STATE_FOLLOW
 
 class GameCameraComponent: public ComponentCamera{
     public:
-		CAMERA_STATE m_State;
-		float m_OrbitRadius;
+        CAMERA_STATE m_State;
+        float m_OrbitRadius;
         Entity* m_Target;
         Entity* m_Player;
-		ComponentBasicBody* m_Body;
+        ComponentBasicBody* m_Body;
 
-		GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
-		GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane);
-		~GameCameraComponent();
+        GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
+        GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane);
+        ~GameCameraComponent();
 
-		void update(const float& dt);
+        void update(const float& dt);
 };
 
 
@@ -39,6 +39,6 @@ class GameCamera: public Camera{
         const Entity* getTarget() const;
         const CAMERA_STATE getState() const;
 
-		Entity* getObjectInCenterRay(Entity* exclusion);
+        Entity* getObjectInCenterRay(Entity* exclusion);
 };
 #endif

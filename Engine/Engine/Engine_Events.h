@@ -9,31 +9,31 @@
 #include "Engine_EventEnums.h"
 
 namespace Engine{
-	namespace epriv{
-		class EventManager final{
-		    private:
-				class impl;
-		    public:
-				std::unique_ptr<impl> m_i;
+    namespace epriv{
+        class EventManager final{
+            private:
+                class impl;
+            public:
+                std::unique_ptr<impl> m_i;
 
-				EventManager(const char* name,uint w,uint h);
-				~EventManager();
+                EventManager(const char* name,uint w,uint h);
+                ~EventManager();
 
-				void _init(const char* name,uint w,uint h);
+                void _init(const char* name,uint w,uint h);
 
-				void _onEventKeyPressed(uint& key);
-				void _onEventKeyReleased(uint& key);
-				void _onEventMouseButtonPressed(uint mouseButton);
-				void _onEventMouseButtonReleased(uint mouseButton);
-				void _onEventMouseWheelMoved(int& delta);
-				void _onResetEvents();
-				void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
+                void _onEventKeyPressed(uint& key);
+                void _onEventKeyReleased(uint& key);
+                void _onEventMouseButtonPressed(uint mouseButton);
+                void _onEventMouseButtonReleased(uint mouseButton);
+                void _onEventMouseWheelMoved(int& delta);
+                void _onResetEvents();
+                void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
 
-				void _update(const float& dt);
-		};
-	};
+                void _update(const float& dt);
+        };
+    };
 
-	//keyboard functions
+    //keyboard functions
     bool isKeyDown(std::string str);
     bool isKeyDownOnce(std::string str);
     bool isKeyUp(std::string str);
@@ -41,7 +41,7 @@ namespace Engine{
     bool isKeyDownOnce(KeyboardKey::Key);
     bool isKeyUp(KeyboardKey::Key);
 
-	//mouse functions
+    //mouse functions
     bool isMouseButtonDown(std::string str);
     bool isMouseButtonDownOnce(std::string str);
     bool isMouseButtonDown(MouseButton::Button);
@@ -52,10 +52,10 @@ namespace Engine{
     const glm::vec2& getMousePosition();
     const float getMouseWheelDelta();
     void setMousePosition(float x,float y,bool resetDifference = false,bool resetPreviousPosition = false);
-	void setMousePosition(uint x,uint y,bool resetDifference = false,bool resetPreviousPosition = false);
+    void setMousePosition(uint x,uint y,bool resetDifference = false,bool resetPreviousPosition = false);
     void setMousePosition(glm::vec2,bool resetDifference = false,bool resetPreviousPosition = false);
     void setMousePosition(glm::uvec2,bool resetDifference = false,bool resetPreviousPosition = false);
-	const glm::vec2& getMousePosition();
+    const glm::vec2& getMousePosition();
 };
 
 

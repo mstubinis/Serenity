@@ -11,28 +11,28 @@ class Engine_Window;
 typedef unsigned int uint;
 
 namespace Engine{
-	namespace epriv{
-		class EventManager;     class SoundManager;  class RenderManager;    class ComponentManager;  class ThreadManager;
-		class ResourceManager;  class TimeManager;   class PhysicsManager;   class EventDispatcher;   class NoiseManager;
-		class Core final{
-		    public:
-				static Core* m_Engine;
+    namespace epriv{
+        class EventManager;     class SoundManager;  class RenderManager;    class ComponentManager;  class ThreadManager;
+        class ResourceManager;  class TimeManager;   class PhysicsManager;   class EventDispatcher;   class NoiseManager;
+        class Core final{
+            public:
+                static Core* m_Engine;
 
-				EventManager* m_EventManager;
-				ResourceManager* m_ResourceManager;
-				TimeManager* m_TimeManager;
-				SoundManager* m_SoundManager;
-				PhysicsManager* m_PhysicsManager;
-				RenderManager* m_RenderManager;
-				EventDispatcher* m_EventDispatcher;
-				ComponentManager* m_ComponentManager;
-				ThreadManager* m_ThreadManager;
-				NoiseManager* m_NoiseManager;
+                EventManager* m_EventManager;
+                ResourceManager* m_ResourceManager;
+                TimeManager* m_TimeManager;
+                SoundManager* m_SoundManager;
+                PhysicsManager* m_PhysicsManager;
+                RenderManager* m_RenderManager;
+                EventDispatcher* m_EventDispatcher;
+                ComponentManager* m_ComponentManager;
+                ThreadManager* m_ThreadManager;
+                NoiseManager* m_NoiseManager;
 
-				Core(const char* name,uint width,uint height);
-				~Core();
-		};
-	};
+                Core(const char* name,uint width,uint height);
+                ~Core();
+        };
+    };
     void init(const char* name,uint width=0,uint height=0);
     void run();
 

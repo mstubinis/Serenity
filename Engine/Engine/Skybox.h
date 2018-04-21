@@ -36,7 +36,7 @@ class Skybox: public SkyboxEmpty{
         Skybox(std::string directory, Scene* = nullptr);
         virtual ~Skybox();
         Texture* texture(){ return m_Texture; }
-		static void initMesh();
-		static void bindMesh();
+        static void initMesh();
+        static void bindMesh();
 };
 #endif

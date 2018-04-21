@@ -9,38 +9,38 @@ using namespace std;
 class epriv::EventDispatcher::impl final{
     public:
 
-		vector<vector<Entity*>> m_Entities;
+        vector<vector<Entity*>> m_Entities;
 
-		void _init(const char* name,uint& w,uint& h){
-			m_Entities.resize(EventType::ZZZTotal); //replace later with a constant?
-		}
-		void _postInit(const char* name,uint& w,uint& h){
-		}
-		void _destruct(){
-			for(auto v:m_Entities){
-				v.clear();
-			}
-			m_Entities.clear();
-		}
-		void _update(const float& dt){
-		}
-		void _registerObject(Entity* obj, EventType::Type& type){
-			vector<Entity*>& v = m_Entities.at(type);
-			for(auto o:v){ if (o == obj){ return; } }
-			v.push_back(obj);
-		}
-		void _unregisterObject(Entity* obj, EventType::Type& type){
-			vector<Entity*>& v = m_Entities.at(type);
-			for(uint i = 0; i < v.size(); ++i){
-				if(v.at(i) == obj){ v.erase(v.begin() + i); break; }
-			}
-		}
-		void _dispatchEvent(EventType::Type& type,const Event& e){
-			vector<Entity*>& v = m_Entities.at(type);
-			for(auto obj:v){
-				obj->onEvent(e);
-			}
-		}
+        void _init(const char* name,uint& w,uint& h){
+            m_Entities.resize(EventType::ZZZTotal); //replace later with a constant?
+        }
+        void _postInit(const char* name,uint& w,uint& h){
+        }
+        void _destruct(){
+            for(auto v:m_Entities){
+                v.clear();
+            }
+            m_Entities.clear();
+        }
+        void _update(const float& dt){
+        }
+        void _registerObject(Entity* obj, EventType::Type& type){
+            vector<Entity*>& v = m_Entities.at(type);
+            for(auto o:v){ if (o == obj){ return; } }
+            v.push_back(obj);
+        }
+        void _unregisterObject(Entity* obj, EventType::Type& type){
+            vector<Entity*>& v = m_Entities.at(type);
+            for(uint i = 0; i < v.size(); ++i){
+                if(v.at(i) == obj){ v.erase(v.begin() + i); break; }
+            }
+        }
+        void _dispatchEvent(EventType::Type& type,const Event& e){
+            vector<Entity*>& v = m_Entities.at(type);
+            for(auto obj:v){
+                obj->onEvent(e);
+            }
+        }
 };
 
 

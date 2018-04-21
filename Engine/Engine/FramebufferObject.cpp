@@ -74,7 +74,7 @@ class epriv::FramebufferTexture::impl{
             m_Divisor = divisor;
         }
         void _destruct(FramebufferTexture* super){
-			SAFE_DELETE(m_Texture);
+            SAFE_DELETE(m_Texture);
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);
@@ -122,24 +122,24 @@ void epriv::RenderbufferObject::bind(){ Renderer::bindRBO(m_i->m_RBO); }
 void epriv::RenderbufferObject::unbind(){ Renderer::unbindRBO(); }
 
 namespace Engine{
-	namespace epriv{
-		struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
-			FramebufferObject* fbo = (FramebufferObject*)r;
-			Renderer::setViewport(0,0,fbo->width(),fbo->height());
-			Renderer::bindFBO(fbo);
-			for(auto attatchment:fbo->attatchments()){
-				attatchment.second->bind();
-			}
-		}};
-		struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
-			FramebufferObject* fbo = (FramebufferObject*)r;
-			for(auto attatchment:fbo->attatchments()){
-				attatchment.second->unbind();
-			}
-			Renderer::unbindFBO();
-			Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
-		}};
-	};
+    namespace epriv{
+        struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
+            FramebufferObject* fbo = (FramebufferObject*)r;
+            Renderer::setViewport(0,0,fbo->width(),fbo->height());
+            Renderer::bindFBO(fbo);
+            for(auto attatchment:fbo->attatchments()){
+                attatchment.second->bind();
+            }
+        }};
+        struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
+            FramebufferObject* fbo = (FramebufferObject*)r;
+            for(auto attatchment:fbo->attatchments()){
+                attatchment.second->unbind();
+            }
+            Renderer::unbindFBO();
+            Renderer::setViewport(0,0,Resources::getWindowSize().x,Resources::getWindowSize().y);
+        }};
+    };
 };
 
 class epriv::FramebufferObject::impl{
@@ -163,12 +163,12 @@ class epriv::FramebufferObject::impl{
         }
         void _init(FramebufferObject* super,uint width, uint height,ImageInternalFormat::Format depthInternalFormat){
             _baseInit(super,width,height);
-			RenderbufferObject* rbo;
-			if(depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8)
+            RenderbufferObject* rbo;
+            if(depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8)
                 rbo = new RenderbufferObject(super,FramebufferAttatchment::DepthAndStencil,depthInternalFormat);
-			else if(depthInternalFormat == ImageInternalFormat::StencilIndex8)
-				rbo = new RenderbufferObject(super,FramebufferAttatchment::Stencil,depthInternalFormat);
-			else
+            else if(depthInternalFormat == ImageInternalFormat::StencilIndex8)
+                rbo = new RenderbufferObject(super,FramebufferAttatchment::Stencil,depthInternalFormat);
+            else
                 rbo = new RenderbufferObject(super,FramebufferAttatchment::Depth,depthInternalFormat);
             _attatchRenderbuffer(super,rbo);
         }

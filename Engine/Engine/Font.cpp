@@ -21,7 +21,7 @@ FontData::FontData(string& filename){
     string file = filename.substr(0,filename.size()-4);
     file += ".png";
     m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
-	epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
+    epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
 }
 FontData::~FontData(){
     for(auto glyph:m_FontGlyphs){
@@ -51,7 +51,7 @@ void FontData::_loadTextFile(string& filename){
                 else if(key == "yoffset")  f->yoffset = stoi(value);
                 else if(key == "xadvance") f->xadvance = stoi(value);
             }
-			f->m_Model = glm::mat4(1.0f);
+            f->m_Model = glm::mat4(1.0f);
             string name = filename.substr(0,filename.size()-4);
             Handle h = Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
             f->char_mesh = Resources::getMesh(h);
@@ -67,5 +67,5 @@ Font::~Font(){
     SAFE_DELETE(m_FontData);
 }
 void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
-	epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
+    epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
 }

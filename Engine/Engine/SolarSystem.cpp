@@ -23,7 +23,7 @@ using namespace std;
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
     this->setActiveCamera(playerCamera);
-	if(file != "NULL")
+    if(file != "NULL")
         SolarSystem::_loadFromFile(file);
 }
 SolarSystem::~SolarSystem(){
@@ -34,7 +34,7 @@ void SolarSystem::_loadFromFile(string filename){
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     unordered_map<string,std::vector<RingInfo>> planetRings;
 
-	unordered_map<string,Handle> loadedMaterials;
+    unordered_map<string,Handle> loadedMaterials;
 
     string skybox;
     for(string line; getline(str, line, '\n');){
@@ -137,10 +137,10 @@ void SolarSystem::_loadFromFile(string filename){
                     if(boost::filesystem::exists(gloFile)){
                         glowFile = gloFile;
                     }
-					if(!loadedMaterials.count(MATERIAL_NAME)){
-						Handle handle = Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
-						loadedMaterials.emplace(MATERIAL_NAME,handle);
-					}
+                    if(!loadedMaterials.count(MATERIAL_NAME)){
+                        Handle handle = Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
+                        loadedMaterials.emplace(MATERIAL_NAME,handle);
+                    }
                 }
                 if(line[0] == 'S'){//Sun
                     Star* star = new Star(glm::vec3(R,G,B),glm::vec3(R1,G1,B1),glm::vec3(0),(float)RADIUS,NAME,this);
@@ -162,7 +162,7 @@ void SolarSystem::_loadFromFile(string filename){
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-							planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id()));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id()));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
@@ -183,14 +183,14 @@ void SolarSystem::_loadFromFile(string filename){
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-							planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id()));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id()));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
                         }
                     }
                     m_Planets.emplace(NAME,planetoid);
-					
+                    
                 }
                 else if(line[0] == '*'){//Player ship
                     if(PARENT != ""){
@@ -199,9 +199,9 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-					setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
-					GameCamera* playerCamera = (GameCamera*)getActiveCamera();
-					playerCamera->follow(getPlayer());
+                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    GameCamera* playerCamera = (GameCamera*)getActiveCamera();
+                    playerCamera->follow(getPlayer());
                 }
                 else if(line[0] == '$'){//Other ship
                     if(PARENT != ""){
@@ -235,23 +235,23 @@ void SolarSystem::_loadFromFile(string filename){
     }
 
     centerSceneToObject(player);
-	ComponentRigidBody& body = *player->getComponent<ComponentRigidBody>();
-	float xPos = body.position().x;
+    ComponentRigidBody& body = *player->getComponent<ComponentRigidBody>();
+    float xPos = body.position().x;
     float zPos = body.position().z;
 
-	/*
+    /*
     ObjectDisplay* _s = new ObjectDisplay(ResourceManifest::TestMesh,ResourceManifest::MirandaMaterial,glm::vec3(xPos+4,0,zPos-2),glm::vec3(1.0f),"TestObject1",nullptr);
     _s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
-	*/
+    */
 
     new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
 
     body.translate(0,0,2);
 
-	//LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
-	//player->addChild(lightP);
+    //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);
+    //player->addChild(lightP);
 }
 void SolarSystem::update(const float& dt){
     Scene::update(dt);

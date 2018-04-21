@@ -27,23 +27,23 @@ class AntiAliasingAlgorithm{public: enum Algorithm{
     None,FXAA,SMAA
 };};
 namespace Engine{
-	namespace epriv{
-		class GBuffer;
-		class FramebufferObject;
+    namespace epriv{
+        class GBuffer;
+        class FramebufferObject;
         class RenderbufferObject;
 
-		class RenderManager final{
-		    private:
-				class impl;
-		    public:
-				std::unique_ptr<impl> m_i;
+        class RenderManager final{
+            private:
+                class impl;
+            public:
+                std::unique_ptr<impl> m_i;
 
-				RenderManager(const char* name,uint w,uint h);
-				~RenderManager();
+                RenderManager(const char* name,uint w,uint h);
+                ~RenderManager();
 
-				void _init(const char* name,uint w,uint h);
-				void _resize(uint width, uint height);
-				void _resizeGbuffer(uint width,uint height);
+                void _init(const char* name,uint w,uint h);
+                void _resize(uint width, uint height);
+                void _resizeGbuffer(uint width,uint height);
 
                 void _render(
                     epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
@@ -55,17 +55,17 @@ namespace Engine{
                     bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
                     Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                 );
-				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
-				void _onOpenGLContextCreation(uint width,uint height);
-				void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-				void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-				void _addShaderToStage(ShaderP*,uint stage);
-				void _bindShaderProgram(ShaderP*);
-				bool _bindMaterial(Material*);
-				bool _unbindMaterial();
-				void _genPBREnvMapData(Texture*,uint,uint);
-		};
-	};
+                void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
+                void _onOpenGLContextCreation(uint width,uint height);
+                void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+                void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+                void _addShaderToStage(ShaderP*,uint stage);
+                void _bindShaderProgram(ShaderP*);
+                bool _bindMaterial(Material*);
+                bool _unbindMaterial();
+                void _genPBREnvMapData(Texture*,uint,uint);
+        };
+    };
     namespace Renderer{
         namespace Settings{
 
@@ -101,7 +101,7 @@ namespace Engine{
                 void setSpanMax(float r);     float getSpanMax();
             };
             namespace HDR{
-				bool enabled();
+                bool enabled();
                 void enable(bool b = true);   void disable();
                 float getExposure();          void setExposure(float e);
                 void setAlgorithm(HDRAlgorithm::Algorithm a);
@@ -112,7 +112,7 @@ namespace Engine{
                 float getStrength();          void setStrength(float r);
             };
             namespace GodRays{
-				bool enabled();
+                bool enabled();
                 void enable(bool b);      void disable();
                 float getExposure();      void setExposure(float e);
                 float getDecay();         void setDecay(float d);
@@ -123,7 +123,7 @@ namespace Engine{
                 float getAlphaFalloff();  void setAlphaFalloff(float a);
             };
             namespace SSAO{
-				bool enabled();
+                bool enabled();
                 void enable(bool b = true);       void disable();
                 void enableBlur(bool b = true);   void disableBlur();
                 float getBlurStrength();          void setBlurStrength(float s);
@@ -138,7 +138,7 @@ namespace Engine{
             };
         };
         void renderFullscreenQuad(uint width, uint height);
-		void renderFullscreenTriangle(uint width,uint height);
+        void renderFullscreenTriangle(uint width,uint height);
 
         inline const GLint getUniformLoc(const char* location);
         inline const GLint& getUniformLocUnsafe(const char* location);

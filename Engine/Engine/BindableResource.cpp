@@ -1,9 +1,9 @@
 #include "BindableResource.h"
 
 namespace Engine{
-	namespace epriv{
-	    struct emptyFunctor{template<class T> void operator()(T* r) const {}};
-	};
+    namespace epriv{
+        struct emptyFunctor{template<class T> void operator()(T* r) const {}};
+    };
 };
 
 BindableResource::BindableResource(std::string name):EngineResource(name){

@@ -113,7 +113,7 @@ class Ship: public Entity{
             );
         virtual ~Ship();
 
-		void onEvent(const Event&);
+        void onEvent(const Event&);
 
         void translateWarp(float amount,float dt);
         void toggleWarp(){

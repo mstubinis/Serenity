@@ -18,23 +18,23 @@ using namespace Engine;
 using namespace std;
 
 namespace Engine{
-	namespace epriv{
-		struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
-			Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
-			Camera* c = s->getActiveCamera();        if(c == nullptr) return;
-			Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
-			Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+    namespace epriv{
+        struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
+            Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
+            Camera* c = s->getActiveCamera();        if(c == nullptr) return;
+            Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
+            Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
 
-			glm::vec3 camPos = c->getPosition();
-			Renderer::sendUniform3fSafe("CameraPosition",camPos);
+            glm::vec3 camPos = c->getPosition();
+            Renderer::sendUniform3fSafe("CameraPosition",camPos);
 
-			if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
-			else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
-		}};
-		struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
-		}};
-		struct srtKey{inline bool operator() ( Material* _1,  Material* _2){return (_1->name() < _2->name());}};
-	};
+            if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
+            else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
+        }};
+        struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
+        }};
+        struct srtKey{inline bool operator() ( Material* _1,  Material* _2){return (_1->name() < _2->name());}};
+    };
 };
 
 
@@ -70,99 +70,99 @@ class ShaderP::impl final{
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
 
-		void _insertStringAtLine(string& source, const string& newLineContent,uint lineToInsertAt){
-			istringstream str(source); string line; 
-			vector<string> lines;
-			uint count = 0;
-			while(std::getline(str,line)){
-				lines.push_back(line + "\n");
-				if(count == lineToInsertAt){
-					lines.push_back(newLineContent + "\n");
-				}
-				++count;
-			}
-			source = "";
-			for(auto line:lines){
-				source = source + line;
-			}
-		}
+        void _insertStringAtLine(string& source, const string& newLineContent,uint lineToInsertAt){
+            istringstream str(source); string line; 
+            vector<string> lines;
+            uint count = 0;
+            while(std::getline(str,line)){
+                lines.push_back(line + "\n");
+                if(count == lineToInsertAt){
+                    lines.push_back(newLineContent + "\n");
+                }
+                ++count;
+            }
+            source = "";
+            for(auto line:lines){
+                source = source + line;
+            }
+        }
         void _convertCode(string& _data,Shader* shader){
-			istringstream str(_data); string line; 
-			
-			//get the first line with actual content
-			while(true){
-			    getline(str,line);
-				if(line != "" && line != "\n"){
-				    break;
-				}
-			}
-			string versionNumberString = regex_replace(line,regex("([^0-9])"),"");
-			uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
-			if (line == "#version 110"){
-			}
-			else if (line == "#version 120"){
-			}
-			else if(line == "#version 130"){
-			}
-			else if(line == "#version 140"){
-			}
-			else if(line == "#version 150"){
-			}
-			else if(line == "#version 330 core"){
-			}
-			else if(line == "#version 400 core"){
-			}
-			else if(line == "#version 410 core"){
-			}
-			else if(line == "#version 420 core"){
-			}
-			else if(line == "#version 430 core"){
-			}
-			else if(line == "#version 440 core"){
-			}
-			else if(line == "#version 450 core"){
-			}
-			if(versionNumber >= 130){
-				if(shader->type() == ShaderType::Vertex){
-					boost::replace_all(_data, "varying", "out");
-				}
-				else if(shader->type() == ShaderType::Fragment){
-					boost::replace_all(_data, "varying", "in");
+            istringstream str(_data); string line; 
+            
+            //get the first line with actual content
+            while(true){
+                getline(str,line);
+                if(line != "" && line != "\n"){
+                    break;
+                }
+            }
+            string versionNumberString = regex_replace(line,regex("([^0-9])"),"");
+            uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
+            if (line == "#version 110"){
+            }
+            else if (line == "#version 120"){
+            }
+            else if(line == "#version 130"){
+            }
+            else if(line == "#version 140"){
+            }
+            else if(line == "#version 150"){
+            }
+            else if(line == "#version 330 core"){
+            }
+            else if(line == "#version 400 core"){
+            }
+            else if(line == "#version 410 core"){
+            }
+            else if(line == "#version 420 core"){
+            }
+            else if(line == "#version 430 core"){
+            }
+            else if(line == "#version 440 core"){
+            }
+            else if(line == "#version 450 core"){
+            }
+            if(versionNumber >= 130){
+                if(shader->type() == ShaderType::Vertex){
+                    boost::replace_all(_data, "varying", "out");
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                    boost::replace_all(_data, "varying", "in");
 
-					boost::replace_all(_data, "gl_FragColor", "FRAGMENT_OUTPUT_COLOR");
-					_insertStringAtLine(_data,"out vec4 FRAGMENT_OUTPUT_COLOR;",1);
-				}
-			}
-			if(versionNumber >= 140){
-				if(shader->type() == ShaderType::Vertex){
-				}
-				else if(shader->type() == ShaderType::Fragment){
-					boost::replace_all(_data, "textureCube(", "texture(");
-					boost::replace_all(_data, "textureCubeLod(", "textureLod(");
-					boost::replace_all(_data, "texture2DLod(", "textureLod(");
-					boost::replace_all(_data, "texture2D(", "texture(");
-				}
-			}
-			if(versionNumber >= 150){
-				if(shader->type() == ShaderType::Vertex){
-				}
-				else if(shader->type() == ShaderType::Fragment){
-				}
-			}
-			if(versionNumber >= 330){
-				if(shader->type() == ShaderType::Vertex){
-				}
-				else if(shader->type() == ShaderType::Fragment){
-				}
-			}
-		}
+                    boost::replace_all(_data, "gl_FragColor", "FRAGMENT_OUTPUT_COLOR");
+                    _insertStringAtLine(_data,"out vec4 FRAGMENT_OUTPUT_COLOR;",1);
+                }
+            }
+            if(versionNumber >= 140){
+                if(shader->type() == ShaderType::Vertex){
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                    boost::replace_all(_data, "textureCube(", "texture(");
+                    boost::replace_all(_data, "textureCubeLod(", "textureLod(");
+                    boost::replace_all(_data, "texture2DLod(", "textureLod(");
+                    boost::replace_all(_data, "texture2D(", "texture(");
+                }
+            }
+            if(versionNumber >= 150){
+                if(shader->type() == ShaderType::Vertex){
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                }
+            }
+            if(versionNumber >= 330){
+                if(shader->type() == ShaderType::Vertex){
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                }
+            }
+        }
         void _construct(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             m_Stage = stage;
             m_VertexShader = vs;
             m_FragmentShader = fs;
             m_UniformLocations.clear();
 
-			epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
+            epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
             super->setName(name);
 
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -189,8 +189,8 @@ class ShaderP::impl final{
             }
             else{ FragmentShaderCode = ps->data(); }
 
-			_convertCode(VertexShaderCode,vs);
-			_convertCode(FragmentShaderCode,ps);
+            _convertCode(VertexShaderCode,vs);
+            _convertCode(FragmentShaderCode,ps);
 
             GLint res = GL_FALSE;
             int logLength;
@@ -276,14 +276,14 @@ ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
 void ShaderP::bind(){
-	epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this);
+    epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this);
     BindableResource::bind();
 }
 void ShaderP::unbind(){
     BindableResource::unbind();
 }
 void ShaderP::addMaterial(Handle& materialHandle){
-	ShaderP::addMaterial(Resources::getMaterial(materialHandle));
+    ShaderP::addMaterial(Resources::getMaterial(materialHandle));
 }
 void ShaderP::addMaterial(Material* material){
     m_i->m_Materials.push_back(material);

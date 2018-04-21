@@ -14,9 +14,9 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 namespace sf{ class Image; }
 namespace Engine{
-	namespace epriv{
-		class FramebufferTexture;
-	};
+    namespace epriv{
+        class FramebufferTexture;
+    };
 };
 class TextureWrap{public: enum Wrap{
     Repeat,

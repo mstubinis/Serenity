@@ -34,52 +34,52 @@ epriv::ResourceManager* resourceManager;
 
 class epriv::ResourceManager::impl final{
     public:
-		//TODO: convert to this resource system --------------------------------------------
+        //TODO: convert to this resource system --------------------------------------------
 
-		//http://gamesfromwithin.com/managing-data-relationships
+        //http://gamesfromwithin.com/managing-data-relationships
 
-		ObjectPool<EngineResource>* m_Resources;
-		//-----------------------------------------------------------------------------------------------
+        ObjectPool<EngineResource>* m_Resources;
+        //-----------------------------------------------------------------------------------------------
 
 
-		Engine_Window* m_Window;
+        Engine_Window* m_Window;
         Scene* m_CurrentScene;
-		bool m_DynamicMemory;
+        bool m_DynamicMemory;
 
         vector<MeshInstance*> m_MeshInstances;
 
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
 
-		void _init(const char* name,const uint& width,const uint& height){
-			m_CurrentScene = nullptr;
-			m_DynamicMemory = false;
+        void _init(const char* name,const uint& width,const uint& height){
+            m_CurrentScene = nullptr;
+            m_DynamicMemory = false;
 
-			m_Resources = new ObjectPool<EngineResource>(8192);
-		}
-		void _postInit(const char* name,uint width,uint height){
-			m_Window = new Engine_Window(name,width,height);
-		}
-		void _destruct(){
-			for (auto it:m_MeshInstances)                                     SAFE_DELETE(it);
-			for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )      it->second.reset();
+            m_Resources = new ObjectPool<EngineResource>(8192);
+        }
+        void _postInit(const char* name,uint width,uint height){
+            m_Window = new Engine_Window(name,width,height);
+        }
+        void _destruct(){
+            for (auto it:m_MeshInstances)                                     SAFE_DELETE(it);
+            for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )      it->second.reset();
 
-			SAFE_DELETE(m_Resources);
-			SAFE_DELETE(m_Window);
-		}
+            SAFE_DELETE(m_Resources);
+            SAFE_DELETE(m_Window);
+        }
 };
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
-	m_i->_init(name,width,height);
+    m_i->_init(name,width,height);
 }
 epriv::ResourceManager::~ResourceManager(){
-	m_i->_destruct();
+    m_i->_destruct();
 }
 void epriv::ResourceManager::_init(const char* n,uint w,uint h){
-	resourceManager = epriv::Core::m_Engine->m_ResourceManager;
-	m_i->_postInit(n,w,h);
+    resourceManager = epriv::Core::m_Engine->m_ResourceManager;
+    m_i->_postInit(n,w,h);
 }
 
 string Engine::Data::reportTime(){
-	return epriv::Core::m_Engine->m_TimeManager->reportTime();
+    return epriv::Core::m_Engine->m_TimeManager->reportTime();
 }
 float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(); }
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
@@ -87,10 +87,10 @@ Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_Curr
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
 
 void epriv::ResourceManager::_addScene(Scene* s){
-	_addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
+    _addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }
 void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
-	m_i->m_MeshInstances.push_back(m);
+    m_i->m_MeshInstances.push_back(m);
 }
 string epriv::ResourceManager::_buildSceneName(string n){return _incrementName(resourceManager->m_i->m_Scenes,n);}
 
@@ -124,7 +124,7 @@ ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_
 
 
 Handle Resources::addFont(string filename){
-	return resourceManager->m_i->m_Resources->add(new Font(filename),ResourceType::Font);
+    return resourceManager->m_i->m_Resources->add(new Font(filename),ResourceType::Font);
 }
 
 Handle Resources::addMesh(string f, CollisionType::Type t, bool b,float threshhold){
@@ -134,64 +134,64 @@ Handle Resources::addMesh(string n,float x,float y,float w,float h,float threshh
     return resourceManager->m_i->m_Resources->add(new Mesh(n,x,y,w,h,threshhold),ResourceType::Mesh);
 }
 Handle Resources::addMesh(string n,float w,float h,float threshhold){
-	return resourceManager->m_i->m_Resources->add(new Mesh(n,w,h,threshhold),ResourceType::Mesh);
+    return resourceManager->m_i->m_Resources->add(new Mesh(n,w,h,threshhold),ResourceType::Mesh);
 }
 Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
     return resourceManager->m_i->m_Resources->add(new Mesh(n,g,w,l,threshhold),ResourceType::Mesh);
 }
 Handle epriv::ResourceManager::_addTexture(Texture* t){
-	return resourceManager->m_i->m_Resources->add(t,ResourceType::Texture);
+    return resourceManager->m_i->m_Resources->add(t,ResourceType::Texture);
 }
 
 Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
-	ShaderP* program = nullptr;
+    ShaderP* program = nullptr;
     if(programHandle.null()){ 
-		program = epriv::InternalShaderPrograms::Deferred;
-	}
-	else{
-		program = Resources::getShaderProgram(programHandle);
-	}
-	Material* material = new Material(name,diffuse,normal,glow,specular,programHandle);
+        program = epriv::InternalShaderPrograms::Deferred;
+    }
+    else{
+        program = Resources::getShaderProgram(programHandle);
+    }
+    Material* material = new Material(name,diffuse,normal,glow,specular,programHandle);
     program->addMaterial(material);
-	return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
+    return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
     if(program == nullptr) program = epriv::InternalShaderPrograms::Deferred;
-	Material* material = new Material(name,diffuse,normal,glow,specular,program);
+    Material* material = new Material(name,diffuse,normal,glow,specular,program);
     program->addMaterial(material);
-	return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
+    return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 
 Handle Resources::addShader(string name, string fileOrData, ShaderType::Type type, bool fromFile){
-	return resourceManager->m_i->m_Resources->add(new Shader(name,fileOrData,type,fromFile),ResourceType::Shader);
+    return resourceManager->m_i->m_Resources->add(new Shader(name,fileOrData,type,fromFile),ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){
-	return resourceManager->m_i->m_Resources->add(new ShaderP(n,v,f,s),ResourceType::ShaderProgram);
+    return resourceManager->m_i->m_Resources->add(new ShaderP(n,v,f,s),ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(string n, Handle& v, Handle& f, ShaderRenderPass::Pass s){
-	Shader* vS = nullptr; resourceManager->m_i->m_Resources->getAs(v,vS);
-	Shader* fS = nullptr; resourceManager->m_i->m_Resources->getAs(f,fS);
-	return resourceManager->m_i->m_Resources->add(new ShaderP(n,vS,fS,s),ResourceType::ShaderProgram);
+    Shader* vS = nullptr; resourceManager->m_i->m_Resources->getAs(v,vS);
+    Shader* fS = nullptr; resourceManager->m_i->m_Resources->getAs(f,fS);
+    return resourceManager->m_i->m_Resources->add(new ShaderP(n,vS,fS,s),ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(string file,string n,bool music){
-	return resourceManager->m_i->m_Resources->add(new SoundData(file,music),ResourceType::SoundData);
+    return resourceManager->m_i->m_Resources->add(new SoundData(file,music),ResourceType::SoundData);
 }
 
 void Resources::setCurrentScene(Scene* scene){
-	if(resourceManager->m_i->m_CurrentScene == nullptr){
-		epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);
-		resourceManager->m_i->m_CurrentScene = scene;
-		return;
-	}
-	if(resourceManager->m_i->m_CurrentScene != scene){
+    if(resourceManager->m_i->m_CurrentScene == nullptr){
+        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);
+        resourceManager->m_i->m_CurrentScene = scene;
+        return;
+    }
+    if(resourceManager->m_i->m_CurrentScene != scene){
         cout << "---- Scene Change started (" << resourceManager->m_i->m_CurrentScene->name() << ") to (" << scene->name() << ") ----" << endl;
         if(epriv::Core::m_Engine->m_ResourceManager->m_i->m_DynamicMemory){
             //mark game object resources to minus use count
         }
-		epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(resourceManager->m_i->m_CurrentScene,scene);
-		resourceManager->m_i->m_CurrentScene = scene;
+        epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(resourceManager->m_i->m_CurrentScene,scene);
+        resourceManager->m_i->m_CurrentScene = scene;
         if(resourceManager->m_i->m_DynamicMemory){
             //mark game object resources to add use count
         }

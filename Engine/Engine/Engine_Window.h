@@ -29,14 +29,14 @@ class Engine_Window final{
         uint getStyle();
         bool hasFocus();
         bool isOpen();
-		bool isFullscreen();
-		bool isActive();
+        bool isFullscreen();
+        bool isActive();
         void setFullScreen(bool);
         void setStyle(uint style);
         void display();
         void keepMouseInWindow(bool=true);
-		void setFramerateLimit(uint limit);
-		uint getFramerateLimit() const;
+        void setFramerateLimit(uint limit);
+        uint getFramerateLimit() const;
         sf::Window* getSFMLHandle() const;
 };
 #endif

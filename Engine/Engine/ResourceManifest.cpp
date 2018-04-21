@@ -46,16 +46,16 @@ Handle ResourceManifest::PBCSound;
 Handle ResourceManifest::SniperSound;
 
 void ResourceManifest::init(){
-	Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
-	Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
+    Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
+    Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
     skyFromSpace = Resources::addShaderProgram("AS_SkyFromSpace",skyFromSpaceVert,skyFromSpaceFrag,ShaderRenderPass::Geometry);
 
-	Handle skyFromAtVert = Resources::addShader("AS_SkyFromAtmosphere_Vert","data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
-	Handle skyFromAtFrag = Resources::addShader("AS_SkyFromAtmosphere_Frag","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
+    Handle skyFromAtVert = Resources::addShader("AS_SkyFromAtmosphere_Vert","data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
+    Handle skyFromAtFrag = Resources::addShader("AS_SkyFromAtmosphere_Frag","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
     skyFromAtmosphere = Resources::addShaderProgram("AS_SkyFromAtmosphere",skyFromAtVert,skyFromAtFrag,ShaderRenderPass::Geometry);
 
-	Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
-	Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
+    Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
+    Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
 
@@ -69,7 +69,7 @@ void ResourceManifest::init(){
     StarbaseMesh = Resources::addMesh("data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
     RingMesh = Resources::addMesh("data/Models/ring.obj",CollisionType::None);
     DreadnaughtMesh = Resources::addMesh("data/Models/dreadnaught.obj",CollisionType::ConvexHull);
-	VenerexMesh = Resources::addMesh("data/Models/venerex.obj",CollisionType::ConvexHull);
+    VenerexMesh = Resources::addMesh("data/Models/venerex.obj",CollisionType::ConvexHull);
 
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
@@ -84,7 +84,7 @@ void ResourceManifest::init(){
     IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
-	CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
+    CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
     SunFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
     Resources::getMaterial(SunFlareMaterial)->setShadeless(true);
@@ -92,8 +92,8 @@ void ResourceManifest::init(){
     GoldMaterial = Resources::addMaterial("Gold","");
     Resources::getMaterial(GoldMaterial)->setMaterialPhysics(MaterialPhysics::Gold);
 
-	PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
-	SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
+    PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
+    SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 
 
 

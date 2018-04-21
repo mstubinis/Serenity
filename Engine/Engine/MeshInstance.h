@@ -11,39 +11,39 @@ struct Handle;
 class Entity;
 
 namespace Engine{
-	namespace epriv{
-		struct DefaultMeshInstanceBindFunctor;
-		struct DefaultMeshInstanceUnbindFunctor;
-	};
+    namespace epriv{
+        struct DefaultMeshInstanceBindFunctor;
+        struct DefaultMeshInstanceUnbindFunctor;
+    };
 };
 
 class MeshInstanceAnimation final{
-	friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
-	friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
+    friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
+    friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
-		class impl; std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         MeshInstanceAnimation(Mesh*,const std::string& animName,float startTime,float endTime,uint requestedLoops = 1);
         ~MeshInstanceAnimation();
 };
 class MeshInstance final: public BindableResource{
-	friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
-	friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
+    friend struct Engine::epriv::DefaultMeshInstanceBindFunctor;
+    friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
         MeshInstance(Entity*,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-		MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-		MeshInstance(Entity*,Handle mesh,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
         ~MeshInstance();
 
         Mesh* mesh();
-		Entity* parent();
-		glm::vec4& color();
-		glm::vec3& godRaysColor();
+        Entity* parent();
+        glm::vec4& color();
+        glm::vec3& godRaysColor();
         Material* material();
-		glm::mat4& model();
+        glm::mat4& model();
         glm::vec3& position();
         glm::quat& orientation();
         glm::vec3& getScale();
@@ -52,11 +52,11 @@ class MeshInstance final: public BindableResource{
         void playAnimation(const std::string& animName,float startTime);
         void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 
-		void setColor(float r,float g,float b,float a = 1.0f);
-		void setColor(glm::vec4& color);
+        void setColor(float r,float g,float b,float a = 1.0f);
+        void setColor(glm::vec4& color);
 
-		void setGodRaysColor(float r,float g,float b);
-		void setGodRaysColor(glm::vec3& color);
+        void setGodRaysColor(float r,float g,float b);
+        void setGodRaysColor(glm::vec3& color);
 
         void setMesh(Handle& meshHandle);                void setMesh(Mesh*);
         void setMaterial(Handle& materialHandle);        void setMaterial(Material*);

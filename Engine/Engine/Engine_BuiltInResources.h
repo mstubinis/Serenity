@@ -5,16 +5,16 @@
 class Mesh;
 class ShaderP;
 namespace Engine{
-	namespace epriv{
-		struct InternalMeshes{
-			static Mesh* PointLightBounds;
-			static Mesh* RodLightBounds;
-			static Mesh* SpotLightBounds;
-		};
-		struct InternalShaderPrograms{
-			static ShaderP* Deferred;
-		};
-	};
+    namespace epriv{
+        struct InternalMeshes{
+            static Mesh* PointLightBounds;
+            static Mesh* RodLightBounds;
+            static Mesh* SpotLightBounds;
+        };
+        struct InternalShaderPrograms{
+            static ShaderP* Deferred;
+        };
+    };
 };
 
 

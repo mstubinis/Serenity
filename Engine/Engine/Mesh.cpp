@@ -26,53 +26,53 @@ Mesh* Mesh::Plane = nullptr;
 Mesh* Mesh::Cube = nullptr;
 
 namespace Engine{
-	namespace epriv{
-		enum LoadWhat{
-			LOAD_POINTS  = 0x01,
-			LOAD_UVS     = 0x02,
-			LOAD_NORMALS = 0x04,
-			LOAD_FACES   = 0x08,
-			LOAD_TBN     = 0x16
-					   //= 0x32
-		};
-		struct MeshVertexData{
-			glm::vec3 position;
-			//float uv;
-			glm::vec2 uv;
-			GLuint normal;
-			GLuint binormal;
-			GLuint tangent;
-			MeshVertexData(){ }
-			MeshVertexData(const MeshVertexData& c){
-				position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
-			}
-			~MeshVertexData(){ }
-		};
-		struct MeshVertexDataAnimated final: public MeshVertexData{
-			glm::vec4 boneIDs;
-			glm::vec4 boneWeights;
-			MeshVertexDataAnimated():MeshVertexData(){ }
-			MeshVertexDataAnimated(const MeshVertexData& c){
-				position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
-			}
-			MeshVertexDataAnimated(const MeshVertexDataAnimated& c){    
-				position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent; boneIDs=c.boneIDs; boneWeights=c.boneWeights;
-			}
-			~MeshVertexDataAnimated(){ }
-		};
-		unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = [](){
-			unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
-			m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
-			//m[VertexFormatAnimated::UV]        = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-			m[VertexFormatAnimated::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-			m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
-			m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
-			m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
-			m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
-			m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
-			return m;
-		}();
-	};
+    namespace epriv{
+        enum LoadWhat{
+            LOAD_POINTS  = 0x01,
+            LOAD_UVS     = 0x02,
+            LOAD_NORMALS = 0x04,
+            LOAD_FACES   = 0x08,
+            LOAD_TBN     = 0x16
+                       //= 0x32
+        };
+        struct MeshVertexData{
+            glm::vec3 position;
+            //float uv;
+            glm::vec2 uv;
+            GLuint normal;
+            GLuint binormal;
+            GLuint tangent;
+            MeshVertexData(){ }
+            MeshVertexData(const MeshVertexData& c){
+                position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
+            }
+            ~MeshVertexData(){ }
+        };
+        struct MeshVertexDataAnimated final: public MeshVertexData{
+            glm::vec4 boneIDs;
+            glm::vec4 boneWeights;
+            MeshVertexDataAnimated():MeshVertexData(){ }
+            MeshVertexDataAnimated(const MeshVertexData& c){
+                position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
+            }
+            MeshVertexDataAnimated(const MeshVertexDataAnimated& c){    
+                position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent; boneIDs=c.boneIDs; boneWeights=c.boneWeights;
+            }
+            ~MeshVertexDataAnimated(){ }
+        };
+        unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = [](){
+            unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
+            m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
+            //m[VertexFormatAnimated::UV]        = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+            m[VertexFormatAnimated::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+            m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
+            m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
+            m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
+            m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
+            m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
+            return m;
+        }();
+    };
 };
 
 
@@ -81,7 +81,7 @@ class MeshSkeleton::impl final{
     public:
         unordered_map<string,uint> m_BoneMapping; // maps a bone name to its index
         uint m_NumBones;
-		vector<epriv::BoneInfo> m_BoneInfo;
+        vector<epriv::BoneInfo> m_BoneInfo;
         glm::mat4 m_GlobalInverseTransform;
         unordered_map<string,epriv::AnimationData*> m_AnimationData;
         vector<glm::vec4> m_BoneIDs;
@@ -905,10 +905,10 @@ class Mesh::impl final{
             }
             _calculateMeshRadius(super);
         }
-		void _loadIntoGPU(){
+        void _loadIntoGPU(){
             _initRenderingContext();
             cout << "(Mesh) ";
-		}
+        }
         void _unload(Mesh* super){
             if(m_File != ""){
                 _clearData(super);
@@ -1084,7 +1084,7 @@ Mesh::Mesh(string name,float width, float height,float threshold):BindableResour
     m_i->_init(this,name,width,height,threshold);
 }
 Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold):BindableResource(fileOrData),m_i(new impl){
-	if(!notMemory) setName("CustomMesh");
+    if(!notMemory) setName("CustomMesh");
     m_i->_init(this,fileOrData,type,notMemory,threshold);
 }
 Mesh::~Mesh(){
@@ -1109,7 +1109,7 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
 void Mesh::load(){
     if(!isLoaded()){
         m_i->_loadIntoCPU(this);
-		m_i->_loadIntoGPU();
+        m_i->_loadIntoGPU();
         EngineResource::load();
     }
 }

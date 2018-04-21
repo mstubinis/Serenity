@@ -137,8 +137,8 @@ namespace Engine{
         glm::quat btToGLMQuat(btQuaternion& q);
         btQuaternion glmToBTQuat(glm::quat& q);
 
-		glm::vec3 btVectorToGLM(btVector3&);
-		btVector3 btVectorFromGLM(glm::vec3&);
+        glm::vec3 btVectorToGLM(btVector3&);
+        btVector3 btVectorFromGLM(glm::vec3&);
 
         glm::vec3 assimpToGLMVec3(aiVector3D&);
         glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
@@ -171,7 +171,7 @@ namespace Engine{
 
         float remainder(float,float);
 
-		void removeMatrixPosition(glm::mat4&);
+        void removeMatrixPosition(glm::mat4&);
 
         void recalculateForwardRightUp(glm::quat&,glm::vec3&,glm::vec3&,glm::vec3&);
         void recalculateForwardRightUp(const btRigidBody*,glm::vec3&,glm::vec3&,glm::vec3&);
