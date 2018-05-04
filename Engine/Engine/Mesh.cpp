@@ -1073,18 +1073,14 @@ uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
 
 
-void Mesh::LoadCPU(Mesh* mesh){
+void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
     if(!mesh->isLoaded()){
-		//std::cout << "(Mesh): " << mesh->name() << " loading into CPU (started)" << std::endl;
         mesh->m_i->_loadIntoCPU(mesh);
-		//std::cout << "(Mesh): " << mesh->name() << " loading into CPU (finished)" << std::endl;
     }
 }
-void Mesh::LoadGPU(Mesh* mesh){
+void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
     if(!mesh->isLoaded()){
-		//std::cout << "(Mesh): " << mesh->name() << " loading into GPU (started)" << std::endl;
         mesh->m_i->_loadIntoGPU();
-		//std::cout << "(Mesh): " << mesh->name() << " loading into GPU (finished)" << std::endl;
 		mesh->EngineResource::load();
     }
 }

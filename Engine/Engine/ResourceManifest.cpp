@@ -62,24 +62,6 @@ void ResourceManifest::init(){
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
 
-
-	/*
-    TestMesh = Resources::addMesh("data/Models/1911.fbx",CollisionType::None,true,0.0f);
-    PlanetMesh = Resources::addMesh("data/Models/planet.obj",CollisionType::None,true);
-    DefiantMesh = Resources::addMesh("data/Models/defiant.obj",CollisionType::ConvexHull,true);
-    AkiraMesh = Resources::addMesh("data/Models/akira.obj",CollisionType::ConvexHull,true);
-    MirandaMesh = Resources::addMesh("data/Models/miranda.obj",CollisionType::ConvexHull);
-    IntrepidMesh = Resources::addMesh("data/Models/intrepid.obj",CollisionType::ConvexHull);
-    NorwayMesh = Resources::addMesh("data/Models/norway.obj",CollisionType::ConvexHull);
-    StarbaseMesh = Resources::addMesh("data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
-    RingMesh = Resources::addMesh("data/Models/ring.obj",CollisionType::None);
-    DreadnaughtMesh = Resources::addMesh("data/Models/dreadnaught.obj",CollisionType::ConvexHull);
-    VenerexMesh = Resources::addMesh("data/Models/venerex.obj",CollisionType::ConvexHull);
-    OberthMesh = Resources::addMesh("data/Models/oberth.obj",CollisionType::ConvexHull);
-    CapsuleTunnelMesh = Resources::addMesh("data/Models/capsuleTunnel.obj",CollisionType::None);
-    CapsuleRibbonMesh = Resources::addMesh("data/Models/capsuleRibbon.obj",CollisionType::None);
-	*/
-
     TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);
     PlanetMesh = Resources::addMeshAsync("data/Models/planet.obj",CollisionType::None,true);
     DefiantMesh = Resources::addMeshAsync("data/Models/defiant.obj",CollisionType::ConvexHull,true);
@@ -96,8 +78,6 @@ void ResourceManifest::init(){
     CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.obj",CollisionType::None);	
 
 	Engine::epriv::threading::waitForAll();
-
-
 
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");

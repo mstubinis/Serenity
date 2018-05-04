@@ -17,13 +17,17 @@
 
 namespace sf{ class Image; };
 
+const uint NUM_BONES_PER_VERTEX = 4;
+
+struct aiAnimation;
 class btHeightfieldTerrainShape;
 class MeshInstance;
-struct aiAnimation;
+class InternalMeshPublicInterface;
+class Mesh;
+class MeshSkeleton;
+
 typedef unsigned int uint;
 typedef unsigned short ushort;
-
-const uint NUM_BONES_PER_VERTEX = 4;
 
 namespace Engine{
     namespace epriv{
@@ -118,18 +122,21 @@ class MeshSkeleton final{
         void clear();
         uint numBones();
 };
+class InternalMeshPublicInterface{
+    public:
+		static void LoadCPU(Mesh*);
+		static void LoadGPU(Mesh*);
+};
+
 class Mesh final: public BindableResource{
     friend struct ::DefaultMeshBindFunctor; friend struct ::DefaultMeshUnbindFunctor;
-    friend class ::Engine::epriv::AnimationData; friend class ::MeshSkeleton;
+    friend class ::Engine::epriv::AnimationData; friend class ::MeshSkeleton; friend class ::InternalMeshPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
         //loaded in renderer
         static Mesh* Plane;
         static Mesh* Cube;
-
-		static void LoadCPU(Mesh*);
-		static void LoadGPU(Mesh*);
 
         Mesh(std::string name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);

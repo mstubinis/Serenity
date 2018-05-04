@@ -143,15 +143,14 @@ Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint
 
 
 Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
-	Mesh* m = new Mesh(f,t,b,threshhold,false);
-	//Engine::epriv::threading::addJobWithPostCallback(*Mesh::LoadCPU,*Mesh::LoadGPU,m);
+	Mesh* mesh = new Mesh(f,t,b,threshhold,false);
 
-	boost::function<void()> job; job = boost::bind(&Mesh::LoadCPU,m);
-	boost::function<void()> callback; callback = boost::bind(&Mesh::LoadGPU,m);
+	boost::function<void()> job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
+	boost::function<void()> cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
 
-	Engine::epriv::threading::addJobWithPostCallback(job,callback);
+	Engine::epriv::threading::addJobWithPostCallback(job,cbk);
 
-    return resourceManager->m_i->m_Resources->add(m,ResourceType::Mesh);
+    return resourceManager->m_i->m_Resources->add(mesh, ResourceType::Mesh);
 }
 
 
