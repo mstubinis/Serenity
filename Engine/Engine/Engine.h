@@ -28,12 +28,16 @@ namespace Engine{
                 ComponentManager* m_ComponentManager;
                 ThreadManager* m_ThreadManager;
                 NoiseManager* m_NoiseManager;
+				bool m_Paused;
 
                 Core(const char* name,uint width,uint height);
                 ~Core();
         };
     };
     void init(const char* name,uint width=0,uint height=0);
+	void pause(bool=true);
+	bool paused();
+	void unpause();
     void run();
 
     const float getFPS();

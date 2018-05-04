@@ -16,13 +16,14 @@ using namespace std;
 
 epriv::ThreadManager* threadManager;
 
+struct emptyFunctor{ void operator()() const {}};
 struct EngineCallback{
 	boost::shared_future<void> fut;
 	boost::function<void()> cbk;
-	EngineCallback(){}
+	EngineCallback(){ emptyFunctor e; cbk = boost::bind<void>(e); }
 	~EngineCallback(){}
 };
-struct emptyFunctor{ void operator()() const {}};
+
 
 class epriv::ThreadManager::impl final{
     public:
@@ -46,6 +47,7 @@ class epriv::ThreadManager::impl final{
             m_ThreadGroup.join_all();
         }
 		void _clearDoneCallbacks(){
+			if(m_Callbacks.size() == 0) return;
             for(auto it = m_Callbacks.begin(); it != m_Callbacks.end();){ 
                 EngineCallback& fut = (*it); 
                 if(fut.fut.is_ready()){
@@ -71,9 +73,7 @@ const uint epriv::ThreadManager::cores() const{ return threadManager->m_i->m_Num
 void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task){
     boost::unique_future<void> future = task->get_future();
 	EngineCallback e;
-	emptyFunctor f;
 	e.fut = boost::move(future);
-	e.cbk = boost::bind<void>(f);
 	threadManager->m_i->m_Callbacks.push_back(e);
     threadManager->m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
@@ -87,17 +87,14 @@ void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task, b
 }
 void epriv::threading::waitForAll(){ 
 	if(threadManager->m_i->m_Callbacks.size() == 0) return;
-	for(auto callback: threadManager->m_i->m_Callbacks){
+	bool allFuturesDone = true;
+	for(auto callback: threadManager->m_i->m_Callbacks){	
+		if(!callback.fut.is_ready()){
+			allFuturesDone = false;
+		}
 		callback.fut.wait();
 	}
 	//check if they are ready
-	bool allFuturesDone = true;
-	for(auto callback: threadManager->m_i->m_Callbacks){
-		if(!callback.fut.is_ready()){
-			allFuturesDone = false;
-			break;
-		}
-	}
 	if(allFuturesDone){
 		threadManager->m_i->_clearDoneCallbacks();
 	}

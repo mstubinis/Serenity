@@ -72,7 +72,12 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
     if(Engine::isKeyDownOnce("space")){
-
+		if(Engine::paused()){
+			Engine::unpause();
+		}
+		else{
+			Engine::pause();
+		}
     }
     m_HUD->update(dt);
 }

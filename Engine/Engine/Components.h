@@ -108,6 +108,8 @@ namespace Engine{
                 ~ComponentManager();
 
                 void _init(const char* name, uint w, uint h);
+				void _pause(bool=true);
+				void _unpause();
                 void _update(const float& dt);
                 void _render();
                 void _resize(uint width,uint height);

@@ -41,7 +41,7 @@ class epriv::PhysicsManager::impl final{
         btSequentialImpulseConstraintSolver* m_Solver;
         btDiscreteDynamicsWorld* m_World;
         GLDebugDrawer* m_DebugDrawer;
-
+		bool m_Paused;
         vector<Collision*> m_CollisionObjects;
 
         void _init(const char* name,uint& w,uint& h){
@@ -50,7 +50,7 @@ class epriv::PhysicsManager::impl final{
             m_Dispatcher = new btCollisionDispatcher(m_CollisionConfiguration);
             m_Solver = new btSequentialImpulseConstraintSolver;
             m_World = new btDiscreteDynamicsWorld(m_Dispatcher,m_Broadphase,m_Solver,m_CollisionConfiguration);
-
+			m_Paused = false;
             m_DebugDrawer = new GLDebugDrawer();
             m_DebugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
             m_World->setDebugDrawer(m_DebugDrawer);
@@ -74,6 +74,7 @@ class epriv::PhysicsManager::impl final{
                 SAFE_DELETE(collision);
         }
         void _update(float& dt, int& maxSteps, float& other){
+			if(m_Paused) return;
             m_World->stepSimulation(dt,maxSteps,other);
             uint numManifolds = m_World->getDispatcher()->getNumManifolds();
             for (uint i = 0; i < numManifolds; ++i){
@@ -133,6 +134,8 @@ void epriv::PhysicsManager::_render(){ m_i->_render(); }
 void epriv::PhysicsManager::_removeCollision(Collision* collisionObject){ m_i->_removeCollision(collisionObject); }
 const btDiscreteDynamicsWorld* epriv::PhysicsManager::_world() const{ return m_i->m_World; }
 
+void Physics::pause(bool b){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_Paused = b; }
+void Physics::unpause(){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_Paused = false; }
 void Physics::setGravity(float x,float y,float z){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ epriv::Core::m_Engine->m_PhysicsManager->m_i->m_World->addRigidBody(rigidBody,group,mask); }

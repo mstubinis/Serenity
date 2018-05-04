@@ -41,6 +41,7 @@ epriv::Core::Core(const char* name,uint w,uint h){
     m_ComponentManager = new epriv::ComponentManager(name,w,h);
     m_ThreadManager = new epriv::ThreadManager(name,w,h);
     m_NoiseManager = new epriv::NoiseManager(name,w,h);
+	m_Paused = false;
 }
 epriv::Core::~Core(){
     SAFE_DELETE(m_ComponentManager);
@@ -53,6 +54,18 @@ epriv::Core::~Core(){
     SAFE_DELETE(m_EventDispatcher);
     SAFE_DELETE(m_NoiseManager);
     SAFE_DELETE(m_PhysicsManager);
+}
+
+bool Engine::paused(){ return epriv::Core::m_Engine->m_Paused; }
+void Engine::pause(bool b){
+	epriv::Core::m_Engine->m_ComponentManager->_pause(b);
+	Engine::Physics::pause(b);
+	epriv::Core::m_Engine->m_Paused = b;
+}
+void Engine::unpause(){
+	epriv::Core::m_Engine->m_ComponentManager->_unpause();
+	Engine::Physics::unpause();
+	epriv::Core::m_Engine->m_Paused = false;
 }
 
 void Engine::init(const char* name,uint w,uint h){

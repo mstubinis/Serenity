@@ -69,10 +69,11 @@ class epriv::ComponentManager::impl final{
     public:	
         ComponentTypeRegistry       m_TypeRegistry;
         vector<Entity*>             m_EntitiesToBeDestroyed;
-
+		bool                        m_Paused;
         void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
             super->m_ComponentPool = new EntityPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
             super->m_EntityPool = new EntityPool<Entity>(epriv::MAX_NUM_ENTITIES);
+			m_Paused = false;
             m_TypeRegistry = ComponentTypeRegistry();
 
 
@@ -208,12 +209,12 @@ class epriv::ComponentManager::impl final{
             vector_clear(m_EntitiesToBeDestroyed);
         }
         void _update(const float& dt,epriv::ComponentManager* super){
-            _updateCurrentScene(dt);
-            
-            _updateComponentBaseBodies(dt);
-            _updateComponentRigidBodies(dt);
-
-            _updateComponentModels(dt);
+			_updateCurrentScene(dt);
+			if(!m_Paused){	
+				_updateComponentBaseBodies(dt);
+				_updateComponentRigidBodies(dt);
+				_updateComponentModels(dt);
+			}
             _updateComponentCameras(dt);
 
             _destroyQueuedEntities(super);
@@ -226,6 +227,9 @@ epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(
 epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 
 void epriv::ComponentManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h); }
+
+void epriv::ComponentManager::_pause(bool b){ m_i->m_Paused = b; }
+void epriv::ComponentManager::_unpause(){ m_i->m_Paused = false; }
 void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,this); }
 void epriv::ComponentManager::_resize(uint width,uint height){
     uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
