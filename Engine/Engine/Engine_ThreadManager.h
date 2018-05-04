@@ -23,6 +23,7 @@ typedef boost::packaged_task<void> boost_packed_task;
 
 namespace Engine{
     namespace epriv{
+
         class ThreadManager final{
             private:
                 class impl;
@@ -34,10 +35,8 @@ namespace Engine{
 
                 void _init(const char* name,uint w, uint h);
                 void _update(const float& dt);
-                void _decrementJobCount();
 
                 const uint cores() const;
-                const uint numJobs() const;
         };
         namespace threading{
             //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
@@ -131,67 +130,45 @@ namespace Engine{
 
             template<typename Job, typename Callback,typename U, typename V, typename W,typename X,typename Y,typename Z> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,U& a1,V& a2,W& a3,X& a4,Y& a5,Z& a6){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job,U& _1, V& _2, W& _3, X& _4, Y& _5, Z& _6) -> void{
-                    _job(_1,_2,_3,_4,_5,_6);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3,a4,a5,a6);
-                auto job = boost::make_shared<boost_packed_task>(j);
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,a1,a2,a3,a4,a5,a6));
                 finalizeJob(job,then);
             }
             template<typename Job, typename Callback,typename U, typename V, typename W,typename X,typename Y> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,U& a1,V& a2,W& a3,X& a4,Y& a5){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job,U& _1, V& _2, W& _3, X& _4, Y& _5) -> void{
-                    _job(_1,_2,_3,_4,_5);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3,a4,a5);
-                auto job = boost::make_shared<boost_packed_task>(j);		
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,a1,a2,a3,a4,a5));		
                 finalizeJob(job,then);
             }
             template<typename Job, typename Callback,typename U, typename V, typename W,typename X> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,U& a1,V& a2,W& a3,X& a4){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job,U& _1, V& _2, W& _3, X& _4) -> void{
-                    _job(_1,_2,_3,_4);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3,a4);
-                auto job = boost::make_shared<boost_packed_task>(j);	
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,a1,a2,a3,a4));	
                 finalizeJob(job,then);
             }
             template<typename Job,typename Callback,typename U, typename V, typename W> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,U& a1,V& a2,W& a3){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job,U& _1, V& _2, W& _3) -> void{
-                    _job(_1,_2,_3);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2,a3);
-                auto job = boost::make_shared<boost_packed_task>(j);	
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,a1,a2,a3));	
                 finalizeJob(job,then);
             }
             template<typename Job, typename Callback, typename U,typename V> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,U& a1,V& a2){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job,U& _1, V& _2) -> void{
-                    _job(_1,_2);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob,a1,a2);
-                auto job = boost::make_shared<boost_packed_task>(j);
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,a1,a2));
                 finalizeJob(job,then);
             }
             template<typename Job,typename Callback, typename U> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,U& a1){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job,U& _1) -> void{
-                    _job(_1);  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob,a1);
-                auto job = boost::make_shared<boost_packed_task>(j);	
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,a1));	
                 finalizeJob(job,then);
             }
             template<typename Job,typename Callback> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor){
                 boost::function<void()> then = boost::bind(postCallbackFunctor);
-                auto lam = [](Job*& _job) -> void{
-                    _job();  Core::m_Engine->m_ThreadManager->_decrementJobCount();
-                };
-                boost::function<void()> j = boost::bind<void>(lam,functorJob);
-                auto job = boost::make_shared<boost_packed_task>(j);	
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob));	
                 finalizeJob(job,then);
             }
+
+            static void addJobWithPostCallback(boost::function<void()>& job, boost::function<void()>& callback){
+                auto _job = boost::make_shared<boost_packed_task>(boost::bind(job));
+                finalizeJob(_job,callback);
+            }
+
         };
     };
 };

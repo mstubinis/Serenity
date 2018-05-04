@@ -87,6 +87,7 @@ namespace Engine{
         Handle addMesh(std::string name, float x, float y, float w, float h,float threshhold = 0.0005f);
         Handle addMesh(std::string name, float w, float h,float threshhold = 0.0005f);
         Handle addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
+        Handle addMeshAsync(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
 
         Handle addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
         Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);

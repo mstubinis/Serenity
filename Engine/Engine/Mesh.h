@@ -128,11 +128,14 @@ class Mesh final: public BindableResource{
         static Mesh* Plane;
         static Mesh* Cube;
 
+		static void LoadCPU(Mesh*);
+		static void LoadGPU(Mesh*);
+
         Mesh(std::string name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);
-        Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f);
+        Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadImmediately = true);
         ~Mesh();
 
         Collision* getCollision() const;
@@ -150,4 +153,6 @@ class Mesh final: public BindableResource{
         void render(GLuint mode = GL_TRIANGLES);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
+
+
 #endif

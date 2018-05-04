@@ -304,7 +304,7 @@ class Mesh::impl final{
 
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold){//from file / data
+        void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadImmediately){//from file / data
             _initGlobal(threshold);
             m_Type = type;
             if(notMemory){
@@ -315,7 +315,9 @@ class Mesh::impl final{
             }
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
+			if(loadImmediately){
+                super->load();
+			}
         }
         void _clearData(Mesh* super){
             vector_clear(m_Vertices);
@@ -1071,6 +1073,24 @@ uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
 
 
+void Mesh::LoadCPU(Mesh* mesh){
+    if(!mesh->isLoaded()){
+		//std::cout << "(Mesh): " << mesh->name() << " loading into CPU (started)" << std::endl;
+        mesh->m_i->_loadIntoCPU(mesh);
+		//std::cout << "(Mesh): " << mesh->name() << " loading into CPU (finished)" << std::endl;
+    }
+}
+void Mesh::LoadGPU(Mesh* mesh){
+    if(!mesh->isLoaded()){
+		//std::cout << "(Mesh): " << mesh->name() << " loading into GPU (started)" << std::endl;
+        mesh->m_i->_loadIntoGPU();
+		//std::cout << "(Mesh): " << mesh->name() << " loading into GPU (finished)" << std::endl;
+		mesh->EngineResource::load();
+    }
+}
+
+
+
 Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,heightfield,threshold);
 }
@@ -1083,9 +1103,9 @@ Mesh::Mesh(string name,float x, float y,float width, float height,float threshol
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,width,height,threshold);
 }
-Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold):BindableResource(fileOrData),m_i(new impl){
+Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadImmediately):BindableResource(fileOrData),m_i(new impl){
     if(!notMemory) setName("CustomMesh");
-    m_i->_init(this,fileOrData,type,notMemory,threshold);
+    m_i->_init(this,fileOrData,type,notMemory,threshold,loadImmediately);
 }
 Mesh::~Mesh(){
     this->unload();
@@ -1094,8 +1114,6 @@ Mesh::~Mesh(){
 Collision* Mesh::getCollision() const { return m_i->m_Collision; }
 
 std::unordered_map<std::string, Engine::epriv::AnimationData*>& Mesh::animationData(){ return m_i->m_Skeleton->m_i->m_AnimationData; }
-//unordered_map<string,epriv::AnimationData*>& Mesh::animationData(){ return m_i->m_Skeleton->m_i->m_AnimationData; }
-
 
 const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }

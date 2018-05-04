@@ -1,5 +1,6 @@
 #include <boost/make_shared.hpp>
 #include "Engine.h"
+#include "Engine_ThreadManager.h"
 #include "Engine_Time.h"
 #include "Engine_Resources.h"
 #include "Engine_ObjectPool.h"
@@ -139,10 +140,27 @@ Handle Resources::addMesh(string n,float w,float h,float threshhold){
 Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
     return resourceManager->m_i->m_Resources->add(new Mesh(n,g,w,l,threshhold),ResourceType::Mesh);
 }
+
+
+Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
+	Mesh* m = new Mesh(f,t,b,threshhold,false);
+	//Engine::epriv::threading::addJobWithPostCallback(*Mesh::LoadCPU,*Mesh::LoadGPU,m);
+
+	boost::function<void()> job; job = boost::bind(&Mesh::LoadCPU,m);
+	boost::function<void()> callback; callback = boost::bind(&Mesh::LoadGPU,m);
+
+	Engine::epriv::threading::addJobWithPostCallback(job,callback);
+
+    return resourceManager->m_i->m_Resources->add(m,ResourceType::Mesh);
+}
+
+
+
+
+
 Handle epriv::ResourceManager::_addTexture(Texture* t){
     return resourceManager->m_i->m_Resources->add(t,ResourceType::Texture);
 }
-
 Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
     ShaderP* program = nullptr;
     if(programHandle.null()){ 

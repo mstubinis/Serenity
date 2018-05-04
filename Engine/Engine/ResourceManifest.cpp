@@ -1,4 +1,5 @@
 #include "ResourceManifest.h"
+#include "Engine_ThreadManager.h"
 #include "Engine_Resources.h"
 #include "Material.h"
 
@@ -19,6 +20,7 @@ Handle ResourceManifest::StarbaseMesh;
 Handle ResourceManifest::RingMesh;
 Handle ResourceManifest::DreadnaughtMesh;
 Handle ResourceManifest::VenerexMesh;
+Handle ResourceManifest::OberthMesh;
 
 Handle ResourceManifest::StarbaseMaterial;
 Handle ResourceManifest::StarMaterial;
@@ -30,6 +32,7 @@ Handle ResourceManifest::MirandaMaterial;
 Handle ResourceManifest::IntrepidMaterial;
 Handle ResourceManifest::NorwayMaterial;
 Handle ResourceManifest::VenerexMaterial;
+Handle ResourceManifest::OberthMaterial;
 Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
 Handle ResourceManifest::SunFlareMaterial;
@@ -59,6 +62,8 @@ void ResourceManifest::init(){
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
 
+
+	/*
     TestMesh = Resources::addMesh("data/Models/1911.fbx",CollisionType::None,true,0.0f);
     PlanetMesh = Resources::addMesh("data/Models/planet.obj",CollisionType::None,true);
     DefiantMesh = Resources::addMesh("data/Models/defiant.obj",CollisionType::ConvexHull,true);
@@ -70,6 +75,29 @@ void ResourceManifest::init(){
     RingMesh = Resources::addMesh("data/Models/ring.obj",CollisionType::None);
     DreadnaughtMesh = Resources::addMesh("data/Models/dreadnaught.obj",CollisionType::ConvexHull);
     VenerexMesh = Resources::addMesh("data/Models/venerex.obj",CollisionType::ConvexHull);
+    OberthMesh = Resources::addMesh("data/Models/oberth.obj",CollisionType::ConvexHull);
+    CapsuleTunnelMesh = Resources::addMesh("data/Models/capsuleTunnel.obj",CollisionType::None);
+    CapsuleRibbonMesh = Resources::addMesh("data/Models/capsuleRibbon.obj",CollisionType::None);
+	*/
+
+    TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);
+    PlanetMesh = Resources::addMeshAsync("data/Models/planet.obj",CollisionType::None,true);
+    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.obj",CollisionType::ConvexHull,true);
+    AkiraMesh = Resources::addMeshAsync("data/Models/akira.obj",CollisionType::ConvexHull,true);
+    MirandaMesh = Resources::addMeshAsync("data/Models/miranda.obj",CollisionType::ConvexHull);
+    IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.obj",CollisionType::ConvexHull);
+    NorwayMesh = Resources::addMeshAsync("data/Models/norway.obj",CollisionType::ConvexHull);
+    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.obj",CollisionType::TriangleShapeStatic);
+    RingMesh = Resources::addMeshAsync("data/Models/ring.obj",CollisionType::None);
+    DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.obj",CollisionType::ConvexHull);
+    VenerexMesh = Resources::addMeshAsync("data/Models/venerex.obj",CollisionType::ConvexHull);
+    OberthMesh = Resources::addMeshAsync("data/Models/oberth.obj",CollisionType::ConvexHull);
+    CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.obj",CollisionType::None);
+    CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.obj",CollisionType::None);	
+
+	Engine::epriv::threading::waitForAll();
+
+
 
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
@@ -84,6 +112,7 @@ void ResourceManifest::init(){
     IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
+	OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.png","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
     CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
     SunFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
@@ -94,12 +123,6 @@ void ResourceManifest::init(){
 
     PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
     SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
-
-
-
-    CapsuleTunnelMesh = Resources::addMesh("data/Models/capsuleTunnel.obj",CollisionType::None);
-    CapsuleRibbonMesh = Resources::addMesh("data/Models/capsuleRibbon.obj",CollisionType::None);
-
 
     CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");
     Resources::getMaterial(CapsuleA)->setShadeless(true);

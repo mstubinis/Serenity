@@ -22,6 +22,7 @@ class ResourceManifest{
         static Handle RingMesh;
         static Handle DreadnaughtMesh;
         static Handle VenerexMesh;
+		static Handle OberthMesh;
 
         static Handle StarbaseMaterial;
         static Handle StarMaterial;
@@ -33,6 +34,7 @@ class ResourceManifest{
         static Handle IntrepidMaterial;
         static Handle NorwayMaterial;
         static Handle VenerexMaterial;
+		static Handle OberthMaterial;
         static Handle CrosshairMaterial;
         static Handle CrosshairArrowMaterial;
         static Handle SunFlareMaterial;
