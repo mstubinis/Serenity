@@ -16,56 +16,63 @@
 using namespace Engine;
 using namespace std;
 
-FontData::FontData(string& filename){
-    _loadTextFile(filename);
-    string file = filename.substr(0,filename.size()-4);
-    file += ".png";
-    m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
-    epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
-}
-FontData::~FontData(){
-    for(auto glyph:m_FontGlyphs){
-        SAFE_DELETE(glyph.second);
-    }
-}
-FontGlyph* FontData::getGlyphData(uchar c){ return m_FontGlyphs[c]; }
-void FontData::_loadTextFile(string& filename){
-    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-    for(string line; getline(str, line, '\n');){
-        if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
-            FontGlyph* f = new FontGlyph();
-            string token;
-            istringstream stream(line);
-            while(getline(stream, token, ' ')) {
-                size_t pos = token.find("=");
+class Font::impl final{
+    public:
+        Texture* m_FontTexture;
+        std::unordered_map<uchar,FontGlyph*> m_FontGlyphs;
 
-                string key = token.substr(0, pos);
-                string value = token.substr(pos + 1, string::npos);
+		void _init(string& filename){
+			_loadTextFile(filename);
+			string file = filename.substr(0,filename.size()-4);
+			file += ".png";
+			m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+			epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
+		}
+		void _destruct(){
+			for(auto glyph:m_FontGlyphs){
+				SAFE_DELETE(glyph.second);
+			}
+		}
+        void _loadTextFile(string& filename){
+			boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+			for(string line; getline(str, line, '\n');){
+				if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
+					FontGlyph* f = new FontGlyph();
+					string token;
+					istringstream stream(line);
+					while(getline(stream, token, ' ')) {
+						size_t pos = token.find("=");
 
-                if(key == "id")            f->id = stoi(value);
-                else if(key == "x")        f->x = stoi(value);
-                else if(key == "y")        f->y = stoi(value);
-                else if(key == "width")    f->width = stoi(value);
-                else if(key == "height")   f->height = stoi(value); 
-                else if(key == "xoffset")  f->xoffset = stoi(value);
-                else if(key == "yoffset")  f->yoffset = stoi(value);
-                else if(key == "xadvance") f->xadvance = stoi(value);
-            }
-            f->m_Model = glm::mat4(1.0f);
-            string name = filename.substr(0,filename.size()-4);
-            Handle h = Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
-            f->char_mesh = Resources::getMesh(h);
-            m_FontGlyphs.emplace(f->id,f);
-        }
-    }
-}
+						string key = token.substr(0, pos);
+						string value = token.substr(pos + 1, string::npos);
 
-Font::Font(string filename):EngineResource(filename){
-    m_FontData = new FontData(filename);
+						if(key == "id")            f->id = stoi(value);
+						else if(key == "x")        f->x = stoi(value);
+						else if(key == "y")        f->y = stoi(value);
+						else if(key == "width")    f->width = stoi(value);
+						else if(key == "height")   f->height = stoi(value); 
+						else if(key == "xoffset")  f->xoffset = stoi(value);
+						else if(key == "yoffset")  f->yoffset = stoi(value);
+						else if(key == "xadvance") f->xadvance = stoi(value);
+					}
+					f->m_Model = glm::mat4(1.0f);
+					string name = filename.substr(0,filename.size()-4);
+					Handle h = Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
+					f->char_mesh = Resources::getMesh(h);
+					m_FontGlyphs.emplace(f->id,f);
+				}
+			}
+		}
+};
+Font::Font(string filename):EngineResource(filename),m_i(new impl){
+	m_i->_init(filename);
 }
 Font::~Font(){
-    SAFE_DELETE(m_FontData);
+	m_i->_destruct();
 }
+Texture* Font::getGlyphTexture() { return m_i->m_FontTexture; }
+FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs[c]; }
+
 void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
 }

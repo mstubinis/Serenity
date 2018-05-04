@@ -1445,7 +1445,7 @@ class epriv::RenderManager::impl final{
                     bindTexture("DiffuseTexture",0,0);
                     sendUniform1i("DiffuseTextureEnabled",0);
                 }
-                sendUniform4f("Object_Color",item.col.r,item.col.g,item.col.b,item.col.a);
+                sendUniform4f("Object_Color",item.col);
 
                 glm::mat4 model = m_IdentityMat4;
                 model = glm::translate(model, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
@@ -1465,18 +1465,18 @@ class epriv::RenderManager::impl final{
         void _renderText(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             for(auto item:m_FontsToBeRendered){
-                bindTexture("DiffuseTexture",item.font->getFontData()->getGlyphTexture(),0);
+                bindTexture("DiffuseTexture",item.font->getGlyphTexture(),0);
                 sendUniform1i("DiffuseTextureEnabled",1);
-                sendUniform4f("Object_Color",item.col.x,item.col.y,item.col.z,item.col.w);
+                sendUniform4f("Object_Color",item.col);
                 float y_offset = 0;
                 float x = item.pos.x;
                 for(auto c:item.text){
                     if(c == '\n'){
-                        y_offset += (item.font->getFontData()->getGlyphData('X')->height+6) * item.scl.y;
+                        y_offset += (item.font->getGlyphData('X')->height+6) * item.scl.y;
                         x = item.pos.x;
                     }
                     else{
-                        FontGlyph& chr = *(item.font->getFontData()->getGlyphData(c));
+                        FontGlyph& chr = *(item.font->getGlyphData(c));
 
                         chr.m_Model = m_IdentityMat4;
                         chr.m_Model = glm::translate(chr.m_Model, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));

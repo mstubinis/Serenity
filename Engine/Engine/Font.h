@@ -25,24 +25,14 @@ struct FontGlyph final{
      Mesh* char_mesh;
      glm::mat4 m_Model;
 };
-class FontData final{
-    private:
-        Texture* m_FontTexture;
-        std::unordered_map<uchar,FontGlyph*> m_FontGlyphs;
-        void _loadTextFile(std::string& filename);
-    public:
-        FontData(std::string& filename);
-        ~FontData();
-        Texture* getGlyphTexture() { return m_FontTexture; }
-        FontGlyph* getGlyphData(uchar);
-};
 class Font final: public EngineResource{
     private:
-        FontData* m_FontData;
+		class impl; std::unique_ptr<impl> m_i;
     public:
         Font(std::string);
         ~Font();
         void renderText(std::string text,glm::vec2& pos,glm::vec4 color = glm::vec4(1),float angle = 0,glm::vec2 scl = glm::vec2(1),float depth = 0.1);
-        FontData* getFontData() { return m_FontData; }
+        Texture* getGlyphTexture();
+        FontGlyph* getGlyphData(uchar);
 };
 #endif
