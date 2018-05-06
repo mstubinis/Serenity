@@ -154,6 +154,10 @@ class Mesh final: public BindableResource{
         void load();
         void unload();
 
+		void modifyPoints(std::vector<glm::vec3>& modifiedPoints);
+		void modifyUVs(std::vector<glm::vec2>& modifiedUVs);
+		void modifyPointsAndUVs(std::vector<glm::vec3>& modifiedPoints, std::vector<glm::vec2>& modifiedUVs);
+
         //Specify wether or not to save the mesh data after loading the data into the OpenGL buffers. By default mesh data is saved.
         void saveMeshData(bool);
 

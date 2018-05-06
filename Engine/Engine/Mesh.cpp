@@ -233,6 +233,7 @@ class Mesh::impl final{
         void _init(Mesh* super,string& name,float x, float y,float width, float height,float threshold){//plane with offset uvs
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
+
             d.points.push_back(glm::vec3(0));
             d.points.push_back(glm::vec3(width,height,0));
             d.points.push_back(glm::vec3(0,height,0));
@@ -241,17 +242,17 @@ class Mesh::impl final{
             d.points.push_back(glm::vec3(width,height,0));
             d.points.push_back(glm::vec3(0));
 
-            float uv_topLeft_x = float(x/256.0f);
-            float uv_topLeft_y = float(y/256.0f);
+            float uv_topLeft_x = float(x / 256.0f);
+            float uv_topLeft_y = float(y / 256.0f);
 
-            float uv_bottomLeft_x = float(x/256.0f);
-            float uv_bottomLeft_y = float(y/256.0f) + float(height/256.0f);
+            float uv_bottomLeft_x = float(x / 256.0f);
+            float uv_bottomLeft_y = float(y / 256.0f) + float(height / 256.0f);
 
-            float uv_bottomRight_x = float(x/256.0f) + float(width/256.0f);
-            float uv_bottomRight_y = float(y/256.0f) + float(height/256.0f);
+            float uv_bottomRight_x = float(x / 256.0f) + float(width / 256.0f);
+            float uv_bottomRight_y = float(y / 256.0f) + float(height / 256.0f);
 
-            float uv_topRight_x = float(x/256.0f) + float(width/256.0f);
-            float uv_topRight_y = float(y/256.0f);
+            float uv_topRight_x = float(x / 256.0f) + float(width / 256.0f);
+            float uv_topRight_y = float(y / 256.0f);
 
             d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
             d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
@@ -261,10 +262,7 @@ class Mesh::impl final{
             d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
             d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-            d.normals.resize(6,glm::vec3(1));
-            d.binormals.resize(6,glm::vec3(1));
-            d.tangents.resize(6,glm::vec3(1));
-
+            d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& name,float width, float height,float threshold){//plane
@@ -298,10 +296,7 @@ class Mesh::impl final{
             d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
             d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
-            d.normals.resize(6,glm::vec3(1));
-            d.binormals.resize(6,glm::vec3(1));
-            d.tangents.resize(6,glm::vec3(1));
-
+            d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
         }
         void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadImmediately){//from file / data
@@ -881,11 +876,11 @@ class Mesh::impl final{
                     vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
                     temp.push_back(vert);
                 }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_STATIC_DRAW );
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
                 vector_clear(temp);
             }
             else{
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_STATIC_DRAW );
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
             m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(1));
@@ -896,6 +891,67 @@ class Mesh::impl final{
                 vector_clear(m_Vertices);
             }
         }
+		void _modifyPoints(vector<glm::vec3>& modifiedPts){
+			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+            if(m_Skeleton != nullptr){
+                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
+                for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
+                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    vert.boneIDs = m_Skeleton->m_i->m_BoneIDs.at(i);
+                    vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
+                    temp.push_back(vert);
+                }
+				for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                vector_clear(temp);
+            }
+            else{
+				for(uint i = 0; i < modifiedPts.size(); ++i){
+					m_Vertices.at(i).position = modifiedPts.at(i);
+				}
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+            }
+		}
+		void _modifyUVs(vector<glm::vec2>& modifiedUVs){
+			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+            if(m_Skeleton != nullptr){
+                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
+                for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
+                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    vert.boneIDs = m_Skeleton->m_i->m_BoneIDs.at(i);
+                    vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
+                    temp.push_back(vert);
+                }
+				for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                vector_clear(temp);
+            }
+            else{
+				for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+            }
+		}
+		void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
+			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+            if(m_Skeleton != nullptr){
+                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
+                for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
+                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    vert.boneIDs = m_Skeleton->m_i->m_BoneIDs.at(i);
+                    vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
+                    temp.push_back(vert);
+                }
+				for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
+				for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                vector_clear(temp);
+            }
+            else{
+				for(uint i = 0; i < modifiedPts.size(); ++i){ m_Vertices.at(i).position = modifiedPts.at(i); }
+				for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+            }
+		}
         void _cleanupRenderingContext(Mesh* super){
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
@@ -1133,6 +1189,9 @@ void Mesh::unload(){
         EngineResource::unload();
     }
 }
+void Mesh::modifyPoints(vector<glm::vec3>& modifiedPts){ m_i->_modifyPoints(modifiedPts); }
+void Mesh::modifyUVs(vector<glm::vec2>& modifiedUVs){ m_i->_modifyUVs(modifiedUVs); }
+void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>& modifiedUVs){ m_i->_modifyPointsAndUVs(modifiedPts,modifiedUVs); }
 void Mesh::saveMeshData(bool save){ m_i->m_SaveMeshData = save; }
 
 

@@ -1314,7 +1314,7 @@ class epriv::RenderManager::impl final{
                 Renderer::Settings::clear(true,true,false);
                 Skybox::bindMesh();
             }
-            cout << "---- " + texture->name() + " (Cubemap): convolution done ----" << endl;
+            //cout << "---- " + texture->name() + " (Cubemap): convolution done ----" << endl;
             Resources::getWindow()->display(); //prevent opengl & windows timeout
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude)->unbind();
 
@@ -1341,7 +1341,7 @@ class epriv::RenderManager::impl final{
                     Skybox::bindMesh();
                 }
             }
-            cout << "---- " + texture->name() + " (Cubemap): prefilter done ----" << endl;
+            //cout << "---- " + texture->name() + " (Cubemap): prefilter done ----" << endl;
             Resources::getWindow()->display(); //prevent opengl & windows timeout
 
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv)->unbind();
@@ -1366,7 +1366,7 @@ class epriv::RenderManager::impl final{
             Renderer::Settings::clear(true,true,false);
             glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
             _renderFullscreenTriangle(brdfSize,brdfSize);
-            cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
+            //cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance)->unbind();
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
@@ -1465,19 +1465,21 @@ class epriv::RenderManager::impl final{
         void _renderText(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             for(auto item:m_FontsToBeRendered){
-                bindTexture("DiffuseTexture",item.font->getGlyphTexture(),0);
+				Font& font = *item.font;
+				Mesh& fontMesh = *(item.font->getFontMesh());
+                bindTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1i("DiffuseTextureEnabled",1);
                 sendUniform4f("Object_Color",item.col);
                 float y_offset = 0;
                 float x = item.pos.x;
+				
                 for(auto c:item.text){
                     if(c == '\n'){
-                        y_offset += (item.font->getGlyphData('X')->height+6) * item.scl.y;
+                        y_offset += (font.getGlyphData('X')->height + 6) * item.scl.y;
                         x = item.pos.x;
                     }
                     else{
-                        FontGlyph& chr = *(item.font->getGlyphData(c));
-
+						FontGlyph& chr = *(font.getGlyphData(c));
                         chr.m_Model = m_IdentityMat4;
                         chr.m_Model = glm::translate(chr.m_Model, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
                         chr.m_Model = glm::rotate(chr.m_Model, item.rot,glm::vec3(0,0,1));
@@ -1485,10 +1487,13 @@ class epriv::RenderManager::impl final{
 
                         sendUniformMatrix4f("VP",m_2DProjectionMatrix);
                         sendUniformMatrix4f("Model",chr.m_Model);
-                        chr.char_mesh->bind();
-                        chr.char_mesh->render();
-                        chr.char_mesh->unbind();
-                        x += (chr.xadvance) * item.scl.x;
+
+						fontMesh.modifyPointsAndUVs(chr.pts,chr.uvs);
+						fontMesh.bind();
+						fontMesh.render();
+						//fontMesh.unbind();
+						
+                        x += chr.xadvance * item.scl.x;
                     }
                 }
             }

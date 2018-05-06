@@ -18,6 +18,7 @@ using namespace std;
 
 class Font::impl final{
     public:
+		Mesh* m_Mesh;
         Texture* m_FontTexture;
         std::unordered_map<uchar,FontGlyph*> m_FontGlyphs;
 
@@ -27,6 +28,9 @@ class Font::impl final{
 			file += ".png";
 			m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
 			epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
+
+			Handle h = Resources::addMesh(file,1.0f,1.0f);
+			m_Mesh = Resources::getMesh(h);
 		}
 		void _destruct(){
 			for(auto glyph:m_FontGlyphs){
@@ -46,7 +50,7 @@ class Font::impl final{
 						string key = token.substr(0, pos);
 						string value = token.substr(pos + 1, string::npos);
 
-						if(key == "id")            f->id = stoi(value);
+						if     (key == "id")       f->id = stoi(value);
 						else if(key == "x")        f->x = stoi(value);
 						else if(key == "y")        f->y = stoi(value);
 						else if(key == "width")    f->width = stoi(value);
@@ -56,9 +60,18 @@ class Font::impl final{
 						else if(key == "xadvance") f->xadvance = stoi(value);
 					}
 					f->m_Model = glm::mat4(1.0f);
-					string name = filename.substr(0,filename.size()-4);
-					Handle h = Resources::addMesh(name+"_"+to_string(f->id),float(f->x),float(f->y),float(f->width),float(f->height));
-					f->char_mesh = Resources::getMesh(h);
+					f->pts.resize(4,glm::vec3(0));  f->uvs.resize(4,glm::vec2(0));
+
+					f->pts.at(0) = glm::vec3(0);
+					f->pts.at(1) = glm::vec3(f->width,f->height,0);
+					f->pts.at(2) = glm::vec3(0,f->height,0);
+					f->pts.at(3) = glm::vec3(f->width,0,0);
+
+					f->uvs.at(0) = glm::vec2(   float(f->x / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f)   );
+					f->uvs.at(1) = glm::vec2(   float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f)   );
+					f->uvs.at(2) = glm::vec2(   float(f->x / 256.0f),float(f->y / 256.0f)   );
+					f->uvs.at(3) = glm::vec2(   float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f)   );
+
 					m_FontGlyphs.emplace(f->id,f);
 				}
 			}
@@ -71,8 +84,8 @@ Font::~Font(){
 	m_i->_destruct();
 }
 Texture* Font::getGlyphTexture() { return m_i->m_FontTexture; }
-FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs[c]; }
-
+FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs.at(c); }
+Mesh* Font::getFontMesh(){ return m_i->m_Mesh; }
 void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
 }
