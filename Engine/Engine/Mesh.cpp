@@ -140,7 +140,7 @@ class Mesh::impl final{
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super->load();
         }
-        
+
         void _init(Mesh* super,string& name,btHeightfieldTerrainShape* heightfield,float threshold){//heightmap
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
@@ -310,9 +310,9 @@ class Mesh::impl final{
             }
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-			if(loadImmediately){
+            if(loadImmediately){
                 super->load();
-			}
+            }
         }
         void _clearData(Mesh* super){
             vector_clear(m_Vertices);
@@ -891,8 +891,8 @@ class Mesh::impl final{
                 vector_clear(m_Vertices);
             }
         }
-		void _modifyPoints(vector<glm::vec3>& modifiedPts){
-			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+        void _modifyPoints(vector<glm::vec3>& modifiedPts){
+            glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
@@ -901,19 +901,19 @@ class Mesh::impl final{
                     vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
                     temp.push_back(vert);
                 }
-				for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
+                for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
                 vector_clear(temp);
             }
             else{
-				for(uint i = 0; i < modifiedPts.size(); ++i){
-					m_Vertices.at(i).position = modifiedPts.at(i);
-				}
+                for(uint i = 0; i < modifiedPts.size(); ++i){
+                    m_Vertices.at(i).position = modifiedPts.at(i);
+                }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
-		}
-		void _modifyUVs(vector<glm::vec2>& modifiedUVs){
-			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+        }
+        void _modifyUVs(vector<glm::vec2>& modifiedUVs){
+            glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
@@ -922,17 +922,17 @@ class Mesh::impl final{
                     vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
                     temp.push_back(vert);
                 }
-				for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
+                for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
                 vector_clear(temp);
             }
             else{
-				for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
+                for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
-		}
-		void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
-			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+        }
+        void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
+            glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < m_Skeleton->m_i->m_BoneIDs.size(); ++i){
@@ -941,17 +941,17 @@ class Mesh::impl final{
                     vert.boneWeights = m_Skeleton->m_i->m_BoneWeights.at(i);
                     temp.push_back(vert);
                 }
-				for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
-				for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
+                for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
+                for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
                 vector_clear(temp);
             }
             else{
-				for(uint i = 0; i < modifiedPts.size(); ++i){ m_Vertices.at(i).position = modifiedPts.at(i); }
-				for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
+                for(uint i = 0; i < modifiedPts.size(); ++i){ m_Vertices.at(i).position = modifiedPts.at(i); }
+                for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
-		}
+        }
         void _cleanupRenderingContext(Mesh* super){
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
@@ -1137,7 +1137,7 @@ void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
 void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
     if(!mesh->isLoaded()){
         mesh->m_i->_loadIntoGPU();
-		mesh->EngineResource::load();
+        mesh->EngineResource::load();
     }
 }
 
