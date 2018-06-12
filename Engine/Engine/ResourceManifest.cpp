@@ -61,8 +61,6 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
-	std::cout << "------------------------------ loading async meshes ---------------------------" << std::endl;
-
     TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);
     PlanetMesh = Resources::addMeshAsync("data/Models/planet.obj",CollisionType::None,true);
     DefiantMesh = Resources::addMeshAsync("data/Models/defiant.obj",CollisionType::ConvexHull,true);
@@ -79,8 +77,6 @@ void ResourceManifest::init(){
     CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.obj",CollisionType::None);	
 
 	Engine::epriv::threading::waitForAll();
-
-	std::cout << "------------------------------ finished loading async meshes -------------------" << std::endl;
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","");
