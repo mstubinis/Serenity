@@ -1132,6 +1132,7 @@ uint MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
     if(!mesh->isLoaded()){
         mesh->m_i->_loadIntoCPU(mesh);
+		std::cout << mesh->name() << " cpu loading done" << std::endl;
     }
 }
 void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){

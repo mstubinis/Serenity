@@ -27,24 +27,24 @@ struct EngineCallback{
 
 class epriv::ThreadManager::impl final{
     public:
-        boost::thread_group                 m_ThreadGroup;
+        boost::thread_group                 m_Threads;
         boost::asio::io_service             m_IOService;
-        uint                                m_NumCores;
-        boost::asio::io_service::work*      m_WorkControl;
+        uint                                m_Cores;
+        boost::asio::io_service::work*      m_Work;
 		vector<EngineCallback>              m_Callbacks;
         void _init(const char* name, uint& w, uint& h,ThreadManager* super){
-            m_NumCores = boost::thread::hardware_concurrency(); if(m_NumCores == 0) m_NumCores = 1;
-            m_WorkControl = new boost::asio::io_service::work(m_IOService);
-            for(uint i = 0; i < m_NumCores; ++i){
-                m_ThreadGroup.create_thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
+            m_Cores = boost::thread::hardware_concurrency(); if(m_Cores==0) m_Cores=1;
+            m_Work = new boost::asio::io_service::work(m_IOService);
+            for(uint i = 0; i < m_Cores; ++i){
+                m_Threads.create_thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
             }
         }
         void _postInit(const char* name, uint& w, uint& h,ThreadManager* super){
         }
         void _destruct(ThreadManager* super){
-            delete(m_WorkControl);
+            delete(m_Work);
             m_IOService.stop();
-            m_ThreadGroup.join_all();
+            m_Threads.join_all();
         }
 		void _clearDoneCallbacks(){
 			if(m_Callbacks.size() == 0) return;
@@ -69,7 +69,7 @@ void epriv::ThreadManager::_init(const char* name, uint w, uint h){
     threadManager = epriv::Core::m_Engine->m_ThreadManager;
 }
 void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
-const uint epriv::ThreadManager::cores() const{ return threadManager->m_i->m_NumCores; }
+const uint epriv::ThreadManager::cores() const{ return threadManager->m_i->m_Cores; }
 void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task){
     boost::unique_future<void> future = task->get_future();
 	EngineCallback e;
@@ -86,16 +86,13 @@ void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task, b
 	threadManager->m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
 void epriv::threading::waitForAll(){ 
-	if(threadManager->m_i->m_Callbacks.size() == 0) return;
-	bool allFuturesDone = true;
-	for(auto callback: threadManager->m_i->m_Callbacks){	
-		if(!callback.fut.is_ready()){
-			allFuturesDone = false;
+	if(threadManager->m_i->m_Callbacks.size() > 0){
+		for(auto callback: threadManager->m_i->m_Callbacks){
+			callback.fut.wait();
+			//if(!callback.fut.is_ready()){
+			//	return;
+			//}
 		}
-		callback.fut.wait();
-	}
-	//check if they are ready
-	if(allFuturesDone){
 		threadManager->m_i->_clearDoneCallbacks();
 	}
 }
