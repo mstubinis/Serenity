@@ -31,9 +31,7 @@ glm::vec3 Math::btVectorToGLM(btVector3& bt){ return glm::vec3(bt.x(),bt.y(),bt.
 btVector3 Math::btVectorFromGLM(glm::vec3& v){ return btVector3(v.x,v.y,v.z); }
 
 void Math::removeMatrixPosition(glm::mat4& m){
-    m[3][0] = 0;
-    m[3][1] = 0;
-    m[3][2] = 0;
+    m[3][0] = 0; m[3][1] = 0; m[3][2] = 0;
 }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){

@@ -36,7 +36,6 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     float camHeight2 = camHeight*camHeight;
 
     uint numberSamples = 1;
-    //uint numberSamples = 8;
     
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
@@ -212,13 +211,10 @@ void Planet::setPosition(float x,float y,float z){ m_Body->setPosition(x,y,z); }
 void Planet::setPosition(glm::vec3& pos){ m_Body->setPosition(pos); }
 void Planet::update(const float& dt){
     if(m_RotationInfo != nullptr){
-        float speed = 360.0f * dt; //speed per second. now we need seconds per rotation cycle
-        float secondsToRotate = m_RotationInfo->days * 86400.0f;
-        float finalSpeed = 1.0f / (secondsToRotate * (speed));
-        m_Body->rotate(0.0f,finalSpeed,0.0f);
+        m_Body->rotate(0.0f,glm::radians(m_RotationInfo->speed * dt),0.0f);
     }
     if(m_OrbitInfo != nullptr){
-        //m_OrbitInfo->setOrbitalPosition(((1.0/(m_OrbitInfo->days*86400.0))*dt)*6.283188,this);
+		//m_OrbitInfo->setOrbitalPosition(((1.0f/(m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);
     }
 }
 void Planet::setOrbit(OrbitInfo* o){ 
@@ -227,8 +223,7 @@ void Planet::setOrbit(OrbitInfo* o){
 }
 void Planet::setRotation(RotationInfo* r){ 
     m_RotationInfo = r;
-    //m_Body->rotate(0.0f,0.0f,glm::radians(-m_RotationInfo->tilt),false);
-    m_Body->rotate(0.0f,0.0f,glm::radians(-m_RotationInfo->tilt));
+	m_Body->rotate(glm::radians(-r->tilt),0.0f,0.0f);
 }
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
@@ -248,6 +243,10 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
 
     //addChild(m_Light);
     m_Light->setPosition(pos);
+
+	if(!Renderer::Settings::GodRays::getObject()){
+		Renderer::Settings::GodRays::setObject(this);
+	}
 }
 Star::~Star(){
 }
@@ -339,12 +338,14 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     this->material = Resources::getMaterial(h);
 }
 
-OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent){
+OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent,float _inclination){
+	//x = eccentricity, y = days, z = minorRadius, w = majorRadius
     angle = _angle;
-    eccentricity = _eccentricity;
-    days = _days;
-    majorRadius = _majorRadius;
-    minorRadius = glm::sqrt(majorRadius * majorRadius * (1 - (eccentricity * eccentricity))); //b² = a²(1 - e²)
+	inclination = glm::radians(_inclination);
+    info.x = _eccentricity;
+    info.y = _days;
+    info.w = _majorRadius;
+    info.z = glm::sqrt(_majorRadius * _majorRadius * (1.0f - (_eccentricity * _eccentricity)));
     parent = _parent;
 }
 glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
@@ -354,8 +355,8 @@ glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
     if(parentPlanet){
         glm::vec3 parentPos = parentPlanet->getPosition();
 
-        float newX = parentPos.x - glm::cos(angle) * majorRadius;
-        float newZ = parentPos.z - glm::sin(angle) * minorRadius;
+        float newX = parentPos.x - glm::cos(angle) * info.w;
+        float newZ = parentPos.z - glm::sin(angle) * info.z;
 
         offset = glm::vec3(newX - currentPos.x,0.0f,newZ - currentPos.z);
     }
@@ -364,5 +365,8 @@ glm::vec3 OrbitInfo::getOrbitalPosition(float angle,Planet* thisPlanet){
 void OrbitInfo::setOrbitalPosition(float a,Planet* planet){
     angle += a;
     glm::vec3 nextPos = getOrbitalPosition(angle,planet);
-    planet->setPosition(nextPos);
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	modelMatrix = glm::rotate(modelMatrix,inclination,glm::vec3(0,1,0));
+	modelMatrix = glm::translate(modelMatrix,nextPos);
+    planet->setPosition(modelMatrix[3][0],modelMatrix[3][1],modelMatrix[3][2]);
 }

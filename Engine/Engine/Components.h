@@ -251,6 +251,7 @@ namespace Engine{
                 ComponentBodyType::Type getBodyType();
                 virtual glm::quat rotation(){ return glm::quat(); }
                 virtual glm::vec3 getScale(){ return glm::vec3(1.0f); }
+				virtual glm::vec3 getScreenCoordinates(){ return glm::vec3(-9999.0f,-9999.0f,0.0f); }
                 virtual glm::vec3 position(){ return glm::vec3(0.0f); }
                 virtual glm::mat4 modelMatrix(){ return glm::mat4(1.0f); }
                 virtual glm::vec3 forward(){ return glm::vec3(0.0f,0.0f,-1.0f); }
@@ -317,6 +318,7 @@ class ComponentBasicBody: public Engine::epriv::ComponentBodyBaseClass{
         ComponentBasicBody();
         ~ComponentBasicBody();
 
+		glm::vec3 getScreenCoordinates();
         glm::vec3 position();
         glm::vec3 getScale();
         glm::vec3 forward();
@@ -358,6 +360,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
         void setScale(glm::vec3& newScale);                         void setScale(float x,float y,float z);
 
         float mass();
+		glm::vec3 getScreenCoordinates();
         glm::quat rotation();
         glm::vec3 position();
         glm::vec3 forward();

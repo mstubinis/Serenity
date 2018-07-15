@@ -333,6 +333,7 @@ void ComponentBasicBody::alignTo(glm::vec3 direction,float speed){
     Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 glm::vec3 ComponentBasicBody::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
+glm::vec3 ComponentBasicBody::getScreenCoordinates(){ return Engine::Math::getScreenCoordinates(position(),false); }
 glm::vec3 ComponentBasicBody::getScale(){ return _scale; }
 glm::vec3 ComponentBasicBody::forward(){ return _forward; }
 glm::vec3 ComponentBasicBody::right(){ return _right; }
@@ -663,6 +664,7 @@ glm::vec3 ComponentRigidBody::position(){ //theres prob a better way to do this
     tr.getOpenGLMatrix(glm::value_ptr(m));
     return glm::vec3(m[3][0],m[3][1],m[3][2]);
 }
+glm::vec3 ComponentRigidBody::getScreenCoordinates(){ return Engine::Math::getScreenCoordinates(position(),false); }
 glm::quat ComponentRigidBody::rotation(){ return Engine::Math::btToGLMQuat(_rigidBody->getWorldTransform().getRotation()); }
 glm::vec3 ComponentRigidBody::forward(){ return _forward; }
 glm::vec3 ComponentRigidBody::right(){ return _right; }

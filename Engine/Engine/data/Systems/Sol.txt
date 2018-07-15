@@ -5,18 +5,18 @@ data/Textures/Skyboxes/SolarSystem
 
 S name=Sun radius=695800 r=1 g=1 b=0 r1=0.9 g1=0.9 b1=1 position=0
 
-P name=Mercuery parent=Sun radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.jpg eccentricity=0.20563 period=87.969 majorAxis=57909050 tilt=0.03 days=58.646
+P name=Mercuery parent=Sun radius=2440 r=1 g=1 b=1 position=57910000 type=Rock atmosphereHeight=0 texture=Mercury.jpg eccentricity=0.20563 period=87.969 majorAxis=57909050 tilt=0.03 days=58.646 inclination=3.38
 
-P name=Venus parent=Sun radius=6031 r=1 g=1 b=1 position=108200000 type=Rock atmosphereHeight=0 texture=Venus.jpg eccentricity=0.006772 period=224.701 majorAxis=108208000 tilt=2.64 days=243
+P name=Venus parent=Sun radius=6031 r=1 g=1 b=1 position=108200000 type=Rock atmosphereHeight=0 texture=Venus.jpg eccentricity=0.006772 period=224.701 majorAxis=108208000 tilt=2.64 days=243 inclination=3.86
 
-P name=Earth parent=Sun radius=6371 r=1 g=1 b=1 position=149600000 type=Rock atmosphereHeight=0.025 texture=Earth.jpg eccentricity=0.017 period=365.256 majorAxis=149598023 tilt=23.44 days=0.9972685
-M name=Moon parent=Earth radius=1737 r=1 g=1 b=1 position=384400 type=Rock atmosphereHeight=0 texture=Moon.jpg eccentricity=0.054 period=27.322 majorAxis=384748 tilt=6.68 days=27.322
+P name=Earth parent=Sun radius=6371 r=1 g=1 b=1 position=149600000 type=Rock atmosphereHeight=0.025 texture=Earth.jpg eccentricity=0.017 period=365.335 majorAxis=149598023 tilt=23.44 days=0.9972685 inclination=7.155
+M name=Moon parent=Earth radius=1737 r=1 g=1 b=1 position=384400 type=Rock atmosphereHeight=0 texture=Moon.jpg eccentricity=0.054 period=27.322 majorAxis=384748 tilt=6.68 days=27.322 inclination=5.15
 
-P name=Mars parent=Sun radius=3390 r=1 g=1 b=1 position=227900000 type=Rock atmosphereHeight=0 texture=Mars.jpg eccentricity=0.0934 period=686.971 majorAxis=227939134 tilt=25.19 days=1.0259541666
+P name=Mars parent=Sun radius=3390 r=1 g=1 b=1 position=227900000 type=Rock atmosphereHeight=0 texture=Mars.jpg eccentricity=0.0934 period=686.971 majorAxis=227939134 tilt=25.19 days=1.0259541666 inclination=5.65
 #M name=Phobos radius=11.2667 r=1 g=1 b=1 parent=Mars position=9390 atmosphereHeight=0 type=Asteroid
 #M name=Deimos radius=6.2 r=1 g=1 b=1 parent=Mars position=23470 atmosphereHeight=0 type=Asteroid
 
-P name=Jupiter parent=Sun radius=69911 r=1 g=1 b=1 position=778500000 type=GasGiant atmosphereHeight=0 texture=Jupiter.jpg eccentricity=0.048498 period=433259 majorAxis=778297882 tilt=3.13 days=0.410069444
+P name=Jupiter parent=Sun radius=69911 r=1 g=1 b=1 position=778500000 type=GasGiant atmosphereHeight=0 texture=Jupiter.jpg eccentricity=0.048498 period=433259 majorAxis=778297882 tilt=3.13 days=0.410069444 inclination=6.09
 M name=Callisto parent=Jupiter radius=2410 r=1 g=1 b=1 position=1882700 atmosphereHeight=0 type=Rock texture=Callisto.jpg eccentricity=0.0074 period=16.6890184 majorAxis=1882700 tilt=0 days=16.6890184
 M name=Io parent=Jupiter radius=1822 r=1 g=1 b=1 position=421700 atmosphereHeight=0 type=Rock texture=Io.jpg eccentricity=0.0041 period=1.769137786 majorAxis=421800 tilt=0 days=1.769137786
 M name=Europa parent=Jupiter radius=1560 r=1 g=1 b=1 position=670900 atmosphereHeight=0 type=Rock texture=Europa.jpg eccentricity=0.009 period=3.551181 majorAxis=671100 tilt=0.1 days=3.551181
@@ -85,7 +85,7 @@ M name=Ganymede parent=Jupiter radius=2634 r=1 g=1 b=1 position=1070400 atmosphe
 #M name=Megaclite parent=Jupiter
 #M name=S/2003-J-2 parent=Jupiter
 
-P name=Saturn parent=Sun radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.jpg eccentricity=0.05555 tilt=26.73 period=10759.22 majorAxis=1429394041.1 days=0.593055555
+P name=Saturn parent=Sun radius=58232 r=1 g=1 b=1 position=1433000000 type=GasGiant atmosphereHeight=0 texture=Saturn.jpg eccentricity=0.05555 tilt=26.73 period=10759.22 majorAxis=1429394041.1 days=0.593055555 inclination=5.51
 R parent=Saturn position=535 radius=279 r=78 g=68 b=56 break=269
 R parent=Saturn position=852 radius=130 r=154 g=138 b=115 break=120
 R parent=Saturn position=172 radius=120 r=96 g=87 b=82 break=110
@@ -181,7 +181,7 @@ M name=Titan parent=Saturn radius=2575.5 r=1 g=1 b=1 position=1221870 type=Rock 
 #M name=Fornjot parent=Saturn
 
 
-P name=Uranus parent=Sun radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.jpg tilt=82.23 eccentricity=0.046381 period=30688.5 majorAxis=2875031718 days=0.718055555
+P name=Uranus parent=Sun radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGiant atmosphereHeight=0 texture=Uranus.jpg tilt=82.23 eccentricity=0.046381 period=30688.5 majorAxis=2875031718 days=0.718055555 inclination=6.48
 #M name=Cordelia parent=Uranus
 #M name=Ophelia parent=Uranus
 #M name=Bianca parent=Uranus
@@ -210,7 +210,7 @@ P name=Uranus parent=Sun radius=25362 r=1 g=1 b=1 position=2877000000 type=IceGi
 #M name=Setebos parent=Uranus
 #M name=Ferdinand parent=Uranus
 
-P name=Neptune parent=Sun radius=24622 r=1 g=1 b=1 position=4503000000 type=IceGiant atmosphereHeight=0 texture=Neptune.jpg tilt=28.32 eccentricity=0.009456 period=60182 majorAxis=4504449781.15 days=0.67125
+P name=Neptune parent=Sun radius=24622 r=1 g=1 b=1 position=4503000000 type=IceGiant atmosphereHeight=0 texture=Neptune.jpg tilt=28.32 eccentricity=0.009456 period=60182 majorAxis=4504449781.15 days=0.67125 inclination=6.43
 #M name=Naiad parent=Neptune
 #M name=Thalassa parent=Neptune
 #M name=Despina parent=Neptune
@@ -227,7 +227,7 @@ P name=Neptune parent=Sun radius=24622 r=1 g=1 b=1 position=4503000000 type=IceG
 #M name=Neso parent=Neptune
 
 #NOTE pluto orbits a point outside itself. Perhaps add this in a future version
-P name=Pluto parent=Sun radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHeight=0 texture=Pluto.jpg tilt=57.47 eccentricity=0.24905 period=90581 majorAxis=5915099807.478 days=6.39
+P name=Pluto parent=Sun radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock atmosphereHeight=0 texture=Pluto.jpg tilt=57.47 eccentricity=0.24905 period=90581 majorAxis=5915099807.478 days=6.39 inclination=17.0
 #M name=Charon parent=Pluto
 #M name=Styx parent=Pluto
 #M name=Nix parent=Pluto

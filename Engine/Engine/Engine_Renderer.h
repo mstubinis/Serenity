@@ -121,6 +121,9 @@ namespace Engine{
                 uint getSamples();        void setSamples(uint s);
                 float getFOVDegrees();    void setFOVDegrees(float d);
                 float getAlphaFalloff();  void setAlphaFalloff(float a);
+				void setObject(uint&);
+				void setObject(Entity*);
+				Entity* getObject();
             };
             namespace SSAO{
                 bool enabled();

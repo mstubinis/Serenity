@@ -70,20 +70,20 @@ void epriv::ThreadManager::_init(const char* name, uint w, uint h){
 }
 void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_i->m_Cores; }
-void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task){
-    boost::unique_future<void> future = task->get_future();
+void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task){
     EngineCallback e;
-    e.fut = boost::move(future);
-    threadManager->m_i->m_Callbacks.push_back(e);
-    threadManager->m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
+    e.fut = boost::move( task->get_future() );
+	const Engine::epriv::ThreadManager& mgr = *threadManager;
+    mgr.m_i->m_Callbacks.push_back( boost::move(e) );
+    mgr.m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
-void epriv::threading::finalizeJob(boost::shared_ptr<boost_packed_task>& task, boost::function<void()>& then_task){
-    boost::unique_future<void> future = task->get_future();
+void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost::function<void()>& then_task){
     EngineCallback e;
-    e.fut = boost::move(future);
+    e.fut = boost::move( task->get_future() );
     e.cbk = boost::bind<void>(then_task);
-    threadManager->m_i->m_Callbacks.push_back(e);
-    threadManager->m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
+	const Engine::epriv::ThreadManager& mgr = *threadManager;
+    mgr.m_i->m_Callbacks.push_back( boost::move(e) );
+    mgr.m_i->m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
 void epriv::threading::waitForAll(){ 
 	if(threadManager->m_i->m_Callbacks.size() > 0){

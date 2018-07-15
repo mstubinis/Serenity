@@ -22,21 +22,20 @@ enum PlanetType {
 
 struct RotationInfo final{
     float tilt;
-    float days;
+    float speed;
     RotationInfo(float _tilt, float _days){
         tilt = _tilt;
-        days = _days;
+		speed = 1.0f / (_days * 86400.0f * 360.0f);
     }
 };
 
 class OrbitInfo final{
     public:
-        float eccentricity;
-        float days;
-        float minorRadius; float majorRadius;
+		glm::vec4 info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
+		float inclination;
         float angle;
         uint parent;
-        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,uint parent);
+        OrbitInfo(float eccentricity, float days, float majorRadius,float angle,uint parent,float inclination = 0);
         ~OrbitInfo(){}
         void setOrbitalPosition(float angle,Planet* planet);
         glm::vec3 getOrbitalPosition(float angle,Planet* planet);

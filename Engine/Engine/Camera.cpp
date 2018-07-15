@@ -61,6 +61,10 @@ glm::vec3 Camera::forward(){ return m_BasicBody->forward(); }
 glm::vec3 Camera::right(){ return m_BasicBody->right(); }
 glm::vec3 Camera::up(){ return m_BasicBody->up(); }
 
+float Camera::getDistance(Entity* e){
+	epriv::ComponentBodyBaseClass* b = e->getComponent<epriv::ComponentBodyBaseClass>();
+	return glm::distance(b->position(),getPosition());
+}
 float Camera::getDistance(glm::vec3 objPos){
     return glm::distance(objPos,getPosition());
 }

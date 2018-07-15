@@ -109,9 +109,6 @@ namespace Engine{
             };
         };
 
-
-
-
         struct TextureRenderInfo final{
             Texture* texture;
             glm::vec2 pos, scl;
@@ -190,6 +187,7 @@ class epriv::RenderManager::impl final{
         uint godRays_samples;
         float godRays_fovDegrees;
         float godRays_alphaFalloff;
+        Entity* godRays_Object;
         #pragma endregion
 
         #pragma region SSAOInfo
@@ -289,6 +287,7 @@ class epriv::RenderManager::impl final{
             godRays_samples = 50;
             godRays_fovDegrees = 75.0f;
             godRays_alphaFalloff = 2.0f;
+            godRays_Object = nullptr;
             #pragma endregion
 
             #pragma region SSAOInfo
@@ -1465,21 +1464,21 @@ class epriv::RenderManager::impl final{
         void _renderText(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             for(auto item:m_FontsToBeRendered){
-				Font& font = *item.font;
-				Mesh& fontMesh = *(item.font->getFontMesh());
+                Font& font = *item.font;
+                Mesh& fontMesh = *(item.font->getFontMesh());
                 bindTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1i("DiffuseTextureEnabled",1);
                 sendUniform4f("Object_Color",item.col);
                 float y_offset = 0;
                 float x = item.pos.x;
-				
+                
                 for(auto c:item.text){
                     if(c == '\n'){
                         y_offset += (font.getGlyphData('X')->height + 6) * item.scl.y;
                         x = item.pos.x;
                     }
                     else{
-						FontGlyph& chr = *(font.getGlyphData(c));
+                        FontGlyph& chr = *(font.getGlyphData(c));
                         chr.m_Model = m_IdentityMat4;
                         chr.m_Model = glm::translate(chr.m_Model, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
                         chr.m_Model = glm::rotate(chr.m_Model, item.rot,glm::vec3(0,0,1));
@@ -1488,11 +1487,11 @@ class epriv::RenderManager::impl final{
                         sendUniformMatrix4f("VP",m_2DProjectionMatrix);
                         sendUniformMatrix4f("Model",chr.m_Model);
 
-						fontMesh.modifyPointsAndUVs(chr.pts,chr.uvs);
-						fontMesh.bind();
-						fontMesh.render();
-						//fontMesh.unbind();
-						
+                        fontMesh.modifyPointsAndUVs(chr.pts,chr.uvs);
+                        fontMesh.bind();
+                        fontMesh.render();
+                        //fontMesh.unbind();
+                        
                         x += chr.xadvance * item.scl.x;
                     }
                 }
@@ -1828,8 +1827,7 @@ class epriv::RenderManager::impl final{
             sendUniform1i("behind",int(behind));
             sendUniform1f("alpha",alpha);
 
-            float _divisor = gbuffer.getBuffer(GBufferType::GodRays)->divisor();
-            sendUniform1f("fbufferDivisor",_divisor);
+            sendUniform1f("fbufferDivisor",gbuffer.getBuffer(GBufferType::GodRays)->divisor());
 
             bindTexture("firstPass",gbuffer.getTexture(GBufferType::Lighting),0);
 
@@ -2082,21 +2080,21 @@ class epriv::RenderManager::impl final{
             _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
             if(godRays){
-                /*
-                gbuffer.start(GBufferType::GodRays,"RGBA",false);
-                Object* o = Resources::getObject("Sun");
-                glm::vec3 sp = Math::getScreenCoordinates(o->getPosition(),false);
-                glm::vec3 camPos = camera.getPosition();
-                glm::vec3 oPos = o->getPosition();
-                glm::vec3 camVec = camera.getViewVector();
-                bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
-                float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
+                if(godRays_Object != nullptr){
+                    gbuffer.start(GBufferType::GodRays,"RGBA",false);
+                    ComponentBasicBody* b = godRays_Object->getComponent<ComponentBasicBody>();
+                    glm::vec3 oPos = b->position();
+                    glm::vec3 sp = Math::getScreenCoordinates(oPos,false);
+                    glm::vec3 camPos = camera.getPosition();
+                    glm::vec3 camVec = camera.getViewVector();
+                    bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
+                    float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
 
-                alpha = glm::pow(alpha,godRays_alphaFalloff);
-                alpha = glm::clamp(alpha,0.0001f,0.9999f);
+                    alpha = glm::pow(alpha,godRays_alphaFalloff);
+                    alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
-                _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
-                */
+                    _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
+                }
             }
             GLDisable(GLState::BLEND);
 
@@ -2116,6 +2114,9 @@ class epriv::RenderManager::impl final{
 
             GLDisable(GLState::STENCIL_TEST);
 
+
+            #pragma region SSAO and Bloom
+
             string _channels;
             bool isdoingssao = false;
             if(doSSAO && ssao){ isdoingssao = true; _channels = "RGBA"; }
@@ -2129,9 +2130,17 @@ class epriv::RenderManager::impl final{
                 gbuffer.start(GBufferType::Bloom,_channels,false);
                 _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
             }
+
+            #pragma endregion
+
+            #pragma region HDR
+
             gbuffer.start(GBufferType::Misc);
             _passHDR(gbuffer,camera,fboWidth,fboHeight);
 
+            #pragma endregion
+
+            #pragma region Finalization and AA
     
             bool doingaa = false;
             if(doAA && aa_algorithm != AntiAliasingAlgorithm::None) doingaa = true;
@@ -2143,9 +2152,6 @@ class epriv::RenderManager::impl final{
             else if(aa_algorithm == AntiAliasingAlgorithm::FXAA && doingaa){
                 gbuffer.start(GBufferType::Lighting);
                 _passFinal(gbuffer,camera,fboWidth,fboHeight);
-
-                //_passEdgeCanny(gbuffer,camera,fboWidth,fboHeight,GBufferType::Lighting);
-
                 gbuffer.stop(fbo,rbo);
                 _passFXAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
             }
@@ -2155,8 +2161,11 @@ class epriv::RenderManager::impl final{
                 _passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
             }
 
+            #pragma endregion
+
             _passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
 
+            #pragma region RenderPhysics
             GLEnable(GLState::BLEND);
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
@@ -2165,6 +2174,7 @@ class epriv::RenderManager::impl final{
                     Core::m_Engine->m_PhysicsManager->_render();
                 }
             }
+            #pragma endregion
 
             //to try and see what the lightprobe is outputting
             /*
@@ -2184,6 +2194,7 @@ class epriv::RenderManager::impl final{
             }
             */
     
+            #pragma region HUD
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -2199,8 +2210,9 @@ class epriv::RenderManager::impl final{
                 vector_clear(m_FontsToBeRendered);
                 vector_clear(m_TexturesToBeRendered);
             }
-        }
+            #pragma endregion
 
+        }
 };
 epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
@@ -2306,6 +2318,9 @@ void Renderer::Settings::GodRays::setWeight(float w){ epriv::Core::m_Engine->m_R
 void Renderer::Settings::GodRays::setSamples(uint s){ epriv::Core::m_Engine->m_RenderManager->m_i->godRays_samples = s; }
 void Renderer::Settings::GodRays::setFOVDegrees(float d){ epriv::Core::m_Engine->m_RenderManager->m_i->godRays_fovDegrees = d; }
 void Renderer::Settings::GodRays::setAlphaFalloff(float a){ epriv::Core::m_Engine->m_RenderManager->m_i->godRays_alphaFalloff = a; }
+void Renderer::Settings::GodRays::setObject(uint& id){ epriv::Core::m_Engine->m_RenderManager->m_i->godRays_Object = epriv::Core::m_Engine->m_ComponentManager->_getEntity(id); }
+void Renderer::Settings::GodRays::setObject(Entity* entity){ epriv::Core::m_Engine->m_RenderManager->m_i->godRays_Object = entity; }
+Entity* Renderer::Settings::GodRays::getObject(){ return epriv::Core::m_Engine->m_RenderManager->m_i->godRays_Object; }
 void Renderer::Settings::Lighting::enable(bool b){ epriv::Core::m_Engine->m_RenderManager->m_i->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ epriv::Core::m_Engine->m_RenderManager->m_i->lighting = false; }
 bool Renderer::Settings::SSAO::enabled(){ return epriv::Core::m_Engine->m_RenderManager->m_i->ssao;  }

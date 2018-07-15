@@ -74,7 +74,7 @@ void GameCameraComponent::update(const float& dt){
 
             m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;
             if( m_OrbitRadius < 0)      m_OrbitRadius = 0;
-            else if(m_OrbitRadius > 60) m_OrbitRadius = 60;
+            else if(m_OrbitRadius > 70) m_OrbitRadius = 70;
 
             m_Body->rotate(-Engine::getMouseDifference().y * 0.02f * dt, -Engine::getMouseDifference().x * 0.02f * dt,0);
 

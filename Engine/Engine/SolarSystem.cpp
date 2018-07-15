@@ -69,6 +69,7 @@ void SolarSystem::_loadFromFile(string filename){
                 float ORBIT_PERIOD = -1;
                 unsigned long long ORBIT_MAJOR_AXIS = -1;
                 float ORBIT_ECCENTRICITY = -1;
+				float INCLINATION = 0.0f;
 
                 float ROTATIONAL_TILT = -1;
                 float ROTATIONAL_PERIOD = -1;
@@ -107,6 +108,7 @@ void SolarSystem::_loadFromFile(string filename){
                     else if(key == "majorAxis")        ORBIT_MAJOR_AXIS = stoll(value)*10;
                     else if(key == "days")             ROTATIONAL_PERIOD = stof(value);
                     else if(key == "tilt")             ROTATIONAL_TILT = stof(value);
+					else if(key == "inclination")      INCLINATION = stof(value);
                     else if(key == "texture"){    
                         TEXTURE += value;
                         MATERIAL_NAME = value.substr(0,value.size()-4);
@@ -162,7 +164,7 @@ void SolarSystem::_loadFromFile(string filename){
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id()));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id(),INCLINATION));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));
@@ -183,7 +185,7 @@ void SolarSystem::_loadFromFile(string filename){
                         planetoid->setPosition(planetoid->getPosition() + parent->getPosition());
 
                         if(ORBIT_PERIOD != -1.0f){
-                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id()));
+                            planetoid->setOrbit(new OrbitInfo(ORBIT_ECCENTRICITY,ORBIT_PERIOD,(float)ORBIT_MAJOR_AXIS,randAngle,parent->id(),INCLINATION));
                         }
                         if(ROTATIONAL_TILT != -1.0f){
                             planetoid->setRotation(new RotationInfo(ROTATIONAL_TILT,ROTATIONAL_PERIOD));

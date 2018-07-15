@@ -75,23 +75,27 @@ void HUD::render(){
     Font* font = Resources::getFont(m_Font);
 
     #pragma region renderCrossHairAndOtherInfo
-    /*
+    
     if(player->getTarget() != nullptr){
-        glm::vec3 pos = player->getTarget()->getScreenCoordinates();
-        float scl = glm::max(0.5f,player->getTarget()->getRadius()*35 / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
+
+		ComponentBasicBody* body = player->getTarget()->getComponent<ComponentBasicBody>();
+		ComponentModel* model = player->getTarget()->getComponent<ComponentModel>();
+
+        glm::vec3 pos = body->getScreenCoordinates();
+        float scl = glm::max(0.5f,model->radius()*31.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
         if(pos.z == 1){
             Material* crosshair = Resources::getMaterial(ResourceManifest::CrosshairMaterial);
             crosshair->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
-            unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
+            //unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
             string stringRepresentation = "";
-            if(distanceInKm > 0){
-                stringRepresentation = Engine::convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
-            }
-            else{
-                float distanceInm = (player->getTarget()->getDistance(player))*100.0f;
-                stringRepresentation = to_string(uint(distanceInm)) + " m";
-            }
-            font->renderText(player->getTarget()->name() + "\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
+            //if(distanceInKm > 0){
+                //stringRepresentation = Engine::convertNumToNumWithCommas(unsigned long long(distanceInKm)) + " Km";
+            //}
+            //else{
+                //float distanceInm = (player->getTarget()->getDistance(player))*100.0f;
+                //stringRepresentation = to_string(uint(distanceInm)) + " m";
+            //}
+            font->renderText(/*player->getTarget()->name() + */"\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
         else{
             Material* crosshairArrow = Resources::getMaterial(ResourceManifest::CrosshairArrowMaterial);
@@ -115,7 +119,7 @@ void HUD::render(){
             crosshairArrow->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),glm::radians(angle),glm::vec2(scl,scl),0.1f);
         }
     }
-    */
+    
     #pragma endregion
 
     #pragma region DrawDebugStuff

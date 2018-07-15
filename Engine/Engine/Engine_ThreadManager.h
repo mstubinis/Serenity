@@ -51,8 +51,8 @@ namespace Engine{
             }
 
             void waitForAll();
-            void finalizeJob(boost::shared_ptr<boost_packed_task>& task);
-            void finalizeJob(boost::shared_ptr<boost_packed_task>& task, boost::function<void()>& then_task);
+            void finalizeJob(const boost::shared_ptr<boost_packed_task>& task);
+            void finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost::function<void()>& then_task);
             
             template<typename T,typename U,typename V,typename W,typename X,typename Y> void addJob(void (*function_ptr)(T,U,V,W,X,Y),T a1,U a2,V a3,W a4,X a5,Y a6){
                 boost::function<void()> j = boost::bind(function_ptr,a1,a2,a3,a4,a5,a6);
