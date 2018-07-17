@@ -8,7 +8,8 @@ class SunLight;
 class Ring;
 class Planet;
 
-struct AtmosphericScatteringMeshInstanceBindFunctor;
+struct AtmosphericScatteringGroundMeshInstanceBindFunctor;
+struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
 
 enum PlanetType { 
     PLANET_TYPE_ROCKY, 
@@ -25,14 +26,14 @@ struct RotationInfo final{
     float speed;
     RotationInfo(float _tilt, float _days){
         tilt = _tilt;
-		speed = 1.0f / (_days * 86400.0f * 360.0f);
+        speed = 1.0f / (_days * 86400.0f * 360.0f);
     }
 };
 
 class OrbitInfo final{
     public:
-		glm::vec4 info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
-		float inclination;
+        glm::vec4 info; //x = eccentricity, y = days, z = minorRadius, w = majorRadius
+        float inclination;
         float angle;
         uint parent;
         OrbitInfo(float eccentricity, float days, float majorRadius,float angle,uint parent,float inclination = 0);
@@ -55,7 +56,8 @@ struct RingInfo final{
 };
 
 class Planet: public Entity{
-    friend struct ::AtmosphericScatteringMeshInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
     protected:
         ComponentModel* m_Model;
         ComponentBasicBody* m_Body;
@@ -79,7 +81,7 @@ class Planet: public Entity{
         glm::vec3 getPosition();
         glm::vec2 getGravityInfo();
         OrbitInfo* getOrbitInfo() const;
-        float getDefaultRadius();
+        float getGroundRadius();
         float getRadius();
         float getAtmosphereHeight();
 

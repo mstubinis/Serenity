@@ -45,18 +45,16 @@ class ComponentModel::impl final{
             float maxLength = 0;
             for(auto model:super->models){
                 MeshInstance& pair = *model;
-                float length = 0;
                 glm::mat4 m = pair.model();
                 glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
-                length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
+                float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
                 if(length > maxLength){
                     maxLength = length;
                 }
             }
             super->_radius = maxLength;
             if(super->m_Owner){
-                epriv::ComponentBodyBaseClass* body = nullptr;
-                body = super->m_Owner->getComponent<epriv::ComponentBodyBaseClass>();
+                epriv::ComponentBodyBaseClass* body = super->m_Owner->getComponent<epriv::ComponentBodyBaseClass>();
                 if(body != nullptr){
                     super->_radius *= Engine::Math::Max(body->getScale());
                 }
@@ -130,14 +128,14 @@ class epriv::ComponentManager::impl final{
                 Engine::Math::recalculateForwardRightUp(b._rigidBody,b._forward,b._right,b._up);
             }
         }
-        void _calculateRenderCheck(ComponentModel& c,Camera* camera){
-            epriv::ComponentBodyBaseClass& body = *(c.m_Owner->getComponent<epriv::ComponentBodyBaseClass>());
+        void _calculateRenderCheck(ComponentModel& m,Camera* camera){
+            epriv::ComponentBodyBaseClass& body = *(m.m_Owner->getComponent<epriv::ComponentBodyBaseClass>());
             glm::vec3& pos = body.position();
-            if(!c.visible() || !camera->sphereIntersectTest(pos,c._radius) || camera->getDistance(pos) > c._radius * 1100.0f){ //1100 is the visibility threshold
-                c.m_i->m_PassedRenderCheck = false;
+            if(!m.visible() || !camera->sphereIntersectTest(pos,m._radius) || camera->getDistance(pos) > m._radius * 1100.0f){ //1100 is the visibility threshold
+                m.m_i->m_PassedRenderCheck = false;
                 return;
             }
-            c.m_i->m_PassedRenderCheck = true;
+            m.m_i->m_PassedRenderCheck = true;
         }
         static void _updateModelComponentsJob(vector<ComponentBaseClass*>& vec,Camera* camera){
             for(uint j = 0; j < vec.size(); ++j){
@@ -455,28 +453,28 @@ glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_
 
 ComponentModel::ComponentModel(Handle& meshHandle,Handle& materialHandle,Entity* owner):ComponentBaseClass(),m_i(new impl){
     m_i->_init(owner,this);
-    if(!meshHandle.null() && !materialHandle.null()){
+    if(!meshHandle.null()){
         models.push_back( new MeshInstance(m_Owner,meshHandle,materialHandle) );
     }
     m_i->calculateRadius(this);
 }
 ComponentModel::ComponentModel(Mesh* mesh,Handle& materialHandle,Entity* owner):ComponentBaseClass(),m_i(new impl){
     m_i->_init(owner,this);
-    if(mesh && !materialHandle.null()){
+    if(mesh){
         models.push_back( new MeshInstance(m_Owner,mesh,materialHandle) );
     }
     m_i->calculateRadius(this);
 }
 ComponentModel::ComponentModel(Handle& meshHandle,Material* material,Entity* owner):ComponentBaseClass(),m_i(new impl){
     m_i->_init(owner,this);
-    if(!meshHandle.null() && material){
+    if(!meshHandle.null()){
         models.push_back( new MeshInstance(m_Owner,meshHandle,material) );
     }
     m_i->calculateRadius(this);
 }
 ComponentModel::ComponentModel(Mesh* mesh,Material* material,Entity* owner):ComponentBaseClass(),m_i(new impl){
     m_i->_init(owner,this);
-    if(mesh && material){
+    if(mesh){
         models.push_back( new MeshInstance(m_Owner,mesh,material) );
     }
     m_i->calculateRadius(this);
@@ -494,7 +492,7 @@ uint ComponentModel::addModel(Handle& meshHandle, Handle& materialHandle){ retur
 uint ComponentModel::addModel(Mesh* mesh,Material* material){
     models.push_back( new MeshInstance(m_Owner,mesh,material) );
     m_i->calculateRadius(this);
-    return models.size();
+    return models.size() - 1;
 }
 
 void ComponentModel::setModel(Handle& meshHandle,Handle& materialHandle,uint index){ ComponentModel::setModel(Resources::getMesh(meshHandle),Resources::getMaterial(materialHandle), index); }

@@ -20,10 +20,9 @@
 using namespace Engine;
 using namespace std;
 
-struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
-    MeshInstance& i = *((MeshInstance*)r);
+struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance& i = *(MeshInstance*)r;
     
-
     Planet* obj = (Planet*)(i.parent());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
@@ -49,9 +48,12 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     glm::vec3 scl = obj->m_Body->getScale();
     
     float fScaledepth = 0.25f;
-    float innerRadius = obj->getDefaultRadius();
-    float outerRadius = innerRadius + (innerRadius * atmosphereHeight);
+    float innerRadius = obj->getGroundRadius();
+	float outerRadius = obj->getRadius();
     float fScale = 1.0f / (outerRadius - innerRadius);
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
+
+	//pass ground based parameters to the gpu
     if(camHeight <= outerRadius){
         Renderer::sendUniform1i("fromAtmosphere", 1);
     }
@@ -79,123 +81,137 @@ struct AtmosphericScatteringMeshInstanceBindFunctor{void operator()(EngineResour
     Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
     Renderer::sendUniform1f("fScale",fScale);
     Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+	Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+
+    //Ground should be currently binded... render the ground
+    glm::mat4 mod = glm::mat4(1.0f);
+    mod = glm::translate(mod,pos);
+    mod *= glm::mat4_cast(orientation);
+    mod = glm::scale(mod,scl);
+
+    Renderer::sendUniformMatrix4f("Model",mod);
+
+    i.mesh()->render();
+}};
+
+struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance& i = *(MeshInstance*)r;
+
+    Planet* obj = (Planet*)(i.parent());
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    
+    float atmosphereHeight = obj->getAtmosphereHeight();
+
+    glm::vec3& pos = obj->m_Body->position();
+    glm::quat& orientation = obj->m_Body->rotation();
+    glm::vec3 camPos = c->getPosition() - pos;
+    float camHeight = glm::length(camPos);
+    float camHeight2 = camHeight*camHeight;
+
+    uint numberSamples = 1;
+    
+    glm::mat4 rot = glm::mat4(1.0f);
+    rot *= glm::mat4_cast(orientation);
+    
+    glm::vec3 lightPos = Resources::getCurrentScene()->lights().at(0)->position();
+    glm::vec3 lightDir = lightPos - pos;
+    lightDir = glm::normalize(lightDir);
+    float Km = 0.0025f;
+    float Kr = 0.0015f;
+    float ESun = 20.0f;
+    glm::vec3 scl = obj->m_Body->getScale();
+    
+    float fScaledepth = 0.25f;
+    float innerRadius = obj->getGroundRadius();
+    float outerRadius = obj->getRadius();
+    float fScale = 1.0f / (outerRadius - innerRadius);
+	glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
 
     ShaderP* program;
-    if(atmosphereHeight > 0){
-        //Ground should be currently binded
-        glm::mat4 mod = glm::mat4(1.0f);
-        mod = glm::translate(mod,pos);
-        mod *= glm::mat4_cast(orientation);
-        mod = glm::scale(mod,scl);
-
-        Renderer::sendUniformMatrix4f("Model",mod);
-
-        glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
-        Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
-
-        i.mesh()->render();
-
-        if(camHeight > outerRadius){ 
-            program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
-            glBlendFunc(GL_ONE, GL_ONE);
-        }
-        else{
-            program = Resources::getShaderProgram(ResourceManifest::skyFromAtmosphere);
-            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        }
-        program->bind();
-
-        if(Engine::Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1i("HasGodsRays",1);
-        else                                               Renderer::sendUniform1i("HasGodsRays",0);
-
-        Renderer::Settings::cullFace(GL_FRONT);
-        Renderer::GLEnable(GLState::BLEND);
-        mod = glm::mat4(1.0f);
-        mod = glm::translate(mod,pos);
-        mod = glm::scale(mod,scl);
-        mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
-
-        Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
-        Renderer::sendUniformMatrix4f("Model",mod);
-        Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
-
-        Renderer::sendUniform1i("nSamples", numberSamples);
-        Renderer::sendUniform1f("fSamples", float(numberSamples));   
-        Renderer::sendUniform3f("v3CameraPos", camPos);
-        Renderer::sendUniform3f("v3LightDir", lightDir);
-        Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
-
-        Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
-        Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
-
-        Renderer::sendUniform1f("fOuterRadius", outerRadius);
-        Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
-        Renderer::sendUniform1f("fInnerRadius", innerRadius);
-        Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
-
-        Renderer::sendUniform1f("fKrESun", Kr * ESun);
-        Renderer::sendUniform1f("fKmESun", Km * ESun);
-        Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
-        Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
-
-        Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-        Renderer::sendUniform1f("fScale",fScale);
-        Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
-
-        // Gravity
-        float g = -0.98f;
-        Renderer::sendUniform1f("g",g);
-        Renderer::sendUniform1f("g2", g*g);
-        Renderer::sendUniform1f("fExposure",2.0f);
-        i.mesh()->render();
-        Renderer::Settings::cullFace(GL_BACK);
-        Renderer::GLDisable(GLState::BLEND);
+	//and now render the atmosphere
+    if(camHeight > outerRadius){ 
+        program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
+        glBlendFunc(GL_ONE, GL_ONE);
     }
     else{
-        //Ground should be currently binded
-        Renderer::sendUniform1i("HasAtmosphere",0);   
-
-        glm::mat4 mod = glm::mat4(1.0f);
-        mod = glm::translate(mod,pos);
-        mod *= glm::mat4_cast(orientation);
-        mod = glm::scale(mod,scl);
-
-        Renderer::sendUniformMatrix4f("Model",mod);
-
-        glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f),1.0f/glm::pow(0.29f,4.0f));
-        Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
-        Renderer::sendUniform3f("v3LightPos", lightPos);
-        i.mesh()->render();
+        program = Resources::getShaderProgram(ResourceManifest::skyFromAtmosphere);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     }
-    /*
-    shader = Resources::getShaderProgram("Deferred")->program();
-    glUseProgram(shader);
-    GLEnable(GLState::BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for(auto ring:m_Rings)
-        ring->draw(shader);
+    program->bind();
 
-    GLDisable(GLState::BLEND);
-    glUseProgram(0);
-    */
+    if(Engine::Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1i("HasGodsRays",1);
+    else                                               Renderer::sendUniform1i("HasGodsRays",0);
+
+    Renderer::Settings::cullFace(GL_FRONT);
+    Renderer::GLEnable(GLState::BLEND);
+    glm::mat4 mod = glm::mat4(1.0f);
+    mod = glm::translate(mod,pos);
+    mod = glm::scale(mod,scl);
+    mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
+
+	//pass atmosphere based parameters to the gpu
+    Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+    Renderer::sendUniformMatrix4f("Model",mod);
+    Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+
+    Renderer::sendUniform1i("nSamples", numberSamples);
+    Renderer::sendUniform1f("fSamples", float(numberSamples));   
+    Renderer::sendUniform3f("v3CameraPos", camPos);
+    Renderer::sendUniform3f("v3LightDir", lightDir);
+    Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+
+    Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
+    Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
+
+    Renderer::sendUniform1f("fOuterRadius", outerRadius);
+    Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
+    Renderer::sendUniform1f("fInnerRadius", innerRadius);
+    Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
+
+    Renderer::sendUniform1f("fKrESun", Kr * ESun);
+    Renderer::sendUniform1f("fKmESun", Km * ESun);
+    Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
+    Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
+
+    Renderer::sendUniform1f("fScaleDepth",fScaledepth);
+    Renderer::sendUniform1f("fScale",fScale);
+    Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
+
+    // Gravity
+    float g = -0.98f;
+    Renderer::sendUniform1f("g",g);
+    Renderer::sendUniform1f("g2", g*g);
+    Renderer::sendUniform1f("fExposure",2.0f);
+    i.mesh()->render();
+    Renderer::Settings::cullFace(GL_BACK);
+    Renderer::GLDisable(GLState::BLEND);
+
 }};
 
 Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
     scene->addEntity(this);
     m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
+	m_AtmosphereHeight = atmosphere;
     addComponent(m_Model);
     if(type != PLANET_TYPE_STAR){
-        AtmosphericScatteringMeshInstanceBindFunctor f;
+        AtmosphericScatteringGroundMeshInstanceBindFunctor f;
         m_Model->setCustomBindFunctor(f,0);
     }
-    
+    if(m_AtmosphereHeight > 0){
+		AtmosphericScatteringSkyMeshInstanceBindFunctor f;
+
+		uint index = m_Model->addModel(ResourceManifest::PlanetMesh,mat);
+		MeshInstance* skyMesh = m_Model->getModel(index);
+		float aScale = 1.0f + m_AtmosphereHeight;
+
+		skyMesh->setCustomBindFunctor(f);
+		skyMesh->setScale(aScale,aScale,aScale);
+	}
     m_Body = new ComponentBasicBody();
     addComponent(m_Body);
     m_Body->setScale(scl,scl,scl);
     m_Body->setPosition(pos);
 
-    m_AtmosphereHeight = atmosphere;
     m_Type = type;
     m_OrbitInfo = nullptr;
     m_RotationInfo = nullptr;
@@ -228,8 +244,8 @@ void Planet::setRotation(RotationInfo* r){
 void Planet::addRing(Ring* ring){ m_Rings.push_back(ring); }
 glm::vec2 Planet::getGravityInfo(){ return glm::vec2(getRadius()*5,getRadius()*7); }
 OrbitInfo* Planet::getOrbitInfo() const { return m_OrbitInfo; }
-float Planet::getDefaultRadius(){ return m_Model->radius(); }
-float Planet::getRadius() { return m_Model->radius() + (m_Model->radius() * m_AtmosphereHeight); }
+float Planet::getGroundRadius(){ return m_Model->radius() - (m_Model->radius() * m_AtmosphereHeight); }
+float Planet::getRadius() { return m_Model->radius(); }
 float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
 

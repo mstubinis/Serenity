@@ -109,6 +109,7 @@ void SolarSystem::_loadFromFile(string filename){
                     else if(key == "days")             ROTATIONAL_PERIOD = stof(value);
                     else if(key == "tilt")             ROTATIONAL_TILT = stof(value);
 					else if(key == "inclination")      INCLINATION = stof(value);
+                    else if(key == "material"){        MATERIAL_NAME = value; TEXTURE = ""; } //todo: implement this somehow
                     else if(key == "texture"){    
                         TEXTURE += value;
                         MATERIAL_NAME = value.substr(0,value.size()-4);
@@ -140,8 +141,9 @@ void SolarSystem::_loadFromFile(string filename){
                         glowFile = gloFile;
                     }
                     if(!loadedMaterials.count(MATERIAL_NAME)){
-                        Handle handle = Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
-                        loadedMaterials.emplace(MATERIAL_NAME,handle);
+						Handle handle;
+						handle = Resources::addMaterial(MATERIAL_NAME,TEXTURE,normalFile,glowFile,"",ResourceManifest::groundFromSpace);
+						loadedMaterials.emplace(MATERIAL_NAME,handle);
                     }
                 }
                 if(line[0] == 'S'){//Sun

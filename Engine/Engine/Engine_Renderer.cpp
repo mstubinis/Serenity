@@ -1580,14 +1580,15 @@ class epriv::RenderManager::impl final{
 
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
-
-            //RENDER FOREGROUND OBJECTS HERE
         }
         void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
 
+            GLEnable(GLState::DEPTH_TEST);
+            GLEnable(GLState::DEPTH_MASK);
+
             //RENDER NORMAL OBJECTS HERE
-            for(auto shader:m_GeometryPassShaderPrograms){
+			for(auto shader:m_ForwardPassShaderPrograms){
                 vector<Material*>& shaderMaterials = shader->getMaterials(); 
                 if(shaderMaterials.size() > 0){
                     shader->bind();
@@ -1624,6 +1625,8 @@ class epriv::RenderManager::impl final{
                     shader->unbind();
                 }
             }
+            GLDisable(GLState::DEPTH_TEST);
+            GLDisable(GLState::DEPTH_MASK);
         }
         void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
@@ -2110,7 +2113,7 @@ class epriv::RenderManager::impl final{
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
             }
             GLDisable(GLState::BLEND);
-            //_passForwardRendering(c,fboWidth,fbufferHeight,ignore);
+			_passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
 
             GLDisable(GLState::STENCIL_TEST);
 

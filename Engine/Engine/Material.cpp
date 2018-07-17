@@ -48,7 +48,7 @@ namespace Engine{
             "HeightmapTexture",
         };
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-            Material& material = *((Material*)r);
+            Material& material = *(Material*)r;
             glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
             for(uint i = 0; i < MaterialComponentType::Number; ++i){
                 if(material.getComponents().count(i)){
@@ -74,8 +74,9 @@ namespace Engine{
                     }
                 }
             }
+			const glm::vec3& f0 = material.f0();
             Renderer::sendUniform1iSafe("Shadeless",int(material.shadeless()));
-            Renderer::sendUniform3fSafe("Material_F0",material.f0().r,material.f0().g,material.f0().b);
+            Renderer::sendUniform3fSafe("Material_F0",f0.r,f0.g,f0.b);
             Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
 
             Renderer::sendUniform1fSafe("matID",float(material.id()));
@@ -84,7 +85,7 @@ namespace Engine{
             Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
-            //Material& material = *((Material*)r);
+            //Material& material = *(Material*)r;
         }};
         unordered_map<uint,vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
             unordered_map<uint,vector<uint>> m;
