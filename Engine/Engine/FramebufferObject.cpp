@@ -209,7 +209,7 @@ class epriv::FramebufferObject::impl{
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(rbo);
             glRenderbufferStorage(GL_RENDERBUFFER,rbo->internalFormat(), super->width(), super->height());
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->attatchment(),GL_RENDERBUFFER,rbo->address());
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->internalFormat(),GL_RENDERBUFFER,rbo->address());
             m_Attatchments.emplace(rbo->attatchment(),rbo);
             Renderer::unbindRBO();
             Renderer::unbindFBO();

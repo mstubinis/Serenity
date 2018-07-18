@@ -31,7 +31,6 @@ SkyboxEmpty::~SkyboxEmpty(){
 Skybox::Skybox(string directory,Scene* scene):SkyboxEmpty(scene){
     Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
-
     string front = directory + "/Right.jpg";
     string back = directory + "/Left.jpg";
     string left = directory + "/Top.jpg";

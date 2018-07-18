@@ -1288,7 +1288,7 @@ class epriv::RenderManager::impl final{
             uint size = convoludeTextureSize;
             glBindTexture(texType, texture->address(1));
             Renderer::unbindFBO();
-            epriv::FramebufferObject* fbo = new epriv::FramebufferObject(texture->name() + "_fbo_envData",size,size,ImageInternalFormat::Depth16);
+            epriv::FramebufferObject* fbo = new epriv::FramebufferObject(texture->name() + "_fbo_envData",size,size); //try without a depth format
             fbo->bind();
     
             //make these 2 variables global in the renderer class?
@@ -1351,7 +1351,7 @@ class epriv::RenderManager::impl final{
             uint& prevReadBuffer = current_bound_read_fbo;
             uint& prevDrawBuffer = current_bound_draw_fbo;
 
-            FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize,ImageInternalFormat::Depth16);
+            FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize); //try without a depth format
             fbo->bind();
 
             glBindTexture(GL_TEXTURE_2D, brdfCook->address());
@@ -1517,9 +1517,9 @@ class epriv::RenderManager::impl final{
                 const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
                 glClearBufferfv(GL_COLOR,3,godRays);
             }
-            glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
-            glBlendEquationi(GL_FUNC_ADD,0);
-            glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
+            //glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
+            //glBlendEquationi(GL_FUNC_ADD,0);
+            //glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
 
             //TODO: move skybox rendering to the last after moving planetary atmosphere to forward rendering pass
             gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");

@@ -48,7 +48,6 @@ void Game::initLogic(){
     //apparently these 2 should not be used together, but i have not found any issues with it so far
     //window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
-
     SolarSystem* sol = new SolarSystem("Sol","data/Systems/Sol.txt");
     CapsuleSpace* cap = new CapsuleSpace();
 

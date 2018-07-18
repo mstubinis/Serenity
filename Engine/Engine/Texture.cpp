@@ -47,7 +47,8 @@ class Texture::impl final{
         }
         void _baseInit(GLuint type,Texture* super,string n,const sf::Image& i,ImageInternalFormat::Format internFormat,bool genMipMaps){
             vector_clear(m_Pixels);
-            m_Width = m_Height = 0;
+            m_Width = 0;
+			m_Height = 0;
             m_Mipmapped = false;
             m_IsToBeMipmapped = genMipMaps;
             m_MinFilter = GL_LINEAR;
@@ -68,12 +69,12 @@ class Texture::impl final{
             glBindTexture(m_Type, m_TextureAddress.at(0));
             if(m_Files.size() == 1 && m_Files.at(0) != "FRAMEBUFFER" && m_Files.at(0) != "PIXELS"){//single file, NOT a framebuffer or pixel data texture
                 sf::Image i;i.loadFromFile(m_Files.at(0).c_str());
-                _generateFromImage(i,super);
+                _generateFromImage(i,super,m_Type);
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files.at(0) == "PIXELS"){//pixel data image
                 sf::Image i;i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
-                _generateFromImage(i,super);
+                _generateFromImage(i,super,m_Type);
                 glBindTexture(m_Type,0);
                 _getPixels();
             }
@@ -85,10 +86,9 @@ class Texture::impl final{
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() > 1){//cubemap
-                for(uint k = 0; k < m_Files.size(); ++k){
+                for(GLuint k = 0; k < m_Files.size(); ++k){
                     sf::Image i;i.loadFromFile(m_Files[k].c_str());
-                    _generateFromImage(i,super);
-                    _buildTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+k,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
+                    _generateFromImage(i,super,GL_TEXTURE_CUBE_MAP_POSITIVE_X+k);
                 }
                 super->setFilter(TextureFilter::Linear);
                 super->setWrapping(TextureWrap::ClampToEdge);
@@ -101,7 +101,7 @@ class Texture::impl final{
             }
         }
         void _buildTexImage2D(GLuint targetType,GLuint internal,const sf::Image& i, GLuint pxlFormat,GLuint pxlType,float divisor=1.0f){
-            glTexImage2D(targetType,0,internal,GLsizei(i.getSize().x*divisor),GLsizei(i.getSize().y*divisor),0,pxlFormat,pxlType,i.getPixelsPtr());
+            glTexImage2D((GLenum)targetType,(GLint)0,(GLint)internal,GLsizei(i.getSize().x*divisor),GLsizei(i.getSize().y*divisor),(GLint)0,(GLenum)pxlFormat,(GLenum)pxlType,(GLvoid*)i.getPixelsPtr());
         }
         void _buildTexImage2D(GLuint targetType,GLuint internal,GLsizei w,GLsizei h, GLuint pxlFormat,GLuint pxlType){
             glTexImage2D(targetType,0,internal,w,h,0,pxlFormat,pxlType,NULL);
@@ -116,14 +116,14 @@ class Texture::impl final{
             vector_clear(m_Pixels);
             vector_clear(m_TextureAddress);
         }
-        void _generateFromImage(const sf::Image& i,Texture* super){
+        void _generateFromImage(const sf::Image& i,Texture* super,GLuint _type){
             if(m_InternalFormat == ImageInternalFormat::RGBA8 || m_InternalFormat == ImageInternalFormat::SRGB8_ALPHA8){
                 m_PixelFormat = ImagePixelFormat::RGBA;
             }
             else if(m_InternalFormat == ImageInternalFormat::RGB8 || m_InternalFormat == ImageInternalFormat::SRGB8){
                 m_PixelFormat = ImagePixelFormat::RGB;
             }
-            _buildTexImage2D(m_Type,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
+            _buildTexImage2D(_type,ImageInternalFormat::at(m_InternalFormat),i,ImagePixelFormat::at(m_PixelFormat),GL_UNSIGNED_BYTE);
             super->setFilter(TextureFilter::Linear);
             m_Width = i.getSize().x;
             m_Height = i.getSize().y;
@@ -200,8 +200,8 @@ Texture::Texture(string file,GLuint t,bool genMipMaps,ImageInternalFormat::Forma
     m_i->_init(t,this,file,i,internalFormat,genMipMaps);
 }
 Texture::Texture(string files[],string n,GLuint t,bool genMipMaps,ImageInternalFormat::Format internalFormat):m_i(new impl){ //cubemap images
-    for(uint q = 0; q < 6; q++){ 
-        m_i->m_Files.push_back(files[q]); 
+    for(uint j = 0; j < 6; ++j){ 
+        m_i->m_Files.push_back(files[j]); 
     }
     const sf::Image i;
     m_i->_init(t,this,n,i,internalFormat,genMipMaps);

@@ -82,6 +82,7 @@ void Engine::init(const char* name,uint w,uint h){
     epriv::Core::m_Engine->m_ThreadManager->_init(name,w,h);
     epriv::Core::m_Engine->m_NoiseManager->_init(name,w,h);
 
+
     //init the game here
     Engine::setMousePosition(w/2,h/2);
     Game::initResources();
@@ -90,6 +91,7 @@ void Engine::init(const char* name,uint w,uint h){
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if(epriv::Core::m_Engine->m_ResourceManager->_numScenes() == 0)
         new Scene("Default");
+
 }
 void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
