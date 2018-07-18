@@ -50,6 +50,13 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     float fScaledepth = 0.25f;
     float innerRadius = obj->getGroundRadius();
 	float outerRadius = obj->getRadius();
+	if(atmosphereHeight <= 0){
+		outerRadius += (outerRadius *  0.025f);
+		Renderer::sendUniform1i("HasAtmosphere",0);   
+	}
+	else{
+		Renderer::sendUniform1i("HasAtmosphere",1);   
+	}
     float fScale = 1.0f / (outerRadius - innerRadius);
 	glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
 
@@ -66,13 +73,14 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     Renderer::sendUniform1i("nSamples", numberSamples);
     Renderer::sendUniform1f("fSamples", float(numberSamples));   
     Renderer::sendUniform3f("v3CameraPos", camPos);
+	Renderer::sendUniform3f("v3CameraPosReal", c->getPosition());
     Renderer::sendUniformMatrix4f("Rot",rot);
     Renderer::sendUniform3f("v3LightDir", lightDir);
+	Renderer::sendUniform3f("v3LightPos", lightPos);
     Renderer::sendUniform1f("fKrESun", Kr * ESun);
     Renderer::sendUniform1f("fKmESun", Km * ESun);
     Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
     Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
-    Renderer::sendUniform1i("HasAtmosphere",1);   
     Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
     Renderer::sendUniform1fSafe("fExposure", 2.0f);
     Renderer::sendUniform1fSafe("fInnerRadius", innerRadius);

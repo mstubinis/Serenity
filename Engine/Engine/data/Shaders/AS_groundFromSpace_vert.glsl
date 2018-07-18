@@ -14,6 +14,7 @@ uniform mat4 Model;
 uniform mat4 Rot;
 
 uniform vec3 v3CameraPos;
+uniform vec3 v3CameraPosReal;
 uniform vec3 v3LightDir;            // The direction vector to the light source 
 uniform vec3 v3InvWavelength;       // 1 / pow(wavelength, 4) for the red, green, and blue channels 
 uniform float fCameraHeight2;       // fCameraHeight^2 
@@ -39,6 +40,7 @@ varying vec2 UV;
 
 varying vec3 WorldPosition;
 varying vec3 CameraPosition;
+varying vec3 CameraPositionReal;
 varying vec3 Normals;
 varying vec3 Binormals;
 varying vec3 Tangents;
@@ -79,6 +81,7 @@ void main(){
 
     //UV = UnpackFloat32Into2Floats(uv);
     CameraPosition = v3CameraPos;
+	CameraPositionReal = v3CameraPosReal;
 
 	HasAtmo = HasAtmosphere;
 
