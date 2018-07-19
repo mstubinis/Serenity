@@ -1531,8 +1531,6 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
 
-
-
             //RENDER NORMAL OBJECTS HERE
             for(auto shader:m_GeometryPassShaderPrograms){
                 vector<Material*>& shaderMaterials = shader->getMaterials(); 
@@ -1544,15 +1542,15 @@ class epriv::RenderManager::impl final{
                             material->bind();
                             for(auto materialMeshEntry:materialMeshes){
                                 MaterialMeshEntry* entry = materialMeshEntry;
-                                Mesh* entryMesh = entry->mesh();
-                                entryMesh->bind();
+                                Mesh* mesh = entry->mesh();
+                                mesh->bind();
                                 for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
-
-                                    if(scene->hasEntity(meshInstance.first)){
-                                        //if entity passed render check
-                                        ComponentModel& model = *(scene->getEntity(meshInstance.first)->getComponent<ComponentModel>());
+									const uint& entityID = meshInstance.first;
+									vector<MeshInstance*>& instances = meshInstance.second;
+                                    if(scene->hasEntity(entityID)){
+                                        ComponentModel& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
-                                            for(auto instance:meshInstance.second){
+                                            for(auto instance:instances){
                                                 instance->bind(); //render also
                                                 instance->unbind();
                                             }
@@ -1564,7 +1562,7 @@ class epriv::RenderManager::impl final{
                                         material->bind();
                                     }
                                 }
-                                entryMesh->unbind();
+                                mesh->unbind();
                             }
                             material->unbind();
                         }
@@ -1592,14 +1590,15 @@ class epriv::RenderManager::impl final{
                             material->bind();
                             for(auto materialMeshEntry:materialMeshes){
                                 MaterialMeshEntry* entry = materialMeshEntry;
-                                Mesh* entryMesh = entry->mesh();
-                                entryMesh->bind();
+                                Mesh* mesh = entry->mesh();
+                                mesh->bind();
                                 for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
-                                    if(scene->hasEntity(meshInstance.first)){
-                                        //if entity passed render check
-                                        ComponentModel& model = *(scene->getEntity(meshInstance.first)->getComponent<ComponentModel>());
+									const uint& entityID = meshInstance.first;
+									vector<MeshInstance*>& instances = meshInstance.second;
+                                    if(scene->hasEntity(entityID)){
+                                        ComponentModel& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
-                                            for(auto instance:meshInstance.second){
+                                            for(auto instance:instances){
                                                 instance->bind(); //render also
                                                 instance->unbind();
                                             }
@@ -1611,7 +1610,7 @@ class epriv::RenderManager::impl final{
                                         material->bind();
                                     }
                                 }
-                                entryMesh->unbind();
+                                mesh->unbind();
                             }
                             material->unbind();
                         }
