@@ -139,19 +139,21 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 	//and now render the atmosphere
     if(camHeight > outerRadius){ 
         program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
-        glBlendFunc(GL_ONE, GL_ONE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     else{
         program = Resources::getShaderProgram(ResourceManifest::skyFromAtmosphere);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     program->bind();
 
-    if(Engine::Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1i("HasGodsRays",1);
-    else                                               Renderer::sendUniform1i("HasGodsRays",0);
+    //if(Engine::Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1i("HasGodsRays",1);
+    //else                                               Renderer::sendUniform1i("HasGodsRays",0);
 
     Renderer::Settings::cullFace(GL_FRONT);
     Renderer::GLEnable(GLState::BLEND);
+    //Renderer::GLDisable(GLState::DEPTH_TEST);
+    //Renderer::GLDisable(GLState::DEPTH_MASK);
     glm::mat4 mod = glm::mat4(1.0f);
     mod = glm::translate(mod,pos);
     mod = glm::scale(mod,scl);
@@ -193,6 +195,8 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     i.mesh()->render();
     Renderer::Settings::cullFace(GL_BACK);
     Renderer::GLDisable(GLState::BLEND);
+    //Renderer::GLEnable(GLState::DEPTH_TEST);
+    //Renderer::GLEnable(GLState::DEPTH_MASK);
 
 }};
 
@@ -208,7 +212,7 @@ Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,f
     if(m_AtmosphereHeight > 0){
 		AtmosphericScatteringSkyMeshInstanceBindFunctor f;
 
-		uint index = m_Model->addModel(ResourceManifest::PlanetMesh,mat);
+		uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial);
 		MeshInstance* skyMesh = m_Model->getModel(index);
 		float aScale = 1.0f + m_AtmosphereHeight;
 

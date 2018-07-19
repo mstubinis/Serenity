@@ -231,7 +231,6 @@ epriv::DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 class epriv::MaterialMeshEntry::impl final{
     public:
         Mesh* m_Mesh;
-        unordered_map<string,vector<MeshInstance*>> m_MeshInstances;
         unordered_map<uint,vector<MeshInstance*>> m_MeshInstancesEntities;
 
         void _init(Mesh* mesh){
@@ -259,39 +258,11 @@ class epriv::MaterialMeshEntry::impl final{
                 }
             }
         }
-        void _addMeshInstance(const string& obj,MeshInstance* meshInstance){
-            if(!m_MeshInstances.count(obj)){
-                m_MeshInstances.emplace(obj,vector<MeshInstance*>(1,meshInstance));
-            }
-            else{
-                m_MeshInstances.at(obj).push_back(meshInstance);
-            }
-        }
-        void _removeMeshInstance(const string& obj,MeshInstance* meshInstance){
-            if(m_MeshInstances.count(obj)){
-                vector<MeshInstance*>& v = m_MeshInstances.at(obj);
-                auto it = v.begin();
-                while(it != v.end()) {
-                    MeshInstance* instance = (*it);
-                    if(instance ==  meshInstance) {
-                        //do not delete the instance here
-                        it = v.erase(it);
-                    }
-                    else ++it;
-                }
-            }
-        }
 };
 epriv::MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
     m_i->_init(mesh);
 }
 epriv::MaterialMeshEntry::~MaterialMeshEntry(){
-}
-void epriv::MaterialMeshEntry::addMeshInstance(const string& objectName,MeshInstance* meshInstance){
-    m_i->_addMeshInstance(objectName,meshInstance);
-}
-void epriv::MaterialMeshEntry::removeMeshInstance(const string& objectName,MeshInstance* meshInstance){
-    m_i->_removeMeshInstance(objectName,meshInstance);
 }
 void epriv::MaterialMeshEntry::addMeshInstance(Entity* entity,MeshInstance* meshInstance){
     m_i->_addMeshInstance(entity,meshInstance);
@@ -308,7 +279,6 @@ void epriv::MaterialMeshEntry::removeMeshInstance(uint entityID,MeshInstance* me
     m_i->_removeMeshInstance(e,meshInstance);
 }
 Mesh* epriv::MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
-unordered_map<string,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstances(){ return m_i->m_MeshInstances; }
 unordered_map<uint,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstancesEntities(){ return m_i->m_MeshInstancesEntities;}
 
 #pragma endregion

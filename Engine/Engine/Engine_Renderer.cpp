@@ -1503,10 +1503,8 @@ class epriv::RenderManager::impl final{
             glm::vec3 clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
-            if(godRays)
-                gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
-            else
-                gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+            if(godRays) gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+            else        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
 
             Settings::clear(true,true,true);
             glDepthFunc(GL_LEQUAL);
@@ -1526,8 +1524,7 @@ class epriv::RenderManager::impl final{
             _renderSkybox(scene->skybox());
 
 
-            if(godRays)
-                gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+            if(godRays) gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
 
             //RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
@@ -1555,9 +1552,9 @@ class epriv::RenderManager::impl final{
                                         //if entity passed render check
                                         ComponentModel& model = *(scene->getEntity(meshInstance.first)->getComponent<ComponentModel>());
                                         if(model.passedRenderCheck()){
-                                            for(auto meshInstance:meshInstance.second){
-                                                meshInstance->bind(); //render also
-                                                meshInstance->unbind();
+                                            for(auto instance:meshInstance.second){
+                                                instance->bind(); //render also
+                                                instance->unbind();
                                             }
                                         }
                                     }
@@ -1577,15 +1574,12 @@ class epriv::RenderManager::impl final{
             }
 
             //TODO: move skybox rendering here after moving planetary atmosphere to forward rendering pass
-
-            GLDisable(GLState::DEPTH_TEST);
-            GLDisable(GLState::DEPTH_MASK);
         }
         void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
 
-            GLEnable(GLState::DEPTH_TEST);
-            GLEnable(GLState::DEPTH_MASK);
+
+			gbuffer.start(GBufferType::Diffuse);
 
             //RENDER NORMAL OBJECTS HERE
 			for(auto shader:m_ForwardPassShaderPrograms){
@@ -1605,9 +1599,9 @@ class epriv::RenderManager::impl final{
                                         //if entity passed render check
                                         ComponentModel& model = *(scene->getEntity(meshInstance.first)->getComponent<ComponentModel>());
                                         if(model.passedRenderCheck()){
-                                            for(auto meshInstance:meshInstance.second){
-                                                meshInstance->bind(); //render also
-                                                meshInstance->unbind();
+                                            for(auto instance:meshInstance.second){
+                                                instance->bind(); //render also
+                                                instance->unbind();
                                             }
                                         }
                                     }
@@ -1625,8 +1619,6 @@ class epriv::RenderManager::impl final{
                     shader->unbind();
                 }
             }
-            GLDisable(GLState::DEPTH_TEST);
-            GLDisable(GLState::DEPTH_MASK);
         }
         void _passCopyDepth(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
@@ -2030,8 +2022,8 @@ class epriv::RenderManager::impl final{
             bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
             bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),2);
             bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),3);
-            //bindTextureSafe("gNormalMap",gbuffer->getTexture(GBufferType::Normal),4);
-            //bindTextureSafe("gLightMap",gbuffer->getTexture(GBufferType::Lighting),5);
+            //bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),4);
+            //bindTextureSafe("gLightMap",gbuffer.getTexture(GBufferType::Lighting),4);
 
             _renderFullscreenTriangle(fboWidth,fboHeight);
 
@@ -2082,6 +2074,9 @@ class epriv::RenderManager::impl final{
 
             _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
+            GLDisable(GLState::DEPTH_TEST);
+            GLDisable(GLState::DEPTH_MASK);
+
             if(godRays){
                 if(godRays_Object != nullptr){
                     gbuffer.start(GBufferType::GodRays,"RGBA",false);
@@ -2112,10 +2107,15 @@ class epriv::RenderManager::impl final{
                 Renderer::Settings::clear(true,false,false);//this is needed for godrays
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
             }
-            GLDisable(GLState::BLEND);
-			_passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
 
-            GLDisable(GLState::STENCIL_TEST);
+            GLDisable(GLState::BLEND);
+			GLDisable(GLState::STENCIL_TEST);
+            GLEnable(GLState::DEPTH_TEST);
+            GLEnable(GLState::DEPTH_MASK);
+			_passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
+			GLDisable(GLState::DEPTH_TEST);
+            GLDisable(GLState::DEPTH_MASK);
+            
 
 
             #pragma region SSAO and Bloom

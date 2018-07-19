@@ -1610,7 +1610,7 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
     "uniform sampler2D gNormalMap;\n"
     "uniform int HasLighting;\n"
     "varying vec2 texcoords;\n"
-    "uniform vec4 HDRInfo; // exposure | HasHDR | HasBloom | HDRAlgorithm\n"
+    "uniform vec4 HDRInfo;\n"// exposure | HasHDR | HasBloom | HDRAlgorithm
     "\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
     "    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);\n"
@@ -1625,14 +1625,14 @@ Shaders::Detail::ShadersManagement::hdr_frag +=
     "    vec3 bloom = texture2D(bloomBuffer, uv).rgb;\n"
     "    vec3 normals = DecodeOctahedron(texture2D(gNormalMap,uv).rg);\n"
     "\n"
-    "    if(distance(normals,ConstantOneVec3) < 0.01 || HasLighting == 0){\n"
+    "    if(distance(normals,ConstantOneVec3) < 0.01 || HasLighting == 0){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
     "        lighting = diffuse;\n"
     "    }\n"
-    "    else if(HDRInfo.z == 1.0){\n"
+    "    else if(HDRInfo.z == 1.0){\n"//HasBloom
     "        lighting += (diffuse * bloom);\n"
     "    }\n"
     "\n"
-    "    if(HDRInfo.y == 1.0){\n"
+    "    if(HDRInfo.y == 1.0){\n"//HasHDR
     "        if(HDRInfo.w == 0.0){\n"// Reinhard tone mapping
     "            lighting = lighting / (lighting + ConstantOneVec3);\n"
     "        }\n"
@@ -1840,7 +1840,7 @@ Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersMa
 Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagement::version + 
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
-    //"uniform sampler2D gLightMap;\n"
+    "uniform sampler2D gLightMap;\n"
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gGodsRaysMap;\n"
     "uniform sampler2D gBloomMap;\n"

@@ -11,7 +11,7 @@ varying vec3 v3LightPosition;
 varying float Depth;
 varying vec3 WorldPosition;
 
-uniform int HasGodsRays;
+//uniform int HasGodsRays;
 
 varying float FC_2_f;
 varying float logz_f;
@@ -26,16 +26,20 @@ void main(){
     
     vec4 f4Ambient = (sun * Depth )*vec4(0.05, 0.05, 0.1,1.0);
     
-    vec4 f4Color = (fRayleighPhase * vec4(c0,1.0) + fMiePhase * vec4(c1,1.0))+f4Ambient;
+    vec4 f4Color = (fRayleighPhase * vec4(c0,1.0) + fMiePhase * vec4(c1,1.0)) + f4Ambient;
     vec4 HDR = 1.0 - exp(f4Color * -fExposure);
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
-    gl_FragData[0] = vec4(HDR.xyz,nightmult);
+    gl_FragColor = vec4(HDR.xyz,nightmult);
+
+	/*
     gl_FragData[1].rg = vec2(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(0.0,0.0,0.0,1.0);
     }
+	*/
+
     gl_FragDepth = log2(logz_f) * FC_2_f;
 }

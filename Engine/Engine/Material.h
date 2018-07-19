@@ -139,10 +139,8 @@ namespace Engine{
                 ~MaterialMeshEntry();
 
                 Mesh* mesh();
-                std::unordered_map<std::string,std::vector<MeshInstance*>>& meshInstances();
                 std::unordered_map<uint,std::vector<MeshInstance*>>& meshInstancesEntities();
 
-                void addMeshInstance(const std::string& objectName,MeshInstance*);   void removeMeshInstance(const std::string& objectName,MeshInstance*);
                 void addMeshInstance(Entity* entity,MeshInstance*);                  void removeMeshInstance(Entity* entity,MeshInstance*);
                 void addMeshInstance(uint entityID,MeshInstance*);                   void removeMeshInstance(uint entityID,MeshInstance*);
         };

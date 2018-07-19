@@ -26,7 +26,7 @@ class ResourceManifest{
 
         static Handle StarbaseMaterial;
         static Handle StarMaterial;
-        static Handle EarthMaterial;
+        static Handle EarthSkyMaterial;
         static Handle DreadnaughtMaterial;
         static Handle DefiantMaterial;
         static Handle AkiraMaterial;

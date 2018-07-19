@@ -24,7 +24,7 @@ Handle ResourceManifest::OberthMesh;
 
 Handle ResourceManifest::StarbaseMaterial;
 Handle ResourceManifest::StarMaterial;
-Handle ResourceManifest::EarthMaterial;
+Handle ResourceManifest::EarthSkyMaterial;
 Handle ResourceManifest::DreadnaughtMaterial;
 Handle ResourceManifest::DefiantMaterial;
 Handle ResourceManifest::AkiraMaterial;
@@ -82,6 +82,11 @@ void ResourceManifest::init(){
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","");
     Resources::getMaterial(StarMaterial)->setShadeless(true);
     Resources::getMaterial(StarMaterial)->setGlow(0.21f);
+
+	EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.jpg","","","",skyFromSpace);
+
+
+
     DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
     DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
     //AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
