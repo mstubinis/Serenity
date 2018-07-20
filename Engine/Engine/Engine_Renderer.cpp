@@ -1515,18 +1515,12 @@ class epriv::RenderManager::impl final{
                 const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
                 glClearBufferfv(GL_COLOR,3,godRays);
             }
-            //glEnablei(GL_BLEND,0); //enable blending on diffuse mrt only
-            //glBlendEquationi(GL_FUNC_ADD,0);
-            //glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,0);
-
             //TODO: move skybox rendering to the last after moving planetary atmosphere to forward rendering pass
             gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
             _renderSkybox(scene->skybox());
 
 
             if(godRays) gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
-
-            //RENDER BACKGROUND OBJECTS THAT ARE IN FRONT OF SKYBOX HERE
 
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
@@ -1838,12 +1832,11 @@ class epriv::RenderManager::impl final{
             sendUniform1iSafe("HasLighting",int(lighting));
 
             bindTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
-            bindTextureSafe("bloomBuffer",gbuffer.getTexture(GBufferType::Bloom),1);
-            bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),2);
-            bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),3);
+            bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);
+            bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),2);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
-            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
+            for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->unbind();
         }
         void _passBlur(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
@@ -2015,14 +2008,13 @@ class epriv::RenderManager::impl final{
 
             sendUniform1iSafe("HasSSAO",int(ssao));
             sendUniform1iSafe("HasRays",int(godRays));
+			sendUniform1iSafe("HasBloom",int(bloom));
             sendUniform1fSafe("godRaysExposure",godRays_exposure);
 
             bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
             bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
             bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),2);
             bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),3);
-            //bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),4);
-            //bindTextureSafe("gLightMap",gbuffer.getTexture(GBufferType::Lighting),4);
 
             _renderFullscreenTriangle(fboWidth,fboHeight);
 
@@ -2076,22 +2068,20 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
 
-            if(godRays){
-                if(godRays_Object != nullptr){
-                    gbuffer.start(GBufferType::GodRays,"RGBA",false);
-                    ComponentBasicBody* b = godRays_Object->getComponent<ComponentBasicBody>();
-                    glm::vec3 oPos = b->position();
-                    glm::vec3 sp = Math::getScreenCoordinates(oPos,false);
-                    glm::vec3 camPos = camera.getPosition();
-                    glm::vec3 camVec = camera.getViewVector();
-                    bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
-                    float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
+            if(godRays && godRays_Object != nullptr){
+                gbuffer.start(GBufferType::GodRays,"RGBA",false);
+                ComponentBasicBody* b = godRays_Object->getComponent<ComponentBasicBody>();
+                glm::vec3 oPos = b->position();
+                glm::vec3 sp = Math::getScreenCoordinates(oPos,false);
+                glm::vec3 camPos = camera.getPosition();
+                glm::vec3 camVec = camera.getViewVector();
+                bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
+                float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
 
-                    alpha = glm::pow(alpha,godRays_alphaFalloff);
-                    alpha = glm::clamp(alpha,0.0001f,0.9999f);
+                alpha = glm::pow(alpha,godRays_alphaFalloff);
+                alpha = glm::clamp(alpha,0.0001f,0.9999f);
 
-                    _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
-                }
+                _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
             }
             GLDisable(GLState::BLEND);
 
@@ -2116,14 +2106,18 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_MASK);
             
 
+            #pragma region HDR
+            gbuffer.start(GBufferType::Misc);
+            _passHDR(gbuffer,camera,fboWidth,fboHeight);
+            #pragma endregion
+
+
 
             #pragma region SSAO and Bloom
-
             string _channels;
             bool isdoingssao = false;
             if(doSSAO && ssao){ isdoingssao = true; _channels = "RGBA"; }
             else{                                   _channels = "RGB";  }
-
             gbuffer.start(GBufferType::Bloom,_channels,false);
             _passSSAO(gbuffer,camera,fboWidth,fboHeight); //ssao AND bloom
             if(ssao_do_blur || bloom){
@@ -2132,15 +2126,8 @@ class epriv::RenderManager::impl final{
                 gbuffer.start(GBufferType::Bloom,_channels,false);
                 _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
             }
-
             #pragma endregion
 
-            #pragma region HDR
-
-            gbuffer.start(GBufferType::Misc);
-            _passHDR(gbuffer,camera,fboWidth,fboHeight);
-
-            #pragma endregion
 
             #pragma region Finalization and AA
     
