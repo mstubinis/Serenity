@@ -39,11 +39,11 @@ class epriv::GBuffer::impl final{
             m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height);
             m_FBO->bind();
 
-            _constructFramebuffer(m_FBO,"BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
-            _constructFramebuffer(m_FBO,"BUFFER_NORMAL",  GBufferType::Normal,  m_Width,m_Height);
-            _constructFramebuffer(m_FBO,"BUFFER_MISC",    GBufferType::Misc,    m_Width,m_Height);
-            _constructFramebuffer(m_FBO,"BUFFER_LIGHTING",GBufferType::Lighting,m_Width,m_Height);
-            _constructFramebuffer(m_FBO,"BUFFER_DEPTH",   GBufferType::Depth,   m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,"BUFFER_DIFFUSE", GBufferType::Diffuse, m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,"BUFFER_NORMAL",  GBufferType::Normal,  m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,"BUFFER_MISC",    GBufferType::Misc,    m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,"BUFFER_LIGHTING",GBufferType::Lighting,m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,"BUFFER_DEPTH",   GBufferType::Depth,   m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
@@ -51,9 +51,9 @@ class epriv::GBuffer::impl final{
             m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
             m_SmallFBO->bind();
 
-            _constructFramebuffer(m_SmallFBO,"BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
-            _constructFramebuffer(m_SmallFBO,"BUFFER_FREE2",   GBufferType::Free2,   m_Width,m_Height);
-            _constructFramebuffer(m_SmallFBO,"BUFFER_GODSRAYS",GBufferType::GodRays, m_Width,m_Height);
+            _constructTextureBuffer(m_SmallFBO,"BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
+            _constructTextureBuffer(m_SmallFBO,"BUFFER_FREE2",   GBufferType::Free2,   m_Width,m_Height);
+            _constructTextureBuffer(m_SmallFBO,"BUFFER_GODSRAYS",GBufferType::GodRays, m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
@@ -67,7 +67,7 @@ class epriv::GBuffer::impl final{
             m_SmallFBO->bind();
             m_SmallFBO->resize(w,h);
         }
-        void _constructFramebuffer(FramebufferObject* fbo,string n,uint t,uint w,uint h){
+        void _constructTextureBuffer(FramebufferObject* fbo,string n,uint t,uint w,uint h){
             boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>& i = GBUFFER_TYPE_DATA.at(t);
             m_Buffers.emplace(t,fbo->attatchTexture(new Texture(n,w,h,i.get<1>(),i.get<2>(),i.get<3>(),GL_TEXTURE_2D,i.get<0>()),i.get<4>(),i.get<0>()));
         }

@@ -1503,8 +1503,8 @@ class epriv::RenderManager::impl final{
             glm::vec3 clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
-            if(godRays) gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
-            else        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+			if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+			else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
 
             Settings::clear(true,true,true);
             glDepthFunc(GL_LEQUAL);
@@ -1520,10 +1520,15 @@ class epriv::RenderManager::impl final{
             _renderSkybox(scene->skybox());
 
 
-            if(godRays) gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); 
+			if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
 
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
+
+			//this is needed for sure
+			glEnablei(GL_BLEND,0);
+			glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+			
 
             //RENDER NORMAL OBJECTS HERE
             for(auto shader:m_GeometryPassShaderPrograms){
@@ -1569,7 +1574,6 @@ class epriv::RenderManager::impl final{
         }
         void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
-
 
 			gbuffer.start(GBufferType::Diffuse);
 
