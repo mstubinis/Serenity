@@ -18,8 +18,7 @@ unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelForm
     m[epriv::GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
     m[epriv::GBufferType::Lighting] = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
     m[epriv::GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_0);
-    m[epriv::GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m[epriv::GBufferType::Free2]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
+    m[epriv::GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
     m[epriv::GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;
@@ -52,7 +51,6 @@ class epriv::GBuffer::impl final{
             m_SmallFBO->bind();
 
             _constructTextureBuffer(m_SmallFBO,"BUFFER_BLOOM",   GBufferType::Bloom,   m_Width,m_Height);
-            _constructTextureBuffer(m_SmallFBO,"BUFFER_FREE2",   GBufferType::Free2,   m_Width,m_Height);
             _constructTextureBuffer(m_SmallFBO,"BUFFER_GODSRAYS",GBufferType::GodRays, m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){

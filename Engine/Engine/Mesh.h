@@ -20,6 +20,8 @@ namespace sf{ class Image; };
 const uint NUM_BONES_PER_VERTEX = 4;
 
 struct aiAnimation;
+struct DefaultMeshBindFunctor;
+struct DefaultMeshUnbindFunctor;
 class btHeightfieldTerrainShape;
 class MeshInstance;
 class InternalMeshPublicInterface;
@@ -104,23 +106,23 @@ namespace Engine{
                 ~AnimationData();
                 float duration();
         };
-    };
-};
-class MeshSkeleton final{
-    friend class ::Engine::epriv::AnimationData;
-    friend class Mesh;
-    friend struct DefaultMeshBindFunctor;
-    friend struct DefaultMeshUnbindFunctor;
-    private:
-        class impl; std::unique_ptr<impl> m_i;
-    public:
-        MeshSkeleton();
-        MeshSkeleton(Engine::epriv::ImportedMeshData&);
-        ~MeshSkeleton();
+		class MeshSkeleton final{
+			friend class ::Engine::epriv::AnimationData;
+			friend class ::Mesh;
+			friend struct ::DefaultMeshBindFunctor;
+			friend struct ::DefaultMeshUnbindFunctor;
+			private:
+				class impl; std::unique_ptr<impl> m_i;
+			public:
+				MeshSkeleton();
+				MeshSkeleton(Engine::epriv::ImportedMeshData&);
+				~MeshSkeleton();
 
-        void fill(Engine::epriv::ImportedMeshData&);
-        void clear();
-        uint numBones();
+				void fill(Engine::epriv::ImportedMeshData&);
+				void clear();
+				uint numBones();
+		};
+    };
 };
 class InternalMeshPublicInterface{
     public:
@@ -129,8 +131,11 @@ class InternalMeshPublicInterface{
 };
 
 class Mesh final: public BindableResource{
-    friend struct ::DefaultMeshBindFunctor; friend struct ::DefaultMeshUnbindFunctor;
-    friend class ::Engine::epriv::AnimationData; friend class ::MeshSkeleton; friend class ::InternalMeshPublicInterface;
+    friend struct ::DefaultMeshBindFunctor;
+	friend struct ::DefaultMeshUnbindFunctor;
+    friend class ::Engine::epriv::AnimationData;
+	friend class ::Engine::epriv::MeshSkeleton;
+	friend class ::InternalMeshPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -149,7 +154,6 @@ class Mesh final: public BindableResource{
         std::unordered_map<std::string, Engine::epriv::AnimationData*>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
-        MeshSkeleton* skeleton();
 
         void load();
         void unload();

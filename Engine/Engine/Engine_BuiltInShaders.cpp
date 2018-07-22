@@ -1603,14 +1603,16 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
     "uniform sampler2D lightingBuffer;\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gNormalMap;\n"
+	"uniform sampler2D gGodsRaysMap;\n"
+	"uniform float godRaysExposure;\n"
     "uniform int HasLighting;\n"
     "varying vec2 texcoords;\n"
     "uniform vec4 HDRInfo;\n"// exposure | HasHDR | HasBloom | HDRAlgorithm
+	"uniform int HasRays;\n"
     "\n"
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
     "    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);\n"
-    "}\n"
-    "\n";
+    "}\n";
 Shaders::Detail::ShadersManagement::hdr_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
 Shaders::Detail::ShadersManagement::hdr_frag +=
     "void main(){\n"
@@ -1639,6 +1641,10 @@ Shaders::Detail::ShadersManagement::hdr_frag +=
     "            vec3 white = 1.0 / uncharted( vec3(W),A,B,C,D,E,F );\n"
     "            lighting *= white;\n"
     "        }\n"
+    "    }\n"
+    "    if(HasRays == 1){\n"
+    "        vec3 rays = texture2D(gGodsRaysMap,uv).rgb;\n"
+    "        lighting = (lighting * 1.1) + (rays * godRaysExposure);\n"
     "    }\n"
     "    gl_FragColor = vec4(lighting, 1.0);\n"
     "}";
@@ -1831,13 +1837,10 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gMiscMap;\n"
-    "uniform sampler2D gGodsRaysMap;\n"
     "uniform sampler2D gBloomMap;\n"
     "\n"
     "uniform int HasSSAO;\n"
-    "uniform int HasRays;\n"
 	"uniform int HasBloom;\n"
-    "uniform float godRaysExposure;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
@@ -1853,10 +1856,6 @@ Shaders::Detail::ShadersManagement::final_frag +=
     "        ssao = texture2D(gBloomMap,texcoords).a + 0.0001;\n"
     "        brightness = min(1.0,pow(brightness,0.125));\n"
     "        hdr *= max(brightness, ssao);\n"
-    "    }\n"
-    "    if(HasRays == 1){\n"
-    "        vec3 rays = texture2D(gGodsRaysMap,texcoords).rgb;\n"
-    "        hdr = (hdr * 1.1) + (rays * godRaysExposure);\n"
     "    }\n"
 	"    if(HasBloom == 1){\n"
 	"        vec3 bloom = texture2D(gBloomMap,texcoords).rgb;\n"

@@ -304,7 +304,7 @@ class epriv::RenderManager::impl final{
             #pragma region HDRInfo
             hdr = true;
             hdr_exposure = 3.0f;
-            hdr_algorithm = HDRAlgorithm::UNCHARTED;
+            hdr_algorithm = HDRAlgorithm::Uncharted;
             #pragma endregion
 
             #pragma region GeneralInfo
@@ -1832,15 +1832,18 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->bind();
 
             sendUniform4f("HDRInfo",hdr_exposure,float(int(hdr)),float(int(bloom)),float(int(hdr_algorithm)));
+			sendUniform1fSafe("godRaysExposure",godRays_exposure);
+			sendUniform1iSafe("HasRays",int(godRays));
 
             sendUniform1iSafe("HasLighting",int(lighting));
 
             bindTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
             bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);
             bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),2);
+			bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight);
 
-            for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
+            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->unbind();
         }
         void _passBlur(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
@@ -2011,18 +2014,15 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->bind();
 
             sendUniform1iSafe("HasSSAO",int(ssao));
-            sendUniform1iSafe("HasRays",int(godRays));
 			sendUniform1iSafe("HasBloom",int(bloom));
-            sendUniform1fSafe("godRaysExposure",godRays_exposure);
 
             bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
             bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
-            bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),2);
-            bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),3);
+            bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),2);
 
             _renderFullscreenTriangle(fboWidth,fboHeight);
 
-            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
+            for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->unbind();
         }
         void _renderFullscreenQuad(uint& width,uint& height){
@@ -2110,7 +2110,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_MASK);
             
 
-            #pragma region HDR
+            #pragma region HDR and GodRays addition
             gbuffer.start(GBufferType::Misc);
             _passHDR(gbuffer,camera,fboWidth,fboHeight);
             #pragma endregion
@@ -2125,10 +2125,10 @@ class epriv::RenderManager::impl final{
             gbuffer.start(GBufferType::Bloom,_channels,false);
             _passSSAO(gbuffer,camera,fboWidth,fboHeight); //ssao AND bloom
             if(ssao_do_blur || bloom){
-                gbuffer.start(GBufferType::Free2,_channels,false);
+                gbuffer.start(GBufferType::GodRays,_channels,false);
                 _passBlur(gbuffer,camera,fboWidth,fboHeight,"H",GBufferType::Bloom,_channels);
                 gbuffer.start(GBufferType::Bloom,_channels,false);
-                _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::Free2,_channels);
+                _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::GodRays,_channels);
             }
             #pragma endregion
 
@@ -2229,10 +2229,6 @@ void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     }
     else if(stage == ShaderRenderPass::Forward){
         Core::m_Engine->m_RenderManager->m_i->m_ForwardPassShaderPrograms.push_back(program);
-    }
-    else if(stage == ShaderRenderPass::Lighting){
-    }
-    else if(stage == ShaderRenderPass::Postprocess){
     }
     else{
     }

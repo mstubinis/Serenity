@@ -15,7 +15,7 @@ namespace Engine{
         class FramebufferTexture;
         class FramebufferObject;
         class GBufferType{public: enum Type{
-            Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Free2, Depth,
+            Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Depth,
 
             EnumTotal
         };};

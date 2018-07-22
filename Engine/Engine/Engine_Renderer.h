@@ -21,7 +21,7 @@ class SMAAQualityLevel{public: enum Level{
     Low,Medium,High,Ultra
 };};
 class HDRAlgorithm{public: enum Algorithm{
-    REINHARD,FILMIC,EXPOSURE,UNCHARTED
+    Reinhard,Filmic,Exposure,Uncharted
 };};
 class AntiAliasingAlgorithm{public: enum Algorithm{
     None,FXAA,SMAA

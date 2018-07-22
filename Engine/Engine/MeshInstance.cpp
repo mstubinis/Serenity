@@ -194,9 +194,6 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
             MeshInstanceAnimation::impl& a = *(q.at(j)->m_i.get());
             if(a.m_Mesh == i.m_Mesh){
                 a.m_CurrentTime += Resources::dt();
-                if(transforms.size() == 0){
-                    transforms.resize(a.m_Mesh->skeleton()->numBones(),glm::mat4(1.0f));
-                }
                 a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
                 if(a.m_CurrentTime >= a.m_EndTime){
                     a.m_CurrentTime = 0;
