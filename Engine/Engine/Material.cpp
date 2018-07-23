@@ -52,8 +52,8 @@ namespace Engine{
             glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
             for(uint i = 0; i < MaterialComponentType::Number; ++i){
                 if(material.getComponents().count(i)){
-                    MaterialComponent* component = material.getComponents().at(i);
-                    if(component->texture() != nullptr && component->texture()->address() != 0){
+                    MaterialComponent& component = *material.getComponents().at(i);
+                    if(component.texture() != nullptr && component.texture()->address() != 0){
                         //enable
                         if     (i == 0) { first.x = 1.0f; }
                         else if(i == 1) { first.y = 1.0f; }
@@ -67,10 +67,10 @@ namespace Engine{
                         else if(i == 9) { third.y = 1.0f; }
                         else if(i == 10){ third.z = 1.0f; }
                         else if(i == 11){ third.w = 1.0f; }
-                        component->bind();
+                        component.bind();
                     }
                     else{ 
-                        component->unbind(); 
+                        component.unbind(); 
                     }
                 }
             }

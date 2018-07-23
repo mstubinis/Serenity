@@ -38,6 +38,9 @@ ShaderP* epriv::InternalShaderPrograms::Deferred = nullptr;
 
 namespace Engine{
     namespace epriv{
+
+		struct srtKeyShaderP final{inline bool operator() ( ShaderP* _1,  ShaderP* _2){return (_1->name() < _2->name());}};
+
         struct EngineInternalShaders final{
             enum Shader{
                 FullscreenVertex,
@@ -2211,44 +2214,46 @@ epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
-void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*Core::m_Engine->m_RenderManager->m_i->m_gBuffer,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
+void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){m_i->_render(*m_i->m_gBuffer,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo);}
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
-void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ Core::m_Engine->m_RenderManager->m_i->m_gBuffer->resize(w,h); }
+void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h){ m_i->_onOpenGLContextCreation(w,h); }
 
 void epriv::RenderManager::_renderText(Font* font,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
-    Core::m_Engine->m_RenderManager->m_i->m_FontsToBeRendered.push_back(FontRenderInfo(font,text,pos,color,scl,angle,depth));
+    m_i->m_FontsToBeRendered.push_back(FontRenderInfo(font,text,pos,color,scl,angle,depth));
 }
 void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
-    Core::m_Engine->m_RenderManager->m_i->m_TexturesToBeRendered.push_back(TextureRenderInfo(texture,pos,color,scl,angle,depth));
+    m_i->m_TexturesToBeRendered.push_back(TextureRenderInfo(texture,pos,color,scl,angle,depth));
 }
 void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     if(stage == ShaderRenderPass::Geometry){
-        Core::m_Engine->m_RenderManager->m_i->m_GeometryPassShaderPrograms.push_back(program);
+        m_i->m_GeometryPassShaderPrograms.push_back(program);
+		sort(m_i->m_GeometryPassShaderPrograms.begin(),m_i->m_GeometryPassShaderPrograms.end(),epriv::srtKeyShaderP());
     }
     else if(stage == ShaderRenderPass::Forward){
-        Core::m_Engine->m_RenderManager->m_i->m_ForwardPassShaderPrograms.push_back(program);
+        m_i->m_ForwardPassShaderPrograms.push_back(program);
+		sort(m_i->m_ForwardPassShaderPrograms.begin(),m_i->m_ForwardPassShaderPrograms.end(),epriv::srtKeyShaderP());
     }
     else{
     }
 }
 void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
-    if(Core::m_Engine->m_RenderManager->m_i->current_shader_program != p){
+    if(m_i->current_shader_program != p){
         glUseProgram(p->program());
-        Core::m_Engine->m_RenderManager->m_i->current_shader_program = p;
+        m_i->current_shader_program = p;
     }
 }
 bool epriv::RenderManager::_bindMaterial(Material* m){
-    if(Core::m_Engine->m_RenderManager->m_i->current_bound_material != m){
-        Core::m_Engine->m_RenderManager->m_i->current_bound_material = m;
+    if(m_i->current_bound_material != m){
+        m_i->current_bound_material = m;
         return true;
     }
     return false;
 }
 bool epriv::RenderManager::_unbindMaterial(){
-    if(Core::m_Engine->m_RenderManager->m_i->current_bound_material != nullptr){   
-        Core::m_Engine->m_RenderManager->m_i->current_bound_material = nullptr;
+    if(m_i->current_bound_material != nullptr){   
+        m_i->current_bound_material = nullptr;
         return true;
     }
     return false;

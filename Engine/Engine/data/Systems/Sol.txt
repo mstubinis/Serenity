@@ -12,7 +12,6 @@ P name=Venus parent=Sun radius=6031 r=1 g=1 b=1 position=108200000 type=Rock atm
 P name=Earth parent=Sun radius=6371 r=1 g=1 b=1 position=149600000 type=Rock atmosphereHeight=0.025 texture=Earth.jpg eccentricity=0.017 period=365.335 majorAxis=149598023 tilt=23.44 days=0.9972685 inclination=7.155
 M name=Moon parent=Earth radius=1737 r=1 g=1 b=1 position=384400 type=Rock atmosphereHeight=0 texture=Moon.jpg eccentricity=0.054 period=27.322 majorAxis=384748 tilt=6.68 days=27.322 inclination=5.15
 
-
 P name=Mars parent=Sun radius=3390 r=1 g=1 b=1 position=227900000 type=Rock atmosphereHeight=0 texture=Mars.jpg eccentricity=0.0934 period=686.971 majorAxis=227939134 tilt=25.19 days=1.0259541666 inclination=5.65
 #M name=Phobos radius=11.2667 r=1 g=1 b=1 parent=Mars position=9390 atmosphereHeight=0 type=Asteroid
 #M name=Deimos radius=6.2 r=1 g=1 b=1 parent=Mars position=23470 atmosphereHeight=0 type=Asteroid

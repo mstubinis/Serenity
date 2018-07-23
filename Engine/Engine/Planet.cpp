@@ -139,11 +139,9 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 	//and now render the atmosphere
     if(camHeight > outerRadius){ 
         program = Resources::getShaderProgram(ResourceManifest::skyFromSpace); 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     else{
         program = Resources::getShaderProgram(ResourceManifest::skyFromAtmosphere);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     program->bind();
 
