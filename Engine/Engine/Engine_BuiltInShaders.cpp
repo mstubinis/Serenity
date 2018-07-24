@@ -4,73 +4,74 @@ using namespace Engine;
 using namespace std;
 
 /*
-GLSL Version      OpenGL Version
-1.10              2.0
-1.20              2.1
-1.30              3.0
-1.40              3.1
-1.50              3.2
-3.30              3.3
-4.00              4.0
-4.10              4.1
-4.20              4.2
-4.30              4.3
-4.40              4.4
-4.50              4.5
+GLSL Version    OpenGL Version
+110              2.0
+120              2.1
+130              3.0
+140              3.1
+150              3.2
+330              3.3
+400              4.0
+410              4.1
+420              4.2
+430              4.3
+440              4.4
+450              4.5
 */
 
 #pragma region Declarations
-string Shaders::Detail::ShadersManagement::version = "#version 120\n";
-string Shaders::Detail::ShadersManagement::constants;
-string Shaders::Detail::ShadersManagement::conditional_functions;
-string Shaders::Detail::ShadersManagement::float_into_2_floats;
-string Shaders::Detail::ShadersManagement::determinent_mat3;
-string Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-string Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-string Shaders::Detail::ShadersManagement::fullscreen_quad_vertex;
-string Shaders::Detail::ShadersManagement::vertex_basic;
-string Shaders::Detail::ShadersManagement::vertex_hud;
-string Shaders::Detail::ShadersManagement::vertex_skybox;
-string Shaders::Detail::ShadersManagement::stencil_passover;
-string Shaders::Detail::ShadersManagement::smaa_common;
-string Shaders::Detail::ShadersManagement::smaa_frag_1_stencil;
-string Shaders::Detail::ShadersManagement::smaa_vertex_1;
-string Shaders::Detail::ShadersManagement::smaa_frag_1;
-string Shaders::Detail::ShadersManagement::smaa_vertex_2;
-string Shaders::Detail::ShadersManagement::smaa_frag_2;
-string Shaders::Detail::ShadersManagement::smaa_vertex_3;
-string Shaders::Detail::ShadersManagement::smaa_frag_3;
-string Shaders::Detail::ShadersManagement::smaa_vertex_4;
-string Shaders::Detail::ShadersManagement::smaa_frag_4;
-string Shaders::Detail::ShadersManagement::fxaa_frag;
-string Shaders::Detail::ShadersManagement::deferred_frag;
-string Shaders::Detail::ShadersManagement::deferred_frag_hud;
-string Shaders::Detail::ShadersManagement::deferred_frag_skybox;
-string Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake;
-string Shaders::Detail::ShadersManagement::copy_depth_frag;
-string Shaders::Detail::ShadersManagement::cubemap_convolude_frag;
-string Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag;
-string Shaders::Detail::ShadersManagement::brdf_precompute;
-string Shaders::Detail::ShadersManagement::ssao_frag;
-string Shaders::Detail::ShadersManagement::hdr_frag;
-string Shaders::Detail::ShadersManagement::godRays_frag;
-string Shaders::Detail::ShadersManagement::blur_frag;
-string Shaders::Detail::ShadersManagement::greyscale_frag;
-string Shaders::Detail::ShadersManagement::edge_canny_frag;
-string Shaders::Detail::ShadersManagement::edge_canny_blur;
-string Shaders::Detail::ShadersManagement::final_frag;
-string Shaders::Detail::ShadersManagement::lighting_frag;
-string Shaders::Detail::ShadersManagement::lighting_frag_gi;
+string epriv::EShaders::version = "#version 120\n";
+string epriv::EShaders::constants;
+string epriv::EShaders::conditional_functions;
+string epriv::EShaders::float_into_2_floats;
+string epriv::EShaders::determinent_mat3;
+string epriv::EShaders::normals_octahedron_compression_functions;
+string epriv::EShaders::reconstruct_log_depth_functions;
+string epriv::EShaders::fullscreen_quad_vertex;
+string epriv::EShaders::vertex_basic;
+string epriv::EShaders::vertex_hud;
+string epriv::EShaders::vertex_skybox;
+string epriv::EShaders::stencil_passover;
+string epriv::EShaders::smaa_common;
+string epriv::EShaders::smaa_frag_1_stencil;
+string epriv::EShaders::smaa_vertex_1;
+string epriv::EShaders::smaa_frag_1;
+string epriv::EShaders::smaa_vertex_2;
+string epriv::EShaders::smaa_frag_2;
+string epriv::EShaders::smaa_vertex_3;
+string epriv::EShaders::smaa_frag_3;
+string epriv::EShaders::smaa_vertex_4;
+string epriv::EShaders::smaa_frag_4;
+string epriv::EShaders::fxaa_frag;
+string epriv::EShaders::forward_frag;
+string epriv::EShaders::deferred_frag;
+string epriv::EShaders::deferred_frag_hud;
+string epriv::EShaders::deferred_frag_skybox;
+string epriv::EShaders::deferred_frag_skybox_fake;
+string epriv::EShaders::copy_depth_frag;
+string epriv::EShaders::cubemap_convolude_frag;
+string epriv::EShaders::cubemap_prefilter_envmap_frag;
+string epriv::EShaders::brdf_precompute;
+string epriv::EShaders::ssao_frag;
+string epriv::EShaders::hdr_frag;
+string epriv::EShaders::godRays_frag;
+string epriv::EShaders::blur_frag;
+string epriv::EShaders::greyscale_frag;
+string epriv::EShaders::edge_canny_frag;
+string epriv::EShaders::edge_canny_blur;
+string epriv::EShaders::final_frag;
+string epriv::EShaders::lighting_frag;
+string epriv::EShaders::lighting_frag_gi;
 #pragma endregion
 
-void Shaders::Detail::ShadersManagement::convertShaderCode(string& code){
+void epriv::EShaders::convertShaderCode(string& code){
 
 }
 
-void Shaders::Detail::ShadersManagement::init(){
+void epriv::EShaders::init(){
 
 #pragma region Constants
-Shaders::Detail::ShadersManagement::constants = 
+epriv::EShaders::constants = 
     "\n"
     "const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n"
     "const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n"
@@ -88,7 +89,7 @@ Shaders::Detail::ShadersManagement::constants =
 
 #pragma region Functions
 
-Shaders::Detail::ShadersManagement::conditional_functions =
+epriv::EShaders::conditional_functions =
     "\n"
     "vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }\n"
     "vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }\n"
@@ -98,7 +99,7 @@ Shaders::Detail::ShadersManagement::conditional_functions =
     "vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }\n"
     "vec4 and(vec4 a, vec4 b) { return a * b; }\n"
     "vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }\n"
-    "//vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; }\n"//this is commented out
+    //"vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; }\n"//this is commented out
     "vec4 not(vec4 a) { return 1.0 - a; }\n"
     "\n"
     "vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }\n"
@@ -109,7 +110,7 @@ Shaders::Detail::ShadersManagement::conditional_functions =
     "vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }\n"
     "vec3 and(vec3 a, vec3 b) { return a * b; }\n"
     "vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }\n"
-    "//vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; }\n"//this is commented out
+    //"vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; }\n"//this is commented out
     "vec3 not(vec3 a) { return 1.0 - a; }\n"
     "\n"
     "vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }\n"
@@ -120,7 +121,7 @@ Shaders::Detail::ShadersManagement::conditional_functions =
     "vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }\n"
     "vec2 and(vec2 a, vec2 b) { return a * b; }\n"
     "vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }\n"
-    "//vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; }\n"//this is commented out
+    //"vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; }\n"//this is commented out
     "vec2 not(vec2 a) { return 1.0 - a; }\n"
     "\n"
 
@@ -132,7 +133,7 @@ Shaders::Detail::ShadersManagement::conditional_functions =
     "float when_le(float x, float y) { return 1.0 - when_gt(x, y); }\n"
     "float and(float a, float b) { return a * b; }\n"
     "float or(float a, float b) { return min(a + b, 1.0); }\n"
-    "//float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
+    //"float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
     "float not(float a) { return 1.0 - a; }\n"
     "\n"
     "int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }\n"
@@ -146,7 +147,7 @@ Shaders::Detail::ShadersManagement::conditional_functions =
     "int inot(int a) { return 1 - a; }\n"
     "\n";
 
-Shaders::Detail::ShadersManagement::float_into_2_floats = 
+epriv::EShaders::float_into_2_floats = 
     "\n"
     "vec3 Unpack3FloatsInto1FloatUnsigned(float v){\n"
     "    vec3 ret;\n"
@@ -194,13 +195,13 @@ Shaders::Detail::ShadersManagement::float_into_2_floats =
     "    return res;\n"
     "}\n"
     "\n";
-Shaders::Detail::ShadersManagement::determinent_mat3 = 
+epriv::EShaders::determinent_mat3 = 
     "\n"
     "float det(mat3 m){\n"
     "    return m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])-m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2])+m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2]);\n"
     "}\n"
     "\n";
-Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions = 
+epriv::EShaders::reconstruct_log_depth_functions = 
     "\n"
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
     "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
@@ -230,7 +231,7 @@ Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions =
     "}\n"
     "\n";
 
-Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = Shaders::Detail::ShadersManagement::constants +
+epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::constants +
     "\n"
     "float Round(float x){\n"
     "    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);\n"
@@ -314,13 +315,12 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions = S
     "    enc.z = n.r < 0.0 ? -1.0 : 1.0;\n"
     "    enc.z *= sqrt(abs(1.0 - enc.x * enc.x - enc.y * enc.y));\n"
     "    return normalize(enc);\n"
-    "}\n"
-    "\n";
+    "}\n";
 
 #pragma endregion
 
 #pragma region FullscreenQuadVertex
-Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::fullscreen_quad_vertex = epriv::EShaders::version + 
     "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
@@ -352,7 +352,7 @@ Shaders::Detail::ShadersManagement::fullscreen_quad_vertex = Shaders::Detail::Sh
 #pragma endregion
 
 #pragma region VertexBasic
-Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::vertex_basic = epriv::EShaders::version + 
     "\n"
     "attribute vec3 position;\n"
     //"//attribute float uv;\n"
@@ -384,8 +384,8 @@ Shaders::Detail::ShadersManagement::vertex_basic = Shaders::Detail::ShadersManag
     "varying float FC_2_f;\n"
     "uniform float fcoeff;\n"
     "\n";
-Shaders::Detail::ShadersManagement::vertex_basic += Shaders::Detail::ShadersManagement::float_into_2_floats;
-Shaders::Detail::ShadersManagement::vertex_basic +=
+epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::vertex_basic +=
     "void main(){\n"
     "    mat4 MVP = VP * Model;\n"
     "    mat4 BoneTransform = mat4(1.0);\n"
@@ -422,28 +422,28 @@ Shaders::Detail::ShadersManagement::vertex_basic +=
 #pragma endregion
 
 #pragma region VertexHUD
-Shaders::Detail::ShadersManagement::vertex_hud = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::vertex_hud = epriv::EShaders::version + 
     "\n"
     "attribute vec3 position;\n"
-    "//attribute float uv;\n"
+    //"attribute float uv;\n"
     "attribute vec2 uv;\n"
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "varying vec2 UV;\n";
-Shaders::Detail::ShadersManagement::vertex_hud += Shaders::Detail::ShadersManagement::float_into_2_floats;
-Shaders::Detail::ShadersManagement::vertex_hud +=
+epriv::EShaders::vertex_hud += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::vertex_hud +=
     "void main(){\n"
     "    mat4 MVP = VP * Model;\n"
-    "    //UV = UnpackFloat32Into2Floats(uv);\n"
+    //"    UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
     "    gl_Position = MVP * vec4(position, 1.0);\n"
-    "    //gl_TexCoord[6] = gl_Position;\n"
+    //"    gl_TexCoord[6] = gl_Position;\n"
     "}";
 #pragma endregion
 
 #pragma region VertexSkybox
-Shaders::Detail::ShadersManagement::vertex_skybox = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::vertex_skybox = epriv::EShaders::version + 
     "\n"
     "attribute vec3 position;\n"
     "uniform mat4 VP;\n"
@@ -456,7 +456,7 @@ Shaders::Detail::ShadersManagement::vertex_skybox = Shaders::Detail::ShadersMana
 #pragma endregion
 
 #pragma region CubemapConvoludeFrag
-Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::cubemap_convolude_frag = epriv::EShaders::version + 
     "\n"
     "varying vec3 UV;\n"
     "uniform samplerCube cubemap;\n"
@@ -489,7 +489,7 @@ Shaders::Detail::ShadersManagement::cubemap_convolude_frag = Shaders::Detail::Sh
 //
 // this shader is heavily modified based on optimizations in the link above. the optimizations are not complete yet, and 
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
-Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::cubemap_prefilter_envmap_frag = epriv::EShaders::version + 
     "varying vec3 UV;\n"
     "uniform samplerCube cubemap;\n"
     "uniform float roughness;\n"
@@ -561,7 +561,7 @@ Shaders::Detail::ShadersManagement::cubemap_prefilter_envmap_frag = Shaders::Det
 
 #pragma region BRDFPrecompute
 
-Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersManagement::version +
+epriv::EShaders::brdf_precompute = epriv::EShaders::version +
     "const float PI2 = 6.283185;\n"
     "uniform int NUM_SAMPLES;\n"
     "varying vec2 texcoords;\n"
@@ -612,7 +612,7 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
     "    float A = 0.0;\n"
     "    float B = 0.0;\n"
     "    vec3 N = vec3(0.0, 0.0, 1.0);\n"
-    "    float a = roughness*roughness;\n"
+    "    float a = roughness * roughness;\n"
     "    float a2 = a * a;\n"
     "    vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);\n"
     "    vec3 tangent   = normalize(cross(up, N));\n"
@@ -645,19 +645,19 @@ Shaders::Detail::ShadersManagement::brdf_precompute = Shaders::Detail::ShadersMa
 #pragma endregion
 
 #pragma region FXAA
-Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::fxaa_frag = epriv::EShaders::version + 
     "uniform float FXAA_REDUCE_MIN;\n"
     "uniform float FXAA_REDUCE_MUL;\n"
     "uniform float FXAA_SPAN_MAX;\n"
     "uniform sampler2D sampler0;\n"
-    "//uniform sampler2D edgeTexture;\n"
+    //"uniform sampler2D edgeTexture;\n"
     "uniform sampler2D depthTexture;\n"
     "uniform vec2 resolution;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
     "   vec2 uv = texcoords;\n"
     "   float depth = texture2D(depthTexture,uv);\n"
-    "   //float edge = texture2D(edgeTexture,uv).r;\n"
+    //"   float edge = texture2D(edgeTexture,uv).r;\n"
     "   if(depth >= 0.999){\n"
     "       gl_FragColor = texture2D(sampler0, uv);\n"
     "       return;\n"
@@ -696,8 +696,8 @@ Shaders::Detail::ShadersManagement::fxaa_frag = Shaders::Detail::ShadersManageme
 
 #pragma region LightingStencilPass
 
-Shaders::Detail::ShadersManagement::stencil_passover = Shaders::Detail::ShadersManagement::version + 
-Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions +
+epriv::EShaders::stencil_passover = epriv::EShaders::version + 
+epriv::EShaders::normals_octahedron_compression_functions +
     "\n"
     "const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "uniform sampler2D gNormalMap;\n"
@@ -713,7 +713,7 @@ Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions +
 
 #pragma region SMAA
    
-Shaders::Detail::ShadersManagement::smaa_common = 
+epriv::EShaders::smaa_common = 
     "vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }\n"
     "vec3 mad(vec3 a, vec3 b, vec3 c){ return (a * b) + c; }\n"
     "vec2 mad(vec2 a, vec2 b, vec2 c){ return (a * b) + c; }\n"
@@ -736,17 +736,17 @@ Shaders::Detail::ShadersManagement::smaa_common =
     "}\n"
     "\n"
     "float API_V_DIR(float v){ return -v; }\n"
-    "//float API_V_COORD(float v){ return 1.0 - v; }\n"
+    //"float API_V_COORD(float v){ return 1.0 - v; }\n"
     "bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
     "bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
     "\n"
-    "//float API_V_DIR(float v){ return v; }\n"
+    //"float API_V_DIR(float v){ return v; }\n"
     "float API_V_COORD(float v){ return v; }\n"
-    "//bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
-    "//bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
+    //"bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }\n"
+    //"bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
     "\n";
  
-Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//edge frag
     "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
     "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
@@ -808,7 +808,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_1_stencil = Shaders::Detail::Shade
     "\n";
 
 
-Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+epriv::EShaders::smaa_vertex_1 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//edge vert
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform mat4 MVP;\n"
@@ -829,10 +829,9 @@ Shaders::Detail::ShadersManagement::smaa_vertex_1 = Shaders::Detail::ShadersMana
     "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)),uv.xyxy);\n"
     "    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)),uv.xyxy);\n"
     "    gl_Position = MVP * vec4(vert,1.0);\n"
-    "}\n"
-    "\n";  
+    "}\n";  
     
-Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//edge frag
     "\n"
     "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
@@ -940,9 +939,8 @@ Shaders::Detail::ShadersManagement::smaa_frag_1 = Shaders::Detail::ShadersManage
     //"    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     //"    gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     "    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
-    "}\n"
-    "\n";
-Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+    "}\n";
+epriv::EShaders::smaa_vertex_2 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//blend vert
     "uniform mat4 MVP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
@@ -969,9 +967,8 @@ Shaders::Detail::ShadersManagement::smaa_vertex_2 = Shaders::Detail::ShadersMana
     "    _offset[2] = mad(SMAA_PIXEL_SIZE.xxyy,vec4(-2.0, 2.0, API_V_DIR(-2.0), API_V_DIR(2.0)) * float(SMAA_MAX_SEARCH_STEPS),vec4(_offset[0].xz, _offset[1].yw));\n"
     "    gl_Position = MVP * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
-    "}\n"
-    "\n";
-Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+    "}\n";
+epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"
     "\n"//blend frag
     "uniform sampler2D edge_tex;\n"
@@ -1211,9 +1208,8 @@ Shaders::Detail::ShadersManagement::smaa_frag_2 = Shaders::Detail::ShadersManage
     "void main(){\n"
     "    vec4 subSamples = vec4( 0.0 , 0.0 , 0.0 , 0.0 );\n"
     "    gl_FragColor = SMAABlendingWeightCalculationPS(uv,pixCoord,_offset,edge_tex,area_tex,search_tex,subSamples);\n"
-    "}\n"
-    "\n";
-Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+    "}\n";
+epriv::EShaders::smaa_vertex_3 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//neightbor vert
     "uniform mat4 MVP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
@@ -1235,9 +1231,8 @@ Shaders::Detail::ShadersManagement::smaa_vertex_3 = Shaders::Detail::ShadersMana
     "    _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0,0.0,0.0,API_V_DIR(1.0)),uv.xyxy);\n"
     "    gl_Position = MVP * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
-    "}\n"
-    "\n";
-Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+    "}\n";
+epriv::EShaders::smaa_frag_3 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//neighbor frag
     "uniform sampler2D textureMap;\n"
     "uniform sampler2D blend_tex;\n"
@@ -1273,7 +1268,7 @@ Shaders::Detail::ShadersManagement::smaa_frag_3 = Shaders::Detail::ShadersManage
     "}";
 
 //vertex & frag 4 are optional passes
-Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+epriv::EShaders::smaa_vertex_4 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"
@@ -1291,7 +1286,7 @@ Shaders::Detail::ShadersManagement::smaa_vertex_4 = Shaders::Detail::ShadersMana
     "    vert.y *= screenSizeDivideBy2.y;\n"
     "    gl_Position = MVP * vec4(vert,1.0);\n"
     "}";
-Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManagement::version + Shaders::Detail::ShadersManagement::smaa_common +
+epriv::EShaders::smaa_frag_4 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"
     "varying vec2 uv;\n"
     "vec4 SMAAResolvePS(vec2 texcoord,sampler2D currentColorTex,sampler2D previousColorTex){\n"
@@ -1303,9 +1298,9 @@ Shaders::Detail::ShadersManagement::smaa_frag_4 = Shaders::Detail::ShadersManage
     "    gl_FragColor = vec4(0.0,0.0,0.0,1.0);\n"
     "}";
 #pragma endregion
-    
-#pragma region DeferredFrag
-Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersManagement::version + 
+   
+#pragma region ForwardFrag
+epriv::EShaders::forward_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
     "uniform sampler2D NormalTexture;\n"
@@ -1350,9 +1345,166 @@ Shaders::Detail::ShadersManagement::deferred_frag = Shaders::Detail::ShadersMana
     "varying float FC_2_f;\n"
     "varying float logz_f;\n"
     "\n";
-Shaders::Detail::ShadersManagement::deferred_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
-Shaders::Detail::ShadersManagement::deferred_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-Shaders::Detail::ShadersManagement::deferred_frag +=
+epriv::EShaders::forward_frag += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::forward_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::forward_frag +=
+    "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){\n"
+    "    vec4 r = vec4(0.0);\n"
+    "    float Alpha = paint.a + canvas.a * (1.0 - paint.a);\n"
+    "    r.r = (paint.r * paint.a + canvas.r * canvas.a * (1.0-paint.a)) / Alpha;\n"
+    "    r.g = (paint.g * paint.a + canvas.g * canvas.a * (1.0-paint.a)) / Alpha;\n"
+    "    r.b = (paint.b * paint.a + canvas.b * canvas.a * (1.0-paint.a)) / Alpha;\n"
+    "    r.a = Alpha;\n"
+    "    return r;\n"
+    "}\n"
+    "vec4 Reflection(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
+    "    vec4 r = vec4(0.0);\n"
+    "    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,_uv).r;\n"
+    "    r.a *= CubemapMixFactor;\n"
+    "    r = PaintersAlgorithm(r,d);\n"
+    "    return r;\n"
+    "}\n"
+    "vec4 Refraction(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
+    "    vec4 r = vec4(0.0);\n"
+    "    r = textureCube(RefractionTexture,refract(n,normalize(cpos - wpos),1.0 / RefractiveIndex)) * texture2D(RefractionTextureMap,_uv).r;\n"
+    "    r.a *= CubemapMixFactor;\n"
+    "    r = PaintersAlgorithm(r,d);\n"
+    "    return r;\n"
+    "}\n"
+    "vec2 ParallaxMap(vec3 _ViewDir){\n"
+    "    float minLayers = min(5.0,(5.0 * ParallaxHeightScale)+1.0);\n"
+    "    float maxLayers = min(30.0,(30.0 * ParallaxHeightScale)+1.0);\n"
+    "    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), _ViewDir)));\n"
+    "    float layerDepth = 1.0 / numLayers;\n"// calculate the size of each layer 
+    "    float currentLayerDepth = 0.0;\n"// depth of current layer  
+    "    vec2 P = _ViewDir.xy * ParallaxHeightScale;\n"// the amount to shift the texture coordinates per layer (from vector P)
+    "    vec2 deltaUV = P / numLayers;\n"
+    "    vec2  currentUV = UV;\n"
+    "    float currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
+    "    while(currentLayerDepth < currentDepth){\n"	
+    "    	currentUV -= deltaUV;\n"// shift texture coordinates along direction of P
+    "    	currentDepth = texture2D(HeightmapTexture, currentUV).r;\n"
+    "    	currentLayerDepth += layerDepth;\n"
+    "    }\n"
+    "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
+    "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
+    "    float beforeDepth = texture(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
+    "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
+    "    return prevUV * weight + currentUV * (1.0 - weight);\n"
+    "}\n"
+    "vec3 CalcBumpedNormal(vec2 _uv){\n"
+    "    vec3 normTexture = texture2D(NormalTexture, _uv).xyz * 2.0 - 1.0;\n"
+    "    return normalize(TBN * normTexture);\n"
+    "}\n"
+    "void main(){\n"
+    "    vec2 uv = UV;\n"
+    "    gl_FragData[0] = Object_Color;\n"
+    "    gl_FragData[1].rg = EncodeOctahedron(normalize(Normals));\n"
+    "    gl_FragData[2].r = MaterialBasePropertiesOne.x;\n" //base glow
+    "    gl_FragData[2].g = 1.0;\n"
+    "\n"
+    "    float ao = MaterialBasePropertiesOne.y;\n"
+    "    float metalness = MaterialBasePropertiesOne.z;\n"
+    "    float smoothness = MaterialBasePropertiesOne.w;\n"
+    "\n"
+    "    if(ThirdConditionals.y > 0.5){\n"
+    "        vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
+    "        uv = ParallaxMap(ViewDir);\n"
+    "    }\n"
+    "\n"
+    "    if(SecondConditionals.x > 0.5){\n"
+    "        ao *= texture2D(AOTexture, uv).r;\n"
+    "    }\n"
+    "    if(SecondConditionals.y > 0.5){\n"
+    "        metalness *= texture2D(MetalnessTexture, uv).r;\n"
+    "    }\n"
+    "    if(SecondConditionals.z > 0.5){\n"
+    "        smoothness *= texture2D(SmoothnessTexture, uv).r;\n"
+    "    }\n"
+    "    gl_FragData[1].b = matID + ao;\n"
+    "    gl_FragData[1].a = Pack2FloatIntoFloat16(metalness,smoothness);\n"
+    "    if(FirstConditionals.x > 0.5){\n"
+    "        gl_FragData[0] *= texture2D(DiffuseTexture, uv);\n"
+    "    }\n"
+    "    else{\n"
+    "        gl_FragData[0] *= vec4(Material_F0,1.0);\n"
+    "    }\n"
+    "    if(FirstConditionals.y > 0.5){\n"
+    "        gl_FragData[1].rg = EncodeOctahedron(CalcBumpedNormal(uv));\n"
+    "    }\n"
+    "    if(SecondConditionals.w > 0.5){\n"
+    "        gl_FragData[0] = Reflection(uv,gl_FragData[0],CamPosition,gl_FragData[1].rgb,WorldPosition);\n"
+    "    }\n"
+    "    if(ThirdConditionals.x > 0.5){\n"
+    "        gl_FragData[0] = Refraction(uv,gl_FragData[0],CamPosition,gl_FragData[1].rgb,WorldPosition);\n"
+    "    }\n"
+    "    if(Shadeless == 0){\n"
+    "        if(FirstConditionals.z > 0.5){ \n"
+    "            gl_FragData[2].r += texture2D(GlowTexture, uv).r; \n"
+    "        }\n"
+    "        if(FirstConditionals.w > 0.5){ \n"
+    "            gl_FragData[2].g = texture2D(SpecularTexture, uv).r; \n"
+    "        }\n"
+    "    }\n"
+    "    else{\n"
+    "        gl_FragData[1].rg = ConstantOneVec2; \n"
+    "    }\n"
+    "    if(HasGodsRays == 1){\n"
+    "        gl_FragData[3] = (texture2D(DiffuseTexture, uv) * vec4(Gods_Rays_Color,1.0))*0.5;\n"
+    "    }\n"
+    "    gl_FragDepth = log2(logz_f) * FC_2_f;\n"
+    "}";
+#pragma endregion
+
+#pragma region DeferredFrag
+epriv::EShaders::deferred_frag = epriv::EShaders::version + 
+    "\n"
+    "uniform sampler2D DiffuseTexture;\n"
+    "uniform sampler2D NormalTexture;\n"
+    "uniform sampler2D GlowTexture;\n"
+    "uniform sampler2D SpecularTexture;\n"
+    "uniform sampler2D AOTexture;\n"
+    "uniform sampler2D MetalnessTexture;\n"
+    "uniform sampler2D SmoothnessTexture;\n"
+    "uniform samplerCube ReflectionTexture;\n"
+    "uniform sampler2D   ReflectionTextureMap;\n"
+    "uniform samplerCube RefractionTexture;\n"
+    "uniform sampler2D   RefractionTextureMap;\n"
+    "uniform sampler2D HeightmapTexture;\n"
+    "\n"
+    "uniform vec4 MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+    "\n"
+    "uniform float       CubemapMixFactor;\n"
+    "uniform float       ParallaxHeightScale;\n"
+    "uniform float       RefractiveIndex;\n"
+    "\n"
+    "uniform float matID;\n"
+    "\n"
+    "uniform int Shadeless;\n"
+    "uniform int HasGodsRays;\n"
+    "\n"
+    "uniform vec4 FirstConditionals;\n" //x = diffuse  y = normals    z = glow w = specular
+    "uniform vec4 SecondConditionals;\n" //x = ao y = metal z = smoothness w = reflection
+    "uniform vec4 ThirdConditionals;\n" //x = refraction y = heightmap z = UNUSED w = UNUSED
+    "\n"
+    "uniform vec4 Object_Color;\n"
+    "uniform vec3 Material_F0;\n"
+    "uniform vec3 Gods_Rays_Color;\n"
+    "\n"
+    "varying vec3 WorldPosition;\n"
+    "varying vec2 UV;\n"
+    "varying vec3 Normals;\n"
+    "varying mat3 TBN;\n"
+    "flat varying vec3 CamPosition;\n"
+    "varying vec3 TangentCameraPos;\n"
+    "varying vec3 TangentFragPos;\n"
+    "\n"
+    "varying float FC_2_f;\n"
+    "varying float logz_f;\n"
+    "\n";
+epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::deferred_frag +=
     "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){\n"
     "    vec4 r = vec4(0.0);\n"
     "    float Alpha = paint.a + canvas.a * (1.0 - paint.a);\n"
@@ -1462,7 +1614,7 @@ Shaders::Detail::ShadersManagement::deferred_frag +=
 #pragma endregion
 
 #pragma region DeferredFragHUD
-Shaders::Detail::ShadersManagement::deferred_frag_hud = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::deferred_frag_hud = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
     "uniform int DiffuseTextureEnabled;\n"
@@ -1477,7 +1629,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_hud = Shaders::Detail::Shaders
 #pragma endregion
 
 #pragma region DeferredFragSkybox
-Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::deferred_frag_skybox = epriv::EShaders::version + 
     "\n"
     "uniform samplerCube Texture;\n"
     "varying vec3 UV;\n"
@@ -1492,7 +1644,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox = Shaders::Detail::Shad
 #pragma endregion
 
 #pragma region DeferredFragSkyboxFake
-Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::deferred_frag_skybox_fake = epriv::EShaders::version + 
     "\n"
     "uniform vec4 Color;\n"
     "varying vec3 UV;\n"
@@ -1507,7 +1659,7 @@ Shaders::Detail::ShadersManagement::deferred_frag_skybox_fake = Shaders::Detail:
 #pragma endregion
 
 #pragma region CopyDepthFrag
-Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::copy_depth_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D gDepthMap;\n"
     "varying vec2 texcoords;\n"
@@ -1517,7 +1669,7 @@ Shaders::Detail::ShadersManagement::copy_depth_frag = Shaders::Detail::ShadersMa
 #pragma endregion
 
 #pragma region SSAO
-Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::ssao_frag = epriv::EShaders::version + 
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gRandomMap;\n"
     "uniform sampler2D gMiscMap;\n"
@@ -1545,9 +1697,9 @@ Shaders::Detail::ShadersManagement::ssao_frag = Shaders::Detail::ShadersManageme
     "uniform float farz;\n"
     "varying vec2 texcoords;\n"
     "\n";
-Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-Shaders::Detail::ShadersManagement::ssao_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-Shaders::Detail::ShadersManagement::ssao_frag +=
+epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::ssao_frag += epriv::EShaders::reconstruct_log_depth_functions;
+epriv::EShaders::ssao_frag +=
     "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
     "    vec3 diff = reconstruct_world_pos(uv + offsetUV,nearz,farz) - origin;\n"
     "    vec3 vec = normalize(diff);\n"
@@ -1598,7 +1750,7 @@ Shaders::Detail::ShadersManagement::ssao_frag +=
 #pragma endregion
 
 #pragma region HDR
-Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::hdr_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D lightingBuffer;\n"
     "uniform sampler2D gDiffuseMap;\n"
@@ -1613,8 +1765,8 @@ Shaders::Detail::ShadersManagement::hdr_frag = Shaders::Detail::ShadersManagemen
     "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){\n"
     "    return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f);\n"
     "}\n";
-Shaders::Detail::ShadersManagement::hdr_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-Shaders::Detail::ShadersManagement::hdr_frag +=
+epriv::EShaders::hdr_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::hdr_frag +=
     "void main(){\n"
     "    vec2 uv = texcoords;\n"
     "    vec3 diffuse = texture2D(gDiffuseMap,uv).rgb;\n"
@@ -1651,7 +1803,7 @@ Shaders::Detail::ShadersManagement::hdr_frag +=
 #pragma endregion
 
 #pragma region Blur
-Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::blur_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D textureMap;\n"
     "uniform vec4 RGBA;\n"
@@ -1704,7 +1856,7 @@ Shaders::Detail::ShadersManagement::blur_frag = Shaders::Detail::ShadersManageme
 #pragma endregion
 
 #pragma region GodRays
-Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::godRays_frag = epriv::EShaders::version + 
     "\n"
     "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
     "\n"
@@ -1737,7 +1889,7 @@ Shaders::Detail::ShadersManagement::godRays_frag = Shaders::Detail::ShadersManag
 #pragma endregion
 
 #pragma region Greyscale
-Shaders::Detail::ShadersManagement::greyscale_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::greyscale_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D textureMap;\n"
     "varying vec2 texcoords;\n"
@@ -1749,7 +1901,7 @@ Shaders::Detail::ShadersManagement::greyscale_frag = Shaders::Detail::ShadersMan
 #pragma endregion
     
 #pragma region EdgeCannyBlur
-Shaders::Detail::ShadersManagement::edge_canny_blur = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::edge_canny_blur = epriv::EShaders::version + 
     "\n"
     "vec2 textureCoordinate;\n"
     "vec2 leftTextureCoordinate;\n"
@@ -1787,7 +1939,7 @@ Shaders::Detail::ShadersManagement::edge_canny_blur = Shaders::Detail::ShadersMa
 #pragma endregion
     
 #pragma region EdgeCannyFrag
-Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::edge_canny_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D textureMap;\n"
     "const float texWidth  = 1.0 / 1024.0;\n"	///< Web cam width size 
@@ -1828,12 +1980,11 @@ Shaders::Detail::ShadersManagement::edge_canny_frag = Shaders::Detail::ShadersMa
     "}\n"
     "void main(){\n"
     "    gl_FragColor = cannyEdge(texcoords);\n"
-    "}\n"
-    "\n";
+    "}\n";
 #pragma endregion
     
 #pragma region FinalFrag
-Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::final_frag = epriv::EShaders::version + 
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gMiscMap;\n"
@@ -1844,9 +1995,9 @@ Shaders::Detail::ShadersManagement::final_frag = Shaders::Detail::ShadersManagem
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
-Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
-Shaders::Detail::ShadersManagement::final_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-Shaders::Detail::ShadersManagement::final_frag +=
+epriv::EShaders::final_frag += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::final_frag +=
     "void main(){\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, texcoords).rgb;\n"
     "    vec3 hdr = texture2D(gMiscMap,texcoords).rgb;\n"
@@ -1867,7 +2018,7 @@ Shaders::Detail::ShadersManagement::final_frag +=
 #pragma endregion
 
 #pragma region LightingFrag
-Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::lighting_frag = epriv::EShaders::version + 
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
     "uniform vec4 LightDataA;\n" //x = ambient, y = diffuse, z = specular, w = LightDirection.x
@@ -1891,10 +2042,10 @@ Shaders::Detail::ShadersManagement::lighting_frag = Shaders::Detail::ShadersMana
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
-Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::float_into_2_floats;
-Shaders::Detail::ShadersManagement::lighting_frag += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-Shaders::Detail::ShadersManagement::lighting_frag +=
+epriv::EShaders::lighting_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::lighting_frag += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::lighting_frag += epriv::EShaders::reconstruct_log_depth_functions;
+epriv::EShaders::lighting_frag +=
     "float azimuth(vec3 vector){\n"
     "    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
     "}\n"
@@ -2139,7 +2290,7 @@ Shaders::Detail::ShadersManagement::lighting_frag +=
 #pragma endregion
 
 #pragma region LightingFragGI
-Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersManagement::version + 
+epriv::EShaders::lighting_frag_gi = epriv::EShaders::version + 
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
     "uniform sampler2D gDiffuseMap;\n"
@@ -2158,10 +2309,10 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi = Shaders::Detail::ShadersM
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
-Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::normals_octahedron_compression_functions;
-Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::float_into_2_floats;
-Shaders::Detail::ShadersManagement::lighting_frag_gi += Shaders::Detail::ShadersManagement::reconstruct_log_depth_functions;
-Shaders::Detail::ShadersManagement::lighting_frag_gi +=
+epriv::EShaders::lighting_frag_gi += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::lighting_frag_gi += epriv::EShaders::float_into_2_floats;
+epriv::EShaders::lighting_frag_gi += epriv::EShaders::reconstruct_log_depth_functions;
+epriv::EShaders::lighting_frag_gi +=
     "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
     "    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
     "    return ret;\n"
@@ -2224,6 +2375,7 @@ Shaders::Detail::ShadersManagement::lighting_frag_gi +=
     convertShaderCode(smaa_vertex_4);
     convertShaderCode(smaa_frag_4);
     convertShaderCode(fxaa_frag);
+    convertShaderCode(forward_frag);
     convertShaderCode(deferred_frag);
     convertShaderCode(deferred_frag_hud);
     convertShaderCode(deferred_frag_skybox);

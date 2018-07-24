@@ -425,10 +425,10 @@ class Material::impl final{
         void _setMetalness(float m){                     m_BaseMetalness = glm::clamp(m,0.001f,0.999f);  _updateGlobalMaterialPool(); }
 };
 
-Material::Material(string name,string diffuse,string normal,string glow,string specular,Handle shaderProgramHandle):m_i(new impl),BindableResource(name){
+Material::Material(string name,string diffuse,string normal,string glow,string specular):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
-Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,ShaderP* shaderProgram):m_i(new impl),BindableResource(name){
+Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
 }
 Material::~Material(){

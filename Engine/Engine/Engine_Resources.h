@@ -92,7 +92,7 @@ namespace Engine{
         Handle addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
         Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
 
-        Handle addShader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
+        Handle addShader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         Handle addSoundData(std::string file,std::string name = "",bool music = false);
         Handle addShaderProgram(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         Handle addShaderProgram(std::string name, Handle& vertexShader, Handle& fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);

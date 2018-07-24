@@ -29,7 +29,7 @@ class Shader final: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Shader(std::string name, std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
+        Shader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         ~Shader();
 
         ShaderType::Type type();

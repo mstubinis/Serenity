@@ -13,6 +13,7 @@ namespace Engine{
         };
         struct InternalShaderPrograms{
             static ShaderP* Deferred;
+			static ShaderP* Forward;
         };
     };
 };

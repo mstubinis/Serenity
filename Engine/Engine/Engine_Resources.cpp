@@ -168,19 +168,19 @@ Handle Resources::addMaterial(string name, string diffuse, string normal,string 
     else{
         program = Resources::getShaderProgram(programHandle);
     }
-    Material* material = new Material(name,diffuse,normal,glow,specular,programHandle);
+    Material* material = new Material(name,diffuse,normal,glow,specular);
     program->addMaterial(material);
     return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
     if(program == nullptr) program = epriv::InternalShaderPrograms::Deferred;
-    Material* material = new Material(name,diffuse,normal,glow,specular,program);
+    Material* material = new Material(name,diffuse,normal,glow,specular);
     program->addMaterial(material);
     return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 
-Handle Resources::addShader(string name, string fileOrData, ShaderType::Type type, bool fromFile){
-    return resourceManager->m_i->m_Resources->add(new Shader(name,fileOrData,type,fromFile),ResourceType::Shader);
+Handle Resources::addShader(string fileOrData, ShaderType::Type type, bool fromFile){
+    return resourceManager->m_i->m_Resources->add(new Shader(fileOrData,type,fromFile),ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(string n, Shader* v, Shader* f, ShaderRenderPass::Pass s){

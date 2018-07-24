@@ -56,6 +56,7 @@ struct RingInfo final{
 };
 
 class Planet: public Entity{
+	friend class ::Ring;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
     protected:
@@ -112,8 +113,9 @@ class Star: public Planet{
 };
 
 class Ring final{
+	friend class ::Planet;
     private:
-        Material* material;
+        Handle m_MaterialHandle;
         Planet* m_Parent;
         void _makeRingImage(std::vector<RingInfo>&,Planet*);
     public:

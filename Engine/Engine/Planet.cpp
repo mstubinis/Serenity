@@ -280,6 +280,11 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     m_Parent = parent;
     _makeRingImage(rings,parent);
     m_Parent->addRing(this);
+
+	uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle);
+	MeshInstance* ringMesh = parent->m_Model->getModel(index);
+	float aScale = 1.0f;
+	ringMesh->setScale(aScale,aScale,aScale);
 }
 Ring::~Ring(){
 }
@@ -297,12 +302,14 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
             if(i > ringInfo.alphaBreakpoint){
                 uint numerator = alphaChangeRange - newI;
                 pC.a = float(numerator/(alphaChangeRange));
-                newI++;
+                ++newI;
             }
             else{
                 pC.a = 1;
             }
 
+            sf::Color fFront;
+            sf::Color fBack;
             if(count > 0){
                 sf::Color bgFrontPixel = ringImage.getPixel(ringInfo.position + i,0);
                 sf::Color bgBackPixel = ringImage.getPixel(ringInfo.position - i,0);
@@ -322,46 +329,29 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
                     _fcf.a = 1.0f - pC.a;
                     _fcb.a = 1.0f - pC.a;
                 }
-
                 float ra = float(int(rand() % 10 - 5))/255.0f;
                 float ra1 = float(int(rand() % 10 - 5))/255.0f;
-
-                _fcf.r += ra;
-                _fcf.g += ra;
-                _fcf.b += ra;
-
-                _fcb.r += ra1;
-                _fcb.g += ra1;
-                _fcb.b += ra1;
-
-                sf::Color fFront = sf::Color(sf::Uint8(_fcf.r) * 255, sf::Uint8(_fcf.g) * 255, sf::Uint8(_fcf.b) * 255, sf::Uint8(_fcf.a) * 255);
-                sf::Color fBack = sf::Color(sf::Uint8(_fcb.r) * 255, sf::Uint8(_fcb.g) * 255, sf::Uint8(_fcb.b) * 255, sf::Uint8(_fcb.a) * 255);
-
-                for(uint s = 0; s < ringImage.getSize().y; s++){
-                    ringImage.setPixel(ringInfo.position + i,s,fFront);
-                    ringImage.setPixel(ringInfo.position - i,s,fBack);
-                }
+                _fcf += glm::vec4(ra,ra,ra,0);
+                _fcb += glm::vec4(ra1,ra1,ra1,0);
+                fFront = sf::Color(sf::Uint8(_fcf.r * 255.0f), sf::Uint8(_fcf.g * 255.0f), sf::Uint8(_fcf.b * 255.0f), sf::Uint8(_fcf.a * 255.0f));
+                fBack = sf::Color(sf::Uint8(_fcb.r * 255.0f), sf::Uint8(_fcb.g * 255.0f), sf::Uint8(_fcb.b * 255.0f), sf::Uint8(_fcb.a * 255.0f));
             }
             else{
                 int ra = rand() % 10 - 5;
-
-                pC.r += ra;
-                pC.g += ra;
-                pC.b += ra;
-                sf::Color _pc = sf::Color(sf::Uint8(pC.r) * 255, sf::Uint8(pC.g) * 255, sf::Uint8(pC.b) * 255, sf::Uint8(pC.a) * 255);
-
-                for(uint s = 0; s < ringImage.getSize().y; s++){
-                    ringImage.setPixel(ringInfo.position + i,s,_pc);
-                    ringImage.setPixel(ringInfo.position - i,s,_pc);
-                }
+				pC += glm::vec4(ra,ra,ra,0);
+                fFront = sf::Color(sf::Uint8(pC.r * 255.0f), sf::Uint8(pC.g * 255.0f), sf::Uint8(pC.b * 255.0f), sf::Uint8(pC.a * 255.0f));
+				fBack = fFront;
+            }
+            for(uint s = 0; s < ringImage.getSize().y; ++s){
+                ringImage.setPixel(ringInfo.position + i,s,fFront);
+                ringImage.setPixel(ringInfo.position - i,s,fBack);
             }
         }
         ++count;
     }
-    Texture* diffuse = new Texture(ringImage,"RingDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+	Texture* diffuse = new Texture(ringImage,"RingDiffuse",GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
-    Handle h = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,nullptr);
-    this->material = Resources::getMaterial(h);
+	m_MaterialHandle = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,nullptr);
 }
 
 OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent,float _inclination){

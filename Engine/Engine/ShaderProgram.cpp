@@ -43,15 +43,20 @@ class Shader::impl final{
         ShaderType::Type m_Type;
         bool m_FromFile;
         string m_Data;
-        void _construct(string& name, string& data, ShaderType::Type type, bool fromFile,Shader* super){
+        void _construct(string& data, ShaderType::Type type, bool fromFile,Shader* super){
             m_Data = data;
             m_Type = type;
             m_FromFile = fromFile;
-            super->setName(name);
+			if(fromFile){
+				super->setName(data);
+			}
+			else{
+				super->setName("ShaderFromMemory");
+			}
         }
 };
-Shader::Shader(string name, string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
-    m_i->_construct(name,shaderFileOrData,shaderType,fromFile,this);
+Shader::Shader(string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){
+    m_i->_construct(shaderFileOrData,shaderType,fromFile,this);
 }
 Shader::~Shader(){
 }

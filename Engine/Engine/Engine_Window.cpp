@@ -8,6 +8,7 @@
 #include "Engine_BuiltInShaders.h"
 
 using namespace Engine;
+using namespace std;
 
 class Engine_Window::impl final{
     public:
@@ -42,10 +43,10 @@ class Engine_Window::impl final{
             settings.antialiasingLevel = 0;
             settings.majorVersion = _majorVersion;
             settings.minorVersion = _minorVersion;
-            std::string core = "";
+            string core = "";
             if(_glslVersion >= 330)
                 core = " core";
-            Shaders::Detail::ShadersManagement::version = "#version " + to_string(_glslVersion) + core + "\n";
+            epriv::EShaders::version = "#version " + to_string(_glslVersion) + core + "\n";
 
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;

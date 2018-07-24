@@ -256,7 +256,8 @@ P name=Pluto parent=Sun radius=1184 r=1 g=1 b=1 position=5906380000 type=Rock at
 
 #P name=20000-Varuna parent=Sun radius=330 r=1 g=1 b=1 position=6450000000 atmosphereHeight=0 
 
-* name=Player parent=Earth position=6779
+#* name=Player parent=Earth position=6779
+* name=Player parent=Saturn position=146779
 $ name=Valiant parent=Player position=2
 
 L name=Earth_Lagrange_Point_L1 lp1=Earth lp2=Moon lType=L1

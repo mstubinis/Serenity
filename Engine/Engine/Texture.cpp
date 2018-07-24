@@ -57,6 +57,8 @@ class Texture::impl final{
             m_InternalFormat = internFormat;
             if(i.getSize().x > 0 && i.getSize().y > 0){
                 const sf::Uint8* pxls = i.getPixelsPtr();
+				m_Width = i.getSize().x;
+				m_Height = i.getSize().y;
                 vector<uchar> p(pxls,pxls+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
@@ -73,7 +75,8 @@ class Texture::impl final{
                 glBindTexture(m_Type,0);
             }
             else if(m_Files.size() == 1 && m_Files.at(0) == "PIXELS"){//pixel data image
-                sf::Image i;i.loadFromMemory(&m_Pixels[0],m_Pixels.size());
+                sf::Image i;
+				i.create(m_Width,m_Height,&m_Pixels[0]);
                 _generateFromImage(i,super,m_Type);
                 glBindTexture(m_Type,0);
                 _getPixels();

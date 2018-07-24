@@ -49,16 +49,16 @@ Handle ResourceManifest::PBCSound;
 Handle ResourceManifest::SniperSound;
 
 void ResourceManifest::init(){
-    Handle skyFromSpaceVert = Resources::addShader("AS_SkyFromSpace_Vert","data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
-    Handle skyFromSpaceFrag = Resources::addShader("AS_SkyFromSpace_Frag","data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
+    Handle skyFromSpaceVert = Resources::addShader("data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
+    Handle skyFromSpaceFrag = Resources::addShader("data/Shaders/AS_skyFromSpace_frag.glsl",ShaderType::Fragment);
     skyFromSpace = Resources::addShaderProgram("AS_SkyFromSpace",skyFromSpaceVert,skyFromSpaceFrag,ShaderRenderPass::Forward);
 
-    Handle skyFromAtVert = Resources::addShader("AS_SkyFromAtmosphere_Vert","data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
-    Handle skyFromAtFrag = Resources::addShader("AS_SkyFromAtmosphere_Frag","data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
+    Handle skyFromAtVert = Resources::addShader("data/Shaders/AS_skyFromAtmosphere_vert.glsl",ShaderType::Vertex);
+    Handle skyFromAtFrag = Resources::addShader("data/Shaders/AS_skyFromAtmosphere_frag.glsl",ShaderType::Fragment);
     skyFromAtmosphere = Resources::addShaderProgram("AS_SkyFromAtmosphere",skyFromAtVert,skyFromAtFrag,ShaderRenderPass::Forward);
 
-    Handle groundFromSpaceVert = Resources::addShader("AS_GroundFromSpace_Vert","data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
-    Handle groundFromSpaceFrag = Resources::addShader("AS_GroundFromSpace_Frag","data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
+    Handle groundFromSpaceVert = Resources::addShader("data/Shaders/AS_groundFromSpace_vert.glsl",ShaderType::Vertex);
+    Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
     TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);

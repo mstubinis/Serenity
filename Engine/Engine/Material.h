@@ -153,8 +153,8 @@ class Material final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="",Handle shaderProgramHandle = Handle());
-        Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);
+        Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="");
+        Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
 
         const std::unordered_map<uint,MaterialComponent*>& getComponents() const;

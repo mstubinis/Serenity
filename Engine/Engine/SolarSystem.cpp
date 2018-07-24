@@ -235,7 +235,7 @@ void SolarSystem::_loadFromFile(string filename){
 
     //add planetary rings
     for(auto rings:planetRings){
-        //new Ring(rings.second,(Planet*)(m_Objects.at(rings.first)));
+        new Ring(rings.second,(Planet*)(m_Planets.at(rings.first)));
     }
 
     centerSceneToObject(player);
