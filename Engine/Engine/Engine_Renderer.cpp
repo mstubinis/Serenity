@@ -40,7 +40,7 @@ ShaderP* epriv::InternalShaderPrograms::Forward = nullptr;
 namespace Engine{
     namespace epriv{
 
-		struct srtKeyShaderP final{inline bool operator() ( ShaderP* _1,  ShaderP* _2){return (_1->name() < _2->name());}};
+        struct srtKeyShaderP final{inline bool operator() ( ShaderP* _1,  ShaderP* _2){return (_1->name() < _2->name());}};
 
         struct EngineInternalShaders final{
             enum Shader{
@@ -348,7 +348,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.at(EngineInternalShaders::VertexBasic) = new Shader(epriv::EShaders::vertex_basic,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::VertexHUD) = new Shader(epriv::EShaders::vertex_hud,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::VertexSkybox) = new Shader(epriv::EShaders::vertex_skybox,ShaderType::Vertex,false);
-			m_InternalShaders.at(EngineInternalShaders::ForwardFrag) = new Shader(epriv::EShaders::forward_frag,ShaderType::Fragment,false);
+            m_InternalShaders.at(EngineInternalShaders::ForwardFrag) = new Shader(epriv::EShaders::forward_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFrag) = new Shader(epriv::EShaders::deferred_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD) = new Shader(epriv::EShaders::deferred_frag_hud,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::DeferredFragSkybox) = new Shader(epriv::EShaders::deferred_frag_skybox,ShaderType::Fragment,false);
@@ -379,7 +379,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.at(EngineInternalShaders::SMAAFrag4) = new Shader(epriv::EShaders::smaa_frag_4,ShaderType::Fragment,false);
 
             epriv::InternalShaderPrograms::Deferred = new ShaderP("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
-			epriv::InternalShaderPrograms::Forward = new ShaderP("Forward",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::ForwardFrag),ShaderRenderPass::Forward);
+            epriv::InternalShaderPrograms::Forward = new ShaderP("Forward",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::ForwardFrag),ShaderRenderPass::Forward);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur) = new ShaderP("Deferred_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BlurFrag),ShaderRenderPass::Postprocess);
@@ -1172,7 +1172,6 @@ class epriv::RenderManager::impl final{
 
             uniform_real_distribution<float> randFloats(0.0f,1.0f);
             default_random_engine gen;
-            vector<glm::vec3> kernels;
             for(uint i = 0; i < SSAO_KERNEL_COUNT; ++i){
                 glm::vec3 sample(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,randFloats(gen));
                 sample = glm::normalize(sample);
@@ -1181,9 +1180,8 @@ class epriv::RenderManager::impl final{
                 float a = 0.1f; float b = 1.0f; float f = scale * scale;
                 scale = a + f * (b - a); //basic lerp   
                 sample *= scale;
-                kernels.push_back(sample);
+		ssao_Kernels[i] = sample;
             }
-            copy(kernels.begin(),kernels.end(),ssao_Kernels);
             vector<glm::vec3> ssaoNoise;
             for(uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i){
                 glm::vec3 noise(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f); 
