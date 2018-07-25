@@ -14,7 +14,7 @@ varying float cameraHeight;
 varying float planetRadius;
 varying vec3 WorldPosition;
 
-varying float FC_2_f;
+varying float FC;
 varying float logz_f;
 
 //uniform int HasGodsRays;
@@ -53,6 +53,5 @@ void main(){
         gl_FragData[3].rgb = max(gl_FragData[4].rgb, vec3(0.125, 0.116, 0.25)) * 0.7;
     }
 	*/
-
-    gl_FragDepth = log2(logz_f) * FC_2_f;
+    gl_FragDepth = log2(logz_f) * FC;
 }

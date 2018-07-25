@@ -13,7 +13,7 @@ varying vec3 WorldPosition;
 
 //uniform int HasGodsRays;
 
-varying float FC_2_f;
+varying float FC;
 varying float logz_f;
 
 void main(){
@@ -41,5 +41,5 @@ void main(){
     }
 	*/
 
-    gl_FragDepth = log2(logz_f) * FC_2_f;
+    gl_FragDepth = log2(logz_f) * FC;
 }

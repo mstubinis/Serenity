@@ -23,7 +23,8 @@ namespace Engine{
             Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
             Camera* c = s->getActiveCamera();        if(c == nullptr) return;
             Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
-            Renderer::sendUniform1fSafe("fcoeff",2.0f / glm::log2(c->getFar() + 1.0f));
+			float fcoeff = (2.0f / glm::log2(c->getFar() + 1.0f)) * 0.5f;
+            Renderer::sendUniform1fSafe("fcoeff",fcoeff);
 
             glm::vec3 camPos = c->getPosition();
             Renderer::sendUniform3fSafe("CameraPosition",camPos);

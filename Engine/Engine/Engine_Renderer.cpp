@@ -1180,7 +1180,7 @@ class epriv::RenderManager::impl final{
                 float a = 0.1f; float b = 1.0f; float f = scale * scale;
                 scale = a + f * (b - a); //basic lerp   
                 sample *= scale;
-		ssao_Kernels[i] = sample;
+                ssao_Kernels[i] = sample;
             }
             vector<glm::vec3> ssaoNoise;
             for(uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i){
@@ -1642,13 +1642,16 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
 
             glm::mat4 invVP = c.getViewProjectionInverse();
-            glm::mat4 invP = glm::inverse(c.getProjection());
+			glm::mat4 invP = c.getProjectionInverse();
+			glm::mat4 invV = c.getViewInverse();
             glm::vec3 campos = c.getPosition();
             float cNear = c.getNear(); float cFar = c.getFar();
     
             sendUniformMatrix4fSafe("VP",c.getViewProjection());
             sendUniformMatrix4fSafe("invVP",invVP);
+			sendUniformMatrix4fSafe("invV",invV);
             sendUniformMatrix4fSafe("invP",invP);
+
             sendUniform4fSafe("CamPosGamma",campos.x, campos.y, campos.z,gamma);
 
             sendUniform4fvSafe("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
@@ -2037,9 +2040,8 @@ class epriv::RenderManager::impl final{
             float h2 = float(height) * 0.5f;
             glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
             sendUniformMatrix4f("MVP",p);
-            sendUniform2f("screenSizeDivideBy2",w2,h2);
+            sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
             setViewport(0,0,width,height);
-
             m_FullscreenQuad->render();
         }
         void _renderFullscreenTriangle(uint& width,uint& height){
@@ -2047,11 +2049,8 @@ class epriv::RenderManager::impl final{
             float h2 = float(height) * 0.5f;
             glm::mat4 p = glm::ortho(-w2,w2,-h2,h2);
             sendUniformMatrix4f("MVP",p);
-            sendUniform2f("screenSizeDivideBy2",w2,h2);
+            sendUniform2fSafe("screenSizeDivideBy2",w2,h2);
             setViewport(0,0,width,height);
-            //apparently drawing oversized triangles is better performance wise as a quad will process the pixels along the triangles' diagonal twice,
-            //and culling out the unseen geometry from the oversized triangle (opengl does this automatically) is alot cheaper than the alternative render diagonal pixels twice
-    
             m_FullscreenTriangle->render();
         }
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
@@ -2342,7 +2341,6 @@ void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorit
 void Renderer::Settings::cullFace(uint s){ epriv::Core::m_Engine->m_RenderManager->m_i->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(!color && !depth && !stencil) return;
-    //if(depth){ enableDepthMask(); }
     if(color == true && depth == true && stencil == true)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     else if(color == true && depth == true && stencil == false)

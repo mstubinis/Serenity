@@ -29,13 +29,13 @@ class epriv::FullscreenTriangle::impl final{
         vector<MeshVertexDataFullscreen> m_Vertices;
         vector<GLuint> m_Buffers;
         void _init(){
-            MeshVertexDataFullscreen vertex1,vertex2,vertex3;
+            MeshVertexDataFullscreen v1,v2,v3;
 
-            vertex1.position = glm::vec3(-1.0f,-1.0f,0.0f); vertex1.uv = glm::vec2(0.0f,0.0f);
-            vertex2.position = glm::vec3(4.0f, -1.0f,0.0f); vertex2.uv = glm::vec2(2.5f,0.0f);
-            vertex3.position = glm::vec3(-1.0f, 4.0f,0.0f); vertex3.uv = glm::vec2(0.0f,2.5f);
+            v1.position = glm::vec3(-1.0f,-1.0f,0.0f); v1.uv = glm::vec2(0.0f,0.0f);
+            v2.position = glm::vec3(4.0f, -1.0f,0.0f); v2.uv = glm::vec2(2.5f,0.0f);
+            v3.position = glm::vec3(-1.0f, 4.0f,0.0f); v3.uv = glm::vec2(0.0f,2.5f);
 
-            m_Vertices.push_back(vertex1);m_Vertices.push_back(vertex2);m_Vertices.push_back(vertex3);
+            m_Vertices.push_back(v1);m_Vertices.push_back(v2);m_Vertices.push_back(v3);
 
             m_Indices.push_back(0);m_Indices.push_back(1);m_Indices.push_back(2);
 
@@ -73,14 +73,14 @@ class epriv::FullscreenQuad::impl final{
         vector<MeshVertexDataFullscreen> m_Vertices;
         vector<GLuint> m_Buffers;
         void _init(){
-            MeshVertexDataFullscreen vertex1,vertex2,vertex3,vertex4;
+            MeshVertexDataFullscreen v1,v2,v3,v4;
 
-            vertex1.position = glm::vec3(-1.0f,-1.0f, 0.0f); vertex1.uv = glm::vec2(0.0f,0.0f);
-            vertex2.position = glm::vec3( 1.0f,-1.0f, 0.0f); vertex2.uv = glm::vec2(1.0f,0.0f);
-            vertex3.position = glm::vec3( 1.0f, 1.0f, 0.0f); vertex3.uv = glm::vec2(1.0f,1.0f);
-            vertex4.position = glm::vec3(-1.0f, 1.0f, 0.0f); vertex4.uv = glm::vec2(0.0f,1.0f);
+            v1.position = glm::vec3(-1.0f,-1.0f, 0.0f); v1.uv = glm::vec2(0.0f,0.0f);
+            v2.position = glm::vec3( 1.0f,-1.0f, 0.0f); v2.uv = glm::vec2(1.0f,0.0f);
+            v3.position = glm::vec3( 1.0f, 1.0f, 0.0f); v3.uv = glm::vec2(1.0f,1.0f);
+            v4.position = glm::vec3(-1.0f, 1.0f, 0.0f); v4.uv = glm::vec2(0.0f,1.0f);
 
-            m_Vertices.push_back(vertex1);m_Vertices.push_back(vertex2);m_Vertices.push_back(vertex3);m_Vertices.push_back(vertex4);
+            m_Vertices.push_back(v1);m_Vertices.push_back(v2);m_Vertices.push_back(v3);m_Vertices.push_back(v4);
 
             m_Indices.push_back(0);m_Indices.push_back(1);m_Indices.push_back(2);m_Indices.push_back(3);
 
@@ -112,22 +112,9 @@ class epriv::FullscreenQuad::impl final{
             glDisableVertexAttribArray(1);
         }
 };
-
-epriv::FullscreenTriangle::FullscreenTriangle():m_i(new impl){
-    m_i->_init();
-}
-epriv::FullscreenTriangle::~FullscreenTriangle(){
-    m_i->_destruct();
-}
-void epriv::FullscreenTriangle::render(){
-    m_i->_render();
-}
-epriv::FullscreenQuad::FullscreenQuad():m_i(new impl){
-    m_i->_init();
-}
-epriv::FullscreenQuad::~FullscreenQuad(){
-    m_i->_destruct();
-}
-void epriv::FullscreenQuad::render(){
-    m_i->_render();
-}
+epriv::FullscreenTriangle::FullscreenTriangle():m_i(new impl){ m_i->_init(); }
+epriv::FullscreenTriangle::~FullscreenTriangle(){ m_i->_destruct(); }
+void epriv::FullscreenTriangle::render(){ m_i->_render(); }
+epriv::FullscreenQuad::FullscreenQuad():m_i(new impl){ m_i->_init(); }
+epriv::FullscreenQuad::~FullscreenQuad(){ m_i->_destruct(); }
+void epriv::FullscreenQuad::render(){ m_i->_render(); }

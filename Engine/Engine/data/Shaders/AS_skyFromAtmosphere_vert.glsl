@@ -41,7 +41,7 @@ varying float outerRadius;
 varying float planetRadius;
 
 varying float logz_f;
-varying float FC_2_f;
+varying float FC;
 uniform float fcoeff;
 
 float scale(float fCos){
@@ -98,5 +98,5 @@ void main(){
 
     logz_f = 1.0 + gl_Position.w;
     gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
-    FC_2_f = fcoeff * 0.5;
+    FC = fcoeff;
 }

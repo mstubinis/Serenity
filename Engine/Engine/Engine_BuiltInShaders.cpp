@@ -72,7 +72,6 @@ void epriv::EShaders::init(){
 
 #pragma region Constants
 epriv::EShaders::constants = 
-    "\n"
     "const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);\n"
     "const vec2 ConstantOneVec2 = vec2(1.0,1.0);\n"
     "\n"
@@ -148,7 +147,6 @@ epriv::EShaders::conditional_functions =
     "\n";
 
 epriv::EShaders::float_into_2_floats = 
-    "\n"
     "vec3 Unpack3FloatsInto1FloatUnsigned(float v){\n"
     "    vec3 ret;\n"
     "    ret.r = mod(v,          1.0);\n"
@@ -193,46 +191,33 @@ epriv::EShaders::float_into_2_floats =
     "    res.x = (res.x - 0.5) * 2.0;\n"
     "    res.y = (res.y - 0.5) * 2.0;\n"
     "    return res;\n"
-    "}\n"
-    "\n";
+    "}\n";
 epriv::EShaders::determinent_mat3 = 
-    "\n"
     "float det(mat3 m){\n"
     "    return m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])-m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2])+m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2]);\n"
-    "}\n"
-    "\n";
+    "}\n";
 epriv::EShaders::reconstruct_log_depth_functions = 
-    "\n"
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
     "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
     "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
-    "\n"  //linearize regular depth
     "    float a = _far / (_far - _near);\n"
     "    float b = _far * _near / (_near - _far);\n"
     "    float linearDepth = (a + b / regularDepth);\n"
-    "\n"
     "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-    "\n"
-    "    \n"//world space it!
     "    vec4 wpos = invVP * clipSpace;\n"
     "    return wpos.xyz / wpos.w;\n"
     "}\n"
-    "\n"
     "vec3 reconstruct_view_pos(vec2 _uv,float _near, float _far){\n"
-    "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
-    "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
-    "\n"  //linearize regular depth
-    "    float a = _far / (_far - _near);\n"
+    "    float depth = texture2D(gDepthMap, _uv).r;\n"
+    "    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
+    "    float a = _far / (_far - _near);\n"//linearize regular depth
     "    float b = _far * _near / (_near - _far);\n"
-    "    float linearDepth = (a + b / regularDepth);\n"
-    "\n"
+    "    float linearDepth = (a + b / depth);\n"
     "    vec4 clipSpace = invP * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
     "    return clipSpace.xyz / clipSpace.w;\n"
-    "}\n"
-    "\n";
+    "}\n";
 
 epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::constants +
-    "\n"
     "float Round(float x){\n"
     "    return x < 0.0 ? int(x - 0.5) : int(x + 0.5);\n"
     "}\n"
@@ -324,7 +309,7 @@ epriv::EShaders::fullscreen_quad_vertex = epriv::EShaders::version +
     "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
-    "uniform float SpotLight;\n"
+    "uniform float Type;\n" // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
     "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
     "\n"
     "attribute vec3 position;\n"
@@ -339,10 +324,10 @@ epriv::EShaders::fullscreen_quad_vertex = epriv::EShaders::version +
     "}\n"
     "void main(){\n"
     "    vec3 vert = position;\n"
-    "    if(SpotLight > 0.99){\n"
+    "    if(Type == 2.0){\n"
     "        vert = doSpotLightStuff(vert);\n"
     "    }\n"
-    "    else{\n"
+	"    else if(Type == 0.0){\n"
     "        vert.x *= screenSizeDivideBy2.x;\n"
     "        vert.y *= screenSizeDivideBy2.y;\n"
     "    }\n"
@@ -381,7 +366,7 @@ epriv::EShaders::vertex_basic = epriv::EShaders::version +
     "varying vec3 TangentFragPos;\n"
     "\n"
     "varying float logz_f;\n"
-    "varying float FC_2_f;\n"
+    "varying float FC;\n"
     "uniform float fcoeff;\n"
     "\n";
 epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
@@ -417,7 +402,7 @@ epriv::EShaders::vertex_basic +=
     "\n"
     "    logz_f = 1.0 + gl_Position.w;\n"
     "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
-    "    FC_2_f = fcoeff * 0.5;\n"
+    "    FC = fcoeff;\n"
     "}";
 #pragma endregion
 
@@ -1342,7 +1327,7 @@ epriv::EShaders::forward_frag = epriv::EShaders::version +
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
-    "varying float FC_2_f;\n"
+    "varying float FC;\n"
     "varying float logz_f;\n"
     "\n";
 epriv::EShaders::forward_frag += epriv::EShaders::float_into_2_floats;
@@ -1452,7 +1437,7 @@ epriv::EShaders::forward_frag +=
     "    if(HasGodsRays == 1){\n"
     "        gl_FragData[3] = (texture2D(DiffuseTexture, uv) * vec4(Gods_Rays_Color,1.0))*0.5;\n"
     "    }\n"
-    "    gl_FragDepth = log2(logz_f) * FC_2_f;\n"
+    "    gl_FragDepth = log2(logz_f) * FC;\n"
     "}";
 #pragma endregion
 
@@ -1499,7 +1484,7 @@ epriv::EShaders::deferred_frag = epriv::EShaders::version +
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
-    "varying float FC_2_f;\n"
+    "varying float FC;\n"
     "varying float logz_f;\n"
     "\n";
 epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
@@ -1609,7 +1594,7 @@ epriv::EShaders::deferred_frag +=
     "    if(HasGodsRays == 1){\n"
     "        gl_FragData[3] = (texture2D(DiffuseTexture, uv) * vec4(Gods_Rays_Color,1.0))*0.5;\n"
     "    }\n"
-    "    gl_FragDepth = log2(logz_f) * FC_2_f;\n"
+    "    gl_FragDepth = log2(logz_f) * FC;\n"
     "}";
 #pragma endregion
 
@@ -1692,6 +1677,7 @@ epriv::EShaders::ssao_frag = epriv::EShaders::version +
     "uniform mat4 Projection;\n"
     "uniform mat4 View;\n"
     "uniform mat4 invVP;\n"
+    "uniform mat4 invV;\n"
     "uniform mat4 invP;\n"
     "uniform float nearz;\n"
     "uniform float farz;\n"
@@ -2038,6 +2024,7 @@ epriv::EShaders::lighting_frag = epriv::EShaders::version +
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
+    "uniform mat4 invV;\n"
     "uniform mat4 invP;\n"
     "\n"
     "varying vec2 texcoords;\n"
@@ -2284,7 +2271,7 @@ epriv::EShaders::lighting_frag +=
     "    else if(LightDataD.w == 4.0){\n"
     "        lightCalculation = CalcRodLight(vec3(LightDataA.w,LightDataB.xy),LightDataC.yzw,PxlPosition,PxlNormal,uv);\n"
     "    }\n"
-    "    gl_FragData[0].rgb = lightCalculation;\n"
+	"    gl_FragData[0].rgb = lightCalculation;\n"
     "}";
 
 #pragma endregion
@@ -2305,6 +2292,7 @@ epriv::EShaders::lighting_frag_gi = epriv::EShaders::version +
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "uniform mat4 VP;\n"
     "uniform mat4 invVP;\n"
+    "uniform mat4 invV;\n"
     "uniform mat4 invP;\n"
     "\n"
     "varying vec2 texcoords;\n"

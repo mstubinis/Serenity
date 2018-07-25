@@ -48,7 +48,7 @@ varying vec3 Tangents;
 flat varying float HasAtmo;
 
 varying float logz_f;
-varying float FC_2_f;
+varying float FC;
 uniform float fcoeff;
 
 vec2 UnpackFloat32Into2Floats(float i){
@@ -87,7 +87,7 @@ void main(){
 
     logz_f = 1.0 + gl_Position.w;
     gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
-    FC_2_f = fcoeff * 0.5;
+    FC = fcoeff;
 
     if(HasAtmosphere == 1){
 		vec3 test = (Rot * vec4(position,1.0)).xyz;

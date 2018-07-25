@@ -45,7 +45,7 @@ varying vec3 Tangents;
 
 flat varying float HasAtmo;
 
-varying float FC_2_f;
+varying float FC;
 varying float logz_f;
 
 const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
@@ -151,5 +151,5 @@ void main(){
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);
     }
-    gl_FragDepth = log2(logz_f) * FC_2_f;
+    gl_FragDepth = log2(logz_f) * FC;
 }

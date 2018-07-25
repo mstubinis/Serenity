@@ -44,7 +44,7 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):E
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(pos/float(100),scene);
-        m_Light->setAttenuation(LightRange::_65);
+        m_Light->setAttenuation(LightRange::_7);
         m_Light->setColor(255,124,27,255);
     }
 }
@@ -59,7 +59,7 @@ void CapsuleStar::update(const float& dt){
     }
     if(m_Light != nullptr){
         m_Light->setPosition(pos * 0.015f);
-        if(glm::distance(m_Light->position(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() + 15.0f){
+        if(glm::distance(m_Light->position(),Resources::getCurrentScene()->getActiveCamera()->getPosition()) > m_Light->getCullingRadius() * 75.0f){
             m_Light->deactivate();
         }
         else{
@@ -105,7 +105,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
     l->setColor(255,200,215,255);
     l->setSpecularIntensity(0.0f);
-    l->setAttenuation(LightRange::_13);
+    l->setAttenuation(LightRange::_7);
 
 
     m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);

@@ -47,7 +47,8 @@ Camera::Camera(float left, float right, float bottom, float top, float _near, fl
 Camera::~Camera(){ 
 }
 glm::vec3 Camera::getPosition(){ return m_BasicBody->position(); }
-glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Camera->getView()));; }
+glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Camera->getView())); }
+float Camera::getAspect(){ return m_Camera->_aspectRatio; }
 float Camera::getNear(){ return m_Camera->_nearPlane; }
 float Camera::getFar(){ return m_Camera->_farPlane; }
 glm::mat4 Camera::getViewProjectionInverse(){ return m_Camera->getViewProjectionInverse(); }

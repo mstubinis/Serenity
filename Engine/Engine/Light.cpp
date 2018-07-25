@@ -80,7 +80,7 @@ void SunLight::lighten(){
     Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
-    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("Type",0.0f);
 
     Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
@@ -110,7 +110,7 @@ void DirectionalLight::lighten(){
     Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
     Renderer::sendUniform4f("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
-    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("Type",0.0f);
     Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 
@@ -161,7 +161,7 @@ void PointLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_C,m_L);
     Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
-    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("Type",1.0f);
 
     Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
 
@@ -201,7 +201,7 @@ void SpotLight::lighten(){
     Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
     Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
-    Renderer::sendUniform1fSafe("SpotLight",1.0f);
+    Renderer::sendUniform1fSafe("Type",2.0f);
 
     Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
 
@@ -214,7 +214,7 @@ void SpotLight::lighten(){
     epriv::InternalMeshes::SpotLightBounds->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 
-    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("Type",0.0f); //is this really needed?
 }
 RodLight::RodLight(glm::vec3 pos,float rodLength,Scene* scene): PointLight(pos,scene){
     setRodLength(rodLength);
@@ -247,7 +247,7 @@ void RodLight::lighten(){
     Renderer::sendUniform4f("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
     Renderer::sendUniform4f("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
     Renderer::sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
-    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("Type",1.0f);
 
     Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
 
@@ -259,7 +259,7 @@ void RodLight::lighten(){
     epriv::InternalMeshes::RodLightBounds->unbind();
     Renderer::Settings::cullFace(GL_BACK);
 
-    Renderer::sendUniform1fSafe("SpotLight",0.0f);
+    Renderer::sendUniform1fSafe("Type",0.0f); //is this really needed?
 }
 float RodLight::rodLength(){ return m_RodLength; }
 /*

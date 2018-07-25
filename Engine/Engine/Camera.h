@@ -32,6 +32,7 @@ class Camera: public Entity{
         float getDistance(Entity*);
         float getDistance(glm::vec3);
 
+		float getAspect();
         float getNear();
         float getFar();
 
