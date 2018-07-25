@@ -198,11 +198,11 @@ epriv::EShaders::determinent_mat3 =
     "}\n";
 epriv::EShaders::reconstruct_log_depth_functions = 
     "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
-    "    float log_depth = texture2D(gDepthMap, _uv).r;\n"
+	"    float log_depth = (texture2D(gDepthMap, _uv).r);\n"
     "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
     "    float a = _far / (_far - _near);\n"
     "    float b = _far * _near / (_near - _far);\n"
-    "    float linearDepth = (a + b / regularDepth);\n"
+	"    float linearDepth = (a + b / regularDepth);\n"
     "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
     "    vec4 wpos = invVP * clipSpace;\n"
     "    return wpos.xyz / wpos.w;\n"

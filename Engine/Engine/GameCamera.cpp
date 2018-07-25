@@ -39,7 +39,7 @@ void GameCameraComponent::update(const float& dt){
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
             glm::vec3 pos = body.position() + ((body.forward() * glm::length(targetRadius) * 1.7f)+ body.up() * glm::length(targetRadius) * 0.3f) * (1.0f + m_OrbitRadius);
-            pos -= glm::vec3(-0.00001f,-0.00001f,0.00001f);//for some reason this is needed to remove lighting bugs...
+            pos -= glm::vec3(-0.001f,-0.001f,0.001f);//for some reason this is needed to remove lighting bugs...
 
             m_Body->setPosition(pos);
 
@@ -86,7 +86,7 @@ void GameCameraComponent::update(const float& dt){
             model = glm::translate(model,pos);
 
             pos = glm::vec3(model[3][0],model[3][1],model[3][2]);
-
+			pos -= glm::vec3(-0.001f,-0.001f,0.001f);//for some reason this is needed to remove lighting bugs...
             m_Body->setPosition(pos);
 
             lookAt(pos,target.position(),m_Body->up());

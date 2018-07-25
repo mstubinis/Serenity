@@ -102,6 +102,9 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     setSkybox(nullptr);
     setBackgroundColor(255.0f,0,0);
 
+	this->getActiveCamera()->setNear(0.1f);
+	this->getActiveCamera()->setFar(70000000.0f);
+
     PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
     l->setColor(255,200,215,255);
     l->setSpecularIntensity(0.0f);

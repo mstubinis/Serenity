@@ -41,6 +41,7 @@ typedef boost::typeindex::type_index boost_type_index;
 
 namespace Engine{
     namespace epriv{
+		class ComponentInternalFunctionality;
         struct MeshMaterialPair;
         class ComponentTypeRegistry;
         class ComponentManager;
@@ -391,6 +392,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 
 class ComponentCamera: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
+	friend class ::Engine::epriv::ComponentInternalFunctionality;
     friend class ::ComponentModel;
     friend class ::Camera;
     private:
@@ -420,6 +422,11 @@ class ComponentCamera: public ComponentBaseClass{
         glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
+
+		float getAngle();    void setAngle(float);
+		float getAspect();   void setAspect(float);
+		float getNear();     void setNear(float);
+		float getFar();      void setFar(float);
 
         bool sphereIntersectTest(glm::vec3 position,float radius);
 };

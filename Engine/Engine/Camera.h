@@ -32,9 +32,10 @@ class Camera: public Entity{
         float getDistance(Entity*);
         float getDistance(glm::vec3);
 
-		float getAspect();
-        float getNear();
-        float getFar();
+		const float getAngle() const;    void setAngle(float);
+		const float getAspect() const;   void setAspect(float);
+        const float getNear() const;     void setNear(float);
+        const float getFar() const;      void setFar(float);
 
         glm::mat4 getViewProjectionInverse();
         glm::mat4 getProjection();

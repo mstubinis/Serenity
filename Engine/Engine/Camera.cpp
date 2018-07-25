@@ -48,9 +48,14 @@ Camera::~Camera(){
 }
 glm::vec3 Camera::getPosition(){ return m_BasicBody->position(); }
 glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Camera->getView())); }
-float Camera::getAspect(){ return m_Camera->_aspectRatio; }
-float Camera::getNear(){ return m_Camera->_nearPlane; }
-float Camera::getFar(){ return m_Camera->_farPlane; }
+const float Camera::getAngle() const{ return m_Camera->_angle; }
+const float Camera::getAspect() const{ return m_Camera->_aspectRatio; }
+const float Camera::getNear() const{ return m_Camera->_nearPlane; }
+const float Camera::getFar() const{ return m_Camera->_farPlane; }
+void Camera::setAngle(float _Angle){ m_Camera->_angle = _Angle; }
+void Camera::setAspect(float _Aspect){ m_Camera->_aspectRatio = _Aspect; }
+void Camera::setNear(float _near){ m_Camera->setNear(_near); }
+void Camera::setFar(float _far){ m_Camera->setFar(_far); }
 glm::mat4 Camera::getViewProjectionInverse(){ return m_Camera->getViewProjectionInverse(); }
 glm::mat4 Camera::getProjection(){ return m_Camera->getProjection(); }
 glm::mat4 Camera::getView(){ return m_Camera->getView(); }

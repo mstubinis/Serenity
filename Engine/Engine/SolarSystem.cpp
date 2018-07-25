@@ -21,7 +21,7 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.01f,9000000000.0f,this);
+    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,2.0f,7000000000.0f,this);
     this->setActiveCamera(playerCamera);
     if(file != "NULL")
         SolarSystem::_loadFromFile(file);
@@ -32,7 +32,7 @@ SolarSystem::~SolarSystem(){
 void SolarSystem::_loadFromFile(string filename){
     uint count = 0;
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-    unordered_map<string,std::vector<RingInfo>> planetRings;
+    unordered_map<string,vector<RingInfo>> planetRings;
 
     unordered_map<string,Handle> loadedMaterials;
 
