@@ -181,7 +181,8 @@ class epriv::FramebufferObject::impl{
         void _resize(FramebufferObject* super,uint new_width,uint new_height){
             Renderer::setViewport(0,0,new_width,new_height);
             Renderer::bindFBO(m_FBO);
-            m_FramebufferWidth = new_width; m_FramebufferHeight = new_height;
+            m_FramebufferWidth = new_width;
+			m_FramebufferHeight = new_height;
             for(auto attatchment:m_Attatchments){
                 attatchment.second->resize(new_width,new_height);
             }
@@ -189,7 +190,7 @@ class epriv::FramebufferObject::impl{
         FramebufferTexture* _attatchTexture(FramebufferObject* super,Texture* _t,FramebufferAttatchment::Attatchment a){
             if(m_Attatchments.count(a)) return nullptr;
             Renderer::bindFBO(m_FBO);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),_t->type(),_t->address(),0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::at(a),_t->type(),_t->address(),0);
             FramebufferTexture* t = new FramebufferTexture(super,a,_t);
             m_Attatchments.emplace(a,t);
             Renderer::unbindFBO();
@@ -198,7 +199,7 @@ class epriv::FramebufferObject::impl{
         FramebufferTexture* _attatchTexture(FramebufferObject* super,Texture* _t,FramebufferAttatchment::Attatchment a,float divisor){
             if(m_Attatchments.count(a)) return nullptr;
             Renderer::bindFBO(m_FBO);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::FRAMEBUFFER_ATTATCHMENT_FORMAT_MAP.at(uint(a)),_t->type(),_t->address(),0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::at(a),_t->type(),_t->address(),0);
             FramebufferTexture* t = new FramebufferTexture(super,a,_t,divisor);
             m_Attatchments.emplace(a,t);
             Renderer::unbindFBO();
