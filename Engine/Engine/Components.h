@@ -18,6 +18,7 @@
 #include <boost/bind.hpp>
 
 typedef unsigned int uint;
+typedef unsigned short ushort;
 
 class Entity;
 class Scene;

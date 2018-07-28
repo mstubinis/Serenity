@@ -14,6 +14,7 @@
 class btVector3;
 class btRigidBody;
 class btQuaternion;
+class Camera;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
@@ -134,6 +135,9 @@ namespace glm{
 
 namespace Engine{
     namespace Math{
+
+		std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
+
         glm::quat btToGLMQuat(btQuaternion& q);
         btQuaternion glmToBTQuat(glm::quat& q);
 

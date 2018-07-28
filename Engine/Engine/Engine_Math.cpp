@@ -9,11 +9,13 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
 
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
 using namespace Engine;
+using namespace std;
 
 glm::quat Math::btToGLMQuat(btQuaternion& q){ glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ()); return glmQuat; }
 btQuaternion Math::glmToBTQuat(glm::quat& q){ btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w); return btQuat; }
@@ -48,6 +50,83 @@ bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVecto
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
+
+vector<glm::vec4> Math::tiledFrustrum(Camera* camera,uint x,uint y){
+	/*
+	Tiled deferred rendering does not strictly require a compute shader.
+	What it requires is that, for each tile, you have a series of lights which it will process.
+	A compute shader is merely one way to accomplish that.
+
+	An alternative is to build the light lists for each frustum on the CPU, then upload that
+	data to the GPU for its eventual use. Obviously it requires much more memory work than the CS version.
+	But it's probably not that expensive, and it allows you to easily play with tile sizes to find the most optimal.
+	More tiles means more CPU work and more data to be uploaded, but fewer lights-per-tile (generally speaking) and more efficient processing.
+
+	One way to do that for GL 3.3-class hardware is to make each tile a separate quad.
+	The quad will be given, as part of its per-vertex parameters, the starting index for its part
+	of the total light list and the total number of lights for that tile to process.
+	The idea being that there is a globally-accessible array, and each tile has a contiguous region of this array that it will process.
+
+	This array could be the actual lights themselves, or it could be indices into a
+	second (much smaller) array of lights. You'll have to measure the difference to tell if
+	it's worthwhile to have the additional indirection in the access.
+
+	The primary array should probably be a buffer texture, since it can get quite large,
+	depending on the number of lights and tiles. If you go with the indirect route, then
+	the array of actual light data will likely fit into a uniform block. But in either case,
+	you're going to need to employ buffer streaming techniques when uploading to it.
+	*/
+
+	uint MAX_WORK_GROUP_SIZE = 16;
+	glm::mat4& proj = camera->getProjection();
+	//glm::mat4 proj = camera->getProjection() * camera->getView();
+	glm::uvec2& winSize = Resources::getWindowSize();
+    glm::vec4 frustumPlanes[6];
+	glm::vec2 tileScale = glm::vec2(winSize.x,winSize.y) * (1.0f / float(2 * MAX_WORK_GROUP_SIZE));
+	glm::vec2 tileBias = tileScale - glm::vec2(x,y);
+	glm::vec4 col1 = glm::vec4(-proj[0][0]  * tileScale.x, proj[0][1], tileBias.x, proj[0][3]); 
+    glm::vec4 col2 = glm::vec4(proj[1][0], -proj[1][1] * tileScale.y, tileBias.y, proj[1][3]);
+    glm::vec4 col4 = glm::vec4(proj[3][0], proj[3][1],  -1.0f, proj[3][3]); 
+    frustumPlanes[0] = col4 + col1; //Left plane
+    frustumPlanes[1] = col4 - col1; //right plane
+    frustumPlanes[2] = col4 - col2; //top plane
+    frustumPlanes[3] = col4 + col2; //bottom plane
+	frustumPlanes[4] = glm::vec4(0.0f, 0.0f, -1.0f,-camera->getNear()); //near
+	frustumPlanes[5] = glm::vec4(0.0f, 0.0f, -1.0f,camera->getFar());  //far
+
+	vector<glm::vec4> v;
+    for(ushort i = 0; i < 4; ++i){
+        frustumPlanes[i] *= 1.0f / glm::length(frustumPlanes[i]);
+		v.push_back(frustumPlanes[i]);
+    }
+	return v;
+
+	/* culling code
+
+    uint threadCount = MAX_WORK_GROUP_SIZE * MAX_WORK_GROUP_SIZE;
+	uint passCount = (NUM_OF_LIGHTS + threadCount - 1) / threadCount;
+	for (uint passIt = 0; passIt < passCount; ++passIt){
+		uint lightIndex =  passIt * threadCount + gl_LocalInvocationIndex;
+		lightIndex = min(lightIndex, NUM_OF_LIGHTS);
+		PointLight p = pointLights[lightIndex];
+		vec4 pos = viewProjectionMatrix * vec4(p.posX,p.posY,p.posZ, 1.0f);
+		float rad = p.radius/pos.w;
+		if (pointLightCount < MAX_LIGHTS_PER_TILE){
+			bool inFrustum = true;
+			for (uint i = 3; i >= 0 && inFrustum; i--){
+				float dist = dot(frustumPlanes[i], pos);
+				inFrustum = (-rad <= dist);
+			}
+			if (inFrustum){
+				uint id = atomicAdd(pointLightCount, 1);
+				pointLightIndex[id] = lightIndex;
+			}
+		}
+	}
+
+	*/
+}
+
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
     glm::vec4 viewport = glm::vec4(0,0,winSize.x,winSize.y);

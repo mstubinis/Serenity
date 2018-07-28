@@ -181,24 +181,19 @@ class epriv::ComponentManager::impl final{
                 cam.update(dt);
             }
         }
-        void _defaultUpdateCameraComponent(const float& dt,ComponentCamera& cameraComponent){
+        void _defaultUpdateCameraComponent(const float& dt,ComponentCamera& cam){
             //update view frustrum
-            glm::mat4 vp = cameraComponent._projectionMatrix * cameraComponent._viewMatrix;
-            glm::vec4 rowX = glm::row(vp, 0);
-            glm::vec4 rowY = glm::row(vp, 1);
-            glm::vec4 rowZ = glm::row(vp, 2);
-            glm::vec4 rowW = glm::row(vp, 3);
-
-            cameraComponent._planes[0] = glm::normalize(rowW + rowX);
-            cameraComponent._planes[1] = glm::normalize(rowW - rowX);
-            cameraComponent._planes[2] = glm::normalize(rowW + rowY);
-            cameraComponent._planes[3] = glm::normalize(rowW - rowY);
-            cameraComponent._planes[4] = glm::normalize(rowW + rowZ);
-            cameraComponent._planes[5] = glm::normalize(rowW - rowZ);
-
-            for(uint i = 0; i < 6; ++i){
-                glm::vec3 normal(cameraComponent._planes[i].x, cameraComponent._planes[i].y, cameraComponent._planes[i].z);
-                cameraComponent._planes[i] = -cameraComponent._planes[i] / glm::length(normal);
+            glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
+			glm::vec4 rows[4];
+			for(ushort i = 0; i < 4; ++i)
+				rows[i] = glm::row(vp,i);
+			for(ushort i = 0; i < 3; ++i){
+				ushort index = i * 2;
+                cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
+                cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
+			}
+            for(ushort i = 0; i < 6; ++i){
+                cam._planes[i] = -cam._planes[i] / glm::length(cam._planes[i]);
             }
         }
         void _updateCurrentScene(const float& dt){
