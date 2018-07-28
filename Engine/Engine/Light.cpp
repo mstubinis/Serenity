@@ -24,21 +24,22 @@
 using namespace Engine;
 using namespace std;
 
-unordered_map<uint,boost::tuple<float,float,float>> LIGHT_RANGES = [](){
-    unordered_map<uint,boost::tuple<float,float,float>> m;
+vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
+    vector<boost::tuple<float,float,float>> m;
+	m.resize(LightRange::_TOTAL,boost::make_tuple(0.0f,0.0f,0.0f));
 
-    m[LightRange::_7]    = boost::make_tuple(1.0f, 0.7f, 1.8f);
-    m[LightRange::_13]   = boost::make_tuple(1.0f, 0.35f, 0.44f);
-    m[LightRange::_20]   = boost::make_tuple(1.0f, 0.22f, 0.20f);
-    m[LightRange::_32]   = boost::make_tuple(1.0f, 0.14f, 0.07f);
-    m[LightRange::_50]   = boost::make_tuple(1.0f, 0.09f, 0.032f);
-    m[LightRange::_65]   = boost::make_tuple(1.0f, 0.07f, 0.017f);
-    m[LightRange::_100]  = boost::make_tuple(1.0f, 0.045f, 0.0075f);
-    m[LightRange::_160]  = boost::make_tuple(1.0f, 0.027f, 0.0028f);
-    m[LightRange::_200]  = boost::make_tuple(1.0f, 0.022f, 0.0019f);
-    m[LightRange::_325]  = boost::make_tuple(1.0f, 0.014f, 0.0007f);
-    m[LightRange::_600]  = boost::make_tuple(1.0f, 0.007f, 0.0002f);
-    m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
+    m.at(LightRange::_7)    = boost::make_tuple(1.0f, 0.7f, 1.8f);
+    m.at(LightRange::_13)   = boost::make_tuple(1.0f, 0.35f, 0.44f);
+    m.at(LightRange::_20)   = boost::make_tuple(1.0f, 0.22f, 0.20f);
+    m.at(LightRange::_32)   = boost::make_tuple(1.0f, 0.14f, 0.07f);
+    m.at(LightRange::_50)   = boost::make_tuple(1.0f, 0.09f, 0.032f);
+    m.at(LightRange::_65)   = boost::make_tuple(1.0f, 0.07f, 0.017f);
+    m.at(LightRange::_100)  = boost::make_tuple(1.0f, 0.045f, 0.0075f);
+    m.at(LightRange::_160)  = boost::make_tuple(1.0f, 0.027f, 0.0028f);
+    m.at(LightRange::_200)  = boost::make_tuple(1.0f, 0.022f, 0.0019f);
+    m.at(LightRange::_325)  = boost::make_tuple(1.0f, 0.014f, 0.0007f);
+    m.at(LightRange::_600)  = boost::make_tuple(1.0f, 0.007f, 0.0002f);
+    m.at(LightRange::_3250) = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
 
     return m;
 }();
@@ -77,9 +78,9 @@ SunLight::~SunLight(){
 void SunLight::lighten(){
     if(!isActive()) return;
     glm::vec3 pos = m_i->m_Body->position();
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
+    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform1fSafe("Type",0.0f);
 
     Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
@@ -107,32 +108,31 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!isActive()) return;
     glm::vec3 _forward = m_i->m_Body->forward();
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
     Renderer::sendUniform4f("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
+    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform1fSafe("Type",0.0f);
     Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
-
 PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,LightType::Point,scene){
     m_C = m_L = m_E = 0.1f;
     m_CullingRadius = calculateCullingRadius();
-    m_AttenuationModel = LightAttenuation::Distance_Squared;
+    m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
 }
 PointLight::~PointLight(){
 }
 float PointLight::calculateCullingRadius(){
-    float lightMax = Engine::Math::Max(m_i->m_Color.x,m_i->m_Color.y,m_i->m_Color.z);
+    float lightMax = Math::Max(m_i->m_Color.x,m_i->m_Color.y,m_i->m_Color.z);
     float radius = 0;
-    if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
+    //if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
         radius = (-m_L +  glm::sqrt(m_L * m_L - 4.0f * m_E * (m_C - (256.0f / 5.0f) * lightMax))) / (2.0f * m_E);
-    }
-    else if(m_AttenuationModel == LightAttenuation::Distance_Squared){
-        radius = glm::sqrt(lightMax * (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
-    }
-    else if(m_AttenuationModel == LightAttenuation::Distance){
-        radius = (lightMax * (256.0f / 5.0f));
-    }
+    //}
+    //else if(m_AttenuationModel == LightAttenuation::Distance_Squared){
+    //    radius = glm::sqrt(lightMax * (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
+    //}
+    //else if(m_AttenuationModel == LightAttenuation::Distance){
+    //    radius = (lightMax * (256.0f / 5.0f));
+    //}
     m_i->m_Body->setScale(radius,radius,radius);
     return radius;
 }
@@ -145,7 +145,7 @@ void PointLight::setLinear(float l){ m_L = l; m_CullingRadius = calculateCulling
 void PointLight::setExponent(float e){ m_E = e; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setAttenuation(float c,float l, float e){ m_C = c; m_L = l; m_E = e; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setAttenuation(LightRange::Range range){
-    boost::tuple<float,float,float>& data = LIGHT_RANGES[uint(range)];
+    boost::tuple<float,float,float>& data = LIGHT_RANGES.at(uint(range));
     PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
 }
 void PointLight::setAttenuationModel(LightAttenuation::Model model){
@@ -157,10 +157,11 @@ void PointLight::lighten(){
     glm::vec3 pos = m_i->m_Body->position();
     if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_C,m_L);
     Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
+	Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+	Renderer::sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform1fSafe("Type",1.0f);
 
     Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
@@ -195,10 +196,10 @@ void SpotLight::lighten(){
     glm::vec3 _forward = m_i->m_Body->forward();
     if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
     Renderer::sendUniform4f("LightDataB", _forward.y,_forward.z,m_C,m_L);
     Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
+    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     Renderer::sendUniform1fSafe("Type",2.0f);
@@ -242,10 +243,10 @@ void RodLight::lighten(){
     float half = m_RodLength / 2.0f;
     glm::vec3 firstEndPt = pos + (m_i->m_Body->forward() * half);
     glm::vec3 secndEndPt = pos - (m_i->m_Body->forward() * half);
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
     Renderer::sendUniform4f("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
     Renderer::sendUniform4f("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
+    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
     Renderer::sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform1fSafe("Type",1.0f);
 

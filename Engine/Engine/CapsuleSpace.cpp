@@ -44,7 +44,7 @@ CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):E
     m_Light = nullptr;
     if(makeLight){
         m_Light = new PointLight(pos/float(100),scene);
-        m_Light->setAttenuation(LightRange::_7);
+        m_Light->setAttenuation(LightRange::_50);
         m_Light->setColor(255,124,27,255);
     }
 }
@@ -108,7 +108,7 @@ CapsuleSpace::CapsuleSpace():SolarSystem("CapsuleSpace","NULL"){
     PointLight* l = new PointLight(glm::vec3(0,1.7f,0),this);
     l->setColor(255,200,215,255);
     l->setSpecularIntensity(0.0f);
-    l->setAttenuation(LightRange::_7);
+    l->setAttenuation(LightRange::_32);
 
 
     m_TunnelA = new CapsuleTunnel(5000,ResourceManifest::CapsuleA,this);

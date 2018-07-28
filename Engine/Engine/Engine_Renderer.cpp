@@ -66,8 +66,6 @@ namespace Engine{
                 CubemapPrefilterEnvFrag,
                 BRDFPrecomputeFrag,
                 GrayscaleFrag,
-                EdgeCannyBlurFrag,
-                EdgeCannyFrag,
                 StencilPassFrag,
                 SMAAVertex1,
                 SMAAVertex2,
@@ -102,8 +100,6 @@ namespace Engine{
                 CubemapPrefilterEnv,
                 BRDFPrecomputeCookTorrance,
                 Grayscale,
-                EdgeCannyBlur,
-                EdgeCannyFrag,
                 StencilPass,
                 SMAA1Stencil,
                 SMAA1,
@@ -365,8 +361,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaders.at(EngineInternalShaders::CubemapPrefilterEnvFrag) = new Shader(epriv::EShaders::cubemap_prefilter_envmap_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::BRDFPrecomputeFrag) = new Shader(epriv::EShaders::brdf_precompute,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::GrayscaleFrag) = new Shader(epriv::EShaders::greyscale_frag,ShaderType::Fragment,false);
-            m_InternalShaders.at(EngineInternalShaders::EdgeCannyBlurFrag) = new Shader(epriv::EShaders::edge_canny_blur,ShaderType::Fragment,false);
-            m_InternalShaders.at(EngineInternalShaders::EdgeCannyFrag) = new Shader(epriv::EShaders::edge_canny_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::StencilPassFrag) = new Shader(epriv::EShaders::stencil_passover,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::SMAAVertex1) = new Shader(epriv::EShaders::smaa_vertex_1,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::SMAAVertex2) = new Shader(epriv::EShaders::smaa_vertex_2,ShaderType::Vertex,false);
@@ -396,8 +390,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv) = new ShaderP("Cubemap_Prefilter_Env",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapPrefilterEnvFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance) = new ShaderP("BRDF_Precompute_CookTorrance",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BRDFPrecomputeFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::Grayscale) = new ShaderP("Greyscale_Frag",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GrayscaleFrag),ShaderRenderPass::Postprocess);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur) = new ShaderP("Deferred_Edge_Canny_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::EdgeCannyBlurFrag),ShaderRenderPass::Postprocess);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag) = new ShaderP("Deferred_Edge_Canny",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::EdgeCannyFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass) = new ShaderP("Stencil_Pass",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::StencilPassFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil) = new ShaderP("Deferred_SMAA_1_Stencil",m_InternalShaders.at(EngineInternalShaders::SMAAVertex1),m_InternalShaders.at(EngineInternalShaders::SMAAFrag1Stencil),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1) = new ShaderP("Deferred_SMAA_1",m_InternalShaders.at(EngineInternalShaders::SMAAVertex1),m_InternalShaders.at(EngineInternalShaders::SMAAFrag1),ShaderRenderPass::Postprocess);
@@ -1771,51 +1763,6 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass)->unbind();
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
-        }
-        void _passEdgeCanny(GBuffer& gbuffer,Camera& c,uint& fboWidth,uint& fboHeight,GLuint texture){
-    
-            //texture is the lighting buffer which is the final pass results
-    
-            gbuffer.start(GBufferType::Misc);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->bind();
-            bindTexture("textureMap",gbuffer.getTexture(texture),0);
-            _renderFullscreenTriangle(fboWidth,fboHeight);
-            unbindTexture2D(0);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->unbind();
-    
-            //misc is now greyscale scene. lighting is still final scene
-
-            gbuffer.start(GBufferType::Diffuse);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->bind();
-            bindTexture("textureMap",gbuffer.getTexture(GBufferType::Misc),0);
-            _renderFullscreenTriangle(fboWidth,fboHeight);
-            unbindTexture2D(0);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->unbind();
-            /*
-            //blur it again
-            gbuffer.start(epriv::GBufferType::Misc);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->bind();
-            bindTexture("textureMap",gbuffer.getTexture(GBufferType::Diffuse),0);
-            renderFullscreenTriangle(fboWidth,fboHeight);
-            unbindTexture2D(0);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->unbind();
-            //blur it again
-            gbuffer.start(GBufferType::Diffuse);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->bind();
-            bindTexture("textureMap",gbuffer.getTexture(GBufferType::Misc),0);
-            renderFullscreenTriangle(fboWidth,fboHeight);
-            unbindTexture2D(0);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyBlur)->unbind();
-            */
-
-            //misc is now the final blurred greyscale image
-            gbuffer.start(GBufferType::Misc);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->bind();
-            bindTexture("textureMap",gbuffer.getTexture(GBufferType::Diffuse),0);
-            _renderFullscreenTriangle(fboWidth,fboHeight);
-            unbindTexture2D(0);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::EdgeCannyFrag)->unbind();
-            //diffuse is the end result of the edge program. lighting is the final pass that we still need
         }
         void _passGodsRays(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,glm::vec2 lightScrnPos,bool behind,float alpha){
             Settings::clear(true,false,false);

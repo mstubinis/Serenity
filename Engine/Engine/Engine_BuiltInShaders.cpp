@@ -57,8 +57,6 @@ string epriv::EShaders::hdr_frag;
 string epriv::EShaders::godRays_frag;
 string epriv::EShaders::blur_frag;
 string epriv::EShaders::greyscale_frag;
-string epriv::EShaders::edge_canny_frag;
-string epriv::EShaders::edge_canny_blur;
 string epriv::EShaders::final_frag;
 string epriv::EShaders::lighting_frag;
 string epriv::EShaders::lighting_frag_gi;
@@ -1886,89 +1884,6 @@ epriv::EShaders::greyscale_frag = epriv::EShaders::version +
     "}";
 #pragma endregion
     
-#pragma region EdgeCannyBlur
-epriv::EShaders::edge_canny_blur = epriv::EShaders::version + 
-    "\n"
-    "vec2 textureCoordinate;\n"
-    "vec2 leftTextureCoordinate;\n"
-    "vec2 rightTextureCoordinate;\n"
-    "vec2 topTextureCoordinate;\n"
-    "vec2 topLeftTextureCoordinate;\n"
-    "vec2 topRightTextureCoordinate;\n"
-    "vec2 bottomTextureCoordinate;\n"
-    "vec2 bottomLeftTextureCoordinate;\n"
-    "vec2 bottomRightTextureCoordinate;\n"
-    "uniform sampler2D textureMap;\n"
-    "varying vec2 texcoords;\n"
-    "void main(){\n"
-    "    textureCoordinate = texcoords;\n"
-    "    leftTextureCoordinate = textureCoordinate + vec2(-1.0, 0.0);\n"
-    "    rightTextureCoordinate = textureCoordinate + vec2(1.0, 0.0);\n"
-    "    topTextureCoordinate = textureCoordinate + vec2(0.0, -1.0);\n"
-    "    topLeftTextureCoordinate = textureCoordinate + vec2(-1.0, -1.0);\n"
-    "    topRightTextureCoordinate = textureCoordinate + vec2(1.0, -1.0);\n"
-    "    bottomTextureCoordinate = textureCoordinate + vec2(0.0,1.0);\n"
-    "    bottomLeftTextureCoordinate = textureCoordinate + vec2(-1.0,1.0);\n"
-    "    bottomRightTextureCoordinate = textureCoordinate + vec2(1.0,1.0);\n"
-    "    float bottomLeftIntensity = texture2D(textureMap, bottomLeftTextureCoordinate).r;\n"
-    "    float topRightIntensity = texture2D(textureMap, topRightTextureCoordinate).r;\n"
-    "    float topLeftIntensity = texture2D(textureMap, topLeftTextureCoordinate).r;\n"
-    "    float bottomRightIntensity = texture2D(textureMap, bottomRightTextureCoordinate).r;\n"
-    "    float leftIntensity = texture2D(textureMap, leftTextureCoordinate).r;\n"
-    "    float rightIntensity = texture2D(textureMap, rightTextureCoordinate).r;\n"
-    "    float bottomIntensity = texture2D(textureMap, bottomTextureCoordinate).r;\n"
-    "    float topIntensity = texture2D(textureMap, topTextureCoordinate).r;\n"
-    "    float blur = leftIntensity + rightIntensity + topIntensity + bottomIntensity + bottomLeftIntensity + topRightIntensity + topLeftIntensity + bottomRightIntensity + texture2D(textureMap, textureCoordinate).r;\n"
-    "    blur *= 0.11111;\n"
-    "    gl_FragColor = vec4(vec3(blur), 1.0);\n"
-    "}";
-#pragma endregion
-    
-#pragma region EdgeCannyFrag
-epriv::EShaders::edge_canny_frag = epriv::EShaders::version + 
-    "\n"
-    "uniform sampler2D textureMap;\n"
-    "const float texWidth  = 1.0 / 1024.0;\n"	///< Web cam width size 
-    "const float texHeight = 1.0 / 768.0;\n"	///< Web cam height size
-    "const float threshold = 0.2;\n"			///< Threshold value
-    "const vec2 unshift = vec2(1.0 / 256.0, 1.0);\n" ///< Value used to unpack 16 bit float data
-    "const float atan0   = 0.414213;\n"  ///< Support value for atan
-    "const float atan45  = 2.414213;\n"  ///< Support value for atan
-    "const float atan90  = -2.414213;\n" ///< Support value for atan
-    "const float atan135 = -0.414213;\n" ///< Support value for atan
-    "varying vec2 texcoords;\n"
-    "vec2 atanForCanny(float x) {\n"
-    "    if (x < atan0 && x > atan135) { return vec2(1.0, 0.0); }\n"
-    "    if (x < atan90 && x > atan45) { return vec2(0.0, 1.0); }\n"
-    "    if (x > atan135 && x < atan90) { return vec2(-1.0, 1.0); }\n"
-    "    return vec2(1.0, 1.0);\n"
-    "}\n"
-    "vec4 cannyEdge(vec2 coords) {\n"
-    "    vec4 color = texture2D(textureMap, coords);\n"
-    "    if (color.z > threshold) {\n"
-    "        color.x -= 0.5;\n"
-    "        color.y -= 0.5;\n"
-    "        vec2 offset = atanForCanny(color.y / color.x);\n"
-    "        offset.x *= texWidth;\n"
-    "        offset.y *= texHeight;\n"
-    "        vec4 forward  = texture2D(textureMap, coords + offset);\n"
-    "        vec4 backward = texture2D(textureMap, coords - offset);\n"
-    "        forward.z  = dot(forward.zw, unshift);\n"
-    "        backward.z = dot(backward.zw, unshift);\n"
-    "        if (forward.z >= color.z || backward.z >= color.z) {\n"
-    "            return vec4(0.0, 0.0, 0.0, 1.0);\n"
-    "        } else {\n"
-    "            color.x += 0.5; color.y += 0.5;\n"
-    "            return vec4(1.0, color.x, color.y, 1.0);\n"
-    "        }\n"
-    "    }\n"
-    "    return vec4(0.0, 0.0, 0.0, 1.0);\n"
-    "}\n"
-    "void main(){\n"
-    "    gl_FragColor = cannyEdge(texcoords);\n"
-    "}\n";
-#pragma endregion
-    
 #pragma region FinalFrag
 epriv::EShaders::final_frag = epriv::EShaders::version + 
     "\n"
@@ -2059,22 +1974,22 @@ epriv::EShaders::lighting_frag +=
     "}\n"
     //make this a uniform if possible?
     "float CalculateAttenuation(float Dist,float LightRadius){\n"
-    "   float attenuation =  0.0;\n"
-    "   if(LightDataE.z == 0.0){\n" //constant
-    "       attenuation = 1.0 / max(1.0 , LightDataB.z);\n"
-    "   }\n"
-    "   else if(LightDataE.z == 1.0){\n" //distance
-    "       attenuation = 1.0 / max(1.0 , Dist);\n"
-    "   }\n"
-    "   else if(LightDataE.z == 2.0){\n" //distance squared
-    "       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
-    "   }\n"
-    "   else if(LightDataE.z == 3.0){\n" //constant linear exponent
+    "   float attenuation = 0.0;\n"
+    //"   if(LightDataE.z == 0.0){\n" //constant
+    //"       attenuation = 1.0 / max(1.0 , LightDataB.z);\n"
+    //"   }\n"
+    //"   else if(LightDataE.z == 1.0){\n" //distance
+    //"       attenuation = 1.0 / max(1.0 , Dist);\n"
+    //"   }\n"
+    //"   else if(LightDataE.z == 2.0){\n" //distance squared
+    //"       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
+    //"   }\n"
+    //"   else if(LightDataE.z == 3.0){\n" //constant linear exponent
     "       attenuation = 1.0 / max(1.0 , LightDataB.z + (LightDataB.w * Dist) + (LightDataC.x * Dist * Dist));\n"
-    "   }\n"
-    "   else if(LightDataE.z == 4.0){\n" //distance radius squared
-    "       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
-    "   }\n"
+    //"   }\n"
+    //"   else if(LightDataE.z == 4.0){\n" //distance radius squared
+    //"       attenuation = 1.0 / max(1.0 ,pow((Dist / LightRadius) + 1.0,2.0));\n"
+    //"   }\n"
     "   return attenuation;\n"
     "}\n"
     "float DiffuseOrenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN,float _alpha,vec3 _PxlNormal){\n"
@@ -2210,6 +2125,7 @@ epriv::EShaders::lighting_frag +=
     "    else if(MaterialTypeSpecular == 6.0){\n"
     "        SpecularFactor = SpecularAshikhminShirley(PxlNormal,Half,NdotH,LightDir,NdotL,VdotN);\n"
     "    }\n"
+
     "    LightDiffuseColor *= LightDataA.y;\n"
     "    LightSpecularColor *= (SpecularFactor * LightDataA.z);\n"
     "\n"
@@ -2376,8 +2292,6 @@ epriv::EShaders::lighting_frag_gi +=
     convertShaderCode(hdr_frag);
     convertShaderCode(godRays_frag);
     convertShaderCode(blur_frag);
-    convertShaderCode(edge_canny_blur);
-    convertShaderCode(edge_canny_frag);
     convertShaderCode(final_frag);
     convertShaderCode(lighting_frag);
     convertShaderCode(lighting_frag_gi);
