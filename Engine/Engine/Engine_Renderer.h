@@ -140,8 +140,8 @@ namespace Engine{
                 void enable(bool b = true);    void disable();
             };
         };
-        void renderFullscreenQuad(uint width, uint height);
-        void renderFullscreenTriangle(uint width,uint height);
+        void renderFullscreenQuad(uint width, uint height, uint startX = 0, uint startY = 0);
+        void renderFullscreenTriangle(uint width,uint height, uint startX = 0, uint startY = 0);
 
         inline const GLint getUniformLoc(const char* location);
         inline const GLint& getUniformLocUnsafe(const char* location);

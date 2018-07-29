@@ -97,7 +97,6 @@ class epriv::ComponentManager::impl final{
             m_TypeRegistry.emplaceVector<ComponentCamera>();
         }
         void _postInit(const char* name, uint& w, uint& h){
-            componentManager = epriv::Core::m_Engine->m_ComponentManager;
         }
         void _destruct(epriv::ComponentManager* super){
             SAFE_DELETE(super->m_ComponentPool);
@@ -228,7 +227,7 @@ class epriv::ComponentManager::impl final{
             
         }
 };
-epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); }
+epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); componentManager = this; }
 epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 
 void epriv::ComponentManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h); }

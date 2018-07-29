@@ -70,12 +70,12 @@ class epriv::ResourceManager::impl final{
 };
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
     m_i->_init(name,width,height);
+	resourceManager = this;
 }
 epriv::ResourceManager::~ResourceManager(){
     m_i->_destruct();
 }
 void epriv::ResourceManager::_init(const char* n,uint w,uint h){
-    resourceManager = epriv::Core::m_Engine->m_ResourceManager;
     m_i->_postInit(n,w,h);
 }
 

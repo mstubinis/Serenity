@@ -731,12 +731,11 @@ epriv::EShaders::smaa_common =
  
 epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//edge frag
-    "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
-    "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
-    "uniform float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;\n"
     "const vec2 comparison = vec2(1.0,1.0);\n"
     "\n"
     "uniform sampler2D textureMap;\n"
+	"\n"
+	"uniform vec2 SMAAInfo0Floats;\n" //SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset[3];\n"
@@ -750,13 +749,13 @@ epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::version + epriv::EShader
     "void SMAADepthEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D depthTex) {\n"
     "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, depthTex);\n"
     "    vec2 delta = abs(neighbours.xx - vec2(neighbours.y, neighbours.z));\n"
-    "    vec2 edges = step(SMAA_DEPTH_THRESHOLD, delta);\n"
+    "    vec2 edges = step(SMAAInfo0Floats.y, delta);\n"
     "    if (dot(edges, comparison) == 0.0){\n"
     "        discard;\n"
     "    }\n"
     "}\n"
     "void SMAAColorEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex){\n"
-    "    vec2 threshold = vec2(SMAA_THRESHOLD, SMAA_THRESHOLD);\n"
+    "    vec2 threshold = vec2(SMAAInfo0Floats.x, SMAAInfo0Floats.x);\n"
     "    vec4 delta;\n"
     "    vec3 C = texture2D(colorTex, texcoord).rgb;\n"
     "    vec3 Cleft = texture2D(colorTex, offset[0].xy).rgb;\n"
@@ -771,7 +770,7 @@ epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::version + epriv::EShader
     "    }\n"
     "}\n"
     "void SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex) {\n"
-    "    vec2 threshold = vec2(SMAA_THRESHOLD, SMAA_THRESHOLD);\n"
+    "    vec2 threshold = vec2(SMAAInfo0Floats.x, SMAAInfo0Floats.x);\n"
     "    vec3 weights = vec3(0.2126, 0.7152, 0.0722);\n"
     "    float L =     dot(texture2D(colorTex, texcoord).rgb,     weights);\n"
     "    float Lleft = dot(texture2D(colorTex, offset[0].xy).rgb, weights);\n"
@@ -817,17 +816,14 @@ epriv::EShaders::smaa_vertex_1 = epriv::EShaders::version + epriv::EShaders::sma
 epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_common +
     "\n"//edge frag
     "\n"
-    "uniform float SMAA_THRESHOLD;\n" //make this global to all smaa shaders
-    "uniform float SMAA_DEPTH_THRESHOLD;\n" //make this global to all smaa shaders
-    "uniform float SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR;\n"
     "uniform int SMAA_PREDICATION;\n"
-    "uniform float SMAA_PREDICATION_THRESHOLD;\n"
-    "uniform float SMAA_PREDICATION_SCALE;\n"
-    "uniform float SMAA_PREDICATION_STRENGTH;\n"
     "const vec2 comparison = vec2(1.0,1.0);\n"
     "\n"
     "uniform sampler2D textureMap;\n"
     "uniform sampler2D texturePredication;\n"
+	"\n"
+	"uniform vec4 SMAAInfo1Floats;\n" //SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD,SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR,SMAA_PREDICATION_THRESHOLD
+	"uniform vec4 SMAAInfo1FloatsA;\n" //SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset[3];\n"
@@ -841,13 +837,13 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_
     "vec2 SMAACalculatePredicatedThreshold(vec2 texcoord,vec4 offset[3]){\n"
     "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset,texturePredication);\n"
     "    vec2 delta = abs(neighbours.xx - neighbours.yz);\n"
-    "    vec2 edges = step(SMAA_PREDICATION_THRESHOLD, delta);\n"
-    "    return SMAA_PREDICATION_SCALE * SMAA_THRESHOLD * (1.0 - SMAA_PREDICATION_STRENGTH * edges);\n"
+    "    vec2 edges = step(SMAAInfo1Floats.w, delta);\n"
+    "    return SMAAInfo1FloatsA.x * SMAAInfo1Floats.x * (1.0 - SMAAInfo1FloatsA.y * edges);\n"
     "}\n"
     "vec2 SMAADepthEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D depthTex) {\n"
     "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, depthTex);\n"
     "    vec2 delta = abs(neighbours.xx - vec2(neighbours.y, neighbours.z));\n"
-    "    vec2 edges = step(SMAA_DEPTH_THRESHOLD, delta);\n"
+    "    vec2 edges = step(SMAAInfo1Floats.y, delta);\n"
     "    if (dot(edges, comparison) == 0.0)\n"
     "        discard;\n"
     "    return edges;\n"
@@ -858,7 +854,7 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_
     "        threshold = SMAACalculatePredicatedThreshold(texcoord, offset);\n"
     "    }\n"
     "    else{\n"
-    "        threshold = vec2(SMAA_THRESHOLD, SMAA_THRESHOLD);\n"
+    "        threshold = vec2(SMAAInfo1Floats.x, SMAAInfo1Floats.x);\n"
     "    }\n"
     "    vec4 delta;\n"
     "    vec3 C = texture2D(colorTex, texcoord).rgb;\n"
@@ -886,7 +882,7 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    delta.w = max(max(t.r, t.g), t.b);\n"
     "    maxDelta = max(maxDelta.xy, delta.zw);\n"
     "    float finalDelta = max(maxDelta.x, maxDelta.y);\n"
-    "    edges.xy *= step((finalDelta), (SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR) * delta.xy);\n" //do we need this line in opengl?
+    "    edges.xy *= step((finalDelta), (SMAAInfo1Floats.z) * delta.xy);\n" //do we need this line in opengl?
     "    return edges;\n"
     "}\n"
     "vec2 SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex) {\n"
@@ -895,7 +891,7 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_
     "        threshold = SMAACalculatePredicatedThreshold(texcoord, offset);\n"
     "    }\n"
     "    else{\n"
-    "        threshold = vec2(SMAA_THRESHOLD, SMAA_THRESHOLD);\n"
+    "        threshold = vec2(SMAAInfo1Floats.x, SMAAInfo1Floats.x);\n"
     "    }\n"
     "    vec3 weights = vec3(0.2126, 0.7152, 0.0722);\n"
     "    float L =     dot(texture2D(colorTex, texcoord).rgb,     weights);\n"
@@ -915,7 +911,7 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    delta.zw = abs(vec2(Lleft, Ltop) - vec2(Lleftleft, Ltoptop));\n"
     "    maxDelta = max(maxDelta.xy, delta.zw);\n"
     "    float finalDelta = max(maxDelta.x, maxDelta.y);\n"
-    "    edges.xy *= step((finalDelta), (SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR) * delta.xy);\n" //do we need this line in opengl?
+    "    edges.xy *= step((finalDelta), (SMAAInfo1Floats.z) * delta.xy);\n" //do we need this line in opengl?
     "    return edges;\n"
     "}\n"
     "void main(){\n"
@@ -963,13 +959,8 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "varying vec4 _offset[3];\n"
     "flat varying vec4 _SMAA_PIXEL_SIZE;\n"
     "\n"
-    "uniform int SMAA_MAX_SEARCH_STEPS_DIAG;\n" //make this globally inherit for all smaa shaders
-    "uniform int SMAA_AREATEX_MAX_DISTANCE;\n" //make this globally inherit for all smaa shaders
-    "uniform int SMAA_AREATEX_MAX_DISTANCE_DIAG;\n" //make this globally inherit for all smaa shaders
-    "uniform vec2 SMAA_AREATEX_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
-    "uniform float SMAA_AREATEX_SUBTEX_SIZE;\n" //make this globally inherit for all smaa shaders
-    "uniform int SMAA_CORNER_ROUNDING;\n" //make this globally inherit for all smaa shaders
-    "uniform float SMAA_CORNER_ROUNDING_NORM;\n"
+	"uniform ivec4 SMAAInfo2Ints;\n" //x = MAX_SEARCH_STEPS_DIAG, y = AREATEX_MAX_DISTANCE, z = AREATEX_MAX_DISTANCE_DIAG, w = CORNER_ROUNDING
+	"uniform vec4 SMAAInfo2Floats;\n" //x, y = SMAA_AREATEX_PIXEL_SIZE(x & y), z = SMAA_AREATEX_SUBTEX_SIZE, w = SMAA_CORNER_ROUNDING_NORM
     "\n"
     "float SMAASearchLength(sampler2D searchTex, vec2 e, float offset) {\n"
     "    vec2 scale = vec2(66.0, 33.0) * vec2(0.5, -1.0);\n"
@@ -1019,10 +1010,10 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    return mad(-_SMAA_PIXEL_SIZE.y, API_V_DIR(offset), texcoord.y);\n"
     "}\n"
     "vec2 SMAAAreaDiag(sampler2D areaTex, vec2 dist, vec2 e, float offset) {\n"
-    "    vec2 texcoord = mad(vec2(SMAA_AREATEX_MAX_DISTANCE_DIAG, SMAA_AREATEX_MAX_DISTANCE_DIAG), e, dist);\n"
-    "    texcoord = mad(SMAA_AREATEX_PIXEL_SIZE, texcoord, 0.5 * SMAA_AREATEX_PIXEL_SIZE);\n"
+    "    vec2 texcoord = mad(vec2(SMAAInfo2Ints.z, SMAAInfo2Ints.z), e, dist);\n"
+    "    texcoord = mad(SMAAInfo2Floats.xy, texcoord, 0.5 * SMAAInfo2Floats.xy);\n"
     "    texcoord.x += 0.5;\n"
-    "    texcoord.y += SMAA_AREATEX_SUBTEX_SIZE * offset;\n"
+    "    texcoord.y += SMAAInfo2Floats.z * offset;\n"
     "    texcoord.y = API_V_COORD(texcoord.y);\n"
     "    return (texture2D(areaTex, texcoord)).rg;\n"
     "}\n"
@@ -1038,7 +1029,7 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    dir.y = API_V_DIR(dir.y);\n"
     "    vec4 coord = vec4(texcoord, -1.0, 1.0);\n"
     "    vec3 t = vec3(_SMAA_PIXEL_SIZE.xy, 1.0);\n"
-    "    while (coord.z < float(SMAA_MAX_SEARCH_STEPS_DIAG - 1) && coord.w > 0.9) {\n"
+    "    while (coord.z < float(SMAAInfo2Ints.x - 1) && coord.w > 0.9) {\n"
     "        coord.xyz = mad(t, vec3(dir, 1.0), coord.xyz);\n"
     "        e = texture2D(edgesTex, coord.xy).rg;\n"
     "        coord.w = dot(e, vec2(0.5));\n"
@@ -1050,7 +1041,7 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    vec4 coord = vec4(texcoord, -1.0, 1.0);\n"
     "    coord.x += 0.25 * _SMAA_PIXEL_SIZE.x;\n" // See @SearchDiag2Optimization
     "    vec3 t = vec3(_SMAA_PIXEL_SIZE.xy, 1.0);\n"
-    "    while (coord.z < float(SMAA_MAX_SEARCH_STEPS_DIAG - 1) && coord.w > 0.9) {\n"
+    "    while (coord.z < float(SMAAInfo2Ints.x - 1) && coord.w > 0.9) {\n"
     "        coord.xyz = mad(t, vec3(dir, 1.0), coord.xyz);\n"
     "        e = texture2D(edgesTex, coord.xy).rg;\n"
     "        e = SMAADecodeDiagBilinearAccess(e);\n"
@@ -1097,16 +1088,16 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    return weights;\n"
     "}\n"
     "vec2 SMAAArea(sampler2D areaTex, vec2 dist, float e1, float e2, float offset) {\n"
-    "    vec2 texcoord = mad(vec2(SMAA_AREATEX_MAX_DISTANCE, SMAA_AREATEX_MAX_DISTANCE), round(4.0 * vec2(e1, e2)), dist);\n"
-    "    texcoord = mad(SMAA_AREATEX_PIXEL_SIZE, texcoord, 0.5 * SMAA_AREATEX_PIXEL_SIZE);\n"
-    "    texcoord.y = mad(SMAA_AREATEX_SUBTEX_SIZE, offset, texcoord.y);\n"
+    "    vec2 texcoord = mad(vec2(SMAAInfo2Ints.y, SMAAInfo2Ints.y), round(4.0 * vec2(e1, e2)), dist);\n"
+    "    texcoord = mad(SMAAInfo2Floats.xy, texcoord, 0.5 * SMAAInfo2Floats.xy);\n"
+    "    texcoord.y = mad(SMAAInfo2Floats.z, offset, texcoord.y);\n"
     "    texcoord.y = API_V_COORD(texcoord.y);\n"
     "    return (texture2D(areaTex, texcoord)).rg;\n"
     "}\n"
     "void SMAADetectHorizontalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 texcoord, vec2 d) {\n"
-    "    if(SMAA_CORNER_ROUNDING == 0) return;\n"
+    "    if(SMAAInfo2Ints.w == 0) return;\n"
     "    vec2 leftRight = step(d.xy, d.yx);\n"
-    "    vec2 rounding = (1.0 - SMAA_CORNER_ROUNDING_NORM) * leftRight;\n"
+    "    vec2 rounding = (1.0 - SMAAInfo2Floats.w) * leftRight;\n"
     "    rounding /= leftRight.x + leftRight.y;\n"
     "    vec2 factor = vec2(1.0, 1.0);\n"
     "    factor.x -= rounding.x * texture2D(edgesTex, texcoord.xy + vec2(0.0,  API_V_DIR(1.0))*_SMAA_PIXEL_SIZE.xy).r;\n"
@@ -1116,9 +1107,9 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    weights *= saturate(factor);\n"
     "}\n"
     "void SMAADetectVerticalCornerPattern(sampler2D edgesTex, inout vec2 weights, vec4 texcoord, vec2 d) {\n"
-    "    if(SMAA_CORNER_ROUNDING == 0) return;\n"
+    "    if(SMAAInfo2Ints.w == 0) return;\n"
     "    vec2 leftRight = step(d.xy, d.yx);\n"
-    "    vec2 rounding = (1.0 - SMAA_CORNER_ROUNDING_NORM) * leftRight;\n"
+    "    vec2 rounding = (1.0 - SMAAInfo2Floats.w) * leftRight;\n"
     "    rounding /= leftRight.x + leftRight.y;\n"
     "    vec2 factor = vec2(1.0, 1.0);\n"
     "    factor.x -= rounding.x * texture2D(edgesTex, texcoord.xy + vec2( 1.0, 0.0)*_SMAA_PIXEL_SIZE.xy).g;\n"
@@ -1131,7 +1122,7 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::version + epriv::EShaders::smaa_
     "    vec4 weights = vec4(0.0, 0.0, 0.0, 0.0);\n"
     "    vec2 e = texture2D(edgesTex, texcoord).rg;\n"
     "    if (e.g > 0.0) {\n"
-    "        if(SMAA_MAX_SEARCH_STEPS_DIAG > 0){\n"
+    "        if(SMAAInfo2Ints.x > 0){\n"
     "            weights.rg = SMAACalculateDiagWeights(edgesTex,areaTex, texcoord, e, subsampleIndices);\n"
     "            if (weights.r == -weights.g) {\n"
     "                vec2 d;\n"
