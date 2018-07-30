@@ -49,13 +49,13 @@ namespace Engine{
                     }
                     delete[] m_Pool;
                 }
-				uint size(){
-					uint c = 0; uint i;
+                uint size(){
+                    uint c = 0; uint i;
                     for(i = 0; i < MAX_ENTRIES; ++i){
                         if(m_Pool[i].resource){ c = i; }
                     }
-					return i;
-				}
+                    return i;
+                }
                 void reset(){
                     m_activeEntryCount = 0;
                     m_firstFreeEntry = 0;

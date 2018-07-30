@@ -106,36 +106,36 @@ namespace Engine{
                 ~AnimationData();
                 float duration();
         };
-		class MeshSkeleton final{
-			friend class ::Engine::epriv::AnimationData;
-			friend class ::Mesh;
-			friend struct ::DefaultMeshBindFunctor;
-			friend struct ::DefaultMeshUnbindFunctor;
-			private:
-				class impl; std::unique_ptr<impl> m_i;
-			public:
-				MeshSkeleton();
-				MeshSkeleton(Engine::epriv::ImportedMeshData&);
-				~MeshSkeleton();
+        class MeshSkeleton final{
+            friend class ::Engine::epriv::AnimationData;
+            friend class ::Mesh;
+            friend struct ::DefaultMeshBindFunctor;
+            friend struct ::DefaultMeshUnbindFunctor;
+            private:
+                class impl; std::unique_ptr<impl> m_i;
+            public:
+                MeshSkeleton();
+                MeshSkeleton(Engine::epriv::ImportedMeshData&);
+                ~MeshSkeleton();
 
-				void fill(Engine::epriv::ImportedMeshData&);
-				void clear();
-				uint numBones();
-		};
+                void fill(Engine::epriv::ImportedMeshData&);
+                void clear();
+                uint numBones();
+        };
     };
 };
 class InternalMeshPublicInterface{
     public:
-		static void LoadCPU(Mesh*);
-		static void LoadGPU(Mesh*);
+        static void LoadCPU(Mesh*);
+        static void LoadGPU(Mesh*);
 };
 
 class Mesh final: public BindableResource{
     friend struct ::DefaultMeshBindFunctor;
-	friend struct ::DefaultMeshUnbindFunctor;
+    friend struct ::DefaultMeshUnbindFunctor;
     friend class ::Engine::epriv::AnimationData;
-	friend class ::Engine::epriv::MeshSkeleton;
-	friend class ::InternalMeshPublicInterface;
+    friend class ::Engine::epriv::MeshSkeleton;
+    friend class ::InternalMeshPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -158,9 +158,9 @@ class Mesh final: public BindableResource{
         void load();
         void unload();
 
-		void modifyPoints(std::vector<glm::vec3>& modifiedPoints);
-		void modifyUVs(std::vector<glm::vec2>& modifiedUVs);
-		void modifyPointsAndUVs(std::vector<glm::vec3>& modifiedPoints, std::vector<glm::vec2>& modifiedUVs);
+        void modifyPoints(std::vector<glm::vec3>& modifiedPoints);
+        void modifyUVs(std::vector<glm::vec2>& modifiedUVs);
+        void modifyPointsAndUVs(std::vector<glm::vec3>& modifiedPoints, std::vector<glm::vec2>& modifiedUVs);
 
         //Specify wether or not to save the mesh data after loading the data into the OpenGL buffers. By default mesh data is saved.
         void saveMeshData(bool);

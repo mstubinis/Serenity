@@ -32,8 +32,8 @@ class Camera: public Entity{
         float getDistance(Entity*);
         float getDistance(glm::vec3);
 
-		const float getAngle() const;    void setAngle(float);
-		const float getAspect() const;   void setAspect(float);
+        const float getAngle() const;    void setAngle(float);
+        const float getAspect() const;   void setAspect(float);
         const float getNear() const;     void setNear(float);
         const float getFar() const;      void setFar(float);
 

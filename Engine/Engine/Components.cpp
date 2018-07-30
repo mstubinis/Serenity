@@ -174,19 +174,19 @@ class epriv::ComponentManager::impl final{
         static void _defaultUpdateCameraComponent(vector<ComponentBaseClass*>& vec,const float& dt){
             for(auto c:vec){
                 ComponentCamera& cam = *(ComponentCamera*)c;
-				//update view frustrum
-				glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
-				glm::vec4 rows[4];
-				for(ushort i = 0; i < 4; ++i)
-					rows[i] = glm::row(vp,i);
-				for(ushort i = 0; i < 3; ++i){
-					ushort index = i * 2;
-					cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
-					cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
-				}
-				for(ushort i = 0; i < 6; ++i){
-					cam._planes[i] = -cam._planes[i] / glm::length(cam._planes[i]);
-				}	
+                //update view frustrum
+                glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
+                glm::vec4 rows[4];
+                for(ushort i = 0; i < 4; ++i)
+                    rows[i] = glm::row(vp,i);
+                for(ushort i = 0; i < 3; ++i){
+                    ushort index = i * 2;
+                    cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
+                    cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
+                }
+                for(ushort i = 0; i < 6; ++i){
+                    cam._planes[i] = -cam._planes[i] / glm::length(cam._planes[i]);
+                }	
                 cam.update(dt);
             }
         }
@@ -219,15 +219,15 @@ class epriv::ComponentManager::impl final{
         }
         void _update(const float& dt,epriv::ComponentManager* super){
             _updateCurrentScene(dt);
-			
+            
             if(!m_Paused){	
                 _updateComponentBaseBodies(dt);
                 _updateComponentRigidBodies(dt);
             }
-			_updateComponentCameras(dt);
-			if(!m_Paused){
-				_updateComponentModels(dt);
-			}
+            _updateComponentCameras(dt);
+            if(!m_Paused){
+                _updateComponentModels(dt);
+            }
 
             _destroyQueuedEntities(super);
         }

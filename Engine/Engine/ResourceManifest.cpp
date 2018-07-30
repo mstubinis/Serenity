@@ -76,14 +76,14 @@ void ResourceManifest::init(){
     CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.obj",CollisionType::None);
     CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.obj",CollisionType::None);	
 
-	Engine::epriv::threading::waitForAll();
+    Engine::epriv::threading::waitForAll();
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","");
     Resources::getMaterial(StarMaterial)->setShadeless(true);
     Resources::getMaterial(StarMaterial)->setGlow(0.21f);
 
-	EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.jpg","","","",skyFromSpace);
+    EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.jpg","","","",skyFromSpace);
 
 
 
@@ -94,7 +94,7 @@ void ResourceManifest::init(){
     //IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     //NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     //VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
-	//OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.png","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
+    //OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.png","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
     CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
     SunFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");

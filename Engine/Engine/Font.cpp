@@ -18,70 +18,70 @@ using namespace std;
 
 class Font::impl final{
     public:
-		Mesh* m_Mesh;
+        Mesh* m_Mesh;
         Texture* m_FontTexture;
         std::unordered_map<uchar,FontGlyph*> m_FontGlyphs;
 
-		void _init(string& filename){
-			_loadTextFile(filename);
-			string file = filename.substr(0,filename.size()-4);
-			file += ".png";
-			m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
-			epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
+        void _init(string& filename){
+            _loadTextFile(filename);
+            string file = filename.substr(0,filename.size()-4);
+            file += ".png";
+            m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+            epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
 
-			Handle h = Resources::addMesh(file,1.0f,1.0f);
-			m_Mesh = Resources::getMesh(h);
-		}
-		void _destruct(){
-			for(auto glyph:m_FontGlyphs){
-				SAFE_DELETE(glyph.second);
-			}
-		}
+            Handle h = Resources::addMesh(file,1.0f,1.0f);
+            m_Mesh = Resources::getMesh(h);
+        }
+        void _destruct(){
+            for(auto glyph:m_FontGlyphs){
+                SAFE_DELETE(glyph.second);
+            }
+        }
         void _loadTextFile(string& filename){
-			boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-			for(string line; getline(str, line, '\n');){
-				if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
-					FontGlyph* f = new FontGlyph();
-					string token;
-					istringstream stream(line);
-					while(getline(stream, token, ' ')) {
-						size_t pos = token.find("=");
+            boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
+            for(string line; getline(str, line, '\n');){
+                if(line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' '){
+                    FontGlyph* f = new FontGlyph();
+                    string token;
+                    istringstream stream(line);
+                    while(getline(stream, token, ' ')) {
+                        size_t pos = token.find("=");
 
-						string key = token.substr(0, pos);
-						string value = token.substr(pos + 1, string::npos);
+                        string key = token.substr(0, pos);
+                        string value = token.substr(pos + 1, string::npos);
 
-						if     (key == "id")       f->id = stoi(value);
-						else if(key == "x")        f->x = stoi(value);
-						else if(key == "y")        f->y = stoi(value);
-						else if(key == "width")    f->width = stoi(value);
-						else if(key == "height")   f->height = stoi(value); 
-						else if(key == "xoffset")  f->xoffset = stoi(value);
-						else if(key == "yoffset")  f->yoffset = stoi(value);
-						else if(key == "xadvance") f->xadvance = stoi(value);
-					}
-					f->m_Model = glm::mat4(1.0f);
-					f->pts.resize(4,glm::vec3(0));  f->uvs.resize(4,glm::vec2(0));
+                        if     (key == "id")       f->id = stoi(value);
+                        else if(key == "x")        f->x = stoi(value);
+                        else if(key == "y")        f->y = stoi(value);
+                        else if(key == "width")    f->width = stoi(value);
+                        else if(key == "height")   f->height = stoi(value); 
+                        else if(key == "xoffset")  f->xoffset = stoi(value);
+                        else if(key == "yoffset")  f->yoffset = stoi(value);
+                        else if(key == "xadvance") f->xadvance = stoi(value);
+                    }
+                    f->m_Model = glm::mat4(1.0f);
+                    f->pts.resize(4,glm::vec3(0));  f->uvs.resize(4,glm::vec2(0));
 
-					f->pts.at(0) = glm::vec3(0);
-					f->pts.at(1) = glm::vec3(f->width,f->height,0);
-					f->pts.at(2) = glm::vec3(0,f->height,0);
-					f->pts.at(3) = glm::vec3(f->width,0,0);
+                    f->pts.at(0) = glm::vec3(0);
+                    f->pts.at(1) = glm::vec3(f->width,f->height,0);
+                    f->pts.at(2) = glm::vec3(0,f->height,0);
+                    f->pts.at(3) = glm::vec3(f->width,0,0);
 
-					f->uvs.at(0) = glm::vec2(   float(f->x / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f)   );
-					f->uvs.at(1) = glm::vec2(   float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f)   );
-					f->uvs.at(2) = glm::vec2(   float(f->x / 256.0f),float(f->y / 256.0f)   );
-					f->uvs.at(3) = glm::vec2(   float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f)   );
+                    f->uvs.at(0) = glm::vec2(   float(f->x / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f)   );
+                    f->uvs.at(1) = glm::vec2(   float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f)   );
+                    f->uvs.at(2) = glm::vec2(   float(f->x / 256.0f),float(f->y / 256.0f)   );
+                    f->uvs.at(3) = glm::vec2(   float(f->x / 256.0f) + float(f->width / 256.0f),float(f->y / 256.0f) + float(f->height / 256.0f)   );
 
-					m_FontGlyphs.emplace(f->id,f);
-				}
-			}
-		}
+                    m_FontGlyphs.emplace(f->id,f);
+                }
+            }
+        }
 };
 Font::Font(string filename):EngineResource(filename),m_i(new impl){
-	m_i->_init(filename);
+    m_i->_init(filename);
 }
 Font::~Font(){
-	m_i->_destruct();
+    m_i->_destruct();
 }
 Texture* Font::getGlyphTexture() { return m_i->m_FontTexture; }
 FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs.at(c); }

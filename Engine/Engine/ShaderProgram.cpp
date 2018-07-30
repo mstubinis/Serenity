@@ -57,8 +57,8 @@ class Shader::impl final{
                 super->setName("NULL");
             }
         }
-		void _destruct(){
-		}
+        void _destruct(){
+        }
 
 };
 Shader::Shader(string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){ m_i->_init(shaderFileOrData,shaderType,fromFile,this); }
@@ -75,7 +75,7 @@ class ShaderP::impl final{
         GLuint m_ShaderProgram;
         vector<Material*> m_Materials;
         unordered_map<string,GLint> m_UniformLocations;
-		unordered_map<GLuint,bool> m_AttachedUBOs;
+        unordered_map<GLuint,bool> m_AttachedUBOs;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
 
@@ -106,14 +106,14 @@ class ShaderP::impl final{
                     break;
                 }
             }
-			//see if we actually have a version line
-			if(!sfind(line,"#version")){
-				string core = "";
-				if(epriv::RenderManager::GLSL_VERSION >= 330)
-					core = " core";
-				line = "#version " + boost::lexical_cast<string>(epriv::RenderManager::GLSL_VERSION) + core + "\n";
-				_d = line +  _d;
-			}
+            //see if we actually have a version line
+            if(!sfind(line,"#version")){
+                string core = "";
+                if(epriv::RenderManager::GLSL_VERSION >= 330)
+                    core = " core";
+                line = "#version " + boost::lexical_cast<string>(epriv::RenderManager::GLSL_VERSION) + core + "\n";
+                _d = line +  _d;
+            }
 
 
             string versionNumberString = regex_replace(line,regex("([^0-9])"),"");
@@ -153,52 +153,52 @@ class ShaderP::impl final{
             }
 
 
-			//see if we need a UBO for the camera
-			if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || 
-			sfind(_d,"CameraInvViewProj") || sfind(_d,"CameraPosition") || sfind(_d,"CameraNear") || sfind(_d,"CameraFar") || sfind(_d,"CameraInfo1") || sfind(_d,"CameraInfo2")){
-				string uboCameraString;
-				if(versionNumber >= 140){ //UBO
-					 if(!sfind(_d,"layout (std140) uniform Camera {//generated")){
-						 uboCameraString = "\n"
-						 "layout (std140) uniform Camera {//generated\n"
-				 		 "    mat4 CameraView;\n"
-						 "    mat4 CameraProj;\n"
-						 "    mat4 CameraViewProj;\n"
-						 "    mat4 CameraInvView;\n"
-						 "    mat4 CameraInvProj;\n"
-						 "    mat4 CameraInvViewProj;\n"
-						 "    vec4 CameraInfo1;\n"
-						 "    vec4 CameraInfo2;\n"
-						 "};\n"
-						 "vec3 CameraPosition = CameraInfo1.xyz;\n"
-					     "vec3 CameraViewVector = CameraInfo2.xyz;\n"
-						 "float CameraNear = CameraInfo1.w;\n"
-						 "float CameraFar = CameraInfo2.w;\n"
-						 "\n";
-						 _insertStringAtLine(_d,uboCameraString,1);
-						 UniformBufferObject::UBO_CAMERA->attachToShader(super);
-					 }
-				}
-				else{ //no UBO's, just add a uniform struct
-					if(!sfind(_d,"uniform mat4 CameraView;//generated")){
-						 uboCameraString = "\n"
-				 		 "uniform mat4 CameraView;//generated;\n"
-						 "uniform mat4 CameraProj;\n"
-						 "uniform mat4 CameraViewProj;\n"
-						 "uniform mat4 CameraInvView;\n"
-						 "uniform mat4 CameraInvProj;\n"
-						 "uniform mat4 CameraInvViewProj;\n"
-						 "uniform vec4 CameraInfo1;\n"
-						 "uniform vec4 CameraInfo2;\n"
-						 "vec3 CameraPosition = CameraInfo1.xyz;\n"
-					     "vec3 CameraViewVector = CameraInfo2.xyz;\n"
-						 "float CameraNear = CameraInfo1.w;\n"
-						 "float CameraFar = CameraInfo2.w;\n"
-						 "\n";
-						 _insertStringAtLine(_d,uboCameraString,1);
-					}
-				}	
-			}
+            //see if we need a UBO for the camera
+            if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || 
+            sfind(_d,"CameraInvViewProj") || sfind(_d,"CameraPosition") || sfind(_d,"CameraNear") || sfind(_d,"CameraFar") || sfind(_d,"CameraInfo1") || sfind(_d,"CameraInfo2")){
+                string uboCameraString;
+                if(versionNumber >= 140){ //UBO
+                     if(!sfind(_d,"layout (std140) uniform Camera {//generated")){
+                         uboCameraString = "\n"
+                         "layout (std140) uniform Camera {//generated\n"
+                         "    mat4 CameraView;\n"
+                         "    mat4 CameraProj;\n"
+                         "    mat4 CameraViewProj;\n"
+                         "    mat4 CameraInvView;\n"
+                         "    mat4 CameraInvProj;\n"
+                         "    mat4 CameraInvViewProj;\n"
+                         "    vec4 CameraInfo1;\n"
+                         "    vec4 CameraInfo2;\n"
+                         "};\n"
+                         "vec3 CameraPosition = CameraInfo1.xyz;\n"
+                         "vec3 CameraViewVector = CameraInfo2.xyz;\n"
+                         "float CameraNear = CameraInfo1.w;\n"
+                         "float CameraFar = CameraInfo2.w;\n"
+                         "\n";
+                         _insertStringAtLine(_d,uboCameraString,1);
+                         UniformBufferObject::UBO_CAMERA->attachToShader(super);
+                     }
+                }
+                else{ //no UBO's, just add a uniform struct
+                    if(!sfind(_d,"uniform mat4 CameraView;//generated")){
+                         uboCameraString = "\n"
+                         "uniform mat4 CameraView;//generated;\n"
+                         "uniform mat4 CameraProj;\n"
+                         "uniform mat4 CameraViewProj;\n"
+                         "uniform mat4 CameraInvView;\n"
+                         "uniform mat4 CameraInvProj;\n"
+                         "uniform mat4 CameraInvViewProj;\n"
+                         "uniform vec4 CameraInfo1;\n"
+                         "uniform vec4 CameraInfo2;\n"
+                         "vec3 CameraPosition = CameraInfo1.xyz;\n"
+                         "vec3 CameraViewVector = CameraInfo2.xyz;\n"
+                         "float CameraNear = CameraInfo1.w;\n"
+                         "float CameraFar = CameraInfo2.w;\n"
+                         "\n";
+                         _insertStringAtLine(_d,uboCameraString,1);
+                    }
+                }	
+            }
         }
         void _init(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
             m_Stage = stage;
@@ -207,23 +207,23 @@ class ShaderP::impl final{
 
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-			super->setName(name);
+            super->setName(name);
             epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
             
-			string& _name = super->name();
-			if(vs->name() == "NULL") vs->setName(_name + ".vert");
-			if(fs->name() == "NULL") fs->setName(_name + ".frag");
+            string& _name = super->name();
+            if(vs->name() == "NULL") vs->setName(_name + ".vert");
+            if(fs->name() == "NULL") fs->setName(_name + ".frag");
             _compileOGL(m_VertexShader,m_FragmentShader,_name,super);
         }
         void _destruct(){
             glDeleteShader(m_ShaderProgram);
             glDeleteProgram(m_ShaderProgram);
             m_UniformLocations.clear();
-			m_AttachedUBOs.clear();
+            m_AttachedUBOs.clear();
         }
         void _compileOGL(Shader* vs,Shader* fs,string& _shaderProgramName,ShaderP* super){
             m_UniformLocations.clear();
-			m_AttachedUBOs.clear();
+            m_AttachedUBOs.clear();
             GLuint vid=glCreateShader(GL_VERTEX_SHADER);GLuint fid=glCreateShader(GL_FRAGMENT_SHADER);
             string VertexCode,FragmentCode = "";
             if(vs->fromFile()){
@@ -324,45 +324,45 @@ class UniformBufferObject::impl final{
     public:
         const char* nameInShader;
         uint sizeOfStruct;
-		int globalBindingPointNumber;
+        int globalBindingPointNumber;
         GLuint uboObject;
         void _init(const char* _nameInShader,uint& _sizeofStruct,int _globalBindingPointNumber){
             nameInShader = _nameInShader;
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
-			if(_globalBindingPointNumber == -1){
-				//automatic assignment
-				globalBindingPointNumber = UniformBufferObject::MAX_UBO_BINDINGS - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
-				++UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
-			}
-			else{
-			    globalBindingPointNumber = _globalBindingPointNumber;
-			}
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
+            if(_globalBindingPointNumber == -1){
+                //automatic assignment
+                globalBindingPointNumber = UniformBufferObject::MAX_UBO_BINDINGS - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
+                ++UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
+            }
+            else{
+                globalBindingPointNumber = _globalBindingPointNumber;
+            }
             sizeOfStruct = _sizeofStruct;
 
             glGenBuffers(1, &uboObject);
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
 
             glBufferData(GL_UNIFORM_BUFFER, sizeOfStruct, NULL, GL_DYNAMIC_DRAW);
-			glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
+            glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
 
-			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
         void _destruct(){
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
-			glDeleteBuffers(1,&uboObject);
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
+            glDeleteBuffers(1,&uboObject);
         }
         void _update(void* _data){
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
-			glBufferSubData(GL_UNIFORM_BUFFER,0, sizeOfStruct, _data);
-			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBufferSubData(GL_UNIFORM_BUFFER,0, sizeOfStruct, _data);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
         void _attachToShader(UniformBufferObject* super,ShaderP* _shaderProgram){
-			if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(_shaderProgram->program())) return;
+            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(_shaderProgram->program())) return;
             uint block_index = glGetUniformBlockIndex(_shaderProgram->program(),nameInShader);
             glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
             glUniformBlockBinding(_shaderProgram->program(), block_index, globalBindingPointNumber);
-			_shaderProgram->m_i->m_AttachedUBOs.emplace(_shaderProgram->program(),true);
+            _shaderProgram->m_i->m_AttachedUBOs.emplace(_shaderProgram->program(),true);
         }
 };
 UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber); }

@@ -52,7 +52,7 @@ namespace Engine{
                 VertexBasic,
                 VertexHUD,
                 VertexSkybox,
-				ForwardFrag,
+                ForwardFrag,
                 DeferredFrag,
                 DeferredFragHUD,
                 DeferredFragSkybox,
@@ -86,7 +86,7 @@ namespace Engine{
         struct EngineInternalShaderPrograms final{
             enum Program{
                 //Deferred, //using the internal resource static one instead
-				//Forward, //using the internal resource static one instead
+                //Forward, //using the internal resource static one instead
                 DeferredHUD,
                 DeferredGodRays,
                 DeferredBlur,
@@ -143,17 +143,17 @@ namespace Engine{
         };
 
 
-		struct UBOCamera final{
-			glm::mat4 View;
-			glm::mat4 Proj;
-			glm::mat4 ViewProj;
-			glm::mat4 InvView;
-			glm::mat4 InvProj;
-			glm::mat4 InvViewProj;
+        struct UBOCamera final{
+            glm::mat4 View;
+            glm::mat4 Proj;
+            glm::mat4 ViewProj;
+            glm::mat4 InvView;
+            glm::mat4 InvProj;
+            glm::mat4 InvViewProj;
 
-			glm::vec4 Info1; //posx,posy,posz,near
-			glm::vec4 Info2; //viewVecX,viewVecY,viewVecZ,far
-		};
+            glm::vec4 Info1; //posx,posy,posz,near
+            glm::vec4 Info2; //viewVecX,viewVecY,viewVecZ,far
+        };
     };
 };
 
@@ -258,11 +258,11 @@ class epriv::RenderManager::impl final{
         vector<Shader*> m_InternalShaders;
         vector<ShaderP*> m_InternalShaderPrograms;
 
-		epriv::UBOCamera m_UBOCameraData;
+        epriv::UBOCamera m_UBOCameraData;
         #pragma endregion
 
         void _init(const char* name,uint& w,uint& h){
-			glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
+            glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
 
             #pragma region FXAAInfo
             FXAA_REDUCE_MIN = 0.0078125f; // (1 / 128)
@@ -354,10 +354,10 @@ class epriv::RenderManager::impl final{
         void _postInit(const char* name,uint& width,uint& height){
             epriv::EShaders::init();
 
-			#pragma region EngineInternalShadersAndPrograms
-			UniformBufferObject::UBO_CAMERA = new UniformBufferObject("Camera",sizeof(epriv::UBOCamera));
-			UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
-			#pragma endregion
+            #pragma region EngineInternalShadersAndPrograms
+            UniformBufferObject::UBO_CAMERA = new UniformBufferObject("Camera",sizeof(epriv::UBOCamera));
+            UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
+            #pragma endregion
 
             m_InternalShaders.resize(EngineInternalShaders::_TOTAL,nullptr);
             m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL,nullptr);
@@ -1236,7 +1236,7 @@ class epriv::RenderManager::impl final{
             _generateBRDFLUTCookTorrance(512);
         }
         void _destruct(){
-			SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
+            SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
 
             SAFE_DELETE(m_gBuffer);
             SAFE_DELETE(m_FullscreenQuad);
@@ -1249,7 +1249,7 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(Mesh::Cube);
 
             SAFE_DELETE(epriv::InternalShaderPrograms::Deferred);
-			SAFE_DELETE(epriv::InternalShaderPrograms::Forward);
+            SAFE_DELETE(epriv::InternalShaderPrograms::Forward);
 
             for(auto program:m_InternalShaderPrograms) SAFE_DELETE(program);
             for(auto shader:m_InternalShaders) SAFE_DELETE(shader);
@@ -1298,12 +1298,12 @@ class epriv::RenderManager::impl final{
             glDepthFunc(GL_LEQUAL);
         }
         void _onOpenGLContextCreation(uint& width,uint& height,uint& _glslVersion){
-			epriv::RenderManager::GLSL_VERSION = _glslVersion;
+            epriv::RenderManager::GLSL_VERSION = _glslVersion;
             glewExperimental = GL_TRUE;
             glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
             Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
             Renderer::GLEnable(GLState::CULL_FACE);
-			Renderer::Settings::cullFace(GL_BACK);
+            Renderer::Settings::cullFace(GL_BACK);
             SAFE_DELETE(m_gBuffer);
             m_gBuffer = new GBuffer(width,height);
         }
@@ -1530,8 +1530,8 @@ class epriv::RenderManager::impl final{
             glm::vec3 clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
-			if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
-			else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
+            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+            else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
 
             Settings::clear(true,true,true);
             glDepthFunc(GL_LEQUAL);
@@ -1547,15 +1547,15 @@ class epriv::RenderManager::impl final{
             _renderSkybox(scene->skybox());
 
 
-			if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
 
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
 
-			//this is needed for sure
-			glEnablei(GL_BLEND,0);
-			glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-			
+            //this is needed for sure
+            glEnablei(GL_BLEND,0);
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            
 
             //RENDER NORMAL OBJECTS HERE
             for(auto shader:m_GeometryPassShaderPrograms){
@@ -1571,8 +1571,8 @@ class epriv::RenderManager::impl final{
                                 Mesh* mesh = entry->mesh();
                                 mesh->bind();
                                 for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
-									const uint& entityID = meshInstance.first;
-									vector<MeshInstance*>& instances = meshInstance.second;
+                                    const uint& entityID = meshInstance.first;
+                                    vector<MeshInstance*>& instances = meshInstance.second;
                                     if(scene->hasEntity(entityID)){
                                         ComponentModel& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
@@ -1602,10 +1602,10 @@ class epriv::RenderManager::impl final{
         void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
 
-			gbuffer.start(GBufferType::Diffuse);
+            gbuffer.start(GBufferType::Diffuse);
 
             //RENDER NORMAL OBJECTS HERE
-			for(auto shader:m_ForwardPassShaderPrograms){
+            for(auto shader:m_ForwardPassShaderPrograms){
                 vector<Material*>& shaderMaterials = shader->getMaterials(); 
                 if(shaderMaterials.size() > 0){
                     shader->bind();
@@ -1618,8 +1618,8 @@ class epriv::RenderManager::impl final{
                                 Mesh* mesh = entry->mesh();
                                 mesh->bind();
                                 for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
-									const uint& entityID = meshInstance.first;
-									vector<MeshInstance*>& instances = meshInstance.second;
+                                    const uint& entityID = meshInstance.first;
+                                    vector<MeshInstance*>& instances = meshInstance.second;
                                     if(scene->hasEntity(entityID)){
                                         ComponentModel& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
@@ -1661,18 +1661,18 @@ class epriv::RenderManager::impl final{
     
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
 
-			if(RenderManager::GLSL_VERSION < 140){
-				glm::vec3 camPos = c.getPosition();
-				glm::vec3 camVVector = c.getViewVector();
-				sendUniformMatrix4fSafe("CameraView",c.getView());
-				sendUniformMatrix4fSafe("CameraProj",c.getProjection());
-				sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
-				sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
-				sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
-				sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-				sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
-				sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
-			}
+            if(RenderManager::GLSL_VERSION < 140){
+                glm::vec3 camPos = c.getPosition();
+                glm::vec3 camVVector = c.getViewVector();
+                sendUniformMatrix4fSafe("CameraView",c.getView());
+                sendUniformMatrix4fSafe("CameraProj",c.getProjection());
+                sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
+                sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
+                sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
+                sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+                sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
+                sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
+            }
             sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
             sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
 
@@ -1690,17 +1690,17 @@ class epriv::RenderManager::impl final{
                 //do GI here. (only doing GI during the main render pass, not during light probes
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI)->bind();
 
-				if(RenderManager::GLSL_VERSION < 140){
-				    glm::vec3 camPos = c.getPosition();
-				    glm::vec3 camVVector = c.getViewVector();
-					sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
-					sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
-					sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-				    sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
-				    sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
-				}
+                if(RenderManager::GLSL_VERSION < 140){
+                    glm::vec3 camPos = c.getPosition();
+                    glm::vec3 camVVector = c.getViewVector();
+                    sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
+                    sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
+                    sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+                    sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
+                    sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
+                }
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-				sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
+                sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
                 bindTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
                 bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
                 bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
@@ -1741,14 +1741,14 @@ class epriv::RenderManager::impl final{
             sendUniform1iSafe("doSSAO",int(ssao));
             sendUniform1iSafe("doBloom",int(bloom));
 
-			if(RenderManager::GLSL_VERSION < 140){
+            if(RenderManager::GLSL_VERSION < 140){
                 glm::vec3 camPos = c.getPosition();
-			    glm::vec3 camVVector = c.getViewVector();
-				sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
-				sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-				sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
-				sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
-			}
+                glm::vec3 camVVector = c.getViewVector();
+                sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
+                sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+                sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
+                sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
+            }
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
     
             sendUniform1i("Samples",ssao_samples);
@@ -1819,15 +1819,15 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->bind();
 
             sendUniform4f("HDRInfo",hdr_exposure,float(int(hdr)),float(int(bloom)),float(int(hdr_algorithm)));
-			sendUniform1fSafe("godRaysExposure",godRays_exposure);
-			sendUniform1iSafe("HasRays",int(godRays));
+            sendUniform1fSafe("godRaysExposure",godRays_exposure);
+            sendUniform1iSafe("HasRays",int(godRays));
 
             sendUniform1iSafe("HasLighting",int(lighting));
 
             bindTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
             bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);
             bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),2);
-			bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
+            bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
 
             for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
@@ -1880,8 +1880,8 @@ class epriv::RenderManager::impl final{
         }
         void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
             if(!renderAA) return;
-			float _fboWidth = float(fboWidth);
-			float _fboHeight = float(fboHeight);
+            float _fboWidth = float(fboWidth);
+            float _fboHeight = float(fboHeight);
             glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
             /*
@@ -1897,7 +1897,7 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::STENCIL_TEST);
 
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-			sendUniform2fSafe("SMAAInfo0Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD);
+            sendUniform2fSafe("SMAAInfo0Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD);
 
             bindTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
@@ -1927,8 +1927,8 @@ class epriv::RenderManager::impl final{
 
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 
-			sendUniform4fSafe("SMAAInfo1Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD,SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR,SMAA_PREDICATION_THRESHOLD);
-			sendUniform2fSafe("SMAAInfo1FloatsA",SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH);
+            sendUniform4fSafe("SMAAInfo1Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD,SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR,SMAA_PREDICATION_THRESHOLD);
+            sendUniform2fSafe("SMAAInfo1FloatsA",SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH);
 
             sendUniform1iSafe("SMAA_PREDICATION",int(SMAA_PREDICATION));
 
@@ -1956,10 +1956,10 @@ class epriv::RenderManager::impl final{
             bindTexture("area_tex",SMAA_AreaTexture,1,GL_TEXTURE_2D);
             bindTexture("search_tex",SMAA_SearchTexture,2,GL_TEXTURE_2D);
 
-			sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",SMAA_MAX_SEARCH_STEPS);
+            sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",SMAA_MAX_SEARCH_STEPS);
 
-			sendUniform4iSafe("SMAAInfo2Ints",SMAA_MAX_SEARCH_STEPS_DIAG,SMAA_AREATEX_MAX_DISTANCE,SMAA_AREATEX_MAX_DISTANCE_DIAG,SMAA_CORNER_ROUNDING);
-			sendUniform4fSafe("SMAAInfo2Floats",SMAA_AREATEX_PIXEL_SIZE.x,SMAA_AREATEX_PIXEL_SIZE.y,SMAA_AREATEX_SUBTEX_SIZE,(float(SMAA_CORNER_ROUNDING) / 100.0f));
+            sendUniform4iSafe("SMAAInfo2Ints",SMAA_MAX_SEARCH_STEPS_DIAG,SMAA_AREATEX_MAX_DISTANCE,SMAA_AREATEX_MAX_DISTANCE_DIAG,SMAA_CORNER_ROUNDING);
+            sendUniform4fSafe("SMAAInfo2Floats",SMAA_AREATEX_PIXEL_SIZE.x,SMAA_AREATEX_PIXEL_SIZE.y,SMAA_AREATEX_SUBTEX_SIZE,(float(SMAA_CORNER_ROUNDING) / 100.0f));
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
@@ -1998,7 +1998,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->bind();
 
             sendUniform1iSafe("HasSSAO",int(ssao));
-			sendUniform1iSafe("HasBloom",int(bloom));
+            sendUniform1iSafe("HasBloom",int(bloom));
 
             bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
             bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
@@ -2030,18 +2030,18 @@ class epriv::RenderManager::impl final{
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
             Scene* s = Resources::getCurrentScene();
             if(mainRenderFunc){
-				//Camera UBO update
-				if(RenderManager::GLSL_VERSION >= 140){
-					m_UBOCameraData.View = camera.getView();
-					m_UBOCameraData.Proj = camera.getProjection();
-					m_UBOCameraData.ViewProj = camera.getViewProjection();
-					m_UBOCameraData.InvProj = camera.getProjectionInverse();
-					m_UBOCameraData.InvView = camera.getViewInverse();
-					m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-					m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
-					m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
-					UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
-				}
+                //Camera UBO update
+                if(RenderManager::GLSL_VERSION >= 140){
+                    m_UBOCameraData.View = camera.getView();
+                    m_UBOCameraData.Proj = camera.getProjection();
+                    m_UBOCameraData.ViewProj = camera.getViewProjection();
+                    m_UBOCameraData.InvProj = camera.getProjectionInverse();
+                    m_UBOCameraData.InvView = camera.getViewInverse();
+                    m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
+                    m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
+                    m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
+                    UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
+                }
 
                 if(s->lightProbes().size() > 0){
                     /*
@@ -2095,11 +2095,11 @@ class epriv::RenderManager::impl final{
             }
 
             GLDisable(GLState::BLEND);
-			GLDisable(GLState::STENCIL_TEST);
+            GLDisable(GLState::STENCIL_TEST);
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
-			_passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
-			GLDisable(GLState::DEPTH_TEST);
+            _passForwardRendering(gbuffer,camera,fboWidth,fboHeight,nullptr);
+            GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             
 
@@ -2219,11 +2219,11 @@ void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2 pos,glm::ve
 void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     if(stage == ShaderRenderPass::Geometry){
         m_i->m_GeometryPassShaderPrograms.push_back(program);
-		sort(m_i->m_GeometryPassShaderPrograms.begin(),m_i->m_GeometryPassShaderPrograms.end(),epriv::srtKeyShaderP());
+        sort(m_i->m_GeometryPassShaderPrograms.begin(),m_i->m_GeometryPassShaderPrograms.end(),epriv::srtKeyShaderP());
     }
     else if(stage == ShaderRenderPass::Forward){
         m_i->m_ForwardPassShaderPrograms.push_back(program);
-		sort(m_i->m_ForwardPassShaderPrograms.begin(),m_i->m_ForwardPassShaderPrograms.end(),epriv::srtKeyShaderP());
+        sort(m_i->m_ForwardPassShaderPrograms.begin(),m_i->m_ForwardPassShaderPrograms.end(),epriv::srtKeyShaderP());
     }
     else{
     }
@@ -2395,11 +2395,11 @@ void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& col
 void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManager->_renderFullscreenQuad(w,h,startX,startY); }
 void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManager->_renderFullscreenTriangle(w,h,startX,startY); }
 inline const GLint Renderer::getUniformLoc(const char* location){
-	const unordered_map<string,GLint>& m = renderManager->current_shader_program->uniforms();
-	if(!m.count(location))
-		return -1;
-	return m.at(location);
+    const unordered_map<string,GLint>& m = renderManager->current_shader_program->uniforms();
+    if(!m.count(location))
+        return -1;
+    return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location){
-	return renderManager->current_shader_program->uniforms().at(location); 
+    return renderManager->current_shader_program->uniforms().at(location); 
 }

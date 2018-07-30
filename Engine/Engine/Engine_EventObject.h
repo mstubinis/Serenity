@@ -28,10 +28,7 @@ struct EventType final{enum Type{
     JoystickButtonReleased,
     JoystickMoved,
     TextEntered,
-
-
-    ZZZTotal, //replace later with a constant?
-};};
+_TOTAL};};
 
 namespace Engine{
     namespace epriv{

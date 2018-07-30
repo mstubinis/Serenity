@@ -6,6 +6,7 @@
 #include "GLImageConstants.h"
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <unordered_map>
 
 typedef unsigned int uint;
 

@@ -74,7 +74,7 @@ namespace Engine{
                     }
                 }
             }
-			const glm::vec3& f0 = material.f0();
+            const glm::vec3& f0 = material.f0();
             Renderer::sendUniform1iSafe("Shadeless",int(material.shadeless()));
             Renderer::sendUniform3fSafe("Material_F0",f0.r,f0.g,f0.b);
             Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());

@@ -415,7 +415,7 @@ class Mesh::impl final{
                 //bones
                 #pragma region Skeleton
                 if(aimesh.mNumBones > 0){
-					epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+                    epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
                     for (uint i = 0; i < aimesh.mNumBones; ++i) { 
                         uint BoneIndex = 0; 
                         string BoneName(aimesh.mBones[i]->mName.data);
@@ -439,19 +439,19 @@ class Mesh::impl final{
                             data.m_Bones.emplace(VertexID,d);
                         }
                     }
-					if(scene->mAnimations && scene->mNumAnimations > 0){
-						for(uint i = 0; i < scene->mNumAnimations; ++i){
-							 aiAnimation* anim = scene->mAnimations[i];
-							 string key(anim->mName.C_Str());
-							 if(key == ""){
-								 key = "Animation " + to_string(skeleton.m_AnimationData.size());
-							 }
-							 if(!skeleton.m_AnimationData.count(key)){
-								epriv::AnimationData* animData = new epriv::AnimationData(mesh,anim);
-								skeleton.m_AnimationData.emplace(key,animData);
-							 }
-						}
-					}
+                    if(scene->mAnimations && scene->mNumAnimations > 0){
+                        for(uint i = 0; i < scene->mNumAnimations; ++i){
+                             aiAnimation* anim = scene->mAnimations[i];
+                             string key(anim->mName.C_Str());
+                             if(key == ""){
+                                 key = "Animation " + to_string(skeleton.m_AnimationData.size());
+                             }
+                             if(!skeleton.m_AnimationData.count(key)){
+                                epriv::AnimationData* animData = new epriv::AnimationData(mesh,anim);
+                                skeleton.m_AnimationData.emplace(key,animData);
+                             }
+                        }
+                    }
                 }
                 #pragma endregion
                 //_calculateTBN(data);
@@ -870,7 +870,7 @@ class Mesh::impl final{
             glGenBuffers(1, &m_buffers.at(0));
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
-				epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
                     epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
@@ -896,7 +896,7 @@ class Mesh::impl final{
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
-				epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
                     epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
@@ -918,7 +918,7 @@ class Mesh::impl final{
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
-				epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
                     epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
@@ -938,7 +938,7 @@ class Mesh::impl final{
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton != nullptr){
-				epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
                     epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
@@ -981,7 +981,7 @@ class Mesh::impl final{
         }
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-	Mesh::impl& mesh = *((Mesh*)r)->m_i;
+    Mesh::impl& mesh = *((Mesh*)r)->m_i;
     glBindBuffer(GL_ARRAY_BUFFER, mesh.m_buffers.at(0));
     if(mesh.m_Skeleton != nullptr){
         for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){
@@ -1043,7 +1043,7 @@ class epriv::AnimationData::impl{
                 }
             }
             glm::mat4 Transform = ParentTransform * NodeTransform;
-			epriv::MeshSkeleton& skeleton = *m_Mesh->m_i->m_Skeleton;
+            epriv::MeshSkeleton& skeleton = *m_Mesh->m_i->m_Skeleton;
             if(skeleton.m_i->m_BoneMapping.count(BoneName)){
                 uint BoneIndex = skeleton.m_i->m_BoneMapping.at(BoneName);
                 glm::mat4& Final = skeleton.m_i->m_BoneInfo.at(BoneIndex).FinalTransform;
@@ -1061,7 +1061,7 @@ class epriv::AnimationData::impl{
             float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
             glm::mat4 Identity = glm::mat4(1.0f);
             _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
-			epriv::MeshSkeleton& skeleton = *m_Mesh->m_i->m_Skeleton;
+            epriv::MeshSkeleton& skeleton = *m_Mesh->m_i->m_Skeleton;
             for(uint i = 0; i < skeleton.m_i->m_NumBones; ++i){
                 Transforms.at(i) = skeleton.m_i->m_BoneInfo.at(i).FinalTransform;
             }
@@ -1183,7 +1183,7 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
     if(transforms.size() == 0){
         transforms.resize(m_i->m_Skeleton->numBones(),glm::mat4(1.0f));
     }
-	m_i->m_Skeleton->m_i->m_AnimationData.at(animationName)->m_i->_BoneTransform(animationName,time, transforms);
+    m_i->m_Skeleton->m_i->m_AnimationData.at(animationName)->m_i->_BoneTransform(animationName,time, transforms);
 }
 void Mesh::load(){
     if(!isLoaded()){

@@ -5,8 +5,8 @@
 #include <string>
 
 namespace Engine{
-	namespace epriv{
-		class EShaders{
+    namespace epriv{
+        class EShaders{
             public:
                 static void init();
                 static void convertShaderCode(std::string&);
@@ -45,7 +45,7 @@ namespace Engine{
 
                 static std::string fxaa_frag;
 
-				static std::string forward_frag;
+                static std::string forward_frag;
                 static std::string deferred_frag;
                 static std::string deferred_frag_hud;
                 static std::string deferred_frag_skybox;
@@ -67,8 +67,8 @@ namespace Engine{
                 static std::string lighting_frag;
                 static std::string lighting_frag_optimized;
                 static std::string lighting_frag_gi;
-		};
-	};
+        };
+    };
 };
 
 #endif

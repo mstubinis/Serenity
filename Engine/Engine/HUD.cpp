@@ -78,8 +78,8 @@ void HUD::render(){
     
     if(player->getTarget() != nullptr){
 
-		ComponentBasicBody* body = player->getTarget()->getComponent<ComponentBasicBody>();
-		ComponentModel* model = player->getTarget()->getComponent<ComponentModel>();
+        ComponentBasicBody* body = player->getTarget()->getComponent<ComponentBasicBody>();
+        ComponentModel* model = player->getTarget()->getComponent<ComponentModel>();
 
         glm::vec3 pos = body->getScreenCoordinates();
         float scl = glm::max(0.5f,model->radius()*31.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));

@@ -25,7 +25,7 @@ namespace Engine{
     namespace epriv{
         class ThreadManager final{
             public:
-				class impl;
+                class impl;
                 std::unique_ptr<impl> m_i;
 
                 ThreadManager(const char* name,uint w, uint h);

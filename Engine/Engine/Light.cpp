@@ -26,7 +26,7 @@ using namespace std;
 
 vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
     vector<boost::tuple<float,float,float>> m;
-	m.resize(LightRange::_TOTAL,boost::make_tuple(0.0f,0.0f,0.0f));
+    m.resize(LightRange::_TOTAL,boost::make_tuple(0.0f,0.0f,0.0f));
 
     m.at(LightRange::_7)    = boost::make_tuple(1.0f, 0.7f, 1.8f);
     m.at(LightRange::_13)   = boost::make_tuple(1.0f, 0.35f, 0.44f);
@@ -160,8 +160,8 @@ void PointLight::lighten(){
     Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
     Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_C,m_L);
     Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
-	Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-	Renderer::sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
+    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    Renderer::sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
     Renderer::sendUniform1fSafe("Type",1.0f);
 
     Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());

@@ -48,7 +48,7 @@ class Texture::impl final{
         void _baseInit(GLuint type,Texture* super,string n,const sf::Image& i,ImageInternalFormat::Format internFormat,bool genMipMaps){
             vector_clear(m_Pixels);
             m_Width = 0;
-			m_Height = 0;
+            m_Height = 0;
             m_Mipmapped = false;
             m_IsToBeMipmapped = genMipMaps;
             m_MinFilter = GL_LINEAR;
@@ -57,8 +57,8 @@ class Texture::impl final{
             m_InternalFormat = internFormat;
             if(i.getSize().x > 0 && i.getSize().y > 0){
                 const sf::Uint8* pxls = i.getPixelsPtr();
-				m_Width = i.getSize().x;
-				m_Height = i.getSize().y;
+                m_Width = i.getSize().x;
+                m_Height = i.getSize().y;
                 vector<uchar> p(pxls,pxls+(i.getSize().x*i.getSize().y*4));
                 m_Pixels = p;
             }
@@ -76,7 +76,7 @@ class Texture::impl final{
             }
             else if(m_Files.size() == 1 && m_Files.at(0) == "PIXELS"){//pixel data image
                 sf::Image i;
-				i.create(m_Width,m_Height,&m_Pixels[0]);
+                i.create(m_Width,m_Height,&m_Pixels[0]);
                 _generateFromImage(i,super,m_Type);
                 glBindTexture(m_Type,0);
                 _getPixels();

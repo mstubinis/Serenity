@@ -86,7 +86,7 @@ void GameCameraComponent::update(const float& dt){
             model = glm::translate(model,pos);
 
             pos = glm::vec3(model[3][0],model[3][1],model[3][2]);
-			pos -= glm::vec3(-0.001f,-0.001f,0.001f);//for some reason this is needed to remove lighting bugs...
+            pos -= glm::vec3(-0.001f,-0.001f,0.001f);//for some reason this is needed to remove lighting bugs...
             m_Body->setPosition(pos);
 
             lookAt(pos,target.position(),m_Body->up());

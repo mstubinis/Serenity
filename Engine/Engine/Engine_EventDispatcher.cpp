@@ -12,7 +12,7 @@ class epriv::EventDispatcher::impl final{
         vector<vector<Entity*>> m_Entities;
 
         void _init(const char* name,uint& w,uint& h){
-            m_Entities.resize(EventType::ZZZTotal); //replace later with a constant?
+            m_Entities.resize(EventType::_TOTAL); //replace later with a constant?
         }
         void _postInit(const char* name,uint& w,uint& h){
         }
