@@ -202,7 +202,7 @@ epriv::EShaders::reconstruct_log_depth_functions =
     "    float b = _far * _near / (_near - _far);\n"
 	"    float linearDepth = (a + b / regularDepth);\n"
     "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-    "    vec4 wpos = invVP * clipSpace;\n"
+    "    vec4 wpos = CameraInvViewProj * clipSpace;\n"
     "    return wpos.xyz / wpos.w;\n"
     "}\n"
     "vec3 reconstruct_view_pos(vec2 _uv,float _near, float _far){\n"
@@ -211,7 +211,7 @@ epriv::EShaders::reconstruct_log_depth_functions =
     "    float a = _far / (_far - _near);\n"//linearize regular depth
     "    float b = _far * _near / (_near - _far);\n"
     "    float linearDepth = (a + b / depth);\n"
-    "    vec4 clipSpace = invP * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+    "    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
     "    return clipSpace.xyz / clipSpace.w;\n"
     "}\n";
 
@@ -1362,7 +1362,7 @@ epriv::EShaders::forward_frag +=
     "    }\n"
     "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
     "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
-    "    float beforeDepth = texture(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
+    "    float beforeDepth = texture2D(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
     "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
     "    return prevUV * weight + currentUV * (1.0 - weight);\n"
     "}\n"
@@ -1519,7 +1519,7 @@ epriv::EShaders::deferred_frag +=
     "    }\n"
     "    vec2 prevUV = currentUV + deltaUV;\n" // get texture coordinates before collision (reverse operations)
     "    float afterDepth  = currentDepth - currentLayerDepth;\n" // get depth after and before collision for linear interpolation
-    "    float beforeDepth = texture(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
+    "    float beforeDepth = texture2D(HeightmapTexture, prevUV).r - currentLayerDepth + layerDepth;\n"
     "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
     "    return prevUV * weight + currentUV * (1.0 - weight);\n"
     "}\n"
@@ -1663,11 +1663,6 @@ epriv::EShaders::ssao_frag = epriv::EShaders::version +
     "\n"
     "uniform vec3 poisson[32];\n"
     "\n"
-    "uniform mat4 Projection;\n"
-    "uniform mat4 View;\n"
-    "uniform mat4 invVP;\n"
-    "uniform mat4 invV;\n"
-    "uniform mat4 invP;\n"
     "uniform float nearz;\n"
     "uniform float farz;\n"
     "varying vec2 texcoords;\n"
@@ -1927,11 +1922,6 @@ epriv::EShaders::lighting_frag = epriv::EShaders::version +
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-    "\n"
-    "uniform mat4 VP;\n"
-    "uniform mat4 invVP;\n"
-    "uniform mat4 invV;\n"
-    "uniform mat4 invP;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
@@ -2200,10 +2190,6 @@ epriv::EShaders::lighting_frag_gi = epriv::EShaders::version +
     "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
     "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-    "uniform mat4 VP;\n"
-    "uniform mat4 invVP;\n"
-    "uniform mat4 invV;\n"
-    "uniform mat4 invP;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n";

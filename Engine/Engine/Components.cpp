@@ -238,7 +238,7 @@ void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,this); }
 void epriv::ComponentManager::_resize(uint width,uint height){
     uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
     for(auto camera:ComponentManager::m_ComponentVectors.at(slot)){ 
-        ComponentCamera& cam = *((ComponentCamera*)camera);
+        ComponentCamera& cam = *(ComponentCamera*)camera;
         cam.resize(width,height); 
     }
 }

@@ -10,6 +10,9 @@
 
 struct Handle;
 class Material;
+class Shader;
+class ShaderP;
+class UniformBufferObject;
 typedef unsigned int uint;
 
 class ShaderRenderPass{public: enum Pass{
@@ -25,6 +28,24 @@ class ShaderType{public:enum Type{
     Geometry,
 };};
 
+//Core since version 3.1 (GLSL 140)
+class UniformBufferObject final{
+    private:
+	    class impl; std::unique_ptr<impl> m_i;
+    public:
+
+		static UniformBufferObject* UBO_CAMERA;
+
+		static GLint MAX_UBO_BINDINGS;
+		static uint CUSTOM_UBO_AUTOMATIC_COUNT;
+
+		UniformBufferObject(const char* nameInShader,uint sizeofStruct,int globalBindingPointIndex = -1);
+		~UniformBufferObject();
+
+		void attachToShader(ShaderP* shaderProgram);
+		void updateData(void* data);
+};
+
 class Shader final: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
@@ -37,6 +58,7 @@ class Shader final: public EngineResource{
         bool fromFile();
 };
 class ShaderP final: public BindableResource{
+	friend class ::UniformBufferObject;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

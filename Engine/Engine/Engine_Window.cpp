@@ -69,7 +69,7 @@ class Engine_Window::impl final{
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
 
-            epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height);
+            epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height,_glslVersion);
 
             return m_SFMLWindow->getSettings();
         }

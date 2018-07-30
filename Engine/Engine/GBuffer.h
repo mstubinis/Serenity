@@ -17,8 +17,7 @@ namespace Engine{
         class GBufferType{public: enum Type{
             Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Depth,
 
-            EnumTotal
-        };};
+        _TOTAL};};
 
         class GBuffer final{
             private:

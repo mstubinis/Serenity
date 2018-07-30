@@ -41,6 +41,8 @@ namespace Engine{
                 RenderManager(const char* name,uint w,uint h);
                 ~RenderManager();
 
+				static uint GLSL_VERSION;
+
                 void _init(const char* name,uint w,uint h);
                 void _resize(uint width, uint height);
                 void _resizeGbuffer(uint width,uint height);
@@ -56,7 +58,7 @@ namespace Engine{
                     Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
                 );
                 void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
-                void _onOpenGLContextCreation(uint width,uint height);
+                void _onOpenGLContextCreation(uint width,uint height,uint glslVersion);
                 void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
                 void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
                 void _addShaderToStage(ShaderP*,uint stage);
@@ -147,17 +149,17 @@ namespace Engine{
         inline const GLint& getUniformLocUnsafe(const char* location);
 
         void setViewport(uint x, uint y, uint width, uint height);
-        void bindFBO(GLuint);
-        void bindFBO(epriv::FramebufferObject*);
-        void bindRBO(GLuint);
-        void bindRBO(epriv::RenderbufferObject*);
-        void bindReadFBO(GLuint);
-        void bindDrawFBO(GLuint);
-        void bindTexture(const char* location,Texture*,uint slot);
-        void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint type);
-        void bindTextureSafe(const char* location,Texture*,uint slot);
-        void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint type);
-        void unbindTexture(uint slot,Texture*);
+        void bindFBO(GLuint fbo);
+        void bindFBO(epriv::FramebufferObject* rbo);
+        void bindRBO(GLuint rbo);
+        void bindRBO(epriv::RenderbufferObject* rbo);
+        void bindReadFBO(GLuint fbo);
+        void bindDrawFBO(GLuint fbo);
+        void bindTexture(const char* location,Texture* texture,uint slot);
+        void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);
+        void bindTextureSafe(const char* location,Texture* texture,uint slot);
+        void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);
+        void unbindTexture(uint slot,Texture* texture);
         void unbindTexture2D(uint slot);
         void unbindTextureCubemap(uint slot);
         void unbindFBO();
@@ -166,7 +168,6 @@ namespace Engine{
         void unbindDrawFBO();
         
         //Uniform 1
-        //seperate (dont need vectors for 1 component ;) )
         inline void sendUniform1(const char* l,double x){ glUniform1d(getUniformLocUnsafe(l),x); }
         inline void sendUniform1(const char* l,int x){ glUniform1i(getUniformLocUnsafe(l),x); }
         inline void sendUniform1(const char* l,float x){ glUniform1f(getUniformLocUnsafe(l),x); }
