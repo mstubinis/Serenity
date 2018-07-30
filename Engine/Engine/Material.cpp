@@ -301,8 +301,8 @@ class Material::impl final{
             _addComponentGlow(glow);
             _addComponentSpecular(specular);
             
-            m_SpecularModel = SpecularModel::Model::Cook_Torrance;
-            m_DiffuseModel = DiffuseModel::Model::Lambert;
+            m_SpecularModel = SpecularModel::GGX;
+            m_DiffuseModel = DiffuseModel::Lambert;
 
             _addToMaterialPool();
 

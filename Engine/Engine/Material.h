@@ -68,7 +68,7 @@ class DiffuseModel{public: enum Model{
 class SpecularModel{public: enum Model{
     Blinn_Phong,
     Phong,
-    GXX,
+    GGX,
     Cook_Torrance,
     Guassian,
     Beckmann,
