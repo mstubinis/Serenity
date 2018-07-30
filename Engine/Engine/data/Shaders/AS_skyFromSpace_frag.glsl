@@ -10,7 +10,7 @@ varying vec3 v3LightPosition;
 varying float Depth;
 varying vec3 WorldPosition;
 
-//uniform int HasGodsRays;
+uniform int HasGodsRays;
 
 varying float FC;
 varying float logz_f;
@@ -32,6 +32,7 @@ void main(){
     gl_FragColor = vec4(HDR.xyz,nightmult);
 
 	/*
+	gl_FragData[0] = vec4(HDR.xyz,nightmult);
     gl_FragData[1].rg = vec2(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;

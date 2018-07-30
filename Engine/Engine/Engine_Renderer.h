@@ -33,9 +33,8 @@ namespace Engine{
         class RenderbufferObject;
 
         class RenderManager final{
-            private:
-                class impl;
             public:
+				class impl;
                 std::unique_ptr<impl> m_i;
 
                 RenderManager(const char* name,uint w,uint h);

@@ -1,26 +1,25 @@
+uniform sampler2D     DiffuseTexture;
+uniform sampler2D     NormalTexture;
+uniform sampler2D     GlowTexture;
+uniform sampler2D     SpecularTexture;
+uniform sampler2D     AOTexture;
+uniform sampler2D     MetalnessTexture;
+uniform sampler2D     SmoothnessTexture;
+uniform samplerCube   ReflectionTexture;
+uniform sampler2D     ReflectionTextureMap;
+uniform samplerCube   RefractionTexture;
+uniform sampler2D     RefractionTextureMap;
+uniform sampler2D     HeightmapTexture;
 
-uniform float fExposure;
-
-uniform sampler2D DiffuseTexture;
-uniform sampler2D NormalTexture;
-uniform sampler2D GlowTexture;
-uniform sampler2D SpecularTexture;
-uniform sampler2D AOTexture;
-uniform sampler2D MetalnessTexture;
-uniform sampler2D SmoothnessTexture;
-uniform samplerCube ReflectionTexture;
-uniform sampler2D   ReflectionTextureMap;
-uniform samplerCube RefractionTexture;
-uniform sampler2D   RefractionTextureMap;
-uniform sampler2D HeightmapTexture;
-
-uniform vec4 MaterialBasePropertiesOne;//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+uniform vec4 MaterialBasePropertiesOne;  //x = BaseGlow    y = BaseAO     z = BaseMetalness  w = BaseSmoothness
 uniform float CubemapMixFactor;
 uniform float RefractionRatio;
 
-uniform vec4 FirstConditionals; //x = diffuse  y = normals    z = glow w = specular
-uniform vec4 SecondConditionals; //x = ao y = metal z = smoothness w = reflection
-uniform vec4 ThirdConditionals; //x = refraction y = heightmap z = UNUSED w = UNUSED
+uniform vec4 FirstConditionals;          //x = diffuse     y = normals    z = glow           w = specular
+uniform vec4 SecondConditionals;         //x = ao          y = metal      z = smoothness     w = reflection
+uniform vec4 ThirdConditionals;          //x = refraction  y = heightmap  z = UNUSED         w = UNUSED
+
+uniform vec4 FragDataMisc1;              //xyz = lightPos  w = exposure
 
 uniform int HasGodsRays;
 
@@ -29,29 +28,20 @@ uniform vec3 Gods_Rays_Color;
 
 varying vec3 c0;
 varying vec3 c1;
-
-uniform int HasAtmosphere;
-uniform vec3 v3LightPos;
-
 varying vec3 WorldPosition;
-varying vec3 CameraPosition;
-varying vec3 CameraPositionReal;
+varying vec3 VCameraPosition;
+varying vec3 VCameraPositionReal;
 varying vec4 Color;
 varying vec2 UV;
 varying vec3 Normals; 
 varying vec3 Binormals;
 varying vec3 Tangents;
-
 flat varying float HasAtmo;
-
-varying float FC;
+flat varying float FC;
 varying float logz_f;
 
 const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
-
 const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
-const vec2 ConstantAlmostOneVec2 = vec2(0.9999,0.9999);
-
 const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
 const vec2 ConstantOneVec2 = vec2(1.0,1.0);
 
@@ -63,13 +53,6 @@ vec2 EncodeOctahedron(vec3 v) {
         return ConstantOneVec2;
 	v.xy /= dot(abs(v), ConstantOneVec3);
 	return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
-}
-vec3 DecodeOctahedron(vec2 n) {
-    if(  all(greaterThan(n,ConstantAlmostOneVec2))  )
-        return ConstantOneVec3;
-	vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));
-	if (v.z < 0.0) v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);
-	return normalize(v);
 }
 vec3 CalcBumpedNormal(){
     vec3 normalTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;
@@ -92,10 +75,10 @@ void main(){
     if(HasAtmo > 0.99){
         if(FirstConditionals.x > 0.5){
             vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-            vec3 HDR = (1.0 - exp(-fExposure * (c0 + diffuse.rgb) * c1));
+            vec3 HDR = (1.0 - exp(-FragDataMisc1.w * (c0 + diffuse.rgb) * c1));
             gl_FragData[0].rgb = max( vec3(0.05) * diffuse.rgb, HDR);    
             if(FirstConditionals.z > 0.5){
-                vec3 lightIntensity = max(vec3(0.05) * ConstantOneVec3,(1.0 - exp( -fExposure * ( (c0 + ConstantOneVec3 ) * c1) )));
+                vec3 lightIntensity = max(vec3(0.05) * ConstantOneVec3,(1.0 - exp( -FragDataMisc1.w * ( (c0 + ConstantOneVec3 ) * c1) )));
                 gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0 - lightIntensity) * texture2D(GlowTexture, UV).rgb);
             }
             gl_FragData[0].a = diffuse.a;
@@ -118,8 +101,8 @@ void main(){
 			else{
 			    PxlNormal = normalize(Normals);
 			}
-		    vec3 ViewDir = normalize(CameraPositionReal - WorldPosition);
-			vec3 LightDir = normalize(v3LightPos - WorldPosition);
+		    vec3 ViewDir = normalize(VCameraPositionReal - WorldPosition);
+			vec3 LightDir = normalize(FragDataMisc1.xyz - WorldPosition);
 			float NdotL = max(0.0,dot(PxlNormal,LightDir ));
 			float VdotN = max(0.0,dot(PxlNormal,ViewDir ));
             //gl_FragData[0].rgb = diffuse.rgb * vec3(minnaert(NdotL,VdotN));

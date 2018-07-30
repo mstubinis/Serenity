@@ -157,7 +157,8 @@ class ShaderP::impl final{
 
 
 			//see if we need a UBO for the camera
-			if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || sfind(_d,"CameraInvViewProj")){
+			if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || 
+			sfind(_d,"CameraInvViewProj") || sfind(_d,"CameraPosition") || sfind(_d,"CameraNear") || sfind(_d,"CameraFar") || sfind(_d,"CameraInfo1") || sfind(_d,"CameraInfo2")){
 				string uboCameraString;
 				if(versionNumber >= 140){ //UBO
 					 if(!sfind(_d,"layout (std140) uniform Camera {//generated")){
@@ -169,7 +170,14 @@ class ShaderP::impl final{
 						 "    mat4 CameraInvView;\n"
 						 "    mat4 CameraInvProj;\n"
 						 "    mat4 CameraInvViewProj;\n"
-						 "};\n";
+						 "    vec4 CameraInfo1;\n"
+						 "    vec4 CameraInfo2;\n"
+						 "};\n"
+						 "vec3 CameraPosition = CameraInfo1.xyz;\n"
+					     "vec3 CameraViewVector = CameraInfo2.xyz;\n"
+						 "float CameraNear = CameraInfo1.w;\n"
+						 "float CameraFar = CameraInfo2.w;\n"
+						 "\n";
 						 _insertStringAtLine(_d,uboCameraString,1);
 						 UniformBufferObject::UBO_CAMERA->attachToShader(super);
 					 }
@@ -183,6 +191,12 @@ class ShaderP::impl final{
 						 "uniform mat4 CameraInvView;\n"
 						 "uniform mat4 CameraInvProj;\n"
 						 "uniform mat4 CameraInvViewProj;\n"
+						 "uniform vec4 CameraInfo1;\n"
+						 "uniform vec4 CameraInfo2;\n"
+						 "vec3 CameraPosition = CameraInfo1.xyz;\n"
+					     "vec3 CameraViewVector = CameraInfo2.xyz;\n"
+						 "float CameraNear = CameraInfo1.w;\n"
+						 "float CameraFar = CameraInfo2.w;\n"
 						 "\n";
 						 _insertStringAtLine(_d,uboCameraString,1);
 					}

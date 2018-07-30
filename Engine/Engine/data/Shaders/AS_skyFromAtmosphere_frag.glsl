@@ -16,7 +16,7 @@ varying vec3 WorldPosition;
 varying float FC;
 varying float logz_f;
 
-//uniform int HasGodsRays;
+uniform int HasGodsRays;
 
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
@@ -40,6 +40,8 @@ void main(){
     gl_FragColor.a = clamp(alpha * (gl_FragColor.rgb * 5.5), 0.01, 0.99);
 
 	/*
+    gl_FragData[0] = clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99);
+    gl_FragData[0].a = clamp(alpha * (gl_FragColor.rgb * 5.5), 0.01, 0.99);
     gl_FragData[1].rg = vec2(1.0);
     gl_FragData[2].r = 0.0;
     gl_FragData[2].b = 0.0;

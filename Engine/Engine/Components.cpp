@@ -33,14 +33,14 @@ epriv::ComponentManager* componentManager = nullptr;
 
 class epriv::ComponentInternalFunctionality final{
     public:
-		static void rebuildProjectionMatrix(ComponentCamera& cam){
-			if(cam._type == ComponentCamera::Type::Perspective){
-				cam._projectionMatrix = glm::perspective(cam._angle,cam._aspectRatio,cam._nearPlane,cam._farPlane);
-			}
-			else{
-				cam._projectionMatrix = glm::ortho(cam._left,cam._right,cam._bottom,cam._top,cam._nearPlane,cam._farPlane);
-			}
-		}
+        static void rebuildProjectionMatrix(ComponentCamera& cam){
+            if(cam._type == ComponentCamera::Type::Perspective){
+                cam._projectionMatrix = glm::perspective(cam._angle,cam._aspectRatio,cam._nearPlane,cam._farPlane);
+            }
+            else{
+                cam._projectionMatrix = glm::ortho(cam._left,cam._right,cam._bottom,cam._top,cam._nearPlane,cam._farPlane);
+            }
+        }
 };
 
 class ComponentModel::impl final{
@@ -79,11 +79,11 @@ class epriv::ComponentManager::impl final{
     public:	
         ComponentTypeRegistry       m_TypeRegistry;
         vector<Entity*>             m_EntitiesToBeDestroyed;
-		bool                        m_Paused;
+        bool                        m_Paused;
         void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
             super->m_ComponentPool = new EntityPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
             super->m_EntityPool = new EntityPool<Entity>(epriv::MAX_NUM_ENTITIES);
-			m_Paused = false;
+            m_Paused = false;
             m_TypeRegistry = ComponentTypeRegistry();
 
 
@@ -182,17 +182,38 @@ class epriv::ComponentManager::impl final{
         }
         void _defaultUpdateCameraComponent(const float& dt,ComponentCamera& cam){
             //update view frustrum
+			/*
             glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
-			glm::vec4 rows[4];
-			for(ushort i = 0; i < 4; ++i)
-				rows[i] = glm::row(vp,i);
-			for(ushort i = 0; i < 3; ++i){
-				ushort index = i * 2;
+            glm::vec4 rows[4];
+            for(ushort i = 0; i < 4; ++i)
+                rows[i] = glm::row(vp,i);
+            for(ushort i = 0; i < 3; ++i){
+                ushort index = i * 2;
                 cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
                 cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
-			}
+            }
             for(ushort i = 0; i < 6; ++i){
-                cam._planes[i] = -cam._planes[i] / glm::length(cam._planes[i]);
+				glm::vec3 normal(cam._planes[i].x, cam._planes[i].y, cam._planes[i].z);
+                cam._planes[i] = -cam._planes[i] / glm::length(normal);
+            }
+			*/
+            //update view frustrum
+            glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
+            glm::vec4 rowX = glm::row(vp, 0);
+            glm::vec4 rowY = glm::row(vp, 1);
+            glm::vec4 rowZ = glm::row(vp, 2);
+            glm::vec4 rowW = glm::row(vp, 3);
+
+            cam._planes[0] = glm::normalize(rowW + rowX);
+            cam._planes[1] = glm::normalize(rowW - rowX);
+            cam._planes[2] = glm::normalize(rowW + rowY);
+            cam._planes[3] = glm::normalize(rowW - rowY);
+            cam._planes[4] = glm::normalize(rowW + rowZ);
+            cam._planes[5] = glm::normalize(rowW - rowZ);
+
+            for(uint i = 0; i < 6; ++i){
+                glm::vec3 normal(cam._planes[i].x, cam._planes[i].y, cam._planes[i].z);
+                cam._planes[i] = -cam._planes[i] / glm::length(normal);
             }
         }
         void _updateCurrentScene(const float& dt){
@@ -213,12 +234,12 @@ class epriv::ComponentManager::impl final{
             vector_clear(m_EntitiesToBeDestroyed);
         }
         void _update(const float& dt,epriv::ComponentManager* super){
-			_updateCurrentScene(dt);
-			if(!m_Paused){	
-				_updateComponentBaseBodies(dt);
-				_updateComponentRigidBodies(dt);
-				_updateComponentModels(dt);
-			}
+            _updateCurrentScene(dt);
+            if(!m_Paused){	
+                _updateComponentBaseBodies(dt);
+                _updateComponentRigidBodies(dt);
+                _updateComponentModels(dt);
+            }
             _updateComponentCameras(dt);
 
             _destroyQueuedEntities(super);
@@ -428,7 +449,7 @@ void ComponentCamera::resize(uint width, uint height){
     if(_type == Type::Perspective){
         _aspectRatio = width/(float)height;
     }
-	epriv::ComponentInternalFunctionality::rebuildProjectionMatrix(*this);
+    epriv::ComponentInternalFunctionality::rebuildProjectionMatrix(*this);
 }
 bool ComponentCamera::sphereIntersectTest(glm::vec3 position,float radius){
     if(radius <= 0) return false;

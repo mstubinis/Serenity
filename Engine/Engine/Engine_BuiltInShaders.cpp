@@ -349,7 +349,6 @@ epriv::EShaders::vertex_basic = epriv::EShaders::version +
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "uniform mat3 NormalMatrix;\n"
-    "uniform vec3 CameraPosition;\n"
     "uniform int AnimationPlaying;\n"
     "uniform mat4 gBones[100];\n"
     "\n"
@@ -1276,18 +1275,18 @@ epriv::EShaders::smaa_frag_4 = epriv::EShaders::version + epriv::EShaders::smaa_
 #pragma region ForwardFrag
 epriv::EShaders::forward_frag = epriv::EShaders::version + 
     "\n"
-    "uniform sampler2D DiffuseTexture;\n"
-    "uniform sampler2D NormalTexture;\n"
-    "uniform sampler2D GlowTexture;\n"
-    "uniform sampler2D SpecularTexture;\n"
-    "uniform sampler2D AOTexture;\n"
-    "uniform sampler2D MetalnessTexture;\n"
-    "uniform sampler2D SmoothnessTexture;\n"
+    "uniform sampler2D   DiffuseTexture;\n"
+    "uniform sampler2D   NormalTexture;\n"
+    "uniform sampler2D   GlowTexture;\n"
+    "uniform sampler2D   SpecularTexture;\n"
+    "uniform sampler2D   AOTexture;\n"
+    "uniform sampler2D   MetalnessTexture;\n"
+    "uniform sampler2D   SmoothnessTexture;\n"
     "uniform samplerCube ReflectionTexture;\n"
     "uniform sampler2D   ReflectionTextureMap;\n"
     "uniform samplerCube RefractionTexture;\n"
     "uniform sampler2D   RefractionTextureMap;\n"
-    "uniform sampler2D HeightmapTexture;\n"
+    "uniform sampler2D   HeightmapTexture;\n"
     "\n"
     "uniform vec4 MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "\n"
@@ -1433,18 +1432,18 @@ epriv::EShaders::forward_frag +=
 #pragma region DeferredFrag
 epriv::EShaders::deferred_frag = epriv::EShaders::version + 
     "\n"
-    "uniform sampler2D DiffuseTexture;\n"
-    "uniform sampler2D NormalTexture;\n"
-    "uniform sampler2D GlowTexture;\n"
-    "uniform sampler2D SpecularTexture;\n"
-    "uniform sampler2D AOTexture;\n"
-    "uniform sampler2D MetalnessTexture;\n"
-    "uniform sampler2D SmoothnessTexture;\n"
+    "uniform sampler2D   DiffuseTexture;\n"
+    "uniform sampler2D   NormalTexture;\n"
+    "uniform sampler2D   GlowTexture;\n"
+    "uniform sampler2D   SpecularTexture;\n"
+    "uniform sampler2D   AOTexture;\n"
+    "uniform sampler2D   MetalnessTexture;\n"
+    "uniform sampler2D   SmoothnessTexture;\n"
     "uniform samplerCube ReflectionTexture;\n"
     "uniform sampler2D   ReflectionTextureMap;\n"
     "uniform samplerCube RefractionTexture;\n"
     "uniform sampler2D   RefractionTextureMap;\n"
-    "uniform sampler2D HeightmapTexture;\n"
+    "uniform sampler2D   HeightmapTexture;\n"
     "\n"
     "uniform vec4 MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "\n"
@@ -1654,31 +1653,27 @@ epriv::EShaders::ssao_frag = epriv::EShaders::version +
     "uniform int doBloom;\n"
     "uniform float fbufferDivisor;\n"
     "\n"
-    "uniform vec3 CameraPosition;\n"
-    "\n"
-    "uniform vec4 SSAOInfo; //x - radius | y - intensity | z - bias | w - scale\n"
+    "uniform vec4 SSAOInfo;\n"//x - radius | y - intensity | z - bias | w - scale
     "\n"
     "uniform int Samples;\n"
     "uniform int NoiseTextureSize;\n"
     "\n"
     "uniform vec3 poisson[32];\n"
     "\n"
-    "uniform float nearz;\n"
-    "uniform float farz;\n"
     "varying vec2 texcoords;\n"
     "\n";
 epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::ssao_frag += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::ssao_frag +=
     "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 diff = reconstruct_world_pos(uv + offsetUV,nearz,farz) - origin;\n"
+    "    vec3 diff = reconstruct_world_pos(uv + offsetUV,CameraNear,CameraFar) - origin;\n"
     "    vec3 vec = normalize(diff);\n"
     "    float dist = length(diff) * SSAOInfo.w;\n"
     "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
     "}\n"
     "void main(){\n"
     "    vec2 uv = texcoords * (1.0 / fbufferDivisor);\n"
-    "    vec3 worldPosition = reconstruct_world_pos(uv,nearz,farz);\n"
+    "    vec3 worldPosition = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "    vec3 randomVector = normalize(texture2D(gRandomMap, texcoords / NoiseTextureSize).xyz);\n" //should texcoords be uv here?
     "\n"
@@ -1919,8 +1914,7 @@ epriv::EShaders::lighting_frag = epriv::EShaders::version +
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gDepthMap;\n"
     "\n"
-    "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
-    "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
+    "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
@@ -2069,7 +2063,7 @@ epriv::EShaders::lighting_frag +=
     "    float roughness = 1.0 - smoothness;\n"
     "    float alpha = roughness * roughness;\n"
     "\n"
-    "    vec3 ViewDir = normalize(CamPosGamma.xyz - PxlWorldPos);\n"
+    "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 Half = normalize(LightDir + ViewDir);\n"
     "    float NdotL = max(0.0, dot(PxlNormal, LightDir));\n"
     "    float NdotH = max(0.0, dot(PxlNormal, Half));\n"
@@ -2151,7 +2145,7 @@ epriv::EShaders::lighting_frag +=
     "void main(){\n"                      //windowX      //windowY
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
-    "    vec3 PxlPosition = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
+    "    vec3 PxlPosition = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
@@ -2189,8 +2183,7 @@ epriv::EShaders::lighting_frag_gi = epriv::EShaders::version +
     "uniform samplerCube prefilterMap;\n"
     "uniform sampler2D brdfLUT;\n"
     "\n"
-    "uniform vec4 CamPosGamma;\n" //x = camX, y = camY, z = camZ, w = monitorGamma
-    "uniform vec4 ScreenData;\n" //x = near, y = far, z = winSize.x, w = winSize.y
+    "uniform vec4 ScreenData;\n" //x = UNUSED, y = gamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
@@ -2208,26 +2201,24 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    vec3 PxlWorldPos = reconstruct_world_pos(uv,ScreenData.x,ScreenData.y);\n"
+    "    vec3 PxlWorldPos = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "\n"
-    "    vec3 ViewDir = normalize(CamPosGamma.xyz - PxlWorldPos);\n"
+    "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
     "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
     "    highp int index = int(floor(matIDandAO));\n"
     "    float ao = fract(matIDandAO)+0.0001;\n"//the 0.0001 makes up for the clamp in material class
-    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n"
-    "    float metalness = stuff.x;\n"
-    "    float smoothness = stuff.y;\n"
+    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n" //x is metalness, y is smoothness
     "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
-    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
+    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(stuff.x));\n"
     "    vec3 Frensel = F0;\n"
-    "    float roughness = 1.0 - smoothness;\n"
+    "    float roughness = 1.0 - stuff.y;\n"
     "    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
     "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
     "    vec3 kD = ConstantOneVec3 - kS;\n"
-    "    kD *= 1.0 - metalness;\n"
+    "    kD *= 1.0 - stuff.x;\n"
     "    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
     "\n"
     "    const float MAX_REFLECTION_LOD = 5.0;\n"
@@ -2236,7 +2227,7 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y);\n"
     "\n"
     "    vec3 TotalIrradiance = (kD * AmbientIrradiance + GISpecular) * ao;\n"
-    "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / CamPosGamma.w));\n" //CamPosGamma.w is gamma
+    "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
     "    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
     "}";
 

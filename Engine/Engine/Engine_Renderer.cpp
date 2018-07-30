@@ -36,7 +36,7 @@ Mesh* epriv::InternalMeshes::SpotLightBounds = nullptr;
 ShaderP* epriv::InternalShaderPrograms::Deferred = nullptr;
 ShaderP* epriv::InternalShaderPrograms::Forward = nullptr;
 
-epriv::RenderManager* renderManager = nullptr;
+epriv::RenderManager::impl* renderManager;
 
 uint epriv::RenderManager::GLSL_VERSION;
 
@@ -150,8 +150,10 @@ namespace Engine{
 			glm::mat4 InvView;
 			glm::mat4 InvProj;
 			glm::mat4 InvViewProj;
-		};
 
+			glm::vec4 Info1; //posx,posy,posz,near
+			glm::vec4 Info2; //viewVecX,viewVecY,viewVecZ,far
+		};
     };
 };
 
@@ -1659,24 +1661,20 @@ class epriv::RenderManager::impl final{
     
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
 
-
-            glm::vec3 campos = c.getPosition();
-            float cNear = c.getNear(); float cFar = c.getFar();
-    
 			if(RenderManager::GLSL_VERSION < 140){
+				glm::vec3 camPos = c.getPosition();
+				glm::vec3 camVVector = c.getViewVector();
 				sendUniformMatrix4fSafe("CameraView",c.getView());
 				sendUniformMatrix4fSafe("CameraProj",c.getProjection());
 				sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
 				sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
 				sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
 				sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+				sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
+				sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
 			}
-
-            sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,gamma);
-
             sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-
-            sendUniform4f("ScreenData",cNear,cFar,(float)fbufferWidth,(float)fbufferHeight);
+            sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
 
             bindTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
             bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
@@ -1693,13 +1691,16 @@ class epriv::RenderManager::impl final{
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI)->bind();
 
 				if(RenderManager::GLSL_VERSION < 140){
+				    glm::vec3 camPos = c.getPosition();
+				    glm::vec3 camVVector = c.getViewVector();
 					sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
 					sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
 					sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+				    sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
+				    sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
 				}
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-                sendUniform4f("CamPosGamma",campos.x, campos.y, campos.z,gamma);
-                sendUniform4f("ScreenData",cNear,cFar,float(fbufferWidth),float(fbufferHeight));
+				sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
                 bindTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
                 bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
                 bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
@@ -1740,18 +1741,14 @@ class epriv::RenderManager::impl final{
             sendUniform1iSafe("doSSAO",int(ssao));
             sendUniform1iSafe("doBloom",int(bloom));
 
-            glm::vec3 camPos = c.getPosition();
-
 			if(RenderManager::GLSL_VERSION < 140){
+                glm::vec3 camPos = c.getPosition();
+			    glm::vec3 camVVector = c.getViewVector();
 				sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
 				sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+				sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
+				sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
 			}
-
-            sendUniform1fSafe("nearz",c.getNear());
-            sendUniform1fSafe("farz",c.getFar());
-
-            sendUniform3fSafe("CameraPosition",camPos.x,camPos.y,camPos.z);
-    
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
     
             sendUniform1i("Samples",ssao_samples);
@@ -2034,13 +2031,17 @@ class epriv::RenderManager::impl final{
             Scene* s = Resources::getCurrentScene();
             if(mainRenderFunc){
 				//Camera UBO update
-				m_UBOCameraData.View = camera.getView();
-				m_UBOCameraData.Proj = camera.getProjection();
-				m_UBOCameraData.ViewProj = camera.getViewProjection();
-				m_UBOCameraData.InvProj = camera.getProjectionInverse();
-				m_UBOCameraData.InvView = camera.getViewInverse();
-				m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-				UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
+				if(RenderManager::GLSL_VERSION >= 140){
+					m_UBOCameraData.View = camera.getView();
+					m_UBOCameraData.Proj = camera.getProjection();
+					m_UBOCameraData.ViewProj = camera.getViewProjection();
+					m_UBOCameraData.InvProj = camera.getProjectionInverse();
+					m_UBOCameraData.InvView = camera.getViewInverse();
+					m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
+					m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
+					m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
+					UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
+				}
 
                 if(s->lightProbes().size() > 0){
                     /*
@@ -2148,7 +2149,7 @@ class epriv::RenderManager::impl final{
 
             #pragma endregion
 
-            _passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
+            //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
 
             #pragma region RenderPhysics
             GLEnable(GLState::BLEND);
@@ -2199,7 +2200,7 @@ class epriv::RenderManager::impl final{
 
         }
 };
-epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = this; }
+epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = this->m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
@@ -2251,80 +2252,80 @@ void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint 
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
 
-void Renderer::Settings::FXAA::setReduceMin(float r){ renderManager->m_i->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
-void Renderer::Settings::FXAA::setReduceMul(float r){ renderManager->m_i->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
-void Renderer::Settings::FXAA::setSpanMax(float r){ renderManager->m_i->FXAA_SPAN_MAX = glm::max(0.0f,r); }
-float Renderer::Settings::FXAA::getReduceMin(){ return renderManager->m_i->FXAA_REDUCE_MIN; }
-float Renderer::Settings::FXAA::getReduceMul(){ return renderManager->m_i->FXAA_REDUCE_MUL; }
-float Renderer::Settings::FXAA::getSpanMax(){ return renderManager->m_i->FXAA_SPAN_MAX; }
-bool Renderer::Settings::HDR::enabled(){ return renderManager->m_i->hdr; }
-void Renderer::Settings::HDR::enable(bool b){ renderManager->m_i->hdr = b; }
-void Renderer::Settings::HDR::disable(){ renderManager->m_i->hdr = false; }
-float Renderer::Settings::HDR::getExposure(){ return renderManager->m_i->hdr_exposure; }
-void Renderer::Settings::HDR::setExposure(float e){ renderManager->m_i->hdr_exposure = e; }
-void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManager->m_i->hdr_algorithm = a; }
-void Renderer::Settings::Bloom::enable(bool b){ renderManager->m_i->bloom = b; }
-void Renderer::Settings::Bloom::disable(){ renderManager->m_i->bloom = false; }
-float Renderer::Settings::Bloom::getRadius(){ return renderManager->m_i->bloom_radius; }
-float Renderer::Settings::Bloom::getStrength(){ return renderManager->m_i->bloom_strength; }
-void Renderer::Settings::Bloom::setRadius(float r){ renderManager->m_i->bloom_radius = glm::max(0.0f,r); }
-void Renderer::Settings::Bloom::setStrength(float r){ renderManager->m_i->bloom_strength = glm::max(0.0f,r); }
-void Renderer::Settings::SMAA::setThreshold(float f){ renderManager->m_i->SMAA_THRESHOLD = f; }
-void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManager->m_i->SMAA_MAX_SEARCH_STEPS = s; }
-void Renderer::Settings::SMAA::disableCornerDetection(){ renderManager->m_i->SMAA_CORNER_ROUNDING = 0; }
-void Renderer::Settings::SMAA::enableCornerDetection(uint c){ renderManager->m_i->SMAA_CORNER_ROUNDING = c; }
-void Renderer::Settings::SMAA::disableDiagonalDetection(){ renderManager->m_i->SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
-void Renderer::Settings::SMAA::enableDiagonalDetection(uint d){ renderManager->m_i->SMAA_MAX_SEARCH_STEPS_DIAG = d; }
-void Renderer::Settings::SMAA::setPredicationThreshold(float f){ renderManager->m_i->SMAA_PREDICATION_THRESHOLD = f; }
-void Renderer::Settings::SMAA::setPredicationScale(float f){ renderManager->m_i->SMAA_PREDICATION_SCALE = f; }
-void Renderer::Settings::SMAA::setPredicationStrength(float s){ renderManager->m_i->SMAA_PREDICATION_STRENGTH = s; }
-void Renderer::Settings::SMAA::setReprojectionScale(float s){ renderManager->m_i->SMAA_REPROJECTION_WEIGHT_SCALE = s; }
-void Renderer::Settings::SMAA::enablePredication(bool b){ renderManager->m_i->SMAA_PREDICATION = b; }
-void Renderer::Settings::SMAA::disablePredication(){ renderManager->m_i->SMAA_PREDICATION = false; }
-void Renderer::Settings::SMAA::enableReprojection(bool b){ renderManager->m_i->SMAA_REPROJECTION = b; }
-void Renderer::Settings::SMAA::disableReprojection(){ renderManager->m_i->SMAA_REPROJECTION = false; }
-void Renderer::Settings::SMAA::setQuality(SMAAQualityLevel::Level level){ renderManager->m_i->_setSMAAQuality(level); }
-bool Renderer::Settings::GodRays::enabled(){ return renderManager->m_i->godRays; }
-void Renderer::Settings::GodRays::enable(bool b = true){ renderManager->m_i->godRays = b; }
-void Renderer::Settings::GodRays::disable(){ renderManager->m_i->godRays = false; }
-float Renderer::Settings::GodRays::getExposure(){ return renderManager->m_i->godRays_exposure; }
-float Renderer::Settings::GodRays::getDecay(){ return renderManager->m_i->godRays_decay; }
-float Renderer::Settings::GodRays::getDensity(){ return renderManager->m_i->godRays_density; }
-float Renderer::Settings::GodRays::getWeight(){ return renderManager->m_i->godRays_weight; }
-uint Renderer::Settings::GodRays::getSamples(){ return renderManager->m_i->godRays_samples; }
-float Renderer::Settings::GodRays::getFOVDegrees(){ return renderManager->m_i->godRays_fovDegrees; }
-float Renderer::Settings::GodRays::getAlphaFalloff(){ return renderManager->m_i->godRays_alphaFalloff; }
-void Renderer::Settings::GodRays::setExposure(float e){ renderManager->m_i->godRays_exposure = e; }
-void Renderer::Settings::GodRays::setDecay(float d){ renderManager->m_i->godRays_decay = d; }
-void Renderer::Settings::GodRays::setDensity(float d){ renderManager->m_i->godRays_density = d; }
-void Renderer::Settings::GodRays::setWeight(float w){ renderManager->m_i->godRays_weight = w; }
-void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->m_i->godRays_samples = s; }
-void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->m_i->godRays_fovDegrees = d; }
-void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->m_i->godRays_alphaFalloff = a; }
-void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->m_i->godRays_Object = epriv::Core::m_Engine->m_ComponentManager->_getEntity(id); }
-void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->m_i->godRays_Object = entity; }
-Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->m_i->godRays_Object; }
-void Renderer::Settings::Lighting::enable(bool b){ renderManager->m_i->lighting = b; }
-void Renderer::Settings::Lighting::disable(){ renderManager->m_i->lighting = false; }
-bool Renderer::Settings::SSAO::enabled(){ return renderManager->m_i->ssao;  }
-void Renderer::Settings::SSAO::enable(bool b){ renderManager->m_i->ssao = b;  }
-void Renderer::Settings::SSAO::disable(){ renderManager->m_i->ssao = false;  }
-void Renderer::Settings::SSAO::enableBlur(bool b){ renderManager->m_i->ssao_do_blur = b;  }
-void Renderer::Settings::SSAO::disableBlur(){ renderManager->m_i->ssao_do_blur = false;  }
-float Renderer::Settings::SSAO::getBlurStrength(){ return renderManager->m_i->ssao_blur_strength; }
-float Renderer::Settings::SSAO::getIntensity(){ return renderManager->m_i->ssao_intensity; }
-float Renderer::Settings::SSAO::getRadius(){ return renderManager->m_i->ssao_radius; }
-float Renderer::Settings::SSAO::getScale(){ return renderManager->m_i->ssao_scale; }
-float Renderer::Settings::SSAO::getBias(){ return renderManager->m_i->ssao_bias; }
-uint Renderer::Settings::SSAO::getSamples(){ return renderManager->m_i->ssao_samples; }
-void Renderer::Settings::SSAO::setBlurStrength(float s){ renderManager->m_i->ssao_blur_strength = glm::max(0.0f,s); }
-void Renderer::Settings::SSAO::setIntensity(float i){ renderManager->m_i->ssao_intensity = glm::max(0.0f,i); }
-void Renderer::Settings::SSAO::setRadius(float r){ renderManager->m_i->ssao_radius = glm::max(0.0f,r); }
-void Renderer::Settings::SSAO::setScale(float s){ renderManager->m_i->ssao_scale = glm::max(0.0f,s); }
-void Renderer::Settings::SSAO::setBias(float b){ renderManager->m_i->ssao_bias = b; }
-void Renderer::Settings::SSAO::setSamples(uint s){ renderManager->m_i->ssao_samples = s; }
-void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManager->m_i->_setAntiAliasingAlgorithm(algorithm); }
-void Renderer::Settings::cullFace(uint s){ renderManager->m_i->_cullFace(s); }
+void Renderer::Settings::FXAA::setReduceMin(float r){ renderManager->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
+void Renderer::Settings::FXAA::setReduceMul(float r){ renderManager->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
+void Renderer::Settings::FXAA::setSpanMax(float r){ renderManager->FXAA_SPAN_MAX = glm::max(0.0f,r); }
+float Renderer::Settings::FXAA::getReduceMin(){ return renderManager->FXAA_REDUCE_MIN; }
+float Renderer::Settings::FXAA::getReduceMul(){ return renderManager->FXAA_REDUCE_MUL; }
+float Renderer::Settings::FXAA::getSpanMax(){ return renderManager->FXAA_SPAN_MAX; }
+bool Renderer::Settings::HDR::enabled(){ return renderManager->hdr; }
+void Renderer::Settings::HDR::enable(bool b){ renderManager->hdr = b; }
+void Renderer::Settings::HDR::disable(){ renderManager->hdr = false; }
+float Renderer::Settings::HDR::getExposure(){ return renderManager->hdr_exposure; }
+void Renderer::Settings::HDR::setExposure(float e){ renderManager->hdr_exposure = e; }
+void Renderer::Settings::HDR::setAlgorithm(HDRAlgorithm::Algorithm a){ renderManager->hdr_algorithm = a; }
+void Renderer::Settings::Bloom::enable(bool b){ renderManager->bloom = b; }
+void Renderer::Settings::Bloom::disable(){ renderManager->bloom = false; }
+float Renderer::Settings::Bloom::getRadius(){ return renderManager->bloom_radius; }
+float Renderer::Settings::Bloom::getStrength(){ return renderManager->bloom_strength; }
+void Renderer::Settings::Bloom::setRadius(float r){ renderManager->bloom_radius = glm::max(0.0f,r); }
+void Renderer::Settings::Bloom::setStrength(float r){ renderManager->bloom_strength = glm::max(0.0f,r); }
+void Renderer::Settings::SMAA::setThreshold(float f){ renderManager->SMAA_THRESHOLD = f; }
+void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManager->SMAA_MAX_SEARCH_STEPS = s; }
+void Renderer::Settings::SMAA::disableCornerDetection(){ renderManager->SMAA_CORNER_ROUNDING = 0; }
+void Renderer::Settings::SMAA::enableCornerDetection(uint c){ renderManager->SMAA_CORNER_ROUNDING = c; }
+void Renderer::Settings::SMAA::disableDiagonalDetection(){ renderManager->SMAA_MAX_SEARCH_STEPS_DIAG = 0; }
+void Renderer::Settings::SMAA::enableDiagonalDetection(uint d){ renderManager->SMAA_MAX_SEARCH_STEPS_DIAG = d; }
+void Renderer::Settings::SMAA::setPredicationThreshold(float f){ renderManager->SMAA_PREDICATION_THRESHOLD = f; }
+void Renderer::Settings::SMAA::setPredicationScale(float f){ renderManager->SMAA_PREDICATION_SCALE = f; }
+void Renderer::Settings::SMAA::setPredicationStrength(float s){ renderManager->SMAA_PREDICATION_STRENGTH = s; }
+void Renderer::Settings::SMAA::setReprojectionScale(float s){ renderManager->SMAA_REPROJECTION_WEIGHT_SCALE = s; }
+void Renderer::Settings::SMAA::enablePredication(bool b){ renderManager->SMAA_PREDICATION = b; }
+void Renderer::Settings::SMAA::disablePredication(){ renderManager->SMAA_PREDICATION = false; }
+void Renderer::Settings::SMAA::enableReprojection(bool b){ renderManager->SMAA_REPROJECTION = b; }
+void Renderer::Settings::SMAA::disableReprojection(){ renderManager->SMAA_REPROJECTION = false; }
+void Renderer::Settings::SMAA::setQuality(SMAAQualityLevel::Level level){ renderManager->_setSMAAQuality(level); }
+bool Renderer::Settings::GodRays::enabled(){ return renderManager->godRays; }
+void Renderer::Settings::GodRays::enable(bool b = true){ renderManager->godRays = b; }
+void Renderer::Settings::GodRays::disable(){ renderManager->godRays = false; }
+float Renderer::Settings::GodRays::getExposure(){ return renderManager->godRays_exposure; }
+float Renderer::Settings::GodRays::getDecay(){ return renderManager->godRays_decay; }
+float Renderer::Settings::GodRays::getDensity(){ return renderManager->godRays_density; }
+float Renderer::Settings::GodRays::getWeight(){ return renderManager->godRays_weight; }
+uint Renderer::Settings::GodRays::getSamples(){ return renderManager->godRays_samples; }
+float Renderer::Settings::GodRays::getFOVDegrees(){ return renderManager->godRays_fovDegrees; }
+float Renderer::Settings::GodRays::getAlphaFalloff(){ return renderManager->godRays_alphaFalloff; }
+void Renderer::Settings::GodRays::setExposure(float e){ renderManager->godRays_exposure = e; }
+void Renderer::Settings::GodRays::setDecay(float d){ renderManager->godRays_decay = d; }
+void Renderer::Settings::GodRays::setDensity(float d){ renderManager->godRays_density = d; }
+void Renderer::Settings::GodRays::setWeight(float w){ renderManager->godRays_weight = w; }
+void Renderer::Settings::GodRays::setSamples(uint s){ renderManager->godRays_samples = s; }
+void Renderer::Settings::GodRays::setFOVDegrees(float d){ renderManager->godRays_fovDegrees = d; }
+void Renderer::Settings::GodRays::setAlphaFalloff(float a){ renderManager->godRays_alphaFalloff = a; }
+void Renderer::Settings::GodRays::setObject(uint& id){ renderManager->godRays_Object = epriv::Core::m_Engine->m_ComponentManager->_getEntity(id); }
+void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->godRays_Object = entity; }
+Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
+void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }
+void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
+bool Renderer::Settings::SSAO::enabled(){ return renderManager->ssao;  }
+void Renderer::Settings::SSAO::enable(bool b){ renderManager->ssao = b;  }
+void Renderer::Settings::SSAO::disable(){ renderManager->ssao = false;  }
+void Renderer::Settings::SSAO::enableBlur(bool b){ renderManager->ssao_do_blur = b;  }
+void Renderer::Settings::SSAO::disableBlur(){ renderManager->ssao_do_blur = false;  }
+float Renderer::Settings::SSAO::getBlurStrength(){ return renderManager->ssao_blur_strength; }
+float Renderer::Settings::SSAO::getIntensity(){ return renderManager->ssao_intensity; }
+float Renderer::Settings::SSAO::getRadius(){ return renderManager->ssao_radius; }
+float Renderer::Settings::SSAO::getScale(){ return renderManager->ssao_scale; }
+float Renderer::Settings::SSAO::getBias(){ return renderManager->ssao_bias; }
+uint Renderer::Settings::SSAO::getSamples(){ return renderManager->ssao_samples; }
+void Renderer::Settings::SSAO::setBlurStrength(float s){ renderManager->ssao_blur_strength = glm::max(0.0f,s); }
+void Renderer::Settings::SSAO::setIntensity(float i){ renderManager->ssao_intensity = glm::max(0.0f,i); }
+void Renderer::Settings::SSAO::setRadius(float r){ renderManager->ssao_radius = glm::max(0.0f,r); }
+void Renderer::Settings::SSAO::setScale(float s){ renderManager->ssao_scale = glm::max(0.0f,s); }
+void Renderer::Settings::SSAO::setBias(float b){ renderManager->ssao_bias = b; }
+void Renderer::Settings::SSAO::setSamples(uint s){ renderManager->ssao_samples = s; }
+void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){ renderManager->_setAntiAliasingAlgorithm(algorithm); }
+void Renderer::Settings::cullFace(uint s){ renderManager->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(!color && !depth && !stencil) return;
     if(color == true && depth == true && stencil == true)
@@ -2342,12 +2343,12 @@ void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     else if(color == true && depth == false && stencil == true)
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
-void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManager->m_i->draw_physics_debug = b; }
-void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->m_i->draw_physics_debug = false; }
-void Renderer::Settings::setGamma(float g){ renderManager->m_i->gamma = g; }
-float Renderer::Settings::getGamma(){ return renderManager->m_i->gamma; }
+void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManager->draw_physics_debug = b; }
+void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->draw_physics_debug = false; }
+void Renderer::Settings::setGamma(float g){ renderManager->gamma = g; }
+float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 
-void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->m_i->_setViewport(x,y,w,h); }
+void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
 void Renderer::bindTexture(const char* location,Texture* texture,uint slot){Renderer::bindTexture(location,texture->address(),slot,texture->type());}
 void Renderer::bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -2360,12 +2361,12 @@ void Renderer::bindTextureSafe(const char* location,GLuint textureAddress,uint s
     glBindTexture(targetType,textureAddress);
     sendUniform1iSafe(location,slot);
 }
-void Renderer::bindReadFBO(GLuint fbo){ renderManager->m_i->_bindReadFBO(fbo); }
+void Renderer::bindReadFBO(GLuint fbo){ renderManager->_bindReadFBO(fbo); }
 void Renderer::bindFBO(epriv::FramebufferObject* fbo){ Renderer::bindFBO(fbo->address()); }
 void Renderer::bindRBO(epriv::RenderbufferObject* rbo){ Renderer::bindRBO(rbo->address()); }
-void Renderer::bindDrawFBO(GLuint fbo){ renderManager->m_i->_bindDrawFBO(fbo); }
+void Renderer::bindDrawFBO(GLuint fbo){ renderManager->_bindDrawFBO(fbo); }
 void Renderer::bindFBO(GLuint fbo){Renderer::bindReadFBO(fbo);Renderer::bindDrawFBO(fbo);}
-void Renderer::bindRBO(GLuint rbo){ renderManager->m_i->_bindRBO(rbo); }
+void Renderer::bindRBO(GLuint rbo){ renderManager->_bindRBO(rbo); }
 void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
 void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
@@ -2383,7 +2384,7 @@ void Renderer::unbindTextureCubemap(uint slot){
     glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 }
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
-    renderManager->m_i->m_TexturesToBeRendered.push_back(epriv::TextureRenderInfo(nullptr,pos,col,glm::vec2(w,h),angle,depth));
+    renderManager->m_TexturesToBeRendered.push_back(epriv::TextureRenderInfo(nullptr,pos,col,glm::vec2(w,h),angle,depth));
 }
 void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth){
     texture->render(pos,col,angle,scl,depth);
@@ -2391,14 +2392,14 @@ void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,flo
 void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& color, float angle, glm::vec2& scl, float depth){
     font->renderText(text,pos,color,angle,scl,depth);
 }
-void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManager->m_i->_renderFullscreenQuad(w,h,startX,startY); }
-void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManager->m_i->_renderFullscreenTriangle(w,h,startX,startY); }
+void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManager->_renderFullscreenQuad(w,h,startX,startY); }
+void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManager->_renderFullscreenTriangle(w,h,startX,startY); }
 inline const GLint Renderer::getUniformLoc(const char* location){
-	const unordered_map<string,GLint>& m = renderManager->m_i->current_shader_program->uniforms();
+	const unordered_map<string,GLint>& m = renderManager->current_shader_program->uniforms();
 	if(!m.count(location))
 		return -1;
 	return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location){
-	return renderManager->m_i->current_shader_program->uniforms().at(location); 
+	return renderManager->current_shader_program->uniforms().at(location); 
 }

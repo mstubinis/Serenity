@@ -23,11 +23,9 @@ typedef boost::packaged_task<void> boost_packed_task;
 
 namespace Engine{
     namespace epriv{
-
         class ThreadManager final{
-            private:
-                class impl;
             public:
+				class impl;
                 std::unique_ptr<impl> m_i;
 
                 ThreadManager(const char* name,uint w, uint h);
