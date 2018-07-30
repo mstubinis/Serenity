@@ -346,7 +346,6 @@ epriv::EShaders::vertex_basic = epriv::EShaders::version +
     "attribute vec4 BoneIDs;\n"
     "attribute vec4 Weights;\n"
     "\n"
-    "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
     "uniform mat3 NormalMatrix;\n"
     "uniform int AnimationPlaying;\n"
@@ -369,7 +368,6 @@ epriv::EShaders::vertex_basic = epriv::EShaders::version +
 epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::vertex_basic +=
     "void main(){\n"
-    "    mat4 MVP = VP * Model;\n"
     "    mat4 BoneTransform = mat4(1.0);\n"
     "    if(AnimationPlaying == 1.0){\n"
     "        BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;\n"
@@ -387,7 +385,7 @@ epriv::EShaders::vertex_basic +=
     "    vec3  Tangents = (NormalMatrix * TangentTrans);\n"
     "    TBN = (mat3(Tangents,Binormals,Normals));\n"
     "\n"
-    "    gl_Position = MVP * PosTrans;\n"
+    "    gl_Position = CameraViewProj * Model * PosTrans;\n"
     "    WorldPosition = (Model * PosTrans).xyz;\n"
     "\n"
     "    CamPosition = CameraPosition;\n"
@@ -416,10 +414,9 @@ epriv::EShaders::vertex_hud = epriv::EShaders::version +
 epriv::EShaders::vertex_hud += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::vertex_hud +=
     "void main(){\n"
-    "    mat4 MVP = VP * Model;\n"
     //"    UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
-    "    gl_Position = MVP * vec4(position, 1.0);\n"
+    "    gl_Position = VP * Model * vec4(position, 1.0);\n"
     //"    gl_TexCoord[6] = gl_Position;\n"
     "}";
 #pragma endregion

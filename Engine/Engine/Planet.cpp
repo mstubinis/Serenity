@@ -40,8 +40,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     rot *= glm::mat4_cast(orientation);
     
     glm::vec3 lightPos = Resources::getCurrentScene()->lights().at(0)->position();
-    glm::vec3 lightDir = lightPos - pos;
-    lightDir = glm::normalize(lightDir);
+    glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
@@ -50,6 +49,13 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     float fScaledepth = 0.25f;
     float innerRadius = obj->getGroundRadius();
 	float outerRadius = obj->getRadius();
+
+    //Ground should be currently binded... render the ground
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model,pos);
+    model *= glm::mat4_cast(orientation);
+    model = glm::scale(model,scl);
+
 	if(atmosphereHeight <= 0){
 		outerRadius += (outerRadius *  0.025f);
 		Renderer::sendUniform1i("HasAtmosphere",0);   
@@ -83,14 +89,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 	Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
 	Renderer::sendUniform4f("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-
-    //Ground should be currently binded... render the ground
-    glm::mat4 mod = glm::mat4(1.0f);
-    mod = glm::translate(mod,pos);
-    mod *= glm::mat4_cast(orientation);
-    mod = glm::scale(mod,scl);
-
-    Renderer::sendUniformMatrix4f("Model",mod);
+    Renderer::sendUniformMatrix4f("Model",model);
 
     i.mesh()->render();
 }};
@@ -111,12 +110,8 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
     uint numberSamples = 1;
     
-    glm::mat4 rot = glm::mat4(1.0f);
-    rot *= glm::mat4_cast(orientation);
-    
     glm::vec3 lightPos = Resources::getCurrentScene()->lights().at(0)->position();
-    glm::vec3 lightDir = lightPos - pos;
-    lightDir = glm::normalize(lightDir);
+    glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
     float ESun = 20.0f;
@@ -126,7 +121,14 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     float innerRadius = obj->getGroundRadius();
     float outerRadius = obj->getRadius();
     float fScale = 1.0f / (outerRadius - innerRadius);
+	float exposure = 2.0f;
+	float g = -0.98f;
 	glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model,pos);
+    model = glm::scale(model,scl);
+    model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
 
     ShaderP* program;
 	//and now render the atmosphere
@@ -145,45 +147,21 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     Renderer::GLEnable(GLState::BLEND);
     //Renderer::GLDisable(GLState::DEPTH_TEST);
     //Renderer::GLDisable(GLState::DEPTH_MASK);
-    glm::mat4 mod = glm::mat4(1.0f);
-    mod = glm::translate(mod,pos);
-    mod = glm::scale(mod,scl);
-    mod = glm::scale(mod,glm::vec3(1.0f + atmosphereHeight));
 
 	//pass atmosphere based parameters to the gpu
-    Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
-    Renderer::sendUniformMatrix4f("Model",mod);
-    float fcoeff = (2.0f / glm::log2(c->getFar() + 1.0f)) * 0.5f;
-    Renderer::sendUniform1fSafe("fcoeff",fcoeff);
+    Renderer::sendUniformMatrix4f("Model",model);
 
-    Renderer::sendUniform1i("nSamples", numberSamples);
-    Renderer::sendUniform1f("fSamples", float(numberSamples));   
-    Renderer::sendUniform3f("v3CameraPos", camPos);
-    Renderer::sendUniform3f("v3LightDir", lightDir);
-    Renderer::sendUniform3f("v3InvWavelength", v3InvWaveLength);
+    Renderer::sendUniform1i("nSamples", numberSamples);  
 
-    Renderer::sendUniform1fSafe("fCameraHeight", camHeight);
-    Renderer::sendUniform1fSafe("fCameraHeight2", camHeight2);
+	Renderer::sendUniform4f("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
+    Renderer::sendUniform4f("VertDataMisc2",camHeight,camHeight2,0.0f,lightDir.y);
+	Renderer::sendUniform4f("VertDataMisc3",v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z,lightDir.z);
+	Renderer::sendUniform4f("VertDataScale",fScale,fScaledepth,fScale / fScaledepth,float(numberSamples));
+	Renderer::sendUniform4f("VertDataRadius",outerRadius,outerRadius*outerRadius,innerRadius,innerRadius*innerRadius);
+	Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
-    Renderer::sendUniform1f("fOuterRadius", outerRadius);
-    Renderer::sendUniform1fSafe("fOuterRadius2", outerRadius*outerRadius);
-    Renderer::sendUniform1f("fInnerRadius", innerRadius);
-    Renderer::sendUniform1fSafe("fInnerRadius2", innerRadius*innerRadius);
+	Renderer::sendUniform4f("FragDataGravity",g,g*g,exposure,0.0f);
 
-    Renderer::sendUniform1f("fKrESun", Kr * ESun);
-    Renderer::sendUniform1f("fKmESun", Km * ESun);
-    Renderer::sendUniform1f("fKr4PI", Kr * 4 * 3.14159265358979f);
-    Renderer::sendUniform1f("fKm4PI", Km * 4 * 3.14159265358979f);
-
-    Renderer::sendUniform1f("fScaleDepth",fScaledepth);
-    Renderer::sendUniform1f("fScale",fScale);
-    Renderer::sendUniform1f("fScaleOverScaleDepth", fScale / fScaledepth);
-
-    // Gravity
-    float g = -0.98f;
-    Renderer::sendUniform1f("g",g);
-    Renderer::sendUniform1f("g2", g*g);
-    Renderer::sendUniform1f("fExposure",2.0f);
     i.mesh()->render();
     Renderer::Settings::cullFace(GL_BACK);
     Renderer::GLDisable(GLState::BLEND);

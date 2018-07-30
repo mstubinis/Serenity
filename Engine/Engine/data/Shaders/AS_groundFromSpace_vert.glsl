@@ -7,7 +7,6 @@ attribute vec4 tangent;
 
 uniform int HasAtmosphere;
 
-uniform mat4 VP;
 uniform mat4 Model;
 uniform mat4 Rot;
 
@@ -54,14 +53,13 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
     return 0.5 * (-B - sqrt(fDet));
 }
 void main(){
-    mat4 MVP = VP * Model;
 	WorldPosition = (Model * vec4(position,1.0)).xyz;
     Normals = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
     Binormals = (Model * vec4(binormal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
     Tangents = (Model * vec4(tangent.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
 	UV = uv;
 
-    gl_Position = MVP * vec4(position, 1.0);
+    gl_Position = CameraViewProj * Model * vec4(position, 1.0);
 
     //UV = UnpackFloat32Into2Floats(uv);
 	VCameraPositionReal = VertDataMisc2.xyz;

@@ -117,7 +117,7 @@ class epriv::ComponentManager::impl final{
         }
         static void _updateBaseBodiesJob(vector<ComponentBaseClass*>& vec){
             for(uint j = 0; j < vec.size(); ++j){
-                ComponentBasicBody& b = *((ComponentBasicBody*)vec.at(j));
+                ComponentBasicBody& b = *(ComponentBasicBody*)vec.at(j);
                 Core::m_Engine->m_ComponentManager->m_i->_performTransformation(b.m_Owner->parent(),b._position,b._rotation,b._scale,b._modelMatrix);
             }
         }
@@ -135,7 +135,7 @@ class epriv::ComponentManager::impl final{
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentRigidBody>();
             vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
             for(auto c:v){
-                ComponentRigidBody& b = *((ComponentRigidBody*)c);
+                ComponentRigidBody& b = *(ComponentRigidBody*)c;
                 Engine::Math::recalculateForwardRightUp(b._rigidBody,b._forward,b._right,b._up);
             }
         }
@@ -150,7 +150,7 @@ class epriv::ComponentManager::impl final{
         }
         static void _updateModelComponentsJob(vector<ComponentBaseClass*>& vec,Camera* camera){
             for(uint j = 0; j < vec.size(); ++j){
-                ComponentModel& modelComponent = *((ComponentModel*)vec.at(j));
+                ComponentModel& modelComponent = *(ComponentModel*)vec.at(j);
                 for(uint i = 0; i < modelComponent.models.size(); ++i){
                     MeshInstance& pair = *modelComponent.models.at(i);
                     if(pair.mesh()){
@@ -171,59 +171,43 @@ class epriv::ComponentManager::impl final{
             }
             epriv::threading::waitForAll();
         }
-        void _updateComponentCameras(const float& dt){
-            uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
-            vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-            for(auto c:v){
-                ComponentCamera& cam = *((ComponentCamera*)c);
-                _defaultUpdateCameraComponent(dt,cam);
+        static void _defaultUpdateCameraComponent(vector<ComponentBaseClass*>& vec,const float& dt){
+            for(auto c:vec){
+                ComponentCamera& cam = *(ComponentCamera*)c;
+				//update view frustrum
+				glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
+				glm::vec4 rows[4];
+				for(ushort i = 0; i < 4; ++i)
+					rows[i] = glm::row(vp,i);
+				for(ushort i = 0; i < 3; ++i){
+					ushort index = i * 2;
+					cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
+					cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
+				}
+				for(ushort i = 0; i < 6; ++i){
+					cam._planes[i] = -cam._planes[i] / glm::length(cam._planes[i]);
+				}	
                 cam.update(dt);
             }
         }
-        void _defaultUpdateCameraComponent(const float& dt,ComponentCamera& cam){
-            //update view frustrum
-			/*
-            glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
-            glm::vec4 rows[4];
-            for(ushort i = 0; i < 4; ++i)
-                rows[i] = glm::row(vp,i);
-            for(ushort i = 0; i < 3; ++i){
-                ushort index = i * 2;
-                cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
-                cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
-            }
-            for(ushort i = 0; i < 6; ++i){
-				glm::vec3 normal(cam._planes[i].x, cam._planes[i].y, cam._planes[i].z);
-                cam._planes[i] = -cam._planes[i] / glm::length(normal);
-            }
-			*/
-            //update view frustrum
-            glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
-            glm::vec4 rowX = glm::row(vp, 0);
-            glm::vec4 rowY = glm::row(vp, 1);
-            glm::vec4 rowZ = glm::row(vp, 2);
-            glm::vec4 rowW = glm::row(vp, 3);
+        void _updateComponentCameras(const float& dt){
+            uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
+            vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
 
-            cam._planes[0] = glm::normalize(rowW + rowX);
-            cam._planes[1] = glm::normalize(rowW - rowX);
-            cam._planes[2] = glm::normalize(rowW + rowY);
-            cam._planes[3] = glm::normalize(rowW - rowY);
-            cam._planes[4] = glm::normalize(rowW + rowZ);
-            cam._planes[5] = glm::normalize(rowW - rowZ);
+            vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
 
-            for(uint i = 0; i < 6; ++i){
-                glm::vec3 normal(cam._planes[i].x, cam._planes[i].y, cam._planes[i].z);
-                cam._planes[i] = -cam._planes[i] / glm::length(normal);
+            for(auto vec:split){
+                epriv::threading::addJob(_defaultUpdateCameraComponent,vec,dt);
             }
+            epriv::threading::waitForAll();
         }
         void _updateCurrentScene(const float& dt){
             Scene* currentScene = Resources::getCurrentScene();
-            Camera* active = currentScene->getActiveCamera();
             for(auto entityID:currentScene->m_Entities){
                 Entity* e = componentManager->_getEntity(entityID);
-                if(e){//should not need this...
+                //if(e){//should not need this...
                     e->update(dt);
-                }
+                //}
             }
             if(currentScene->m_Skybox != nullptr) currentScene->m_Skybox->update();
         }
@@ -235,12 +219,15 @@ class epriv::ComponentManager::impl final{
         }
         void _update(const float& dt,epriv::ComponentManager* super){
             _updateCurrentScene(dt);
+			
             if(!m_Paused){	
                 _updateComponentBaseBodies(dt);
                 _updateComponentRigidBodies(dt);
-                _updateComponentModels(dt);
             }
-            _updateComponentCameras(dt);
+			_updateComponentCameras(dt);
+			if(!m_Paused){
+				_updateComponentModels(dt);
+			}
 
             _destroyQueuedEntities(super);
         }

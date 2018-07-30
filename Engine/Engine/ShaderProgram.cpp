@@ -26,12 +26,9 @@ namespace Engine{
         struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
             Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
             Camera* c = s->getActiveCamera();        if(c == nullptr) return;
-            Renderer::sendUniformMatrix4fSafe("VP",c->getViewProjection());
+
             float fcoeff = (2.0f / glm::log2(c->getFar() + 1.0f)) * 0.5f;
             Renderer::sendUniform1fSafe("fcoeff",fcoeff);
-
-            glm::vec3 camPos = c->getPosition();
-            Renderer::sendUniform3fSafe("CameraPosition",camPos);
 
             if(Renderer::Settings::GodRays::enabled()) Renderer::sendUniform1iSafe("HasGodsRays",1);
             else                                       Renderer::sendUniform1iSafe("HasGodsRays",0);
