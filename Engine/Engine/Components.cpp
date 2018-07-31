@@ -336,16 +336,16 @@ ComponentBasicBody::ComponentBasicBody():epriv::ComponentBodyBaseClass(epriv::Co
     _scale = glm::vec3(1.0f);
     _rotation = glm::quat();
     _modelMatrix = glm::mat4(1.0f);
-    Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
+    Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 ComponentBasicBody::~ComponentBasicBody(){
 }
 void ComponentBasicBody::alignTo(glm::vec3 direction,float speed){
-    Engine::Math::alignTo(_rotation,direction,speed);
-    Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
+    Math::alignTo(_rotation,direction,speed);
+    Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 glm::vec3 ComponentBasicBody::position(){ return glm::vec3(_modelMatrix[3][0],_modelMatrix[3][1],_modelMatrix[3][2]); }
-glm::vec3 ComponentBasicBody::getScreenCoordinates(){ return Engine::Math::getScreenCoordinates(position(),false); }
+glm::vec3 ComponentBasicBody::getScreenCoordinates(){ return Math::getScreenCoordinates(position(),false); }
 glm::vec3 ComponentBasicBody::getScale(){ return _scale; }
 glm::vec3 ComponentBasicBody::forward(){ return _forward; }
 glm::vec3 ComponentBasicBody::right(){ return _right; }
@@ -373,7 +373,7 @@ void ComponentBasicBody::rotate(float pitch,float yaw,float roll){
     if(abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
     if(abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));   //yaw
     if(abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll,   glm::vec3(0,0,1)));   //roll
-    Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
+    Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 void ComponentBasicBody::scale(glm::vec3& amount){ ComponentBasicBody::scale(amount.x,amount.y,amount.z); }
 void ComponentBasicBody::scale(float x,float y,float z){
@@ -388,7 +388,7 @@ void ComponentBasicBody::scale(float x,float y,float z){
 void ComponentBasicBody::setRotation(glm::quat& newRotation){
     newRotation = glm::normalize(newRotation);
     _rotation = newRotation;
-    Engine::Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
+    Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 }
 void ComponentBasicBody::setRotation(float x,float y,float z,float w){ ComponentBasicBody::setRotation(glm::quat(w,x,y,z)); }
 void ComponentBasicBody::setScale(glm::vec3& newScale){ ComponentBasicBody::setScale(newScale.x,newScale.y,newScale.z); }
@@ -538,11 +538,12 @@ void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ Compon
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
     epriv::ComponentBodyBaseClass* baseBody = m_Owner->getComponent<epriv::ComponentBodyBaseClass>();
     epriv::ComponentBodyType::Type type = baseBody->getBodyType();
+    //clean this up a little
     if(type == epriv::ComponentBodyType::BasicBody){
-        return Engine::Math::rayIntersectSphere(  ((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector()  );
+        return Math::rayIntersectSphere(((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector());
     }
     else if(type == epriv::ComponentBodyType::RigidBody){
-        return Engine::Math::rayIntersectSphere(  ((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector()  );
+        return Math::rayIntersectSphere(((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector());
     }
     return false;
 }
@@ -572,7 +573,7 @@ ComponentRigidBody::ComponentRigidBody(Collision* collision,Entity* owner):epriv
     _rigidBody->setFriction(0.3f);
     _rigidBody->setDamping(0.1f,0.4f);//this makes the objects slowly slow down in space, like air friction
     _rigidBody->setUserPointer(this);
-    _rigidBody->setMassProps(  _mass, *(_collision->getInertia())   );
+    _rigidBody->setMassProps(_mass, *(_collision->getInertia()));
 
     if(m_Owner->scene() == Resources::getCurrentScene())
         Physics::addRigidBody(_rigidBody);
@@ -606,7 +607,7 @@ void ComponentRigidBody::translate(glm::vec3& translation,bool local){ Component
 void ComponentRigidBody::translate(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    Engine::Math::translate(_rigidBody,vec,local);
+    Math::translate(_rigidBody,vec,local);
     setPosition(  position() + Engine::Math::btVectorToGLM(vec)  );
 }
 void ComponentRigidBody::rotate(glm::vec3& rotation,bool local){ ComponentRigidBody::rotate(rotation.x,rotation.y,rotation.z,local); }
@@ -661,7 +662,7 @@ void ComponentRigidBody::setRotation(float x,float y,float z,float w){
     _rigidBody->setCenterOfMassTransform(tr);
     _motionState->setWorldTransform(tr);
 
-    Engine::Math::recalculateForwardRightUp(_rigidBody,_forward,_right,_up);
+    Math::recalculateForwardRightUp(_rigidBody,_forward,_right,_up);
 
     clearAngularForces();
 }
@@ -721,21 +722,21 @@ void ComponentRigidBody::setDynamic(bool dynamic){
 void ComponentRigidBody::setLinearVelocity(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    Engine::Math::translate(_rigidBody,vec,local);
+    Math::translate(_rigidBody,vec,local);
     _rigidBody->setLinearVelocity(vec); 
 }
 void ComponentRigidBody::setLinearVelocity(glm::vec3 velocity,bool local){ ComponentRigidBody::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ComponentRigidBody::setAngularVelocity(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    Engine::Math::translate(_rigidBody,vec,local);
+    Math::translate(_rigidBody,vec,local);
     _rigidBody->setAngularVelocity(vec); 
 }
 void ComponentRigidBody::setAngularVelocity(glm::vec3 velocity,bool local){ ComponentRigidBody::setAngularVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ComponentRigidBody::applyForce(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    Engine::Math::translate(_rigidBody,vec,local);
+    Math::translate(_rigidBody,vec,local);
     _rigidBody->applyCentralForce(vec); 
 }
 void ComponentRigidBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
@@ -750,7 +751,7 @@ void ComponentRigidBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local)
 void ComponentRigidBody::applyImpulse(float x,float y,float z,bool local){
     _rigidBody->activate();
     btVector3 vec = btVector3(x,y,z);
-    Engine::Math::translate(_rigidBody,vec,local);
+    Math::translate(_rigidBody,vec,local);
     _rigidBody->applyCentralImpulse(vec);
 }
 void ComponentRigidBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
