@@ -14,7 +14,10 @@ class Texture;
 namespace Engine{
     namespace epriv{
         class FramebufferObject;
-
+        class FramebufferObjectAttatchment;
+        class FramebufferTexture;
+        class RenderbufferObject;
+        
         class FramebufferObjectAttatchment{
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -38,8 +41,7 @@ namespace Engine{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*,float divisor);
-                FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
+                FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*,float divisor = 1.0f);
                 ~FramebufferTexture();
 
                 void resize(uint,uint);
@@ -49,7 +51,6 @@ namespace Engine{
                 void unbind();
                 float divisor();
         };
-
         class RenderbufferObject final: public FramebufferObjectAttatchment{
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -62,7 +63,6 @@ namespace Engine{
                 void bind();
                 void unbind();
         };
-
         class FramebufferObject final: public BindableResource{
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -72,8 +72,7 @@ namespace Engine{
                 ~FramebufferObject();
 
                 void resize(uint,uint);
-                FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment);
-                FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment,float divisor);
+                FramebufferTexture* attatchTexture(Texture*,FramebufferAttatchment::Attatchment,float divisor = 1.0f);
                 RenderbufferObject* attatchRenderBuffer(RenderbufferObject*);
                 uint width();
                 uint height();
