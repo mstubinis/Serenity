@@ -23,7 +23,7 @@ Collision::Collision(ImportedMeshData& data,COLLISION_TYPE type, float mass){
     _init(type,mass);
 }
 void Collision::_init(COLLISION_TYPE type, float mass){
-    if(m_Inertia == nullptr){
+    if(!m_Inertia){
         m_Inertia = new btVector3(0,0,0);
     }
     else{
@@ -118,7 +118,7 @@ void Collision::_load(ImportedMeshData& data, COLLISION_TYPE collisionType){
     }
 }
 void Collision::setMass(float mass){
-    if(m_CollisionShape == nullptr || m_CollisionType == COLLISION_TYPE_STATIC_TRIANGLESHAPE || m_CollisionType == COLLISION_TYPE_NONE) return;
+    if(!m_CollisionShape || m_CollisionType == COLLISION_TYPE_STATIC_TRIANGLESHAPE || m_CollisionType == COLLISION_TYPE_NONE) return;
 
     if(m_CollisionType != COLLISION_TYPE_TRIANGLESHAPE){
         m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
