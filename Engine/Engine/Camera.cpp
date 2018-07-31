@@ -18,13 +18,11 @@ using namespace std;
 class Camera::impl final{
     public:
         void _baseInit(Scene* scene, Camera* super){
+            if(!scene) //might have to check to see if this needs to be placed further down
+                scene = Resources::getCurrentScene();
             scene->addEntity(super);
-
             super->m_BasicBody = new ComponentBasicBody();
             super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
-            if(scene == nullptr)
-                scene = Resources::getCurrentScene();
-
             super->addComponent(super->m_BasicBody);
             super->addComponent(super->m_Camera);	
         }
