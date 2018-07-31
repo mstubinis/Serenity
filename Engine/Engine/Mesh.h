@@ -97,7 +97,7 @@ namespace Engine{
             ImportedMeshData(){ }
             ~ImportedMeshData(){ clear(); }
         };
-        class AnimationData{
+        class AnimationData final{
             friend class ::Mesh;
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -124,7 +124,7 @@ namespace Engine{
         };
     };
 };
-class InternalMeshPublicInterface{
+class InternalMeshPublicInterface final{
     public:
         static void LoadCPU(Mesh*);
         static void LoadGPU(Mesh*);
