@@ -296,7 +296,7 @@ class ShaderP::impl final{
                     if(_length>0){
                         string _name1((char*)_name,_length);
                         GLint _loc = glGetUniformLocation(m_ShaderProgram,_name);
-                        this->m_UniformLocations.emplace(_name1,_loc);
+                        m_UniformLocations.emplace(_name1,_loc);
                     }
                 }
             }
@@ -363,11 +363,12 @@ class UniformBufferObject::impl final{
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
         void _attachToShader(UniformBufferObject* super,ShaderP* _shaderProgram){
-            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(_shaderProgram->program())) return;
-            uint block_index = glGetUniformBlockIndex(_shaderProgram->program(),nameInShader);
+            GLuint& prog = _shaderProgram->program();
+            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(prog)) return;
+            uint block_index = glGetUniformBlockIndex(prog,nameInShader);
             glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
-            glUniformBlockBinding(_shaderProgram->program(), block_index, globalBindingPointNumber);
-            _shaderProgram->m_i->m_AttachedUBOs.emplace(_shaderProgram->program(),true);
+            glUniformBlockBinding(prog, block_index, globalBindingPointNumber);
+            _shaderProgram->m_i->m_AttachedUBOs.emplace(prog,true);
         }
 };
 UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber); }
