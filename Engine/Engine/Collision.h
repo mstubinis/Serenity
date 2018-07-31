@@ -6,6 +6,7 @@
 class btTriangleMesh;
 class btVector3;
 class btCollisionShape;
+class Collision;
 struct ImportedMeshData;
 
 typedef unsigned int uint;
