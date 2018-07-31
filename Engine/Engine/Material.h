@@ -141,8 +141,10 @@ namespace Engine{
                 Mesh* mesh();
                 std::unordered_map<uint,std::vector<MeshInstance*>>& meshInstancesEntities();
 
-                void addMeshInstance(Entity* entity,MeshInstance*);                  void removeMeshInstance(Entity* entity,MeshInstance*);
-                void addMeshInstance(uint entityID,MeshInstance*);                   void removeMeshInstance(uint entityID,MeshInstance*);
+                void addMeshInstance(Entity* entity,MeshInstance*);
+                void addMeshInstance(uint entityID,MeshInstance*);
+                void removeMeshInstance(Entity* entity,MeshInstance*);
+                void removeMeshInstance(uint entityID,MeshInstance*);
         };
     };
 };
