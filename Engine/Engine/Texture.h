@@ -12,6 +12,7 @@
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
+class Texture;
 namespace sf{ class Image; }
 namespace Engine{
     namespace epriv{
@@ -52,10 +53,13 @@ class Texture: public EngineResource{
         virtual void load();
         virtual void unload();
 
-        void setXWrapping(TextureWrap::Wrap);  void setYWrapping(TextureWrap::Wrap);  void setZWrapping(TextureWrap::Wrap);
+        void setXWrapping(TextureWrap::Wrap);
+        void setYWrapping(TextureWrap::Wrap);
+        void setZWrapping(TextureWrap::Wrap);
         void setWrapping(TextureWrap::Wrap);
 
-        void setMinFilter(TextureFilter::Filter);  void setMaxFilter(TextureFilter::Filter);
+        void setMinFilter(TextureFilter::Filter);
+        void setMaxFilter(TextureFilter::Filter);
         void setFilter(TextureFilter::Filter);
 
         static void setXWrapping(GLuint type,TextureWrap::Wrap);
@@ -63,7 +67,8 @@ class Texture: public EngineResource{
         static void setZWrapping(GLuint type,TextureWrap::Wrap);
         static void setWrapping(GLuint type,TextureWrap::Wrap);
 
-        static void setMinFilter(GLuint type,TextureFilter::Filter);  static void setMaxFilter(GLuint type,TextureFilter::Filter);
+        static void setMinFilter(GLuint type,TextureFilter::Filter);
+        static void setMaxFilter(GLuint type,TextureFilter::Filter);
         static void setFilter(GLuint type,TextureFilter::Filter);
 
         void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
