@@ -57,14 +57,6 @@ class epriv::FramebufferTexture::impl{
         GLuint m_PixelFormat;
         GLuint m_PixelType;
         float m_Divisor;
-        void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t){
-            m_Texture = t;
-            m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
-            m_PixelType = ImagePixelType::at(t->pixelType());
-            glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
-            glBindTexture(m_Texture->type(),0);
-            m_Divisor = 1.0f;
-        }
         void _init(FramebufferTexture* super, FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t,float divisor){
             m_Texture = t;
             m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
@@ -84,9 +76,6 @@ class epriv::FramebufferTexture::impl{
 };
 epriv::FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t,float d):FramebufferObjectAttatchment(_fbo,a,t),m_i(new impl){
     m_i->_init(this,_fbo,a,t,d);
-}
-epriv::FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t):FramebufferObjectAttatchment(_fbo,a,t),m_i(new impl){
-    m_i->_init(this,_fbo,a,t);
 }
 epriv::FramebufferTexture::~FramebufferTexture(){ m_i->_destruct(this); }
 void epriv::FramebufferTexture::resize(uint w, uint h){ m_i->_resize(this,w,h); }
@@ -124,16 +113,16 @@ void epriv::RenderbufferObject::unbind(){ Renderer::unbindRBO(); }
 namespace Engine{
     namespace epriv{
         struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
-            FramebufferObject* fbo = (FramebufferObject*)r;
-            Renderer::setViewport(0,0,fbo->width(),fbo->height());
-            Renderer::bindFBO(fbo);
-            for(auto attatchment:fbo->attatchments()){
+            FramebufferObject& fbo = *(FramebufferObject*)r;
+            Renderer::setViewport(0,0,fbo.width(),fbo.height());
+            Renderer::bindFBO(&fbo);
+            for(auto attatchment:fbo.attatchments()){
                 attatchment.second->bind();
             }
         }};
         struct FramebufferObjectDefaultUnbindFunctor{void operator()(BindableResource* r) const {
-            FramebufferObject* fbo = (FramebufferObject*)r;
-            for(auto attatchment:fbo->attatchments()){
+            FramebufferObject& fbo = *(FramebufferObject*)r;
+            for(auto attatchment:fbo.attatchments()){
                 attatchment.second->unbind();
             }
             Renderer::unbindFBO();
@@ -182,19 +171,10 @@ class epriv::FramebufferObject::impl{
             Renderer::setViewport(0,0,new_width,new_height);
             Renderer::bindFBO(m_FBO);
             m_FramebufferWidth = new_width;
-			m_FramebufferHeight = new_height;
+            m_FramebufferHeight = new_height;
             for(auto attatchment:m_Attatchments){
                 attatchment.second->resize(new_width,new_height);
             }
-        }
-        FramebufferTexture* _attatchTexture(FramebufferObject* super,Texture* _t,FramebufferAttatchment::Attatchment a){
-            if(m_Attatchments.count(a)) return nullptr;
-            Renderer::bindFBO(m_FBO);
-            glFramebufferTexture2D(GL_FRAMEBUFFER,FramebufferAttatchment::at(a),_t->type(),_t->address(),0);
-            FramebufferTexture* t = new FramebufferTexture(super,a,_t);
-            m_Attatchments.emplace(a,t);
-            Renderer::unbindFBO();
-            return t;
         }
         FramebufferTexture* _attatchTexture(FramebufferObject* super,Texture* _t,FramebufferAttatchment::Attatchment a,float divisor){
             if(m_Attatchments.count(a)) return nullptr;
@@ -210,7 +190,7 @@ class epriv::FramebufferObject::impl{
             Renderer::bindFBO(m_FBO);
             Renderer::bindRBO(rbo);
             glRenderbufferStorage(GL_RENDERBUFFER,rbo->internalFormat(), super->width(), super->height());
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->internalFormat(),GL_RENDERBUFFER,rbo->address());
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER,rbo->internalFormat(),GL_RENDERBUFFER,rbo->address());
             m_Attatchments.emplace(rbo->attatchment(),rbo);
             Renderer::unbindRBO();
             Renderer::unbindFBO();
@@ -236,7 +216,6 @@ epriv::FramebufferObject::FramebufferObject(string name,uint w,uint h,ImageInter
 }
 epriv::FramebufferObject::~FramebufferObject(){ m_i->_destruct(this); }
 void epriv::FramebufferObject::resize(uint w,uint h){ m_i->_resize(this,w,h); }
-epriv::FramebufferTexture* epriv::FramebufferObject::attatchTexture(Texture* t,FramebufferAttatchment::Attatchment a){ return m_i->_attatchTexture(this,t,a); }
 epriv::FramebufferTexture* epriv::FramebufferObject::attatchTexture(Texture* t,FramebufferAttatchment::Attatchment a,float d){ return m_i->_attatchTexture(this,t,a,d); }
 epriv::RenderbufferObject* epriv::FramebufferObject::attatchRenderBuffer(epriv::RenderbufferObject* t){ return m_i->_attatchRenderbuffer(this,t); }
 uint epriv::FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
