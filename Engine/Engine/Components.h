@@ -42,7 +42,7 @@ typedef boost::typeindex::type_index boost_type_index;
 
 namespace Engine{
     namespace epriv{
-		class ComponentInternalFunctionality;
+        class ComponentInternalFunctionality;
         struct MeshMaterialPair;
         class ComponentTypeRegistry;
         class ComponentManager;
@@ -424,10 +424,10 @@ class ComponentCamera: public ComponentBaseClass{
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
 
-		float getAngle();    void setAngle(float);
-		float getAspect();   void setAspect(float);
-		float getNear();     void setNear(float);
-		float getFar();      void setFar(float);
+        float getAngle();    void setAngle(float);
+        float getAspect();   void setAspect(float);
+        float getNear();     void setNear(float);
+        float getFar();      void setFar(float);
 
         bool sphereIntersectTest(glm::vec3 position,float radius);
 };
@@ -488,7 +488,7 @@ class Entity{
             if(componentID == std::numeric_limits<uint>::max()) return;
             component->m_Owner = nullptr;
             uint sceneSlot = Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
-            std::vector<ComponentBaseClass*>& v = Engine::epriv::ComponentManager::m_ComponentVectors.at(sceneSlot);
+            std::vector<ComponentBaseClass*>& v      = Engine::epriv::ComponentManager::m_ComponentVectors.at(sceneSlot);
             std::vector<ComponentBaseClass*>& vScene = Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(sceneSlot);
             removeFromVector(v,component);
             removeFromVector(vScene,component);
