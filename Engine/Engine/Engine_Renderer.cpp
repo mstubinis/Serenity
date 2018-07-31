@@ -45,74 +45,71 @@ namespace Engine{
 
         struct srtKeyShaderP final{inline bool operator() ( ShaderP* _1,  ShaderP* _2){return (_1->name() < _2->name());}};
 
-        struct EngineInternalShaders final{
-            enum Shader{
-                FullscreenVertex,
-                FXAAFrag,
-                VertexBasic,
-                VertexHUD,
-                VertexSkybox,
-                ForwardFrag,
-                DeferredFrag,
-                DeferredFragHUD,
-                DeferredFragSkybox,
-                DeferredFragSkyboxFake,
-                CopyDepthFrag,
-                SSAOFrag,
-                HDRFrag,
-                BlurFrag,
-                GodRaysFrag,
-                FinalFrag,
-                LightingFrag,
-                LightingGIFrag,
-                CubemapConvoludeFrag,
-                CubemapPrefilterEnvFrag,
-                BRDFPrecomputeFrag,
-                GrayscaleFrag,
-                StencilPassFrag,
-                SMAAVertex1,
-                SMAAVertex2,
-                SMAAVertex3,
-                SMAAVertex4,
-                SMAAFrag1Stencil,
-                SMAAFrag1,
-                SMAAFrag2,
-                SMAAFrag3,
-                SMAAFrag4,
+        struct EngineInternalShaders final{enum Shader{
+            FullscreenVertex,
+            FXAAFrag,
+            VertexBasic,
+            VertexHUD,
+            VertexSkybox,
+			FogVertex,
+			FogFrag,
+            ForwardFrag,
+            DeferredFrag,
+            DeferredFragHUD,
+            DeferredFragSkybox,
+            DeferredFragSkyboxFake,
+            CopyDepthFrag,
+            SSAOFrag,
+            HDRFrag,
+            BlurFrag,
+            GodRaysFrag,
+            FinalFrag,
+            LightingFrag,
+            LightingGIFrag,
+            CubemapConvoludeFrag,
+            CubemapPrefilterEnvFrag,
+            BRDFPrecomputeFrag,
+            GrayscaleFrag,
+            StencilPassFrag,
+            SMAAVertex1,
+            SMAAVertex2,
+            SMAAVertex3,
+            SMAAVertex4,
+            SMAAFrag1Stencil,
+            SMAAFrag1,
+            SMAAFrag2,
+            SMAAFrag3,
+            SMAAFrag4,
 
-                _TOTAL
-            };
-        };
-        struct EngineInternalShaderPrograms final{
-            enum Program{
-                //Deferred, //using the internal resource static one instead
-                //Forward, //using the internal resource static one instead
-                DeferredHUD,
-                DeferredGodRays,
-                DeferredBlur,
-                DeferredHDR,
-                DeferredSSAO,
-                DeferredFinal,
-                DeferredFXAA,
-                DeferredSkybox,
-                DeferredSkyboxFake,
-                CopyDepth,
-                DeferredLighting,
-                DeferredLightingGI,
-                CubemapConvolude,
-                CubemapPrefilterEnv,
-                BRDFPrecomputeCookTorrance,
-                Grayscale,
-                StencilPass,
-                SMAA1Stencil,
-                SMAA1,
-                SMAA2,
-                SMAA3,
-                SMAA4,
+        _TOTAL};};
+        struct EngineInternalShaderPrograms final{enum Program{
+            //Deferred, //using the internal resource static one instead
+            //Forward, //using the internal resource static one instead
+			Fog,
+            DeferredHUD,
+            DeferredGodRays,
+            DeferredBlur,
+            DeferredHDR,
+            DeferredSSAO,
+            DeferredFinal,
+            DeferredFXAA,
+            DeferredSkybox,
+            DeferredSkyboxFake,
+            CopyDepth,
+            DeferredLighting,
+            DeferredLightingGI,
+            CubemapConvolude,
+            CubemapPrefilterEnv,
+            BRDFPrecomputeCookTorrance,
+            Grayscale,
+            StencilPass,
+            SMAA1Stencil,
+            SMAA1,
+            SMAA2,
+            SMAA3,
+            SMAA4,
 
-                _TOTAL
-            };
-        };
+        _TOTAL};};
 
         struct TextureRenderInfo final{
             Texture* texture;
@@ -159,6 +156,11 @@ namespace Engine{
 
 class epriv::RenderManager::impl final{
     public:
+
+        #pragma region FogInfo
+        bool fog;
+        #pragma endregion
+
         #pragma region FXAAInfo
         float FXAA_REDUCE_MIN;
         float FXAA_REDUCE_MUL;
@@ -264,6 +266,10 @@ class epriv::RenderManager::impl final{
         void _init(const char* name,uint& w,uint& h){
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
 
+            #pragma region FogInfo
+            fog = false;
+            #pragma endregion
+
             #pragma region FXAAInfo
             FXAA_REDUCE_MIN = 0.0078125f; // (1 / 128)
             FXAA_REDUCE_MUL = 0.125f;     // (1 / 8)
@@ -363,6 +369,9 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL,nullptr);
 
             #pragma region EngineInternalShadersAndPrograms
+
+			m_InternalShaders.at(EngineInternalShaders::FogVertex) = new Shader(epriv::EShaders::fog_vert,ShaderType::Vertex,false);
+			m_InternalShaders.at(EngineInternalShaders::FogFrag) = new Shader(epriv::EShaders::fog_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::FullscreenVertex) = new Shader(epriv::EShaders::fullscreen_quad_vertex,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::FXAAFrag) = new Shader(epriv::EShaders::fxaa_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::VertexBasic) = new Shader(epriv::EShaders::vertex_basic,ShaderType::Vertex,false);
@@ -398,6 +407,7 @@ class epriv::RenderManager::impl final{
 
             epriv::InternalShaderPrograms::Deferred = new ShaderP("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
             epriv::InternalShaderPrograms::Forward = new ShaderP("Forward",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::ForwardFrag),ShaderRenderPass::Forward);
+			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::Fog) = new ShaderP("Fog",m_InternalShaders.at(EngineInternalShaders::FogVertex),m_InternalShaders.at(EngineInternalShaders::FogFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur) = new ShaderP("Deferred_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BlurFrag),ShaderRenderPass::Postprocess);
@@ -2251,6 +2261,11 @@ bool epriv::RenderManager::_unbindMaterial(){
 void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
+
+
+bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
+void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
+void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }
 
 void Renderer::Settings::FXAA::setReduceMin(float r){ renderManager->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
 void Renderer::Settings::FXAA::setReduceMul(float r){ renderManager->FXAA_REDUCE_MUL = glm::max(0.0f,r); }

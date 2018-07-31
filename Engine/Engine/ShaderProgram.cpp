@@ -79,44 +79,49 @@ class ShaderP::impl final{
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
 
-        void _insertStringAtLine(string& source, const string& newLineContent,uint lineToInsertAt){
-            istringstream str(source); string line; 
-            vector<string> lines;
-            uint count = 0;
-            while(std::getline(str,line)){
-                lines.push_back(line + "\n");
-                if(count == lineToInsertAt){
-                    lines.push_back(newLineContent + "\n");
-                }
-                ++count;
+        void _insertStringAtLine(string& source, const string& newLineContent,uint lineToInsertAt){   
+            if(lineToInsertAt == 0){
+                source = newLineContent + "\n" + source;
             }
-            source = "";
-            for(auto line:lines){
-                source = source + line;
+            else{
+                istringstream str(source);
+                string line; 
+                vector<string> lines;
+                uint count = 0;
+                while(getline(str,line)){
+                    lines.push_back(line + "\n");
+                    if(count == lineToInsertAt){
+                        lines.push_back(newLineContent + "\n");
+                    }
+                    ++count;
+                }
+                source = "";
+                for(auto line:lines){
+                    source += line;
+                }
             }
         }
         void _convertCode(string& _data1,Shader* shader1,string& _data2,Shader* shader2,ShaderP* super){ _convertCode(_data1,shader1,super); _convertCode(_data2,shader2,super); }
         void _convertCode(string& _d,Shader* shader,ShaderP* super){
-            istringstream str(_d); string line; 
+            istringstream str(_d); 
             
-            //get the first line with actual content
-            while(true){
-                getline(str,line);
-                if(line != "" && line != "\n"){
-                    break;
+            //see if we actually have a version line
+            string versionLine;
+            if(sfind(_d,"#version ")){
+                //use the found one
+                while(true){
+                    getline(str,versionLine); if(sfind(versionLine,"#version ")){ break; }
                 }
             }
-            //see if we actually have a version line
-            if(!sfind(line,"#version")){
+            else{
+                //generate one
                 string core = "";
-                if(epriv::RenderManager::GLSL_VERSION >= 330)
-                    core = " core";
-                line = "#version " + boost::lexical_cast<string>(epriv::RenderManager::GLSL_VERSION) + core + "\n";
-                _d = line +  _d;
+                if(epriv::RenderManager::GLSL_VERSION >= 330) core = " core";
+                versionLine = "#version " + boost::lexical_cast<string>(epriv::RenderManager::GLSL_VERSION) + core + "\n";
+                _insertStringAtLine(_d,versionLine,0);
             }
 
-
-            string versionNumberString = regex_replace(line,regex("([^0-9])"),"");
+            string versionNumberString = regex_replace(versionLine,regex("([^0-9])"),"");
             uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
             if(versionNumber >= 130){
                 if(shader->type() == ShaderType::Vertex){
@@ -125,8 +130,8 @@ class ShaderP::impl final{
                 else if(shader->type() == ShaderType::Fragment){
                     boost::replace_all(_d, "varying", "in");
 
-                    boost::replace_all(_d, "gl_FragColor", "FRAGMENT_OUTPUT_COLOR");
-                    _insertStringAtLine(_d,"out vec4 FRAGMENT_OUTPUT_COLOR;",1);
+                    boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
+                    _insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
                 }
             }
             if(versionNumber >= 140){

@@ -43,10 +43,6 @@ class Engine_Window::impl final{
             settings.antialiasingLevel = 0;
             settings.majorVersion = _majorVersion;
             settings.minorVersion = _minorVersion;
-            string core = "";
-            if(_glslVersion >= 330)
-                core = " core";
-            epriv::EShaders::version = "#version " + to_string(_glslVersion) + core + "\n";
 
             #ifdef _DEBUG
                 settings.attributeFlags = settings.Debug;

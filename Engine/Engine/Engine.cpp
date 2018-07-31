@@ -84,7 +84,7 @@ void Engine::init(const char* name,uint w,uint h){
 
 
     //init the game here
-    Engine::setMousePosition(w/2,h/2);
+	Engine::setMousePosition(w/2,h/2);
     Game::initResources();
     epriv::threading::waitForAll();
     Game::initLogic();
@@ -121,8 +121,8 @@ void updateLogic(float dt){
     Game::update(dt);
     Resources::getCurrentScene()->update(dt);
     epriv::Core::m_Engine->m_ComponentManager->_update(dt);
-    epriv::Core::m_Engine->m_EventManager->_update(dt);
     epriv::Core::m_Engine->m_ThreadManager->_update(dt);
+	epriv::Core::m_Engine->m_EventManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 

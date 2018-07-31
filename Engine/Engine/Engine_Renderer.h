@@ -79,6 +79,12 @@ namespace Engine{
 
             void enableDrawPhysicsInfo(bool b = true);   void disableDrawPhysicsInfo();
 
+			namespace Fog{
+				void enable(bool b = true);
+				void disable();
+				bool enabled();
+			};
+
             namespace SMAA{
                 void setThreshold(float f);
                 void setSearchSteps(uint s);

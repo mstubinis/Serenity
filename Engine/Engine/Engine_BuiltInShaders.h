@@ -11,8 +11,6 @@ namespace Engine{
                 static void init();
                 static void convertShaderCode(std::string&);
 
-                static std::string version;
-
                 static std::string constants;
                 static std::string conditional_functions;
                 static std::string float_into_2_floats;
@@ -25,6 +23,8 @@ namespace Engine{
                 static std::string vertex_hud;
                 static std::string vertex_skybox;
                 
+				static std::string fog_vert;
+				static std::string fog_frag;
                 static std::string stencil_passover;
 
                 static std::string smaa_common;
