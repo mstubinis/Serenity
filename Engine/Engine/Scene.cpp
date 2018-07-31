@@ -21,7 +21,7 @@ Scene::Scene(string name){
 
     epriv::Core::m_Engine->m_ResourceManager->_addScene(this);
 
-    if(Resources::getCurrentScene() == nullptr){
+    if(!Resources::getCurrentScene()){
         Resources::setCurrentScene(this);
     }
 }
@@ -52,27 +52,26 @@ void Scene::setActiveCamera(Camera* c){
 
 void Scene::centerSceneToObject(Entity* center){
     epriv::ComponentBodyBaseClass& bodyBase = *(center->getComponent<epriv::ComponentBodyBaseClass>());
-    glm::vec3 offset = -(bodyBase.position());
-    for(auto object:m_Entities){
-        Entity* e = getEntity(object);
+    for(auto entityID:m_Entities){
+        Entity* e = getEntity(entityID);
         epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
-        if(e != center && e->parent() == nullptr){
-            entityBody.setPosition(entityBody.position() + offset);
+        if(e != center && !e->parent()){
+            entityBody.setPosition(entityBody.position() - bodyBase.position());
         }
     }
-    if(center->parent() == nullptr)
+    if(!center->parent()){
         bodyBase.setPosition(0.0f,0.0f,0.0f);
+    }
 }
 Scene::~Scene(){
     SAFE_DELETE(m_Skybox);
 }
 void Scene::update(const float& dt){
 }
-void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
-
 glm::vec3 Scene::getBackgroundColor(){ return m_BackgroundColor; }
 std::vector<uint>& Scene::entities(){ return m_Entities; }
 vector<SunLight*>& Scene::lights() { return m_Lights; }
 unordered_map<string,LightProbe*>& Scene::lightProbes(){ return m_LightProbes; }
 SkyboxEmpty* Scene::skybox() const { return m_Skybox; }
 void Scene::setSkybox(SkyboxEmpty* s){ m_Skybox = s; }
+void Scene::setBackgroundColor(float r, float g, float b){ Math::setColor(m_BackgroundColor,r,g,b); }
