@@ -5,10 +5,13 @@
 #include "Engine_Math.h"
 #include "BindableResource.h"
 
-class Mesh;
-class Material;
 struct Handle;
+
 class Entity;
+class Material;
+class Mesh;
+class MeshInstanceAnimation;
+class MeshInstance;
 
 namespace Engine{
     namespace epriv{
@@ -32,17 +35,17 @@ class MeshInstance final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstance(Entity*,Mesh*,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
-        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3& = glm::vec3(0),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0));
+        MeshInstance(Entity*,Mesh*,Material*,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
+        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
+        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
+        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
         ~MeshInstance();
 
         Mesh* mesh();
+        Material* material();
         Entity* parent();
         glm::vec4& color();
         glm::vec3& godRaysColor();
-        Material* material();
         glm::mat4& model();
         glm::vec3& position();
         glm::quat& orientation();
