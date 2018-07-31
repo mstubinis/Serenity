@@ -31,19 +31,19 @@ class ShaderType{public:enum Type{
 //Core since version 3.1 (GLSL 140)
 class UniformBufferObject final{
     private:
-	    class impl; std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
 
-		static UniformBufferObject* UBO_CAMERA;
+        static UniformBufferObject* UBO_CAMERA;
 
-		static GLint MAX_UBO_BINDINGS;
-		static uint CUSTOM_UBO_AUTOMATIC_COUNT;
+        static GLint MAX_UBO_BINDINGS;
+        static uint CUSTOM_UBO_AUTOMATIC_COUNT;
 
-		UniformBufferObject(const char* nameInShader,uint sizeofStruct,int globalBindingPointIndex = -1);
-		~UniformBufferObject();
+        UniformBufferObject(const char* nameInShader,uint sizeofStruct,int globalBindingPointIndex = -1);
+        ~UniformBufferObject();
 
-		void attachToShader(ShaderP* shaderProgram);
-		void updateData(void* data);
+        void attachToShader(ShaderP* shaderProgram);
+        void updateData(void* data);
 };
 
 class Shader final: public EngineResource{
