@@ -30,8 +30,7 @@ string epriv::EShaders::fullscreen_quad_vertex;
 string epriv::EShaders::vertex_basic;
 string epriv::EShaders::vertex_hud;
 string epriv::EShaders::vertex_skybox;
-string epriv::EShaders::fog_vert;
-string epriv::EShaders::fog_frag;
+string epriv::EShaders::lighting_vert;
 string epriv::EShaders::stencil_passover;
 string epriv::EShaders::smaa_common;
 string epriv::EShaders::smaa_frag_1_stencil;
@@ -303,8 +302,8 @@ epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::con
 
 #pragma endregion
 
-#pragma region FullscreenQuadVertex
-epriv::EShaders::fullscreen_quad_vertex = 
+#pragma region LightingVertex
+epriv::EShaders::lighting_vert = 
     "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
@@ -690,33 +689,24 @@ epriv::EShaders::stencil_passover = epriv::EShaders::normals_octahedron_compress
 
 #pragma endregion
 
-#pragma region FogVert
-epriv::EShaders::fog_vert = 
-	"\n"
-	"void main(){\n"
-	"}\n"
-	"\n";
-#pragma endregion
-
-#pragma region FogFrag
-//http://www.terathon.com/lengyel/Lengyel-UnifiedFog.pdf
-//https://stackoverflow.com/questions/21549456/how-to-implement-a-ground-fog-glsl-shader
-epriv::EShaders::fog_frag = 
-	"\n"
-	"uniform vec3 aV;\n" // (a / 2) * V
-	"uniform vec3 fogColor;\n"
-	"varying float c1;\n" // k * (dot(PlaneF,PixelFragment) + dot(PlaneF,CamPosition))
-	"varying float c2;\n" // (1 - 2k) * (dot(PlaneF,PixelFragment)
-	"varying float F_dot_V;\n"
-	"void main(){\n"
-	"	vec4 color = vec4(0.0);\n" // final color (input color via sampler2D?)
-	"	float g = min(c2, 0.0);\n"// Calculate g(P) using Equation (13)
-	"	g = -length(aV) * (c1 - g * g / abs(F_dot_V));\n"
-	"	float f = clamp(exp2(-g),0.0,1.0);\n"// Calculate fog fraction and apply
-	"	gl_FragColor.rgb = color.rgb * f + fogColor * (1.0 - f);\n"
-	"	gl_FragColor.a = color.a;\n"
-	"}\n";
-
+#pragma region FullscreenQuadVertex
+epriv::EShaders::fullscreen_quad_vertex = 
+    "\n"
+    "uniform mat4 MVP;\n"
+    "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
+    "\n"
+    "attribute vec3 position;\n"
+    "attribute vec2 uv;\n"
+    "\n"
+    "varying vec2 texcoords;\n"
+    "\n"
+    "void main(){\n"
+    "    vec3 vert = position;\n"
+    "    vert.x *= screenSizeDivideBy2.x;\n"
+    "    vert.y *= screenSizeDivideBy2.y;\n"
+    "    texcoords = uv;\n"
+    "    gl_Position = MVP * vec4(vert,1.0);\n"
+    "}";
 #pragma endregion
 
 #pragma region SMAA
@@ -1347,15 +1337,6 @@ epriv::EShaders::forward_frag =
 epriv::EShaders::forward_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::forward_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::forward_frag +=
-    "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){\n"
-    "    vec4 r = vec4(0.0);\n"
-    "    float Alpha = paint.a + canvas.a * (1.0 - paint.a);\n"
-    "    r.r = (paint.r * paint.a + canvas.r * canvas.a * (1.0-paint.a)) / Alpha;\n"
-    "    r.g = (paint.g * paint.a + canvas.g * canvas.a * (1.0-paint.a)) / Alpha;\n"
-    "    r.b = (paint.b * paint.a + canvas.b * canvas.a * (1.0-paint.a)) / Alpha;\n"
-    "    r.a = Alpha;\n"
-    "    return r;\n"
-    "}\n"
     "vec4 Reflection(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
     "    vec4 r = vec4(0.0);\n"
     "    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,_uv).r;\n"
@@ -1504,15 +1485,6 @@ epriv::EShaders::deferred_frag =
 epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::deferred_frag +=
-    "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){\n"
-    "    vec4 r = vec4(0.0);\n"
-    "    float Alpha = paint.a + canvas.a * (1.0 - paint.a);\n"
-    "    r.r = (paint.r * paint.a + canvas.r * canvas.a * (1.0-paint.a)) / Alpha;\n"
-    "    r.g = (paint.g * paint.a + canvas.g * canvas.a * (1.0-paint.a)) / Alpha;\n"
-    "    r.b = (paint.b * paint.a + canvas.b * canvas.a * (1.0-paint.a)) / Alpha;\n"
-    "    r.a = Alpha;\n"
-    "    return r;\n"
-    "}\n"
     "vec4 Reflection(vec2 _uv,vec4 d, vec3 cpos, vec3 n, vec3 wpos){\n"
     "    vec4 r = vec4(0.0);\n"
     "    r = textureCube(ReflectionTexture,reflect(n,normalize(cpos - wpos))) * texture2D(ReflectionTextureMap,_uv).r;\n"
@@ -1897,14 +1869,21 @@ epriv::EShaders::final_frag =
     "uniform sampler2D gDiffuseMap;\n"
     "uniform sampler2D gMiscMap;\n"
     "uniform sampler2D gBloomMap;\n"
+    "uniform sampler2D gDepthMap;\n"
     "\n"
     "uniform int HasSSAO;\n"
     "uniform int HasBloom;\n"
+    "uniform int HasFog;\n"
+    "\n"
+    "uniform vec4 FogColor;\n"
+    "uniform float FogDistNull;\n"
+    "uniform float FogDistBlend;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
 epriv::EShaders::final_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_functions;
+epriv::EShaders::final_frag += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::final_frag +=
     "void main(){\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, texcoords).rgb;\n"
@@ -1921,6 +1900,17 @@ epriv::EShaders::final_frag +=
     "        hdr += bloom;\n"
     "    }\n"
     "    gl_FragColor = (vec4(hdr,1.0));\n"
+    "\n"
+    "    if(HasFog == 1){\n"
+    "        float distFrag = abs(distance(reconstruct_world_pos(texcoords,CameraNear,CameraFar),CameraPosition));\n"
+    "        float distVoid = FogDistNull + FogDistBlend;\n"
+    "        float distBlendIn = FogDistBlend - (distVoid - distFrag);\n"
+    "        float omega = smoothstep(0.0,1.0,(distBlendIn / FogDistBlend));\n"
+    //"      float omega = mix(0.0,1.0,(distBlendIn / FogDistBlend));\n"
+    "        vec4 fc = FogColor * clamp(omega,0.0,1.0);\n"
+    "        gl_FragColor = PaintersAlgorithm(fc,gl_FragColor);\n"
+    "    }\n"
+    "\n"
     "}";
 
 #pragma endregion
@@ -2269,9 +2259,8 @@ epriv::EShaders::lighting_frag_gi +=
     convertShaderCode(vertex_basic);
     convertShaderCode(vertex_hud);
     convertShaderCode(vertex_skybox);
-	convertShaderCode(stencil_passover);
-	convertShaderCode(fog_vert);
-	convertShaderCode(fog_frag);
+    convertShaderCode(stencil_passover);
+    convertShaderCode(lighting_vert);
     convertShaderCode(smaa_vertex_1);
     convertShaderCode(smaa_frag_1);
     convertShaderCode(smaa_vertex_2);

@@ -82,6 +82,12 @@ namespace Engine{
 				void enable(bool b = true);
 				void disable();
 				bool enabled();
+				void setColor(glm::vec4& color);
+				void setColor(float r,float g,float b,float a);
+				void setNullDistance(float d);
+				void setBlendDistance(float d);
+				float getNullDistance();
+				float getBlendDistance();
 			};
 
             namespace SMAA{

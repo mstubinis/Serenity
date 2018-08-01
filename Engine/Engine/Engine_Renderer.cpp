@@ -51,8 +51,7 @@ namespace Engine{
             VertexBasic,
             VertexHUD,
             VertexSkybox,
-			FogVertex,
-			FogFrag,
+            LightingVertex,
             ForwardFrag,
             DeferredFrag,
             DeferredFragHUD,
@@ -85,7 +84,6 @@ namespace Engine{
         struct EngineInternalShaderPrograms final{enum Program{
             //Deferred, //using the internal resource static one instead
             //Forward, //using the internal resource static one instead
-			Fog,
             DeferredHUD,
             DeferredGodRays,
             DeferredBlur,
@@ -159,6 +157,9 @@ class epriv::RenderManager::impl final{
 
         #pragma region FogInfo
         bool fog;
+        float fog_distNull;
+        float fog_distBlend;
+        glm::vec4 fog_color;
         #pragma endregion
 
         #pragma region FXAAInfo
@@ -268,6 +269,9 @@ class epriv::RenderManager::impl final{
 
             #pragma region FogInfo
             fog = false;
+            fog_distNull = 5.0f;
+            fog_distBlend = 65.0f;
+            fog_color = glm::vec4(1.0f,1.0f,1.0f,0.95f);
             #pragma endregion
 
             #pragma region FXAAInfo
@@ -370,8 +374,7 @@ class epriv::RenderManager::impl final{
 
             #pragma region EngineInternalShadersAndPrograms
 
-			m_InternalShaders.at(EngineInternalShaders::FogVertex) = new Shader(epriv::EShaders::fog_vert,ShaderType::Vertex,false);
-			m_InternalShaders.at(EngineInternalShaders::FogFrag) = new Shader(epriv::EShaders::fog_frag,ShaderType::Fragment,false);
+            m_InternalShaders.at(EngineInternalShaders::LightingVertex) = new Shader(epriv::EShaders::lighting_vert,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::FullscreenVertex) = new Shader(epriv::EShaders::fullscreen_quad_vertex,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::FXAAFrag) = new Shader(epriv::EShaders::fxaa_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::VertexBasic) = new Shader(epriv::EShaders::vertex_basic,ShaderType::Vertex,false);
@@ -407,7 +410,6 @@ class epriv::RenderManager::impl final{
 
             epriv::InternalShaderPrograms::Deferred = new ShaderP("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
             epriv::InternalShaderPrograms::Forward = new ShaderP("Forward",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::ForwardFrag),ShaderRenderPass::Forward);
-			m_InternalShaderPrograms.at(EngineInternalShaderPrograms::Fog) = new ShaderP("Fog",m_InternalShaders.at(EngineInternalShaders::FogVertex),m_InternalShaders.at(EngineInternalShaders::FogFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur) = new ShaderP("Deferred_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BlurFrag),ShaderRenderPass::Postprocess);
@@ -418,7 +420,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox) = new ShaderP("Deferred_Skybox",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::DeferredFragSkybox),ShaderRenderPass::Geometry);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake) = new ShaderP("Deferred_Skybox_Fake",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::DeferredFragSkyboxFake),ShaderRenderPass::Geometry);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth) = new ShaderP("Copy_Depth",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::CopyDepthFrag),ShaderRenderPass::Postprocess);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting) = new ShaderP("Deferred_Light",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::LightingFrag),ShaderRenderPass::Lighting);
+            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting) = new ShaderP("Deferred_Light",m_InternalShaders.at(EngineInternalShaders::LightingVertex),m_InternalShaders.at(EngineInternalShaders::LightingFrag),ShaderRenderPass::Lighting);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI) = new ShaderP("Deferred_Light_GI",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::LightingGIFrag),ShaderRenderPass::Lighting);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude) = new ShaderP("Cubemap_Convolude",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapConvoludeFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv) = new ShaderP("Cubemap_Prefilter_Env",m_InternalShaders.at(EngineInternalShaders::VertexSkybox),m_InternalShaders.at(EngineInternalShaders::CubemapPrefilterEnvFrag),ShaderRenderPass::Postprocess);
@@ -1222,6 +1224,7 @@ class epriv::RenderManager::impl final{
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
             GLEnable(GLState::DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
+            glClearDepth(1.0f);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //used for IBL. but its not implemented on my GPU :(
@@ -2009,14 +2012,20 @@ class epriv::RenderManager::impl final{
 
             sendUniform1iSafe("HasSSAO",int(ssao));
             sendUniform1iSafe("HasBloom",int(bloom));
-
+            sendUniform1iSafe("HasFog",int(fog));
+            if(fog){
+                sendUniform1fSafe("FogDistNull",fog_distNull);
+                sendUniform1fSafe("FogDistBlend",fog_distBlend);
+                sendUniform4fSafe("FogColor",fog_color);
+                bindTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
+            }
             bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
             bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
             bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),2);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-            for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
+            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->unbind();
         }
         void _renderFullscreenQuad(uint& width,uint& height,uint startX,uint startY){
@@ -2266,6 +2275,13 @@ void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint 
 bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
 void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
 void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }
+void Renderer::Settings::Fog::setColor(glm::vec4& color){ Renderer::Settings::Fog::setColor(color.r,color.g,color.b,color.a); }
+void Renderer::Settings::Fog::setColor(float r,float g,float b,float a){ Math::setColor(renderManager->fog_color,r,g,b,a); }
+void Renderer::Settings::Fog::setNullDistance(float d){ renderManager->fog_distNull = d; }
+void Renderer::Settings::Fog::setBlendDistance(float d){ renderManager->fog_distBlend = d; }
+float Renderer::Settings::Fog::getNullDistance(){ return renderManager->fog_distNull; }
+float Renderer::Settings::Fog::getBlendDistance(){ return renderManager->fog_distBlend; }
+
 
 void Renderer::Settings::FXAA::setReduceMin(float r){ renderManager->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
 void Renderer::Settings::FXAA::setReduceMul(float r){ renderManager->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
