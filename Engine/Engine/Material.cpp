@@ -558,7 +558,7 @@ void Material::addComponentReflection(string cubemapName,string mapFile,float mi
 	//}
 	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
 	if(!map){
-        Texture* map = new Texture(mapFile);
+        map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 	}
     Material::addComponentReflection(cubemap,map,mixFactor);
@@ -575,7 +575,7 @@ void Material::addComponentRefraction(string textureFiles[],string mapFile,float
 	//}
 	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
 	if(!map){
-        Texture* map = new Texture(mapFile);
+        map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 	}
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
@@ -589,7 +589,7 @@ void Material::addComponentRefraction(string cubemapName,string mapFile,float re
 	//}
 	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
 	if(!map){
-        Texture* map = new Texture(mapFile);
+        map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
 	}
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
@@ -600,7 +600,7 @@ void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale)
 void Material::addComponentParallaxOcclusion(std::string textureFile,float heightScale){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentParallaxOcclusion(texture,heightScale);

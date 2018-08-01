@@ -113,10 +113,13 @@ class Engine_Window::impl final{
             m_WindowName = name;
             m_SFMLWindow->setTitle(m_WindowName);
         }
-        void _setIcon(const char* file){ //if this is called twice using the same file, a duplicate texture will be added. possibly fix or just warn the user?
-            Texture* texture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-            epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-            m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
+        void _setIcon(const char* file){
+            Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(file);
+			if(!texture){
+				texture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+				epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+			}
+			m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }
         void _setIcon(Texture* texture){
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());

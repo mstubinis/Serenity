@@ -12,20 +12,38 @@
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
+
 class Texture;
-namespace sf{ class Image; }
-namespace Engine{
-    namespace epriv{
-        class FramebufferTexture;
-    };
-};
 class TextureWrap{public: enum Wrap{
     Repeat,RepeatMirrored,ClampToEdge,ClampToBorder,
 };};
 class TextureFilter{public: enum Filter{
     Linear,Nearest,Nearest_Mipmap_Nearest,Nearest_Mipmap_Linear,Linear_Mipmap_Nearest,Linear_Mipmap_Linear,
 };};
+
+namespace sf{ class Image; }
+namespace Engine{
+    namespace epriv{
+        class FramebufferTexture;
+        class TextureLoader final{
+			friend class ::Texture;
+            public:
+                static void LoadTexture2DIntoOpenGL(Texture* texture);
+				static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
+                static void LoadTextureCubemapIntoOpenGL(Texture* texture);
+
+                static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
+                static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
+
+				static void GenerateMipmapsOpenGL(Texture* texture);
+				static void WithdrawPixelsFromOpenGLMemory(Texture* texture);
+				static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
+        };
+
+    };
+};
 class Texture: public EngineResource{
+	friend class Engine::epriv::TextureLoader;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
