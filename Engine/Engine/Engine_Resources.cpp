@@ -86,7 +86,19 @@ float& Engine::Resources::dt(){ return epriv::Core::m_Engine->m_TimeManager->dt(
 Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_CurrentScene; }
 
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
-
+Texture* epriv::ResourceManager::_hasTexture(string n){
+	uint i;
+	for(i = 0; i < resourceManager->m_i->m_Resources->maxEntries(); ++i){
+		EngineResource* r = resourceManager->m_i->m_Resources->getAsFast<EngineResource>(i);
+		if(r){
+			Texture* t = dynamic_cast<Texture*>(r);
+			if(t && t->name() == n){
+				return t;
+			}
+		}
+	}
+	return 0;
+}
 void epriv::ResourceManager::_addScene(Scene* s){
     _addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
 }

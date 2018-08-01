@@ -172,7 +172,7 @@ void MaterialComponentReflection::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
-    if(m_Texture == nullptr)
+    if(!m_Texture)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
@@ -194,7 +194,7 @@ void MaterialComponentRefraction::bind(){
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
-    if(m_Texture == nullptr)
+    if(!m_Texture)
         Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
         Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
@@ -319,26 +319,36 @@ class Material::impl final{
             super->load();
         }
         void _init(string& name,string& diffuseFile,string& normalFile,string& glowFile,string& specularFile,Material* super){
-            //add checks to see if texture was loaded already
-            Texture *diffuseTexture,*normalTexture,*glowTexture,*specularTexture;
-            diffuseTexture = normalTexture = glowTexture = specularTexture = nullptr;
+            Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
             if(diffuseFile != ""){
-                diffuseTexture = new Texture(diffuseFile);
-                epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuseTexture);
+				d = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(diffuseFile);
+				if(!d){
+					d = new Texture(diffuseFile);
+					epriv::Core::m_Engine->m_ResourceManager->_addTexture(d);
+				}
             }
             if(normalFile != ""){
-                normalTexture = new Texture(normalFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-                epriv::Core::m_Engine->m_ResourceManager->_addTexture(normalTexture);
+				n = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(normalFile);
+				if(!n){
+					n = new Texture(normalFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+					epriv::Core::m_Engine->m_ResourceManager->_addTexture(n);
+				}
             }
             if(glowFile != ""){
-                glowTexture = new Texture(glowFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-                epriv::Core::m_Engine->m_ResourceManager->_addTexture(glowTexture);
+				g = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(glowFile);
+				if(!g){
+					g = new Texture(glowFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+					epriv::Core::m_Engine->m_ResourceManager->_addTexture(g);
+				}
             }
             if(specularFile != ""){
-                specularTexture = new Texture(specularFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
-                epriv::Core::m_Engine->m_ResourceManager->_addTexture(specularTexture);
+				s = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(specularFile);
+				if(!s){
+					s = new Texture(specularFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+					epriv::Core::m_Engine->m_ResourceManager->_addTexture(s);
+				}
             }
-            _init(name,diffuseTexture,normalTexture,glowTexture,specularTexture,super);
+            _init(name,d,n,g,s,super);
         }
         void _load(){
             for(auto component:m_Components){
@@ -442,40 +452,44 @@ void Material::addComponentDiffuse(Texture* texture){
     m_i->_addComponentDiffuse(texture);
 }
 void Material::addComponentDiffuse(string textureFile){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,true,ImageInternalFormat::SRGB8_ALPHA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,true,ImageInternalFormat::SRGB8_ALPHA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentDiffuse(texture);
 }
 void Material::addComponentNormal(Texture* texture){
     m_i->_addComponentNormal(texture);
 }
 void Material::addComponentNormal(string textureFile){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentNormal(texture);
 }
 void Material::addComponentGlow(Texture* texture){
     m_i->_addComponentGlow(texture);
 }
 void Material::addComponentGlow(string textureFile){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentGlow(texture);
 }
 void Material::addComponentSpecular(Texture* texture){
     m_i->_addComponentSpecular(texture);
 }
 void Material::addComponentSpecular(string textureFile){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentSpecular(texture);
 }
 void Material::addComponentAO(Texture* texture,float baseValue){
@@ -483,10 +497,11 @@ void Material::addComponentAO(Texture* texture,float baseValue){
     setAO(baseValue);
 }
 void Material::addComponentAO(string textureFile,float baseValue){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentAO(texture);
     setAO(baseValue);
 }
@@ -495,10 +510,11 @@ void Material::addComponentMetalness(Texture* texture,float baseValue){
     setMetalness(baseValue);
 }
 void Material::addComponentMetalness(string textureFile,float baseValue){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentMetalness(texture);
     setMetalness(baseValue);
 }
@@ -507,10 +523,11 @@ void Material::addComponentSmoothness(Texture* texture,float baseValue){
     setSmoothness(baseValue);
 }
 void Material::addComponentSmoothness(string textureFile,float baseValue){
-    //add checks to see if texture was loaded already
-        Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
+        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentSmoothness(texture);
     setSmoothness(baseValue);
 }
@@ -520,22 +537,30 @@ void Material::addComponentReflection(Texture* cubemap,Texture* map,float mixFac
 }
 void Material::addComponentReflection(string textureFiles[],string mapFile,float mixFactor){
     //add checks to see if texture was loaded already
-        Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+	Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	//if(!cubemap){
+        cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
-
-        Texture* map = new Texture(mapFile);
+	//}
+	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
+	if(!map){
+        map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
-
+	}
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentReflection(string cubemapName,string mapFile,float mixFactor){
     //add checks to see if texture was loaded already
-        Texture* cubemap = new Texture(cubemapName);
+	Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	//if(!cubemap){
+        cubemap = new Texture(cubemapName);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
-
+	//}
+	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
+	if(!map){
         Texture* map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
-
+	}
     Material::addComponentReflection(cubemap,map,mixFactor);
 }
 void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refractiveIndex,float mixFactor){
@@ -543,33 +568,41 @@ void Material::addComponentRefraction(Texture* cubemap,Texture* map,float refrac
 }
 void Material::addComponentRefraction(string textureFiles[],string mapFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
-        Texture* cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+	Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	//if(!cubemap){
+        cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
-
+	//}
+	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
+	if(!map){
         Texture* map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
-
+	}
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
 void Material::addComponentRefraction(string cubemapName,string mapFile,float refractiveIndex,float mixFactor){
     //add checks to see if texture was loaded already
-        Texture* cubemap = new Texture(cubemapName);
+	Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	//if(!cubemap){
+        cubemap = new Texture(cubemapName);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
-
-
+	//}
+	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
+	if(!map){
         Texture* map = new Texture(mapFile);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(map);
-
+	}
     Material::addComponentRefraction(cubemap,map,refractiveIndex,mixFactor);
 }
 void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale){
     m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
 void Material::addComponentParallaxOcclusion(std::string textureFile,float heightScale){
-    //add checks to see if texture was loaded already
+	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
+	if(!texture){
         Texture* texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-
+	}
     m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
 const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
@@ -591,8 +624,8 @@ void Material::setGlow(float f){ m_i->_setBaseGlow(f); }
 void Material::setF0Color(glm::vec3 color){ Material::setF0Color(color.r, color.g, color.b); }
 void Material::setF0Color(float r, float g, float b){ m_i->_setF0Color(r, g, b); }
 void Material::setMaterialPhysics(MaterialPhysics::Physics c){
-    boost::tuple<float, float, float, float, float>& t = epriv::MATERIAL_PROPERTIES.at(c);
-    m_i->_setMaterialProperties( t.get<0>(), t.get<1>(), t.get<2>(), t.get<3>(), t.get<4>() );
+    boost::tuple<float,float,float,float,float>& t = epriv::MATERIAL_PROPERTIES.at(c);
+    m_i->_setMaterialProperties(t.get<0>(),t.get<1>(),t.get<2>(),t.get<3>(),t.get<4>() );
 }
 void Material::setSmoothness(float s){ m_i->_setSmoothness(s); }
 void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(m); }

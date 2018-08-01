@@ -35,10 +35,10 @@ class MeshInstance final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstance(Entity*,Mesh*,Material*,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
-        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
-        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
-        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3&=glm::vec3(0.0f),glm::quat&=glm::quat(),glm::vec3&=glm::vec3(1.0f));
+        MeshInstance(Entity*,Mesh*,Material*,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
+        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
+        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
+        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
         ~MeshInstance();
 
         Mesh* mesh();

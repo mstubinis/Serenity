@@ -46,7 +46,7 @@ namespace Engine{
 
                 bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
                 void _addMeshInstance(MeshInstance*);
-
+				Texture* _hasTexture(std::string);
                 void _remObject(std::string);
 
                 void _resizeCameras(uint w,uint h);

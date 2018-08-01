@@ -31,41 +31,40 @@ namespace Engine{
         class GBuffer;
         class FramebufferObject;
         class RenderbufferObject;
-
-        class RenderManager final{
-            public:
+		class RenderManager final{
+			public:
 				class impl;
-                std::unique_ptr<impl> m_i;
+				std::unique_ptr<impl> m_i;
 
-                RenderManager(const char* name,uint w,uint h);
-                ~RenderManager();
+				RenderManager(const char* name,uint w,uint h);
+				~RenderManager();
 
 				static uint GLSL_VERSION;
 
-                void _init(const char* name,uint w,uint h);
-                void _resize(uint width, uint height);
-                void _resizeGbuffer(uint width,uint height);
+				void _init(const char* name,uint w,uint h);
+				void _resize(uint width, uint height);
+				void _resizeGbuffer(uint width,uint height);
 
-                void _render(
-                    epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
-                    bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
-                );
-                void _render(
-                    Camera*,uint fboWidth,uint fboHeight,
-                    bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
-                );
-                void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
-                void _onOpenGLContextCreation(uint width,uint height,uint glslVersion);
-                void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-                void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-                void _addShaderToStage(ShaderP*,uint stage);
-                void _bindShaderProgram(ShaderP*);
-                bool _bindMaterial(Material*);
-                bool _unbindMaterial();
-                void _genPBREnvMapData(Texture*,uint,uint);
-        };
+				void _render(
+					epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
+					bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+					Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+				);
+				void _render(
+					Camera*,uint fboWidth,uint fboHeight,
+					bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+					Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+				);
+				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
+				void _onOpenGLContextCreation(uint width,uint height,uint glslVersion);
+				void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+				void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+				void _addShaderToStage(ShaderP*,uint stage);
+				void _bindShaderProgram(ShaderP*);
+				bool _bindMaterial(Material*);
+				bool _unbindMaterial();
+				void _genPBREnvMapData(Texture*,uint,uint);
+		};
     };
     namespace Renderer{
         namespace Settings{

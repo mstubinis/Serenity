@@ -55,23 +55,23 @@ class Collision final{
 
 namespace Engine{
     namespace epriv{
-        class PhysicsManager final{
-            private:
-                class impl;
-            public:
-                std::unique_ptr<impl> m_i;
+		class PhysicsManager final{
+			private:
+				class impl;
+			public:
+				std::unique_ptr<impl> m_i;
 
-                PhysicsManager(const char* name,uint w,uint h);
-                ~PhysicsManager();
+				PhysicsManager(const char* name,uint w,uint h);
+				~PhysicsManager();
 
-                void _init(const char* name,uint w,uint h);
+				void _init(const char* name,uint w,uint h);
 
-                void _update(float dt,int maxSteps = 1,float = 0.0166666f);
-                void _render();
+				void _update(float dt,int maxSteps = 1,float = 0.0166666f);
+				void _render();
 
-                void _removeCollision(Collision*);
-                const btDiscreteDynamicsWorld* _world() const;
-        };
+				void _removeCollision(Collision*);
+				const btDiscreteDynamicsWorld* _world() const;
+		};
     };
 
 

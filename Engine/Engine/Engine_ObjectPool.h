@@ -49,6 +49,9 @@ namespace Engine{
                     }
                     delete[] m_Pool;
                 }
+				uint maxEntries(){
+					return MAX_ENTRIES;
+				}
                 uint size(){
                     uint c = 0; uint i;
                     for(i = 0; i < MAX_ENTRIES; ++i){
@@ -206,6 +209,9 @@ namespace Engine{
                         m_Pool[id].resource = ptr;
                     }
                 }
+				uint maxEntries(){
+					return MAX_ENTRIES;
+				}
                 uint add(T* ptr){
                     const uint newIndex = m_firstFreeEntry;
                     if(newIndex >= MAX_ENTRIES) return uint(-1); //null entity

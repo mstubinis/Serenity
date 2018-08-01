@@ -11,17 +11,17 @@ typedef unsigned int uint;
 namespace Engine{
 
     namespace epriv{
-        class NoiseManager final{
-            private:
-                class impl;
-            public:
-                std::unique_ptr<impl> m_i;
+		class NoiseManager final{
+			private:
+				class impl;
+			public:
+				std::unique_ptr<impl> m_i;
 
-                NoiseManager(const char* name,uint w,uint h);
-                ~NoiseManager();
+				NoiseManager(const char* name,uint w,uint h);
+				~NoiseManager();
 
-                void _init(const char* name,uint w,uint h);
-        };
+				void _init(const char* name,uint w,uint h);
+		};
     };
     namespace Noise{
         double noiseOpenSimplex2D(double x, double y);

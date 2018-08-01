@@ -344,13 +344,10 @@ class UniformBufferObject::impl final{
             }
             sizeOfStruct = _sizeofStruct;
 
-            glGenBuffers(1, &uboObject);
-            glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
-
-            glBufferData(GL_UNIFORM_BUFFER, sizeOfStruct, NULL, GL_DYNAMIC_DRAW);
-            glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
-
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glGenBuffers(1, &uboObject);glBindBuffer(GL_UNIFORM_BUFFER, uboObject);//gen and bind buffer
+            glBufferData(GL_UNIFORM_BUFFER, sizeOfStruct, NULL, GL_DYNAMIC_DRAW); //create buffer data storage
+            glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);//link UBO to it's global numerical index
+            //glBindBuffer(GL_UNIFORM_BUFFER, 0); //is this really needed?
         }
         void _destruct(){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
@@ -360,14 +357,13 @@ class UniformBufferObject::impl final{
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
             glBufferSubData(GL_UNIFORM_BUFFER,0, sizeOfStruct, _data);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            //glBindBuffer(GL_UNIFORM_BUFFER, 0); //is this really needed?
         }
         void _attachToShader(UniformBufferObject* super,ShaderP* _shaderProgram){
-            GLuint& prog = _shaderProgram->program();
+            GLuint prog = _shaderProgram->program();
             if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(prog)) return;
-            uint block_index = glGetUniformBlockIndex(prog,nameInShader);
             glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
-            glUniformBlockBinding(prog, block_index, globalBindingPointNumber);
+            glUniformBlockBinding(prog, glGetUniformBlockIndex(prog,nameInShader), globalBindingPointNumber);
             _shaderProgram->m_i->m_AttachedUBOs.emplace(prog,true);
         }
 };
