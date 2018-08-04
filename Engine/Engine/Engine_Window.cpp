@@ -64,8 +64,8 @@ class Engine_Window::impl final{
                 m_Height = m_VideoMode.height;
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
-
-            epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height,_glslVersion);
+			uint opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
+            epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height,_glslVersion,opengl_version);
 
             return m_SFMLWindow->getSettings();
         }

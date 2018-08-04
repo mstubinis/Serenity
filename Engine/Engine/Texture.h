@@ -24,16 +24,18 @@ class TextureFilter{public: enum Filter{
 namespace sf{ class Image; }
 namespace Engine{
     namespace epriv{
+		struct ImageLoadedStructure;
         class FramebufferTexture;
         class TextureLoader final{
 			friend class ::Texture;
             public:
-                static void LoadTexture2DIntoOpenGL(Texture* texture);
+                static void LoadTexture2DIntoOpenGL(Texture* texture, uint imageCompressedSize = 0);
 				static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
                 static void LoadTextureCubemapIntoOpenGL(Texture* texture);
 
                 static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
                 static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
+				static bool IsCompressedType(ImageInternalFormat::Format);
 
 				static void GenerateMipmapsOpenGL(Texture* texture);
 				static void WithdrawPixelsFromOpenGLMemory(Texture* texture);
@@ -47,10 +49,14 @@ class Texture: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        Texture(std::string name,uint w, uint h,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,GLuint = GL_TEXTURE_2D,float divisor=1.0f);
-        Texture(std::string file,GLuint = GL_TEXTURE_2D,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8);
-        Texture(const sf::Image&,std::string name = "CustomTexture",GLuint = GL_TEXTURE_2D,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8);
-        Texture(std::string files[],std::string name = "Cubemap",GLuint = GL_TEXTURE_CUBE_MAP,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8);
+		//Framebuffer
+        Texture(uint renderTgtWidth,uint renderTgtHeight,ImagePixelType::Type,ImagePixelFormat::Format,ImageInternalFormat::Format,float divisor = 1.0f);
+		//Single File
+        Texture(std::string filename,GLuint openglTexType = GL_TEXTURE_2D,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
+		//Pixels From Memory
+        Texture(const sf::Image& sfmlImage,std::string name = "CustomTexture",GLuint openglTexType = GL_TEXTURE_2D,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
+		//Cubemap from 6 files
+        Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
 
         uchar* pixels();

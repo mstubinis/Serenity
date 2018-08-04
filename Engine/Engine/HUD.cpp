@@ -123,12 +123,8 @@ void HUD::render(){
     #pragma endregion
 
     #pragma region DrawDebugStuff
-	glm::vec3 posS = scene->getPlanets().at("Saturn")->getPosition();
     font->renderText(Engine::Data::reportTime() + 
-                     "\nEntity Count: " + to_string(Resources::getCurrentScene()->entities().size()) + 
-					 "\nX: " + to_string(posS.x) +
-					 "\nY: " + to_string(posS.y) +
-					 "\nZ: " + to_string(posS.z),
+                     "\nEntity Count: " + to_string(Resources::getCurrentScene()->entities().size()),
                      glm::vec2(10,Resources::getWindowSize().y-10),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.8f,0.8f),0.1f);
 
     #pragma endregion

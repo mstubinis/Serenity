@@ -40,6 +40,7 @@ namespace Engine{
 				~RenderManager();
 
 				static uint GLSL_VERSION;
+				static uint OPENGL_VERSION;
 
 				void _init(const char* name,uint w,uint h);
 				void _resize(uint width, uint height);
@@ -56,7 +57,7 @@ namespace Engine{
 					Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
 				);
 				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
-				void _onOpenGLContextCreation(uint width,uint height,uint glslVersion);
+				void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
 				void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
 				void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
 				void _addShaderToStage(ShaderP*,uint stage);

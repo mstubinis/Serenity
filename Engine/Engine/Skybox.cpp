@@ -39,7 +39,7 @@ Skybox::Skybox(string directory,Scene* scene):SkyboxEmpty(scene){
     string bottom = directory + "/Back.jpg";
     string names[6] = {front,back,left,right,top,bottom};
 
-    m_Texture = new Texture(names,directory+"Cubemap",GL_TEXTURE_CUBE_MAP,true,ImageInternalFormat::SRGB8_ALPHA8);
+    m_Texture = new Texture(names,directory+"Cubemap",true,ImageInternalFormat::SRGB8_ALPHA8);
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
 }

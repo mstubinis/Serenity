@@ -539,7 +539,7 @@ void Material::addComponentReflection(string textureFiles[],string mapFile,float
     //add checks to see if texture was loaded already
 	Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	//if(!cubemap){
-        cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+        cubemap = new Texture(textureFiles,"Cubemap ");
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
 	//}
 	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);
@@ -570,7 +570,7 @@ void Material::addComponentRefraction(string textureFiles[],string mapFile,float
     //add checks to see if texture was loaded already
 	Texture* cubemap;// = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	//if(!cubemap){
-        cubemap = new Texture(textureFiles,"Cubemap ",GL_TEXTURE_CUBE_MAP);
+        cubemap = new Texture(textureFiles,"Cubemap ");
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(cubemap);
 	//}
 	Texture* map = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(mapFile);

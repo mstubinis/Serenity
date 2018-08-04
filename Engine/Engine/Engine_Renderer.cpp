@@ -39,6 +39,7 @@ ShaderP* epriv::InternalShaderPrograms::Forward = nullptr;
 epriv::RenderManager::impl* renderManager;
 
 uint epriv::RenderManager::GLSL_VERSION;
+uint epriv::RenderManager::OPENGL_VERSION;
 
 namespace Engine{
     namespace epriv{
@@ -1189,7 +1190,7 @@ class epriv::RenderManager::impl final{
             Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
             Mesh::Cube = new Mesh(cubeMesh,CollisionType::None,false,0.0005f);
 
-            brdfCook = new Texture("BRDFCookTorrance",512,512,ImageInternalFormat::RG16F,ImagePixelFormat::RG,ImagePixelType::FLOAT,GL_TEXTURE_2D,1.0f);
+			brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             brdfCook->setWrapping(TextureWrap::ClampToEdge);	
             epriv::Core::m_Engine->m_ResourceManager->_addTexture(brdfCook);
 
@@ -1227,7 +1228,7 @@ class epriv::RenderManager::impl final{
             glClearDepth(1.0f);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
-            //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //used for IBL. but its not implemented on my GPU :(
+            //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very wierd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
 
             glGenTextures(1,&SMAA_AreaTexture);
             glBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
@@ -1271,15 +1272,15 @@ class epriv::RenderManager::impl final{
             glDeleteTextures(1,&SMAA_SearchTexture);
             glDeleteTextures(1,&SMAA_AreaTexture);
         }
-        void _renderSkybox(SkyboxEmpty* s){
+        void _renderSkybox(SkyboxEmpty* skybox){
             Scene* scene = Resources::getCurrentScene();
             Camera* c = scene->getActiveCamera();
             glm::mat4 view = c->getView();
             Math::removeMatrixPosition(view);
-            if(s != nullptr){
+            if(skybox){
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->bind();
                 Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
-                Renderer::bindTexture("Texture",s->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
+                Renderer::bindTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
                 Renderer::unbindTextureCubemap(0);//yes, this is needed.
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
@@ -1310,8 +1311,9 @@ class epriv::RenderManager::impl final{
             glClearStencil(0);
             glDepthFunc(GL_LEQUAL);
         }
-        void _onOpenGLContextCreation(uint& width,uint& height,uint& _glslVersion){
+        void _onOpenGLContextCreation(uint& width,uint& height,uint& _glslVersion,uint _openglVersion){
             epriv::RenderManager::GLSL_VERSION = _glslVersion;
+            epriv::RenderManager::OPENGL_VERSION = _openglVersion;
             glewExperimental = GL_TRUE;
             glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
             Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
@@ -1555,12 +1557,6 @@ class epriv::RenderManager::impl final{
                 const float godRays[4] = { 0.03f,0.023f,0.032f,1.0f };
                 glClearBufferfv(GL_COLOR,3,godRays);
             }
-            //TODO: move skybox rendering to the last after moving planetary atmosphere to forward rendering pass
-            gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
-            _renderSkybox(scene->skybox());
-
-
-            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
 
             GLEnable(GLState::DEPTH_TEST);
             GLEnable(GLState::DEPTH_MASK);
@@ -1610,7 +1606,10 @@ class epriv::RenderManager::impl final{
                 }
             }
 
-            //TODO: move skybox rendering here after moving planetary atmosphere to forward rendering pass
+            gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA");
+            _renderSkybox(scene->skybox());
+            if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
+            
         }
         void _passForwardRendering(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
@@ -2227,7 +2226,7 @@ void epriv::RenderManager::_render(Camera* c,uint fboW,uint fboH,bool ssao,bool 
 void epriv::RenderManager::_resize(uint w,uint h){ m_i->_resize(w,h); }
 void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_gBuffer->resize(w,h); }
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
-void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion); }
+void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); }
 
 void epriv::RenderManager::_renderText(Font* font,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
     m_i->m_FontsToBeRendered.push_back(FontRenderInfo(font,text,pos,color,scl,angle,depth));
