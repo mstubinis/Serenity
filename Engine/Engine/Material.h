@@ -60,12 +60,14 @@ class MaterialPhysics{public: enum Physics{
     Nickel,
 };};
 class DiffuseModel{public: enum Model{
+	None,
     Lambert,
     Oren_Nayar,
     Ashikhmin_Shirley,
     Minnaert,
-};};
+_TOTAL};};
 class SpecularModel{public: enum Model{
+	None,
     Blinn_Phong,
     Phong,
     GGX,
@@ -73,7 +75,7 @@ class SpecularModel{public: enum Model{
     Guassian,
     Beckmann,
     Ashikhmin_Shirley,
-};};
+_TOTAL};};
 class MaterialComponent{
     protected:
         Texture* m_Texture;

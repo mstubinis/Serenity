@@ -29,7 +29,10 @@ namespace Engine{
         class TextureLoader final{
 			friend class ::Texture;
             public:
-                static void LoadTexture2DIntoOpenGL(Texture* texture, uint imageCompressedSize = 0);
+
+				static void LoadDDSFile(Texture* texture, std::string filename,epriv::ImageLoadedStructure& image);
+
+                static void LoadTexture2DIntoOpenGL(Texture* texture);
 				static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
                 static void LoadTextureCubemapIntoOpenGL(Texture* texture);
 

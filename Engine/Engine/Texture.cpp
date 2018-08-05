@@ -13,6 +13,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 using namespace Engine;
@@ -20,16 +21,24 @@ using namespace std;
 
 
 struct epriv::ImageLoadedStructure final{
-	uint          width;
-	uint          height;
-	const uchar*  pixels;
-	std::string extension;
-	std::string filename;
+	uint                          width;
+	uint                          height;
+	uint                          compressedSize;
+	uint                          pixelBufferSize;
+	uchar*                        pixels;
+	ImageInternalFormat::Format   internalFormat;
+	ImagePixelFormat::Format      pixelFormat;
+	ImagePixelType::Type          pixelType;
 	ImageLoadedStructure(){
-		width = 0; height = 0; pixels = 0; extension = ""; filename = "";
+		width = 0; height = 0; pixels = 0; compressedSize = 0; pixelBufferSize = 0;
 	}
+	~ImageLoadedStructure(){}
 	ImageLoadedStructure(const sf::Image& i){
-		width = i.getSize().x; height = i.getSize().y; pixels = i.getPixelsPtr(); extension = ""; filename = "";
+		width = i.getSize().x;
+		height = i.getSize().y;
+		pixels = const_cast<uchar*>(i.getPixelsPtr());
+		compressedSize = 0;
+		pixelBufferSize = width * height * 4;
 	}
 };
 
@@ -42,6 +51,7 @@ class Texture::impl final{
         vector<string> m_Files; //if non cubemap, this is only 1 file
         vector<GLuint> m_TextureAddress;
         GLuint m_Type;
+		uint m_CompressedSize;
         uint m_Width, m_Height;
         ImageInternalFormat::Format m_InternalFormat;
         ImagePixelFormat::Format m_PixelFormat;
@@ -51,7 +61,6 @@ class Texture::impl final{
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
-
 		void _initFramebuffer(uint _w,uint _h,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat,float _divisor,Texture* _super){
 			epriv::ImageLoadedStructure image;
             m_PixelFormat = _pixelFormat;
@@ -59,38 +68,55 @@ class Texture::impl final{
 			image.width = uint(float(_w) * _divisor);
 			image.height = uint(float(_h) * _divisor);
 			_baseInit(GL_TEXTURE_2D,"RenderTarget",image,_internalFormat,false,_super);
+			_super->load();
 		}
 		void _initFromPixelsMemory(const sf::Image& _sfImage,string _name,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){
 			epriv::ImageLoadedStructure image(_sfImage);
 			m_PixelType = ImagePixelType::UNSIGNED_BYTE;
 			_baseInit(_openglTextureType,_name,image,_internalFormat,false,_super);
+			_super->load();
 		}
-		void _initFromImageFile(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){
-			sf::Image _sfImage;
-			_sfImage.loadFromFile(_filename);
-			_initFromPixelsMemory(_sfImage,_filename,_openglTextureType,_genMipMaps,_internalFormat,_super);
+		void _initFromImageFile(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){	
+			string extension = boost::filesystem::extension(_filename);
+			if(extension != ".dds"){
+				sf::Image _sfImage;
+			    _sfImage.loadFromFile(_filename);
+			    _initFromPixelsMemory(_sfImage,_filename,_openglTextureType,_genMipMaps,_internalFormat,_super);
+			}
+			else{
+				epriv::ImageLoadedStructure image;
+				epriv::TextureLoader::LoadDDSFile(_super,_filename,image);
+				m_PixelType = image.pixelType;
+				m_PixelFormat = image.pixelFormat;
+				m_InternalFormat = image.internalFormat;
+				_baseInit(_openglTextureType,_filename,image,m_InternalFormat,false,_super);
+				m_CompressedSize = image.compressedSize;
+				_super->load();
+				delete[] image.pixels;
+			}
 		}
 		void _initCubemap(string _name,ImageInternalFormat::Format _internalFormat,bool _genMipMaps,Texture* _super){
 			epriv::ImageLoadedStructure image;
             m_PixelType = ImagePixelType::UNSIGNED_BYTE;
 			_baseInit(GL_TEXTURE_CUBE_MAP,_name,image,_internalFormat,false,_super);
+			_super->load();
 		}
-        void _baseInit(GLuint type,string n,const epriv::ImageLoadedStructure& i,ImageInternalFormat::Format internFormat,bool genMipMaps,Texture* super){
+        void _baseInit(GLuint type,string n,epriv::ImageLoadedStructure& i,ImageInternalFormat::Format internFormat,bool genMipMaps,Texture* _super){
             vector_clear(m_Pixels);
             m_Mipmapped = false;
             m_IsToBeMipmapped = genMipMaps;
             m_MinFilter = GL_LINEAR;
             m_MipMapLevels = 0;
+			m_CompressedSize = 0;
             m_Type = type;
 			m_Width = i.width;
 			m_Height = i.height;
             m_InternalFormat = internFormat;
             if(i.width > 0 && i.height > 0 && i.pixels){
-                vector<uchar> p(i.pixels,i.pixels+(i.width * i.height * 4));
+				vector<uchar> p(i.pixels, i.pixels + i.pixelBufferSize);
                 m_Pixels = p;
             }
-            super->setName(n);
-			super->load();
+            _super->setName(n);		
         }
         void _load(Texture* super){
             if(m_TextureAddress.size() == 0)
@@ -126,16 +152,82 @@ class Texture::impl final{
             glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),m_Width,m_Height,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
         }
 };
-void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture,uint imageCompressedSize){
+
+void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,epriv::ImageLoadedStructure& image){
+	uchar header[124];
+	FILE* fp = fopen(_filename.c_str(), "rb");
+	if (!fp) return;
+	char filecode[4];
+	fread(filecode, 1, 4, fp);
+	if (filecode != string("DDS ")) {
+		fclose(fp);
+		return;
+	}
+	fread(&header, 124, 1, fp); 
+	image.height = *(uint*)&(header[8 ]);
+	image.width = *(uint*)&(header[12]);
+	uint linearSize = *(uint*)&(header[16]);
+	uint mipMapCount = *(uint*)&(header[24]);
+	uint fourCC = *(uint*)&(header[80]);
+
+	/* how big is it going to be including all mipmaps? */
+	image.pixelBufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
+	image.pixels = new uchar[image.pixelBufferSize * sizeof(uchar)];
+	fread(image.pixels, 1, image.pixelBufferSize, fp);
+	fclose(fp);
+
+	const unsigned long FOURCC_DXT1 = 0x31545844;
+    const unsigned long FOURCC_DXT3 = 0x33545844;
+    const unsigned long FOURCC_DXT5 = 0x35545844;
+	uint components = (fourCC == FOURCC_DXT1) ? 3 : 4;
+	switch(fourCC){
+		case FOURCC_DXT1:{ 
+			image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+			image.pixelFormat = ImagePixelFormat::RGBA;
+			image.pixelType = ImagePixelType::UNSIGNED_BYTE;
+			break; 
+		}
+		case FOURCC_DXT3:{ 
+			image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+			image.pixelFormat = ImagePixelFormat::RGBA;
+			image.pixelType = ImagePixelType::UNSIGNED_BYTE;
+			break; 
+		}
+		case FOURCC_DXT5:{ 
+			image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+			image.pixelFormat = ImagePixelFormat::RGBA;
+			image.pixelType = ImagePixelType::UNSIGNED_BYTE;
+			break; 
+		}
+		default:{ delete[] image.pixels; return; }
+	}
+	uint blockSize = (image.internalFormat == ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT) ? 8 : 16;
+	uint offset = 0;
+ 
+	//load single mipmap
+	image.compressedSize = ((image.width + 3) / 4) * ((image.height + 3) / 4) * blockSize;
+	offset += image.compressedSize;
+
+	//load all mipmaps
+	/*
+	for (uint level = 0; level < mipMapCount && (width || height); ++level){
+		if(width <= 2 || height <= 2) break;
+		uint size = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
+		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,0, size, image.pixels + offset);
+		offset += image.compressedSize;
+		width = Math::Max(width / 2, 1);
+        height = Math::Max(height / 2, 1);
+	}
+	*/
+}
+void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
 	Texture::impl& i = *_texture->m_i;
-    sf::Image img;
-    img.create(i.m_Width,i.m_Height,&i.m_Pixels[0]);
     TextureLoader::ChoosePixelFormat(i.m_PixelFormat,i.m_InternalFormat);
-	if(TextureLoader::IsCompressedType(i.m_InternalFormat) && imageCompressedSize != 0){
-	    glCompressedTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,imageCompressedSize,img.getPixelsPtr());
+	if(TextureLoader::IsCompressedType(i.m_InternalFormat) && i.m_CompressedSize != 0){
+	    glCompressedTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,i.m_CompressedSize,&i.m_Pixels[0]);
 	}
 	else{
-		glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,ImagePixelFormat::at(i.m_PixelFormat),ImagePixelType::at(i.m_PixelType),img.getPixelsPtr());
+		glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,ImagePixelFormat::at(i.m_PixelFormat),ImagePixelType::at(i.m_PixelType),&i.m_Pixels[0]);
 	}
 	_texture->setFilter(TextureFilter::Linear);
     glBindTexture(i.m_Type,0);

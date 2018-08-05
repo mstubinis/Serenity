@@ -83,18 +83,16 @@ void ResourceManifest::init(){
     Resources::getMaterial(StarMaterial)->setShadeless(true);
     Resources::getMaterial(StarMaterial)->setGlow(0.21f);
 
-    EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.jpg","","","",skyFromSpace);
+    EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.dds","","","",skyFromSpace);
 
-
-
-    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.png","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
-    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.png","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
-    //AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.png","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
-    //MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.png","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
-    //IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.png","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
-    //NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.png","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
-    //VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.png","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
-    //OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.png","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
+    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
+    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
+    //AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.dds","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
+    //MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.dds","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
+    //IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.dds","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
+    //NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.dds","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
+    //VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.dds","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
+    //OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.dds","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
     CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
     CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
     SunFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
@@ -106,11 +104,11 @@ void ResourceManifest::init(){
     PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
     SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 
-    CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.png");
+    CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.dds");
     Resources::getMaterial(CapsuleA)->setShadeless(true);
-    CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.png");
+    CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.dds");
     Resources::getMaterial(CapsuleB)->setShadeless(true);
-    CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.png");
+    CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.dds");
     Resources::getMaterial(CapsuleC)->setShadeless(true);
     Resources::getMaterial(CapsuleC)->setGlow(0.01f);
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
