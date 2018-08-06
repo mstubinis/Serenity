@@ -125,21 +125,18 @@ class ShaderP::impl final{
             uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
 
 			//check for normal map texture extraction
-			if(sfind(_d,"CalcBumpedNormal(") || sfind(_d,"CalcBumpedNormalCompressed(")){
-				if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _normalTexture){//generated")){
+			if(sfind(_d,"CalcBumpedNormal(")){
+				if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated")){
 					if(sfind(_d,"varying mat3 TBN;")){
 						boost::replace_all(_d,"varying mat3 TBN;","");
 					}
 					string normalMap = 
 					"varying mat3 TBN;\n"
-					"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _normalTexture){//generated\n"
-					"    vec3 _texture = texture2D(_normalTexture, _uv).xyz;\n"
-					"    return normalize(TBN * (_texture * 2.0 - 1.0));\n"
-					"}\n"
-					"vec3 CalcBumpedNormalCompressed(vec2 _uv,sampler2D _normalTexture){\n"
-					"    vec4 _texture = texture2D(_normalTexture, _uv);\n"
-					"    vec3 normal = vec3(_texture.wg, sqrt(1.0 - _texture.w * _texture.w - _texture.g * _texture.g));\n"
-					"    return normalize(TBN * (normal * 2.0 - 1.0));\n"
+					"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"
+					"    vec3 _t = texture2D(_inTexture, _uv).rgb;\n"
+					//"    float zRecalc = sqrt(1.0 - _t.r * _t.r - _t.g * _t.g);\n"
+					//"    vec3 normal = vec3(_t.rg, zRecalc);\n"//recalc z in the shader
+					"    return normalize(TBN * (_t * 2.0 - 1.0));\n"
 					"}\n";
 					_insertStringAtLine(_d,normalMap,1);
 				}

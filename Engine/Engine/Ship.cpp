@@ -5,6 +5,7 @@
 #include "Engine_Events.h"
 #include "GameCamera.h"
 #include "SolarSystem.h"
+#include "ResourceManifest.h"
 
 #include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
@@ -274,7 +275,7 @@ void Ship::update(const float& dt){
                     if(e){
                         ComponentCamera* cam = e->getComponent<ComponentCamera>();
                         GameCameraComponent* camGame = (e->getComponent<GameCameraComponent>());
-                        if(e != this && e->parent() == nullptr && cam == nullptr && camGame == nullptr){
+                        if(e != this && !e->parent() && !cam && !camGame){
                             epriv::ComponentBodyBaseClass* ebody = e->getComponent<epriv::ComponentBodyBaseClass>();
                             ebody->setPosition(ebody->position() + (s * dt));
                         }
@@ -292,21 +293,21 @@ void Ship::update(const float& dt){
             }
         }
         else if(Engine::isKeyDownOnce("f2")){
-            if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW || m_Target == nullptr || m_PlayerCamera->getTarget() != this){
+            if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOW || !m_Target || m_PlayerCamera->getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->orbit(this);
             }
-            else if(m_Target != nullptr){
+            else if(m_Target){
                 Resources::getCurrentScene()->centerSceneToObject(m_Target);
                 m_PlayerCamera->orbit(m_Target);
             }
         }
         else if(Engine::isKeyDownOnce("f3")){
-            if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOWTARGET || (m_Target == nullptr && m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW) || m_PlayerCamera->getTarget() != this){
+            if(m_PlayerCamera->getState() == CAMERA_STATE_FOLLOWTARGET || (!m_Target && m_PlayerCamera->getState() != CAMERA_STATE_FOLLOW) || m_PlayerCamera->getTarget() != this){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->follow(this);
             }
-            else if(m_Target != nullptr){
+            else if(m_Target){
                 Resources::getCurrentScene()->centerSceneToObject(this);
                 m_PlayerCamera->followTarget(m_Target,this);
             }

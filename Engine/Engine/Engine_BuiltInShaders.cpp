@@ -375,10 +375,10 @@ epriv::EShaders::vertex_basic +=
     "        BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;\n"
     "        BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
     "    }\n"
-    "    vec4 PosTrans = BoneTransform * vec4(position, 1.0);\n"
-    "    vec3 NormalTrans = (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec4 PosTrans =       BoneTransform * vec4(position, 1.0);\n"
+    "    vec3 NormalTrans =   (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 BinormalTrans = (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans = (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans =  (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
     "\n"
     "           Normals = (NormalMatrix * NormalTrans);\n"
     "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"

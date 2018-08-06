@@ -193,7 +193,7 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,vector
     fread(image->pixels, 1, image->pixelBufferSize, fileparser);
     fclose(fileparser);
 
-	std::cout << "FourCC: " << fourcc(fourCC) << std::endl;
+	//std::cout << "FourCC: " << fourcc(fourCC) << std::endl;
 
     uint components = (fourCC == FOURCC('D','X','T','1')) ? 3 : 4;
     image->pixelFormat = ImagePixelFormat::RGBA;
@@ -215,10 +215,11 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,vector
         }
         case FOURCC('D','X','T','5'):{
 			//DXT5nm, A=X, G=Y, sometimes setting R & B to Y. Recalculate Z using z = sqrt( 1-x*x-y*y )
-            image->internalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            image->internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
             break; 
         }
-        case FOURCC('A','T','I','2'):{ 
+        case FOURCC('A','T','I','2'):{//aka ATI2n aka 3Dc aka LATC2 aka BC5
+			image->internalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
             break; 
         }
         default:{ delete[] image->pixels; return; }

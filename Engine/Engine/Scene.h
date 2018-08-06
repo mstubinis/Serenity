@@ -31,7 +31,7 @@ class Scene: public EngineResource{
         virtual ~Scene();
 
         Entity* getEntity(uint entityID);
-        void addEntity(Entity*);
+        uint addEntity(Entity*);
         bool hasEntity(Entity*);
         bool hasEntity(uint entityID);
 

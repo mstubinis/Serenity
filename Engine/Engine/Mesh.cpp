@@ -660,8 +660,8 @@ class Mesh::impl final{
                     out_indices.push_back(index);
 
                     //average out TBN. I think this does more harm than good though
-                    //temp_binormals.at(index) += data.binormals.at(i);
-                    //temp_tangents.at(index) += data.tangents.at(i);
+                    temp_binormals.at(index) += data.binormals.at(i);
+                    temp_tangents.at(index) += data.tangents.at(i);
                 }
                 else{
                     if(m_Skeleton != nullptr){
