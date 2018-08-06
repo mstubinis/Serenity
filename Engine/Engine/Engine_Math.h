@@ -210,6 +210,10 @@ namespace Engine{
         float Max(float,float,float);
         float Max(float,float,float,float);
 
+        uint Max(uint,uint);
+        uint Max(uint,uint,uint);
+        uint Max(uint,uint,uint,uint);
+
         float fade(float t);
         double fade(double t);
 

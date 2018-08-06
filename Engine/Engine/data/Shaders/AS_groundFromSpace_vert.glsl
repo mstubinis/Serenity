@@ -28,8 +28,7 @@ varying vec2 UV;
 varying vec3 WorldPosition;
 varying vec3 VCameraPositionReal;
 varying vec3 Normals;
-varying vec3 Binormals;
-varying vec3 Tangents;
+varying mat3 TBN;
 flat varying float HasAtmo;
 varying float logz_f;
 flat varying float FC;
@@ -54,9 +53,12 @@ float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
 }
 void main(){
 	WorldPosition = (Model * vec4(position,1.0)).xyz;
-    Normals = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    Binormals = (Model * vec4(binormal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    Tangents = (Model * vec4(tangent.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+
+          Normals   = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    vec3  Binormals = (Model * vec4(binormal.zyx,0.0)).xyz;
+    vec3  Tangents  = (Model * vec4(tangent.zyx,0.0)).xyz;
+    TBN = (mat3(Tangents,Binormals,Normals));
+
 	UV = uv;
 
     gl_Position = CameraViewProj * Model * vec4(position, 1.0);

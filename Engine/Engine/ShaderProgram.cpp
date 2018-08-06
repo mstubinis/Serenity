@@ -123,40 +123,27 @@ class ShaderP::impl final{
 
             string versionNumberString = regex_replace(versionLine,regex("([^0-9])"),"");
             uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
-            if(versionNumber >= 130){
-                if(shader->type() == ShaderType::Vertex){
-                    boost::replace_all(_d, "varying", "out");
-                }
-                else if(shader->type() == ShaderType::Fragment){
-                    boost::replace_all(_d, "varying", "in");
 
-                    boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
-                    _insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
-                }
-            }
-            if(versionNumber >= 140){
-                if(shader->type() == ShaderType::Vertex){
-                }
-                else if(shader->type() == ShaderType::Fragment){
-                    boost::replace_all(_d, "textureCube(", "texture(");
-                    boost::replace_all(_d, "textureCubeLod(", "textureLod(");
-                    boost::replace_all(_d, "texture2DLod(", "textureLod(");
-                    boost::replace_all(_d, "texture2D(", "texture(");
-                }
-            }	
-            if(versionNumber >= 150){
-                if(shader->type() == ShaderType::Vertex){
-                }
-                else if(shader->type() == ShaderType::Fragment){
-                }
-            }
-            if(versionNumber >= 330){
-                if(shader->type() == ShaderType::Vertex){
-                }
-                else if(shader->type() == ShaderType::Fragment){
-                }
-            }
-
+			//check for normal map texture extraction
+			if(sfind(_d,"CalcBumpedNormal(") || sfind(_d,"CalcBumpedNormalCompressed(")){
+				if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _normalTexture){//generated")){
+					if(sfind(_d,"varying mat3 TBN;")){
+						boost::replace_all(_d,"varying mat3 TBN;","");
+					}
+					string normalMap = 
+					"varying mat3 TBN;\n"
+					"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _normalTexture){//generated\n"
+					"    vec3 _texture = texture2D(_normalTexture, _uv).xyz;\n"
+					"    return normalize(TBN * (_texture * 2.0 - 1.0));\n"
+					"}\n"
+					"vec3 CalcBumpedNormalCompressed(vec2 _uv,sampler2D _normalTexture){\n"
+					"    vec4 _texture = texture2D(_normalTexture, _uv);\n"
+					"    vec3 normal = vec3(_texture.wg, sqrt(1.0 - _texture.w * _texture.w - _texture.g * _texture.g));\n"
+					"    return normalize(TBN * (normal * 2.0 - 1.0));\n"
+					"}\n";
+					_insertStringAtLine(_d,normalMap,1);
+				}
+			}
 			//check for painters algorithm
 			if(sfind(_d,"PaintersAlgorithm(")){
 				if(!sfind(_d,"vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated")){
@@ -218,6 +205,48 @@ class ShaderP::impl final{
                          _insertStringAtLine(_d,uboCameraString,1);
                     }
                 }	
+            }
+
+
+
+
+
+
+
+
+
+            if(versionNumber >= 130){
+                if(shader->type() == ShaderType::Vertex){
+                    boost::replace_all(_d, "varying", "out");
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                    boost::replace_all(_d, "varying", "in");
+
+                    boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
+                    _insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
+                }
+            }
+            if(versionNumber >= 140){
+                if(shader->type() == ShaderType::Vertex){
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                    boost::replace_all(_d, "textureCube(", "texture(");
+                    boost::replace_all(_d, "textureCubeLod(", "textureLod(");
+                    boost::replace_all(_d, "texture2DLod(", "textureLod(");
+                    boost::replace_all(_d, "texture2D(", "texture(");
+                }
+            }	
+            if(versionNumber >= 150){
+                if(shader->type() == ShaderType::Vertex){
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                }
+            }
+            if(versionNumber >= 330){
+                if(shader->type() == ShaderType::Vertex){
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                }
             }
         }
         void _init(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){

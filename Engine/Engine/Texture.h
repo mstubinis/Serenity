@@ -30,7 +30,7 @@ namespace Engine{
 			friend class ::Texture;
             public:
 
-				static void LoadDDSFile(Texture* texture, std::string filename,epriv::ImageLoadedStructure& image);
+				static void LoadDDSFile(Texture* texture, std::string filename,std::vector<epriv::ImageLoadedStructure*>& images);
 
                 static void LoadTexture2DIntoOpenGL(Texture* texture);
 				static void LoadTextureFramebufferIntoOpenGL(Texture* texture);

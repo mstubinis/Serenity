@@ -33,9 +33,7 @@ varying vec3 VCameraPosition;
 varying vec3 VCameraPositionReal;
 varying vec4 Color;
 varying vec2 UV;
-varying vec3 Normals; 
-varying vec3 Binormals;
-varying vec3 Tangents;
+varying vec3 Normals;
 flat varying float HasAtmo;
 flat varying float FC;
 varying float logz_f;
@@ -53,11 +51,6 @@ vec2 EncodeOctahedron(vec3 v) {
         return ConstantOneVec2;
 	v.xy /= dot(abs(v), ConstantOneVec3);
 	return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
-}
-vec3 CalcBumpedNormal(){
-    vec3 normalTexture = texture2D(NormalTexture, UV).xyz * 2.0 - 1.0;
-    mat3 TBN = mat3(Tangents, Binormals, Normals);
-    return TBN * normalize(normalTexture);
 }
 float minnaert(float _NdotL, float _VdotN){
     const float smoothness = 1.1;
@@ -96,7 +89,7 @@ void main(){
 		    vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
 		    vec3 PxlNormal;
 			if(FirstConditionals.y > 0.5){
-			    PxlNormal = normalize(CalcBumpedNormal());
+			    PxlNormal = CalcBumpedNormal(UV,NormalTexture);
 			}
 			else{
 			    PxlNormal = normalize(Normals);

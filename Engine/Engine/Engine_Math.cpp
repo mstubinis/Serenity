@@ -161,6 +161,10 @@ float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w
 float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
+uint Math::Max(uint x,uint y){ return glm::max(x,y); }
+uint Math::Max(uint x,uint y,uint z){ return glm::max(x,glm::max(y,z)); }
+uint Math::Max(uint x,uint y,uint z,uint w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
+
 GLuint Math::pack3NormalsInto32Int(float x, float y, float z){
    // Convert to signed integer -511 to +511 range
    int iX = int(x * 511.0f);
