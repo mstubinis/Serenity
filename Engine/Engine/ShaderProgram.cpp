@@ -124,42 +124,42 @@ class ShaderP::impl final{
             string versionNumberString = regex_replace(versionLine,regex("([^0-9])"),"");
             uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
 
-			//check for normal map texture extraction
-			if(sfind(_d,"CalcBumpedNormal(")){
-				if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated")){
-					if(sfind(_d,"varying mat3 TBN;")){
-						boost::replace_all(_d,"varying mat3 TBN;","");
-					}
-					string normalMap = 
-					"varying mat3 TBN;\n"
-					"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"
-					"    vec3 _t = texture2D(_inTexture, _uv).rgb;\n"
-					//"    float zRecalc = sqrt(1.0 - _t.r * _t.r - _t.g * _t.g);\n"
-					//"    vec3 normal = vec3(_t.rg, zRecalc);\n"//recalc z in the shader
-					"    return normalize(TBN * (_t * 2.0 - 1.0));\n"
-					"}\n";
-					_insertStringAtLine(_d,normalMap,1);
-				}
-			}
-			//check for painters algorithm
-			if(sfind(_d,"PaintersAlgorithm(")){
-				if(!sfind(_d,"vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated")){
-					string painters = "\n"
-					"vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated\n"
-					"    float paintA = paint.a;\n"
-					"    float canvasA = canvas.a;\n"
-					"    float Alpha = paintA + canvasA * (1.0 - paint.a);\n"
-					"    vec3 r = (paint.rgb * paintA + canvas.rgb * canvasA * (1.0 - paintA)) / Alpha;\n"
-					"    return vec4(r,Alpha);\n"
-					"}\n";
-					_insertStringAtLine(_d,painters,1);
-				}
-			}
+            //check for normal map texture extraction
+            if(sfind(_d,"CalcBumpedNormal(")){
+                if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated")){
+                    if(sfind(_d,"varying mat3 TBN;")){
+                        boost::replace_all(_d,"varying mat3 TBN;","");
+                    }
+                    string normalMap = 
+                    "varying mat3 TBN;\n"
+                    "vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"
+                    "    vec3 _t = texture2D(_inTexture, _uv).rgb;\n"
+                    //"    float zRecalc = sqrt(1.0 - _t.r * _t.r - _t.g * _t.g);\n"
+                    //"    vec3 normal = vec3(_t.rg, zRecalc);\n"//recalc z in the shader
+                    "    return normalize(TBN * (_t * 2.0 - 1.0));\n"
+                    "}\n";
+                    _insertStringAtLine(_d,normalMap,1);
+                }
+            }
+            //check for painters algorithm
+            if(sfind(_d,"PaintersAlgorithm(")){
+                if(!sfind(_d,"vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated")){
+                    string painters = "\n"
+                    "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated\n"
+                    "    float paintA = paint.a;\n"
+                    "    float canvasA = canvas.a;\n"
+                    "    float Alpha = paintA + canvasA * (1.0 - paint.a);\n"
+                    "    vec3 r = (paint.rgb * paintA + canvas.rgb * canvasA * (1.0 - paintA)) / Alpha;\n"
+                    "    return vec4(r,Alpha);\n"
+                    "}\n";
+                    _insertStringAtLine(_d,painters,1);
+                }
+            }
 
             //see if we need a UBO for the camera
             if(sfind(_d,"CameraView") || sfind(_d,"CameraProj") || sfind(_d,"CameraViewProj") || sfind(_d,"CameraInvView") || sfind(_d,"CameraInvProj") || 
             sfind(_d,"CameraInvViewProj") || sfind(_d,"CameraPosition") || sfind(_d,"CameraNear") || sfind(_d,"CameraFar") || sfind(_d,"CameraInfo1") ||
-			sfind(_d,"CameraInfo2") || sfind(_d,"CameraViewVector")){
+            sfind(_d,"CameraInfo2") || sfind(_d,"CameraViewVector")){
                 string uboCameraString;
                 if(versionNumber >= 140){ //UBO
                      if(!sfind(_d,"layout (std140) uniform Camera {//generated")){
