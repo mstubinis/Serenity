@@ -26,35 +26,39 @@ struct epriv::ImageMipmap final{
     uint                          width;
     uint                          height;
     uint                          compressedSize;
-    uint                          pixelBufferSize;
-    uchar*                        pixels;
+    vector<uchar>                 pixels;
 	uint                          level;
     ImageMipmap(){
-        level = 1; width = 0; height = 0; pixels = 0; compressedSize = 0; pixelBufferSize = 0;
+        level = 0; width = 0; height = 0; compressedSize = 0;
     }
     ~ImageMipmap(){}
 };
 
 struct epriv::ImageLoadedStructure final{
-    uint                          width;
-    uint                          height;
-    uint                          compressedSize;
-    uint                          pixelBufferSize;
-    uchar*                        pixels;
     ImageInternalFormat::Format   internalFormat;
     ImagePixelFormat::Format      pixelFormat;
     ImagePixelType::Type          pixelType;
 	vector<epriv::ImageMipmap>    mipmaps;
     ImageLoadedStructure(){
-        width = 0; height = 0; pixels = 0; compressedSize = 0; pixelBufferSize = 0;
+		epriv::ImageMipmap baseImage;
+		baseImage.compressedSize = 0;
+		mipmaps.push_back(baseImage);
+    }
+    ImageLoadedStructure(uint _width,uint _height){
+		epriv::ImageMipmap baseImage;
+		baseImage.width = _width;
+		baseImage.height = _height;
+		baseImage.compressedSize = 0;
+		mipmaps.push_back(baseImage);
     }
     ~ImageLoadedStructure(){}
     ImageLoadedStructure(const sf::Image& i){
-        width = i.getSize().x;
-        height = i.getSize().y;
-        pixels = const_cast<uchar*>(i.getPixelsPtr());
-        compressedSize = 0;
-        pixelBufferSize = width * height * 4;
+		epriv::ImageMipmap baseImage;
+        baseImage.width = i.getSize().x;
+        baseImage.height = i.getSize().y;
+		baseImage.pixels.assign(i.getPixelsPtr(),i.getPixelsPtr() + baseImage.width * baseImage.height * 4);
+        baseImage.compressedSize = 0;
+		mipmaps.push_back(baseImage);
     }
 };
 
@@ -78,11 +82,9 @@ class Texture::impl final{
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
         void _initFramebuffer(uint _w,uint _h,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat,float _divisor,Texture* _super){
-            epriv::ImageLoadedStructure image;
+            epriv::ImageLoadedStructure image(uint(float(_w) * _divisor),uint(float(_h) * _divisor));
             m_PixelFormat = _pixelFormat;
             m_PixelType = _pixelType;
-            image.width = uint(float(_w) * _divisor);
-            image.height = uint(float(_h) * _divisor);
             _baseInit(GL_TEXTURE_2D,"RenderTarget",image,_internalFormat,false,_super);
             _super->load();
         }
@@ -105,18 +107,18 @@ class Texture::impl final{
                 m_PixelType = image.pixelType;
                 m_PixelFormat = image.pixelFormat;
                 _baseInit(_openglTextureType,_filename,image,image.internalFormat,false,_super);
-                m_CompressedSize = image.compressedSize;
+                m_CompressedSize = image.mipmaps.at(0).compressedSize;
                 _super->load();
 
                 //mipmaps
-                if(image.mipmaps.size() > 0){
+                if(image.mipmaps.size() >= 2){
                     glBindTexture(m_Type, m_TextureAddress.at(0));	
                     for(auto mip:image.mipmaps){
-						glCompressedTexImage2D(GL_TEXTURE_2D,mip.level,image.internalFormat,mip.width,mip.height,0,mip.compressedSize,mip.pixels);
+						if(mip.level >= 1)
+						    glCompressedTexImage2D(GL_TEXTURE_2D,mip.level,image.internalFormat,mip.width,mip.height,0,mip.compressedSize,&mip.pixels[0]);
                     }
                     glBindTexture(m_Type, 0);
                 }
-				delete[] image.pixels;
             }
         }
         void _initCubemap(string _name,ImageInternalFormat::Format _internalFormat,bool _genMipMaps,Texture* _super){
@@ -133,13 +135,11 @@ class Texture::impl final{
             m_MipMapLevels = 0;
             m_CompressedSize = 0;
             m_Type = type;
-            m_Width = i.width;
-            m_Height = i.height;
+            m_Width = i.mipmaps.at(0).width;
+            m_Height = i.mipmaps.at(0).height;
             m_InternalFormat = internFormat;
-            if(i.width > 0 && i.height > 0 && i.pixels){
-                vector<uchar> p(i.pixels, i.pixels + i.pixelBufferSize);
-                m_Pixels = p;
-            }
+			for(auto p:i.mipmaps.at(0).pixels)
+				m_Pixels.push_back(p);
             _super->setName(n);		
         }
         void _load(Texture* super){
@@ -189,67 +189,67 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,epriv:
         return;
     }
     fread(&header, 124, 1, fileparser);
-    uint h = *(uint*)&(header[8 ]);
+    uint h = *(uint*)&(header[8]);
     uint w = *(uint*)&(header[12]);
     uint linearSize = *(uint*)&(header[16]);
     uint mipMapCount = *(uint*)&(header[24]);
     uint fourCC = *(uint*)&(header[80]);
-
-    /* how big is it going to be including all mipmaps? */
-    image.pixelBufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-    image.pixels = new uchar[image.pixelBufferSize * sizeof(uchar)];
-    fread(image.pixels, 1, image.pixelBufferSize, fileparser);
-    fclose(fileparser);
-
-    //std::cout << "FourCC: " << fourcc(fourCC) << std::endl;
-
-    uint components = (fourCC == FOURCC('D','X','T','1')) ? 3 : 4;
-    image.pixelFormat = ImagePixelFormat::RGBA;
-    image.pixelType = ImagePixelType::UNSIGNED_BYTE;
+	uint factor;
+	uint blockSize;
+	uint offset = 0;
     switch(fourCC){
         case FOURCC('D','X','T','1'):{ 
-            image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;break; 
+            factor = 2; blockSize = 8; image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;break; 
         }
-        case FOURCC('D','X','T','2'):{ break; }
+        case FOURCC('D','X','T','2'):{ factor = 4; blockSize = 16; break; }
         case FOURCC('D','X','T','3'):{ 
-            image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;break; 
+            factor = 4; blockSize = 16; image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;break; 
         }
-        case FOURCC('D','X','T','4'):{ break; }
+        case FOURCC('D','X','T','4'):{ factor = 4; blockSize = 16; break; }
         case FOURCC('D','X','T','5'):{
-            image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;break; 
+            factor = 4; blockSize = 16; image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;break; 
         }
+        case FOURCC('D','X','1','0'):{ break; }
+        case FOURCC('A','T','I','1'):{ factor = 2; blockSize = 8; break; }
         case FOURCC('A','T','I','2'):{//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
-            image.internalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;break; 
+            blockSize = 16; image.internalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;break; 
         }
-        default:{ delete[] image.pixels; return; }
+		case FOURCC('R','X','G','B'):{ factor = 4; blockSize = 16; break; }
+        case FOURCC('$','\0','\0','\0'):{ break; }
+        case FOURCC('o','\0','\0','\0'):{ break; }
+        case FOURCC('p','\0','\0','\0'):{ break; }
+        case FOURCC('q','\0','\0','\0'):{ break; }
+        case FOURCC('r','\0','\0','\0'):{ break; }
+        case FOURCC('s','\0','\0','\0'):{ break; }
+        case FOURCC('t','\0','\0','\0'):{ break; }
+        default:{ return; }
     }
-    uint blockSize = (image.internalFormat == ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT ||
-        image.internalFormat == ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-    uint offset = 0;
- 
-    //load single mipmap
-    image.compressedSize = ((w + 3) / 4) * ((h + 3) / 4) * blockSize;
-    image.width = w;
-    image.height = h;
-    offset += image.compressedSize;
 
-    //load all mipmaps
-	if(mipMapCount > 1){
-		for (uint level = 0; level < mipMapCount && (w || h); ++level){
-			if(w <= 2 || h <= 2) break;
-			epriv::ImageMipmap mipmap = epriv::ImageMipmap();
-			mipmap.pixelBufferSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-			mipmap.level = level;
-			mipmap.width = w;
-			mipmap.height = h;
-			mipmap.compressedSize = ((w + 3) / 4) * ((h + 3) / 4) * blockSize;
-			mipmap.pixels = image.pixels + offset;
-			offset += mipmap.compressedSize;
-			w = Math::Max(uint(w / 2), 1);
-			h = Math::Max(uint(h / 2), 1);
-			image.mipmaps.push_back(mipmap);
-		}
+    uint bufferSize = mipMapCount >= 2 ? linearSize * factor : linearSize;
+	uchar* pxls = (uchar*)malloc(bufferSize * sizeof(uchar));
+    fread(pxls, 1, bufferSize, fileparser);
+    fclose(fileparser);
+    //std::cout << "FourCC: " << fourcc(fourCC) << std::endl;
+    //uint components = (fourCC == FOURCC('D','X','T','1')) ? 3 : 4;
+    image.pixelFormat = ImagePixelFormat::RGBA;
+    image.pixelType = ImagePixelType::UNSIGNED_BYTE;	
+    offset = bufferSize;
+	for (uint level = 0; level < mipMapCount && (w || h); ++level){
+		if(level > 0 && (w < 64 || h < 64)) break;
+		epriv::ImageMipmap* mipmap = nullptr;
+		epriv::ImageMipmap mipMapCon = epriv::ImageMipmap();
+		if(level >= 1){ mipmap = &mipMapCon; }
+		else{           mipmap = &image.mipmaps.at(0); }
+		mipmap->level = level;
+		mipmap->width = w;
+		mipmap->height = h;
+		mipmap->compressedSize = ((w + 3) / 4) * ((h + 3) / 4) * blockSize;
+		mipmap->pixels.assign(pxls,pxls + offset);
+		w = Math::Max(uint(w / 2), 1);
+		h = Math::Max(uint(h / 2), 1);
+		offset += mipmap->compressedSize;
 	}
+	free(pxls);
 }
 void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
