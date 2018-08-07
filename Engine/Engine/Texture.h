@@ -24,14 +24,16 @@ class TextureFilter{public: enum Filter{
 namespace sf{ class Image; }
 namespace Engine{
     namespace epriv{
-		struct ImageMipmap;
-		struct ImageLoadedStructure;
+		namespace textures{
+			struct ImageMipmap;
+			struct ImageLoadedStructure;
+		};
         class FramebufferTexture;
         class TextureLoader final{
 			friend class ::Texture;
             public:
 
-				static void LoadDDSFile(Texture* texture, std::string filename,epriv::ImageLoadedStructure& image);
+				static void LoadDDSFile(Texture* texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
 
                 static void LoadTexture2DIntoOpenGL(Texture* texture);
 				static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
