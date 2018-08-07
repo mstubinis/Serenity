@@ -571,6 +571,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
 }
 void Texture::resize(epriv::FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
+bool Texture::compressed(){ return m_i->m_CompressedSize > 0 ? true : false; }
 ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
 uchar* Texture::pixels(){ epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(this); return &m_i->m_Pixels[0]; }
 GLuint& Texture::address(){ return m_i->m_TextureAddress.at(0); }

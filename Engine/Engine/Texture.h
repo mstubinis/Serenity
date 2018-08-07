@@ -72,6 +72,7 @@ class Texture: public EngineResource{
         uint numAddresses();
         ushort mipmapLevels();
         bool mipmapped();
+		bool compressed();
         void resize(Engine::epriv::FramebufferTexture*,uint width,uint height);
 
         ImageInternalFormat::Format internalFormat();

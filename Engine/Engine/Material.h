@@ -28,9 +28,7 @@ class MaterialComponentType{public: enum Type{
     Reflection,
     Refraction,
     ParallaxOcclusion,
-
-Number,};};
-
+_TOTAL};};
 class MaterialPhysics{public: enum Physics{
     Water,
     Plastic_Or_Glass_Low,
@@ -58,7 +56,7 @@ class MaterialPhysics{public: enum Physics{
     Titanium,
     Platinum,
     Nickel,
-};};
+_TOTAL};};
 class DiffuseModel{public: enum Model{
 	None,
     Lambert,

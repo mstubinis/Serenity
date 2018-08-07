@@ -34,8 +34,8 @@ namespace Engine{
             Refraction_CUBEMAP,
             Refraction_CUBEMAP_MAP,
             Heightmap,
-        };};
-        GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::Number] = {
+        _TOTAL};};
+        GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::_TOTAL] = {
             "DiffuseTexture",
             "NormalTexture",
             "GlowTexture",
@@ -50,13 +50,13 @@ namespace Engine{
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
             Material& material = *(Material*)r;
             glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
-            for(uint i = 0; i < MaterialComponentType::Number; ++i){
+            for(uint i = 0; i < MaterialComponentType::_TOTAL; ++i){
                 if(material.getComponents().count(i)){
                     MaterialComponent& component = *material.getComponents().at(i);
-                    if(component.texture() != nullptr && component.texture()->address() != 0){
+                    if(component.texture() && component.texture()->address() != 0){
                         //enable
                         if     (i == 0) { first.x = 1.0f; }
-                        else if(i == 1) { first.y = 1.0f; }
+                        else if(i == 1) { first.y = component.texture()->compressed() ? 0.5f : 1.0f; }
                         else if(i == 2) { first.z = 1.0f; }
                         else if(i == 3) { first.w = 1.0f; }
                         else if(i == 4) { second.x = 1.0f; }
