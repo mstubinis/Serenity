@@ -21,8 +21,8 @@ using namespace Engine::epriv;
 using namespace Engine::epriv::textures;
 using namespace std;
 
-#define FOURCC(a,b,c,d)( (uint32) (((d)<<24) | ((c)<<16) | ((b)<<8) | (a)) )
-string fourcc(uint32 e){ char c[5]={'\0'};c[0]=e>>0 & 0xFF;c[1]=e>>8 & 0xFF;c[2]=e>>16 & 0xFF;c[3]=e>>24 & 0xFF;return c; }
+#define FOURCC(a,b,c,d)((uint32_t) (((d)<<24) | ((c)<<16) | ((b)<<8) | (a)))
+string fourcc(uint32_t e){char c[5]={'\0'};c[0]=e>>0 & 0xFF;c[1]=e>>8 & 0xFF;c[2]=e>>16 & 0xFF;c[3]=e>>24 & 0xFF;return c;}
 
 namespace Engine{
     namespace epriv{
@@ -158,17 +158,65 @@ namespace Engine{
               D3D_RESOURCE_DIMENSION_TEXTURE3D
             } ;
 
+            static const uint FourCC_DXT1    = 0x31545844;
+            static const uint FourCC_DXT2    = 0x32545844;
+            static const uint FourCC_DXT3    = 0x33545844;
+            static const uint FourCC_DXT4    = 0x34545844;
+            static const uint FourCC_DXT5    = 0x35545844;
+            static const uint FourCC_DX10    = 0x30315844;
+            static const uint FourCC_ATI1    = 0x31495441;
+            static const uint FourCC_ATI2    = 0x32495441;
+            static const uint FourCC_RXGB    = 0x42475852;
+            static const uint FourCC_$       = 0x00000024;
+            static const uint FourCC_o       = 0x0000006f;
+            static const uint FourCC_p       = 0x00000070;
+            static const uint FourCC_q       = 0x00000071;
+            static const uint FourCC_r       = 0x00000072;
+            static const uint FourCC_s       = 0x00000073;
+            static const uint FourCC_t       = 0x00000074;
+            static const uint FourCC_BC4U    = 0x55344342;
+            static const uint FourCC_BC4S    = 0x53344342;
+            static const uint FourCC_BC5U    = 0x55354342;
+            static const uint FourCC_BC5S    = 0x53354342;
+            static const uint FourCC_RGBG    = 0x47424752;
+            static const uint FourCC_GRGB    = 0x42475247;
+            static const uint FourCC_YUY2    = 0x32595559;
 
             namespace DDS{
+                struct DDS_PixelFormat final{
+                    uint32_t pxl_size,pxl_flags;
+                    uint32_t fourCC;
+                    uint32_t BitCountRGB; //Number of bits in an RGB (possibly including alpha) format. Valid when flags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
+                    uint32_t BitMaskR,BitMaskG,BitMaskB,BitMaskA;
+                    DDS_PixelFormat(){}
+                    DDS_PixelFormat(uint32_t _size,uint32_t _flags,uint32_t _fourCC,uint32_t _bitCRGB,uint32_t _mskR,uint32_t _mskG,uint32_t _mskB,uint32_t _mskA){
+                        pxl_size = _size;
+                        pxl_flags = _flags;
+                        fourCC = _fourCC;
+                        BitCountRGB = _bitCRGB;
+                        BitMaskR = _mskR;
+                        BitMaskG = _mskG;
+                        BitMaskB = _mskB;
+                        BitMaskA = _mskA;
+                    }
+                    void fill(uchar _header[128]){
+                        pxl_size           = *(uint32_t*)&_header[76];
+                        pxl_flags          = *(uint32_t*)&_header[80];
+                        fourCC             = *(uint32_t*)&_header[84];
+                        BitCountRGB        = *(uint32_t*)&_header[88];
+                        BitMaskR           = *(uint32_t*)&_header[92];
+                        BitMaskG           = *(uint32_t*)&_header[96];
+                        BitMaskB           = *(uint32_t*)&_header[100];
+                        BitMaskA           = *(uint32_t*)&_header[104];
+                    }
+                    DDS_PixelFormat(uchar _header[128]){ fill(_header); }
+                    ~DDS_PixelFormat(){}
+                };
                 struct DDS_Header_DX10 final{
                     textures::DXGI_FORMAT            dxgiFormat;
                     textures::D3D_RESOURCE_DIMENSION resourceDimension;
                     uint32_t miscFlag, arraySize, miscFlags2;
-                    DDS_Header_DX10(){
-                        dxgiFormat = (textures::DXGI_FORMAT)0;
-                        resourceDimension = (textures::D3D_RESOURCE_DIMENSION)0;
-                        miscFlag = arraySize = miscFlags2 = 0;
-                    }
+                    DDS_Header_DX10(){}
                     void fill(uchar _headerDX10[20]){
                         dxgiFormat        = (textures::DXGI_FORMAT)(*(uint32_t*)&_headerDX10[0]);
                         resourceDimension = (textures::D3D_RESOURCE_DIMENSION)(*(uint32_t*)&_headerDX10[4]);
@@ -187,12 +235,10 @@ namespace Engine{
                     uint32_t depth;
                     uint32_t mipMapCount;
                     //uint32_t reserved1[11];
-                    uint32_t pxl_size,pxl_flags;
-                    uint32_t fourCC;
-                    uint32_t BitCountRGB; //Number of bits in an RGB (possibly including alpha) format. Valid when flags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
-                    uint32_t BitMaskR,BitMaskG,BitMaskB,BitMaskA;
+                    DDS_PixelFormat format;
                     uint32_t caps,caps2,caps3,caps4;
                     uint32_t reserved2;
+                    DDS_Header(){}
                     DDS_Header(uchar _header[128]){
                         magic              = *(uint32_t*)&_header[0];
                         header_size        = *(uint32_t*)&_header[4];
@@ -202,15 +248,10 @@ namespace Engine{
                         pitchOrlinearSize  = *(uint32_t*)&_header[20];
                         depth              = *(uint32_t*)&_header[24];
                         mipMapCount        = *(uint32_t*)&_header[28];
+
                         //reserved1[11]    = *(uint32_t*)&_header[32-72];
-                        pxl_size           = *(uint32_t*)&_header[76];
-                        pxl_flags          = *(uint32_t*)&_header[80];
-                        fourCC             = *(uint32_t*)&_header[84];
-                        BitCountRGB        = *(uint32_t*)&_header[88];
-                        BitMaskR           = *(uint32_t*)&_header[92];
-                        BitMaskG           = *(uint32_t*)&_header[96];
-                        BitMaskB           = *(uint32_t*)&_header[100];
-                        BitMaskA           = *(uint32_t*)&_header[104];
+                        format.fill(_header);
+
                         caps               = *(uint32_t*)&_header[108];
                         caps2              = *(uint32_t*)&_header[112];
                         caps3              = *(uint32_t*)&_header[116];
@@ -220,38 +261,6 @@ namespace Engine{
                     ~DDS_Header(){}
                 };
                 
-                /*
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_DXT1 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('DXT1'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_DXT2 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('DXT2'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_DXT3 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('DXT3'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_DXT4 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('DXT4'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_DXT5 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('DXT5'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_BC4_UNORM = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('BC4U'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_BC4_SNORM = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('BC4S'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_BC5_UNORM = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('BC5U'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_BC5_SNORM = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('BC5S'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_R8G8_B8G8 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('RGBG'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_G8R8_G8B8 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('GRGB'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_YUY2 = { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('YUY2'), 0, 0, 0, 0, 0 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A8R8G8B8 = { sizeof(DDS_PIXELFORMAT), DDS_RGBA, 0, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_X8R8G8B8 = { sizeof(DDS_PIXELFORMAT), DDS_RGB,  0, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A8B8G8R8 = { sizeof(DDS_PIXELFORMAT), DDS_RGBA, 0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_X8B8G8R8 = { sizeof(DDS_PIXELFORMAT), DDS_RGB,  0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0x00000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_G16R16 = { sizeof(DDS_PIXELFORMAT), DDS_RGB,  0, 32, 0x0000ffff, 0xffff0000, 0x00000000, 0x00000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_R5G6B5 = { sizeof(DDS_PIXELFORMAT), DDS_RGB, 0, 16, 0x0000f800, 0x000007e0, 0x0000001f, 0x00000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A1R5G5B5 = { sizeof(DDS_PIXELFORMAT), DDS_RGBA, 0, 16, 0x00007c00, 0x000003e0, 0x0000001f, 0x00008000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A4R4G4B4 = { sizeof(DDS_PIXELFORMAT), DDS_RGBA, 0, 16, 0x00000f00, 0x000000f0, 0x0000000f, 0x0000f000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_R8G8B8 = { sizeof(DDS_PIXELFORMAT), DDS_RGB, 0, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_L8 = { sizeof(DDS_PIXELFORMAT), DDS_LUMINANCE, 0,  8, 0xff, 0x00, 0x00, 0x00 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_L16 = { sizeof(DDS_PIXELFORMAT), DDS_LUMINANCE, 0, 16, 0xffff, 0x0000, 0x0000, 0x0000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A8L8 = { sizeof(DDS_PIXELFORMAT), DDS_LUMINANCEA, 0, 16, 0x00ff, 0x0000, 0x0000, 0xff00 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A8L8_ALT = { sizeof(DDS_PIXELFORMAT), DDS_LUMINANCEA, 0, 8, 0x00ff, 0x0000, 0x0000, 0xff00 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_A8 = { sizeof(DDS_PIXELFORMAT), DDS_ALPHA, 0, 8, 0x00, 0x00, 0x00, 0xff };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_V8U8 = { sizeof(DDS_PIXELFORMAT), DDS_BUMPDUDV, 0, 16, 0x00ff, 0xff00, 0x0000, 0x0000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_Q8W8V8U8 = { sizeof(DDS_PIXELFORMAT), DDS_BUMPDUDV, 0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 };
-                extern __declspec(selectany) const DDS_PIXELFORMAT DDSPF_V16U16 = { sizeof(DDS_PIXELFORMAT), DDS_BUMPDUDV, 0, 32, 0x0000ffff, 0xffff0000, 0x00000000, 0x00000000 };
-                */	
-
                 static const uint DDS_CAPS                    = 0x00000001;
                 static const uint DDS_HEIGHT                  = 0x00000002;
                 static const uint DDS_WIDTH                   = 0x00000004;
@@ -294,24 +303,40 @@ namespace Engine{
                 static const uint DDPF_RGB                      = 0x00000040;
                 static const uint DDPF_YUV                      = 0x00000200;
                 static const uint DDPF_LUMINANCE                = 0x00020000;
-            };
+                static const uint DDS_RGBA                      = 0x00000041;
+                static const uint DDS_LUMINANCEA                = 0x00020001;
+                static const uint DDPF_BUMPDUDV                 = 0x00080000;
 
-            static const uint FourCC_DXT1                 = 0x31545844;
-            static const uint FourCC_DXT2                 = 0x32545844;
-            static const uint FourCC_DXT3                 = 0x33545844;
-            static const uint FourCC_DXT4                 = 0x34545844;
-            static const uint FourCC_DXT5                 = 0x35545844;
-            static const uint FourCC_DX10                 = 0x30315844;
-            static const uint FourCC_ATI1                 = 0x31495441;
-            static const uint FourCC_ATI2                 = 0x32495441;
-            static const uint FourCC_RXGB                 = 0x42475852;
-            static const uint FourCC_$                    = 0x00000024;
-            static const uint FourCC_o                    = 0x0000006f;
-            static const uint FourCC_p                    = 0x00000070;
-            static const uint FourCC_q                    = 0x00000071;
-            static const uint FourCC_r                    = 0x00000072;
-            static const uint FourCC_s                    = 0x00000073;
-            static const uint FourCC_t                    = 0x00000074;
+                static const DDS_PixelFormat DDSPF_DXT1 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT1, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_DXT2 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT2, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_DXT3 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT3, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_DXT4 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT4, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_DXT5 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT5, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_BC4_UNORM = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_BC4U, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_BC4_SNORM = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_BC4S, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_BC5_UNORM = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_BC5U, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_BC5_SNORM = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_BC5S, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_R8G8_B8G8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_RGBG, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_G8R8_G8B8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_GRGB, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_YUY2 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_YUY2, 0, 0, 0, 0, 0);
+                static const DDS_PixelFormat DDSPF_A8R8G8B8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDS_RGBA, 0, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+                static const DDS_PixelFormat DDSPF_X8R8G8B8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_RGB,  0, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000);
+                static const DDS_PixelFormat DDSPF_A8B8G8R8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDS_RGBA, 0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+                static const DDS_PixelFormat DDSPF_X8B8G8R8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_RGB,  0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0x00000000);
+                static const DDS_PixelFormat DDSPF_G16R16 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_RGB,  0, 32, 0x0000ffff, 0xffff0000, 0x00000000, 0x00000000);
+                static const DDS_PixelFormat DDSPF_R5G6B5 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_RGB, 0, 16, 0x0000f800, 0x000007e0, 0x0000001f, 0x00000000);
+                static const DDS_PixelFormat DDSPF_A1R5G5B5 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDS_RGBA, 0, 16, 0x00007c00, 0x000003e0, 0x0000001f, 0x00008000);
+                static const DDS_PixelFormat DDSPF_A4R4G4B4 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDS_RGBA, 0, 16, 0x00000f00, 0x000000f0, 0x0000000f, 0x0000f000);
+                static const DDS_PixelFormat DDSPF_R8G8B8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_RGB, 0, 24, 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000);
+                static const DDS_PixelFormat DDSPF_L8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_LUMINANCE, 0,  8, 0xff, 0x00, 0x00, 0x00);
+                static const DDS_PixelFormat DDSPF_L16 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_LUMINANCE, 0, 16, 0xffff, 0x0000, 0x0000, 0x0000);
+                static const DDS_PixelFormat DDSPF_A8L8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDS_LUMINANCEA, 0, 16, 0x00ff, 0x0000, 0x0000, 0xff00);
+                static const DDS_PixelFormat DDSPF_A8L8_ALT = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDS_LUMINANCEA, 0, 8, 0x00ff, 0x0000, 0x0000, 0xff00);
+                static const DDS_PixelFormat DDSPF_A8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_ALPHA, 0, 8, 0x00, 0x00, 0x00, 0xff);
+                static const DDS_PixelFormat DDSPF_V8U8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_BUMPDUDV, 0, 16, 0x00ff, 0xff00, 0x0000, 0x0000);
+                static const DDS_PixelFormat DDSPF_Q8W8V8U8 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_BUMPDUDV, 0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+                static const DDS_PixelFormat DDSPF_V16U16 = DDS_PixelFormat(sizeof(DDS_PixelFormat), DDPF_BUMPDUDV, 0, 32, 0x0000ffff, 0xffff0000, 0x00000000, 0x00000000);
+            };
         };
     };
 };
@@ -329,31 +354,53 @@ struct textures::ImageMipmap final{
 };
 
 struct textures::ImageLoadedStructure final{
-    ImageInternalFormat::Format   internalFormat;
-    ImagePixelFormat::Format      pixelFormat;
-    ImagePixelType::Type          pixelType;
+    ImageInternalFormat::Format      internalFormat;
+    ImagePixelFormat::Format         pixelFormat;
+    ImagePixelType::Type             pixelType;
     vector<textures::ImageMipmap>    mipmaps;
+	string                           filename;
     ImageLoadedStructure(){
         ImageMipmap baseImage;
-        baseImage.compressedSize = 0;
-        mipmaps.push_back(baseImage);
-    }
-    ImageLoadedStructure(uint _width,uint _height){
-        ImageMipmap baseImage;
-        baseImage.width = _width;
-        baseImage.height = _height;
+		filename = "";
         baseImage.compressedSize = 0;
         mipmaps.push_back(baseImage);
     }
     ~ImageLoadedStructure(){}
-    ImageLoadedStructure(const sf::Image& i){
-        ImageMipmap baseImage;
-        baseImage.width = i.getSize().x;
-        baseImage.height = i.getSize().y;
-        baseImage.pixels.assign(i.getPixelsPtr(),i.getPixelsPtr() + baseImage.width * baseImage.height * 4);
-        baseImage.compressedSize = 0;
-        mipmaps.push_back(baseImage);
-    }
+	void load(uint _width,uint _height){
+        ImageMipmap* baseImage = nullptr;
+		if(mipmaps.size() > 0){
+			baseImage = &(mipmaps.at(0));
+		}
+		else{
+			baseImage = new ImageMipmap();
+		}
+		filename = "";
+        baseImage->width = _width;
+        baseImage->height = _height;
+        baseImage->compressedSize = 0;
+		if(mipmaps.size() == 0){
+			mipmaps.push_back(*baseImage);
+		}
+	}
+	void load(const sf::Image& i,string _filename = ""){
+        ImageMipmap* baseImage = nullptr;
+		if(mipmaps.size() > 0){
+			baseImage = &(mipmaps.at(0));
+		}
+		else{
+			baseImage = new ImageMipmap();
+		}
+		filename = _filename;
+        baseImage->width = i.getSize().x;
+        baseImage->height = i.getSize().y;
+        baseImage->pixels.assign(i.getPixelsPtr(),i.getPixelsPtr() + baseImage->width * baseImage->height * 4);
+        baseImage->compressedSize = 0;
+		if(mipmaps.size() == 0){
+			mipmaps.push_back(*baseImage);
+		}
+	}
+    ImageLoadedStructure(uint _width,uint _height){ load(_width,_height); }
+    ImageLoadedStructure(const sf::Image& i,string _filename = ""){ load(i,_filename); }
 };
 
 
@@ -361,31 +408,29 @@ class Texture::impl final{
     friend class epriv::TextureLoader;
     friend class ::Texture;
     public:
-        vector<uchar> m_Pixels;
-        vector<string> m_Files; //if non cubemap, this is only 1 file
+		vector<ImageLoadedStructure*> m_ImagesDatas;
         vector<GLuint> m_TextureAddress;
         GLuint m_Type;
-        uint m_CompressedSize;
-        uint m_Width, m_Height;
-        ImageInternalFormat::Format m_InternalFormat;
-        ImagePixelFormat::Format m_PixelFormat;
-        ImagePixelType::Type m_PixelType;
-        ushort m_MipMapLevels;
+		TextureType::Type m_TextureType;
         bool m_Mipmapped;
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
         void _initFramebuffer(uint _w,uint _h,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat,float _divisor,Texture* _super){
-            ImageLoadedStructure image(uint(float(_w)*_divisor),uint(float(_h)*_divisor));
-            m_PixelFormat = _pixelFormat;
-            m_PixelType = _pixelType;
-            _baseInit(GL_TEXTURE_2D,"RenderTarget",image,_internalFormat,false,_super);
+            ImageLoadedStructure* image = new ImageLoadedStructure(uint(float(_w)*_divisor),uint(float(_h)*_divisor));
+			image->pixelFormat = _pixelFormat;
+			image->pixelType = _pixelType;
+			image->internalFormat = _internalFormat;
+			_baseInit(GL_TEXTURE_2D,"RenderTarget",false,_super);
+			m_ImagesDatas.push_back(image);
             _super->load();
         }
         void _initFromPixelsMemory(const sf::Image& _sfImage,string _name,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){
-            ImageLoadedStructure image(_sfImage);
-            m_PixelType = ImagePixelType::UNSIGNED_BYTE;
-            _baseInit(_openglTextureType,_name,image,_internalFormat,false,_super);
+            ImageLoadedStructure* image = new ImageLoadedStructure(_sfImage,_name);
+			image->pixelType = ImagePixelType::UNSIGNED_BYTE;
+			image->internalFormat = _internalFormat;
+            _baseInit(_openglTextureType,_name,false,_super);
+			m_ImagesDatas.push_back(image);
             _super->load();
         }
         void _initFromImageFile(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){	
@@ -396,44 +441,40 @@ class Texture::impl final{
                 _initFromPixelsMemory(_sfImage,_filename,_openglTextureType,_genMipMaps,_internalFormat,_super);
             }
             else{
-                ImageLoadedStructure image;
-                TextureLoader::LoadDDSFile(_super,_filename,image);
-                m_PixelType = image.pixelType;
-                m_PixelFormat = image.pixelFormat;
-                _baseInit(_openglTextureType,_filename,image,image.internalFormat,false,_super);
-                m_CompressedSize = image.mipmaps.at(0).compressedSize;
+                ImageLoadedStructure* image = new ImageLoadedStructure();
+				image->filename = _filename;
+                TextureLoader::LoadDDSFile(_super,_filename,*image);
+                _baseInit(_openglTextureType,_filename,false,_super);
+				m_ImagesDatas.push_back(image);
                 _super->load();
 
                 //mipmaps
-                if(image.mipmaps.size() >= 2){
+                if(image->mipmaps.size() >= 2){
                     glBindTexture(m_Type, m_TextureAddress.at(0));	
-                    for(auto mip:image.mipmaps){
+                    for(auto mip:image->mipmaps){
                         if(mip.level >= 1)
-                            glCompressedTexImage2D(GL_TEXTURE_2D,mip.level,image.internalFormat,mip.width,mip.height,0,mip.compressedSize,&mip.pixels[0]);
+                            glCompressedTexImage2D(GL_TEXTURE_2D,mip.level,image->internalFormat,mip.width,mip.height,0,mip.compressedSize,&mip.pixels[0]);
                     }
                     glBindTexture(m_Type, 0);
                 }
             }
         }
         void _initCubemap(string _name,ImageInternalFormat::Format _internalFormat,bool _genMipMaps,Texture* _super){
-            ImageLoadedStructure image;
-            m_PixelType = ImagePixelType::UNSIGNED_BYTE;
-            _baseInit(GL_TEXTURE_CUBE_MAP,_name,image,_internalFormat,false,_super);
-            _super->load();
+			for(auto sideImage:m_ImagesDatas){
+				m_Type = GL_TEXTURE_CUBE_MAP;
+				sf::Image img; img.loadFromFile(sideImage->filename);
+				sideImage->load(img,sideImage->filename);
+				sideImage->pixelType = ImagePixelType::UNSIGNED_BYTE;
+				sideImage->internalFormat = _internalFormat;
+				TextureLoader::ChoosePixelFormat(sideImage->pixelFormat,sideImage->internalFormat);	
+			}
+			_super->load();
         }
-        void _baseInit(GLuint type,string n,ImageLoadedStructure& i,ImageInternalFormat::Format internFormat,bool genMipMaps,Texture* _super){
-            vector_clear(m_Pixels);
+        void _baseInit(GLuint type,string n,bool genMipMaps,Texture* _super){
             m_Mipmapped = false;
             m_IsToBeMipmapped = genMipMaps;
             m_MinFilter = GL_LINEAR;
-            m_MipMapLevels = 0;
-            m_CompressedSize = 0;
             m_Type = type;
-            m_Width = i.mipmaps.at(0).width;
-            m_Height = i.mipmaps.at(0).height;
-            m_InternalFormat = internFormat;
-            for(auto p:i.mipmaps.at(0).pixels)
-                m_Pixels.push_back(p);
             _super->setName(n);		
         }
         void _load(Texture* super){
@@ -442,11 +483,20 @@ class Texture::impl final{
             glGenTextures(1, &m_TextureAddress.at(0));
             glBindTexture(m_Type, m_TextureAddress.at(0));
             
-            if(m_Files.size() == 1 && m_Files.at(0) == "FB"){ TextureLoader::LoadTextureFramebufferIntoOpenGL(super); } //FRAMEBUFFER
-            else if(m_Files.size() == 1 && m_Files.at(0) != "FB" && m_Files.at(0) != "PIXELS"){ TextureLoader::LoadTexture2DIntoOpenGL(super); } //IMAGE FILE
-            else if(m_Files.size() == 1 && m_Files.at(0) == "PIXELS"){ TextureLoader::LoadTexture2DIntoOpenGL(super); } //PIXELS FROM MEMORY
-            else if(m_Files.size() > 1){ TextureLoader::LoadTextureCubemapIntoOpenGL(super); } //CUBEMAP
-
+			switch(m_TextureType){
+				case TextureType::RenderTarget:{
+					TextureLoader::LoadTextureFramebufferIntoOpenGL(super); break;
+                }
+				case TextureType::Texture1D:{ break; }
+				case TextureType::Texture2D:{
+					TextureLoader::LoadTexture2DIntoOpenGL(super); break;
+                }
+				case TextureType::Texture3D:{ break; }
+				case TextureType::CubeMap:{
+					TextureLoader::LoadTextureCubemapIntoOpenGL(super); break;
+                }
+				default:{ break; }
+			}
             if(m_IsToBeMipmapped) TextureLoader::GenerateMipmapsOpenGL(super);
         }
         void _unload(){
@@ -454,24 +504,24 @@ class Texture::impl final{
                 glDeleteTextures(1,&m_TextureAddress.at(i));
             }
             glBindTexture(m_Type,0);
-            m_MipMapLevels = 0;
             m_Mipmapped = false;
-            vector_clear(m_Pixels);
             vector_clear(m_TextureAddress);
         }
         void _resize(epriv::FramebufferTexture* t,uint w, uint h){
-            if(m_Files.size() == 0 || (m_Files.size() == 1 && m_Files.at(0) != "FB")){
+            if(m_TextureType != TextureType::RenderTarget){
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
             glBindTexture(m_Type, m_TextureAddress.at(0));
-            m_Width = uint(float(w) * t->divisor()); 
-            m_Height = uint(float(h) * t->divisor());
-            glTexImage2D(m_Type,0,ImageInternalFormat::at(m_InternalFormat),m_Width,m_Height,0,ImagePixelFormat::at(m_PixelFormat),ImagePixelType::at(m_PixelType),NULL);
+			uint _w = uint(float(w) * t->divisor());
+			uint _h = uint(float(h) * t->divisor());
+			m_ImagesDatas.at(0)->mipmaps.at(0).width = _w; 
+            m_ImagesDatas.at(0)->mipmaps.at(0).height = _h;
+			glTexImage2D(m_Type,0,ImageInternalFormat::at(m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(m_ImagesDatas.at(0)->pixelType),NULL);
         }
 };
 
-void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,textures::ImageLoadedStructure& image){
+void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageLoadedStructure& image){
     FILE* fileparser = fopen(_filename.c_str(), "rb");
     if (!fileparser) return;
     uchar header_buffer[128];
@@ -483,39 +533,104 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,textur
     }
     //DX10 header here
     DDS::DDS_Header_DX10 headDX10;
-    if( (head.header_flags & DDS::DDPF_FOURCC) && head.fourCC == FourCC_DX10 ){
+    if( (head.header_flags & DDS::DDPF_FOURCC) && head.format.fourCC == FourCC_DX10 ){
         uchar header_buffer_DX10[20];
         fread(&header_buffer_DX10, 20, 1, fileparser);
         headDX10.fill(header_buffer_DX10);
     }
     uint32_t factor, blockSize, offset = 0;
-
-    switch(head.fourCC){
+    switch(head.format.fourCC){
         case FourCC_DXT1:{ 
-            factor = 2; blockSize = 8; image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;break; 
+            factor = 2;
+            blockSize = 8;
+            image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+            break; 
         }
-        case FourCC_DXT2:{ factor = 4; blockSize = 16; break; }
+        case FourCC_DXT2:{ 
+            factor = 4;
+            blockSize = 16;
+            break;
+        }
         case FourCC_DXT3:{ 
-            factor = 4; blockSize = 16; image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;break; 
+            factor = 4;
+            blockSize = 16;
+            image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+            break; 
         }
-        case FourCC_DXT4:{ factor = 4; blockSize = 16; break; }
+        case FourCC_DXT4:{ 
+            factor = 4;
+            blockSize = 16;
+            break;
+        }
         case FourCC_DXT5:{
-            factor = 4; blockSize = 16; image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;break; 
+            factor = 4;
+            blockSize = 16;
+            image.internalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+            break; 
         }
-        case FourCC_DX10:{ break; }
-        case FourCC_ATI1:{ factor = 2; blockSize = 8; break; }
+        case FourCC_DX10:{ 
+            break; 
+        }
+        case FourCC_ATI1:{ 
+            factor = 2;
+            blockSize = 8;
+            break;
+        }
         case FourCC_ATI2:{//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
-            blockSize = 16; image.internalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;break; 
+            blockSize = 16;
+            image.internalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
+            break; 
         }
-        case FourCC_RXGB:{ factor = 4; blockSize = 16; break; }
-        case FourCC_$:{ break; }
-        case FourCC_o:{ break; }
-        case FourCC_p:{ break; }
-        case FourCC_q:{ break; }
-        case FourCC_r:{ break; }
-        case FourCC_s:{ break; }
-        case FourCC_t:{ break; }
-        default:{ return; }
+        case FourCC_RXGB:{ 
+            factor = 4;
+            blockSize = 16;
+            break;
+        }
+        case FourCC_$:{ 
+            break; 
+        }
+        case FourCC_o:{ 
+            break; 
+        }
+        case FourCC_p:{ 
+            break; 
+        }
+        case FourCC_q:{ 
+            break; 
+        }
+        case FourCC_r:{ 
+            break; 
+        }
+        case FourCC_s:{ 
+            break; 
+        }
+        case FourCC_t:{ 
+            break; 
+        }
+        case FourCC_BC4U:{ 
+            break; 
+        }
+        case FourCC_BC4S:{ 
+            break; 
+        }
+        case FourCC_BC5U:{ 
+            break;
+        }
+        case FourCC_BC5S:{ 
+            break; 
+        }
+        case FourCC_RGBG:{ 
+            break;
+        }
+        case FourCC_GRGB:{
+            break;
+        }
+        case FourCC_YUY2:{
+            break;
+        }
+        default:{ 
+            return;
+        }
     }
 
     uint bufferSize = head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize;
@@ -544,13 +659,17 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,textur
 }
 void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
-    TextureLoader::ChoosePixelFormat(i.m_PixelFormat,i.m_InternalFormat);
-    if(TextureLoader::IsCompressedType(i.m_InternalFormat) && i.m_CompressedSize != 0){
-        glCompressedTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,i.m_CompressedSize,&i.m_Pixels[0]);
-    }
-    else{
-        glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,ImagePixelFormat::at(i.m_PixelFormat),ImagePixelType::at(i.m_PixelType),&i.m_Pixels[0]);
-    }
+	TextureLoader::ChoosePixelFormat(i.m_ImagesDatas.at(0)->pixelFormat,i.m_ImagesDatas.at(0)->internalFormat);
+	uint level = 0;
+	for(auto mipmap:i.m_ImagesDatas.at(0)->mipmaps){
+		if(TextureLoader::IsCompressedType(i.m_ImagesDatas.at(0)->internalFormat) && mipmap.compressedSize != 0){
+			glCompressedTexImage2D(i.m_Type,level,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
+		}
+		else{
+			glTexImage2D(i.m_Type,level,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),mipmap.width,mipmap.height,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),&(mipmap.pixels)[0]);
+		}
+		++level;
+	}
     _texture->setFilter(TextureFilter::Linear);
     glBindTexture(i.m_Type,0);
     epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture);
@@ -558,36 +677,46 @@ void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
 void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
     glBindTexture(i.m_Type,i.m_TextureAddress.at(0));
-    glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,ImagePixelFormat::at(i.m_PixelFormat),ImagePixelType::at(i.m_PixelType),NULL);
+	uint& _w = i.m_ImagesDatas.at(0)->mipmaps.at(0).width;
+	uint& _h = i.m_ImagesDatas.at(0)->mipmaps.at(0).height;
+    glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),NULL);
     _texture->setFilter(TextureFilter::Linear);
     _texture->setWrapping(TextureWrap::ClampToEdge);
     glBindTexture(i.m_Type,0);
 }
 void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
-    for(uint k = 0; k < i.m_Files.size(); ++k){
-        sf::Image img;
-        img.loadFromFile(i.m_Files[k].c_str());
-        i.m_Width = img.getSize().x;
-        i.m_Height = img.getSize().y;
-        i.m_Type = GL_TEXTURE_CUBE_MAP_POSITIVE_X + k;
-        TextureLoader::ChoosePixelFormat(i.m_PixelFormat,i.m_InternalFormat);
-        glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_InternalFormat),i.m_Width,i.m_Height,0,ImagePixelFormat::at(i.m_PixelFormat),GL_UNSIGNED_BYTE,img.getPixelsPtr());
-    }
-    i.m_Type = GL_TEXTURE_CUBE_MAP;
-    _texture->setFilter(TextureFilter::Linear);
-    _texture->setWrapping(TextureWrap::ClampToEdge);
-    glBindTexture(i.m_Type,0);
-    TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture);
+	glBindTexture(i.m_Type,i.m_TextureAddress.at(0));
+	uint imageIndex = 0;
+	for(auto image:i.m_ImagesDatas){
+		uint level = 0;
+		for(auto mipmap:image->mipmaps){
+			if(TextureLoader::IsCompressedType(i.m_ImagesDatas.at(0)->internalFormat) && mipmap.compressedSize != 0){
+				glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + imageIndex,level,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),mipmap.width,mipmap.height,0,mipmap.compressedSize,&(mipmap.pixels)[0]);
+			}
+			else{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + imageIndex,level,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),mipmap.width,mipmap.height,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),&(mipmap.pixels)[0]);
+			}
+			TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,imageIndex,level);
+			++level;
+		}
+		++imageIndex;
+	}
+	_texture->setFilter(TextureFilter::Linear);
+	_texture->setWrapping(TextureWrap::ClampToEdge);
+	glBindTexture(i.m_Type,0);
 }
-void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture* _texture){
+void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture* _texture,uint imageIndex,uint mipmapLevel){
     Texture::impl& i = *_texture->m_i;
-    if(i.m_Pixels.size() == 0){
-        i.m_Pixels.resize(i.m_Width * i.m_Height * 4);
-        glBindTexture(i.m_Type,i.m_TextureAddress.at(0));
-        glGetTexImage(i.m_Type,0,ImagePixelFormat::at(i.m_PixelFormat),ImagePixelType::at(i.m_PixelType),&i.m_Pixels[0]);
-        glBindTexture(i.m_Type,0);
-    }
+	vector<uchar>& pxls = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).pixels;
+	if(pxls.size() != 0) return;
+	uint& _w = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).width;
+	uint& _h = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).height;
+    pxls.resize(_w * _h * 4);
+    glBindTexture(i.m_Type,i.m_TextureAddress.at(0));
+	glGetTexImage(i.m_Type,0,ImagePixelFormat::at(i.m_ImagesDatas.at(imageIndex)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(imageIndex)->pixelType),&pxls[0]);
+    glBindTexture(i.m_Type,0);
+
 }
 void epriv::TextureLoader::ChoosePixelFormat(ImagePixelFormat::Format& _out,ImageInternalFormat::Format& _in){
     switch(_in){
@@ -712,7 +841,8 @@ bool epriv::TextureLoader::IsCompressedType(ImageInternalFormat::Format _format)
 }
 void epriv::TextureLoader::GenerateMipmapsOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i; if(i.m_Mipmapped) return;
-
+	uint& _w = i.m_ImagesDatas.at(0)->mipmaps.at(0).width;
+	uint& _h = i.m_ImagesDatas.at(0)->mipmaps.at(0).height;
     glBindTexture(i.m_Type, i.m_TextureAddress.at(0));
     glTexParameteri(i.m_Type, GL_TEXTURE_BASE_LEVEL, 0);
     if(i.m_MinFilter == GL_LINEAR){        
@@ -724,7 +854,7 @@ void epriv::TextureLoader::GenerateMipmapsOpenGL(Texture* _texture){
     glTexParameteri(i.m_Type, GL_TEXTURE_MIN_FILTER, i.m_MinFilter);
     glGenerateMipmap(i.m_Type);
     i.m_Mipmapped = true;
-    i.m_MipMapLevels = uint(glm::log2(glm::max(i.m_Width,i.m_Height)) + 1.0f);
+    //uint mipmaplevels = uint(glm::log2(glm::max(_w,_h)) + 1.0f);
     glBindTexture(i.m_Type, 0);
 }
 void epriv::TextureLoader::EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap){
@@ -753,29 +883,34 @@ void epriv::TextureLoader::EnumFilterToGL(uint& gl, TextureFilter::Filter& filte
 }
 
 Texture::Texture(uint _w, uint _h,ImagePixelType::Type _pxlType,ImagePixelFormat::Format _pxlFormat,ImageInternalFormat::Format _internal,float _divisor):m_i(new impl){
-    m_i->m_Files.push_back("FB");
+	m_i->m_TextureType = TextureType::RenderTarget;
     m_i->_initFramebuffer(_w,_h,_pxlType,_pxlFormat,_internal,_divisor,this);
 }
 Texture::Texture(const sf::Image& _sfImage,string _name,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat):m_i(new impl){
-    m_i->m_Files.push_back("PIXELS");
+	m_i->m_TextureType = TextureType::Texture2D;
     m_i->_initFromPixelsMemory(_sfImage,_name,_openglTextureType,_genMipMaps,_internalFormat,this);
 }
 Texture::Texture(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat):m_i(new impl){
-    m_i->m_Files.push_back(_filename);
+    m_i->m_TextureType = TextureType::Texture2D;
     m_i->_initFromImageFile(_filename,_openglTextureType,_genMipMaps,_internalFormat,this);
 }
 //CubemapFrom6ImageFiles
 Texture::Texture(string files[],string _name,bool _genMipMaps,ImageInternalFormat::Format _internalFormat):m_i(new impl){
+	m_i->m_TextureType = TextureType::CubeMap;
     for(uint j = 0; j < 6; ++j){ 
-        m_i->m_Files.push_back( files[j] ); 
+		ImageLoadedStructure* image = new ImageLoadedStructure();
+		image->filename = files[j];
+		m_i->m_ImagesDatas.push_back(image);
     }
     m_i->_initCubemap(_name,_internalFormat,_genMipMaps,this);
 }
 Texture::~Texture(){
     unload();
+	for(auto data:m_i->m_ImagesDatas)
+		SAFE_DELETE(data);
 }
 void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
-    if(m_i->m_Files.size() != 1) return;
+	if(m_i->m_TextureType == TextureType::CubeMap) return;
     Core::m_Engine->m_RenderManager->_renderTexture(this,pos,color,scl,angle,depth);
 }
 void Texture::setXWrapping(TextureWrap::Wrap w){ Texture::setXWrapping(m_i->m_Type,w); }
@@ -862,15 +997,18 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
 }
 void Texture::resize(FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
-bool Texture::compressed(){ return m_i->m_CompressedSize > 0 ? true : false; }
-ushort Texture::mipmapLevels(){ return m_i->m_MipMapLevels; }
-uchar* Texture::pixels(){ TextureLoader::WithdrawPixelsFromOpenGLMemory(this); return &m_i->m_Pixels[0]; }
+bool Texture::compressed(){
+	//if(m_i->m_ImagesDatas.size() == 0) return false;
+	//else if(m_i->m_ImagesDatas.at(0)->mipmaps.size() == 0) return false;
+	if(m_i->m_ImagesDatas.at(0)->mipmaps.at(0).compressedSize > 0) return true; return false;
+}
+uchar* Texture::pixels(){ TextureLoader::WithdrawPixelsFromOpenGLMemory(this); return &(m_i->m_ImagesDatas.at(0)->mipmaps.at(0).pixels)[0]; }
 GLuint& Texture::address(){ return m_i->m_TextureAddress.at(0); }
 GLuint& Texture::address(uint index){ return m_i->m_TextureAddress.at(index); }
 uint Texture::numAddresses(){ return m_i->m_TextureAddress.size(); }
 GLuint Texture::type(){ return m_i->m_Type; }
-uint Texture::width(){ return m_i->m_Width; }
-uint Texture::height(){ return m_i->m_Height; }
-ImageInternalFormat::Format Texture::internalFormat(){ return m_i->m_InternalFormat; }
-ImagePixelFormat::Format Texture::pixelFormat(){ return m_i->m_PixelFormat; }
-ImagePixelType::Type Texture::pixelType(){ return m_i->m_PixelType; }
+uint Texture::width(){ return m_i->m_ImagesDatas.at(0)->mipmaps.at(0).width; }
+uint Texture::height(){ return m_i->m_ImagesDatas.at(0)->mipmaps.at(0).height; }
+ImageInternalFormat::Format Texture::internalFormat(){ return m_i->m_ImagesDatas.at(0)->internalFormat; }
+ImagePixelFormat::Format Texture::pixelFormat(){ return m_i->m_ImagesDatas.at(0)->pixelFormat; }
+ImagePixelType::Type Texture::pixelType(){ return m_i->m_ImagesDatas.at(0)->pixelType; }

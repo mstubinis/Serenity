@@ -16,10 +16,13 @@ typedef unsigned short ushort;
 class Texture;
 class TextureWrap{public: enum Wrap{
     Repeat,RepeatMirrored,ClampToEdge,ClampToBorder,
-};};
+_TOTAL};};
 class TextureFilter{public: enum Filter{
     Linear,Nearest,Nearest_Mipmap_Nearest,Nearest_Mipmap_Linear,Linear_Mipmap_Nearest,Linear_Mipmap_Linear,
-};};
+_TOTAL};};
+class TextureType{public: enum Type{
+	Texture1D,Texture2D,Texture3D,CubeMap,RenderTarget,
+_TOTAL};};
 
 namespace sf{ class Image; }
 namespace Engine{
@@ -44,7 +47,7 @@ namespace Engine{
 				static bool IsCompressedType(ImageInternalFormat::Format);
 
 				static void GenerateMipmapsOpenGL(Texture* texture);
-				static void WithdrawPixelsFromOpenGLMemory(Texture* texture);
+				static void WithdrawPixelsFromOpenGLMemory(Texture* texture,uint imageIndex = 0,uint mipmapLevel = 0);
 				static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
         };
 
@@ -72,7 +75,6 @@ class Texture: public EngineResource{
         uint width();
         uint height();
         uint numAddresses();
-        ushort mipmapLevels();
         bool mipmapped();
 		bool compressed();
         void resize(Engine::epriv::FramebufferTexture*,uint width,uint height);
