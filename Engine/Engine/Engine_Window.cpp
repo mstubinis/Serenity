@@ -116,7 +116,7 @@ class Engine_Window::impl final{
         void _setIcon(const char* file){
             Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(file);
 			if(!texture){
-				texture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+				texture = new Texture(file,false,ImageInternalFormat::RGBA8);
 				epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 			}
 			m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());

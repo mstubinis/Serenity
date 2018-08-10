@@ -18,19 +18,27 @@ using namespace std;
 
 class Font::impl final{
     public:
-        Mesh* m_Mesh;
+        //Mesh* m_Mesh;
         Texture* m_FontTexture;
         std::unordered_map<uchar,FontGlyph*> m_FontGlyphs;
 
-        void _init(string& filename){
-            _loadTextFile(filename);
-            string file = filename.substr(0,filename.size()-4);
-            file += ".png";
-            m_FontTexture = new Texture(file,GL_TEXTURE_2D,false,ImageInternalFormat::SRGB8_ALPHA8);
+        void _init(string& _FontFilename){
+            _loadTextFile(_FontFilename);
+
+
+			string rawname = _FontFilename;
+			size_t lastindex = _FontFilename.find_last_of("."); 
+			if(lastindex != string::npos){
+				rawname = _FontFilename.substr(0, lastindex); 
+				rawname += ".png";
+			}
+
+
+            m_FontTexture = new Texture(rawname,false,ImageInternalFormat::SRGB8_ALPHA8);
             epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_FontTexture);
 
-            Handle h = Resources::addMesh(file,1.0f,1.0f);
-            m_Mesh = Resources::getMesh(h);
+            //Handle h = Resources::addMesh(file,1.0f,1.0f);
+            //m_Mesh = Resources::getMesh(h);
         }
         void _destruct(){
             for(auto glyph:m_FontGlyphs){
@@ -85,7 +93,7 @@ Font::~Font(){
 }
 Texture* Font::getGlyphTexture() { return m_i->m_FontTexture; }
 FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs.at(c); }
-Mesh* Font::getFontMesh(){ return m_i->m_Mesh; }
+//Mesh* Font::getFontMesh(){ return m_i->m_Mesh; }
 void Font::renderText(string text, glm::vec2& pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
 }

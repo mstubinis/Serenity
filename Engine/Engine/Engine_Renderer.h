@@ -166,13 +166,15 @@ namespace Engine{
         void bindRBO(epriv::RenderbufferObject* rbo);
         void bindReadFBO(GLuint fbo);
         void bindDrawFBO(GLuint fbo);
-        void bindTexture(const char* location,Texture* texture,uint slot);
-        void bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);
-        void bindTextureSafe(const char* location,Texture* texture,uint slot);
-        void bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);
-        void unbindTexture(uint slot,Texture* texture);
-        void unbindTexture2D(uint slot);
-        void unbindTextureCubemap(uint slot);
+
+		void bindTexture(GLuint _textureType,GLuint _textureObject);
+		void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
+
+        void sendTexture(const char* location,Texture* texture,uint slot);
+        void sendTexture(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);
+        void sendTextureSafe(const char* location,Texture* texture,uint slot);
+        void sendTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);
+
         void unbindFBO();
         void unbindRBO();
         void unbindReadFBO();

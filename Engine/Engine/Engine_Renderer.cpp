@@ -242,6 +242,10 @@ class epriv::RenderManager::impl final{
         GLuint current_bound_read_fbo;
         GLuint current_bound_draw_fbo;
         GLuint current_bound_rbo;
+		GLuint current_bound_texture_1D;
+		GLuint current_bound_texture_2D;
+		GLuint current_bound_texture_3D;
+		GLuint current_bound_texture_cube_map;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         glm::uvec4 gl_viewport_data;
         bool draw_physics_debug;
@@ -348,6 +352,10 @@ class epriv::RenderManager::impl final{
             current_bound_read_fbo = 0;
             current_bound_draw_fbo = 0;
             current_bound_rbo = 0;
+		    current_bound_texture_1D = 0;
+		    current_bound_texture_2D = 0;
+		    current_bound_texture_3D = 0;
+		    current_bound_texture_cube_map = 0;
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             gl_viewport_data = glm::uvec4(0,0,0,0);
             #ifdef _DEBUG
@@ -1187,6 +1195,7 @@ class epriv::RenderManager::impl final{
             epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,CollisionType::None,false,0.0005f);
             epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,CollisionType::None,false,0.0005f);
 
+			Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
             Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
             Mesh::Cube = new Mesh(cubeMesh,CollisionType::None,false,0.0005f);
 
@@ -1216,8 +1225,7 @@ class epriv::RenderManager::impl final{
                 glm::vec3 noise(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f); 
                 ssaoNoise.push_back(noise);
             }
-            glGenTextures(1, &ssao_noise_texture);
-            glBindTexture(GL_TEXTURE_2D, ssao_noise_texture);
+			genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE,SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1230,19 +1238,17 @@ class epriv::RenderManager::impl final{
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very wierd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
 
-            glGenTextures(1,&SMAA_AreaTexture);
-            glBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
+			genAndBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
             glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
-            glBindTexture(GL_TEXTURE_2D,0);
+            //bindTexture(GL_TEXTURE_2D,0);
 
-            glGenTextures(1,&SMAA_SearchTexture);
-            glBindTexture(GL_TEXTURE_2D,SMAA_SearchTexture);
+			genAndBindTexture(GL_TEXTURE_2D,SMAA_SearchTexture);
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
             glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
-            glBindTexture(GL_TEXTURE_2D,0);
+            //bindTexture(GL_TEXTURE_2D,0);
 
             glClearStencil(0);
             GLDisable(GLState::STENCIL_TEST);
@@ -1259,6 +1265,7 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(epriv::InternalMeshes::PointLightBounds);
             SAFE_DELETE(epriv::InternalMeshes::RodLightBounds);
             SAFE_DELETE(epriv::InternalMeshes::SpotLightBounds);
+			SAFE_DELETE(Mesh::FontPlane);
             SAFE_DELETE(Mesh::Plane);
             SAFE_DELETE(Mesh::Cube);
 
@@ -1279,20 +1286,20 @@ class epriv::RenderManager::impl final{
             Math::removeMatrixPosition(view);
             if(skybox){
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->bind();
-                Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
-                Renderer::bindTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
+                sendUniformMatrix4f("VP",c->getProjection() * view);
+                sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
-                Renderer::unbindTextureCubemap(0);//yes, this is needed.
+                //unbindTextureCubemap(0);
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
             }
             else{//render a fake skybox.
                 Skybox::initMesh();
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->bind();
                 glm::vec3 bgColor = scene->getBackgroundColor();
-                Renderer::sendUniformMatrix4f("VP",c->getProjection() * view);
-                Renderer::sendUniform4f("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
+                sendUniformMatrix4f("VP",c->getProjection() * view);
+                sendUniform4f("Color",bgColor.r,bgColor.g,bgColor.b,1.0f);
                 Skybox::bindMesh();
-                Renderer::unbindTextureCubemap(0);//yes, this is needed.
+                //unbindTextureCubemap(0);
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->unbind();
             }
         }
@@ -1316,9 +1323,9 @@ class epriv::RenderManager::impl final{
             epriv::RenderManager::OPENGL_VERSION = _openglVersion;
             glewExperimental = GL_TRUE;
             glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
-            Renderer::GLEnable(GLState::TEXTURE_2D); //is this really needed?
-            Renderer::GLEnable(GLState::CULL_FACE);
-            Renderer::Settings::cullFace(GL_BACK);
+            GLEnable(GLState::TEXTURE_2D); //is this really needed?
+            GLEnable(GLState::CULL_FACE);
+            Settings::cullFace(GL_BACK);
             SAFE_DELETE(m_gBuffer);
             m_gBuffer = new GBuffer(width,height);
         }
@@ -1328,7 +1335,7 @@ class epriv::RenderManager::impl final{
                 cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
             }
             uint size = convoludeTextureSize;
-            glBindTexture(texType, texture->address(1));
+            bindTexture(texType, texture->address(1));
             Renderer::unbindFBO();
             epriv::FramebufferObject* fbo = new epriv::FramebufferObject(texture->name() + "_fbo_envData",size,size); //try without a depth format
             fbo->bind();
@@ -1346,13 +1353,13 @@ class epriv::RenderManager::impl final{
     
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapConvolude)->bind();
 
-            Renderer::bindTexture("cubemap",texture->address(),0,texType);
-            Renderer::setViewport(0,0,size,size);
+            sendTexture("cubemap",texture->address(),0,texType);
+            setViewport(0,0,size,size);
             for (uint i = 0; i < 6; ++i){
-                glm::mat4 vp = captureProjection*captureViews[i];
-                Renderer::sendUniformMatrix4f("VP",vp);
+                glm::mat4 vp = captureProjection * captureViews[i];
+                sendUniformMatrix4f("VP",vp);
                 glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture->address(1),0);
-                Renderer::Settings::clear(true,true,false);
+                Settings::clear(true,true,false);
                 Skybox::bindMesh();
             }
             //cout << "---- " + texture->name() + " (Cubemap): convolution done ----" << endl;
@@ -1361,24 +1368,24 @@ class epriv::RenderManager::impl final{
 
             //now gen EnvPrefilterMap for specular IBL
             size = preEnvFilterSize;
-            glBindTexture(texType, texture->address(2));
+            bindTexture(texType, texture->address(2));
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CubemapPrefilterEnv)->bind();
-            Renderer::bindTexture("cubemap",texture->address(),0,texType);
-            Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((texture->width() * texture->width())*6));
-            Renderer::sendUniform1i("NUM_SAMPLES",32);
+            sendTexture("cubemap",texture->address(),0,texType);
+            sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((texture->width() * texture->width())*6));
+            sendUniform1i("NUM_SAMPLES",32);
             uint maxMipLevels = 5;
             for (uint m = 0; m < maxMipLevels; ++m){
                 uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
                 fbo->resize(mipSize,mipSize);
                 float roughness = (float)m/(float)(maxMipLevels-1);
-                Renderer::sendUniform1f("roughness",roughness);
+                sendUniform1f("roughness",roughness);
                 float a = roughness * roughness;
-                Renderer::sendUniform1f("a2",a*a);
+                sendUniform1f("a2",a*a);
                 for (uint i = 0; i < 6; ++i){
                     glm::mat4 vp = captureProjection * captureViews[i];
-                    Renderer::sendUniformMatrix4f("VP", vp);
+                    sendUniformMatrix4f("VP", vp);
                     glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture->address(2),m);
-                    Renderer::Settings::clear(true,true,false);
+                    Settings::clear(true,true,false);
                     Skybox::bindMesh();
                 }
             }
@@ -1396,15 +1403,15 @@ class epriv::RenderManager::impl final{
             FramebufferObject* fbo = new FramebufferObject("BRDFLUT_Gen_CookTorr_FBO",brdfSize,brdfSize); //try without a depth format
             fbo->bind();
 
-            glBindTexture(GL_TEXTURE_2D, brdfCook->address());
+            bindTexture(GL_TEXTURE_2D, brdfCook->address());
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToEdge);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,brdfCook->address(), 0);
 
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance)->bind();
-            Renderer::sendUniform1i("NUM_SAMPLES",256);
-            Renderer::Settings::clear(true,true,false);
+            sendUniform1i("NUM_SAMPLES",256);
+            Settings::clear(true,true,false);
             glColorMask(GL_TRUE,GL_TRUE,GL_FALSE,GL_FALSE);
             _renderFullscreenTriangle(brdfSize,brdfSize,0,0);
             //cout << "----  BRDF LUT (Cook Torrance) completed ----" << endl;
@@ -1412,8 +1419,8 @@ class epriv::RenderManager::impl final{
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
             delete fbo;
-            Renderer::bindReadFBO(prevReadBuffer);
-            Renderer::bindDrawFBO(prevDrawBuffer);
+            bindReadFBO(prevReadBuffer);
+            bindDrawFBO(prevDrawBuffer);
         }
         void _setSMAAQuality(SMAAQualityLevel::Level& l){
             if(l == SMAAQualityLevel::Low){
@@ -1479,11 +1486,11 @@ class epriv::RenderManager::impl final{
             Mesh::Plane->bind();
             for(auto item:m_TexturesToBeRendered){
                 if(item.texture != nullptr){
-                    bindTexture("DiffuseTexture",item.texture,0);
+                    sendTexture("DiffuseTexture",item.texture,0);
                     sendUniform1i("DiffuseTextureEnabled",1);
                 }
                 else{
-                    bindTexture("DiffuseTexture",0,0);
+                    sendTexture("DiffuseTexture",0,0);
                     sendUniform1i("DiffuseTextureEnabled",0);
                 }
                 sendUniform4f("Object_Color",item.col);
@@ -1507,8 +1514,8 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             for(auto item:m_FontsToBeRendered){
                 Font& font = *item.font;
-                Mesh& fontMesh = *(item.font->getFontMesh());
-                bindTexture("DiffuseTexture",font.getGlyphTexture(),0);
+				Mesh& mesh = *(Mesh::FontPlane);
+                sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1i("DiffuseTextureEnabled",1);
                 sendUniform4f("Object_Color",item.col);
                 float y_offset = 0;
@@ -1529,10 +1536,10 @@ class epriv::RenderManager::impl final{
                         sendUniformMatrix4f("VP",m_2DProjectionMatrix);
                         sendUniformMatrix4f("Model",chr.m_Model);
 
-                        fontMesh.modifyPointsAndUVs(chr.pts,chr.uvs);
-                        fontMesh.bind();
-                        fontMesh.render();
-                        //fontMesh.unbind();
+                        mesh.modifyPointsAndUVs(chr.pts,chr.uvs);
+                        mesh.bind();
+                        mesh.render();
+                        //mesh.unbind();
                         
                         x += chr.xadvance * item.scl.x;
                     }
@@ -1660,11 +1667,10 @@ class epriv::RenderManager::impl final{
             glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth)->bind();
 
-            bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),0);
+            sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),0);
 
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
 
-            unbindTexture2D(0);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::CopyDepth)->unbind();
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
         }
@@ -1688,15 +1694,14 @@ class epriv::RenderManager::impl final{
             sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
             sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
 
-            bindTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
-            bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
-            bindTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
-            bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
+            sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
+            sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
+            sendTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
+            sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
 
             for (auto light:s->lights()){
                 light->lighten();
             }
-            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->unbind();
             if(mainRenderFunc){
                 //do GI here. (only doing GI during the main render pass, not during light probes
@@ -1713,9 +1718,9 @@ class epriv::RenderManager::impl final{
                 }
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
                 sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
-                bindTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
-                bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
-                bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
+                sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
+                sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
+                sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
 
                 SkyboxEmpty* skybox = s->skybox();
 
@@ -1723,26 +1728,21 @@ class epriv::RenderManager::impl final{
                     /*
                     for(auto probe:s->lightProbes()){
                         LightProbe* p = probe.second;
-                        bindTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
-                        bindTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
-                        bindTextureSafe("brdfLUT",brdfCook,5);
+                        sendTextureSafe("irradianceMap",p->getIrriadianceMap(),3,GL_TEXTURE_CUBE_MAP);
+                        sendTextureSafe("prefilterMap",p->getPrefilterMap(),4,GL_TEXTURE_CUBE_MAP);
+                        sendTextureSafe("brdfLUT",brdfCook,5);
                         break;
                     }
                     */
                 }
                 else{
-                    if(skybox != nullptr && skybox->texture()->numAddresses() >= 3){
-                        bindTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
-                        bindTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
-                        bindTextureSafe("brdfLUT",brdfCook,5);
+                    if(skybox && skybox->texture()->numAddresses() >= 3){
+                        sendTextureSafe("irradianceMap",skybox->texture()->address(1),3,GL_TEXTURE_CUBE_MAP);
+                        sendTextureSafe("prefilterMap",skybox->texture()->address(2),4,GL_TEXTURE_CUBE_MAP);
+                        sendTextureSafe("brdfLUT",brdfCook,5);
                     }
                 }
-
                 _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
-                for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
-                unbindTextureCubemap(3);
-                unbindTextureCubemap(4);
-                unbindTexture2D(5);
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI)->unbind();
             }
             GLDisable(GLState::STENCIL_TEST);
@@ -1771,15 +1771,14 @@ class epriv::RenderManager::impl final{
     
             sendUniform3fv("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
-            bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
-            bindTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);
-            bindTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
-            bindTexture("gLightMap",gbuffer.getTexture(GBufferType::Lighting),3);
-            bindTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),4);
+            sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
+            sendTexture("gRandomMap",ssao_noise_texture,1,GL_TEXTURE_2D);
+            sendTexture("gMiscMap",gbuffer.getTexture(GBufferType::Misc),2);
+            sendTexture("gLightMap",gbuffer.getTexture(GBufferType::Lighting),3);
+            sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),4);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-            for(uint i = 0; i < 5; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->unbind();
         }
         void _passStencil(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
@@ -1794,14 +1793,13 @@ class epriv::RenderManager::impl final{
             glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
             GLEnable(GLState::STENCIL_TEST);
 
-            bindTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
+            sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
 
             glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_EQUAL, 0x1, 0x1);
+            glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
 
-            for(uint i = 0; i < 1; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass)->unbind();
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
@@ -1820,11 +1818,10 @@ class epriv::RenderManager::impl final{
 
             sendUniform1f("fbufferDivisor",gbuffer.getBuffer(GBufferType::GodRays)->divisor());
 
-            bindTexture("firstPass",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTexture("firstPass",gbuffer.getTexture(GBufferType::Lighting),0);
 
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
 
-            unbindTexture2D(0);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays)->unbind();
         }
         void _passHDR(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
@@ -1836,13 +1833,12 @@ class epriv::RenderManager::impl final{
 
             sendUniform1iSafe("HasLighting",int(lighting));
 
-            bindTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
-            bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);
-            bindTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),2);
-            bindTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
+            sendTextureSafe("lightingBuffer",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),1);
+            sendTextureSafe("gNormalMap",gbuffer.getTexture(GBufferType::Normal),2);
+            sendTextureSafe("gGodsRaysMap",gbuffer.getTexture(GBufferType::GodRays),3);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
 
-            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHDR)->unbind();
         }
         void _passBlur(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
@@ -1860,16 +1856,15 @@ class epriv::RenderManager::impl final{
             if(channels.find("B") != string::npos) rgba.z = 1.0f;
             if(channels.find("A") != string::npos) rgba.w = 1.0f;
 
-            sendUniform4f("RGBA",rgba.x,rgba.y,rgba.z,rgba.w);
+            sendUniform4f("RGBA",rgba);
 
             if(type == "H"){ sendUniform2f("HV",1.0f,0.0f); }
             else{            sendUniform2f("HV",0.0f,1.0f); }
 
-            bindTexture("textureMap",gbuffer.getTexture(texture),0);
+            sendTexture("textureMap",gbuffer.getTexture(texture),0);
 
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
 
-            unbindTexture2D(0);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->unbind();
         }
         void _passFXAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
@@ -1882,12 +1877,11 @@ class epriv::RenderManager::impl final{
             sendUniform1f("FXAA_SPAN_MAX",FXAA_SPAN_MAX);
 
             sendUniform2f("resolution",float(fboWidth),float(fboHeight));
-            bindTexture("sampler0",gbuffer.getTexture(GBufferType::Lighting),0);
-            bindTextureSafe("edgeTexture",gbuffer.getTexture(GBufferType::Misc),1);
-            bindTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
+            sendTexture("sampler0",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTextureSafe("edgeTexture",gbuffer.getTexture(GBufferType::Misc),1);
+            sendTexture("depthTexture",gbuffer.getTexture(GBufferType::Depth),2);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-            for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFXAA)->unbind();
         }
         void _passSMAA(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,bool renderAA){
@@ -1911,14 +1905,13 @@ class epriv::RenderManager::impl final{
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
             sendUniform2fSafe("SMAAInfo0Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD);
 
-            bindTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
             glStencilMask(0xFFFFFFFF);
             glStencilFunc(GL_EQUAL, 0x1, 0x1);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 
-            for(uint i = 0; i < 1; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil)->unbind();
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
@@ -1944,16 +1937,15 @@ class epriv::RenderManager::impl final{
 
             sendUniform1iSafe("SMAA_PREDICATION",int(SMAA_PREDICATION));
 
-            bindTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
-            bindTextureSafe("texturePredication",gbuffer.getTexture(GBufferType::Diffuse),1);
+            sendTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
+            sendTextureSafe("texturePredication",gbuffer.getTexture(GBufferType::Diffuse),1);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
             glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_EQUAL, 0x1, 0x1);
+            glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 
-            for(uint i = 0; i < 2; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->unbind();
             #pragma endregion
     
@@ -1964,9 +1956,9 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2)->bind();
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
 
-            bindTexture("edge_tex",gbuffer.getTexture(GBufferType::Misc),0);
-            bindTexture("area_tex",SMAA_AreaTexture,1,GL_TEXTURE_2D);
-            bindTexture("search_tex",SMAA_SearchTexture,2,GL_TEXTURE_2D);
+            sendTexture("edge_tex",gbuffer.getTexture(GBufferType::Misc),0);
+            sendTexture("area_tex",SMAA_AreaTexture,1,GL_TEXTURE_2D);
+            sendTexture("search_tex",SMAA_SearchTexture,2,GL_TEXTURE_2D);
 
             sendUniform1iSafe("SMAA_MAX_SEARCH_STEPS",SMAA_MAX_SEARCH_STEPS);
 
@@ -1975,7 +1967,6 @@ class epriv::RenderManager::impl final{
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-            for(uint i = 0; i < 3; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA2)->unbind();
             #pragma endregion
 
@@ -1986,12 +1977,11 @@ class epriv::RenderManager::impl final{
             gbuffer.stop();
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3)->bind();
             sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-            bindTextureSafe("textureMap",gbuffer.getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
-            bindTextureSafe("blend_tex",gbuffer.getTexture(GBufferType::Normal),1);
+            sendTextureSafe("textureMap",gbuffer.getTexture(GBufferType::Lighting),0); //need original final image from first smaa pass
+            sendTextureSafe("blend_tex",gbuffer.getTexture(GBufferType::Normal),1);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-            for(uint i = 0; i < 2; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA3)->unbind();
             #pragma endregion
 
@@ -2016,15 +2006,14 @@ class epriv::RenderManager::impl final{
                 sendUniform1fSafe("FogDistNull",fog_distNull);
                 sendUniform1fSafe("FogDistBlend",fog_distBlend);
                 sendUniform4fSafe("FogColor",fog_color);
-                bindTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
+                sendTextureSafe("gDepthMap",gbuffer.getTexture(GBufferType::Depth),3);
             }
-            bindTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
-            bindTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
-            bindTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),2);
+            sendTextureSafe("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0); 
+            sendTextureSafe("gMiscMap",gbuffer.getTexture(GBufferType::Misc),1);
+            sendTextureSafe("gBloomMap",gbuffer.getTexture(GBufferType::Bloom),2);
 
             _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
 
-            for(uint i = 0; i < 4; ++i){ unbindTexture2D(i); }
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredFinal)->unbind();
         }
         void _renderFullscreenQuad(uint& width,uint& height,uint startX,uint startY){
@@ -2047,6 +2036,14 @@ class epriv::RenderManager::impl final{
         }
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
             Scene* s = Resources::getCurrentScene();
+
+			//restore default state, might have to increase this as we use more textures
+		    for(uint i = 0; i < 7; ++i){ 
+		        glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D,0);
+				glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+		    }
+
             if(mainRenderFunc){
                 //Camera UBO update
                 if(RenderManager::GLSL_VERSION >= 140){
@@ -2186,14 +2183,14 @@ class epriv::RenderManager::impl final{
             Settings::clear();
             LightProbe* pr  = (LightProbe*)(Resources::getCamera("CapsuleLightProbe"));
             Skybox* skybox = (Skybox*)(s->getSkybox());
-            if(pr != nullptr){
+            if(pr){
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->bind();
                 glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));
                 Renderer::sendUniformMatrix4f("VP",camera->getProjection() * view);
                 GLuint address = pr->getEnvMap();
-                Renderer::bindTexture("Texture",address,0,GL_TEXTURE_CUBE_MAP);
+                sendTexture("Texture",address,0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
-                Renderer::unbindTextureCubemap(0);
+                //unbindTextureCubemap(0);
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
             }
             */
@@ -2358,20 +2355,11 @@ void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorit
 void Renderer::Settings::cullFace(uint s){ renderManager->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(!color && !depth && !stencil) return;
-    if(color == true && depth == true && stencil == true)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    else if(color == true && depth == true && stencil == false)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    else if(color == true && depth == false && stencil == false)
-        glClear(GL_COLOR_BUFFER_BIT);
-    else if(color == false && depth == true && stencil == true)
-        glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    else if(color == false && depth == false && stencil == true)
-        glClear(GL_STENCIL_BUFFER_BIT);
-    else if(color == false && depth == true && stencil == false)
-        glClear(GL_DEPTH_BUFFER_BIT);
-    else if(color == true && depth == false && stencil == true)
-        glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	GLuint clearBit = 0x00000000;
+	if(color)   clearBit |= GL_COLOR_BUFFER_BIT;
+	if(depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
+	if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
+	glClear(clearBit);
 }
 void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManager->draw_physics_debug = b; }
 void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->draw_physics_debug = false; }
@@ -2379,16 +2367,53 @@ void Renderer::Settings::setGamma(float g){ renderManager->gamma = g; }
 float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
-void Renderer::bindTexture(const char* location,Texture* texture,uint slot){Renderer::bindTexture(location,texture->address(),slot,texture->type());}
-void Renderer::bindTexture(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
+void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
+	epriv::RenderManager::impl& i = *renderManager;
+	switch(_textureType){
+		case GL_TEXTURE_1D:{
+			if(i.current_bound_texture_1D != _textureObject){
+				i.current_bound_texture_1D = _textureObject;
+				glBindTexture(_textureType,_textureObject);
+			}
+			break;
+        }
+		case GL_TEXTURE_2D:{
+			if(i.current_bound_texture_2D != _textureObject){
+				i.current_bound_texture_2D = _textureObject;
+				glBindTexture(_textureType,_textureObject);
+			}
+			break;
+        }
+		case GL_TEXTURE_3D:{
+			if(i.current_bound_texture_3D != _textureObject){
+				i.current_bound_texture_3D = _textureObject;
+				glBindTexture(_textureType,_textureObject);
+			}
+			break;
+        }
+		case GL_TEXTURE_CUBE_MAP:{
+			if(i.current_bound_texture_cube_map != _textureObject){
+				i.current_bound_texture_cube_map = _textureObject;
+				glBindTexture(_textureType,_textureObject);
+			}
+			break;
+        }
+	}
+}
+void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
+    glGenTextures(1, &_textureObject);
+    bindTexture(_textureType,_textureObject);
+}
+void Renderer::sendTexture(const char* location,Texture* texture,uint slot){Renderer::sendTexture(location,texture->address(),slot,texture->type());}
+void Renderer::sendTexture(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(targetType,textureAddress);
+    bindTexture(targetType,textureAddress);
     sendUniform1i(location,slot);
 }
-void Renderer::bindTextureSafe(const char* location,Texture* texture,uint slot){Renderer::bindTextureSafe(location,texture->address(),slot,texture->type());}
-void Renderer::bindTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
+void Renderer::sendTextureSafe(const char* location,Texture* texture,uint slot){Renderer::sendTextureSafe(location,texture->address(),slot,texture->type());}
+void Renderer::sendTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(targetType,textureAddress);
+    bindTexture(targetType,textureAddress);
     sendUniform1iSafe(location,slot);
 }
 void Renderer::bindReadFBO(GLuint fbo){ renderManager->_bindReadFBO(fbo); }
@@ -2401,18 +2426,20 @@ void Renderer::unbindFBO(){ Renderer::bindFBO(GLuint(0)); }
 void Renderer::unbindRBO(){ Renderer::bindRBO(GLuint(0)); }
 void Renderer::unbindReadFBO(){ Renderer::bindReadFBO(0); }
 void Renderer::unbindDrawFBO(){ Renderer::bindDrawFBO(0); }
+/*
 void Renderer::unbindTexture(uint slot,Texture* texture){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(texture->type(),0);
+    bindTexture(texture->type(),0);
 }
 void Renderer::unbindTexture2D(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D,0);
+    bindTexture(GL_TEXTURE_2D,0);
 }
 void Renderer::unbindTextureCubemap(uint slot){
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+    bindTexture(GL_TEXTURE_CUBE_MAP,0);
 }
+*/
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
     renderManager->m_TexturesToBeRendered.push_back(epriv::TextureRenderInfo(nullptr,pos,col,glm::vec2(w,h),angle,depth));
 }

@@ -22,6 +22,7 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
+using namespace Engine::Renderer;
 using namespace std;
 
 vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
@@ -78,12 +79,12 @@ SunLight::~SunLight(){
 void SunLight::lighten(){
     if(!isActive()) return;
     glm::vec3 pos = m_i->m_Body->position();
-    Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
-    Renderer::sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    Renderer::sendUniform1fSafe("Type",0.0f);
+    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
+    sendUniform4f("LightDataC",0.0f,pos.x,pos.y,pos.z);
+    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform1fSafe("Type",0.0f);
 
-    Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 glm::vec3 SunLight::position(){ return m_i->m_Body->position(); }
 void SunLight::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
@@ -108,11 +109,11 @@ DirectionalLight::~DirectionalLight(){
 void DirectionalLight::lighten(){
     if(!isActive()) return;
     glm::vec3 _forward = m_i->m_Body->forward();
-    Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
-    Renderer::sendUniform4f("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    Renderer::sendUniform1fSafe("Type",0.0f);
-    Renderer::renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
+    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
+    sendUniform4f("LightDataB", _forward.y,_forward.z,0.0f, 0.0f);
+    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform1fSafe("Type",0.0f);
+    renderFullscreenTriangle(Resources::getWindowSize().x,Resources::getWindowSize().y);
 }
 PointLight::PointLight(glm::vec3 pos,Scene* scene): SunLight(pos,LightType::Point,scene){
     m_C = m_L = m_E = 0.1f;
@@ -157,22 +158,22 @@ void PointLight::lighten(){
     glm::vec3 pos = m_i->m_Body->position();
     if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
-    Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
-    Renderer::sendUniform4f("LightDataB", 0.0f,0.0f,m_C,m_L);
-    Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    Renderer::sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
-    Renderer::sendUniform1fSafe("Type",1.0f);
+    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
+    sendUniform4f("LightDataB", 0.0f,0.0f,m_C,m_L);
+    sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
+    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
+    sendUniform1fSafe("Type",1.0f);
 
-    Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
+    sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
 
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
-        Renderer::Settings::cullFace(GL_FRONT);
+        Settings::cullFace(GL_FRONT);
     }
     epriv::InternalMeshes::PointLightBounds->bind();
     epriv::InternalMeshes::PointLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::PointLightBounds->unbind();
-    Renderer::Settings::cullFace(GL_BACK);
+    Settings::cullFace(GL_BACK);
 }
 SpotLight::SpotLight(glm::vec3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,scene){
     m_i->m_Body->alignTo(direction,0);
@@ -196,26 +197,26 @@ void SpotLight::lighten(){
     glm::vec3 _forward = m_i->m_Body->forward();
     if(!c->sphereIntersectTest(pos,m_CullingRadius) || (c->getDistance(pos) > 1100.0f * m_CullingRadius))
         return;
-    Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
-    Renderer::sendUniform4f("LightDataB", _forward.y,_forward.z,m_C,m_L);
-    Renderer::sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    Renderer::sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
-    Renderer::sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
-    Renderer::sendUniform1fSafe("Type",2.0f);
+    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,_forward.x);
+    sendUniform4f("LightDataB", _forward.y,_forward.z,m_C,m_L);
+    sendUniform4f("LightDataC", m_E,pos.x,pos.y,pos.z);
+    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4fSafe("LightDataE", m_Cutoff, m_OuterCutoff, float(m_AttenuationModel),0.0f);
+    sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
+    sendUniform1fSafe("Type",2.0f);
 
-    Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
+    sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
 
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
-        Renderer::Settings::cullFace(GL_FRONT);
+        Settings::cullFace(GL_FRONT);
     }
 
     epriv::InternalMeshes::SpotLightBounds->bind();
     epriv::InternalMeshes::SpotLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::SpotLightBounds->unbind();
-    Renderer::Settings::cullFace(GL_BACK);
+    Settings::cullFace(GL_BACK);
 
-    Renderer::sendUniform1fSafe("Type",0.0f); //is this really needed?
+    sendUniform1fSafe("Type",0.0f); //is this really needed?
 }
 RodLight::RodLight(glm::vec3 pos,float rodLength,Scene* scene): PointLight(pos,scene){
     setRodLength(rodLength);
@@ -243,24 +244,24 @@ void RodLight::lighten(){
     float half = m_RodLength / 2.0f;
     glm::vec3 firstEndPt = pos + (m_i->m_Body->forward() * half);
     glm::vec3 secndEndPt = pos - (m_i->m_Body->forward() * half);
-    Renderer::sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
-    Renderer::sendUniform4f("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
-    Renderer::sendUniform4f("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
-    Renderer::sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
-    Renderer::sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
-    Renderer::sendUniform1fSafe("Type",1.0f);
+    sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,firstEndPt.x);
+    sendUniform4f("LightDataB", firstEndPt.y,firstEndPt.z,m_C,m_L);
+    sendUniform4f("LightDataC", m_E,secndEndPt.x,secndEndPt.y,secndEndPt.z);
+    sendUniform4f("LightDataD",m_i->m_Color.x, m_i->m_Color.y, m_i->m_Color.z,float(m_i->m_Type));
+    sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
+    sendUniform1fSafe("Type",1.0f);
 
-    Renderer::sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
+    sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
 
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
-        Renderer::Settings::cullFace(GL_FRONT);
+        Settings::cullFace(GL_FRONT);
     }
     epriv::InternalMeshes::RodLightBounds->bind();
     epriv::InternalMeshes::RodLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::RodLightBounds->unbind();
-    Renderer::Settings::cullFace(GL_BACK);
+    Settings::cullFace(GL_BACK);
 
-    Renderer::sendUniform1fSafe("Type",0.0f); //is this really needed?
+    sendUniform1fSafe("Type",0.0f); //is this really needed?
 }
 float RodLight::rodLength(){ return m_RodLength; }
 /*
@@ -308,7 +309,7 @@ class LightProbe::impl{
             glDeleteTextures(1,&m_TextureConvolutionMap);
             glDeleteTextures(1,&m_TexturePrefilterMap);
 
-            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            bindTexture(GL_TEXTURE_CUBE_MAP,0);
             SAFE_DELETE(m_FBO);
         }
         void _update(float dt,LightProbe* super,glm::mat4& viewMatrix){
@@ -376,8 +377,7 @@ class LightProbe::impl{
             epriv::Core::m_Engine->m_RenderManager->_resizeGbuffer(m_EnvMapSize,m_EnvMapSize);
             
             if(m_TexturesMade == 0){
-                glGenTextures(1,&m_TextureEnvMap);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
+			    genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
                 vector<GLubyte> testData(m_EnvMapSize * m_EnvMapSize * 256, 128);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA8,m_EnvMapSize,m_EnvMapSize,0,GL_RGBA,GL_UNSIGNED_BYTE,&testData[0]);
@@ -392,10 +392,10 @@ class LightProbe::impl{
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0); 
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); 
                 m_TexturesMade++;
-                glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+                bindTexture(GL_TEXTURE_CUBE_MAP,0);
             }
             else{
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
+                bindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
             }
             Camera* old = Resources::getCurrentScene()->getActiveCamera();
             Resources::getCurrentScene()->setActiveCamera(super);
@@ -429,8 +429,7 @@ class LightProbe::impl{
             #pragma region RenderConvolution
             uint size = 32;
             if(m_TexturesMade == 1){
-                glGenTextures(1,&m_TextureConvolutionMap);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
+				Renderer::genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
                 vector<GLubyte> testData(size * size * 256, 155);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, &testData[0]);
@@ -445,15 +444,15 @@ class LightProbe::impl{
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0); 
                 glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0); 
                 m_TexturesMade++;
-                glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+                bindTexture(GL_TEXTURE_CUBE_MAP,0);
             }
             else{
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
+                bindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
             }
             m_FBO->bind();
             
             convolude->bind();
-            Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
+            Renderer::sendTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
 
             m_FBO->resize(size,size);
 
@@ -466,8 +465,7 @@ class LightProbe::impl{
             //now gen EnvPrefilterMap for specular IBL.
             size = m_EnvMapSize/8;
             if(m_TexturesMade == 2){
-                glGenTextures(1, &m_TexturePrefilterMap);
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
+				Renderer::genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
                 vector<GLubyte> testData(size * size * 256, 255);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,&testData[0]);
@@ -483,11 +481,11 @@ class LightProbe::impl{
                 m_TexturesMade++;
             }
             else{
-                glBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
+                bindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
             }
 
             prefilter->bind();
-            Renderer::bindTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
+            Renderer::sendTexture("cubemap",m_TextureEnvMap,0,GL_TEXTURE_CUBE_MAP);
             Renderer::sendUniform1f("PiFourDividedByResSquaredTimesSix",12.56637f / float((m_EnvMapSize * m_EnvMapSize)*6));
             Renderer::sendUniform1i("NUM_SAMPLES",32);
             uint maxMipLevels = 5;

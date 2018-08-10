@@ -53,19 +53,26 @@ namespace Engine{
 
     };
 };
+class InternalTexturePublicInterface final{
+    public:
+        static void LoadCPU(Texture*);
+        static void LoadGPU(Texture*);
+};
+
 class Texture: public EngineResource{
 	friend class Engine::epriv::TextureLoader;
+    friend class ::InternalTexturePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
 		//Framebuffer
         Texture(uint renderTgtWidth,uint renderTgtHeight,ImagePixelType::Type,ImagePixelFormat::Format,ImageInternalFormat::Format,float divisor = 1.0f);
 		//Single File
-        Texture(std::string filename,GLuint openglTexType = GL_TEXTURE_2D,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
+        Texture(std::string filename,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,GLuint openglTexType = GL_TEXTURE_2D);
 		//Pixels From Memory
-        Texture(const sf::Image& sfmlImage,std::string name = "CustomTexture",GLuint openglTexType = GL_TEXTURE_2D,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
+        Texture(const sf::Image& sfmlImage,std::string name = "CustomTexture",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,GLuint openglTexType = GL_TEXTURE_2D);
 		//Cubemap from 6 files
-        Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
+        Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
 
         uchar* pixels();

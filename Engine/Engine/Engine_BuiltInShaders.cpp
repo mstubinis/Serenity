@@ -376,9 +376,9 @@ epriv::EShaders::vertex_basic +=
     "        BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
     "    }\n"
     "    vec4 PosTrans =       BoneTransform * vec4(position, 1.0);\n"
-    "    vec3 NormalTrans =   (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 NormalTrans =   (BoneTransform * vec4(normal.zyx, 0.0)).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 BinormalTrans = (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans =  (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans =  (BoneTransform * vec4(tangent.zyx, 0.0)).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
     "\n"
     "           Normals = (NormalMatrix * NormalTrans);\n"
     "    vec3 Binormals = (NormalMatrix * BinormalTrans);\n"
@@ -417,7 +417,6 @@ epriv::EShaders::vertex_hud +=
     //"    UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
     "    gl_Position = VP * Model * vec4(position, 1.0);\n"
-    //"    gl_TexCoord[6] = gl_Position;\n"
     "}";
 #pragma endregion
 
@@ -1597,12 +1596,10 @@ epriv::EShaders::deferred_frag_skybox =
     "uniform samplerCube Texture;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
-    "const vec2 one = vec2(1.0,1.0);\n"
-    "const vec2 zero = vec2(0.0,0.0);\n"
     "void main(){\n"
     "    gl_FragData[0] = textureCube(Texture, UV);\n"
-    "    gl_FragData[1].rg = one;\n"
-    "    gl_FragData[2].rb = zero;\n"
+    "    gl_FragData[1].rg = vec2(1.0);\n"
+    "    gl_FragData[2].rb = vec2(0.0);\n"
     "}";
 #pragma endregion
 
@@ -1612,12 +1609,10 @@ epriv::EShaders::deferred_frag_skybox_fake =
     "uniform vec4 Color;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
-    "const vec2 one = vec2(1.0,1.0);\n"
-    "const vec2 zero = vec2(0.0,0.0);\n"
     "void main(){\n"
     "    gl_FragData[0].rgba = Color;\n"
-    "    gl_FragData[1].rg = one;\n"
-    "    gl_FragData[2].rb = zero;\n"
+    "    gl_FragData[1].rg = vec2(1.0);\n"
+    "    gl_FragData[2].rb = vec2(0.0);\n"
     "}";
 #pragma endregion
 
@@ -1627,7 +1622,7 @@ epriv::EShaders::copy_depth_frag =
     "uniform sampler2D gDepthMap;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    gl_FragDepth = texture2D(gDepthMap,texcoords);\n"
+    "    gl_FragDepth = texture2D(gDepthMap,texcoords).r;\n"
     "}";
 #pragma endregion
 

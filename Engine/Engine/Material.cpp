@@ -15,6 +15,7 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
+using namespace Engine::Renderer;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
@@ -75,14 +76,14 @@ namespace Engine{
                 }
             }
             const glm::vec3& f0 = material.f0();
-            Renderer::sendUniform1iSafe("Shadeless",int(material.shadeless()));
-            Renderer::sendUniform3fSafe("Material_F0",f0.r,f0.g,f0.b);
-            Renderer::sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
+            sendUniform1iSafe("Shadeless",int(material.shadeless()));
+            sendUniform3fSafe("Material_F0",f0.r,f0.g,f0.b);
+            sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
 
-            Renderer::sendUniform1fSafe("matID",float(material.id()));
-            Renderer::sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
-            Renderer::sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
-            Renderer::sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
+            sendUniform1fSafe("matID",float(material.id()));
+            sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
+            sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
+            sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //Material& material = *(Material*)r;
@@ -149,14 +150,12 @@ void MaterialComponent::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
     for(uint i = 0; i < slots.size(); ++i){
-        Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
+        sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(i));
     }
 }
 void MaterialComponent::unbind(){
-    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    for(uint i = 0; i < slots.size(); ++i){
-        Renderer::unbindTexture2D(slots.at(i));
-    }
+    //vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    //for(uint i = 0; i < slots.size(); ++i){ unbindTexture2D(slots.at(i)); }
 }
 MaterialComponentReflection::MaterialComponentReflection(uint type,Texture* cubemap,Texture* map,float mixFactor):MaterialComponent(type,cubemap){
     setMixFactor(mixFactor);
@@ -171,17 +170,17 @@ void MaterialComponentReflection::setMixFactor(float factor){
 void MaterialComponentReflection::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
+    sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
     if(!m_Texture)
-        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
+        sendTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
-        Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
-    Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
+        sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+    sendTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 void MaterialComponentReflection::unbind(){
-    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    Renderer::unbindTexture2D(slots.at(0));
-    Renderer::unbindTextureCubemap(slots.at(1));
+    //vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    //unbindTexture2D(slots.at(0));
+    //unbindTextureCubemap(slots.at(1));
 }
 MaterialComponentRefraction::MaterialComponentRefraction(Texture* cubemap,Texture* map,float i,float mix):MaterialComponentReflection(MaterialComponentType::Refraction,cubemap,map,mix){
     m_RefractionIndex = i;
@@ -192,13 +191,13 @@ MaterialComponentRefraction::~MaterialComponentRefraction(){
 void MaterialComponentRefraction::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    Renderer::sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
-    Renderer::sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
+    sendUniform1fSafe("CubemapMixFactor",m_MixFactor);
+    sendUniform1fSafe("RefractionIndex",m_RefractionIndex);
     if(!m_Texture)
-        Renderer::bindTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
+        sendTextureSafe(textureTypeName.c_str(),Resources::getCurrentScene()->skybox()->texture(),slots.at(0));
     else
-        Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
-    Renderer::bindTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
+        sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+    sendTextureSafe((textureTypeName+"Map").c_str(),m_Map,slots.at(1));
 }
 
 MaterialComponentParallaxOcclusion::MaterialComponentParallaxOcclusion(Texture* map,float heightScale):MaterialComponent(MaterialComponentType::ParallaxOcclusion,map){
@@ -213,12 +212,12 @@ void MaterialComponentParallaxOcclusion::setHeightScale(float factor){
 void MaterialComponentParallaxOcclusion::bind(){
     vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
     string textureTypeName = epriv::MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[m_ComponentType];
-    Renderer::sendUniform1fSafe("ParallaxHeightScale",m_HeightScale);
-    Renderer::bindTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
+    sendUniform1fSafe("ParallaxHeightScale",m_HeightScale);
+    sendTextureSafe(textureTypeName.c_str(),m_Texture,slots.at(0));
 }
 void MaterialComponentParallaxOcclusion::unbind(){
-    vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
-    Renderer::unbindTexture2D(slots.at(0));
+    //vector<uint>& slots = epriv::MATERIAL_TEXTURE_SLOTS_MAP.at(m_ComponentType);
+    //unbindTexture2D(slots.at(0));
 }
 
 #pragma endregion
@@ -330,21 +329,21 @@ class Material::impl final{
             if(normalFile != ""){
 				n = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(normalFile);
 				if(!n){
-					n = new Texture(normalFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+					n = new Texture(normalFile,false,ImageInternalFormat::RGBA8);
 					epriv::Core::m_Engine->m_ResourceManager->_addTexture(n);
 				}
             }
             if(glowFile != ""){
 				g = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(glowFile);
 				if(!g){
-					g = new Texture(glowFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+					g = new Texture(glowFile,false,ImageInternalFormat::RGBA8);
 					epriv::Core::m_Engine->m_ResourceManager->_addTexture(g);
 				}
             }
             if(specularFile != ""){
 				s = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(specularFile);
 				if(!s){
-					s = new Texture(specularFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+					s = new Texture(specularFile,false,ImageInternalFormat::RGBA8);
 					epriv::Core::m_Engine->m_ResourceManager->_addTexture(s);
 				}
             }
@@ -454,7 +453,7 @@ void Material::addComponentDiffuse(Texture* texture){
 void Material::addComponentDiffuse(string textureFile){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,true,ImageInternalFormat::SRGB8_ALPHA8);
+        texture = new Texture(textureFile,true,ImageInternalFormat::SRGB8_ALPHA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentDiffuse(texture);
@@ -465,7 +464,7 @@ void Material::addComponentNormal(Texture* texture){
 void Material::addComponentNormal(string textureFile){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentNormal(texture);
@@ -476,7 +475,7 @@ void Material::addComponentGlow(Texture* texture){
 void Material::addComponentGlow(string textureFile){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentGlow(texture);
@@ -487,7 +486,7 @@ void Material::addComponentSpecular(Texture* texture){
 void Material::addComponentSpecular(string textureFile){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentSpecular(texture);
@@ -499,7 +498,7 @@ void Material::addComponentAO(Texture* texture,float baseValue){
 void Material::addComponentAO(string textureFile,float baseValue){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentAO(texture);
@@ -512,7 +511,7 @@ void Material::addComponentMetalness(Texture* texture,float baseValue){
 void Material::addComponentMetalness(string textureFile,float baseValue){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentMetalness(texture);
@@ -525,7 +524,7 @@ void Material::addComponentSmoothness(Texture* texture,float baseValue){
 void Material::addComponentSmoothness(string textureFile,float baseValue){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentSmoothness(texture);
@@ -600,7 +599,7 @@ void Material::addComponentParallaxOcclusion(Texture* texture,float heightScale)
 void Material::addComponentParallaxOcclusion(std::string textureFile,float heightScale){
 	Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(textureFile);
 	if(!texture){
-        texture = new Texture(textureFile,GL_TEXTURE_2D,false,ImageInternalFormat::RGBA8);
+        texture = new Texture(textureFile,false,ImageInternalFormat::RGBA8);
         epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
 	}
     m_i->_addComponentParallaxOcclusion(texture,heightScale);

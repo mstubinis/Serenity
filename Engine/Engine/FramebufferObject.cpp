@@ -62,7 +62,7 @@ class epriv::FramebufferTexture::impl{
             m_PixelFormat = ImagePixelFormat::at(t->pixelFormat());
             m_PixelType = ImagePixelType::at(t->pixelType());
             glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);
-            glBindTexture(m_Texture->type(),0);
+            Renderer::bindTexture(m_Texture->type(),0);
             m_Divisor = divisor;
         }
         void _destruct(FramebufferTexture* super){
@@ -71,7 +71,7 @@ class epriv::FramebufferTexture::impl{
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);
             //glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);//is this line even needed?
-            glBindTexture(m_Texture->type(),0);
+            Renderer::bindTexture(m_Texture->type(),0);
         }
 };
 epriv::FramebufferTexture::FramebufferTexture(FramebufferObject* _fbo,FramebufferAttatchment::Attatchment a,Texture* t,float d):FramebufferObjectAttatchment(_fbo,a,t),m_i(new impl){

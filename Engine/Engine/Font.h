@@ -12,7 +12,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-class Mesh;
+//class Mesh;
 class Texture;
 typedef unsigned int uint;
 typedef unsigned char uchar;
@@ -36,7 +36,7 @@ class Font final: public EngineResource{
         ~Font();
         void renderText(std::string text,glm::vec2& pos,glm::vec4 color = glm::vec4(1),float angle = 0,glm::vec2 scl = glm::vec2(1),float depth = 0.1);
         Texture* getGlyphTexture();
-		Mesh* getFontMesh();
+		//Mesh* getFontMesh();
         FontGlyph* getGlyphData(uchar);
 };
 #endif

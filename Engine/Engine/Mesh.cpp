@@ -22,6 +22,7 @@
 using namespace std;
 using namespace Engine;
 
+Mesh* Mesh::FontPlane = nullptr;
 Mesh* Mesh::Plane = nullptr;
 Mesh* Mesh::Cube = nullptr;
 
