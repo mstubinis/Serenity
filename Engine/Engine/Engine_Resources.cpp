@@ -87,15 +87,9 @@ Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_Curr
 
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
 Texture* epriv::ResourceManager::_hasTexture(string n){
-	uint i;
-	for(i = 0; i < resourceManager->m_i->m_Resources->maxEntries(); ++i){
+	for(uint i = 0; i < resourceManager->m_i->m_Resources->maxEntries(); ++i){
 		EngineResource* r = resourceManager->m_i->m_Resources->getAsFast<EngineResource>(i);
-		if(r){
-			Texture* t = dynamic_cast<Texture*>(r);
-			if(t && t->name() == n){
-				return t;
-			}
-		}
+		if(r){ Texture* t = dynamic_cast<Texture*>(r); if(t && t->name() == n){ return t; } }
 	}
 	return 0;
 }
@@ -135,11 +129,9 @@ void Resources::getShaderProgram(Handle& h,ShaderP*& p){ resourceManager->m_i->m
 ShaderP* Resources::getShaderProgram(Handle& h){ ShaderP* p; resourceManager->m_i->m_Resources->getAs(h,p); return p; }
 
 
-
 Handle Resources::addFont(string filename){
     return resourceManager->m_i->m_Resources->add(new Font(filename),ResourceType::Font);
 }
-
 Handle Resources::addMesh(string f, CollisionType::Type t, bool b,float threshhold){
     return resourceManager->m_i->m_Resources->add(new Mesh(f,t,b,threshhold),ResourceType::Mesh);
 }
@@ -152,8 +144,6 @@ Handle Resources::addMesh(string n,float w,float h,float threshhold){
 Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint l,float threshhold){
     return resourceManager->m_i->m_Resources->add(new Mesh(n,g,w,l,threshhold),ResourceType::Mesh);
 }
-
-
 Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
 	Mesh* mesh = new Mesh(f,t,b,threshhold,false);
 
@@ -164,9 +154,6 @@ Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float thr
 
     return resourceManager->m_i->m_Resources->add(mesh, ResourceType::Mesh);
 }
-
-
-
 
 
 Handle epriv::ResourceManager::_addTexture(Texture* t){
@@ -185,7 +172,7 @@ Handle Resources::addMaterial(string name, string diffuse, string normal,string 
     return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
-    if(program == nullptr) program = epriv::InternalShaderPrograms::Deferred;
+    if(!program) program = epriv::InternalShaderPrograms::Deferred;
     Material* material = new Material(name,diffuse,normal,glow,specular);
     program->addMaterial(material);
     return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
@@ -209,7 +196,7 @@ Handle Resources::addSoundData(string file,string n,bool music){
 }
 
 void Resources::setCurrentScene(Scene* scene){
-    if(resourceManager->m_i->m_CurrentScene == nullptr){
+    if(!resourceManager->m_i->m_CurrentScene){
         epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);
         resourceManager->m_i->m_CurrentScene = scene;
         return;
