@@ -83,7 +83,7 @@ namespace Engine{
 
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 32768;
-
+		const uint UINT_MAX_VALUE = std::numeric_limits<uint>::max();
         class ComponentManager final{
             friend class ::Entity;
             friend class ::Scene;
@@ -458,7 +458,7 @@ class Entity{
             boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             uint slot = Engine::epriv::ComponentTypeRegistry::m_Map.at(typeIndex);
             const uint& componentID = m_Components[slot];
-            if(componentID == std::numeric_limits<uint>::max()){
+            if(componentID == Engine::epriv::UINT_MAX_VALUE){
                 return nullptr;
             }
             T* c = nullptr;
@@ -469,7 +469,7 @@ class Entity{
             boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             uint type = Engine::epriv::ComponentTypeRegistry::m_Map.at(typeIndex);
             uint& componentID = m_Components[type];
-            if(componentID != std::numeric_limits<uint>::max()) return;
+            if(componentID != Engine::epriv::UINT_MAX_VALUE) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
             uint sceneSlot = Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
             std::vector<ComponentBaseClass*>& v = Engine::epriv::ComponentManager::m_ComponentVectors.at(sceneSlot);			
@@ -485,7 +485,7 @@ class Entity{
             boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             uint type = Engine::epriv::ComponentTypeRegistry::m_Map.at(typeIndex);
             uint& componentID = m_Components[type];
-            if(componentID == std::numeric_limits<uint>::max()) return;
+            if(componentID == Engine::epriv::UINT_MAX_VALUE) return;
             component->m_Owner = nullptr;
             uint sceneSlot = Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
             std::vector<ComponentBaseClass*>& v      = Engine::epriv::ComponentManager::m_ComponentVectors.at(sceneSlot);
@@ -493,7 +493,7 @@ class Entity{
             removeFromVector(v,component);
             removeFromVector(vScene,component);
             Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
-            componentID = std::numeric_limits<uint>::max();
+            componentID = Engine::epriv::UINT_MAX_VALUE;
         }
 };
 #endif

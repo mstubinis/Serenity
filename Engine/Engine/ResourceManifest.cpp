@@ -61,6 +61,7 @@ void ResourceManifest::init(){
     Handle groundFromSpaceFrag = Resources::addShader("data/Shaders/AS_groundFromSpace_frag.glsl",ShaderType::Fragment);
     groundFromSpace = Resources::addShaderProgram("AS_GroundFromSpace",groundFromSpaceVert,groundFromSpaceFrag,ShaderRenderPass::Geometry);
 
+
     TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);
     PlanetMesh = Resources::addMeshAsync("data/Models/planet.obj",CollisionType::None,true);
     DefiantMesh = Resources::addMeshAsync("data/Models/defiant.obj",CollisionType::ConvexHull,true); //220 metres long (0.22 km)

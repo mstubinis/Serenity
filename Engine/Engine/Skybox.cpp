@@ -28,18 +28,24 @@ SkyboxEmpty::SkyboxEmpty(Scene* scene){
 SkyboxEmpty::~SkyboxEmpty(){
 
 }   
-Skybox::Skybox(string directory,Scene* scene):SkyboxEmpty(scene){
+Skybox::Skybox(string* files,Scene* scene):SkyboxEmpty(scene){
     Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
-    string front = directory + "/Right.jpg";
-    string back = directory + "/Left.jpg";
-    string left = directory + "/Top.jpg";
-    string right = directory + "/Bottom.jpg";
-    string top = directory + "/Front.jpg";
-    string bottom = directory + "/Back.jpg";
-    string names[6] = {front,back,left,right,top,bottom};
+	
+    string names[6] = {files[0],files[1],files[2],files[3],files[4],files[5]};
 
-    m_Texture = new Texture(names,directory+"Cubemap",true,ImageInternalFormat::SRGB8_ALPHA8);
+	//instead of using files[0] generate a proper name using the directory?
+    m_Texture = new Texture(names,files[0] + "Cubemap",false,ImageInternalFormat::SRGB8_ALPHA8);
+	
+    m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
+    epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
+}
+Skybox::Skybox(string filename,Scene* scene):SkyboxEmpty(scene){
+    Skybox::initMesh();
+    glActiveTexture(GL_TEXTURE0);
+	
+	m_Texture = new Texture(filename,false,ImageInternalFormat::SRGB8_ALPHA8);
+
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
 }

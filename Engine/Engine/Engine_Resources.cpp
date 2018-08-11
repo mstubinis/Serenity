@@ -159,9 +159,14 @@ Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float thr
 Handle epriv::ResourceManager::_addTexture(Texture* t){
     return resourceManager->m_i->m_Resources->add(t,ResourceType::Texture);
 }
+
+Handle Resources::addTexture(string file,ImageInternalFormat::Format internFormat,bool mipmaps){
+	return resourceManager->m_i->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
+}
+
 Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
     ShaderP* program = nullptr;
-    if(programHandle.null()){ 
+    if(programHandle.null()){
         program = epriv::InternalShaderPrograms::Deferred;
     }
     else{

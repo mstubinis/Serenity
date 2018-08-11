@@ -1289,6 +1289,7 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4f("VP",c->getProjection() * view);
                 sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
+				skybox->draw();
                 //unbindTextureCubemap(0);
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
             }
@@ -1485,7 +1486,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             Mesh::Plane->bind();
             for(auto item:m_TexturesToBeRendered){
-                if(item.texture != nullptr){
+                if(item.texture){
                     sendTexture("DiffuseTexture",item.texture,0);
                     sendUniform1i("DiffuseTextureEnabled",1);
                 }
@@ -1497,10 +1498,10 @@ class epriv::RenderManager::impl final{
 
                 glm::mat4 model = m_IdentityMat4;
                 model = glm::translate(model, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
-                model = glm::rotate(model, item.rot,glm::vec3(0,0,1));
-                if(item.texture != nullptr)
-                    model = glm::scale(model, glm::vec3(item.texture->width(),item.texture->height(),1));
-                model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1));
+                model = glm::rotate(model, item.rot,glm::vec3(0.0f,0.0f,1.0f));
+                if(item.texture)
+                    model = glm::scale(model, glm::vec3(item.texture->width(),item.texture->height(),1.0f));
+                model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1.0f));
 
                 sendUniformMatrix4f("VP",m_2DProjectionMatrix);
                 sendUniformMatrix4f("Model",model);

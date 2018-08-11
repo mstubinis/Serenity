@@ -28,135 +28,135 @@ namespace Engine{
     namespace epriv{
         namespace textures{
 
-            typedef enum DXGI_FORMAT {
-              DXGI_FORMAT_UNKNOWN                     ,
-              DXGI_FORMAT_R32G32B32A32_TYPELESS       ,
-              DXGI_FORMAT_R32G32B32A32_FLOAT          ,
-              DXGI_FORMAT_R32G32B32A32_UINT           ,
-              DXGI_FORMAT_R32G32B32A32_SINT           ,
-              DXGI_FORMAT_R32G32B32_TYPELESS          ,
-              DXGI_FORMAT_R32G32B32_FLOAT             ,
-              DXGI_FORMAT_R32G32B32_UINT              ,
-              DXGI_FORMAT_R32G32B32_SINT              ,
-              DXGI_FORMAT_R16G16B16A16_TYPELESS       ,
-              DXGI_FORMAT_R16G16B16A16_FLOAT          ,
-              DXGI_FORMAT_R16G16B16A16_UNORM          ,
-              DXGI_FORMAT_R16G16B16A16_UINT           ,
-              DXGI_FORMAT_R16G16B16A16_SNORM          ,
-              DXGI_FORMAT_R16G16B16A16_SINT           ,
-              DXGI_FORMAT_R32G32_TYPELESS             ,
-              DXGI_FORMAT_R32G32_FLOAT                ,
-              DXGI_FORMAT_R32G32_UINT                 ,
-              DXGI_FORMAT_R32G32_SINT                 ,
-              DXGI_FORMAT_R32G8X24_TYPELESS           ,
-              DXGI_FORMAT_D32_FLOAT_S8X24_UINT        ,
-              DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS    ,
-              DXGI_FORMAT_X32_TYPELESS_G8X24_UINT     ,
-              DXGI_FORMAT_R10G10B10A2_TYPELESS        ,
-              DXGI_FORMAT_R10G10B10A2_UNORM           ,
-              DXGI_FORMAT_R10G10B10A2_UINT            ,
-              DXGI_FORMAT_R11G11B10_FLOAT             ,
-              DXGI_FORMAT_R8G8B8A8_TYPELESS           ,
-              DXGI_FORMAT_R8G8B8A8_UNORM              ,
-              DXGI_FORMAT_R8G8B8A8_UNORM_SRGB         ,
-              DXGI_FORMAT_R8G8B8A8_UINT               ,
-              DXGI_FORMAT_R8G8B8A8_SNORM              ,
-              DXGI_FORMAT_R8G8B8A8_SINT               ,
-              DXGI_FORMAT_R16G16_TYPELESS             ,
-              DXGI_FORMAT_R16G16_FLOAT                ,
-              DXGI_FORMAT_R16G16_UNORM                ,
-              DXGI_FORMAT_R16G16_UINT                 ,
-              DXGI_FORMAT_R16G16_SNORM                ,
-              DXGI_FORMAT_R16G16_SINT                 ,
-              DXGI_FORMAT_R32_TYPELESS                ,
-              DXGI_FORMAT_D32_FLOAT                   ,
-              DXGI_FORMAT_R32_FLOAT                   ,
-              DXGI_FORMAT_R32_UINT                    ,
-              DXGI_FORMAT_R32_SINT                    ,
-              DXGI_FORMAT_R24G8_TYPELESS              ,
-              DXGI_FORMAT_D24_UNORM_S8_UINT           ,
-              DXGI_FORMAT_R24_UNORM_X8_TYPELESS       ,
-              DXGI_FORMAT_X24_TYPELESS_G8_UINT        ,
-              DXGI_FORMAT_R8G8_TYPELESS               ,
-              DXGI_FORMAT_R8G8_UNORM                  ,
-              DXGI_FORMAT_R8G8_UINT                   ,
-              DXGI_FORMAT_R8G8_SNORM                  ,
-              DXGI_FORMAT_R8G8_SINT                   ,
-              DXGI_FORMAT_R16_TYPELESS                ,
-              DXGI_FORMAT_R16_FLOAT                   ,
-              DXGI_FORMAT_D16_UNORM                   ,
-              DXGI_FORMAT_R16_UNORM                   ,
-              DXGI_FORMAT_R16_UINT                    ,
-              DXGI_FORMAT_R16_SNORM                   ,
-              DXGI_FORMAT_R16_SINT                    ,
-              DXGI_FORMAT_R8_TYPELESS                 ,
-              DXGI_FORMAT_R8_UNORM                    ,
-              DXGI_FORMAT_R8_UINT                     ,
-              DXGI_FORMAT_R8_SNORM                    ,
-              DXGI_FORMAT_R8_SINT                     ,
-              DXGI_FORMAT_A8_UNORM                    ,
-              DXGI_FORMAT_R1_UNORM                    ,
-              DXGI_FORMAT_R9G9B9E5_SHAREDEXP          ,
-              DXGI_FORMAT_R8G8_B8G8_UNORM             ,
-              DXGI_FORMAT_G8R8_G8B8_UNORM             ,
-              DXGI_FORMAT_BC1_TYPELESS                ,
-              DXGI_FORMAT_BC1_UNORM                   ,
-              DXGI_FORMAT_BC1_UNORM_SRGB              ,
-              DXGI_FORMAT_BC2_TYPELESS                ,
-              DXGI_FORMAT_BC2_UNORM                   ,
-              DXGI_FORMAT_BC2_UNORM_SRGB              ,
-              DXGI_FORMAT_BC3_TYPELESS                ,
-              DXGI_FORMAT_BC3_UNORM                   ,
-              DXGI_FORMAT_BC3_UNORM_SRGB              ,
-              DXGI_FORMAT_BC4_TYPELESS                ,
-              DXGI_FORMAT_BC4_UNORM                   ,
-              DXGI_FORMAT_BC4_SNORM                   ,
-              DXGI_FORMAT_BC5_TYPELESS                ,
-              DXGI_FORMAT_BC5_UNORM                   ,
-              DXGI_FORMAT_BC5_SNORM                   ,
-              DXGI_FORMAT_B5G6R5_UNORM                ,
-              DXGI_FORMAT_B5G5R5A1_UNORM              ,
-              DXGI_FORMAT_B8G8R8A8_UNORM              ,
-              DXGI_FORMAT_B8G8R8X8_UNORM              ,
-              DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM  ,
-              DXGI_FORMAT_B8G8R8A8_TYPELESS           ,
-              DXGI_FORMAT_B8G8R8A8_UNORM_SRGB         ,
-              DXGI_FORMAT_B8G8R8X8_TYPELESS           ,
-              DXGI_FORMAT_B8G8R8X8_UNORM_SRGB         ,
-              DXGI_FORMAT_BC6H_TYPELESS               ,
-              DXGI_FORMAT_BC6H_UF16                   ,
-              DXGI_FORMAT_BC6H_SF16                   ,
-              DXGI_FORMAT_BC7_TYPELESS                ,
-              DXGI_FORMAT_BC7_UNORM                   ,
-              DXGI_FORMAT_BC7_UNORM_SRGB              ,
-              DXGI_FORMAT_AYUV                        ,
-              DXGI_FORMAT_Y410                        ,
-              DXGI_FORMAT_Y416                        ,
-              DXGI_FORMAT_NV12                        ,
-              DXGI_FORMAT_P010                        ,
-              DXGI_FORMAT_P016                        ,
-              DXGI_FORMAT_420_OPAQUE                  ,
-              DXGI_FORMAT_YUY2                        ,
-              DXGI_FORMAT_Y210                        ,
-              DXGI_FORMAT_Y216                        ,
-              DXGI_FORMAT_NV11                        ,
-              DXGI_FORMAT_AI44                        ,
-              DXGI_FORMAT_IA44                        ,
-              DXGI_FORMAT_P8                          ,
-              DXGI_FORMAT_A8P8                        ,
-              DXGI_FORMAT_B4G4R4A4_UNORM              ,
-              DXGI_FORMAT_P208                        ,
-              DXGI_FORMAT_V208                        ,
-              DXGI_FORMAT_V408                        ,
-              DXGI_FORMAT_FORCE_UINT
-            } ;
-            typedef enum D3D_RESOURCE_DIMENSION {
-              D3D_RESOURCE_DIMENSION_UNKNOWN    ,
-              D3D_RESOURCE_DIMENSION_BUFFER     ,
-              D3D_RESOURCE_DIMENSION_TEXTURE1D  ,
-              D3D_RESOURCE_DIMENSION_TEXTURE2D  ,
-              D3D_RESOURCE_DIMENSION_TEXTURE3D
-            } ;
+            class DXGI_FORMAT { public: enum Format{
+                DXGI_FORMAT_UNKNOWN                     ,
+                DXGI_FORMAT_R32G32B32A32_TYPELESS       ,
+                DXGI_FORMAT_R32G32B32A32_FLOAT          ,
+                DXGI_FORMAT_R32G32B32A32_UINT           ,
+                DXGI_FORMAT_R32G32B32A32_SINT           ,
+                DXGI_FORMAT_R32G32B32_TYPELESS          ,
+                DXGI_FORMAT_R32G32B32_FLOAT             ,
+                DXGI_FORMAT_R32G32B32_UINT              ,
+                DXGI_FORMAT_R32G32B32_SINT              ,
+                DXGI_FORMAT_R16G16B16A16_TYPELESS       ,
+                DXGI_FORMAT_R16G16B16A16_FLOAT          ,
+                DXGI_FORMAT_R16G16B16A16_UNORM          ,
+                DXGI_FORMAT_R16G16B16A16_UINT           ,
+                DXGI_FORMAT_R16G16B16A16_SNORM          ,
+                DXGI_FORMAT_R16G16B16A16_SINT           ,
+                DXGI_FORMAT_R32G32_TYPELESS             ,
+                DXGI_FORMAT_R32G32_FLOAT                ,
+                DXGI_FORMAT_R32G32_UINT                 ,
+                DXGI_FORMAT_R32G32_SINT                 ,
+                DXGI_FORMAT_R32G8X24_TYPELESS           ,
+                DXGI_FORMAT_D32_FLOAT_S8X24_UINT        ,
+                DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS    ,
+                DXGI_FORMAT_X32_TYPELESS_G8X24_UINT     ,
+                DXGI_FORMAT_R10G10B10A2_TYPELESS        ,
+                DXGI_FORMAT_R10G10B10A2_UNORM           ,
+                DXGI_FORMAT_R10G10B10A2_UINT            ,
+                DXGI_FORMAT_R11G11B10_FLOAT             ,
+                DXGI_FORMAT_R8G8B8A8_TYPELESS           ,
+                DXGI_FORMAT_R8G8B8A8_UNORM              ,
+                DXGI_FORMAT_R8G8B8A8_UNORM_SRGB         ,
+                DXGI_FORMAT_R8G8B8A8_UINT               ,
+                DXGI_FORMAT_R8G8B8A8_SNORM              ,
+                DXGI_FORMAT_R8G8B8A8_SINT               ,
+                DXGI_FORMAT_R16G16_TYPELESS             ,
+                DXGI_FORMAT_R16G16_FLOAT                ,
+                DXGI_FORMAT_R16G16_UNORM                ,
+                DXGI_FORMAT_R16G16_UINT                 ,
+                DXGI_FORMAT_R16G16_SNORM                ,
+                DXGI_FORMAT_R16G16_SINT                 ,
+                DXGI_FORMAT_R32_TYPELESS                ,
+                DXGI_FORMAT_D32_FLOAT                   ,
+                DXGI_FORMAT_R32_FLOAT                   ,
+                DXGI_FORMAT_R32_UINT                    ,
+                DXGI_FORMAT_R32_SINT                    ,
+                DXGI_FORMAT_R24G8_TYPELESS              ,
+                DXGI_FORMAT_D24_UNORM_S8_UINT           ,
+                DXGI_FORMAT_R24_UNORM_X8_TYPELESS       ,
+                DXGI_FORMAT_X24_TYPELESS_G8_UINT        ,
+                DXGI_FORMAT_R8G8_TYPELESS               ,
+                DXGI_FORMAT_R8G8_UNORM                  ,
+                DXGI_FORMAT_R8G8_UINT                   ,
+                DXGI_FORMAT_R8G8_SNORM                  ,
+                DXGI_FORMAT_R8G8_SINT                   ,
+                DXGI_FORMAT_R16_TYPELESS                ,
+                DXGI_FORMAT_R16_FLOAT                   ,
+                DXGI_FORMAT_D16_UNORM                   ,
+                DXGI_FORMAT_R16_UNORM                   ,
+                DXGI_FORMAT_R16_UINT                    ,
+                DXGI_FORMAT_R16_SNORM                   ,
+                DXGI_FORMAT_R16_SINT                    ,
+                DXGI_FORMAT_R8_TYPELESS                 ,
+                DXGI_FORMAT_R8_UNORM                    ,
+                DXGI_FORMAT_R8_UINT                     ,
+                DXGI_FORMAT_R8_SNORM                    ,
+                DXGI_FORMAT_R8_SINT                     ,
+                DXGI_FORMAT_A8_UNORM                    ,
+                DXGI_FORMAT_R1_UNORM                    ,
+                DXGI_FORMAT_R9G9B9E5_SHAREDEXP          ,
+                DXGI_FORMAT_R8G8_B8G8_UNORM             ,
+                DXGI_FORMAT_G8R8_G8B8_UNORM             ,
+                DXGI_FORMAT_BC1_TYPELESS                ,
+                DXGI_FORMAT_BC1_UNORM                   ,
+                DXGI_FORMAT_BC1_UNORM_SRGB              ,
+                DXGI_FORMAT_BC2_TYPELESS                ,
+                DXGI_FORMAT_BC2_UNORM                   ,
+                DXGI_FORMAT_BC2_UNORM_SRGB              ,
+                DXGI_FORMAT_BC3_TYPELESS                ,
+                DXGI_FORMAT_BC3_UNORM                   ,
+                DXGI_FORMAT_BC3_UNORM_SRGB              ,
+                DXGI_FORMAT_BC4_TYPELESS                ,
+                DXGI_FORMAT_BC4_UNORM                   ,
+                DXGI_FORMAT_BC4_SNORM                   ,
+                DXGI_FORMAT_BC5_TYPELESS                ,
+                DXGI_FORMAT_BC5_UNORM                   ,
+                DXGI_FORMAT_BC5_SNORM                   ,
+                DXGI_FORMAT_B5G6R5_UNORM                ,
+                DXGI_FORMAT_B5G5R5A1_UNORM              ,
+                DXGI_FORMAT_B8G8R8A8_UNORM              ,
+                DXGI_FORMAT_B8G8R8X8_UNORM              ,
+                DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM  ,
+                DXGI_FORMAT_B8G8R8A8_TYPELESS           ,
+                DXGI_FORMAT_B8G8R8A8_UNORM_SRGB         ,
+                DXGI_FORMAT_B8G8R8X8_TYPELESS           ,
+                DXGI_FORMAT_B8G8R8X8_UNORM_SRGB         ,
+                DXGI_FORMAT_BC6H_TYPELESS               ,
+                DXGI_FORMAT_BC6H_UF16                   ,
+                DXGI_FORMAT_BC6H_SF16                   ,
+                DXGI_FORMAT_BC7_TYPELESS                ,
+                DXGI_FORMAT_BC7_UNORM                   ,
+                DXGI_FORMAT_BC7_UNORM_SRGB              ,
+                DXGI_FORMAT_AYUV                        ,
+                DXGI_FORMAT_Y410                        ,
+                DXGI_FORMAT_Y416                        ,
+                DXGI_FORMAT_NV12                        ,
+                DXGI_FORMAT_P010                        ,
+                DXGI_FORMAT_P016                        ,
+                DXGI_FORMAT_420_OPAQUE                  ,
+                DXGI_FORMAT_YUY2                        ,
+                DXGI_FORMAT_Y210                        ,
+                DXGI_FORMAT_Y216                        ,
+                DXGI_FORMAT_NV11                        ,
+                DXGI_FORMAT_AI44                        ,
+                DXGI_FORMAT_IA44                        ,
+                DXGI_FORMAT_P8                          ,
+                DXGI_FORMAT_A8P8                        ,
+                DXGI_FORMAT_B4G4R4A4_UNORM              ,
+                DXGI_FORMAT_P208                        ,
+                DXGI_FORMAT_V208                        ,
+                DXGI_FORMAT_V408                        ,
+                DXGI_FORMAT_FORCE_UINT                  ,
+            _TOTAL};};
+            class D3D_RESOURCE_DIMENSION {public: enum Dimension{
+                D3D_RESOURCE_DIMENSION_UNKNOWN    ,
+                D3D_RESOURCE_DIMENSION_BUFFER     ,
+                D3D_RESOURCE_DIMENSION_TEXTURE1D  ,
+                D3D_RESOURCE_DIMENSION_TEXTURE2D  ,
+                D3D_RESOURCE_DIMENSION_TEXTURE3D  ,
+            _TOTAL};};
 
             static const uint FourCC_DXT1    = 0x31545844;
             static const uint FourCC_DXT2    = 0x32545844;
@@ -213,13 +213,13 @@ namespace Engine{
                     ~DDS_PixelFormat(){}
                 };
                 struct DDS_Header_DX10 final{
-                    textures::DXGI_FORMAT            dxgiFormat;
-                    textures::D3D_RESOURCE_DIMENSION resourceDimension;
+                    textures::DXGI_FORMAT::Format               dxgiFormat;
+                    textures::D3D_RESOURCE_DIMENSION::Dimension resourceDimension;
                     uint32_t miscFlag, arraySize, miscFlags2;
                     DDS_Header_DX10(){}
                     void fill(uchar _headerDX10[20]){
-                        dxgiFormat        = (textures::DXGI_FORMAT)(*(uint32_t*)&_headerDX10[0]);
-                        resourceDimension = (textures::D3D_RESOURCE_DIMENSION)(*(uint32_t*)&_headerDX10[4]);
+                        dxgiFormat        = (textures::DXGI_FORMAT::Format)(*(uint32_t*)&_headerDX10[0]);
+                        resourceDimension = (textures::D3D_RESOURCE_DIMENSION::Dimension)(*(uint32_t*)&_headerDX10[4]);
                         miscFlag          = *(uint32_t*)&_headerDX10[8];
                         arraySize         = *(uint32_t*)&_headerDX10[12];
                         miscFlags2        = *(uint32_t*)&_headerDX10[16];
@@ -227,11 +227,10 @@ namespace Engine{
                     ~DDS_Header_DX10(){}
                 };
                 struct DDS_Header final{
-                    uint32_t magic;
-                    uint32_t header_size;
+                    uint32_t magic,header_size;
                     uint32_t header_flags;//if this is DDPF_FOURCC then we include the DDS_HEADER_DXT10
                     uint32_t h,w;
-                    uint32_t pitchOrlinearSize;
+                    uint32_t pitchOrlinearSize;//The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
                     uint32_t depth;
                     uint32_t mipMapCount;
                     //uint32_t reserved1[11];
@@ -342,13 +341,10 @@ namespace Engine{
 };
 
 struct textures::ImageMipmap final{
-    uint                          width;
-    uint                          height;
-    uint                          compressedSize;
-    vector<uchar>                 pixels;
-    uint                          level;
+    uint width, height, compressedSize, level;
+    vector<uchar> pixels;
     ImageMipmap(){
-        level = 0; width = 0; height = 0; compressedSize = 0;
+        level = width = height = compressedSize = 0;
     }
     ~ImageMipmap(){
         vector_clear(pixels);
@@ -406,8 +402,12 @@ struct textures::ImageLoadedStructure final{
             mipmaps.push_back(*baseImage);
         }
     }
-    ImageLoadedStructure(uint _width,uint _height,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat){ load(_width,_height,_pixelType,_pixelFormat,_internalFormat); }
-    ImageLoadedStructure(const sf::Image& i,string _filename = ""){ load(i,_filename); }
+    ImageLoadedStructure(uint _w,uint _h,ImagePixelType::Type _pxlType,ImagePixelFormat::Format _pxlFormat,ImageInternalFormat::Format _internFormat){ 
+        load(_w,_h,_pxlType,_pxlFormat,_internFormat); 
+    }
+    ImageLoadedStructure(const sf::Image& i,string _filename = ""){ 
+        load(i,_filename); 
+    }
 };
 
 
@@ -423,82 +423,88 @@ class Texture::impl final{
         bool m_IsToBeMipmapped;
         GLuint m_MinFilter; //used to determine filter type for mipmaps
 
+
+        void _initCommon(GLuint _openglTextureType,bool _toBeMipmapped){
+            m_Mipmapped = false;
+            m_IsToBeMipmapped = _toBeMipmapped;
+            m_MinFilter = GL_LINEAR;
+            m_Type = _openglTextureType;
+        }
+
         void _initFramebuffer(uint _w,uint _h,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat,float _divisor,Texture* _super){
             uint _width = uint(float(_w)*_divisor);
             uint _height = uint(float(_h)*_divisor);
             ImageLoadedStructure* image = new ImageLoadedStructure(_width,_height,_pixelType,_pixelFormat,_internalFormat);
 
-			m_Mipmapped = false;
-			m_IsToBeMipmapped = false;
-			m_MinFilter = GL_LINEAR;
-			m_Type = GL_TEXTURE_2D;
+            _initCommon(GL_TEXTURE_2D,false);
 
             m_ImagesDatas.push_back(image);
-			_super->setName("RenderTarget");
-            _super->load();
+            _super->setName("RenderTarget"); _super->load();
         }
         void _initFromPixelsMemory(const sf::Image& _sfImage,string _name,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){
             ImageLoadedStructure* image = new ImageLoadedStructure(_sfImage,_name);
             image->pixelType = ImagePixelType::UNSIGNED_BYTE;
             image->internalFormat = _internalFormat;
 
-			m_Mipmapped = false;
-			m_IsToBeMipmapped = _genMipMaps;
-			m_MinFilter = GL_LINEAR;
-			m_Type = _openglTextureType;
-			
+            _initCommon(_openglTextureType,_genMipMaps);
+   
             m_ImagesDatas.push_back(image);
-            TextureLoader::ChoosePixelFormat(m_ImagesDatas.at(0)->pixelFormat,m_ImagesDatas.at(0)->internalFormat);
+            TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
 
-			_super->setName(_name);
-            _super->load();
+            _super->setName(_name); _super->load();
         }
         void _initFromImageFile(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){	
+            ImageLoadedStructure* image = new ImageLoadedStructure();
+            image->filename = _filename;
             string extension = boost::filesystem::extension(_filename);
-            if(extension != ".dds"){
-                sf::Image _sfImage;
-                _sfImage.loadFromFile(_filename);
-                _initFromPixelsMemory(_sfImage,_filename,_openglTextureType,_genMipMaps,_internalFormat,_super);
+            _initCommon(_openglTextureType,_genMipMaps);
+            TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
+            if(extension == ".dds"){
+                TextureLoader::LoadDDSFile(_super,_filename,*image);
             }
             else{
-                ImageLoadedStructure* image = new ImageLoadedStructure();
-                image->filename = _filename;
-                TextureLoader::LoadDDSFile(_super,_filename,*image);	
+                image->pixelType = ImagePixelType::UNSIGNED_BYTE;
+                image->internalFormat = _internalFormat;
+            }
+            m_ImagesDatas.insert(m_ImagesDatas.begin(),image);
 
-				m_Mipmapped = false;
-				m_IsToBeMipmapped = _genMipMaps;
-				m_MinFilter = GL_LINEAR;
-				m_Type = _openglTextureType;
-				
-                m_ImagesDatas.push_back(image);
-                TextureLoader::ChoosePixelFormat(m_ImagesDatas.at(0)->pixelFormat,m_ImagesDatas.at(0)->internalFormat);
-
-				_super->setName(_filename);	
-                _super->load();
-            }      
+            _super->setName(_filename); _super->load();
         }
         void _initCubemap(string _name,ImageInternalFormat::Format _internalFormat,bool _genMipMaps,Texture* _super){
             for(auto sideImage:m_ImagesDatas){
                 m_Type = GL_TEXTURE_CUBE_MAP;
-                sf::Image img; img.loadFromFile(sideImage->filename);
-                sideImage->load(img,sideImage->filename);
                 sideImage->pixelType = ImagePixelType::UNSIGNED_BYTE;
                 sideImage->internalFormat = _internalFormat;
                 TextureLoader::ChoosePixelFormat(sideImage->pixelFormat,sideImage->internalFormat);	
             }
-            _super->load();
+            _super->setName(_name); _super->load();
         }
-        void _load(Texture* super){
-            _loadIntoGPU(super);
-        }
-
-        void _loadIntoCPU(){
-
+        void _loadIntoCPU(Texture* super){
+            for(auto image:m_ImagesDatas){
+                if(image->filename != ""){
+                    bool _do = false;
+                    if(image->mipmaps.size() == 0){ _do = true; }
+                    for(auto mip:image->mipmaps){
+                        if(mip.pixels.size() == 0){ _do = true; }
+                    }
+                    if(_do){
+                        string extension = boost::filesystem::extension(image->filename);
+                        if(extension == ".dds"){
+                            TextureLoader::LoadDDSFile(super,image->filename,*image);
+                        }
+                        else{
+                            sf::Image _sfImage;
+                            _sfImage.loadFromFile(image->filename);
+                            image->load(_sfImage,image->filename);
+                        }
+                    }
+                }
+            }
         }
         void _loadIntoGPU(Texture* super){
             if(m_TextureAddress.size() == 0)
                 m_TextureAddress.push_back(0);
-			Renderer::genAndBindTexture(m_Type,m_TextureAddress.at(0));
+            Renderer::genAndBindTexture(m_Type,m_TextureAddress.at(0));
             switch(m_TextureType){
                 case TextureType::RenderTarget:{
                     TextureLoader::LoadTextureFramebufferIntoOpenGL(super); break;
@@ -521,20 +527,18 @@ class Texture::impl final{
                 glDeleteTextures(1,&m_TextureAddress.at(i));
             }
             vector_clear(m_TextureAddress);
-            Renderer::bindTexture(m_Type,0);
         }
         void _unloadFromCPU(){
             for(auto image:m_ImagesDatas){
-                for(auto mipmap:image->mipmaps){
-                    vector_clear(mipmap.pixels);
-                    mipmap.width = mipmap.height = mipmap.compressedSize = mipmap.level = 0;
+                if(image->filename != ""){
+                    for(auto mipmap:image->mipmaps){
+                        if(mipmap.pixels.size() == 0){
+                            vector_clear(mipmap.pixels);
+                        }
+                    }	
                 }
-                vector_clear(image->mipmaps);
-            }
-			m_Mipmapped = false;
-        }
-        void _unload(){
-            _unloadFromGPU();   
+            }  
+            m_Mipmapped = false;
         }
         void _resize(epriv::FramebufferTexture* t,uint w, uint h){
             if(m_TextureType != TextureType::RenderTarget){
@@ -557,15 +561,13 @@ class Texture::impl final{
 };
 
 void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageLoadedStructure& image){
-    FILE* fileparser = fopen(_filename.c_str(), "rb");
-    if (!fileparser) return;
+    Texture::impl& i = *_texture->m_i;
+    FILE* fileparser = fopen(_filename.c_str(), "rb"); if (!fileparser) return;
     uchar header_buffer[128];
     fread(&header_buffer, 128, 1, fileparser);
 
     DDS::DDS_Header head(header_buffer);
-    if (head.magic != 0x20534444){ // "DDS "
-        fclose(fileparser); return;
-    }
+    if (head.magic != 0x20534444){ fclose(fileparser); return; } //check if this is "DDS "
     //DX10 header here
     DDS::DDS_Header_DX10 headDX10;
     if( (head.header_flags & DDS::DDPF_FOURCC) && head.format.fourCC == FourCC_DX10 ){
@@ -668,38 +670,83 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
         }
     }
 
-    uint bufferSize = head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize;
-    uchar* pxls = (uchar*)malloc(bufferSize * sizeof(uchar));
-    fread(pxls, 1, bufferSize, fileparser);
+    uint numberOfMainImages = 1;
+     
+    if(head.caps & DDS::DDS_CAPS_COMPLEX){
+        if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP){//cubemap
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEX){ ++numberOfMainImages; }
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEX){ ++numberOfMainImages; }
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEY){ ++numberOfMainImages; }
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEY){ ++numberOfMainImages; }
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEZ){ ++numberOfMainImages; }
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEZ){ ++numberOfMainImages; }
+            i.m_Type = GL_TEXTURE_CUBE_MAP;
+            i.m_TextureType = TextureType::CubeMap;
+            i.m_IsToBeMipmapped = false;
+            --numberOfMainImages;
+        }
+    }
+    
+    uint bufferSize = (head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize);
+    uchar* pxls = (uchar*)malloc(bufferSize * numberOfMainImages);
+    fread(pxls, 1, bufferSize * numberOfMainImages, fileparser);
     fclose(fileparser);
     image.pixelFormat = ImagePixelFormat::RGBA;
     image.pixelType = ImagePixelType::UNSIGNED_BYTE;	
-    offset = bufferSize;
-    for (uint level = 0; level < head.mipMapCount && (head.w || head.h); ++level){
-        if(level > 0 && (head.w < 64 || head.h < 64)) break;
-        ImageMipmap* mipmap = nullptr;
-        ImageMipmap mipMapCon = ImageMipmap();
-        if(level >= 1){ mipmap = &mipMapCon; }
-        else{           mipmap = &image.mipmaps.at(0); }
-        mipmap->level = level;
-        mipmap->width = head.w;
-        mipmap->height = head.h;
-        mipmap->compressedSize = ((head.w + 3) / 4) * ((head.h + 3) / 4) * blockSize;
-        mipmap->pixels.assign(pxls,pxls + offset);
-        head.w = Math::Max(uint(head.w / 2), 1);
-        head.h = Math::Max(uint(head.h / 2), 1);
-        offset += mipmap->compressedSize;
+
+    uint _width = head.w;
+    uint _height = head.h;
+    for(uint mainImageLevel = 0; mainImageLevel < numberOfMainImages; ++mainImageLevel){
+
+        ImageLoadedStructure* imgPtr = nullptr;
+        if(mainImageLevel == 0){ 
+            imgPtr = &image; 
+        }
+        else if(i.m_ImagesDatas.size() < mainImageLevel){                    
+            imgPtr = new ImageLoadedStructure();
+            imgPtr->pixelFormat = image.pixelFormat;
+            imgPtr->pixelType = image.pixelType;
+            imgPtr->internalFormat = image.internalFormat;
+            i.m_ImagesDatas.push_back(imgPtr);
+        }
+        else{
+            imgPtr = i.m_ImagesDatas.at(mainImageLevel);
+        }
+
+        _width = head.w;
+        _height = head.h;
+        for (uint level = 0; level < head.mipMapCount && (_width || _height); ++level){
+            if(level > 0 && (_width < 64 || _height < 64)) break;
+            ImageMipmap* mipmap = nullptr;
+            ImageMipmap mipMapCon = ImageMipmap();
+            if(level >= 1){ mipmap = &mipMapCon; }
+            else{           mipmap = &imgPtr->mipmaps.at(0); }
+            mipmap->level = level;
+            mipmap->width = _width;
+            mipmap->height = _height;
+            mipmap->compressedSize = ((_width + 3) / 4) * ((_height + 3) / 4) * blockSize;
+
+            mipmap->pixels.resize(mipmap->compressedSize);
+            for(uint t = 0; t < mipmap->pixels.size(); ++t){
+                uint _index = offset + t;
+                mipmap->pixels.at(t) = pxls[_index];
+            }
+            _width = Math::Max(uint(_width / 2), 1);
+            _height = Math::Max(uint(_height / 2), 1);
+            offset += mipmap->compressedSize;
+            if(level >= 1){ imgPtr->mipmaps.push_back(*mipmap); }
+        }
     }
     free(pxls);
 }
 void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
+    Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
     for(auto mipmap:i.m_ImagesDatas.at(0)->mipmaps){
         i._importIntoOpenGL(mipmap,i.m_Type);
-		TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,0,mipmap.level);
-	}
-    _texture->setFilter(TextureFilter::Linear);   
-    Renderer::bindTexture(i.m_Type,0);    
+        //TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,0,mipmap.level);
+    }
+    _texture->setFilter(TextureFilter::Linear); 
 }
 void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
@@ -718,13 +765,12 @@ void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
     for(auto image:i.m_ImagesDatas){
         for(auto mipmap:image->mipmaps){
             i._importIntoOpenGL(mipmap,GL_TEXTURE_CUBE_MAP_POSITIVE_X + imageIndex);
-            TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,imageIndex,mipmap.level);
+            //TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,imageIndex,mipmap.level);
         }
         ++imageIndex;
     }
     _texture->setFilter(TextureFilter::Linear);
     _texture->setWrapping(TextureWrap::ClampToEdge);
-    Renderer::bindTexture(i.m_Type,0);
 }
 void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture* _texture,uint imageIndex,uint mipmapLevel){
     Texture::impl& i = *_texture->m_i;
@@ -735,7 +781,6 @@ void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture* _texture,uint
     pxls.resize(_w * _h * 4);
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
     glGetTexImage(i.m_Type,0,ImagePixelFormat::at(i.m_ImagesDatas.at(imageIndex)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(imageIndex)->pixelType),&pxls[0]);
-    Renderer::bindTexture(i.m_Type,0);
 }
 void epriv::TextureLoader::ChoosePixelFormat(ImagePixelFormat::Format& _out,ImageInternalFormat::Format& _in){
     switch(_in){
@@ -874,7 +919,6 @@ void epriv::TextureLoader::GenerateMipmapsOpenGL(Texture* _texture){
     glGenerateMipmap(i.m_Type);
     i.m_Mipmapped = true;
     //uint mipmaplevels = uint(glm::log2(glm::max(_w,_h)) + 1.0f);
-    Renderer::bindTexture(i.m_Type, 0);
 }
 void epriv::TextureLoader::EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap){
     if(wrap == TextureWrap::Repeat)              gl = GL_REPEAT;
@@ -977,7 +1021,7 @@ void Texture::setFilter(GLuint type,TextureFilter::Filter f){
 
 void InternalTexturePublicInterface::LoadCPU(Texture* _texture){
     if(!_texture->isLoaded()){
-        _texture->m_i->_loadIntoCPU();
+        _texture->m_i->_loadIntoCPU(_texture);
     }
 }
 void InternalTexturePublicInterface::LoadGPU(Texture* _texture){
@@ -990,14 +1034,16 @@ void InternalTexturePublicInterface::LoadGPU(Texture* _texture){
 
 void Texture::load(){
     if(!isLoaded()){
-        m_i->_load(this);
+        m_i->_loadIntoCPU(this);
+        m_i->_loadIntoGPU(this);
         cout << "(Texture) ";
         EngineResource::load();
     }
 }
 void Texture::unload(){
     if(isLoaded() && useCount() == 0){
-        m_i->_unload();
+        m_i->_unloadFromGPU();
+        m_i->_unloadFromCPU();   
         cout << "(Texture) ";
         EngineResource::unload();
     }
@@ -1005,19 +1051,18 @@ void Texture::unload(){
 void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     if(m_i->m_TextureAddress.size() == 1){
         m_i->m_TextureAddress.push_back(0);
-		Renderer::genAndBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(1));
+        Renderer::genAndBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(1));
         for (uint i = 0; i < 6; ++i){
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,convoludeTextureSize,convoludeTextureSize,0,GL_RGB,GL_FLOAT,NULL);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGB16F,convoludeTextureSize,convoludeTextureSize,0,GL_RGB,GL_FLOAT,NULL);
         }
         setWrapping(TextureWrap::ClampToEdge);
         setFilter(TextureFilter::Linear);
     }
     if(m_i->m_TextureAddress.size() == 2){
-        Renderer::bindTexture(m_i->m_Type,0);
         m_i->m_TextureAddress.push_back(0);
-		Renderer::genAndBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(2));
+        Renderer::genAndBindTexture(m_i->m_Type,m_i->m_TextureAddress.at(2));
         for (uint i = 0; i < 6; ++i){
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,preEnvFilterSize,preEnvFilterSize,0,GL_RGB,GL_FLOAT,NULL);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGB16F,preEnvFilterSize,preEnvFilterSize,0,GL_RGB,GL_FLOAT,NULL);
         }
         setWrapping(TextureWrap::ClampToEdge);
         setMinFilter(TextureFilter::Linear_Mipmap_Linear);

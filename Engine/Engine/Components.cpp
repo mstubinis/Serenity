@@ -274,10 +274,8 @@ void epriv::ComponentManager::_addEntityToBeDestroyed(Entity* e){
 void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
 
     //TODO: add method to handle each component type on scene swap (like remove/add rigid body from physics world)
-
     for(auto type:m_ComponentVectorsScene){
-        vector<ComponentBaseClass*>& v = (type.second);
-        vector_clear(v);
+        vector_clear(type.second);
         vector<ComponentBaseClass*> n;
         m_ComponentVectorsScene.at(type.first) = n;
     }
@@ -285,7 +283,7 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
         Entity* e = newScene->getEntity(entityID);
         for(uint index = 0; index < ComponentType::_TOTAL; ++index){
             uint componentID = e->m_Components[index];
-            if(componentID != std::numeric_limits<uint>::max()){
+			if(componentID != UINT_MAX_VALUE){
                 ComponentBaseClass* component = nullptr;
                 m_ComponentPool->get(componentID,component);
                 if(component){
@@ -816,19 +814,17 @@ void ComponentRigidBody::setMass(float mass){
 
 
 Entity::Entity(){
-    uint maxValue = std::numeric_limits<uint>::max();
     m_Scene = nullptr;
-    m_ParentID = maxValue;
-    m_ID = maxValue;
+    m_ParentID = epriv::UINT_MAX_VALUE;
+    m_ID = epriv::UINT_MAX_VALUE;
     m_Components = new uint[ComponentType::_TOTAL];
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        m_Components[i] = maxValue;
+        m_Components[i] = epriv::UINT_MAX_VALUE;
     }
 }
 Entity::~Entity(){
-    uint maxValue = std::numeric_limits<uint>::max();
-    m_ParentID = maxValue;
-    m_ID = maxValue;
+    m_ParentID = epriv::UINT_MAX_VALUE;
+    m_ID = epriv::UINT_MAX_VALUE;
     m_Scene = nullptr;
     delete[] m_Components;
 }
@@ -836,17 +832,14 @@ uint Entity::id(){ return m_ID; }
 Scene* Entity::scene(){ return m_Scene; }
 void Entity::destroy(bool immediate){
     if(!immediate){
-        //add to the deletion queue
-        componentManager->_addEntityToBeDestroyed(m_ID);
+        componentManager->_addEntityToBeDestroyed(m_ID); //add to the deletion queue
     }
     else{
-        //delete immediately
-        componentManager->_deleteEntityImmediately(this);
+        componentManager->_deleteEntityImmediately(this); //delete immediately
     }
 }
 Entity* Entity::parent(){
-    uint maxValue = std::numeric_limits<uint>::max();
-    if(m_ParentID == maxValue)
+    if(m_ParentID == epriv::UINT_MAX_VALUE)
         return nullptr;
     return componentManager->_getEntity(m_ParentID);
 }

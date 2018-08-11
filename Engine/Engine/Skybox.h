@@ -33,8 +33,11 @@ class Skybox: public SkyboxEmpty{
         static GLuint m_Buffer;
         static std::vector<glm::vec3> m_Vertices;
     public:
-        Skybox(std::string directory, Scene* = nullptr);
+        Skybox(std::string* files, Scene* = nullptr);
+		Skybox(std::string file, Scene* = nullptr);
         virtual ~Skybox();
+        virtual void update(){}
+        virtual void draw(){}
         Texture* texture(){ return m_Texture; }
         static void initMesh();
         static void bindMesh();

@@ -36,7 +36,7 @@ void SolarSystem::_loadFromFile(string filename){
 
     unordered_map<string,Handle> loadedMaterials;
 
-    string skybox;
+    string skyboxDirectory;
     for(string line; getline(str, line, '\n');){
         line.erase( remove(line.begin(), line.end(), '\r'), line.end() ); //remove \r from the line
         if(line[0] != '#'){//ignore commented lines
@@ -44,10 +44,10 @@ void SolarSystem::_loadFromFile(string filename){
                 setName(line);
             }
             else if(count == 2){//this line has the system's skybox
-                skybox = line;
+                skyboxDirectory = line;
             }
             else if(count == 3){//this line has the system's skybox's number of flares
-                GameSkybox* box = new GameSkybox(skybox,boost::lexical_cast<uint>(line),this);
+                GameSkybox* box = new GameSkybox(skyboxDirectory,boost::lexical_cast<uint>(line),this);
             }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;

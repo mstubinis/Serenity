@@ -347,9 +347,6 @@
     <ClInclude Include="GLImageConstants.h">
       <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="SMAA_LUT.h">
-      <Filter>Header Files\Engine\Rendering\BuiltInShaders</Filter>
-    </ClInclude>
     <ClInclude Include="ReubixCube.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -391,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="Engine_Utils.h">
       <Filter>Header Files\Engine\Engine_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="SMAA_LUT.h">
+      <Filter>Header Files\Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

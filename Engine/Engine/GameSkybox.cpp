@@ -21,44 +21,73 @@
 using namespace Engine;
 using namespace std;
 
-GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene){
-    if(numFlares > 0){
-        for(uint i = 0; i < numFlares; ++i){
-            SkyboxSunFlare flare;
+struct SkyboxSunFlare final{
+    glm::vec3 position;
+    glm::vec3 color;
+    float scale;
+    SkyboxSunFlare(){ position = glm::vec3(0); color = glm::vec3(0); scale = 0;}
+    ~SkyboxSunFlare(){ position = glm::vec3(0); color = glm::vec3(0); scale = 0;}
+};
 
-            float x = (((rand() % 100) - 50.0f) / 100.0f); x*=999999;
-            float y = (((rand() % 100) - 50.0f) / 100.0f); y*=999999;
-            float z = (((rand() % 100) - 50.0f) / 100.0f); z*=999999;
+class GameSkybox::impl final{
+    public:
+	    vector<SkyboxSunFlare> sunFlares;
 
-            float r = (rand() % 100) / 100.0f;
-            float g = (rand() % 100) / 100.0f;
-            float b = (rand() % 100) / 100.0f;
+		void _init(uint _numFlares){
+			if(_numFlares > 0){
+				for(uint i = 0; i < _numFlares; ++i){
+					SkyboxSunFlare flare;
 
-            float scl = ((rand() % 100)) / 300.0f; scl += 0.25;
+					float x = (((rand() % 100) - 50.0f) / 100.0f); x*=999999.0f;
+					float y = (((rand() % 100) - 50.0f) / 100.0f); y*=999999.0f;
+					float z = (((rand() % 100) - 50.0f) / 100.0f); z*=999999.0f;
 
-            flare.position = glm::vec3(x,y,z);
-            flare.scale = scl;
-            flare.color = glm::vec3(r,g,b);
-            m_SunFlares.push_back(flare);
-        }
-    }
+					float r = (rand() % 100) / 100.0f;
+					float g = (rand() % 100) / 100.0f;
+					float b = (rand() % 100) / 100.0f;
+
+					float scl = ((((rand() % 100)) / 300.0f) + 0.15f) * 0.25f;
+
+					flare.position = glm::vec3(x,y,z);
+					flare.scale = scl;
+					flare.color = glm::vec3(r,g,b);
+					sunFlares.push_back(flare);
+				}
+			}
+		}
+		void _destruct(){
+			vector_clear(sunFlares);
+		}
+		void _draw(){
+			//find a better way of doing this
+			/*
+			if(sunFlares.size() > 0){
+				Material* mat = Resources::getMaterial(ResourceManifest::SunFlareMaterial);
+				Texture* texture = mat->getComponent(MaterialComponentType::Diffuse)->texture();
+				for(auto flare:sunFlares){
+					//glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getCurrentScene()->getActiveCamera()->getPosition()) - flare.position,false);
+					glm::vec3 pos = Math::getScreenCoordinates(flare.position,false);
+					glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
+					glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
+					texture->render(glm::vec2(pos.x,pos.y),col,0,scl,0.1f);
+				}
+			}
+			*/
+		}
+};
+GameSkybox::GameSkybox(string name, uint numFlares, Scene* scene):Skybox(name,scene),m_i(new impl){
+	m_i->_init(numFlares);
+}
+GameSkybox::GameSkybox(string* names, uint numFlares, Scene* scene):Skybox(names,scene),m_i(new impl){
+    m_i->_init(numFlares);
 }
 GameSkybox::~GameSkybox(){
-    m_SunFlares.clear();
+    m_i->_destruct();
 }
 void GameSkybox::update(){
     Skybox::update();
 }
 void GameSkybox::draw(){
     Skybox::draw();
-    if(m_SunFlares.size() > 0){
-        Material* sunFlareMat = Resources::getMaterial(ResourceManifest::SunFlareMaterial);
-        Texture* texture = sunFlareMat->getComponent(MaterialComponentType::Diffuse)->texture();
-        for(auto flare:m_SunFlares){
-            glm::vec3 pos = Math::getScreenCoordinates(glm::vec3(Resources::getCurrentScene()->getActiveCamera()->getPosition()) - flare.position,false);
-            glm::vec4 col = glm::vec4(flare.color.x,flare.color.y,flare.color.z,1);
-            glm::vec2 scl = glm::vec2(flare.scale,flare.scale);
-            texture->render(glm::vec2(pos.x,pos.y),col,0,scl,0.5f);
-        }
-    }
+	m_i->_draw();
 }

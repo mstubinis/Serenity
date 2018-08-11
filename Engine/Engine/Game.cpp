@@ -53,6 +53,7 @@ void Game::initLogic(){
     CapsuleSpace* cap = new CapsuleSpace();
 
     Resources::setCurrentScene("Sol");
+	//Resources::Settings::enableDynamicMemory();
     m_HUD = new HUD();
 }
 
@@ -66,19 +67,19 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F5)){
         Resources::setCurrentScene("CapsuleSpace");
     }
-    if(Engine::isKeyDownOnce("f7")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
-    if(Engine::isKeyDownOnce("f8")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
-    if(Engine::isKeyDownOnce("f9")){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
-    if(Engine::isKeyDownOnce("f10")){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
+	if(Engine::isKeyDownOnce(KeyboardKey::F7)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
+    if(Engine::isKeyDownOnce(KeyboardKey::F8)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
+    if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
+    if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
-    if(Engine::isKeyDownOnce("space")){
-        if(Engine::paused()){
-            Engine::unpause();
-        }
-        else{
-            Engine::pause();
-        }
-    }
+	/*
+	if(Engine::isKeyDownOnce("f11")){
+		Resources::getTexture(ResourceManifest::DefiantDiffuseTexture)->unload();
+	}
+	if(Engine::isKeyDownOnce("f12")){
+		Resources::getTexture(ResourceManifest::DefiantDiffuseTexture)->load();
+	}
+	*/
     m_HUD->update(dt);
 }
 void Game::render(){
