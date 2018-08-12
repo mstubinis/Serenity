@@ -123,22 +123,14 @@ void SolarSystem::_loadFromFile(string filename){
                 float zPos = glm::sin(randAngle) * float(POSITION);
 
                 if(MATERIAL_NAME != ""){
-                    string normalFile = "";
-                    string glowFile = "";
-                    string extention;
-
-                    //get file extension
-                    for(uint i = TEXTURE.length() - 4; i < TEXTURE.length(); ++i) extention += tolower(TEXTURE.at(i));
-
-                    string normFile = TEXTURE.substr(0,TEXTURE.size()-4);
-                    normFile += "_Normal" + extention;
-                    if(boost::filesystem::exists(normFile)){
-                        normalFile = normFile;
+					string extention = boost::filesystem::extension(TEXTURE);
+                    string normalFile = (TEXTURE.substr(0,TEXTURE.size()-extention.size())) + "_Normal" + extention;
+					string glowFile = (TEXTURE.substr(0,TEXTURE.size()-extention.size())) + "_Glow" + extention;
+                    if(!boost::filesystem::exists(normalFile)){
+                        normalFile = "";
                     }
-                    string gloFile = TEXTURE.substr(0,TEXTURE.size()-4);
-                    gloFile += "_Glow" + extention;
-                    if(boost::filesystem::exists(gloFile)){
-                        glowFile = gloFile;
+                    if(!boost::filesystem::exists(glowFile)){
+                        glowFile = "";
                     }
                     if(!loadedMaterials.count(MATERIAL_NAME)){
                         Handle handle;

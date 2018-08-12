@@ -608,9 +608,10 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
         case FourCC_DX10:{ 
             break; 
         }
-        case FourCC_ATI1:{ 
+        case FourCC_ATI1:{ //useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
             factor = 2;
             blockSize = 8;
+            image.internalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
             break;
         }
         case FourCC_ATI2:{//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
@@ -618,9 +619,14 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
             image.internalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
             break; 
         }
-        case FourCC_RXGB:{ 
+        case FourCC_RXGB:{ //By its design, it is just a DXT5 image with reading it in the shader differently
+            //As I recall, the most you would have to do in the shader is something like:
+            //vec3 normal;
+            //normal.xy = texture2D(RXGBnormalmap, texcoord).ag;
+            //normal.z = sqrt(1.0 - normal.x * normal.x - normal.y * normal.y);
             factor = 4;
             blockSize = 16;
+			image.internalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
             break;
         }
         case FourCC_$:{ 

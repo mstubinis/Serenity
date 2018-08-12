@@ -80,14 +80,14 @@ void ResourceManifest::init(){
     Engine::epriv::threading::waitForAll();
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
-    StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.jpg","","","");
+    StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.dds","","","");
     Resources::getMaterial(StarMaterial)->setShadeless(true);
     Resources::getMaterial(StarMaterial)->setGlow(0.21f);
 
     EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.dds","","","",skyFromSpace);
 
-    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.png");
-    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.png");
+    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.dds");
+    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.dds");
     //AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.dds","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
     //MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.dds","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     //IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.dds","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
@@ -112,7 +112,7 @@ void ResourceManifest::init(){
     CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.dds");
     Resources::getMaterial(CapsuleC)->setShadeless(true);
     Resources::getMaterial(CapsuleC)->setGlow(0.01f);
-    CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.png");
+    CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.dds");
     Resources::getMaterial(CapsuleD)->setShadeless(true);
 
 }

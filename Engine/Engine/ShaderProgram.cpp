@@ -137,9 +137,9 @@ class ShaderP::impl final{
                     "    return normalize(TBN * (_t * 2.0 - 1.0));\n"
                     "}\n"
                     "vec3 CalcBumpedNormalCompressed(vec2 _uv,sampler2D _inTexture){//generated\n"
-                    "    vec2 _t = texture2D(_inTexture, _uv).rg;\n"
-                    "    float zRecalc = sqrt(1.0 - _t.r * _t.r - _t.g * _t.g);\n"
-                    "    vec3 normal = vec3(_t.rg, zRecalc);\n"//recalc z in the shader
+                    "    vec2 _t = texture2D(_inTexture, _uv).ag;\n"
+                    "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
+                    "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
                     "    return normalize(TBN * (normal * 2.0 - 1.0));\n"
                     "}\n";
                     _insertStringAtLine(_d,normalMap,1);
