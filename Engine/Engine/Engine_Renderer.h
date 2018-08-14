@@ -123,6 +123,7 @@ namespace Engine{
                 void enable(bool b = true);   void disable();
                 float getRadius();            void setRadius(float r);
                 float getStrength();          void setStrength(float r);
+				float getScale();             void setScale(float s);
             };
             namespace GodRays{
                 bool enabled();

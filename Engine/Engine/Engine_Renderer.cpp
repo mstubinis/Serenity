@@ -194,6 +194,7 @@ class epriv::RenderManager::impl final{
         bool bloom;
         float bloom_radius;
         float bloom_strength;
+		float bloom_scale;
         #pragma endregion
 
         #pragma region LightingInfo
@@ -308,6 +309,7 @@ class epriv::RenderManager::impl final{
             bloom = true;
             bloom_radius = 0.84f;
             bloom_strength = 2.5f;
+			bloom_scale = 3.1f;
             #pragma endregion
 
             #pragma region LightingInfo
@@ -1750,10 +1752,7 @@ class epriv::RenderManager::impl final{
         }
         void _passSSAO(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->bind();
-
-            sendUniform1iSafe("doSSAO",int(ssao));
-            sendUniform1iSafe("doBloom",int(bloom));
-
+			float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
             if(RenderManager::GLSL_VERSION < 140){
                 glm::vec3 camPos = c.getPosition();
                 glm::vec3 camVVector = c.getViewVector();
@@ -1763,13 +1762,10 @@ class epriv::RenderManager::impl final{
                 sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
             }
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
-    
-            sendUniform1i("Samples",ssao_samples);
-            sendUniform1i("NoiseTextureSize",SSAO_NORMALMAP_SIZE);
-    
-            float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
+			sendUniform4i("SSAOInfoA",int(ssao),int(bloom),ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
+
             sendUniform1f("fbufferDivisor",_divisor);
-    
+			sendUniform1f("bloomScale",bloom_scale);
             sendUniform3fv("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
@@ -1845,23 +1841,19 @@ class epriv::RenderManager::impl final{
         void _passBlur(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->bind();
 
-            sendUniform1f("radius",bloom_radius);
-            sendUniform4f("strengthModifier",bloom_strength,bloom_strength,bloom_strength,ssao_blur_strength);
-
-            float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
-            sendUniform1f("fbufferDivisor",_divisor);
-
+			float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
             glm::vec4 rgba(0.0f);
+			glm::vec2 hv(0.0f);
             if(channels.find("R") != string::npos) rgba.x = 1.0f;
             if(channels.find("G") != string::npos) rgba.y = 1.0f;
             if(channels.find("B") != string::npos) rgba.z = 1.0f;
             if(channels.find("A") != string::npos) rgba.w = 1.0f;
+            if(type == "H"){ hv = glm::vec2(1.0f,0.0f); }
+            else{            hv = glm::vec2(0.0f,1.0f); }
 
+            sendUniform4f("strengthModifier",bloom_strength,bloom_strength,bloom_strength,ssao_blur_strength);
+			sendUniform4f("UniformsA",bloom_radius,_divisor,hv.x,hv.y);
             sendUniform4f("RGBA",rgba);
-
-            if(type == "H"){ sendUniform2f("HV",1.0f,0.0f); }
-            else{            sendUniform2f("HV",0.0f,1.0f); }
-
             sendTexture("textureMap",gbuffer.getTexture(texture),0);
 
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
@@ -2081,7 +2073,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
 
-            if(godRays && godRays_Object != nullptr){
+            if(godRays && godRays_Object){
                 gbuffer.start(GBufferType::GodRays,"RGBA",false);
                 ComponentBasicBody* b = godRays_Object->getComponent<ComponentBasicBody>();
                 glm::vec3 oPos = b->position();
@@ -2298,6 +2290,8 @@ float Renderer::Settings::Bloom::getRadius(){ return renderManager->bloom_radius
 float Renderer::Settings::Bloom::getStrength(){ return renderManager->bloom_strength; }
 void Renderer::Settings::Bloom::setRadius(float r){ renderManager->bloom_radius = glm::max(0.0f,r); }
 void Renderer::Settings::Bloom::setStrength(float r){ renderManager->bloom_strength = glm::max(0.0f,r); }
+float Renderer::Settings::Bloom::getScale(){ return renderManager->bloom_scale; }
+void Renderer::Settings::Bloom::setScale(float s){ renderManager->bloom_scale = glm::max(0.0f,s); }
 void Renderer::Settings::SMAA::setThreshold(float f){ renderManager->SMAA_THRESHOLD = f; }
 void Renderer::Settings::SMAA::setSearchSteps(uint s){ renderManager->SMAA_MAX_SEARCH_STEPS = s; }
 void Renderer::Settings::SMAA::disableCornerDetection(){ renderManager->SMAA_CORNER_ROUNDING = 0; }

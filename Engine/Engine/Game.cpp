@@ -72,14 +72,14 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
-	/*
-	if(Engine::isKeyDownOnce("f11")){
-		Resources::getTexture(ResourceManifest::DefiantDiffuseTexture)->unload();
+
+	if(Engine::isKeyDown("f11")){
+		Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() - 0.01f);
 	}
-	if(Engine::isKeyDownOnce("f12")){
-		Resources::getTexture(ResourceManifest::DefiantDiffuseTexture)->load();
+	if(Engine::isKeyDown("f12")){
+		Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() + 0.01f);
 	}
-	*/
+
     m_HUD->update(dt);
 }
 void Game::render(){
