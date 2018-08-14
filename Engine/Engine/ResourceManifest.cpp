@@ -35,7 +35,7 @@ Handle ResourceManifest::VenerexMaterial;
 Handle ResourceManifest::OberthMaterial;
 Handle ResourceManifest::CrosshairMaterial;
 Handle ResourceManifest::CrosshairArrowMaterial;
-Handle ResourceManifest::SunFlareMaterial;
+Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::GoldMaterial;
 
 Handle ResourceManifest::CapsuleTunnelMesh;
@@ -86,18 +86,18 @@ void ResourceManifest::init(){
 
     EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.dds","","","",skyFromSpace);
 
-    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.png","data/Textures/dreadnaught_Glow.dds");
-    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.png","data/Textures/defiant_Glow.dds");
+    DreadnaughtMaterial = Resources::addMaterial("Dreadnaught","data/Textures/dreadnaught.dds","data/Textures/dreadnaught_Normal.dds","data/Textures/dreadnaught_Glow.dds");
+    DefiantMaterial = Resources::addMaterial("Defiant","data/Textures/defiant.dds","data/Textures/defiant_Normal.dds","data/Textures/defiant_Glow.dds");
     //AkiraMaterial = Resources::addMaterial("Akira","data/Textures/akira.dds","data/Textures/akira_Normal.png","data/Textures/akira_Glow.png");
     //MirandaMaterial = Resources::addMaterial("Miranda","data/Textures/miranda.dds","data/Textures/miranda_Normal.png","data/Textures/miranda_Glow.png");
     //IntrepidMaterial = Resources::addMaterial("Intrepid","data/Textures/intrepid.dds","data/Textures/intrepid_Normal.png","data/Textures/intrepid_Glow.png");
     //NorwayMaterial = Resources::addMaterial("Norway","data/Textures/norway.dds","data/Textures/norway_Normal.png","data/Textures/norway_Glow.png");
     //VenerexMaterial = Resources::addMaterial("Venerex","data/Textures/venerex.dds","data/Textures/venerex_Normal.png","data/Textures/venerex_Glow.png");
     //OberthMaterial = Resources::addMaterial("Oberth","data/Textures/oberth.dds","data/Textures/oberth_Normal.png","data/Textures/oberth_Glow.png");
-    CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.png","","","");
-    CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.png","","","");
-    SunFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.png");
-    Resources::getMaterial(SunFlareMaterial)->setShadeless(true);
+    CrosshairMaterial = Resources::addMaterial("Crosshair","data/Textures/HUD/Crosshair.dds","","","");
+    CrosshairArrowMaterial = Resources::addMaterial("CrosshairArrow","data/Textures/HUD/CrosshairArrow.dds","","","");
+    StarFlareMaterial = Resources::addMaterial("SunFlare","data/Textures/Skyboxes/StarFlare.dds");
+    Resources::getMaterial(StarFlareMaterial)->setShadeless(true);
 
     GoldMaterial = Resources::addMaterial("Gold","");
     Resources::getMaterial(GoldMaterial)->setMaterialPhysics(MaterialPhysics::Gold);

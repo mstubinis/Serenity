@@ -37,7 +37,7 @@ class ResourceManifest{
 		static Handle OberthMaterial;
         static Handle CrosshairMaterial;
         static Handle CrosshairArrowMaterial;
-        static Handle SunFlareMaterial;
+        static Handle StarFlareMaterial;
         static Handle GoldMaterial;
 
         static Handle CapsuleTunnelMesh;

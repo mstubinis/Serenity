@@ -34,7 +34,7 @@ void CapsuleEnd::update(const float& dt){
 CapsuleStar::CapsuleStar(float size,glm::vec3 pos,Scene* scene,bool makeLight):Entity(){
     scene->addEntity(this);
     
-    ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::SunFlareMaterial,this);  addComponent(model);
+    ComponentModel* model = new ComponentModel(Mesh::Plane, ResourceManifest::StarFlareMaterial,this);  addComponent(model);
     model->getModel()->setColor(255,235,206,255);
     
     m_Body = new ComponentBasicBody();  addComponent(m_Body);

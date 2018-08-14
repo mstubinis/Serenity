@@ -371,18 +371,22 @@ class Mesh::impl final{
                         data.normals.push_back(norm);
 
                         //tangent
+						/*
                         glm::vec3 tangent;
                         tangent.x = aimesh.mTangents[i].x;
                         tangent.y = aimesh.mTangents[i].y;
                         tangent.z = aimesh.mTangents[i].z;
                         //data.tangents.push_back(tangent);
+						*/
 
                         //binorm
+						/*
                         glm::vec3 binorm;
                         binorm.x = aimesh.mBitangents[i].x;
                         binorm.y = aimesh.mBitangents[i].y;
                         binorm.z = aimesh.mBitangents[i].z;
                         //data.binormals.push_back(binorm);
+						*/
                     }
                 }
                 #pragma endregion
@@ -570,8 +574,11 @@ class Mesh::impl final{
                 float sy = uvP1.y - uvP0.y;
                 float tx = uvP2.x - uvP0.x;
                 float ty = uvP2.y - uvP0.y;
+				float dirCorrection = 1.0;
 
-                float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
+				if ((tx * sy - ty * sx) < 0.0f) dirCorrection = -1.0f;//this is important for normals and mirrored mesh geometry using identical uv's
+
+
                 // when t1, t2, t3 in same position in UV space, just use default UV direction.
                 //if ( 0 == sx && 0 == sy && 0 == tx && 0 == ty ) {
                 if ( sx * ty == sy * tx ){
