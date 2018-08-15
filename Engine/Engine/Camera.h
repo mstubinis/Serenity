@@ -46,8 +46,9 @@ class Camera: public Entity{
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
 
-        bool sphereIntersectTest(Entity*);
-        bool sphereIntersectTest(glm::vec3 pos, float radius);
+        uint sphereIntersectTest(glm::vec3 pos,float radius);
+        uint pointIntersectTest(glm::vec3 pos);
+
         bool rayIntersectSphere(Entity*);
 };
 #endif

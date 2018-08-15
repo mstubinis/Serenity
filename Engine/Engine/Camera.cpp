@@ -72,8 +72,11 @@ float Camera::getDistance(Entity* e){
 float Camera::getDistance(glm::vec3 objPos){
     return glm::distance(objPos,getPosition());
 }
-bool Camera::sphereIntersectTest(glm::vec3 pos, float radius){
+uint Camera::sphereIntersectTest(glm::vec3 pos, float radius){
     return m_Camera->sphereIntersectTest(pos,radius);
+}
+uint Camera::pointIntersectTest(glm::vec3 pos){
+	return m_Camera->pointIntersectTest(pos);
 }
 bool Camera::rayIntersectSphere(Entity* entity){
     epriv::ComponentBodyBaseClass& body = *(entity->getComponent<epriv::ComponentBodyBaseClass>());
@@ -82,3 +85,5 @@ bool Camera::rayIntersectSphere(Entity* entity){
     if(model) radius = model->radius();
     return Engine::Math::rayIntersectSphere(body.position(),radius,m_BasicBody->position(),m_Camera->getViewVector());
 }
+
+

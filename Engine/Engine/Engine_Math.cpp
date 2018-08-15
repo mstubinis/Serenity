@@ -17,6 +17,28 @@
 using namespace Engine;
 using namespace std;
 
+void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4& inViewProjection,glm::vec4* outPlanes){
+    glm::vec4 rows[4];
+    for(ushort i = 0; i < 4; ++i)
+        rows[i] = glm::row(inViewProjection,i);
+	//0 = left,1 = right,2 = top,3 = bottom,4 = near,5 = far
+    for(ushort i = 0; i < 3; ++i){
+        ushort index = i * 2;
+        outPlanes[index  ] = -(rows[3] + rows[i]);  //0,2,4
+        outPlanes[index+1] = -(rows[3] - rows[i]);  //1,3,5
+    }
+	//https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
+	//avoiding normalization of the planes for now so we can uitilize halfspace and thus negatives (outside frust / inside frust / intersecting frust)
+	/*
+    for(ushort i = 0; i < 6; ++i){
+		float mag = glm::sqrt(outPlanes[i].x * outPlanes[i].x + outPlanes[i].y * outPlanes[i].y + outPlanes[i].z * outPlanes[i].z);
+		outPlanes[i].x = outPlanes[i].x / mag;
+		outPlanes[i].y = outPlanes[i].y / mag;
+		outPlanes[i].z = outPlanes[i].z / mag;
+		outPlanes[i].w = outPlanes[i].w / mag;
+    }
+	*/
+}
 glm::quat Math::btToGLMQuat(btQuaternion& q){ glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ()); return glmQuat; }
 btQuaternion Math::glmToBTQuat(glm::quat& q){ btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w); return btQuat; }
 glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){ glm::vec3 ret = glm::vec3(n.x,n.y,n.z); return ret; }
@@ -37,13 +59,13 @@ void Math::removeMatrixPosition(glm::mat4& m){
 }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians){
-    point.x += 0.0001f;// forced protection against NaN if vectors happen to be equal
+    point.x += 0.0000001f;// forced protection against NaN if vectors happen to be equal
     glm::vec3 diff = glm::normalize(point - conePos);
     float t = glm::dot(coneVector,diff);
     return ( t >= glm::cos( fovRadians ) );
 }
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector,glm::vec3& point,const float fovRadians,const float maxDistance){
-    point.x += 0.0001f;// forced protection against NaN if vectors happen to be equal
+    point.x += 0.0000001f;// forced protection against NaN if vectors happen to be equal
     glm::vec3 diff = glm::normalize(point - conePos);
     float t = glm::dot(coneVector,diff);
     float length = glm::length(point-conePos);
@@ -52,79 +74,79 @@ bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVecto
 }
 
 vector<glm::vec4> Math::tiledFrustrum(Camera* camera,uint x,uint y){
-	/*
-	Tiled deferred rendering does not strictly require a compute shader.
-	What it requires is that, for each tile, you have a series of lights which it will process.
-	A compute shader is merely one way to accomplish that.
+    /*
+    Tiled deferred rendering does not strictly require a compute shader.
+    What it requires is that, for each tile, you have a series of lights which it will process.
+    A compute shader is merely one way to accomplish that.
 
-	An alternative is to build the light lists for each frustum on the CPU, then upload that
-	data to the GPU for its eventual use. Obviously it requires much more memory work than the CS version.
-	But it's probably not that expensive, and it allows you to easily play with tile sizes to find the most optimal.
-	More tiles means more CPU work and more data to be uploaded, but fewer lights-per-tile (generally speaking) and more efficient processing.
+    An alternative is to build the light lists for each frustum on the CPU, then upload that
+    data to the GPU for its eventual use. Obviously it requires much more memory work than the CS version.
+    But it's probably not that expensive, and it allows you to easily play with tile sizes to find the most optimal.
+    More tiles means more CPU work and more data to be uploaded, but fewer lights-per-tile (generally speaking) and more efficient processing.
 
-	One way to do that for GL 3.3-class hardware is to make each tile a separate quad.
-	The quad will be given, as part of its per-vertex parameters, the starting index for its part
-	of the total light list and the total number of lights for that tile to process.
-	The idea being that there is a globally-accessible array, and each tile has a contiguous region of this array that it will process.
+    One way to do that for GL 3.3-class hardware is to make each tile a separate quad.
+    The quad will be given, as part of its per-vertex parameters, the starting index for its part
+    of the total light list and the total number of lights for that tile to process.
+    The idea being that there is a globally-accessible array, and each tile has a contiguous region of this array that it will process.
 
-	This array could be the actual lights themselves, or it could be indices into a
-	second (much smaller) array of lights. You'll have to measure the difference to tell if
-	it's worthwhile to have the additional indirection in the access.
+    This array could be the actual lights themselves, or it could be indices into a
+    second (much smaller) array of lights. You'll have to measure the difference to tell if
+    it's worthwhile to have the additional indirection in the access.
 
-	The primary array should probably be a buffer texture, since it can get quite large,
-	depending on the number of lights and tiles. If you go with the indirect route, then
-	the array of actual light data will likely fit into a uniform block. But in either case,
-	you're going to need to employ buffer streaming techniques when uploading to it.
-	*/
+    The primary array should probably be a buffer texture, since it can get quite large,
+    depending on the number of lights and tiles. If you go with the indirect route, then
+    the array of actual light data will likely fit into a uniform block. But in either case,
+    you're going to need to employ buffer streaming techniques when uploading to it.
+    */
 
-	uint MAX_WORK_GROUP_SIZE = 16;
-	glm::mat4& proj = camera->getProjection();
-	//glm::mat4 proj = camera->getProjection() * camera->getView();
-	glm::uvec2& winSize = Resources::getWindowSize();
+    uint MAX_WORK_GROUP_SIZE = 16;
+    glm::mat4& proj = camera->getProjection();
+    //glm::mat4 proj = camera->getProjection() * camera->getView();
+    glm::uvec2& winSize = Resources::getWindowSize();
     glm::vec4 frustumPlanes[6];
-	glm::vec2 tileScale = glm::vec2(winSize.x,winSize.y) * (1.0f / float(2 * MAX_WORK_GROUP_SIZE));
-	glm::vec2 tileBias = tileScale - glm::vec2(x,y);
-	glm::vec4 col1 = glm::vec4(-proj[0][0]  * tileScale.x, proj[0][1], tileBias.x, proj[0][3]); 
+    glm::vec2 tileScale = glm::vec2(winSize.x,winSize.y) * (1.0f / float(2 * MAX_WORK_GROUP_SIZE));
+    glm::vec2 tileBias = tileScale - glm::vec2(x,y);
+    glm::vec4 col1 = glm::vec4(-proj[0][0]  * tileScale.x, proj[0][1], tileBias.x, proj[0][3]); 
     glm::vec4 col2 = glm::vec4(proj[1][0], -proj[1][1] * tileScale.y, tileBias.y, proj[1][3]);
     glm::vec4 col4 = glm::vec4(proj[3][0], proj[3][1],  -1.0f, proj[3][3]); 
     frustumPlanes[0] = col4 + col1; //Left plane
     frustumPlanes[1] = col4 - col1; //right plane
     frustumPlanes[2] = col4 - col2; //top plane
     frustumPlanes[3] = col4 + col2; //bottom plane
-	frustumPlanes[4] = glm::vec4(0.0f, 0.0f, -1.0f,-camera->getNear()); //near
-	frustumPlanes[5] = glm::vec4(0.0f, 0.0f, -1.0f,camera->getFar());  //far
+    frustumPlanes[4] = glm::vec4(0.0f, 0.0f, -1.0f,-camera->getNear()); //near
+    frustumPlanes[5] = glm::vec4(0.0f, 0.0f, -1.0f,camera->getFar());  //far
 
-	vector<glm::vec4> v;
+    vector<glm::vec4> v;
     for(ushort i = 0; i < 4; ++i){
         frustumPlanes[i] *= 1.0f / glm::length(frustumPlanes[i]);
-		v.push_back(frustumPlanes[i]);
+        v.push_back(frustumPlanes[i]);
     }
-	return v;
+    return v;
 
-	/* culling code
+    /* culling code
 
     uint threadCount = MAX_WORK_GROUP_SIZE * MAX_WORK_GROUP_SIZE;
-	uint passCount = (NUM_OF_LIGHTS + threadCount - 1) / threadCount;
-	for (uint passIt = 0; passIt < passCount; ++passIt){
-		uint lightIndex =  passIt * threadCount + gl_LocalInvocationIndex;
-		lightIndex = min(lightIndex, NUM_OF_LIGHTS);
-		PointLight p = pointLights[lightIndex];
-		vec4 pos = viewProjectionMatrix * vec4(p.posX,p.posY,p.posZ, 1.0f);
-		float rad = p.radius/pos.w;
-		if (pointLightCount < MAX_LIGHTS_PER_TILE){
-			bool inFrustum = true;
-			for (uint i = 3; i >= 0 && inFrustum; i--){
-				float dist = dot(frustumPlanes[i], pos);
-				inFrustum = (-rad <= dist);
-			}
-			if (inFrustum){
-				uint id = atomicAdd(pointLightCount, 1);
-				pointLightIndex[id] = lightIndex;
-			}
-		}
-	}
+    uint passCount = (NUM_OF_LIGHTS + threadCount - 1) / threadCount;
+    for (uint passIt = 0; passIt < passCount; ++passIt){
+        uint lightIndex =  passIt * threadCount + gl_LocalInvocationIndex;
+        lightIndex = min(lightIndex, NUM_OF_LIGHTS);
+        PointLight p = pointLights[lightIndex];
+        vec4 pos = viewProjectionMatrix * vec4(p.posX,p.posY,p.posZ, 1.0f);
+        float rad = p.radius/pos.w;
+        if (pointLightCount < MAX_LIGHTS_PER_TILE){
+            bool inFrustum = true;
+            for (uint i = 3; i >= 0 && inFrustum; i--){
+                float dist = dot(frustumPlanes[i], pos);
+                inFrustum = (-rad <= dist);
+            }
+            if (inFrustum){
+                uint id = atomicAdd(pointLightCount, 1);
+                pointLightIndex[id] = lightIndex;
+            }
+        }
+    }
 
-	*/
+    */
 }
 
 glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
@@ -295,7 +317,7 @@ void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm:
 void Math::recalculateForwardRightUp(const btRigidBody* b,glm::vec3& f,glm::vec3& r,glm::vec3& u){f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);}
 float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
-    a.x += 0.0001f;
+    a.x += 0.0000001f;
     float angle = glm::acos( glm::dot(glm::normalize(a),glm::normalize(b)) );
     if(degrees) angle *= 57.2958f;
     return angle;
@@ -348,9 +370,7 @@ double Math::grad(int hash, double x, double y, double z){
 glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
     glm::vec4 ret(0.0f);
     float a = p.a + c.a * (1.0f-p.a);
-    ret.r = ((p.r*p.a + c.r*c.a * (1.0f-p.a)) / a);
-    ret.g = ((p.g*p.a + c.g*c.a * (1.0f-p.a)) / a);
-    ret.b = ((p.b*p.a + c.b*c.a * (1.0f-p.a)) / a);
+	ret = ((p*p.a + c*c.a * (1.0f-p.a)) / a);
     ret.a = a;
     return ret;
 }

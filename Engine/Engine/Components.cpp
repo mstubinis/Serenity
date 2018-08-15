@@ -67,7 +67,7 @@ class ComponentModel::impl final{
             super->_radius = maxLength;
             if(super->m_Owner){
                 epriv::ComponentBodyBaseClass* body = super->m_Owner->getComponent<epriv::ComponentBodyBaseClass>();
-                if(body != nullptr){
+                if(body){
                     super->_radius *= Engine::Math::Max(body->getScale());
                 }
             }
@@ -103,7 +103,7 @@ class epriv::ComponentManager::impl final{
             SAFE_DELETE(super->m_EntityPool);
         }
         void _performTransformation(Entity* parent,glm::vec3& position,glm::quat& rotation,glm::vec3& scale,glm::mat4& modelMatrix){
-            if(parent == nullptr){
+            if(!parent){
                 modelMatrix = glm::mat4(1.0f);
             }
             else{
@@ -142,7 +142,8 @@ class epriv::ComponentManager::impl final{
         void _calculateRenderCheck(ComponentModel& m,Camera* camera){
             epriv::ComponentBodyBaseClass& body = *(m.m_Owner->getComponent<epriv::ComponentBodyBaseClass>());
             glm::vec3& pos = body.position();
-            if(!m.visible() || !camera->sphereIntersectTest(pos,m._radius) || camera->getDistance(pos) > m._radius * 1100.0f){ //1100 is the visibility threshold
+			uint sphereTest = camera->sphereIntersectTest(pos,m._radius);
+            if(!m.visible() || sphereTest == 0 || camera->getDistance(pos) > m._radius * 1100.0f){ //1100 is the visibility threshold
                 m.m_i->m_PassedRenderCheck = false;
                 return;
             }
@@ -176,17 +177,7 @@ class epriv::ComponentManager::impl final{
                 ComponentCamera& cam = *(ComponentCamera*)c;
                 //update view frustrum
                 glm::mat4 vp = cam._projectionMatrix * cam._viewMatrix;
-                glm::vec4 rows[4];
-                for(ushort i = 0; i < 4; ++i)
-                    rows[i] = glm::row(vp,i);
-                for(ushort i = 0; i < 3; ++i){
-                    ushort index = i * 2;
-                    cam._planes[index  ] = glm::normalize(rows[3] + rows[i]);  //0,2,4
-                    cam._planes[index+1] = glm::normalize(rows[3] - rows[i]);  //1,3,5
-                }
-                for(ushort i = 0; i < 6; ++i){
-                    cam._planes[i] = -cam._planes[i] / glm::length(cam._planes[i]);
-                }	
+                Math::extractViewFrustumPlanesHartmannGribbs(vp,cam._planes);
                 cam.update(dt);
             }
         }
@@ -209,7 +200,7 @@ class epriv::ComponentManager::impl final{
                     e->update(dt);
                 //}
             }
-            if(currentScene->m_Skybox != nullptr) currentScene->m_Skybox->update();
+            if(currentScene->m_Skybox) currentScene->m_Skybox->update();
         }
         void _destroyQueuedEntities(epriv::ComponentManager* super){
             for(auto e:m_EntitiesToBeDestroyed){
@@ -283,7 +274,7 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
         Entity* e = newScene->getEntity(entityID);
         for(uint index = 0; index < ComponentType::_TOTAL; ++index){
             uint componentID = e->m_Components[index];
-			if(componentID != UINT_MAX_VALUE){
+            if(componentID != UINT_MAX_VALUE){
                 ComponentBaseClass* component = nullptr;
                 m_ComponentPool->get(componentID,component);
                 if(component){
@@ -436,12 +427,24 @@ void ComponentCamera::resize(uint width, uint height){
     }
     epriv::ComponentInternalFunctionality::rebuildProjectionMatrix(*this);
 }
-bool ComponentCamera::sphereIntersectTest(glm::vec3 position,float radius){
-    if(radius <= 0) return false;
-    for (uint i = 0; i < 6; ++i){
-        if (_planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w - radius > 0) return false;
-    }
-    return true;
+uint ComponentCamera::pointIntersectTest(glm::vec3& position){
+	for(ushort i=0; i < 6; ++i){
+		float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
+		if (d > 0.0f) return 0; //outside
+	}
+	return 1;//inside
+}
+uint ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
+	uint res = 1; //inside the viewing frustum
+    if(radius <= 0.0f) return 0;
+	for (ushort i = 0; i < 6; ++i){
+		float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
+		if (d > radius * 2.0f) 
+			return 0; //outside the viewing frustrum
+		else if (d > 0.0f) 
+			res = 2; //intersecting the viewing plane
+	}
+	return res;
 }
 void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
     _eye = eye;

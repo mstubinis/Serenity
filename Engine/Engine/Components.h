@@ -429,7 +429,8 @@ class ComponentCamera: public ComponentBaseClass{
         float getNear();     void setNear(float);
         float getFar();      void setFar(float);
 
-        bool sphereIntersectTest(glm::vec3 position,float radius);
+		uint pointIntersectTest(glm::vec3& objectPosition);
+        uint sphereIntersectTest(glm::vec3& objectPosition,float objectRadius);
 };
 
 class Entity{

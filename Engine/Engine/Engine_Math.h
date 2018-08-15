@@ -15,6 +15,7 @@ class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Camera;
+class ComponentCamera;
 typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
@@ -135,6 +136,7 @@ namespace glm{
 
 namespace Engine{
     namespace Math{
+        void extractViewFrustumPlanesHartmannGribbs(glm::mat4& inViewProjection,glm::vec4* outPlanes);
 
         std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
 
