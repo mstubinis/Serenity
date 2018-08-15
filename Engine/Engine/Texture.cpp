@@ -382,7 +382,8 @@ struct textures::ImageLoadedStructure final{
         baseImage->height = _height;
         baseImage->compressedSize = 0;
         if(mipmaps.size() == 0){
-            mipmaps.push_back(*baseImage);
+            mipmaps.push_back(ImageMipmap(*baseImage));
+			delete baseImage;
         }
     }
     void load(const sf::Image& i,string _filename = ""){
@@ -399,7 +400,8 @@ struct textures::ImageLoadedStructure final{
         baseImage->pixels.assign(i.getPixelsPtr(),i.getPixelsPtr() + baseImage->width * baseImage->height * 4);
         baseImage->compressedSize = 0;
         if(mipmaps.size() == 0){
-            mipmaps.push_back(*baseImage);
+            mipmaps.push_back(ImageMipmap(*baseImage));
+			delete baseImage;
         }
     }
     ImageLoadedStructure(uint _w,uint _h,ImagePixelType::Type _pxlType,ImagePixelFormat::Format _pxlFormat,ImageInternalFormat::Format _internFormat){ 

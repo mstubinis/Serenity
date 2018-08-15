@@ -131,6 +131,8 @@ class MaterialComponentParallaxOcclusion: public MaterialComponent{
 
 namespace Engine{
     namespace epriv{
+		struct DefaultMaterialBindFunctor;
+		struct DefaultMaterialUnbindFunctor;
         class MaterialMeshEntry{
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -150,6 +152,8 @@ namespace Engine{
 };
 
 class Material final: public BindableResource{
+	friend struct Engine::epriv::DefaultMaterialBindFunctor;
+	friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
     public:
         static std::vector<glm::vec4> m_MaterialProperities;
     private:
@@ -159,7 +163,7 @@ class Material final: public BindableResource{
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
 
-        const std::unordered_map<uint,MaterialComponent*>& getComponents() const;
+        const std::vector<MaterialComponent*>& getComponents() const;
         const MaterialComponent* getComponent(MaterialComponentType::Type) const;
 
         const MaterialComponentReflection* getComponentReflection() const;

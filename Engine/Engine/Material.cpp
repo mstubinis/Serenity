@@ -37,7 +37,7 @@ namespace Engine{
             Heightmap,
         _TOTAL};};
         vector<vector<uint>> MATERIAL_TEXTURE_SLOTS_MAP = [](){
-			vector<vector<uint>> m; m.resize(MaterialComponentType::_TOTAL);
+            vector<vector<uint>> m; m.resize(MaterialComponentType::_TOTAL);
             m.at(MaterialComponentType::Diffuse).push_back(MaterialComponentTextureSlot::Diffuse);
             m.at(MaterialComponentType::Normal).push_back(MaterialComponentTextureSlot::Normal);
             m.at(MaterialComponentType::Glow).push_back(MaterialComponentTextureSlot::Glow);
@@ -95,12 +95,178 @@ namespace Engine{
             "RefractionTexture",
             "HeightmapTexture",
         };
+    };
+};
+
+class Material::impl final{
+    public:
+        vector<MaterialComponent*> m_Components;
+        vector<epriv::MaterialMeshEntry*> m_Meshes;
+        uint m_DiffuseModel, m_SpecularModel;
+        bool m_Shadeless;
+        glm::vec3 m_F0Color;
+        float m_BaseGlow, m_BaseAO, m_BaseMetalness, m_BaseSmoothness;
+        uint m_ID;
+
+        void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
+            m_Components.resize(MaterialComponentType::_TOTAL,nullptr);
+
+            _addComponentDiffuse(diffuse);
+            _addComponentNormal(normal);
+            _addComponentGlow(glow);
+            _addComponentSpecular(specular);
+            
+            m_SpecularModel = SpecularModel::GGX;
+            m_DiffuseModel = DiffuseModel::Lambert;
+
+            _updateGlobalMaterialPool(true);
+
+            _setF0Color(0.04f,0.04f,0.04f);
+            _setSmoothness(0.7f);
+            _setAO(1.0f);
+            _setMetalness(0.0f);
+            
+            m_Shadeless = false;
+            m_BaseGlow = 0.0f;
+
+            super->load();
+        }
+        void _init(string& name,string& diffuseFile,string& normalFile,string& glowFile,string& specularFile,Material* super){
+            Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
+            if(diffuseFile != ""){
+                d = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(diffuseFile);
+                if(!d){
+                    d = new Texture(diffuseFile);
+                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(d);
+                }
+            }
+            if(normalFile != ""){
+                n = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(normalFile);
+                if(!n){
+                    n = new Texture(normalFile,false,ImageInternalFormat::RGBA8);
+                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(n);
+                }
+            }
+            if(glowFile != ""){
+                g = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(glowFile);
+                if(!g){
+                    g = new Texture(glowFile,false,ImageInternalFormat::RGBA8);
+                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(g);
+                }
+            }
+            if(specularFile != ""){
+                s = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(specularFile);
+                if(!s){
+                    s = new Texture(specularFile,false,ImageInternalFormat::RGBA8);
+                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(s);
+                }
+            }
+            _init(name,d,n,g,s,super);
+        }
+        void _load(){
+            for(auto component:m_Components){
+                if(component){
+                    Texture& texture = *component->texture();
+                    texture.incrementUseCount();
+                    if(!texture.isLoaded() && texture.useCount() > 0){
+                        texture.load();
+                    }
+                }
+            }
+        }
+        void _unload(){
+            for(auto component:m_Components){
+                if(component){
+                    Texture& texture = *component->texture();
+                    texture.decrementUseCount();
+                    if(texture.useCount() == 0 && texture.isLoaded()){
+                        texture.unload();
+                    }
+                }
+            }
+        }
+        void _updateGlobalMaterialPool(bool add){
+            glm::vec4* data = nullptr;
+            if(!add){
+                data = &Material::m_MaterialProperities.at(m_ID);
+            }
+            else{
+                m_ID = Material::m_MaterialProperities.size();
+                data = new glm::vec4(0.0f);
+            }
+            data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r,m_F0Color.g,m_F0Color.b);
+            data->g = m_BaseSmoothness;
+            data->b = float(m_SpecularModel);
+            data->a = float(m_DiffuseModel);
+            if(add){
+                glm::vec4 dataCopy = glm::vec4(*data);
+                Material::m_MaterialProperities.push_back(dataCopy);
+                delete data;
+            }
+        }
+        void _destruct(){
+            for(auto component:m_Components)
+                SAFE_DELETE(component);
+        }
+        void _addComponentGeneric(Texture* texture,MaterialComponentType::Type type){
+            if(m_Components.at(type) || !texture)
+                return;
+            m_Components.at(type) = new MaterialComponent(type,texture);
+        }
+        void _addComponentDiffuse(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Diffuse); }
+        void _addComponentNormal(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Normal); }
+        void _addComponentGlow(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Glow); }
+        void _addComponentSpecular(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Specular); }
+        void _addComponentAO(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::AO); }
+        void _addComponentMetalness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Metalness); }
+        void _addComponentSmoothness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Smoothness); }
+        void _addComponentReflection(Texture* texture,Texture* map,float& mixFactor){
+            uint type = MaterialComponentType::Reflection;
+            if(m_Components.at(type) || (!texture || !map))
+                return;
+            m_Components.at(type) = new MaterialComponentReflection(type,texture,map,mixFactor);
+        }
+        void _addComponentRefraction(Texture* texture,Texture* map,float& refractiveIndex,float& mixFactor){
+            uint type = MaterialComponentType::Refraction;
+            if(m_Components.at(type) || (!texture || !map))
+                return;
+            m_Components.at(type) = new MaterialComponentRefraction(texture,map,refractiveIndex,mixFactor);
+        }
+        void _addComponentParallaxOcclusion(Texture* texture,float& heightScale){
+            uint type = MaterialComponentType::ParallaxOcclusion;
+            if(m_Components.at(type) || !texture)
+                return;
+            m_Components.at(type) = new MaterialComponentParallaxOcclusion(texture,heightScale);
+        }
+        void _setF0Color(float r,float g,float b){
+            m_F0Color.r = glm::clamp(r,0.0001f,0.9999f); 
+            m_F0Color.g = glm::clamp(g,0.0001f,0.9999f); 
+            m_F0Color.b = glm::clamp(b,0.0001f,0.9999f);
+            _updateGlobalMaterialPool(false);
+        }
+        void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
+            _setF0Color(r,g,b);
+            _setSmoothness(smoothness);
+            _setMetalness(metalness);
+            _updateGlobalMaterialPool(false);
+        }
+        void _setShadeless(bool b){                      m_Shadeless = b;      _updateGlobalMaterialPool(false); }
+        void _setBaseGlow(float f){                      m_BaseGlow = f;       _updateGlobalMaterialPool(false); }
+        void _setSmoothness(float s){                    m_BaseSmoothness = glm::clamp(s,0.001f,0.999f); _updateGlobalMaterialPool(false); }
+        void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m;  _updateGlobalMaterialPool(false); }
+        void _setDiffuseModel(DiffuseModel::Model& m){   m_DiffuseModel = m;   _updateGlobalMaterialPool(false); }
+        void _setAO(float a){                            m_BaseAO = glm::clamp(a,0.001f,0.999f);         _updateGlobalMaterialPool(false); }
+        void _setMetalness(float m){                     m_BaseMetalness = glm::clamp(m,0.001f,0.999f);  _updateGlobalMaterialPool(false); }
+};
+
+namespace Engine{
+    namespace epriv{
         struct DefaultMaterialBindFunctor{void operator()(BindableResource* r) const {
-            Material& material = *(Material*)r;
+            Material::impl& material = *((Material*)r)->m_i;
             glm::vec4 first(0.0f); glm::vec4 second(0.0f); glm::vec4 third(0.0f);
             for(uint i = 0; i < MaterialComponentType::_TOTAL; ++i){
-                if(material.getComponents().count(i)){
-                    MaterialComponent& component = *material.getComponents().at(i);
+                if(material.m_Components.at(i)){
+                    MaterialComponent& component = *material.m_Components.at(i);
                     if(component.texture() && component.texture()->address() != 0){
                         //enable
                         if     (i == 0) { first.x = 1.0f; }
@@ -122,21 +288,26 @@ namespace Engine{
                     }
                 }
             }
-            const glm::vec3& f0 = material.f0();
-            sendUniform1iSafe("Shadeless",int(material.shadeless()));
-            sendUniform3fSafe("Material_F0",f0.r,f0.g,f0.b);
-            sendUniform4fSafe("MaterialBasePropertiesOne",material.glow(),material.ao(),material.metalness(),material.smoothness());
-
-            sendUniform1fSafe("matID",float(material.id()));
-            sendUniform4fSafe("FirstConditionals", first.x,first.y,first.z,first.w);
-            sendUniform4fSafe("SecondConditionals",second.x,second.y,second.z,second.w);
-            sendUniform4fSafe("ThirdConditionals",third.x,third.y,third.z,third.w);
+            sendUniform1iSafe("Shadeless",int(material.m_Shadeless));
+            sendUniform3fSafe("Material_F0",material.m_F0Color);
+            sendUniform4fSafe("MaterialBasePropertiesOne",material.m_BaseGlow,material.m_BaseAO,material.m_BaseMetalness,material.m_BaseSmoothness);
+            sendUniform1fSafe("matID",float(material.m_ID));
+            sendUniform4fSafe("FirstConditionals", first);
+            sendUniform4fSafe("SecondConditionals",second);
+            sendUniform4fSafe("ThirdConditionals",third);
         }};
         struct DefaultMaterialUnbindFunctor{void operator()(BindableResource* r) const {
             //Material& material = *(Material*)r;
         }};
+        DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
+        DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
     };
 };
+
+
+
+
+
 
 #pragma region MaterialComponents
 
@@ -222,8 +393,6 @@ void MaterialComponentParallaxOcclusion::unbind(){
 
 #pragma endregion
 
-epriv::DefaultMaterialBindFunctor DEFAULT_BIND_FUNCTOR;
-epriv::DefaultMaterialUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
 #pragma region MaterialMeshEntry
 
@@ -284,161 +453,15 @@ unordered_map<uint,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstanc
 
 #pragma region Material
 
-class Material::impl final{
-    public:
-        unordered_map<uint,MaterialComponent*> m_Components;
-        vector<epriv::MaterialMeshEntry*> m_Meshes;
-        uint m_DiffuseModel, m_SpecularModel;
-        bool m_Shadeless;
-        glm::vec3 m_F0Color;
-        float m_BaseGlow, m_BaseAO, m_BaseMetalness, m_BaseSmoothness;
-        uint m_ID;
-
-        void _init(string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular,Material* super){
-            _addComponentDiffuse(diffuse);
-            _addComponentNormal(normal);
-            _addComponentGlow(glow);
-            _addComponentSpecular(specular);
-            
-            m_SpecularModel = SpecularModel::GGX;
-            m_DiffuseModel = DiffuseModel::Lambert;
-
-            _addToMaterialPool();
-
-            _setF0Color(0.04f,0.04f,0.04f);
-            _setSmoothness(0.7f);
-            _setAO(1.0f);
-            _setMetalness(0.0f);
-            
-            m_Shadeless = false;
-            m_BaseGlow = 0.0f;
-
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->load();
-        }
-        void _init(string& name,string& diffuseFile,string& normalFile,string& glowFile,string& specularFile,Material* super){
-            Texture* d = 0; Texture* n = 0; Texture* g = 0; Texture* s = 0;
-            if(diffuseFile != ""){
-                d = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(diffuseFile);
-                if(!d){
-                    d = new Texture(diffuseFile);
-                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(d);
-                }
-            }
-            if(normalFile != ""){
-                n = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(normalFile);
-                if(!n){
-                    n = new Texture(normalFile,false,ImageInternalFormat::RGBA8);
-                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(n);
-                }
-            }
-            if(glowFile != ""){
-                g = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(glowFile);
-                if(!g){
-                    g = new Texture(glowFile,false,ImageInternalFormat::RGBA8);
-                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(g);
-                }
-            }
-            if(specularFile != ""){
-                s = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(specularFile);
-                if(!s){
-                    s = new Texture(specularFile,false,ImageInternalFormat::RGBA8);
-                    epriv::Core::m_Engine->m_ResourceManager->_addTexture(s);
-                }
-            }
-            _init(name,d,n,g,s,super);
-        }
-        void _load(){
-            for(auto component:m_Components){
-                if(component.second){
-                    component.second->texture()->incrementUseCount();
-                    component.second->texture()->load();
-                }
-            }
-        }
-        void _unload(){
-            for(auto component:m_Components){
-                if(component.second){
-                    component.second->texture()->decrementUseCount();
-                    if(component.second->texture()->useCount() == 0){
-                        component.second->texture()->unload();
-                    }
-                }
-            }
-        }
-        void _addToMaterialPool(){
-            this->m_ID = Material::m_MaterialProperities.size();
-            glm::vec4 data(Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r,m_F0Color.g,m_F0Color.b), m_BaseSmoothness, float(m_SpecularModel), float(m_DiffuseModel));
-            Material::m_MaterialProperities.push_back(data);
-        }
-        void _updateGlobalMaterialPool(){
-            glm::vec4& data = Material::m_MaterialProperities.at(m_ID);
-            data.r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r,m_F0Color.g,m_F0Color.b);
-            data.g = m_BaseSmoothness;
-            data.b = float(m_SpecularModel);
-            data.a = float(m_DiffuseModel);
-        }
-        void _destruct(){
-            for(auto component:m_Components)
-                delete component.second;
-        }
-        void _addComponentGeneric(Texture* texture,MaterialComponentType::Type type){
-            if((m_Components.count(type) && m_Components.at(type)) || !texture)
-                return;
-            m_Components.emplace(type,new MaterialComponent(type,texture));
-        }
-        void _addComponentDiffuse(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Diffuse); }
-        void _addComponentNormal(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Normal); }
-        void _addComponentGlow(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Glow); }
-        void _addComponentSpecular(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Specular); }
-        void _addComponentAO(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::AO); }
-        void _addComponentMetalness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Metalness); }
-        void _addComponentSmoothness(Texture* texture){ _addComponentGeneric(texture,MaterialComponentType::Smoothness); }
-        void _addComponentReflection(Texture* texture,Texture* map,float& mixFactor){
-            uint type = MaterialComponentType::Reflection;
-            if((m_Components.count(type) && m_Components.at(type)) || (!texture || !map))
-                return;
-            m_Components.emplace(type,new MaterialComponentReflection(type,texture,map,mixFactor));
-        }
-        void _addComponentRefraction(Texture* texture,Texture* map,float& refractiveIndex,float& mixFactor){
-            uint type = MaterialComponentType::Refraction;
-            if((m_Components.count(type) && m_Components.at(type)) || (!texture || !map))
-                return;
-            m_Components.emplace(type,new MaterialComponentRefraction(texture,map,refractiveIndex,mixFactor));
-        }
-        void _addComponentParallaxOcclusion(Texture* texture,float& heightScale){
-            uint type = MaterialComponentType::ParallaxOcclusion;
-            if((m_Components.count(type) && m_Components.at(type)) || !texture)
-                return;
-            m_Components.emplace(type,new MaterialComponentParallaxOcclusion(texture,heightScale));
-        }
-        void _setF0Color(float r,float g,float b){
-            m_F0Color.r = glm::clamp(r,0.001f,0.999f); 
-            m_F0Color.g = glm::clamp(g,0.001f,0.999f); 
-            m_F0Color.b = glm::clamp(b,0.001f,0.999f);
-            _updateGlobalMaterialPool();
-        }
-        void _setMaterialProperties(float& r,float& g,float& b,float& smoothness,float& metalness){
-            _setF0Color(r,g,b);
-            _setSmoothness(smoothness);
-            _setMetalness(metalness);
-            _updateGlobalMaterialPool();
-        }
-        void _setShadeless(bool b){                      m_Shadeless = b;      _updateGlobalMaterialPool(); }
-        void _setBaseGlow(float f){                      m_BaseGlow = f;       _updateGlobalMaterialPool(); }
-        void _setSmoothness(float s){                    m_BaseSmoothness = glm::clamp(s,0.001f,0.999f); _updateGlobalMaterialPool(); }
-        void _setSpecularModel(SpecularModel::Model& m){ m_SpecularModel = m;  _updateGlobalMaterialPool(); }
-        void _setDiffuseModel(DiffuseModel::Model& m){   m_DiffuseModel = m;   _updateGlobalMaterialPool(); }
-        void _setAO(float a){                            m_BaseAO = glm::clamp(a,0.001f,0.999f);         _updateGlobalMaterialPool(); }
-        void _setMetalness(float m){                     m_BaseMetalness = glm::clamp(m,0.001f,0.999f);  _updateGlobalMaterialPool(); }
-};
-
 Material::Material(string name,string diffuse,string normal,string glow,string specular):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
+    setCustomBindFunctor(epriv::DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(epriv::DEFAULT_UNBIND_FUNCTOR);
 }
 Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular):m_i(new impl),BindableResource(name){
     m_i->_init(name,diffuse,normal,glow,specular,this);
+    setCustomBindFunctor(epriv::DEFAULT_BIND_FUNCTOR);
+    setCustomUnbindFunctor(epriv::DEFAULT_UNBIND_FUNCTOR);
 }
 Material::~Material(){
     m_i->_destruct();
@@ -604,7 +627,7 @@ void Material::addComponentParallaxOcclusion(std::string textureFile,float heigh
     }
     m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
-const unordered_map<uint,MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
+const vector<MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(MaterialComponentType::Type type) const { return m_i->m_Components.at(type); }
 const MaterialComponentReflection* Material::getComponentReflection() const { return (MaterialComponentReflection*)(m_i->m_Components.at(MaterialComponentType::Reflection)); }
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components.at(MaterialComponentType::Refraction)); }
