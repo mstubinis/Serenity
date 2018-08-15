@@ -21,8 +21,8 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,2.0f,7000000000.0f,this);
-    this->setActiveCamera(playerCamera);
+    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,7000000000.0f,this);
+    setActiveCamera(playerCamera);
     if(file != "NULL")
         SolarSystem::_loadFromFile(file);
 }
@@ -195,7 +195,7 @@ void SolarSystem::_loadFromFile(string filename){
                         xPos += parentX;
                         zPos += parentZ;
                     }
-                    setPlayer(new Ship(ResourceManifest::DefiantMesh,ResourceManifest::DefiantMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
+                    setPlayer(new Ship(ResourceManifest::DreadnaughtMesh,ResourceManifest::DreadnaughtMaterial,true,NAME,glm::vec3(xPos,0,zPos),glm::vec3(1),nullptr,this));
                     GameCamera* playerCamera = (GameCamera*)getActiveCamera();
                     playerCamera->follow(getPlayer());
                 }

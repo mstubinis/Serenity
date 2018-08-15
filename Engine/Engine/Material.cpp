@@ -101,7 +101,7 @@ namespace Engine{
 class Material::impl final{
     public:
         vector<MaterialComponent*> m_Components;
-        vector<epriv::MaterialMeshEntry*> m_Meshes;
+        vector<epriv::MaterialMeshEntry*> m_MaterialMeshEntries;
         uint m_DiffuseModel, m_SpecularModel;
         bool m_Shadeless;
         glm::vec3 m_F0Color;
@@ -404,26 +404,20 @@ class epriv::MaterialMeshEntry::impl final{
         void _init(Mesh* mesh){
             m_Mesh = mesh;
         }
-        void _addMeshInstance(Entity* obj,MeshInstance* meshInstance){
-            if(!m_MeshInstancesEntities.count(obj->id())){
-                m_MeshInstancesEntities.emplace(obj->id(),vector<MeshInstance*>(1,meshInstance));
+        void _addMeshInstance(const uint& entity_id,MeshInstance* meshInstance){
+            if(!m_MeshInstancesEntities.count(entity_id)){
+                m_MeshInstancesEntities.emplace(entity_id,vector<MeshInstance*>());
             }
-            else{
-                m_MeshInstancesEntities.at(obj->id()).push_back(meshInstance);
-            }
+			//do not add duplicates
+			for(auto _meshInstance:m_MeshInstancesEntities.at(entity_id)){
+				if(_meshInstance == meshInstance){ return; }
+			}
+			m_MeshInstancesEntities.at(entity_id).push_back(meshInstance);
         }
-        void _removeMeshInstance(Entity* obj,MeshInstance* meshInstance){
-            if(m_MeshInstancesEntities.count(obj->id())){
-                vector<MeshInstance*>& v = m_MeshInstancesEntities.at(obj->id());
-                auto it = v.begin();
-                while(it != v.end()) {
-                    MeshInstance* instance = (*it);
-                    if(instance ==  meshInstance) {
-                        //do not delete the instance here
-                        it = v.erase(it);
-                    }
-                    else ++it;
-                }
+        void _removeMeshInstance(const uint& entity_id,MeshInstance* meshInstance){
+            if(m_MeshInstancesEntities.count(entity_id)){
+                vector<MeshInstance*>& v = m_MeshInstancesEntities.at(entity_id);
+				removeFromVector(v,meshInstance);
             }
         }
 };
@@ -433,18 +427,16 @@ epriv::MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
 epriv::MaterialMeshEntry::~MaterialMeshEntry(){
 }
 void epriv::MaterialMeshEntry::addMeshInstance(Entity* entity,MeshInstance* meshInstance){
-    m_i->_addMeshInstance(entity,meshInstance);
+	m_i->_addMeshInstance(entity->id(),meshInstance);
 }
 void epriv::MaterialMeshEntry::removeMeshInstance(Entity* entity,MeshInstance* meshInstance){
-    m_i->_removeMeshInstance(entity,meshInstance);
+	m_i->_removeMeshInstance(entity->id(),meshInstance);
 }
 void epriv::MaterialMeshEntry::addMeshInstance(uint entityID,MeshInstance* meshInstance){
-    Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
-    m_i->_addMeshInstance(e,meshInstance);
+    m_i->_addMeshInstance(entityID,meshInstance);
 }
 void epriv::MaterialMeshEntry::removeMeshInstance(uint entityID,MeshInstance* meshInstance){
-    Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(entityID);
-    m_i->_removeMeshInstance(e,meshInstance);
+    m_i->_removeMeshInstance(entityID,meshInstance);
 }
 Mesh* epriv::MaterialMeshEntry::mesh(){ return m_i->m_Mesh; }
 unordered_map<uint,vector<MeshInstance*>>& epriv::MaterialMeshEntry::meshInstancesEntities(){ return m_i->m_MeshInstancesEntities;}
@@ -465,10 +457,10 @@ Material::Material(string name,Texture* diffuse,Texture* normal,Texture* glow,Te
 }
 Material::~Material(){
     m_i->_destruct();
-    for(auto materialMeshEntry:m_i->m_Meshes){
+    for(auto materialMeshEntry:m_i->m_MaterialMeshEntries){
         SAFE_DELETE(materialMeshEntry);
     }
-    vector_clear(m_i->m_Meshes);
+    vector_clear(m_i->m_MaterialMeshEntries);
 }
 void Material::addComponentDiffuse(Texture* texture){
     m_i->_addComponentDiffuse(texture);
@@ -627,7 +619,6 @@ void Material::addComponentParallaxOcclusion(std::string textureFile,float heigh
     }
     m_i->_addComponentParallaxOcclusion(texture,heightScale);
 }
-const vector<MaterialComponent*>& Material::getComponents() const { return m_i->m_Components; }
 const MaterialComponent* Material::getComponent(MaterialComponentType::Type type) const { return m_i->m_Components.at(type); }
 const MaterialComponentReflection* Material::getComponentReflection() const { return (MaterialComponentReflection*)(m_i->m_Components.at(MaterialComponentType::Reflection)); }
 const MaterialComponentRefraction* Material::getComponentRefraction() const { return (MaterialComponentRefraction*)(m_i->m_Components.at(MaterialComponentType::Refraction)); }
@@ -654,18 +645,20 @@ void Material::setSpecularModel(SpecularModel::Model m){ m_i->_setSpecularModel(
 void Material::setDiffuseModel(DiffuseModel::Model m){ m_i->_setDiffuseModel(m); }
 void Material::setAO(float a){ m_i->_setAO(a); }
 void Material::setMetalness(float m){ m_i->_setMetalness(m); }
+
+
 void Material::addMeshEntry(Mesh* mesh){
-    for(auto entry:m_i->m_Meshes){
+    for(auto entry:m_i->m_MaterialMeshEntries){
         if(entry->mesh() == mesh){ return; }
     }
-    m_i->m_Meshes.push_back(new epriv::MaterialMeshEntry(mesh));
+    m_i->m_MaterialMeshEntries.push_back(new epriv::MaterialMeshEntry(mesh));
 }
 void Material::removeMeshEntry(Mesh* mesh){
-    for (auto it = m_i->m_Meshes.cbegin(); it != m_i->m_Meshes.cend();){
+    for (auto it = m_i->m_MaterialMeshEntries.cbegin(); it != m_i->m_MaterialMeshEntries.cend();){
         epriv::MaterialMeshEntry* entry = (*it);
         if(entry->mesh() == mesh){
             SAFE_DELETE(entry); //do we need this?
-            m_i->m_Meshes.erase(it++);
+            m_i->m_MaterialMeshEntries.erase(it++);
         }
         else ++it;
     }
@@ -692,6 +685,6 @@ void Material::unload(){
         EngineResource::unload();
     }
 }
-vector<epriv::MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_Meshes; }
+vector<epriv::MaterialMeshEntry*>& Material::getMeshEntries(){ return m_i->m_MaterialMeshEntries; }
 
 #pragma endregion

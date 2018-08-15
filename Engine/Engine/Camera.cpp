@@ -18,7 +18,7 @@ using namespace std;
 class Camera::impl final{
     public:
         void _baseInit(Scene* scene, Camera* super){
-            if(!scene) //might have to check to see if this needs to be placed further down
+            if(!scene)
                 scene = Resources::getCurrentScene();
             scene->addEntity(super);
             super->m_BasicBody = new ComponentBasicBody();

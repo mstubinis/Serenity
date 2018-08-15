@@ -103,16 +103,5 @@ namespace Engine{
     namespace Data{
         std::string reportTime();
     };
-    //TODO: Move this somewhere else
-    template<typename T>
-    static std::string convertNumToNumWithCommas(T n){
-        std::string r = std::to_string(n);
-        int insertPosition = r.length() - 3;
-        while (insertPosition > 0) {
-            r.insert(insertPosition, ",");
-            insertPosition-=3;
-        }
-        return r;
-    }
 };
 #endif

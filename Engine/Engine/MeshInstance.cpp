@@ -19,7 +19,7 @@ class MeshInstanceAnimation::impl{
     public:
         uint m_CurrentLoops, m_RequestedLoops;
         float m_CurrentTime, m_StartTime, m_EndTime;
-        string m_AnimName;
+        string m_AnimationName;
         Mesh* m_Mesh;
 
         void _init(Mesh* _mesh,const string& _animName,float _startTime,float _endTime,uint _requestedLoops){
@@ -28,7 +28,7 @@ class MeshInstanceAnimation::impl{
             m_CurrentTime = 0;
             m_StartTime = _startTime;
             m_EndTime = _endTime;
-            m_AnimName = _animName;
+            m_AnimationName = _animName;
             m_Mesh = _mesh;
         }
 };
@@ -51,14 +51,13 @@ class MeshInstance::impl{
             _setMaterial(mat,super);
             _setMesh(mesh,super);
             
+            m_Color = glm::vec4(1.0f);
+            m_GodRaysColor = glm::vec3(0.0f);
             m_Position = pos;
             m_Orientation = rot;
             m_Scale = scl;
             _updateModelMatrix();
             m_NeedsUpdate = false;
-
-            m_Color = glm::vec4(1.0f);
-            m_GodRaysColor = glm::vec3(0.0f);
         }
         void _setMesh(Mesh* mesh,MeshInstance* super){
             _removeMeshFromInstance(super);
@@ -104,20 +103,7 @@ class MeshInstance::impl{
                     m_Material->addMeshEntry(m_Mesh); //this checks if theres an entry already
                     for(auto entry:m_Material->getMeshEntries()){
                         if(entry->mesh() == m_Mesh){
-                            bool add = true;
-                            for(auto object:entry->meshInstancesEntities()){
-                                if(object.first == m_Entity->id()){
-                                    for(auto instance:object.second){
-                                        if(instance == super){
-                                            add = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if(add){
-                                entry->addMeshInstance(m_Entity,super);
-                            }
+                            entry->addMeshInstance(m_Entity,super);
                         }
                     }
                 }
@@ -191,7 +177,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
             MeshInstanceAnimation::impl& a = *(animationQueue.at(j)->m_i.get());
             if(a.m_Mesh == i.m_Mesh){
                 a.m_CurrentTime += Resources::dt();
-                a.m_Mesh->playAnimation(transforms,a.m_AnimName,a.m_CurrentTime);
+                a.m_Mesh->playAnimation(transforms,a.m_AnimationName,a.m_CurrentTime);
                 if(a.m_CurrentTime >= a.m_EndTime){
                     a.m_CurrentTime = 0;
                     ++a.m_CurrentLoops;

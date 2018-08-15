@@ -439,7 +439,7 @@ uint ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
     if(radius <= 0.0f) return 0;
 	for (ushort i = 0; i < 6; ++i){
 		float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
-		if (d > radius * 2.0f) 
+		if (d > radius * 2.0f)
 			return 0; //outside the viewing frustrum
 		else if (d > 0.0f) 
 			res = 2; //intersecting the viewing plane

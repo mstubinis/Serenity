@@ -35,35 +35,24 @@ epriv::ResourceManager* resourceManager;
 
 class epriv::ResourceManager::impl final{
     public:
-        //TODO: convert to this resource system --------------------------------------------
-
         //http://gamesfromwithin.com/managing-data-relationships
-
-        ObjectPool<EngineResource>* m_Resources;
-        //-----------------------------------------------------------------------------------------------
-
-
-        Engine_Window* m_Window;
-        Scene* m_CurrentScene;
-        bool m_DynamicMemory;
-
-        vector<MeshInstance*> m_MeshInstances;
-
+        ObjectPool<EngineResource>*                    m_Resources;
+        Engine_Window*                                 m_Window;
+        Scene*                                         m_CurrentScene;
+        bool                                           m_DynamicMemory;
+        vector<MeshInstance*>                          m_MeshInstances;
         unordered_map<string,boost::shared_ptr<Scene>> m_Scenes;
-
         void _init(const char* name,const uint& width,const uint& height){
             m_CurrentScene = nullptr;
             m_DynamicMemory = false;
-
-            m_Resources = new ObjectPool<EngineResource>(8192);
+            m_Resources = new ObjectPool<EngineResource>(32768);
         }
         void _postInit(const char* name,uint width,uint height){
             m_Window = new Engine_Window(name,width,height);
         }
         void _destruct(){
-            for (auto it:m_MeshInstances)                                     SAFE_DELETE(it);
-            for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )      it->second.reset();
-
+            for (auto it:m_MeshInstances)                                 SAFE_DELETE(it);
+            for (auto it = m_Scenes.begin();it != m_Scenes.end(); ++it )  it->second.reset();
             SAFE_DELETE(m_Resources);
             SAFE_DELETE(m_Window);
         }

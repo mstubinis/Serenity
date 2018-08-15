@@ -163,7 +163,6 @@ class Material final: public BindableResource{
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
 
-        const std::vector<MaterialComponent*>& getComponents() const;
         const MaterialComponent* getComponent(MaterialComponentType::Type) const;
 
         const MaterialComponentReflection* getComponentReflection() const;
