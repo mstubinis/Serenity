@@ -17,15 +17,23 @@
 using namespace Engine;
 using namespace std;
 
-bool sfind(string str1,string str2){ if(str1.find(str2) != string::npos) return true; return false; }
+bool sfind(string whole,string part){ if(whole.find(part) != string::npos) return true; return false; }
+void insertStringAtLine(string& src, const string& newcontent,uint line){   
+    if(line == 0){src=newcontent+"\n"+src;}else{istringstream str(src);string l; vector<string> lines;uint count=0;
+        while(getline(str,l)){lines.push_back(l+"\n");if(count==line){lines.push_back(newcontent+"\n");}++count;}src="";for(auto ln:lines){src+=ln;}
+    }
+}
+void insertStringAtEndOfMainFunc(string& src, const string& content){
+    uint p=src.size()-1;while(p>0){char c=src.at(p);--p;if(c=='}'){break;}}src.insert(p,content);
+}
 
 UniformBufferObject* UniformBufferObject::UBO_CAMERA = nullptr;
 
 namespace Engine{
     namespace epriv{
         struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
-            Scene* s = Resources::getCurrentScene(); if(s == nullptr) return;
-            Camera* c = s->getActiveCamera();        if(c == nullptr) return;
+            Scene* s = Resources::getCurrentScene(); if(!s) return;
+            Camera* c = s->getActiveCamera();        if(!c) return;
 
             float fcoeff = (2.0f / glm::log2(c->getFar() + 1.0f)) * 0.5f;
             Renderer::sendUniform1fSafe("fcoeff",fcoeff);
@@ -79,28 +87,6 @@ class ShaderP::impl final{
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
 
-        void _insertStringAtLine(string& source, const string& newLineContent,uint lineToInsertAt){   
-            if(lineToInsertAt == 0){
-                source = newLineContent + "\n" + source;
-            }
-            else{
-                istringstream str(source);
-                string line; 
-                vector<string> lines;
-                uint count = 0;
-                while(getline(str,line)){
-                    lines.push_back(line + "\n");
-                    if(count == lineToInsertAt){
-                        lines.push_back(newLineContent + "\n");
-                    }
-                    ++count;
-                }
-                source = "";
-                for(auto line:lines){
-                    source += line;
-                }
-            }
-        }
         void _convertCode(string& _data1,Shader* shader1,string& _data2,Shader* shader2,ShaderP* super){ _convertCode(_data1,shader1,super); _convertCode(_data2,shader2,super); }
         void _convertCode(string& _d,Shader* shader,ShaderP* super){
             istringstream str(_d); 
@@ -118,14 +104,14 @@ class ShaderP::impl final{
                 string core = "";
                 if(epriv::RenderManager::GLSL_VERSION >= 330) core = " core";
                 versionLine = "#version " + boost::lexical_cast<string>(epriv::RenderManager::GLSL_VERSION) + core + "\n";
-                _insertStringAtLine(_d,versionLine,0);
+                insertStringAtLine(_d,versionLine,0);
             }
 
             string versionNumberString = regex_replace(versionLine,regex("([^0-9])"),"");
             uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
 
             //check for normal map texture extraction
-			//refer to mesh.cpp dirCorrection comment about using an uncompressed normal map and not reconstructing z
+            //refer to mesh.cpp dirCorrection comment about using an uncompressed normal map and not reconstructing z
             if(sfind(_d,"CalcBumpedNormal(") || sfind(_d,"CalcBumpedNormalCompressed(")){
                 if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated")){
                     if(sfind(_d,"varying mat3 TBN;")){
@@ -134,16 +120,16 @@ class ShaderP::impl final{
                     string normalMap = 
                     "varying mat3 TBN;\n"
                     "vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"			
-					"    vec3 _t = (texture2D(_inTexture, _uv).xyz) * 2.0 - 1.0;\n"
+                    "    vec3 _t = (texture2D(_inTexture, _uv).xyz) * 2.0 - 1.0;\n"
                     "    return normalize(TBN * _t);\n"
                     "}\n"
                     "vec3 CalcBumpedNormalCompressed(vec2 _uv,sampler2D _inTexture){//generated\n"
-					"    vec2 _t = (texture2D(_inTexture, _uv).yx) * 2.0 - 1.0;\n" //notice the yx flip, its needed
-					"    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
+                    "    vec2 _t = (texture2D(_inTexture, _uv).yx) * 2.0 - 1.0;\n" //notice the yx flip, its needed
+                    "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
                     "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
                     "    return normalize(TBN * normal);\n"
                     "}\n";
-                    _insertStringAtLine(_d,normalMap,1);
+                    insertStringAtLine(_d,normalMap,1);
                 }
             }
             //check for painters algorithm
@@ -157,7 +143,7 @@ class ShaderP::impl final{
                     "    vec3 r = (paint.rgb * paintA + canvas.rgb * canvasA * (1.0 - paintA)) / Alpha;\n"
                     "    return vec4(r,Alpha);\n"
                     "}\n";
-                    _insertStringAtLine(_d,painters,1);
+                    insertStringAtLine(_d,painters,1);
                 }
             }
 
@@ -184,7 +170,7 @@ class ShaderP::impl final{
                          "float CameraNear = CameraInfo1.w;\n"
                          "float CameraFar = CameraInfo2.w;\n"
                          "\n";
-                         _insertStringAtLine(_d,uboCameraString,1);
+                         insertStringAtLine(_d,uboCameraString,1);
                          UniformBufferObject::UBO_CAMERA->attachToShader(super);
                      }
                 }
@@ -204,16 +190,39 @@ class ShaderP::impl final{
                          "float CameraNear = CameraInfo1.w;\n"
                          "float CameraFar = CameraInfo2.w;\n"
                          "\n";
-                         _insertStringAtLine(_d,uboCameraString,1);
+                         insertStringAtLine(_d,uboCameraString,1);
                     }
                 }	
             }
 
-
-
-
-
-
+            //check for log depth
+            if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && shader->type() == ShaderType::Vertex){
+                boost::replace_all(_d,"USE_LOG_DEPTH_VERTEX","");
+                string log_vertex_code = "\n"
+                "uniform float fcoeff;\n"
+                "flat varying float FC;\n"
+                "varying float logz_f;\n"
+                "\n";
+                insertStringAtLine(_d,log_vertex_code,1);
+                log_vertex_code = "\n"
+                "logz_f = 1.0 + gl_Position.w;\n"
+                "gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
+                "FC = fcoeff;\n"
+                "\n";
+                insertStringAtEndOfMainFunc(_d,log_vertex_code);
+            }
+            if(sfind(_d,"USE_LOG_DEPTH_FRAGMENT") && shader->type() == ShaderType::Fragment){
+                boost::replace_all(_d,"USE_LOG_DEPTH_FRAGMENT","");
+                string log_frag_code = "\n"
+                "flat varying float FC;\n"
+                "varying float logz_f;\n"
+                "\n";
+                insertStringAtLine(_d,log_frag_code,1);
+                log_frag_code = "\n"
+                "gl_FragDepth = log2(logz_f) * FC;\n"
+                "\n";
+                insertStringAtEndOfMainFunc(_d,log_frag_code);
+            }
 
 
 
@@ -225,7 +234,7 @@ class ShaderP::impl final{
                     boost::replace_all(_d, "varying", "in");
 
                     boost::replace_all(_d, "gl_FragColor", "FRAG_COL");
-                    _insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
+                    insertStringAtLine(_d,"out vec4 FRAG_COL;",1);
                 }
             }
             if(versionNumber >= 140){

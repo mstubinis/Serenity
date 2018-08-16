@@ -309,7 +309,7 @@ class epriv::RenderManager::impl final{
             bloom = true;
             bloom_radius = 0.84f;
             bloom_strength = 2.5f;
-			bloom_scale = 3.1f;
+			bloom_scale = 7.1f;
             #pragma endregion
 
             #pragma region LightingInfo
@@ -1239,6 +1239,7 @@ class epriv::RenderManager::impl final{
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very wierd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
+			GLEnable(GLState::DEPTH_CLAMP);
 
 			genAndBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);

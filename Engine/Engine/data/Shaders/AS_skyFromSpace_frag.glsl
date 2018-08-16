@@ -1,4 +1,6 @@
 
+USE_LOG_DEPTH_FRAGMENT
+
 uniform vec4 FragDataGravity; //g,g*g,exposure,UNUSED
 
 varying vec3 c0;
@@ -7,8 +9,6 @@ varying vec3 v3Direction;
 varying vec3 v3LightPosition;
 varying float Depth;
 varying vec3 WorldPosition;
-flat varying float FC;
-varying float logz_f;
 
 uniform int HasGodsRays;
 
@@ -37,6 +37,4 @@ void main(){
         gl_FragData[3] = vec4(0.0,0.0,0.0,1.0);
     }
 	*/
-
-    gl_FragDepth = log2(logz_f) * FC;
 }

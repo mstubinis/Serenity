@@ -1,3 +1,5 @@
+USE_LOG_DEPTH_VERTEX
+
 attribute vec3 position;
 //attribute float uv;
 attribute vec2 uv;
@@ -12,8 +14,6 @@ uniform mat4 Rot;
 
 uniform int nSamples;
 uniform int fromAtmosphere;
-
-uniform float fcoeff;
 
 uniform vec4 VertDataMisc1;     //xyz = camPos,             w = lightDir.x
 uniform vec4 VertDataMisc2;     //xyz = camPosReal,         w = lightDir.y
@@ -30,8 +30,6 @@ varying vec3 VCameraPositionReal;
 varying vec3 Normals;
 varying mat3 TBN;
 flat varying float HasAtmo;
-varying float logz_f;
-flat varying float FC;
 
 vec2 UnpackFloat32Into2Floats(float i){
     vec2 res;
@@ -67,10 +65,6 @@ void main(){
 	VCameraPositionReal = VertDataMisc2.xyz;
 
 	HasAtmo = HasAtmosphere;
-
-    logz_f = 1.0 + gl_Position.w;
-    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
-    FC = fcoeff;
 
     if(HasAtmosphere == 1){
 		vec3 test = (Rot * vec4(position,1.0)).xyz;

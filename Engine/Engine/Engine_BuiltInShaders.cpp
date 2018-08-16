@@ -62,10 +62,6 @@ string epriv::EShaders::lighting_frag;
 string epriv::EShaders::lighting_frag_gi;
 #pragma endregion
 
-void epriv::EShaders::convertShaderCode(string& code){
-
-}
-
 void epriv::EShaders::init(){
 
 #pragma region Constants
@@ -337,6 +333,8 @@ epriv::EShaders::lighting_vert =
 #pragma region VertexBasic
 epriv::EShaders::vertex_basic = 
     "\n"
+	"USE_LOG_DEPTH_VERTEX\n"
+	"\n"
     "attribute vec3 position;\n"
     //"//attribute float uv;\n"
     "attribute vec2 uv;\n"
@@ -360,10 +358,6 @@ epriv::EShaders::vertex_basic =
     "flat varying vec3 CamPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
-    "\n"
-    "varying float logz_f;\n"
-    "varying float FC;\n"
-    "uniform float fcoeff;\n"
     "\n";
 epriv::EShaders::vertex_basic += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::vertex_basic +=
@@ -395,9 +389,6 @@ epriv::EShaders::vertex_basic +=
     //"    //UV = UnpackFloat32Into2Floats(uv);\n"
     "    UV = uv;\n"
     "\n"
-    "    logz_f = 1.0 + gl_Position.w;\n"
-    "    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
-    "    FC = fcoeff;\n"
     "}";
 #pragma endregion
 
@@ -1290,6 +1281,8 @@ epriv::EShaders::smaa_frag_4 = epriv::EShaders::smaa_common +
 #pragma region ForwardFrag
 epriv::EShaders::forward_frag =
     "\n"
+	"USE_LOG_DEPTH_FRAGMENT\n"
+	"\n"
     "uniform sampler2D   DiffuseTexture;\n"
     "uniform sampler2D   NormalTexture;\n"
     "uniform sampler2D   GlowTexture;\n"
@@ -1329,9 +1322,6 @@ epriv::EShaders::forward_frag =
     "flat varying vec3 CamPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
-    "\n"
-    "varying float FC;\n"
-    "varying float logz_f;\n"
     "\n";
 epriv::EShaders::forward_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::forward_frag += epriv::EShaders::normals_octahedron_compression_functions;
@@ -1427,13 +1417,14 @@ epriv::EShaders::forward_frag +=
     "    if(HasGodsRays == 1){\n"
     "        gl_FragData[3] = (texture2D(DiffuseTexture, uv) * vec4(Gods_Rays_Color,1.0))*0.5;\n"
     "    }\n"
-    "    gl_FragDepth = log2(logz_f) * FC;\n"
     "}";
 #pragma endregion
 
 #pragma region DeferredFrag
 epriv::EShaders::deferred_frag =
     "\n"
+	"USE_LOG_DEPTH_FRAGMENT\n"
+	"\n"
     "uniform sampler2D   DiffuseTexture;\n"
     "uniform sampler2D   NormalTexture;\n"
     "uniform sampler2D   GlowTexture;\n"
@@ -1473,9 +1464,6 @@ epriv::EShaders::deferred_frag =
     "flat varying vec3 CamPosition;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
-    "\n"
-    "varying float FC;\n"
-    "varying float logz_f;\n"
     "\n";
 epriv::EShaders::deferred_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::deferred_frag += epriv::EShaders::normals_octahedron_compression_functions;
@@ -1571,7 +1559,6 @@ epriv::EShaders::deferred_frag +=
     "    if(HasGodsRays == 1){\n"
     "        gl_FragData[3] = (texture2D(DiffuseTexture, uv) * vec4(Gods_Rays_Color,1.0))*0.5;\n"
     "    }\n"
-    "    gl_FragDepth = log2(logz_f) * FC;\n"
     "}";
 #pragma endregion
 
@@ -2213,41 +2200,4 @@ epriv::EShaders::lighting_frag_gi +=
 
 #pragma endregion
 
-    convertShaderCode(constants);
-    convertShaderCode(conditional_functions);
-    convertShaderCode(float_into_2_floats);
-    convertShaderCode(determinent_mat3);
-    convertShaderCode(normals_octahedron_compression_functions);
-    convertShaderCode(reconstruct_log_depth_functions);
-    convertShaderCode(fullscreen_quad_vertex);
-    convertShaderCode(vertex_basic);
-    convertShaderCode(vertex_hud);
-    convertShaderCode(vertex_skybox);
-    convertShaderCode(stencil_passover);
-    convertShaderCode(lighting_vert);
-    convertShaderCode(smaa_vertex_1);
-    convertShaderCode(smaa_frag_1);
-    convertShaderCode(smaa_vertex_2);
-    convertShaderCode(smaa_frag_2);
-    convertShaderCode(smaa_vertex_3);
-    convertShaderCode(smaa_frag_3);
-    convertShaderCode(smaa_vertex_4);
-    convertShaderCode(smaa_frag_4);
-    convertShaderCode(fxaa_frag);
-    convertShaderCode(forward_frag);
-    convertShaderCode(deferred_frag);
-    convertShaderCode(deferred_frag_hud);
-    convertShaderCode(deferred_frag_skybox);
-    convertShaderCode(deferred_frag_skybox_fake);
-    convertShaderCode(copy_depth_frag);
-    convertShaderCode(cubemap_convolude_frag);
-    convertShaderCode(cubemap_prefilter_envmap_frag);
-    convertShaderCode(brdf_precompute);
-    convertShaderCode(ssao_frag);
-    convertShaderCode(hdr_frag);
-    convertShaderCode(godRays_frag);
-    convertShaderCode(blur_frag);
-    convertShaderCode(final_frag);
-    convertShaderCode(lighting_frag);
-    convertShaderCode(lighting_frag_gi);
 }

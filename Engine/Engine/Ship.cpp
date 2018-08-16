@@ -70,7 +70,7 @@ void ShipSystemMainThrusters::update(const float& dt){
         ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getLinearVelocity();
         // apply dampening
-        body->setLinearVelocity(velocity * 0.9993f,false);
+        body->setLinearVelocity(velocity * 0.9991f,false);
 
         if(m_Ship->IsPlayer()){
             if(!m_Ship->IsWarping()){
@@ -111,7 +111,7 @@ void ShipSystemPitchThrusters::update(const float& dt){
     if(isOnline()){
         ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getAngularVelocity();
-        velocity.x *= 0.9985f;
+        velocity.x *= 0.9970f;
         // apply dampening
         body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
@@ -136,7 +136,7 @@ void ShipSystemYawThrusters::update(const float& dt){
     if(isOnline()){
         ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getAngularVelocity();
-        velocity.y *= 0.9985f;
+        velocity.y *= 0.9970f;
         // apply dampening
         body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){
@@ -162,7 +162,7 @@ void ShipSystemRollThrusters::update(const float& dt){
     if(isOnline()){
         ComponentRigidBody* body = m_Ship->getComponent<ComponentRigidBody>();
         glm::vec3 velocity = body->getAngularVelocity();
-        velocity.z *= 0.9985f;
+        velocity.z *= 0.9970f;
         // apply dampening
         body->setAngularVelocity(velocity,false);
         if(m_Ship->IsPlayer()){

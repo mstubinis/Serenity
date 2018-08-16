@@ -73,13 +73,6 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
 
-	if(Engine::isKeyDown("f11")){
-		Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() - 0.01f);
-	}
-	if(Engine::isKeyDown("f12")){
-		Renderer::Settings::Bloom::setScale(Renderer::Settings::Bloom::getScale() + 0.01f);
-	}
-
     m_HUD->update(dt);
 }
 void Game::render(){

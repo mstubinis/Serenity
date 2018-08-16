@@ -9,7 +9,6 @@ namespace Engine{
         class EShaders{
             public:
                 static void init();
-                static void convertShaderCode(std::string&);
 
                 static std::string constants;
                 static std::string conditional_functions;

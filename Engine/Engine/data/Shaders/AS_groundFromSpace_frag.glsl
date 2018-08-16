@@ -1,3 +1,6 @@
+
+USE_LOG_DEPTH_FRAGMENT
+
 uniform sampler2D     DiffuseTexture;
 uniform sampler2D     NormalTexture;
 uniform sampler2D     GlowTexture;
@@ -35,8 +38,6 @@ varying vec4 Color;
 varying vec2 UV;
 varying vec3 Normals;
 flat varying float HasAtmo;
-flat varying float FC;
-varying float logz_f;
 
 const vec4 ConstantZeroVec4 = vec4(0.0,0.0,0.0,0.0);
 const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
@@ -126,5 +127,4 @@ void main(){
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);
     }
-    gl_FragDepth = log2(logz_f) * FC;
 }

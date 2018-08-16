@@ -1,8 +1,9 @@
 
+USE_LOG_DEPTH_VERTEX
+
 attribute vec3 position;
 
 uniform mat4 Model;
-uniform float fcoeff;
 uniform int nSamples;
 
 uniform vec4 VertDataMisc1;         //xyz = camPos,                              w = lightDir.x
@@ -18,8 +19,6 @@ varying vec3 v3Direction;
 varying vec3 v3LightPosition;
 varying vec3 WorldPosition;
 varying float Depth;
-varying float logz_f;
-flat varying float FC;
 
 float scale(float fCos){
     float x = 1.0 - fCos;
@@ -73,8 +72,4 @@ void main(){
     c1 = v3FrontColor * VertDatafK.y;
 
     WorldPosition = (Model * vec4(position, 1.0)).xyz;
-
-    logz_f = 1.0 + gl_Position.w;
-    gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;
-    FC = fcoeff;
 }
