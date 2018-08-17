@@ -31,41 +31,50 @@ namespace Engine{
         class GBuffer;
         class FramebufferObject;
         class RenderbufferObject;
-		class RenderManager final{
-			public:
-				class impl;
-				std::unique_ptr<impl> m_i;
+        class RenderManager final{
+            public:
+                class impl;
+                std::unique_ptr<impl> m_i;
 
-				RenderManager(const char* name,uint w,uint h);
-				~RenderManager();
+                RenderManager(const char* name,uint w,uint h);
+                ~RenderManager();
 
-				static uint GLSL_VERSION;
-				static uint OPENGL_VERSION;
+                static uint GLSL_VERSION;
+                static uint OPENGL_VERSION;
 
-				void _init(const char* name,uint w,uint h);
-				void _resize(uint width, uint height);
-				void _resizeGbuffer(uint width,uint height);
+                static std::vector<bool> OPENGL_EXTENSIONS;
 
-				void _render(
-					epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
-					bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-					Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
-				);
-				void _render(
-					Camera*,uint fboWidth,uint fboHeight,
-					bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
-					Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
-				);
-				void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
-				void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-				void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-				void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
-				void _addShaderToStage(ShaderP*,uint stage);
-				void _bindShaderProgram(ShaderP*);
-				bool _bindMaterial(Material*);
-				bool _unbindMaterial();
-				void _genPBREnvMapData(Texture*,uint,uint);
-		};
+                void _init(const char* name,uint w,uint h);
+                void _resize(uint width, uint height);
+                void _resizeGbuffer(uint width,uint height);
+
+                void _render(
+                    epriv::GBuffer*,Camera*,uint fboWidth,uint fboHeight,
+                    bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                );
+                void _render(
+                    Camera*,uint fboWidth,uint fboHeight,
+                    bool ssao=true,bool godRays=true,bool AA=true,bool HUD=true,
+                    Entity* ignore=nullptr,bool mainRenderFunc=true,GLuint display_fbo=0,GLuint display_rbo=0
+                );
+                void _onFullscreen(sf::Window* sfWindow,sf::VideoMode videoMode,const char* winName,uint style,sf::ContextSettings&);
+                void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
+                void _renderText(Font*,std::string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+                void _renderTexture(Texture*,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth);
+                void _addShaderToStage(ShaderP*,uint stage);
+                void _bindShaderProgram(ShaderP*);
+                bool _bindMaterial(Material*);
+                bool _unbindMaterial();
+                void _genPBREnvMapData(Texture*,uint,uint);
+        };
+        class OpenGLExtensionEnum final{
+            public: enum Extension{
+                EXT_Ansiotropic_Filtering,
+                ARB_Ansiotropic_Filtering,
+            _TOTAL};
+            public: static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS.at(e); }
+        };
     };
     namespace Renderer{
         namespace Settings{
@@ -79,17 +88,17 @@ namespace Engine{
 
             void enableDrawPhysicsInfo(bool b = true);   void disableDrawPhysicsInfo();
 
-			namespace Fog{
-				void enable(bool b = true);
-				void disable();
-				bool enabled();
-				void setColor(glm::vec4& color);
-				void setColor(float r,float g,float b,float a);
-				void setNullDistance(float d);
-				void setBlendDistance(float d);
-				float getNullDistance();
-				float getBlendDistance();
-			};
+            namespace Fog{
+                void enable(bool b = true);
+                void disable();
+                bool enabled();
+                void setColor(glm::vec4& color);
+                void setColor(float r,float g,float b,float a);
+                void setNullDistance(float d);
+                void setBlendDistance(float d);
+                float getNullDistance();
+                float getBlendDistance();
+            };
 
             namespace SMAA{
                 void setThreshold(float f);
@@ -123,7 +132,7 @@ namespace Engine{
                 void enable(bool b = true);   void disable();
                 float getRadius();            void setRadius(float r);
                 float getStrength();          void setStrength(float r);
-				float getScale();             void setScale(float s);
+                float getScale();             void setScale(float s);
             };
             namespace GodRays{
                 bool enabled();
@@ -135,9 +144,9 @@ namespace Engine{
                 uint getSamples();        void setSamples(uint s);
                 float getFOVDegrees();    void setFOVDegrees(float d);
                 float getAlphaFalloff();  void setAlphaFalloff(float a);
-				void setObject(uint&);
-				void setObject(Entity*);
-				Entity* getObject();
+                void setObject(uint&);
+                void setObject(Entity*);
+                Entity* getObject();
             };
             namespace SSAO{
                 bool enabled();
@@ -168,8 +177,8 @@ namespace Engine{
         void bindReadFBO(GLuint fbo);
         void bindDrawFBO(GLuint fbo);
 
-		void bindTexture(GLuint _textureType,GLuint _textureObject);
-		void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
+        void bindTexture(GLuint _textureType,GLuint _textureObject);
+        void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
 
         void sendTexture(const char* location,Texture* texture,uint slot);
         void sendTexture(const char* location,GLuint textureAddress,uint slot,GLuint glTextureType);

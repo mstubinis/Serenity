@@ -9,6 +9,10 @@
 template<typename E,typename B> void removeFromVector(std::vector<B*>& v,E* e){
     for(auto it=v.begin();it!=v.end();){B* c=(*it);if(c==e){it=v.erase(it);}else{++it;}}
 }
+//removes a specific element from a vector
+template<typename E,typename B> void removeFromVector(std::vector<B>& v,E e){
+    for(auto it=v.begin();it!=v.end();){B c=(*it);if(c==e){it=v.erase(it);}else{++it;}}
+}
 
 //clears a vector, reset its size to zero, and removes the elements from memory. does NOT delete pointer elements
 template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }

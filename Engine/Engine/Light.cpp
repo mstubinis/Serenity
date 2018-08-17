@@ -377,7 +377,7 @@ class LightProbe::impl{
             epriv::Core::m_Engine->m_RenderManager->_resizeGbuffer(m_EnvMapSize,m_EnvMapSize);
             
             if(m_TexturesMade == 0){
-			    genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
+                genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureEnvMap);
                 vector<GLubyte> testData(m_EnvMapSize * m_EnvMapSize * 256, 128);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGBA8,m_EnvMapSize,m_EnvMapSize,0,GL_RGBA,GL_UNSIGNED_BYTE,&testData[0]);
@@ -429,7 +429,7 @@ class LightProbe::impl{
             #pragma region RenderConvolution
             uint size = 32;
             if(m_TexturesMade == 1){
-				Renderer::genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
+                Renderer::genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TextureConvolutionMap);
                 vector<GLubyte> testData(size * size * 256, 155);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, size, size, 0, GL_RGB, GL_FLOAT, &testData[0]);
@@ -465,7 +465,7 @@ class LightProbe::impl{
             //now gen EnvPrefilterMap for specular IBL.
             size = m_EnvMapSize/8;
             if(m_TexturesMade == 2){
-				Renderer::genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
+                Renderer::genAndBindTexture(GL_TEXTURE_CUBE_MAP,m_TexturePrefilterMap);
                 vector<GLubyte> testData(size * size * 256, 255);
                 for (uint i = 0; i < 6; ++i){
                     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0,GL_RGB16F,size,size,0,GL_RGB,GL_FLOAT,&testData[0]);

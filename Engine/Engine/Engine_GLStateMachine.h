@@ -15,7 +15,7 @@ typedef boost::function<void()> BF;
 struct GLStateT{
     bool enabled; 
     BF enableFunc, disableFunc;
-	GLStateT(){}
+    GLStateT(){}
     GLStateT(const bool& b, const BF& en, const BF& dis){
         enabled = b;
         enableFunc = en;

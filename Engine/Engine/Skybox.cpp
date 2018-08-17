@@ -31,20 +31,20 @@ SkyboxEmpty::~SkyboxEmpty(){
 Skybox::Skybox(string* files,Scene* scene):SkyboxEmpty(scene){
     Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
-	
+    
     string names[6] = {files[0],files[1],files[2],files[3],files[4],files[5]};
 
-	//instead of using files[0] generate a proper name using the directory?
+    //instead of using files[0] generate a proper name using the directory?
     m_Texture = new Texture(names,files[0] + "Cubemap",false,ImageInternalFormat::SRGB8_ALPHA8);
-	
+    
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);
 }
 Skybox::Skybox(string filename,Scene* scene):SkyboxEmpty(scene){
     Skybox::initMesh();
     glActiveTexture(GL_TEXTURE0);
-	
-	m_Texture = new Texture(filename,false,ImageInternalFormat::SRGB8_ALPHA8);
+    
+    m_Texture = new Texture(filename,false,ImageInternalFormat::SRGB8_ALPHA8);
 
     m_Texture->genPBREnvMapData(32,m_Texture->width() / 4);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(m_Texture);

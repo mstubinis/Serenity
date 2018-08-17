@@ -140,7 +140,7 @@ class Mesh final: public BindableResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         //loaded in renderer
-		static Mesh* FontPlane;
+        static Mesh* FontPlane;
         static Mesh* Plane;
         static Mesh* Cube;
 

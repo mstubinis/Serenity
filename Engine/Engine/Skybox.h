@@ -34,7 +34,7 @@ class Skybox: public SkyboxEmpty{
         static std::vector<glm::vec3> m_Vertices;
     public:
         Skybox(std::string* files, Scene* = nullptr);
-		Skybox(std::string file, Scene* = nullptr);
+        Skybox(std::string file, Scene* = nullptr);
         virtual ~Skybox();
         virtual void update(){}
         virtual void draw(){}

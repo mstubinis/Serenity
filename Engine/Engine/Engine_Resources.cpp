@@ -59,7 +59,7 @@ class epriv::ResourceManager::impl final{
 };
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
     m_i->_init(name,width,height);
-	resourceManager = this;
+    resourceManager = this;
 }
 epriv::ResourceManager::~ResourceManager(){
     m_i->_destruct();
@@ -76,11 +76,11 @@ Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_i->m_Curr
 
 bool epriv::ResourceManager::_hasScene(string n){ if(resourceManager->m_i->m_Scenes.count(n)) return true; return false; }
 Texture* epriv::ResourceManager::_hasTexture(string n){
-	for(uint i = 0; i < resourceManager->m_i->m_Resources->maxEntries(); ++i){
-		EngineResource* r = resourceManager->m_i->m_Resources->getAsFast<EngineResource>(i);
-		if(r){ Texture* t = dynamic_cast<Texture*>(r); if(t && t->name() == n){ return t; } }
-	}
-	return 0;
+    for(uint i = 0; i < resourceManager->m_i->m_Resources->maxEntries(); ++i){
+        EngineResource* r = resourceManager->m_i->m_Resources->getAsFast<EngineResource>(i);
+        if(r){ Texture* t = dynamic_cast<Texture*>(r); if(t && t->name() == n){ return t; } }
+    }
+    return 0;
 }
 void epriv::ResourceManager::_addScene(Scene* s){
     _addToContainer(resourceManager->m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
@@ -134,12 +134,12 @@ Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint
     return resourceManager->m_i->m_Resources->add(new Mesh(n,g,w,l,threshhold),ResourceType::Mesh);
 }
 Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
-	Mesh* mesh = new Mesh(f,t,b,threshhold,false);
+    Mesh* mesh = new Mesh(f,t,b,threshhold,false);
 
-	boost::function<void()> job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
-	boost::function<void()> cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
+    boost::function<void()> job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
+    boost::function<void()> cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
 
-	Engine::epriv::threading::addJobWithPostCallback(job,cbk);
+    Engine::epriv::threading::addJobWithPostCallback(job,cbk);
 
     return resourceManager->m_i->m_Resources->add(mesh, ResourceType::Mesh);
 }
@@ -150,7 +150,7 @@ Handle epriv::ResourceManager::_addTexture(Texture* t){
 }
 
 Handle Resources::addTexture(string file,ImageInternalFormat::Format internFormat,bool mipmaps){
-	return resourceManager->m_i->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
+    return resourceManager->m_i->m_Resources->add(new Texture(file,mipmaps,internFormat),ResourceType::Texture);
 }
 
 Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){

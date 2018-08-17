@@ -64,7 +64,7 @@ class Engine_Window::impl final{
                 m_Height = m_VideoMode.height;
             }
             m_SFMLWindow->create(m_VideoMode,name,m_Style,settings);
-			uint opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
+            uint opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
             epriv::Core::m_Engine->m_RenderManager->_onOpenGLContextCreation(m_Width,m_Height,_glslVersion,opengl_version);
 
             return m_SFMLWindow->getSettings();
@@ -115,11 +115,11 @@ class Engine_Window::impl final{
         }
         void _setIcon(const char* file){
             Texture* texture = epriv::Core::m_Engine->m_ResourceManager->_hasTexture(file);
-			if(!texture){
-				texture = new Texture(file,false,ImageInternalFormat::RGBA8);
-				epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
-			}
-			m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
+            if(!texture){
+                texture = new Texture(file,false,ImageInternalFormat::RGBA8);
+                epriv::Core::m_Engine->m_ResourceManager->_addTexture(texture);
+            }
+            m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());
         }
         void _setIcon(Texture* texture){
             m_SFMLWindow->setIcon(texture->width(),texture->height(),texture->pixels());

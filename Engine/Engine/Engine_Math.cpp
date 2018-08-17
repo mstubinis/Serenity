@@ -21,23 +21,23 @@ void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4& inViewProjection,gl
     glm::vec4 rows[4];
     for(ushort i = 0; i < 4; ++i)
         rows[i] = glm::row(inViewProjection,i);
-	//0 = left,1 = right,2 = top,3 = bottom,4 = near,5 = far
+    //0 = left,1 = right,2 = top,3 = bottom,4 = near,5 = far
     for(ushort i = 0; i < 3; ++i){
         ushort index = i * 2;
         outPlanes[index  ] = -(rows[3] + rows[i]);  //0,2,4
         outPlanes[index+1] = -(rows[3] - rows[i]);  //1,3,5
     }
-	//https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
-	//avoiding normalization of the planes for now so we can uitilize halfspace and thus negatives (outside frust / inside frust / intersecting frust)
-	/*
+    //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
+    //avoiding normalization of the planes for now so we can uitilize halfspace and thus negatives (outside frust / inside frust / intersecting frust)
+    /*
     for(ushort i = 0; i < 6; ++i){
-		float mag = glm::sqrt(outPlanes[i].x * outPlanes[i].x + outPlanes[i].y * outPlanes[i].y + outPlanes[i].z * outPlanes[i].z);
-		outPlanes[i].x = outPlanes[i].x / mag;
-		outPlanes[i].y = outPlanes[i].y / mag;
-		outPlanes[i].z = outPlanes[i].z / mag;
-		outPlanes[i].w = outPlanes[i].w / mag;
+        float mag = glm::sqrt(outPlanes[i].x * outPlanes[i].x + outPlanes[i].y * outPlanes[i].y + outPlanes[i].z * outPlanes[i].z);
+        outPlanes[i].x = outPlanes[i].x / mag;
+        outPlanes[i].y = outPlanes[i].y / mag;
+        outPlanes[i].z = outPlanes[i].z / mag;
+        outPlanes[i].w = outPlanes[i].w / mag;
     }
-	*/
+    */
 }
 glm::quat Math::btToGLMQuat(btQuaternion& q){ glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ()); return glmQuat; }
 btQuaternion Math::glmToBTQuat(glm::quat& q){ btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w); return btQuat; }
@@ -370,7 +370,7 @@ double Math::grad(int hash, double x, double y, double z){
 glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
     glm::vec4 ret(0.0f);
     float a = p.a + c.a * (1.0f-p.a);
-	ret = ((p*p.a + c*c.a * (1.0f-p.a)) / a);
+    ret = ((p*p.a + c*c.a * (1.0f-p.a)) / a);
     ret.a = a;
     return ret;
 }

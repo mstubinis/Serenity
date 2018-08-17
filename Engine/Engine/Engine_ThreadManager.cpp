@@ -31,7 +31,7 @@ class epriv::ThreadManager::impl final{
         boost::asio::io_service             m_IOService;
         uint                                m_Cores;
         boost::asio::io_service::work*      m_Work;
-		vector<EngineCallback>              m_Callbacks;
+        vector<EngineCallback>              m_Callbacks;
         void _init(const char* name, uint& w, uint& h,ThreadManager* super){
             m_Cores = boost::thread::hardware_concurrency(); if(m_Cores==0) m_Cores=1;
             m_Work = new boost::asio::io_service::work(m_IOService);
@@ -70,7 +70,7 @@ const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
 void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task){
     EngineCallback e;
     e.fut = boost::move( task->get_future() );
-	Engine::epriv::ThreadManager::impl& mgr = *threadManager;
+    Engine::epriv::ThreadManager::impl& mgr = *threadManager;
     mgr.m_Callbacks.push_back( boost::move(e) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
@@ -78,18 +78,18 @@ void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& t
     EngineCallback e;
     e.fut = boost::move( task->get_future() );
     e.cbk = boost::bind<void>(then_task);
-	Engine::epriv::ThreadManager::impl& mgr = *threadManager;
+    Engine::epriv::ThreadManager::impl& mgr = *threadManager;
     mgr.m_Callbacks.push_back( boost::move(e) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
 void epriv::threading::waitForAll(){ 
-	if(threadManager->m_Callbacks.size() > 0){
-		for(auto callback: threadManager->m_Callbacks){
-			callback.fut.wait();
-			//if(!callback.fut.is_ready()){
-			//	return;
-			//}
-		}
-		threadManager->_clearDoneCallbacks();
-	}
+    if(threadManager->m_Callbacks.size() > 0){
+        for(auto callback: threadManager->m_Callbacks){
+            callback.fut.wait();
+            //if(!callback.fut.is_ready()){
+            //	return;
+            //}
+        }
+        threadManager->_clearDoneCallbacks();
+    }
 }

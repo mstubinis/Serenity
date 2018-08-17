@@ -408,16 +408,16 @@ class epriv::MaterialMeshEntry::impl final{
             if(!m_MeshInstancesEntities.count(entity_id)){
                 m_MeshInstancesEntities.emplace(entity_id,vector<MeshInstance*>());
             }
-			//do not add duplicates
-			for(auto _meshInstance:m_MeshInstancesEntities.at(entity_id)){
-				if(_meshInstance == meshInstance){ return; }
-			}
-			m_MeshInstancesEntities.at(entity_id).push_back(meshInstance);
+            //do not add duplicates
+            for(auto _meshInstance:m_MeshInstancesEntities.at(entity_id)){
+                if(_meshInstance == meshInstance){ return; }
+            }
+            m_MeshInstancesEntities.at(entity_id).push_back(meshInstance);
         }
         void _removeMeshInstance(const uint& entity_id,MeshInstance* meshInstance){
             if(m_MeshInstancesEntities.count(entity_id)){
                 vector<MeshInstance*>& v = m_MeshInstancesEntities.at(entity_id);
-				removeFromVector(v,meshInstance);
+                removeFromVector(v,meshInstance);
             }
         }
 };
@@ -427,10 +427,10 @@ epriv::MaterialMeshEntry::MaterialMeshEntry(Mesh* mesh):m_i(new impl){
 epriv::MaterialMeshEntry::~MaterialMeshEntry(){
 }
 void epriv::MaterialMeshEntry::addMeshInstance(Entity* entity,MeshInstance* meshInstance){
-	m_i->_addMeshInstance(entity->id(),meshInstance);
+    m_i->_addMeshInstance(entity->id(),meshInstance);
 }
 void epriv::MaterialMeshEntry::removeMeshInstance(Entity* entity,MeshInstance* meshInstance){
-	m_i->_removeMeshInstance(entity->id(),meshInstance);
+    m_i->_removeMeshInstance(entity->id(),meshInstance);
 }
 void epriv::MaterialMeshEntry::addMeshInstance(uint entityID,MeshInstance* meshInstance){
     m_i->_addMeshInstance(entityID,meshInstance);

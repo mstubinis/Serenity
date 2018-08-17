@@ -31,10 +31,17 @@ uint Scene::addEntity(Entity* entity){
     entity->m_ID = entityID;
     entity->m_Scene = this;
     m_Entities.push_back(entityID);
-	return entityID;
+    return entityID;
+}
+void Scene::removeEntity(Entity* e,bool immediate){
+    e->destroy(immediate);
+}
+void Scene::removeEntity(uint id,bool immediate){
+    Entity* e = epriv::Core::m_Engine->m_ComponentManager->_getEntity(id);
+    removeEntity(e,immediate);
 }
 Entity* Scene::getEntity(uint entityID){
-	if(entityID == epriv::UINT_MAX_VALUE)
+    if(entityID == epriv::UINT_MAX_VALUE)
         return nullptr;
     return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
 }

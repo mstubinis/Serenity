@@ -23,11 +23,11 @@
 using namespace Engine;
 using namespace std;
 
-boost::unordered_map<boost_type_index,uint> epriv::ComponentTypeRegistry::m_Map;
-boost::unordered_map<boost_type_index,uint> epriv::ComponentTypeRegistry::m_MapScene;
-epriv::EntityPool<ComponentBaseClass>* epriv::ComponentManager::m_ComponentPool;
-unordered_map<uint, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectors;
-unordered_map<uint, vector<ComponentBaseClass*>> epriv::ComponentManager::m_ComponentVectorsScene;
+boost::unordered_map<boost_type_index,uint>               epriv::ComponentTypeRegistry::m_Map;
+boost::unordered_map<boost_type_index,uint>               epriv::ComponentTypeRegistry::m_MapScene;
+boost::unordered_map<uint, vector<ComponentBaseClass*>>   epriv::ComponentManager::m_ComponentVectors;
+boost::unordered_map<uint, vector<ComponentBaseClass*>>   epriv::ComponentManager::m_ComponentVectorsScene;
+epriv::ObjectPool<ComponentBaseClass>*                    epriv::ComponentManager::m_ComponentPool;
 
 epriv::ComponentManager* componentManager = nullptr;
 
@@ -81,8 +81,8 @@ class epriv::ComponentManager::impl final{
         vector<Entity*>             m_EntitiesToBeDestroyed;
         bool                        m_Paused;
         void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
-            super->m_ComponentPool = new EntityPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
-            super->m_EntityPool = new EntityPool<Entity>(epriv::MAX_NUM_ENTITIES);
+            super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
+            super->m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
             m_Paused = false;
             m_TypeRegistry = ComponentTypeRegistry();
 
@@ -118,7 +118,7 @@ class epriv::ComponentManager::impl final{
         static void _updateBaseBodiesJob(vector<ComponentBaseClass*>& vec){
             for(uint j = 0; j < vec.size(); ++j){
                 ComponentBasicBody& b = *(ComponentBasicBody*)vec.at(j);
-                Core::m_Engine->m_ComponentManager->m_i->_performTransformation(b.m_Owner->parent(),b._position,b._rotation,b._scale,b._modelMatrix);
+                componentManager->m_i->_performTransformation(b.m_Owner->parent(),b._position,b._rotation,b._scale,b._modelMatrix);
             }
         }
         void _updateComponentBaseBodies(const float& dt){
@@ -142,7 +142,7 @@ class epriv::ComponentManager::impl final{
         void _calculateRenderCheck(ComponentModel& m,Camera* camera){
             epriv::ComponentBodyBaseClass& body = *(m.m_Owner->getComponent<epriv::ComponentBodyBaseClass>());
             glm::vec3& pos = body.position();
-			uint sphereTest = camera->sphereIntersectTest(pos,m._radius);
+            uint sphereTest = camera->sphereIntersectTest(pos,m._radius);
             if(!m.visible() || sphereTest == 0 || camera->getDistance(pos) > m._radius * 1100.0f){ //1100 is the visibility threshold
                 m.m_i->m_PassedRenderCheck = false;
                 return;
@@ -155,8 +155,8 @@ class epriv::ComponentManager::impl final{
                 for(uint i = 0; i < modelComponent.models.size(); ++i){
                     MeshInstance& pair = *modelComponent.models.at(i);
                     if(pair.mesh()){
-                        Core::m_Engine->m_ComponentManager->m_i->_performTransformation(modelComponent.m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
-                        Core::m_Engine->m_ComponentManager->m_i->_calculateRenderCheck(modelComponent,camera);
+                        componentManager->m_i->_performTransformation(modelComponent.m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
+                        componentManager->m_i->_calculateRenderCheck(modelComponent,camera);
                     }
                 }
             }
@@ -226,6 +226,20 @@ class epriv::ComponentManager::impl final{
             
         }
 };
+
+
+epriv::ComponentTypeRegistry::ComponentTypeRegistry(){
+    m_NextIndex = 0;
+    m_NextIndexScene = 0;
+}
+epriv::ComponentTypeRegistry::~ComponentTypeRegistry(){
+    m_Map.clear();
+    m_MapScene.clear();
+    m_NextIndex = 0;
+    m_NextIndexScene = 0;
+}
+
+
 epriv::ComponentManager::ComponentManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); componentManager = this; }
 epriv::ComponentManager::~ComponentManager(){ m_i->_destruct(this); }
 
@@ -243,17 +257,16 @@ void epriv::ComponentManager::_resize(uint width,uint height){
 }
 void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
     //obviously try to improve this performance wise
+    removeFromVector(e->scene()->entities(),e->id());
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        ComponentBaseClass* base = nullptr;
-        m_ComponentPool->get(e->m_Components[i],base);
-        if(base){
-            uint slot = componentManager->getIndividualComponentTypeSlot(base);
-            removeFromVector(m_ComponentVectors.at(slot),base);
-            removeFromVector(m_ComponentVectorsScene.at(slot),base);
+        const uint& componentID = e->m_Components[i];
+        if(componentID != epriv::UINT_MAX_VALUE){
+            ComponentBaseClass* component = nullptr;
+            m_ComponentPool->get(componentID,component);
+            componentManager->_removeComponent(component);
+            m_ComponentPool->remove(componentID);
+            e->m_Components[i] = epriv::UINT_MAX_VALUE;
         }
-    }
-    for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        m_ComponentPool->remove(e->m_Components[i]);
     }
     m_EntityPool->remove(e->m_ID);
 }
@@ -267,8 +280,7 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
     //TODO: add method to handle each component type on scene swap (like remove/add rigid body from physics world)
     for(auto type:m_ComponentVectorsScene){
         vector_clear(type.second);
-        vector<ComponentBaseClass*> n;
-        m_ComponentVectorsScene.at(type.first) = n;
+        vector_clear(m_ComponentVectorsScene.at(type.first));
     }
     for(auto entityID:newScene->entities()){
         Entity* e = newScene->getEntity(entityID);
@@ -428,23 +440,23 @@ void ComponentCamera::resize(uint width, uint height){
     epriv::ComponentInternalFunctionality::rebuildProjectionMatrix(*this);
 }
 uint ComponentCamera::pointIntersectTest(glm::vec3& position){
-	for(ushort i=0; i < 6; ++i){
-		float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
-		if (d > 0.0f) return 0; //outside
-	}
-	return 1;//inside
+    for(ushort i=0; i < 6; ++i){
+        float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
+        if (d > 0.0f) return 0; //outside
+    }
+    return 1;//inside
 }
 uint ComponentCamera::sphereIntersectTest(glm::vec3& position,float radius){
-	uint res = 1; //inside the viewing frustum
+    uint res = 1; //inside the viewing frustum
     if(radius <= 0.0f) return 0;
-	for (ushort i = 0; i < 6; ++i){
-		float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
-		if (d > radius * 2.0f)
-			return 0; //outside the viewing frustrum
-		else if (d > 0.0f) 
-			res = 2; //intersecting the viewing plane
-	}
-	return res;
+    for (ushort i = 0; i < 6; ++i){
+        float d = _planes[i].x * position.x + _planes[i].y * position.y + _planes[i].z * position.z + _planes[i].w;
+        if (d > radius * 2.0f)
+            return 0; //outside the viewing frustrum
+        else if (d > 0.0f) 
+            res = 2; //intersecting the viewing plane
+    }
+    return res;
 }
 void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
     _eye = eye;
@@ -538,15 +550,7 @@ void ComponentModel::setModelMaterial(Material* material,uint index){
 void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ ComponentModel::setModelMaterial(Resources::getMaterial(materialHandle),index); }
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
     epriv::ComponentBodyBaseClass* baseBody = m_Owner->getComponent<epriv::ComponentBodyBaseClass>();
-    epriv::ComponentBodyType::Type type = baseBody->getBodyType();
-    //clean this up a little
-    if(type == epriv::ComponentBodyType::BasicBody){
-        return Math::rayIntersectSphere(((ComponentBasicBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector());
-    }
-    else if(type == epriv::ComponentBodyType::RigidBody){
-        return Math::rayIntersectSphere(((ComponentRigidBody*)baseBody)->position(),_radius,camera->_eye,camera->getViewVector());
-    }
-    return false;
+    return Math::rayIntersectSphere(baseBody->position(),_radius,camera->_eye,camera->getViewVector());
 }
 
 #pragma endregion
@@ -818,20 +822,18 @@ void ComponentRigidBody::setMass(float mass){
 
 Entity::Entity(){
     m_Scene = nullptr;
-    m_ParentID = epriv::UINT_MAX_VALUE;
-    m_ID = epriv::UINT_MAX_VALUE;
+    m_ID = m_ParentID = epriv::UINT_MAX_VALUE;
     m_Components = new uint[ComponentType::_TOTAL];
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
         m_Components[i] = epriv::UINT_MAX_VALUE;
     }
 }
 Entity::~Entity(){
-    m_ParentID = epriv::UINT_MAX_VALUE;
-    m_ID = epriv::UINT_MAX_VALUE;
+    m_ID = m_ParentID = epriv::UINT_MAX_VALUE;
     m_Scene = nullptr;
     delete[] m_Components;
 }
-uint Entity::id(){ return m_ID; }
+const uint Entity::id() const { return m_ID; }
 Scene* Entity::scene(){ return m_Scene; }
 void Entity::destroy(bool immediate){
     if(!immediate){
@@ -847,5 +849,5 @@ Entity* Entity::parent(){
     return componentManager->_getEntity(m_ParentID);
 }
 void Entity::addChild(Entity* child){
-    child->m_ParentID = this->m_ID;
+    child->m_ParentID = m_ID;
 }

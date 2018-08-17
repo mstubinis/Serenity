@@ -17,7 +17,7 @@ vector<GLStateT> GLState::SM = [](){
     _add(m,GLState::CULL_FACE,GLStateT(false,B::bind<void>(glEnable,GL_CULL_FACE),B::bind<void>(glDisable,GL_CULL_FACE)));
     _add(m,GLState::ALPHA_TEST,GLStateT(false,B::bind<void>(glEnable,GL_ALPHA_TEST),B::bind<void>(glDisable,GL_ALPHA_TEST)));
     _add(m,GLState::DEPTH_TEST,GLStateT(true,B::bind<void>(glEnable,GL_DEPTH_TEST),B::bind<void>(glDisable,GL_DEPTH_TEST)));
-	_add(m,GLState::DEPTH_CLAMP,GLStateT(true,B::bind<void>(glEnable,GL_DEPTH_CLAMP),B::bind<void>(glDisable,GL_DEPTH_CLAMP)));
+    _add(m,GLState::DEPTH_CLAMP,GLStateT(true,B::bind<void>(glEnable,GL_DEPTH_CLAMP),B::bind<void>(glDisable,GL_DEPTH_CLAMP)));
     _add(m,GLState::STENCIL_TEST,GLStateT(false,B::bind<void>(glEnable,GL_STENCIL_TEST),B::bind<void>(glDisable,GL_STENCIL_TEST)));
     _add(m,GLState::TEXTURE_CUBE_MAP_SEAMLESS,GLStateT(false,B::bind<void>(glEnable,GL_TEXTURE_CUBE_MAP_SEAMLESS),B::bind<void>(glDisable,GL_TEXTURE_CUBE_MAP_SEAMLESS) ));
     _add(m,GLState::BLEND,GLStateT(false,B::bind<void>(glEnable,GL_BLEND),B::bind<void>(glDisable,GL_BLEND)));

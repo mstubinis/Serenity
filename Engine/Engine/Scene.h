@@ -32,6 +32,8 @@ class Scene: public EngineResource{
 
         Entity* getEntity(uint entityID);
         uint addEntity(Entity*);
+        void removeEntity(Entity*,bool immediate = false);
+        void removeEntity(uint id,bool immediate = false);
         bool hasEntity(Entity*);
         bool hasEntity(uint entityID);
 

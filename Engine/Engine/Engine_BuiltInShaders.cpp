@@ -333,8 +333,8 @@ epriv::EShaders::lighting_vert =
 #pragma region VertexBasic
 epriv::EShaders::vertex_basic = 
     "\n"
-	"USE_LOG_DEPTH_VERTEX\n"
-	"\n"
+    "USE_LOG_DEPTH_VERTEX\n"
+    "\n"
     "attribute vec3 position;\n"
     //"//attribute float uv;\n"
     "attribute vec2 uv;\n"
@@ -1281,8 +1281,8 @@ epriv::EShaders::smaa_frag_4 = epriv::EShaders::smaa_common +
 #pragma region ForwardFrag
 epriv::EShaders::forward_frag =
     "\n"
-	"USE_LOG_DEPTH_FRAGMENT\n"
-	"\n"
+    "USE_LOG_DEPTH_FRAGMENT\n"
+    "\n"
     "uniform sampler2D   DiffuseTexture;\n"
     "uniform sampler2D   NormalTexture;\n"
     "uniform sampler2D   GlowTexture;\n"
@@ -1423,8 +1423,8 @@ epriv::EShaders::forward_frag +=
 #pragma region DeferredFrag
 epriv::EShaders::deferred_frag =
     "\n"
-	"USE_LOG_DEPTH_FRAGMENT\n"
-	"\n"
+    "USE_LOG_DEPTH_FRAGMENT\n"
+    "\n"
     "uniform sampler2D   DiffuseTexture;\n"
     "uniform sampler2D   NormalTexture;\n"
     "uniform sampler2D   GlowTexture;\n"
@@ -1622,10 +1622,10 @@ epriv::EShaders::ssao_frag =
     "uniform sampler2D gDepthMap;\n"
     "\n"
     "uniform float fbufferDivisor;\n"
-	"uniform float bloomScale;\n"
+    "uniform float bloomScale;\n"
     "\n"
     "uniform vec4 SSAOInfo;\n"  //x - radius | y - intensity | z - bias | w - scale
-	"uniform ivec4 SSAOInfoA;\n"//X = doSSAO Y = doBloom Z = Samples W = NoiseTextureSize
+    "uniform ivec4 SSAOInfoA;\n"//X = doSSAO Y = doBloom Z = Samples W = NoiseTextureSize
     "\n"
     "uniform vec3 poisson[32];\n"
     "\n"
@@ -1640,9 +1640,9 @@ epriv::EShaders::ssao_frag +=
     "    float dist = length(diff) * SSAOInfo.w;\n"
     "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
     "}\n"
-	"float logB(float base,float x){\n"
-	"    return (log2(base)/log2(2.71828)) * x;\n"
-	"}\n"
+    "float logB(float base,float x){\n"
+    "    return (log2(base)/log2(2.71828)) * x;\n"
+    "}\n"
     "void main(){\n"
     "    vec2 uv = texcoords * (1.0 / fbufferDivisor);\n"
     "    vec3 worldPosition = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
@@ -1676,9 +1676,9 @@ epriv::EShaders::ssao_frag +=
     "    if(SSAOInfoA.y == 1){\n"
     "        float Glow = texture2D(gMiscMap,uv).r;\n"
     "        vec3 lighting = texture2D(gLightMap,uv).rgb;\n"
-	"        float baseBright = log(dot(lighting, vec3(0.2126, 0.7152, 0.0722)));\n"
-	"        float brightness = max(Glow, baseBright);\n"
-	"        gl_FragColor.rgb = lighting * pow(brightness,bloomScale);\n"
+    "        float baseBright = log(dot(lighting, vec3(0.2126, 0.7152, 0.0722)));\n"
+    "        float brightness = max(Glow, baseBright);\n"
+    "        gl_FragColor.rgb = lighting * pow(brightness,bloomScale);\n"
     "    }\n"
     "    else{\n"
     "        gl_FragColor.rgb = ConstantZeroVec3;\n"
@@ -1743,15 +1743,15 @@ epriv::EShaders::hdr_frag +=
 epriv::EShaders::blur_frag =
     "uniform sampler2D textureMap;\n"
     "uniform vec4 RGBA;\n"
-	"uniform vec4 UniformsA;\n"//radius, divisor, HV
+    "uniform vec4 UniformsA;\n"//radius, divisor, HV
     "uniform vec4 strengthModifier;\n"
-	"\n"
+    "\n"
     "varying vec2 texcoords;\n"
-	"\n"
+    "\n"
     "vec2 offset[14];\n"
     "float weights[7] = float[](0.028,0.024,0.020,0.016,0.012,0.008,0.004);\n"
     "float gauss[7] = float[](0.0044299121055113265,0.00895781211794,0.0215963866053,0.0443683338718,0.0776744219933,0.115876621105,0.147308056121);\n"
-	"\n"
+    "\n"
     "void main(){\n"
     "    for(int i = 0; i < 7; ++i){\n"
     "        offset[i] = vec2(-weights[i] * UniformsA.x * UniformsA.z, -weights[i] * UniformsA.x * UniformsA.w);\n"
@@ -1760,13 +1760,13 @@ epriv::EShaders::blur_frag =
     "    vec4 v4Sum = vec4(0.0);\n"
     "    vec2 uv = texcoords * (1.0 / UniformsA.y);\n"
     "\n"
-	"    vec4 v4Strength = max(vec4(1.0), UniformsA.x * strengthModifier);\n"
+    "    vec4 v4Strength = max(vec4(1.0), UniformsA.x * strengthModifier);\n"
     "    for(int i = 0; i < 7; ++i){\n"
     "        v4Sum += texture2D(textureMap, uv + offset[i])    * gauss[i] * v4Strength;\n"
     "        v4Sum += texture2D(textureMap, uv + offset[13-i]) * gauss[i] * v4Strength;\n"
     "    }\n"
-	"    v4Sum += texture2D(textureMap, uv ) * 0.159576912161 * v4Strength;\n"
-	"    gl_FragColor = (v4Sum * RGBA) + (gl_FragColor * (vec4(1.0) - RGBA));\n" //fancy way of saying if(RGBA.whatever == 1.0) gl_FragColor.whatever = v4Sum.whatever;
+    "    v4Sum += texture2D(textureMap, uv ) * 0.159576912161 * v4Strength;\n"
+    "    gl_FragColor = (v4Sum * RGBA) + (gl_FragColor * (vec4(1.0) - RGBA));\n" //fancy way of saying if(RGBA.whatever == 1.0) gl_FragColor.whatever = v4Sum.whatever;
     "}";
 #pragma endregion
 
@@ -1837,7 +1837,7 @@ epriv::EShaders::final_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::final_frag += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::final_frag +=
-	"\n"
+    "\n"
     "void main(){\n"
     "    vec3 diffuse = texture2D(gDiffuseMap, texcoords).rgb;\n"
     "    vec3 hdr = texture2D(gMiscMap,texcoords).rgb;\n"
@@ -1850,7 +1850,7 @@ epriv::EShaders::final_frag +=
     "    }\n"
     "    if(HasBloom == 1){\n"
     "        vec3 bloom = texture2D(gBloomMap,texcoords).rgb;\n"
-	"        hdr += bloom;\n"
+    "        hdr += bloom;\n"
     "    }\n"
     "    gl_FragColor = (vec4(hdr,1.0));\n"
     "\n"

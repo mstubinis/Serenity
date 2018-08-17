@@ -12,16 +12,16 @@ typedef unsigned int uint;
 
 namespace Engine{
     namespace epriv{
-		class EventManager;
-		class SoundManager;
-		class RenderManager;
-		class ComponentManager;
-		class ThreadManager;
-		class ResourceManager;
-		class TimeManager;
-		class PhysicsManager;
-		class EventDispatcher;
-		class NoiseManager;
+        class EventManager;
+        class SoundManager;
+        class RenderManager;
+        class ComponentManager;
+        class ThreadManager;
+        class ResourceManager;
+        class TimeManager;
+        class PhysicsManager;
+        class EventDispatcher;
+        class NoiseManager;
         class Core final{
             public:
                 static Core* m_Engine;
@@ -36,16 +36,16 @@ namespace Engine{
                 ComponentManager* m_ComponentManager;
                 ThreadManager* m_ThreadManager;
                 NoiseManager* m_NoiseManager;
-				bool m_Paused;
+                bool m_Paused;
 
                 Core(const char* name,uint width,uint height);
                 ~Core();
         };
     };
     void init(const char* name,uint width=0,uint height=0);
-	void pause(bool=true);
-	bool paused();
-	void unpause();
+    void pause(bool=true);
+    bool paused();
+    void unpause();
     void run();
 
     const float getFPS();

@@ -31,17 +31,17 @@ using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
 epriv::Core::Core(const char* name,uint w,uint h){
-    m_EventManager = new epriv::EventManager(name,w,h);
-    m_ResourceManager = new epriv::ResourceManager(name,w,h);
-    m_TimeManager = new epriv::TimeManager(name,w,h);
-    m_SoundManager = new epriv::SoundManager(name,w,h);
-    m_PhysicsManager = new epriv::PhysicsManager(name,w,h);
-    m_RenderManager = new epriv::RenderManager(name,w,h);
-    m_EventDispatcher = new epriv::EventDispatcher(name,w,h);
+    m_EventManager     = new epriv::EventManager(name,w,h);
+    m_ResourceManager  = new epriv::ResourceManager(name,w,h);
+    m_TimeManager      = new epriv::TimeManager(name,w,h);
+    m_SoundManager     = new epriv::SoundManager(name,w,h);
+    m_PhysicsManager   = new epriv::PhysicsManager(name,w,h);
+    m_RenderManager    = new epriv::RenderManager(name,w,h);
+    m_EventDispatcher  = new epriv::EventDispatcher(name,w,h);
     m_ComponentManager = new epriv::ComponentManager(name,w,h);
-    m_ThreadManager = new epriv::ThreadManager(name,w,h);
-    m_NoiseManager = new epriv::NoiseManager(name,w,h);
-	m_Paused = false;
+    m_ThreadManager    = new epriv::ThreadManager(name,w,h);
+    m_NoiseManager     = new epriv::NoiseManager(name,w,h);
+    m_Paused = false;
 }
 epriv::Core::~Core(){
     SAFE_DELETE(m_ComponentManager);
@@ -58,33 +58,31 @@ epriv::Core::~Core(){
 
 bool Engine::paused(){ return epriv::Core::m_Engine->m_Paused; }
 void Engine::pause(bool b){
-	epriv::Core::m_Engine->m_ComponentManager->_pause(b);
-	Engine::Physics::pause(b);
-	epriv::Core::m_Engine->m_Paused = b;
+    epriv::Core::m_Engine->m_ComponentManager->_pause(b);
+    Engine::Physics::pause(b);
+    epriv::Core::m_Engine->m_Paused = b;
 }
 void Engine::unpause(){
-	epriv::Core::m_Engine->m_ComponentManager->_unpause();
-	Engine::Physics::unpause();
-	epriv::Core::m_Engine->m_Paused = false;
+    epriv::Core::m_Engine->m_ComponentManager->_unpause();
+    Engine::Physics::unpause();
+    epriv::Core::m_Engine->m_Paused = false;
 }
 
 void Engine::init(const char* name,uint w,uint h){
     epriv::Core::m_Engine = new epriv::Core(name,w,h);
-
     epriv::Core::m_Engine->m_ResourceManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_RenderManager->_init(name,w,h);
     epriv::Core::m_Engine->m_EventManager->_init(name,w,h);
     epriv::Core::m_Engine->m_TimeManager->_init(name,w,h);
     epriv::Core::m_Engine->m_SoundManager->_init(name,w,h);
     epriv::Core::m_Engine->m_PhysicsManager->_init(name,w,h);
+    epriv::Core::m_Engine->m_RenderManager->_init(name,w,h);
     epriv::Core::m_Engine->m_EventDispatcher->_init(name,w,h);
     epriv::Core::m_Engine->m_ComponentManager->_init(name,w,h);
     epriv::Core::m_Engine->m_ThreadManager->_init(name,w,h);
     epriv::Core::m_Engine->m_NoiseManager->_init(name,w,h);
 
-
     //init the game here
-	Engine::setMousePosition(w/2,h/2);
+    Engine::setMousePosition(w/2,h/2);
     Game::initResources();
     epriv::threading::waitForAll();
     Game::initLogic();
@@ -122,7 +120,7 @@ void updateLogic(float dt){
     Resources::getCurrentScene()->update(dt);
     epriv::Core::m_Engine->m_ComponentManager->_update(dt);
     epriv::Core::m_Engine->m_ThreadManager->_update(dt);
-	epriv::Core::m_Engine->m_EventManager->_update(dt);
+    epriv::Core::m_Engine->m_EventManager->_update(dt);
     RESET_EVENTS();
     Game::onPostUpdate(dt);
 

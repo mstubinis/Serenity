@@ -231,9 +231,6 @@
     <ClCompile Include="Engine_EventDispatcher.cpp">
       <Filter>Source Files\Engine\Engine_Events</Filter>
     </ClCompile>
-    <ClCompile Include="Engine_EventObject.cpp">
-      <Filter>Source Files\Engine\Engine_Events</Filter>
-    </ClCompile>
     <ClCompile Include="Components.cpp">
       <Filter>Source Files\Engine\Engine_Components</Filter>
     </ClCompile>

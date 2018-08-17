@@ -56,7 +56,7 @@ struct RingInfo final{
 };
 
 class Planet: public Entity{
-	friend class ::Ring;
+    friend class ::Ring;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
     protected:
@@ -113,7 +113,7 @@ class Star: public Planet{
 };
 
 class Ring final{
-	friend class ::Planet;
+    friend class ::Planet;
     private:
         Handle m_MaterialHandle;
         Planet* m_Parent;

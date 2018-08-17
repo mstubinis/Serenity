@@ -47,7 +47,7 @@ namespace Engine{
 
                 bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
                 void _addMeshInstance(MeshInstance*);
-				Texture* _hasTexture(std::string);
+                Texture* _hasTexture(std::string);
                 void _remObject(std::string);
 
                 void _resizeCameras(uint w,uint h);
@@ -90,7 +90,7 @@ namespace Engine{
         Handle addMesh(std::string name, std::unordered_map<std::string,float>& grid, uint width, uint length,float threshhold = 0.0005f);
         Handle addMeshAsync(std::string file, CollisionType::Type = CollisionType::None,bool fromFile = true,float threshhold = 0.0005f);
 
-		Handle addTexture(std::string file,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,bool mipmaps = false);
+        Handle addTexture(std::string file,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,bool mipmaps = false);
 
         Handle addMaterial(std::string name, std::string diffuse, std::string normal = "", std::string glow = "",std::string specular = "",Handle shaderHandle = Handle());
         Handle addMaterial(std::string name, Texture* diffuse, Texture* normal = nullptr, Texture* glow = nullptr,Texture* specular = nullptr,ShaderP* = nullptr);

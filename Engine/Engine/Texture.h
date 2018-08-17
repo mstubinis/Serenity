@@ -21,34 +21,34 @@ class TextureFilter{public: enum Filter{
     Linear,Nearest,Nearest_Mipmap_Nearest,Nearest_Mipmap_Linear,Linear_Mipmap_Nearest,Linear_Mipmap_Linear,
 _TOTAL};};
 class TextureType{public: enum Type{
-	Texture1D,Texture2D,Texture3D,CubeMap,RenderTarget,
+    Texture1D,Texture2D,Texture3D,CubeMap,RenderTarget,
 _TOTAL};};
 
 namespace sf{ class Image; }
 namespace Engine{
     namespace epriv{
-		namespace textures{
-			struct ImageMipmap;
-			struct ImageLoadedStructure;
-		};
+        namespace textures{
+            struct ImageMipmap;
+            struct ImageLoadedStructure;
+        };
         class FramebufferTexture;
         class TextureLoader final{
-			friend class ::Texture;
+            friend class ::Texture;
             public:
 
-				static void LoadDDSFile(Texture* texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
+                static void LoadDDSFile(Texture* texture, std::string filename,epriv::textures::ImageLoadedStructure& image);
 
                 static void LoadTexture2DIntoOpenGL(Texture* texture);
-				static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
+                static void LoadTextureFramebufferIntoOpenGL(Texture* texture);
                 static void LoadTextureCubemapIntoOpenGL(Texture* texture);
 
                 static void EnumWrapToGL(uint& gl, TextureWrap::Wrap& wrap);
                 static void EnumFilterToGL(uint& gl, TextureFilter::Filter& filter,bool min);
-				static bool IsCompressedType(ImageInternalFormat::Format);
+                static bool IsCompressedType(ImageInternalFormat::Format);
 
-				static void GenerateMipmapsOpenGL(Texture* texture);
-				static void WithdrawPixelsFromOpenGLMemory(Texture* texture,uint imageIndex = 0,uint mipmapLevel = 0);
-				static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
+                static void GenerateMipmapsOpenGL(Texture* texture);
+                static void WithdrawPixelsFromOpenGLMemory(Texture* texture,uint imageIndex = 0,uint mipmapLevel = 0);
+                static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat,ImageInternalFormat::Format& inInternalFormat);
         };
 
     };
@@ -60,18 +60,18 @@ class InternalTexturePublicInterface final{
 };
 
 class Texture: public EngineResource{
-	friend class Engine::epriv::TextureLoader;
+    friend class Engine::epriv::TextureLoader;
     friend class ::InternalTexturePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-		//Framebuffer
+        //Framebuffer
         Texture(uint renderTgtWidth,uint renderTgtHeight,ImagePixelType::Type,ImagePixelFormat::Format,ImageInternalFormat::Format,float divisor = 1.0f);
-		//Single File
+        //Single File
         Texture(std::string filename,bool genMipmaps = true,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,GLuint openglTexType = GL_TEXTURE_2D);
-		//Pixels From Memory
+        //Pixels From Memory
         Texture(const sf::Image& sfmlImage,std::string name = "CustomTexture",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,GLuint openglTexType = GL_TEXTURE_2D);
-		//Cubemap from 6 files
+        //Cubemap from 6 files
         Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
 
@@ -83,7 +83,8 @@ class Texture: public EngineResource{
         uint height();
         uint numAddresses();
         bool mipmapped();
-		bool compressed();
+        bool compressed();
+        void setAnisotropicFiltering(float aniso);
         void resize(Engine::epriv::FramebufferTexture*,uint width,uint height);
 
         ImageInternalFormat::Format internalFormat();

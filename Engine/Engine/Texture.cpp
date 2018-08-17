@@ -383,7 +383,7 @@ struct textures::ImageLoadedStructure final{
         baseImage->compressedSize = 0;
         if(mipmaps.size() == 0){
             mipmaps.push_back(ImageMipmap(*baseImage));
-			delete baseImage;
+            delete baseImage;
         }
     }
     void load(const sf::Image& i,string _filename = ""){
@@ -401,7 +401,7 @@ struct textures::ImageLoadedStructure final{
         baseImage->compressedSize = 0;
         if(mipmaps.size() == 0){
             mipmaps.push_back(ImageMipmap(*baseImage));
-			delete baseImage;
+            delete baseImage;
         }
     }
     ImageLoadedStructure(uint _w,uint _h,ImagePixelType::Type _pxlType,ImagePixelFormat::Format _pxlFormat,ImageInternalFormat::Format _internFormat){ 
@@ -628,7 +628,7 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
             //normal.z = sqrt(1.0 - normal.x * normal.x - normal.y * normal.y);
             factor = 4;
             blockSize = 16;
-			image.internalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            image.internalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
             break;
         }
         case FourCC_$:{ 
@@ -754,7 +754,7 @@ void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
         i._importIntoOpenGL(mipmap,i.m_Type);
         //TextureLoader::WithdrawPixelsFromOpenGLMemory(_texture,0,mipmap.level);
     }
-    _texture->setFilter(TextureFilter::Linear); 
+    _texture->setFilter(TextureFilter::Linear);
 }
 void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
@@ -764,7 +764,6 @@ void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
     glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),NULL);
     _texture->setFilter(TextureFilter::Linear);
     _texture->setWrapping(TextureWrap::ClampToEdge);
-    Renderer::bindTexture(i.m_Type,0);
 }
 void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
     Texture::impl& i = *_texture->m_i;
@@ -1025,7 +1024,26 @@ void Texture::setFilter(GLuint type,TextureFilter::Filter f){
     Texture::setMinFilter(type,f);
     Texture::setMaxFilter(type,f);
 }
-
+void Texture::setAnisotropicFiltering(float aniso){
+    Texture::impl& i = *m_i;
+    Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
+    //need to update glew for this
+    //if(epriv::RenderManager::OPENGL_VERSION >= 46){
+    //	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &aniso);
+    //	glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY, aniso);
+    //}
+    //else{
+        /*
+        if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::ARB_Ansiotropic_Filtering)){
+            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_ARB, &aniso);
+            glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY_ARB, aniso);
+        }
+        else*/ if(OpenGLExtensionEnum::supported(OpenGLExtensionEnum::EXT_Ansiotropic_Filtering)){
+            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+            glTexParameterf(m_i->m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+        }
+    //}
+}
 
 void InternalTexturePublicInterface::LoadCPU(Texture* _texture){
     if(!_texture->isLoaded()){

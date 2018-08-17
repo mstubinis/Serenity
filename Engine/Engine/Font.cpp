@@ -26,12 +26,12 @@ class Font::impl final{
             _loadTextFile(_FontFilename);
 
 
-			string rawname = _FontFilename;
-			size_t lastindex = _FontFilename.find_last_of("."); 
-			if(lastindex != string::npos){
-				rawname = _FontFilename.substr(0, lastindex); 
-				rawname += ".png";
-			}
+            string rawname = _FontFilename;
+            size_t lastindex = _FontFilename.find_last_of("."); 
+            if(lastindex != string::npos){
+                rawname = _FontFilename.substr(0, lastindex); 
+                rawname += ".png";
+            }
 
 
             m_FontTexture = new Texture(rawname,false,ImageInternalFormat::SRGB8_ALPHA8);

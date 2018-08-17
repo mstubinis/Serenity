@@ -8,12 +8,11 @@ typedef std::uint32_t uint32;
 
 class ResourceType final{public: enum Type{
     Empty, //do NOT move this specific enum
-
     Texture,
     Mesh,
     Material,
     Sound,
-    MeshInstance,//we will most likely not need this anymore once component system is in place
+    MeshInstance,
     Object,
     Font,
     Camera,
@@ -21,7 +20,7 @@ class ResourceType final{public: enum Type{
     ShaderProgram,
     SoundData,
     Scene,
-};};
+_TOTAL};};
 
 struct Handle final{
     uint32 index : 12;

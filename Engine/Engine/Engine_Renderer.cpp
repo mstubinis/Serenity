@@ -40,6 +40,12 @@ epriv::RenderManager::impl* renderManager;
 
 uint epriv::RenderManager::GLSL_VERSION;
 uint epriv::RenderManager::OPENGL_VERSION;
+//extensions
+vector<bool> epriv::RenderManager::OPENGL_EXTENSIONS = [](){
+    vector<bool> v; v.resize(epriv::OpenGLExtensionEnum::_TOTAL,false);
+
+    return v;
+}();
 
 namespace Engine{
     namespace epriv{
@@ -155,7 +161,6 @@ namespace Engine{
 
 class epriv::RenderManager::impl final{
     public:
-
         #pragma region FogInfo
         bool fog;
         float fog_distNull;
@@ -194,7 +199,7 @@ class epriv::RenderManager::impl final{
         bool bloom;
         float bloom_radius;
         float bloom_strength;
-		float bloom_scale;
+        float bloom_scale;
         #pragma endregion
 
         #pragma region LightingInfo
@@ -243,10 +248,10 @@ class epriv::RenderManager::impl final{
         GLuint current_bound_read_fbo;
         GLuint current_bound_draw_fbo;
         GLuint current_bound_rbo;
-		GLuint current_bound_texture_1D;
-		GLuint current_bound_texture_2D;
-		GLuint current_bound_texture_3D;
-		GLuint current_bound_texture_cube_map;
+        GLuint current_bound_texture_1D;
+        GLuint current_bound_texture_2D;
+        GLuint current_bound_texture_3D;
+        GLuint current_bound_texture_cube_map;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
         glm::uvec4 gl_viewport_data;
         bool draw_physics_debug;
@@ -271,8 +276,6 @@ class epriv::RenderManager::impl final{
         #pragma endregion
 
         void _init(const char* name,uint& w,uint& h){
-            glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
-
             #pragma region FogInfo
             fog = false;
             fog_distNull = 5.0f;
@@ -309,7 +312,7 @@ class epriv::RenderManager::impl final{
             bloom = true;
             bloom_radius = 0.84f;
             bloom_strength = 2.5f;
-			bloom_scale = 7.1f;
+            bloom_scale = 7.1f;
             #pragma endregion
 
             #pragma region LightingInfo
@@ -354,10 +357,10 @@ class epriv::RenderManager::impl final{
             current_bound_read_fbo = 0;
             current_bound_draw_fbo = 0;
             current_bound_rbo = 0;
-		    current_bound_texture_1D = 0;
-		    current_bound_texture_2D = 0;
-		    current_bound_texture_3D = 0;
-		    current_bound_texture_cube_map = 0;
+            current_bound_texture_1D = 0;
+            current_bound_texture_2D = 0;
+            current_bound_texture_3D = 0;
+            current_bound_texture_cube_map = 0;
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
             gl_viewport_data = glm::uvec4(0,0,0,0);
             #ifdef _DEBUG
@@ -371,8 +374,21 @@ class epriv::RenderManager::impl final{
             m_IdentityMat4 = glm::mat4(1.0f);
             m_IdentityMat3 = glm::mat3(1.0f);
             #pragma endregion
+
         }
+        
         void _postInit(const char* name,uint& width,uint& height){
+            glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS,&UniformBufferObject::MAX_UBO_BINDINGS);
+
+            #pragma region OpenGLExtensions
+
+            OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_Ansiotropic_Filtering) = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
+            OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_Ansiotropic_Filtering) = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
+
+            #pragma endregion
+
+
+
             epriv::EShaders::init();
 
             #pragma region EngineInternalShadersAndPrograms
@@ -1197,11 +1213,11 @@ class epriv::RenderManager::impl final{
             epriv::InternalMeshes::RodLightBounds = new Mesh(rodLightData,CollisionType::None,false,0.0005f);
             epriv::InternalMeshes::SpotLightBounds = new Mesh(spotLightData,CollisionType::None,false,0.0005f);
 
-			Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
+            Mesh::FontPlane = new Mesh("FontPlane",1.0f,1.0f,0.0005f);
             Mesh::Plane = new Mesh("Plane",1.0f,1.0f,0.0005f);
             Mesh::Cube = new Mesh(cubeMesh,CollisionType::None,false,0.0005f);
 
-			brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
+            brdfCook = new Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             brdfCook->setWrapping(TextureWrap::ClampToEdge);	
             epriv::Core::m_Engine->m_ResourceManager->_addTexture(brdfCook);
 
@@ -1227,7 +1243,7 @@ class epriv::RenderManager::impl final{
                 glm::vec3 noise(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f); 
                 ssaoNoise.push_back(noise);
             }
-			genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
+            genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE,SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1239,19 +1255,17 @@ class epriv::RenderManager::impl final{
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
             //GLEnable(GLState::TEXTURE_CUBE_MAP_SEAMLESS); //very wierd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
-			GLEnable(GLState::DEPTH_CLAMP);
+            GLEnable(GLState::DEPTH_CLAMP);
 
-			genAndBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
+            genAndBindTexture(GL_TEXTURE_2D,SMAA_AreaTexture);
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
             glTexImage2D(GL_TEXTURE_2D,0,GL_RG8,160,560,0,GL_RG,GL_UNSIGNED_BYTE,areaTexBytes);
-            //bindTexture(GL_TEXTURE_2D,0);
 
-			genAndBindTexture(GL_TEXTURE_2D,SMAA_SearchTexture);
+            genAndBindTexture(GL_TEXTURE_2D,SMAA_SearchTexture);
             Texture::setFilter(GL_TEXTURE_2D,TextureFilter::Linear);
             Texture::setWrapping(GL_TEXTURE_2D,TextureWrap::ClampToBorder);
             glTexImage2D(GL_TEXTURE_2D,0,GL_R8,64,16,0,GL_RED,GL_UNSIGNED_BYTE,searchTexBytes);
-            //bindTexture(GL_TEXTURE_2D,0);
 
             glClearStencil(0);
             GLDisable(GLState::STENCIL_TEST);
@@ -1268,7 +1282,7 @@ class epriv::RenderManager::impl final{
             SAFE_DELETE(epriv::InternalMeshes::PointLightBounds);
             SAFE_DELETE(epriv::InternalMeshes::RodLightBounds);
             SAFE_DELETE(epriv::InternalMeshes::SpotLightBounds);
-			SAFE_DELETE(Mesh::FontPlane);
+            SAFE_DELETE(Mesh::FontPlane);
             SAFE_DELETE(Mesh::Plane);
             SAFE_DELETE(Mesh::Cube);
 
@@ -1282,6 +1296,7 @@ class epriv::RenderManager::impl final{
             glDeleteTextures(1,&SMAA_SearchTexture);
             glDeleteTextures(1,&SMAA_AreaTexture);
         }
+        bool _checkOpenGLExtension(const char* e){ if(glewIsExtensionSupported(e)!=0) return true;return 0!=glewIsSupported(e); }
         void _renderSkybox(SkyboxEmpty* skybox){
             Scene* scene = Resources::getCurrentScene();
             Camera* c = scene->getActiveCamera();
@@ -1292,7 +1307,7 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4f("VP",c->getProjection() * view);
                 sendTexture("Texture",skybox->texture()->address(0),0,GL_TEXTURE_CUBE_MAP);
                 Skybox::bindMesh();
-				skybox->draw();
+                skybox->draw();
                 //unbindTextureCubemap(0);
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
             }
@@ -1518,7 +1533,7 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             for(auto item:m_FontsToBeRendered){
                 Font& font = *item.font;
-				Mesh& mesh = *(Mesh::FontPlane);
+                Mesh& mesh = *(Mesh::FontPlane);
                 sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1i("DiffuseTextureEnabled",1);
                 sendUniform4f("Object_Color",item.col);
@@ -1753,7 +1768,7 @@ class epriv::RenderManager::impl final{
         }
         void _passSSAO(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->bind();
-			float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
+            float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
             if(RenderManager::GLSL_VERSION < 140){
                 glm::vec3 camPos = c.getPosition();
                 glm::vec3 camVVector = c.getViewVector();
@@ -1763,10 +1778,10 @@ class epriv::RenderManager::impl final{
                 sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
             }
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
-			sendUniform4i("SSAOInfoA",int(ssao),int(bloom),ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
+            sendUniform4i("SSAOInfoA",int(ssao),int(bloom),ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
 
             sendUniform1f("fbufferDivisor",_divisor);
-			sendUniform1f("bloomScale",bloom_scale);
+            sendUniform1f("bloomScale",bloom_scale);
             sendUniform3fv("poisson[0]",ssao_Kernels,SSAO_KERNEL_COUNT);
 
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
@@ -1842,9 +1857,9 @@ class epriv::RenderManager::impl final{
         void _passBlur(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,string type, GLuint texture,string channels){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur)->bind();
 
-			float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
+            float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
             glm::vec4 rgba(0.0f);
-			glm::vec2 hv(0.0f);
+            glm::vec2 hv(0.0f);
             if(channels.find("R") != string::npos) rgba.x = 1.0f;
             if(channels.find("G") != string::npos) rgba.y = 1.0f;
             if(channels.find("B") != string::npos) rgba.z = 1.0f;
@@ -1853,7 +1868,7 @@ class epriv::RenderManager::impl final{
             else{            hv = glm::vec2(0.0f,1.0f); }
 
             sendUniform4f("strengthModifier",bloom_strength,bloom_strength,bloom_strength,ssao_blur_strength);
-			sendUniform4f("UniformsA",bloom_radius,_divisor,hv.x,hv.y);
+            sendUniform4f("UniformsA",bloom_radius,_divisor,hv.x,hv.y);
             sendUniform4f("RGBA",rgba);
             sendTexture("textureMap",gbuffer.getTexture(texture),0);
 
@@ -2031,12 +2046,12 @@ class epriv::RenderManager::impl final{
         void _render(GBuffer& gbuffer,Camera& camera,uint& fboWidth,uint& fboHeight,bool& doSSAO, bool& doGodRays, bool& doAA,bool& HUD, Entity* ignore,bool& mainRenderFunc,GLuint& fbo, GLuint& rbo){
             Scene* s = Resources::getCurrentScene();
 
-			//restore default state, might have to increase this as we use more textures
-		    for(uint i = 0; i < 7; ++i){ 
-		        glActiveTexture(GL_TEXTURE0 + i);
+            //restore default state, might have to increase this as we use more textures
+            for(uint i = 0; i < 7; ++i){ 
+                glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D,0);
-				glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-		    }
+                glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+            }
 
             if(mainRenderFunc){
                 //Camera UBO update
@@ -2209,7 +2224,7 @@ class epriv::RenderManager::impl final{
 
         }
 };
-epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = this->m_i.get(); }
+epriv::RenderManager::RenderManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); renderManager = m_i.get(); }
 epriv::RenderManager::~RenderManager(){ m_i->_destruct(); }
 void epriv::RenderManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::RenderManager::_render(GBuffer* g,Camera* c,uint fboW,uint fboH,bool ssao,bool rays,bool AA,bool HUD,Entity* ignore,bool mainFunc,GLuint display_fbo,GLuint display_rbo){ m_i->_render(*g,*c,fboW,fboH,ssao,rays,AA,HUD,ignore,mainFunc,display_fbo,display_rbo); }
@@ -2251,7 +2266,7 @@ bool epriv::RenderManager::_bindMaterial(Material* m){
     return false;
 }
 bool epriv::RenderManager::_unbindMaterial(){
-    if(m_i->current_bound_material != nullptr){   
+    if(m_i->current_bound_material){   
         m_i->current_bound_material = nullptr;
         return true;
     }
@@ -2351,11 +2366,11 @@ void Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorit
 void Renderer::Settings::cullFace(uint s){ renderManager->_cullFace(s); }
 void Renderer::Settings::clear(bool color, bool depth, bool stencil){
     if(!color && !depth && !stencil) return;
-	GLuint clearBit = 0x00000000;
-	if(color)   clearBit |= GL_COLOR_BUFFER_BIT;
-	if(depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
-	if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
-	glClear(clearBit);
+    GLuint clearBit = 0x00000000;
+    if(color)   clearBit |= GL_COLOR_BUFFER_BIT;
+    if(depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
+    if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
+    glClear(clearBit);
 }
 void Renderer::Settings::enableDrawPhysicsInfo(bool b){ renderManager->draw_physics_debug = b; }
 void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->draw_physics_debug = false; }
@@ -2364,37 +2379,37 @@ float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
-	epriv::RenderManager::impl& i = *renderManager;
-	switch(_textureType){
-		case GL_TEXTURE_1D:{
-			if(i.current_bound_texture_1D != _textureObject){
-				i.current_bound_texture_1D = _textureObject;
-				glBindTexture(_textureType,_textureObject);
-			}
-			break;
+    epriv::RenderManager::impl& i = *renderManager;
+    switch(_textureType){
+        case GL_TEXTURE_1D:{
+            if(i.current_bound_texture_1D != _textureObject){
+                i.current_bound_texture_1D = _textureObject;
+                glBindTexture(_textureType,_textureObject);
+            }
+            break;
         }
-		case GL_TEXTURE_2D:{
-			if(i.current_bound_texture_2D != _textureObject){
-				i.current_bound_texture_2D = _textureObject;
-				glBindTexture(_textureType,_textureObject);
-			}
-			break;
+        case GL_TEXTURE_2D:{
+            if(i.current_bound_texture_2D != _textureObject){
+                i.current_bound_texture_2D = _textureObject;
+                glBindTexture(_textureType,_textureObject);
+            }
+            break;
         }
-		case GL_TEXTURE_3D:{
-			if(i.current_bound_texture_3D != _textureObject){
-				i.current_bound_texture_3D = _textureObject;
-				glBindTexture(_textureType,_textureObject);
-			}
-			break;
+        case GL_TEXTURE_3D:{
+            if(i.current_bound_texture_3D != _textureObject){
+                i.current_bound_texture_3D = _textureObject;
+                glBindTexture(_textureType,_textureObject);
+            }
+            break;
         }
-		case GL_TEXTURE_CUBE_MAP:{
-			if(i.current_bound_texture_cube_map != _textureObject){
-				i.current_bound_texture_cube_map = _textureObject;
-				glBindTexture(_textureType,_textureObject);
-			}
-			break;
+        case GL_TEXTURE_CUBE_MAP:{
+            if(i.current_bound_texture_cube_map != _textureObject){
+                i.current_bound_texture_cube_map = _textureObject;
+                glBindTexture(_textureType,_textureObject);
+            }
+            break;
         }
-	}
+    }
 }
 void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
     glGenTextures(1, &_textureObject);

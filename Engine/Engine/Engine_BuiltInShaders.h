@@ -22,7 +22,7 @@ namespace Engine{
                 static std::string vertex_hud;
                 static std::string vertex_skybox;
                 
-				static std::string lighting_vert;
+                static std::string lighting_vert;
                 static std::string stencil_passover;
 
                 static std::string smaa_common;

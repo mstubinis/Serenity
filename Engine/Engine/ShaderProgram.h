@@ -58,7 +58,7 @@ class Shader final: public EngineResource{
         bool fromFile();
 };
 class ShaderP final: public BindableResource{
-	friend class ::UniformBufferObject;
+    friend class ::UniformBufferObject;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

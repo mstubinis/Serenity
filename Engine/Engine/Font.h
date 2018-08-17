@@ -24,19 +24,19 @@ struct FontGlyph final{
      uint xadvance;
      glm::mat4 m_Model;
 
-	 //mesh specific
-	 std::vector<glm::vec3> pts;
-	 std::vector<glm::vec2> uvs;
+     //mesh specific
+     std::vector<glm::vec3> pts;
+     std::vector<glm::vec2> uvs;
 };
 class Font final: public EngineResource{
     private:
-		class impl; std::unique_ptr<impl> m_i;
+        class impl; std::unique_ptr<impl> m_i;
     public:
         Font(std::string);
         ~Font();
         void renderText(std::string text,glm::vec2& pos,glm::vec4 color = glm::vec4(1),float angle = 0,glm::vec2 scl = glm::vec2(1),float depth = 0.1);
         Texture* getGlyphTexture();
-		//Mesh* getFontMesh();
+        //Mesh* getFontMesh();
         FontGlyph* getGlyphData(uchar);
 };
 #endif

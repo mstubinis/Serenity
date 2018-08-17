@@ -107,7 +107,6 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Engine_BuiltInShaders.cpp" />
     <ClCompile Include="Engine_EventDispatcher.cpp" />
-    <ClCompile Include="Engine_EventObject.cpp" />
     <ClCompile Include="Engine_FullscreenItems.cpp" />
     <ClCompile Include="Engine_GLStateMachine.cpp" />
     <ClCompile Include="Engine_Math.cpp" />

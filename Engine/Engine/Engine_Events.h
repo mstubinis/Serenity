@@ -10,27 +10,27 @@
 
 namespace Engine{
     namespace epriv{
-		class EventManager final{
-			private:
-				class impl;
-			public:
-				std::unique_ptr<impl> m_i;
+        class EventManager final{
+            private:
+                class impl;
+            public:
+                std::unique_ptr<impl> m_i;
 
-				EventManager(const char* name,uint w,uint h);
-				~EventManager();
+                EventManager(const char* name,uint w,uint h);
+                ~EventManager();
 
-				void _init(const char* name,uint w,uint h);
+                void _init(const char* name,uint w,uint h);
 
-				void _onEventKeyPressed(uint& key);
-				void _onEventKeyReleased(uint& key);
-				void _onEventMouseButtonPressed(uint mouseButton);
-				void _onEventMouseButtonReleased(uint mouseButton);
-				void _onEventMouseWheelMoved(int& delta);
-				void _onResetEvents();
-				void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
+                void _onEventKeyPressed(uint& key);
+                void _onEventKeyReleased(uint& key);
+                void _onEventMouseButtonPressed(uint mouseButton);
+                void _onEventMouseButtonReleased(uint mouseButton);
+                void _onEventMouseWheelMoved(int& delta);
+                void _onResetEvents();
+                void _setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition);
 
-				void _update(const float& dt);
-		};
+                void _update(const float& dt);
+        };
     };
 
     //keyboard functions

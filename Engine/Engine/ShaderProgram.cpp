@@ -153,9 +153,10 @@ class ShaderP::impl final{
             sfind(_d,"CameraInfo2") || sfind(_d,"CameraViewVector")){
                 string uboCameraString;
                 if(versionNumber >= 140){ //UBO
-                     if(!sfind(_d,"layout (std140) uniform Camera {//generated")){
+                     if(!sfind(_d,"layout (std140) uniform Camera //generated")){
                          uboCameraString = "\n"
-                         "layout (std140) uniform Camera {//generated\n"
+                         "layout (std140) uniform Camera //generated\n"
+                         "{\n"
                          "    mat4 CameraView;\n"
                          "    mat4 CameraProj;\n"
                          "    mat4 CameraViewProj;\n"
@@ -171,7 +172,6 @@ class ShaderP::impl final{
                          "float CameraFar = CameraInfo2.w;\n"
                          "\n";
                          insertStringAtLine(_d,uboCameraString,1);
-                         UniformBufferObject::UBO_CAMERA->attachToShader(super);
                      }
                 }
                 else{ //no UBO's, just add a uniform struct
@@ -355,6 +355,9 @@ class ShaderP::impl final{
                     }
                 }
             }
+            if(sfind(VertexCode,"layout (std140) uniform Camera //generated") || sfind(FragmentCode,"layout (std140) uniform Camera //generated")){
+                UniformBufferObject::UBO_CAMERA->attachToShader(super);
+            }
         }
 };
 ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_init(n,vs,fs,s,this); }
@@ -391,18 +394,24 @@ class UniformBufferObject::impl final{
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
             if(_globalBindingPointNumber == -1){
                 //automatic assignment
-                globalBindingPointNumber = UniformBufferObject::MAX_UBO_BINDINGS - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
+                globalBindingPointNumber = (UniformBufferObject::MAX_UBO_BINDINGS-1) - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
                 ++UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
+                if(globalBindingPointNumber < 0){
+                    cout << "Warning: Max UBO Limit reached!" << std::endl;
+                    globalBindingPointNumber = 0;
+                }
             }
             else{
                 globalBindingPointNumber = _globalBindingPointNumber;
             }
             sizeOfStruct = _sizeofStruct;
 
-            glGenBuffers(1, &uboObject);glBindBuffer(GL_UNIFORM_BUFFER, uboObject);//gen and bind buffer
+            glGenBuffers(1, &uboObject);
+            glBindBuffer(GL_UNIFORM_BUFFER, uboObject);//gen and bind buffer
             glBufferData(GL_UNIFORM_BUFFER, sizeOfStruct, NULL, GL_DYNAMIC_DRAW); //create buffer data storage
+            glBindBuffer(GL_UNIFORM_BUFFER, 0); //is this really needed?
+
             glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);//link UBO to it's global numerical index
-            //glBindBuffer(GL_UNIFORM_BUFFER, 0); //is this really needed?
         }
         void _destruct(){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
@@ -412,14 +421,14 @@ class UniformBufferObject::impl final{
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
             glBufferSubData(GL_UNIFORM_BUFFER,0, sizeOfStruct, _data);
-            //glBindBuffer(GL_UNIFORM_BUFFER, 0); //is this really needed?
+            glBindBuffer(GL_UNIFORM_BUFFER, 0); //is this really needed?
         }
         void _attachToShader(UniformBufferObject* super,ShaderP* _shaderProgram){
-            GLuint prog = _shaderProgram->program();
-            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(prog)) return;
-            glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);
-            glUniformBlockBinding(prog, glGetUniformBlockIndex(prog,nameInShader), globalBindingPointNumber);
-            _shaderProgram->m_i->m_AttachedUBOs.emplace(prog,true);
+            GLuint program = _shaderProgram->program();
+            if(epriv::RenderManager::GLSL_VERSION < 140 || _shaderProgram->m_i->m_AttachedUBOs.count(program)) return;
+            uint programBlockIndex = glGetUniformBlockIndex(program,nameInShader);
+            glUniformBlockBinding(program, programBlockIndex, globalBindingPointNumber);
+            _shaderProgram->m_i->m_AttachedUBOs.emplace(program,true);
         }
 };
 UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber); }
