@@ -94,24 +94,6 @@ void Engine::init(const char* name,uint w,uint h){
 void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
 }
-
-void updatePhysics(float dt){
-    // update physics //////////////////////////////////////////
-    epriv::Core::m_Engine->m_TimeManager->stop_clock();
-
-    //It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time.
-    //dt < maxSubSteps * fixedTimeStep
-
-    float minStep = 0.0166666f; // == 0.0166666 at 1 fps
-    uint maxSubSteps = 0;
-    while(true){
-        ++maxSubSteps;
-        if(dt < (maxSubSteps * minStep)) break;
-    }
-    epriv::Core::m_Engine->m_PhysicsManager->_update(dt,maxSubSteps,minStep);
-    epriv::Core::m_Engine->m_TimeManager->calculate_physics();
-    ////////////////////////////////////////////////////////////
-}
 void updateLogic(float dt){
     // update logic   //////////////////////////////////////////
     epriv::Core::m_Engine->m_TimeManager->stop_clock();
@@ -135,7 +117,6 @@ void updateSounds(float dt){
     ////////////////////////////////////////////////////////////
 }
 void update(const float& dt){
-    updatePhysics(dt);
     updateLogic(dt);
     updateSounds(dt);
 }

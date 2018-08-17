@@ -10,6 +10,7 @@
 #include "Skybox.h"
 #include "MeshInstance.h"
 #include "Engine_ThreadManager.h"
+#include "Engine_Time.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -208,16 +209,29 @@ class epriv::ComponentManager::impl final{
             }
             vector_clear(m_EntitiesToBeDestroyed);
         }
+		void _updatePhysicsEngine(const float& dt){
+			epriv::Core::m_Engine->m_TimeManager->stop_clock();
+
+			//It's important that timeStep is always less than maxSubSteps * fixedTimeStep, otherwise you are losing time.
+			//dt < maxSubSteps * fixedTimeStep
+			float minStep = 0.0166666f; // == 0.0166666 at 1 fps
+			uint maxSubSteps = 0;
+			while(true){
+				++maxSubSteps; if(dt < (maxSubSteps * minStep)) break;
+			}
+			epriv::Core::m_Engine->m_PhysicsManager->_update(dt,maxSubSteps,minStep);
+			epriv::Core::m_Engine->m_TimeManager->calculate_physics();
+		}
         void _update(const float& dt,epriv::ComponentManager* super){
-            _updateCurrentScene(dt);
-            
+            _updateCurrentScene(dt); //take player input and perform player actions
+            _updatePhysicsEngine(dt);
             if(!m_Paused){	
-                _updateComponentBaseBodies(dt);
-                _updateComponentRigidBodies(dt);
+                _updateComponentBaseBodies(dt); //transform model matrices
+                _updateComponentRigidBodies(dt); //recalc forward right up
             }
-            _updateComponentCameras(dt);
+            _updateComponentCameras(dt); //update frustum planes
             if(!m_Paused){
-                _updateComponentModels(dt);
+                _updateComponentModels(dt); //transform model matrices and perform render check
             }
 
             _destroyQueuedEntities(super);
