@@ -2091,7 +2091,7 @@ class epriv::RenderManager::impl final{
 
             if(godRays && godRays_Object){
                 gbuffer.start(GBufferType::GodRays,"RGBA",false);
-                ComponentBasicBody* b = godRays_Object->getComponent<ComponentBasicBody>();
+                ComponentBody* b = godRays_Object->getComponent<ComponentBody>();
                 glm::vec3 oPos = b->position();
                 glm::vec3 sp = Math::getScreenCoordinates(oPos,false);
                 glm::vec3 camPos = camera.getPosition();

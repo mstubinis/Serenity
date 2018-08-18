@@ -32,8 +32,7 @@ struct Handle;
 class MeshInstance;
 
 class ComponentBaseClass;
-class ComponentBasicBody;
-class ComponentRigidBody;
+class ComponentBody;
 class ComponentModel;
 class ComponentCamera;
 
@@ -45,11 +44,11 @@ namespace Engine{
         struct MeshMaterialPair;
         class ComponentTypeRegistry;
         class ComponentManager;
-        class ComponentBodyBaseClass;
+		class ComponentCameraSystem;
     };
 };
 class ComponentType{public:enum Type{
-    Body, //Can contain: ComponentRigidBody, ComponentBasicBody, maybe more...
+    Body,
     Model,
     Camera, //Can contain: ComponentCamera, ComponentGameCamera
 _TOTAL,};};
@@ -86,6 +85,7 @@ namespace Engine{
             friend class ::Entity;
             friend class ::Scene;
             friend class ::Engine::epriv::ComponentTypeRegistry;
+			friend class ::Engine::epriv::ComponentCameraSystem;
             private:
                 class impl;
                 ObjectPool<Entity>*                                                 m_EntityPool;
@@ -111,7 +111,6 @@ namespace Engine{
                 void _pause(bool=true);
                 void _unpause();
                 void _update(const float& dt);
-                void _render();
                 void _resize(uint width,uint height);
 
                 void _sceneSwap(Scene* oldScene, Scene* newScene);
@@ -186,37 +185,23 @@ namespace Engine{
                    _emplaceSceneFinal();
                 }
         };
-        class ComponentBodyType{public:enum Type{
-            BasicBody,
-            RigidBody,
+		class ComponentCameraSystem{
+			friend class ::Engine::epriv::ComponentManager;
+		    private:
+				class impl; 
+		    public:
+				std::unique_ptr<impl> m_i;
 
-        _TOTAL,};};
-        class ComponentBodyBaseClass: public ComponentBaseClass{
-            protected:
-                ComponentBodyType::Type _type;
-            public:
-                BOOST_TYPE_INDEX_REGISTER_CLASS
-                ComponentBodyBaseClass(ComponentBodyType::Type);
-                virtual ~ComponentBodyBaseClass();
-                ComponentBodyType::Type getBodyType();
-                virtual glm::quat rotation(){ return glm::quat(); }
-                virtual glm::vec3 getScale(){ return glm::vec3(1.0f); }
-                virtual glm::vec3 getScreenCoordinates(){ return glm::vec3(-9999.0f,-9999.0f,0.0f); }
-                virtual glm::vec3 position(){ return glm::vec3(0.0f); }
-                virtual glm::mat4 modelMatrix(){ return glm::mat4(1.0f); }
-                virtual glm::vec3 forward(){ return glm::vec3(0.0f,0.0f,-1.0f); }
-                virtual glm::vec3 right(){ return glm::vec3(1.0f,0.0f,0.0f); }
-                virtual glm::vec3 up(){ return glm::vec3(0.0f,1.0f,0.0f); }
-                virtual void setPosition(float x,float y,float z){}
-                virtual void setPosition(glm::vec3& pos){}
-        };
+				ComponentCameraSystem();
+				~ComponentCameraSystem();
+				void update(const float& dt);
+		};
     };
 };
 
 class ComponentModel: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
-    friend class ::ComponentRigidBody;
-    friend class ::ComponentBasicBody;
+    friend class ::ComponentBody;
     private:
         std::vector<MeshInstance*> models;
         float _radius;
@@ -255,51 +240,28 @@ class ComponentModel: public ComponentBaseClass{
         template<class T> void setCustomUnbindFunctor(T& functor,uint index = 0){ models.at(index)->setCustomUnbindFunctor(functor); }
 };
 
-class ComponentBasicBody: public Engine::epriv::ComponentBodyBaseClass{
-    friend class ::Engine::epriv::ComponentManager;
-    friend class ::ComponentModel;
-    friend class ::Camera;
-    private:
-        glm::mat4 _modelMatrix;
-        glm::vec3 _position, _scale, _forward, _right, _up;
-        glm::quat _rotation;
-    public:
-        BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBasicBody();
-        ~ComponentBasicBody();
-
-        glm::vec3 getScreenCoordinates();
-        glm::vec3 position();
-        glm::vec3 getScale();
-        glm::vec3 forward();
-        glm::vec3 right();
-        glm::vec3 up();
-        glm::mat4 modelMatrix();
-        glm::quat rotation();
-
-        void alignTo(glm::vec3 direction,float speed = 0);
-
-        void translate(glm::vec3& translation,bool local = true);    void translate(float x,float y,float z,bool local = true);
-        void rotate(glm::vec3& rotation);                            void rotate(float pitch,float yaw,float roll);
-        void scale(glm::vec3& amount);                               void scale(float x,float y,float z);
-
-        void setPosition(glm::vec3& newPosition);                    void setPosition(float x,float y,float z);
-        void setRotation(glm::quat& newRotation);                    void setRotation(float x,float y,float z,float w);
-        void setScale(glm::vec3& newScale);                          void setScale(float x,float y,float z);
-};
-
-class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
+class ComponentBody: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     private:
-        Collision* _collision;
-        btRigidBody* _rigidBody;
-        btDefaultMotionState* _motionState;
-        float _mass;
+		struct PhysicsData{
+			Collision* collision;   btRigidBody* rigidBody;   btDefaultMotionState* motionState; float mass;
+		};
+		struct NormalData{
+			glm::vec3* scale;   glm::vec3* position;   glm::quat* rotation;   glm::mat4* modelMatrix;
+		};
+		union{
+			NormalData n;
+			PhysicsData p;
+		} data;
+		bool _physics;
         glm::vec3 _forward, _right, _up;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentRigidBody(Collision* = nullptr,Entity* owner = nullptr);
-        ~ComponentRigidBody();
+        ComponentBody(Collision*,Entity* owner = nullptr);
+		ComponentBody(Entity* owner = nullptr);
+        ~ComponentBody();
+
+		void alignTo(glm::vec3 direction,float speed);
 
         void translate(glm::vec3& translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
         void rotate(glm::vec3& rotation,bool local = true);         void rotate(float pitch,float yaw,float roll,bool local = true);
@@ -312,6 +274,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
         float mass();
         glm::vec3 getScreenCoordinates();
         glm::quat rotation();
+		glm::vec3 getScale();
         glm::vec3 position();
         glm::vec3 forward();
         glm::vec3 right();
@@ -341,6 +304,7 @@ class ComponentRigidBody: public Engine::epriv::ComponentBodyBaseClass{
 
 class ComponentCamera: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
+	friend class ::Engine::epriv::ComponentCameraSystem;
     friend class ::Engine::epriv::ComponentInternalFunctionality;
     friend class ::ComponentModel;
     friend class ::Camera;

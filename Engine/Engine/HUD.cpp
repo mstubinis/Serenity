@@ -76,9 +76,9 @@ void HUD::render(){
 
     #pragma region renderCrossHairAndOtherInfo
     
-    if(player->getTarget() != nullptr){
+    if(player->getTarget()){
 
-        ComponentBasicBody* body = player->getTarget()->getComponent<ComponentBasicBody>();
+        ComponentBody* body = player->getTarget()->getComponent<ComponentBody>();
         ComponentModel* model = player->getTarget()->getComponent<ComponentModel>();
 
         glm::vec3 pos = body->getScreenCoordinates();

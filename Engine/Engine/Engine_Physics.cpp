@@ -90,8 +90,8 @@ class epriv::PhysicsManager::impl final{
                         const btVector3& ptB = pt.getPositionWorldOnB();
                         const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-                        ComponentRigidBody* a = (ComponentRigidBody*)(obA->getUserPointer());
-                        ComponentRigidBody* b = (ComponentRigidBody*)(obB->getUserPointer());
+                        ComponentBody* a = (ComponentBody*)(obA->getUserPointer());
+                        ComponentBody* b = (ComponentBody*)(obB->getUserPointer());
 
                         //a->collisionResponse(b);
                         //b->collisionResponse(a);
@@ -168,7 +168,7 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,Entity
     btVector3 _s = btVector3(btScalar(s.x),btScalar(s.y),btScalar(s.z));
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     
-    ComponentRigidBody* body = ignored->getComponent<ComponentRigidBody>();
+    ComponentBody* body = ignored->getComponent<ComponentBody>();
 
     if(body){
         return Physics::rayCast(_s,_e,const_cast<btRigidBody*>(body->getBody()));
@@ -180,7 +180,7 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     btVector3 _e = btVector3(btScalar(e.x),btScalar(e.y),btScalar(e.z));
     vector<btRigidBody*> objs;
     for(auto o:ignored){
-        ComponentRigidBody* body = o->getComponent<ComponentRigidBody>();
+        ComponentBody* body = o->getComponent<ComponentBody>();
         if(body){
             objs.push_back(const_cast<btRigidBody*>(body->getBody()));
         }
@@ -235,9 +235,9 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
         case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-                btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
-                btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
-                btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
+                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position);
+                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position);
+                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btGImpactMeshShape(m_InternalMeshData);
@@ -251,9 +251,9 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
         case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-                btVector3 v1 = Engine::Math::btVectorFromGLM(triangle.v1.position);
-                btVector3 v2 = Engine::Math::btVectorFromGLM(triangle.v2.position);
-                btVector3 v3 = Engine::Math::btVectorFromGLM(triangle.v3.position);
+                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position);
+                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position);
+                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);

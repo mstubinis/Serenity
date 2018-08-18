@@ -59,10 +59,10 @@ void Scene::setActiveCamera(Camera* c){
 }
 
 void Scene::centerSceneToObject(Entity* center){
-    epriv::ComponentBodyBaseClass& bodyBase = *(center->getComponent<epriv::ComponentBodyBaseClass>());
+    ComponentBody& bodyBase = *(center->getComponent<ComponentBody>());
     for(auto entityID:m_Entities){
         Entity* e = getEntity(entityID);
-        epriv::ComponentBodyBaseClass& entityBody = *(e->getComponent<epriv::ComponentBodyBaseClass>());
+        ComponentBody& entityBody = *(e->getComponent<ComponentBody>());
         if(e != center && !e->parent()){
             entityBody.setPosition(entityBody.position() - bodyBase.position());
         }

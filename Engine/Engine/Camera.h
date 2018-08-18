@@ -17,7 +17,7 @@ class Camera: public Entity{
     private:
         class impl; std::unique_ptr<impl> m_i;
     protected:
-        ComponentBasicBody* m_BasicBody;
+        ComponentBody* m_BasicBody;
         ComponentCamera* m_Camera;
     public:
         Camera(float angle,float aspectRatio,float nearPlane,float farPlane,Scene* = nullptr);

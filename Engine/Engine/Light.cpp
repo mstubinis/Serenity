@@ -47,7 +47,7 @@ vector<boost::tuple<float,float,float>> LIGHT_RANGES = [](){
 
 class SunLight::impl final{
     public:
-        ComponentBasicBody* m_Body;
+        ComponentBody* m_Body;
         bool m_Active;
         glm::vec4 m_Color;
         LightType::Type m_Type;
@@ -60,7 +60,7 @@ class SunLight::impl final{
             m_DiffuseIntensity = 2.0f;
             m_SpecularIntensity = 1.0f;
 
-            m_Body = new ComponentBasicBody();  super->addComponent(m_Body);
+            m_Body = new ComponentBody();  super->addComponent(m_Body);
         }
 };
 

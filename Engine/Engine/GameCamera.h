@@ -12,7 +12,7 @@ class GameCameraComponent: public ComponentCamera{
         float m_OrbitRadius;
         Entity* m_Target;
         Entity* m_Player;
-        ComponentBasicBody* m_Body;
+        ComponentBody* m_Body;
 
         GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane);
         GameCameraComponent(float left,float right,float bottom,float top,float nearPlane,float farPlane);

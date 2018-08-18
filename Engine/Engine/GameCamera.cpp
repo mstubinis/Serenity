@@ -30,7 +30,7 @@ GameCameraComponent::~GameCameraComponent(){
 void GameCameraComponent::update(const float& dt){
     switch(m_State){
         case CAMERA_STATE_FOLLOW:{
-            epriv::ComponentBodyBaseClass& body = *(m_Target->getComponent<epriv::ComponentBodyBaseClass>());
+            ComponentBody& body = *(m_Target->getComponent<ComponentBody>());
             ComponentModel& targetModel = *(m_Target->getComponent<ComponentModel>());
             float targetRadius = targetModel.radius();
 
@@ -47,8 +47,8 @@ void GameCameraComponent::update(const float& dt){
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
-            epriv::ComponentBodyBaseClass& target = *(m_Target->getComponent<epriv::ComponentBodyBaseClass>());
-            epriv::ComponentBodyBaseClass& player = *(m_Player->getComponent<epriv::ComponentBodyBaseClass>());
+            ComponentBody& target = *(m_Target->getComponent<ComponentBody>());
+            ComponentBody& player = *(m_Player->getComponent<ComponentBody>());
             ComponentModel& playerModel = *(m_Player->getComponent<ComponentModel>());
 
             m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
@@ -68,7 +68,7 @@ void GameCameraComponent::update(const float& dt){
             break;
         }
         case CAMERA_STATE_ORBIT:{
-            epriv::ComponentBodyBaseClass& target = *(m_Target->getComponent<epriv::ComponentBodyBaseClass>());
+            ComponentBody& target = *(m_Target->getComponent<ComponentBody>());
             ComponentModel& targetModel = *(m_Target->getComponent<ComponentModel>());
 
 
@@ -139,7 +139,7 @@ Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
 
     float distance = -1;
     for(auto object:objs){
-        epriv::ComponentBodyBaseClass& body = *(object->getComponent<epriv::ComponentBodyBaseClass>());
+        ComponentBody& body = *(object->getComponent<ComponentBody>());
         float d = glm::distance(body.position(), getPosition());
         if(distance == -1 || d < distance){
             distance = d;

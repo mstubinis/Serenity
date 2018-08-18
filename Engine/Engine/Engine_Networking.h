@@ -23,7 +23,7 @@ namespace Engine{namespace Networking{
             ~SocketTCP();
 
             const sf::TcpSocket& socket();
-            const std::string& ip();    
+            const std::string ip();    
             const ushort remotePort();
             const ushort localPort();
 
@@ -65,7 +65,7 @@ namespace Engine{namespace Networking{
             ~ListenerTCP();
 
             const sf::TcpListener& socket();
-            const std::string& ip();
+            const std::string ip();
             const ushort localPort();
             void setBlocking(bool);
             const bool isBlocking();

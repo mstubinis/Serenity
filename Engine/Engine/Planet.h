@@ -61,7 +61,7 @@ class Planet: public Entity{
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
     protected:
         ComponentModel* m_Model;
-        ComponentBasicBody* m_Body;
+        ComponentBody* m_Body;
         std::vector<Ring*> m_Rings;
         PlanetType m_Type;
         OrbitInfo* m_OrbitInfo;

@@ -189,7 +189,7 @@ Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,f
         skyMesh->setCustomBindFunctor(f);
         skyMesh->setScale(aScale,aScale,aScale);
     }
-    m_Body = new ComponentBasicBody();
+    m_Body = new ComponentBody();
     addComponent(m_Body);
     m_Body->setScale(scl,scl,scl);
     m_Body->setPosition(pos);

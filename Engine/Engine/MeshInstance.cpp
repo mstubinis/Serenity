@@ -164,7 +164,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
     glm::mat4 parentModel = glm::mat4(1.0f);
     Entity* parent = nullptr;
     parent = i.m_Entity;
-    epriv::ComponentBodyBaseClass& body = *(parent->getComponent<epriv::ComponentBodyBaseClass>());
+    ComponentBody& body = *(parent->getComponent<ComponentBody>());
     parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& animationQueue = i.m_AnimationQueue;

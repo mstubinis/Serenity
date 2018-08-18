@@ -21,7 +21,7 @@ class Camera::impl final{
             if(!scene)
                 scene = Resources::getCurrentScene();
             scene->addEntity(super);
-            super->m_BasicBody = new ComponentBasicBody();
+            super->m_BasicBody = new ComponentBody();
             super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
             super->addComponent(super->m_BasicBody);
             super->addComponent(super->m_Camera);	
@@ -66,14 +66,14 @@ glm::vec3 Camera::right(){ return m_BasicBody->right(); }
 glm::vec3 Camera::up(){ return m_BasicBody->up(); }
 
 float Camera::getDistance(Entity* e){
-    epriv::ComponentBodyBaseClass* b = e->getComponent<epriv::ComponentBodyBaseClass>();
+    ComponentBody* b = e->getComponent<ComponentBody>();
     return glm::distance(b->position(),getPosition());
 }
 float Camera::getDistance(glm::vec3 objPos){ return glm::distance(objPos,getPosition()); }
 uint Camera::sphereIntersectTest(glm::vec3 pos, float radius){ return m_Camera->sphereIntersectTest(pos,radius); }
 uint Camera::pointIntersectTest(glm::vec3 pos){ return m_Camera->pointIntersectTest(pos); }
 bool Camera::rayIntersectSphere(Entity* entity){
-    epriv::ComponentBodyBaseClass& body = *(entity->getComponent<epriv::ComponentBodyBaseClass>());
+    ComponentBody& body = *(entity->getComponent<ComponentBody>());
     ComponentModel* model = entity->getComponent<ComponentModel>();
     float radius = 0.0f;
     if(model) radius = model->radius();
