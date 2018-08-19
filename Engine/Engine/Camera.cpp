@@ -66,18 +66,18 @@ glm::vec3 Camera::right(){ return m_BasicBody->right(); }
 glm::vec3 Camera::up(){ return m_BasicBody->up(); }
 
 float Camera::getDistance(Entity* e){
-    ComponentBody* b = e->getComponent<ComponentBody>();
+    auto* b = e->getComponent<ComponentBody>();
     return glm::distance(b->position(),getPosition());
 }
 float Camera::getDistance(glm::vec3 objPos){ return glm::distance(objPos,getPosition()); }
 uint Camera::sphereIntersectTest(glm::vec3 pos, float radius){ return m_Camera->sphereIntersectTest(pos,radius); }
 uint Camera::pointIntersectTest(glm::vec3 pos){ return m_Camera->pointIntersectTest(pos); }
 bool Camera::rayIntersectSphere(Entity* entity){
-    ComponentBody& body = *(entity->getComponent<ComponentBody>());
-    ComponentModel* model = entity->getComponent<ComponentModel>();
+    auto& body = *(entity->getComponent<ComponentBody>());
+    auto* model = entity->getComponent<ComponentModel>();
     float radius = 0.0f;
     if(model) radius = model->radius();
-    return Engine::Math::rayIntersectSphere(body.position(),radius,m_BasicBody->position(),m_Camera->getViewVector());
+    return Math::rayIntersectSphere(body.position(),radius,m_BasicBody->position(),m_Camera->getViewVector());
 }
 
 

@@ -434,8 +434,8 @@ class Texture::impl final{
         }
 
         void _initFramebuffer(uint _w,uint _h,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat,float _divisor,Texture* _super){
-            uint _width = uint(float(_w)*_divisor);
-            uint _height = uint(float(_h)*_divisor);
+            uint _width(float(_w)*_divisor);
+            uint _height(float(_h)*_divisor);
             ImageLoadedStructure* image = new ImageLoadedStructure(_width,_height,_pixelType,_pixelFormat,_internalFormat);
 
             _initCommon(GL_TEXTURE_2D,false);
@@ -548,8 +548,8 @@ class Texture::impl final{
                 return;
             }
             Renderer::bindTexture(m_Type, m_TextureAddress.at(0));
-            uint _w = uint(float(w) * t->divisor());
-            uint _h = uint(float(h) * t->divisor());
+            uint _w(float(w) * t->divisor());
+            uint _h(float(h) * t->divisor());
             m_ImagesDatas.at(0)->mipmaps.at(0).width = _w; 
             m_ImagesDatas.at(0)->mipmaps.at(0).height = _h;
             glTexImage2D(m_Type,0,ImageInternalFormat::at(m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(m_ImagesDatas.at(0)->pixelType),NULL);
@@ -748,7 +748,7 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
     free(pxls);
 }
 void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
-    Texture::impl& i = *_texture->m_i;
+    auto& i = *_texture->m_i;
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
     for(auto mipmap:i.m_ImagesDatas.at(0)->mipmaps){
         i._importIntoOpenGL(mipmap,i.m_Type);
@@ -757,16 +757,16 @@ void epriv::TextureLoader::LoadTexture2DIntoOpenGL(Texture* _texture){
     _texture->setFilter(TextureFilter::Linear);
 }
 void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
-    Texture::impl& i = *_texture->m_i;
+    auto& i = *_texture->m_i;
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
-    uint& _w = i.m_ImagesDatas.at(0)->mipmaps.at(0).width;
-    uint& _h = i.m_ImagesDatas.at(0)->mipmaps.at(0).height;
+    uint& _w(i.m_ImagesDatas.at(0)->mipmaps.at(0).width);
+    uint& _h(i.m_ImagesDatas.at(0)->mipmaps.at(0).height);
     glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),NULL);
     _texture->setFilter(TextureFilter::Linear);
     _texture->setWrapping(TextureWrap::ClampToEdge);
 }
 void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
-    Texture::impl& i = *_texture->m_i;
+    auto& i = *_texture->m_i;
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
     uint imageIndex = 0;
     for(auto image:i.m_ImagesDatas){
@@ -780,11 +780,11 @@ void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
     _texture->setWrapping(TextureWrap::ClampToEdge);
 }
 void epriv::TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture* _texture,uint imageIndex,uint mipmapLevel){
-    Texture::impl& i = *_texture->m_i;
-    vector<uchar>& pxls = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).pixels;
+    auto& i = *_texture->m_i;
+    auto& pxls = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).pixels;
     if(pxls.size() != 0) return;
-    uint& _w = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).width;
-    uint& _h = i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).height;
+    uint& _w(i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).width);
+    uint& _h(i.m_ImagesDatas.at(imageIndex)->mipmaps.at(mipmapLevel).height);
     pxls.resize(_w * _h * 4);
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
     glGetTexImage(i.m_Type,0,ImagePixelFormat::at(i.m_ImagesDatas.at(imageIndex)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(imageIndex)->pixelType),&pxls[0]);
@@ -1025,7 +1025,7 @@ void Texture::setFilter(GLuint type,TextureFilter::Filter f){
     Texture::setMaxFilter(type,f);
 }
 void Texture::setAnisotropicFiltering(float aniso){
-    Texture::impl& i = *m_i;
+    auto& i = *m_i;
     Renderer::bindTexture(i.m_Type,i.m_TextureAddress.at(0));
     //need to update glew for this
     //if(epriv::RenderManager::OPENGL_VERSION >= 46){

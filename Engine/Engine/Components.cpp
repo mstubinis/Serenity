@@ -24,8 +24,7 @@
 using namespace Engine;
 using namespace std;
 
-boost::unordered_map<boost_type_index,uint>               epriv::ComponentTypeRegistry::m_Map;
-boost::unordered_map<boost_type_index,uint>               epriv::ComponentTypeRegistry::m_MapScene;
+boost::unordered_map<boost_type_index,uint>               epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot;
 boost::unordered_map<uint, vector<ComponentBaseClass*>>   epriv::ComponentManager::m_ComponentVectors;
 boost::unordered_map<uint, vector<ComponentBaseClass*>>   epriv::ComponentManager::m_ComponentVectorsScene;
 epriv::ObjectPool<ComponentBaseClass>*                    epriv::ComponentManager::m_ComponentPool;
@@ -57,8 +56,8 @@ class ComponentModel::impl final{
         float calculateRadius(ComponentModel* super){
             float maxLength = 0;
             for(auto model:super->models){
-                MeshInstance& pair = *model;
-                glm::mat4 m = pair.model();
+                auto& pair = *model;
+                glm::mat4& m = pair.model();
                 glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
                 float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
                 if(length > maxLength){
@@ -67,7 +66,7 @@ class ComponentModel::impl final{
             }
             super->_radius = maxLength;
             if(super->m_Owner){
-                ComponentBody* body = super->m_Owner->getComponent<ComponentBody>();
+                auto* body = super->m_Owner->getComponent<ComponentBody>();
                 if(body){
                     super->_radius *= Engine::Math::Max(body->getScale());
                 }
@@ -85,13 +84,12 @@ class epriv::ComponentCameraSystem::impl final{
 		}
         static void _defaultUpdateCameraComponent(vector<ComponentBaseClass*>& vec,const float& dt){
             for(auto c:vec){
-                ComponentCamera& cmpnt = *(ComponentCamera*)c;
+                auto& cmpnt = *(ComponentCamera*)c;
 				cmpnt.update(dt);//custom camera user code
                 Math::extractViewFrustumPlanesHartmannGribbs(cmpnt._projectionMatrix * cmpnt._viewMatrix,cmpnt._planes);//update view frustrum 
             }
         }
 		void _update(const float& dt){
-
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
             vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
             vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
@@ -128,9 +126,9 @@ class epriv::ComponentManager::impl final{
             m_TypeRegistry.emplace<ComponentModel>();
             m_TypeRegistry.emplace<ComponentCamera>();
 
-            m_TypeRegistry.emplaceVector<ComponentBody>();
-            m_TypeRegistry.emplaceVector<ComponentModel>();
-            m_TypeRegistry.emplaceVector<ComponentCamera>();
+            //m_TypeRegistry.emplaceVector<ComponentBody>();
+            //m_TypeRegistry.emplaceVector<ComponentModel>();
+            //m_TypeRegistry.emplaceVector<ComponentCamera>();
         }
         void _postInit(const char* name, uint& w, uint& h){
         }
@@ -145,7 +143,7 @@ class epriv::ComponentManager::impl final{
                 modelMatrix = glm::mat4(1.0f);
             }
             else{
-                ComponentBody* body = parent->getComponent<ComponentBody>();
+                auto* body = parent->getComponent<ComponentBody>();
                 modelMatrix = body->modelMatrix();
             }
             glm::mat4 translationMat = glm::translate(position);
@@ -155,7 +153,7 @@ class epriv::ComponentManager::impl final{
         }
         static void _updateBodiesJob(vector<ComponentBaseClass*>& vec){
             for(uint j = 0; j < vec.size(); ++j){
-                ComponentBody& b = *(ComponentBody*)vec.at(j);
+                auto& b = *(ComponentBody*)vec.at(j);
 
 				if(b._physics){
 					Engine::Math::recalculateForwardRightUp(b.data.p.rigidBody,b._forward,b._right,b._up);
@@ -177,8 +175,8 @@ class epriv::ComponentManager::impl final{
             epriv::threading::waitForAll();
         }
         void _calculateRenderCheck(ComponentModel& m,Camera* camera){
-            ComponentBody& body = *(m.m_Owner->getComponent<ComponentBody>());
-            glm::vec3& pos = body.position();
+            auto& body = *(m.m_Owner->getComponent<ComponentBody>());
+            auto& pos = body.position();
             uint sphereTest = camera->sphereIntersectTest(pos,m._radius);
             if(!m.visible() || sphereTest == 0 || camera->getDistance(pos) > m._radius * 1100.0f){ //1100 is the visibility threshold
                 m.m_i->m_PassedRenderCheck = false;
@@ -188,18 +186,18 @@ class epriv::ComponentManager::impl final{
         }
         static void _updateModelComponentsJob(vector<ComponentBaseClass*>& vec,Camera* camera){
             for(uint j = 0; j < vec.size(); ++j){
-                ComponentModel& modelComponent = *(ComponentModel*)vec.at(j);
-                for(uint i = 0; i < modelComponent.models.size(); ++i){
-                    MeshInstance& pair = *modelComponent.models.at(i);
+                auto& model = *(ComponentModel*)vec.at(j);
+                for(uint i = 0; i < model.models.size(); ++i){
+                    auto& pair = *model.models.at(i);
                     if(pair.mesh()){
-                        componentManager->m_i->_performTransformation(modelComponent.m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
-                        componentManager->m_i->_calculateRenderCheck(modelComponent,camera);
+                        componentManager->m_i->_performTransformation(model.m_Owner->parent(),pair.position(),pair.orientation(),pair.getScale(),pair.model());
+                        componentManager->m_i->_calculateRenderCheck(model,camera);
                     }
                 }
             }
         }
         void _updateComponentModels(const float& dt){
-            Camera* camera = Resources::getCurrentScene()->getActiveCamera();
+            auto* camera = Resources::getCurrentScene()->getActiveCamera();
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentModel>();
             vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
             vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
@@ -210,7 +208,7 @@ class epriv::ComponentManager::impl final{
             epriv::threading::waitForAll();
         }
         void _updateCurrentScene(const float& dt){
-            Scene* currentScene = Resources::getCurrentScene();
+            auto* currentScene = Resources::getCurrentScene();
             for(auto entityID:currentScene->m_Entities){
                 Entity* e = componentManager->_getEntity(entityID);
                 //if(e){//should not need this...
@@ -256,13 +254,13 @@ class epriv::ComponentManager::impl final{
 
 epriv::ComponentTypeRegistry::ComponentTypeRegistry(){
     m_NextIndex = 0;
-    m_NextIndexScene = 0;
+    //m_NextIndexScene = 0;
 }
 epriv::ComponentTypeRegistry::~ComponentTypeRegistry(){
-    m_Map.clear();
-    m_MapScene.clear();
+	m_MapComponentTypesToSlot.clear();
+    //m_MapScene.clear();
     m_NextIndex = 0;
-    m_NextIndexScene = 0;
+    //m_NextIndexScene = 0;
 }
 
 
@@ -277,7 +275,7 @@ void epriv::ComponentManager::_update(const float& dt){ m_i->_update(dt,this); }
 void epriv::ComponentManager::_resize(uint width,uint height){
     uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
     for(auto camera:ComponentManager::m_ComponentVectors.at(slot)){ 
-        ComponentCamera& cam = *(ComponentCamera*)camera;
+        auto& cam = *(ComponentCamera*)camera;
         cam.resize(width,height); 
     }
 }
@@ -479,19 +477,19 @@ void ComponentModel::setModel(Mesh* mesh,Material* material,uint index){
 }
 
 void ComponentModel::setModelMesh(Mesh* mesh,uint index){
-    MeshInstance& pair = *(models.at(index));
+    auto& pair = *(models.at(index));
     pair.setMesh(mesh);
     m_i->calculateRadius(this);
 }
 void ComponentModel::setModelMesh(Handle& meshHandle, uint index){ ComponentModel::setModelMesh(Resources::getMesh(meshHandle),index); }
 
 void ComponentModel::setModelMaterial(Material* material,uint index){
-    MeshInstance& pair = *(models.at(index));
+    auto& pair = *(models.at(index));
     pair.setMaterial(material);
 }
 void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ ComponentModel::setModelMaterial(Resources::getMaterial(materialHandle),index); }
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
-    ComponentBody* body = m_Owner->getComponent<ComponentBody>();
+    auto* body = m_Owner->getComponent<ComponentBody>();
     return Math::rayIntersectSphere(body->position(),_radius,camera->_eye,camera->getViewVector());
 }
 
@@ -518,13 +516,10 @@ ComponentBody::ComponentBody(Collision* _collision,Entity* owner):ComponentBaseC
     setCollision(_collision,false);
     setScale(1.0f,1.0f,1.0f);
 
-    //motion state/////////////////////////////////////
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix *= glm::mat4_cast(glm::quat());
-    modelMatrix = glm::scale(modelMatrix,glm::vec3(1.0f));
-    btTransform tr; tr.setFromOpenGLMatrix(glm::value_ptr(modelMatrix));
+    btTransform tr;
+	tr.setFromOpenGLMatrix(glm::value_ptr(glm::mat4(1.0f)));
     data.p.motionState = new btDefaultMotionState(tr);
-    ///////////////////////////////////////////////////
+
     setMass(1.0f);
     btRigidBody::btRigidBodyConstructionInfo CI(data.p.mass,data.p.motionState,data.p.collision->getCollisionShape(),*(data.p.collision->getInertia()));
     data.p.rigidBody = new btRigidBody(CI);
@@ -568,7 +563,7 @@ void ComponentBody::setCollision(Collision* collision,bool emptyCollision){
     data.p.collision = collision;
     if(!data.p.collision){
         if(m_Owner && !emptyCollision){
-            ComponentModel* model = m_Owner->getComponent<ComponentModel>();
+            auto* model = m_Owner->getComponent<ComponentModel>();
             if(model && model->models.size() > 0){
                 btCompoundShape* shape = new btCompoundShape();
                 for(auto m:model->models){
@@ -588,14 +583,14 @@ void ComponentBody::translate(glm::vec3& translation,bool local){ ComponentBody:
 void ComponentBody::translate(float x,float y,float z,bool local){
 	if(_physics){
 		data.p.rigidBody->activate();
-		btVector3 vec = btVector3(x,y,z);
-		Math::translate(data.p.rigidBody,vec,local);
-		setPosition(  position() + Engine::Math::btVectorToGLM(vec)  );
+		btVector3 v(x,y,z);
+		Math::translate(data.p.rigidBody,v,local);
+		setPosition(  position() + Engine::Math::btVectorToGLM(v)  );
 	}
 	else{
 		glm::vec3& _position = *data.n.position;
 		_position.x += x; _position.y += y; _position.z += z;
-		glm::vec3 offset = glm::vec3(x,y,z);
+		glm::vec3 offset(x,y,z);
 		if(local){
 			offset = *(data.n.rotation) * offset;
 		}
@@ -606,7 +601,7 @@ void ComponentBody::rotate(glm::vec3& rotation,bool local){ ComponentBody::rotat
 void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
 	if(_physics){
 		btQuaternion quat = data.p.rigidBody->getWorldTransform().getRotation().normalize();
-		glm::quat glmquat = glm::quat(quat.w(),quat.x(),quat.y(),quat.z());
+		glm::quat glmquat(quat.w(),quat.x(),quat.y(),quat.z());
 
 		if(abs(pitch) >= 0.001f) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
 		if(abs(yaw) >= 0.001f)   glmquat = glmquat * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));   //yaw
@@ -634,7 +629,7 @@ void ComponentBody::scale(float x,float y,float z){
 		_scale.x += x; _scale.y += y; _scale.z += z;
 	}
 	if(m_Owner){
-		ComponentModel* models = m_Owner->getComponent<ComponentModel>();
+		auto* models = m_Owner->getComponent<ComponentModel>();
 		if(models){
 			models->m_i->calculateRadius(models);
 		}
@@ -643,7 +638,8 @@ void ComponentBody::scale(float x,float y,float z){
 void ComponentBody::setPosition(glm::vec3& newPosition){ ComponentBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
 void ComponentBody::setPosition(float x,float y,float z){
 	if(_physics){
-		btTransform tr; tr.setOrigin(btVector3(x,y,z));
+		btTransform tr;
+		tr.setOrigin(btVector3(x,y,z));
 		tr.setRotation(data.p.rigidBody->getOrientation()); 
 		if(data.p.collision->getCollisionType() == CollisionType::TriangleShapeStatic){
 			Physics::removeRigidBody(data.p.rigidBody);
@@ -687,9 +683,9 @@ void ComponentBody::setRotation(float x,float y,float z,float w){
 		clearAngularForces();
 	}
 	else{
-		glm::quat newRotation = glm::quat(w,x,y,z);
+		glm::quat newRotation(w,x,y,z);
 		newRotation = glm::normalize(newRotation);
-		glm::quat _rotation = *data.n.rotation;
+		glm::quat& _rotation = *data.n.rotation;
 		_rotation = newRotation;
 		Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
 	}
@@ -704,7 +700,7 @@ void ComponentBody::setScale(float x,float y,float z){
 		_scale.x = x; _scale.y = y; _scale.z = z;
 	}
 	if(m_Owner){
-		ComponentModel* models = m_Owner->getComponent<ComponentModel>();
+		auto* models = m_Owner->getComponent<ComponentModel>();
 		if(models){
 			models->m_i->calculateRadius(models);
 		}
@@ -774,47 +770,47 @@ void ComponentBody::setDynamic(bool dynamic){
 }
 void ComponentBody::setLinearVelocity(float x,float y,float z,bool local){
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(x,y,z);
-    Math::translate(data.p.rigidBody,vec,local);
-    data.p.rigidBody->setLinearVelocity(vec); 
+    btVector3 v(x,y,z);
+    Math::translate(data.p.rigidBody,v,local);
+    data.p.rigidBody->setLinearVelocity(v); 
 }
 void ComponentBody::setLinearVelocity(glm::vec3 velocity,bool local){ ComponentBody::setLinearVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ComponentBody::setAngularVelocity(float x,float y,float z,bool local){
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(x,y,z);
-    Math::translate(data.p.rigidBody,vec,local);
-    data.p.rigidBody->setAngularVelocity(vec); 
+    btVector3 v(x,y,z);
+    Math::translate(data.p.rigidBody,v,local);
+    data.p.rigidBody->setAngularVelocity(v); 
 }
 void ComponentBody::setAngularVelocity(glm::vec3 velocity,bool local){ ComponentBody::setAngularVelocity(velocity.x,velocity.y,velocity.z,local); }
 void ComponentBody::applyForce(float x,float y,float z,bool local){
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(x,y,z);
-    Math::translate(data.p.rigidBody,vec,local);
-    data.p.rigidBody->applyCentralForce(vec); 
+    btVector3 v(x,y,z);
+    Math::translate(data.p.rigidBody,v,local);
+    data.p.rigidBody->applyCentralForce(v); 
 }
 void ComponentBody::applyForce(glm::vec3 force,glm::vec3 origin,bool local){
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(force.x,force.y,force.z);
+    btVector3 v(force.x,force.y,force.z);
     if(local){
         btQuaternion q = data.p.rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
+        v = v.rotate(q.getAxis(),q.getAngle());
     }
-    data.p.rigidBody->applyForce(vec,btVector3(origin.x,origin.y,origin.z)); 
+    data.p.rigidBody->applyForce(v,btVector3(origin.x,origin.y,origin.z)); 
 }
 void ComponentBody::applyImpulse(float x,float y,float z,bool local){
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(x,y,z);
-    Math::translate(data.p.rigidBody,vec,local);
-    data.p.rigidBody->applyCentralImpulse(vec);
+    btVector3 v(x,y,z);
+    Math::translate(data.p.rigidBody,v,local);
+    data.p.rigidBody->applyCentralImpulse(v);
 }
 void ComponentBody::applyImpulse(glm::vec3 impulse,glm::vec3 origin,bool local){
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(impulse.x,impulse.y,impulse.z);
+    btVector3 v(impulse.x,impulse.y,impulse.z);
     if(local){
         btQuaternion q = data.p.rigidBody->getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(),q.getAngle());
+        v = v.rotate(q.getAxis(),q.getAngle());
     }
-    data.p.rigidBody->applyImpulse(vec,btVector3(origin.x,origin.y,origin.z));
+    data.p.rigidBody->applyImpulse(v,btVector3(origin.x,origin.y,origin.z));
 }
 void ComponentBody::applyTorque(float x,float y,float z,bool local){
     data.p.rigidBody->activate();
@@ -837,21 +833,21 @@ void ComponentBody::applyTorqueImpulse(glm::vec3 torqueImpulse,bool local){ Comp
 void ComponentBody::clearLinearForces(){
     data.p.rigidBody->setActivationState(0);
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(0,0,0);
-    data.p.rigidBody->setLinearVelocity(vec); 
+    btVector3 v(0,0,0);
+    data.p.rigidBody->setLinearVelocity(v); 
 }
 void ComponentBody::clearAngularForces(){
     data.p.rigidBody->setActivationState(0);
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(0,0,0);
-    data.p.rigidBody->setAngularVelocity(vec); 
+    btVector3 v(0,0,0);
+    data.p.rigidBody->setAngularVelocity(v); 
 }
 void ComponentBody::clearAllForces(){
     data.p.rigidBody->setActivationState(0);
     data.p.rigidBody->activate();
-    btVector3 vec = btVector3(0,0,0);
-    data.p.rigidBody->setLinearVelocity(vec); 
-    data.p.rigidBody->setAngularVelocity(vec); 
+    btVector3 v(0,0,0);
+    data.p.rigidBody->setLinearVelocity(v); 
+    data.p.rigidBody->setAngularVelocity(v); 
 }
 void ComponentBody::setMass(float mass){
     data.p.mass = mass;

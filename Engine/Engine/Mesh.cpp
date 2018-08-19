@@ -145,8 +145,8 @@ class Mesh::impl final{
         void _init(Mesh* super,string& name,btHeightfieldTerrainShape* heightfield,float threshold){//heightmap
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
-            uint width = heightfield->getHeightStickWidth();
-            uint length = heightfield->getHeightStickLength();
+            uint width(heightfield->getHeightStickWidth());
+            uint length(heightfield->getHeightStickLength());
             for(uint i = 0; i < width-1; ++i){
                 for(uint j = 0; j < length-1; ++j){
                     btVector3 vert1,vert2,vert3,vert4;
@@ -161,9 +161,9 @@ class Mesh::impl final{
                     v3.position = glm::vec3(vert3.x(),vert3.y(),vert3.z());
                     v4.position = glm::vec3(vert4.x(),vert4.y(),vert4.z());
 
-                    glm::vec3 a = v4.position - v1.position;
-                    glm::vec3 b = v2.position - v3.position;
-                    glm::vec3 normal = glm::normalize(glm::cross(a,b));
+                    glm::vec3 a(v4.position - v1.position);
+                    glm::vec3 b(v2.position - v3.position);
+                    glm::vec3 normal(glm::normalize(glm::cross(a,b)));
 
                     v1.normal = normal;
                     v2.normal = normal;
@@ -193,10 +193,10 @@ class Mesh::impl final{
             _initGlobal(threshold);  
             for(uint i = 0; i < width-1; ++i){
                 for(uint j = 0; j < length-1; ++j){
-                    string key1 = to_string(i) + "," + to_string(j);
-                    string key2 = to_string(i+1) + "," + to_string(j);
-                    string key3 = to_string(i) + "," + to_string(j+1);
-                    string key4 = to_string(i+1) + "," + to_string(j+1);
+                    string key1(to_string(i) + "," + to_string(j));
+                    string key2(to_string(i+1) + "," + to_string(j));
+                    string key3(to_string(i) + "," + to_string(j+1));
+                    string key4(to_string(i+1) + "," + to_string(j+1));
 
                     epriv::Vertex v1,v2,v3,v4;
                     v1.position = glm::vec3(i-width/2.0f,   grid[key1], j-length/2.0f);
@@ -204,9 +204,9 @@ class Mesh::impl final{
                     v3.position = glm::vec3(i-width/2.0f,   grid[key3], (j+1)-length/2.0f);
                     v4.position = glm::vec3((i+1)-width/2.0f, grid[key4], (j+1)-length/2.0f);
 
-                    glm::vec3 a = v4.position - v1.position;
-                    glm::vec3 b = v2.position - v3.position;
-                    glm::vec3 normal = glm::normalize(glm::cross(a,b));
+                    glm::vec3 a(v4.position - v1.position);
+                    glm::vec3 b(v2.position - v3.position);
+                    glm::vec3 normal(glm::normalize(glm::cross(a,b)));
 
                     v1.normal = normal;
                     v2.normal = normal;
@@ -317,7 +317,7 @@ class Mesh::impl final{
         }
         void _clearData(Mesh* super){
             vector_clear(m_Vertices);
-            if(m_Skeleton != nullptr){
+            if(m_Skeleton){
                 SAFE_DELETE(m_Skeleton);
             }
         }
@@ -336,7 +336,7 @@ class Mesh::impl final{
                 doOther = true;
             }
             _processNode(mesh,data,m_aiScene->mRootNode,m_aiScene);
-            if(doOther == true){
+            if(doOther){
                 m_Skeleton->fill(data);
             }
         }
@@ -358,8 +358,8 @@ class Mesh::impl final{
                     else{ uv = glm::vec2(0.0f, 0.0f); }
 
                     //this is to prevent uv compression from beign f-ed up at the poles.
-                    if(uv.y <= 0.0001f){ uv.y = 0.001f; }
-                    if(uv.y >= 0.9999f){ uv.y = 0.999f; }
+                    //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
+                    //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
                     data.uvs.push_back(uv);
 
                     //norm
@@ -420,7 +420,7 @@ class Mesh::impl final{
                 //bones
                 #pragma region Skeleton
                 if(aimesh.mNumBones > 0){
-                    epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+                    auto& skeleton = *m_Skeleton->m_i;
                     for (uint i = 0; i < aimesh.mNumBones; ++i) { 
                         uint BoneIndex = 0; 
                         string BoneName(aimesh.mBones[i]->mName.data);
@@ -452,7 +452,7 @@ class Mesh::impl final{
                                  key = "Animation " + to_string(skeleton.m_AnimationData.size());
                              }
                              if(!skeleton.m_AnimationData.count(key)){
-                                epriv::AnimationData* animData = new epriv::AnimationData(mesh,anim);
+                                auto* animData = new epriv::AnimationData(mesh,anim);
                                 skeleton.m_AnimationData.emplace(key,animData);
                              }
                         }
@@ -511,23 +511,23 @@ class Mesh::impl final{
         void _calculateTBN(epriv::ImportedMeshData& data){
             if(data.normals.size() == 0) return;
             for(uint i=0; i < data.points.size(); i+=3){
-                uint p0 = i + 0; uint p1 = i + 1; uint p2 = i + 2;
+                uint p0(i+0); uint p1(i+1); uint p2(i+2);
 
                 if(p2 > data.points.size() || p1 > data.points.size()) break;
 
-                glm::vec3 deltaPos1 = data.points.at(p1) - data.points.at(p0);
-                glm::vec3 deltaPos2 = data.points.at(p2) - data.points.at(p0);
+                glm::vec3 deltaPos1(data.points.at(p1) - data.points.at(p0));
+                glm::vec3 deltaPos2(data.points.at(p2) - data.points.at(p0));
 
-                glm::vec2 deltaUV1 = data.uvs.at(p1) - data.uvs.at(p0);
-                glm::vec2 deltaUV2 = data.uvs.at(p2) - data.uvs.at(p0);
+                glm::vec2 deltaUV1(data.uvs.at(p1) - data.uvs.at(p0));
+                glm::vec2 deltaUV2(data.uvs.at(p2) - data.uvs.at(p0));
 
                 float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-                glm::vec3 tangent = r * (deltaUV2.y * deltaPos1 - deltaUV1.y * deltaPos2);
-                glm::vec3 bitangent = r * (deltaUV1.x * deltaPos2 - deltaUV2.x * deltaPos1);
+                glm::vec3 tangent(r * (deltaUV2.y * deltaPos1 - deltaUV1.y * deltaPos2));
+                glm::vec3 bitangent(r * (deltaUV1.x * deltaPos2 - deltaUV2.x * deltaPos1));
                 tangent = glm::normalize(tangent); bitangent = glm::normalize(bitangent);
 
-                glm::vec3 t1 = tangent;   glm::vec3 t2 = tangent;   glm::vec3 t3 = tangent;
-                glm::vec3 b1 = bitangent; glm::vec3 b2 = bitangent; glm::vec3 b3 = bitangent;
+                glm::vec3 t1(tangent);   glm::vec3 t2(tangent);   glm::vec3 t3(tangent);
+                glm::vec3 b1(bitangent); glm::vec3 b2(bitangent); glm::vec3 b3(bitangent);
                 //do we even need these next 6 lines?
                 t1 = glm::normalize(tangent - data.normals.at(p0) * glm::dot(data.normals.at(p0), tangent));
                 t2 = glm::normalize(tangent - data.normals.at(p1) * glm::dot(data.normals.at(p1), tangent));
@@ -543,14 +543,14 @@ class Mesh::impl final{
         }
         void _calculateTBNAssimp(epriv::ImportedMeshData& data){
             if(data.normals.size() == 0) return;
-            uint dataSize = data.points.size();
+            uint dataSize(data.points.size());
             for(uint i=0; i < dataSize; i+=3){
-                uint p0 = i+0; uint p1 = i+1; uint p2 = i+2;
+                uint p0(i+0); uint p1(i+1); uint p2(i+2);
 
                 glm::vec3 dataP0,dataP1,dataP2;
                 glm::vec2 uvP0,uvP1,uvP2;
 
-                uint uvSize = data.uvs.size();
+                uint uvSize(data.uvs.size());
 
                 if(dataSize > p0) dataP0 = data.points.at(p0);
                 else              dataP0 = glm::vec3(0.0f);
@@ -566,14 +566,14 @@ class Mesh::impl final{
                 if(uvSize > p2)   uvP2 = data.uvs.at(p2);
                 else              uvP2 = glm::vec2(0.0f);
 
-                glm::vec3 v = dataP1 - dataP0;
-                glm::vec3 w = dataP2 - dataP0;
+                glm::vec3 v(dataP1-dataP0);
+                glm::vec3 w(dataP2-dataP0);
 
                 // texture offset p1->p2 and p1->p3
-                float sx = uvP1.x - uvP0.x;
-                float sy = uvP1.y - uvP0.y;
-                float tx = uvP2.x - uvP0.x;
-                float ty = uvP2.y - uvP0.y;
+                float sx(uvP1.x-uvP0.x);
+                float sy(uvP1.y-uvP0.y);
+                float tx(uvP2.x-uvP0.x);
+                float ty(uvP2.y-uvP0.y);
                 float dirCorrection = 1.0;
 
                 if ((tx * sy - ty * sx) < 0.0f) dirCorrection = -1.0f;//this is important for normals and mirrored mesh geometry using identical uv's
@@ -609,8 +609,8 @@ class Mesh::impl final{
                     else                        normal = glm::vec3(0.0f);
 
                     // project tangent and bitangent into the plane formed by the vertex' normal
-                    glm::vec3 localTangent   = tangent   - normal * (tangent   * normal);
-                    glm::vec3 localBitangent = bitangent - normal * (bitangent * normal);
+                    glm::vec3 localTangent(tangent   - normal * (tangent   * normal));
+                    glm::vec3 localBitangent(bitangent - normal * (bitangent * normal));
                     localTangent   = glm::normalize(localTangent);
                     localBitangent = glm::normalize(localBitangent);
 
@@ -692,8 +692,8 @@ class Mesh::impl final{
                 }
             }
             for(uint i = 0; i < out_vertices.size(); ++i){
-                if(m_Skeleton != nullptr){
-                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)out_vertices.at(i);
+                if(m_Skeleton){
+                    auto& vert = (epriv::MeshVertexDataAnimated)out_vertices.at(i);
                     //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
                     vert.uv = temp_uvs.at(i);
                     vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
@@ -701,7 +701,7 @@ class Mesh::impl final{
                     vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
                 }
                 else{
-                    epriv::MeshVertexData& vert = out_vertices.at(i);
+                    auto& vert = out_vertices.at(i);
                     //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
                     vert.uv = temp_uvs.at(i);
                     vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
@@ -744,9 +744,9 @@ class Mesh::impl final{
             uint count = 0;
             epriv::Triangle triangle;
             for(uint i=0; i < _pi.size(); ++i ){
-                glm::vec3 pos  = glm::vec3(0,0,0);
-                glm::vec2 uv   = glm::vec2(0,0);
-                glm::vec3 norm = glm::vec3(1,1,1);
+                glm::vec3 pos(glm::vec3(0.0f,0.0f,0.0f));
+                glm::vec2 uv(glm::vec2(0.0f,0.0f));
+                glm::vec3 norm(glm::vec3(1.0f,1.0f,1.0f));
                 if(_flags && epriv::LOAD_POINTS && data.file_points.size() > 0){  
                     pos = data.file_points.at(_pi[i]-1);
                     data.points.push_back(pos);
@@ -877,11 +877,11 @@ class Mesh::impl final{
             m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(0));
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-            if(m_Skeleton != nullptr){
-                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+            if(m_Skeleton){
+                auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -896,18 +896,19 @@ class Mesh::impl final{
             glGenBuffers(1, &m_buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
+
             //cannot clear indices buffer. just dont do it. ;)
-            if(m_SaveMeshData == false){
+            if(!m_SaveMeshData){
                 vector_clear(m_Vertices);
             }
         }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-            if(m_Skeleton != nullptr){
-                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+            if(m_Skeleton){
+                auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -925,11 +926,11 @@ class Mesh::impl final{
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-            if(m_Skeleton != nullptr){
-                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+            if(m_Skeleton){
+                auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -945,11 +946,11 @@ class Mesh::impl final{
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-            if(m_Skeleton != nullptr){
-                epriv::MeshSkeleton::impl& skeleton = *m_Skeleton->m_i;
+            if(m_Skeleton){
+                auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    epriv::MeshVertexDataAnimated& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -989,9 +990,9 @@ class Mesh::impl final{
         }
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-    Mesh::impl& mesh = *((Mesh*)r)->m_i;
+    auto& mesh = *((Mesh*)r)->m_i;
     glBindBuffer(GL_ARRAY_BUFFER, mesh.m_buffers.at(0));
-    if(mesh.m_Skeleton != nullptr){
+    if(mesh.m_Skeleton){
         for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){
             boost::tuple<uint,GLuint,GLuint,GLuint>& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
@@ -1007,8 +1008,8 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.m_buffers.at(1));
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    Mesh::impl& mesh = *((Mesh*)r)->m_i;
-    if(mesh.m_Skeleton != nullptr){
+    auto& mesh = *((Mesh*)r)->m_i;
+    if(mesh.m_Skeleton){
         for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
     }else{
         for(uint i = 0; i < epriv::VertexFormat::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
@@ -1029,20 +1030,20 @@ class epriv::AnimationData::impl{
             m_TicksPerSecond = anim->mTicksPerSecond;
             m_DurationInTicks = anim->mDuration;
             for(uint i = 0; i < anim->mNumChannels; ++i){
-                string key = (anim->mChannels[i]->mNodeName.data);
+                string key(anim->mChannels[i]->mNodeName.data);
                 m_KeyframeData.emplace(key,anim->mChannels[i]);
             }
         }
 
         void _ReadNodeHeirarchy(const string& animationName,float time, const aiNode* n,glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){
             string BoneName(n->mName.data);
-            glm::mat4 NodeTransform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(n->mTransformation));
+            glm::mat4 NodeTransform(Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(n->mTransformation)));
             if(m_KeyframeData.count(BoneName)){
-                const aiNodeAnim* keyframes = m_KeyframeData.at(BoneName);
+                const aiNodeAnim* keyframes(m_KeyframeData.at(BoneName));
                 if(keyframes){
                     glm::vec3 s; _CalcInterpolatedScaling(s, time, keyframes);
                     aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
-                    glm::mat4 rotation = glm::mat4(Math::assimpToGLMMat3(q.GetMatrix()));
+                    glm::mat4 rotation(glm::mat4(Math::assimpToGLMMat3(q.GetMatrix())));
                     glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
                     NodeTransform = glm::mat4(1.0f);
                     NodeTransform = glm::translate(NodeTransform,t);
@@ -1050,11 +1051,11 @@ class epriv::AnimationData::impl{
                     NodeTransform = glm::scale(NodeTransform,s);
                 }
             }
-            glm::mat4 Transform = ParentTransform * NodeTransform;
-            epriv::MeshSkeleton& skeleton = *m_Mesh->m_i->m_Skeleton;
+            glm::mat4 Transform(ParentTransform * NodeTransform);
+            auto& skeleton = *m_Mesh->m_i->m_Skeleton;
             if(skeleton.m_i->m_BoneMapping.count(BoneName)){
-                uint BoneIndex = skeleton.m_i->m_BoneMapping.at(BoneName);
-                glm::mat4& Final = skeleton.m_i->m_BoneInfo.at(BoneIndex).FinalTransform;
+                uint BoneIndex(skeleton.m_i->m_BoneMapping.at(BoneName));
+                glm::mat4& Final(skeleton.m_i->m_BoneInfo.at(BoneIndex).FinalTransform);
                 Final = skeleton.m_i->m_GlobalInverseTransform * Transform * skeleton.m_i->m_BoneInfo.at(BoneIndex).BoneOffset;
                 //this line allows for animation combinations. only works when additional animations start off in their resting places...
                 Final = Transforms.at(BoneIndex) * Final;
@@ -1065,11 +1066,11 @@ class epriv::AnimationData::impl{
         }
         void _BoneTransform(const string& animationName,float TimeInSeconds, vector<glm::mat4>& Transforms){
             float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
-            float TimeInTicks = TimeInSeconds * TicksPerSecond;
-            float AnimationTime = float(fmod(TimeInTicks, m_DurationInTicks));
-            glm::mat4 Identity = glm::mat4(1.0f);
+            float TimeInTicks(TimeInSeconds * TicksPerSecond);
+            float AnimationTime(float(fmod(TimeInTicks, m_DurationInTicks)));
+            glm::mat4 Identity(glm::mat4(1.0f));
             _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
-            epriv::MeshSkeleton& skeleton = *m_Mesh->m_i->m_Skeleton;
+            auto& skeleton = *m_Mesh->m_i->m_Skeleton;
             for(uint i = 0; i < skeleton.m_i->m_NumBones; ++i){
                 Transforms.at(i) = skeleton.m_i->m_BoneInfo.at(i).FinalTransform;
             }
@@ -1078,23 +1079,22 @@ class epriv::AnimationData::impl{
             if (node->mNumPositionKeys == 1) {
                 Out = Math::assimpToGLMVec3(node->mPositionKeys[0].mValue); return;
             }
-            uint PositionIndex = _FindPosition(AnimationTime,node);
-            uint NextIndex = PositionIndex + 1;
-            float DeltaTime = (float)(node->mPositionKeys[NextIndex].mTime - node->mPositionKeys[PositionIndex].mTime);
-            float Factor = (AnimationTime - (float)node->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-            glm::vec3 Start = Math::assimpToGLMVec3(node->mPositionKeys[PositionIndex].mValue);
-            glm::vec3 End = Math::assimpToGLMVec3(node->mPositionKeys[NextIndex].mValue);
-            glm::vec3 Delta = End - Start;
-            Out = Start + Factor * Delta;
+            uint PositionIndex(_FindPosition(AnimationTime,node));
+            uint NextIndex(PositionIndex + 1);
+            float DeltaTime((float)(node->mPositionKeys[NextIndex].mTime - node->mPositionKeys[PositionIndex].mTime));
+            float Factor((AnimationTime - (float)node->mPositionKeys[PositionIndex].mTime) / DeltaTime);
+            glm::vec3 Start(Math::assimpToGLMVec3(node->mPositionKeys[PositionIndex].mValue));
+            glm::vec3 End(Math::assimpToGLMVec3(node->mPositionKeys[NextIndex].mValue));
+            Out = Start + Factor * (End - Start);
         }
         void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* node){
             if (node->mNumRotationKeys == 1) {
                 Out = node->mRotationKeys[0].mValue; return;
             }
-            uint RotationIndex = _FindRotation(AnimationTime, node);
-            uint NextIndex = RotationIndex + 1;
-            float DeltaTime = (float)(node->mRotationKeys[NextIndex].mTime - node->mRotationKeys[RotationIndex].mTime);
-            float Factor = (AnimationTime - (float)node->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+            uint RotationIndex(_FindRotation(AnimationTime, node));
+            uint NextIndex(RotationIndex + 1);
+            float DeltaTime((float)(node->mRotationKeys[NextIndex].mTime - node->mRotationKeys[RotationIndex].mTime));
+            float Factor((AnimationTime - (float)node->mRotationKeys[RotationIndex].mTime) / DeltaTime);
             const aiQuaternion& StartRotationQ = node->mRotationKeys[RotationIndex].mValue;
             const aiQuaternion& EndRotationQ   = node->mRotationKeys[NextIndex].mValue;    
             aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
@@ -1104,14 +1104,13 @@ class epriv::AnimationData::impl{
             if (node->mNumScalingKeys == 1) {
                 Out = Math::assimpToGLMVec3(node->mScalingKeys[0].mValue); return;
             }
-            uint ScalingIndex = _FindScaling(AnimationTime, node);
-            uint NextIndex = ScalingIndex + 1;
-            float DeltaTime = (float)(node->mScalingKeys[NextIndex].mTime - node->mScalingKeys[ScalingIndex].mTime);
-            float Factor = (AnimationTime - (float)node->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
-            glm::vec3 Start = Math::assimpToGLMVec3(node->mScalingKeys[ScalingIndex].mValue);
-            glm::vec3 End   = Math::assimpToGLMVec3(node->mScalingKeys[NextIndex].mValue);
-            glm::vec3 Delta = End - Start;
-            Out = Start + Factor * Delta;
+            uint ScalingIndex(_FindScaling(AnimationTime, node));
+            uint NextIndex(ScalingIndex + 1);
+            float DeltaTime((float)(node->mScalingKeys[NextIndex].mTime - node->mScalingKeys[ScalingIndex].mTime));
+            float Factor((AnimationTime - (float)node->mScalingKeys[ScalingIndex].mTime) / DeltaTime);
+            glm::vec3 Start(Math::assimpToGLMVec3(node->mScalingKeys[ScalingIndex].mValue));
+            glm::vec3 End(Math::assimpToGLMVec3(node->mScalingKeys[NextIndex].mValue));
+            Out = Start + Factor * (End - Start);
         }
         uint _FindPosition(float AnimationTime, const aiNodeAnim* node){
             for(uint i=0;i<node->mNumPositionKeys-1;++i){if(AnimationTime<(float)node->mPositionKeys[i+1].mTime){return i;}}return 0;
@@ -1123,7 +1122,7 @@ class epriv::AnimationData::impl{
             for(uint i=0;i<node->mNumScalingKeys-1;++i){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
         }
         float _Duration(){
-            float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
+            float TicksPerSecond(float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f));
             return float(float(m_DurationInTicks) / TicksPerSecond);
         }
 };
@@ -1142,8 +1141,6 @@ epriv::MeshSkeleton::~MeshSkeleton(){
 }
 uint epriv::MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
-
-
 void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
     if(!mesh->isLoaded()){
         mesh->m_i->_loadIntoCPU(mesh);
@@ -1155,7 +1152,6 @@ void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
         mesh->EngineResource::load();
     }
 }
-
 
 
 Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
@@ -1175,7 +1171,7 @@ Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float thres
     m_i->_init(this,fileOrData,type,notMemory,threshold,loadImmediately);
 }
 Mesh::~Mesh(){
-    this->unload();
+    unload();
     m_i->_clearData(this);
 }
 Collision* Mesh::getCollision() const { return m_i->m_Collision; }

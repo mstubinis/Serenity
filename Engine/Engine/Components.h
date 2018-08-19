@@ -65,16 +65,13 @@ class ComponentBaseClass{
 };
 namespace Engine{
 
-    template<typename Base,typename Derived> void registerComponent(){
+    template<class Base,class Derived> void registerComponent(){
         const boost_type_index baseType    = boost_type_index(boost::typeindex::type_id<Base>());
         const boost_type_index derivedType = boost_type_index(boost::typeindex::type_id<Derived>());
-        if(!epriv::ComponentTypeRegistry::m_MapScene.count(derivedType)){
-            const uint& baseClassSlot = epriv::ComponentTypeRegistry::m_MapScene.at(baseType);
-            epriv::ComponentTypeRegistry::m_MapScene.emplace(derivedType,baseClassSlot);
-        }
-        if(!epriv::ComponentTypeRegistry::m_Map.count(derivedType)){
-            const uint& baseClassSlot = epriv::ComponentTypeRegistry::m_Map.at(baseType);
-            epriv::ComponentTypeRegistry::m_Map.emplace(derivedType,baseClassSlot);
+		boost::unordered_map<boost_type_index,uint>& map = epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot;
+        if(!map.count(derivedType)){
+            const uint& baseClassSlot = map.at(baseType);
+            map.emplace(derivedType,baseClassSlot);
         }
     }
 
@@ -93,13 +90,13 @@ namespace Engine{
                 static boost::unordered_map<uint, std::vector<ComponentBaseClass*>> m_ComponentVectors;
                 static boost::unordered_map<uint, std::vector<ComponentBaseClass*>> m_ComponentVectorsScene;
 
-                template<typename T> const uint getIndividualComponentTypeSlot(){
+                template<class T> const uint getIndividualComponentTypeSlot(){
                     const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-                    return Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
+					return Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
                 }
-                template<typename T> const uint getIndividualComponentTypeSlot(T* component){
+                template<class T> const uint getIndividualComponentTypeSlot(T* component){
                     const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id_runtime(*component));
-                    return Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
+                    return Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
                 }
             public:
                 std::unique_ptr<impl> m_i;
@@ -128,61 +125,40 @@ namespace Engine{
             friend class ::Engine::epriv::ComponentManager;
             private:
                 uint m_NextIndex;
-                uint m_NextIndexScene;
             public:
-                static boost::unordered_map<boost_type_index,uint> m_Map;
-                static boost::unordered_map<boost_type_index,uint> m_MapScene;
+                static boost::unordered_map<boost_type_index,uint> m_MapComponentTypesToSlot;
 
                 ComponentTypeRegistry();
                 ~ComponentTypeRegistry();
-                template<typename T> void emplace(){
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
+                template<class T> void emplace(){
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
+                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
-                template<typename T,typename V> void emplace(){
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
+                template<class T,class V> void emplace(){
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
+                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
-                template<typename T,typename V,typename W> void emplace(){
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<W>()),m_NextIndex);
+                template<class T,class V,class W> void emplace(){
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<W>()),m_NextIndex);
+                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
                 }
-                template<typename T,typename V,typename W,typename X> void emplace(){
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<W>()),m_NextIndex);
-                    m_Map.emplace(boost_type_index(boost::typeindex::type_id<X>()),m_NextIndex);
+                template<class T,class V,class W,class X> void emplace(){
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndex);
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndex);
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<W>()),m_NextIndex);
+                    m_MapComponentTypesToSlot.emplace(boost_type_index(boost::typeindex::type_id<X>()),m_NextIndex);
+                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
+                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndex,std::vector<ComponentBaseClass*>());
                     ++m_NextIndex;
-                }
-                void _emplaceSceneFinal(){
-                    ComponentManager::m_ComponentVectors     .emplace(m_NextIndexScene,std::vector<ComponentBaseClass*>());
-                    ComponentManager::m_ComponentVectorsScene.emplace(m_NextIndexScene,std::vector<ComponentBaseClass*>());
-                    ++m_NextIndexScene;
-                }   
-                template<typename T> void emplaceVector(){
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndexScene);
-                   _emplaceSceneFinal();
-                }
-                template<typename T,typename U> void emplaceVector(){
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndexScene);
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<U>()),m_NextIndexScene);
-                   _emplaceSceneFinal();
-                }
-                template<typename T,typename U,typename V> void emplaceVector(){
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndexScene);
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<U>()),m_NextIndexScene);
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndexScene);
-                   _emplaceSceneFinal();
-                }
-                template<typename T,typename U,typename V,typename W> void emplaceVector(){
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<T>()),m_NextIndexScene);
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<U>()),m_NextIndexScene);
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<V>()),m_NextIndexScene);
-                    m_MapScene.emplace(boost_type_index(boost::typeindex::type_id<W>()),m_NextIndexScene);
-                   _emplaceSceneFinal();
                 }
         };
 		class ComponentCameraSystem{
@@ -367,9 +343,9 @@ class Entity{
         Entity* parent();
         void addChild(Entity* child);
 
-        template<typename T> T* getComponent(){
+        template<class T> T* getComponent(){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            const uint& slot = Engine::epriv::ComponentTypeRegistry::m_Map.at(typeIndex);
+            const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
             const uint& componentID = m_Components[slot];
             if(componentID == Engine::epriv::UINT_MAX_VALUE){
                 return nullptr;
@@ -378,33 +354,27 @@ class Entity{
             Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(componentID,c);
             return c;
         }
-        template<typename T> void addComponent(T* component){
+        template<class T> void addComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            const uint& type = Engine::epriv::ComponentTypeRegistry::m_Map.at(typeIndex);
-            uint& componentID = m_Components[type];
+            const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
+            uint& componentID = m_Components[slot];
             if(componentID != Engine::epriv::UINT_MAX_VALUE) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
-            const uint& sceneSlot = Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
-            std::vector<ComponentBaseClass*>& v = Engine::epriv::ComponentManager::m_ComponentVectors.at(sceneSlot);			
-            v.push_back(component);
+            Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
             if(m_Scene && m_Scene == Resources::getCurrentScene()){
-                std::vector<ComponentBaseClass*>& vScene = Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(sceneSlot);
-                vScene.push_back(component);
+                Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot).push_back(component);
             }
             component->m_Owner = this;
             componentID = generatedID;
         }
-        template<typename T> void removeComponent(T* component){
+        template<class T> void removeComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-            const uint& type = Engine::epriv::ComponentTypeRegistry::m_Map.at(typeIndex);
-            uint& componentID = m_Components[type];
+            const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
+            uint& componentID = m_Components[slot];
             if(componentID == Engine::epriv::UINT_MAX_VALUE) return;
             component->m_Owner = nullptr;
-            const uint& sceneSlot = Engine::epriv::ComponentTypeRegistry::m_MapScene.at(typeIndex);
-            std::vector<ComponentBaseClass*>& v      = Engine::epriv::ComponentManager::m_ComponentVectors.at(sceneSlot);
-            std::vector<ComponentBaseClass*>& vScene = Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(sceneSlot);
-            removeFromVector(v,component);
-            removeFromVector(vScene,component);
+            removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectors.at(slot),component);
+            removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot),component);
             Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
             componentID = Engine::epriv::UINT_MAX_VALUE;
         }
