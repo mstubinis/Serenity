@@ -74,6 +74,8 @@ class Texture: public EngineResource{
         //Cubemap from 6 files
         Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
+		Texture(const Texture&); // non construction-copyable
+		Texture& operator=(const Texture&); // non copyable
 
         uchar* pixels();
         GLuint& address();

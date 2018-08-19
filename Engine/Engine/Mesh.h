@@ -150,6 +150,9 @@ class Mesh final: public BindableResource{
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);
         Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadImmediately = true);
         ~Mesh();
+		Mesh(const Mesh&); // non construction-copyable
+		Mesh& operator=(const Mesh&); // non copyable
+
 
         Collision* getCollision() const;
         std::unordered_map<std::string, Engine::epriv::AnimationData*>& animationData();

@@ -162,6 +162,8 @@ class Material final: public BindableResource{
         Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="");
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);
         ~Material();
+		Material(const Material&); // non construction-copyable
+		Material& operator=(const Material&); // non copyable
 
         const MaterialComponent* getComponent(MaterialComponentType::Type) const;
 
