@@ -3,9 +3,11 @@
 #define ENGINE_SCENE_H
 
 #include "Engine_ResourceBasic.h"
+#include "Engine_Utils.h"
 #include "Components.h"
 #include <unordered_map>
 #include <glm/glm.hpp>
+#include <iostream>
 
 class Entity;
 class Camera;

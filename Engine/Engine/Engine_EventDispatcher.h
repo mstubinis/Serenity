@@ -7,11 +7,9 @@
 
 namespace Engine{
     namespace epriv{
-        class EventDispatcher final{
+        class EventDispatcher final: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
-                EventDispatcher(const EventDispatcher&); // non construction-copyable
-                EventDispatcher& operator=(const EventDispatcher&); // non copyable
             public:
                 EventDispatcher(const char* name,uint w,uint h);
                 ~EventDispatcher();

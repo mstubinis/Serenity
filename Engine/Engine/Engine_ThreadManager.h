@@ -14,6 +14,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <SFML/System/Clock.hpp>
+#include "Engine_Utils.h"
 
 #include <memory>
 
@@ -23,10 +24,7 @@ typedef boost::packaged_task<void> boost_packed_task;
 
 namespace Engine{
     namespace epriv{
-        class ThreadManager final{
-            private:
-                ThreadManager(const ThreadManager&); // non construction-copyable
-                ThreadManager& operator=(const ThreadManager&); // non copyable
+        class ThreadManager final: private Engine::epriv::noncopyable{
             public:
                 class impl;
                 std::unique_ptr<impl> m_i;

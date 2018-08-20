@@ -5,6 +5,7 @@
 #include <glm/fwd.hpp>
 #include <vector>
 #include <memory>
+#include "Engine_Utils.h"
 
 class Entity;
 class btCollisionDispatcher;
@@ -55,11 +56,9 @@ class Collision final{
 
 namespace Engine{
     namespace epriv{
-        class PhysicsManager final{
+        class PhysicsManager final: private Engine::epriv::noncopyable{
             private:
                 class impl;
-				PhysicsManager(const PhysicsManager&); // non construction-copyable
-				PhysicsManager& operator=(const PhysicsManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

@@ -7,14 +7,13 @@
 #include <memory>
 #include "Engine_Math.h"
 #include "Engine_EventEnums.h"
+#include "Engine_Utils.h"
 
 namespace Engine{
     namespace epriv{
-        class EventManager final{
+        class EventManager final: private Engine::epriv::noncopyable{
             private:
                 class impl;
-				EventManager(const EventManager&); // non construction-copyable
-				EventManager& operator=(const EventManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <memory>
-#include <unordered_map>
+#include "Engine_Utils.h"
 
 class Texture;
 typedef unsigned int uint;
@@ -19,11 +19,9 @@ namespace Engine{
 
         _TOTAL};};
 
-        class GBuffer final{
+        class GBuffer final: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
-                GBuffer(const GBuffer&); // non construction-copyable
-                GBuffer& operator=(const GBuffer&); // non copyable
             public:
                 GBuffer(uint w,uint h);
                 ~GBuffer();
@@ -39,7 +37,7 @@ namespace Engine{
                 void start(uint,uint,uint,uint,uint,uint,std::string = "RGBA",bool = true);
                 void stop(GLuint fbo = 0,GLuint rbo = 0);
 
-                const std::unordered_map<uint,FramebufferTexture*>& getBuffers() const;
+                const std::vector<FramebufferTexture*>& getBuffers() const;
                 FramebufferTexture* getBuffer(uint);
                 Texture* getTexture(uint);
 

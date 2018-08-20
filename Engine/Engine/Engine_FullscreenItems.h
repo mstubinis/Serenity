@@ -3,25 +3,22 @@
 #define ENGINE_FULLSCREEN_ITEMS_H
 
 #include <memory>
+#include "Engine_Utils.h"
 
 namespace Engine{
     namespace epriv{
-        class FullscreenTriangle final{
+        class FullscreenTriangle final: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
-                FullscreenTriangle(const FullscreenTriangle&); // non construction-copyable
-                FullscreenTriangle& operator=(const FullscreenTriangle&); // non copyable
             public:
                 FullscreenTriangle();
                 ~FullscreenTriangle();
 
                 void render();
         };
-        class FullscreenQuad final{
+        class FullscreenQuad final: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
-                FullscreenQuad(const FullscreenQuad&); // non construction-copyable
-                FullscreenQuad& operator=(const FullscreenQuad&); // non copyable
             public:
                 FullscreenQuad();
                 ~FullscreenQuad();

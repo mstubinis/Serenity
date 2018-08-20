@@ -10,48 +10,52 @@
 using namespace Engine;
 using namespace std;
 
-unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
-    unordered_map<uint,boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m;
+vector<boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
+	vector<boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m; m.resize(epriv::GBufferType::_TOTAL);
                                                       //winSizeRatio     //internFormat        //pxl_components                   //pxl_format
-    m[epriv::GBufferType::Diffuse]  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
-    m[epriv::GBufferType::Normal]   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m[epriv::GBufferType::Misc]     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m[epriv::GBufferType::Lighting] = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
-    m[epriv::GBufferType::Bloom]    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
-    m[epriv::GBufferType::GodRays]  = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_1);
-    m[epriv::GBufferType::Depth]    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
+    m.at(epriv::GBufferType::Diffuse)  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
+    m.at(epriv::GBufferType::Normal)   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
+    m.at(epriv::GBufferType::Misc)     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
+    m.at(epriv::GBufferType::Lighting) = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
+    m.at(epriv::GBufferType::Bloom)    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
+    m.at(epriv::GBufferType::GodRays)  = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_1);
+    m.at(epriv::GBufferType::Depth)    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;
 }();
 
 class epriv::GBuffer::impl final{
     public:
-        FramebufferObject* m_FBO;
-        FramebufferObject* m_SmallFBO;
-        unordered_map<uint,FramebufferTexture*> m_Buffers;
-        uint m_Width; uint m_Height;
+        FramebufferObject *m_FBO, *m_SmallFBO;
+        vector<FramebufferTexture*> m_Buffers;
+        uint m_Width, m_Height;
         bool _init(uint w,uint h){
             _destruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
             m_Width = w; m_Height = h;
 
-            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height);
-            m_FBO->bind();
+			m_Buffers.resize(GBufferType::_TOTAL);
 
-            _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Normal,    m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Misc,      m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Lighting,  m_Width,m_Height);
-            _constructTextureBuffer(m_FBO,GBufferType::Depth,     m_Width,m_Height);
+            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height);
+
+			FramebufferObject& _fbo = *m_FBO;
+
+            _fbo.bind();
+            _constructTextureBuffer(_fbo,GBufferType::Diffuse,   m_Width,m_Height);
+            _constructTextureBuffer(_fbo,GBufferType::Normal,    m_Width,m_Height);
+            _constructTextureBuffer(_fbo,GBufferType::Misc,      m_Width,m_Height);
+            _constructTextureBuffer(_fbo,GBufferType::Lighting,  m_Width,m_Height);
+            _constructTextureBuffer(_fbo,GBufferType::Depth,     m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
             }
             m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
-            m_SmallFBO->bind();
+			FramebufferObject& _smallfbo = *m_SmallFBO;
+            _smallfbo.bind();
 
-            _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
-            _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
+            _constructTextureBuffer(_smallfbo,GBufferType::Bloom,   m_Width,m_Height);
+            _constructTextureBuffer(_smallfbo,GBufferType::GodRays, m_Width,m_Height);
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
                 return false;
@@ -65,16 +69,14 @@ class epriv::GBuffer::impl final{
             m_SmallFBO->bind();
             m_SmallFBO->resize(w,h);
         }
-        void _constructTextureBuffer(FramebufferObject* fbo,uint t,uint w,uint h){
-            boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>& i = GBUFFER_TYPE_DATA.at(t);
-            m_Buffers.emplace(t,fbo->attatchTexture(new Texture(w,h,i.get<3>(),i.get<2>(),i.get<1>(),i.get<0>()),i.get<4>(),i.get<0>()));
+        void _constructTextureBuffer(FramebufferObject& fbo,uint t,uint w,uint h){
+            auto& i = GBUFFER_TYPE_DATA.at(t);
+            m_Buffers.at(t) = fbo.attatchTexture(new Texture(w,h,i.get<3>(),i.get<2>(),i.get<1>(),i.get<0>()),i.get<4>(),i.get<0>());
         }
         void _destruct(){
             m_Width = m_Height = 0;
-
-            delete m_FBO;
-            delete m_SmallFBO;
-
+            SAFE_DELETE(m_FBO);
+            SAFE_DELETE(m_SmallFBO);
             Renderer::unbindFBO();
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
@@ -142,6 +144,7 @@ class epriv::GBuffer::impl final{
         }
 };
 epriv::GBuffer::GBuffer(uint width,uint height):m_i(new impl){
+	m_i->m_FBO = m_i->m_SmallFBO = nullptr;
     m_i->_init(width,height);
 }
 epriv::GBuffer::~GBuffer(){
@@ -158,7 +161,7 @@ void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO)
 void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
 void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,uint t5,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,t5,c,mainFBO);}
 void epriv::GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
-const unordered_map<uint,epriv::FramebufferTexture*>& epriv::GBuffer::getBuffers() const{ return m_i->m_Buffers; }
+const vector<epriv::FramebufferTexture*>& epriv::GBuffer::getBuffers() const{ return m_i->m_Buffers; }
 Texture* epriv::GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t)->texture();}
 epriv::FramebufferTexture* epriv::GBuffer::getBuffer(uint t){ return m_i->m_Buffers.at(t); }
 epriv::FramebufferObject* epriv::GBuffer::getMainFBO(){ return m_i->m_FBO; }

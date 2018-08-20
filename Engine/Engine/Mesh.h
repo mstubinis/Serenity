@@ -104,7 +104,7 @@ namespace Engine{
             ImportedMeshData(){ }
             ~ImportedMeshData(){ clear(); }
         };
-        class AnimationData final{
+        class AnimationData final: private Engine::epriv::noncopyable{
             friend class ::Mesh;
             private:
                 class impl; std::unique_ptr<impl> m_i;
@@ -113,7 +113,7 @@ namespace Engine{
                 ~AnimationData();
                 float duration();
         };
-        class MeshSkeleton final{
+        class MeshSkeleton final: private Engine::epriv::noncopyable{
             friend class ::Engine::epriv::AnimationData;
             friend class ::Mesh;
             friend struct ::DefaultMeshBindFunctor;
@@ -145,8 +145,6 @@ class Mesh final: public BindableResource{
     friend class ::InternalMeshPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
-        Mesh(const Mesh&); // non construction-copyable
-        Mesh& operator=(const Mesh&); // non copyable
     public:
         //loaded in renderer
         static Mesh* FontPlane;

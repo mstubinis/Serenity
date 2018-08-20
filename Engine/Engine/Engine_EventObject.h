@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdint>
 #include "Engine_EventEnums.h"
+#include "Engine_Utils.h"
 
 class Scene;
 
@@ -68,10 +69,7 @@ Inherit from this class to expose your class to events and event dispatching, sp
     void unregisterEvent(const EventType::Type& type)  -  unregister this object as an observer to the parameterized event type
     virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
 */
-class EventObserver{
-    private:
-        EventObserver(const EventObserver&); // non construction-copyable
-        EventObserver& operator=(const EventObserver&); // non copyable
+class EventObserver: private Engine::epriv::noncopyable{
     public:
         EventObserver();
         ~EventObserver();

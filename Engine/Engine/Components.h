@@ -68,7 +68,7 @@ namespace Engine{
     template<class Base,class Derived> void registerComponent(){
         const boost_type_index baseType    = boost_type_index(boost::typeindex::type_id<Base>());
         const boost_type_index derivedType = boost_type_index(boost::typeindex::type_id<Derived>());
-        boost::unordered_map<boost_type_index,uint>& map = epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot;
+        auto& map = epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot;
         if(!map.count(derivedType)){
             const uint& baseClassSlot = map.at(baseType);
             map.emplace(derivedType,baseClassSlot);
@@ -78,7 +78,7 @@ namespace Engine{
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 32768;
         const uint UINT_MAX_VALUE   = std::numeric_limits<uint>::max();
-        class ComponentManager final{
+		class ComponentManager final: private Engine::epriv::noncopyable{
             friend class ::Entity;
             friend class ::Scene;
             friend class ::Engine::epriv::ComponentTypeRegistry;
@@ -120,7 +120,7 @@ namespace Engine{
                 void _removeComponent(uint componentID);
                 void _removeComponent(ComponentBaseClass* component);
         };
-        class ComponentTypeRegistry final{
+        class ComponentTypeRegistry final: private Engine::epriv::noncopyable{
             friend class ::Entity;
             friend class ::Engine::epriv::ComponentManager;
             private:
@@ -161,7 +161,7 @@ namespace Engine{
                     ++m_NextIndex;
                 }
         };
-        class ComponentCameraSystem{
+        class ComponentCameraSystem final: private Engine::epriv::noncopyable{
             friend class ::Engine::epriv::ComponentManager;
             private:
                 class impl; 
@@ -336,7 +336,7 @@ class Entity: public EventObserver{
         Scene* scene();
         virtual void update(const float& dt){}
 
-        void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the frame before rendering logic, but can be overrided to be deleted immediately after the call
+        void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the update frame before rendering logic, but can be overrided to be deleted immediately after the call
         Entity* parent();
         void addChild(Entity* child);
 
@@ -347,9 +347,9 @@ class Entity: public EventObserver{
             if(componentID == Engine::epriv::UINT_MAX_VALUE){
                 return nullptr;
             }
-            T* c = nullptr;
-            Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(componentID,c);
-            return c;
+            T* component = nullptr;
+            Engine::epriv::ComponentManager::m_ComponentPool->getAsFast(componentID,component);
+            return component;
         }
         template<class T> void addComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());

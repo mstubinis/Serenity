@@ -272,9 +272,6 @@ void SolarSystem::update(const float& dt){
 }
 void SolarSystem::onEvent(const Event& e){
 	if(e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this){
-		std::cout << giDiffuse << std::endl;
-		std::cout << giSpecular << std::endl;
-		std::cout << giGlobal << std::endl;
 		Renderer::Settings::Lighting::setGIContributionDiffuse(giDiffuse);
 		Renderer::Settings::Lighting::setGIContributionSpecular(giSpecular);
 		Renderer::Settings::Lighting::setGIContributionGlobal(giGlobal);

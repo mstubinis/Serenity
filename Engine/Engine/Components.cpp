@@ -110,25 +110,18 @@ class epriv::ComponentManager::impl final{
         ComponentTypeRegistry       m_TypeRegistry;
         vector<Entity*>             m_EntitiesToBeDestroyed;
         bool                        m_Paused;
-
-		ComponentCameraSystem*       m_ComponentCameraSystem;
-
+		ComponentCameraSystem*      m_ComponentCameraSystem;
         void _init(const char* name, uint& w, uint& h,epriv::ComponentManager* super){
             super->m_ComponentPool = new ObjectPool<ComponentBaseClass>(epriv::MAX_NUM_ENTITIES * ComponentType::_TOTAL);
-            super->m_EntityPool = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
+            super->m_EntityPool    = new ObjectPool<Entity>(epriv::MAX_NUM_ENTITIES);
 
 			m_ComponentCameraSystem = new ComponentCameraSystem();
 
             m_Paused = false;
-            m_TypeRegistry = ComponentTypeRegistry();
 
             m_TypeRegistry.emplace<ComponentBody>();
             m_TypeRegistry.emplace<ComponentModel>();
             m_TypeRegistry.emplace<ComponentCamera>();
-
-            //m_TypeRegistry.emplaceVector<ComponentBody>();
-            //m_TypeRegistry.emplaceVector<ComponentModel>();
-            //m_TypeRegistry.emplaceVector<ComponentCamera>();
         }
         void _postInit(const char* name, uint& w, uint& h){
         }

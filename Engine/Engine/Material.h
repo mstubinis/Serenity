@@ -133,11 +133,9 @@ namespace Engine{
     namespace epriv{
         struct DefaultMaterialBindFunctor;
         struct DefaultMaterialUnbindFunctor;
-        class MaterialMeshEntry{
+        class MaterialMeshEntry: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
-                MaterialMeshEntry(const MaterialMeshEntry&); // non construction-copyable
-                MaterialMeshEntry& operator=(const MaterialMeshEntry&); // non copyable
             public:
                 MaterialMeshEntry(Mesh*);
                 ~MaterialMeshEntry();
@@ -160,8 +158,6 @@ class Material final: public BindableResource{
         static std::vector<glm::vec4> m_MaterialProperities;
     private:
         class impl; std::unique_ptr<impl> m_i;
-        Material(const Material&); // non construction-copyable
-        Material& operator=(const Material&); // non copyable
     public:
         Material(std::string name, std::string diffuse,std::string normal="",std::string glow="", std::string specular="");
         Material(std::string name, Texture* diffuse,Texture* normal = nullptr,Texture* glow = nullptr,Texture* specular = nullptr);

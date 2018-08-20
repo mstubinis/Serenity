@@ -5,17 +5,16 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
+#include "Engine_Utils.h"
 
 typedef unsigned int uint;
 
 namespace Engine{
 
     namespace epriv{
-        class NoiseManager final{
+        class NoiseManager final: private Engine::epriv::noncopyable{
             private:
                 class impl;
-				NoiseManager(const NoiseManager&); // non construction-copyable
-				NoiseManager& operator=(const NoiseManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

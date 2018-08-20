@@ -32,11 +32,9 @@ class SoundData;
 
 namespace Engine{
     namespace epriv{
-        class ResourceManager final{
+        class ResourceManager final: Engine::epriv::noncopyable{
             private:
                 class impl;
-                ResourceManager(const ResourceManager&); // non construction-copyable
-                ResourceManager& operator=(const ResourceManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

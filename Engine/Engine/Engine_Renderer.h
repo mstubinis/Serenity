@@ -4,6 +4,7 @@
 
 #include "Engine_Math.h"
 #include "Engine_GLStateMachine.h"
+#include "Engine_Utils.h"
 #include "ShaderProgram.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -31,10 +32,7 @@ namespace Engine{
         class GBuffer;
         class FramebufferObject;
         class RenderbufferObject;
-        class RenderManager final{
-            private:
-                RenderManager(const RenderManager&); // non construction-copyable
-                RenderManager& operator=(const RenderManager&); // non copyable
+        class RenderManager final: private Engine::epriv::noncopyable{
             public:
                 class impl;
                 std::unique_ptr<impl> m_i;

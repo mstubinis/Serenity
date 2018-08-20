@@ -64,8 +64,6 @@ class Texture: public EngineResource{
     friend class ::InternalTexturePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
-        Texture(const Texture&); // non construction-copyable
-        Texture& operator=(const Texture&); // non copyable
     public:
         //Framebuffer
         Texture(uint renderTgtWidth,uint renderTgtHeight,ImagePixelType::Type,ImagePixelFormat::Format,ImageInternalFormat::Format,float divisor = 1.0f);

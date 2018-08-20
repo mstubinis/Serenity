@@ -30,8 +30,6 @@ struct FontGlyph final{
 class Font final: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
-        Font(const Font&); // non construction-copyable
-        Font& operator=(const Font&); // non copyable
     public:
         Font(std::string);
         ~Font();

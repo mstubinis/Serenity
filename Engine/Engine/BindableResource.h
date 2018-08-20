@@ -11,8 +11,6 @@
 class BindableResource: public EngineResource{
     private:
         boost::function<void()> m_CustomBindFunctor, m_CustomUnbindFunctor;
-        BindableResource(const BindableResource&); // non construction-copyable
-        BindableResource& operator=(const BindableResource&); // non copyable
     public:
         BindableResource(std::string name = "");
         virtual ~BindableResource();

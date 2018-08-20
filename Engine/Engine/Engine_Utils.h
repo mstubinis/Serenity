@@ -6,6 +6,25 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/container/vector.hpp>
 
+namespace Engine{
+	namespace epriv{
+		class noncopyable{
+			protected:
+				noncopyable(){}
+				~noncopyable(){}
+			private:
+				const noncopyable& operator=(const noncopyable&);// non copyable
+				noncopyable(const noncopyable&);                 // non construction-copyable
+				noncopyable(const noncopyable&&);                // non moveable 1
+				noncopyable(noncopyable&&);                      // non moveable 2
+				noncopyable& operator=(const noncopyable&&);     // non move assignable 1
+				noncopyable& operator=(noncopyable&&);           // non move assignable 2
+		};
+	};
+};
+
+
+
 //removes a specific element from a vector
 template<typename E,typename B> void removeFromVector(std::vector<B*>& v,E* e){
     for(auto it=v.begin();it!=v.end();){B* c=(*it);if(c==e){it=v.erase(it);}else{++it;}}

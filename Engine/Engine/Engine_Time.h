@@ -4,15 +4,14 @@
 
 #include <memory>
 #include <string>
+#include "Engine_Utils.h"
 typedef unsigned int uint;
 
 namespace Engine{
     namespace epriv{
-        class TimeManager{
+        class TimeManager: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
-				TimeManager(const TimeManager&); // non construction-copyable
-				TimeManager& operator=(const TimeManager&); // non copyable
             public:
                 TimeManager(const char* name,uint w,uint h);
                 ~TimeManager();
