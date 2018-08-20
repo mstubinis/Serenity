@@ -14,12 +14,16 @@ class SolarSystem: public Scene{
         std::unordered_map<std::string,Planet*> m_Planets;
 
         Ship* player;
+		float giGlobal;
+		float giDiffuse;
+		float giSpecular;
 
         void _loadFromFile(std::string);
     public:
         SolarSystem(std::string name, std::string file);
         virtual ~SolarSystem();
 
+		virtual void onEvent(const Event& e);
         virtual void update(const float& dt);
 
         Ship* getPlayer(){ return player; }

@@ -24,6 +24,9 @@ typedef boost::packaged_task<void> boost_packed_task;
 namespace Engine{
     namespace epriv{
         class ThreadManager final{
+            private:
+                ThreadManager(const ThreadManager&); // non construction-copyable
+                ThreadManager& operator=(const ThreadManager&); // non copyable
             public:
                 class impl;
                 std::unique_ptr<impl> m_i;
@@ -43,18 +46,20 @@ namespace Engine{
                 std::vector<std::vector<T>> outVec;  uint length = vec.size() / n;  uint remain = vec.size() % n;  uint begin = 0;  uint end = 0;
                 for (uint i = 0; i < std::min(n, vec.size()); ++i){
                     end += (remain > 0) ? (length + !!(remain--)) : length;
-                    outVec.push_back(std::vector<T>(vec.begin() + begin, vec.begin() + end));  begin = end;
+                    outVec.emplace_back(vec.begin() + begin, vec.begin() + end);
+                    begin = end;
                 }
                 return outVec;
             }
 
             void waitForAll();
             void finalizeJob(const boost::shared_ptr<boost_packed_task>& task);
+            void finalizeJob1(const boost::shared_ptr<boost_packed_task>& task);
             void finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost::function<void()>& then_task);
             
 
-            template<typename... ARGS> void addJob(void (*function_ptr)(ARGS...),ARGS&... _args){
-                auto j = boost::bind(function_ptr,_args...);
+            template<typename... ARGS> void addJob(void (*function_ptr)(ARGS...),ARGS&&... _args){
+                auto j = boost::bind(function_ptr,std::forward<ARGS>(_args)...);
                 auto job = boost::make_shared<boost_packed_task>(j);
                 finalizeJob(job);
             }
@@ -64,9 +69,8 @@ namespace Engine{
                 finalizeJob(job);
             }
 
-
-            template<typename T, typename... ARGS> void addJob(T& functorJob,ARGS&... _args){
-                auto j = boost::bind(functorJob,_args...);
+            template<typename T, typename... ARGS> void addJob(T& functorJob,ARGS&&... _args){
+                auto j = boost::bind(functorJob,std::forward<ARGS>(_args)...);
                 auto job = boost::make_shared<boost_packed_task>(j);
                 finalizeJob(job);
             }
@@ -77,10 +81,10 @@ namespace Engine{
                 finalizeJob(job);
             }
 
-			
-            template<typename Job,typename Callback, typename... ARGS> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,ARGS&... _args){
+            
+            template<typename Job,typename Callback, typename... ARGS> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,ARGS&&... _args){
                 auto then = boost::bind(postCallbackFunctor);
-                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,_args...));	
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,std::forward<ARGS>(_args)...));	
                 finalizeJob(job,then);
             }
             template<typename Job,typename Callback> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor){

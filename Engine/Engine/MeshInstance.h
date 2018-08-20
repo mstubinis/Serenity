@@ -25,6 +25,8 @@ class MeshInstanceAnimation final{
     friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
         class impl; std::unique_ptr<impl> m_i;
+        MeshInstanceAnimation(const MeshInstanceAnimation&); // non construction-copyable
+        MeshInstanceAnimation& operator=(const MeshInstanceAnimation&); // non copyable
     public:
         MeshInstanceAnimation(Mesh*,const std::string& animName,float startTime,float endTime,uint requestedLoops = 1);
         ~MeshInstanceAnimation();
@@ -34,14 +36,14 @@ class MeshInstance final: public BindableResource{
     friend struct Engine::epriv::DefaultMeshInstanceUnbindFunctor;
     private:
         class impl; std::unique_ptr<impl> m_i;
+        MeshInstance(const MeshInstance&); // non construction-copyable
+        MeshInstance& operator=(const MeshInstance&); // non copyable
     public:
         MeshInstance(Entity*,Mesh*,Material*,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
         MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
         MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
         MeshInstance(Entity*,Handle mesh,Material*,glm::vec3& = glm::vec3(0.0f),glm::quat& = glm::quat(),glm::vec3& = glm::vec3(1.0f));
         ~MeshInstance();
-		MeshInstance(const MeshInstance&); // non construction-copyable
-		MeshInstance& operator=(const MeshInstance&); // non copyable
 
         Mesh* mesh();
         Material* material();

@@ -13,6 +13,8 @@ namespace Engine{
         class EventManager final{
             private:
                 class impl;
+				EventManager(const EventManager&); // non construction-copyable
+				EventManager& operator=(const EventManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

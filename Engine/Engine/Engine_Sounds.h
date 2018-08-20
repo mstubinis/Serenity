@@ -27,6 +27,8 @@ class SoundStatus final{public: enum Status{
 class SoundData final: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
+        SoundData(const SoundData&); // non construction-copyable
+        SoundData& operator=(const SoundData&); // non copyable
     public:
         SoundData(bool music = false);
         SoundData(std::string,bool music = false);
@@ -132,6 +134,8 @@ namespace Engine{
             friend class ::SoundBaseClass;  friend class ::SoundBaseClass::impl;
             private:
                 class impl;
+                SoundManager(const SoundManager&); // non construction-copyable
+                SoundManager& operator=(const SoundManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

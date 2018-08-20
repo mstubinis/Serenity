@@ -21,6 +21,8 @@ namespace Engine{
         class FramebufferObjectAttatchment{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                FramebufferObjectAttatchment(const FramebufferObjectAttatchment&); // non construction-copyable
+                FramebufferObjectAttatchment& operator=(const FramebufferObjectAttatchment&); // non copyable
             public:
                 FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
                 FramebufferObjectAttatchment(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*);
@@ -40,6 +42,8 @@ namespace Engine{
         class FramebufferTexture final: public FramebufferObjectAttatchment{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                FramebufferTexture(const FramebufferTexture&); // non construction-copyable
+                FramebufferTexture& operator=(const FramebufferTexture&); // non copyable
             public:
                 FramebufferTexture(FramebufferObject*,FramebufferAttatchment::Attatchment,Texture*,float divisor = 1.0f);
                 ~FramebufferTexture();
@@ -54,6 +58,8 @@ namespace Engine{
         class RenderbufferObject final: public FramebufferObjectAttatchment{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                RenderbufferObject(const RenderbufferObject&); // non construction-copyable
+                RenderbufferObject& operator=(const RenderbufferObject&); // non copyable
             public:
                 RenderbufferObject(FramebufferObject*,FramebufferAttatchment::Attatchment,ImageInternalFormat::Format);
                 ~RenderbufferObject();
@@ -66,6 +72,8 @@ namespace Engine{
         class FramebufferObject final: public BindableResource{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                FramebufferObject(const FramebufferObject&); // non construction-copyable
+                FramebufferObject& operator=(const FramebufferObject&); // non copyable
             public:
                 FramebufferObject(std::string name,uint width,uint height);
                 FramebufferObject(std::string name,uint width,uint height,ImageInternalFormat::Format);

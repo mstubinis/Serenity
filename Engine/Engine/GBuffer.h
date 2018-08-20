@@ -22,6 +22,8 @@ namespace Engine{
         class GBuffer final{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                GBuffer(const GBuffer&); // non construction-copyable
+                GBuffer& operator=(const GBuffer&); // non copyable
             public:
                 GBuffer(uint w,uint h);
                 ~GBuffer();

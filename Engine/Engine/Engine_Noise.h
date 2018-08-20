@@ -14,6 +14,8 @@ namespace Engine{
         class NoiseManager final{
             private:
                 class impl;
+				NoiseManager(const NoiseManager&); // non construction-copyable
+				NoiseManager& operator=(const NoiseManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

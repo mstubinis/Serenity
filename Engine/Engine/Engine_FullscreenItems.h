@@ -9,6 +9,8 @@ namespace Engine{
         class FullscreenTriangle final{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                FullscreenTriangle(const FullscreenTriangle&); // non construction-copyable
+                FullscreenTriangle& operator=(const FullscreenTriangle&); // non copyable
             public:
                 FullscreenTriangle();
                 ~FullscreenTriangle();
@@ -18,6 +20,8 @@ namespace Engine{
         class FullscreenQuad final{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+                FullscreenQuad(const FullscreenQuad&); // non construction-copyable
+                FullscreenQuad& operator=(const FullscreenQuad&); // non copyable
             public:
                 FullscreenQuad();
                 ~FullscreenQuad();

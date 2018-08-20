@@ -11,35 +11,53 @@
 
 #include <iostream>
 
+#include <chrono>
+
 using namespace Engine;
 using namespace std;
+
+typedef boost::shared_future<void> boost_shared_fut;
+typedef boost::function<void()> boost_void_func;
+typedef boost::asio::io_service boost_asio_service;
 
 epriv::ThreadManager::impl* threadManager;
 
 struct emptyFunctor{ void operator()() const {}};
 struct EngineCallback{
-    boost::shared_future<void> fut;
-    boost::function<void()> cbk;
-    EngineCallback(){ emptyFunctor e; cbk = boost::bind<void>(e); }
+    boost_shared_fut fut;
+    boost_void_func cbk;
+    EngineCallback(){ 
+		emptyFunctor e; 
+		cbk = boost::bind<void>(e); 
+	}
+	EngineCallback(boost_shared_fut& _fut){ 
+		emptyFunctor e;
+		fut = _fut;
+		cbk = boost::bind<void>(e); 
+	}
+	EngineCallback(boost_shared_fut& _fut, boost_void_func& _cbk){ 
+		fut = _fut;
+		cbk = _cbk; 
+	}
     ~EngineCallback(){}
 };
-
 
 class epriv::ThreadManager::impl final{
     public:
         boost::thread_group                 m_Threads;
-        boost::asio::io_service             m_IOService;
+        boost_asio_service                  m_IOService;
         uint                                m_Cores;
-        boost::asio::io_service::work*      m_Work;
+        boost_asio_service::work*           m_Work;
         vector<EngineCallback>              m_Callbacks;
         void _init(const char* name, uint& w, uint& h,ThreadManager* super){
             m_Cores = boost::thread::hardware_concurrency(); if(m_Cores==0) m_Cores=1;
-            m_Work = new boost::asio::io_service::work(m_IOService);
+            m_Work = new boost_asio_service::work(m_IOService);
             for(uint i = 0; i < m_Cores; ++i){
-                m_Threads.create_thread(boost::bind(&boost::asio::io_service::run, &m_IOService));
+                m_Threads.create_thread(boost::bind(&boost_asio_service::run, &m_IOService));
             }
         }
         void _postInit(const char* name, uint& w, uint& h,ThreadManager* super){
+
         }
         void _destruct(ThreadManager* super){
             delete(m_Work);
@@ -62,23 +80,20 @@ class epriv::ThreadManager::impl final{
         }
 };
 
-epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); threadManager = this->m_i.get(); }
+epriv::ThreadManager::ThreadManager(const char* name, uint w, uint h):m_i(new impl){ m_i->_init(name,w,h,this); threadManager = m_i.get(); }
 epriv::ThreadManager::~ThreadManager(){ m_i->_destruct(this); }
 void epriv::ThreadManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h,this); }
 void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
 void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task){
-    EngineCallback e;
-    e.fut = boost::move( task->get_future() );
-    Engine::epriv::ThreadManager::impl& mgr = *threadManager;
-    mgr.m_Callbacks.push_back( boost::move(e) );
+    auto& mgr = *threadManager;
+    mgr.m_Callbacks.emplace_back( boost::move(boost_shared_fut( task->get_future() )) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
-void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost::function<void()>& then_task){
-    EngineCallback e;
-    e.fut = boost::move( task->get_future() );
-    e.cbk = boost::bind<void>(then_task);
-    Engine::epriv::ThreadManager::impl& mgr = *threadManager;
+void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost_void_func& then_task){
+	auto& mgr = *threadManager;
+	EngineCallback e(boost::move(boost_shared_fut( task->get_future())));
+    e.cbk = boost::bind<void>(then_task); 
     mgr.m_Callbacks.push_back( boost::move(e) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }

@@ -2,6 +2,7 @@
 Sol
 data/Textures/Skyboxes/SolarSystem/Skybox.dds
 125
+giDiffuse=1.0 giSpecular=1.0 giGlobal=1.0
 
 S name=Sun radius=695800 r=1 g=1 b=0 r1=0.9 g1=0.9 b1=1 position=0
 

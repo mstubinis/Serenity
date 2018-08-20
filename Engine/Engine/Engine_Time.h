@@ -11,6 +11,8 @@ namespace Engine{
         class TimeManager{
             private:
                 class impl; std::unique_ptr<impl> m_i;
+				TimeManager(const TimeManager&); // non construction-copyable
+				TimeManager& operator=(const TimeManager&); // non copyable
             public:
                 TimeManager(const char* name,uint w,uint h);
                 ~TimeManager();

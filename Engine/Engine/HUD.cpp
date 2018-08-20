@@ -36,7 +36,7 @@ uint _count = 0;
 void HUD::update(const float& dt){
     if(Engine::isKeyDownOnce(",")){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
-        unordered_map<string,Planet*>& planets = scene->getPlanets();
+        const unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
@@ -50,7 +50,7 @@ void HUD::update(const float& dt){
     }
     else if(Engine::isKeyDownOnce(".")){
         SolarSystem* scene = (SolarSystem*)(Resources::getCurrentScene());
-        unordered_map<string,Planet*>& planets = scene->getPlanets();
+        const unordered_map<string,Planet*>& planets = scene->getPlanets();
         uint a = 0;
         for(auto p:planets){
             if(a == _count){
@@ -77,11 +77,9 @@ void HUD::render(){
     #pragma region renderCrossHairAndOtherInfo
     
     if(player->getTarget()){
-
-        ComponentBody* body = player->getTarget()->getComponent<ComponentBody>();
-        ComponentModel* model = player->getTarget()->getComponent<ComponentModel>();
-
-        glm::vec3 pos = body->getScreenCoordinates();
+        auto* body = player->getTarget()->getComponent<ComponentBody>();
+        auto* model = player->getTarget()->getComponent<ComponentModel>();
+        const glm::vec3& pos = body->getScreenCoordinates();
         float scl = glm::max(0.5f,model->radius()*31.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
         if(pos.z == 1){
             Material* crosshair = Resources::getMaterial(ResourceManifest::CrosshairMaterial);

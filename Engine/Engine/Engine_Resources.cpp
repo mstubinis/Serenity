@@ -5,6 +5,7 @@
 #include "Engine_Resources.h"
 #include "Engine_ObjectPool.h"
 #include "Engine_BuiltInResources.h"
+#include "Engine_EventDispatcher.h"
 #include "Engine_Sounds.h"
 #include "Engine_Window.h"
 #include "Light.h"
@@ -190,6 +191,11 @@ Handle Resources::addSoundData(string file,string n,bool music){
 }
 
 void Resources::setCurrentScene(Scene* scene){
+	epriv::EventSceneChanged e;
+	e.oldScene = resourceManager->m_i->m_CurrentScene; e.newScene = scene;
+	Event ev; ev.eventSceneChanged = e; ev.type = EventType::SceneChanged;
+	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::SceneChanged,ev);
+
     if(!resourceManager->m_i->m_CurrentScene){
         epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);
         resourceManager->m_i->m_CurrentScene = scene;

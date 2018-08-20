@@ -434,8 +434,8 @@ class Texture::impl final{
         }
 
         void _initFramebuffer(uint _w,uint _h,ImagePixelType::Type _pixelType,ImagePixelFormat::Format _pixelFormat,ImageInternalFormat::Format _internalFormat,float _divisor,Texture* _super){
-            uint _width(float(_w)*_divisor);
-            uint _height(float(_h)*_divisor);
+            uint _width(uint(float(_w)*_divisor));
+            uint _height(uint(float(_h)*_divisor));
             ImageLoadedStructure* image = new ImageLoadedStructure(_width,_height,_pixelType,_pixelFormat,_internalFormat);
 
             _initCommon(GL_TEXTURE_2D,false);
@@ -548,8 +548,8 @@ class Texture::impl final{
                 return;
             }
             Renderer::bindTexture(m_Type, m_TextureAddress.at(0));
-            uint _w(float(w) * t->divisor());
-            uint _h(float(h) * t->divisor());
+            uint _w(uint(float(w) * t->divisor()));
+            uint _h(uint(float(h) * t->divisor()));
             m_ImagesDatas.at(0)->mipmaps.at(0).width = _w; 
             m_ImagesDatas.at(0)->mipmaps.at(0).height = _h;
             glTexImage2D(m_Type,0,ImageInternalFormat::at(m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(m_ImagesDatas.at(0)->pixelType),NULL);
@@ -563,7 +563,7 @@ class Texture::impl final{
 };
 
 void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageLoadedStructure& image){
-    Texture::impl& i = *_texture->m_i;
+    auto& i = *_texture->m_i;
     FILE* fileparser = fopen(_filename.c_str(), "rb"); if (!fileparser) return;
     uchar header_buffer[128];
     fread(&header_buffer, 128, 1, fileparser);
@@ -679,15 +679,16 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
     }
 
     uint numberOfMainImages = 1;
-     
     if(head.caps & DDS::DDS_CAPS_COMPLEX){
         if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP){//cubemap
-            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEX){ ++numberOfMainImages; }
-            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEX){ ++numberOfMainImages; }
-            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEY){ ++numberOfMainImages; }
-            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEY){ ++numberOfMainImages; }
-            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEZ){ ++numberOfMainImages; }
-            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEZ){ ++numberOfMainImages; }
+			//note: in skybox dds files, especially in gimp, layer order is as follows:
+			//right,left,top,bottom,front,back
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEX){ ++numberOfMainImages; }//right
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEX){ ++numberOfMainImages; }//left
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEY){ ++numberOfMainImages; }//top
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEY){ ++numberOfMainImages; }//bottom
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEZ){ ++numberOfMainImages; }//front
+            if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEZ){ ++numberOfMainImages; }//back
             i.m_Type = GL_TEXTURE_CUBE_MAP;
             i.m_TextureType = TextureType::CubeMap;
             i.m_IsToBeMipmapped = false;
@@ -695,7 +696,7 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
         }
     }
     
-    uint bufferSize = (head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize);
+    const uint& bufferSize = (head.mipMapCount >= 2 ? head.pitchOrlinearSize * factor : head.pitchOrlinearSize);
     uchar* pxls = (uchar*)malloc(bufferSize * numberOfMainImages);
     fread(pxls, 1, bufferSize * numberOfMainImages, fileparser);
     fclose(fileparser);

@@ -11,6 +11,8 @@ typedef unsigned int uint;
 class Engine_Window final{
     private:
         class impl; std::unique_ptr<impl> m_i;
+        Engine_Window(const Engine_Window&); // non construction-copyable
+        Engine_Window& operator=(const Engine_Window&); // non copyable
     public:
         Engine_Window(const char* name,uint width,uint height);
         ~Engine_Window();

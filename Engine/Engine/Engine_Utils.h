@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <boost/lexical_cast.hpp>
+#include <boost/container/vector.hpp>
 
 //removes a specific element from a vector
 template<typename E,typename B> void removeFromVector(std::vector<B*>& v,E* e){
@@ -16,6 +17,8 @@ template<typename E,typename B> void removeFromVector(std::vector<B>& v,E e){
 
 //clears a vector, reset its size to zero, and removes the elements from memory. does NOT delete pointer elements
 template <typename E> void vector_clear(std::vector<E>& t){ t.clear(); std::vector<E>().swap(t); t.shrink_to_fit(); }
+//clears a vector, reset its size to zero, and removes the elements from memory. does NOT delete pointer elements
+template <typename E> void vector_clear(boost::container::vector<E>& t){ t.clear(); boost::container::vector<E>().swap(t); t.shrink_to_fit(); }
 //converts any type to its string representation
 template <typename E> std::string to_string(E t){ return boost::lexical_cast<std::string>(t); }
 //formats a number to have commas to represent thousandth places

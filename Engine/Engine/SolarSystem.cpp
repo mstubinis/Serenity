@@ -1,12 +1,14 @@
 #include "Engine_Events.h"
-#include "SolarSystem.h"
+#include "Engine_Renderer.h"
 #include "Engine_Resources.h"
+#include "Light.h"
+
+#include "SolarSystem.h"
 #include "ResourceManifest.h"
 #include "Planet.h"
 #include "GameCamera.h"
 #include "Ship.h"
 #include "GameSkybox.h"
-#include "Light.h"
 
 #include <algorithm>
 #include <sstream>
@@ -23,8 +25,9 @@ using namespace std;
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,7000000000.0f,this);
     setActiveCamera(playerCamera);
+	giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
-        SolarSystem::_loadFromFile(file);
+        SolarSystem::_loadFromFile(file);	
 }
 SolarSystem::~SolarSystem(){
 
@@ -49,6 +52,21 @@ void SolarSystem::_loadFromFile(string filename){
             else if(count == 3){//this line has the system's skybox's number of flares
                 GameSkybox* box = new GameSkybox(skyboxDirectory,boost::lexical_cast<uint>(line),this);
             }
+            else if(count == 4){//this line has the system's GI contribution
+                string token;
+                istringstream stream(line);
+                while(getline(stream, token, ' ')) {
+                    size_t pos = token.find("=");
+
+                    string key = token.substr(0, pos);
+                    string value = token.substr(pos + 1,string::npos);
+
+                         if(key == "giDiffuse")   giDiffuse = stof(value);
+                    else if(key == "giSpecular")  giSpecular = stof(value);
+                    else if(key == "giGlobal")    giGlobal = stof(value);
+
+                }
+            }
             if((line[0] == 'S' || line[0] == 'M' || line[0] == 'P' || line[0] == '*' || line[0] == 'R' || line[0] == '$' || line[0] == 'L' || line[0] == 's') && line[1] == ' '){//we got something to work with
                 Planet* planetoid = nullptr;
 
@@ -56,7 +74,7 @@ void SolarSystem::_loadFromFile(string filename){
                 istringstream stream(line);
 
                 string NAME;
-                string LAGRANGE__TYPE;
+                string LAGRANGE_TYPE;
                 string LAGRANGE_PLANET_1, LAGRANGE_PLANET_2;
                 string PARENT = "";
                 float R,G,B,   R1,G1,B1;
@@ -90,7 +108,7 @@ void SolarSystem::_loadFromFile(string filename){
                     }
                     else if(key == "lp1")              LAGRANGE_PLANET_1 = value;
                     else if(key == "lp2")              LAGRANGE_PLANET_2 = value;
-                    else if(key == "lType")            LAGRANGE__TYPE = value;
+                    else if(key == "lType")            LAGRANGE_TYPE = value;
                     else if(key == "radius")           RADIUS = stoull(value)*10;
                     else if(key == "r")                R = stof(value);
                     else if(key == "g")                G = stof(value);
@@ -251,4 +269,14 @@ void SolarSystem::_loadFromFile(string filename){
 }
 void SolarSystem::update(const float& dt){
     Scene::update(dt);
+}
+void SolarSystem::onEvent(const Event& e){
+	if(e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this){
+		std::cout << giDiffuse << std::endl;
+		std::cout << giSpecular << std::endl;
+		std::cout << giGlobal << std::endl;
+		Renderer::Settings::Lighting::setGIContributionDiffuse(giDiffuse);
+		Renderer::Settings::Lighting::setGIContributionSpecular(giSpecular);
+		Renderer::Settings::Lighting::setGIContributionGlobal(giGlobal);
+	}
 }

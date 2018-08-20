@@ -49,7 +49,14 @@ namespace Engine{
             glm::vec3 binormal;
             void clear(){ position = normal = binormal = tangent = glm::vec3(0.0f); uv = glm::vec2(0.0f); }
         };
-        struct Triangle final{Vertex v1;Vertex v2;Vertex v3;};
+        struct Triangle final{
+			Vertex v1;
+			Vertex v2;
+			Vertex v3;
+			Triangle(){}
+			Triangle(Vertex& _v1, Vertex& _v2, Vertex& _v3){ v1 = _v1; v2 = _v2; v3 = _v3; }
+			~Triangle(){}
+		};
         struct VertexBoneData final{
             float IDs[NUM_BONES_PER_VERTEX];
             float Weights[NUM_BONES_PER_VERTEX];
@@ -138,6 +145,8 @@ class Mesh final: public BindableResource{
     friend class ::InternalMeshPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
+        Mesh(const Mesh&); // non construction-copyable
+        Mesh& operator=(const Mesh&); // non copyable
     public:
         //loaded in renderer
         static Mesh* FontPlane;
@@ -150,8 +159,6 @@ class Mesh final: public BindableResource{
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);
         Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadImmediately = true);
         ~Mesh();
-		Mesh(const Mesh&); // non construction-copyable
-		Mesh& operator=(const Mesh&); // non copyable
 
 
         Collision* getCollision() const;

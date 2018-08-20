@@ -58,6 +58,8 @@ namespace Engine{
         class PhysicsManager final{
             private:
                 class impl;
+				PhysicsManager(const PhysicsManager&); // non construction-copyable
+				PhysicsManager& operator=(const PhysicsManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

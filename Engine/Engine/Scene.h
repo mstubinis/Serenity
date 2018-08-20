@@ -13,7 +13,7 @@ class SunLight;
 class SkyboxEmpty;
 class LightProbe;
 
-class Scene: public EngineResource{
+class Scene: public EngineResource, public EventObserver{
     friend class LightProbe;
     friend class ::Engine::epriv::ComponentManager;
     private:

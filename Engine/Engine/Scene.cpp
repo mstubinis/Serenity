@@ -24,6 +24,7 @@ Scene::Scene(string name){
     if(!Resources::getCurrentScene()){
         Resources::setCurrentScene(this);
     }
+	registerEvent(EventType::SceneChanged);
 }
 uint Scene::addEntity(Entity* entity){
     for(auto entityInScene:m_Entities){if (entity->m_ID == entityInScene) return entityInScene; } //rethink this maybe use a fixed size array?

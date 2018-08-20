@@ -72,7 +72,17 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
+	if(Engine::isKeyDown(KeyboardKey::N)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setMetalness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->metalness() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::M)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setMetalness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->metalness() + 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::V)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setSmoothness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->smoothness() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::B)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setSmoothness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->smoothness() + 0.025f); }
 
+	if(Engine::isKeyDown(KeyboardKey::Z)){ Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::X)){ Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.025f); }
+	if(Engine::isKeyDown(KeyboardKey::G)){ Renderer::Settings::Lighting::setGIContributionDiffuse(Renderer::Settings::Lighting::getGIContributionDiffuse() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::H)){ Renderer::Settings::Lighting::setGIContributionDiffuse(Renderer::Settings::Lighting::getGIContributionDiffuse() + 0.025f); }
+	if(Engine::isKeyDown(KeyboardKey::J)){ Renderer::Settings::Lighting::setGIContributionSpecular(Renderer::Settings::Lighting::getGIContributionSpecular() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::K)){ Renderer::Settings::Lighting::setGIContributionSpecular(Renderer::Settings::Lighting::getGIContributionSpecular() + 0.025f); }
     m_HUD->update(dt);
 }
 void Game::render(){

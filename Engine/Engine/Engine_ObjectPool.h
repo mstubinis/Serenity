@@ -35,6 +35,8 @@ namespace Engine{
                 HandleEntry<T>* m_Pool;
                 uint32 m_activeEntryCount;
                 uint32 m_firstFreeEntry;
+                ObjectPool(const ObjectPool&); // non construction-copyable
+                ObjectPool& operator=(const ObjectPool&); // non copyable
             public:
                 ObjectPool(uint numEntries){ 
                     MAX_ENTRIES = numEntries; m_Pool = new HandleEntry<T>[MAX_ENTRIES]; reset(); 

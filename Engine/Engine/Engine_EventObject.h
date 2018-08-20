@@ -6,6 +6,8 @@
 #include <cstdint>
 #include "Engine_EventEnums.h"
 
+class Scene;
+
 struct EventType final{enum Type{
     WindowResized,
     WindowGainedFocus,
@@ -28,6 +30,7 @@ struct EventType final{enum Type{
     JoystickButtonReleased,
     JoystickMoved,
     TextEntered,
+    SceneChanged,
 _TOTAL};};
 
 namespace Engine{
@@ -41,24 +44,41 @@ namespace Engine{
         struct EventJoystickMoved final{ uint joystickID; JoystickAxis::Axis axis; float position; };
         struct EventJoystickButton final{ uint joystickID; uint button; };
         struct EventJoystickConnection final{ uint joystickID; };
+        struct EventSceneChanged final{ Scene *oldScene, *newScene; };
     };
 };
-
-class Event final{
+struct Event final{
+    EventType::Type type;
+    union{
+        Engine::epriv::EventWindowResized eventWindowResized;
+        Engine::epriv::EventKeyboard eventKeyboard;
+        Engine::epriv::EventTextEntered eventTextEntered;
+        Engine::epriv::EventMouseButton eventMouseButton;
+        Engine::epriv::EventMouseMove eventMouseMoved;
+        Engine::epriv::EventMouseWheel eventMouseWheel;
+        Engine::epriv::EventJoystickMoved eventJoystickMoved;
+        Engine::epriv::EventJoystickButton eventJoystickButton;
+        Engine::epriv::EventJoystickConnection eventJoystickConnection;
+        Engine::epriv::EventSceneChanged eventSceneChanged;
+    };
+};
+/*
+Inherit from this class to expose your class to events and event dispatching, specifically the following functions:
+    void registerEvent(const EventType::Type& type)    -  register this object as an observer to the parameterized event type
+    void unregisterEvent(const EventType::Type& type)  -  unregister this object as an observer to the parameterized event type
+    virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
+*/
+class EventObserver{
+    private:
+        EventObserver(const EventObserver&); // non construction-copyable
+        EventObserver& operator=(const EventObserver&); // non copyable
     public:
-        EventType::Type type;
+        EventObserver();
+        ~EventObserver();
 
-        union{
-            Engine::epriv::EventWindowResized eventWindowResized;
-            Engine::epriv::EventKeyboard eventKeyboard;
-            Engine::epriv::EventTextEntered eventTextEntered;
-            Engine::epriv::EventMouseButton eventMouseButton;
-            Engine::epriv::EventMouseMove eventMouseMoved;
-            Engine::epriv::EventMouseWheel eventMouseWheel;
-            Engine::epriv::EventJoystickMoved eventJoystickMoved;
-            Engine::epriv::EventJoystickButton eventJoystickButton;
-            Engine::epriv::EventJoystickConnection eventJoystickConnection;
-        };
+        void registerEvent(const EventType::Type& type);
+        void unregisterEvent(const EventType::Type& type);
+        virtual void onEvent(const Event& e){}
 };
 
 

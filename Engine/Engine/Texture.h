@@ -64,6 +64,8 @@ class Texture: public EngineResource{
     friend class ::InternalTexturePublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
+        Texture(const Texture&); // non construction-copyable
+        Texture& operator=(const Texture&); // non copyable
     public:
         //Framebuffer
         Texture(uint renderTgtWidth,uint renderTgtHeight,ImagePixelType::Type,ImagePixelFormat::Format,ImageInternalFormat::Format,float divisor = 1.0f);
@@ -74,8 +76,6 @@ class Texture: public EngineResource{
         //Cubemap from 6 files
         Texture(std::string files[],std::string name = "Cubemap",bool genMipmaps = false,ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
-		Texture(const Texture&); // non construction-copyable
-		Texture& operator=(const Texture&); // non copyable
 
         uchar* pixels();
         GLuint& address();

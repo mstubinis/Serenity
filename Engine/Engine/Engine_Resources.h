@@ -35,6 +35,8 @@ namespace Engine{
         class ResourceManager final{
             private:
                 class impl;
+                ResourceManager(const ResourceManager&); // non construction-copyable
+                ResourceManager& operator=(const ResourceManager&); // non copyable
             public:
                 std::unique_ptr<impl> m_i;
 

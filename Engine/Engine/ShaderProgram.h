@@ -32,6 +32,8 @@ class ShaderType{public:enum Type{
 class UniformBufferObject final{
     private:
         class impl; std::unique_ptr<impl> m_i;
+        UniformBufferObject(const UniformBufferObject&); // non construction-copyable
+        UniformBufferObject& operator=(const UniformBufferObject&); // non copyable
     public:
 
         static UniformBufferObject* UBO_CAMERA;
@@ -49,6 +51,8 @@ class UniformBufferObject final{
 class Shader final: public EngineResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
+        Shader(const Shader&); // non construction-copyable
+        Shader& operator=(const Shader&); // non copyable
     public:
         Shader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         ~Shader();
@@ -61,6 +65,8 @@ class ShaderP final: public BindableResource{
     friend class ::UniformBufferObject;
     private:
         class impl; std::unique_ptr<impl> m_i;
+        ShaderP(const ShaderP&); // non construction-copyable
+        ShaderP& operator=(const ShaderP&); // non copyable
     public:
         ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
 

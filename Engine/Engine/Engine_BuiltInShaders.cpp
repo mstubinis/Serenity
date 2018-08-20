@@ -2150,7 +2150,7 @@ epriv::EShaders::lighting_frag_gi =
     "uniform samplerCube prefilterMap;\n"
     "uniform sampler2D brdfLUT;\n"
     "\n"
-    "uniform vec4 ScreenData;\n" //x = UNUSED, y = gamma, z = winSize.x, w = winSize.y
+    "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
@@ -2182,20 +2182,21 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(stuff.x));\n"
     "    vec3 Frensel = F0;\n"
     "    float roughness = 1.0 - stuff.y;\n"
-    "    vec3 GIDiffuse = textureCube(irradianceMap, PxlNormal).rgb;\n"
+    "    vec3 irradianceColor = textureCube(irradianceMap, PxlNormal).rgb;\n"
     "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
     "    vec3 kD = ConstantOneVec3 - kS;\n"
-    "    kD *= 1.0 - stuff.x;\n"
-    "    vec3 AmbientIrradiance = GIDiffuse * MaterialAlbedoTexture;\n"
+	"    kD *= 1.0 - stuff.x;\n"
+    "    vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+	"    vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
     "\n"
     "    const float MAX_REFLECTION_LOD = 5.0;\n"
     "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
     "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
-    "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y);\n"
+	"    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
     "\n"
-    "    vec3 TotalIrradiance = (kD * AmbientIrradiance + GISpecular) * ao;\n"
+    "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
-    "    gl_FragColor += vec4(TotalIrradiance,1.0);\n"
+	"    gl_FragColor += vec4(TotalIrradiance,1.0) * vec4(vec3(GIContribution.z),1.0);\n"
     "}";
 
 #pragma endregion

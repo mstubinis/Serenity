@@ -15,6 +15,8 @@ class EngineResource{
         bool m_IsLoaded;
         std::string m_Name;
         uint m_UsageCount;
+        EngineResource(const EngineResource&); // non construction-copyable
+        EngineResource& operator=(const EngineResource&); // non copyable
     public:
         EngineResource(std::string = "");
         virtual ~EngineResource();

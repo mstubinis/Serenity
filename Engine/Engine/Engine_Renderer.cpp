@@ -25,6 +25,8 @@
 #include <random>
 #include <math.h>
 
+#include <boost/container/vector.hpp>
+
 using namespace Engine;
 using namespace Engine::Renderer;
 using namespace std;
@@ -121,10 +123,7 @@ namespace Engine{
             glm::vec2 pos, scl;
             glm::vec4 col;
             float rot, depth;
-            TextureRenderInfo(){
-                texture = nullptr; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
-            }
-            TextureRenderInfo(Texture* _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
+            TextureRenderInfo(Texture* _texture, glm::vec2& _pos, glm::vec4& _col, glm::vec2& _scl, float& _rot, float& _depth){
                 texture = _texture; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
             }
         };
@@ -134,11 +133,7 @@ namespace Engine{
             glm::vec4 col;
             float rot, depth;
             std::string text;
-            FontRenderInfo(){
-                font = nullptr; pos = scl = glm::vec2(0); col = glm::vec4(1); rot = depth = 0;
-                text = "";
-            }
-            FontRenderInfo(Font* _font, std::string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
+            FontRenderInfo(Font* _font, string& _text, glm::vec2& _pos, glm::vec4& _col, glm::vec2& _scl, float& _rot, float& _depth){
                 font = _font; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
                 text = _text;
             }
@@ -204,6 +199,9 @@ class epriv::RenderManager::impl final{
 
         #pragma region LightingInfo
         bool lighting;
+		float lighting_gi_contribution_diffuse;
+		float lighting_gi_contribution_specular;
+		float lighting_gi_contribution_global;
         #pragma endregion
 
         #pragma region GodRaysInfo
@@ -258,8 +256,8 @@ class epriv::RenderManager::impl final{
 
         GBuffer* m_gBuffer;
         glm::mat4 m_2DProjectionMatrix;
-        vector<FontRenderInfo> m_FontsToBeRendered;
-        vector<TextureRenderInfo> m_TexturesToBeRendered;
+        boost::container::vector<FontRenderInfo> m_FontsToBeRendered;
+        boost::container::vector<TextureRenderInfo> m_TexturesToBeRendered;
         vector<ShaderP*> m_GeometryPassShaderPrograms;
         vector<ShaderP*> m_ForwardPassShaderPrograms;
         glm::mat4 m_IdentityMat4;
@@ -317,6 +315,9 @@ class epriv::RenderManager::impl final{
 
             #pragma region LightingInfo
             lighting = true;
+			lighting_gi_contribution_diffuse = 1.0f;
+			lighting_gi_contribution_specular = 1.0f;
+			lighting_gi_contribution_global = 1.0f;
             #pragma endregion
 
             #pragma region GodRaysInfo
@@ -1240,8 +1241,7 @@ class epriv::RenderManager::impl final{
             }
             vector<glm::vec3> ssaoNoise;
             for(uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i){
-                glm::vec3 noise(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f); 
-                ssaoNoise.push_back(noise);
+                ssaoNoise.emplace_back(randFloats(gen)*2.0-1.0,randFloats(gen)*2.0-1.0,0.0f);
             }
             genAndBindTexture(GL_TEXTURE_2D,ssao_noise_texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE,SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
@@ -1503,6 +1503,7 @@ class epriv::RenderManager::impl final{
         void _renderTextures(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             Mesh::Plane->bind();
+			glm::mat4 m = m_IdentityMat4;
             for(auto item:m_TexturesToBeRendered){
                 if(item.texture){
                     sendTexture("DiffuseTexture",item.texture,0);
@@ -1514,32 +1515,33 @@ class epriv::RenderManager::impl final{
                 }
                 sendUniform4f("Object_Color",item.col);
 
-                glm::mat4 model = m_IdentityMat4;
-                model = glm::translate(model, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
-                model = glm::rotate(model, item.rot,glm::vec3(0.0f,0.0f,1.0f));
+                m = m_IdentityMat4;
+                m = glm::translate(m, glm::vec3(item.pos.x,item.pos.y,-0.001f - item.depth));
+                m = glm::rotate(m, item.rot,glm::vec3(0.0f,0.0f,1.0f));
                 if(item.texture)
-                    model = glm::scale(model, glm::vec3(item.texture->width(),item.texture->height(),1.0f));
-                model = glm::scale(model, glm::vec3(item.scl.x,item.scl.y,1.0f));
+                    m = glm::scale(m, glm::vec3(item.texture->width(),item.texture->height(),1.0f));
+                m = glm::scale(m, glm::vec3(item.scl.x,item.scl.y,1.0f));
 
                 sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-                sendUniformMatrix4f("Model",model);
+                sendUniformMatrix4f("Model",m);
 
                 Mesh::Plane->render();
             }
-            Mesh::Plane->unbind();
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->unbind();
         }
         void _renderText(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
+			glm::mat4 m = m_IdentityMat4;
+			float y_offset = 0.0f;
+			float x = 0.0f;  
+			Mesh& mesh = *(Mesh::FontPlane);
             for(auto item:m_FontsToBeRendered){
                 Font& font = *item.font;
-                Mesh& mesh = *(Mesh::FontPlane);
                 sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
                 sendUniform1i("DiffuseTextureEnabled",1);
                 sendUniform4f("Object_Color",item.col);
-                float y_offset = 0;
-                float x = item.pos.x;
-                
+                y_offset = 0;
+                x = item.pos.x;        
                 for(auto c:item.text){
                     if(c == '\n'){
                         y_offset += (font.getGlyphData('X')->height + 6) * item.scl.y;
@@ -1547,19 +1549,18 @@ class epriv::RenderManager::impl final{
                     }
                     else{
                         FontGlyph& chr = *(font.getGlyphData(c));
-                        chr.m_Model = m_IdentityMat4;
-                        chr.m_Model = glm::translate(chr.m_Model, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
-                        chr.m_Model = glm::rotate(chr.m_Model, item.rot,glm::vec3(0,0,1));
-                        chr.m_Model = glm::scale(chr.m_Model, glm::vec3(item.scl.x,item.scl.y,1));
+                        m = m_IdentityMat4;
+                        m = glm::translate(m, glm::vec3(x + chr.xoffset ,item.pos.y - (chr.height + chr.yoffset) - y_offset,-0.001f - item.depth));
+                        m = glm::rotate(m, item.rot,glm::vec3(0,0,1));
+                        m = glm::scale(m, glm::vec3(item.scl.x,item.scl.y,1));
 
                         sendUniformMatrix4f("VP",m_2DProjectionMatrix);
-                        sendUniformMatrix4f("Model",chr.m_Model);
+                        sendUniformMatrix4f("Model",m);
 
                         mesh.modifyPointsAndUVs(chr.pts,chr.uvs);
                         mesh.bind();
                         mesh.render();
-                        //mesh.unbind();
-                        
+
                         x += chr.xadvance * item.scl.x;
                     }
                 }
@@ -1568,7 +1569,7 @@ class epriv::RenderManager::impl final{
         }
         void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
-            glm::vec3 clear = scene->getBackgroundColor();
+            const glm::vec3& clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
             if(godRays){ gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,GBufferType::Lighting,"RGBA"); }
@@ -1594,11 +1595,11 @@ class epriv::RenderManager::impl final{
 
             //RENDER NORMAL OBJECTS HERE
             for(auto shader:m_GeometryPassShaderPrograms){
-                vector<Material*>& shaderMaterials = shader->getMaterials(); 
+                auto& shaderMaterials = shader->getMaterials(); 
                 if(shaderMaterials.size() > 0){
                     shader->bind();
                     for(auto material:shaderMaterials){
-                        vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); 
+                        auto& materialMeshes = material->getMeshEntries(); 
                         if(materialMeshes.size() > 0){
                             material->bind();
                             for(auto materialMeshEntry:materialMeshes){
@@ -1607,9 +1608,9 @@ class epriv::RenderManager::impl final{
                                 mesh->bind();
                                 for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
                                     const uint& entityID = meshInstance.first;
-                                    vector<MeshInstance*>& instances = meshInstance.second;
+                                    auto& instances = meshInstance.second;
                                     if(scene->hasEntity(entityID)){
-                                        ComponentModel& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
+                                        auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
                                             for(auto instance:instances){
                                                 instance->bind(); //render also
@@ -1644,11 +1645,11 @@ class epriv::RenderManager::impl final{
 
             //RENDER NORMAL OBJECTS HERE
             for(auto shader:m_ForwardPassShaderPrograms){
-                vector<Material*>& shaderMaterials = shader->getMaterials(); 
+                auto& shaderMaterials = shader->getMaterials(); 
                 if(shaderMaterials.size() > 0){
                     shader->bind();
                     for(auto material:shaderMaterials){
-                        vector<MaterialMeshEntry*>& materialMeshes = material->getMeshEntries(); 
+                        auto& materialMeshes = material->getMeshEntries(); 
                         if(materialMeshes.size() > 0){
                             material->bind();
                             for(auto materialMeshEntry:materialMeshes){
@@ -1657,9 +1658,9 @@ class epriv::RenderManager::impl final{
                                 mesh->bind();
                                 for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
                                     const uint& entityID = meshInstance.first;
-                                    vector<MeshInstance*>& instances = meshInstance.second;
+                                    auto& instances = meshInstance.second;
                                     if(scene->hasEntity(entityID)){
-                                        ComponentModel& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
+                                        auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
                                             for(auto instance:instances){
                                                 instance->bind(); //render also
@@ -1736,7 +1737,13 @@ class epriv::RenderManager::impl final{
                     sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
                 }
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-                sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
+
+				float pack = Math::pack3FloatsInto1FloatUnsigned(
+					lighting_gi_contribution_diffuse,
+					lighting_gi_contribution_specular,
+					lighting_gi_contribution_global
+				);
+                sendUniform4f("ScreenData",pack,gamma,(float)fbufferWidth,(float)fbufferHeight);
                 sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
                 sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
                 sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
@@ -2055,7 +2062,7 @@ class epriv::RenderManager::impl final{
 
             if(mainRenderFunc){
                 //Camera UBO update
-                if(RenderManager::GLSL_VERSION >= 140){
+                if(RenderManager::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){
                     m_UBOCameraData.View = camera.getView();
                     m_UBOCameraData.Proj = camera.getProjection();
                     m_UBOCameraData.ViewProj = camera.getViewProjection();
@@ -2217,6 +2224,7 @@ class epriv::RenderManager::impl final{
                     _renderText(gbuffer,camera,fboWidth,fboHeight);
                     GLDisable(GLState::ALPHA_TEST);
                 }
+				
                 vector_clear(m_FontsToBeRendered);
                 vector_clear(m_TexturesToBeRendered);
             }
@@ -2234,11 +2242,11 @@ void epriv::RenderManager::_resizeGbuffer(uint w,uint h){ m_i->m_gBuffer->resize
 void epriv::RenderManager::_onFullscreen(sf::Window* w,sf::VideoMode m,const char* n,uint s,sf::ContextSettings& set){ m_i->_onFullscreen(w,m,n,s,set); }
 void epriv::RenderManager::_onOpenGLContextCreation(uint w,uint h,uint _glslVersion,uint _openglVersion){ m_i->_onOpenGLContextCreation(w,h,_glslVersion,_openglVersion); }
 
-void epriv::RenderManager::_renderText(Font* font,string text,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
-    m_i->m_FontsToBeRendered.push_back(FontRenderInfo(font,text,pos,color,scl,angle,depth));
+void epriv::RenderManager::_renderText(Font* font,string& text,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){
+    m_i->m_FontsToBeRendered.emplace_back(font,text,pos,color,scl,angle,depth);
 }
-void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2 pos,glm::vec4 color,glm::vec2 scl,float angle,float depth){
-    m_i->m_TexturesToBeRendered.push_back(TextureRenderInfo(texture,pos,color,scl,angle,depth));
+void epriv::RenderManager::_renderTexture(Texture* texture,glm::vec2& pos,glm::vec4& color,glm::vec2& scl,float& angle,float& depth){
+    m_i->m_TexturesToBeRendered.emplace_back(texture,pos,color,scl,angle,depth);
 }
 void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     if(stage == ShaderRenderPass::Geometry){
@@ -2345,6 +2353,12 @@ void Renderer::Settings::GodRays::setObject(Entity* entity){ renderManager->godR
 Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_Object; }
 void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
+float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManager->lighting_gi_contribution_global; }
+void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ renderManager->lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f); }
+float Renderer::Settings::Lighting::getGIContributionDiffuse(){ return renderManager->lighting_gi_contribution_diffuse; }
+void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ renderManager->lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f); }
+float Renderer::Settings::Lighting::getGIContributionSpecular(){ return renderManager->lighting_gi_contribution_specular; }
+void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){ renderManager->lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f); }
 bool Renderer::Settings::SSAO::enabled(){ return renderManager->ssao;  }
 void Renderer::Settings::SSAO::enable(bool b){ renderManager->ssao = b;  }
 void Renderer::Settings::SSAO::disable(){ renderManager->ssao = false;  }
@@ -2415,14 +2429,14 @@ void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
     glGenTextures(1, &_textureObject);
     bindTexture(_textureType,_textureObject);
 }
-void Renderer::sendTexture(const char* location,Texture* texture,uint slot){Renderer::sendTexture(location,texture->address(),slot,texture->type());}
-void Renderer::sendTexture(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
+void Renderer::sendTexture(const char* location,Texture* texture,const uint slot){Renderer::sendTexture(location,texture->address(),slot,texture->type());}
+void Renderer::sendTexture(const char* location,const GLuint textureAddress,const uint slot,const GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);
     sendUniform1i(location,slot);
 }
-void Renderer::sendTextureSafe(const char* location,Texture* texture,uint slot){Renderer::sendTextureSafe(location,texture->address(),slot,texture->type());}
-void Renderer::sendTextureSafe(const char* location,GLuint textureAddress,uint slot,GLuint targetType){
+void Renderer::sendTextureSafe(const char* location,Texture* texture,const uint slot){Renderer::sendTextureSafe(location,texture->address(),slot,texture->type());}
+void Renderer::sendTextureSafe(const char* location,const GLuint textureAddress,const uint slot,const GLuint targetType){
     glActiveTexture(GL_TEXTURE0 + slot);
     bindTexture(targetType,textureAddress);
     sendUniform1iSafe(location,slot);
@@ -2452,7 +2466,7 @@ void Renderer::unbindTextureCubemap(uint slot){
 }
 */
 void Renderer::renderRectangle(glm::vec2& pos, glm::vec4& col, float w, float h, float angle, float depth){
-    renderManager->m_TexturesToBeRendered.push_back(epriv::TextureRenderInfo(nullptr,pos,col,glm::vec2(w,h),angle,depth));
+    renderManager->m_TexturesToBeRendered.emplace_back(nullptr,pos,col,glm::vec2(w,h),angle,depth);
 }
 void Renderer::renderTexture(Texture* texture,glm::vec2& pos, glm::vec4& col,float angle, glm::vec2& scl, float depth){
     texture->render(pos,col,angle,scl,depth);
@@ -2463,10 +2477,7 @@ void Renderer::renderText(string& text,Font* font, glm::vec2& pos,glm::vec4& col
 void Renderer::renderFullscreenQuad(uint w, uint h, uint startX, uint startY){ renderManager->_renderFullscreenQuad(w,h,startX,startY); }
 void Renderer::renderFullscreenTriangle(uint w,uint h, uint startX, uint startY){ renderManager->_renderFullscreenTriangle(w,h,startX,startY); }
 inline const GLint Renderer::getUniformLoc(const char* location){
-    const unordered_map<string,GLint>& m = renderManager->current_shader_program->uniforms();
-    if(!m.count(location))
-        return -1;
-    return m.at(location);
+    auto& m = renderManager->current_shader_program->uniforms(); if(!m.count(location)) return -1; return m.at(location);
 }
 inline const GLint& Renderer::getUniformLocUnsafe(const char* location){
     return renderManager->current_shader_program->uniforms().at(location); 

@@ -346,46 +346,32 @@ class Mesh::impl final{
                 #pragma region vertices
                 for(uint i = 0; i < aimesh.mNumVertices; ++i){
                     //pos
-                    glm::vec3 pos;
-                    pos.x = aimesh.mVertices[i].x;
-                    pos.y = aimesh.mVertices[i].y;
-                    pos.z = aimesh.mVertices[i].z;
-                    data.points.push_back(pos);
+                    data.points.emplace_back(aimesh.mVertices[i].x,aimesh.mVertices[i].y,aimesh.mVertices[i].z);
 
                     //uv
-                    glm::vec2 uv;
-                    if(aimesh.mTextureCoords[0]){ uv.x = aimesh.mTextureCoords[0][i].x; uv.y = aimesh.mTextureCoords[0][i].y; }
-                    else{ uv = glm::vec2(0.0f, 0.0f); }
+                    if(aimesh.mTextureCoords[0]){
+						//this is to prevent uv compression from beign f-ed up at the poles.
+						//if(aimesh.mTextureCoords[0][i].y <= 0.0001f){ aimesh.mTextureCoords[0][i].y = 0.001f; }
+						//if(aimesh.mTextureCoords[0][i].y >= 0.9999f){ aimesh.mTextureCoords[0][i].y = 0.999f; }
+						data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x,aimesh.mTextureCoords[0][i].y);
+					}
+                    else{ 
+						data.uvs.emplace_back(0.0f,0.0f);
+					}
 
-                    //this is to prevent uv compression from beign f-ed up at the poles.
-                    //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
-                    //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
-                    data.uvs.push_back(uv);
 
                     //norm
-                    glm::vec3 norm;
                     if(aimesh.mNormals){
-                        norm.x = aimesh.mNormals[i].x;
-                        norm.y = aimesh.mNormals[i].y;
-                        norm.z = aimesh.mNormals[i].z;
-                        data.normals.push_back(norm);
+                        data.normals.emplace_back(aimesh.mNormals[i].x,aimesh.mNormals[i].y,aimesh.mNormals[i].z);
 
                         //tangent
                         /*
-                        glm::vec3 tangent;
-                        tangent.x = aimesh.mTangents[i].x;
-                        tangent.y = aimesh.mTangents[i].y;
-                        tangent.z = aimesh.mTangents[i].z;
-                        //data.tangents.push_back(tangent);
+                        //data.tangents.emplace_back(aimesh.mTangents[i].x,aimesh.mTangents[i].y,aimesh.mTangents[i].z);
                         */
 
                         //binorm
                         /*
-                        glm::vec3 binorm;
-                        binorm.x = aimesh.mBitangents[i].x;
-                        binorm.y = aimesh.mBitangents[i].y;
-                        binorm.z = aimesh.mBitangents[i].z;
-                        //data.binormals.push_back(binorm);
+                        //data.binormals.push_back(aimesh.mBitangents[i].x,aimesh.mBitangents[i].y,aimesh.mBitangents[i].z);
                         */
                     }
                 }
@@ -393,28 +379,33 @@ class Mesh::impl final{
                 // Process indices
                 #pragma region indices
                 for(uint i = 0; i < aimesh.mNumFaces; ++i){
-                    aiFace face = aimesh.mFaces[i];
-                    epriv::Triangle t;
-                    for(uint j = 0; j < face.mNumIndices; ++j){
-                        ushort index = (ushort)face.mIndices[j];
-                        data.indices.push_back(index);
-                        if(j == 0){
-                            t.v1.position = data.points.at(index);
-                            if(data.uvs.size() > 0) t.v1.uv = data.uvs.at(index);
-                            if(data.normals.size() > 0) t.v1.normal = data.normals.at(index);
-                        }
-                        else if(j == 1){
-                            t.v2.position = data.points.at(index);
-                            if(data.uvs.size() > 0) t.v2.uv = data.uvs.at(index);
-                            if(data.normals.size() > 0) t.v2.normal = data.normals.at(index);
-                        }
-                        else if(j == 2){
-                            t.v3.position = data.points.at(index);
-                            if(data.uvs.size() > 0) t.v3.uv = data.uvs.at(index);
-                            if(data.normals.size() > 0) t.v3.normal = data.normals.at(index);
-                            data.file_triangles.push_back(t);
-                        }
-                    }
+                    aiFace& face = aimesh.mFaces[i];
+
+					uint& index0 = face.mIndices[0];
+					uint& index1 = face.mIndices[1];
+					uint& index2 = face.mIndices[2];
+
+					data.indices.push_back(index0);
+					data.indices.push_back(index1);
+					data.indices.push_back(index2);
+
+					epriv::Vertex v1,v2,v3;
+
+                    v1.position = data.points.at(index0);
+					v2.position = data.points.at(index1);
+					v3.position = data.points.at(index2);
+                    if(data.uvs.size() > 0){ 
+						v1.uv = data.uvs.at(index0);
+						v2.uv = data.uvs.at(index1);
+						v3.uv = data.uvs.at(index2);
+					}
+                    if(data.normals.size() > 0){
+						v1.normal = data.normals.at(index0);
+						v2.normal = data.normals.at(index1);
+						v3.normal = data.normals.at(index2);
+					}
+					data.file_triangles.emplace_back(v1,v2,v3);
+
                 }
                 #pragma endregion
                 //bones
@@ -672,7 +663,7 @@ class Mesh::impl final{
                     //temp_tangents.at(index) += data.tangents.at(i);
                 }
                 else{
-                    if(m_Skeleton != nullptr){
+                    if(m_Skeleton){
                         epriv::MeshVertexDataAnimated vert;
                         vert.position = data.points.at(i);
                         out_vertices.push_back(vert);

@@ -44,7 +44,7 @@ namespace Engine{
         struct MeshMaterialPair;
         class ComponentTypeRegistry;
         class ComponentManager;
-		class ComponentCameraSystem;
+        class ComponentCameraSystem;
     };
 };
 class ComponentType{public:enum Type{
@@ -68,7 +68,7 @@ namespace Engine{
     template<class Base,class Derived> void registerComponent(){
         const boost_type_index baseType    = boost_type_index(boost::typeindex::type_id<Base>());
         const boost_type_index derivedType = boost_type_index(boost::typeindex::type_id<Derived>());
-		boost::unordered_map<boost_type_index,uint>& map = epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot;
+        boost::unordered_map<boost_type_index,uint>& map = epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot;
         if(!map.count(derivedType)){
             const uint& baseClassSlot = map.at(baseType);
             map.emplace(derivedType,baseClassSlot);
@@ -82,7 +82,7 @@ namespace Engine{
             friend class ::Entity;
             friend class ::Scene;
             friend class ::Engine::epriv::ComponentTypeRegistry;
-			friend class ::Engine::epriv::ComponentCameraSystem;
+            friend class ::Engine::epriv::ComponentCameraSystem;
             private:
                 class impl;
                 ObjectPool<Entity>*                                                 m_EntityPool;
@@ -92,7 +92,7 @@ namespace Engine{
 
                 template<class T> const uint getIndividualComponentTypeSlot(){
                     const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
-					return Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
+                    return Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
                 }
                 template<class T> const uint getIndividualComponentTypeSlot(T* component){
                     const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id_runtime(*component));
@@ -161,17 +161,17 @@ namespace Engine{
                     ++m_NextIndex;
                 }
         };
-		class ComponentCameraSystem{
-			friend class ::Engine::epriv::ComponentManager;
-		    private:
-				class impl; 
-		    public:
-				std::unique_ptr<impl> m_i;
+        class ComponentCameraSystem{
+            friend class ::Engine::epriv::ComponentManager;
+            private:
+                class impl; 
+            public:
+                std::unique_ptr<impl> m_i;
 
-				ComponentCameraSystem();
-				~ComponentCameraSystem();
-				void update(const float& dt);
-		};
+                ComponentCameraSystem();
+                ~ComponentCameraSystem();
+                void update(const float& dt);
+        };
     };
 };
 
@@ -219,25 +219,25 @@ class ComponentModel: public ComponentBaseClass{
 class ComponentBody: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
     private:
-		struct PhysicsData{
-			Collision* collision;   btRigidBody* rigidBody;   btDefaultMotionState* motionState; float mass;
-		};
-		struct NormalData{
-			glm::vec3* scale;   glm::vec3* position;   glm::quat* rotation;   glm::mat4* modelMatrix;
-		};
-		union{
-			NormalData n;
-			PhysicsData p;
-		} data;
-		bool _physics;
+        struct PhysicsData{
+            Collision* collision;   btRigidBody* rigidBody;   btDefaultMotionState* motionState; float mass;
+        };
+        struct NormalData{
+            glm::vec3* scale;   glm::vec3* position;   glm::quat* rotation;   glm::mat4* modelMatrix;
+        };
+        union{
+            NormalData n;
+            PhysicsData p;
+        } data;
+        bool _physics;
         glm::vec3 _forward, _right, _up;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Collision*,Entity* owner = nullptr);
-		ComponentBody(Entity* owner = nullptr);
+        ComponentBody(Entity* owner = nullptr);
         ~ComponentBody();
 
-		void alignTo(glm::vec3 direction,float speed);
+        void alignTo(glm::vec3 direction,float speed);
 
         void translate(glm::vec3& translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
         void rotate(glm::vec3& rotation,bool local = true);         void rotate(float pitch,float yaw,float roll,bool local = true);
@@ -250,7 +250,7 @@ class ComponentBody: public ComponentBaseClass{
         float mass();
         glm::vec3 getScreenCoordinates();
         glm::quat rotation();
-		glm::vec3 getScale();
+        glm::vec3 getScale();
         glm::vec3 position();
         glm::vec3 forward();
         glm::vec3 right();
@@ -280,7 +280,7 @@ class ComponentBody: public ComponentBaseClass{
 
 class ComponentCamera: public ComponentBaseClass{
     friend class ::Engine::epriv::ComponentManager;
-	friend class ::Engine::epriv::ComponentCameraSystem;
+    friend class ::Engine::epriv::ComponentCameraSystem;
     friend class ::Engine::epriv::ComponentInternalFunctionality;
     friend class ::ComponentModel;
     friend class ::Camera;
@@ -321,7 +321,7 @@ class ComponentCamera: public ComponentBaseClass{
         uint sphereIntersectTest(glm::vec3& objectPosition,float objectRadius);
 };
 
-class Entity{
+class Entity: public EventObserver{
     friend class ::Scene;
     friend class ::Engine::epriv::ComponentManager;
     private:
@@ -334,10 +334,7 @@ class Entity{
 
         const uint id() const;
         Scene* scene();
-        virtual void registerEvent(const EventType::Type& type){}
-        virtual void unregisterEvent(const EventType::Type& type){}
         virtual void update(const float& dt){}
-        virtual void onEvent(const Event& e){}
 
         void destroy(bool immediate = false); //completely eradicate from memory. by default it its eradicated at the end of the frame before rendering logic, but can be overrided to be deleted immediately after the call
         Entity* parent();
