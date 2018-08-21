@@ -12,7 +12,6 @@ using namespace Engine;
 using namespace std;
 
 
-
 GameCameraComponent::GameCameraComponent(float angle,float aspectRatio,float nearPlane,float farPlane):ComponentCamera(angle,aspectRatio,nearPlane,farPlane){
     m_State = CAMERA_STATE_FREEFORM;
     m_Target = nullptr;
@@ -30,26 +29,26 @@ GameCameraComponent::~GameCameraComponent(){
 void GameCameraComponent::update(const float& dt){
     switch(m_State){
         case CAMERA_STATE_FOLLOW:{
-            ComponentBody& body = *(m_Target->getComponent<ComponentBody>());
-            ComponentModel& targetModel = *(m_Target->getComponent<ComponentModel>());
+            auto& targetBody = *(m_Target->getComponent<ComponentBody>());
+            auto& targetModel = *(m_Target->getComponent<ComponentModel>());
             float targetRadius = targetModel.radius();
 
             m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if( m_OrbitRadius < 0)     m_OrbitRadius = 0;
             else if(m_OrbitRadius > 3) m_OrbitRadius = 3;
 
-            glm::vec3 pos = body.position() + ((body.forward() * glm::length(targetRadius) * 1.7f)+ body.up() * glm::length(targetRadius) * 0.3f) * (1.0f + m_OrbitRadius);
-            pos -= glm::vec3(-0.001f,-0.001f,0.001f);//for some reason this is needed to remove lighting bugs...
+            glm::vec3 pos = targetBody.position() + ((targetBody.forward() * glm::length(targetRadius) * 1.7f)+ targetBody.up() * glm::length(targetRadius) * 0.3f) * (1.0f + m_OrbitRadius);
+            pos -= glm::vec3(-0.00001f,-0.00001f,0.00001f);//for some reason this is needed to remove lighting bugs...
 
             m_Body->setPosition(pos);
 
-            lookAt(pos,body.position() - body.forward() * 50.0f,body.up());
+            lookAt(pos,targetBody.position() - targetBody.forward() * 50.0f,targetBody.up());
             break;
         }
         case CAMERA_STATE_FOLLOWTARGET:{
-            ComponentBody& target = *(m_Target->getComponent<ComponentBody>());
-            ComponentBody& player = *(m_Player->getComponent<ComponentBody>());
-            ComponentModel& playerModel = *(m_Player->getComponent<ComponentModel>());
+            auto& target = *(m_Target->getComponent<ComponentBody>());
+            auto& player = *(m_Player->getComponent<ComponentBody>());
+            auto& playerModel = *(m_Player->getComponent<ComponentModel>());
 
             m_OrbitRadius += (Engine::getMouseWheelDelta() * 0.02f);
             if( m_OrbitRadius < 0)     m_OrbitRadius = 0;
@@ -68,8 +67,8 @@ void GameCameraComponent::update(const float& dt){
             break;
         }
         case CAMERA_STATE_ORBIT:{
-            ComponentBody& target = *(m_Target->getComponent<ComponentBody>());
-            ComponentModel& targetModel = *(m_Target->getComponent<ComponentModel>());
+            auto& targetBody = *(m_Target->getComponent<ComponentBody>());
+            auto& targetModel = *(m_Target->getComponent<ComponentModel>());
 
 
             m_OrbitRadius += Engine::getMouseWheelDelta() * 0.01f;
@@ -80,16 +79,16 @@ void GameCameraComponent::update(const float& dt){
 
             glm::vec3 pos = (glm::vec3(0,0,1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0,0,1) * glm::length(targetModel.radius() * (1.0f + m_OrbitRadius)));
 
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model,target.position());
-            model *= glm::mat4_cast(m_Body->rotation());
-            model = glm::translate(model,pos);
+            glm::mat4 cameraModel = glm::mat4(1.0f);
+            cameraModel = glm::translate(cameraModel,targetBody.position());
+            cameraModel *= glm::mat4_cast(m_Body->rotation());
+            cameraModel = glm::translate(cameraModel,pos);
 
-            pos = glm::vec3(model[3][0],model[3][1],model[3][2]);
-            pos -= glm::vec3(-0.001f,-0.001f,0.001f);//for some reason this is needed to remove lighting bugs...
-            m_Body->setPosition(pos);
+            glm::vec3 eye(cameraModel[3][0],cameraModel[3][1],cameraModel[3][2]);
+            eye -= glm::vec3(-0.00001f,-0.00001f,0.00001f);//for some reason this is needed to remove lighting bugs...
+            m_Body->setPosition(eye);
 
-            lookAt(pos,target.position(),m_Body->up());
+			lookAt(eye,targetBody.position(),m_Body->up());
             break;
         }
         case CAMERA_STATE_FREEFORM:{
@@ -106,14 +105,14 @@ GameCamera::GameCamera(float a, float r, float n, float f,Scene* scene):Camera(a
     m_Camera = new GameCameraComponent(a,r,n,f);
     addComponent(m_Camera);
     
-    ((GameCameraComponent*)m_Camera)->m_Body = m_BasicBody;
+    ((GameCameraComponent*)m_Camera)->m_Body = m_Body;
 }
 GameCamera::GameCamera(float l, float r, float b, float t, float n, float f, Scene* scene):Camera(l,r,b,t,n,f,scene){
     removeComponent(m_Camera);
     m_Camera = new GameCameraComponent(l,r,b,t,n,f);
     addComponent(m_Camera);
 
-    ((GameCameraComponent*)m_Camera)->m_Body = m_BasicBody;
+    ((GameCameraComponent*)m_Camera)->m_Body = m_Body;
 }
 GameCamera::~GameCamera()
 {
@@ -139,7 +138,7 @@ Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
 
     float distance = -1;
     for(auto object:objs){
-        ComponentBody& body = *(object->getComponent<ComponentBody>());
+        auto& body = *(object->getComponent<ComponentBody>());
         float d = glm::distance(body.position(), getPosition());
         if(distance == -1 || d < distance){
             distance = d;
@@ -156,13 +155,13 @@ void GameCamera::follow(Entity* target){
     cam.m_State = CAMERA_STATE_FOLLOW;
 }
 void GameCamera::followTarget(Entity* target,Entity* player){
-    GameCameraComponent& cam = *((GameCameraComponent*)m_Camera);
+    auto& cam = *((GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = player;
     cam.m_State = CAMERA_STATE_FOLLOWTARGET;
 }
 void GameCamera::orbit(Entity* target){
-    GameCameraComponent& cam = *((GameCameraComponent*)m_Camera);
+    auto& cam = *((GameCameraComponent*)m_Camera);
     cam.m_Target = target;
     cam.m_Player = target;
     cam.m_State = CAMERA_STATE_ORBIT;

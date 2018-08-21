@@ -122,7 +122,6 @@ void HUD::render(){
 
     #pragma region DrawDebugStuff
 
-
     font->renderText(Engine::Data::reportTime() + 
                      "\nEntity Count: " + to_string(Resources::getCurrentScene()->entities().size()) + 
                      "\nBloom Scale: " + to_string(Renderer::Settings::Bloom::getScale()),

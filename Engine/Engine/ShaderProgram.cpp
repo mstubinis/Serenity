@@ -26,6 +26,11 @@ void insertStringAtLine(string& src, const string& newcontent,uint line){
 void insertStringAtEndOfMainFunc(string& src, const string& content){
     uint p=src.size()-1;while(p>0){char c=src.at(p);--p;if(c=='}'){break;}}src.insert(p,content);
 }
+void insertStringRightAfterLineContent(string& src, const string& newContent,const string& lineContent){
+	istringstream str(src);string l; vector<string> lines; bool a = false;
+    while(getline(str,l)){lines.push_back(l+"\n");if(sfind(l,lineContent) && !a){lines.push_back(newContent+"\n"); a=true;}}src="";for(auto ln:lines){src+=ln;}
+}
+
 
 UniformBufferObject* UniformBufferObject::UBO_CAMERA = nullptr;
 
@@ -195,34 +200,118 @@ class ShaderP::impl final{
                 }	
             }
 
-            //check for log depth
+            //check for log depth - vertex
             if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && !sfind(_d,"//USE_LOG_DEPTH_VERTEX") && shader->type() == ShaderType::Vertex){
                 boost::replace_all(_d,"USE_LOG_DEPTH_VERTEX","");
                 string log_vertex_code = "\n"
-                "uniform float fcoeff;\n"
-                "flat varying float FC;\n"
-                "varying float logz_f;\n"
-                "\n";
+					"uniform float fcoeff;\n"
+					"flat varying float FC;\n"
+					"varying float logz_f;\n"
+					"\n";
                 insertStringAtLine(_d,log_vertex_code,1);
                 log_vertex_code = "\n"
-                "logz_f = 1.0 + gl_Position.w;\n"
-                "gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
-                "FC = fcoeff;\n"
-                "\n";
+					"logz_f = 1.0 + gl_Position.w;\n"
+					"gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
+					"FC = fcoeff;\n"
+					"\n";
                 insertStringAtEndOfMainFunc(_d,log_vertex_code);
             }
+			//check for log depth - fragment
             if(sfind(_d,"USE_LOG_DEPTH_FRAGMENT") && !sfind(_d,"//USE_LOG_DEPTH_FRAGMENT") && shader->type() == ShaderType::Fragment){
                 boost::replace_all(_d,"USE_LOG_DEPTH_FRAGMENT","");
                 string log_frag_code = "\n"
-                "flat varying float FC;\n"
-                "varying float logz_f;\n"
-                "\n";
+					"flat varying float FC;\n"
+					"varying float logz_f;\n"
+					"\n";
                 insertStringAtLine(_d,log_frag_code,1);
                 log_frag_code = "\n"
-                "gl_FragDepth = log2(logz_f) * FC;\n"
-                "\n";
+					"gl_FragDepth = log2(logz_f) * FC;\n"
+					"\n";
                 insertStringAtEndOfMainFunc(_d,log_frag_code);
+				if(sfind(_d,"GetWorldPosition(") || sfind(_d,"GetViewPosition(")){
+					if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
+						string reconstructPos = "\n"
+						"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
+						"    float log_depth = (texture2D(gDepthMap, _uv).r);\n"
+						"    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
+						"    float a = _far / (_far - _near);\n"
+						"    float b = _far * _near / (_near - _far);\n"
+						"    float linearDepth = (a + b / regularDepth);\n"
+						"    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+						"    vec4 wpos = CameraInvViewProj * clipSpace;\n"
+						"    return wpos.xyz / wpos.w;\n"
+						"}\n"
+						"vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
+						"    float depth = texture2D(gDepthMap, _uv).r;\n"
+						"    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
+						"    float a = _far / (_far - _near);\n"//linearize regular depth
+						"    float b = _far * _near / (_near - _far);\n"
+						"    float linearDepth = (a + b / depth);\n"
+						"    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+						"    return clipSpace.xyz / clipSpace.w;\n"
+						"}\n";
+						insertStringRightAfterLineContent(_d,reconstructPos,"uniform sampler2D gDepthMap;");
+					}
+				}
             }
+			else{
+				if(sfind(_d,"GetWorldPosition(") || sfind(_d,"GetViewPosition(")){
+					if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
+						if(sfind(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !sfind(_d,"//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader->type() == ShaderType::Fragment){
+							//log
+							boost::replace_all(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION","");
+							if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
+								string reconstructPos = "\n"
+								"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
+								"    float log_depth = (texture2D(gDepthMap, _uv).r);\n"
+								"    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
+								"    float a = _far / (_far - _near);\n"
+								"    float b = _far * _near / (_near - _far);\n"
+								"    float linearDepth = (a + b / regularDepth);\n"
+								"    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+								"    vec4 wpos = CameraInvViewProj * clipSpace;\n"
+								"    return wpos.xyz / wpos.w;\n"
+								"}\n"
+								"vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
+								"    float depth = texture2D(gDepthMap, _uv).r;\n"
+								"    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
+								"    float a = _far / (_far - _near);\n"//linearize regular depth
+								"    float b = _far * _near / (_near - _far);\n"
+								"    float linearDepth = (a + b / depth);\n"
+								"    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+								"    return clipSpace.xyz / clipSpace.w;\n"
+								"}\n";
+								insertStringRightAfterLineContent(_d,reconstructPos,"uniform sampler2D gDepthMap;");
+							}
+						}
+						else{
+							//normal
+							if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
+								string reconstructPos = "\n"
+								"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
+								"    float regularDepth = (texture2D(gDepthMap, _uv).r);\n"
+								"    float a = _far / (_far - _near);\n"
+								"    float b = _far * _near / (_near - _far);\n"
+								"    float linearDepth = (a + b / regularDepth);\n"
+								"    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+								"    vec4 wpos = CameraInvViewProj * clipSpace;\n"
+								"    return wpos.xyz / wpos.w;\n"
+								"}\n"
+								"vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
+								"    float depth = texture2D(gDepthMap, _uv).r;\n"
+								"    float a = _far / (_far - _near);\n"
+								"    float b = _far * _near / (_near - _far);\n"
+								"    float linearDepth = (a + b / depth);\n"
+								"    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
+								"    return clipSpace.xyz / clipSpace.w;\n"
+								"}\n";
+								insertStringRightAfterLineContent(_d,reconstructPos,"uniform sampler2D gDepthMap;");
+							}
+						}
+					}
+				}
+			}
+
 
 
 
@@ -336,7 +425,7 @@ class ShaderP::impl final{
             glGetProgramiv(m_ShaderProgram,GL_LINK_STATUS,&res);glGetProgramiv(m_ShaderProgram,GL_INFO_LOG_LENGTH,&ll);vector<char>pe(std::max(ll,int(1)));
             glGetProgramInfoLog(m_ShaderProgram,ll,NULL,&pe[0]);
 
-            if(res == GL_FALSE){cout<<"ShaderProgram Log : "<<endl;cout<<&pe[0]<<endl;}
+            if(res==GL_FALSE){cout<<"ShaderProgram Log : "<<endl;cout<<&pe[0]<<endl;}
          
             //populate uniform table
             if(res==GL_TRUE){

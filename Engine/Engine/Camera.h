@@ -17,13 +17,14 @@ class Camera: public Entity{
     private:
         class impl; std::unique_ptr<impl> m_i;
     protected:
-        ComponentBody* m_BasicBody;
+        ComponentBody* m_Body;
         ComponentCamera* m_Camera;
     public:
         Camera(float angle,float aspectRatio,float nearPlane,float farPlane,Scene* = nullptr);
         Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);
         virtual ~Camera();
 
+		//void lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up);
         glm::vec3 getPosition();
         glm::vec3 forward();
         glm::vec3 right();

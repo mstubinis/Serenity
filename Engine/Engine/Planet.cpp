@@ -30,7 +30,8 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 
     glm::vec3& pos = obj->m_Body->position();
     glm::quat& orientation = obj->m_Body->rotation();
-    glm::vec3 camPos = c->getPosition() - pos;
+	glm::vec3 camPosR = c->getPosition();
+    glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight*camHeight;
 
@@ -47,14 +48,10 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     glm::vec3 scl = obj->m_Body->getScale();
     
     float fScaledepth = 0.25f;
-    float innerRadius = obj->getGroundRadius();
+    float innerRadius = obj->getGroundRadius(); //includes rings too
     float outerRadius = obj->getRadius();
 
-    //Ground should be currently binded... render the ground
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model,pos);
-    model *= glm::mat4_cast(orientation);
-    model = glm::scale(model,scl);
+    glm::mat4 model = obj->m_Body->modelMatrix();
 
     if(atmosphereHeight <= 0){
         outerRadius += (outerRadius *  0.025f);
@@ -77,7 +74,6 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
 
     Renderer::sendUniform1i("nSamples", numberSamples); 
-    glm::vec3 camPosR = c->getPosition();
     float exposure = 2.0f;
     Renderer::sendUniformMatrix4f("Rot",rot);
 
@@ -89,7 +85,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4f("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-    Renderer::sendUniformMatrix4f("Model",model);
+	Renderer::sendUniformMatrix4f("Model",model);
 
     i.mesh()->render();
 }};
@@ -208,10 +204,10 @@ glm::vec3 Planet::getPosition(){ return m_Body->position(); }
 void Planet::setPosition(float x,float y,float z){ m_Body->setPosition(x,y,z); }
 void Planet::setPosition(glm::vec3& pos){ m_Body->setPosition(pos); }
 void Planet::update(const float& dt){
-    if(m_RotationInfo != nullptr){
+    if(m_RotationInfo){
         m_Body->rotate(0.0f,glm::radians(m_RotationInfo->speed * dt),0.0f);
     }
-    if(m_OrbitInfo != nullptr){
+    if(m_OrbitInfo){
         //m_OrbitInfo->setOrbitalPosition(((1.0f/(m_OrbitInfo->info.y*86400.0f))*dt)*6.283188f,this);
     }
 }

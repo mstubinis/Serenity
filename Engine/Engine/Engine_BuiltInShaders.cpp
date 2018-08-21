@@ -25,7 +25,6 @@ string epriv::EShaders::conditional_functions;
 string epriv::EShaders::float_into_2_floats;
 string epriv::EShaders::determinent_mat3;
 string epriv::EShaders::normals_octahedron_compression_functions;
-string epriv::EShaders::reconstruct_log_depth_functions;
 string epriv::EShaders::fullscreen_quad_vertex;
 string epriv::EShaders::vertex_basic;
 string epriv::EShaders::vertex_hud;
@@ -189,26 +188,6 @@ epriv::EShaders::float_into_2_floats =
 epriv::EShaders::determinent_mat3 = 
     "float det(mat3 m){\n"
     "    return m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])-m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2])+m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2]);\n"
-    "}\n";
-epriv::EShaders::reconstruct_log_depth_functions = 
-    "vec3 reconstruct_world_pos(vec2 _uv,float _near, float _far){\n"
-    "    float log_depth = (texture2D(gDepthMap, _uv).r);\n"
-    "    float regularDepth = pow(_far + 1.0, log_depth) - 1.0;\n"//log to regular depth
-    "    float a = _far / (_far - _near);\n"
-    "    float b = _far * _near / (_near - _far);\n"
-    "    float linearDepth = (a + b / regularDepth);\n"
-    "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-    "    vec4 wpos = CameraInvViewProj * clipSpace;\n"
-    "    return wpos.xyz / wpos.w;\n"
-    "}\n"
-    "vec3 reconstruct_view_pos(vec2 _uv,float _near, float _far){\n"
-    "    float depth = texture2D(gDepthMap, _uv).r;\n"
-    "    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
-    "    float a = _far / (_far - _near);\n"//linearize regular depth
-    "    float b = _far * _near / (_near - _far);\n"
-    "    float linearDepth = (a + b / depth);\n"
-    "    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-    "    return clipSpace.xyz / clipSpace.w;\n"
     "}\n";
 
 epriv::EShaders::normals_octahedron_compression_functions = epriv::EShaders::constants +
@@ -1615,6 +1594,9 @@ epriv::EShaders::copy_depth_frag =
 
 #pragma region SSAO
 epriv::EShaders::ssao_frag =
+	"\n"
+	"USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
+	"\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gRandomMap;\n"
     "uniform sampler2D gMiscMap;\n"
@@ -1632,10 +1614,9 @@ epriv::EShaders::ssao_frag =
     "varying vec2 texcoords;\n"
     "\n";
 epriv::EShaders::ssao_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::ssao_frag += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::ssao_frag +=
     "float occlude(vec2 uv, vec2 offsetUV, vec3 origin, vec3 normal){\n"
-    "    vec3 diff = reconstruct_world_pos(uv + offsetUV,CameraNear,CameraFar) - origin;\n"
+    "    vec3 diff = GetWorldPosition(uv + offsetUV,CameraNear,CameraFar) - origin;\n"
     "    vec3 vec = normalize(diff);\n"
     "    float dist = length(diff) * SSAOInfo.w;\n"
     "    return max(0.0, dot(normal,vec) - SSAOInfo.z) * (1.0 / (1.0 + dist)) * SSAOInfo.y;\n"
@@ -1645,7 +1626,7 @@ epriv::EShaders::ssao_frag +=
     "}\n"
     "void main(){\n"
     "    vec2 uv = texcoords * (1.0 / fbufferDivisor);\n"
-    "    vec3 worldPosition = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
+    "    vec3 worldPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "    vec3 randomVector = normalize(texture2D(gRandomMap, texcoords / SSAOInfoA.w).xyz);\n" //should texcoords be uv here?
     "\n"
@@ -1835,7 +1816,6 @@ epriv::EShaders::final_frag =
     "\n";
 epriv::EShaders::final_frag += epriv::EShaders::float_into_2_floats;
 epriv::EShaders::final_frag += epriv::EShaders::normals_octahedron_compression_functions;
-epriv::EShaders::final_frag += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::final_frag +=
     "\n"
     "void main(){\n"
@@ -1855,7 +1835,7 @@ epriv::EShaders::final_frag +=
     "    gl_FragColor = (vec4(hdr,1.0));\n"
     "\n"
     "    if(HasFog == 1){\n"
-    "        float distFrag = abs(distance(reconstruct_world_pos(texcoords,CameraNear,CameraFar),CameraPosition));\n"
+    "        float distFrag = abs(distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition));\n"
     "        float distVoid = FogDistNull + FogDistBlend;\n"
     "        float distBlendIn = FogDistBlend - (distVoid - distFrag);\n"
     "        float omega = smoothstep(0.0,1.0,(distBlendIn / FogDistBlend));\n"
@@ -1889,7 +1869,6 @@ epriv::EShaders::lighting_frag =
     "\n";
 epriv::EShaders::lighting_frag += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::lighting_frag += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::lighting_frag += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::lighting_frag +=
     "float azimuth(vec3 vector){\n"
     "    return atan(vector.y / vector.x);\n" //might also be x / y and not y / x
@@ -2112,7 +2091,7 @@ epriv::EShaders::lighting_frag +=
     //"        return;\n"
     //"        discard;\n"
     //"    }\n"
-    "    vec3 PxlPosition = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
+    "    vec3 PxlPosition = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
     "    vec3 LightPosition = vec3(LightDataC.yzw);\n"
@@ -2156,7 +2135,6 @@ epriv::EShaders::lighting_frag_gi =
     "\n";
 epriv::EShaders::lighting_frag_gi += epriv::EShaders::normals_octahedron_compression_functions;
 epriv::EShaders::lighting_frag_gi += epriv::EShaders::float_into_2_floats;
-epriv::EShaders::lighting_frag_gi += epriv::EShaders::reconstruct_log_depth_functions;
 epriv::EShaders::lighting_frag_gi +=
     "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
     "    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
@@ -2173,7 +2151,7 @@ epriv::EShaders::lighting_frag_gi +=
     //"        discard;\n"
     //"    }\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    vec3 PxlWorldPos = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
+    "    vec3 PxlWorldPos = GetWorldPosition(uv,CameraNear,CameraFar);\n"
     "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"

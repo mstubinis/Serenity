@@ -21,9 +21,9 @@ class Camera::impl final{
             if(!scene)
                 scene = Resources::getCurrentScene();
             scene->addEntity(super);
-            super->m_BasicBody = new ComponentBody();
-            super->m_Camera->lookAt(super->m_BasicBody->position(),super->m_BasicBody->position() + super->m_BasicBody->forward(),super->m_BasicBody->up());
-            super->addComponent(super->m_BasicBody);
+            super->m_Body = new ComponentBody();
+            super->m_Camera->lookAt(super->m_Body->position(),super->m_Body->position() + super->m_Body->forward(),super->m_Body->up());
+            super->addComponent(super->m_Body);
             super->addComponent(super->m_Camera);	
         }
         void _init(float& angle, float& aspectRatio, float& _near, float& _far,Scene* scene,Camera* super){
@@ -44,7 +44,7 @@ Camera::Camera(float left, float right, float bottom, float top, float _near, fl
 }
 Camera::~Camera(){ 
 }
-glm::vec3 Camera::getPosition(){ return m_BasicBody->position(); }
+glm::vec3 Camera::getPosition(){ return m_Body->position(); }
 glm::quat Camera::getOrientation(){ return glm::conjugate(glm::quat_cast(m_Camera->getView())); }
 const float Camera::getAngle() const{ return m_Camera->_angle; }
 const float Camera::getAspect() const{ return m_Camera->_aspectRatio; }
@@ -61,10 +61,15 @@ glm::mat4 Camera::getViewInverse(){ return m_Camera->getViewInverse(); }
 glm::mat4 Camera::getProjectionInverse(){ return m_Camera->getProjectionInverse(); }
 glm::mat4 Camera::getViewProjection(){ return m_Camera->getViewProjection(); }
 glm::vec3 Camera::getViewVector(){ return m_Camera->getViewVector(); }
-glm::vec3 Camera::forward(){ return m_BasicBody->forward(); }
-glm::vec3 Camera::right(){ return m_BasicBody->right(); }
-glm::vec3 Camera::up(){ return m_BasicBody->up(); }
-
+glm::vec3 Camera::forward(){ return m_Body->forward(); }
+glm::vec3 Camera::right(){ return m_Body->right(); }
+glm::vec3 Camera::up(){ return m_Body->up(); }
+/*
+void Camera::lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up){
+	//m_Camera->lookAt(_eye,_forward,_up);
+	//m_Body->setPosition(_eye);
+}
+*/
 float Camera::getDistance(Entity* e){
     auto* b = e->getComponent<ComponentBody>();
     return glm::distance(b->position(),getPosition());
@@ -77,7 +82,7 @@ bool Camera::rayIntersectSphere(Entity* entity){
     auto* model = entity->getComponent<ComponentModel>();
     float radius = 0.0f;
     if(model) radius = model->radius();
-    return Math::rayIntersectSphere(body.position(),radius,m_BasicBody->position(),m_Camera->getViewVector());
+    return Math::rayIntersectSphere(body.position(),radius,m_Body->position(),m_Camera->getViewVector());
 }
 
 

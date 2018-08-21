@@ -160,7 +160,7 @@ ShipSystemRollThrusters::~ShipSystemRollThrusters(){
 }
 void ShipSystemRollThrusters::update(const float& dt){
     if(isOnline()){
-        ComponentBody* body = m_Ship->getComponent<ComponentBody>();
+        auto* body = m_Ship->getComponent<ComponentBody>();
         glm::vec3 velocity = body->getAngularVelocity();
         velocity.z *= 0.9970f;
         // apply dampening
@@ -267,16 +267,16 @@ void Ship::update(const float& dt){
 
         if(!Engine::paused()){
             if(m_IsWarping && m_WarpFactor > 0){
-                ComponentBody* body = getComponent<ComponentBody>();
+                auto* body = getComponent<ComponentBody>();
                 float speed = (m_WarpFactor * 1.0f / 0.46f) * 2.0f;
                 glm::vec3 s = (body->forward() * glm::pow(speed, 15.0f)) / body->mass();
                 for(auto id:currentScene->entities()){
                     Entity* e = currentScene->getEntity(id);
                     if(e){
-                        ComponentCamera* cam = e->getComponent<ComponentCamera>();
-                        GameCameraComponent* camGame = (e->getComponent<GameCameraComponent>());
+                        auto* cam = e->getComponent<ComponentCamera>();
+                        auto* camGame = (e->getComponent<GameCameraComponent>());
                         if(e != this && !e->parent() && !cam && !camGame){
-                            ComponentBody* ebody = e->getComponent<ComponentBody>();
+                            auto* ebody = e->getComponent<ComponentBody>();
                             ebody->setPosition(ebody->position() + (s * dt));
                         }
                     }

@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
+#include "Scene.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -164,7 +165,8 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
     glm::mat4 parentModel = glm::mat4(1.0f);
     Entity* parent = nullptr;
     parent = i.m_Entity;
-    ComponentBody& body = *(parent->getComponent<ComponentBody>());
+    auto& body = *(parent->getComponent<ComponentBody>());
+	auto& model = *(parent->getComponent<ComponentModel>());
     parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& animationQueue = i.m_AnimationQueue;
@@ -202,11 +204,11 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
     
-    glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    glm::mat4 modelMatrix = parentModel * i.m_Model; //might need to reverse this order.
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
     
     Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
-    Renderer::sendUniformMatrix4f("Model",model);
+    Renderer::sendUniformMatrix4f("Model",modelMatrix);
     i.m_Mesh->render();
 }};
 struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
