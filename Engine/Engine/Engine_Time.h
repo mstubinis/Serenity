@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include "Engine_Utils.h"
+#include "Engine_Resources.h"
 typedef unsigned int uint;
 
 namespace Engine{
@@ -19,7 +20,8 @@ namespace Engine{
                 void _init(const char* name,uint w,uint h);
 
                 void calculate();
-
+				void beginGLQuery();
+				void endGLQuery(std::string& tag);
                 void stop_clock();
 
                 void calculate_logic();

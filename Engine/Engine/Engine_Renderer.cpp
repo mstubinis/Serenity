@@ -2087,9 +2087,9 @@ class epriv::RenderManager::impl final{
                 }
             }
 
-            if(doSSAO == false) Renderer::Settings::SSAO::disable();
-            if(doGodRays == false) Renderer::Settings::GodRays::disable();
-            if(doAA == false) aa_algorithm = AntiAliasingAlgorithm::None;
+            if(!doSSAO) Renderer::Settings::SSAO::disable();
+            if(!doGodRays) Renderer::Settings::GodRays::disable();
+            if(!doAA) aa_algorithm = AntiAliasingAlgorithm::None;
 
             _passGeometry(gbuffer,camera,fboWidth,fboHeight,ignore);
 
@@ -2111,6 +2111,7 @@ class epriv::RenderManager::impl final{
 
                 _passGodsRays(gbuffer,camera,fboWidth,fboHeight,glm::vec2(sp.x,sp.y),!behind,1.0f - alpha);
             }
+
             GLDisable(GLState::BLEND);
 
             //confirm, stencil rejection does help
@@ -2119,7 +2120,8 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::BLEND);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
-            if(lighting == true && s->lights().size() > 0){
+
+            if(lighting && s->lights().size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Renderer::Settings::clear(true,false,false);//this is needed for godrays
                 _passLighting(gbuffer,camera,fboWidth,fboHeight,mainRenderFunc);
@@ -2133,13 +2135,10 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             
-
             #pragma region HDR and GodRays addition
             gbuffer.start(GBufferType::Misc);
             _passHDR(gbuffer,camera,fboWidth,fboHeight);
             #pragma endregion
-
-
 
             #pragma region SSAO and Bloom
             string _channels;
@@ -2155,7 +2154,6 @@ class epriv::RenderManager::impl final{
                 _passBlur(gbuffer,camera,fboWidth,fboHeight,"V",GBufferType::GodRays,_channels);
             }
             #pragma endregion
-
 
             #pragma region Finalization and AA
     
@@ -2177,7 +2175,6 @@ class epriv::RenderManager::impl final{
                 _passFinal(gbuffer,camera,fboWidth,fboHeight);
                 _passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
             }
-
             #pragma endregion
 
             //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);

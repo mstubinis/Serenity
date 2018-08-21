@@ -788,9 +788,9 @@ epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::smaa_common +
     "    }\n"
     "}\n"
     "void main(){\n"
-    //"    SMAAColorEdgeDetectionPS(uv, _offset, textureMap);\n"
+    "    SMAAColorEdgeDetectionPS(uv, _offset, textureMap);\n"
     //"    SMAADepthEdgeDetectionPS(uv, _offset, textureMap);\n"
-    "    SMAALumaEdgeDetectionPS(uv, _offset, textureMap);\n"
+    //"    SMAALumaEdgeDetectionPS(uv, _offset, textureMap);\n"
     "}\n"
     "\n";
 
@@ -920,9 +920,9 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::smaa_common +
     "    return edges;\n"
     "}\n"
     "void main(){\n"
-    //"    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
+    "    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     //"    gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
-    "    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
+    //"    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     "}\n";
 epriv::EShaders::smaa_vertex_2 = epriv::EShaders::smaa_common +
     "\n"//blend vert
@@ -2170,7 +2170,10 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
     "    vec3 PxlWorldPos = reconstruct_world_pos(uv,CameraNear,CameraFar);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "\n"
+    "    if(distance(PxlNormal,ConstantOneVec3) < 0.01){\n"
+    //"        return ConstantZeroVec3;\n"
+    "        discard;\n"
+    "    }\n"
     "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
