@@ -1,3 +1,4 @@
+
 USE_LOG_DEPTH_VERTEX
 
 attribute vec3 position;

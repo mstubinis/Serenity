@@ -1815,9 +1815,9 @@ class epriv::RenderManager::impl final{
 
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
-
+			
             glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
+            glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001); //Please only render when the stencil bit = this
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
 
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::StencilPass)->unbind();
@@ -1906,40 +1906,11 @@ class epriv::RenderManager::impl final{
             float _fboHeight = float(fboHeight);
             glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
-            /*
-            #pragma region StencilEdgePass
-            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil)->bind();
-            gbuffer.getMainFBO()->bind();
-
-            Settings::clear(false,false,true); //stencil is completely filled with 0's
-            glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
-            glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
-            GLEnable(GLState::STENCIL_TEST);
-
-            sendUniform4f("SMAA_PIXEL_SIZE",SMAA_PIXEL_SIZE);
-            sendUniform2fSafe("SMAAInfo0Floats",SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD);
-
-            sendTexture("textureMap",gbuffer.getTexture(GBufferType::Lighting),0);
-            _renderFullscreenTriangle(fboWidth,fboHeight,0,0);
-
-            glStencilMask(0xFFFFFFFF);
-            glStencilFunc(GL_EQUAL, 0x1, 0x1);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
-
-            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1Stencil)->unbind();
-            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-
-            #pragma endregion
-            */
-
             #pragma region PassEdge
             gbuffer.start(GBufferType::Misc);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::SMAA1)->bind();
 
-            Settings::clear(true,false,true); 
-            //Settings::clear(false,false,true);
+            Settings::clear(true,false,true);//stencil is completely filled with 0's
 
             glStencilMask(0xFFFFFFFF);
             glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
@@ -2114,13 +2085,12 @@ class epriv::RenderManager::impl final{
 
             GLDisable(GLState::BLEND);
 
-            //confirm, stencil rejection does help
+            //confirmed, stencil rejection does help
             _passStencil(gbuffer,camera,fboWidth,fboHeight);
 
             GLEnable(GLState::BLEND);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
-
             if(lighting && s->lights().size() > 0){
                 gbuffer.start(GBufferType::Lighting,"RGB");
                 Renderer::Settings::clear(true,false,false);//this is needed for godrays
@@ -2176,7 +2146,6 @@ class epriv::RenderManager::impl final{
                 _passSMAA(gbuffer,camera,fboWidth,fboHeight,doingaa);
             }
             #pragma endregion
-
             //_passCopyDepth(gbuffer,camera,fboWidth,fboHeight);
 
             #pragma region RenderPhysics

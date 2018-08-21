@@ -196,7 +196,7 @@ class ShaderP::impl final{
             }
 
             //check for log depth
-            if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && shader->type() == ShaderType::Vertex){
+            if(sfind(_d,"USE_LOG_DEPTH_VERTEX") && !sfind(_d,"//USE_LOG_DEPTH_VERTEX") && shader->type() == ShaderType::Vertex){
                 boost::replace_all(_d,"USE_LOG_DEPTH_VERTEX","");
                 string log_vertex_code = "\n"
                 "uniform float fcoeff;\n"
@@ -211,7 +211,7 @@ class ShaderP::impl final{
                 "\n";
                 insertStringAtEndOfMainFunc(_d,log_vertex_code);
             }
-            if(sfind(_d,"USE_LOG_DEPTH_FRAGMENT") && shader->type() == ShaderType::Fragment){
+            if(sfind(_d,"USE_LOG_DEPTH_FRAGMENT") && !sfind(_d,"//USE_LOG_DEPTH_FRAGMENT") && shader->type() == ShaderType::Fragment){
                 boost::replace_all(_d,"USE_LOG_DEPTH_FRAGMENT","");
                 string log_frag_code = "\n"
                 "flat varying float FC;\n"
