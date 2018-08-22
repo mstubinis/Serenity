@@ -55,18 +55,17 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 
 	//TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
 	//experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-	if(Renderer::Settings::SSAO::enabled()){
-		float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-		float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
-		//2.718281828459045235360287471352 = euler's number
-		float _distance = _factor * _distanceReal;
-		glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
-		float _newScale = scl.x * _factor;
-		model = glm::mat4(1.0f);
-		model = glm::translate(model,camPosR - _newPosition);
-		model *= glm::mat4_cast(orientation);
-		model = glm::scale(model,glm::vec3(_newScale));
-	}
+	float _distanceReal = glm::abs(glm::distance(camPosR,pos));
+	float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+	//2.718281828459045235360287471352 = euler's number
+	float _distance = _factor * _distanceReal;
+	glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
+	float _newScale = scl.x * _factor;
+	model = glm::mat4(1.0f);
+	model = glm::translate(model,camPosR - _newPosition);
+	model *= glm::mat4_cast(orientation);
+	model = glm::scale(model,glm::vec3(_newScale));
+
 
 
     if(atmosphereHeight <= 0){
@@ -145,18 +144,16 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
 	/*
 	//experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-	if(Renderer::Settings::SSAO::enabled()){
-		float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-		float _factor1 = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
-		//2.718281828459045235360287471352 = euler's number
-		float _distance = _factor1 * _distanceReal;
-		glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
-		float _newScale = scl.x * _factor1;
-		model = glm::mat4(1.0f);
-		model = glm::translate(model,camPosR - _newPosition);
-		model = glm::scale(model,glm::vec3(_newScale));
-		model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
-	}
+	float _distanceReal = glm::abs(glm::distance(camPosR,pos));
+	float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+	//2.718281828459045235360287471352 = euler's number
+	float _distance = _factor * _distanceReal;
+	glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
+	float _newScale = scl.x * _factor;
+	model = glm::mat4(1.0f);
+	model = glm::translate(model,camPosR - _newPosition);
+	model = glm::scale(model,glm::vec3(_newScale));
+	model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
 	*/
 
     ShaderP* program;
