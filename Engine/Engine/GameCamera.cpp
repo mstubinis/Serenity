@@ -88,7 +88,7 @@ void GameCameraComponent::update(const float& dt){
             eye -= glm::vec3(-0.00001f,-0.00001f,0.00001f);//for some reason this is needed to remove lighting bugs...
             m_Body->setPosition(eye);
 
-			lookAt(eye,targetBody.position(),m_Body->up());
+            lookAt(eye,targetBody.position(),m_Body->up());
             break;
         }
         case CAMERA_STATE_FREEFORM:{

@@ -66,8 +66,8 @@ glm::vec3 Camera::right(){ return m_Body->right(); }
 glm::vec3 Camera::up(){ return m_Body->up(); }
 /*
 void Camera::lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up){
-	//m_Camera->lookAt(_eye,_forward,_up);
-	//m_Body->setPosition(_eye);
+    //m_Camera->lookAt(_eye,_forward,_up);
+    //m_Body->setPosition(_eye);
 }
 */
 float Camera::getDistance(Entity* e){

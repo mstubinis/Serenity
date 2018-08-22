@@ -24,7 +24,7 @@ class Camera: public Entity{
         Camera(float left,float right,float bottom,float top,float nearPlane,float farPlane,Scene* = nullptr);
         virtual ~Camera();
 
-		//void lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up);
+        //void lookAt(glm::vec3 _eye, glm::vec3 _forward, glm::vec3 _up);
         glm::vec3 getPosition();
         glm::vec3 forward();
         glm::vec3 right();

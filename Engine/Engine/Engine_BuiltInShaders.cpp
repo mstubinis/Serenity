@@ -1594,9 +1594,9 @@ epriv::EShaders::copy_depth_frag =
 
 #pragma region SSAO
 epriv::EShaders::ssao_frag =
-	"\n"
-	"USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
-	"\n"
+    "\n"
+    "USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
+    "\n"
     "uniform sampler2D gNormalMap;\n"
     "uniform sampler2D gRandomMap;\n"
     "uniform sampler2D gMiscMap;\n"
@@ -2086,7 +2086,7 @@ epriv::EShaders::lighting_frag +=
     "void main(){\n"                      //windowX      //windowY
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-	//   this code helps performance, but we have the stencil test for that
+    //   this code helps performance, but we have the stencil test for that
     //"    if(distance(PxlNormal,ConstantOneVec3) < 0.01){\n"
     //"        return;\n"
     //"        discard;\n"
@@ -2145,7 +2145,7 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-	//   this code helps performance, but we have the stencil test for that
+    //   this code helps performance, but we have the stencil test for that
     //"    if(distance(PxlNormal,ConstantOneVec3) < 0.01){\n"
     //"        return;\n"
     //"        discard;\n"
@@ -2166,18 +2166,18 @@ epriv::EShaders::lighting_frag_gi +=
     "    vec3 irradianceColor = textureCube(irradianceMap, PxlNormal).rgb;\n"
     "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
     "    vec3 kD = ConstantOneVec3 - kS;\n"
-	"    kD *= 1.0 - stuff.x;\n"
+    "    kD *= 1.0 - stuff.x;\n"
     "    vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
-	"    vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
+    "    vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
     "\n"
     "    const float MAX_REFLECTION_LOD = 5.0;\n"
     "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
     "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
-	"    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
+    "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
     "\n"
     "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
     "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
-	"    gl_FragColor += vec4(TotalIrradiance,1.0) * vec4(vec3(GIContribution.z),1.0);\n"
+    "    gl_FragColor += vec4(TotalIrradiance,1.0) * vec4(vec3(GIContribution.z),1.0);\n"
     "}";
 
 #pragma endregion

@@ -23,7 +23,7 @@ using namespace std;
 
 
 SolarSystem::SolarSystem(string n, string file):Scene(n){
-    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.1f,7000000000.0f,this);
+    GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
     setActiveCamera(playerCamera);
 	giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")

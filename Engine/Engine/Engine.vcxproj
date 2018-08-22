@@ -45,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\bullet;C:\boost164\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_WIN32_WINNT=0x0501;ENGINE_FORCE_NO_LOG_DEPTH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -75,7 +75,7 @@ xcopy "$(SolutionDir)$(SolutionName)\bin" "$(TargetDir)" /e /y</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\include\bullet;C:\boost164\;$(SolutionDir)dependencies\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;NDEBUG;ENGINE_PRECISION_VERY_HIGH;_WIN32_WINNT=0x0501;ENGINE_FORCE_NO_LOG_DEPTH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
