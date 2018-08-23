@@ -55,8 +55,8 @@ class ComponentModel::impl final{
 
         float calculateRadius(ComponentModel* super){
             float maxLength = 0;
-            for(auto model:super->models){
-                auto& pair = *model;
+            for(auto meshInstance:super->models){
+                auto& pair = *meshInstance;
                 glm::mat4& m = pair.model();
                 glm::vec3 localPosition = glm::vec3(m[3][0],m[3][1],m[3][2]);
                 float length = glm::length(localPosition) + pair.mesh()->getRadius() * Engine::Math::Max(pair.getScale());
@@ -91,8 +91,8 @@ class epriv::ComponentCameraSystem::impl final{
         }
 		void _update(const float& dt){
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
-            vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-            vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
+            auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
+            auto& split = epriv::threading::splitVector(v);
             for(auto vec:split){
                 epriv::threading::addJob(_defaultUpdateCameraComponent,vec,dt);
             }
@@ -147,7 +147,6 @@ class epriv::ComponentManager::impl final{
         static void _updateBodiesJob(vector<ComponentBaseClass*>& vec){
             for(uint j = 0; j < vec.size(); ++j){
                 auto& b = *(ComponentBody*)vec.at(j);
-
 				if(b._physics){
 					Engine::Math::recalculateForwardRightUp(b.data.p.rigidBody,b._forward,b._right,b._up);
 				}
@@ -192,9 +191,8 @@ class epriv::ComponentManager::impl final{
         void _updateComponentModels(const float& dt){
             auto* camera = Resources::getCurrentScene()->getActiveCamera();
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentModel>();
-            vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-            vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
-
+            auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
+            auto& split = epriv::threading::splitVector(v);
             for(auto vec:split){
                 epriv::threading::addJob(_updateModelComponentsJob,vec,camera);
             }
@@ -365,10 +363,8 @@ ComponentCamera::ComponentCamera(float left,float right,float bottom,float top,f
     _viewMatrix = glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f));
     _type = Type::Orthographic;
 }
-ComponentCamera::~ComponentCamera(){
-}
-void ComponentCamera::update(const float& dt){
-}
+ComponentCamera::~ComponentCamera(){}
+void ComponentCamera::update(const float& dt){}
 void ComponentCamera::resize(uint width, uint height){	
     if(_type == Type::Perspective){
         _aspectRatio = width/(float)height;
@@ -396,14 +392,16 @@ void ComponentCamera::lookAt(glm::vec3 eye,glm::vec3 forward,glm::vec3 up){
     _eye = eye;
     _up = up;
     _viewMatrix = glm::lookAt(_eye,forward,_up);
+	_viewMatrixNoTranslation = glm::lookAt(glm::vec3(0.0f),forward - _eye,_up);
 }
-glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrix); }
 glm::mat4 ComponentCamera::getProjection(){ return _projectionMatrix; }
 glm::mat4 ComponentCamera::getProjectionInverse(){ return glm::inverse(_projectionMatrix); }
-glm::mat4 ComponentCamera::getView(){ return _viewMatrix; }
-glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrix); }
-glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrix; }
+glm::mat4 ComponentCamera::getView(){ return _viewMatrixNoTranslation; }
+glm::mat4 ComponentCamera::getViewInverse(){ return glm::inverse(_viewMatrixNoTranslation); }
+glm::mat4 ComponentCamera::getViewProjection(){ return _projectionMatrix * _viewMatrixNoTranslation; }
+glm::mat4 ComponentCamera::getViewProjectionInverse(){ return glm::inverse(_projectionMatrix * _viewMatrixNoTranslation); }
 glm::vec3 ComponentCamera::getViewVector(){ return glm::vec3(_viewMatrix[0][2],_viewMatrix[1][2],_viewMatrix[2][2]); }
+glm::vec3 ComponentCamera::getViewVectorNoTranslation(){ return glm::vec3(_viewMatrixNoTranslation[0][2],_viewMatrixNoTranslation[1][2],_viewMatrixNoTranslation[2][2]); }
 float ComponentCamera::getAngle(){ return _angle; }
 float ComponentCamera::getAspect(){ return _aspectRatio; }
 float ComponentCamera::getNear(){ return _nearPlane; }
@@ -711,8 +709,6 @@ glm::vec3 ComponentBody::position(){ //theres prob a better way to do this
 	return glm::vec3(_matrix[3][0],_matrix[3][1],_matrix[3][2]);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(){ return Math::getScreenCoordinates(position(),false); }
-
-
 glm::vec3 ComponentBody::getScale(){
 	if(_physics){
 		const btVector3& v = data.p.collision->getCollisionShape()->getLocalScaling();

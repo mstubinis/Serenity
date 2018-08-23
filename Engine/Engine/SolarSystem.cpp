@@ -25,7 +25,7 @@ using namespace std;
 SolarSystem::SolarSystem(string n, string file):Scene(n){
     GameCamera* playerCamera = new GameCamera(60,Resources::getWindowSize().x/(float)Resources::getWindowSize().y,0.35f,7000000000.0f,this);
     setActiveCamera(playerCamera);
-	giGlobal = giSpecular = giDiffuse = 1.0f;
+    giGlobal = giSpecular = giDiffuse = 1.0f;
     if(file != "NULL")
         SolarSystem::_loadFromFile(file);	
 }
@@ -164,12 +164,12 @@ void SolarSystem::_loadFromFile(string filename){
                     m_Planets.emplace(NAME,star);
                 }
                 else if(line[0] == 'P'){//Planet
-                    PlanetType PLANET_TYPE;
-                    if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
-                    else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
-                    else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
-                    else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
-                    else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
+                    PlanetType::Type PLANET_TYPE;
+                         if(TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
+                    else if(TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
+                    else if(TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
+                    else if(TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
+                    else if(TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
                     planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
                         Planet* parent = m_Planets.at(PARENT);
@@ -185,12 +185,12 @@ void SolarSystem::_loadFromFile(string filename){
                     m_Planets.emplace(NAME,planetoid);
                 }
                 else if(line[0] == 'M'){//Moon
-                    PlanetType PLANET_TYPE;
-                    if(TYPE == "Rock") PLANET_TYPE = PLANET_TYPE_ROCKY;
-                    else if(TYPE == "Ice") PLANET_TYPE = PLANET_TYPE_ICE;
-                    else if(TYPE == "GasGiant") PLANET_TYPE = PLANET_TYPE_GAS_GIANT;
-                    else if(TYPE == "IceGiant") PLANET_TYPE = PLANET_TYPE_ICE_GIANT;
-                    else if(TYPE == "Asteroid") PLANET_TYPE = PLANET_TYPE_ASTEROID;
+                    PlanetType::Type PLANET_TYPE;
+                         if(TYPE == "Rock")     PLANET_TYPE = PlanetType::Rocky;
+                    else if(TYPE == "Ice")      PLANET_TYPE = PlanetType::Ice;
+                    else if(TYPE == "GasGiant") PLANET_TYPE = PlanetType::GasGiant;
+                    else if(TYPE == "IceGiant") PLANET_TYPE = PlanetType::IceGiant;
+                    else if(TYPE == "Asteroid") PLANET_TYPE = PlanetType::Asteroid;
                     planetoid = new Planet(loadedMaterials.at(MATERIAL_NAME),PLANET_TYPE,glm::vec3(xPos,0,zPos),(float)RADIUS,NAME,ATMOSPHERE_HEIGHT,this);
                     if(PARENT != ""){
                         Planet* parent = m_Planets.at(PARENT);
@@ -249,7 +249,7 @@ void SolarSystem::_loadFromFile(string filename){
     }
 
     centerSceneToObject(player);
-    ComponentBody& body = *player->getComponent<ComponentBody>();
+    auto& body = *player->getComponent<ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
 
@@ -271,9 +271,9 @@ void SolarSystem::update(const float& dt){
     Scene::update(dt);
 }
 void SolarSystem::onEvent(const Event& e){
-	if(e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this){
-		Renderer::Settings::Lighting::setGIContributionDiffuse(giDiffuse);
-		Renderer::Settings::Lighting::setGIContributionSpecular(giSpecular);
-		Renderer::Settings::Lighting::setGIContributionGlobal(giGlobal);
-	}
+    if(e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this){
+        Renderer::Settings::Lighting::setGIContributionDiffuse(giDiffuse);
+        Renderer::Settings::Lighting::setGIContributionSpecular(giSpecular);
+        Renderer::Settings::Lighting::setGIContributionGlobal(giGlobal);
+    }
 }

@@ -70,7 +70,6 @@ class epriv::FramebufferTexture::impl{
         }
         void _resize(FramebufferTexture* super,uint w,uint h){
             m_Texture->resize(super,w,h);
-            //glFramebufferTexture2D(GL_FRAMEBUFFER,super->attatchment(),GL_TEXTURE_2D,m_Texture->address(),0);//is this line even needed?
             Renderer::bindTexture(m_Texture->type(),0);
         }
 };
@@ -196,13 +195,15 @@ class epriv::FramebufferObject::impl{
             Renderer::unbindFBO();
             return rbo;
         }
-        void _check(FramebufferObject* super){
+        bool _check(FramebufferObject* super){
             super->bind();
             GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             if(err != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl _check() is incomplete!" << endl;
                 cout << "Error is: " << err << std::endl;
+				return false;
             }
+			return true;
         }
 };
 epriv::FramebufferObjectDefaultBindFunctor epriv::FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
@@ -222,4 +223,4 @@ uint epriv::FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint epriv::FramebufferObject::height(){ return m_i->m_FramebufferHeight; }
 const GLuint& epriv::FramebufferObject::address() const { return m_i->m_FBO; }
 unordered_map<uint,epriv::FramebufferObjectAttatchment*>& epriv::FramebufferObject::attatchments(){ return m_i->m_Attatchments; }
-void epriv::FramebufferObject::check(){ m_i->_check(this); }
+bool epriv::FramebufferObject::check(){ return m_i->_check(this); }

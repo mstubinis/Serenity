@@ -12,6 +12,10 @@ varying vec3 WorldPosition;
 
 uniform int HasGodsRays;
 
+const vec3 ConstVec3Zero = vec3(0.0);
+const vec2 ConstVec2Zero = vec2(0.0);
+const vec2 ConstVec2One = vec2(1.0);
+
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
 	float fCos2 = fCos * fCos;
@@ -27,14 +31,12 @@ void main(){
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
     gl_FragColor = vec4(HDR.xyz,nightmult);
-
 	/*
 	gl_FragData[0] = vec4(HDR.xyz,nightmult);
-    gl_FragData[1].rg = vec2(1.0);
-    gl_FragData[2].r = 0.0;
-    gl_FragData[2].b = 0.0;
+    gl_FragData[1].rg = ConstVec2One;
+    gl_FragData[2].rg = ConstVec2Zero;
     if(HasGodsRays == 1){
-        gl_FragData[3] = vec4(0.0,0.0,0.0,1.0);
+        gl_FragData[3] = vec4(ConstVec3Zero,1.0);
     }
 	*/
 }

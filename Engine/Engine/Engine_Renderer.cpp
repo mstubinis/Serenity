@@ -199,9 +199,9 @@ class epriv::RenderManager::impl final{
 
         #pragma region LightingInfo
         bool lighting;
-		float lighting_gi_contribution_diffuse;
-		float lighting_gi_contribution_specular;
-		float lighting_gi_contribution_global;
+        float lighting_gi_contribution_diffuse;
+        float lighting_gi_contribution_specular;
+        float lighting_gi_contribution_global;
         #pragma endregion
 
         #pragma region GodRaysInfo
@@ -315,9 +315,9 @@ class epriv::RenderManager::impl final{
 
             #pragma region LightingInfo
             lighting = true;
-			lighting_gi_contribution_diffuse = 1.0f;
-			lighting_gi_contribution_specular = 1.0f;
-			lighting_gi_contribution_global = 1.0f;
+            lighting_gi_contribution_diffuse = 1.0f;
+            lighting_gi_contribution_specular = 1.0f;
+            lighting_gi_contribution_global = 1.0f;
             #pragma endregion
 
             #pragma region GodRaysInfo
@@ -1503,7 +1503,7 @@ class epriv::RenderManager::impl final{
         void _renderTextures(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
             Mesh::Plane->bind();
-			glm::mat4 m = m_IdentityMat4;
+            glm::mat4 m = m_IdentityMat4;
             for(auto item:m_TexturesToBeRendered){
                 if(item.texture){
                     sendTexture("DiffuseTexture",item.texture,0);
@@ -1531,10 +1531,10 @@ class epriv::RenderManager::impl final{
         }
         void _renderText(GBuffer& gbuffer,Camera& c,uint& fbufferWidth, uint& fbufferHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD)->bind();
-			glm::mat4 m = m_IdentityMat4;
-			float y_offset = 0.0f;
-			float x = 0.0f;  
-			Mesh& mesh = *(Mesh::FontPlane);
+            glm::mat4 m = m_IdentityMat4;
+            float y_offset = 0.0f;
+            float x = 0.0f;  
+            Mesh& mesh = *(Mesh::FontPlane);
             for(auto item:m_FontsToBeRendered){
                 Font& font = *item.font;
                 sendTexture("DiffuseTexture",font.getGlyphTexture(),0);
@@ -1698,19 +1698,18 @@ class epriv::RenderManager::impl final{
             Scene* s = Resources::getCurrentScene();
     
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLighting)->bind();
-
+            
             if(RenderManager::GLSL_VERSION < 140){
-                glm::vec3 camPos = c.getPosition();
-                glm::vec3 camVVector = c.getViewVector();
                 sendUniformMatrix4fSafe("CameraView",c.getView());
                 sendUniformMatrix4fSafe("CameraProj",c.getProjection());
                 sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
                 sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
                 sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-                sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
-                sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
+                sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
+                sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
             }
+            
             sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
             sendUniform4f("ScreenData",0.0f,gamma,(float)fbufferWidth,(float)fbufferHeight);
 
@@ -1726,23 +1725,22 @@ class epriv::RenderManager::impl final{
             if(mainRenderFunc){
                 //do GI here. (only doing GI during the main render pass, not during light probes
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredLightingGI)->bind();
-
+                
                 if(RenderManager::GLSL_VERSION < 140){
-                    glm::vec3 camPos = c.getPosition();
-                    glm::vec3 camVVector = c.getViewVector();
                     sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
                     sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                     sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-                    sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
-                    sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
+                    sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
+                    sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
                 }
+                
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
 
-				float pack = Math::pack3FloatsInto1FloatUnsigned(
-					lighting_gi_contribution_diffuse,
-					lighting_gi_contribution_specular,
-					lighting_gi_contribution_global
-				);
+                float pack = Math::pack3FloatsInto1FloatUnsigned(
+                    lighting_gi_contribution_diffuse,
+                    lighting_gi_contribution_specular,
+                    lighting_gi_contribution_global
+                );
                 sendUniform4f("ScreenData",pack,gamma,(float)fbufferWidth,(float)fbufferHeight);
                 sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
                 sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
@@ -1776,14 +1774,14 @@ class epriv::RenderManager::impl final{
         void _passSSAO(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->bind();
             float _divisor = gbuffer.getBuffer(GBufferType::Bloom)->divisor();
+            
             if(RenderManager::GLSL_VERSION < 140){
-                glm::vec3 camPos = c.getPosition();
-                glm::vec3 camVVector = c.getViewVector();
                 sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
-                sendUniform4fSafe("CameraInfo1",camPos.x,camPos.y,camPos.z,c.getNear());
-                sendUniform4fSafe("CameraInfo2",camVVector.x,camVVector.y,camVVector.z,c.getFar());
+                sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
+                sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
             }
+            
             sendUniform4f("SSAOInfo",ssao_radius,ssao_intensity,ssao_bias,ssao_scale);
             sendUniform4i("SSAOInfoA",int(ssao),int(bloom),ssao_samples,SSAO_NORMALMAP_SIZE);//change to 4f eventually?
 
@@ -1815,7 +1813,7 @@ class epriv::RenderManager::impl final{
 
             sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             _renderFullscreenTriangle(fbufferWidth,fbufferHeight,0,0);
-			
+            
             glStencilMask(0xFFFFFFFF);
             glStencilFunc(GL_EQUAL, 0x00000001, 0x00000001); //Please only render when the stencil bit = this
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
@@ -2033,6 +2031,9 @@ class epriv::RenderManager::impl final{
 
             if(mainRenderFunc){
                 //Camera UBO update
+                //NOTE: camera render info is different than simulated camera info, the position of the camera is always at the origin to prevent
+                //shading and render calculation errors. Likewise the model matrices of the objects sent to the rendering pipeline
+                //have their positions offset by the camera to make up for this shift
                 if(RenderManager::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){
                     m_UBOCameraData.View = camera.getView();
                     m_UBOCameraData.Proj = camera.getProjection();
@@ -2040,8 +2041,8 @@ class epriv::RenderManager::impl final{
                     m_UBOCameraData.InvProj = camera.getProjectionInverse();
                     m_UBOCameraData.InvView = camera.getViewInverse();
                     m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-                    m_UBOCameraData.Info1 = glm::vec4(camera.getPosition(),camera.getNear());
-                    m_UBOCameraData.Info2 = glm::vec4(camera.getViewVector(),camera.getFar());
+                    m_UBOCameraData.Info1 = glm::vec4(glm::vec3(0.0001f),camera.getNear());
+                    m_UBOCameraData.Info2 = glm::vec4(camera.getViewVectorNoTranslation(),camera.getFar());
                     UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
                 }
 
@@ -2069,11 +2070,11 @@ class epriv::RenderManager::impl final{
 
             if(godRays && godRays_Object){
                 gbuffer.start(GBufferType::GodRays,"RGBA",false);
-                ComponentBody* b = godRays_Object->getComponent<ComponentBody>();
-                glm::vec3 oPos = b->position();
-                glm::vec3 sp = Math::getScreenCoordinates(oPos,false);
-                glm::vec3 camPos = camera.getPosition();
-                glm::vec3 camVec = camera.getViewVector();
+                auto& body = *godRays_Object->getComponent<ComponentBody>();
+                glm::vec3& oPos = body.position();
+                glm::vec3& sp = Math::getScreenCoordinates(oPos,false);
+                glm::vec3& camPos = camera.getPosition();
+                glm::vec3& camVec = camera.getViewVector();
                 bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
                 float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
 
@@ -2182,15 +2183,14 @@ class epriv::RenderManager::impl final{
             GLEnable(GLState::DEPTH_MASK);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(mainRenderFunc){
-                if(HUD == true){
+                if(HUD){
                     Settings::clear(false,true,false); //clear depth only
                     GLEnable(GLState::ALPHA_TEST);
                     glAlphaFunc(GL_GREATER, 0.1f);
                     _renderTextures(gbuffer,camera,fboWidth,fboHeight);
                     _renderText(gbuffer,camera,fboWidth,fboHeight);
                     GLDisable(GLState::ALPHA_TEST);
-                }
-				
+                }		
                 vector_clear(m_FontsToBeRendered);
                 vector_clear(m_TexturesToBeRendered);
             }
@@ -2249,8 +2249,6 @@ bool epriv::RenderManager::_unbindMaterial(){
 void epriv::RenderManager::_genPBREnvMapData(Texture* texture, uint size1, uint size2){
     m_i->_generatePBREnvMapData(texture,size1,size2);
 }
-
-
 bool Renderer::Settings::Fog::enabled(){ return renderManager->fog; }
 void Renderer::Settings::Fog::enable(bool b){ renderManager->fog = b; }
 void Renderer::Settings::Fog::disable(){ renderManager->fog = false; }
@@ -2260,8 +2258,6 @@ void Renderer::Settings::Fog::setNullDistance(float d){ renderManager->fog_distN
 void Renderer::Settings::Fog::setBlendDistance(float d){ renderManager->fog_distBlend = d; }
 float Renderer::Settings::Fog::getNullDistance(){ return renderManager->fog_distNull; }
 float Renderer::Settings::Fog::getBlendDistance(){ return renderManager->fog_distBlend; }
-
-
 void Renderer::Settings::FXAA::setReduceMin(float r){ renderManager->FXAA_REDUCE_MIN = glm::max(0.0f,r); }
 void Renderer::Settings::FXAA::setReduceMul(float r){ renderManager->FXAA_REDUCE_MUL = glm::max(0.0f,r); }
 void Renderer::Settings::FXAA::setSpanMax(float r){ renderManager->FXAA_SPAN_MAX = glm::max(0.0f,r); }

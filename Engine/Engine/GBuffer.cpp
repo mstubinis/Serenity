@@ -29,6 +29,7 @@ class epriv::GBuffer::impl final{
         FramebufferObject *m_FBO, *m_SmallFBO;
         vector<FramebufferTexture*> m_Buffers;
         uint m_Width, m_Height;
+
         bool _init(uint w,uint h){
             _destruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
@@ -37,29 +38,22 @@ class epriv::GBuffer::impl final{
 			m_Buffers.resize(GBufferType::_TOTAL);
 
             m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height);
+            m_FBO->bind();
+            _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,GBufferType::Normal,    m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,GBufferType::Misc,      m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,GBufferType::Lighting,  m_Width,m_Height);
+            _constructTextureBuffer(m_FBO,GBufferType::Depth,     m_Width,m_Height);
 
-			FramebufferObject& _fbo = *m_FBO;
+			if(!m_FBO->check()) return false;
 
-            _fbo.bind();
-            _constructTextureBuffer(_fbo,GBufferType::Diffuse,   m_Width,m_Height);
-            _constructTextureBuffer(_fbo,GBufferType::Normal,    m_Width,m_Height);
-            _constructTextureBuffer(_fbo,GBufferType::Misc,      m_Width,m_Height);
-            _constructTextureBuffer(_fbo,GBufferType::Lighting,  m_Width,m_Height);
-            _constructTextureBuffer(_fbo,GBufferType::Depth,     m_Width,m_Height);
-
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-                return false;
-            }
             m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
-			FramebufferObject& _smallfbo = *m_SmallFBO;
-            _smallfbo.bind();
+            m_SmallFBO->bind();
 
-            _constructTextureBuffer(_smallfbo,GBufferType::Bloom,   m_Width,m_Height);
-            _constructTextureBuffer(_smallfbo,GBufferType::GodRays, m_Width,m_Height);
+            _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
+            _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
 
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-                return false;
-            }
+			if(!m_SmallFBO->check()) return false;
             return true;
         }
         void _resize(uint w, uint h){
@@ -69,9 +63,9 @@ class epriv::GBuffer::impl final{
             m_SmallFBO->bind();
             m_SmallFBO->resize(w,h);
         }
-        void _constructTextureBuffer(FramebufferObject& fbo,uint t,uint w,uint h){
+        void _constructTextureBuffer(FramebufferObject* fbo,uint t,uint w,uint h){
             auto& i = GBUFFER_TYPE_DATA.at(t);
-            m_Buffers.at(t) = fbo.attatchTexture(new Texture(w,h,i.get<3>(),i.get<2>(),i.get<1>(),i.get<0>()),i.get<4>(),i.get<0>());
+            m_Buffers.at(t) = fbo->attatchTexture(new Texture(w,h,i.get<3>(),i.get<2>(),i.get<1>(),i.get<0>()),i.get<4>(),i.get<0>());
         }
         void _destruct(){
             m_Width = m_Height = 0;
@@ -126,16 +120,6 @@ class epriv::GBuffer::impl final{
             t.push_back(m_Buffers.at(t5)->attatchment());
             _start(t,c,f);
         }
-        void _start(uint t1,uint t2,uint t3,uint t4,uint t5,uint t6,string& c,bool f){
-            vector<uint> t;
-            t.push_back(m_Buffers.at(t1)->attatchment());
-            t.push_back(m_Buffers.at(t2)->attatchment());
-            t.push_back(m_Buffers.at(t3)->attatchment());
-            t.push_back(m_Buffers.at(t4)->attatchment());
-            t.push_back(m_Buffers.at(t5)->attatchment());
-            t.push_back(m_Buffers.at(t6)->attatchment());
-            _start(t,c,f);
-        }
         void _stop(GLuint final_fbo, GLuint final_rbo){
             Renderer::bindFBO(final_fbo);
             Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
@@ -159,7 +143,6 @@ void epriv::GBuffer::start(uint t,uint t1,string c,bool mainFBO){m_i->_start(t,t
 void epriv::GBuffer::start(uint t,uint t1,uint t2,string c,bool mainFBO){m_i->_start(t,t1,t2,c,mainFBO);}
 void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,c,mainFBO);}
 void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,c,mainFBO);}
-void epriv::GBuffer::start(uint t,uint t1,uint t2,uint t3,uint t4,uint t5,string c,bool mainFBO){m_i->_start(t,t1,t2,t3,t4,t5,c,mainFBO);}
 void epriv::GBuffer::stop(GLuint fbo, GLuint rbo){m_i->_stop(fbo,rbo);}
 const vector<epriv::FramebufferTexture*>& epriv::GBuffer::getBuffers() const{ return m_i->m_Buffers; }
 Texture* epriv::GBuffer::getTexture(uint t){ return m_i->m_Buffers.at(t)->texture();}

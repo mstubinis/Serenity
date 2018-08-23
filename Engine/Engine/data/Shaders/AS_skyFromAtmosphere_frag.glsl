@@ -33,17 +33,19 @@ void main(){
     float range = outerRadius - planetRadius;
     float alpha = (range - camHeightOffGround) / (range * 0.5);
 
-    gl_FragColor = clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99);
-    gl_FragColor.a = clamp(alpha * (gl_FragColor.rgb * 5.5), 0.01, 0.99);
+	vec4 OutDiffuse;
+	OutDiffuse.rgb = vec3(clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99));
+    gl_FragColor = vec4(OutDiffuse.rgb,clamp(alpha * (OutDiffuse.rgb * 5.5), 0.01, 0.99));
 
+	//TODO: fix the code below after (if / when) this is moved back to the geometry pass
 	/*
-    gl_FragData[0] = clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99);
-    gl_FragData[0].a = clamp(alpha * (gl_FragColor.rgb * 5.5), 0.01, 0.99);
+    gl_FragData[0] = vec4(vec3(clamp(vec4(HDR.xyz, nightmult), 0.01, 0.99)),   clamp(alpha * (gl_FragColor.rgb * 5.5), 0.01, 0.99));
     gl_FragData[1].rg = vec2(1.0);
-    gl_FragData[2].r = 0.0;
-    gl_FragData[2].b = 0.0;
+    gl_FragData[2].rg = vec2(0.0); //outglow, outspecular
     if(HasGodsRays == 1){
         gl_FragData[3] = clamp(vec4(HDR.xyz,nightmult), 0.01, 0.99);
+
+		//WTF is gl_FragData[4]?????
 
         gl_FragData[3] = pow(gl_FragData[4], vec4(11.0));
 

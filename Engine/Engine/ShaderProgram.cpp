@@ -42,7 +42,7 @@ string getLogDepthFunctions(){
         "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
         "    vec4 wpos = CameraInvViewProj * clipSpace;\n"
         "    return wpos.xyz / wpos.w;\n"
-        "}\n"
+        "}//log depth\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
         "    float depth = texture2D(gDepthMap, _uv).r;\n"
         "    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
@@ -51,28 +51,21 @@ string getLogDepthFunctions(){
         "    float linearDepth = (a + b / depth);\n"
         "    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
         "    return clipSpace.xyz / clipSpace.w;\n"
-        "}\n";
+        "}//log depth\n";
     return res;
 }
 string getNormalDepthFunctions(){
     string res = "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float regularDepth = (texture2D(gDepthMap, _uv).r);\n"
-        "    float a = _far / (_far - _near);\n"
-        "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / regularDepth);\n"
-        "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-        "    vec4 wpos = CameraInvViewProj * clipSpace;\n"
-        "    return wpos.xyz / wpos.w;\n"
-        "}\n"
+		"	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
+		"	 vec4 worldPos = CameraInvViewProj * clipSpace;\n"
+		"	 return worldPos.xyz / worldPos.w;\n"
+        "}//normal depth\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r;\n"
-        "    float a = _far / (_far - _near);\n"
-        "    float b = _far * _near / (_near - _far);\n"
-        "    float linearDepth = (a + b / depth);\n"
-        "    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
-        "    return clipSpace.xyz / clipSpace.w;\n"
-        "}\n";
+		"	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
+		"	 vec4 viewPos = CameraInvProj * clipSpace;\n"
+		"	 return viewPos.xyz / viewPos.w;\n"
+        "}//normal depth\n";
     return res;
 }
 

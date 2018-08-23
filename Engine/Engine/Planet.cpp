@@ -20,9 +20,8 @@
 using namespace Engine;
 using namespace std;
 
-struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-    
     Planet* obj = (Planet*)(i.parent());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
@@ -30,7 +29,84 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 
     glm::vec3& pos = obj->m_Body->position();
     glm::quat& orientation = obj->m_Body->rotation();
-	glm::vec3 camPosR = c->getPosition();
+    glm::vec3 camPosR = c->getPosition();
+    glm::vec3 camPos = camPosR - pos;
+    float camHeight = glm::length(camPos);
+    float camHeight2 = camHeight*camHeight;
+
+    uint numberSamples = 1;
+    
+    glm::mat4 rot = glm::mat4(1.0f);
+    rot *= glm::mat4_cast(orientation);
+    
+    glm::vec3 lightPos = Resources::getCurrentScene()->lights().at(0)->position();
+    glm::vec3 lightDir = glm::normalize(lightPos - pos);
+    float Km = 0.0025f;
+    float Kr = 0.0015f;
+    float ESun = 20.0f;
+    glm::vec3 scl = obj->m_Body->getScale();
+    
+    float fScaledepth = 0.25f;
+    float innerRadius = obj->getGroundRadius() * 0.5f; //includes rings too
+    float outerRadius = obj->getRadius();
+
+    glm::mat4 model = obj->m_Body->modelMatrix();
+
+    //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
+    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    float _distanceReal = glm::abs(glm::distance(camPosR,pos));
+    float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+    //2.718281828459045235360287471352 = euler's number
+    float _distance = _factor * _distanceReal;
+    glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
+    float _newScale = innerRadius * _factor;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model,camPosR - _newPosition);
+    model *= glm::mat4_cast(orientation);
+    model = glm::scale(model,glm::vec3(_newScale));
+
+    model[3][0] -= camPosR.x;
+    model[3][1] -= camPosR.y;
+    model[3][2] -= camPosR.z;
+
+    outerRadius += (outerRadius *  0.025f);
+    Renderer::sendUniform1i("HasAtmosphere",0);   
+
+    float fScale = 1.0f / (outerRadius - innerRadius);
+    glm::vec3 v3InvWaveLength = glm::vec3(1.0f/glm::pow(0.65f,4.0f),1.0f/glm::pow(0.57f,4.0f),1.0f/glm::pow(0.475f,4.0f));
+
+    //pass ground based parameters to the gpu
+    Renderer::sendUniform1i("fromAtmosphere", 0); 
+    Renderer::sendUniform4fSafe("Object_Color",i.color());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
+
+    Renderer::sendUniform1i("nSamples", numberSamples); 
+    float exposure = 2.0f;
+    Renderer::sendUniformMatrix4f("Rot",rot);
+
+    Renderer::sendUniform4f("VertDataMisc1",camPos.x,camPos.y,camPos.z,lightDir.x);
+    Renderer::sendUniform4f("VertDataMisc2",camPosR.x,camPosR.y,camPosR.z,lightDir.y);
+    Renderer::sendUniform4f("VertDataMisc3",v3InvWaveLength.x,v3InvWaveLength.y,v3InvWaveLength.z,lightDir.z);
+    Renderer::sendUniform4f("VertDataScale",fScale,fScaledepth,fScale / fScaledepth,float(numberSamples));
+    Renderer::sendUniform4f("VertDataRadius",camHeight2,outerRadius,outerRadius*outerRadius,innerRadius);
+    Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
+
+    Renderer::sendUniform4f("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
+    Renderer::sendUniformMatrix4f("Model",model);
+
+    i.mesh()->render();
+}};
+
+struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance& i = *(MeshInstance*)r;
+    Planet* obj = (Planet*)(i.parent());
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    
+    float atmosphereHeight = obj->getAtmosphereHeight();
+
+    glm::vec3& pos = obj->m_Body->position();
+    glm::quat& orientation = obj->m_Body->rotation();
+    glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight*camHeight;
@@ -53,21 +129,25 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
 
     glm::mat4 model = obj->m_Body->modelMatrix();
 
-	//TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
-	//experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-	float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-	float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
-	//2.718281828459045235360287471352 = euler's number
-	float _distance = _factor * _distanceReal;
-	glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
-	float _newScale = scl.x * _factor;
-	model = glm::mat4(1.0f);
-	model = glm::translate(model,camPosR - _newPosition);
-	model *= glm::mat4_cast(orientation);
-	model = glm::scale(model,glm::vec3(_newScale));
+    //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
+    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    float _distanceReal = glm::abs(glm::distance(camPosR,pos));
+    float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+    //2.718281828459045235360287471352 = euler's number
+    float _distance = _factor * _distanceReal;
+    glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
+    float _newScale = scl.x * _factor;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model,camPosR - _newPosition);
+    model *= glm::mat4_cast(orientation);
+    model = glm::scale(model,glm::vec3(_newScale));
+
+    model[3][0] -= camPosR.x;
+    model[3][1] -= camPosR.y;
+    model[3][2] -= camPosR.z;
 
 
-
+	Renderer::GLEnable(GLState::BLEND);
     if(atmosphereHeight <= 0){
         outerRadius += (outerRadius *  0.025f);
         Renderer::sendUniform1i("HasAtmosphere",0);   
@@ -100,14 +180,14 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4f("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-	Renderer::sendUniformMatrix4f("Model",model);
-
+    Renderer::sendUniformMatrix4f("Model",model);
+	
     i.mesh()->render();
+	Renderer::GLDisable(GLState::BLEND);
 }};
 
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-
     Planet* obj = (Planet*)(i.parent());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
     
@@ -115,7 +195,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
     glm::vec3& pos = obj->m_Body->position();
     glm::quat& orientation = obj->m_Body->rotation();
-	glm::vec3 camPosR = c->getPosition();
+    glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
     float camHeight2 = camHeight*camHeight;
@@ -142,19 +222,23 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     model = glm::scale(model,scl);
     model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
 
-	/*
-	//experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
-	float _distanceReal = glm::abs(glm::distance(camPosR,pos));
-	float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
-	//2.718281828459045235360287471352 = euler's number
-	float _distance = _factor * _distanceReal;
-	glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
-	float _newScale = scl.x * _factor;
-	model = glm::mat4(1.0f);
-	model = glm::translate(model,camPosR - _newPosition);
-	model = glm::scale(model,glm::vec3(_newScale));
-	model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
-	*/
+    /*
+    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    float _distanceReal = glm::abs(glm::distance(camPosR,pos));
+    float _factor = 1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f);
+    //2.718281828459045235360287471352 = euler's number
+    float _distance = _factor * _distanceReal;
+    glm::vec3 _newPosition = glm::normalize(camPosR - pos) * _distance;
+    float _newScale = scl.x * _factor;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model,camPosR - _newPosition);
+    model = glm::scale(model,glm::vec3(_newScale));
+    model = glm::scale(model,glm::vec3(1.0f + atmosphereHeight));
+    */
+
+    model[3][0] -= camPosR.x;
+    model[3][1] -= camPosR.y;
+    model[3][2] -= camPosR.z;
 
     ShaderP* program;
     //and now render the atmosphere
@@ -196,12 +280,12 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
 
 }};
 
-Planet::Planet(Handle& mat,PlanetType type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
+Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
     scene->addEntity(this);
     m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
     m_AtmosphereHeight = atmosphere;
     addComponent(m_Model);
-    if(type != PLANET_TYPE_STAR){
+	if(type != PlanetType::Star){
         AtmosphericScatteringGroundMeshInstanceBindFunctor f;
         m_Model->setCustomBindFunctor(f,0);
     }
@@ -258,7 +342,7 @@ float Planet::getAtmosphereHeight(){ return m_AtmosphereHeight; }
 
 
 
-Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PLANET_TYPE_STAR,pos,scl,name,0.0f,scene){
+Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,string name,Scene* scene):Planet(ResourceManifest::StarMaterial,PlanetType::Star,pos,scl,name,0.0f,scene){
     m_Light = new SunLight(glm::vec3(0.0f),LightType::Sun,scene);
     m_Light->setColor(lightColor.x,lightColor.y,lightColor.z,1);
 
@@ -279,8 +363,11 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     _makeRingImage(rings,parent);
     m_Parent->addRing(this);
 
+	PlanetaryRingMeshInstanceBindFunctor f;
+
     uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle);
     MeshInstance* ringMesh = parent->m_Model->getModel(index);
+	ringMesh->setCustomBindFunctor(f);
     float aScale = 1.0f;
     ringMesh->setScale(aScale,aScale,aScale);
 }
@@ -349,7 +436,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     }
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
-    m_MaterialHandle = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,nullptr);
+    m_MaterialHandle = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,ResourceManifest::groundFromSpace);
     Resources::getMaterial(m_MaterialHandle)->setSpecularModel(SpecularModel::None);
 }
 

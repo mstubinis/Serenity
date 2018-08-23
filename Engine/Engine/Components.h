@@ -288,7 +288,7 @@ class ComponentCamera: public ComponentBaseClass{
         enum Type{ Perspective, Orthographic, };
         Type _type;
         glm::vec3 _eye,_up;
-        glm::mat4 _viewMatrix,  _projectionMatrix;
+        glm::mat4 _viewMatrix, _viewMatrixNoTranslation, _projectionMatrix;
         glm::vec4 _planes[6];
         float _nearPlane,  _farPlane,  _bottom,  _top;
         union{ float _angle;        float _left;  };
@@ -311,6 +311,7 @@ class ComponentCamera: public ComponentBaseClass{
         glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
+		glm::vec3 getViewVectorNoTranslation();
 
         float getAngle();    void setAngle(float);
         float getAspect();   void setAspect(float);

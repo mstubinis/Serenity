@@ -137,8 +137,8 @@ Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint
 Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
     Mesh* mesh = new Mesh(f,t,b,threshhold,false);
 
-    boost::function<void()> job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
-    boost::function<void()> cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
+    auto& job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
+    auto& cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
 
     Engine::epriv::threading::addJobWithPostCallback(job,cbk);
 
@@ -156,18 +156,22 @@ Handle Resources::addTexture(string file,ImageInternalFormat::Format internForma
 
 Handle Resources::addMaterial(string name, string diffuse, string normal,string glow, string specular,Handle programHandle){
     ShaderP* program = nullptr;
-    if(programHandle.null()){
-        program = epriv::InternalShaderPrograms::Deferred;
-    }
-    else{
-        program = Resources::getShaderProgram(programHandle);
-    }
+    if(programHandle.null()){ program = epriv::InternalShaderPrograms::Deferred; }
+    else{                     program = Resources::getShaderProgram(programHandle); }
     Material* material = new Material(name,diffuse,normal,glow,specular);
     program->addMaterial(material);
     return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
 }
 Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,ShaderP* program){
     if(!program) program = epriv::InternalShaderPrograms::Deferred;
+    Material* material = new Material(name,diffuse,normal,glow,specular);
+    program->addMaterial(material);
+    return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);
+}
+Handle Resources::addMaterial(string name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular,Handle programHandle){
+    ShaderP* program = nullptr;
+    if(programHandle.null()){ program = epriv::InternalShaderPrograms::Deferred; }
+    else{                     program = Resources::getShaderProgram(programHandle); }
     Material* material = new Material(name,diffuse,normal,glow,specular);
     program->addMaterial(material);
     return resourceManager->m_i->m_Resources->add(material,ResourceType::Material);

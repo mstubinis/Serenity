@@ -44,6 +44,13 @@ const vec3 ConstantAlmostOneVec3 = vec3(0.9999,0.9999,0.9999);
 const vec3 ConstantOneVec3 = vec3(1.0,1.0,1.0);
 const vec2 ConstantOneVec2 = vec2(1.0,1.0);
 
+float Pack2FloatIntoFloat16(float x,float y){
+    x = clamp(x,0.0001,0.9999);
+    y = clamp(y,0.0001,0.9999);
+    float _x = (x + 1.0) * 0.5;
+    float _y = (y + 1.0) * 0.5;
+    return floor(_x * 100.0) + _y;
+}
 vec2 sign_not_zero(vec2 v) {
     return vec2(v.x >= 0 ? 1.0 : -1.0,v.y >= 0 ? 1.0 : -1.0);
 }
@@ -66,65 +73,52 @@ float orenNayar(vec3 _ViewDir, vec3 _LightDir,float _NdotL,float _VdotN){
      return (A + B * max(0.0, cosAzimuthSinPolarTanPolar));
 }
 void main(){
+    vec4 InDiffuse = texture2D(DiffuseTexture, UV) * Object_Color;
+    vec4 OutDiffuse = ConstantZeroVec4;
+    vec2 OutNormals = ConstantOneVec2;
+	vec3 InGlow = texture2D(GlowTexture, UV).rgb;
+    float OutGlow = 0.0;
+	float OutSpecular = 1.0;
+	float OutPackedMetalnessSmoothness = 1.0;
+
     if(HasAtmo > 0.99){
         if(FirstConditionals.x > 0.5){
-            vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-            vec3 HDR = (1.0 - exp(-FragDataMisc1.w * (c0 + diffuse.rgb) * c1));
-            gl_FragData[0].rgb = max( vec3(0.05) * diffuse.rgb, HDR);    
+            vec3 HDR = (1.0 - exp(-FragDataMisc1.w * (c0 + InDiffuse.rgb) * c1));
+            OutDiffuse.rgb = max(0.05 * InDiffuse.rgb, HDR);    
             if(FirstConditionals.z > 0.5){
-                vec3 lightIntensity = max(vec3(0.05) * ConstantOneVec3,(1.0 - exp( -FragDataMisc1.w * ( (c0 + ConstantOneVec3 ) * c1) )));
-                gl_FragData[0].rgb = max(gl_FragData[0].rgb, (1.0 - lightIntensity) * texture2D(GlowTexture, UV).rgb);
+                vec3 lightIntensity = max(0.05 * ConstantOneVec3,(1.0 - exp( -FragDataMisc1.w * ( (c0 + ConstantOneVec3 ) * c1) )));
+                OutDiffuse = vec4(max(OutDiffuse.rgb, (1.0 - lightIntensity) * InGlow),InDiffuse.a);
             }
-            gl_FragData[0].a = diffuse.a;
         }
-        else{
-            gl_FragData[0] = ConstantZeroVec4;
-        }
-        gl_FragData[1].rg = ConstantOneVec2;
-
-        gl_FragData[2].r = 0.0;
-        gl_FragData[2].g = 1.0;
-    }
-    else{
+    }else{
         if(FirstConditionals.x > 0.5){
-		    vec4 diffuse = texture2D(DiffuseTexture, UV) * Object_Color;
-		    vec3 PxlNormal;
+		    vec3 PxlNormal = normalize(Normals);
 			if(FirstConditionals.y > 0.5){
 			    PxlNormal = CalcBumpedNormal(UV,NormalTexture);
 			}
-			else{
-			    PxlNormal = normalize(Normals);
-			}
 		    vec3 ViewDir = normalize(VCameraPositionReal - WorldPosition);
 			vec3 LightDir = normalize(FragDataMisc1.xyz - WorldPosition);
-			float NdotL = max(0.0,dot(PxlNormal,LightDir ));
-			float VdotN = max(0.0,dot(PxlNormal,ViewDir ));
-            //gl_FragData[0].rgb = diffuse.rgb * vec3(minnaert(NdotL,VdotN));
-			gl_FragData[0].rgb = max(diffuse.rgb * vec3(0.038),diffuse.rgb * vec3(orenNayar(ViewDir,LightDir,NdotL,VdotN)) * NdotL * 1.6);
-			gl_FragData[0].a = 1.0;
+			float NdotL = max(0.0,dot(PxlNormal,LightDir));
+			float VdotN = max(0.0,dot(PxlNormal,ViewDir));
+            //OutDiffuse = vec4(InDiffuse.rgb * minnaert(NdotL,VdotN),InDiffuse.a);
+			OutDiffuse = vec4(max(InDiffuse.rgb * 0.038,InDiffuse.rgb * orenNayar(ViewDir,LightDir,NdotL,VdotN) * NdotL * 1.6),InDiffuse.a);
         }
-        else{
-            gl_FragData[0] = ConstantZeroVec4;
-        }
-        gl_FragData[1].rg = EncodeOctahedron(vec3(1.0));
-        gl_FragData[1].a = texture2D(DiffuseTexture, UV).a;
+        OutNormals.rg = EncodeOctahedron(ConstantOneVec3);
+        OutPackedMetalnessSmoothness = Pack2FloatIntoFloat16(0.0,1.0);
 
         if(FirstConditionals.z > 0.5){
-            gl_FragData[2].r = texture2D(GlowTexture, UV).r + MaterialBasePropertiesOne.x;
+            OutGlow = InGlow.r + MaterialBasePropertiesOne.x;
+        }else{
+            OutGlow = MaterialBasePropertiesOne.x;
         }
-        else{
-            gl_FragData[2].r = MaterialBasePropertiesOne.x;
-        }
-
         if(FirstConditionals.w > 0.5){
-            gl_FragData[2].g = texture2D(SpecularTexture, UV).r;
-        }
-        else{
-            gl_FragData[2].g = 1.0;
+            OutSpecular = texture2D(SpecularTexture, UV).r;
         }
     }
-    gl_FragData[2].b = 0.0;
+	gl_FragData[0] = OutDiffuse;          
+	gl_FragData[1] = vec4(OutNormals,0.0,OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
+	gl_FragData[2].rg = vec2(OutGlow,OutSpecular);
     if(HasGodsRays == 1){
-        gl_FragData[3] = vec4(Gods_Rays_Color.r,Gods_Rays_Color.g,Gods_Rays_Color.b,1.0);
+        gl_FragData[3] = vec4(Gods_Rays_Color,1.0);
     }
 }

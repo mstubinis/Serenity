@@ -65,13 +65,13 @@ class SunLight::impl final{
 };
 
 SunLight::SunLight(glm::vec3 pos,LightType::Type type,Scene* scene):Entity(),m_i(new impl){
-    m_i->_init(this,type);
-    if(scene == nullptr){
+    if(!scene){
         scene = Resources::getCurrentScene();
     }
     scene->addEntity(this); //keep lights out of the global per scene entity pool?
     scene->lights().push_back(this);
 
+    m_i->_init(this,type);
     m_i->m_Body->setPosition(pos);
 }
 SunLight::~SunLight(){
@@ -155,7 +155,7 @@ void PointLight::setAttenuationModel(LightAttenuation::Model model){
 void PointLight::lighten(){
     if(!isActive()) return;
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3 pos = m_i->m_Body->position();
+    glm::vec3& pos = m_i->m_Body->position();
     if((!c->sphereIntersectTest(pos,m_CullingRadius)) || (c->getDistance(pos) > 1100.0f * m_CullingRadius)) //1100.0f is the visibility threshold
         return;
     sendUniform4f("LightDataA", m_i->m_AmbientIntensity,m_i->m_DiffuseIntensity,m_i->m_SpecularIntensity,0.0f);
@@ -165,7 +165,14 @@ void PointLight::lighten(){
     sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1fSafe("Type",1.0f);
 
-    sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
+	glm::vec3& camPos = c->getPosition();
+	glm::mat4& model = m_i->m_Body->modelMatrix();
+	model[3][0] -= camPos.x;
+	model[3][1] -= camPos.y;
+	model[3][2] -= camPos.z;
+	glm::mat4& vp = c->getViewProjection();
+
+    sendUniformMatrix4f("MVP",vp * model);
 
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
         Settings::cullFace(GL_FRONT);
@@ -205,7 +212,14 @@ void SpotLight::lighten(){
     sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     sendUniform1fSafe("Type",2.0f);
 
-    sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
+	glm::vec3& camPos = c->getPosition();
+	glm::mat4& model = m_i->m_Body->modelMatrix();
+	model[3][0] -= camPos.x;
+	model[3][1] -= camPos.y;
+	model[3][2] -= camPos.z;
+	glm::mat4& vp = c->getViewProjection();
+
+    sendUniformMatrix4f("MVP",vp * model);
 
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
         Settings::cullFace(GL_FRONT);
@@ -251,7 +265,14 @@ void RodLight::lighten(){
     sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1fSafe("Type",1.0f);
 
-    sendUniformMatrix4f("MVP",c->getViewProjection() * m_i->m_Body->modelMatrix());
+	glm::vec3& camPos = c->getPosition();
+	glm::mat4& model = m_i->m_Body->modelMatrix();
+	model[3][0] -= camPos.x;
+	model[3][1] -= camPos.y;
+	model[3][2] -= camPos.z;
+	glm::mat4& vp = c->getViewProjection();
+
+    sendUniformMatrix4f("MVP",vp * model);
 
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
         Settings::cullFace(GL_FRONT);

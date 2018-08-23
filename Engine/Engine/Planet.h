@@ -8,18 +8,13 @@ class SunLight;
 class Ring;
 class Planet;
 
+struct PlanetaryRingMeshInstanceBindFunctor;
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor;
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
 
-enum PlanetType { 
-    PLANET_TYPE_ROCKY, 
-    PLANET_TYPE_ICE,
-    PLANET_TYPE_GAS_GIANT, 
-    PLANET_TYPE_ICE_GIANT,
-    PLANET_TYPE_MOON, 
-    PLANET_TYPE_STAR, 
-    PLANET_TYPE_ASTEROID,
-};
+class PlanetType{ public:enum Type { 
+    Rocky,Ice,GasGiant,IceGiant,Moon,Star,Asteroid,
+};};
 
 struct RotationInfo final{
     float tilt;
@@ -57,24 +52,25 @@ struct RingInfo final{
 
 class Planet: public Entity{
     friend class ::Ring;
+    friend struct ::PlanetaryRingMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
     protected:
         ComponentModel* m_Model;
         ComponentBody* m_Body;
         std::vector<Ring*> m_Rings;
-        PlanetType m_Type;
+        PlanetType::Type m_Type;
         OrbitInfo* m_OrbitInfo;
         RotationInfo* m_RotationInfo;
         float m_AtmosphereHeight;
     public:
         Planet(
-            Handle& materialHandle,         //Material
-            PlanetType = PLANET_TYPE_ROCKY, //Type
-            glm::vec3 = glm::vec3(0),       //Position
-            float = 1,                      //Radius
-            std::string = "Planet",         //Name
-            float = 0,                      //Atmosphere size
+            Handle& materialHandle,               //Material
+            PlanetType::Type = PlanetType::Rocky, //Type
+            glm::vec3 = glm::vec3(0),             //Position
+            float = 1,                            //Radius
+            std::string = "Planet",               //Name
+            float = 0,                            //Atmosphere size
             Scene* = nullptr
         );
         virtual ~Planet();
@@ -102,11 +98,11 @@ class Star: public Planet{
         SunLight* m_Light;
     public:
         Star(
-            glm::vec3 = glm::vec3(1,1,0),   //Star Color
-            glm::vec3 = glm::vec3(1,1,1),   //Sunlight Color
-            glm::vec3 = glm::vec3(0),       //Position
-            float = 1,                      //Scale
-            std::string = "Star",           //Name
+            glm::vec3 = glm::vec3(1.0f,1.0f,0.0f),   //Star Color
+            glm::vec3 = glm::vec3(1.0f,1.0f,1.0f),   //Sunlight Color
+            glm::vec3 = glm::vec3(0.0f),             //Position
+            float = 1,                               //Scale
+            std::string = "Star",                    //Name
             Scene* = nullptr
         );
         virtual ~Star();
