@@ -135,6 +135,8 @@ class InternalMeshPublicInterface final{
     public:
         static void LoadCPU(Mesh*);
         static void LoadGPU(Mesh*);
+        static void UnloadCPU(Mesh*);
+        static void UnloadGPU(Mesh*);
 };
 
 class Mesh final: public BindableResource{

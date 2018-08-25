@@ -58,9 +58,17 @@ class Shader final: public EngineResource{
         std::string data();
         bool fromFile();
 };
+class InternalShaderProgramPublicInterface final{
+    public:
+        static void LoadCPU(ShaderP*);
+        static void LoadGPU(ShaderP*);
+		static void UnloadCPU(ShaderP*);
+		static void UnloadGPU(ShaderP*);
+};
 class ShaderP final: public BindableResource{
     friend class ::UniformBufferObject;
 	friend class ::Shader;
+	friend class ::InternalShaderProgramPublicInterface;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:

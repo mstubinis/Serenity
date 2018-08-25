@@ -153,10 +153,6 @@ class ShaderP::impl final{
 
             super->load();
         }
-        void _destruct(ShaderP* super){
-            _unloadFromGPU(super);
-            _unloadFromCPU(super);
-        }
         void _convertCode(string& vCode,string& fCode,ShaderP* super){ 
             _convertCode(vCode,m_VertexShader,super); 
             _convertCode(fCode,m_FragmentShader,super);
@@ -374,8 +370,8 @@ class ShaderP::impl final{
                 }
             }
         }
-        void _loadIntoCPU(ShaderP* super){
-            _unloadFromCPU(super);
+        void _load_CPU(ShaderP* super){
+            _unload_CPU(super);
             if(!m_LoadedCPU){
                 string VertexCode, FragmentCode = "";
                 //load initial code
@@ -394,15 +390,15 @@ class ShaderP::impl final{
                 m_LoadedCPU = true;
             }
         }
-        void _unloadFromCPU(ShaderP* super){
+        void _unload_CPU(ShaderP* super){
             if(m_LoadedCPU){
                 m_UniformLocations.clear();
                 m_AttachedUBOs.clear();
                 m_LoadedCPU = false;
             }
         }
-        void _loadIntoGPU(ShaderP* super){
-            _unloadFromGPU(super);
+        void _load_GPU(ShaderP* super){
+            _unload_GPU(super);
             if(!m_LoadedGPU){
                 string& VertexCode = m_VertexShader->m_i->m_Code;
                 string& FragmentCode = m_FragmentShader->m_i->m_Code;
@@ -471,7 +467,7 @@ class ShaderP::impl final{
                 m_LoadedGPU = true;
             }
         }
-        void _unloadFromGPU(ShaderP* super){
+        void _unload_GPU(ShaderP* super){
             if(m_LoadedGPU){
                 glDeleteProgram(m_ShaderProgram);
                 m_LoadedGPU = false;
@@ -479,23 +475,45 @@ class ShaderP::impl final{
         }
 };
 ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_init(n,vs,fs,s,this); }
-ShaderP::~ShaderP(){ m_i->_destruct(this); }
+ShaderP::~ShaderP(){ unload(); }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
+void InternalShaderProgramPublicInterface::LoadCPU(ShaderP* shaderP){
+    if(!shaderP->isLoaded()){
+        shaderP->m_i->_load_CPU(shaderP);
+    }
+}
+void InternalShaderProgramPublicInterface::LoadGPU(ShaderP* shaderP){
+    if(!shaderP->isLoaded()){
+        shaderP->m_i->_load_GPU(shaderP);
+        shaderP->EngineResource::load();
+    }
+}
+void InternalShaderProgramPublicInterface::UnloadCPU(ShaderP* shaderP){
+    if(shaderP->isLoaded()){
+        shaderP->m_i->_unload_CPU(shaderP);
+		shaderP->EngineResource::unload();
+    }
+}
+void InternalShaderProgramPublicInterface::UnloadGPU(ShaderP* shaderP){
+    if(shaderP->isLoaded()){
+        shaderP->m_i->_unload_GPU(shaderP);        
+    }
+}
 void ShaderP::load(){
     if(!isLoaded()){
-        m_i->_loadIntoCPU(this);
-        m_i->_loadIntoGPU(this);
+        m_i->_load_CPU(this);
+        m_i->_load_GPU(this);
         cout << "(Shader Program) ";
         EngineResource::load();
     }
 }
 void ShaderP::unload(){
     if(isLoaded() /*&& useCount() == 0*/){
-        m_i->_unloadFromGPU(this);
-        m_i->_unloadFromCPU(this);
+        m_i->_unload_GPU(this);
+        m_i->_unload_CPU(this);
         cout << "(Shader Program) ";
         EngineResource::unload();
     }

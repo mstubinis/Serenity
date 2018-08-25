@@ -451,7 +451,7 @@ class Texture::impl final{
             _initCommon(_openglTextureType,_genMipMaps);
    
             TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
-			m_ImagesDatas.push_back(image);
+            m_ImagesDatas.push_back(image);
             _super->setName(_name); _super->load();
         }
         void _initFromImageFile(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){	
@@ -466,7 +466,7 @@ class Texture::impl final{
                 image->pixelType = ImagePixelType::UNSIGNED_BYTE;
                 image->internalFormat = _internalFormat;
             }
-			TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
+            TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
             m_ImagesDatas.insert(m_ImagesDatas.begin(),image);
 
             _super->setName(_filename); _super->load();
@@ -480,7 +480,7 @@ class Texture::impl final{
             }
             _super->setName(_name); _super->load();
         }
-        void _loadIntoCPU(Texture* super){
+        void _load_CPU(Texture* super){
             for(auto image:m_ImagesDatas){
                 if(image->filename != ""){
                     bool _do = false;
@@ -502,7 +502,8 @@ class Texture::impl final{
                 }
             }
         }
-        void _loadIntoGPU(Texture* super){
+        void _load_GPU(Texture* super){
+            _unload_GPU(super);
             if(m_TextureAddress.size() == 0)
                 m_TextureAddress.push_back(0);
             Renderer::genAndBindTexture(m_Type,m_TextureAddress.at(0));
@@ -523,13 +524,13 @@ class Texture::impl final{
             if(m_IsToBeMipmapped) TextureLoader::GenerateMipmapsOpenGL(super);
         }
 
-        void _unloadFromGPU(){
+        void _unload_GPU(Texture* super){
             for(uint i = 0; i < m_TextureAddress.size(); ++i){
                 glDeleteTextures(1,&m_TextureAddress.at(i));
             }
             vector_clear(m_TextureAddress);
         }
-        void _unloadFromCPU(){
+        void _unload_CPU(Texture* super){
             for(auto image:m_ImagesDatas){
                 if(image->filename != ""){
                     for(auto mipmap:image->mipmaps){
@@ -546,7 +547,7 @@ class Texture::impl final{
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
-			float _divisor = fbo.divisor();
+            float _divisor = fbo.divisor();
             Renderer::bindTexture(m_Type, m_TextureAddress.at(0));
             uint _w(uint(float(w) * _divisor));
             uint _h(uint(float(h) * _divisor));
@@ -681,8 +682,8 @@ void epriv::TextureLoader::LoadDDSFile(Texture* _texture,string _filename,ImageL
     uint numberOfMainImages = 1;
     if(head.caps & DDS::DDS_CAPS_COMPLEX){
         if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP){//cubemap
-			//note: in skybox dds files, especially in gimp, layer order is as follows:
-			//right,left,top,bottom,front,back
+            //note: in skybox dds files, especially in gimp, layer order is as follows:
+            //right,left,top,bottom,front,back
             if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEX){ ++numberOfMainImages; }//right
             if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEX){ ++numberOfMainImages; }//left
             if(head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEY){ ++numberOfMainImages; }//top
@@ -763,7 +764,7 @@ void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
     uint& _w(i.m_ImagesDatas.at(0)->mipmaps.at(0).width);
     uint& _h(i.m_ImagesDatas.at(0)->mipmaps.at(0).height);
     glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),NULL);
-	_texture->setFilter(TextureFilter::Linear);
+    _texture->setFilter(TextureFilter::Linear);
     _texture->setWrapping(TextureWrap::ClampToEdge);
 }
 void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
@@ -1048,29 +1049,41 @@ void Texture::setAnisotropicFiltering(float aniso){
 
 void InternalTexturePublicInterface::LoadCPU(Texture* _texture){
     if(!_texture->isLoaded()){
-        _texture->m_i->_loadIntoCPU(_texture);
+        _texture->m_i->_load_CPU(_texture);
     }
 }
 void InternalTexturePublicInterface::LoadGPU(Texture* _texture){
     if(!_texture->isLoaded()){
-        _texture->m_i->_loadIntoGPU(_texture);
+        _texture->m_i->_load_GPU(_texture);
         _texture->EngineResource::load();
+    }
+}
+void InternalTexturePublicInterface::UnloadCPU(Texture* _texture){
+    if(_texture->isLoaded()){
+        _texture->m_i->_unload_CPU(_texture);
+        _texture->EngineResource::unload();
+    }
+}
+void InternalTexturePublicInterface::UnloadGPU(Texture* _texture){
+    if(_texture->isLoaded()){
+        _texture->m_i->_unload_GPU(_texture);      
     }
 }
 
 
+
 void Texture::load(){
     if(!isLoaded()){
-        m_i->_loadIntoCPU(this);
-        m_i->_loadIntoGPU(this);
+        m_i->_load_CPU(this);
+        m_i->_load_GPU(this);
         cout << "(Texture) ";
         EngineResource::load();
     }
 }
 void Texture::unload(){
     if(isLoaded() /*&& useCount() == 0*/){
-        m_i->_unloadFromGPU();
-        m_i->_unloadFromCPU();
+        m_i->_unload_GPU(this);
+        m_i->_unload_CPU(this);
         cout << "(Texture) ";
         EngineResource::unload();
     }

@@ -928,27 +928,27 @@ class Mesh::impl final{
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
         }
-		void _unloadFromCPU(Mesh* super){
+		void _unload_CPU(Mesh* super){
             if(m_File != ""){
                 _clearData(super);
             }
 			cout << "(Mesh) ";
 		}
-        void _unloadFromGPU(Mesh* super){
+        void _unload_GPU(Mesh* super){
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
+			vector_clear(m_buffers);
         }
-        void _loadIntoCPU(Mesh* super){
+        void _load_CPU(Mesh* super){
             if(m_File != ""){
                 _loadFromFile(super,m_File,m_Type,m_threshold);
             }
             _calculateMeshRadius(super);
         }
-        void _loadIntoGPU(Mesh* super){
+        void _load_GPU(Mesh* super){
 			if(m_buffers.size() > 0){
-				_unloadFromGPU(super);
-				vector_clear(m_buffers);
+				_unload_GPU(super);
 			}
 
             m_buffers.push_back(0);
@@ -1135,15 +1135,27 @@ uint epriv::MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
 void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
     if(!mesh->isLoaded()){
-        mesh->m_i->_loadIntoCPU(mesh);
+        mesh->m_i->_load_CPU(mesh);
     }
 }
 void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
     if(!mesh->isLoaded()){
-        mesh->m_i->_loadIntoGPU(mesh);
+        mesh->m_i->_load_GPU(mesh);
         mesh->EngineResource::load();
     }
 }
+void InternalMeshPublicInterface::UnloadCPU(Mesh* mesh){
+    if(mesh->isLoaded()){
+        mesh->m_i->_unload_CPU(mesh);
+        mesh->EngineResource::unload();
+    }
+}
+void InternalMeshPublicInterface::UnloadGPU(Mesh* mesh){
+    if(mesh->isLoaded()){
+        mesh->m_i->_unload_GPU(mesh);
+    }
+}
+
 
 
 Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
@@ -1183,15 +1195,15 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
 }
 void Mesh::load(){
     if(!isLoaded()){
-        m_i->_loadIntoCPU(this);
-        m_i->_loadIntoGPU(this);
+        m_i->_load_CPU(this);
+        m_i->_load_GPU(this);
         EngineResource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded() && useCount() == 0){
-		m_i->_unloadFromGPU(this);
-		m_i->_unloadFromCPU(this);
+		m_i->_unload_GPU(this);
+		m_i->_unload_CPU(this);
         EngineResource::unload();
     }
 }

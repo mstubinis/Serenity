@@ -57,6 +57,8 @@ class InternalTexturePublicInterface final{
     public:
         static void LoadCPU(Texture*);
         static void LoadGPU(Texture*);
+        static void UnloadCPU(Texture*);
+        static void UnloadGPU(Texture*);
 };
 
 class Texture: public EngineResource{
