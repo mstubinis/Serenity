@@ -21,23 +21,34 @@ class Engine_Window::impl final{
         bool m_MouseCursorVisible;
         bool m_Fullscreen;
         bool m_Active;
+		bool m_Vsync;
+		bool m_MouseCursorGrabbed;
         sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
             m_FramerateLimit = 0;
             m_MouseCursorVisible = true;
-            m_Fullscreen = false;
+            m_Fullscreen = m_Vsync = m_MouseCursorGrabbed = false;
             m_WindowName = name;
             m_Width = width;
             m_Height = height;
             m_SFMLWindow = new sf::Window();
             _setActive(true);
             m_SFContextSettings = _createOpenGLWindow(name,width,height,3,3,330);
+
             std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
         }
         void _destruct(){
 			m_SFMLWindow->close();
             SAFE_DELETE(m_SFMLWindow);
         }
+		void _restoreStateMachine(){
+			if(m_FramerateLimit > 0)
+				m_SFMLWindow->setFramerateLimit(m_FramerateLimit);
+			m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
+			m_SFMLWindow->setActive(m_Active);
+			m_SFMLWindow->setVerticalSyncEnabled(m_Vsync);
+			m_SFMLWindow->setMouseCursorGrabbed(m_MouseCursorGrabbed);
+		}
         const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion = 3, uint _minorVersion = 3,uint _glslVersion = 120){
             sf::ContextSettings settings;
             settings.depthBits = 24;
@@ -103,6 +114,7 @@ class Engine_Window::impl final{
             m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
 			m_SFContextSettings = m_SFMLWindow->getSettings();
             m_Fullscreen = fullscreen;
+			_restoreStateMachine();
         }
         void _setStyle(uint style){
             if(m_Style == style) return;
@@ -144,6 +156,18 @@ class Engine_Window::impl final{
             m_SFMLWindow->setFramerateLimit(limit);
             m_FramerateLimit = limit;
         }
+		void _setVerticalSyncEnabled(bool enabled){
+			if(m_Vsync != enabled){
+				m_SFMLWindow->setVerticalSyncEnabled(enabled);
+				m_Vsync = enabled;
+			}
+		}
+		void _keepMouseInWindow(bool keep){
+			if(m_MouseCursorGrabbed != keep){
+				m_SFMLWindow->setMouseCursorGrabbed(keep);
+				m_MouseCursorGrabbed = keep;
+			}
+		}
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){
@@ -157,7 +181,7 @@ void Engine_Window::setIcon(Texture* texture){m_i->_setIcon(texture);}
 void Engine_Window::setIcon(const char* file){m_i->_setIcon(file);}
 const char* Engine_Window::name() const {return m_i->m_WindowName;}
 void Engine_Window::setName(const char* name){m_i->_setName(name);}
-void Engine_Window::setVerticalSyncEnabled(bool enabled){m_i->m_SFMLWindow->setVerticalSyncEnabled(enabled);}
+void Engine_Window::setVerticalSyncEnabled(bool enabled){ m_i->_setVerticalSyncEnabled(enabled); }
 void Engine_Window::setKeyRepeatEnabled(bool enabled){m_i->m_SFMLWindow->setKeyRepeatEnabled(enabled);}
 void Engine_Window::setMouseCursorVisible(bool visible){ m_i->_setMouseCursorVisible(visible); }
 void Engine_Window::requestFocus(){m_i->m_SFMLWindow->requestFocus();}
@@ -171,7 +195,7 @@ void Engine_Window::setActive(bool active){m_i->_setActive(active);}
 void Engine_Window::setSize(uint w, uint h){m_i->_setSize(w,h);}
 void Engine_Window::setStyle(uint style){m_i->_setStyle(style);}
 void Engine_Window::setFullScreen(bool fullscreen){ m_i->_setFullScreen(fullscreen); }
-void Engine_Window::keepMouseInWindow(bool keep){ m_i->m_SFMLWindow->setMouseCursorGrabbed(keep); }
+void Engine_Window::keepMouseInWindow(bool keep){ m_i->_keepMouseInWindow(keep); }
 void Engine_Window::setFramerateLimit(uint limit){ m_i->_setFramerateLimit(limit); }
 sf::Window* Engine_Window::getSFMLHandle() const { return m_i->m_SFMLWindow; }
 uint Engine_Window::getStyle(){ return m_i->m_Style; }

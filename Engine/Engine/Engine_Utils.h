@@ -19,6 +19,7 @@ namespace Engine{
 				noncopyable(noncopyable&&);                      // non moveable 2
 				noncopyable& operator=(const noncopyable&&);     // non move assignable 1
 				noncopyable& operator=(noncopyable&&);           // non move assignable 2
+				//noncopyable& operator=(noncopyable);             // copy and swap 1
 		};
 	};
 };

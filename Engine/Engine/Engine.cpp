@@ -133,6 +133,7 @@ void render(){
     //display
     epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Resources::getWindow()->display();
+	//glFinish(); //might help with screen tearing?
     epriv::Core::m_Engine->m_TimeManager->calculate_display();	
 }
 void EVENT_RESIZE(uint w, uint h,bool saveSize){
