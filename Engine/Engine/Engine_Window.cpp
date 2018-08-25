@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Engine_Window.h"
 #include "Engine_Resources.h"
+#include "Engine_EventDispatcher.h"
 #include "Engine_Renderer.h"
 #include "Components.h"
 #include "Texture.h"
@@ -85,6 +86,11 @@ class Engine_Window::impl final{
             }
             epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
 
+			//event dispatch
+			epriv::EventWindowFullscreenChanged e; e.isFullscreen = fullscreen;
+			Event ev; ev.eventWindowFullscreenChanged = e; ev.type = EventType::WindowFullscreenChanged;
+			epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
+
             glm::uvec2 winSize = Engine::getWindowSize();
 
             //basically this block of code is a copy of EVENT_RESIZE, i wish this would trigger the event resize method...
@@ -95,7 +101,7 @@ class Engine_Window::impl final{
 
             //for some reason the mouse is shown even if it was hidden at first
             m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
-
+			m_SFContextSettings = m_SFMLWindow->getSettings();
             m_Fullscreen = fullscreen;
         }
         void _setStyle(uint style){

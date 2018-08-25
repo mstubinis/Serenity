@@ -1134,26 +1134,26 @@ epriv::MeshSkeleton::~MeshSkeleton(){
 uint epriv::MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
 void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
-    if(!mesh->isLoaded()){
+    //if(!mesh->isLoaded()){
         mesh->m_i->_load_CPU(mesh);
-    }
+    //}
 }
 void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
-    if(!mesh->isLoaded()){
+    //if(!mesh->isLoaded()){
         mesh->m_i->_load_GPU(mesh);
         mesh->EngineResource::load();
-    }
+    //}
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh* mesh){
-    if(mesh->isLoaded()){
+    //if(mesh->isLoaded()){
         mesh->m_i->_unload_CPU(mesh);
         mesh->EngineResource::unload();
-    }
+    //}
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh* mesh){
-    if(mesh->isLoaded()){
+    //if(mesh->isLoaded()){
         mesh->m_i->_unload_GPU(mesh);
-    }
+    //}
 }
 
 

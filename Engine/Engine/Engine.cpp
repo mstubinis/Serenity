@@ -144,33 +144,33 @@ void EVENT_RESIZE(uint w, uint h,bool saveSize){
 
     epriv::EventWindowResized e;  e.width = w; e.height = h;
     Event ev; ev.eventWindowResized = e; ev.type = EventType::WindowResized;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowResized,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_CLOSE(){
     Resources::getWindow()->close();
     Game::onClose();
 
     Event e; e.type = EventType::WindowClosed;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowClosed,e);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(e);
 }
 void EVENT_LOST_FOCUS(){
     Game::onLostFocus();
 
     Event e; e.type = EventType::WindowLostFocus;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowLostFocus,e);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(e);
 }
 void EVENT_GAINED_FOCUS(){ 
     Game::onGainedFocus();
 
     Event e; e.type = EventType::WindowGainedFocus;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::WindowGainedFocus,e);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(e);
 }
 void EVENT_TEXT_ENTERED(uint& unicode){ 
     Game::onTextEntered(unicode); 
 
     epriv::EventTextEntered e;  e.unicode = unicode;
     Event ev;  ev.eventTextEntered = e; ev.type = EventType::TextEntered;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::TextEntered,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_KEY_PRESSED(uint key){
     epriv::Core::m_Engine->m_EventManager->_onEventKeyPressed(key);
@@ -182,7 +182,7 @@ void EVENT_KEY_PRESSED(uint key){
     if(Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift))      e.shift = true;
     if(Engine::isKeyDown(KeyboardKey::LeftSystem) || Engine::isKeyDown(KeyboardKey::RightSystem))    e.system = true;
     Event ev;  ev.eventKeyboard = e; ev.type = EventType::KeyPressed;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::KeyPressed,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_KEY_RELEASED(uint key){
     epriv::Core::m_Engine->m_EventManager->_onEventKeyReleased(key);
@@ -194,7 +194,7 @@ void EVENT_KEY_RELEASED(uint key){
     if(Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift))      e.shift = true;
     if(Engine::isKeyDown(KeyboardKey::LeftSystem) || Engine::isKeyDown(KeyboardKey::RightSystem))    e.system = true;
     Event ev;  ev.eventKeyboard = e; ev.type = EventType::KeyReleased;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::KeyReleased,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_MOUSE_WHEEL_MOVED(int& delta){
     epriv::Core::m_Engine->m_EventManager->_onEventMouseWheelMoved(delta);
@@ -202,7 +202,7 @@ void EVENT_MOUSE_WHEEL_MOVED(int& delta){
 
     epriv::EventMouseWheel e;  e.delta = delta;
     Event ev;  ev.eventMouseWheel = e; ev.type = EventType::MouseWheelMoved;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseWheelMoved,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
     epriv::Core::m_Engine->m_EventManager->_onEventMouseButtonPressed(mouseButton);
@@ -211,7 +211,7 @@ void EVENT_MOUSE_BUTTON_PRESSED(uint mouseButton){
     const glm::uvec2 mpos = Engine::getMousePosition();
     epriv::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
     Event ev; ev.eventMouseButton = e; ev.type = EventType::MouseButtonPressed;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseButtonPressed,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
     epriv::Core::m_Engine->m_EventManager->_onEventMouseButtonReleased(mouseButton);
@@ -220,7 +220,7 @@ void EVENT_MOUSE_BUTTON_RELEASED(uint mouseButton){
     const glm::uvec2 mpos = Engine::getMousePosition();
     epriv::EventMouseButton e;  e.button = (MouseButton::Button)mouseButton;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
     Event ev; ev.eventMouseButton = e; ev.type = EventType::MouseButtonReleased;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseButtonReleased,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_MOUSE_MOVED(int mouseX, int mouseY){
     float mX = (float)mouseX; float mY = (float)mouseY;
@@ -231,7 +231,7 @@ void EVENT_MOUSE_MOVED(int mouseX, int mouseY){
 
     epriv::EventMouseMove e;  e.x = mX;  e.y = mY;
     Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseMoved;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseMoved,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_MOUSE_ENTERED(){ 
     Game::onMouseEntered(); 
@@ -239,7 +239,7 @@ void EVENT_MOUSE_ENTERED(){
     const glm::uvec2 mpos = Engine::getMousePosition();
     epriv::EventMouseMove e;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
     Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseEnteredWindow;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseEnteredWindow,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_MOUSE_LEFT(){ 
     Game::onMouseLeft(); 
@@ -247,42 +247,42 @@ void EVENT_MOUSE_LEFT(){
     const glm::uvec2 mpos = Engine::getMousePosition();
     epriv::EventMouseMove e;  e.x = (float)mpos.x;  e.y = (float)mpos.y;
     Event ev; ev.eventMouseMoved = e; ev.type = EventType::MouseLeftWindow;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::MouseLeftWindow,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_JOYSTICK_BUTTON_PRESSED(uint& button, uint& id){ 
     Game::onJoystickButtonPressed();
 
     epriv::EventJoystickButton e;  e.button = button;  e.joystickID = id;
     Event ev; ev.eventJoystickButton = e; ev.type = EventType::JoystickButtonPressed;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickButtonPressed,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_JOYSTICK_BUTTON_RELEASED(uint& button, uint& id){ 
     Game::onJoystickButtonReleased();
 
     epriv::EventJoystickButton e;  e.button = button;  e.joystickID = id;
     Event ev; ev.eventJoystickButton = e; ev.type = EventType::JoystickButtonReleased;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickButtonReleased,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_JOYSTICK_MOVED(uint& id,float& position,uint axis){
     Game::onJoystickMoved();
 
     epriv::EventJoystickMoved e;  e.axis = (JoystickAxis::Axis)axis;  e.joystickID = id;  e.position = position;
     Event ev; ev.eventJoystickMoved = e; ev.type = EventType::JoystickMoved;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickMoved,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_JOYSTICK_CONNECTED(uint& id){ 
     Game::onJoystickConnected(); 
 
     epriv::EventJoystickConnection e;  e.joystickID = id;
     Event ev; ev.eventJoystickConnection = e; ev.type = EventType::JoystickConnected;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickConnected,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 void EVENT_JOYSTICK_DISCONNECTED(uint& id){ 
     Game::onJoystickDisconnected(); 
 
     epriv::EventJoystickConnection e;  e.joystickID = id;
     Event ev; ev.eventJoystickConnection = e; ev.type = EventType::JoystickDisconnected;
-    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::JoystickDisconnected,ev);
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 }
 
 const float Engine::getFPS(){ return 1.0f / Resources::dt(); }

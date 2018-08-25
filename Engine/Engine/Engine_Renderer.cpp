@@ -1329,12 +1329,8 @@ class epriv::RenderManager::impl final{
         void _onFullscreen(sf::Window* sfWindow,sf::VideoMode& videoMode,const char* winName,uint& style,sf::ContextSettings& settings){
             SAFE_DELETE(m_gBuffer);
 
-
 			sfWindow->close();
             sfWindow->create(videoMode,winName,style,settings);
-
-			while(!sfWindow->isOpen()){
-			}
 
             //oh yea the opengl context is lost, gotta restore the state machine
             Renderer::RestoreGLState();
@@ -1343,6 +1339,7 @@ class epriv::RenderManager::impl final{
 			GLEnable(GLState::DEPTH_CLAMP);
 			GLEnable(GLState::TEXTURE_2D);
 			glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
+
 
 			m_gBuffer = new GBuffer(Resources::getWindowSize().x,Resources::getWindowSize().y);
         }
@@ -1711,7 +1708,7 @@ class epriv::RenderManager::impl final{
             if(RenderManager::GLSL_VERSION < 140){
                 sendUniformMatrix4fSafe("CameraView",c.getView());
                 sendUniformMatrix4fSafe("CameraProj",c.getProjection());
-                sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
+                //sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection()); //moved to shader binding function
                 sendUniformMatrix4fSafe("CameraInvView",c.getViewInverse());
                 sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
@@ -1784,8 +1781,8 @@ class epriv::RenderManager::impl final{
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSSAO)->bind();
 			float _divisor = gbuffer.getSmallFBO()->divisor();
             if(RenderManager::GLSL_VERSION < 140){
-                sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniformMatrix4fSafe("CameraInvViewProj",c.getViewProjectionInverse());
+                sendUniformMatrix4fSafe("CameraInvProj",c.getProjectionInverse());
                 sendUniform4fSafe("CameraInfo1",glm::vec4(glm::vec3(0.0001f),c.getNear()));
                 sendUniform4fSafe("CameraInfo2",glm::vec4(c.getViewVectorNoTranslation(),c.getFar()));
             }

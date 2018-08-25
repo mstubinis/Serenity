@@ -11,6 +11,7 @@ class Planet;
 struct PlanetaryRingMeshInstanceBindFunctor;
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor;
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
+struct StarMeshInstanceBindFunctor;
 
 class PlanetType{ public:enum Type { 
     Rocky,Ice,GasGiant,IceGiant,Moon,Star,Asteroid,
@@ -55,6 +56,7 @@ class Planet: public Entity{
     friend struct ::PlanetaryRingMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
+	friend struct ::StarMeshInstanceBindFunctor;
     protected:
         ComponentModel* m_Model;
         ComponentBody* m_Body;

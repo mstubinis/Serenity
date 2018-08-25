@@ -1048,26 +1048,26 @@ void Texture::setAnisotropicFiltering(float aniso){
 }
 
 void InternalTexturePublicInterface::LoadCPU(Texture* _texture){
-    if(!_texture->isLoaded()){
+    //if(!_texture->isLoaded()){
         _texture->m_i->_load_CPU(_texture);
-    }
+    //}
 }
 void InternalTexturePublicInterface::LoadGPU(Texture* _texture){
-    if(!_texture->isLoaded()){
+    //if(!_texture->isLoaded()){
         _texture->m_i->_load_GPU(_texture);
         _texture->EngineResource::load();
-    }
+    //}
 }
 void InternalTexturePublicInterface::UnloadCPU(Texture* _texture){
-    if(_texture->isLoaded()){
+    //if(_texture->isLoaded()){
         _texture->m_i->_unload_CPU(_texture);
         _texture->EngineResource::unload();
-    }
+    //}
 }
 void InternalTexturePublicInterface::UnloadGPU(Texture* _texture){
-    if(_texture->isLoaded()){
+    //if(_texture->isLoaded()){
         _texture->m_i->_unload_GPU(_texture);      
-    }
+    //}
 }
 
 

@@ -14,6 +14,7 @@ struct EventType final{enum Type{
     WindowGainedFocus,
     WindowLostFocus,
     WindowClosed,
+	WindowFullscreenChanged,
     SoundStartedPlaying,
     SoundStoppedPlaying,
     SoundPaused,
@@ -37,6 +38,7 @@ _TOTAL};};
 namespace Engine{
     namespace epriv{
         struct EventWindowResized final{ uint width,height; };
+		struct EventWindowFullscreenChanged final{ bool isFullscreen; };
         struct EventKeyboard final{ KeyboardKey::Key key; bool alt; bool control; bool shift; bool system; };
         struct EventTextEntered final{ std::uint32_t unicode; };
         struct EventMouseButton final{ MouseButton::Button button; float x, y; };
@@ -52,6 +54,7 @@ struct Event final{
     EventType::Type type;
     union{
         Engine::epriv::EventWindowResized eventWindowResized;
+		Engine::epriv::EventWindowFullscreenChanged eventWindowFullscreenChanged;
         Engine::epriv::EventKeyboard eventKeyboard;
         Engine::epriv::EventTextEntered eventTextEntered;
         Engine::epriv::EventMouseButton eventMouseButton;

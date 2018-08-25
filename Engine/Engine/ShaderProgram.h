@@ -3,6 +3,7 @@
 #define ENGINE_SHADERPROGRAM_H
 
 #include "BindableResource.h"
+#include "Engine_EventObject.h"
 #include <unordered_map>
 
 #include <GL/glew.h>
@@ -29,7 +30,7 @@ class ShaderType{public:enum Type{
 };};
 
 //Core since version 3.1 (GLSL 140)
-class UniformBufferObject final: private Engine::epriv::noncopyable{
+class UniformBufferObject final: public EventObserver{
 	friend class ::Shader;
     private:
         class impl; std::unique_ptr<impl> m_i;
@@ -41,6 +42,9 @@ class UniformBufferObject final: private Engine::epriv::noncopyable{
 
         UniformBufferObject(const char* nameInShader,uint sizeofStruct,int globalBindingPointIndex = -1);
         ~UniformBufferObject();
+
+		void onEvent(const Event& e);
+		GLuint address();
 
         void attachToShader(ShaderP* shaderProgram);
         void updateData(void* data);
@@ -65,7 +69,7 @@ class InternalShaderProgramPublicInterface final{
 		static void UnloadCPU(ShaderP*);
 		static void UnloadGPU(ShaderP*);
 };
-class ShaderP final: public BindableResource{
+class ShaderP final: public BindableResource, public EventObserver{
     friend class ::UniformBufferObject;
 	friend class ::Shader;
 	friend class ::InternalShaderProgramPublicInterface;
@@ -74,6 +78,8 @@ class ShaderP final: public BindableResource{
     public:
         ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         virtual ~ShaderP();
+
+		void onEvent(const Event& e);
 
 		void load();
 		void unload();

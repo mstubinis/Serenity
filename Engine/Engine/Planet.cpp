@@ -97,6 +97,44 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     i.mesh()->render();
 }};
 
+struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
+    MeshInstance& i = *(MeshInstance*)r;
+	Planet* obj = (Planet*)(i.parent());
+	Camera* c = Resources::getCurrentScene()->getActiveCamera();
+	glm::vec3& pos = obj->m_Body->position();
+	glm::vec3& camPos = c->getPosition();
+	glm::quat& orientation = obj->m_Body->rotation();
+
+    Renderer::sendUniform4fSafe("Object_Color",i.color());
+    Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
+    Renderer::sendUniform1iSafe("AnimationPlaying",0);
+    glm::mat4 model = i.model();
+
+
+    //TODO: add this to stars and further tweak the _factor, and find out how to fix this in the game camera's orbit feature
+    //experimental, simulation space to render space to help with depth buffer (a non-log depth buffer)
+    float _distanceReal = glm::abs(glm::distance(camPos,pos));
+    float _factor = (1.0f / ((glm::smoothstep(50000.0f,c->getFar()*0.001f,_distanceReal) * 20.0f) + 1.0f)) * 0.01f;
+    //2.718281828459045235360287471352 = euler's number
+    float _distance = _factor * _distanceReal;
+    glm::vec3 _newPosition = glm::normalize(camPos - pos) * _distance;
+	float _newScale = obj->getRadius() * _factor;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model,camPos - _newPosition);
+    model *= glm::mat4_cast(orientation);
+    model = glm::scale(model,glm::vec3(_newScale));
+
+	model[3][0] -= camPos.x;
+	model[3][1] -= camPos.y;
+	model[3][2] -= camPos.z;
+
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    
+    Renderer::sendUniformMatrix4f("Model",model);
+	Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
+    i.mesh()->render();
+}};
+
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
     Planet* obj = (Planet*)(i.parent());
@@ -348,6 +386,9 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
 
     m_Model->getModel()->setColor(starColor.x,starColor.y,starColor.z,1.0f);
     m_Model->getModel()->setGodRaysColor(starColor.x,starColor.y,starColor.z);
+
+	StarMeshInstanceBindFunctor f;
+	m_Model->setCustomBindFunctor(f);
 
     //addChild(m_Light);
     m_Light->setPosition(pos);

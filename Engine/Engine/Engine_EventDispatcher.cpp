@@ -48,3 +48,4 @@ void epriv::EventDispatcher::_update(const float& dt){ m_i->_update(dt); }
 void epriv::EventDispatcher::_registerObject(EventObserver* obj,EventType::Type type){ m_i->_registerObject(obj,type); }
 void epriv::EventDispatcher::_unregisterObject(EventObserver* obj,EventType::Type type){ m_i->_unregisterObject(obj,type); }
 void epriv::EventDispatcher::_dispatchEvent(EventType::Type type,const Event& e){ m_i->_dispatchEvent(type,e); }
+void epriv::EventDispatcher::_dispatchEvent(const Event& e){ m_i->_dispatchEvent((EventType::Type)e.type,e); }

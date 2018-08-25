@@ -41,7 +41,7 @@ namespace Engine{
                 ~ResourceManager();
 
                 void _init(const char* name,uint width,uint height);
-        
+ 
                 Handle _addTexture(Texture*);
 
                 bool _hasScene(std::string);         void _addScene(Scene*);                std::string _buildSceneName(std::string);
