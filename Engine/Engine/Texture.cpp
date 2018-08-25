@@ -450,17 +450,15 @@ class Texture::impl final{
 
             _initCommon(_openglTextureType,_genMipMaps);
    
-            m_ImagesDatas.push_back(image);
             TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
-
+			m_ImagesDatas.push_back(image);
             _super->setName(_name); _super->load();
         }
         void _initFromImageFile(string _filename,GLuint _openglTextureType,bool _genMipMaps,ImageInternalFormat::Format _internalFormat,Texture* _super){	
             ImageLoadedStructure* image = new ImageLoadedStructure();
             image->filename = _filename;
             string extension = boost::filesystem::extension(_filename);
-            _initCommon(_openglTextureType,_genMipMaps);
-            TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
+            _initCommon(_openglTextureType,_genMipMaps);      
             if(extension == ".dds"){
                 TextureLoader::LoadDDSFile(_super,_filename,*image);
             }
@@ -468,6 +466,7 @@ class Texture::impl final{
                 image->pixelType = ImagePixelType::UNSIGNED_BYTE;
                 image->internalFormat = _internalFormat;
             }
+			TextureLoader::ChoosePixelFormat(image->pixelFormat,image->internalFormat);
             m_ImagesDatas.insert(m_ImagesDatas.begin(),image);
 
             _super->setName(_filename); _super->load();
@@ -542,14 +541,15 @@ class Texture::impl final{
             }  
             m_Mipmapped = false;
         }
-        void _resize(epriv::FramebufferTexture* t,uint w, uint h){
+        void _resize(epriv::FramebufferObject& fbo,uint w, uint h){
             if(m_TextureType != TextureType::RenderTarget){
                 cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
                 return;
             }
+			float _divisor = fbo.divisor();
             Renderer::bindTexture(m_Type, m_TextureAddress.at(0));
-            uint _w(uint(float(w) * t->divisor()));
-            uint _h(uint(float(h) * t->divisor()));
+            uint _w(uint(float(w) * _divisor));
+            uint _h(uint(float(h) * _divisor));
             m_ImagesDatas.at(0)->mipmaps.at(0).width = _w; 
             m_ImagesDatas.at(0)->mipmaps.at(0).height = _h;
             glTexImage2D(m_Type,0,ImageInternalFormat::at(m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(m_ImagesDatas.at(0)->pixelType),NULL);
@@ -763,7 +763,7 @@ void epriv::TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture* _texture){
     uint& _w(i.m_ImagesDatas.at(0)->mipmaps.at(0).width);
     uint& _h(i.m_ImagesDatas.at(0)->mipmaps.at(0).height);
     glTexImage2D(i.m_Type,0,ImageInternalFormat::at(i.m_ImagesDatas.at(0)->internalFormat),_w,_h,0,ImagePixelFormat::at(i.m_ImagesDatas.at(0)->pixelFormat),ImagePixelType::at(i.m_ImagesDatas.at(0)->pixelType),NULL);
-    _texture->setFilter(TextureFilter::Linear);
+	_texture->setFilter(TextureFilter::Linear);
     _texture->setWrapping(TextureWrap::ClampToEdge);
 }
 void epriv::TextureLoader::LoadTextureCubemapIntoOpenGL(Texture* _texture){
@@ -1068,9 +1068,9 @@ void Texture::load(){
     }
 }
 void Texture::unload(){
-    if(isLoaded() && useCount() == 0){
+    if(isLoaded() /*&& useCount() == 0*/){
         m_i->_unloadFromGPU();
-        m_i->_unloadFromCPU();   
+        m_i->_unloadFromCPU();
         cout << "(Texture) ";
         EngineResource::unload();
     }
@@ -1098,7 +1098,7 @@ void Texture::genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize){
     }
     Core::m_Engine->m_RenderManager->_genPBREnvMapData(this,convoludeTextureSize,preEnvFilterSize);
 }
-void Texture::resize(FramebufferTexture* t,uint w, uint h){ m_i->_resize(t,w,h); }
+void Texture::resize(epriv::FramebufferObject* fbo,uint w, uint h){ m_i->_resize(*fbo,w,h); }
 bool Texture::mipmapped(){ return m_i->m_Mipmapped; }
 bool Texture::compressed(){
     //if(m_i->m_ImagesDatas.size() == 0) return false;

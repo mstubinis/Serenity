@@ -130,9 +130,8 @@ namespace Engine{
     namespace epriv{
         class SoundManager final: private Engine::epriv::noncopyable{
             friend class ::SoundBaseClass;  friend class ::SoundBaseClass::impl;
-            private:
-                class impl;
             public:
+				class impl;
                 std::unique_ptr<impl> m_i;
 
                 SoundManager(const char* name,uint w,uint h);

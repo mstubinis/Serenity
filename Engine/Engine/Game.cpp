@@ -67,6 +67,9 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F5)){
         Resources::setCurrentScene("CapsuleSpace");
     }
+    if(Engine::isKeyDownOnce(KeyboardKey::F6)){
+		Resources::getWindow()->setFullScreen(!Resources::getWindow()->isFullscreen());
+    }
     if(Engine::isKeyDownOnce(KeyboardKey::F7)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::None); }
     if(Engine::isKeyDownOnce(KeyboardKey::F8)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::SMAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }

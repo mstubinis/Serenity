@@ -357,7 +357,6 @@ class ShaderP::impl final{
             _compileOGL(m_VertexShader,m_FragmentShader,_name,super);
         }
         void _destruct(){
-            glDeleteShader(m_ShaderProgram);
             glDeleteProgram(m_ShaderProgram);
             m_UniformLocations.clear();
             m_AttachedUBOs.clear();
@@ -458,8 +457,9 @@ void ShaderP::addMaterial(Handle& materialHandle){
     ShaderP::addMaterial(Resources::getMaterial(materialHandle));
 }
 void ShaderP::addMaterial(Material* material){
-    m_i->m_Materials.push_back(material);
-    sort(m_i->m_Materials.begin(),m_i->m_Materials.end(),epriv::srtKey());
+	auto& i = *m_i;
+    i.m_Materials.push_back(material);
+    sort(i.m_Materials.begin(),i.m_Materials.end(),epriv::srtKey());
 }
 const unordered_map<string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
 

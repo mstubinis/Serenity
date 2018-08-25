@@ -37,6 +37,7 @@ namespace Engine{
                 ThreadManager* m_ThreadManager;
                 NoiseManager* m_NoiseManager;
                 bool m_Paused;
+				bool m_Destroyed;
 
                 Core(const char* name,uint width,uint height);
                 ~Core();

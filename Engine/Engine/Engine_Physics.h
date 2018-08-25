@@ -57,9 +57,8 @@ class Collision final{
 namespace Engine{
     namespace epriv{
         class PhysicsManager final: private Engine::epriv::noncopyable{
-            private:
-                class impl;
             public:
+				class impl;
                 std::unique_ptr<impl> m_i;
 
                 PhysicsManager(const char* name,uint w,uint h);

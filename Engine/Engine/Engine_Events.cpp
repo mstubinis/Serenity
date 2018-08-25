@@ -10,8 +10,6 @@
 using namespace Engine;
 using namespace std;
 
-epriv::EventManager* eventManager;
-
 class epriv::EventManager::impl final{
     public:
         unordered_map<string,uint> m_KeyMap, m_MouseMap;
@@ -368,98 +366,50 @@ class epriv::EventManager::impl final{
             m_Difference *= (0.975f);
         }
 };
+
+epriv::EventManager::impl* eventManager;
+
 epriv::EventManager::EventManager(const char* name,uint w,uint h):m_i(new impl){
     m_i->_init(name,w,h);
+	eventManager = m_i.get();
 }
-epriv::EventManager::~EventManager(){
-    m_i->_destruct();
-}
-void epriv::EventManager::_init(const char* name,uint w,uint h){
-    eventManager = epriv::Core::m_Engine->m_EventManager;
-    m_i->_postInit(name,w,h);
-}
-void epriv::EventManager::_onEventKeyPressed(uint& key){
-    m_i->_onEventKeyPressed(key);
-}
-void epriv::EventManager::_onEventKeyReleased(uint& key){
-    m_i->_onEventKeyReleased(key);
-}
-void epriv::EventManager::_onEventMouseButtonPressed(uint mouseButton){
-    m_i->_onEventMouseButtonPressed(mouseButton);
-}
-void epriv::EventManager::_onEventMouseButtonReleased(uint mouseButton){
-    m_i->_onEventMouseButtonReleased(mouseButton);
-}
-void epriv::EventManager::_onEventMouseWheelMoved(int& delta){
-    m_i->_onEventMouseWheelMoved(delta);
-}
-void epriv::EventManager::_onResetEvents(){
-    m_i->_onResetEvents();
-}
-void epriv::EventManager::_update(const float& dt){
-    m_i->_update(dt);
-}
-void epriv::EventManager::_setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
-    m_i->_setMousePositionInternal(x,y,resetDifference,resetPreviousPosition);
-}
-bool Engine::isKeyDown(string str){
-    return eventManager->m_i->_isKeyDown(str);
-}
-bool Engine::isKeyDownOnce(string str){
-    return eventManager->m_i->_isKeyDownOnce(str);
-}
-bool Engine::isKeyUp(string str){
-    return eventManager->m_i->_isKeyUp(str);
-}
-bool Engine::isKeyDown(KeyboardKey::Key key){
-    return eventManager->m_i->_isKeyDown(key);
-}
-bool Engine::isKeyDownOnce(KeyboardKey::Key key){
-    return eventManager->m_i->_isKeyDownOnce(key);
-}
-bool Engine::isKeyUp(KeyboardKey::Key key){
-    return eventManager->m_i->_isKeyUp(key);
-}
-
-bool Engine::isMouseButtonDown(string str){
-    return eventManager->m_i->_isMouseButtonDown(str);
-}
-bool Engine::isMouseButtonDownOnce(string str){
-    return eventManager->m_i->_isMouseButtonDownOnce(str);
-}
-bool Engine::isMouseButtonDown(MouseButton::Button button){
-    return eventManager->m_i->_isMouseButtonDown(button);
-}
-bool Engine::isMouseButtonDownOnce(MouseButton::Button button){
-    return eventManager->m_i->_isMouseButtonDownOnce(button);
-}
-
-
-const glm::vec2& Engine::getMouseDifference(){
-    return eventManager->m_i->m_Difference;
-}
-const glm::vec2& Engine::getMousePositionPrevious(){
-    return eventManager->m_i->m_Position_Previous;
-}
-const glm::vec2& Engine::getMousePosition(){
-    return eventManager->m_i->m_Position;
-}
-const float Engine::getMouseWheelDelta(){
-    return eventManager->m_i->m_Delta;
-}
+epriv::EventManager::~EventManager(){ m_i->_destruct(); }
+void epriv::EventManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
+void epriv::EventManager::_onEventKeyPressed(uint& key){ m_i->_onEventKeyPressed(key); }
+void epriv::EventManager::_onEventKeyReleased(uint& key){ m_i->_onEventKeyReleased(key); }
+void epriv::EventManager::_onEventMouseButtonPressed(uint mouseButton){ m_i->_onEventMouseButtonPressed(mouseButton); }
+void epriv::EventManager::_onEventMouseButtonReleased(uint mouseButton){ m_i->_onEventMouseButtonReleased(mouseButton); }
+void epriv::EventManager::_onEventMouseWheelMoved(int& delta){ m_i->_onEventMouseWheelMoved(delta); }
+void epriv::EventManager::_onResetEvents(){ m_i->_onResetEvents(); }
+void epriv::EventManager::_update(const float& dt){ m_i->_update(dt); }
+void epriv::EventManager::_setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){ m_i->_setMousePositionInternal(x,y,resetDifference,resetPreviousPosition); }
+bool Engine::isKeyDown(string str){ return eventManager->_isKeyDown(str); }
+bool Engine::isKeyDownOnce(string str){ return eventManager->_isKeyDownOnce(str); }
+bool Engine::isKeyUp(string str){ return eventManager->_isKeyUp(str); }
+bool Engine::isKeyDown(KeyboardKey::Key key){ return eventManager->_isKeyDown(key); }
+bool Engine::isKeyDownOnce(KeyboardKey::Key key){ return eventManager->_isKeyDownOnce(key); }
+bool Engine::isKeyUp(KeyboardKey::Key key){ return eventManager->_isKeyUp(key); }
+bool Engine::isMouseButtonDown(string str){ return eventManager->_isMouseButtonDown(str); }
+bool Engine::isMouseButtonDownOnce(string str){ return eventManager->_isMouseButtonDownOnce(str); }
+bool Engine::isMouseButtonDown(MouseButton::Button button){ return eventManager->_isMouseButtonDown(button); }
+bool Engine::isMouseButtonDownOnce(MouseButton::Button button){ return eventManager->_isMouseButtonDownOnce(button); }
+const glm::vec2& Engine::getMouseDifference(){ return eventManager->m_Difference; }
+const glm::vec2& Engine::getMousePositionPrevious(){ return eventManager->m_Position_Previous; }
+const glm::vec2& Engine::getMousePosition(){ return eventManager->m_Position; }
+const float Engine::getMouseWheelDelta(){ return eventManager->m_Delta; }
 void Engine::setMousePosition(float x,float y,bool resetDifference,bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(int(x),int(y)),*Resources::getWindow()->getSFMLHandle());
-    eventManager->_setMousePosition(x,y,resetDifference,resetPreviousPosition);
+    eventManager->_setMousePositionInternal(x,y,resetDifference,resetPreviousPosition);
 }
 void Engine::setMousePosition(uint x,uint y,bool resetDifference,bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(x,y),*Resources::getWindow()->getSFMLHandle());
-    eventManager->_setMousePosition((float)x,(float)y,resetDifference,resetPreviousPosition);
+    eventManager->_setMousePositionInternal((float)x,(float)y,resetDifference,resetPreviousPosition);
 }
 void Engine::setMousePosition(glm::vec2 pos,bool resetDifference,bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(int(pos.x),int(pos.y)),*Resources::getWindow()->getSFMLHandle());
-    eventManager->_setMousePosition(pos.x,pos.y,resetDifference,resetPreviousPosition);
+    eventManager->_setMousePositionInternal(pos.x,pos.y,resetDifference,resetPreviousPosition);
 }
 void Engine::setMousePosition(glm::uvec2 pos,bool resetDifference,bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(pos.x,pos.y),*Resources::getWindow()->getSFMLHandle());
-    eventManager->_setMousePosition((float)pos.x,(float)pos.y,resetDifference,resetPreviousPosition);
+    eventManager->_setMousePositionInternal((float)pos.x,(float)pos.y,resetDifference,resetPreviousPosition);
 }

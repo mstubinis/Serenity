@@ -16,17 +16,15 @@ namespace Engine{
         class FramebufferObject;
         class GBufferType{public: enum Type{
             Diffuse, Normal, Misc, Lighting, Bloom, GodRays, Depth,
-
         _TOTAL};};
-
         class GBuffer final: private Engine::epriv::noncopyable{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                GBuffer(uint w,uint h);
+                GBuffer(uint width,uint height);
                 ~GBuffer();
 
-                void resize(uint w,uint h);
+                void resize(uint width,uint height);
 
                 void start(std::vector<uint>&,std::string = "RGBA",bool = true);
                 void start(uint,std::string = "RGBA",bool = true);

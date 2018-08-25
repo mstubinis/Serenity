@@ -27,9 +27,6 @@
 using namespace Engine;
 using namespace std;
 
-epriv::PhysicsManager* physicsManager = nullptr;
-
-
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep){
 }
 void _postTicCallback(btDynamicsWorld* world, btScalar timeStep){
@@ -115,9 +112,11 @@ class epriv::PhysicsManager::impl final{
             SAFE_DELETE(collisionObject);
         }
 };
+epriv::PhysicsManager::impl* physicsManager;
+
 vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end){
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    physicsManager->m_i->m_World->rayTest(start, end, RayCallback);
+    physicsManager->m_World->rayTest(start, end, RayCallback);
     vector<glm::vec3> result;
     if(RayCallback.hasHit()){
         glm::vec3 res1 = glm::vec3(RayCallback.m_hitPointWorld.x(),RayCallback.m_hitPointWorld.y(),RayCallback.m_hitPointWorld.z()); 
@@ -128,7 +127,7 @@ vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end)
     return result;
 }
 
-epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); physicsManager = this; }
+epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); physicsManager = m_i.get(); }
 epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
 void epriv::PhysicsManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
 void epriv::PhysicsManager::_update(float dt,int maxsteps,float other){ m_i->_update(dt,maxsteps,other); }
@@ -136,31 +135,31 @@ void epriv::PhysicsManager::_render(){ m_i->_render(); }
 void epriv::PhysicsManager::_removeCollision(Collision* collisionObject){ m_i->_removeCollision(collisionObject); }
 const btDiscreteDynamicsWorld* epriv::PhysicsManager::_world() const{ return m_i->m_World; }
 
-void Physics::pause(bool b){ physicsManager->m_i->m_Paused = b; }
-void Physics::unpause(){ physicsManager->m_i->m_Paused = false; }
-void Physics::setGravity(float x,float y,float z){ physicsManager->m_i->m_World->setGravity(btVector3(x,y,z)); }
+void Physics::pause(bool b){ physicsManager->m_Paused = b; }
+void Physics::unpause(){ physicsManager->m_Paused = false; }
+void Physics::setGravity(float x,float y,float z){ physicsManager->m_World->setGravity(btVector3(x,y,z)); }
 void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,gravity.y,gravity.z); }
-void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->m_i->m_World->addRigidBody(rigidBody,group,mask); }
-void Physics::addRigidBody(btRigidBody* body){ physicsManager->m_i->m_World->addRigidBody(body); }
-void Physics::removeRigidBody(btRigidBody* body){ physicsManager->m_i->m_World->removeRigidBody(body); }
+void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->m_World->addRigidBody(rigidBody,group,mask); }
+void Physics::addRigidBody(btRigidBody* body){ physicsManager->m_World->addRigidBody(body); }
+void Physics::removeRigidBody(btRigidBody* body){ physicsManager->m_World->removeRigidBody(body); }
 
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){
-        physicsManager->m_i->m_World->removeRigidBody(ignored);
+        physicsManager->m_World->removeRigidBody(ignored);
     }
     vector<glm::vec3> result = _rayCastInternal(s,e);
     if(ignored){
-        physicsManager->m_i->m_World->addRigidBody(ignored);
+        physicsManager->m_World->addRigidBody(ignored);
     }
     return result;
 }
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,vector<btRigidBody*>& ignored){
     for(auto object:ignored){
-        physicsManager->m_i->m_World->removeRigidBody(object);
+        physicsManager->m_World->removeRigidBody(object);
     }
     vector<glm::vec3> result = _rayCastInternal(s,e);
     for(auto object:ignored){
-        physicsManager->m_i->m_World->addRigidBody(object);
+        physicsManager->m_World->addRigidBody(object);
     }
     return result;
  }
@@ -204,7 +203,7 @@ void Collision::_init(CollisionType::Type type, float mass){
         m_Inertia->setX(0.0f);m_Inertia->setY(0.0f);m_Inertia->setZ(0.0f);
     }
     setMass(mass);
-    physicsManager->m_i->m_CollisionObjects.push_back(this);
+    physicsManager->m_CollisionObjects.push_back(this);
 }
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);

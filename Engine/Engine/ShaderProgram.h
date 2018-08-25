@@ -50,7 +50,7 @@ class Shader final: public EngineResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         Shader(std::string shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
-        ~Shader();
+        virtual ~Shader();
 
         ShaderType::Type type();
         std::string data();
@@ -62,8 +62,7 @@ class ShaderP final: public BindableResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
-
-        ~ShaderP();
+        virtual ~ShaderP();
 
         void bind();
         void unbind();

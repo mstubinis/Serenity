@@ -42,18 +42,19 @@ epriv::Core::Core(const char* name,uint w,uint h){
     m_ThreadManager    = new epriv::ThreadManager(name,w,h);
     m_NoiseManager     = new epriv::NoiseManager(name,w,h);
     m_Paused = false;
+	m_Destroyed = false;
 }
 epriv::Core::~Core(){
+    SAFE_DELETE(m_TimeManager);
+    SAFE_DELETE(m_EventDispatcher);
+    SAFE_DELETE(m_NoiseManager);
     SAFE_DELETE(m_ComponentManager);
     SAFE_DELETE(m_ThreadManager);
     SAFE_DELETE(m_EventManager);
     SAFE_DELETE(m_SoundManager);
-    SAFE_DELETE(m_ResourceManager);
-    SAFE_DELETE(m_TimeManager);
-    SAFE_DELETE(m_RenderManager);
-    SAFE_DELETE(m_EventDispatcher);
-    SAFE_DELETE(m_NoiseManager);
     SAFE_DELETE(m_PhysicsManager);
+    SAFE_DELETE(m_RenderManager);
+    SAFE_DELETE(m_ResourceManager);
 }
 
 bool Engine::paused(){ return epriv::Core::m_Engine->m_Paused; }
@@ -131,16 +132,13 @@ void render(){
 
     //display
     epriv::Core::m_Engine->m_TimeManager->stop_clock();
-	glFlush();
     Resources::getWindow()->display();
-	glFinish();
     epriv::Core::m_Engine->m_TimeManager->calculate_display();	
 }
 void EVENT_RESIZE(uint w, uint h,bool saveSize){
     epriv::Core::m_Engine->m_RenderManager->_resize(w,h);
 
     epriv::Core::m_Engine->m_ComponentManager->_resize(w,h);
-    Renderer::setViewport(0,0,w,h);
     if(saveSize) Engine::Resources::getWindow()->setSize(w,h);
     Game::onResize(w,h);
 
@@ -293,7 +291,7 @@ const glm::uvec2 Engine::getWindowSize(){ return Engine::Resources::getWindowSiz
 void Engine::setWindowIcon(Texture* texture){ Resources::getWindow()->setIcon(texture); }
 void Engine::showMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(true); }
 void Engine::hideMouseCursor(){ Resources::getWindow()->setMouseCursorVisible(false); }
-void Engine::stop(){ Resources::getWindow()->close(); }
+void Engine::stop(){ epriv::Core::m_Engine->m_Destroyed = true; }
 void Engine::setFullScreen(bool b){ Engine::Resources::getWindow()->setFullScreen(b); }
 
 void handleEvents(){
@@ -323,8 +321,8 @@ void handleEvents(){
 
 void Engine::run(){
     Engine_Window* window = Resources::getWindow();
-    while(window->isOpen()){
-        float dt = epriv::Core::m_Engine->m_TimeManager->dt();
+    while(!epriv::Core::m_Engine->m_Destroyed /*&& window->isOpen()*/){
+        float& dt = epriv::Core::m_Engine->m_TimeManager->dt();
         handleEvents();
         update(dt);
         render();

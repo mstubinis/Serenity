@@ -3,10 +3,8 @@
 using namespace std;
 namespace B = ::boost;
 
-void _add(vector<GLStateT>& v,unsigned int key,GLStateT& value){ v.at(key) = value; }
-
+void _add(vector<GLStateT>& v,uint key,GLStateT& value){ v.at(key) = value; }
 //enabled? //enableGLFunc //disableGLFunc
-
 vector<GLStateT> GLState::SM = [](){
     vector<GLStateT> m; m.resize(GLState::_TOTAL);
     
@@ -22,6 +20,8 @@ vector<GLStateT> GLState::SM = [](){
     _add(m,GLState::TEXTURE_CUBE_MAP_SEAMLESS,GLStateT(false,B::bind<void>(glEnable,GL_TEXTURE_CUBE_MAP_SEAMLESS),B::bind<void>(glDisable,GL_TEXTURE_CUBE_MAP_SEAMLESS) ));
     _add(m,GLState::BLEND,GLStateT(false,B::bind<void>(glEnable,GL_BLEND),B::bind<void>(glDisable,GL_BLEND)));
     _add(m,GLState::DEPTH_MASK,GLStateT(true,B::bind<void>(glDepthMask,GL_TRUE),B::bind<void>(glDepthMask,GL_FALSE)));
+    _add(m,GLState::DITHER,GLStateT(false,B::bind<void>(glEnable,GL_DITHER),B::bind<void>(glDisable,GL_DITHER)));
+    _add(m,GLState::SCISSOR_TEST,GLStateT(false,B::bind<void>(glEnable,GL_SCISSOR_TEST),B::bind<void>(glDisable,GL_SCISSOR_TEST)));
 
     return m;
 }();

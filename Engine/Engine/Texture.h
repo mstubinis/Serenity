@@ -31,7 +31,7 @@ namespace Engine{
             struct ImageMipmap;
             struct ImageLoadedStructure;
         };
-        class FramebufferTexture;
+        class FramebufferObject;
         class TextureLoader final{
             friend class ::Texture;
             public:
@@ -85,7 +85,7 @@ class Texture: public EngineResource{
         bool mipmapped();
         bool compressed();
         void setAnisotropicFiltering(float aniso);
-        void resize(Engine::epriv::FramebufferTexture*,uint width,uint height);
+        void resize(Engine::epriv::FramebufferObject*,uint width,uint height);
 
         ImageInternalFormat::Format internalFormat();
         ImagePixelFormat::Format pixelFormat();

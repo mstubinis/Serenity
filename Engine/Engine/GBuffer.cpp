@@ -10,16 +10,16 @@
 using namespace Engine;
 using namespace std;
 
-vector<boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
-	vector<boost::tuple<float,ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m; m.resize(epriv::GBufferType::_TOTAL);
-                                                      //winSizeRatio     //internFormat        //pxl_components                   //pxl_format
-    m.at(epriv::GBufferType::Diffuse)  = boost::make_tuple(1.0f,  ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
-    m.at(epriv::GBufferType::Normal)   = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
-    m.at(epriv::GBufferType::Misc)     = boost::make_tuple(1.0f,  ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
-    m.at(epriv::GBufferType::Lighting) = boost::make_tuple(1.0f,  ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
-    m.at(epriv::GBufferType::Bloom)    = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
-    m.at(epriv::GBufferType::GodRays)  = boost::make_tuple(0.5f,  ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_1);
-    m.at(epriv::GBufferType::Depth)    = boost::make_tuple(1.0f,  ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
+vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
+	vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m; m.resize(epriv::GBufferType::_TOTAL);
+                                                           //internFormat        //pxl_components                   //pxl_format
+    m.at(epriv::GBufferType::Diffuse)  = boost::make_tuple(ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
+    m.at(epriv::GBufferType::Normal)   = boost::make_tuple(ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
+    m.at(epriv::GBufferType::Misc)     = boost::make_tuple(ImageInternalFormat::RGBA8,    ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_2);
+    m.at(epriv::GBufferType::Lighting) = boost::make_tuple(ImageInternalFormat::RGB16F,   ImagePixelFormat::RGB,             ImagePixelType::FLOAT,  FramebufferAttatchment::Color_3);
+    m.at(epriv::GBufferType::Bloom)    = boost::make_tuple(ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
+    m.at(epriv::GBufferType::GodRays)  = boost::make_tuple(ImageInternalFormat::RGBA4,    ImagePixelFormat::RGBA,            ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_1);
+    m.at(epriv::GBufferType::Depth)    = boost::make_tuple(ImageInternalFormat::Depth24Stencil8,  ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8,  FramebufferAttatchment::DepthAndStencil);
 
     return m;
 }();
@@ -37,7 +37,7 @@ class epriv::GBuffer::impl final{
 
 			m_Buffers.resize(GBufferType::_TOTAL);
 
-            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height);
+            m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f);
             m_FBO->bind();
             _constructTextureBuffer(m_FBO,GBufferType::Diffuse,   m_Width,m_Height);
             _constructTextureBuffer(m_FBO,GBufferType::Normal,    m_Width,m_Height);
@@ -47,31 +47,48 @@ class epriv::GBuffer::impl final{
 
 			if(!m_FBO->check()) return false;
 
-            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height);
+            m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.5f);
             m_SmallFBO->bind();
 
             _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
             _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
-
+			
 			if(!m_SmallFBO->check()) return false;
+
+			//this should be better performance wise, but clean up this code a bit
+			Texture& depthTexture = *m_Buffers.at(GBufferType::Depth)->texture();
+	        Renderer::bindTexture(depthTexture.type(),depthTexture.address());
+			depthTexture.setFilter(TextureFilter::Nearest);
+
+			Texture& diffuseTexture = *m_Buffers.at(GBufferType::Diffuse)->texture();
+			Renderer::bindTexture(diffuseTexture.type(),diffuseTexture.address());
+			diffuseTexture.setFilter(TextureFilter::Nearest);
+
+			Texture& normalTexture = *m_Buffers.at(GBufferType::Normal)->texture();
+			Renderer::bindTexture(normalTexture.type(),normalTexture.address());
+			normalTexture.setFilter(TextureFilter::Nearest);
+
+			Texture& godRaysTexture = *m_Buffers.at(GBufferType::GodRays)->texture();
+			Renderer::bindTexture(godRaysTexture.type(),godRaysTexture.address());
+			godRaysTexture.setFilter(TextureFilter::Nearest);
+
             return true;
         }
         void _resize(uint w, uint h){
             m_Width = w; m_Height = h;
-            m_FBO->bind();
             m_FBO->resize(w,h);
-            m_SmallFBO->bind();
             m_SmallFBO->resize(w,h);
         }
         void _constructTextureBuffer(FramebufferObject* fbo,uint t,uint w,uint h){
             auto& i = GBUFFER_TYPE_DATA.at(t);
-            m_Buffers.at(t) = fbo->attatchTexture(new Texture(w,h,i.get<3>(),i.get<2>(),i.get<1>(),i.get<0>()),i.get<4>(),i.get<0>());
+            m_Buffers.at(t) = fbo->attatchTexture(new Texture(w,h,i.get<2>(),i.get<1>(),i.get<0>(),fbo->divisor()),i.get<3>());
         }
         void _destruct(){
             m_Width = m_Height = 0;
             SAFE_DELETE(m_FBO);
             SAFE_DELETE(m_SmallFBO);
             Renderer::unbindFBO();
+			vector_clear(m_Buffers);
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
             if(first_fbo){ m_FBO->bind(); }

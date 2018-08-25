@@ -33,9 +33,8 @@ class SoundData;
 namespace Engine{
     namespace epriv{
         class ResourceManager final: Engine::epriv::noncopyable{
-            private:
-                class impl;
             public:
+				class impl;
                 std::unique_ptr<impl> m_i;
 
                 ResourceManager(const char* name,uint width,uint height);
