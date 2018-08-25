@@ -30,6 +30,7 @@ class ShaderType{public:enum Type{
 
 //Core since version 3.1 (GLSL 140)
 class UniformBufferObject final: private Engine::epriv::noncopyable{
+	friend class ::Shader;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -46,6 +47,7 @@ class UniformBufferObject final: private Engine::epriv::noncopyable{
 };
 
 class Shader final: public EngineResource{
+	friend class ::ShaderP;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -58,11 +60,15 @@ class Shader final: public EngineResource{
 };
 class ShaderP final: public BindableResource{
     friend class ::UniformBufferObject;
+	friend class ::Shader;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
         ShaderP(std::string name, Shader* vertexShader, Shader* fragmentShader, ShaderRenderPass::Pass = ShaderRenderPass::Geometry);
         virtual ~ShaderP();
+
+		void load();
+		void unload();
 
         void bind();
         void unbind();

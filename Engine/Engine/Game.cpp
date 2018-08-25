@@ -54,6 +54,7 @@ void Game::initLogic(){
 
     Resources::setCurrentScene("Sol");
     //Resources::Settings::enableDynamicMemory();
+
     m_HUD = new HUD();
 }
 

@@ -1328,7 +1328,13 @@ class epriv::RenderManager::impl final{
         }
         void _onFullscreen(sf::Window* sfWindow,sf::VideoMode& videoMode,const char* winName,uint& style,sf::ContextSettings& settings){
             SAFE_DELETE(m_gBuffer);
+
+
+			sfWindow->close();
             sfWindow->create(videoMode,winName,style,settings);
+
+			while(!sfWindow->isOpen()){
+			}
 
             //oh yea the opengl context is lost, gotta restore the state machine
             Renderer::RestoreGLState();

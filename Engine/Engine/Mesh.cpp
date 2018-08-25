@@ -864,35 +864,6 @@ class Mesh::impl final{
             m_radiusBox = glm::vec3(maxX,maxY,maxZ);
             m_radius = Math::Max(m_radiusBox);
         }
-        void _initRenderingContext(){
-            m_buffers.push_back(0);
-            glGenBuffers(1, &m_buffers.at(0));
-            glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-            if(m_Skeleton){
-                auto& skeleton = *m_Skeleton->m_i;
-                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
-                for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
-                    vert.boneIDs = skeleton.m_BoneIDs.at(i);
-                    vert.boneWeights = skeleton.m_BoneWeights.at(i);
-                    temp.push_back(vert);
-                }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
-                vector_clear(temp);
-            }
-            else{
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
-            }
-            m_buffers.push_back(0);
-            glGenBuffers(1, &m_buffers.at(1));
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
-
-            //cannot clear indices buffer. just dont do it. ;)
-            if(!m_SaveMeshData){
-                vector_clear(m_Vertices);
-            }
-        }
         void _modifyPoints(vector<glm::vec3>& modifiedPts){
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
             if(m_Skeleton){
@@ -957,7 +928,13 @@ class Mesh::impl final{
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
         }
-        void _cleanupRenderingContext(Mesh* super){
+		void _unloadFromCPU(Mesh* super){
+            if(m_File != ""){
+                _clearData(super);
+            }
+			cout << "(Mesh) ";
+		}
+        void _unloadFromGPU(Mesh* super){
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
@@ -968,15 +945,39 @@ class Mesh::impl final{
             }
             _calculateMeshRadius(super);
         }
-        void _loadIntoGPU(){
-            _initRenderingContext();
-            cout << "(Mesh) ";
-        }
-        void _unload(Mesh* super){
-            if(m_File != ""){
-                _clearData(super);
+        void _loadIntoGPU(Mesh* super){
+			if(m_buffers.size() > 0){
+				_unloadFromGPU(super);
+				vector_clear(m_buffers);
+			}
+
+            m_buffers.push_back(0);
+            glGenBuffers(1, &m_buffers.at(0));
+            glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+            if(m_Skeleton){
+                auto& skeleton = *m_Skeleton->m_i;
+                vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
+                for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
+                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    vert.boneIDs = skeleton.m_BoneIDs.at(i);
+                    vert.boneWeights = skeleton.m_BoneWeights.at(i);
+                    temp.push_back(vert);
+                }
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                vector_clear(temp);
             }
-            _cleanupRenderingContext(super);
+            else{
+                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+            }
+            m_buffers.push_back(0);
+            glGenBuffers(1, &m_buffers.at(1));
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
+
+            //cannot clear indices buffer. just dont do it. ;)
+            if(!m_SaveMeshData){
+                vector_clear(m_Vertices);
+            }
             cout << "(Mesh) ";
         }
 };
@@ -985,13 +986,13 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     glBindBuffer(GL_ARRAY_BUFFER, mesh.m_buffers.at(0));
     if(mesh.m_Skeleton){
         for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){
-            boost::tuple<uint,GLuint,GLuint,GLuint>& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexDataAnimated),(void*)d.get<3>());
         }
     }else{     
         for(uint i = 0; i < epriv::VertexFormat::EnumTotal; ++i){
-            boost::tuple<uint,GLuint,GLuint,GLuint>& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
         }
@@ -1139,7 +1140,7 @@ void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
 }
 void InternalMeshPublicInterface::LoadGPU(Mesh* mesh){
     if(!mesh->isLoaded()){
-        mesh->m_i->_loadIntoGPU();
+        mesh->m_i->_loadIntoGPU(mesh);
         mesh->EngineResource::load();
     }
 }
@@ -1183,13 +1184,14 @@ void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationNa
 void Mesh::load(){
     if(!isLoaded()){
         m_i->_loadIntoCPU(this);
-        m_i->_loadIntoGPU();
+        m_i->_loadIntoGPU(this);
         EngineResource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded() && useCount() == 0){
-        m_i->_unload(this);
+		m_i->_unloadFromGPU(this);
+		m_i->_unloadFromCPU(this);
         EngineResource::unload();
     }
 }

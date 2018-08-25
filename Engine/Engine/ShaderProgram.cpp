@@ -57,14 +57,14 @@ string getLogDepthFunctions(){
 string getNormalDepthFunctions(){
     string res = "\n"
         "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-		"	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
-		"	 vec4 worldPos = CameraInvViewProj * clipSpace;\n"
-		"	 return worldPos.xyz / worldPos.w;\n"
+        "	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
+        "	 vec4 worldPos = CameraInvViewProj * clipSpace;\n"
+        "	 return worldPos.xyz / worldPos.w;\n"
         "}//normal depth\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-		"	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
-		"	 vec4 viewPos = CameraInvProj * clipSpace;\n"
-		"	 return viewPos.xyz / viewPos.w;\n"
+        "	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
+        "	 vec4 viewPos = CameraInvProj * clipSpace;\n"
+        "	 return viewPos.xyz / viewPos.w;\n"
         "}//normal depth\n";
     return res;
 }
@@ -95,16 +95,21 @@ class Shader::impl final{
     public:
         ShaderType::Type m_Type;
         bool m_FromFile;
-        string m_Data;
-        void _init(string& data, ShaderType::Type type, bool fromFile,Shader* super){
-            m_Data = data;
+        string m_FileName;
+        string m_Code;
+        void _init(string& filenameOrCode, ShaderType::Type type, bool fromFile,Shader* super){
+            m_FileName = filenameOrCode;
             m_Type = type;
             m_FromFile = fromFile;
             if(fromFile){
-                super->setName(data);
+                super->setName(filenameOrCode);
+                m_FileName = filenameOrCode;
+                m_Code = "NULL";
             }
             else{
                 super->setName("NULL");
+				m_FileName = "NULL";
+				m_Code = filenameOrCode;
             }
         }
         void _destruct(){
@@ -114,7 +119,7 @@ class Shader::impl final{
 Shader::Shader(string shaderFileOrData, ShaderType::Type shaderType,bool fromFile):m_i(new impl){ m_i->_init(shaderFileOrData,shaderType,fromFile,this); }
 Shader::~Shader(){ m_i->_destruct(); }
 ShaderType::Type Shader::type(){ return m_i->m_Type; }
-string Shader::data(){ return m_i->m_Data; }
+string Shader::data(){ return m_i->m_Code; }
 bool Shader::fromFile(){ return m_i->m_FromFile; }
 
 epriv::DefaultShaderBindFunctor DEFAULT_BIND_FUNCTOR;
@@ -128,8 +133,36 @@ class ShaderP::impl final{
         unordered_map<GLuint,bool> m_AttachedUBOs;
         Shader* m_VertexShader;
         Shader* m_FragmentShader;
+        bool m_LoadedCPU;
+        bool m_LoadedGPU;
 
-        void _convertCode(string& _data1,Shader* shader1,string& _data2,Shader* shader2,ShaderP* super){ _convertCode(_data1,shader1,super); _convertCode(_data2,shader2,super); }
+        void _init(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
+            m_Stage = stage;
+            m_VertexShader = vs;
+            m_FragmentShader = fs;
+            m_LoadedGPU = m_LoadedCPU = false;
+
+            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
+            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+            super->setName(name);
+            epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
+            
+            string& _name = super->name();
+            if(vs->name() == "NULL") vs->setName(_name + ".vert");
+            if(fs->name() == "NULL") fs->setName(_name + ".frag");
+
+            super->load();
+        }
+        void _destruct(ShaderP* super){
+            _unloadFromGPU(super);
+            _unloadFromCPU(super);
+        }
+        void _convertCode(string& vCode,string& fCode,ShaderP* super){ 
+            _convertCode(vCode,m_VertexShader,super); 
+            _convertCode(fCode,m_FragmentShader,super);
+            m_VertexShader->m_i->m_Code = vCode;
+            m_FragmentShader->m_i->m_Code = fCode;
+        }
         void _convertCode(string& _d,Shader* shader,ShaderP* super){
             istringstream str(_d); 
             
@@ -341,111 +374,132 @@ class ShaderP::impl final{
                 }
             }
         }
-        void _init(string& name, Shader* vs, Shader* fs, ShaderRenderPass::Pass stage,ShaderP* super){
-            m_Stage = stage;
-            m_VertexShader = vs;
-            m_FragmentShader = fs;
-
-            super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-            super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            super->setName(name);
-            epriv::Core::m_Engine->m_RenderManager->_addShaderToStage(super,stage);
-            
-            string& _name = super->name();
-            if(vs->name() == "NULL") vs->setName(_name + ".vert");
-            if(fs->name() == "NULL") fs->setName(_name + ".frag");
-            _compileOGL(m_VertexShader,m_FragmentShader,_name,super);
+        void _loadIntoCPU(ShaderP* super){
+            _unloadFromCPU(super);
+            if(!m_LoadedCPU){
+                string VertexCode, FragmentCode = "";
+                //load initial code
+                if(m_VertexShader->fromFile()){
+					boost::iostreams::stream<boost::iostreams::mapped_file_source> str(m_VertexShader->m_i->m_FileName);
+                    for(string line;getline(str,line,'\n');){VertexCode+="\n"+line;}
+                }
+                else{ VertexCode=m_VertexShader->data(); }
+                if(m_FragmentShader->fromFile()){
+                    boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(m_FragmentShader->m_i->m_FileName);
+                    for(string line;getline(str1,line,'\n');){FragmentCode+="\n"+line; }
+                }
+                else{FragmentCode=m_FragmentShader->data();}
+                //convert the code
+                _convertCode(VertexCode,FragmentCode,super);
+                m_LoadedCPU = true;
+            }
         }
-        void _destruct(){
-            glDeleteProgram(m_ShaderProgram);
-            m_UniformLocations.clear();
-            m_AttachedUBOs.clear();
+        void _unloadFromCPU(ShaderP* super){
+            if(m_LoadedCPU){
+                m_UniformLocations.clear();
+                m_AttachedUBOs.clear();
+                m_LoadedCPU = false;
+            }
         }
-        void _compileOGL(Shader* vs,Shader* fs,string& _shaderProgramName,ShaderP* super){
-            m_UniformLocations.clear();
-            m_AttachedUBOs.clear();
-            GLuint vid=glCreateShader(GL_VERTEX_SHADER);GLuint fid=glCreateShader(GL_FRAGMENT_SHADER);
-            string VertexCode,FragmentCode = "";
-            if(vs->fromFile()){
-                boost::iostreams::stream<boost::iostreams::mapped_file_source> str(vs->data());
-                for(string line;getline(str,line,'\n');){VertexCode+="\n"+line;}
-            }
-            else{VertexCode=vs->data();}
-            if(fs->fromFile()){
-                boost::iostreams::stream<boost::iostreams::mapped_file_source> str1(fs->data());
-                for(string line;getline(str1,line,'\n');){FragmentCode+="\n"+line; }
-            }
-            else{FragmentCode=fs->data();}
-
-            _convertCode(VertexCode,vs,FragmentCode,fs,super);
-
-            GLint res=GL_FALSE; int ll;
-
-            // Compile Vertex Shader
-            char const* vss=VertexCode.c_str();glShaderSource(vid,1,&vss,NULL);glCompileShader(vid);
-
-            // Check Vertex Shader
-            glGetShaderiv(vid,GL_COMPILE_STATUS,&res);glGetShaderiv(vid,GL_INFO_LOG_LENGTH,&ll);vector<char>ve(ll);glGetShaderInfoLog(vid,ll,NULL,&ve[0]);
-
-            if(res==GL_FALSE){
-                if(vs->fromFile()){cout<<"VertexShader Log ("+vs->data()+"): "<<endl;}
-                else{cout<<"VertexShader Log ("+vs->name()+"): "<<endl;}
-                cout<<&ve[0]<<endl;
-            }
-
-            // Compile Fragment Shader
-            char const* fss=FragmentCode.c_str();glShaderSource(fid,1,&fss,NULL);glCompileShader(fid);
-
-            // Check Fragment Shader
-            glGetShaderiv(fid,GL_COMPILE_STATUS,&res);glGetShaderiv(fid,GL_INFO_LOG_LENGTH,&ll);vector<char>fe(ll);glGetShaderInfoLog(fid,ll,NULL,&fe[0]);
-
-            if(res==GL_FALSE){
-                if(fs->fromFile()){cout<<"FragmentShader Log ("+fs->data()+"): "<<endl;}
-                else{cout<<"FragmentShader Log ("+fs->name()+"): "<<endl;}
-                cout<<&fe[0]<<endl;
-            }
-
-            // Link the program id
-            m_ShaderProgram=glCreateProgram();
-            glAttachShader(m_ShaderProgram,vid);glAttachShader(m_ShaderProgram,fid);
-            glLinkProgram(m_ShaderProgram);
-            glDetachShader(m_ShaderProgram,vid);glDetachShader(m_ShaderProgram,fid);
-            glDeleteShader(vid);glDeleteShader(fid);
-
-            // Check the program
-            glGetProgramiv(m_ShaderProgram,GL_LINK_STATUS,&res);glGetProgramiv(m_ShaderProgram,GL_INFO_LOG_LENGTH,&ll);vector<char>pe(std::max(ll,int(1)));
-            glGetProgramInfoLog(m_ShaderProgram,ll,NULL,&pe[0]);
-
-            if(res==GL_FALSE){cout<<"ShaderProgram Log : "<<endl;cout<<&pe[0]<<endl;}
-         
-            //populate uniform table
-            if(res==GL_TRUE){
-                GLint _i,_count,_size;
-                GLenum _type; // type of the variable (float, vec3 or mat4, etc)
-                const GLsizei _bufSize = 256; // maximum name length
-                GLchar _name[_bufSize]; // variable name in GLSL
-                GLsizei _length; // name length
-                glGetProgramiv(m_ShaderProgram,GL_ACTIVE_UNIFORMS,&_count);
-                for(_i=0;_i<_count;++_i){
-                    glGetActiveUniform(m_ShaderProgram,(GLuint)_i,_bufSize,&_length,&_size,&_type,_name);
-                    if(_length>0){
-                        string _name1((char*)_name,_length);
-                        GLint _loc = glGetUniformLocation(m_ShaderProgram,_name);
-                        m_UniformLocations.emplace(_name1,_loc);
+        void _loadIntoGPU(ShaderP* super){
+            _unloadFromGPU(super);
+            if(!m_LoadedGPU){
+                string& VertexCode = m_VertexShader->m_i->m_Code;
+                string& FragmentCode = m_FragmentShader->m_i->m_Code;
+                GLuint vid=glCreateShader(GL_VERTEX_SHADER);
+                GLuint fid=glCreateShader(GL_FRAGMENT_SHADER);
+                GLint res=GL_FALSE; int ll;
+                // Compile Vertex Shader
+                char const* vss=VertexCode.c_str();
+                glShaderSource(vid,1,&vss,NULL);
+                glCompileShader(vid);
+                // Check Vertex Shader
+                glGetShaderiv(vid,GL_COMPILE_STATUS,&res);
+                glGetShaderiv(vid,GL_INFO_LOG_LENGTH,&ll);
+                vector<char>ve(ll);
+                glGetShaderInfoLog(vid,ll,NULL,&ve[0]);
+                if(res==GL_FALSE){
+                    if(m_VertexShader->fromFile()){cout<<"VertexShader Log ("+m_VertexShader->m_i->m_FileName+"): "<<endl;}
+                    else{cout<<"VertexShader Log ("+m_VertexShader->name()+"): "<<endl;}
+                    cout<<&ve[0]<<endl;
+                }
+                // Compile Fragment Shader
+                char const* fss=FragmentCode.c_str();
+                glShaderSource(fid,1,&fss,NULL);
+                glCompileShader(fid);
+                // Check Fragment Shader
+                glGetShaderiv(fid,GL_COMPILE_STATUS,&res);
+                glGetShaderiv(fid,GL_INFO_LOG_LENGTH,&ll);
+                vector<char>fe(ll);
+                glGetShaderInfoLog(fid,ll,NULL,&fe[0]);
+                if(res==GL_FALSE){
+                    if(m_FragmentShader->fromFile()){cout<<"FragmentShader Log ("+m_FragmentShader->m_i->m_FileName+"): "<<endl;}
+                    else{cout<<"FragmentShader Log ("+m_FragmentShader->name()+"): "<<endl;}
+                    cout<<&fe[0]<<endl;
+                }
+                // Link the program id
+                m_ShaderProgram=glCreateProgram();
+                glAttachShader(m_ShaderProgram,vid);glAttachShader(m_ShaderProgram,fid);
+                glLinkProgram(m_ShaderProgram);
+                glDetachShader(m_ShaderProgram,vid);glDetachShader(m_ShaderProgram,fid);
+                glDeleteShader(vid);glDeleteShader(fid);
+                // Check the program
+                glGetProgramiv(m_ShaderProgram,GL_LINK_STATUS,&res);glGetProgramiv(m_ShaderProgram,GL_INFO_LOG_LENGTH,&ll);vector<char>pe(std::max(ll,int(1)));
+                glGetProgramInfoLog(m_ShaderProgram,ll,NULL,&pe[0]);
+                if(res==GL_FALSE){cout<<"ShaderProgram Log : "<<endl;cout<<&pe[0]<<endl;}
+                //populate uniform table
+                if(res==GL_TRUE){
+                    GLint _i,_count,_size;
+                    GLenum _type; // type of the variable (float, vec3 or mat4, etc)
+                    const GLsizei _bufSize = 256; // maximum name length
+                    GLchar _name[_bufSize]; // variable name in GLSL
+                    GLsizei _length; // name length
+                    glGetProgramiv(m_ShaderProgram,GL_ACTIVE_UNIFORMS,&_count);
+                    for(_i=0;_i<_count;++_i){
+                        glGetActiveUniform(m_ShaderProgram,(GLuint)_i,_bufSize,&_length,&_size,&_type,_name);
+                        if(_length>0){
+                            string _name1((char*)_name,_length);
+                            GLint _loc = glGetUniformLocation(m_ShaderProgram,_name);
+                            m_UniformLocations.emplace(_name1,_loc);
+                        }
                     }
                 }
+                //link UBO's
+                if(sfind(VertexCode,"layout (std140) uniform Camera //generated") || sfind(FragmentCode,"layout (std140) uniform Camera //generated")){
+                    UniformBufferObject::UBO_CAMERA->attachToShader(super);
+                }	
+                m_LoadedGPU = true;
             }
-            if(sfind(VertexCode,"layout (std140) uniform Camera //generated") || sfind(FragmentCode,"layout (std140) uniform Camera //generated")){
-                UniformBufferObject::UBO_CAMERA->attachToShader(super);
+        }
+        void _unloadFromGPU(ShaderP* super){
+            if(m_LoadedGPU){
+                glDeleteProgram(m_ShaderProgram);
+                m_LoadedGPU = false;
             }
         }
 };
 ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_init(n,vs,fs,s,this); }
-ShaderP::~ShaderP(){ m_i->_destruct(); }
+ShaderP::~ShaderP(){ m_i->_destruct(this); }
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
 
+void ShaderP::load(){
+    if(!isLoaded()){
+        m_i->_loadIntoCPU(this);
+        m_i->_loadIntoGPU(this);
+        cout << "(Shader Program) ";
+        EngineResource::load();
+    }
+}
+void ShaderP::unload(){
+    if(isLoaded() /*&& useCount() == 0*/){
+        m_i->_unloadFromGPU(this);
+        m_i->_unloadFromCPU(this);
+        cout << "(Shader Program) ";
+        EngineResource::unload();
+    }
+}
 void ShaderP::bind(){
     epriv::Core::m_Engine->m_RenderManager->_bindShaderProgram(this);
     BindableResource::bind();
@@ -457,7 +511,7 @@ void ShaderP::addMaterial(Handle& materialHandle){
     ShaderP::addMaterial(Resources::getMaterial(materialHandle));
 }
 void ShaderP::addMaterial(Material* material){
-	auto& i = *m_i;
+    auto& i = *m_i;
     i.m_Materials.push_back(material);
     sort(i.m_Materials.begin(),i.m_Materials.end(),epriv::srtKey());
 }
