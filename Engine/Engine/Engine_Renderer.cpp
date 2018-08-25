@@ -202,6 +202,7 @@ class epriv::RenderManager::impl final{
         float lighting_gi_contribution_diffuse;
         float lighting_gi_contribution_specular;
         float lighting_gi_contribution_global;
+		float lighting_gi_pack;
         #pragma endregion
 
         #pragma region GodRaysInfo
@@ -251,6 +252,7 @@ class epriv::RenderManager::impl final{
         GLuint current_bound_texture_3D;
         GLuint current_bound_texture_cube_map;
         AntiAliasingAlgorithm::Algorithm aa_algorithm;
+		DepthFunc::Func depth_func;
         glm::uvec4 gl_viewport_data;
         bool draw_physics_debug;
 
@@ -318,6 +320,7 @@ class epriv::RenderManager::impl final{
             lighting_gi_contribution_diffuse = 1.0f;
             lighting_gi_contribution_specular = 1.0f;
             lighting_gi_contribution_global = 1.0f;
+            lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(lighting_gi_contribution_diffuse,lighting_gi_contribution_specular,lighting_gi_contribution_global);
             #pragma endregion
 
             #pragma region GodRaysInfo
@@ -363,6 +366,7 @@ class epriv::RenderManager::impl final{
             current_bound_texture_3D = 0;
             current_bound_texture_cube_map = 0;
             aa_algorithm = AntiAliasingAlgorithm::FXAA;
+			depth_func = DepthFunc::Less;
             gl_viewport_data = glm::uvec4(0,0,0,0);
             #ifdef _DEBUG
                 draw_physics_debug = true;
@@ -1250,7 +1254,7 @@ class epriv::RenderManager::impl final{
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
             GLEnable(GLState::DEPTH_TEST);
-            glDepthFunc(GL_LEQUAL);
+            Renderer::setDepthFunc(DepthFunc::LEqual);
             glClearDepth(1.0f);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
     
@@ -1335,7 +1339,7 @@ class epriv::RenderManager::impl final{
             //oh yea the opengl context is lost, gotta restore the state machine
             Renderer::RestoreGLState();
             glClearStencil(0);
-            glDepthFunc(GL_LEQUAL);
+			Renderer::setDepthFunc(DepthFunc::LEqual);
 			GLEnable(GLState::DEPTH_CLAMP);
 			GLEnable(GLState::TEXTURE_2D);
 			glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
@@ -1468,6 +1472,12 @@ class epriv::RenderManager::impl final{
         void _setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm& algorithm){
             if(aa_algorithm != algorithm){ aa_algorithm = algorithm; }
         }
+		void _setDepthFunc(DepthFunc::Func func){
+			if(depth_func != func){
+				glDepthFunc(func);
+				depth_func = func;
+			}
+		}
         void _cullFace(uint s){
             //0 = back | 1 = front | 2 = front and back
             if(s == GL_BACK && cull_face_status != 0){
@@ -1582,7 +1592,7 @@ class epriv::RenderManager::impl final{
             else{        gbuffer.start(GBufferType::Diffuse,GBufferType::Normal,GBufferType::Misc,"RGBA"); }
 
             Settings::clear(true,true,true);
-            glDepthFunc(GL_LEQUAL);
+            Renderer::setDepthFunc(DepthFunc::LEqual);
             GLDisable(GLState::BLEND);//disable blending on all mrts
 
             glClearBufferfv(GL_COLOR,0,colors);
@@ -1741,13 +1751,7 @@ class epriv::RenderManager::impl final{
                 }
                 
                 sendUniform4fv("materials[0]",Material::m_MaterialProperities,Material::m_MaterialProperities.size());
-
-                float pack = Math::pack3FloatsInto1FloatUnsigned(
-                    lighting_gi_contribution_diffuse,
-                    lighting_gi_contribution_specular,
-                    lighting_gi_contribution_global
-                );
-                sendUniform4f("ScreenData",pack,gamma,(float)fboWidth,(float)fboHeight);
+                sendUniform4f("ScreenData",lighting_gi_pack,gamma,(float)fboWidth,(float)fboHeight);
                 sendTexture("gDiffuseMap",gbuffer.getTexture(GBufferType::Diffuse),0);
                 sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),1);
                 sendTexture("gDepthMap",gbuffer.getTexture(GBufferType::Depth),2);
@@ -2321,11 +2325,30 @@ Entity* Renderer::Settings::GodRays::getObject(){ return renderManager->godRays_
 void Renderer::Settings::Lighting::enable(bool b){ renderManager->lighting = b; }
 void Renderer::Settings::Lighting::disable(){ renderManager->lighting = false; }
 float Renderer::Settings::Lighting::getGIContributionGlobal(){ return renderManager->lighting_gi_contribution_global; }
-void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ renderManager->lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f); }
+void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){ 
+	auto mgr = *renderManager;
+	mgr.lighting_gi_contribution_global = glm::clamp(gi,0.001f,0.999f);
+	mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
+}
 float Renderer::Settings::Lighting::getGIContributionDiffuse(){ return renderManager->lighting_gi_contribution_diffuse; }
-void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ renderManager->lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f); }
+void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){ 
+	auto mgr = *renderManager;
+	mgr.lighting_gi_contribution_diffuse = glm::clamp(gi,0.001f,0.999f);
+	mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
+}
 float Renderer::Settings::Lighting::getGIContributionSpecular(){ return renderManager->lighting_gi_contribution_specular; }
-void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){ renderManager->lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f); }
+void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
+	auto mgr = *renderManager;
+	mgr.lighting_gi_contribution_specular = glm::clamp(gi,0.001f,0.999f);
+	mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
+}
+void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
+	auto mgr = *renderManager;
+	mgr.lighting_gi_contribution_global = glm::clamp(g,0.001f,0.999f);
+	mgr.lighting_gi_contribution_diffuse = glm::clamp(d,0.001f,0.999f);
+	mgr.lighting_gi_contribution_specular = glm::clamp(s,0.001f,0.999f);
+	mgr.lighting_gi_pack = Math::pack3FloatsInto1FloatUnsigned(mgr.lighting_gi_contribution_diffuse,mgr.lighting_gi_contribution_specular,mgr.lighting_gi_contribution_global);
+}
 bool Renderer::Settings::SSAO::enabled(){ return renderManager->ssao;  }
 void Renderer::Settings::SSAO::enable(bool b){ renderManager->ssao = b;  }
 void Renderer::Settings::SSAO::disable(){ renderManager->ssao = false;  }
@@ -2358,6 +2381,7 @@ void Renderer::Settings::disableDrawPhysicsInfo(){ renderManager->draw_physics_d
 void Renderer::Settings::setGamma(float g){ renderManager->gamma = g; }
 float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 
+void Renderer::setDepthFunc(DepthFunc::Func func){ renderManager->_setDepthFunc(func); }
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
     epriv::RenderManager::impl& i = *renderManager;

@@ -145,10 +145,7 @@ void PointLight::setConstant(float c){ m_C = c; m_CullingRadius = calculateCulli
 void PointLight::setLinear(float l){ m_L = l; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setExponent(float e){ m_E = e; m_CullingRadius = calculateCullingRadius(); }
 void PointLight::setAttenuation(float c,float l, float e){ m_C = c; m_L = l; m_E = e; m_CullingRadius = calculateCullingRadius(); }
-void PointLight::setAttenuation(LightRange::Range range){
-    boost::tuple<float,float,float>& data = LIGHT_RANGES.at(uint(range));
-    PointLight::setAttenuation(data.get<0>(),data.get<1>(),data.get<2>());
-}
+void PointLight::setAttenuation(LightRange::Range r){ auto& d=LIGHT_RANGES.at(uint(r)); PointLight::setAttenuation(d.get<0>(),d.get<1>(),d.get<2>()); }
 void PointLight::setAttenuationModel(LightAttenuation::Model model){
     m_AttenuationModel = model; m_CullingRadius = calculateCullingRadius();
 }
@@ -174,13 +171,17 @@ void PointLight::lighten(){
 
     sendUniformMatrix4f("MVP",vp * model);
 
-    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
+    GLEnable(GLState::DEPTH_TEST);
+    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume
         Settings::cullFace(GL_FRONT);
+		Renderer::setDepthFunc(DepthFunc::GEqual);
     }
     epriv::InternalMeshes::PointLightBounds->bind();
     epriv::InternalMeshes::PointLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::PointLightBounds->unbind();
     Settings::cullFace(GL_BACK);
+	Renderer::setDepthFunc(DepthFunc::LEqual);
+    GLDisable(GLState::DEPTH_TEST);
 }
 SpotLight::SpotLight(glm::vec3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,scene){
     m_i->m_Body->alignTo(direction,0);
@@ -221,16 +222,19 @@ void SpotLight::lighten(){
 
     sendUniformMatrix4f("MVP",vp * model);
 
-    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){                                                  
+    GLEnable(GLState::DEPTH_TEST);
+    if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume                                                 
         Settings::cullFace(GL_FRONT);
+		Renderer::setDepthFunc(DepthFunc::GEqual);
     }
-
     epriv::InternalMeshes::SpotLightBounds->bind();
     epriv::InternalMeshes::SpotLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::SpotLightBounds->unbind();
     Settings::cullFace(GL_BACK);
+	Renderer::setDepthFunc(DepthFunc::LEqual);
 
     sendUniform1fSafe("Type",0.0f); //is this really needed?
+    GLDisable(GLState::DEPTH_TEST);
 }
 RodLight::RodLight(glm::vec3 pos,float rodLength,Scene* scene): PointLight(pos,scene){
     setRodLength(rodLength);
@@ -274,13 +278,17 @@ void RodLight::lighten(){
 
     sendUniformMatrix4f("MVP",vp * model);
 
+    GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
         Settings::cullFace(GL_FRONT);
+		Renderer::setDepthFunc(DepthFunc::GEqual);
     }
     epriv::InternalMeshes::RodLightBounds->bind();
     epriv::InternalMeshes::RodLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::RodLightBounds->unbind();
     Settings::cullFace(GL_BACK);
+	Renderer::setDepthFunc(DepthFunc::LEqual);
+    GLDisable(GLState::DEPTH_TEST);
 
     sendUniform1fSafe("Type",0.0f); //is this really needed?
 }
