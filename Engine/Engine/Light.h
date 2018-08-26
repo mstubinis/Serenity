@@ -7,6 +7,12 @@
 
 class Scene;
 class ShaderP;
+class SunLight;
+class DirectionalLight;
+class PointLight;
+class SpotLight;
+class RodLight;
+
 class LightType{public: enum Type{
     Sun,Point,Directional,Spot,Rod
 };};

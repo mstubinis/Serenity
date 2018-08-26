@@ -83,6 +83,8 @@ namespace Engine{
             public: enum Extension{
                 EXT_Ansiotropic_Filtering,
                 ARB_Ansiotropic_Filtering,
+				EXT_draw_instanced,
+				ARB_draw_instanced,
             _TOTAL};
             public: static bool supported(OpenGLExtensionEnum::Extension e){ return RenderManager::OPENGL_EXTENSIONS.at(e); }
         };

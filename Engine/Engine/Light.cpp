@@ -293,6 +293,7 @@ void RodLight::lighten(){
     sendUniform1fSafe("Type",0.0f); //is this really needed?
 }
 float RodLight::rodLength(){ return m_RodLength; }
+
 /*
 class LightProbe::impl{
     public:
