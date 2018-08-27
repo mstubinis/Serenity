@@ -108,7 +108,7 @@ namespace Engine{
     namespace epriv{
         struct FramebufferObjectDefaultBindFunctor{void operator()(BindableResource* r) const {
             FramebufferObject& fbo = *(FramebufferObject*)r;
-			Renderer::setViewport(0,0,fbo.width(),fbo.height());
+            Renderer::setViewport(0,0,fbo.width(),fbo.height());
             Renderer::bindFBO(&fbo);
             for(auto attatchment:fbo.attatchments()){
                 attatchment.second->bind();
@@ -120,8 +120,8 @@ namespace Engine{
                 attatchment.second->unbind();
             }
             Renderer::unbindFBO();
-			glm::uvec2& winSize = Resources::getWindowSize();
-			Renderer::setViewport(0,0,winSize.x,winSize.y);
+            glm::uvec2& winSize = Resources::getWindowSize();
+            Renderer::setViewport(0,0,winSize.x,winSize.y);
         }};
     };
 };
@@ -134,13 +134,13 @@ class epriv::FramebufferObject::impl{
         GLuint m_FBO;
 
         unordered_map<uint,FramebufferObjectAttatchment*> m_Attatchments;
-		float m_Divisor;
+        float m_Divisor;
 
         uint m_FramebufferWidth; uint m_FramebufferHeight;
         void _baseInit(FramebufferObject* super,uint width, uint height,float divisor){
-			m_Divisor = divisor;
+            m_Divisor = divisor;
             m_FramebufferWidth = uint(float(width) * m_Divisor);
-			m_FramebufferHeight = uint(float(height) * m_Divisor);
+            m_FramebufferHeight = uint(float(height) * m_Divisor);
             super->setCustomBindFunctor(FramebufferObject::impl::DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(FramebufferObject::impl::DEFAULT_UNBIND_FUNCTOR);
             glGenFramebuffers(1, &m_FBO);
@@ -166,9 +166,9 @@ class epriv::FramebufferObject::impl{
             glDeleteFramebuffers(1, &m_FBO);
         }
         void _resize(FramebufferObject* super,uint new_width,uint new_height){
-			m_FramebufferWidth = uint(float(new_width) * m_Divisor);
-			m_FramebufferHeight = uint(float(new_height) * m_Divisor);
-			Renderer::setViewport(0,0,m_FramebufferWidth,m_FramebufferHeight);
+            m_FramebufferWidth = uint(float(new_width) * m_Divisor);
+            m_FramebufferHeight = uint(float(new_height) * m_Divisor);
+            Renderer::setViewport(0,0,m_FramebufferWidth,m_FramebufferHeight);
             Renderer::bindFBO(m_FBO);
             for(auto attatchment:m_Attatchments){
                 attatchment.second->resize(super,new_width,new_height);
@@ -200,9 +200,9 @@ class epriv::FramebufferObject::impl{
             if(err != GL_FRAMEBUFFER_COMPLETE){
                 cout << "Framebuffer completeness in FramebufferObject::impl _check() is incomplete!" << endl;
                 cout << "Error is: " << err << std::endl;
-				return false;
+                return false;
             }
-			return true;
+            return true;
         }
 };
 epriv::FramebufferObjectDefaultBindFunctor epriv::FramebufferObject::impl::DEFAULT_BIND_FUNCTOR;
@@ -217,10 +217,10 @@ epriv::FramebufferObject::FramebufferObject(string name,uint w,uint h,ImageInter
 epriv::FramebufferObject::~FramebufferObject(){ m_i->_destruct(); }
 void epriv::FramebufferObject::resize(uint w,uint h){ m_i->_resize(this,w,h); }
 epriv::FramebufferTexture* epriv::FramebufferObject::attatchTexture(Texture* t,FramebufferAttatchment::Attatchment a){ 
-	return m_i->_attatchTexture(this,t,a); 
+    return m_i->_attatchTexture(this,t,a); 
 }
 epriv::RenderbufferObject* epriv::FramebufferObject::attatchRenderBuffer(epriv::RenderbufferObject* t){ 
-	return m_i->_attatchRenderbuffer(this,t); 
+    return m_i->_attatchRenderbuffer(this,t); 
 }
 uint epriv::FramebufferObject::width(){ return m_i->m_FramebufferWidth; }
 uint epriv::FramebufferObject::height(){ return m_i->m_FramebufferHeight; }

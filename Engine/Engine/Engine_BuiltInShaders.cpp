@@ -285,8 +285,8 @@ epriv::EShaders::lighting_vert =
     "uniform float Type;\n" // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
     "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
     "\n"
-    "attribute vec3 position;\n"
-    "attribute vec2 uv;\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 uv;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n"
@@ -314,14 +314,14 @@ epriv::EShaders::vertex_basic =
     "\n"
     "USE_LOG_DEPTH_VERTEX\n"
     "\n"
-    "attribute vec3 position;\n"
-    //"//attribute float uv;\n"
-    "attribute vec2 uv;\n"
-    "attribute vec4 normal;\n" //Order is ZYXW
-    "attribute vec4 binormal;\n"//Order is ZYXW
-    "attribute vec4 tangent;\n"//Order is ZYXW
-    "attribute vec4 BoneIDs;\n"
-    "attribute vec4 Weights;\n"
+    "layout (location = 0) in vec3 position;\n"
+    //"//layout (location = 1) in float uv;\n"
+    "layout (location = 1) in vec2 uv;\n"
+    "layout (location = 2) in vec4 normal;\n" //Order is ZYXW
+    "layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
+    "layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
+    "layout (location = 5) in vec4 BoneIDs;\n"
+    "layout (location = 6) in vec4 Weights;\n"
     "\n"
     "uniform mat4 Model;\n"
     "uniform mat3 NormalMatrix;\n"
@@ -374,9 +374,9 @@ epriv::EShaders::vertex_basic +=
 #pragma region VertexHUD
 epriv::EShaders::vertex_hud =
     "\n"
-    "attribute vec3 position;\n"
-    //"attribute float uv;\n"
-    "attribute vec2 uv;\n"
+    "layout (location = 0) in vec3 position;\n"
+    //"layout (location = 1) in float uv;\n"
+    "layout (location = 1) in vec2 uv;\n"
     "\n"
     "uniform mat4 VP;\n"
     "uniform mat4 Model;\n"
@@ -393,7 +393,7 @@ epriv::EShaders::vertex_hud +=
 #pragma region VertexSkybox
 epriv::EShaders::vertex_skybox =
     "\n"
-    "attribute vec3 position;\n"
+    "layout (location = 0) in vec3 position;\n"
     "uniform mat4 VP;\n"
     "varying vec3 UV;\n"
     "void main(){\n"
@@ -658,11 +658,11 @@ epriv::EShaders::stencil_passover = epriv::EShaders::normals_octahedron_compress
 #pragma region FullscreenQuadVertex
 epriv::EShaders::fullscreen_quad_vertex = 
     "\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 uv;\n"
+    "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
-    "\n"
-    "attribute vec3 position;\n"
-    "attribute vec2 uv;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n"
@@ -773,12 +773,12 @@ epriv::EShaders::smaa_frag_1_stencil = epriv::EShaders::smaa_common +
 
 epriv::EShaders::smaa_vertex_1 = epriv::EShaders::smaa_common +
     "\n"//edge vert
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 UV;\n"
+    "\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform mat4 MVP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"
-    "\n"
-    "attribute vec3 position;\n"
-    "attribute vec2 UV;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset[3];\n"
@@ -902,13 +902,13 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::smaa_common +
     "}\n";
 epriv::EShaders::smaa_vertex_2 = epriv::EShaders::smaa_common +
     "\n"//blend vert
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 UV;\n"
+    "\n"
     "uniform mat4 MVP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
     "uniform vec2 screenSizeDivideBy2;\n"
-    "\n"
-    "attribute vec3 position;\n"
-    "attribute vec2 UV;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec2 pixCoord;\n"
@@ -1166,12 +1166,12 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::smaa_common +
     "}\n";
 epriv::EShaders::smaa_vertex_3 = epriv::EShaders::smaa_common +
     "\n"//neightbor vert
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 UV;\n"
+    "\n"
     "uniform mat4 MVP;\n"
     "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
     "uniform vec2 screenSizeDivideBy2;\n"
-    "\n"
-    "attribute vec3 position;\n"
-    "attribute vec2 UV;\n"
     "\n"
     "varying vec2 uv;\n"
     "varying vec4 _offset;\n"
@@ -1225,11 +1225,14 @@ epriv::EShaders::smaa_frag_3 = epriv::EShaders::smaa_common +
 //vertex & frag 4 are optional passes
 epriv::EShaders::smaa_vertex_4 = epriv::EShaders::smaa_common +
     "\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 UV;\n"
+    "\n"
     "uniform mat4 MVP;\n"
     "uniform vec2 screenSizeDivideBy2;\n"
-    "attribute vec3 position;\n"
-    "attribute vec2 UV;\n"
+    "\n"
     "varying vec2 uv;\n"
+    "\n"
     "void SMAAResolveVS(inout vec2 uv){\n"
     "}\n"
     "void SMAASeparateVS(inout vec2 uv){\n"
@@ -1278,8 +1281,6 @@ epriv::EShaders::forward_frag =
     "uniform float       ParallaxHeightScale;\n"
     "uniform float       RefractiveIndex;\n"
     "\n"
-    "uniform float matID;\n"
-    "\n"
     "uniform int Shadeless;\n"
     "uniform int HasGodsRays;\n"
     "\n"
@@ -1288,7 +1289,7 @@ epriv::EShaders::forward_frag =
     "uniform vec4 ThirdConditionals;\n" //x = refraction y = heightmap z = UNUSED w = UNUSED
     "\n"
     "uniform vec4 Object_Color;\n"
-    "uniform vec3 Material_F0;\n"
+    "uniform vec4 Material_F0AndID;\n"
     "uniform vec3 Gods_Rays_Color;\n"
     "\n"
     "varying vec3 WorldPosition;\n"
@@ -1362,12 +1363,12 @@ epriv::EShaders::forward_frag +=
     "    if(SecondConditionals.z > 0.5){\n"
     "        smoothness *= texture2D(SmoothnessTexture, uv).r;\n"
     "    }\n"
-    "    gl_FragData[1].b = matID + ao;\n"
+    "    gl_FragData[1].b = Material_F0AndID.w + ao;\n"
     "    gl_FragData[1].a = Pack2FloatIntoFloat16(metalness,smoothness);\n"
     "    if(FirstConditionals.x > 0.5){\n"
     "        gl_FragData[0] *= texture2D(DiffuseTexture, uv);\n"
     "    }else{\n"
-    "        gl_FragData[0] *= vec4(Material_F0,1.0);\n"
+    "        gl_FragData[0] *= vec4(Material_F0AndID.xyz,1.0);\n"
     "    }\n"
     "    if(FirstConditionals.y > 0.9){\n"
     "        gl_FragData[1].rg = EncodeOctahedron(CalcBumpedNormal(uv,NormalTexture));\n"
@@ -1416,11 +1417,10 @@ epriv::EShaders::deferred_frag =
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "\n"
-	//make these the fourth conditionals?
+    //make these the fourth conditionals?
     "uniform float       CubemapMixFactor;\n"
     "uniform float       ParallaxHeightScale;\n"
     "uniform float       RefractiveIndex;\n"
-    "uniform float       matID;\n"
     "\n"
     "uniform int Shadeless;\n"
     "uniform int HasGodsRays;\n"
@@ -1430,7 +1430,7 @@ epriv::EShaders::deferred_frag =
     "uniform vec4 ThirdConditionals;\n" //x = refraction y = heightmap z = UNUSED w = UNUSED
     "\n"
     "uniform vec4 Object_Color;\n"
-    "uniform vec3 Material_F0;\n"
+    "uniform vec4 Material_F0AndID;\n"
     "uniform vec3 Gods_Rays_Color;\n"
     "\n"
     "varying vec3 WorldPosition;\n"
@@ -1484,13 +1484,13 @@ epriv::EShaders::deferred_frag +=
     "    float ao = MaterialBasePropertiesOne.y;\n"
     "    float metalness = MaterialBasePropertiesOne.z;\n"
     "    float smoothness = MaterialBasePropertiesOne.w;\n"
-	"    vec3 InNormals = normalize(Normals);\n"
-	"    vec4 InDiffuse = texture2D(DiffuseTexture, uv);\n"
-	"    vec4 OutDiffuse = Object_Color;\n"
-	"	 float OutGlow = MaterialBasePropertiesOne.x;\n"
-	"	 float OutSpecular = 1.0;\n"
-	"	 float OutMatIDAndAO = matID + ao;\n"
-	"	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(metalness,smoothness);\n"
+    "    vec3 InNormals = normalize(Normals);\n"
+    "    vec4 InDiffuse = texture2D(DiffuseTexture, uv);\n"
+    "    vec4 OutDiffuse = Object_Color;\n"
+    "	 float OutGlow = MaterialBasePropertiesOne.x;\n"
+    "	 float OutSpecular = 1.0;\n"
+    "	 float OutMatIDAndAO = Material_F0AndID.w + ao;\n"
+    "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(metalness,smoothness);\n"
     "    if(ThirdConditionals.y > 0.5){\n"
     "        vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
     "        uv = ParallaxMap(ViewDir);\n"
@@ -1507,12 +1507,12 @@ epriv::EShaders::deferred_frag +=
     "    if(FirstConditionals.x > 0.5){\n"
     "        OutDiffuse *= InDiffuse;\n"
     "    }else{\n"
-    "        OutDiffuse *= vec4(Material_F0,1.0);\n"
+    "        OutDiffuse *= vec4(Material_F0AndID.xyz,1.0);\n"
     "    }\n"
     "    if(FirstConditionals.y > 0.9){\n"
-	"        InNormals = CalcBumpedNormal(uv,NormalTexture);\n"
+    "        InNormals = CalcBumpedNormal(uv,NormalTexture);\n"
     "    }else if(FirstConditionals.y > 0.4){\n"
-	"        InNormals = CalcBumpedNormalCompressed(uv,NormalTexture);\n"
+    "        InNormals = CalcBumpedNormalCompressed(uv,NormalTexture);\n"
     "    }\n"
     "    if(SecondConditionals.w > 0.5){\n"
     "        OutDiffuse = Reflection(uv,OutDiffuse,CamPosition,InNormals,WorldPosition);\n"
@@ -1532,7 +1532,7 @@ epriv::EShaders::deferred_frag +=
     "        OutNormals = ConstantOneVec2; \n"
     "    }\n"
     "    gl_FragData[0] = OutDiffuse;\n"
-	"    gl_FragData[1] = vec4(OutNormals,OutMatIDAndAO,OutPackedMetalnessAndSmoothness);\n"
+    "    gl_FragData[1] = vec4(OutNormals,OutMatIDAndAO,OutPackedMetalnessAndSmoothness);\n"
     "    gl_FragData[2].rg = vec2(OutGlow,OutSpecular);\n"
     "    if(HasGodsRays == 1){\n"
     "        gl_FragData[3] = (InDiffuse * vec4(Gods_Rays_Color,1.0)) * 0.5;\n"

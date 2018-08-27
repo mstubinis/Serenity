@@ -138,8 +138,6 @@ namespace Engine{
                 text = _text;
             }
         };
-
-
         struct UBOCamera final{
             glm::mat4 View;
             glm::mat4 Proj;
@@ -387,19 +385,23 @@ class epriv::RenderManager::impl final{
 
             #pragma region OpenGLExtensions
 
-			//prints all the extensions the gpu supports
-			/*
-			GLint n=0; glGetIntegerv(GL_NUM_EXTENSIONS, &n); 
-			for (GLint i=0; i<n; i++) { 
-			const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
-			printf("Ext %d: %s\n", i, extension); 
-			}
-			*/
+            //prints all the extensions the gpu supports
+            /*
+            GLint n=0; glGetIntegerv(GL_NUM_EXTENSIONS, &n); 
+            for (GLint i=0; i<n; i++) { 
+            const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
+            printf("Ext %d: %s\n", i, extension); 
+            }
+            */
 
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_Ansiotropic_Filtering) = _checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_Ansiotropic_Filtering) = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_draw_instanced) = _checkOpenGLExtension("GL_EXT_draw_instanced");
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_draw_instanced) = _checkOpenGLExtension("GL_ARB_draw_instanced");
+			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_separate_shader_objects) = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
+			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_separate_shader_objects) = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
+			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_explicit_attrib_location) = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
+			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_explicit_attrib_location) = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
             #pragma endregion
 
 
@@ -1351,8 +1353,8 @@ class epriv::RenderManager::impl final{
             Renderer::RestoreGLState();
             glClearStencil(0);
             glDepthFunc(GL_LEQUAL);
-			glCullFace(GL_BACK);
-			glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_CLAMP);
             glEnable(GL_TEXTURE_2D);
             glPixelStorei(GL_UNPACK_ALIGNMENT,1); //for non Power of Two textures
@@ -1553,7 +1555,7 @@ class epriv::RenderManager::impl final{
                 sendUniformMatrix4f("VP",m_2DProjectionMatrix);
                 sendUniformMatrix4f("Model",m);
 
-                Mesh::Plane->render();
+                Mesh::Plane->render(false);
             }
         }
         void _renderText(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight){
@@ -1586,7 +1588,7 @@ class epriv::RenderManager::impl final{
 
                         mesh.modifyPointsAndUVs(chr.pts,chr.uvs);
                         mesh.bind();
-                        mesh.render();
+                        mesh.render(false);
 
                         x += chr.xadvance * item.scl.x;
                     }
@@ -1631,27 +1633,55 @@ class epriv::RenderManager::impl final{
                                 MaterialMeshEntry* entry = materialMeshEntry;
                                 Mesh* mesh = entry->mesh();
                                 mesh->bind();
-                                for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
-                                    const uint& entityID = meshInstance.first;
-                                    auto& instances = meshInstance.second;
-                                    if(scene->hasEntity(entityID)){
-                                        auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
-                                        if(model.passedRenderCheck()){
-                                            for(auto instance:instances){
-                                                instance->bind(); //render also
-                                                instance->unbind();
+                                if(InternalMeshPublicInterface::SupportsInstancing()){
+									MeshInstance* _meshInstance = nullptr;
+                                    vector<glm::mat4> instanceMatrices;
+                                    for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
+                                        const uint& entityID = meshInstance.first;
+                                        auto& instances = meshInstance.second;
+                                        if(scene->hasEntity(entityID)){
+                                            auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
+                                            if(model.passedRenderCheck()){
+                                                for(auto instance:instances){
+													if(!_meshInstance) _meshInstance = instance;
+                                                    instanceMatrices.push_back(instance->model());
+                                                }
                                             }
                                         }
                                     }
-                                    //protect against any custom changes by restoring to the regular shader and material
-                                    if(current_shader_program != shader){
-                                        shader->bind();
-                                        material->bind();
+                                    InternalMeshPublicInterface::UpdateInstances(mesh,instanceMatrices);
+                                    if(instanceMatrices.size() > 0){
+										std::cout << mesh->name() << std::endl;
+										_meshInstance->bind();
+                                        mesh->render();
+                                        mesh->unbind();
+										_meshInstance->unbind();
                                     }
                                 }
-                                mesh->unbind();
+                                else{
+                                    for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
+                                        const uint& entityID = meshInstance.first;
+                                        auto& instances = meshInstance.second;
+                                        if(scene->hasEntity(entityID)){
+                                            auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
+                                            if(model.passedRenderCheck()){
+                                                for(auto instance:instances){
+                                                    instance->bind();
+													mesh->render(false);
+                                                    instance->unbind();
+                                                }
+                                            }
+                                        }
+                                        //protect against any custom changes by restoring to the regular shader and material
+                                        if(current_shader_program != shader){
+                                            shader->bind();
+                                            material->bind();
+                                        }
+                                    }
+                                    mesh->unbind();
+                                }
                             }
-                            material->unbind();
+                            //material->unbind();
                         }
                     }
                 }
@@ -1686,7 +1716,8 @@ class epriv::RenderManager::impl final{
                                         auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
                                         if(model.passedRenderCheck()){
                                             for(auto instance:instances){
-                                                instance->bind(); //render also
+                                                instance->bind();
+												mesh->render(false);
                                                 instance->unbind();
                                             }
                                         }
@@ -1829,7 +1860,7 @@ class epriv::RenderManager::impl final{
 
 
             glStencilMask(0xFFFFFFFF);
-			glStencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
+            glStencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
 
             glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);

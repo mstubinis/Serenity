@@ -10,7 +10,9 @@ class Planet;
 
 struct PlanetaryRingMeshInstanceBindFunctor;
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor;
+struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor;
+struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
 struct StarMeshInstanceBindFunctor;
 
 class PlanetType{ public:enum Type { 
@@ -55,7 +57,9 @@ class Planet: public Entity{
     friend class ::Ring;
     friend struct ::PlanetaryRingMeshInstanceBindFunctor;
     friend struct ::AtmosphericScatteringGroundMeshInstanceBindFunctor;
+    friend struct ::AtmosphericScatteringGroundMeshInstanceUnbindFunctor;
     friend struct ::AtmosphericScatteringSkyMeshInstanceBindFunctor;
+	friend struct ::AtmosphericScatteringSkyMeshInstanceUnbindFunctor;
 	friend struct ::StarMeshInstanceBindFunctor;
     protected:
         ComponentModel* m_Model;

@@ -18,6 +18,7 @@
 namespace sf{ class Image; };
 
 const uint NUM_BONES_PER_VERTEX = 4;
+const uint NUM_MAX_INSTANCES = 16384;
 
 struct aiAnimation;
 struct DefaultMeshBindFunctor;
@@ -137,6 +138,9 @@ class InternalMeshPublicInterface final{
         static void LoadGPU(Mesh*);
         static void UnloadCPU(Mesh*);
         static void UnloadGPU(Mesh*);
+		static void UpdateInstance(Mesh*,uint _id, glm::mat4 _modelMatrix);
+		static void UpdateInstances(Mesh*, std::vector<glm::mat4>& _modelMatrices);
+		static bool SupportsInstancing();
 };
 
 class Mesh final: public BindableResource{
@@ -149,9 +153,7 @@ class Mesh final: public BindableResource{
         class impl; std::unique_ptr<impl> m_i;
     public:
         //loaded in renderer
-        static Mesh* FontPlane;
-        static Mesh* Plane;
-        static Mesh* Cube;
+        static Mesh *FontPlane, *Plane, *Cube;
 
         Mesh(std::string name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
@@ -159,7 +161,6 @@ class Mesh final: public BindableResource{
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);
         Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadImmediately = true);
         ~Mesh();
-
 
         Collision* getCollision() const;
         std::unordered_map<std::string, Engine::epriv::AnimationData*>& animationData();
@@ -173,10 +174,7 @@ class Mesh final: public BindableResource{
         void modifyUVs(std::vector<glm::vec2>& modifiedUVs);
         void modifyPointsAndUVs(std::vector<glm::vec3>& modifiedPoints, std::vector<glm::vec2>& modifiedUVs);
 
-        //Specify wether or not to save the mesh data after loading the data into the OpenGL buffers. By default mesh data is saved.
-        void saveMeshData(bool);
-
-        void render(GLuint mode = GL_TRIANGLES);
+        void render(bool instancing = true,GLuint mode = GL_TRIANGLES);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
 

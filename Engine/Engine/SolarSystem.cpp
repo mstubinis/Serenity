@@ -259,9 +259,9 @@ void SolarSystem::_loadFromFile(string filename){
     _s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
     _s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
     */
-
-    new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command",glm::vec3(xPos+50,0,zPos+50),glm::vec3(1),nullptr,this);
-
+    for(uint k = 0; k < 6; ++k){
+        Ship* _starbase = new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command " + to_string(k),glm::vec3(xPos+50+(k*3),0,zPos+50+(k*3)),glm::vec3(1),nullptr,this);
+    }
     body.translate(0,0,2);
 
     //LightProbe* lightP = new LightProbe("MainLightProbe",512,glm::vec3(0),false,this,1);

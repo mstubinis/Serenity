@@ -289,9 +289,8 @@ namespace Engine{
                 }
             }
             sendUniform1iSafe("Shadeless",int(material.m_Shadeless));
-            sendUniform3fSafe("Material_F0",material.m_F0Color);
+            sendUniform4fSafe("Material_F0AndID",glm::vec4(material.m_F0Color,float(material.m_ID)));
             sendUniform4fSafe("MaterialBasePropertiesOne",material.m_BaseGlow,material.m_BaseAO,material.m_BaseMetalness,material.m_BaseSmoothness);
-            sendUniform1fSafe("matID",float(material.m_ID));
             sendUniform4fSafe("FirstConditionals", first);
             sendUniform4fSafe("SecondConditionals",second);
             sendUniform4fSafe("ThirdConditionals",third);

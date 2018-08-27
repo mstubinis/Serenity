@@ -161,11 +161,10 @@ class MeshInstance::impl{
 
 struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance::impl& i = *((MeshInstance*)r)->m_i;
-	glm::vec3& camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
+    glm::vec3& camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
     Entity* parent = nullptr;
     parent = i.m_Entity;
     auto& body = *(parent->getComponent<ComponentBody>());
-	//auto& componentModel = *(parent->getComponent<ComponentModel>());
     glm::mat4& parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& animationQueue = i.m_AnimationQueue;
@@ -204,16 +203,14 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
     }
     
     glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
-	model[3][0] -= camPos.x;
-	model[3][1] -= camPos.y;
-	model[3][2] -= camPos.z;
+    model[3][0] -= camPos.x;
+    model[3][1] -= camPos.y;
+    model[3][2] -= camPos.z;
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-    
-    
-    Renderer::sendUniformMatrix4f("Model",model);
-	Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
-    i.m_Mesh->render();
+     
+    Renderer::sendUniformMatrix4fSafe("Model",model);
+    Renderer::sendUniformMatrix3fSafe("NormalMatrix",normalMatrix);
 }};
 struct epriv::DefaultMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
 }};

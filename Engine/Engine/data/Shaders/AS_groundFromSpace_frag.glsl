@@ -57,8 +57,8 @@ vec2 sign_not_zero(vec2 v) {
 vec2 EncodeOctahedron(vec3 v) {
     if(  all(greaterThan(v,ConstantAlmostOneVec3))  )
         return ConstantOneVec2;
-	v.xy /= dot(abs(v), ConstantOneVec3);
-	return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
+    v.xy /= dot(abs(v), ConstantOneVec3);
+    return mix(v.xy, (1.0 - abs(v.yx)) * sign_not_zero(v.xy), step(v.z, 0.0));
 }
 float minnaert(float _NdotL, float _VdotN){
     const float smoothness = 1.1;
@@ -76,10 +76,10 @@ void main(){
     vec4 InDiffuse = texture2D(DiffuseTexture, UV) * Object_Color;
     vec4 OutDiffuse = ConstantZeroVec4;
     vec2 OutNormals = ConstantOneVec2;
-	vec3 InGlow = texture2D(GlowTexture, UV).rgb;
+    vec3 InGlow = texture2D(GlowTexture, UV).rgb;
     float OutGlow = 0.0;
-	float OutSpecular = 1.0;
-	float OutPackedMetalnessSmoothness = 1.0;
+    float OutSpecular = 1.0;
+    float OutPackedMetalnessSmoothness = 1.0;
 
     if(HasAtmo > 0.99){
         if(FirstConditionals.x > 0.5){
@@ -92,16 +92,16 @@ void main(){
         }
     }else{
         if(FirstConditionals.x > 0.5){
-		    vec3 PxlNormal = normalize(Normals);
-			if(FirstConditionals.y > 0.5){
-			    PxlNormal = CalcBumpedNormal(UV,NormalTexture);
-			}
-		    vec3 ViewDir = normalize(VCameraPositionReal - WorldPosition);
-			vec3 LightDir = normalize(FragDataMisc1.xyz - WorldPosition);
-			float NdotL = max(0.0,dot(PxlNormal,LightDir));
-			float VdotN = max(0.0,dot(PxlNormal,ViewDir));
+            vec3 PxlNormal = normalize(Normals);
+            if(FirstConditionals.y > 0.5){
+                PxlNormal = CalcBumpedNormal(UV,NormalTexture);
+            }
+            vec3 ViewDir = normalize(VCameraPositionReal - WorldPosition);
+            vec3 LightDir = normalize(FragDataMisc1.xyz - WorldPosition);
+            float NdotL = max(0.0,dot(PxlNormal,LightDir));
+            float VdotN = max(0.0,dot(PxlNormal,ViewDir));
             //OutDiffuse = vec4(InDiffuse.rgb * minnaert(NdotL,VdotN),InDiffuse.a);
-			OutDiffuse = vec4(max(InDiffuse.rgb * 0.038,InDiffuse.rgb * orenNayar(ViewDir,LightDir,NdotL,VdotN) * NdotL * 1.6),InDiffuse.a);
+            OutDiffuse = vec4(max(InDiffuse.rgb * 0.038,InDiffuse.rgb * orenNayar(ViewDir,LightDir,NdotL,VdotN) * NdotL * 1.6),InDiffuse.a);
         }
         OutNormals.rg = EncodeOctahedron(ConstantOneVec3);
         OutPackedMetalnessSmoothness = Pack2FloatIntoFloat16(0.0,1.0);
@@ -115,9 +115,9 @@ void main(){
             OutSpecular = texture2D(SpecularTexture, UV).r;
         }
     }
-	gl_FragData[0] = OutDiffuse;          
-	gl_FragData[1] = vec4(OutNormals,0.0,OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
-	gl_FragData[2].rg = vec2(OutGlow,OutSpecular);
+    gl_FragData[0] = OutDiffuse;          
+    gl_FragData[1] = vec4(OutNormals,0.0,OutPackedMetalnessSmoothness); //0.0 = matID + ao, which is never used
+    gl_FragData[2].rg = vec2(OutGlow,OutSpecular);
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(Gods_Rays_Color,1.0);
     }

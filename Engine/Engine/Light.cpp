@@ -162,25 +162,25 @@ void PointLight::lighten(){
     sendUniform4fSafe("LightDataE", 0.0f, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1fSafe("Type",1.0f);
 
-	glm::vec3& camPos = c->getPosition();
-	glm::mat4& model = m_i->m_Body->modelMatrix();
-	model[3][0] -= camPos.x;
-	model[3][1] -= camPos.y;
-	model[3][2] -= camPos.z;
-	glm::mat4& vp = c->getViewProjection();
+    glm::vec3& camPos = c->getPosition();
+    glm::mat4& model = m_i->m_Body->modelMatrix();
+    model[3][0] -= camPos.x;
+    model[3][1] -= camPos.y;
+    model[3][2] -= camPos.z;
+    glm::mat4& vp = c->getViewProjection();
 
     sendUniformMatrix4f("MVP",vp * model);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume
         Settings::cullFace(GL_FRONT);
-		Renderer::setDepthFunc(DepthFunc::GEqual);
+        Renderer::setDepthFunc(DepthFunc::GEqual);
     }
     epriv::InternalMeshes::PointLightBounds->bind();
-    epriv::InternalMeshes::PointLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
+    epriv::InternalMeshes::PointLightBounds->render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::PointLightBounds->unbind();
     Settings::cullFace(GL_BACK);
-	Renderer::setDepthFunc(DepthFunc::LEqual);
+    Renderer::setDepthFunc(DepthFunc::LEqual);
     GLDisable(GLState::DEPTH_TEST);
 }
 SpotLight::SpotLight(glm::vec3 pos,glm::vec3 direction,float cutoff, float outerCutoff,Scene* scene): PointLight(pos,scene){
@@ -213,25 +213,25 @@ void SpotLight::lighten(){
     sendUniform2fSafe("VertexShaderData",m_OuterCutoff,m_CullingRadius);
     sendUniform1fSafe("Type",2.0f);
 
-	glm::vec3& camPos = c->getPosition();
-	glm::mat4& model = m_i->m_Body->modelMatrix();
-	model[3][0] -= camPos.x;
-	model[3][1] -= camPos.y;
-	model[3][2] -= camPos.z;
-	glm::mat4& vp = c->getViewProjection();
+    glm::vec3& camPos = c->getPosition();
+    glm::mat4& model = m_i->m_Body->modelMatrix();
+    model[3][0] -= camPos.x;
+    model[3][1] -= camPos.y;
+    model[3][2] -= camPos.z;
+    glm::mat4& vp = c->getViewProjection();
 
     sendUniformMatrix4f("MVP",vp * model);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= m_CullingRadius){ //inside the light volume                                                 
         Settings::cullFace(GL_FRONT);
-		Renderer::setDepthFunc(DepthFunc::GEqual);
+        Renderer::setDepthFunc(DepthFunc::GEqual);
     }
     epriv::InternalMeshes::SpotLightBounds->bind();
-    epriv::InternalMeshes::SpotLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
+    epriv::InternalMeshes::SpotLightBounds->render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::SpotLightBounds->unbind();
     Settings::cullFace(GL_BACK);
-	Renderer::setDepthFunc(DepthFunc::LEqual);
+    Renderer::setDepthFunc(DepthFunc::LEqual);
 
     sendUniform1fSafe("Type",0.0f); //is this really needed?
     GLDisable(GLState::DEPTH_TEST);
@@ -269,25 +269,25 @@ void RodLight::lighten(){
     sendUniform4fSafe("LightDataE", m_RodLength, 0.0f, float(m_AttenuationModel),0.0f);
     sendUniform1fSafe("Type",1.0f);
 
-	glm::vec3& camPos = c->getPosition();
-	glm::mat4& model = m_i->m_Body->modelMatrix();
-	model[3][0] -= camPos.x;
-	model[3][1] -= camPos.y;
-	model[3][2] -= camPos.z;
-	glm::mat4& vp = c->getViewProjection();
+    glm::vec3& camPos = c->getPosition();
+    glm::mat4& model = m_i->m_Body->modelMatrix();
+    model[3][0] -= camPos.x;
+    model[3][1] -= camPos.y;
+    model[3][2] -= camPos.z;
+    glm::mat4& vp = c->getViewProjection();
 
     sendUniformMatrix4f("MVP",vp * model);
 
     GLEnable(GLState::DEPTH_TEST);
     if(glm::distance(c->getPosition(),pos) <= cullingDistance){                                                  
         Settings::cullFace(GL_FRONT);
-		Renderer::setDepthFunc(DepthFunc::GEqual);
+        Renderer::setDepthFunc(DepthFunc::GEqual);
     }
     epriv::InternalMeshes::RodLightBounds->bind();
-    epriv::InternalMeshes::RodLightBounds->render(); //this can bug out if we pass in custom uv's like in the renderQuad method
+    epriv::InternalMeshes::RodLightBounds->render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
     epriv::InternalMeshes::RodLightBounds->unbind();
     Settings::cullFace(GL_BACK);
-	Renderer::setDepthFunc(DepthFunc::LEqual);
+    Renderer::setDepthFunc(DepthFunc::LEqual);
     GLDisable(GLState::DEPTH_TEST);
 
     sendUniform1fSafe("Type",0.0f); //is this really needed?

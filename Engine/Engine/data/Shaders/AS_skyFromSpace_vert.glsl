@@ -1,7 +1,14 @@
 
 USE_LOG_DEPTH_VERTEX
 
-attribute vec3 position;
+layout (location = 0) in vec3 position;
+//layout (location = 1) in float uv;
+layout (location = 1) in vec2 uv;
+layout (location = 2) in vec4 normal;
+layout (location = 3) in vec4 binormal;
+layout (location = 4) in vec4 tangent;
+layout (location = 5) in vec4 BoneIDs;
+layout (location = 6) in vec4 Weights;
 
 uniform mat4 Model;
 uniform int nSamples;
@@ -33,7 +40,7 @@ float getNearIntersection(vec3 v3Pos, vec3 v3Ray, float fDistance2, float fRadiu
 void main(){
     vec3 v3Pos = position * vec3(VertDataRadius.x);
     vec3 v3Ray = v3Pos - VertDataMisc1.xyz;
-	vec3 v3LightDir = vec3(VertDataMisc1.w,VertDataMisc2.w,VertDataMisc3.w);
+    vec3 v3LightDir = vec3(VertDataMisc1.w,VertDataMisc2.w,VertDataMisc3.w);
     float fFar = length(v3Ray);
     v3Ray /= fFar;
 

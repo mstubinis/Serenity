@@ -42,7 +42,7 @@ epriv::Core::Core(const char* name,uint w,uint h){
     m_ThreadManager    = new epriv::ThreadManager(name,w,h);
     m_NoiseManager     = new epriv::NoiseManager(name,w,h);
     m_Paused = false;
-	m_Destroyed = false;
+    m_Destroyed = false;
 }
 epriv::Core::~Core(){
     SAFE_DELETE(m_TimeManager);
@@ -133,7 +133,7 @@ void render(){
     //display
     epriv::Core::m_Engine->m_TimeManager->stop_clock();
     Resources::getWindow()->display();
-	//glFinish(); //might help with screen tearing?
+    //glFinish(); //might help with screen tearing?
     epriv::Core::m_Engine->m_TimeManager->calculate_display();	
 }
 void EVENT_RESIZE(uint w, uint h,bool saveSize){

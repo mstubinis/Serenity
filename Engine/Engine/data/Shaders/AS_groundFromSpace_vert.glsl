@@ -1,12 +1,14 @@
 
 USE_LOG_DEPTH_VERTEX
 
-attribute vec3 position;
-//attribute float uv;
-attribute vec2 uv;
-attribute vec4 normal;
-attribute vec4 binormal;
-attribute vec4 tangent;
+layout (location = 0) in vec3 position;
+//layout (location = 1) in float uv;
+layout (location = 1) in vec2 uv;
+layout (location = 2) in vec4 normal;
+layout (location = 3) in vec4 binormal;
+layout (location = 4) in vec4 tangent;
+layout (location = 5) in vec4 BoneIDs;
+layout (location = 6) in vec4 Weights;
 
 uniform int HasAtmosphere;
 
@@ -19,9 +21,9 @@ uniform int fromAtmosphere;
 uniform vec4 VertDataMisc1;     //xyz = camPos,             w = lightDir.x
 uniform vec4 VertDataMisc2;     //xyz = camPosReal,         w = lightDir.y
 uniform vec4 VertDataMisc3;     //xyz = v3InvWaveLength,    w = lightDir.z
-uniform vec4 VertDataScale;     //fScale,fScaledepth,fScaleOverScaleDepth,fSamples
-uniform vec4 VertDataRadius;    //fCameraHeight2,fOuterRadius,fOuterRadius2,fInnerRadius
-uniform vec4 VertDatafK;        //fKrESun,fKmESun,fKr4PI,fKm4PI
+uniform vec4 VertDataScale;     //Scale,Scaledepth,ScaleOverScaleDepth,Samples
+uniform vec4 VertDataRadius;    //CameraHeight2,OuterRadius,OuterRadius2,InnerRadius
+uniform vec4 VertDatafK;        //KrESun,KmESun,Kr4PI,Km4PI
 
 varying vec3 c0;
 varying vec3 c1;
@@ -40,73 +42,72 @@ vec2 UnpackFloat32Into2Floats(float i){
     res.y = (res.y - 0.5) * 2.0;
     return res;
 }
-float scale(float fCos) {   
-    float x = 1.0 - fCos;   
+float scale(float _cos) {   
+    float x = 1.0 - _cos;   
     return VertDataScale.y * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25)))); 
 }
 float getNearIntersection(vec3 _p, vec3 _r, float _d2, float _r2){
     float B = 2.0 * dot(_p, _r);
     float C = _d2 - _r2;
-    float fDet = max(0.0, B * B - 4.0 * C);
-    return 0.5 * (-B - sqrt(fDet));
+    float _det = max(0.0, B * B - 4.0 * C);
+    return 0.5 * (-B - sqrt(_det));
 }
 void main(){
-	WorldPosition = (Model * vec4(position,1.0)).xyz;
+    WorldPosition = (Model * vec4(position,1.0)).xyz;
 
-          Normals   = (Model * vec4(normal.zyx,0.0)).xyz; //Order is ZYXW so to bring it to XYZ we need to use ZYX
+          Normals   = (Model * vec4(normal.zyx,0.0)).xyz;
     vec3  Binormals = (Model * vec4(binormal.zyx,0.0)).xyz;
     vec3  Tangents  = (Model * vec4(tangent.zyx,0.0)).xyz;
     TBN = (mat3(Tangents,Binormals,Normals));
 
-	UV = uv;
+    UV = uv;
 
     gl_Position = CameraViewProj * Model * vec4(position, 1.0);
 
     //UV = UnpackFloat32Into2Floats(uv);
-	VCameraPositionReal = VertDataMisc2.xyz;
+    VCameraPositionReal = VertDataMisc2.xyz;
 
-	HasAtmo = HasAtmosphere;
+    HasAtmo = HasAtmosphere;
 
     if(HasAtmosphere == 1){
-		vec3 test = (Rot * vec4(position,1.0)).xyz;
-		vec3 v3Pos = test * VertDataRadius.w;
+        vec3 test = (Rot * vec4(position,1.0)).xyz;
+        vec3 v3Pos = test * VertDataRadius.w;
         vec3 v3Ray = v3Pos - VertDataMisc1.xyz;
-        float fFar = length(v3Ray);
-        v3Ray /= fFar;  
+        float _far = length(v3Ray);
+        v3Ray /= _far;  
         
         vec3 v3Start;
         if(fromAtmosphere == 0){
-            float fNear = getNearIntersection(VertDataMisc1.xyz, v3Ray, VertDataRadius.x, VertDataRadius.z);
-            v3Start = VertDataMisc1.xyz + v3Ray * fNear; 
-            fFar -= fNear;
-        }
-        else{
+            float _near = getNearIntersection(VertDataMisc1.xyz, v3Ray, VertDataRadius.x, VertDataRadius.z);
+            v3Start = VertDataMisc1.xyz + v3Ray * _near; 
+            _far -= _near;
+        }else{
             v3Start = VertDataMisc1.xyz;
         }
         
         vec3 normalSphere = normalize(v3Pos);
-        float fDepth = exp((VertDataRadius.w - VertDataRadius.y) / VertDataScale.y);    
-        float fCameraAngle = dot(-v3Ray, normalSphere);
-		vec3 lightDirection = vec3(VertDataMisc1.w,VertDataMisc2.w,VertDataMisc3.w);
-        float fLightAngle = dot(lightDirection, normalSphere);
-        float fCameraScale = scale(fCameraAngle);
-        float fLightScale = scale(fLightAngle);
-        float fCameraOffset = fDepth*fCameraScale;
-        float fTemp = (fLightScale + fCameraScale);
+        float _depth = exp((VertDataRadius.w - VertDataRadius.y) / VertDataScale.y);    
+        float _cameraAngle = dot(-v3Ray, normalSphere);
+        vec3 lightDirection = vec3(VertDataMisc1.w,VertDataMisc2.w,VertDataMisc3.w);
+        float _lightAngle = dot(lightDirection, normalSphere);
+        float _cameraScale = scale(_cameraAngle);
+        float _lightScale = scale(_lightAngle);
+        float _cameraOffset = _depth * _cameraScale;
+        float _temp = (_lightScale + _cameraScale);
     
-        float fSampleLength = fFar / VertDataScale.w;
-        float fScaledLength = fSampleLength * VertDataScale.x;   
-        vec3 v3SampleRay = v3Ray * fSampleLength;   
+        float _sampleLength = _far / VertDataScale.w;
+        float _scaledLength = _sampleLength * VertDataScale.x;   
+        vec3 v3SampleRay = v3Ray * _sampleLength;   
         vec3 v3SamplePoint = v3Start + v3SampleRay * 0.5;   
     
         vec3 v3FrontColor = vec3(0.0);    
         vec3 v3Attenuate = vec3(0.0);
         for(int i = 0; i < nSamples; ++i)   {   
-            float fHeight = length(v3SamplePoint);  
-            float fDepth = exp(VertDataScale.z * (VertDataRadius.w - fHeight));    
-            float fScatter = fDepth*fTemp - fCameraOffset;  
-            v3Attenuate = exp(-fScatter * (VertDataMisc3.xyz * VertDatafK.z + VertDatafK.w)); 
-            v3FrontColor += v3Attenuate * (fDepth * fScaledLength); 
+            float _height = length(v3SamplePoint);  
+            float _depth = exp(VertDataScale.z * (VertDataRadius.w - _height));    
+            float _scatter = _depth * _temp - _cameraOffset;  
+            v3Attenuate = exp(-_scatter * (VertDataMisc3.xyz * VertDatafK.z + VertDatafK.w)); 
+            v3FrontColor += v3Attenuate * (_depth * _scaledLength); 
             v3SamplePoint += v3SampleRay;
         }
         c0 = v3FrontColor * (VertDataMisc3.xyz * VertDatafK.x + VertDatafK.y);  

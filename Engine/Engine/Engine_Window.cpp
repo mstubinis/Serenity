@@ -21,8 +21,8 @@ class Engine_Window::impl final{
         bool m_MouseCursorVisible;
         bool m_Fullscreen;
         bool m_Active;
-		bool m_Vsync;
-		bool m_MouseCursorGrabbed;
+        bool m_Vsync;
+        bool m_MouseCursorGrabbed;
         sf::ContextSettings m_SFContextSettings;
         void _init(const char* name,uint width,uint height){
             m_FramerateLimit = 0;
@@ -38,17 +38,17 @@ class Engine_Window::impl final{
             std::cout << "Using OpenGL: " << m_SFContextSettings.majorVersion << "." << m_SFContextSettings.minorVersion << ", with depth bits: " << m_SFContextSettings.depthBits << " and stencil bits: " << m_SFContextSettings.stencilBits << std::endl;
         }
         void _destruct(){
-			m_SFMLWindow->close();
+            m_SFMLWindow->close();
             SAFE_DELETE(m_SFMLWindow);
         }
-		void _restoreStateMachine(){
-			if(m_FramerateLimit > 0)
-				m_SFMLWindow->setFramerateLimit(m_FramerateLimit);
-			m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
-			m_SFMLWindow->setActive(m_Active);
-			m_SFMLWindow->setVerticalSyncEnabled(m_Vsync);
-			m_SFMLWindow->setMouseCursorGrabbed(m_MouseCursorGrabbed);
-		}
+        void _restoreStateMachine(){
+            if(m_FramerateLimit > 0)
+                m_SFMLWindow->setFramerateLimit(m_FramerateLimit);
+            m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
+            m_SFMLWindow->setActive(m_Active);
+            m_SFMLWindow->setVerticalSyncEnabled(m_Vsync);
+            m_SFMLWindow->setMouseCursorGrabbed(m_MouseCursorGrabbed);
+        }
         const sf::ContextSettings _createOpenGLWindow(const char* name,uint width,uint height,uint _majorVersion = 3, uint _minorVersion = 3,uint _glslVersion = 120){
             sf::ContextSettings settings;
             settings.depthBits = 24;
@@ -97,10 +97,10 @@ class Engine_Window::impl final{
             }
             epriv::Core::m_Engine->m_RenderManager->_onFullscreen(m_SFMLWindow,m_VideoMode,m_WindowName,m_Style,m_SFContextSettings);
 
-			//event dispatch
-			epriv::EventWindowFullscreenChanged e; e.isFullscreen = fullscreen;
-			Event ev; ev.eventWindowFullscreenChanged = e; ev.type = EventType::WindowFullscreenChanged;
-			epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
+            //event dispatch
+            epriv::EventWindowFullscreenChanged e; e.isFullscreen = fullscreen;
+            Event ev; ev.eventWindowFullscreenChanged = e; ev.type = EventType::WindowFullscreenChanged;
+            epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(ev);
 
             glm::uvec2 winSize = Engine::getWindowSize();
 
@@ -112,9 +112,9 @@ class Engine_Window::impl final{
 
             //for some reason the mouse is shown even if it was hidden at first
             m_SFMLWindow->setMouseCursorVisible(m_MouseCursorVisible);
-			m_SFContextSettings = m_SFMLWindow->getSettings();
+            m_SFContextSettings = m_SFMLWindow->getSettings();
             m_Fullscreen = fullscreen;
-			_restoreStateMachine();
+            _restoreStateMachine();
         }
         void _setStyle(uint style){
             if(m_Style == style) return;
@@ -156,18 +156,18 @@ class Engine_Window::impl final{
             m_SFMLWindow->setFramerateLimit(limit);
             m_FramerateLimit = limit;
         }
-		void _setVerticalSyncEnabled(bool enabled){
-			if(m_Vsync != enabled){
-				m_SFMLWindow->setVerticalSyncEnabled(enabled);
-				m_Vsync = enabled;
-			}
-		}
-		void _keepMouseInWindow(bool keep){
-			if(m_MouseCursorGrabbed != keep){
-				m_SFMLWindow->setMouseCursorGrabbed(keep);
-				m_MouseCursorGrabbed = keep;
-			}
-		}
+        void _setVerticalSyncEnabled(bool enabled){
+            if(m_Vsync != enabled){
+                m_SFMLWindow->setVerticalSyncEnabled(enabled);
+                m_Vsync = enabled;
+            }
+        }
+        void _keepMouseInWindow(bool keep){
+            if(m_MouseCursorGrabbed != keep){
+                m_SFMLWindow->setMouseCursorGrabbed(keep);
+                m_MouseCursorGrabbed = keep;
+            }
+        }
 };
 
 Engine_Window::Engine_Window(const char* name,uint width,uint height):m_i(new impl){

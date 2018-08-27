@@ -18,11 +18,11 @@ const vec2 ConstVec2One = vec2(1.0);
 
 void main(){
     float fCos = dot(v3LightPosition, v3Direction) / length(v3Direction);
-	float fCos2 = fCos * fCos;
+    float fCos2 = fCos * fCos;
     float fRayleighPhase = 0.75 * (1.0 + fCos2);
     float fMiePhase = 1.5 * ((1.0 - FragDataGravity.y) / (2.0 + FragDataGravity.y)) * (1.0 + fCos2) / pow(1.0 + FragDataGravity.y - 2.0 * FragDataGravity.x * fCos, 1.5);
     
-	float sun = 0.727272 * (1.0 + fCos2) / pow(1.2 + 0.4 * fCos, 1.0);
+    float sun = 0.727272 * (1.0 + fCos2) / pow(1.2 + 0.4 * fCos, 1.0);
     
     vec4 f4Ambient = (sun * Depth) * vec4(0.05, 0.05, 0.1,1.0);
     
@@ -31,12 +31,12 @@ void main(){
     float nightmult = clamp(max(HDR.x, max(HDR.y, HDR.z))*1.5,0.0,1.0);
 
     gl_FragColor = vec4(HDR.xyz,nightmult);
-	/*
-	gl_FragData[0] = vec4(HDR.xyz,nightmult);
+    /*
+    gl_FragData[0] = vec4(HDR.xyz,nightmult);
     gl_FragData[1].rg = ConstVec2One;
     gl_FragData[2].rg = ConstVec2Zero;
     if(HasGodsRays == 1){
         gl_FragData[3] = vec4(ConstVec3Zero,1.0);
     }
-	*/
+    */
 }

@@ -11,7 +11,7 @@ using namespace Engine;
 using namespace std;
 
 vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = [](){
-	vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m; m.resize(epriv::GBufferType::_TOTAL);
+    vector<boost::tuple<ImageInternalFormat::Format,ImagePixelFormat::Format,ImagePixelType::Type,FramebufferAttatchment::Attatchment>> m; m.resize(epriv::GBufferType::_TOTAL);
                                                            //internFormat        //pxl_components                   //pxl_format
     m.at(epriv::GBufferType::Diffuse)  = boost::make_tuple(ImageInternalFormat::RGB8,     ImagePixelFormat::RGB,             ImagePixelType::UNSIGNED_BYTE,  FramebufferAttatchment::Color_0);
     m.at(epriv::GBufferType::Normal)   = boost::make_tuple(ImageInternalFormat::RGBA16F,  ImagePixelFormat::RGBA,            ImagePixelType::FLOAT,  FramebufferAttatchment::Color_1);
@@ -35,7 +35,7 @@ class epriv::GBuffer::impl final{
 
             m_Width = w; m_Height = h;
 
-			m_Buffers.resize(GBufferType::_TOTAL);
+            m_Buffers.resize(GBufferType::_TOTAL);
 
             m_FBO = new FramebufferObject("GBuffer_FBO",m_Width,m_Height,1.0f);
             m_FBO->bind();
@@ -45,32 +45,32 @@ class epriv::GBuffer::impl final{
             _constructTextureBuffer(m_FBO,GBufferType::Lighting,  m_Width,m_Height);
             _constructTextureBuffer(m_FBO,GBufferType::Depth,     m_Width,m_Height);
 
-			if(!m_FBO->check()) return false;
+            if(!m_FBO->check()) return false;
 
             m_SmallFBO = new FramebufferObject("GBuffer_Small_FBO",m_Width,m_Height,0.5f);
             m_SmallFBO->bind();
 
             _constructTextureBuffer(m_SmallFBO,GBufferType::Bloom,   m_Width,m_Height);
             _constructTextureBuffer(m_SmallFBO,GBufferType::GodRays, m_Width,m_Height);
-			
-			if(!m_SmallFBO->check()) return false;
+            
+            if(!m_SmallFBO->check()) return false;
 
-			//this should be better performance wise, but clean up this code a bit
-			Texture& depthTexture = *m_Buffers.at(GBufferType::Depth)->texture();
-	        Renderer::bindTexture(depthTexture.type(),depthTexture.address());
-			depthTexture.setFilter(TextureFilter::Nearest);
+            //this should be better performance wise, but clean up this code a bit
+            Texture& depthTexture = *m_Buffers.at(GBufferType::Depth)->texture();
+            Renderer::bindTexture(depthTexture.type(),depthTexture.address());
+            depthTexture.setFilter(TextureFilter::Nearest);
 
-			Texture& diffuseTexture = *m_Buffers.at(GBufferType::Diffuse)->texture();
-			Renderer::bindTexture(diffuseTexture.type(),diffuseTexture.address());
-			diffuseTexture.setFilter(TextureFilter::Nearest);
+            Texture& diffuseTexture = *m_Buffers.at(GBufferType::Diffuse)->texture();
+            Renderer::bindTexture(diffuseTexture.type(),diffuseTexture.address());
+            diffuseTexture.setFilter(TextureFilter::Nearest);
 
-			Texture& normalTexture = *m_Buffers.at(GBufferType::Normal)->texture();
-			Renderer::bindTexture(normalTexture.type(),normalTexture.address());
-			normalTexture.setFilter(TextureFilter::Nearest);
+            Texture& normalTexture = *m_Buffers.at(GBufferType::Normal)->texture();
+            Renderer::bindTexture(normalTexture.type(),normalTexture.address());
+            normalTexture.setFilter(TextureFilter::Nearest);
 
-			Texture& godRaysTexture = *m_Buffers.at(GBufferType::GodRays)->texture();
-			Renderer::bindTexture(godRaysTexture.type(),godRaysTexture.address());
-			godRaysTexture.setFilter(TextureFilter::Nearest);
+            Texture& godRaysTexture = *m_Buffers.at(GBufferType::GodRays)->texture();
+            Renderer::bindTexture(godRaysTexture.type(),godRaysTexture.address());
+            godRaysTexture.setFilter(TextureFilter::Nearest);
 
             return true;
         }
@@ -88,7 +88,7 @@ class epriv::GBuffer::impl final{
             SAFE_DELETE(m_FBO);
             SAFE_DELETE(m_SmallFBO);
             Renderer::unbindFBO();
-			vector_clear(m_Buffers);
+            vector_clear(m_Buffers);
         }
         void _start(vector<uint>& types,string& channels,bool first_fbo){
             if(first_fbo){ m_FBO->bind(); }
@@ -145,7 +145,7 @@ class epriv::GBuffer::impl final{
         }
 };
 epriv::GBuffer::GBuffer(uint width,uint height):m_i(new impl){
-	m_i->m_FBO = m_i->m_SmallFBO = nullptr;
+    m_i->m_FBO = m_i->m_SmallFBO = nullptr;
     m_i->_init(width,height);
 }
 epriv::GBuffer::~GBuffer(){

@@ -92,18 +92,16 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4f("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-    Renderer::sendUniformMatrix4f("Model",model);
-
-    i.mesh()->render();
+    Renderer::sendUniformMatrix4fSafe("Model",model);
 }};
 
 struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
-	Planet* obj = (Planet*)(i.parent());
-	Camera* c = Resources::getCurrentScene()->getActiveCamera();
-	glm::vec3& pos = obj->m_Body->position();
-	glm::vec3& camPos = c->getPosition();
-	glm::quat& orientation = obj->m_Body->rotation();
+    Planet* obj = (Planet*)(i.parent());
+    Camera* c = Resources::getCurrentScene()->getActiveCamera();
+    glm::vec3& pos = obj->m_Body->position();
+    glm::vec3& camPos = c->getPosition();
+    glm::quat& orientation = obj->m_Body->rotation();
 
     Renderer::sendUniform4fSafe("Object_Color",i.color());
     Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
@@ -118,21 +116,20 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     //2.718281828459045235360287471352 = euler's number
     float _distance = _factor * _distanceReal;
     glm::vec3 _newPosition = glm::normalize(camPos - pos) * _distance;
-	float _newScale = obj->getRadius() * _factor;
+    float _newScale = obj->getRadius() * _factor;
     model = glm::mat4(1.0f);
     model = glm::translate(model,camPos - _newPosition);
     model *= glm::mat4_cast(orientation);
     model = glm::scale(model,glm::vec3(_newScale));
 
-	model[3][0] -= camPos.x;
-	model[3][1] -= camPos.y;
-	model[3][2] -= camPos.z;
+    model[3][0] -= camPos.x;
+    model[3][1] -= camPos.y;
+    model[3][2] -= camPos.z;
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     
-    Renderer::sendUniformMatrix4f("Model",model);
-	Renderer::sendUniformMatrix3f("NormalMatrix",normalMatrix);
-    i.mesh()->render();
+    Renderer::sendUniformMatrix4fSafe("Model",model);
+    Renderer::sendUniformMatrix3fSafe("NormalMatrix",normalMatrix);
 }};
 
 struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
@@ -185,7 +182,7 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     model[3][2] -= camPosR.z;
 
 
-	Renderer::GLEnable(GLState::BLEND);
+    Renderer::GLEnable(GLState::BLEND);
     if(atmosphereHeight <= 0){
         outerRadius += (outerRadius *  0.025f);
         Renderer::sendUniform1i("HasAtmosphere",0);   
@@ -218,10 +215,11 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4f("FragDataMisc1",lightPos.x,lightPos.y,lightPos.z,exposure);
-    Renderer::sendUniformMatrix4f("Model",model);
-	
-    i.mesh()->render();
-	Renderer::GLDisable(GLState::BLEND);
+    Renderer::sendUniformMatrix4fSafe("Model",model);
+}};
+
+struct AtmosphericScatteringGroundMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
+    Renderer::GLDisable(GLState::BLEND);
 }};
 
 struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
@@ -297,7 +295,7 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     //Renderer::GLDisable(GLState::DEPTH_MASK);
 
     //pass atmosphere based parameters to the gpu
-    Renderer::sendUniformMatrix4f("Model",model);
+    Renderer::sendUniformMatrix4fSafe("Model",model);
 
     Renderer::sendUniform1i("nSamples", numberSamples);  
 
@@ -309,13 +307,12 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     Renderer::sendUniform4f("VertDatafK",Kr * ESun,Km * ESun,Kr * 12.56637061435916f,Km * 12.56637061435916f); //12.56637061435916 = 4 * pi
 
     Renderer::sendUniform4f("FragDataGravity",g,g*g,exposure,0.0f);
-
-    i.mesh()->render();
+}};
+struct AtmosphericScatteringSkyMeshInstanceUnbindFunctor{void operator()(EngineResource* r) const {
     Renderer::Settings::cullFace(GL_BACK);
     Renderer::GLDisable(GLState::BLEND);
     //Renderer::GLEnable(GLState::DEPTH_TEST);
     //Renderer::GLEnable(GLState::DEPTH_MASK);
-
 }};
 
 Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string name,float atmosphere,Scene* scene):Entity(){
@@ -323,18 +320,22 @@ Planet::Planet(Handle& mat,PlanetType::Type type,glm::vec3 pos,float scl,string 
     m_Model = new ComponentModel(ResourceManifest::PlanetMesh,mat,this);
     m_AtmosphereHeight = atmosphere;
     addComponent(m_Model);
-	if(type != PlanetType::Star){
+    if(type != PlanetType::Star){
         AtmosphericScatteringGroundMeshInstanceBindFunctor f;
-        m_Model->setCustomBindFunctor(f,0);
+        AtmosphericScatteringGroundMeshInstanceUnbindFunctor f1;
+        m_Model->setCustomBindFunctor(f);
+        m_Model->setCustomUnbindFunctor(f1);
     }
     if(m_AtmosphereHeight > 0){
         AtmosphericScatteringSkyMeshInstanceBindFunctor f;
+        AtmosphericScatteringSkyMeshInstanceUnbindFunctor f1;
 
         uint index = m_Model->addModel(ResourceManifest::PlanetMesh,ResourceManifest::EarthSkyMaterial);
         MeshInstance* skyMesh = m_Model->getModel(index);
         float aScale = 1.0f + m_AtmosphereHeight;
 
         skyMesh->setCustomBindFunctor(f);
+        skyMesh->setCustomUnbindFunctor(f1);
         skyMesh->setScale(aScale,aScale,aScale);
     }
     m_Body = new ComponentBody();
@@ -387,8 +388,8 @@ Star::Star(glm::vec3 starColor,glm::vec3 lightColor,glm::vec3 pos,float scl,stri
     m_Model->getModel()->setColor(starColor.x,starColor.y,starColor.z,1.0f);
     m_Model->getModel()->setGodRaysColor(starColor.x,starColor.y,starColor.z);
 
-	StarMeshInstanceBindFunctor f;
-	m_Model->setCustomBindFunctor(f);
+    StarMeshInstanceBindFunctor f;
+    m_Model->setCustomBindFunctor(f);
 
     //addChild(m_Light);
     m_Light->setPosition(pos);
@@ -404,11 +405,11 @@ Ring::Ring(vector<RingInfo>& rings,Planet* parent){
     _makeRingImage(rings,parent);
     m_Parent->addRing(this);
 
-	PlanetaryRingMeshInstanceBindFunctor f;
+    PlanetaryRingMeshInstanceBindFunctor f;
 
     uint index = parent->m_Model->addModel(ResourceManifest::RingMesh,m_MaterialHandle);
     MeshInstance* ringMesh = parent->m_Model->getModel(index);
-	ringMesh->setCustomBindFunctor(f);
+    ringMesh->setCustomBindFunctor(f);
     float aScale = 1.0f;
     ringMesh->setScale(aScale,aScale,aScale);
 }

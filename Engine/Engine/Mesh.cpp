@@ -63,14 +63,14 @@ namespace Engine{
         };
         unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = [](){
             unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
-            m[VertexFormatAnimated::Position]    = boost::make_tuple(3,  GL_FLOAT,         GL_FALSE,  0);
-            //m[VertexFormatAnimated::UV]        = boost::make_tuple(1,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-            m[VertexFormatAnimated::UV]          = boost::make_tuple(2,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
-            m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,normal));
-            m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,binormal));
-            m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,    offsetof(MeshVertexDataAnimated,tangent));
-            m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
-            m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,  GL_FLOAT,         GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
+            m[VertexFormatAnimated::Position]    = boost::make_tuple(3,        GL_FLOAT,              GL_FALSE,  0);
+            //m[VertexFormatAnimated::UV]        = boost::make_tuple(1,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+            m[VertexFormatAnimated::UV]          = boost::make_tuple(2,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
+            m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,normal));
+            m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,binormal));
+            m[VertexFormatAnimated::Tangent]     = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,tangent));
+            m[VertexFormatAnimated::BoneIDs]     = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneIDs));
+            m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
             return m;
         }();
     };
@@ -122,15 +122,14 @@ class Mesh::impl final{
         glm::vec3 m_radiusBox;
         float m_radius;
         float m_threshold;
-        bool m_SaveMeshData;
         CollisionType::Type m_Type;
 
         vector<epriv::MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
+        vector<glm::mat4> m_InstanceMatrices;
 
         void _initGlobal(float threshold){
             m_File = "";
-            m_SaveMeshData = true;
             m_Collision = nullptr;
             m_Skeleton = nullptr;
             m_threshold = threshold;
@@ -350,14 +349,14 @@ class Mesh::impl final{
 
                     //uv
                     if(aimesh.mTextureCoords[0]){
-						//this is to prevent uv compression from beign f-ed up at the poles.
-						//if(aimesh.mTextureCoords[0][i].y <= 0.0001f){ aimesh.mTextureCoords[0][i].y = 0.001f; }
-						//if(aimesh.mTextureCoords[0][i].y >= 0.9999f){ aimesh.mTextureCoords[0][i].y = 0.999f; }
-						data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x,aimesh.mTextureCoords[0][i].y);
-					}
+                        //this is to prevent uv compression from beign f-ed up at the poles.
+                        //if(aimesh.mTextureCoords[0][i].y <= 0.0001f){ aimesh.mTextureCoords[0][i].y = 0.001f; }
+                        //if(aimesh.mTextureCoords[0][i].y >= 0.9999f){ aimesh.mTextureCoords[0][i].y = 0.999f; }
+                        data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x,aimesh.mTextureCoords[0][i].y);
+                    }
                     else{ 
-						data.uvs.emplace_back(0.0f,0.0f);
-					}
+                        data.uvs.emplace_back(0.0f,0.0f);
+                    }
 
 
                     //norm
@@ -381,30 +380,30 @@ class Mesh::impl final{
                 for(uint i = 0; i < aimesh.mNumFaces; ++i){
                     aiFace& face = aimesh.mFaces[i];
 
-					uint& index0 = face.mIndices[0];
-					uint& index1 = face.mIndices[1];
-					uint& index2 = face.mIndices[2];
+                    uint& index0 = face.mIndices[0];
+                    uint& index1 = face.mIndices[1];
+                    uint& index2 = face.mIndices[2];
 
-					data.indices.push_back(index0);
-					data.indices.push_back(index1);
-					data.indices.push_back(index2);
+                    data.indices.push_back(index0);
+                    data.indices.push_back(index1);
+                    data.indices.push_back(index2);
 
-					epriv::Vertex v1,v2,v3;
+                    epriv::Vertex v1,v2,v3;
 
                     v1.position = data.points.at(index0);
-					v2.position = data.points.at(index1);
-					v3.position = data.points.at(index2);
+                    v2.position = data.points.at(index1);
+                    v3.position = data.points.at(index2);
                     if(data.uvs.size() > 0){ 
-						v1.uv = data.uvs.at(index0);
-						v2.uv = data.uvs.at(index1);
-						v3.uv = data.uvs.at(index2);
-					}
+                        v1.uv = data.uvs.at(index0);
+                        v2.uv = data.uvs.at(index1);
+                        v3.uv = data.uvs.at(index2);
+                    }
                     if(data.normals.size() > 0){
-						v1.normal = data.normals.at(index0);
-						v2.normal = data.normals.at(index1);
-						v3.normal = data.normals.at(index2);
-					}
-					data.file_triangles.emplace_back(v1,v2,v3);
+                        v1.normal = data.normals.at(index0);
+                        v2.normal = data.normals.at(index1);
+                        v3.normal = data.normals.at(index2);
+                    }
+                    data.file_triangles.emplace_back(v1,v2,v3);
 
                 }
                 #pragma endregion
@@ -876,14 +875,14 @@ class Mesh::impl final{
                     temp.push_back(vert);
                 }
                 for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0]);
                 vector_clear(temp);
             }
             else{
                 for(uint i = 0; i < modifiedPts.size(); ++i){
                     m_Vertices.at(i).position = modifiedPts.at(i);
                 }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
             }
         }
         void _modifyUVs(vector<glm::vec2>& modifiedUVs){
@@ -898,12 +897,12 @@ class Mesh::impl final{
                     temp.push_back(vert);
                 }
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0]);
                 vector_clear(temp);
             }
             else{
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
             }
         }
         void _modifyPointsAndUVs(vector<glm::vec3>& modifiedPts,vector<glm::vec2>& modifiedUVs){
@@ -919,26 +918,26 @@ class Mesh::impl final{
                 }
                 for(uint i = 0; i < modifiedPts.size(); ++i){ temp.at(i).position = modifiedPts.at(i); }
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ temp.at(i).uv = modifiedUVs.at(i); }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0], GL_DYNAMIC_DRAW );
+                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexDataAnimated),&temp[0]);
                 vector_clear(temp);
             }
             else{
                 for(uint i = 0; i < modifiedPts.size(); ++i){ m_Vertices.at(i).position = modifiedPts.at(i); }
                 for(uint i = 0; i < modifiedUVs.size(); ++i){ m_Vertices.at(i).uv = modifiedUVs.at(i); }
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
+                glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
             }
         }
-		void _unload_CPU(Mesh* super){
+        void _unload_CPU(Mesh* super){
             if(m_File != ""){
                 _clearData(super);
             }
-			cout << "(Mesh) ";
-		}
+            cout << "(Mesh) ";
+        }
         void _unload_GPU(Mesh* super){
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
-			vector_clear(m_buffers);
+            vector_clear(m_buffers);
         }
         void _load_CPU(Mesh* super){
             if(m_File != ""){
@@ -947,10 +946,10 @@ class Mesh::impl final{
             _calculateMeshRadius(super);
         }
         void _load_GPU(Mesh* super){
-			if(m_buffers.size() > 0){
-				_unload_GPU(super);
-			}
-
+            if(m_buffers.size() > 0){
+                _unload_GPU(super);
+            }
+            //vertex data
             m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(0));
             glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
@@ -969,22 +968,40 @@ class Mesh::impl final{
             else{
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0], GL_DYNAMIC_DRAW );
             }
+            //index data
             m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
 
-            //cannot clear indices buffer. just dont do it. ;)
-            if(!m_SaveMeshData){
-                vector_clear(m_Vertices);
+            if(InternalMeshPublicInterface::SupportsInstancing()){
+                //instancing data
+                m_buffers.push_back(0);
+                vector<glm::mat4> defaultMatrices;
+                glm::mat4 _identity = glm::mat4(1.0f);
+                defaultMatrices.resize(NUM_MAX_INSTANCES,_identity);
+                glGenBuffers(1, &m_buffers.at(2));
+                glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
+                glBufferData(GL_ARRAY_BUFFER, NUM_MAX_INSTANCES * sizeof(glm::mat4), &defaultMatrices[0], GL_DYNAMIC_DRAW);
+                /*
+                attributeIndex = epriv::VertexFormatAnimated::EnumTotal;
+                GLsizei vec4Size = sizeof(glm::vec4);
+                for(uint j = 0; j < 4; ++j){
+                    glEnableVertexAttribArray(attributeIndex+j); 
+                    glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(j * vec4Size));
+                    if(epriv::RenderManager::OPENGL_VERSION >= 33){
+                        glVertexAttribDivisor(attributeIndex+j, 1);
+                    }
+                }
+                */
             }
             cout << "(Mesh) ";
         }
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-    auto& mesh = *((Mesh*)r)->m_i;
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.m_buffers.at(0));
-    if(mesh.m_Skeleton){
+    auto& m = *((Mesh*)r)->m_i;
+    glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
+    if(m.m_Skeleton){
         for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){
             auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
             glEnableVertexAttribArray(i);
@@ -997,14 +1014,29 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
             glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
         }
     }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.m_buffers.at(1));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.m_buffers.at(1));
+    //instances
+    if(m.m_buffers.size() >= 3){
+        uint attributeIndex = epriv::VertexFormatAnimated::EnumTotal;
+        GLsizei vec4Size = sizeof(glm::vec4);
+        for(uint j = 0; j < 4; ++j){
+            glEnableVertexAttribArray(attributeIndex+j); 
+            glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(j * vec4Size));
+            if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
+        }
+    }
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
-    auto& mesh = *((Mesh*)r)->m_i;
-    if(mesh.m_Skeleton){
+    auto& m = *((Mesh*)r)->m_i;
+    if(m.m_Skeleton){
         for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
     }else{
         for(uint i = 0; i < epriv::VertexFormat::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
+    }
+    //instances
+    if(m.m_buffers.size() >= 3){
+        uint attributeIndex = epriv::VertexFormatAnimated::EnumTotal;
+        for(uint j = 0; j < 4; ++j){ glDisableVertexAttribArray(attributeIndex + j); }
     }
 }};
 DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
@@ -1114,23 +1146,15 @@ class epriv::AnimationData::impl{
             for(uint i=0;i<node->mNumScalingKeys-1;++i){if(AnimationTime<(float)node->mScalingKeys[i+1].mTime){return i;}}return 0;
         }
         float _Duration(){
-            float TicksPerSecond(float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f));
-            return float(float(m_DurationInTicks) / TicksPerSecond);
+            float TicksPerSecond(float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f));return float(float(m_DurationInTicks) / TicksPerSecond);
         }
 };
 
-
-epriv::MeshSkeleton::MeshSkeleton():m_i(new impl){
-    clear();
-}
-epriv::MeshSkeleton::MeshSkeleton(epriv::ImportedMeshData& data):m_i(new impl){
-    fill(data);
-}
+epriv::MeshSkeleton::MeshSkeleton():m_i(new impl){ clear(); }
+epriv::MeshSkeleton::MeshSkeleton(epriv::ImportedMeshData& data):m_i(new impl){ fill(data); }
 void epriv::MeshSkeleton::fill(epriv::ImportedMeshData& data){ m_i->_fill(data); }
 void epriv::MeshSkeleton::clear(){ m_i->_clear(); }
-epriv::MeshSkeleton::~MeshSkeleton(){
-    clear();
-}
+epriv::MeshSkeleton::~MeshSkeleton(){ clear(); }
 uint epriv::MeshSkeleton::numBones(){ return m_i->m_NumBones; }
 
 void InternalMeshPublicInterface::LoadCPU(Mesh* mesh){
@@ -1155,8 +1179,27 @@ void InternalMeshPublicInterface::UnloadGPU(Mesh* mesh){
         mesh->m_i->_unload_GPU(mesh);
     //}
 }
-
-
+void InternalMeshPublicInterface::UpdateInstance(Mesh* mesh,uint _id, glm::mat4 _modelMatrix){
+    auto& i = *mesh->m_i;
+    glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers.at(2));
+    glBufferSubData(GL_ARRAY_BUFFER, _id * sizeof(glm::mat4), sizeof(glm::mat4), &_modelMatrix);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+void InternalMeshPublicInterface::UpdateInstances(Mesh* mesh,std::vector<glm::mat4>& _modelMatrices){
+    if(_modelMatrices.size() == 0) return;
+    auto& i = *mesh->m_i;
+    glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers.at(2));
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * _modelMatrices.size(), &_modelMatrices[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+bool InternalMeshPublicInterface::SupportsInstancing(){
+    if(epriv::RenderManager::OPENGL_VERSION >= 31 || 
+    epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced) || 
+    epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)){
+        return true;
+    }
+    return false;
+}
 
 Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,heightfield,threshold);
@@ -1184,36 +1227,49 @@ unordered_map<string, epriv::AnimationData*>& Mesh::animationData(){ return m_i-
 
 const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }
-void Mesh::render(GLuint mode){
-    glDrawElements(mode,m_i->m_Indices.size(),GL_UNSIGNED_SHORT,0);
+void Mesh::render(bool instancing,GLuint mode){
+	auto& i = *m_i;
+	const uint& indicesSize = i.m_Indices.size();
+    if(instancing && InternalMeshPublicInterface::SupportsInstancing()){
+		const uint& instancesCount = i.m_InstanceMatrices.size();
+        if(epriv::RenderManager::OPENGL_VERSION >= 31){
+               glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
+        }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced)){
+            glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
+        }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_draw_instanced)){
+            glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
+        }
+    }else{
+        glDrawElements(mode, indicesSize, GL_UNSIGNED_SHORT, 0);
+    }
 }
 void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){
+    auto& i = *m_i->m_Skeleton;
     if(transforms.size() == 0){
-        transforms.resize(m_i->m_Skeleton->numBones(),glm::mat4(1.0f));
+        transforms.resize(i.numBones(),glm::mat4(1.0f));
     }
-    m_i->m_Skeleton->m_i->m_AnimationData.at(animationName)->m_i->_BoneTransform(animationName,time, transforms);
+    i.m_i->m_AnimationData.at(animationName)->m_i->_BoneTransform(animationName,time, transforms);
 }
 void Mesh::load(){
     if(!isLoaded()){
-        m_i->_load_CPU(this);
-        m_i->_load_GPU(this);
+        auto& i = *m_i;
+        i._load_CPU(this);
+        i._load_GPU(this);
         EngineResource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded() && useCount() == 0){
-		m_i->_unload_GPU(this);
-		m_i->_unload_CPU(this);
+        auto& i = *m_i;
+        i._unload_GPU(this);
+        i._unload_CPU(this);
         EngineResource::unload();
     }
 }
 void Mesh::modifyPoints(vector<glm::vec3>& modifiedPts){ m_i->_modifyPoints(modifiedPts); }
 void Mesh::modifyUVs(vector<glm::vec2>& modifiedUVs){ m_i->_modifyUVs(modifiedUVs); }
 void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>& modifiedUVs){ m_i->_modifyPointsAndUVs(modifiedPts,modifiedUVs); }
-void Mesh::saveMeshData(bool save){ m_i->m_SaveMeshData = save; }
-
 
 epriv::AnimationData::AnimationData(Mesh* m,aiAnimation* a):m_i(new impl){ m_i->_init(m,a); }
 epriv::AnimationData::~AnimationData(){ }
 float epriv::AnimationData::duration(){ return m_i->_Duration(); }
-

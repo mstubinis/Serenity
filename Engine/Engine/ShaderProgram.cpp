@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "ShaderProgram.h"
+#include "Mesh.h"
 #include "Material.h"
 #include "Camera.h"
 #include "Engine_Resources.h"
@@ -21,9 +22,13 @@ typedef boost::iostreams::stream<boost::iostreams::mapped_file_source> boost_str
 
 bool sfind(string whole,string part){ if(whole.find(part) != string::npos) return true; return false; }
 void insertStringAtLine(string& src, const string& newcontent,uint line){   
-    if(line == 0){src=newcontent+"\n"+src;}else{istringstream str(src);string l; vector<string> lines;uint count=0;
-        while(getline(str,l)){lines.push_back(l+"\n");if(count==line){lines.push_back(newcontent+"\n");}++count;}src="";for(auto ln:lines){src+=ln;}
+    if(line == 0){src=newcontent+"\n"+src;}else{istringstream str(src);string l; vector<string> lines;uint c=0;
+        while(getline(str,l)){lines.push_back(l+"\n");if(c==line){lines.push_back(newcontent+"\n");}++c;}src="";for(auto ln:lines){src+=ln;}
     }
+}
+void insertStringAtAndReplaceLine(string& src, const string& newcontent,uint line){
+    istringstream str(src);string l;vector<string> lines;while(getline(str,l)){lines.push_back(l+"\n");}
+    uint c = 0;src="";for(auto ln:lines){if(c==line)ln=newcontent+"\n";src+=ln;++c;}
 }
 void insertStringAtEndOfMainFunc(string& src, const string& content){
     uint p=src.size()-1;while(p>0){char c=src.at(p);--p;if(c=='}'){break;}}src.insert(p,content);
@@ -44,7 +49,7 @@ string getLogDepthFunctions(){
         "    vec4 clipSpace = vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
         "    vec4 wpos = CameraInvViewProj * clipSpace;\n"
         "    return wpos.xyz / wpos.w;\n"
-        "}//log depth\n"
+        "}//log depth world\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
         "    float depth = texture2D(gDepthMap, _uv).r;\n"
         "    depth = pow(_far + 1.0, depth) - 1.0;\n"//log to regular depth
@@ -53,7 +58,7 @@ string getLogDepthFunctions(){
         "    float linearDepth = (a + b / depth);\n"
         "    vec4 clipSpace = CameraInvProj * vec4(_uv,linearDepth, 1.0) * 2.0 - 1.0;\n"
         "    return clipSpace.xyz / clipSpace.w;\n"
-        "}//log depth\n";
+        "}//log depth view\n";
     return res;
 }
 string getNormalDepthFunctions(){
@@ -62,12 +67,12 @@ string getNormalDepthFunctions(){
         "	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
         "	 vec4 worldPos = CameraInvViewProj * clipSpace;\n"
         "	 return worldPos.xyz / worldPos.w;\n"
-        "}//normal depth\n"
+        "}//normal depth world\n"
         "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
         "	 vec4 clipSpace = vec4(vec2(_uv * 2.0 - 1.0),texture2D(gDepthMap, _uv).r,1.0);\n"
         "	 vec4 viewPos = CameraInvProj * clipSpace;\n"
         "	 return viewPos.xyz / viewPos.w;\n"
-        "}//normal depth\n";
+        "}//normal depth view\n";
     return res;
 }
 
@@ -78,12 +83,12 @@ namespace Engine{
         struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
             Scene* scene = Resources::getCurrentScene();  if(!scene) return;
             Camera* camera = scene->getActiveCamera();    if(!camera) return;
-			Camera& c = *camera;
+            Camera& c = *camera;
 
             float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
             Renderer::sendUniform1fSafe("fcoeff",fcoeff);
 
-			//yes this is needed
+            //yes this is needed
             if(RenderManager::GLSL_VERSION < 140){
                 Renderer::sendUniformMatrix4fSafe("CameraViewProj",c.getViewProjection());
             }
@@ -116,8 +121,8 @@ class Shader::impl final{
             }
             else{
                 super->setName("NULL");
-				m_FileName = "";
-				m_Code = filenameOrCode;
+                m_FileName = "";
+                m_Code = filenameOrCode;
             }
         }
         void _destruct(){
@@ -159,7 +164,7 @@ class ShaderP::impl final{
             if(vs->name() == "NULL") vs->setName(_name + ".vert");
             if(fs->name() == "NULL") fs->setName(_name + ".frag");
 
-			super->registerEvent(EventType::WindowFullscreenChanged);
+            super->registerEvent(EventType::WindowFullscreenChanged);
             super->load();
         }
         void _convertCode(string& vCode,string& fCode,ShaderP* super){ 
@@ -190,10 +195,49 @@ class ShaderP::impl final{
             string versionNumberString = regex_replace(versionLine,regex("([^0-9])"),"");
             uint versionNumber = boost::lexical_cast<uint>(versionNumberString);
 
+            vector<string> _types;
+            _types.emplace_back("float");  _types.emplace_back("vec2");   _types.emplace_back("vec3");
+            _types.emplace_back("vec4");   _types.emplace_back("mat3");   _types.emplace_back("mat4");
+
+            _types.emplace_back("double"); _types.emplace_back("dvec2");  _types.emplace_back("dvec3");
+            _types.emplace_back("dvec4");  _types.emplace_back("dmat3");  _types.emplace_back("dmat4");
+
+            _types.emplace_back("int");    _types.emplace_back("ivec2");  _types.emplace_back("ivec3");
+            _types.emplace_back("ivec4");  _types.emplace_back("imat3");  _types.emplace_back("imat4");
+
+            _types.emplace_back("bool");   _types.emplace_back("bvec2");  _types.emplace_back("bvec3");
+            _types.emplace_back("bvec4");  _types.emplace_back("bmat3");  _types.emplace_back("bmat4");
+
+            _types.emplace_back("uint");   _types.emplace_back("uvec2");  _types.emplace_back("uvec3");
+            _types.emplace_back("uvec4");  _types.emplace_back("umat3");  _types.emplace_back("umat4");
+
+            //check for instancing
+            //TODO: clean this up a little
+            if(InternalMeshPublicInterface::SupportsInstancing()){
+                if(sfind(_d,"attribute vec4 Weights;") && shader->type() == ShaderType::Vertex){
+                    if(!sfind(_d,"attribute mat4 instanceMatrix;")){
+                        insertStringRightAfterLineContent(_d,"attribute mat4 instanceMatrix;","attribute vec4 Weights;");
+                        boost::replace_all(_d,"uniform mat4 Model;","");
+                        boost::replace_all(_d,"Model","instanceMatrix");
+                        boost::replace_all(_d,"uniform mat3 NormalMatrix;","");
+                        insertStringRightAfterLineContent(_d,"    mat3 NormalMatrix = transpose(inverse(mat3(instanceMatrix)));","void main(){");
+                    }
+                }
+                if(sfind(_d,"layout (location = 6) in vec4 Weights") && shader->type() == ShaderType::Vertex){
+                    if(!sfind(_d,"layout (location = 7) in mat4 instanceMatrix;")){
+                        insertStringRightAfterLineContent(_d,"layout (location = 7) in mat4 instanceMatrix;","layout (location = 6) in vec4 Weights");
+                        boost::replace_all(_d,"uniform mat4 Model;","");
+                        boost::replace_all(_d,"Model","instanceMatrix");
+                        boost::replace_all(_d,"uniform mat3 NormalMatrix;","");
+                        insertStringRightAfterLineContent(_d,"    mat3 NormalMatrix = transpose(inverse(mat3(instanceMatrix)));","void main(){");
+                    }
+                }
+            }
+
             //check for normal map texture extraction
             //refer to mesh.cpp dirCorrection comment about using an uncompressed normal map and not reconstructing z
             if(sfind(_d,"CalcBumpedNormal(") || sfind(_d,"CalcBumpedNormalCompressed(")){
-                if(!sfind(_d,"vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated")){
+                if(!sfind(_d,"vec3 CalcBumpedNormal(")){
                     if(sfind(_d,"varying mat3 TBN;")){
                         boost::replace_all(_d,"varying mat3 TBN;","");
                     }
@@ -214,7 +258,7 @@ class ShaderP::impl final{
             }
             //check for painters algorithm
             if(sfind(_d,"PaintersAlgorithm(")){
-                if(!sfind(_d,"vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated")){
+                if(!sfind(_d,"vec4 PaintersAlgorithm(")){
                     string painters = "\n"
                     "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated\n"
                     "    float paintA = paint.a;\n"
@@ -287,7 +331,7 @@ class ShaderP::impl final{
                 insertStringAtLine(_d,log_vertex_code,1);
                 log_vertex_code = "\n"
                     "logz_f = 1.0 + gl_Position.w;\n"
-                    "gl_Position.z = (log2(max(1e-6, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
+                    "gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;\n"
                     "FC = fcoeff;\n"
                     "\n";
                 insertStringAtEndOfMainFunc(_d,log_vertex_code);
@@ -309,7 +353,7 @@ class ShaderP::impl final{
                 #endif
                 if(sfind(_d,"GetWorldPosition(") || sfind(_d,"GetViewPosition(")){
                     
-                    if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
+                    if(!sfind(_d,"vec3 GetWorldPosition(")){
                         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
                              insertStringRightAfterLineContent(_d,getLogDepthFunctions(),"uniform sampler2D gDepthMap;");
                         #else
@@ -321,22 +365,59 @@ class ShaderP::impl final{
             }
             else{
                 if(sfind(_d,"GetWorldPosition(") || sfind(_d,"GetViewPosition(")){
-                    if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
+                    if(!sfind(_d,"vec3 GetWorldPosition(")){
                         if(sfind(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION") && !sfind(_d,"//USE_LOG_DEPTH_FRAG_WORLD_POSITION") && shader->type() == ShaderType::Fragment){
                             //log
                             boost::replace_all(_d,"USE_LOG_DEPTH_FRAG_WORLD_POSITION","");
-                            if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
-                                #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                                     insertStringRightAfterLineContent(_d,getLogDepthFunctions(),"uniform sampler2D gDepthMap;");
-                                #else
-                                     insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
-                                #endif
-                            }
+                            #ifndef ENGINE_FORCE_NO_LOG_DEPTH
+                                    insertStringRightAfterLineContent(_d,getLogDepthFunctions(),"uniform sampler2D gDepthMap;");
+                            #else
+                                    insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
+                            #endif
                         }
                         else{
                             //normal
-                            if(!sfind(_d,"vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated")){
-                                insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
+                            insertStringRightAfterLineContent(_d,getNormalDepthFunctions(),"uniform sampler2D gDepthMap;");
+                        }
+                    }
+                }
+            }
+            //deal with layout (location = X) in
+            if(versionNumber < 330){
+                if(shader->type() == ShaderType::Vertex){
+                    if(sfind(_d,"layout") && sfind(_d,"location") && sfind(_d,"=")){
+                        if(versionNumber > 130){
+                            if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_separate_shader_objects)){
+                                insertStringAtLine(_d,"#extension GL_EXT_seperate_shader_objects : enable",1);
+                            }
+                            else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_separate_shader_objects)){
+                                insertStringAtLine(_d,"#extension GL_ARB_seperate_shader_objects : enable",1);
+                            }
+                            if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_explicit_attrib_location)){
+                                insertStringAtLine(_d,"#extension GL_EXT_explicit_attrib_location : enable",1);
+                            }
+                            else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::ARB_explicit_attrib_location)){
+                                insertStringAtLine(_d,"#extension GL_ARB_explicit_attrib_location : enable",1);
+                            }
+                        }
+                        else{
+                            //replace with attribute
+                            istringstream str(_d); string line; uint count = 0;
+                            while(getline(str,line)){
+                                if(sfind(line,"layout") && sfind(line,"location") && sfind(line,"=")){
+                                    for(auto type:_types){
+                                        size_t found = line.find(type);
+                                        size_t firstFound = line.find("layout");
+                                        if(firstFound != string::npos && found != string::npos){
+                                            string _part1 = line.substr(0,firstFound);
+                                            line.erase(0,found);
+                                            line = _part1 + "attribute " + line;
+                                            insertStringAtAndReplaceLine(_d,line,count);
+                                            break;
+                                        }
+                                    }
+                                }
+                                ++count;
                             }
                         }
                     }
@@ -345,7 +426,20 @@ class ShaderP::impl final{
 
 
 
-
+            if(versionNumber >= 110){
+                if(shader->type() == ShaderType::Vertex){
+                    boost::replace_all(_d, "flat", "");
+                    boost::replace_all(_d, "highp ", "");
+                    boost::replace_all(_d, "mediump ", "");
+                    boost::replace_all(_d, "lowp ", "");
+                }
+                else if(shader->type() == ShaderType::Fragment){
+                    boost::replace_all(_d, "flat", "");
+                    boost::replace_all(_d, "highp ", "");
+                    boost::replace_all(_d, "mediump ", "");
+                    boost::replace_all(_d, "lowp ", "");
+                }
+            }
             if(versionNumber >= 130){
                 if(shader->type() == ShaderType::Vertex){
                     boost::replace_all(_d, "varying", "out");
@@ -374,6 +468,27 @@ class ShaderP::impl final{
             }
             if(versionNumber >= 330){
                 if(shader->type() == ShaderType::Vertex){
+                    //attribute to layout (location = X) in
+                    istringstream str(_d); string line; uint count = 0; uint aCount = 0;
+                    while(getline(str,line)){
+                        if(sfind(line,"attribute")){
+                            for(auto type:_types){
+                                size_t found = line.find(type);
+                                size_t firstFound = line.find("attribute");
+                                if(firstFound != string::npos && found != string::npos){
+                                    string _part1 = line.substr(0,firstFound);
+                                    line.erase(0,found);
+                                    line = _part1 + "layout (location = " + to_string(aCount) + ") in " + line;
+                                    insertStringAtAndReplaceLine(_d,line,count);
+                                    if(!sfind(_part1,"//") && !sfind(_part1,"/*") && !sfind(_part1,"///")){ //do we need to test for triple slashes?
+                                        ++aCount;
+                                    }
+                                    break;
+                                }
+                            }	
+                        }
+                        ++count;
+                    }
                 }
                 else if(shader->type() == ShaderType::Fragment){
                 }
@@ -381,8 +496,6 @@ class ShaderP::impl final{
         }
         void _unload_CPU(ShaderP* super){
             if(m_LoadedCPU){
-				m_VertexShader->m_i->m_Code = "";
-				m_FragmentShader->m_i->m_Code = "";
                 m_LoadedCPU = false;
             }
         }
@@ -392,7 +505,7 @@ class ShaderP::impl final{
                 string VertexCode, FragmentCode = "";
                 //load initial code
                 if(m_VertexShader->fromFile()){
-					boost_stream_mapped_file str(m_VertexShader->m_i->m_FileName);
+                    boost_stream_mapped_file str(m_VertexShader->m_i->m_FileName);
                     for(string line;getline(str,line,'\n');){VertexCode+="\n"+line;}
                 }
                 else{ VertexCode=m_VertexShader->data(); }
@@ -408,8 +521,8 @@ class ShaderP::impl final{
         }
         void _unload_GPU(ShaderP* super){
             if(m_LoadedGPU){
-				m_UniformLocations.clear();
-				m_AttachedUBOs.clear();
+                m_UniformLocations.clear();
+                m_AttachedUBOs.clear();
                 glDeleteProgram(m_ShaderProgram);
                 m_LoadedGPU = false;
             }
@@ -494,7 +607,7 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderP* shaderP){
 void InternalShaderProgramPublicInterface::UnloadCPU(ShaderP* shaderP){
     //if(shaderP->isLoaded()){
         shaderP->m_i->_unload_CPU(shaderP);
-		shaderP->EngineResource::unload();
+        shaderP->EngineResource::unload();
     //}
 }
 void InternalShaderProgramPublicInterface::UnloadGPU(ShaderP* shaderP){
@@ -535,8 +648,8 @@ void ShaderP::addMaterial(Material* material){
 }
 const unordered_map<string,GLint>& ShaderP::uniforms() const { return this->m_i->m_UniformLocations; }
 void ShaderP::onEvent(const Event& e){
-	if(e.type == EventType::WindowFullscreenChanged){
-	}
+    if(e.type == EventType::WindowFullscreenChanged){
+    }
 }
 
 
@@ -563,30 +676,30 @@ class UniformBufferObject::impl final{
             }
             sizeOfStruct = _sizeofStruct;
 
-			super->registerEvent(EventType::WindowFullscreenChanged);
+            super->registerEvent(EventType::WindowFullscreenChanged);
 
-			_load_CPU(super);
-			_load_GPU(super);
+            _load_CPU(super);
+            _load_GPU(super);
         }
-		void _unload_CPU(UniformBufferObject* super){
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
-		}
-		void _load_CPU(UniformBufferObject* super){
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
-			_unload_CPU(super);
-		}
-		void _unload_GPU(UniformBufferObject* super){
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
-			glDeleteBuffers(1,&uboObject);
-		}
-		void _load_GPU(UniformBufferObject* super){
-			if(epriv::RenderManager::GLSL_VERSION < 140) return;
-			_unload_GPU(super);
+        void _unload_CPU(UniformBufferObject* super){
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
+        }
+        void _load_CPU(UniformBufferObject* super){
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
+            _unload_CPU(super);
+        }
+        void _unload_GPU(UniformBufferObject* super){
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
+            glDeleteBuffers(1,&uboObject);
+        }
+        void _load_GPU(UniformBufferObject* super){
+            if(epriv::RenderManager::GLSL_VERSION < 140) return;
+            _unload_GPU(super);
             glGenBuffers(1, &uboObject);
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);//gen and bind buffer
             glBufferData(GL_UNIFORM_BUFFER, sizeOfStruct, NULL, GL_DYNAMIC_DRAW); //create buffer data storage
             glBindBufferBase(GL_UNIFORM_BUFFER, globalBindingPointNumber, uboObject);//link UBO to it's global numerical index
-		}
+        }
         void _update(void* _data){
             if(epriv::RenderManager::GLSL_VERSION < 140) return;
             glBindBuffer(GL_UNIFORM_BUFFER, uboObject);
@@ -606,7 +719,7 @@ void UniformBufferObject::updateData(void* _data){ m_i->_update(_data); }
 void UniformBufferObject::attachToShader(ShaderP* _shaderProgram){ m_i->_attachToShader(this,_shaderProgram); }
 GLuint UniformBufferObject::address(){ return m_i->uboObject; }
 void UniformBufferObject::onEvent(const Event& e){
-	if(e.type == EventType::WindowFullscreenChanged){
-		m_i->_load_GPU(this);
-	}
+    if(e.type == EventType::WindowFullscreenChanged){
+        m_i->_load_GPU(this);
+    }
 }
