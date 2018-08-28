@@ -2461,7 +2461,7 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
         }
     }
 }
-void Renderer::bindVAO(GLuint& _vaoObject){
+void Renderer::bindVAO(const GLuint _vaoObject){
     auto& i = *renderManager;
     if(i.current_bound_vao != _vaoObject){
         glBindVertexArray(_vaoObject);

@@ -1017,7 +1017,7 @@ class Mesh::impl final{
 						if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
 					}
 				}
-				glBindVertexArray(0);
+				Renderer::bindVAO(0);
 			}
             cout << "(Mesh) ";
         }
@@ -1025,7 +1025,7 @@ class Mesh::impl final{
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
 	auto& m = *((Mesh*)r)->m_i;
 	if(m.m_VAO){
-		glBindVertexArray(m.m_VAO);
+		Renderer::bindVAO(m.m_VAO);
 	}else{
 		glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
 		uint _structSize = m.m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
@@ -1051,7 +1051,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
     auto& m = *((Mesh*)r)->m_i;
 	if(m.m_VAO){
-		glBindVertexArray(0);
+		Renderer::bindVAO(0);
 	}else{
 		uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
 		for(uint i = 0; i < _enumTotal; ++i){ glDisableVertexAttribArray(i); }

@@ -63,7 +63,7 @@ class epriv::FullscreenTriangle::impl final{
 				glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
 
-				glBindVertexArray(0);
+				Renderer::bindVAO(0);
 			}
         }
         void _destruct(){
@@ -76,9 +76,9 @@ class epriv::FullscreenTriangle::impl final{
         }
         void _render(){
 			if(m_VAO){
-				glBindVertexArray(m_VAO);
+				Renderer::bindVAO(m_VAO);
 				glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
-				//glBindVertexArray(0);
+				//Renderer::bindVAO(0);
 			}else{
 				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
 				glEnableVertexAttribArray(0);
@@ -133,7 +133,7 @@ class epriv::FullscreenQuad::impl final{
 				glEnableVertexAttribArray(1);
 				glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
-				glBindVertexArray(0);
+				Renderer::bindVAO(0);
 			}
         }
         void _destruct(){
@@ -146,9 +146,9 @@ class epriv::FullscreenQuad::impl final{
         }
         void _render(){
 			if(m_VAO){
-				glBindVertexArray(m_VAO);
+				Renderer::bindVAO(m_VAO);
 				glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
-				//glBindVertexArray(0);
+				//Renderer::bindVAO(0);
 			}else{
 				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
 				glEnableVertexAttribArray(0);
