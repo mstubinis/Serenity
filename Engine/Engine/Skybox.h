@@ -31,6 +31,7 @@ class Skybox: public SkyboxEmpty{
     protected:
         Texture* m_Texture;
         static GLuint m_Buffer;
+		static GLuint m_VAO;
         static std::vector<glm::vec3> m_Vertices;
     public:
         Skybox(std::string* files, Scene* = nullptr);

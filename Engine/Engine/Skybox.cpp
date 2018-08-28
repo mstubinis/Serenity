@@ -15,13 +15,14 @@ using namespace Engine;
 using namespace std;
 
 GLuint Skybox::m_Buffer;
+GLuint Skybox::m_VAO = 0;
 vector<glm::vec3> Skybox::m_Vertices;
 
 SkyboxEmpty::SkyboxEmpty(Scene* scene){
-    if(scene == nullptr){
+    if(!scene){
         scene = Resources::getCurrentScene();
     }
-    if(scene->skybox() == nullptr){
+    if(!scene->skybox()){
         scene->setSkybox(this);
     }
 }
@@ -97,12 +98,30 @@ void Skybox::initMesh(){
         glGenBuffers(1, &Skybox::m_Buffer);
         glBindBuffer(GL_ARRAY_BUFFER, Skybox::m_Buffer );
         glBufferData(GL_ARRAY_BUFFER, Skybox::m_Vertices.size() * sizeof(glm::vec3),&Skybox::m_Vertices[0], GL_STATIC_DRAW );
+
+		//vao's
+		if(epriv::RenderManager::OPENGL_VERSION >= 30){
+			//gen and bind vao
+			Renderer::genAndBindVAO(m_VAO);
+
+			glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+			glBindVertexArray(0);
+		}
     }
 }
 void Skybox::bindMesh(){
-    glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
-    glDisableVertexAttribArray(0);
+	if(m_VAO){
+		glBindVertexArray(m_VAO);
+		glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
+		//glBindVertexArray(0);
+	}else{
+		glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
+		glDisableVertexAttribArray(0);
+	}
 }

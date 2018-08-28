@@ -24,8 +24,124 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+//yes, this code is needed or stuff breaks. find out why
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+////////////////////////////////////////////
+
 using namespace Engine;
 using namespace std;
+
+
+namespace Engine{
+    namespace epriv{
+        class GLDebugDrawer: public btIDebugDraw {
+            friend class ::Engine::epriv::PhysicsManager;
+            private:
+                GLuint m_Mode, m_VAO, m_VertexBuffer, C_MAX_POINTS;
+                struct LineVertex{
+                    glm::vec3 position;
+                    glm::vec3 color;
+                    LineVertex(){ position = glm::vec3(0.0f); color = glm::vec3(1.0f); }
+                };
+                vector<LineVertex> vertices;
+
+                void init(){
+                    C_MAX_POINTS = 262144;
+                    m_VAO = m_VertexBuffer = 0;
+                }
+                void destruct(){
+                    glDeleteBuffers(1, &m_VertexBuffer);
+                    if(m_VAO){
+                        glDeleteVertexArrays(1, &m_VAO);
+                        m_VAO = 0;
+                    }
+                    vector_clear(vertices);
+                }
+                void renderLines(){
+                    if(m_VAO){
+                        glBindVertexArray(m_VAO);
+                        glDrawArrays(GL_LINES, 0,vertices.size());
+                        glBindVertexArray(0);
+                    }else{
+                        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+                        glEnableVertexAttribArray(0);
+                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
+                        glEnableVertexAttribArray(1);
+                        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex,color)));
+                        glDrawArrays(GL_LINES, 0,vertices.size());
+                        glDisableVertexAttribArray(0);
+                        glDisableVertexAttribArray(1);
+                    }
+                }
+                void postRender(){
+                    vector_clear(vertices);
+                }
+            public:
+                void initRenderingContext(){
+                    vector<LineVertex> temp1;
+                    temp1.resize(C_MAX_POINTS,LineVertex());
+
+                    glGenBuffers(1, &m_VertexBuffer);
+                    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * C_MAX_POINTS, &temp1[0], GL_DYNAMIC_DRAW);
+
+                    //support vao's
+                    if(epriv::RenderManager::OPENGL_VERSION >= 30){
+                        Renderer::genAndBindVAO(m_VAO);
+
+                        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+                        glEnableVertexAttribArray(0);
+                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
+                        glEnableVertexAttribArray(1);
+                        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex,color)));
+
+                        glBindVertexArray(0);
+                    }
+                }
+                virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
+                    // Vertex data
+
+                    if(vertices.size() >= (C_MAX_POINTS)) return;
+
+                    LineVertex v1, v2;
+
+                    glm::vec3 _color = glm::vec3(color.x(),color.y(),color.z());
+                    v1.color = _color;
+                    v2.color = _color;
+
+                    v1.position = glm::vec3(from.x(),from.y(),from.z());
+                    v2.position = glm::vec3(to.x(),to.y(),to.z());
+
+                    vertices.push_back(v1);
+                    vertices.push_back(v2);
+                }
+                void drawAccumulatedLines(){
+                    glBindBuffer(   GL_ARRAY_BUFFER, m_VertexBuffer);
+                    glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
+
+                    renderLines();
+                }
+                virtual void drawAabb(const btVector3 &from, const btVector3 &to, const btVector3 &color){
+                }
+                virtual void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform &transform, const btVector3 &color){
+                }
+                virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB,btScalar distance,int lifeTime, const btVector3& color){
+                }
+                virtual void reportErrorWarning(const char* errWarning){
+                }
+                virtual void draw3dText(const btVector3& location, const char* text){
+                }
+                virtual void setDebugMode(int _mode){ m_Mode = _mode; }
+                int getDebugMode() const { return m_Mode; }
+                //int getDebugMode() const { return 3; }
+                GLDebugDrawer(){ init(); }
+                ~GLDebugDrawer(){ destruct(); }
+        };
+    };
+};
+
 
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep){
 }
@@ -61,6 +177,7 @@ class epriv::PhysicsManager::impl final{
             m_World->setInternalTickCallback(_postTicCallback,(void*)m_World,false);
         }
         void _postInit(const char* name,uint w,uint h){
+            m_DebugDrawer->initRenderingContext();
         }
         void _destruct(){
             SAFE_DELETE(m_DebugDrawer);
@@ -97,15 +214,19 @@ class epriv::PhysicsManager::impl final{
             }
         }
         void _render(){
-            glUseProgram(0); //this is important
-            glMatrixMode(GL_PROJECTION); glPushMatrix();
-            Camera* c = Resources::getCurrentScene()->getActiveCamera();
-            glLoadMatrixf(glm::value_ptr(c->getProjection()));
-            glMatrixMode(GL_MODELVIEW); glPushMatrix();
-            glLoadMatrixf(glm::value_ptr(c->getView()));
             m_World->debugDrawWorld();
-            glMatrixMode(GL_PROJECTION); glPopMatrix();
-            glMatrixMode(GL_MODELVIEW); glPopMatrix();
+
+            Camera* c = Resources::getCurrentScene()->getActiveCamera();
+            glm::vec3& camPos = c->getPosition();
+            glm::mat4& model = glm::mat4(1.0f);
+            model[3][0] -= camPos.x;
+            model[3][1] -= camPos.y;
+            model[3][2] -= camPos.z;
+            Renderer::sendUniformMatrix4f("Model",model);
+            Renderer::sendUniformMatrix4f("VP",c->getViewProjection());
+
+            m_DebugDrawer->drawAccumulatedLines();
+            m_DebugDrawer->postRender();
         }
         void _removeCollision(Collision* collisionObject){
             removeFromVector(m_CollisionObjects,collisionObject);
@@ -142,6 +263,9 @@ void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,grav
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->m_World->addRigidBody(rigidBody,group,mask); }
 void Physics::addRigidBody(btRigidBody* body){ physicsManager->m_World->addRigidBody(body); }
 void Physics::removeRigidBody(btRigidBody* body){ physicsManager->m_World->removeRigidBody(body); }
+void Physics::updateRigidBody(btRigidBody* body){ 
+	physicsManager->m_World->updateSingleAabb(body);
+}
 
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){
@@ -191,8 +315,8 @@ Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mas
     m_CollisionType = type;
     _init(type,mass);
 }
-Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass){ 
-    _load(data,type);
+Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass,glm::vec3 scale){ 
+    _load(data,type,scale);
     _init(type,mass);
 }
 void Collision::_init(CollisionType::Type type, float mass){
@@ -211,32 +335,45 @@ Collision::~Collision(){
     SAFE_DELETE(m_CollisionShape);
     m_CollisionType = CollisionType::None;
 }
-void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisionType){
+void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisionType,glm::vec3 _scale){
+	if(m_CollisionShape){
+		SAFE_DELETE(m_CollisionShape);
+	}
+	if(m_InternalMeshData){
+		SAFE_DELETE(m_InternalMeshData);
+	}
+
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
     m_CollisionType = collisionType;
     switch(collisionType){
         case CollisionType::ConvexHull:{
             shape = new btConvexHullShape();
-            for(auto vertex:data.points){ ((btConvexHullShape*)shape)->addPoint(btVector3(vertex.x,vertex.y,vertex.z)); }
-            btShapeHull* hull =  new btShapeHull((btConvexHullShape*)shape);
-            hull->buildHull(shape->getMargin());
+			btConvexHullShape& convexCast = *((btConvexHullShape*)shape);
+            for(auto vertex:data.points){ 
+				convexCast.addPoint(btVector3(vertex.x * _scale.x,vertex.y * _scale.y,vertex.z * _scale.z)); 
+			}
+            btShapeHull hull = btShapeHull(&convexCast);
+            hull.buildHull(convexCast.getMargin());
             SAFE_DELETE(shape);
-            const btVector3* ptsArray = hull->getVertexPointer();
+            const btVector3* ptsArray = hull.getVertexPointer();
             shape = new btConvexHullShape();
-            for(int i = 0; i < hull->numVertices(); ++i){
-                ((btConvexHullShape*)shape)->addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
+			btConvexHullShape& convexShape = *((btConvexHullShape*)shape);
+            for(int i = 0; i < hull.numVertices(); ++i){
+                convexShape.addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
             }
+			convexShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+			convexShape.setMargin(0.001f);
+			convexShape.recalcLocalAabb();
             m_CollisionShape = shape;
-            SAFE_DELETE(hull);
             break;
         }
         case CollisionType::TriangleShape:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position);
-                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position);
-                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position);
+                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
+                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
+                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btGImpactMeshShape(m_InternalMeshData);
@@ -250,14 +387,16 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
         case CollisionType::TriangleShapeStatic:{
             m_InternalMeshData = new btTriangleMesh();
             for(auto triangle:data.file_triangles){
-                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position);
-                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position);
-                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position);
+                btVector3 v1 = Math::btVectorFromGLM(triangle.v1.position * _scale);
+                btVector3 v2 = Math::btVectorFromGLM(triangle.v2.position * _scale);
+                btVector3 v3 = Math::btVectorFromGLM(triangle.v3.position * _scale);
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
-            shape->setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-            shape->setMargin(0.001f);
+			btBvhTriangleMeshShape& triShape = *((btBvhTriangleMeshShape*)shape);
+            triShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+            triShape.setMargin(0.001f);
+			triShape.recalcLocalAabb();
             m_CollisionShape = shape;
             break;
         }
@@ -269,7 +408,10 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
                     radius = length;
                 }
             }
-            shape = new btSphereShape(radius);
+            shape = new btSphereShape(radius * _scale.x);
+			btSphereShape& sphere = *((btSphereShape*)shape);
+			sphere.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+			sphere.setMargin(0.001f);
             m_CollisionShape = shape;
             break;
         };
@@ -279,7 +421,10 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
                 float x = abs(vertex.x); float y = abs(vertex.y); float z = abs(vertex.z);
                 if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
             }
-            shape = new btBoxShape(btVector3(max.x,max.y,max.z));
+            shape = new btBoxShape(btVector3(max.x * _scale.x,max.y * _scale.y,max.z * _scale.z));
+			btBoxShape& boxShape = *((btBoxShape*)shape);
+			boxShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+			boxShape.setMargin(0.001f);
             m_CollisionShape = shape;
             break;
         }
@@ -298,106 +443,3 @@ void Collision::setMass(float mass){
         ((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
     }
 }
-
-GLDebugDrawer::GLDebugDrawer():m_debugMode(0){}
-GLDebugDrawer::~GLDebugDrawer(){}
-void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor){
-    glBegin(GL_LINES);
-        glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
-        glVertex3d(from.getX(), from.getY(), from.getZ());
-        glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
-        glVertex3d(to.getX(), to.getY(), to.getZ());
-    glEnd();
-}
-void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color){ 
-    drawLine(from,to,color,color);
-}
-void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVector3& color){
-    glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
-    glPushMatrix ();
-    glTranslatef (p.getX(), p.getY(), p.getZ());
-
-    int lats = 5;
-    int longs = 5;
-
-    int i, j;
-    for(i = 0; i <= lats; ++i) {
-        btScalar lat0 = SIMD_PI * (-btScalar(0.5) + (btScalar) (i - 1) / lats);
-        btScalar z0  = radius*glm::sin(lat0);
-        btScalar zr0 =  radius*glm::cos(lat0);
-
-        btScalar lat1 = SIMD_PI * (-btScalar(0.5) + (btScalar) i / lats);
-        btScalar z1 = radius*glm::sin(lat1);
-        btScalar zr1 = radius*glm::cos(lat1);
-
-        glBegin(GL_QUAD_STRIP);
-        for(j = 0; j <= longs; ++j) {
-            btScalar lng = 2 * SIMD_PI * (btScalar) (j - 1) / longs;
-            btScalar x = glm::cos(lng);
-            btScalar y = glm::sin(lng);
-
-            glNormal3f(x * zr0, y * zr0, z0);
-            glVertex3f(x * zr0, y * zr0, z0);
-            glNormal3f(x * zr1, y * zr1, z1);
-            glVertex3f(x * zr1, y * zr1, z1);
-        }
-        glEnd();
-    }
-    glPopMatrix();
-}
-void GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btVector3& c,const btVector3& color,btScalar alpha){
-    const btVector3 n=btCross(b-a,c-a).normalized();
-    glBegin(GL_TRIANGLES);      
-        glColor4f(color.getX(), color.getY(), color.getZ(),alpha);
-        glNormal3d(n.getX(),n.getY(),n.getZ());
-        glVertex3d(a.getX(),a.getY(),a.getZ());
-        glVertex3d(b.getX(),b.getY(),b.getZ());
-        glVertex3d(c.getX(),c.getY(),c.getZ());
-    glEnd();
-}
-void GLDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color){
-    btVector3 to=pointOnB+normalOnB*1;//distance;
-    const btVector3&from = pointOnB;
-    glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
-    glBegin(GL_LINES);
-        glVertex3d(from.getX(), from.getY(), from.getZ());
-        glVertex3d(to.getX(), to.getY(), to.getZ());
-    glEnd();
-}
-void GLDebugDrawer::reportErrorWarning(const char* warningString){}
-void GLDebugDrawer::draw3dText(const btVector3& location,const char* textString){
-    glRasterPos3f(location.x(),location.y(),location.z());
-}
-void GLDebugDrawer::setDebugMode(int debugMode){ m_debugMode = debugMode; }
-
-#ifdef _WIN32//for glut.h
-#include <windows.h>
-#endif
-
-#if defined(__APPLE__) && !defined (VMDMESA)
-#include <TargetConditionals.h>
-#if (defined (TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || (defined (TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR)
-#import <OpenGLES/ES1/gl.h>
-#define glOrtho glOrthof
-#else
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#endif
-#else
-
-#ifdef _WINDOWS
-#include <windows.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glut.h>
-#endif
-#endif
-
-void GLDebugResetFont(int screenWidth,int screenHeight){}
-#define USE_ARRAYS 1
-void GLDebugDrawStringInternal(int x,int y,const char* string, const btVector3& rgb){GLDebugDrawStringInternal(x,y,string,rgb,true,10);}
-void GLDebugDrawStringInternal(int x,int y,const char* string, const btVector3& rgb, bool enableBlend, int spacing){}
-void GLDebugDrawString(int x,int y,const char* string){}

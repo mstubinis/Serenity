@@ -225,7 +225,7 @@ Ship::Ship(Handle& mesh,Handle& mat, bool player,string name,glm::vec3 pos, glm:
     scene->addEntity(this);
     ComponentModel* model = new ComponentModel(mesh,mat,this);
     addComponent(model);
-    ComponentBody* rigidBody = new ComponentBody(collision,this);
+    ComponentBody* rigidBody = new ComponentBody(collision,this,scl);
     addComponent(rigidBody);
 
     float radius = model->radius();

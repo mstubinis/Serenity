@@ -57,6 +57,8 @@ namespace Engine{
         struct EngineInternalShaders final{enum Shader{
             FullscreenVertex,
             FXAAFrag,
+            BulletPhysicsVertex,
+            BulletPhysicsFrag,
             VertexBasic,
             VertexHUD,
             VertexSkybox,
@@ -93,6 +95,7 @@ namespace Engine{
         struct EngineInternalShaderPrograms final{enum Program{
             //Deferred, //using the internal resource static one instead
             //Forward, //using the internal resource static one instead
+            BulletPhysics,
             DeferredHUD,
             DeferredGodRays,
             DeferredBlur,
@@ -242,6 +245,7 @@ class epriv::RenderManager::impl final{
         ShaderP* current_shader_program;
         Material* current_bound_material;
         unsigned char cull_face_status;
+        GLuint current_bound_vao;
         GLuint current_bound_read_fbo;
         GLuint current_bound_draw_fbo;
         GLuint current_bound_rbo;
@@ -356,6 +360,7 @@ class epriv::RenderManager::impl final{
             current_shader_program = nullptr;
             current_bound_material = nullptr;
             cull_face_status = 0; /* 0 = back | 1 = front | 2 = front and back */
+            current_bound_vao = 0;
             current_bound_read_fbo = 0;
             current_bound_draw_fbo = 0;
             current_bound_rbo = 0;
@@ -398,10 +403,10 @@ class epriv::RenderManager::impl final{
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_Ansiotropic_Filtering) = _checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_draw_instanced) = _checkOpenGLExtension("GL_EXT_draw_instanced");
             OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_draw_instanced) = _checkOpenGLExtension("GL_ARB_draw_instanced");
-			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_separate_shader_objects) = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
-			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_separate_shader_objects) = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
-			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_explicit_attrib_location) = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
-			OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_explicit_attrib_location) = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
+            OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_separate_shader_objects) = _checkOpenGLExtension("GL_EXT_separate_shader_objects");
+            OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_separate_shader_objects) = _checkOpenGLExtension("GL_ARB_separate_shader_objects");
+            OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::EXT_explicit_attrib_location) = _checkOpenGLExtension("GL_EXT_explicit_attrib_location");
+            OPENGL_EXTENSIONS.at(OpenGLExtensionEnum::ARB_explicit_attrib_location) = _checkOpenGLExtension("GL_ARB_explicit_attrib_location");
             #pragma endregion
 
 
@@ -418,6 +423,8 @@ class epriv::RenderManager::impl final{
 
             #pragma region EngineInternalShadersAndPrograms
 
+            m_InternalShaders.at(EngineInternalShaders::BulletPhysicsVertex) = new Shader(epriv::EShaders::bullet_physics_vert,ShaderType::Vertex,false);
+            m_InternalShaders.at(EngineInternalShaders::BulletPhysicsFrag) = new Shader(epriv::EShaders::bullet_physcis_frag,ShaderType::Fragment,false);
             m_InternalShaders.at(EngineInternalShaders::LightingVertex) = new Shader(epriv::EShaders::lighting_vert,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::FullscreenVertex) = new Shader(epriv::EShaders::fullscreen_quad_vertex,ShaderType::Vertex,false);
             m_InternalShaders.at(EngineInternalShaders::FXAAFrag) = new Shader(epriv::EShaders::fxaa_frag,ShaderType::Fragment,false);
@@ -454,6 +461,7 @@ class epriv::RenderManager::impl final{
 
             epriv::InternalShaderPrograms::Deferred = new ShaderP("Deferred",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::DeferredFrag),ShaderRenderPass::Geometry);
             epriv::InternalShaderPrograms::Forward = new ShaderP("Forward",m_InternalShaders.at(EngineInternalShaders::VertexBasic),m_InternalShaders.at(EngineInternalShaders::ForwardFrag),ShaderRenderPass::Forward);
+            m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics) = new ShaderP("Bullet_Physics",m_InternalShaders.at(EngineInternalShaders::BulletPhysicsVertex),m_InternalShaders.at(EngineInternalShaders::BulletPhysicsFrag),ShaderRenderPass::None);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredHUD) = new ShaderP("Deferred_HUD",m_InternalShaders.at(EngineInternalShaders::VertexHUD),m_InternalShaders.at(EngineInternalShaders::DeferredFragHUD),ShaderRenderPass::Geometry);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredGodRays) = new ShaderP("Deferred_GodsRays",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::GodRaysFrag),ShaderRenderPass::Postprocess);
             m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredBlur) = new ShaderP("Deferred_Blur",m_InternalShaders.at(EngineInternalShaders::FullscreenVertex),m_InternalShaders.at(EngineInternalShaders::BlurFrag),ShaderRenderPass::Postprocess);
@@ -1484,7 +1492,9 @@ class epriv::RenderManager::impl final{
             }
         }
         void _setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm& algorithm){
-            if(aa_algorithm != algorithm){ aa_algorithm = algorithm; }
+            if(aa_algorithm != algorithm){ 
+                aa_algorithm = algorithm; 
+            }
         }
         void _setDepthFunc(DepthFunc::Func func){
             if(depth_func != func){
@@ -1597,6 +1607,7 @@ class epriv::RenderManager::impl final{
         }
         void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
+			glm::vec3& camPos = scene->getActiveCamera()->getPosition();
             const glm::vec3& clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
@@ -1633,41 +1644,54 @@ class epriv::RenderManager::impl final{
                                 MaterialMeshEntry* entry = materialMeshEntry;
                                 Mesh* mesh = entry->mesh();
                                 mesh->bind();
+								/*
                                 if(InternalMeshPublicInterface::SupportsInstancing()){
-									MeshInstance* _meshInstance = nullptr;
+                                    MeshInstance* _meshInstance = nullptr;
                                     vector<glm::mat4> instanceMatrices;
                                     for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
                                         const uint& entityID = meshInstance.first;
                                         auto& instances = meshInstance.second;
                                         if(scene->hasEntity(entityID)){
-                                            auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
-                                            if(model.passedRenderCheck()){
-                                                for(auto instance:instances){
-													if(!_meshInstance) _meshInstance = instance;
-                                                    instanceMatrices.push_back(instance->model());
+                                            auto* model = scene->getEntity(entityID)->getComponent<ComponentModel>();
+                                            if(model){
+                                                if(model->passedRenderCheck()){
+                                                    for(auto instance:instances){
+                                                        if(!_meshInstance) _meshInstance = instance;
+                                                        Entity* parent = instance->parent();
+                                                        if(parent){
+                                                            auto* body = parent->getComponent<ComponentBody>();
+                                                            if(body){
+                                                                glm::mat4& _modelMatrix = body->modelMatrix() * instance->model();
+                                                                _modelMatrix[3][0] -= camPos.x;
+                                                                _modelMatrix[3][1] -= camPos.y;
+                                                                _modelMatrix[3][2] -= camPos.z;
+                                                                instanceMatrices.emplace_back(_modelMatrix);
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                    InternalMeshPublicInterface::UpdateInstances(mesh,instanceMatrices);
                                     if(instanceMatrices.size() > 0){
-										std::cout << mesh->name() << std::endl;
-										_meshInstance->bind();
+										InternalMeshPublicInterface::UpdateInstances(mesh,instanceMatrices);
+                                        _meshInstance->bind();
                                         mesh->render();
                                         mesh->unbind();
-										_meshInstance->unbind();
+                                        _meshInstance->unbind();
                                     }
                                 }
-                                else{
+								*/
+                                //else{
                                     for(auto meshInstance:materialMeshEntry->meshInstancesEntities()){
                                         const uint& entityID = meshInstance.first;
                                         auto& instances = meshInstance.second;
                                         if(scene->hasEntity(entityID)){
-                                            auto& model = *scene->getEntity(entityID)->getComponent<ComponentModel>();
-                                            if(model.passedRenderCheck()){
+                                            auto* model = scene->getEntity(entityID)->getComponent<ComponentModel>();
+                                            if(model->passedRenderCheck()){
                                                 for(auto instance:instances){
                                                     instance->bind();
-													mesh->render(false);
+                                                    mesh->render(false);
                                                     instance->unbind();
                                                 }
                                             }
@@ -1679,7 +1703,7 @@ class epriv::RenderManager::impl final{
                                         }
                                     }
                                     mesh->unbind();
-                                }
+                                //}
                             }
                             //material->unbind();
                         }
@@ -1717,7 +1741,7 @@ class epriv::RenderManager::impl final{
                                         if(model.passedRenderCheck()){
                                             for(auto instance:instances){
                                                 instance->bind();
-												mesh->render(false);
+                                                mesh->render(false);
                                                 instance->unbind();
                                             }
                                         }
@@ -2183,6 +2207,7 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
                 if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
+                    m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics)->bind();
                     Core::m_Engine->m_PhysicsManager->_render();
                 }
             }
@@ -2255,9 +2280,10 @@ void epriv::RenderManager::_addShaderToStage(ShaderP* program,uint stage){
     }
 }
 void epriv::RenderManager::_bindShaderProgram(ShaderP* p){
-    if(m_i->current_shader_program != p){
+    auto& currentShaderPgrm = m_i->current_shader_program;
+    if(currentShaderPgrm != p){
         glUseProgram(p->program());
-        m_i->current_shader_program = p;
+        currentShaderPgrm = p;
     }
 }
 bool epriv::RenderManager::_bindMaterial(Material* m){
@@ -2403,7 +2429,7 @@ float Renderer::Settings::getGamma(){ return renderManager->gamma; }
 void Renderer::setDepthFunc(DepthFunc::Func func){ renderManager->_setDepthFunc(func); }
 void Renderer::setViewport(uint x,uint y,uint w,uint h){ renderManager->_setViewport(x,y,w,h); }
 void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
-    epriv::RenderManager::impl& i = *renderManager;
+    auto& i = *renderManager;
     switch(_textureType){
         case GL_TEXTURE_1D:{
             if(i.current_bound_texture_1D != _textureObject){
@@ -2435,9 +2461,20 @@ void Renderer::bindTexture(GLuint _textureType,GLuint _textureObject){
         }
     }
 }
+void Renderer::bindVAO(GLuint& _vaoObject){
+    auto& i = *renderManager;
+    if(i.current_bound_vao != _vaoObject){
+        glBindVertexArray(_vaoObject);
+        i.current_bound_vao = _vaoObject;
+    }
+}
 void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
     glGenTextures(1, &_textureObject);
     bindTexture(_textureType,_textureObject);
+}
+void Renderer::genAndBindVAO(GLuint& _vaoObject){
+    glGenVertexArrays(1, &_vaoObject);
+    bindVAO(_vaoObject);
 }
 void Renderer::sendTexture(const char* location,Texture* texture,const uint slot){Renderer::sendTexture(location,texture->address(),slot,texture->type());}
 void Renderer::sendTexture(const char* location,const GLuint textureAddress,const uint slot,const GLuint targetType){

@@ -162,8 +162,7 @@ class MeshInstance::impl{
 struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance::impl& i = *((MeshInstance*)r)->m_i;
     glm::vec3& camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
-    Entity* parent = nullptr;
-    parent = i.m_Entity;
+    Entity* parent = i.m_Entity;
     auto& body = *(parent->getComponent<ComponentBody>());
     glm::mat4& parentModel = body.modelMatrix();
 
@@ -197,11 +196,9 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
             }
             else{ ++it; }
         }
-    }
-    else{
+    }else{
         Renderer::sendUniform1iSafe("AnimationPlaying",0);
     }
-    
     glm::mat4 model = parentModel * i.m_Model; //might need to reverse this order.
     model[3][0] -= camPos.x;
     model[3][1] -= camPos.y;

@@ -76,7 +76,7 @@ namespace Engine{
     }
 
     namespace epriv{
-        const uint MAX_NUM_ENTITIES = 32768;
+        const uint MAX_NUM_ENTITIES = 131072;
         const uint UINT_MAX_VALUE   = std::numeric_limits<uint>::max();
 		class ComponentManager final: private Engine::epriv::noncopyable{
             friend class ::Entity;
@@ -233,8 +233,8 @@ class ComponentBody: public ComponentBaseClass{
         glm::vec3 _forward, _right, _up;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBody(Collision*,Entity* owner = nullptr);
-        ComponentBody(Entity* owner = nullptr);
+        ComponentBody(Collision*,Entity* owner,glm::vec3 scale = glm::vec3(1.0f));
+        ComponentBody();
         ~ComponentBody();
 
         void alignTo(glm::vec3 direction,float speed);
@@ -260,7 +260,7 @@ class ComponentBody: public ComponentBaseClass{
         glm::mat4 modelMatrix();
         const btRigidBody* getBody() const;
 
-        void setCollision(Collision*,bool emptyCollision = false);
+        void setCollision(Collision*,bool emptyCollision = false,glm::vec3 _scale = glm::vec3(1.0f));
         void setDamping(float linear,float angular);
 
         void setDynamic(bool dynamic);

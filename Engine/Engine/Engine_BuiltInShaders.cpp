@@ -25,6 +25,8 @@ string epriv::EShaders::conditional_functions;
 string epriv::EShaders::float_into_2_floats;
 string epriv::EShaders::determinent_mat3;
 string epriv::EShaders::normals_octahedron_compression_functions;
+string epriv::EShaders::bullet_physics_vert;
+string epriv::EShaders::bullet_physcis_frag;
 string epriv::EShaders::fullscreen_quad_vertex;
 string epriv::EShaders::vertex_basic;
 string epriv::EShaders::vertex_hud;
@@ -308,6 +310,37 @@ epriv::EShaders::lighting_vert =
     "    gl_Position = MVP * vec4(vert,1.0);\n"
     "}";
 #pragma endregion
+
+#pragma region BulletPhysicsVertex
+epriv::EShaders::bullet_physics_vert = 
+	"\n"
+	"layout (location = 0) in vec3 position;\n"
+	"layout (location = 1) in vec3 color;\n"
+    "\n"
+	"varying vec3 OutColor;\n"
+    "\n"
+	"uniform mat4 Model;\n"
+	"uniform mat4 VP;\n"
+	"\n"
+	"void main(){\n"
+	"	gl_Position = VP * Model * vec4(position, 1.0f);\n"
+	"	OutColor = color;\n"
+	"}\n"
+	"\n";
+#pragma endregion
+
+#pragma region BulletPhysicsFragment
+epriv::EShaders::bullet_physcis_frag =
+	"\n"
+	"in vec3 OutColor;\n"
+	"\n"
+	"void main(){\n"
+	//"	color = color;\n" 
+	"	gl_FragColor = vec4(OutColor,1.0);\n" 
+	"}\n"
+	"\n";
+#pragma endregion
+
 
 #pragma region VertexBasic
 epriv::EShaders::vertex_basic = 

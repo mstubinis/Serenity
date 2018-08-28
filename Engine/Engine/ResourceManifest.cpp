@@ -63,13 +63,13 @@ void ResourceManifest::init(){
 
 
     TestMesh = Resources::addMeshAsync("data/Models/1911.fbx",CollisionType::None,true,0.0f);
-    PlanetMesh = Resources::addMeshAsync("data/Models/planet.obj",CollisionType::None,true);
-    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.obj",CollisionType::ConvexHull,true); //220 metres long (0.22 km)
-    //AkiraMesh = Resources::addMeshAsync("data/Models/akira.obj",CollisionType::ConvexHull,true);
+    PlanetMesh = Resources::addMeshAsync("data/Models/planet.obj",CollisionType::None);
+    DefiantMesh = Resources::addMeshAsync("data/Models/defiant.obj",CollisionType::ConvexHull); //220 metres long (0.22 km)
+    //AkiraMesh = Resources::addMeshAsync("data/Models/akira.obj",CollisionType::ConvexHull);
     //MirandaMesh = Resources::addMeshAsync("data/Models/miranda.obj",CollisionType::ConvexHull);
     //IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.obj",CollisionType::ConvexHull);
     //NorwayMesh = Resources::addMeshAsync("data/Models/norway.obj",CollisionType::ConvexHull);
-    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.obj",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
+	StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.obj",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
     RingMesh = Resources::addMeshAsync("data/Models/ring.obj",CollisionType::None);
     DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.obj",CollisionType::ConvexHull);
     //VenerexMesh = Resources::addMeshAsync("data/Models/venerex.obj",CollisionType::ConvexHull);

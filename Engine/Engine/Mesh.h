@@ -18,7 +18,7 @@
 namespace sf{ class Image; };
 
 const uint NUM_BONES_PER_VERTEX = 4;
-const uint NUM_MAX_INSTANCES = 16384;
+const uint NUM_MAX_INSTANCES = 65536;
 
 struct aiAnimation;
 struct DefaultMeshBindFunctor;
@@ -36,12 +36,10 @@ namespace Engine{
     namespace epriv{
         class VertexFormat final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,
-            EnumTotal
-        };};
+        _TOTAL};};
         class VertexFormatAnimated final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,BoneIDs,BoneWeights,
-            EnumTotal
-        };};
+        _TOTAL};};
         struct Vertex final{
             glm::vec3 position;
             glm::vec2 uv;

@@ -35,8 +35,8 @@ epriv::Core::Core(const char* name,uint w,uint h){
     m_ResourceManager  = new epriv::ResourceManager(name,w,h);
     m_TimeManager      = new epriv::TimeManager(name,w,h);
     m_SoundManager     = new epriv::SoundManager(name,w,h);
-    m_PhysicsManager   = new epriv::PhysicsManager(name,w,h);
     m_RenderManager    = new epriv::RenderManager(name,w,h);
+    m_PhysicsManager   = new epriv::PhysicsManager(name,w,h);
     m_EventDispatcher  = new epriv::EventDispatcher(name,w,h);
     m_ComponentManager = new epriv::ComponentManager(name,w,h);
     m_ThreadManager    = new epriv::ThreadManager(name,w,h);
@@ -75,8 +75,8 @@ void Engine::init(const char* name,uint w,uint h){
     epriv::Core::m_Engine->m_EventManager->_init(name,w,h);
     epriv::Core::m_Engine->m_TimeManager->_init(name,w,h);
     epriv::Core::m_Engine->m_SoundManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_PhysicsManager->_init(name,w,h);
     epriv::Core::m_Engine->m_RenderManager->_init(name,w,h);
+    epriv::Core::m_Engine->m_PhysicsManager->_init(name,w,h);
     epriv::Core::m_Engine->m_EventDispatcher->_init(name,w,h);
     epriv::Core::m_Engine->m_ComponentManager->_init(name,w,h);
     epriv::Core::m_Engine->m_ThreadManager->_init(name,w,h);

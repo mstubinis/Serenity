@@ -29,12 +29,12 @@ Mesh* Mesh::Cube = nullptr;
 namespace Engine{
     namespace epriv{
         enum LoadWhat{
-            LOAD_POINTS  = 0x01,
-            LOAD_UVS     = 0x02,
-            LOAD_NORMALS = 0x04,
-            LOAD_FACES   = 0x08,
-            LOAD_TBN     = 0x16
-                       //= 0x32
+            LOAD_POINTS  = 0x00000001,
+            LOAD_UVS     = 0x00000002,
+            LOAD_NORMALS = 0x00000004,
+            LOAD_FACES   = 0x00000008,
+            LOAD_TBN     = 0x00000016,
+                       //= 0x00000032
         };
         struct MeshVertexData{
             glm::vec3 position;
@@ -127,8 +127,12 @@ class Mesh::impl final{
         vector<epriv::MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
         vector<glm::mat4> m_InstanceMatrices;
+		uint m_InstanceCount;
+		GLuint m_VAO;
 
         void _initGlobal(float threshold){
+			m_InstanceCount = 0;
+			m_VAO = 0;
             m_File = "";
             m_Collision = nullptr;
             m_Skeleton = nullptr;
@@ -234,13 +238,13 @@ class Mesh::impl final{
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
 
-            d.points.push_back(glm::vec3(0));
-            d.points.push_back(glm::vec3(width,height,0));
-            d.points.push_back(glm::vec3(0,height,0));
+            d.points.emplace_back(glm::vec3(0));
+            d.points.emplace_back(glm::vec3(width,height,0));
+            d.points.emplace_back(glm::vec3(0,height,0));
 
-            d.points.push_back(glm::vec3(width,0,0));
-            d.points.push_back(glm::vec3(width,height,0));
-            d.points.push_back(glm::vec3(0));
+            d.points.emplace_back(glm::vec3(width,0,0));
+            d.points.emplace_back(glm::vec3(width,height,0));
+            d.points.emplace_back(glm::vec3(0));
 
             float uv_topLeft_x = float(x / 256.0f);
             float uv_topLeft_y = float(y / 256.0f);
@@ -254,13 +258,13 @@ class Mesh::impl final{
             float uv_topRight_x = float(x / 256.0f) + float(width / 256.0f);
             float uv_topRight_y = float(y / 256.0f);
 
-            d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
-            d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-            d.uvs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
+            d.uvs.emplace_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+            d.uvs.emplace_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+            d.uvs.emplace_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
 
-            d.uvs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
-            d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-            d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+            d.uvs.emplace_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
+            d.uvs.emplace_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+            d.uvs.emplace_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
@@ -268,13 +272,13 @@ class Mesh::impl final{
         void _init(Mesh* super,string& name,float width, float height,float threshold){//plane
             epriv::ImportedMeshData d;
             _initGlobal(threshold);
-            d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
-            d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
-            d.points.push_back(glm::vec3(-width/2.0f,height/2.0f,0));
+            d.points.emplace_back(glm::vec3(-width/2.0f,-height/2.0f,0));
+            d.points.emplace_back(glm::vec3(width/2.0f,height/2.0f,0));
+            d.points.emplace_back(glm::vec3(-width/2.0f,height/2.0f,0));
 
-            d.points.push_back(glm::vec3(width/2.0f,-height/2.0f,0));
-            d.points.push_back(glm::vec3(width/2.0f,height/2.0f,0));
-            d.points.push_back(glm::vec3(-width/2.0f,-height/2.0f,0));
+            d.points.emplace_back(glm::vec3(width/2.0f,-height/2.0f,0));
+            d.points.emplace_back(glm::vec3(width/2.0f,height/2.0f,0));
+            d.points.emplace_back(glm::vec3(-width/2.0f,-height/2.0f,0));
 
             float uv_topLeft_x = 0.0f;
             float uv_topLeft_y = 0.0f;
@@ -288,13 +292,13 @@ class Mesh::impl final{
             float uv_topRight_x = 0.0f + float(width);
             float uv_topRight_y = 0.0f;
 
-            d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
-            d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-            d.uvs.push_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
+            d.uvs.emplace_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+            d.uvs.emplace_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+            d.uvs.emplace_back(glm::vec2(uv_topLeft_x,uv_topLeft_y));
 
-            d.uvs.push_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
-            d.uvs.push_back(glm::vec2(uv_topRight_x,uv_topRight_y));
-            d.uvs.push_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
+            d.uvs.emplace_back(glm::vec2(uv_bottomRight_x,uv_bottomRight_y));
+            d.uvs.emplace_back(glm::vec2(uv_topRight_x,uv_topRight_y));
+            d.uvs.emplace_back(glm::vec2(uv_bottomLeft_x,uv_bottomLeft_y));
 
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
@@ -357,21 +361,14 @@ class Mesh::impl final{
                     else{ 
                         data.uvs.emplace_back(0.0f,0.0f);
                     }
-
-
                     //norm
                     if(aimesh.mNormals){
                         data.normals.emplace_back(aimesh.mNormals[i].x,aimesh.mNormals[i].y,aimesh.mNormals[i].z);
-
                         //tangent
-                        /*
                         //data.tangents.emplace_back(aimesh.mTangents[i].x,aimesh.mTangents[i].y,aimesh.mTangents[i].z);
-                        */
 
                         //binorm
-                        /*
                         //data.binormals.push_back(aimesh.mBitangents[i].x,aimesh.mBitangents[i].y,aimesh.mBitangents[i].z);
-                        */
                     }
                 }
                 #pragma endregion
@@ -937,6 +934,10 @@ class Mesh::impl final{
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
+			if(m_VAO){
+				glDeleteVertexArrays(1,&m_VAO);
+				m_VAO = 0;
+			}
             vector_clear(m_buffers);
         }
         void _load_CPU(Mesh* super){
@@ -973,7 +974,7 @@ class Mesh::impl final{
             glGenBuffers(1, &m_buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
-
+			/*
             if(InternalMeshPublicInterface::SupportsInstancing()){
                 //instancing data
                 m_buffers.push_back(0);
@@ -982,62 +983,84 @@ class Mesh::impl final{
                 defaultMatrices.resize(NUM_MAX_INSTANCES,_identity);
                 glGenBuffers(1, &m_buffers.at(2));
                 glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
-                glBufferData(GL_ARRAY_BUFFER, NUM_MAX_INSTANCES * sizeof(glm::mat4), &defaultMatrices[0], GL_DYNAMIC_DRAW);
-                /*
-                attributeIndex = epriv::VertexFormatAnimated::EnumTotal;
-                GLsizei vec4Size = sizeof(glm::vec4);
-                for(uint j = 0; j < 4; ++j){
-                    glEnableVertexAttribArray(attributeIndex+j); 
-                    glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(j * vec4Size));
-                    if(epriv::RenderManager::OPENGL_VERSION >= 33){
-                        glVertexAttribDivisor(attributeIndex+j, 1);
-                    }
-                }
-                */
+                glBufferData(GL_ARRAY_BUFFER, NUM_MAX_INSTANCES * sizeof(glm::mat4), &defaultMatrices[0], GL_DYNAMIC_DRAW);           
             }
+			*/
+			//support vao's
+			if(epriv::RenderManager::OPENGL_VERSION >= 30){
+				//gen and bind vao
+				Renderer::genAndBindVAO(m_VAO);
+				//vertex data
+				glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+				if(m_Skeleton){
+					for(uint i = 0; i < epriv::VertexFormatAnimated::_TOTAL; ++i){
+						auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+						glEnableVertexAttribArray(i);
+						glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexDataAnimated),(void*)d.get<3>());
+					}
+				}else{     
+					for(uint i = 0; i < epriv::VertexFormat::_TOTAL; ++i){
+						auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+						glEnableVertexAttribArray(i);
+						glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
+					}
+				}
+				//indices data
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
+				//instances data
+				if(m_buffers.size() >= 3){
+					glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
+					uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+					for(uint j = 0; j < 4; ++j){
+						glEnableVertexAttribArray(attributeIndex+j); 
+						glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
+						if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
+					}
+				}
+				glBindVertexArray(0);
+			}
             cout << "(Mesh) ";
         }
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-    auto& m = *((Mesh*)r)->m_i;
-    glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
-    if(m.m_Skeleton){
-        for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){
-            auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexDataAnimated),(void*)d.get<3>());
-        }
-    }else{     
-        for(uint i = 0; i < epriv::VertexFormat::EnumTotal; ++i){
-            auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
-        }
-    }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.m_buffers.at(1));
-    //instances
-    if(m.m_buffers.size() >= 3){
-        uint attributeIndex = epriv::VertexFormatAnimated::EnumTotal;
-        GLsizei vec4Size = sizeof(glm::vec4);
-        for(uint j = 0; j < 4; ++j){
-            glEnableVertexAttribArray(attributeIndex+j); 
-            glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(j * vec4Size));
-            if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
-        }
-    }
+	auto& m = *((Mesh*)r)->m_i;
+	if(m.m_VAO){
+		glBindVertexArray(m.m_VAO);
+	}else{
+		glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
+		uint _structSize = m.m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
+		uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
+		for(uint i = 0; i < _enumTotal; ++i){
+			auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+			glEnableVertexAttribArray(i);
+			glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),_structSize,(void*)d.get<3>());
+		}
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.m_buffers.at(1));
+		//instances
+		if(m.m_buffers.size() >= 3){
+			glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(2));
+			uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+			for(uint j = 0; j < 4; ++j){
+				glEnableVertexAttribArray(attributeIndex+j); 
+				glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
+				if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
+			}
+		}
+	}
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
     auto& m = *((Mesh*)r)->m_i;
-    if(m.m_Skeleton){
-        for(uint i = 0; i < epriv::VertexFormatAnimated::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
-    }else{
-        for(uint i = 0; i < epriv::VertexFormat::EnumTotal; ++i){ glDisableVertexAttribArray(i); }
-    }
-    //instances
-    if(m.m_buffers.size() >= 3){
-        uint attributeIndex = epriv::VertexFormatAnimated::EnumTotal;
-        for(uint j = 0; j < 4; ++j){ glDisableVertexAttribArray(attributeIndex + j); }
-    }
+	if(m.m_VAO){
+		glBindVertexArray(0);
+	}else{
+		uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
+		for(uint i = 0; i < _enumTotal; ++i){ glDisableVertexAttribArray(i); }
+		//instances
+		if(m.m_buffers.size() >= 3){
+			uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+			for(uint j = 0; j < 4; ++j){ glDisableVertexAttribArray(attributeIndex + j); }
+		}
+	}
 }};
 DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMeshUnbindFunctor Mesh::impl::DEFAULT_UNBIND_FUNCTOR;
@@ -1185,11 +1208,12 @@ void InternalMeshPublicInterface::UpdateInstance(Mesh* mesh,uint _id, glm::mat4 
     glBufferSubData(GL_ARRAY_BUFFER, _id * sizeof(glm::mat4), sizeof(glm::mat4), &_modelMatrix);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-void InternalMeshPublicInterface::UpdateInstances(Mesh* mesh,std::vector<glm::mat4>& _modelMatrices){
+void InternalMeshPublicInterface::UpdateInstances(Mesh* mesh,vector<glm::mat4>& _modelMatrices){
+	auto& i = *mesh->m_i;
+	i.m_InstanceCount = _modelMatrices.size();
     if(_modelMatrices.size() == 0) return;
-    auto& i = *mesh->m_i;
     glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers.at(2));
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * _modelMatrices.size(), &_modelMatrices[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * i.m_InstanceCount, &_modelMatrices[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 bool InternalMeshPublicInterface::SupportsInstancing(){
@@ -1200,7 +1224,6 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
     }
     return false;
 }
-
 Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,heightfield,threshold);
 }
@@ -1231,7 +1254,8 @@ void Mesh::render(bool instancing,GLuint mode){
 	auto& i = *m_i;
 	const uint& indicesSize = i.m_Indices.size();
     if(instancing && InternalMeshPublicInterface::SupportsInstancing()){
-		const uint& instancesCount = i.m_InstanceMatrices.size();
+		const uint& instancesCount = i.m_InstanceCount;
+		if(instancesCount == 0) return;
         if(epriv::RenderManager::OPENGL_VERSION >= 31){
                glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced)){

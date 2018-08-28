@@ -1,4 +1,5 @@
 #include "Engine_FullscreenItems.h"
+#include "Engine_Renderer.h"
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -28,9 +29,10 @@ class epriv::FullscreenTriangle::impl final{
         vector<ushort> m_Indices;
         vector<MeshVertexDataFullscreen> m_Vertices;
         vector<GLuint> m_Buffers;
+		GLuint m_VAO;
         void _init(){
             MeshVertexDataFullscreen v1,v2,v3;
-
+			m_VAO = 0;
             v1.position = glm::vec3(-1.0f,-1.0f,0.0f); v1.uv = glm::vec2(0.0f,0.0f);
             v2.position = glm::vec3(4.0f, -1.0f,0.0f); v2.uv = glm::vec2(2.5f,0.0f);
             v3.position = glm::vec3(-1.0f, 4.0f,0.0f); v3.uv = glm::vec2(0.0f,2.5f);
@@ -48,23 +50,48 @@ class epriv::FullscreenTriangle::impl final{
             glGenBuffers(1, &m_Buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
+
+			//vao's
+			if(RenderManager::OPENGL_VERSION >= 30){
+				//gen and bind vao
+				Renderer::genAndBindVAO(m_VAO);
+
+				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)0);
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
+
+				glBindVertexArray(0);
+			}
         }
         void _destruct(){
-            glDeleteBuffers(1,&m_Buffers.at(0));
-            glDeleteBuffers(1,&m_Buffers.at(1));
+            for(uint i = 0; i < m_Buffers.size(); ++i)
+                glDeleteBuffers(1,&m_Buffers.at(i));
+			if(m_VAO){
+				glDeleteVertexArrays(1,&m_VAO);
+				m_VAO = 0;
+			}
         }
         void _render(){
-            glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)0);
+			if(m_VAO){
+				glBindVertexArray(m_VAO);
+				glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
+				//glBindVertexArray(0);
+			}else{
+				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)0);
 
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
-            glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
-            glDisableVertexAttribArray(0);
-            glDisableVertexAttribArray(1);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
+				glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
+				glDisableVertexAttribArray(0);
+				glDisableVertexAttribArray(1);
+			}
         }
 };
 class epriv::FullscreenQuad::impl final{
@@ -72,9 +99,10 @@ class epriv::FullscreenQuad::impl final{
         vector<ushort> m_Indices;
         vector<MeshVertexDataFullscreen> m_Vertices;
         vector<GLuint> m_Buffers;
+		GLuint m_VAO;
         void _init(){
             MeshVertexDataFullscreen v1,v2,v3,v4;
-
+			m_VAO = 0;
             v1.position = glm::vec3(-1.0f,-1.0f, 0.0f); v1.uv = glm::vec2(0.0f,0.0f);
             v2.position = glm::vec3( 1.0f,-1.0f, 0.0f); v2.uv = glm::vec2(1.0f,0.0f);
             v3.position = glm::vec3( 1.0f, 1.0f, 0.0f); v3.uv = glm::vec2(1.0f,1.0f);
@@ -93,23 +121,47 @@ class epriv::FullscreenQuad::impl final{
             glGenBuffers(1, &m_Buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
+
+			//vao's
+			if(RenderManager::OPENGL_VERSION >= 30){
+				//gen and bind vao
+				Renderer::genAndBindVAO(m_VAO);
+
+				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)0);
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
+				glBindVertexArray(0);
+			}
         }
         void _destruct(){
-            glDeleteBuffers(1,&m_Buffers.at(0));
-            glDeleteBuffers(1,&m_Buffers.at(1));
+            for(uint i = 0; i < m_Buffers.size(); ++i)
+                glDeleteBuffers(1,&m_Buffers.at(i));
+			if(m_VAO){
+				glDeleteVertexArrays(1,&m_VAO);
+				m_VAO = 0;
+			}
         }
         void _render(){
-            glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)0);
+			if(m_VAO){
+				glBindVertexArray(m_VAO);
+				glDrawElements(GL_TRIANGLES,m_Indices.size(),GL_UNSIGNED_SHORT,0);
+				//glBindVertexArray(0);
+			}else{
+				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)0);
 
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(MeshVertexDataFullscreen),(void*)offsetof(MeshVertexDataFullscreen,uv));
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
-            glDrawElements(GL_QUADS,m_Indices.size(),GL_UNSIGNED_SHORT,0);
-            glDisableVertexAttribArray(0);
-            glDisableVertexAttribArray(1);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers.at(1));
+				glDrawElements(GL_QUADS,m_Indices.size(),GL_UNSIGNED_SHORT,0);
+				glDisableVertexAttribArray(0);
+				glDisableVertexAttribArray(1);
+			}
         }
 };
 epriv::FullscreenTriangle::FullscreenTriangle():m_i(new impl){ m_i->_init(); }
