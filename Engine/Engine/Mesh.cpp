@@ -144,53 +144,6 @@ class Mesh::impl final{
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super->load();
         }
-
-        void _init(Mesh* super,string& name,btHeightfieldTerrainShape* heightfield,float threshold){//heightmap
-            epriv::ImportedMeshData d;
-            _initGlobal(threshold);
-            uint width(heightfield->getHeightStickWidth());
-            uint length(heightfield->getHeightStickLength());
-            for(uint i = 0; i < width-1; ++i){
-                for(uint j = 0; j < length-1; ++j){
-                    btVector3 vert1,vert2,vert3,vert4;
-                    heightfield->getVertex1(i,  j,  vert1);
-                    heightfield->getVertex1(i+1,j,  vert2);
-                    heightfield->getVertex1(i,  j+1,vert3);
-                    heightfield->getVertex1(i+1,j+1,vert4);
-
-                    epriv::Vertex v1,v2,v3,v4;
-                    v1.position = glm::vec3(vert1.x(),vert1.y(),vert1.z());
-                    v2.position = glm::vec3(vert2.x(),vert2.y(),vert2.z());
-                    v3.position = glm::vec3(vert3.x(),vert3.y(),vert3.z());
-                    v4.position = glm::vec3(vert4.x(),vert4.y(),vert4.z());
-
-                    glm::vec3 a(v4.position - v1.position);
-                    glm::vec3 b(v2.position - v3.position);
-                    glm::vec3 normal(glm::normalize(glm::cross(a,b)));
-
-                    v1.normal = normal;
-                    v2.normal = normal;
-                    v3.normal = normal;
-                    v4.normal = normal;
-
-                    v1.uv = glm::vec2(float(i) / float(width),float(j) / float(length));
-                    v2.uv = glm::vec2(float(i+1) / float(width),float(j) / float(length));
-                    v3.uv = glm::vec2(float(i) / float(width),float(j+1) / float(length));
-                    v4.uv = glm::vec2(float(i+1) / float(width),float(j+1) / float(length));
-
-                    d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
-                    d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
-                    d.points.push_back(v1.position); d.uvs.push_back(v1.uv); d.normals.push_back(v1.normal);
-
-                    d.points.push_back(v3.position); d.uvs.push_back(v3.uv); d.normals.push_back(v3.normal);
-                    d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
-                    d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
-
-                    _calculateTBN(d);
-                }
-            }
-            _initGlobalTwo(super,d,threshold);
-        }
         void _init(Mesh* super,string& name,unordered_map<string,float>& grid,uint width,uint length,float threshold){//grid
             epriv::ImportedMeshData d;
             _initGlobal(threshold);  
@@ -1017,7 +970,7 @@ class Mesh::impl final{
 						if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
 					}
 				}
-				glBindVertexArray(0);
+				Renderer::bindVAO(0);
 			}
             cout << "(Mesh) ";
         }
@@ -1025,7 +978,7 @@ class Mesh::impl final{
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
 	auto& m = *((Mesh*)r)->m_i;
 	if(m.m_VAO){
-		glBindVertexArray(m.m_VAO);
+		Renderer::bindVAO(m.m_VAO);
 	}else{
 		glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
 		uint _structSize = m.m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
@@ -1051,7 +1004,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
     auto& m = *((Mesh*)r)->m_i;
 	if(m.m_VAO){
-		glBindVertexArray(0);
+		Renderer::bindVAO(0);
 	}else{
 		uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
 		for(uint i = 0; i < _enumTotal; ++i){ glDisableVertexAttribArray(i); }

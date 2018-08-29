@@ -108,15 +108,15 @@ void Skybox::initMesh(){
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-			glBindVertexArray(0);
+			Renderer::bindVAO(0);
 		}
     }
 }
 void Skybox::bindMesh(){
 	if(m_VAO){
-		glBindVertexArray(m_VAO);
+		Renderer::bindVAO(m_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, Skybox::m_Vertices.size());
-		//glBindVertexArray(0);
+		//Renderer::bindVAO(0);
 	}else{
 		glBindBuffer( GL_ARRAY_BUFFER, m_Buffer);
 		glEnableVertexAttribArray(0);

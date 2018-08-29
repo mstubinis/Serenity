@@ -200,7 +200,7 @@ namespace Engine{
         void bindDrawFBO(GLuint fbo);
 
         void bindTexture(GLuint _textureType,GLuint _textureObject);
-		void bindVAO(GLuint& _vaoObject);
+		void bindVAO(const GLuint _vaoObject);
         void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
 		void genAndBindVAO(GLuint& _vaoObject);
 

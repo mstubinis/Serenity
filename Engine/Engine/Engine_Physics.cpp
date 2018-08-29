@@ -25,9 +25,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 //yes, this code is needed or stuff breaks. find out why
-#include <windows.h>
 #include <GL/gl.h>
-#include <GL/glut.h>
+//#include <GL/glut.h>
 ////////////////////////////////////////////
 
 using namespace Engine;
@@ -61,9 +60,9 @@ namespace Engine{
                 }
                 void renderLines(){
                     if(m_VAO){
-                        glBindVertexArray(m_VAO);
+                        Renderer::bindVAO(m_VAO);
                         glDrawArrays(GL_LINES, 0,vertices.size());
-                        glBindVertexArray(0);
+                        Renderer::bindVAO(0);
                     }else{
                         glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
                         glEnableVertexAttribArray(0);
@@ -97,7 +96,7 @@ namespace Engine{
                         glEnableVertexAttribArray(1);
                         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex,color)));
 
-                        glBindVertexArray(0);
+                        Renderer::bindVAO(0);
                     }
                 }
                 virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
