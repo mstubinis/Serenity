@@ -120,7 +120,7 @@ namespace Engine{
                 attatchment.second->unbind();
             }
             Renderer::unbindFBO();
-            glm::uvec2& winSize = Resources::getWindowSize();
+            glm::uvec2 winSize = Resources::getWindowSize();
             Renderer::setViewport(0,0,winSize.x,winSize.y);
         }};
     };

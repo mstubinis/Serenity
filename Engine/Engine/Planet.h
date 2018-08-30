@@ -89,7 +89,7 @@ class Planet: public Entity{
         float getAtmosphereHeight();
 
         void setPosition(float x,float y,float z);
-        void setPosition(glm::vec3& pos);
+        void setPosition(glm::vec3 pos);
 
         void addRing(Ring*);
 

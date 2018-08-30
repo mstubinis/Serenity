@@ -30,12 +30,12 @@ struct EngineCallback{
 		emptyFunctor e; 
 		cbk = boost::bind<void>(e); 
 	}
-	EngineCallback(boost_shared_fut& _fut){ 
+	EngineCallback(boost_shared_fut _fut){ 
 		emptyFunctor e;
 		fut = _fut;
 		cbk = boost::bind<void>(e); 
 	}
-	EngineCallback(boost_shared_fut& _fut, boost_void_func& _cbk){ 
+	EngineCallback(boost_shared_fut _fut, boost_void_func _cbk){ 
 		fut = _fut;
 		cbk = _cbk; 
 	}

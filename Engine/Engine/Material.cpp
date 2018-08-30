@@ -83,7 +83,7 @@ namespace Engine{
             m.at(MaterialPhysics::Car_Paint_Orange)     = boost::make_tuple(1.0f,0.2f,0.0f,                0.9f,           0.5f);
             return m;
         }();
-        GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::_TOTAL] = {
+        const GLchar* MATERIAL_COMPONENT_SHADER_TEXTURE_NAMES[MaterialComponentType::Type::_TOTAL] = {
             "DiffuseTexture",
             "NormalTexture",
             "GlowTexture",

@@ -92,7 +92,7 @@ class epriv::ComponentCameraSystem::impl final{
         void _update(const float& dt){
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentCamera>();
             auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-            auto& split = epriv::threading::splitVector(v);
+            auto split = epriv::threading::splitVector(v);
             for(auto vec:split){
                 epriv::threading::addJob(_defaultUpdateCameraComponent,vec,dt);
             }
@@ -159,7 +159,7 @@ class epriv::ComponentManager::impl final{
             //basic bodies
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentBody>();
             vector<ComponentBaseClass*>& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-            vector<vector<ComponentBaseClass*>>& split = epriv::threading::splitVector(v);
+            vector<vector<ComponentBaseClass*>> split = epriv::threading::splitVector(v);
 
             for(auto vec:split){
                 epriv::threading::addJob(_updateBodiesJob,vec);
@@ -168,7 +168,7 @@ class epriv::ComponentManager::impl final{
         }
         void _calculateRenderCheck(ComponentModel& m,Camera* camera){
             auto& body = *(m.m_Owner->getComponent<ComponentBody>());
-            auto& pos = body.position();
+            auto pos = body.position();
             uint sphereTest = camera->sphereIntersectTest(pos,m._radius);
             if(!m.visible() || sphereTest == 0 || camera->getDistance(pos) > m._radius * 1100.0f){ //1100 is the visibility threshold
                 m.m_i->m_PassedRenderCheck = false;
@@ -192,7 +192,7 @@ class epriv::ComponentManager::impl final{
             auto* camera = Resources::getCurrentScene()->getActiveCamera();
             uint slot = componentManager->getIndividualComponentTypeSlot<ComponentModel>();
             auto& v = ComponentManager::m_ComponentVectorsScene.at(slot);
-            auto& split = epriv::threading::splitVector(v);
+            auto split = epriv::threading::splitVector(v);
             for(auto vec:split){
                 epriv::threading::addJob(_updateModelComponentsJob,vec,camera);
             }
@@ -542,7 +542,7 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
         //recheck this
         btTransform tr;
         data.p.rigidBody->getMotionState()->getWorldTransform(tr);
-        Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction,speed);
+        //Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction,speed);
         Math::recalculateForwardRightUp(data.p.rigidBody,_forward,_right,_up);
     }
     else{
@@ -588,7 +588,7 @@ void ComponentBody::setCollision(Collision* collision,bool emptyCollision,glm::v
     data.p.collision = collision;
     data.p.collision->getCollisionShape()->setUserPointer(this);
 }
-void ComponentBody::translate(glm::vec3& translation,bool local){ ComponentBody::translate(translation.x,translation.y,translation.z,local); }
+void ComponentBody::translate(glm::vec3 translation,bool local){ ComponentBody::translate(translation.x,translation.y,translation.z,local); }
 void ComponentBody::translate(float x,float y,float z,bool local){
     if(_physics){
         data.p.rigidBody->activate();
@@ -606,7 +606,7 @@ void ComponentBody::translate(float x,float y,float z,bool local){
         setPosition(_position + offset);
     }
 }
-void ComponentBody::rotate(glm::vec3& rotation,bool local){ ComponentBody::rotate(rotation.x,rotation.y,rotation.z,local); }
+void ComponentBody::rotate(glm::vec3 rotation,bool local){ ComponentBody::rotate(rotation.x,rotation.y,rotation.z,local); }
 void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
     if(_physics){
         btQuaternion quat = data.p.rigidBody->getWorldTransform().getRotation().normalize();
@@ -627,7 +627,7 @@ void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
         Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
     }
 }
-void ComponentBody::scale(glm::vec3& amount){ ComponentBody::scale(amount.x,amount.y,amount.z); }
+void ComponentBody::scale(glm::vec3 amount){ ComponentBody::scale(amount.x,amount.y,amount.z); }
 void ComponentBody::scale(float x,float y,float z){
     if(_physics){
         if(data.p.collision){
@@ -659,7 +659,7 @@ void ComponentBody::scale(float x,float y,float z){
         }
     }
 }
-void ComponentBody::setPosition(glm::vec3& newPosition){ ComponentBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
+void ComponentBody::setPosition(glm::vec3 newPosition){ ComponentBody::setPosition(newPosition.x,newPosition.y,newPosition.z); }
 void ComponentBody::setPosition(float x,float y,float z){
     if(_physics){
         btTransform tr;
@@ -689,7 +689,7 @@ void ComponentBody::setPosition(float x,float y,float z){
         _matrix[3][2] = z;
     }
 }
-void ComponentBody::setRotation(glm::quat& newRotation){ ComponentBody::setRotation(newRotation.x,newRotation.y,newRotation.z,newRotation.w); }
+void ComponentBody::setRotation(glm::quat newRotation){ ComponentBody::setRotation(newRotation.x,newRotation.y,newRotation.z,newRotation.w); }
 void ComponentBody::setRotation(float x,float y,float z,float w){
     if(_physics){
         btQuaternion quat(x,y,z,w);
@@ -714,7 +714,7 @@ void ComponentBody::setRotation(float x,float y,float z,float w){
         Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
     }
 }
-void ComponentBody::setScale(glm::vec3& newScale){ ComponentBody::setScale(newScale.x,newScale.y,newScale.z); }
+void ComponentBody::setScale(glm::vec3 newScale){ ComponentBody::setScale(newScale.x,newScale.y,newScale.z); }
 void ComponentBody::setScale(float x,float y,float z){
     if(_physics){
         if(data.p.collision){

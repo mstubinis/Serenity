@@ -633,7 +633,7 @@ class Mesh::impl final{
             }
             for(uint i = 0; i < out_vertices.size(); ++i){
                 if(m_Skeleton){
-                    auto& vert = (epriv::MeshVertexDataAnimated)out_vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)out_vertices.at(i);
                     //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
                     vert.uv = temp_uvs.at(i);
                     vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
@@ -641,7 +641,7 @@ class Mesh::impl final{
                     vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
                 }
                 else{
-                    auto& vert = out_vertices.at(i);
+                    auto vert = out_vertices.at(i);
                     //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
                     vert.uv = temp_uvs.at(i);
                     vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
@@ -819,7 +819,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -841,7 +841,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -861,7 +861,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -911,7 +911,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -1176,9 +1176,6 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
         return true;
     }
     return false;
-}
-Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(this,name,heightfield,threshold);
 }
 Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,grid,width,length,threshold);

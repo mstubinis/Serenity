@@ -81,14 +81,18 @@ class Networking::SocketUDP::impl{
         }
         sf::Socket::Status _bind(const std::string& _ip){
             m_Socket.unbind();
-            if(_ip == ""){ return m_Socket.bind(m_Port,sf::IpAddress::Any); }
+            if(_ip == ""){ return m_Socket.bind(m_Port, sf::IpAddress(0, 0, 0, 0)); }
             else{ return m_Socket.bind(m_Port,_ip); }
         }
         void _unbind(){ m_Socket.unbind(); }
         sf::Socket::Status _send(sf::Packet& _packet,const string& _ip){ return m_Socket.send(_packet,_ip,m_Port); }
         sf::Socket::Status _send(const void* _data, size_t _size,const string& _ip){ return m_Socket.send(_data,_size,_ip,m_Port); }
-        sf::Socket::Status _receive(sf::Packet& _packet,const string& _ip){ return m_Socket.receive(_packet,sf::IpAddress(_ip),m_Port); }
-        sf::Socket::Status _receive(void* _data, size_t _size,size_t& _received,const string& _ip){ return m_Socket.receive(_data,_size,_received,sf::IpAddress(_ip),m_Port); }
+        sf::Socket::Status _receive(sf::Packet& _packet,const string& _ip){ 
+			sf::IpAddress ip(_ip); return m_Socket.receive(_packet,ip,m_Port);
+		}
+        sf::Socket::Status _receive(void* _data, size_t _size,size_t& _received,const string& _ip){ 
+			sf::IpAddress ip(_ip); return m_Socket.receive(_data,_size,_received,ip,m_Port);
+		}
 };
 Networking::SocketUDP::SocketUDP(const uint _port):m_i(new impl){
     m_i->_init(_port);
@@ -139,7 +143,7 @@ class Networking::ListenerTCP::impl{
         }
         sf::Socket::Status _listen(){
             m_Listener.close();
-            if(m_IP == ""){ return m_Listener.listen(m_Port,sf::IpAddress::Any); }
+            if(m_IP == ""){ return m_Listener.listen(m_Port,sf::IpAddress(0,0,0,0)); }
             else{ return m_Listener.listen(m_Port,m_IP); }
         }
         sf::Socket::Status _accept(sf::TcpSocket& _socket){

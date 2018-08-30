@@ -7,7 +7,6 @@
 #include <memory>
 #include "Engine_Utils.h"
 
-
 class Entity;
 class btCollisionDispatcher;
 class btDynamicsWorld;
@@ -33,7 +32,6 @@ class CollisionType{public: enum Type{
     Box,
     Sphere,
     None,
-
 _TOTAL,};};
 class Collision final{
     private:

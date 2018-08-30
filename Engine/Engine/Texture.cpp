@@ -980,7 +980,7 @@ Texture::~Texture(){
     for(auto data:m_i->m_ImagesDatas)
         SAFE_DELETE(data);
 }
-void Texture::render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
+void Texture::render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     if(m_i->m_TextureType == TextureType::CubeMap) return;
     Core::m_Engine->m_RenderManager->_renderTexture(this,pos,color,scl,angle,depth);
 }
