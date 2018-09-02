@@ -3,7 +3,7 @@
 using namespace std;
 namespace B = ::boost;
 
-void _add(vector<GLStateT>& v,uint key,GLStateT& value){ v.at(key) = value; }
+void _add(vector<GLStateT>& v,uint key,GLStateT value){ v.at(key) = value; }
 //enabled? //enableGLFunc //disableGLFunc
 vector<GLStateT> GLState::SM = [](){
     vector<GLStateT> m; m.resize(GLState::_TOTAL);

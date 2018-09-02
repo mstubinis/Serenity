@@ -70,7 +70,7 @@ namespace Engine{
                 }
                 void update(Handle& handle,T* ptr){
                     const uint index = handle.index;
-                    if(m_Pool[index].counter == h.counter && m_Pool[index].active){
+                    if(m_Pool[index].counter == handle.counter && m_Pool[index].active){
                         m_Pool[index].resource = ptr;
                     }
                 }

@@ -17,7 +17,7 @@
 using namespace Engine;
 using namespace std;
 
-void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4& inViewProjection,glm::vec4* outPlanes){
+void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4 inViewProjection,glm::vec4* outPlanes){
     glm::vec4 rows[4];
     for(ushort i = 0; i < 4; ++i)
         rows[i] = glm::row(inViewProjection,i);
@@ -39,11 +39,11 @@ void Math::extractViewFrustumPlanesHartmannGribbs(glm::mat4& inViewProjection,gl
     }
     */
 }
-glm::quat Math::btToGLMQuat(btQuaternion& q){ glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ()); return glmQuat; }
-btQuaternion Math::glmToBTQuat(glm::quat& q){ btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w); return btQuat; }
-glm::vec3 Math::assimpToGLMVec3(aiVector3D& n){ glm::vec3 ret = glm::vec3(n.x,n.y,n.z); return ret; }
-glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4& n){ glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4); return ret; }
-glm::mat3 Math::assimpToGLMMat3(aiMatrix3x3& n){ glm::mat3 ret = glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3); return ret; }
+glm::quat Math::btToGLMQuat(btQuaternion q){ glm::quat glmQuat = glm::quat(q.getW(),q.getX(),q.getY(),q.getZ()); return glmQuat; }
+btQuaternion Math::glmToBTQuat(glm::quat q){ btQuaternion btQuat = btQuaternion(q.x,q.y,q.z,q.w); return btQuat; }
+glm::vec3 Math::assimpToGLMVec3(aiVector3D n){ glm::vec3 ret = glm::vec3(n.x,n.y,n.z); return ret; }
+glm::mat4 Math::assimpToGLMMat4(aiMatrix4x4 n){ glm::mat4 ret = glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4); return ret; }
+glm::mat3 Math::assimpToGLMMat3(aiMatrix3x3 n){ glm::mat3 ret = glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3); return ret; }
 
 float Math::toRadians(float degrees){ return degrees * 0.0174533f; }
 float Math::toDegrees(float radians){ return radians * 57.2958f; }
@@ -51,8 +51,8 @@ float Math::toRadians(double degrees){ return Math::toRadians(float(degrees)); }
 float Math::toDegrees(double radians){ return Math::toDegrees(float(radians)); }
 float Math::remainder(float x,float y){ return x - (glm::round(x/y)*y); }
 
-glm::vec3 Math::btVectorToGLM(btVector3& bt){ return glm::vec3(bt.x(),bt.y(),bt.z()); }
-btVector3 Math::btVectorFromGLM(glm::vec3& v){ return btVector3(v.x,v.y,v.z); }
+glm::vec3 Math::btVectorToGLM(btVector3 bt){ return glm::vec3(bt.x(),bt.y(),bt.z()); }
+btVector3 Math::btVectorFromGLM(glm::vec3 v){ return btVector3(v.x,v.y,v.z); }
 
 void Math::removeMatrixPosition(glm::mat4& m){
     m[3][0] = 0; m[3][1] = 0; m[3][2] = 0;
@@ -100,9 +100,9 @@ vector<glm::vec4> Math::tiledFrustrum(Camera* camera,uint x,uint y){
     */
 
     uint MAX_WORK_GROUP_SIZE = 16;
-    glm::mat4& proj = camera->getProjection();
+    glm::mat4 proj = camera->getProjection();
     //glm::mat4 proj = camera->getProjection() * camera->getView();
-    glm::uvec2& winSize = Resources::getWindowSize();
+    glm::uvec2 winSize = Resources::getWindowSize();
     glm::vec4 frustumPlanes[6];
     glm::vec2 tileScale = glm::vec2(winSize.x,winSize.y) * (1.0f / float(2 * MAX_WORK_GROUP_SIZE));
     glm::vec2 tileBias = tileScale - glm::vec2(x,y);
@@ -149,7 +149,7 @@ vector<glm::vec4> Math::tiledFrustrum(Camera* camera,uint x,uint y){
     */
 }
 
-glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
+glm::vec3 Math::getScreenCoordinates(glm::vec3 objPos,bool clampToEdge){
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize().x,Resources::getWindowSize().y);
     glm::vec4 viewport = glm::vec4(0,0,winSize.x,winSize.y);
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
@@ -177,9 +177,9 @@ glm::vec3 Math::getScreenCoordinates(glm::vec3& objPos,bool clampToEdge){
     else if(fY > winSize.y/2){ if(clampToEdge) fY = winSize.y; else fY = -9999999.0f; }
     return glm::vec3(fX,fY,inBounds);
 }
-float Math::Max(glm::vec2& v){ return glm::max(v.x,v.y); }
-float Math::Max(glm::vec3& v){ return glm::max(v.x,glm::max(v.y,v.z)); }
-float Math::Max(glm::vec4& v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w))); }
+float Math::Max(glm::vec2 v){ return glm::max(v.x,v.y); }
+float Math::Max(glm::vec3 v){ return glm::max(v.x,glm::max(v.y,v.z)); }
+float Math::Max(glm::vec4 v){ return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w))); }
 float Math::Max(float x, float y){ return glm::max(x,y); }
 float Math::Max(float x, float y, float z){ return glm::max(x,glm::max(y,z)); }
 float Math::Max(float x, float y, float z, float w){ return glm::max(x,glm::max(y,glm::max(z,w))); }
@@ -315,7 +315,7 @@ glm::vec3 Math::getRight(const btRigidBody* b){ return Math::getColumnVector(b,0
 glm::vec3 Math::getUp(const btRigidBody* b){ return Math::getColumnVector(b,1); }
 void Math::recalculateForwardRightUp(glm::quat& o,glm::vec3& f,glm::vec3& r,glm::vec3& u){ f = Math::getForward(o); r = Math::getRight(o); u = Math::getUp(o); }
 void Math::recalculateForwardRightUp(const btRigidBody* b,glm::vec3& f,glm::vec3& r,glm::vec3& u){f = Math::getForward(b); r = Math::getRight(b); u = Math::getUp(b);}
-float Math::getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees){
+float Math::getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees){
     // forced protection against NaN if a and b happen to be equal
     a.x += 0.0000001f;
     float angle = glm::acos( glm::dot(glm::normalize(a),glm::normalize(b)) );
@@ -374,7 +374,7 @@ glm::vec4 Math::PaintersAlgorithm(glm::vec4& p, glm::vec4& c){
     ret.a = a;
     return ret;
 }
-bool Math::rayIntersectSphere(glm::vec3& C, float r,glm::vec3& A, glm::vec3& rayVector){
+bool Math::rayIntersectSphere(glm::vec3 C, float r,glm::vec3 A, glm::vec3 rayVector){
     glm::vec3 B = A + rayVector;
     float dot = glm::dot(rayVector,C - A); //check if point is behind
     if(dot >= 0.0f)

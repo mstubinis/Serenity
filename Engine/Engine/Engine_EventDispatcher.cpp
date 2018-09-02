@@ -23,16 +23,16 @@ class epriv::EventDispatcher::impl final{
         }
         void _update(const float& dt){
         }
-        void _registerObject(EventObserver* obj, EventType::Type& type){
+        void _registerObject(EventObserver* obj, EventType::Type type){
             auto& v = m_Observers.at(type);
             for(auto o:v){ if (o == obj){ return; } }
             v.push_back(obj);
         }
-        void _unregisterObject(EventObserver* obj, EventType::Type& type){
+        void _unregisterObject(EventObserver* obj, EventType::Type type){
             auto& v = m_Observers.at(type);
 			removeFromVector(v,obj);
         }
-        void _dispatchEvent(EventType::Type& type,const Event& e){
+        void _dispatchEvent(EventType::Type type,const Event& e){
             auto& v = m_Observers.at(type);
             for(auto obj:v){
                 obj->onEvent(e);

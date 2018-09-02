@@ -56,7 +56,7 @@ namespace Engine{
             MeshVertexDataAnimated(const MeshVertexData& c){
                 position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
             }
-            MeshVertexDataAnimated(const MeshVertexDataAnimated& c){    
+            MeshVertexDataAnimated(const MeshVertexDataAnimated& c){
                 position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent; boneIDs=c.boneIDs; boneWeights=c.boneWeights;
             }
             ~MeshVertexDataAnimated(){ }
@@ -421,10 +421,10 @@ class Mesh::impl final{
             if(boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z) ) return true;
             return false;
         }
-        bool _getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<epriv::MeshVertexData>& out_vertices,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
-            for (uint i=0; i < out_vertices.size(); ++i ){
-                if (_is_near( in_pos.x , out_vertices.at(i).position.x ,threshold) && _is_near( in_pos.y , out_vertices.at(i).position.y ,threshold) &&
-                    _is_near( in_pos.z , out_vertices.at(i).position.z ,threshold) && _is_near( in_uv.x  , uvs.at(i).x      ,threshold) &&
+        bool _getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
+            for (uint i=0; i < m_Vertices.size(); ++i ){
+                if (_is_near( in_pos.x , m_Vertices.at(i).position.x ,threshold) && _is_near( in_pos.y , m_Vertices.at(i).position.y ,threshold) &&
+                    _is_near( in_pos.z , m_Vertices.at(i).position.z ,threshold) && _is_near( in_uv.x  , uvs.at(i).x      ,threshold) &&
                     _is_near( in_uv.y  , uvs.at(i).y      ,threshold) && _is_near( in_norm.x , norms.at(i).x ,threshold) &&
                     _is_near( in_norm.y , norms.at(i).y ,threshold) && _is_near( in_norm.z , norms.at(i).z ,threshold)
                 ){
@@ -566,11 +566,11 @@ class Mesh::impl final{
                 }
             }
         }
-        void _indexVBO(Mesh* mesh,epriv::ImportedMeshData& data,vector<ushort>& out_indices,vector<epriv::MeshVertexData>& out_vertices, float threshold){
+        void _indexVBO(Mesh* mesh,epriv::ImportedMeshData& data, float threshold){
             if(threshold == 0.0f){
                 uint c = 0;
                 for(auto pt:data.points){
-                    if(m_Skeleton != nullptr){
+                    if(m_Skeleton){
                         epriv::MeshVertexDataAnimated vert;
                         vert.position = pt;
                         //vert.uv = Math::pack2FloatsInto1Float(data.uvs.at(c));
@@ -580,7 +580,7 @@ class Mesh::impl final{
                             vert.binormal = Math::pack3NormalsInto32Int(data.binormals.at(c));
                         if(c <= data.tangents.size()-1)
                             vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
-                        out_vertices.push_back(vert);
+                        m_Vertices.push_back(vert);
                     }
                     else{
                         epriv::MeshVertexData vert;
@@ -590,11 +590,11 @@ class Mesh::impl final{
                         vert.normal = Math::pack3NormalsInto32Int(data.normals.at(c));
                         vert.binormal = Math::pack3NormalsInto32Int(data.binormals.at(c));
                         vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
-                        out_vertices.push_back(vert);
+						m_Vertices.push_back(vert);
                     }
-                    c++;
+                    ++c;
                 }
-                out_indices = data.indices;
+                m_Indices = data.indices;
                 return;
             }
             vector<glm::vec2> temp_uvs;
@@ -603,9 +603,9 @@ class Mesh::impl final{
             vector<glm::vec3> temp_tangents;
             for (uint i=0; i < data.points.size(); ++i){
                 ushort index;
-                bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),out_vertices,temp_uvs,temp_normals, index,threshold);
+                bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),temp_uvs,temp_normals, index,threshold);
                 if (found){
-                    out_indices.push_back(index);
+					m_Indices.push_back(index);
 
                     //average out TBN. But it cancels out normal mapping on some flat surfaces
                     //temp_binormals.at(index) += data.binormals.at(i);
@@ -615,12 +615,12 @@ class Mesh::impl final{
                     if(m_Skeleton){
                         epriv::MeshVertexDataAnimated vert;
                         vert.position = data.points.at(i);
-                        out_vertices.push_back(vert);
+						m_Vertices.push_back(vert);
                     }
                     else{
                         epriv::MeshVertexData vert;
                         vert.position = data.points.at(i);
-                        out_vertices.push_back(vert);
+						m_Vertices.push_back(vert);
                     }
                     temp_uvs.push_back(data.uvs.at(i));
 
@@ -628,12 +628,13 @@ class Mesh::impl final{
                     temp_binormals.push_back(data.binormals.at(i));
                     temp_tangents.push_back(data.tangents.at(i));
 
-                    out_indices.push_back((ushort)out_vertices.size() - 1);
+					m_Indices.push_back((ushort)m_Vertices.size() - 1);
                 }
             }
-            for(uint i = 0; i < out_vertices.size(); ++i){
+            for(uint i = 0; i < m_Vertices.size(); ++i){
+				/*
                 if(m_Skeleton){
-                    auto& vert = (epriv::MeshVertexDataAnimated)out_vertices.at(i);
+                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
                     vert.uv = temp_uvs.at(i);
                     vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
@@ -641,13 +642,20 @@ class Mesh::impl final{
                     vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
                 }
                 else{
-                    auto& vert = out_vertices.at(i);
+                    auto& vert = m_Vertices.at(i);
                     //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
                     vert.uv = temp_uvs.at(i);
                     vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
                     vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
                     vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
                 }
+				*/
+				auto& vert = m_Vertices.at(i);
+				//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
+				vert.uv = temp_uvs.at(i);
+				vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
+				vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
+				vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
             }
         }
         void _loadData(Mesh* super,epriv::ImportedMeshData& data,float threshold){
@@ -658,7 +666,7 @@ class Mesh::impl final{
             if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
             if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-            _indexVBO(super,data,m_Indices,m_Vertices,m_threshold);
+            _indexVBO(super,data,m_threshold);
         }
         void _loadFromFile(Mesh* super,string file,CollisionType::Type type,float threshold){
             string extention; for(uint i = m_File.length() - 4; i < m_File.length(); ++i)extention += tolower(m_File.at(i));
@@ -819,7 +827,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -841,7 +849,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -861,7 +869,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -911,7 +919,7 @@ class Mesh::impl final{
                 auto& skeleton = *m_Skeleton->m_i;
                 vector<epriv::MeshVertexDataAnimated> temp; //this is needed to store the bone info into the buffer.
                 for(uint i = 0; i < skeleton.m_BoneIDs.size(); ++i){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+                    auto vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
                     vert.boneIDs = skeleton.m_BoneIDs.at(i);
                     vert.boneWeights = skeleton.m_BoneWeights.at(i);
                     temp.push_back(vert);
@@ -1176,9 +1184,6 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
         return true;
     }
     return false;
-}
-Mesh::Mesh(string name,btHeightfieldTerrainShape* heightfield,float threshold):BindableResource(name),m_i(new impl){
-    m_i->_init(this,name,heightfield,threshold);
 }
 Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,grid,width,length,threshold);

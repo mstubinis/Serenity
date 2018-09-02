@@ -32,7 +32,7 @@ class Constraint{
         Constraint(btRigidBody* a, btRigidBody* b);
         ~Constraint();
 
-        void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3& locationA = glm::vec3(0.0f),glm::vec3& locationB = glm::vec3(0.0f));
+        void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3 locationA = glm::vec3(0.0f),glm::vec3 locationB = glm::vec3(0.0f));
 };
 
 #endif

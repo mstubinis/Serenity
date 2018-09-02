@@ -85,7 +85,8 @@ Texture* epriv::ResourceManager::_hasTexture(string n){
     return 0;
 }
 void epriv::ResourceManager::_addScene(Scene* s){
-    _addToContainer(m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
+	boost::shared_ptr<Scene> ptr(s);
+    _addToContainer(m_i->m_Scenes,s->name(), ptr);
 }
 void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
     m_i->m_MeshInstances.push_back(m);
@@ -138,8 +139,8 @@ Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint
 Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
     Mesh* mesh = new Mesh(f,t,b,threshhold,false);
 
-    auto& job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
-    auto& cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
+    auto job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
+    auto cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
 
     Engine::epriv::threading::addJobWithPostCallback(job,cbk);
 

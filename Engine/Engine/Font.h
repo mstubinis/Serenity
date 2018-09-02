@@ -33,7 +33,7 @@ class Font final: public EngineResource{
     public:
         Font(std::string);
         ~Font();
-        void renderText(std::string& text,glm::vec2& pos,glm::vec4& color = glm::vec4(1),float angle = 0.0f,glm::vec2& scl = glm::vec2(1.0f),float depth = 0.1f);
+        void renderText(std::string text,glm::vec2 pos,glm::vec4 color = glm::vec4(1),float angle = 0.0f,glm::vec2 scl = glm::vec2(1.0f),float depth = 0.1f);
         Texture* getGlyphTexture();
         FontGlyph* getGlyphData(uchar);
 };
