@@ -241,17 +241,12 @@ class epriv::ComponentManager::impl final{
             _destroyQueuedEntities(super);
         }
 };
-
-
 epriv::ComponentTypeRegistry::ComponentTypeRegistry(){
     m_NextIndex = 0;
-    //m_NextIndexScene = 0;
 }
 epriv::ComponentTypeRegistry::~ComponentTypeRegistry(){
     m_MapComponentTypesToSlot.clear();
-    //m_MapScene.clear();
     m_NextIndex = 0;
-    //m_NextIndexScene = 0;
 }
 
 
@@ -274,13 +269,13 @@ void epriv::ComponentManager::_deleteEntityImmediately(Entity* e){
     //obviously try to improve this performance wise
     removeFromVector(e->scene()->entities(),e->id());
     for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        const uint& componentID = e->m_Components[i];
-        if(componentID != epriv::UINT_MAX_VALUE){
+        const uint& componentID = e->m_Components.at(i);
+        if(componentID != 0){
             ComponentBaseClass* component = nullptr;
             m_ComponentPool->get(componentID,component);
             componentManager->_removeComponent(component);
             m_ComponentPool->remove(componentID);
-            e->m_Components[i] = epriv::UINT_MAX_VALUE;
+            e->m_Components.at(i) = 0;
         }
     }
     m_EntityPool->remove(e->m_ID);
@@ -300,8 +295,8 @@ void epriv::ComponentManager::_sceneSwap(Scene* oldScene, Scene* newScene){
     for(auto entityID:newScene->entities()){
         Entity* e = newScene->getEntity(entityID);
         for(uint index = 0; index < ComponentType::_TOTAL; ++index){
-            uint componentID = e->m_Components[index];
-            if(componentID != UINT_MAX_VALUE){
+            uint componentID = e->m_Components.at(index);
+            if(componentID != 0){
                 ComponentBaseClass* component = nullptr;
                 m_ComponentPool->get(componentID,component);
                 if(component){
@@ -529,8 +524,7 @@ ComponentBody::~ComponentBody(){
         Physics::removeRigidBody(data.p.rigidBody);
         SAFE_DELETE(data.p.rigidBody);
         SAFE_DELETE(data.p.motionState);
-    }
-    else{
+    }else{
         SAFE_DELETE(data.n.position);
         SAFE_DELETE(data.n.scale);
         SAFE_DELETE(data.n.rotation);
@@ -544,8 +538,7 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
         data.p.rigidBody->getMotionState()->getWorldTransform(tr);
         //Math::alignTo(Math::btToGLMQuat(tr.getRotation()),direction,speed);
         Math::recalculateForwardRightUp(data.p.rigidBody,_forward,_right,_up);
-    }
-    else{
+    }else{
         Math::alignTo(*data.n.rotation,direction,speed);
         Math::recalculateForwardRightUp(*data.n.rotation,_forward,_right,_up);
     }
@@ -599,8 +592,7 @@ void ComponentBody::translate(float x,float y,float z,bool local){
         btVector3 v(x,y,z);
         Math::translate(data.p.rigidBody,v,local);
         setPosition(  position() + Engine::Math::btVectorToGLM(v)  );
-    }
-    else{
+    }else{
         glm::vec3& _position = *data.n.position;
         _position.x += x; _position.y += y; _position.z += z;
         glm::vec3 offset(x,y,z);
@@ -622,8 +614,7 @@ void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
 
         quat = btQuaternion(glmquat.x,glmquat.y,glmquat.z,glmquat.w);
         data.p.rigidBody->getWorldTransform().setRotation(quat);
-    }
-	else {
+    }else{
 		glm::quat& _rotation = *data.n.rotation;
 		if (abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
 		if (abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0, 1, 0)));
@@ -651,8 +642,7 @@ void ComponentBody::scale(float x,float y,float z){
                 }
             }
         }
-    }
-    else{
+    }else{
         glm::vec3& _scale = *data.n.scale;
         _scale.x += x; _scale.y += y; _scale.z += z;
     }
@@ -683,8 +673,7 @@ void ComponentBody::setPosition(float x,float y,float z){
         data.p.rigidBody->setMotionState(data.p.motionState); //is this needed?
         data.p.rigidBody->setWorldTransform(tr);
         data.p.rigidBody->setCenterOfMassTransform(tr);
-    }
-    else{
+    }else{
         glm::vec3& _position = *data.n.position;
         glm::mat4& _matrix = *data.n.modelMatrix;
         _position.x = x; _position.y = y; _position.z = z;
@@ -709,8 +698,7 @@ void ComponentBody::setRotation(float x,float y,float z,float w){
         Math::recalculateForwardRightUp(data.p.rigidBody,_forward,_right,_up);
 
         clearAngularForces();
-    }
-    else{
+    }else{
         glm::quat newRotation(w,x,y,z);
         newRotation = glm::normalize(newRotation);
         glm::quat& _rotation = *data.n.rotation;
@@ -738,8 +726,7 @@ void ComponentBody::setScale(float x,float y,float z){
                 }
             }
         }
-    }
-    else{
+    }else{
         glm::vec3& _scale = *data.n.scale;
         _scale.x = x; _scale.y = y; _scale.z = z;
     }
@@ -815,8 +802,7 @@ void ComponentBody::setDynamic(bool dynamic){
         data.p.rigidBody->setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
         Physics::addRigidBody(data.p.rigidBody);
         data.p.rigidBody->activate();
-    }
-    else{
+    }else{
         Physics::removeRigidBody(data.p.rigidBody);
         data.p.rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
         ComponentBody::clearAllForces();
@@ -918,29 +904,24 @@ void ComponentBody::setMass(float mass){
 
 Entity::Entity(){
     m_Scene = nullptr;
-    m_ID = m_ParentID = epriv::UINT_MAX_VALUE;
-    m_Components = new uint[ComponentType::_TOTAL];
-    for(uint i = 0; i < ComponentType::_TOTAL; ++i){
-        m_Components[i] = epriv::UINT_MAX_VALUE;
-    }
+    m_ID = m_ParentID = 0;
+	m_Components.resize(ComponentType::_TOTAL, 0);
 }
 Entity::~Entity(){
-    m_ID = m_ParentID = epriv::UINT_MAX_VALUE;
+    m_ID = m_ParentID = 0;
     m_Scene = nullptr;
-    delete[] m_Components;
 }
 const uint Entity::id() const { return m_ID; }
 Scene* Entity::scene(){ return m_Scene; }
 void Entity::destroy(bool immediate){
     if(!immediate){
         componentManager->_addEntityToBeDestroyed(m_ID); //add to the deletion queue
-    }
-    else{
+    }else{
         componentManager->_deleteEntityImmediately(this); //delete immediately
     }
 }
 Entity* Entity::parent(){
-    if(m_ParentID == epriv::UINT_MAX_VALUE)
+    if(m_ParentID == 0)
         return nullptr;
     return componentManager->_getEntity(m_ParentID);
 }

@@ -77,7 +77,6 @@ namespace Engine{
 
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 131072;
-        const uint UINT_MAX_VALUE   = std::numeric_limits<uint>::max();
 		class ComponentManager final: private Engine::epriv::noncopyable{
             friend class ::Entity;
             friend class ::Scene;
@@ -328,7 +327,7 @@ class Entity: public EventObserver{
     private:
         Scene* m_Scene;
         uint m_ParentID, m_ID;
-        uint* m_Components;
+        std::vector<uint> m_Components;
     public:
         Entity();
         virtual ~Entity();
@@ -344,8 +343,8 @@ class Entity: public EventObserver{
         template<class T> T* getComponent(){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
-            const uint& componentID = m_Components[slot];
-            if(componentID == Engine::epriv::UINT_MAX_VALUE){
+            const uint& componentID = m_Components.at(slot);
+            if(componentID == 0){
                 return nullptr;
             }
             T* component = nullptr;
@@ -355,8 +354,8 @@ class Entity: public EventObserver{
         template<class T> void addComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
-            uint& componentID = m_Components[slot];
-            if(componentID != Engine::epriv::UINT_MAX_VALUE) return;
+            uint& componentID = m_Components.at(slot);
+            if(componentID != 0) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
             Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
             if(m_Scene && m_Scene == Resources::getCurrentScene()){
@@ -368,13 +367,13 @@ class Entity: public EventObserver{
         template<class T> void removeComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
-            uint& componentID = m_Components[slot];
-            if(componentID == Engine::epriv::UINT_MAX_VALUE) return;
+            uint& componentID = m_Components.at(slot);
+            if(componentID == 0) return;
             component->m_Owner = nullptr;
             removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectors.at(slot),component);
             removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot),component);
             Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
-            componentID = Engine::epriv::UINT_MAX_VALUE;
+            componentID = 0;
         }
 };
 #endif

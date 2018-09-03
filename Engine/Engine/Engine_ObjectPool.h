@@ -21,10 +21,16 @@ namespace Engine{
             uint32 endOfList : 1;
             R* resource;
             HandleEntry(){
-                counter = 1; nextFreeIndex, active, endOfList = 0; resource = nullptr;
+                counter = 1;
+				nextFreeIndex = 1;
+				active = endOfList = 0;
+				resource = nullptr;
             }
             explicit HandleEntry(uint32 _nextFreeIndex){
-                nextFreeIndex = _nextFreeIndex; counter = 1; active, endOfList = 0; resource = nullptr;
+                nextFreeIndex = ++_nextFreeIndex;
+				counter = 1;
+				active = endOfList = 0; 
+				resource = nullptr;
             }
         };
         #pragma region ObjectPool
@@ -37,7 +43,9 @@ namespace Engine{
                 uint32 m_firstFreeEntry;
             public:
                 ObjectPool(uint numEntries){ 
-                    MAX_ENTRIES = numEntries; m_Pool = new HandleEntry<T>[MAX_ENTRIES]; reset(); 
+                    MAX_ENTRIES = numEntries; 
+					m_Pool = new HandleEntry<T>[MAX_ENTRIES]; 
+					reset(); 
                 }
                 ~ObjectPool(){ destruct(); }
 
@@ -57,11 +65,11 @@ namespace Engine{
                     for(i = 0; i < MAX_ENTRIES; ++i){
                         if(m_Pool[i].resource){ c = i; }
                     }
-                    return i;
+                    return c;
                 }
                 void reset(){
                     m_activeEntryCount = 0;
-                    m_firstFreeEntry = 0;
+                    m_firstFreeEntry = 1;
                     for (uint i = 0; i < MAX_ENTRIES - 1; ++i){
                         m_Pool[i] = HandleEntry<T>(i + 1);
                     }
@@ -69,18 +77,18 @@ namespace Engine{
                     m_Pool[MAX_ENTRIES - 1].endOfList = true;
                 }
                 void update(Handle& handle,T* ptr){
-                    const uint index = handle.index;
+                    const uint index = handle.index - 1;
                     if(m_Pool[index].counter == handle.counter && m_Pool[index].active){
                         m_Pool[index].resource = ptr;
                     }
                 }
                 void update(const uint& id,T* ptr){
-                    if(m_Pool[id].active){
-                        m_Pool[id].resource = ptr;
+                    if(m_Pool[id - 1].active){
+                        m_Pool[id - 1].resource = ptr;
                     }
                 }
                 Handle add(T* ptr,uint type){
-                    const uint newIndex = m_firstFreeEntry;
+                    const uint newIndex = m_firstFreeEntry - 1;
                     if(newIndex >= MAX_ENTRIES) return Handle(); //null handle
                     m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
                     m_Pool[newIndex].nextFreeIndex = 0;
@@ -91,11 +99,11 @@ namespace Engine{
                     m_Pool[newIndex].active = true;
                     m_Pool[newIndex].resource = ptr;
                     ++m_activeEntryCount;
-                    return Handle(newIndex, m_Pool[newIndex].counter, type);
+                    return Handle(newIndex+1, m_Pool[newIndex].counter, type);
                 }
                 uint add(T* ptr){
-                    const uint newIndex = m_firstFreeEntry;
-                    if(newIndex >= MAX_ENTRIES) return uint(-1); //null entity
+                    const uint newIndex = m_firstFreeEntry - 1;
+                    if(newIndex >= MAX_ENTRIES) return 0; //null entity
                     m_firstFreeEntry = m_Pool[newIndex].nextFreeIndex;
                     m_Pool[newIndex].nextFreeIndex = 0;
                     ++m_Pool[newIndex].counter;
@@ -105,14 +113,15 @@ namespace Engine{
                     m_Pool[newIndex].active = true;
                     m_Pool[newIndex].resource = ptr;
                     ++m_activeEntryCount;
-                    return newIndex;
+                    return newIndex+1;
                 }
                 void remove(uint index){
-                    if(m_Pool[index].active){
-                        m_Pool[index].nextFreeIndex = m_firstFreeEntry;
-                        m_Pool[index].active = false;
-                        if(m_Pool[index].resource){
-                            SAFE_DELETE(m_Pool[index].resource);
+					const uint realIndex = index - 1;
+                    if(m_Pool[realIndex].active){
+                        m_Pool[realIndex].nextFreeIndex = m_firstFreeEntry;
+                        m_Pool[realIndex].active = false;
+                        if(m_Pool[realIndex].resource){
+                            SAFE_DELETE(m_Pool[realIndex].resource);
                         }
                         m_firstFreeEntry = index;
                         --m_activeEntryCount;		
@@ -120,10 +129,11 @@ namespace Engine{
                 }
                 void remove(Handle& handle){
                     const uint32 index = handle.index;
-                    if(m_Pool[index].counter == handle.counter && m_Pool[index].active){
-                        m_Pool[index].nextFreeIndex = m_firstFreeEntry;
-                        m_Pool[index].active = false;
-                        SAFE_DELETE(m_Pool[index].resource);
+					const uint realIndex = index - 1;
+                    if(m_Pool[realIndex].counter == handle.counter && m_Pool[realIndex].active){
+                        m_Pool[realIndex].nextFreeIndex = m_firstFreeEntry;
+                        m_Pool[realIndex].active = false;
+                        SAFE_DELETE(m_Pool[realIndex].resource);
                         m_firstFreeEntry = index;
                         --m_activeEntryCount;		
                     }
@@ -140,7 +150,7 @@ namespace Engine{
                     return outPtr;
                 }
                 bool get(const Handle& handle, T*& outPtr){
-                    const uint index = handle.index;
+                    const uint index = handle.index - 1;
                     if (m_Pool[index].counter != handle.counter || !m_Pool[index].active){
                         outPtr = nullptr;
                         return false;
@@ -149,11 +159,11 @@ namespace Engine{
                     return true;
                 }
                 bool get(const uint& index, T*& outPtr){
-                    if(!m_Pool[index].resource){
+                    if(!m_Pool[index - 1].resource){
                         outPtr = nullptr;
                         return false;
                     }
-                    outPtr = m_Pool[index].resource;
+                    outPtr = m_Pool[index - 1].resource;
                     return true;
                 }
                 template<typename U> inline bool getAs(Handle& handle, U*& outPtr){
@@ -169,26 +179,26 @@ namespace Engine{
                     return rv;
                 }
                 template<typename U> inline void getAsFast(const uint& index, U*& outPtr){
-                    if(!m_Pool[index].resource){
+                    if(!m_Pool[index - 1].resource){
                         outPtr = nullptr;
                         return;
                     }
-                    outPtr = (U*)m_Pool[index].resource;
+                    outPtr = (U*)m_Pool[index - 1].resource;
                 }
                 template<typename U> inline void getAsFast(Handle& handle, U*& outPtr){
-                    if(!m_Pool[handle.index].resource){
+                    if(!m_Pool[handle.index - 1].resource){
                         outPtr = nullptr;
                         return;
                     }
-                    outPtr = (U*)m_Pool[handle.index].resource;
+                    outPtr = (U*)m_Pool[handle.index - 1].resource;
                 }
                 template<typename U> inline U* getAsFast(Handle& handle){
-                    if(!m_Pool[handle.index].resource) return nullptr;
-                    return (U*)m_Pool[handle.index].resource;
+                    if(!m_Pool[handle.index - 1].resource) return nullptr;
+                    return (U*)m_Pool[handle.index - 1].resource;
                 }
                 template<typename U> inline U* getAsFast(const uint& index){
-                    if(!m_Pool[index].resource) return nullptr;
-                    return (U*)m_Pool[index].resource;
+                    if(!m_Pool[index - 1].resource) return nullptr;
+                    return (U*)m_Pool[index - 1].resource;
                 }
         };
         #pragma endregion

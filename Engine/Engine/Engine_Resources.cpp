@@ -79,7 +79,7 @@ bool epriv::ResourceManager::_hasScene(string n){ if(m_i->m_Scenes.count(n)) ret
 Texture* epriv::ResourceManager::_hasTexture(string n){
 	auto& resourcePool = *(m_i->m_Resources);
     for(uint i = 0; i < resourcePool.maxEntries(); ++i){
-        EngineResource* r = resourcePool.getAsFast<EngineResource>(i);
+        EngineResource* r = resourcePool.getAsFast<EngineResource>(i+1);
         if(r){ Texture* t = dynamic_cast<Texture*>(r); if(t && t->name() == n){ return t; } }
     }
     return 0;
