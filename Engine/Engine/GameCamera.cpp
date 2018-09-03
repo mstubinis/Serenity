@@ -127,7 +127,7 @@ Entity* GameCamera::getObjectInCenterRay(Entity* exclusion){
     Scene* s = Resources::getCurrentScene();
     for(auto id:s->entities()){
         Entity* e = s->getEntity(id);
-        if(this->rayIntersectSphere(e)){
+        if(rayIntersectSphere(e)){
             if(e != exclusion){
                 objs.push_back(e);
             }

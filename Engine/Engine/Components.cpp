@@ -494,7 +494,7 @@ ComponentBody::ComponentBody():ComponentBaseClass(){
     _physics = false;
     data.n.position = new glm::vec3(0.0f);
     data.n.scale = new glm::vec3(1.0f);
-    data.n.rotation = new glm::quat();
+	data.n.rotation = new glm::quat(1.0f,0.0f,0.0f,0.0f);
     data.n.modelMatrix = new glm::mat4(1.0f);
     Math::recalculateForwardRightUp(*data.n.rotation,_forward,_right,_up);
 }
@@ -616,18 +616,18 @@ void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
         btQuaternion quat = data.p.rigidBody->getWorldTransform().getRotation().normalize();
         glm::quat glmquat(quat.w(),quat.x(),quat.y(),quat.z());
 
-        if(abs(pitch) >= 0.001f) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
-        if(abs(yaw) >= 0.001f)   glmquat = glmquat * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));   //yaw
-        if(abs(roll) >= 0.001f)  glmquat = glmquat * (glm::angleAxis(roll,   glm::vec3(0,0,1)));   //roll
+        if(abs(pitch) >= 0.001f) glmquat = glmquat * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));
+        if(abs(yaw) >= 0.001f)   glmquat = glmquat * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));
+        if(abs(roll) >= 0.001f)  glmquat = glmquat * (glm::angleAxis(roll,   glm::vec3(0,0,1)));
 
         quat = btQuaternion(glmquat.x,glmquat.y,glmquat.z,glmquat.w);
         data.p.rigidBody->getWorldTransform().setRotation(quat);
     }
-    else{
-        glm::quat& _rotation = *data.n.rotation;
-        if(abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1,0,0)));   //pitch
-        if(abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw,   glm::vec3(0,1,0)));   //yaw
-        if(abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll,   glm::vec3(0,0,1)));   //roll
+	else {
+		glm::quat& _rotation = *data.n.rotation;
+		if (abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
+		if (abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0, 1, 0)));
+		if (abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));
         Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
     }
 }
