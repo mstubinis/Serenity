@@ -82,7 +82,7 @@ void HUD::render(){
         const glm::vec3& pos = body->getScreenCoordinates();
         float scl = glm::max(0.5f,model->radius()*23.0f / Resources::getCurrentScene()->getActiveCamera()->getDistance(player->getTarget()));
         if(pos.z == 1){
-            Material* crosshair = Resources::getMaterial(ResourceManifest::CrosshairMaterial);
+            Material* crosshair = (Material*)ResourceManifest::CrosshairMaterial.get();
             crosshair->getComponent(MaterialComponentType::Diffuse)->texture()->render(glm::vec2(pos.x,pos.y),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(scl,scl),0.1f);
             //unsigned long long distanceInKm = (player->getTarget()->getDistanceLL(player) / 10);
             string stringRepresentation = "";
@@ -96,7 +96,7 @@ void HUD::render(){
             font->renderText(/*player->getTarget()->name() + */"\n"+stringRepresentation,glm::vec2(pos.x+40,pos.y-15),glm::vec4(m_Color.x,m_Color.y,m_Color.z,1),0,glm::vec2(0.7f,0.7f),0.1f);
         }
         else{
-            Material* crosshairArrow = Resources::getMaterial(ResourceManifest::CrosshairArrowMaterial);
+            Material* crosshairArrow = (Material*)ResourceManifest::CrosshairArrowMaterial.get();
             glm::vec2 winSize = glm::vec2(Resources::getWindow()->getSize().x,Resources::getWindow()->getSize().y);
             scl = 1;
 

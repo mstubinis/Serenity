@@ -17,7 +17,6 @@ using namespace Engine;
 using namespace std;
 
 typedef boost::shared_future<void> boost_shared_fut;
-typedef boost::function<void()> boost_void_func;
 typedef boost::asio::io_service boost_asio_service;
 
 epriv::ThreadManager::impl* threadManager;
@@ -27,18 +26,18 @@ struct EngineCallback{
     boost_shared_fut fut;
     boost_void_func cbk;
     EngineCallback(){ 
-		emptyFunctor e; 
-		cbk = boost::bind<void>(e); 
-	}
-	EngineCallback(boost_shared_fut& _fut){ 
-		emptyFunctor e;
-		fut = _fut;
-		cbk = boost::bind<void>(e); 
-	}
-	EngineCallback(boost_shared_fut& _fut, boost_void_func& _cbk){ 
-		fut = _fut;
-		cbk = _cbk; 
-	}
+        emptyFunctor e; 
+        cbk = boost::bind<void>(e); 
+    }
+    EngineCallback(boost_shared_fut _fut){ 
+        emptyFunctor e;
+        fut = _fut;
+        cbk = boost::bind<void>(e); 
+    }
+    EngineCallback(boost_shared_fut _fut, boost_void_func _cbk){ 
+        fut = _fut;
+        cbk = _cbk; 
+    }
     ~EngineCallback(){}
 };
 
@@ -85,14 +84,14 @@ epriv::ThreadManager::~ThreadManager(){ m_i->_destruct(this); }
 void epriv::ThreadManager::_init(const char* name, uint w, uint h){ m_i->_postInit(name,w,h,this); }
 void epriv::ThreadManager::_update(const float& dt){ m_i->_update(dt,this); }
 const uint epriv::ThreadManager::cores() const{ return threadManager->m_Cores; }
-void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task){
+void epriv::threading::finalizeJob( boost_packed_task_ptr&& task){
     auto& mgr = *threadManager;
     mgr.m_Callbacks.emplace_back( boost::move(boost_shared_fut( task->get_future() )) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
 }
-void epriv::threading::finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost_void_func& then_task){
-	auto& mgr = *threadManager;
-	EngineCallback e(boost::move(boost_shared_fut( task->get_future())));
+void epriv::threading::finalizeJob( boost_packed_task_ptr&& task, boost_void_func&& then_task){
+    auto& mgr = *threadManager;
+    EngineCallback e(boost::move(boost_shared_fut( task->get_future())));
     e.cbk = boost::bind<void>(then_task); 
     mgr.m_Callbacks.push_back( boost::move(e) );
     mgr.m_IOService.post(boost::bind(&boost_packed_task::operator(), task));
@@ -101,9 +100,6 @@ void epriv::threading::waitForAll(){
     if(threadManager->m_Callbacks.size() > 0){
         for(auto callback: threadManager->m_Callbacks){
             callback.fut.wait();
-            //if(!callback.fut.is_ready()){
-            //	return;
-            //}
         }
         threadManager->_clearDoneCallbacks();
     }

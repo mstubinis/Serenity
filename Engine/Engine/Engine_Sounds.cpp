@@ -184,7 +184,7 @@ class SoundEffect::impl final{
             _init(s,data,queue);
         }
         void _init(SoundBaseClass* s,SoundData* data,bool queue){
-            if(data->getBuffer() == nullptr){
+            if(!data->getBuffer()){
                 data->buildBuffer();
             }
             m_Sound.setBuffer( *(data->getBuffer()) );
@@ -294,7 +294,7 @@ void SoundEffect::stop(){
     m_i->_stop(this);
 }
 void SoundEffect::restart(){ 
-    m_i->m_Sound.setPlayingOffset(sf::Time::Zero); 
+    m_i->m_Sound.setPlayingOffset(sf::Time()); 
 }
 void SoundEffect::update(const float& dt){
     m_i->_update(dt,this);
@@ -339,7 +339,7 @@ void SoundMusic::stop(){
     m_i->_stop(this);
 }
 void SoundMusic::restart(){ 
-    m_i->m_Sound.setPlayingOffset(sf::Time::Zero);
+    m_i->m_Sound.setPlayingOffset(sf::Time());
 }
 void SoundMusic::update(const float& dt){
     m_i->_update(dt,this);

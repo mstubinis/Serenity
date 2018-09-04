@@ -3,7 +3,7 @@
 #define ENGINE_MATERIAL_H
 
 #include "BindableResource.h"
-#include "Engine_ResourceHandle.h"
+#include "Engine_Resources.h"
 #include <unordered_map>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>

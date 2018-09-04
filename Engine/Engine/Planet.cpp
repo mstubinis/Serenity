@@ -27,8 +27,8 @@ struct PlanetaryRingMeshInstanceBindFunctor{void operator()(EngineResource* r) c
     
     float atmosphereHeight = obj->getAtmosphereHeight();
 
-    glm::vec3& pos = obj->m_Body->position();
-    glm::quat& orientation = obj->m_Body->rotation();
+    glm::vec3 pos = obj->m_Body->position();
+    glm::quat orientation = obj->m_Body->rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -99,9 +99,9 @@ struct StarMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance& i = *(MeshInstance*)r;
     Planet* obj = (Planet*)(i.parent());
     Camera* c = Resources::getCurrentScene()->getActiveCamera();
-    glm::vec3& pos = obj->m_Body->position();
-    glm::vec3& camPos = c->getPosition();
-    glm::quat& orientation = obj->m_Body->rotation();
+    glm::vec3 pos = obj->m_Body->position();
+    glm::vec3 camPos = c->getPosition();
+    glm::quat orientation = obj->m_Body->rotation();
 
     Renderer::sendUniform4fSafe("Object_Color",i.color());
     Renderer::sendUniform3fSafe("Gods_Rays_Color",i.godRaysColor());
@@ -139,8 +139,8 @@ struct AtmosphericScatteringGroundMeshInstanceBindFunctor{void operator()(Engine
     
     float atmosphereHeight = obj->getAtmosphereHeight();
 
-    glm::vec3& pos = obj->m_Body->position();
-    glm::quat& orientation = obj->m_Body->rotation();
+    glm::vec3 pos = obj->m_Body->position();
+    glm::quat orientation = obj->m_Body->rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -229,8 +229,8 @@ struct AtmosphericScatteringSkyMeshInstanceBindFunctor{void operator()(EngineRes
     
     float atmosphereHeight = obj->getAtmosphereHeight();
 
-    glm::vec3& pos = obj->m_Body->position();
-    glm::quat& orientation = obj->m_Body->rotation();
+    glm::vec3 pos = obj->m_Body->position();
+    glm::quat orientation = obj->m_Body->rotation();
     glm::vec3 camPosR = c->getPosition();
     glm::vec3 camPos = camPosR - pos;
     float camHeight = glm::length(camPos);
@@ -355,7 +355,7 @@ Planet::~Planet(){
 }
 glm::vec3 Planet::getPosition(){ return m_Body->position(); }
 void Planet::setPosition(float x,float y,float z){ m_Body->setPosition(x,y,z); }
-void Planet::setPosition(glm::vec3& pos){ m_Body->setPosition(pos); }
+void Planet::setPosition(glm::vec3 pos){ m_Body->setPosition(pos); }
 void Planet::update(const float& dt){
     if(m_RotationInfo){
         m_Body->rotate(0.0f,glm::radians(m_RotationInfo->speed * dt),0.0f);
@@ -417,8 +417,8 @@ Ring::~Ring(){
 }
 void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     sf::Image ringImage;
-    ringImage.create(1024,2,sf::Color::Black);
-    ringImage.createMaskFromColor(sf::Color::Black,0);
+    ringImage.create(1024,2,sf::Color());
+    ringImage.createMaskFromColor(sf::Color(),0);
 
     uint count = 0;
     for(auto ringInfo: rings){
@@ -479,7 +479,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
     m_MaterialHandle = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,ResourceManifest::groundFromSpace);
-    Resources::getMaterial(m_MaterialHandle)->setSpecularModel(SpecularModel::None);
+	((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
 }
 
 OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent,float _inclination){

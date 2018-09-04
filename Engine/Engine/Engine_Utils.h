@@ -13,13 +13,13 @@ namespace Engine{
 				noncopyable(){}
 				~noncopyable(){}
 			private:
-				const noncopyable& operator=(const noncopyable&);// non copyable
-				noncopyable(const noncopyable&);                 // non construction-copyable
-				noncopyable(const noncopyable&&);                // non moveable 1
-				noncopyable(noncopyable&&);                      // non moveable 2
-				noncopyable& operator=(const noncopyable&&);     // non move assignable 1
-				noncopyable& operator=(noncopyable&&);           // non move assignable 2
-				//noncopyable& operator=(noncopyable);             // copy and swap 1
+				const noncopyable& operator=(const noncopyable&) = delete;// non copyable
+				noncopyable(const noncopyable&) = delete;                 // non construction-copyable
+				noncopyable(const noncopyable&&) = delete;                // non moveable 1
+				noncopyable(noncopyable&&) = delete;                      // non moveable 2
+				noncopyable& operator=(const noncopyable&&) = delete;     // non move assignable 1
+				noncopyable& operator=(noncopyable&&) = delete;           // non move assignable 2
+				//noncopyable& operator=(noncopyable) = delete;           // copy and swap 1
 		};
 	};
 };

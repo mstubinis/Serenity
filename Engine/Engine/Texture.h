@@ -114,7 +114,7 @@ class Texture: public EngineResource{
         static void setMaxFilter(GLuint type,TextureFilter::Filter);
         static void setFilter(GLuint type,TextureFilter::Filter);
 
-        void render(glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth);
+        void render(glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth);
 
         void genPBREnvMapData(uint convoludeTextureSize,uint preEnvFilterSize);
 };

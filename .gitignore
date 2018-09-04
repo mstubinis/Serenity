@@ -1,9 +1,13 @@
 # Directories
 Debug/
 Release/
+Engine/.vs/
+.vs/
 
 # VS Stuff
 *.sdf
+*.VC
+*.ipch
 
 # Compiled Object files
 *.slo

@@ -161,10 +161,10 @@ class MeshInstance::impl{
 
 struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) const {
     MeshInstance::impl& i = *((MeshInstance*)r)->m_i;
-    glm::vec3& camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
+    glm::vec3 camPos = Resources::getCurrentScene()->getActiveCamera()->getPosition();
     Entity* parent = i.m_Entity;
     auto& body = *(parent->getComponent<ComponentBody>());
-    glm::mat4& parentModel = body.modelMatrix();
+    glm::mat4 parentModel = body.modelMatrix();
 
     vector<MeshInstanceAnimation*>& animationQueue = i.m_AnimationQueue;
     Renderer::sendUniform4fSafe("Object_Color",i.m_Color);
@@ -223,29 +223,29 @@ MeshInstanceAnimation::MeshInstanceAnimation(Mesh* m,const string& a,float s,flo
 MeshInstanceAnimation::~MeshInstanceAnimation(){
 }
 
-MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
+MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
     m_i->_init(mesh,mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
-    Mesh* _mesh = Resources::getMesh(mesh);
-    Material* _mat = Resources::getMaterial(mat);
+MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
+	Mesh* _mesh = (Mesh*)mesh.get();
+	Material* _mat = (Material*)mat.get();
     m_i->_init(_mesh,_mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
-    Material* _mat = Resources::getMaterial(mat);
+MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
+	Material* _mat = (Material*)mat.get();
     m_i->_init(mesh,_mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3& pos,glm::quat& rot,glm::vec3& scl):m_i(new impl){
-    Mesh* _mesh = Resources::getMesh(mesh);
+MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
+	Mesh* _mesh = (Mesh*)mesh.get();
     m_i->_init(_mesh,mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -254,19 +254,19 @@ MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3& p
 MeshInstance::~MeshInstance(){ m_i->_destruct(this); }
 
 void MeshInstance::setColor(float r,float g,float b,float a){ Engine::Math::setColor(m_i->m_Color,r,g,b,a); }
-void MeshInstance::setColor(glm::vec4& color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
+void MeshInstance::setColor(glm::vec4 color){ MeshInstance::setColor(color.r,color.g,color.b,color.a); }
 void MeshInstance::setGodRaysColor(float r,float g,float b){ Engine::Math::setColor(m_i->m_GodRaysColor,r,g,b); }
-void MeshInstance::setGodRaysColor(glm::vec3& color){ MeshInstance::setGodRaysColor(color.r,color.g,color.b); }
+void MeshInstance::setGodRaysColor(glm::vec3 color){ MeshInstance::setGodRaysColor(color.r,color.g,color.b); }
 void MeshInstance::setPosition(float x, float y, float z){ m_i->_setPosition(x,y,z); }
 void MeshInstance::setScale(float x,float y,float z){ m_i->_setScale(x,y,z); }
 void MeshInstance::translate(float x, float y, float z){ m_i->_translate(x,y,z); }
 void MeshInstance::rotate(float x, float y, float z){ m_i->_rotate(x,y,z); }
 void MeshInstance::scale(float x,float y,float z){ m_i->_scale(x,y,z); }
-void MeshInstance::setPosition(glm::vec3& v){ m_i->_setPosition(v.x,v.y,v.z); }
-void MeshInstance::setScale(glm::vec3& v){ m_i->_setScale(v.x,v.y,v.z); }
-void MeshInstance::translate(glm::vec3& v){ m_i->_translate(v.x,v.y,v.z); }
-void MeshInstance::rotate(glm::vec3& v){ m_i->_rotate(v.x,v.y,v.z); }
-void MeshInstance::scale(glm::vec3& v){ m_i->_scale(v.x,v.y,v.z); }
+void MeshInstance::setPosition(glm::vec3 v){ m_i->_setPosition(v.x,v.y,v.z); }
+void MeshInstance::setScale(glm::vec3 v){ m_i->_setScale(v.x,v.y,v.z); }
+void MeshInstance::translate(glm::vec3 v){ m_i->_translate(v.x,v.y,v.z); }
+void MeshInstance::rotate(glm::vec3 v){ m_i->_rotate(v.x,v.y,v.z); }
+void MeshInstance::scale(glm::vec3 v){ m_i->_scale(v.x,v.y,v.z); }
 Entity* MeshInstance::parent(){ return m_i->m_Entity; }
 glm::vec4& MeshInstance::color(){ return m_i->m_Color; }
 glm::vec3& MeshInstance::godRaysColor(){ return m_i->m_GodRaysColor; }
@@ -276,11 +276,11 @@ glm::vec3& MeshInstance::position(){ return m_i->m_Position; }
 glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
-void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(Resources::getMesh(meshHandle),this); }
+void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get()),this); }
 void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
-void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(Resources::getMaterial(materialHandle),this); }
+void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(((Material*)materialHandle.get()),this); }
 void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
-void MeshInstance::setOrientation(glm::quat& o){ m_i->m_Orientation = o; }
+void MeshInstance::setOrientation(glm::quat o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 
     if(abs(x) > 0.001f) m_i->m_Orientation =                      (glm::angleAxis(-x, glm::vec3(1,0,0)));//pitch
     if(abs(y) > 0.001f) m_i->m_Orientation = m_i->m_Orientation * (glm::angleAxis(-y, glm::vec3(0,1,0)));//yaw

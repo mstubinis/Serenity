@@ -26,7 +26,7 @@
 
 //yes, this code is needed or stuff breaks. find out why
 #include <GL/gl.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 ////////////////////////////////////////////
 
 using namespace Engine;
@@ -216,8 +216,8 @@ class epriv::PhysicsManager::impl final{
             m_World->debugDrawWorld();
 
             Camera* c = Resources::getCurrentScene()->getActiveCamera();
-            glm::vec3& camPos = c->getPosition();
-            glm::mat4& model = glm::mat4(1.0f);
+            glm::vec3 camPos = c->getPosition();
+            glm::mat4 model = glm::mat4(1.0f);
             model[3][0] -= camPos.x;
             model[3][1] -= camPos.y;
             model[3][2] -= camPos.z;

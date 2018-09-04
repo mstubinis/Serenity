@@ -23,7 +23,6 @@ const uint NUM_MAX_INSTANCES = 65536;
 struct aiAnimation;
 struct DefaultMeshBindFunctor;
 struct DefaultMeshUnbindFunctor;
-class btHeightfieldTerrainShape;
 class MeshInstance;
 class InternalMeshPublicInterface;
 class Mesh;
@@ -153,7 +152,6 @@ class Mesh final: public BindableResource{
         //loaded in renderer
         static Mesh *FontPlane, *Plane, *Cube;
 
-        Mesh(std::string name,btHeightfieldTerrainShape*,float threshhold);
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);

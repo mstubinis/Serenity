@@ -2,7 +2,6 @@
 #ifndef ENGINE_ENGINE_RESOURCES_H
 #define ENGINE_ENGINE_RESOURCES_H
 
-#include "Engine_ResourceHandle.h"
 #include "Engine_Physics.h"
 #include "Engine_Utils.h"
 #include "ShaderProgram.h"
@@ -29,6 +28,34 @@ class Material;
 class SunLight;
 class MeshInstance;
 class SoundData;
+
+class ResourceType final {public: enum Type {
+	Empty, //do NOT move this specific enum
+	Texture,
+	Mesh,
+	Material,
+	Sound,
+	MeshInstance,
+	Object,
+	Font,
+	Camera,
+	Shader,
+	ShaderProgram,
+	SoundData,
+	Scene,
+_TOTAL};};
+
+struct Handle final {
+	uint32 index : 12;
+	uint32 counter : 15;
+	uint32 type : 5;
+	Handle();
+	Handle(uint32 _index, uint32 _counter, uint32 _type);
+	inline operator uint32() const;
+	const bool null() const;
+	const EngineResource* get() const;
+	inline const EngineResource* operator ->() const;
+};
 
 namespace Engine{
     namespace epriv{

@@ -77,8 +77,7 @@ namespace Engine{
 
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 131072;
-        const uint UINT_MAX_VALUE   = std::numeric_limits<uint>::max();
-		class ComponentManager final: private Engine::epriv::noncopyable{
+        class ComponentManager final: private Engine::epriv::noncopyable{
             friend class ::Entity;
             friend class ::Scene;
             friend class ::Engine::epriv::ComponentTypeRegistry;
@@ -239,13 +238,13 @@ class ComponentBody: public ComponentBaseClass{
 
         void alignTo(glm::vec3 direction,float speed);
 
-        void translate(glm::vec3& translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
-        void rotate(glm::vec3& rotation,bool local = true);         void rotate(float pitch,float yaw,float roll,bool local = true);
-        void scale(glm::vec3& amount);                              void scale(float x,float y,float z);
+        void translate(glm::vec3 translation,bool local = true);   void translate(float x,float y,float z,bool local = true);
+        void rotate(glm::vec3 rotation,bool local = true);         void rotate(float pitch,float yaw,float roll,bool local = true);
+        void scale(glm::vec3 amount);                              void scale(float x,float y,float z);
 
-        void setPosition(glm::vec3& newPosition);                   void setPosition(float x,float y,float z);
-        void setRotation(glm::quat& newRotation);                   void setRotation(float x,float y,float z,float w);
-        void setScale(glm::vec3& newScale);                         void setScale(float x,float y,float z);
+        void setPosition(glm::vec3 newPosition);                   void setPosition(float x,float y,float z);
+        void setRotation(glm::quat newRotation);                   void setRotation(float x,float y,float z,float w);
+        void setScale(glm::vec3 newScale);                         void setScale(float x,float y,float z);
 
         float mass();
         glm::vec3 getScreenCoordinates();
@@ -311,7 +310,7 @@ class ComponentCamera: public ComponentBaseClass{
         glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
-		glm::vec3 getViewVectorNoTranslation();
+        glm::vec3 getViewVectorNoTranslation();
 
         float getAngle();    void setAngle(float);
         float getAspect();   void setAspect(float);
@@ -328,7 +327,7 @@ class Entity: public EventObserver{
     private:
         Scene* m_Scene;
         uint m_ParentID, m_ID;
-        uint* m_Components;
+        std::vector<uint> m_Components;
     public:
         Entity();
         virtual ~Entity();
@@ -344,8 +343,8 @@ class Entity: public EventObserver{
         template<class T> T* getComponent(){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
-            const uint& componentID = m_Components[slot];
-            if(componentID == Engine::epriv::UINT_MAX_VALUE){
+            const uint& componentID = m_Components.at(slot);
+            if(componentID == 0){
                 return nullptr;
             }
             T* component = nullptr;
@@ -355,8 +354,8 @@ class Entity: public EventObserver{
         template<class T> void addComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
-            uint& componentID = m_Components[slot];
-            if(componentID != Engine::epriv::UINT_MAX_VALUE) return;
+            uint& componentID = m_Components.at(slot);
+            if(componentID != 0) return;
             uint generatedID = Engine::epriv::ComponentManager::m_ComponentPool->add(component);
             Engine::epriv::ComponentManager::m_ComponentVectors.at(slot).push_back(component);
             if(m_Scene && m_Scene == Resources::getCurrentScene()){
@@ -368,13 +367,13 @@ class Entity: public EventObserver{
         template<class T> void removeComponent(T* component){
             const boost_type_index typeIndex = boost_type_index(boost::typeindex::type_id<T>());
             const uint& slot = Engine::epriv::ComponentTypeRegistry::m_MapComponentTypesToSlot.at(typeIndex);
-            uint& componentID = m_Components[slot];
-            if(componentID == Engine::epriv::UINT_MAX_VALUE) return;
+            uint& componentID = m_Components.at(slot);
+            if(componentID == 0) return;
             component->m_Owner = nullptr;
             removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectors.at(slot),component);
             removeFromVector(Engine::epriv::ComponentManager::m_ComponentVectorsScene.at(slot),component);
             Engine::epriv::ComponentManager::m_ComponentPool->remove(componentID);
-            componentID = Engine::epriv::UINT_MAX_VALUE;
+            componentID = 0;
         }
 };
 #endif

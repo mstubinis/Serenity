@@ -212,7 +212,7 @@ class ShaderP::impl final{
             _types.emplace_back("uvec4");  _types.emplace_back("umat3");  _types.emplace_back("umat4");
 
             //check for instancing
-			/*
+            /*
             //TODO: clean this up a little
             if(InternalMeshPublicInterface::SupportsInstancing()){
                 if(sfind(_d,"attribute vec4 Weights;") && shader->type() == ShaderType::Vertex){
@@ -234,7 +234,7 @@ class ShaderP::impl final{
                     }
                 }
             }
-			*/
+            */
 
             //check for normal map texture extraction
             //refer to mesh.cpp dirCorrection comment about using an uncompressed normal map and not reconstructing z
@@ -641,7 +641,7 @@ void ShaderP::unbind(){
     BindableResource::unbind();
 }
 void ShaderP::addMaterial(Handle& materialHandle){
-    ShaderP::addMaterial(Resources::getMaterial(materialHandle));
+    ShaderP::addMaterial(((Material*)materialHandle.get()));
 }
 void ShaderP::addMaterial(Material* material){
     auto& i = *m_i;

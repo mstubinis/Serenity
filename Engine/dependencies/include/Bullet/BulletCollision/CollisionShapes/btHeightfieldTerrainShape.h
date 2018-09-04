@@ -143,10 +143,7 @@ public:
 
 	virtual ~btHeightfieldTerrainShape();
 
-	int getHeightStickWidth();
-	int getHeightStickLength();
-	
-	void getVertex1(int x,int y,btVector3& vertex) const;
+
 	void setUseDiamondSubdivision(bool useDiamondSubdivision=true) { m_useDiamondSubdivision = useDiamondSubdivision;}
 
 	///could help compatibility with Ogre heightfields. See https://code.google.com/p/bullet/issues/detail?id=625	

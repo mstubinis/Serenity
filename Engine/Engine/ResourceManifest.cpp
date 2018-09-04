@@ -69,7 +69,7 @@ void ResourceManifest::init(){
     //MirandaMesh = Resources::addMeshAsync("data/Models/miranda.obj",CollisionType::ConvexHull);
     //IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.obj",CollisionType::ConvexHull);
     //NorwayMesh = Resources::addMeshAsync("data/Models/norway.obj",CollisionType::ConvexHull);
-	StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.obj",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
+    StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.obj",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
     RingMesh = Resources::addMeshAsync("data/Models/ring.obj",CollisionType::None);
     DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.obj",CollisionType::ConvexHull);
     //VenerexMesh = Resources::addMeshAsync("data/Models/venerex.obj",CollisionType::ConvexHull);
@@ -81,8 +81,8 @@ void ResourceManifest::init(){
 
     StarbaseMaterial = Resources::addMaterial("Starbase","data/Textures/starbase.png","data/Textures/starbase_Normal.png","data/Textures/starbase_Glow.png");
     StarMaterial = Resources::addMaterial("Star","data/Textures/Planets/Sun.dds","","","");
-    Resources::getMaterial(StarMaterial)->setShadeless(true);
-    Resources::getMaterial(StarMaterial)->setGlow(0.21f);
+    ((Material*)StarMaterial.get())->setShadeless(true);
+    ((Material*)StarMaterial.get())->setGlow(0.21f);
 
     EarthSkyMaterial = Resources::addMaterial("EarthSky","data/Textures/Planets/Earth.dds","","","",skyFromSpace);
 
@@ -100,19 +100,19 @@ void ResourceManifest::init(){
     Resources::getMaterial(StarFlareMaterial)->setShadeless(true);
 
     GoldMaterial = Resources::addMaterial("Gold","");
-    Resources::getMaterial(GoldMaterial)->setMaterialPhysics(MaterialPhysics::Gold);
+	((Material*)GoldMaterial.get())->setMaterialPhysics(MaterialPhysics::Gold);
 
     PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
     SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 
     CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.dds");
-    Resources::getMaterial(CapsuleA)->setShadeless(true);
+	((Material*)CapsuleA.get())->setShadeless(true);
     CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.dds");
-    Resources::getMaterial(CapsuleB)->setShadeless(true);
+	((Material*)CapsuleB.get())->setShadeless(true);
     CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.dds");
-    Resources::getMaterial(CapsuleC)->setShadeless(true);
-    Resources::getMaterial(CapsuleC)->setGlow(0.01f);
+	((Material*)CapsuleC.get())->setShadeless(true);
+	((Material*)CapsuleC.get())->setGlow(0.01f);
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.dds");
-    Resources::getMaterial(CapsuleD)->setShadeless(true);
+	((Material*)CapsuleD.get())->setShadeless(true);
 
 }

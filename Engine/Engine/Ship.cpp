@@ -221,41 +221,40 @@ void ShipSystemSensors::update(const float& dt){
 }
 #pragma endregion
 
-Ship::Ship(Handle& mesh,Handle& mat, bool player,string name,glm::vec3 pos, glm::vec3 scl, Collision* collision,Scene* scene):Entity(){
-    scene->addEntity(this);
-    ComponentModel* model = new ComponentModel(mesh,mat,this);
-    addComponent(model);
-    ComponentBody* rigidBody = new ComponentBody(collision,this,scl);
-    addComponent(rigidBody);
+Ship::Ship(Handle& mesh, Handle& mat, bool player, string name, glm::vec3 pos, glm::vec3 scl, Collision* collision, Scene* scene) :Entity() {
+	scene->addEntity(this);
+	ComponentModel* model = new ComponentModel(mesh, mat, this);
+	addComponent(model);
+	ComponentBody* rigidBody = new ComponentBody(collision, this, scl);
+	addComponent(rigidBody);
 
-    float radius = model->radius();
-    rigidBody->setMass(0.5f * radius);
-    rigidBody->setPosition(pos);
-    rigidBody->setScale(scl);
-    rigidBody->setDamping(0,0);//we dont want default dampening, we want the ship systems to manually control that
+	float radius = model->radius();
+	rigidBody->setMass(0.5f * radius);
+	rigidBody->setPosition(pos);
+	rigidBody->setScale(scl);
+	rigidBody->setDamping(0, 0);//we dont want default dampening, we want the ship systems to manually control that
 
-    m_WarpFactor = 0;
-    m_IsPlayer = player;
-    m_IsWarping = false;
-    m_Target = nullptr;
-    m_PlayerCamera = nullptr;
+	m_WarpFactor = 0;
+	m_IsPlayer = player;
+	m_IsWarping = false;
+	m_Target = nullptr;
+	m_PlayerCamera = nullptr;
 
-    if(player){
-        m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
-    }
-
-    for(unsigned int i = 0; i < SHIP_SYSTEM_NUMBER; ++i){
-        ShipSystem* system = nullptr;
-        if(i == 0)       system = new ShipSystemReactor(this,1000);
-        else if(i == 1)  system = new ShipSystemPitchThrusters(this);
-        else if(i == 2)  system = new ShipSystemYawThrusters(this);
-        else if(i == 3)  system = new ShipSystemRollThrusters(this);
-        else if(i == 4)  system = new ShipSystemShields(this);
-        else if(i == 5)  system = new ShipSystemMainThrusters(this);
-        else if(i == 6)  system = new ShipSystemWarpDrive(this);
-        else if(i == 7)  system = new ShipSystemSensors(this);
-        m_ShipSystems[i] = system;
-    } 
+	if (player) {
+		m_PlayerCamera = (GameCamera*)(scene->getActiveCamera());
+	}
+	for (uint i = 0; i < SHIP_SYSTEM_NUMBER; ++i) {
+		ShipSystem* system = nullptr;
+		if (i == 0)       system = new ShipSystemReactor(this, 1000);
+		else if (i == 1)  system = new ShipSystemPitchThrusters(this);
+		else if (i == 2)  system = new ShipSystemYawThrusters(this);
+		else if (i == 3)  system = new ShipSystemRollThrusters(this);
+		else if (i == 4)  system = new ShipSystemShields(this);
+		else if (i == 5)  system = new ShipSystemMainThrusters(this);
+		else if (i == 6)  system = new ShipSystemWarpDrive(this);
+		else if (i == 7)  system = new ShipSystemSensors(this);
+		m_ShipSystems[i] = system;
+	}
 }
 Ship::~Ship(){
     for(auto shipSystem:m_ShipSystems) SAFE_DELETE(shipSystem.second);

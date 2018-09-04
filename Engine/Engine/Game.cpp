@@ -76,10 +76,10 @@ void Game::update(const float& dt){
     if(Engine::isKeyDownOnce(KeyboardKey::F9)){ Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::FXAA); }
     if(Engine::isKeyDownOnce(KeyboardKey::F10)){ Renderer::Settings::SSAO::enable(!Renderer::Settings::SSAO::enabled()); }
 
-    if(Engine::isKeyDown(KeyboardKey::N)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setMetalness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->metalness() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::M)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setMetalness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->metalness() + 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::V)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setSmoothness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->smoothness() - 0.025f); }
-    if(Engine::isKeyDown(KeyboardKey::B)){ Resources::getMaterial(ResourceManifest::DefiantMaterial)->setSmoothness(Resources::getMaterial(ResourceManifest::DefiantMaterial)->smoothness() + 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::N)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setMetalness(((Material*)ResourceManifest::DefiantMaterial.get())->metalness() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::M)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setMetalness(((Material*)ResourceManifest::DefiantMaterial.get())->metalness() + 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::V)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setSmoothness(((Material*)ResourceManifest::DefiantMaterial.get())->smoothness() - 0.025f); }
+    if(Engine::isKeyDown(KeyboardKey::B)){ ((Material*)ResourceManifest::DefiantMaterial.get())->setSmoothness(((Material*)ResourceManifest::DefiantMaterial.get())->smoothness() + 0.025f); }
 
     if(Engine::isKeyDown(KeyboardKey::Z)){ Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() - 0.025f); }
     if(Engine::isKeyDown(KeyboardKey::X)){ Renderer::Settings::Lighting::setGIContributionGlobal(Renderer::Settings::Lighting::getGIContributionGlobal() + 0.025f); }

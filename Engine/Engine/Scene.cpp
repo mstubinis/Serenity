@@ -42,7 +42,7 @@ void Scene::removeEntity(uint id,bool immediate){
     removeEntity(e,immediate);
 }
 Entity* Scene::getEntity(uint entityID){
-    if(entityID == epriv::UINT_MAX_VALUE)
+    if(entityID == 0)
         return nullptr;
     return epriv::Core::m_Engine->m_ComponentManager->m_EntityPool->getAsFast<Entity>(entityID);
 }

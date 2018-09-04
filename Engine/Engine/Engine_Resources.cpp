@@ -32,6 +32,8 @@ template<class V,class S>void* _getFromContainer(unordered_map<S,V>& m,const S& 
 template<class V,class S>void _removeFromContainer(map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
 template<class V,class S>void _removeFromContainer(unordered_map<S,V>& m,const S& n){if(m.size()>0&&m.count(n)){m.at(n).reset();m.erase(n);}}
 
+epriv::ResourceManager::impl* resourceManager;
+
 class epriv::ResourceManager::impl final{
     public:
         //http://gamesfromwithin.com/managing-data-relationships
@@ -56,11 +58,27 @@ class epriv::ResourceManager::impl final{
             SAFE_DELETE(m_Window);
         }
 };
-epriv::ResourceManager::impl* resourceManager;
+Handle::Handle() {
+	index = 0; counter = 0; type = 0;
+}
+Handle::Handle(uint32 _index, uint32 _counter, uint32 _type) {
+	index = _index; counter = _counter; type = _type;
+}
+inline Handle::operator uint32() const {
+	return type << 27 | counter << 12 | index;
+}
+const bool Handle::null() const { if (type == ResourceType::Empty) return true; return false; }
+const EngineResource* Handle::get() const {
+	if (null()) return nullptr;
+	return resourceManager->m_Resources->getAsFast<EngineResource>(index);
+}
+inline const EngineResource* Handle::operator ->() const {
+	return get();
+}
 
 epriv::ResourceManager::ResourceManager(const char* name,uint width,uint height):m_i(new impl){
     m_i->_init(name,width,height);
-	resourceManager = m_i.get();
+    resourceManager = m_i.get();
 }
 epriv::ResourceManager::~ResourceManager(){
     m_i->_destruct();
@@ -77,15 +95,16 @@ Scene* Engine::Resources::getCurrentScene(){ return resourceManager->m_CurrentSc
 
 bool epriv::ResourceManager::_hasScene(string n){ if(m_i->m_Scenes.count(n)) return true; return false; }
 Texture* epriv::ResourceManager::_hasTexture(string n){
-	auto& resourcePool = *(m_i->m_Resources);
+    auto& resourcePool = *(m_i->m_Resources);
     for(uint i = 0; i < resourcePool.maxEntries(); ++i){
-        EngineResource* r = resourcePool.getAsFast<EngineResource>(i);
+        EngineResource* r = resourcePool.getAsFast<EngineResource>(i+1);
         if(r){ Texture* t = dynamic_cast<Texture*>(r); if(t && t->name() == n){ return t; } }
     }
     return 0;
 }
 void epriv::ResourceManager::_addScene(Scene* s){
-    _addToContainer(m_i->m_Scenes,s->name(),boost::shared_ptr<Scene>(s));
+    boost::shared_ptr<Scene> ptr(s);
+    _addToContainer(m_i->m_Scenes,s->name(), ptr);
 }
 void epriv::ResourceManager::_addMeshInstance(MeshInstance* m){
     m_i->m_MeshInstances.push_back(m);
@@ -138,8 +157,8 @@ Handle Resources::addMesh(string n, unordered_map<string,float>& g, uint w, uint
 Handle Resources::addMeshAsync(string f, CollisionType::Type t, bool b,float threshhold){
     Mesh* mesh = new Mesh(f,t,b,threshhold,false);
 
-    auto& job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
-    auto& cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
+    auto job = boost::bind(&InternalMeshPublicInterface::LoadCPU, mesh);
+    auto cbk = boost::bind(&InternalMeshPublicInterface::LoadGPU, mesh);
 
     Engine::epriv::threading::addJobWithPostCallback(job,cbk);
 
@@ -196,10 +215,10 @@ Handle Resources::addSoundData(string file,string n,bool music){
 }
 
 void Resources::setCurrentScene(Scene* scene){
-	epriv::EventSceneChanged e;
-	e.oldScene = resourceManager->m_CurrentScene; e.newScene = scene;
-	Event ev; ev.eventSceneChanged = e; ev.type = EventType::SceneChanged;
-	epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::SceneChanged,ev);
+    epriv::EventSceneChanged e;
+    e.oldScene = resourceManager->m_CurrentScene; e.newScene = scene;
+    Event ev; ev.eventSceneChanged = e; ev.type = EventType::SceneChanged;
+    epriv::Core::m_Engine->m_EventDispatcher->_dispatchEvent(EventType::SceneChanged,ev);
 
     if(!resourceManager->m_CurrentScene){
         epriv::Core::m_Engine->m_ComponentManager->_sceneSwap(nullptr,scene);

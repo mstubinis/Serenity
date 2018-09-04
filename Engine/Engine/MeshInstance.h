@@ -35,10 +35,10 @@ class MeshInstance final: public BindableResource{
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        MeshInstance(Entity*,Mesh*,Material*,glm::vec3& position = glm::vec3(0.0f),glm::quat& rotation = glm::quat(),glm::vec3& scale = glm::vec3(1.0f));
-        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3& position = glm::vec3(0.0f),glm::quat& rotation = glm::quat(),glm::vec3& scale = glm::vec3(1.0f));
-        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3& position = glm::vec3(0.0f),glm::quat& rotation = glm::quat(),glm::vec3& scale = glm::vec3(1.0f));
-        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3& position = glm::vec3(0.0f),glm::quat& rotation = glm::quat(),glm::vec3& scale = glm::vec3(1.0f));
+        MeshInstance(Entity*,Mesh*,Material*,glm::vec3 position = glm::vec3(0.0f),glm::quat rotation = glm::quat(1.0f,0.0f,0.0f,0.0f),glm::vec3 scale = glm::vec3(1.0f));
+        MeshInstance(Entity*,Handle mesh,Handle mat,glm::vec3 position = glm::vec3(0.0f),glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),glm::vec3 scale = glm::vec3(1.0f));
+        MeshInstance(Entity*,Mesh*,Handle mat,glm::vec3 position = glm::vec3(0.0f),glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),glm::vec3 scale = glm::vec3(1.0f));
+        MeshInstance(Entity*,Handle mesh,Material*,glm::vec3 position = glm::vec3(0.0f),glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),glm::vec3 scale = glm::vec3(1.0f));
         ~MeshInstance();
 
         Mesh* mesh();
@@ -56,21 +56,21 @@ class MeshInstance final: public BindableResource{
         void playAnimation(const std::string& animName,float startTime,float endTime,uint requestedLoops);
 
         void setColor(float r,float g,float b,float a = 1.0f);
-        void setColor(glm::vec4& color);
+        void setColor(glm::vec4 color);
 
         void setGodRaysColor(float r,float g,float b);
-        void setGodRaysColor(glm::vec3& color);
+        void setGodRaysColor(glm::vec3 color);
 
         void setMesh(Handle& meshHandle);                void setMesh(Mesh*);
         void setMaterial(Handle& materialHandle);        void setMaterial(Material*);
 
-        void setPosition(float x,float y,float z);       void setPosition(glm::vec3&);
-        void setOrientation(glm::quat&);                 void setOrientation(float x,float y,float z);
-        void setScale(float x,float y,float z);          void setScale(glm::vec3&);
+        void setPosition(float x,float y,float z);       void setPosition(glm::vec3);
+        void setOrientation(glm::quat);                 void setOrientation(float x,float y,float z);
+        void setScale(float x,float y,float z);          void setScale(glm::vec3);
 
-        void translate(float x,float y,float z);         void translate(glm::vec3&);
-        void rotate(float pitch,float yaw,float roll);   void rotate(glm::vec3&);
-        void scale(float x,float y,float z);             void scale(glm::vec3&);
+        void translate(float x,float y,float z);         void translate(glm::vec3);
+        void rotate(float pitch,float yaw,float roll);   void rotate(glm::vec3);
+        void scale(float x,float y,float z);             void scale(glm::vec3);
 
         void update(const float& dt);
         void render();

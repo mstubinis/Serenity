@@ -83,6 +83,6 @@ Font::~Font(){
 }
 Texture* Font::getGlyphTexture(){ return m_i->m_FontTexture; }
 FontGlyph* Font::getGlyphData(uchar c){ return m_i->m_FontGlyphs.at(c); }
-void Font::renderText(string& text, glm::vec2& pos, glm::vec4& color,float angle, glm::vec2& scl, float depth){
+void Font::renderText(string text, glm::vec2 pos, glm::vec4 color,float angle, glm::vec2 scl, float depth){
     epriv::Core::m_Engine->m_RenderManager->_renderText(this,text,pos,color,scl,angle,depth);
 }

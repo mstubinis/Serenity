@@ -136,21 +136,21 @@ namespace glm{
 
 namespace Engine{
     namespace Math{
-        void extractViewFrustumPlanesHartmannGribbs(glm::mat4& inViewProjection,glm::vec4* outPlanes);
+        void extractViewFrustumPlanesHartmannGribbs(glm::mat4 inViewProjection,glm::vec4* outPlanes);
 
         std::vector<glm::vec4> tiledFrustrum(Camera* camera,uint x,uint y);
 
-        glm::quat btToGLMQuat(btQuaternion& q);
-        btQuaternion glmToBTQuat(glm::quat& q);
+        glm::quat btToGLMQuat(btQuaternion q);
+        btQuaternion glmToBTQuat(glm::quat q);
 
-        glm::vec3 btVectorToGLM(btVector3&);
-        btVector3 btVectorFromGLM(glm::vec3&);
+        glm::vec3 btVectorToGLM(btVector3);
+        btVector3 btVectorFromGLM(glm::vec3);
 
-        glm::vec3 assimpToGLMVec3(aiVector3D&);
-        glm::mat4 assimpToGLMMat4(aiMatrix4x4&);
-        glm::mat3 assimpToGLMMat3(aiMatrix3x3&);
+        glm::vec3 assimpToGLMVec3(aiVector3D);
+        glm::mat4 assimpToGLMMat4(aiMatrix4x4);
+        glm::mat3 assimpToGLMMat3(aiMatrix3x3);
 
-        glm::vec3 getScreenCoordinates(glm::vec3&,bool clampToEdge = true);
+        glm::vec3 getScreenCoordinates(glm::vec3 _3Dposition, bool clampToEdge = true);
 
         glm::vec3 midpoint(glm::vec3&,glm::vec3&);
 
@@ -190,7 +190,7 @@ namespace Engine{
         glm::vec3 getRight(const btRigidBody* b);
         glm::vec3 getUp(const btRigidBody* b);
 
-        float getAngleBetweenTwoVectors(glm::vec3& a, glm::vec3& b, bool degrees = true);
+        float getAngleBetweenTwoVectors(glm::vec3 a, glm::vec3 b, bool degrees = true);
         void alignTo(glm::quat& o, glm::vec3& direction,float speed=0);
 
         void setColor(glm::vec3& color,float r,float g,float b);
@@ -204,9 +204,9 @@ namespace Engine{
         float toRadians(double degrees);
         float toDegrees(double radians);
 
-        float Max(glm::vec2&);
-        float Max(glm::vec3&);
-        float Max(glm::vec4&);
+        float Max(glm::vec2);
+        float Max(glm::vec3);
+        float Max(glm::vec4);
 
         float Max(float,float);
         float Max(float,float,float);
@@ -227,7 +227,7 @@ namespace Engine{
 
         glm::vec4 PaintersAlgorithm(glm::vec4& paintColor, glm::vec4& canvasColor);
 
-        bool rayIntersectSphere(glm::vec3& position, float radius, glm::vec3& A, glm::vec3& rayVector);
+        bool rayIntersectSphere(glm::vec3 position, float radius, glm::vec3 A, glm::vec3 rayVector);
     };
 };
 #endif

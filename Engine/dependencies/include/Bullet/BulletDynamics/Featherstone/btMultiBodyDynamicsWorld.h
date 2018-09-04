@@ -72,6 +72,11 @@ public:
 		return m_multiBodies[mbIndex];
 	}
 
+	const btMultiBody*	getMultiBody(int mbIndex) const
+	{
+		return m_multiBodies[mbIndex];
+	}
+
 	virtual void	addMultiBodyConstraint( btMultiBodyConstraint* constraint);
 
 	virtual int     getNumMultiBodyConstraints() const
@@ -104,6 +109,8 @@ public:
 	virtual void applyGravity();
 	
 	virtual	void	serialize(btSerializer* serializer);
+	virtual void	setMultiBodyConstraintSolver(btMultiBodyConstraintSolver* solver);
+    virtual void    setConstraintSolver(btConstraintSolver* solver);
 
 };
 #endif //BT_MULTIBODY_DYNAMICS_WORLD_H

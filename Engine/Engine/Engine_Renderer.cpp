@@ -126,7 +126,7 @@ namespace Engine{
             glm::vec2 pos, scl;
             glm::vec4 col;
             float rot, depth;
-            TextureRenderInfo(Texture* _texture, glm::vec2& _pos, glm::vec4& _col, glm::vec2& _scl, float& _rot, float& _depth){
+            TextureRenderInfo(Texture* _texture, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
                 texture = _texture; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
             }
         };
@@ -136,7 +136,7 @@ namespace Engine{
             glm::vec4 col;
             float rot, depth;
             std::string text;
-            FontRenderInfo(Font* _font, string& _text, glm::vec2& _pos, glm::vec4& _col, glm::vec2& _scl, float& _rot, float& _depth){
+            FontRenderInfo(Font* _font, string _text, glm::vec2 _pos, glm::vec4 _col, glm::vec2 _scl, float _rot, float _depth){
                 font = _font; pos = _pos; col = _col; scl = _scl; rot = _rot; depth = _depth;
                 text = _text;
             }
@@ -1607,7 +1607,7 @@ class epriv::RenderManager::impl final{
         }
         void _passGeometry(GBuffer& gbuffer,Camera& c,uint& fboWidth, uint& fboHeight,Entity* ignore){
             Scene* scene = Resources::getCurrentScene();
-			glm::vec3& camPos = scene->getActiveCamera()->getPosition();
+			glm::vec3 camPos = scene->getActiveCamera()->getPosition();
             const glm::vec3& clear = scene->getBackgroundColor();
             const float colors[4] = { clear.r,clear.g,clear.b,1.0f };  
     
@@ -2123,10 +2123,10 @@ class epriv::RenderManager::impl final{
             if(godRays && godRays_Object){
                 gbuffer.start(GBufferType::GodRays,"RGBA",false);
                 auto& body = *godRays_Object->getComponent<ComponentBody>();
-                glm::vec3& oPos = body.position();
-                glm::vec3& sp = Math::getScreenCoordinates(oPos,false);
-                glm::vec3& camPos = camera.getPosition();
-                glm::vec3& camVec = camera.getViewVector();
+                glm::vec3 oPos = body.position();
+                glm::vec3 sp = Math::getScreenCoordinates(oPos,false);
+                glm::vec3 camPos = camera.getPosition();
+                glm::vec3 camVec = camera.getViewVector();
                 bool behind = Math::isPointWithinCone(camPos,-camVec,oPos,Math::toRadians(godRays_fovDegrees));
                 float alpha = Math::getAngleBetweenTwoVectors(camVec,camPos - oPos,true) / godRays_fovDegrees;
 
@@ -2206,10 +2206,10 @@ class epriv::RenderManager::impl final{
             GLDisable(GLState::DEPTH_TEST);
             GLDisable(GLState::DEPTH_MASK);
             if(mainRenderFunc){
-                if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
+                //if(draw_physics_debug  &&  &camera == s->getActiveCamera()){
                     m_InternalShaderPrograms.at(EngineInternalShaderPrograms::BulletPhysics)->bind();
                     Core::m_Engine->m_PhysicsManager->_render();
-                }
+                //}
             }
             #pragma endregion
 

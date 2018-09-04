@@ -110,7 +110,7 @@ class Ship: public Entity{
             glm::vec3 = glm::vec3(1), //Scale
             Collision* = nullptr,     //Bullet Collision Shape
             Scene* = nullptr
-            );
+        );
         virtual ~Ship();
 
         void onEvent(const Event&);

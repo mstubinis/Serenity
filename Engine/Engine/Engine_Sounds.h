@@ -2,8 +2,7 @@
 #ifndef ENGINE_ENGINE_SOUNDS_H
 #define ENGINE_ENGINE_SOUNDS_H
 
-#include "Engine_ResourceBasic.h"
-#include "Engine_ResourceHandle.h"
+#include "Engine_Resources.h"
 #include <SFML/Audio.hpp>
 #include <glm/vec3.hpp>
 #include <memory>
