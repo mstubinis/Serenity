@@ -95,7 +95,6 @@
     <ClInclude Include="Engine\Engine_Physics.h" />
     <ClInclude Include="Engine\Engine_Renderer.h" />
     <ClInclude Include="Engine\Engine_ResourceBasic.h" />
-    <ClInclude Include="Engine\Engine_ResourceHandle.h" />
     <ClInclude Include="Engine\Engine_Resources.h" />
     <ClInclude Include="Engine\Engine_Sounds.h" />
     <ClInclude Include="Engine\Engine_ThreadManager.h" />

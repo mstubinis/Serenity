@@ -5,7 +5,7 @@
 #include <memory>
 #include <cstdint>
 
-#include "Engine_ResourceHandle.h"
+#include "Engine_Resources.h"
 #include "Engine_Utils.h"
 
 typedef unsigned int uint;
@@ -22,15 +22,15 @@ namespace Engine{
             R* resource;
             HandleEntry(){
                 counter = 1;
-				nextFreeIndex = 1;
-				active = endOfList = 0;
-				resource = nullptr;
+                nextFreeIndex = 1;
+                active = endOfList = 0;
+                resource = nullptr;
             }
             explicit HandleEntry(uint32 _nextFreeIndex){
                 nextFreeIndex = ++_nextFreeIndex;
-				counter = 1;
-				active = endOfList = 0; 
-				resource = nullptr;
+                counter = 1;
+                active = endOfList = 0; 
+                resource = nullptr;
             }
         };
         #pragma region ObjectPool
@@ -44,8 +44,8 @@ namespace Engine{
             public:
                 ObjectPool(uint numEntries){ 
                     MAX_ENTRIES = numEntries; 
-					m_Pool = new HandleEntry<T>[MAX_ENTRIES]; 
-					reset(); 
+                    m_Pool = new HandleEntry<T>[MAX_ENTRIES]; 
+                    reset(); 
                 }
                 ~ObjectPool(){ destruct(); }
 
@@ -116,7 +116,7 @@ namespace Engine{
                     return newIndex+1;
                 }
                 void remove(uint index){
-					const uint realIndex = index - 1;
+                    const uint realIndex = index - 1;
                     if(m_Pool[realIndex].active){
                         m_Pool[realIndex].nextFreeIndex = m_firstFreeEntry;
                         m_Pool[realIndex].active = false;
@@ -129,7 +129,7 @@ namespace Engine{
                 }
                 void remove(Handle& handle){
                     const uint32 index = handle.index;
-					const uint realIndex = index - 1;
+                    const uint realIndex = index - 1;
                     if(m_Pool[realIndex].counter == handle.counter && m_Pool[realIndex].active){
                         m_Pool[realIndex].nextFreeIndex = m_firstFreeEntry;
                         m_Pool[realIndex].active = false;

@@ -77,7 +77,7 @@ namespace Engine{
 
     namespace epriv{
         const uint MAX_NUM_ENTITIES = 131072;
-		class ComponentManager final: private Engine::epriv::noncopyable{
+        class ComponentManager final: private Engine::epriv::noncopyable{
             friend class ::Entity;
             friend class ::Scene;
             friend class ::Engine::epriv::ComponentTypeRegistry;
@@ -310,7 +310,7 @@ class ComponentCamera: public ComponentBaseClass{
         glm::mat4 getProjectionInverse();
         glm::mat4 getViewProjection();
         glm::vec3 getViewVector();
-		glm::vec3 getViewVectorNoTranslation();
+        glm::vec3 getViewVectorNoTranslation();
 
         float getAngle();    void setAngle(float);
         float getAspect();   void setAspect(float);

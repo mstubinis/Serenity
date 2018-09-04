@@ -21,6 +21,8 @@
 typedef unsigned int uint;
 
 typedef boost::packaged_task<void> boost_packed_task;
+typedef boost::shared_ptr<boost_packed_task> boost_packed_task_ptr;
+typedef boost::function<void()> boost_void_func;
 
 namespace Engine{
     namespace epriv{
@@ -39,63 +41,38 @@ namespace Engine{
         };
         namespace threading{
             //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-            template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& vec,uint n = 0){
+            template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v,uint n = 0){
                 if(n == 0) n = Core::m_Engine->m_ThreadManager->cores();
-                std::vector<std::vector<T>> outVec;  uint length = vec.size() / n;  uint remain = vec.size() % n;  uint begin = 0;  uint end = 0;
-                for (uint i = 0; i < std::min(n, vec.size()); ++i){
+                const uint& vs = v.size();
+                std::vector<std::vector<T>> outVec;  uint length = vs / n;  uint remain = vs % n;  uint begin = 0;  uint end = 0;
+                for (uint i = 0; i < std::min(n, vs); ++i){
                     end += (remain > 0) ? (length + !!(remain--)) : length;
-                    outVec.emplace_back(vec.begin() + begin, vec.begin() + end);
+                    outVec.emplace_back(v.begin() + begin, v.begin() + end);
                     begin = end;
                 }
                 return outVec;
             }
 
             void waitForAll();
-            void finalizeJob(const boost::shared_ptr<boost_packed_task>& task);
-            void finalizeJob1(const boost::shared_ptr<boost_packed_task>& task);
-            void finalizeJob(const boost::shared_ptr<boost_packed_task>& task,const boost::function<void()>& then_task);
+            void finalizeJob( boost_packed_task_ptr&& task);
+            void finalizeJob( boost_packed_task_ptr&& task, boost_void_func&& then_task);
             
-
-            template<typename... ARGS> void addJob(void (*function_ptr)(ARGS...),ARGS&&... _args){
-                auto j = boost::bind(function_ptr,std::forward<ARGS>(_args)...);
-                auto job = boost::make_shared<boost_packed_task>(j);
-                finalizeJob(job);
+            template<typename Job, typename... ARGS> void addJob(Job&& _job,ARGS&&... _args){
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(boost::move(_job), std::forward<ARGS>(_args)...));
+                finalizeJob(boost::move(job));
             }
-            static void addJob( void (*function_ptr)(void) ){
-                auto j = boost::bind(function_ptr);
-                auto job = boost::make_shared<boost_packed_task>(j);
-                finalizeJob(job);
+            template<typename Job> void addJob(Job&& _job){
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(boost::move(_job)));
+                finalizeJob(boost::move(job));
+            }    
+            template<typename Job,typename Then, typename... ARGS> void addJobWithPostCallback(Job&& _job, Then&& _then,ARGS&&... _args){
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(boost::move(_job),std::forward<ARGS>(_args)...));
+                finalizeJob(boost::move(job), boost::move(boost::bind(boost::move(_then))));
             }
-
-            template<typename T, typename... ARGS> void addJob(T& functorJob,ARGS&&... _args){
-                auto j = boost::bind(functorJob,std::forward<ARGS>(_args)...);
-                auto job = boost::make_shared<boost_packed_task>(j);
-                finalizeJob(job);
+            template<typename Job,typename Then> void addJobWithPostCallback(Job&& _job, Then&& _then){
+                auto job = boost::make_shared<boost_packed_task>(boost::bind(boost::move(_job)));
+                finalizeJob(boost::move(job), boost::move(boost::bind(boost::move(_then))));
             }
-
-            template<typename T> void addJob(T& functorJob){
-                auto j = boost::bind(functorJob);
-                auto job = boost::make_shared<boost_packed_task>(j);
-                finalizeJob(job);
-            }
-
-            
-            template<typename Job,typename Callback, typename... ARGS> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor,ARGS&&... _args){
-                auto then = boost::bind(postCallbackFunctor);
-                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob,std::forward<ARGS>(_args)...));	
-                finalizeJob(job,then);
-            }
-            template<typename Job,typename Callback> void addJobWithPostCallback(Job& functorJob,Callback& postCallbackFunctor){
-                auto then = boost::bind(postCallbackFunctor);
-                auto job = boost::make_shared<boost_packed_task>(boost::bind(functorJob));	
-                finalizeJob(job,then);
-            }
-
-            static void addJobWithPostCallback(boost::function<void()>& job, boost::function<void()>& callback){
-                auto _job = boost::make_shared<boost_packed_task>(boost::bind(job));
-                finalizeJob(_job,callback);
-            }
-
         };
     };
 };

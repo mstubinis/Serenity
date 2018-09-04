@@ -479,7 +479,7 @@ void Ring::_makeRingImage(vector<RingInfo>& rings,Planet* parent){
     Texture* diffuse = new Texture(ringImage,"RingDiffuse",false,ImageInternalFormat::SRGB8_ALPHA8);
     epriv::Core::m_Engine->m_ResourceManager->_addTexture(diffuse);
     m_MaterialHandle = Resources::addMaterial("RingMaterial",diffuse,nullptr,nullptr,nullptr,ResourceManifest::groundFromSpace);
-    Resources::getMaterial(m_MaterialHandle)->setSpecularModel(SpecularModel::None);
+	((Material*)m_MaterialHandle.get())->setSpecularModel(SpecularModel::None);
 }
 
 OrbitInfo::OrbitInfo(float _eccentricity, float _days, float _majorRadius,float _angle,uint _parent,float _inclination){

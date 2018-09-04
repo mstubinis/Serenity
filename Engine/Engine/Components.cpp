@@ -447,14 +447,14 @@ bool ComponentModel::visible(){ return m_i->m_Visible; }
 void ComponentModel::show(){ m_i->m_Visible = true; }
 void ComponentModel::hide(){ m_i->m_Visible = false; }
 float ComponentModel::radius(){ return _radius; }
-uint ComponentModel::addModel(Handle& meshHandle, Handle& materialHandle){ return ComponentModel::addModel(Resources::getMesh(meshHandle),Resources::getMaterial(materialHandle)); }
+uint ComponentModel::addModel(Handle& mesh, Handle& mat){ return ComponentModel::addModel((Mesh*)mesh.get(),(Material*)mat.get()); }
 uint ComponentModel::addModel(Mesh* mesh,Material* material){
     models.push_back( new MeshInstance(m_Owner,mesh,material) );
     m_i->calculateRadius(this);
     return models.size() - 1;
 }
 
-void ComponentModel::setModel(Handle& meshHandle,Handle& materialHandle,uint index){ ComponentModel::setModel(Resources::getMesh(meshHandle),Resources::getMaterial(materialHandle), index); }
+void ComponentModel::setModel(Handle& mesh,Handle& mat,uint index){ ComponentModel::setModel((Mesh*)mesh.get(),(Material*)mat.get(), index); }
 void ComponentModel::setModel(Mesh* mesh,Material* material,uint index){
     MeshInstance& pair = *(models.at(index));
     pair.setMesh(mesh);
@@ -467,13 +467,12 @@ void ComponentModel::setModelMesh(Mesh* mesh,uint index){
     pair.setMesh(mesh);
     m_i->calculateRadius(this);
 }
-void ComponentModel::setModelMesh(Handle& meshHandle, uint index){ ComponentModel::setModelMesh(Resources::getMesh(meshHandle),index); }
-
+void ComponentModel::setModelMesh(Handle& mesh, uint index){ ComponentModel::setModelMesh((Mesh*)mesh.get(),index); }
 void ComponentModel::setModelMaterial(Material* material,uint index){
     auto& pair = *(models.at(index));
     pair.setMaterial(material);
 }
-void ComponentModel::setModelMaterial(Handle& materialHandle,uint index){ ComponentModel::setModelMaterial(Resources::getMaterial(materialHandle),index); }
+void ComponentModel::setModelMaterial(Handle& mat,uint index){ ComponentModel::setModelMaterial((Material*)mat.get(),index); }
 bool ComponentModel::rayIntersectSphere(ComponentCamera* camera){
     auto* body = m_Owner->getComponent<ComponentBody>();
     return Math::rayIntersectSphere(body->position(),_radius,camera->_eye,camera->getViewVector());

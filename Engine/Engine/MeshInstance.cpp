@@ -230,22 +230,22 @@ MeshInstance::MeshInstance(Entity* entity, Mesh* mesh,Material* mat,glm::vec3 po
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Handle mesh,Handle mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
-    Mesh* _mesh = Resources::getMesh(mesh);
-    Material* _mat = Resources::getMaterial(mat);
+	Mesh* _mesh = (Mesh*)mesh.get();
+	Material* _mat = (Material*)mat.get();
     m_i->_init(_mesh,_mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Mesh* mesh,Handle mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
-    Material* _mat = Resources::getMaterial(mat);
+	Material* _mat = (Material*)mat.get();
     m_i->_init(mesh,_mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
 MeshInstance::MeshInstance(Entity* entity,Handle mesh,Material* mat,glm::vec3 pos,glm::quat rot,glm::vec3 scl):m_i(new impl){
-    Mesh* _mesh = Resources::getMesh(mesh);
+	Mesh* _mesh = (Mesh*)mesh.get();
     m_i->_init(_mesh,mat,pos,rot,scl,this,entity);
     epriv::Core::m_Engine->m_ResourceManager->_addMeshInstance(this);
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
@@ -276,9 +276,9 @@ glm::vec3& MeshInstance::position(){ return m_i->m_Position; }
 glm::quat& MeshInstance::orientation(){ return m_i->m_Orientation; }
 Mesh* MeshInstance::mesh(){ return m_i->m_Mesh; }
 Material* MeshInstance::material(){ return m_i->m_Material; }
-void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(Resources::getMesh(meshHandle),this); }
+void MeshInstance::setMesh(Handle& meshHandle){ m_i->_setMesh(((Mesh*)meshHandle.get()),this); }
 void MeshInstance::setMesh(Mesh* m){ m_i->_setMesh(m,this); }
-void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(Resources::getMaterial(materialHandle),this); }
+void MeshInstance::setMaterial(Handle& materialHandle){ m_i->_setMaterial(((Material*)materialHandle.get()),this); }
 void MeshInstance::setMaterial(Material* m){ m_i->_setMaterial(m,this); }
 void MeshInstance::setOrientation(glm::quat o){ m_i->m_Orientation = o; }
 void MeshInstance::setOrientation(float x,float y,float z){ 

@@ -247,9 +247,6 @@
     <ClInclude Include="Engine\Engine_ResourceBasic.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Engine_ResourceHandle.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Engine_Resources.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
