@@ -33,6 +33,7 @@ typedef unsigned short ushort;
 
 namespace Engine{
     namespace epriv{
+		class MeshLoader;
         class VertexFormat final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,
         _TOTAL};};
@@ -146,6 +147,7 @@ class Mesh final: public BindableResource{
     friend class ::Engine::epriv::AnimationData;
     friend class ::Engine::epriv::MeshSkeleton;
     friend class ::InternalMeshPublicInterface;
+	friend class ::Engine::epriv::MeshLoader;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
@@ -155,7 +157,7 @@ class Mesh final: public BindableResource{
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);
         Mesh(std::string name,float x, float y, float width, float height,float threshhold);
-        Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadImmediately = true);
+        Mesh(std::string fileOrData,CollisionType::Type = CollisionType::ConvexHull, bool notMemory = true,float threshhold = 0.0005f,bool loadNow = true);
         ~Mesh();
 
         Collision* getCollision() const;

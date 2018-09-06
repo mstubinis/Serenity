@@ -18,23 +18,54 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace Engine;
+namespace boostm = boost::math;
 
 Mesh* Mesh::FontPlane = nullptr;
 Mesh* Mesh::Plane = nullptr;
 Mesh* Mesh::Cube = nullptr;
 
+
+void float32(float* __restrict out, const uint16_t in) {
+    uint32_t t1,t2,t3;
+    t1 = in & 0x7fff;                       // Non-sign bits
+    t2 = in & 0x8000;                       // Sign bit
+    t3 = in & 0x7c00;                       // Exponent
+    t1 <<= 13;                              // Align mantissa on MSB
+    t2 <<= 16;                              // Shift sign bit into position
+    t1 += 0x38000000;                       // Adjust bias
+    t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
+    t1 |= t2;                               // Re-insert sign bit
+    *((uint32_t*)out) = t1;
+};
+void float16(uint16_t* __restrict out, const float in) {
+    uint32_t inu = *((uint32_t*)&in);
+    uint32_t t1,t2,t3;
+    t1 = inu & 0x7fffffff;                 // Non-sign bits
+    t2 = inu & 0x80000000;                 // Sign bit
+    t3 = inu & 0x7f800000;                 // Exponent
+    t1 >>= 13;                             // Align mantissa on MSB
+    t2 >>= 16;                             // Shift sign bit into position
+    t1 -= 0x1c000;                         // Adjust bias
+    t1 = (t3 < 0x38800000) ? 0 : t1;
+    t1 = (t3 > 0x47000000) ? 0x7bff : t1;
+    t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
+    t1 |= t2;                              // Re-insert sign bit
+    *((uint16_t*)out) = t1;
+};
+
 namespace Engine{
     namespace epriv{
         enum LoadWhat{
-            LOAD_POINTS  = 0x00000001,
-            LOAD_UVS     = 0x00000002,
-            LOAD_NORMALS = 0x00000004,
-            LOAD_FACES   = 0x00000008,
-            LOAD_TBN     = 0x00000016,
-                       //= 0x00000032
+            LOAD_POINTS  = 1,
+            LOAD_UVS     = 2,
+            LOAD_NORMALS = 4,
+            LOAD_FACES   = 8,
+            LOAD_TBN     = 16,
+                       //= 32
         };
         struct MeshVertexData{
             glm::vec3 position;
@@ -73,6 +104,132 @@ namespace Engine{
             m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
             return m;
         }();
+
+        class MeshLoader final {
+            friend class ::Mesh;
+            public:
+                static bool IsNear(float v1, float v2, float threshold) { return fabs(v1 - v2) < threshold; }
+                static bool IsSpecialFloat(float f) {
+                    if (boostm::isnan(f)) return true;
+                    if (boostm::isinf(f)) return true;
+                    return false;
+                }
+                static bool IsSpecialFloat(glm::vec2& v) {
+                    if (boostm::isnan(v.x) || boostm::isnan(v.y)) return true;
+                    if (boostm::isinf(v.x) || boostm::isinf(v.y)) return true;
+                    return false;
+                }
+                static bool IsSpecialFloat(glm::vec3& v) {
+                    if (boostm::isnan(v.x) || boostm::isnan(v.y) || boostm::isnan(v.z)) return true;
+                    if (boostm::isinf(v.x) || boostm::isinf(v.y) || boostm::isinf(v.z)) return true;
+                    return false;
+                }
+                static bool GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts,vector<glm::vec2>& uvs, vector<glm::vec3>& norms, ushort& result, float threshold) {
+                    for (uint t = 0; t < pts.size(); ++t){
+                        if (IsNear(in_pos.x,pts.at(t).x,threshold) && IsNear(in_pos.y,pts.at(t).y,threshold) &&
+                            IsNear(in_pos.z,pts.at(t).z,threshold) && IsNear(in_uv.x,uvs.at(t).x,threshold) &&
+                            IsNear(in_uv.y,uvs.at(t).y,threshold) && IsNear(in_norm.x,norms.at(t).x,threshold) &&
+                            IsNear(in_norm.y,norms.at(t).y,threshold) && IsNear(in_norm.z,norms.at(t).z,threshold)
+                        ){
+                            result = t;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                static void CalculateTBNAssimp(epriv::ImportedMeshData& data) {
+                    if (data.normals.size() == 0) return;
+                    uint dataSize(data.points.size());
+                    for (uint i = 0; i < dataSize; i += 3) {
+                        uint p0(i + 0); uint p1(i + 1); uint p2(i + 2);
+
+                        glm::vec3 dataP0, dataP1, dataP2;
+                        glm::vec2 uvP0, uvP1, uvP2;
+
+                        uint uvSize(data.uvs.size());
+
+                        if (dataSize > p0) dataP0 = data.points.at(p0);
+                        else              dataP0 = glm::vec3(0.0f);
+                        if (dataSize > p1) dataP1 = data.points.at(p1);
+                        else              dataP1 = glm::vec3(0.0f);
+                        if (dataSize > p2) dataP2 = data.points.at(p2);
+                        else              dataP2 = glm::vec3(0.0f);
+
+                        if (uvSize > p0)   uvP0 = data.uvs.at(p0);
+                        else              uvP0 = glm::vec2(0.0f);
+                        if (uvSize > p1)   uvP1 = data.uvs.at(p1);
+                        else              uvP1 = glm::vec2(0.0f);
+                        if (uvSize > p2)   uvP2 = data.uvs.at(p2);
+                        else              uvP2 = glm::vec2(0.0f);
+
+                        glm::vec3 v(dataP1 - dataP0);
+                        glm::vec3 w(dataP2 - dataP0);
+
+                        // texture offset p1->p2 and p1->p3
+                        float sx(uvP1.x - uvP0.x);
+                        float sy(uvP1.y - uvP0.y);
+                        float tx(uvP2.x - uvP0.x);
+                        float ty(uvP2.y - uvP0.y);
+                        float dirCorrection = 1.0;
+
+                        if ((tx * sy - ty * sx) < 0.0f) dirCorrection = -1.0f;//this is important for normals and mirrored mesh geometry using identical uv's
+
+
+                        // when t1, t2, t3 in same position in UV space, just use default UV direction.
+                        //if ( 0 == sx && 0 == sy && 0 == tx && 0 == ty ) {
+                        if (sx * ty == sy * tx) {
+                            sx = 0.0; sy = 1.0;
+                            tx = 1.0; ty = 0.0;
+                        }
+
+                        // tangent points in the direction where to positive X axis of the texture coord's would point in model space
+                        // bitangent's points along the positive Y axis of the texture coord's, respectively
+                        glm::vec3 tangent;
+                        glm::vec3 bitangent;
+                        tangent.x = (w.x * sy - v.x * ty) * dirCorrection;
+                        tangent.y = (w.y * sy - v.y * ty) * dirCorrection;
+                        tangent.z = (w.z * sy - v.z * ty) * dirCorrection;
+                        bitangent.x = (w.x * sx - v.x * tx) * dirCorrection;
+                        bitangent.y = (w.y * sx - v.y * tx) * dirCorrection;
+                        bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
+
+                        // store for every vertex of that face
+                        for (uint b = 0; b < 3; ++b) {
+                            uint p;
+                            glm::vec3 normal;
+                            if (b == 0)      p = p0;
+                            else if (b == 1) p = p1;
+                            else          p = p2;
+
+                            if (data.normals.size() > p) normal = data.normals.at(p);
+                            else                        normal = glm::vec3(0.0f);
+
+                            // project tangent and bitangent into the plane formed by the vertex' normal
+                            glm::vec3 localTangent(tangent - normal * (tangent   * normal));
+                            glm::vec3 localBitangent(bitangent - normal * (bitangent * normal));
+                            localTangent = glm::normalize(localTangent);
+                            localBitangent = glm::normalize(localBitangent);
+
+                            // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
+                            bool invalid_tangent = IsSpecialFloat(localTangent);
+                            bool invalid_bitangent = IsSpecialFloat(localBitangent);
+                            if (invalid_tangent != invalid_bitangent) {
+                                if (invalid_tangent) localTangent = glm::normalize(glm::cross(normal, localBitangent));
+                                else                 localBitangent = glm::normalize(glm::cross(localTangent, normal));
+                            }
+                            data.tangents.push_back(localTangent);
+                            data.binormals.push_back(localBitangent);
+                        }
+                    }
+					for (uint i = 0; i < data.points.size(); ++i) {
+						glm::vec3& n = data.normals.at(i);
+						glm::vec3& t = data.binormals.at(i);
+						glm::vec3& b = data.tangents.at(i);
+
+						t = glm::normalize(t - n * glm::dot(n, t)); // Gram-Schmidt orthogonalize
+					}
+                }
+        };
     };
 };
 
@@ -127,19 +284,19 @@ class Mesh::impl final{
         vector<epriv::MeshVertexData> m_Vertices;
         vector<ushort> m_Indices;
         vector<glm::mat4> m_InstanceMatrices;
-		uint m_InstanceCount;
-		GLuint m_VAO;
+        uint m_InstanceCount;
+        GLuint m_VAO;
 
         void _initGlobal(float threshold){
-			m_InstanceCount = 0;
-			m_VAO = 0;
+            m_InstanceCount = 0;
+            m_VAO = 0;
             m_File = "";
             m_Collision = nullptr;
             m_Skeleton = nullptr;
             m_threshold = threshold;
         }
         void _initGlobalTwo(Mesh* super,epriv::ImportedMeshData& data,float threshold){
-            _loadData(super,data,threshold);
+			_finalizeData(data,threshold);
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
             super->load();
@@ -155,10 +312,10 @@ class Mesh::impl final{
                     string key4(to_string(i+1) + "," + to_string(j+1));
 
                     epriv::Vertex v1,v2,v3,v4;
-                    v1.position = glm::vec3(i-width/2.0f,   grid[key1], j-length/2.0f);
-                    v2.position = glm::vec3((i+1)-width/2.0f, grid[key2], j-length/2.0f);
-                    v3.position = glm::vec3(i-width/2.0f,   grid[key3], (j+1)-length/2.0f);
-                    v4.position = glm::vec3((i+1)-width/2.0f, grid[key4], (j+1)-length/2.0f);
+                    v1.position = glm::vec3(i-width/2.0f,   grid.at(key1), j-length/2.0f);
+                    v2.position = glm::vec3((i+1)-width/2.0f, grid.at(key2), j-length/2.0f);
+                    v3.position = glm::vec3(i-width/2.0f,   grid.at(key3), (j+1)-length/2.0f);
+                    v4.position = glm::vec3((i+1)-width/2.0f, grid.at(key4), (j+1)-length/2.0f);
 
                     glm::vec3 a(v4.position - v1.position);
                     glm::vec3 b(v2.position - v3.position);
@@ -182,7 +339,7 @@ class Mesh::impl final{
                     d.points.push_back(v4.position); d.uvs.push_back(v4.uv); d.normals.push_back(v4.normal);
                     d.points.push_back(v2.position); d.uvs.push_back(v2.uv); d.normals.push_back(v2.normal);
 
-                    _calculateTBN(d);
+                    epriv::MeshLoader::CalculateTBNAssimp(d);
                 }
             }
             _initGlobalTwo(super,d,threshold);
@@ -256,22 +413,22 @@ class Mesh::impl final{
             d.normals.resize(6,glm::vec3(1));  d.binormals.resize(6,glm::vec3(1));  d.tangents.resize(6,glm::vec3(1));
             _initGlobalTwo(super,d,threshold);
         }
-        void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadImmediately){//from file / data
+        void _init(Mesh* super,string& fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadNow){//from file / data
             _initGlobal(threshold);
             m_Type = type;
             if(notMemory){
                 m_File = fileOrData;
-            }
-            else{
+                if (m_File == "data/Models/defiant.obj")
+                    _loadFromOBJMemory(super, type, threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN, fileOrData);
+            }else{
                 _loadFromOBJMemory(super,type,threshold, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN,fileOrData);
             }
             super->setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
             super->setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
-            if(loadImmediately){
+			if(loadNow)
                 super->load();
-            }
         }
-        void _clearData(Mesh* super){
+        void _clearData(){
             vector_clear(m_Vertices);
             if(m_Skeleton){
                 SAFE_DELETE(m_Skeleton);
@@ -300,28 +457,26 @@ class Mesh::impl final{
             for(uint i = 0; i < node->mNumMeshes; ++i){
                 aiMesh& aimesh = *scene->mMeshes[node->mMeshes[i]];
                 #pragma region vertices
-                for(uint i = 0; i < aimesh.mNumVertices; ++i){
+                for (uint i = 0; i < aimesh.mNumVertices; ++i) {
                     //pos
-                    data.points.emplace_back(aimesh.mVertices[i].x,aimesh.mVertices[i].y,aimesh.mVertices[i].z);
-
+                    data.points.emplace_back(aimesh.mVertices[i].x, aimesh.mVertices[i].y, aimesh.mVertices[i].z);
                     //uv
-                    if(aimesh.mTextureCoords[0]){
+                    if (aimesh.mTextureCoords[0]) {
                         //this is to prevent uv compression from beign f-ed up at the poles.
                         //if(aimesh.mTextureCoords[0][i].y <= 0.0001f){ aimesh.mTextureCoords[0][i].y = 0.001f; }
                         //if(aimesh.mTextureCoords[0][i].y >= 0.9999f){ aimesh.mTextureCoords[0][i].y = 0.999f; }
-                        data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x,aimesh.mTextureCoords[0][i].y);
+                        data.uvs.emplace_back(aimesh.mTextureCoords[0][i].x, aimesh.mTextureCoords[0][i].y);
+                    }else{
+                        data.uvs.emplace_back(0.0f, 0.0f);
                     }
-                    else{ 
-                        data.uvs.emplace_back(0.0f,0.0f);
+                    if (aimesh.mNormals) {
+                        data.normals.emplace_back(aimesh.mNormals[i].x, aimesh.mNormals[i].y, aimesh.mNormals[i].z);
                     }
-                    //norm
-                    if(aimesh.mNormals){
-                        data.normals.emplace_back(aimesh.mNormals[i].x,aimesh.mNormals[i].y,aimesh.mNormals[i].z);
-                        //tangent
+                    if (aimesh.mTangents) {
                         //data.tangents.emplace_back(aimesh.mTangents[i].x,aimesh.mTangents[i].y,aimesh.mTangents[i].z);
-
-                        //binorm
-                        //data.binormals.push_back(aimesh.mBitangents[i].x,aimesh.mBitangents[i].y,aimesh.mBitangents[i].z);
+                    }
+                    if (aimesh.mBitangents) {
+                        //data.binormals.emplace_back(aimesh.mBitangents[i].x,aimesh.mBitangents[i].y,aimesh.mBitangents[i].z);
                     }
                 }
                 #pragma endregion
@@ -399,266 +554,14 @@ class Mesh::impl final{
                     }
                 }
                 #pragma endregion
-                //_calculateTBN(data);
-                _calculateTBNAssimp(data);
-                //_calculateGramSchmidt(data.points,data.normals,data.binormals,data.tangents);
+                epriv::MeshLoader::CalculateTBNAssimp(data);
             }
             for(uint i = 0; i < node->mNumChildren; ++i){
                 _processNode(mesh,data,node->mChildren[i], scene);
             }
         }
-        bool _is_near(float v1, float v2, float threshold){ return fabs( v1-v2 ) < threshold; }
-        bool _is_special_float(float f){
-            if(boost::math::isnan(f)) return true; if(boost::math::isinf(f)) return true;
-            return false;
-        }
-        bool _is_special_float(glm::vec2 v){
-            if(boost::math::isnan(v.x) || boost::math::isnan(v.y) ) return true; if(boost::math::isinf(v.x) || boost::math::isinf(v.y) ) return true;
-            return false;
-        }
-        bool _is_special_float(glm::vec3 v){
-            if(boost::math::isnan(v.x) || boost::math::isnan(v.y) || boost::math::isnan(v.z) ) return true;
-            if(boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z) ) return true;
-            return false;
-        }
-        bool _getSimilarVertexIndex(glm::vec3& in_pos,glm::vec2& in_uv,glm::vec3& in_norm,vector<glm::vec2>& uvs,vector<glm::vec3>& norms,ushort& result, float threshold){
-            for (uint i=0; i < m_Vertices.size(); ++i ){
-                if (_is_near( in_pos.x , m_Vertices.at(i).position.x ,threshold) && _is_near( in_pos.y , m_Vertices.at(i).position.y ,threshold) &&
-                    _is_near( in_pos.z , m_Vertices.at(i).position.z ,threshold) && _is_near( in_uv.x  , uvs.at(i).x      ,threshold) &&
-                    _is_near( in_uv.y  , uvs.at(i).y      ,threshold) && _is_near( in_norm.x , norms.at(i).x ,threshold) &&
-                    _is_near( in_norm.y , norms.at(i).y ,threshold) && _is_near( in_norm.z , norms.at(i).z ,threshold)
-                ){
-                    result = i;
-                    return true;
-                }
-            }
-            return false;
-        }
-        void _calculateGramSchmidt(vector<glm::vec3>& points,vector<glm::vec3>& normals,vector<glm::vec3>& binormals,vector<glm::vec3>& tangents){
-            for(uint i=0; i < points.size(); ++i){
-                glm::vec3& n = normals.at(i);
-                glm::vec3& t = binormals.at(i);
-                glm::vec3& b = tangents.at(i);
-                // Gram-Schmidt orthogonalize
-                t = glm::normalize(t - n * glm::dot(n, t));
 
-                //handedness
-                if (glm::dot(glm::cross(n, t), b) < 0.0f){
-                     t = t * -1.0f;
-                }
-            }
-        }
-        void _calculateTBN(epriv::ImportedMeshData& data){
-            if(data.normals.size() == 0) return;
-            for(uint i=0; i < data.points.size(); i+=3){
-                uint p0(i+0); uint p1(i+1); uint p2(i+2);
-
-                if(p2 > data.points.size() || p1 > data.points.size()) break;
-
-                glm::vec3 deltaPos1(data.points.at(p1) - data.points.at(p0));
-                glm::vec3 deltaPos2(data.points.at(p2) - data.points.at(p0));
-
-                glm::vec2 deltaUV1(data.uvs.at(p1) - data.uvs.at(p0));
-                glm::vec2 deltaUV2(data.uvs.at(p2) - data.uvs.at(p0));
-
-                float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-                glm::vec3 tangent(r * (deltaUV2.y * deltaPos1 - deltaUV1.y * deltaPos2));
-                glm::vec3 bitangent(r * (deltaUV1.x * deltaPos2 - deltaUV2.x * deltaPos1));
-                tangent = glm::normalize(tangent); bitangent = glm::normalize(bitangent);
-
-                glm::vec3 t1(tangent);   glm::vec3 t2(tangent);   glm::vec3 t3(tangent);
-                glm::vec3 b1(bitangent); glm::vec3 b2(bitangent); glm::vec3 b3(bitangent);
-                //do we even need these next 6 lines?
-                t1 = glm::normalize(tangent - data.normals.at(p0) * glm::dot(data.normals.at(p0), tangent));
-                t2 = glm::normalize(tangent - data.normals.at(p1) * glm::dot(data.normals.at(p1), tangent));
-                t3 = glm::normalize(tangent - data.normals.at(p2) * glm::dot(data.normals.at(p2), tangent));
-
-                b1 = glm::normalize(bitangent - data.normals.at(p0) * glm::dot(data.normals.at(p0), bitangent));
-                b2 = glm::normalize(bitangent - data.normals.at(p1) * glm::dot(data.normals.at(p1), bitangent));
-                b3 = glm::normalize(bitangent - data.normals.at(p2) * glm::dot(data.normals.at(p2), bitangent));
-                //////////////////////////////////////
-                data.tangents.push_back(t1); data.tangents.push_back(t2); data.tangents.push_back(t3);
-                data.binormals.push_back(b1); data.binormals.push_back(b2); data.binormals.push_back(b3);
-            }
-        }
-        void _calculateTBNAssimp(epriv::ImportedMeshData& data){
-            if(data.normals.size() == 0) return;
-            uint dataSize(data.points.size());
-            for(uint i=0; i < dataSize; i+=3){
-                uint p0(i+0); uint p1(i+1); uint p2(i+2);
-
-                glm::vec3 dataP0,dataP1,dataP2;
-                glm::vec2 uvP0,uvP1,uvP2;
-
-                uint uvSize(data.uvs.size());
-
-                if(dataSize > p0) dataP0 = data.points.at(p0);
-                else              dataP0 = glm::vec3(0.0f);
-                if(dataSize > p1) dataP1 = data.points.at(p1);
-                else              dataP1 = glm::vec3(0.0f);
-                if(dataSize > p2) dataP2 = data.points.at(p2);
-                else              dataP2 = glm::vec3(0.0f);
-
-                if(uvSize > p0)   uvP0 = data.uvs.at(p0);
-                else              uvP0 = glm::vec2(0.0f);
-                if(uvSize > p1)   uvP1 = data.uvs.at(p1);
-                else              uvP1 = glm::vec2(0.0f);
-                if(uvSize > p2)   uvP2 = data.uvs.at(p2);
-                else              uvP2 = glm::vec2(0.0f);
-
-                glm::vec3 v(dataP1-dataP0);
-                glm::vec3 w(dataP2-dataP0);
-
-                // texture offset p1->p2 and p1->p3
-                float sx(uvP1.x-uvP0.x);
-                float sy(uvP1.y-uvP0.y);
-                float tx(uvP2.x-uvP0.x);
-                float ty(uvP2.y-uvP0.y);
-                float dirCorrection = 1.0;
-
-                if ((tx * sy - ty * sx) < 0.0f) dirCorrection = -1.0f;//this is important for normals and mirrored mesh geometry using identical uv's
-
-
-                // when t1, t2, t3 in same position in UV space, just use default UV direction.
-                //if ( 0 == sx && 0 == sy && 0 == tx && 0 == ty ) {
-                if ( sx * ty == sy * tx ){
-                    sx = 0.0; sy = 1.0;
-                    tx = 1.0; ty = 0.0;
-                }
-
-                // tangent points in the direction where to positive X axis of the texture coord's would point in model space
-                // bitangent's points along the positive Y axis of the texture coord's, respectively
-                glm::vec3 tangent;
-                glm::vec3 bitangent;
-                tangent.x   = (w.x * sy - v.x * ty) * dirCorrection;
-                tangent.y   = (w.y * sy - v.y * ty) * dirCorrection;
-                tangent.z   = (w.z * sy - v.z * ty) * dirCorrection;
-                bitangent.x = (w.x * sx - v.x * tx) * dirCorrection;
-                bitangent.y = (w.y * sx - v.y * tx) * dirCorrection;
-                bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
-
-                // store for every vertex of that face
-                for( uint b = 0; b < 3; ++b ) {
-                    uint p;
-                    glm::vec3 normal;
-                    if(b==0)      p = p0;
-                    else if(b==1) p = p1;
-                    else          p = p2;
-
-                    if(data.normals.size() > p) normal = data.normals.at(p);
-                    else                        normal = glm::vec3(0.0f);
-
-                    // project tangent and bitangent into the plane formed by the vertex' normal
-                    glm::vec3 localTangent(tangent   - normal * (tangent   * normal));
-                    glm::vec3 localBitangent(bitangent - normal * (bitangent * normal));
-                    localTangent   = glm::normalize(localTangent);
-                    localBitangent = glm::normalize(localBitangent);
-
-                    // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-                    bool invalid_tangent   = _is_special_float(localTangent);
-                    bool invalid_bitangent = _is_special_float(localBitangent);
-                    if (invalid_tangent != invalid_bitangent){
-                        if (invalid_tangent) localTangent   = glm::normalize(glm::cross(normal,localBitangent));
-                        else                 localBitangent = glm::normalize(glm::cross(localTangent,normal));
-                    }
-                    data.tangents.push_back(localTangent);
-                    data.binormals.push_back(localBitangent);
-                }
-            }
-        }
-        void _indexVBO(Mesh* mesh,epriv::ImportedMeshData& data, float threshold){
-            if(threshold == 0.0f){
-                uint c = 0;
-                for(auto pt:data.points){
-                    if(m_Skeleton){
-                        epriv::MeshVertexDataAnimated vert;
-                        vert.position = pt;
-                        //vert.uv = Math::pack2FloatsInto1Float(data.uvs.at(c));
-                        vert.uv = data.uvs.at(c);
-                        vert.normal = Math::pack3NormalsInto32Int(data.normals.at(c));
-                        if(c <= data.binormals.size()-1)
-                            vert.binormal = Math::pack3NormalsInto32Int(data.binormals.at(c));
-                        if(c <= data.tangents.size()-1)
-                            vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
-                        m_Vertices.push_back(vert);
-                    }
-                    else{
-                        epriv::MeshVertexData vert;
-                        vert.position = pt;
-                        //vert.uv = Math::pack2FloatsInto1Float(data.uvs.at(c));
-                        vert.uv = data.uvs.at(c);
-                        vert.normal = Math::pack3NormalsInto32Int(data.normals.at(c));
-                        vert.binormal = Math::pack3NormalsInto32Int(data.binormals.at(c));
-                        vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
-						m_Vertices.push_back(vert);
-                    }
-                    ++c;
-                }
-                m_Indices = data.indices;
-                return;
-            }
-            vector<glm::vec2> temp_uvs;
-            vector<glm::vec3> temp_normals;
-            vector<glm::vec3> temp_binormals;
-            vector<glm::vec3> temp_tangents;
-            for (uint i=0; i < data.points.size(); ++i){
-                ushort index;
-                bool found = _getSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i),temp_uvs,temp_normals, index,threshold);
-                if (found){
-					m_Indices.push_back(index);
-
-                    //average out TBN. But it cancels out normal mapping on some flat surfaces
-                    //temp_binormals.at(index) += data.binormals.at(i);
-                    //temp_tangents.at(index) += data.tangents.at(i);
-                }
-                else{
-                    if(m_Skeleton){
-                        epriv::MeshVertexDataAnimated vert;
-                        vert.position = data.points.at(i);
-						m_Vertices.push_back(vert);
-                    }
-                    else{
-                        epriv::MeshVertexData vert;
-                        vert.position = data.points.at(i);
-						m_Vertices.push_back(vert);
-                    }
-                    temp_uvs.push_back(data.uvs.at(i));
-
-                    temp_normals .push_back(data.normals.at(i));
-                    temp_binormals.push_back(data.binormals.at(i));
-                    temp_tangents.push_back(data.tangents.at(i));
-
-					m_Indices.push_back((ushort)m_Vertices.size() - 1);
-                }
-            }
-            for(uint i = 0; i < m_Vertices.size(); ++i){
-				/*
-                if(m_Skeleton){
-                    auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
-                    //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
-                    vert.uv = temp_uvs.at(i);
-                    vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
-                    vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
-                    vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
-                }
-                else{
-                    auto& vert = m_Vertices.at(i);
-                    //vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
-                    vert.uv = temp_uvs.at(i);
-                    vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
-                    vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
-                    vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
-                }
-				*/
-				auto& vert = m_Vertices.at(i);
-				//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
-				vert.uv = temp_uvs.at(i);
-				vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
-				vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
-				vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
-            }
-        }
-        void _loadData(Mesh* super,epriv::ImportedMeshData& data,float threshold){
+        void _finalizeData(epriv::ImportedMeshData& data,float threshold){
             m_threshold = threshold;
 
             if(data.uvs.size() == 0) data.uvs.resize(data.points.size());
@@ -666,14 +569,103 @@ class Mesh::impl final{
             if(data.binormals.size() == 0) data.binormals.resize(data.points.size());
             if(data.tangents.size() == 0) data.tangents.resize(data.points.size());
 
-            _indexVBO(super,data,m_threshold);
+			if (threshold == 0.0f) {
+				uint c = 0;
+				for (auto pt : data.points) {
+					if (m_Skeleton) {
+						epriv::MeshVertexDataAnimated vert;
+						vert.position = pt;
+						//vert.uv = Math::pack2FloatsInto1Float(data.uvs.at(c));
+						vert.uv = data.uvs.at(c);
+						vert.normal = Math::pack3NormalsInto32Int(data.normals.at(c));
+						if (c <= data.binormals.size() - 1)
+							vert.binormal = Math::pack3NormalsInto32Int(data.binormals.at(c));
+						if (c <= data.tangents.size() - 1)
+							vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
+						m_Vertices.push_back(vert);
+					}
+					else {
+						epriv::MeshVertexData vert;
+						vert.position = pt;
+						//vert.uv = Math::pack2FloatsInto1Float(data.uvs.at(c));
+						vert.uv = data.uvs.at(c);
+						vert.normal = Math::pack3NormalsInto32Int(data.normals.at(c));
+						vert.binormal = Math::pack3NormalsInto32Int(data.binormals.at(c));
+						vert.tangent = Math::pack3NormalsInto32Int(data.tangents.at(c));
+						m_Vertices.push_back(vert);
+					}
+					++c;
+				}
+				m_Indices = data.indices;
+				return;
+			}
+			vector<glm::vec3> temp_pos;
+			vector<glm::vec2> temp_uvs;
+			vector<glm::vec3> temp_normals;
+			vector<glm::vec3> temp_binormals;
+			vector<glm::vec3> temp_tangents;
+			for (uint i = 0; i < data.points.size(); ++i) {
+				ushort index;
+				bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points.at(i), data.uvs.at(i), data.normals.at(i), temp_pos, temp_uvs, temp_normals, index, threshold);
+				if (found) {
+					m_Indices.push_back(index);
+
+					//average out TBN. But it cancels out normal mapping on some flat surfaces
+					//temp_binormals.at(index) += data.binormals.at(i);
+					//temp_tangents.at(index) += data.tangents.at(i);
+				}
+				else {
+					if (m_Skeleton) {
+						epriv::MeshVertexDataAnimated vert;
+						vert.position = data.points.at(i);
+						m_Vertices.push_back(vert);
+					}
+					else {
+						epriv::MeshVertexData vert;
+						vert.position = data.points.at(i);
+						m_Vertices.push_back(vert);
+					}
+					temp_pos.push_back(data.points.at(i));
+					temp_uvs.push_back(data.uvs.at(i));
+					temp_normals.push_back(data.normals.at(i));
+					temp_binormals.push_back(data.binormals.at(i));
+					temp_tangents.push_back(data.tangents.at(i));
+					m_Indices.push_back((ushort)m_Vertices.size() - 1);
+				}
+			}
+			for (uint i = 0; i < m_Vertices.size(); ++i) {
+				/*
+				if(m_Skeleton){
+					auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
+					//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
+					vert.uv = temp_uvs.at(i);
+					vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
+					vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
+					vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
+				}
+				else{
+					auto& vert = m_Vertices.at(i);
+					//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
+					vert.uv = temp_uvs.at(i);
+					vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
+					vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
+					vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
+				}
+				*/
+				auto& vert = m_Vertices.at(i);
+				//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
+				vert.uv = temp_uvs.at(i);
+				vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
+				vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
+				vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
+			}
         }
         void _loadFromFile(Mesh* super,string file,CollisionType::Type type,float threshold){
             string extention; for(uint i = m_File.length() - 4; i < m_File.length(); ++i)extention += tolower(m_File.at(i));
             epriv::ImportedMeshData d;
             _loadInternal(super,d,m_File);
             m_threshold = threshold; //this is needed
-            _loadData(super,d,m_threshold);
+			_finalizeData(d,m_threshold);
 
             if(type == CollisionType::None){
                 m_Collision = new Collision(new btEmptyShape());
@@ -727,7 +719,7 @@ class Mesh::impl final{
                 }
             }
         }
-        void _loadObjDataFromLine(string& l,epriv::ImportedMeshData& data,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,const char _f){
+        void _loadObjDataFromLine(string& l,epriv::ImportedMeshData& _d,vector<uint>& _pi,vector<uint>& _ui,vector<uint>& _ni,const char _f){
             if(l[0] == 'o'){
             }
             //vertex positions
@@ -735,7 +727,7 @@ class Mesh::impl final{
                 if(_f && epriv::LOAD_POINTS){
                     glm::vec3 p;
                     sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&p.x,&p.y,&p.z);
-                    data.file_points.push_back(p);
+                    _d.file_points.push_back(p);
                 }
             }
             //vertex uvs
@@ -744,7 +736,7 @@ class Mesh::impl final{
                     glm::vec2 uv;
                     sscanf(l.substr(2,l.size()).c_str(),"%f %f",&uv.x,&uv.y);
                     uv.y = 1.0f - uv.y;
-                    data.file_uvs.push_back(uv);
+                    _d.file_uvs.push_back(uv);
                 }
             }
             //vertex normals
@@ -752,7 +744,7 @@ class Mesh::impl final{
                 if(_f && epriv::LOAD_NORMALS){
                     glm::vec3 n;
                     sscanf(l.substr(2,l.size()).c_str(),"%f %f %f",&n.x,&n.y,&n.z);
-                    data.file_normals.push_back(n);
+                    _d.file_normals.push_back(n);
                 }
             }
             //faces
@@ -802,9 +794,9 @@ class Mesh::impl final{
                 _loadDataIntoTriangles(d,positionIndices,uvIndices,normalIndices,_flags);
             }
             if(_flags && epriv::LOAD_TBN && d.normals.size() > 0){
-                _calculateTBN(d);
+                epriv::MeshLoader::CalculateTBNAssimp(d);
             }
-            _loadData(super,d,threshold);
+			_finalizeData(d,threshold);
             if(type == CollisionType::None){
                 m_Collision = new Collision(new btEmptyShape);
             }
@@ -887,7 +879,7 @@ class Mesh::impl final{
         }
         void _unload_CPU(Mesh* super){
             if(m_File != ""){
-                _clearData(super);
+                _clearData();
             }
             cout << "(Mesh) ";
         }
@@ -895,10 +887,10 @@ class Mesh::impl final{
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
-			if(m_VAO){
-				glDeleteVertexArrays(1,&m_VAO);
-				m_VAO = 0;
-			}
+            if(m_VAO){
+                glDeleteVertexArrays(1,&m_VAO);
+                m_VAO = 0;
+            }
             vector_clear(m_buffers);
         }
         void _load_CPU(Mesh* super){
@@ -911,6 +903,7 @@ class Mesh::impl final{
             if(m_buffers.size() > 0){
                 _unload_GPU(super);
             }
+
             //vertex data
             m_buffers.push_back(0);
             glGenBuffers(1, &m_buffers.at(0));
@@ -935,7 +928,7 @@ class Mesh::impl final{
             glGenBuffers(1, &m_buffers.at(1));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0] , GL_STATIC_DRAW);
-			/*
+            /*
             if(InternalMeshPublicInterface::SupportsInstancing()){
                 //instancing data
                 m_buffers.push_back(0);
@@ -946,82 +939,215 @@ class Mesh::impl final{
                 glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
                 glBufferData(GL_ARRAY_BUFFER, NUM_MAX_INSTANCES * sizeof(glm::mat4), &defaultMatrices[0], GL_DYNAMIC_DRAW);           
             }
-			*/
-			//support vao's
-			if(epriv::RenderManager::OPENGL_VERSION >= 30){
-				//gen and bind vao
-				Renderer::genAndBindVAO(m_VAO);
-				//vertex data
-				glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-				if(m_Skeleton){
-					for(uint i = 0; i < epriv::VertexFormatAnimated::_TOTAL; ++i){
-						auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-						glEnableVertexAttribArray(i);
-						glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexDataAnimated),(void*)d.get<3>());
-					}
-				}else{     
-					for(uint i = 0; i < epriv::VertexFormat::_TOTAL; ++i){
-						auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-						glEnableVertexAttribArray(i);
-						glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
-					}
-				}
-				//indices data
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
-				//instances data
-				if(m_buffers.size() >= 3){
-					glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
-					uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-					for(uint j = 0; j < 4; ++j){
-						glEnableVertexAttribArray(attributeIndex+j); 
-						glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
-						if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
-					}
-				}
-				Renderer::bindVAO(0);
-			}
+            */
+            //support vao's
+            if(epriv::RenderManager::OPENGL_VERSION >= 30){
+                //gen and bind vao
+                Renderer::genAndBindVAO(m_VAO);
+                //vertex data
+                glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+                if(m_Skeleton){
+                    for(uint i = 0; i < epriv::VertexFormatAnimated::_TOTAL; ++i){
+                        auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+                        glEnableVertexAttribArray(i);
+                        glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexDataAnimated),(void*)d.get<3>());
+                    }
+                }else{     
+                    for(uint i = 0; i < epriv::VertexFormat::_TOTAL; ++i){
+                        auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+                        glEnableVertexAttribArray(i);
+                        glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
+                    }
+                }
+                //indices data
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
+                //instances data
+                if(m_buffers.size() >= 3){
+                    glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
+                    uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+                    for(uint j = 0; j < 4; ++j){
+                        glEnableVertexAttribArray(attributeIndex+j); 
+                        glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
+                        if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
+                    }
+                }
+                Renderer::bindVAO(0);
+            }
             cout << "(Mesh) ";
         }
+
+
+        void _writeToObjCompressed(epriv::ImportedMeshData& data) {
+            //header:
+            //faces example f 372/688/534 435/860/656 368/686/532
+            //number of chars used to represent a face, faces MUST be triangleized
+            string f = m_File;
+            string ext = boost::filesystem::extension(m_File);
+            f = f.substr(0, f.size() - ext.size());
+            f += ".objc";
+            ofstream stream;
+            stream.open(f, ios::out | ios::binary);
+
+
+            //header
+            uint32_t posSize = data.points.size() * 6;
+            uint32_t uvSize = data.uvs.size() * 4;
+            uint32_t normSize = data.normals.size() * 6;
+            uint32_t indiceSize = data.indices.size() * 2;
+
+            char* header = new char[16];
+            header[0] = (posSize >> 24) & 0xFF;
+            header[1] = (posSize >> 16) & 0xFF;
+            header[2] = (posSize >> 8) & 0xFF;
+            header[3] = posSize & 0xFF;
+
+            header[4] = (uvSize >> 24) & 0xFF;
+            header[5] = (uvSize >> 16) & 0xFF;
+            header[6] = (uvSize >> 8) & 0xFF;
+            header[7] = uvSize & 0xFF;
+
+            header[8] = (normSize >> 24) & 0xFF;
+            header[9] = (normSize >> 16) & 0xFF;
+            header[10] = (normSize >> 8) & 0xFF;
+            header[11] = normSize & 0xFF;
+
+            header[12] = (indiceSize >> 24) & 0xFF;
+            header[13] = (indiceSize >> 16) & 0xFF;
+            header[14] = (indiceSize >> 8) & 0xFF;
+            header[15] = indiceSize & 0xFF;
+
+            stream.write(header, 16);
+            delete[] header;
+
+            char* positionBuffer = new char[posSize];
+            uint count = 0;
+            for (auto pos : data.points) {
+                uint16_t outX, outY, outZ;
+                float16(&outX, pos.x);
+                float16(&outY, pos.y);
+                float16(&outZ, pos.z);
+                uchar x_part1, x_part2, y_part1, y_part2, z_part1, z_part2;
+                x_part1 = outX & 0xF; // bits 0..3
+                x_part2 = (outX >> 4) & 0xF; // bits 4..7
+                y_part1 = outY & 0xF; // bits 0..3
+                y_part2 = (outY >> 4) & 0xF; // bits 4..7
+                z_part1 = outZ & 0xF; // bits 0..3
+                z_part2 = (outZ >> 4) & 0xF; // bits 4..7    
+                positionBuffer[(count * 6) + 0] = x_part1;
+                positionBuffer[(count * 6) + 1] = x_part2;
+                positionBuffer[(count * 6) + 2] = y_part1;
+                positionBuffer[(count * 6) + 3] = y_part2;
+                positionBuffer[(count * 6) + 4] = z_part1;
+                positionBuffer[(count * 6) + 5] = z_part2;
+                ++count;
+            }
+
+            stream.write(positionBuffer, posSize);
+            delete[] positionBuffer;
+
+            count = 0;
+            char* uvBuffer = new char[uvSize];
+            for (auto uv : data.uvs) {
+                uint16_t outX, outY;
+                float16(&outX, uv.x);
+                float16(&outY, uv.y);
+                uchar x_part1, x_part2, y_part1, y_part2;
+                x_part1 = outX & 0xF; // bits 0..3
+                x_part2 = (outX >> 4) & 0xF; // bits 4..7
+                y_part1 = outY & 0xF; // bits 0..3
+                y_part2 = (outY >> 4) & 0xF; // bits 4..7 
+                uvBuffer[(count * 4) + 0] = x_part1;
+                uvBuffer[(count * 4) + 1] = x_part2;
+                uvBuffer[(count * 4) + 2] = y_part1;
+                uvBuffer[(count * 4) + 3] = y_part2;
+                ++count;
+            }
+            stream.write(uvBuffer, uvSize);
+            delete[] uvBuffer;
+
+
+            count = 0;
+            char* normBuffer = new char[normSize];
+            for (auto norm : data.normals) {
+                uint16_t outX, outY,outZ;
+                float16(&outX, norm.x);
+                float16(&outY, norm.y);
+                float16(&outZ, norm.z);
+                uchar x_part1, x_part2, y_part1, y_part2, z_part1, z_part2;
+                x_part1 = outX & 0xF; // bits 0..3
+                x_part2 = (outX >> 4) & 0xF; // bits 4..7
+                y_part1 = outY & 0xF; // bits 0..3
+                y_part2 = (outY >> 4) & 0xF; // bits 4..7 
+                z_part1 = outZ & 0xF; // bits 0..3
+                z_part2 = (outZ >> 4) & 0xF; // bits 4..7 
+                normBuffer[(count * 6) + 0] = x_part1;
+                normBuffer[(count * 6) + 1] = x_part2;
+                normBuffer[(count * 6) + 2] = y_part1;
+                normBuffer[(count * 6) + 3] = y_part2;
+                normBuffer[(count * 6) + 4] = z_part1;
+                normBuffer[(count * 6) + 5] = z_part2;
+                ++count;
+            }
+            stream.write(normBuffer, normSize);
+            delete[] normBuffer;
+
+            //pack indices normally, unpack normally too
+            count = 0;
+            char* indiceBuffer = new char[indiceSize];
+            for (auto ind : data.indices) {
+                uchar x_part1, x_part2;
+                x_part1 = ind & 0xF; // bits 0..3
+                x_part2 = (ind >> 4) & 0xF; // bits 4..7
+                indiceBuffer[(count * 2) + 0] = x_part1;
+                indiceBuffer[(count * 2) + 1] = x_part2;
+                ++count;
+            }
+            stream.write(indiceBuffer, indiceSize);
+            delete[] indiceBuffer;
+
+            stream.close();
+        }
+        
 };
 struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
-	auto& m = *((Mesh*)r)->m_i;
-	if(m.m_VAO){
-		Renderer::bindVAO(m.m_VAO);
-	}else{
-		glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
-		uint _structSize = m.m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
-		uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
-		for(uint i = 0; i < _enumTotal; ++i){
-			auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),_structSize,(void*)d.get<3>());
-		}
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.m_buffers.at(1));
-		//instances
-		if(m.m_buffers.size() >= 3){
-			glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(2));
-			uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-			for(uint j = 0; j < 4; ++j){
-				glEnableVertexAttribArray(attributeIndex+j); 
-				glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
-				if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
-			}
-		}
-	}
+    auto& m = *((Mesh*)r)->m_i;
+    if(m.m_VAO){
+        Renderer::bindVAO(m.m_VAO);
+    }else{
+        glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
+        uint _structSize = m.m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
+        uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
+        for(uint i = 0; i < _enumTotal; ++i){
+            auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),_structSize,(void*)d.get<3>());
+        }
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.m_buffers.at(1));
+        //instances
+        if(m.m_buffers.size() >= 3){
+            glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(2));
+            uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+            for(uint j = 0; j < 4; ++j){
+                glEnableVertexAttribArray(attributeIndex+j); 
+                glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
+                if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
+            }
+        }
+    }
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
     auto& m = *((Mesh*)r)->m_i;
-	if(m.m_VAO){
-		Renderer::bindVAO(0);
-	}else{
-		uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
-		for(uint i = 0; i < _enumTotal; ++i){ glDisableVertexAttribArray(i); }
-		//instances
-		if(m.m_buffers.size() >= 3){
-			uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-			for(uint j = 0; j < 4; ++j){ glDisableVertexAttribArray(attributeIndex + j); }
-		}
-	}
+    if(m.m_VAO){
+        Renderer::bindVAO(0);
+    }else{
+        uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
+        for(uint i = 0; i < _enumTotal; ++i){ glDisableVertexAttribArray(i); }
+        //instances
+        if(m.m_buffers.size() >= 3){
+            uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+            for(uint j = 0; j < 4; ++j){ glDisableVertexAttribArray(attributeIndex + j); }
+        }
+    }
 }};
 DefaultMeshBindFunctor Mesh::impl::DEFAULT_BIND_FUNCTOR;
 DefaultMeshUnbindFunctor Mesh::impl::DEFAULT_UNBIND_FUNCTOR;
@@ -1033,7 +1159,7 @@ class epriv::AnimationData::impl{
         double m_DurationInTicks;
         unordered_map<string,aiNodeAnim*> m_KeyframeData;
 
-        void _init(Mesh* mesh,aiAnimation* anim){
+        void _Init(Mesh* mesh,aiAnimation* anim){
             m_Mesh = mesh;
             m_TicksPerSecond = anim->mTicksPerSecond;
             m_DurationInTicks = anim->mDuration;
@@ -1042,7 +1168,6 @@ class epriv::AnimationData::impl{
                 m_KeyframeData.emplace(key,anim->mChannels[i]);
             }
         }
-
         void _ReadNodeHeirarchy(const string& animationName,float time, const aiNode* n,glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){
             string BoneName(n->mName.data);
             glm::mat4 NodeTransform(Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(n->mTransformation)));
@@ -1133,6 +1258,9 @@ class epriv::AnimationData::impl{
             float TicksPerSecond(float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f));return float(float(m_DurationInTicks) / TicksPerSecond);
         }
 };
+epriv::AnimationData::AnimationData(Mesh* m, aiAnimation* a) :m_i(new impl) { m_i->_Init(m, a); }
+epriv::AnimationData::~AnimationData() { }
+float epriv::AnimationData::duration() { return m_i->_Duration(); }
 
 epriv::MeshSkeleton::MeshSkeleton():m_i(new impl){ clear(); }
 epriv::MeshSkeleton::MeshSkeleton(epriv::ImportedMeshData& data):m_i(new impl){ fill(data); }
@@ -1170,8 +1298,8 @@ void InternalMeshPublicInterface::UpdateInstance(Mesh* mesh,uint _id, glm::mat4 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 void InternalMeshPublicInterface::UpdateInstances(Mesh* mesh,vector<glm::mat4>& _modelMatrices){
-	auto& i = *mesh->m_i;
-	i.m_InstanceCount = _modelMatrices.size();
+    auto& i = *mesh->m_i;
+    i.m_InstanceCount = _modelMatrices.size();
     if(_modelMatrices.size() == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, i.m_buffers.at(2));
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::mat4) * i.m_InstanceCount, &_modelMatrices[0]);
@@ -1194,13 +1322,13 @@ Mesh::Mesh(string name,float x, float y,float width, float height,float threshol
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,width,height,threshold);
 }
-Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadImmediately):BindableResource(fileOrData),m_i(new impl){
+Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData),m_i(new impl){
     if(!notMemory) setName("CustomMesh");
-    m_i->_init(this,fileOrData,type,notMemory,threshold,loadImmediately);
+    m_i->_init(this,fileOrData,type,notMemory,threshold,loadNow);
 }
 Mesh::~Mesh(){
     unload();
-    m_i->_clearData(this);
+    m_i->_clearData();
 }
 Collision* Mesh::getCollision() const { return m_i->m_Collision; }
 
@@ -1209,11 +1337,11 @@ unordered_map<string, epriv::AnimationData*>& Mesh::animationData(){ return m_i-
 const glm::vec3& Mesh::getRadiusBox() const { return m_i->m_radiusBox; }
 const float Mesh::getRadius() const { return m_i->m_radius; }
 void Mesh::render(bool instancing,GLuint mode){
-	auto& i = *m_i;
-	const uint& indicesSize = i.m_Indices.size();
+    auto& i = *m_i;
+    const uint& indicesSize = i.m_Indices.size();
     if(instancing && InternalMeshPublicInterface::SupportsInstancing()){
-		const uint& instancesCount = i.m_InstanceCount;
-		if(instancesCount == 0) return;
+        const uint& instancesCount = i.m_InstanceCount;
+        if(instancesCount == 0) return;
         if(epriv::RenderManager::OPENGL_VERSION >= 31){
                glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         }else if(epriv::OpenGLExtensionEnum::supported(epriv::OpenGLExtensionEnum::EXT_draw_instanced)){
@@ -1251,7 +1379,3 @@ void Mesh::unload(){
 void Mesh::modifyPoints(vector<glm::vec3>& modifiedPts){ m_i->_modifyPoints(modifiedPts); }
 void Mesh::modifyUVs(vector<glm::vec2>& modifiedUVs){ m_i->_modifyUVs(modifiedUVs); }
 void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>& modifiedUVs){ m_i->_modifyPointsAndUVs(modifiedPts,modifiedUVs); }
-
-epriv::AnimationData::AnimationData(Mesh* m,aiAnimation* a):m_i(new impl){ m_i->_init(m,a); }
-epriv::AnimationData::~AnimationData(){ }
-float epriv::AnimationData::duration(){ return m_i->_Duration(); }
