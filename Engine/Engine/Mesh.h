@@ -141,7 +141,7 @@ class InternalMeshPublicInterface final{
 		static bool SupportsInstancing();
 };
 
-class Mesh final: public BindableResource{
+class Mesh final: public BindableResource, public EventObserver{
     friend struct ::DefaultMeshBindFunctor;
     friend struct ::DefaultMeshUnbindFunctor;
     friend class ::Engine::epriv::AnimationData;
@@ -164,6 +164,8 @@ class Mesh final: public BindableResource{
         std::unordered_map<std::string, Engine::epriv::AnimationData*>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
+
+		void onEvent(const Event& e);
 
         void load();
         void unload();

@@ -31,16 +31,6 @@ using namespace Engine;
 
 epriv::Core* epriv::Core::m_Engine = nullptr;
 epriv::Core::Core(const char* name,uint w,uint h){
-    m_EventManager     = new epriv::EventManager(name,w,h);
-    m_ResourceManager  = new epriv::ResourceManager(name,w,h);
-    m_TimeManager      = new epriv::TimeManager(name,w,h);
-    m_SoundManager     = new epriv::SoundManager(name,w,h);
-    m_RenderManager    = new epriv::RenderManager(name,w,h);
-    m_PhysicsManager   = new epriv::PhysicsManager(name,w,h);
-    m_EventDispatcher  = new epriv::EventDispatcher(name,w,h);
-    m_ComponentManager = new epriv::ComponentManager(name,w,h);
-    m_ThreadManager    = new epriv::ThreadManager(name,w,h);
-    m_NoiseManager     = new epriv::NoiseManager(name,w,h);
     m_Paused = false;
     m_Destroyed = false;
 }
@@ -71,16 +61,29 @@ void Engine::unpause(){
 
 void Engine::init(const char* name,uint w,uint h){
     epriv::Core::m_Engine = new epriv::Core(name,w,h);
-    epriv::Core::m_Engine->m_ResourceManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_EventManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_TimeManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_SoundManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_RenderManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_PhysicsManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_EventDispatcher->_init(name,w,h);
-    epriv::Core::m_Engine->m_ComponentManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_ThreadManager->_init(name,w,h);
-    epriv::Core::m_Engine->m_NoiseManager->_init(name,w,h);
+	auto& engine = *epriv::Core::m_Engine;
+
+	engine.m_EventManager = new epriv::EventManager(name, w, h);
+	engine.m_EventDispatcher = new epriv::EventDispatcher(name, w, h);
+	engine.m_ResourceManager = new epriv::ResourceManager(name, w, h);
+	engine.m_TimeManager = new epriv::TimeManager(name, w, h);
+	engine.m_SoundManager = new epriv::SoundManager(name, w, h);
+	engine.m_RenderManager = new epriv::RenderManager(name, w, h);
+	engine.m_PhysicsManager = new epriv::PhysicsManager(name, w, h);
+	engine.m_ComponentManager = new epriv::ComponentManager(name, w, h);
+	engine.m_ThreadManager = new epriv::ThreadManager(name, w, h);
+	engine.m_NoiseManager = new epriv::NoiseManager(name, w, h);
+
+	engine.m_ResourceManager->_init(name,w,h);
+	engine.m_EventManager->_init(name,w,h);
+	engine.m_EventDispatcher->_init(name, w, h);
+	engine.m_TimeManager->_init(name,w,h);
+	engine.m_SoundManager->_init(name,w,h);
+	engine.m_RenderManager->_init(name,w,h);
+	engine.m_PhysicsManager->_init(name,w,h);
+	engine.m_ComponentManager->_init(name,w,h);
+	engine.m_ThreadManager->_init(name,w,h);
+	engine.m_NoiseManager->_init(name,w,h);
 
     //init the game here
     Engine::setMousePosition(w/2,h/2);
@@ -88,9 +91,8 @@ void Engine::init(const char* name,uint w,uint h){
     epriv::threading::waitForAll();
     Game::initLogic();
     //the scene is the root of all games. create the default scene if 1 does not exist already
-    if(epriv::Core::m_Engine->m_ResourceManager->_numScenes() == 0)
+    if(engine.m_ResourceManager->_numScenes() == 0)
         new Scene("Default");
-
 }
 void RESET_EVENTS(){
     epriv::Core::m_Engine->m_EventManager->_onResetEvents();
@@ -321,8 +323,8 @@ void handleEvents(){
 }
 
 void Engine::run(){
-    Engine_Window* window = Resources::getWindow();
-    while(!epriv::Core::m_Engine->m_Destroyed /*&& window->isOpen()*/){
+    const Engine_Window& window = *Resources::getWindow();
+    while(!epriv::Core::m_Engine->m_Destroyed /*&& window.isOpen()*/){
         float& dt = epriv::Core::m_Engine->m_TimeManager->dt();
         handleEvents();
         update(dt);

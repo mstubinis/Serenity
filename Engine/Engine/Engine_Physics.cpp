@@ -35,7 +35,7 @@ using namespace std;
 
 namespace Engine{
     namespace epriv{
-        class GLDebugDrawer: public btIDebugDraw {
+        class GLDebugDrawer: public btIDebugDraw,public EventObserver {
             friend class ::Engine::epriv::PhysicsManager;
             private:
                 GLuint m_Mode, m_VAO, m_VertexBuffer, C_MAX_POINTS;
@@ -49,28 +49,41 @@ namespace Engine{
                 void init(){
                     C_MAX_POINTS = 262144;
                     m_VAO = m_VertexBuffer = 0;
+					registerEvent(EventType::WindowFullscreenChanged);
                 }
                 void destruct(){
+					unregisterEvent(EventType::WindowFullscreenChanged);
                     glDeleteBuffers(1, &m_VertexBuffer);
 					Renderer::deleteVAO(m_VAO);
                     vector_clear(vertices);
                 }
+				void bindDataToGPU() {
+					glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+					glEnableVertexAttribArray(0);
+					glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
+					glEnableVertexAttribArray(1);
+					glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
+				}
                 void renderLines(){
                     if(m_VAO){
                         Renderer::bindVAO(m_VAO);
                         glDrawArrays(GL_LINES, 0,vertices.size());
                         Renderer::bindVAO(0);
                     }else{
-                        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-                        glEnableVertexAttribArray(0);
-                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
-                        glEnableVertexAttribArray(1);
-                        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex,color)));
+						bindDataToGPU();
                         glDrawArrays(GL_LINES, 0,vertices.size());
                         glDisableVertexAttribArray(0);
                         glDisableVertexAttribArray(1);
                     }
                 }
+				void buildVAO() {
+					Renderer::deleteVAO(m_VAO);
+					if (epriv::RenderManager::OPENGL_VERSION >= 30) {
+						Renderer::genAndBindVAO(m_VAO);
+						bindDataToGPU();
+						Renderer::bindVAO(0);
+					}
+				}
                 void postRender(){
                     vector_clear(vertices);
                 }
@@ -84,17 +97,7 @@ namespace Engine{
                     glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * C_MAX_POINTS, &temp1[0], GL_DYNAMIC_DRAW);
 
                     //support vao's
-                    if(epriv::RenderManager::OPENGL_VERSION >= 30){
-                        Renderer::genAndBindVAO(m_VAO);
-
-                        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-                        glEnableVertexAttribArray(0);
-                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
-                        glEnableVertexAttribArray(1);
-                        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex,color)));
-
-                        Renderer::bindVAO(0);
-                    }
+					buildVAO();
                 }
                 virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
                     if(vertices.size() >= (C_MAX_POINTS)) return;
@@ -109,6 +112,11 @@ namespace Engine{
                     glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
                     renderLines();
                 }
+				void onEvent(const Event& e) {
+					if (e.type == EventType::WindowFullscreenChanged) {
+						buildVAO();
+					}
+				}
                 virtual void drawAabb(const btVector3 &from, const btVector3 &to, const btVector3 &color){
                 }
                 virtual void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform &transform, const btVector3 &color){

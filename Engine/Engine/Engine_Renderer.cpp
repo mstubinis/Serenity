@@ -1338,7 +1338,6 @@ class epriv::RenderManager::impl final{
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkybox)->unbind();
             }
             else{//render a fake skybox.
-                Skybox::initMesh();
                 m_InternalShaderPrograms.at(EngineInternalShaderPrograms::DeferredSkyboxFake)->bind();
                 glm::vec3 bgColor = scene->getBackgroundColor();
                 sendUniformMatrix4f("VP",c->getProjection() * view);

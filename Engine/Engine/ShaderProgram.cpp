@@ -163,8 +163,6 @@ class ShaderP::impl final{
             string& _name = super->name();
             if(vs->name() == "NULL") vs->setName(_name + ".vert");
             if(fs->name() == "NULL") fs->setName(_name + ".frag");
-
-            super->registerEvent(EventType::WindowFullscreenChanged);
             super->load();
         }
         void _convertCode(string& vCode,string& fCode,ShaderP* super){ 
@@ -589,8 +587,14 @@ class ShaderP::impl final{
             }
         }
 };
-ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){ m_i->_init(n,vs,fs,s,this); }
-ShaderP::~ShaderP(){ unload(); }
+ShaderP::ShaderP(string n, Shader* vs, Shader* fs, ShaderRenderPass::Pass s):m_i(new impl){
+	m_i->_init(n,vs,fs,s,this);
+	registerEvent(EventType::WindowFullscreenChanged);
+}
+ShaderP::~ShaderP(){ 
+	unregisterEvent(EventType::WindowFullscreenChanged);
+	unload(); 
+}
 GLuint ShaderP::program(){ return m_i->m_ShaderProgram; }
 ShaderRenderPass::Pass ShaderP::stage(){ return m_i->m_Stage; }
 vector<Material*>& ShaderP::getMaterials(){ return m_i->m_Materials; }
@@ -677,9 +681,6 @@ class UniformBufferObject::impl final{
                 globalBindingPointNumber = _globalBindingPointNumber;
             }
             sizeOfStruct = _sizeofStruct;
-
-            super->registerEvent(EventType::WindowFullscreenChanged);
-
             _load_CPU(super);
             _load_GPU(super);
         }
@@ -715,8 +716,15 @@ class UniformBufferObject::impl final{
             _shaderProgram->m_i->m_AttachedUBOs.emplace(uboObject,true);
         }
 };
-UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber,this); }
-UniformBufferObject::~UniformBufferObject(){ m_i->_unload_GPU(this); m_i->_unload_CPU(this); }
+UniformBufferObject::UniformBufferObject(const char* _nameInShader,uint _sizeofStruct,int _globalBindingPointNumber):m_i(new impl){ 
+	m_i->_init(_nameInShader,_sizeofStruct,_globalBindingPointNumber,this);
+	registerEvent(EventType::WindowFullscreenChanged);
+}
+UniformBufferObject::~UniformBufferObject(){ 
+	unregisterEvent(EventType::WindowFullscreenChanged);
+	m_i->_unload_GPU(this);
+	m_i->_unload_CPU(this);
+}
 void UniformBufferObject::updateData(void* _data){ m_i->_update(_data); }
 void UniformBufferObject::attachToShader(ShaderP* _shaderProgram){ m_i->_attachToShader(this,_shaderProgram); }
 GLuint UniformBufferObject::address(){ return m_i->uboObject; }

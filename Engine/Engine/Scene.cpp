@@ -73,6 +73,7 @@ void Scene::centerSceneToObject(Entity* center){
     }
 }
 Scene::~Scene(){
+	unregisterEvent(EventType::SceneChanged);
     SAFE_DELETE(m_Skybox);
 }
 void Scene::update(const float& dt){

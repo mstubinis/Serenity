@@ -4,10 +4,11 @@
 
 #include <memory>
 #include "Engine_Utils.h"
+#include "Engine_EventObject.h"
 
 namespace Engine{
     namespace epriv{
-        class FullscreenTriangle final: private Engine::epriv::noncopyable{
+        class FullscreenTriangle final: public EventObserver{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
@@ -15,8 +16,9 @@ namespace Engine{
                 ~FullscreenTriangle();
 
                 void render();
+				void onEvent(const Event& e);
         };
-        class FullscreenQuad final: private Engine::epriv::noncopyable{
+        class FullscreenQuad final: public EventObserver{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
@@ -24,6 +26,7 @@ namespace Engine{
                 ~FullscreenQuad();
 
                 void render();
+				void onEvent(const Event& e);
         };
     };
 };

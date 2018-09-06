@@ -28,7 +28,6 @@ Mesh* Mesh::FontPlane = nullptr;
 Mesh* Mesh::Plane = nullptr;
 Mesh* Mesh::Cube = nullptr;
 
-
 void float32(float* __restrict out, const uint16_t in) {
     uint32_t t1,t2,t3;
     t1 = in & 0x7fff;                       // Non-sign bits
@@ -877,6 +876,35 @@ class Mesh::impl final{
                 glBufferSubData(GL_ARRAY_BUFFER,0,m_Vertices.size() * sizeof(epriv::MeshVertexData),&m_Vertices[0]);
             }
         }
+		void _bindMeshDataToGPU(){
+			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
+			uint _structSize = m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
+			uint _enumTotal = m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
+			for (uint i = 0; i < _enumTotal; ++i) {
+				auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
+				glEnableVertexAttribArray(i);
+				glVertexAttribPointer(i, d.get<0>(), d.get<1>(), d.get<2>(), _structSize, (void*)d.get<3>());
+			}
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
+			//instances
+			if (m_buffers.size() >= 3) {
+				glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
+				uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
+				for (uint j = 0; j < 4; ++j) {
+					glEnableVertexAttribArray(attributeIndex + j);
+					glVertexAttribPointer(attributeIndex + j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
+					if (epriv::RenderManager::OPENGL_VERSION >= 33) { glVertexAttribDivisor(attributeIndex + j, 1); }
+				}
+			}
+		}
+		void _buildVAO(){
+			Renderer::deleteVAO(m_VAO);
+			if (epriv::RenderManager::OPENGL_VERSION >= 30) {
+				Renderer::genAndBindVAO(m_VAO);
+				_bindMeshDataToGPU();
+				Renderer::bindVAO(0);
+			}
+		}
         void _unload_CPU(Mesh* super){
             if(m_File != ""){
                 _clearData();
@@ -938,35 +966,7 @@ class Mesh::impl final{
             }
             */
             //support vao's
-            if(epriv::RenderManager::OPENGL_VERSION >= 30){
-                Renderer::genAndBindVAO(m_VAO);
-                glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
-                if(m_Skeleton){
-                    for(uint i = 0; i < epriv::VertexFormatAnimated::_TOTAL; ++i){
-                        auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-                        glEnableVertexAttribArray(i);
-                        glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexDataAnimated),(void*)d.get<3>());
-                    }
-                }else{     
-                    for(uint i = 0; i < epriv::VertexFormat::_TOTAL; ++i){
-                        auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-                        glEnableVertexAttribArray(i);
-                        glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
-                    }
-                }
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
-                //instances data
-                if(m_buffers.size() >= 3){
-                    glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(2));
-                    uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-                    for(uint j = 0; j < 4; ++j){
-                        glEnableVertexAttribArray(attributeIndex+j); 
-                        glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
-                        if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
-                    }
-                }
-                Renderer::bindVAO(0);
-            }
+			_buildVAO();
             cout << "(Mesh) ";
         }
 
@@ -1108,25 +1108,7 @@ struct DefaultMeshBindFunctor{void operator()(BindableResource* r) const {
     if(m.m_VAO){
         Renderer::bindVAO(m.m_VAO);
     }else{
-        glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(0));
-        uint _structSize = m.m_Skeleton ? sizeof(epriv::MeshVertexDataAnimated) : sizeof(epriv::MeshVertexData);
-        uint _enumTotal  = m.m_Skeleton ? epriv::VertexFormatAnimated::_TOTAL : epriv::VertexFormat::_TOTAL;
-        for(uint i = 0; i < _enumTotal; ++i){
-            auto& d = epriv::VERTEX_ANIMATED_FORMAT_DATA.at(i);
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),_structSize,(void*)d.get<3>());
-        }
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.m_buffers.at(1));
-        //instances
-        if(m.m_buffers.size() >= 3){
-            glBindBuffer(GL_ARRAY_BUFFER, m.m_buffers.at(2));
-            uint attributeIndex = epriv::VertexFormatAnimated::_TOTAL;
-            for(uint j = 0; j < 4; ++j){
-                glEnableVertexAttribArray(attributeIndex+j); 
-                glVertexAttribPointer(attributeIndex+j, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(j * sizeof(glm::vec4)));
-                if(epriv::RenderManager::OPENGL_VERSION >= 33){ glVertexAttribDivisor(attributeIndex+j, 1); }
-            }
-        }
+		m._bindMeshDataToGPU();
     }
 }};
 struct DefaultMeshUnbindFunctor{void operator()(BindableResource* r) const {
@@ -1309,18 +1291,23 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
 }
 Mesh::Mesh(string name,unordered_map<string,float>& grid,uint width,uint length,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,grid,width,length,threshold);
+	registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::Mesh(string name,float x, float y,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,x,y,width,height,threshold);
+	registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::Mesh(string name,float width, float height,float threshold):BindableResource(name),m_i(new impl){
     m_i->_init(this,name,width,height,threshold);
+	registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::Mesh(string fileOrData,CollisionType::Type type,bool notMemory,float threshold,bool loadNow):BindableResource(fileOrData),m_i(new impl){
     if(!notMemory) setName("CustomMesh");
     m_i->_init(this,fileOrData,type,notMemory,threshold,loadNow);
+	registerEvent(EventType::WindowFullscreenChanged);
 }
 Mesh::~Mesh(){
+	unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
     m_i->_clearData();
 }
@@ -1373,3 +1360,9 @@ void Mesh::unload(){
 void Mesh::modifyPoints(vector<glm::vec3>& modifiedPts){ m_i->_modifyPoints(modifiedPts); }
 void Mesh::modifyUVs(vector<glm::vec2>& modifiedUVs){ m_i->_modifyUVs(modifiedUVs); }
 void Mesh::modifyPointsAndUVs(vector<glm::vec3>& modifiedPts, vector<glm::vec2>& modifiedUVs){ m_i->_modifyPointsAndUVs(modifiedPts,modifiedUVs); }
+void Mesh::onEvent(const Event& e) {
+	if (e.type == EventType::WindowFullscreenChanged) {
+		auto& i = *m_i;
+		i._buildVAO();
+	}
+}

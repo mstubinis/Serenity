@@ -75,11 +75,11 @@ Inherit from this class to expose your class to events and event dispatching, sp
 class EventObserver: private Engine::epriv::noncopyable{
     public:
         EventObserver();
-        ~EventObserver();
+        virtual ~EventObserver();
 
         void registerEvent(const EventType::Type& type);
         void unregisterEvent(const EventType::Type& type);
-        virtual void onEvent(const Event& e){}
+		virtual void onEvent(const Event& e);
 };
 
 
