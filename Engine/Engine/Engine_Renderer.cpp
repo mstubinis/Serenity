@@ -2468,6 +2468,12 @@ void Renderer::bindVAO(const GLuint _vaoObject){
         i.current_bound_vao = _vaoObject;
     }
 }
+void Renderer::deleteVAO(GLuint& _vaoObject) {
+	if (_vaoObject) {
+		glDeleteVertexArrays(1,&_vaoObject);
+		_vaoObject = 0;
+	}
+}
 void Renderer::genAndBindTexture(GLuint _textureType,GLuint& _textureObject){
     glGenTextures(1, &_textureObject);
     bindTexture(_textureType,_textureObject);

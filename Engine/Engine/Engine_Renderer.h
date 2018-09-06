@@ -203,6 +203,7 @@ namespace Engine{
 		void bindVAO(const GLuint _vaoObject);
         void genAndBindTexture(GLuint _textureType,GLuint& _textureObject);
 		void genAndBindVAO(GLuint& _vaoObject);
+		void deleteVAO(GLuint& _vaoObject);
 
         void sendTexture(const char* location,Texture* texture,const uint slot);
         void sendTexture(const char* location,const GLuint textureAddress,const uint slot,const GLuint glTextureType);

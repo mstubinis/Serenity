@@ -52,10 +52,7 @@ namespace Engine{
                 }
                 void destruct(){
                     glDeleteBuffers(1, &m_VertexBuffer);
-                    if(m_VAO){
-                        glDeleteVertexArrays(1, &m_VAO);
-                        m_VAO = 0;
-                    }
+					Renderer::deleteVAO(m_VAO);
                     vector_clear(vertices);
                 }
                 void renderLines(){

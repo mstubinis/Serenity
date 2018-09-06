@@ -53,7 +53,6 @@ class epriv::FullscreenTriangle::impl final{
 
 			//vao's
 			if(RenderManager::OPENGL_VERSION >= 30){
-				//gen and bind vao
 				Renderer::genAndBindVAO(m_VAO);
 
 				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
@@ -69,10 +68,7 @@ class epriv::FullscreenTriangle::impl final{
         void _destruct(){
             for(uint i = 0; i < m_Buffers.size(); ++i)
                 glDeleteBuffers(1,&m_Buffers.at(i));
-			if(m_VAO){
-				glDeleteVertexArrays(1,&m_VAO);
-				m_VAO = 0;
-			}
+			Renderer::deleteVAO(m_VAO);
         }
         void _render(){
 			if(m_VAO){
@@ -124,7 +120,6 @@ class epriv::FullscreenQuad::impl final{
 
 			//vao's
 			if(RenderManager::OPENGL_VERSION >= 30){
-				//gen and bind vao
 				Renderer::genAndBindVAO(m_VAO);
 
 				glBindBuffer(GL_ARRAY_BUFFER, m_Buffers.at(0));
@@ -139,10 +134,7 @@ class epriv::FullscreenQuad::impl final{
         void _destruct(){
             for(uint i = 0; i < m_Buffers.size(); ++i)
                 glDeleteBuffers(1,&m_Buffers.at(i));
-			if(m_VAO){
-				glDeleteVertexArrays(1,&m_VAO);
-				m_VAO = 0;
-			}
+			Renderer::deleteVAO(m_VAO);
         }
         void _render(){
 			if(m_VAO){

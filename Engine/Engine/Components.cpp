@@ -230,14 +230,13 @@ class epriv::ComponentManager::impl final{
         void _update(const float& dt,epriv::ComponentManager* super){
             _updateCurrentScene(dt); //take player input and perform player actions
             _updatePhysicsEngine(dt);
-            if(!m_Paused){	
+            if(!m_Paused){
                 _updateComponentBodies(dt);
             }
             m_ComponentCameraSystem->update(dt); //update frustum planes
             if(!m_Paused){
                 _updateComponentModels(dt); //transform model matrices and perform render check
             }
-
             _destroyQueuedEntities(super);
         }
 };

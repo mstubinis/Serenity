@@ -887,10 +887,7 @@ class Mesh::impl final{
             for(uint i = 0; i < m_buffers.size(); ++i){
                 glDeleteBuffers(1,&m_buffers.at(i));
             }
-            if(m_VAO){
-                glDeleteVertexArrays(1,&m_VAO);
-                m_VAO = 0;
-            }
+			Renderer::deleteVAO(m_VAO);
             vector_clear(m_buffers);
         }
         void _load_CPU(Mesh* super){
@@ -942,9 +939,7 @@ class Mesh::impl final{
             */
             //support vao's
             if(epriv::RenderManager::OPENGL_VERSION >= 30){
-                //gen and bind vao
                 Renderer::genAndBindVAO(m_VAO);
-                //vertex data
                 glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(0));
                 if(m_Skeleton){
                     for(uint i = 0; i < epriv::VertexFormatAnimated::_TOTAL; ++i){
@@ -959,7 +954,6 @@ class Mesh::impl final{
                         glVertexAttribPointer(i,d.get<0>(),d.get<1>(),d.get<2>(),sizeof(epriv::MeshVertexData),(void*)d.get<3>());
                     }
                 }
-                //indices data
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers.at(1));
                 //instances data
                 if(m_buffers.size() >= 3){
