@@ -25,7 +25,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 //yes, this code is needed or stuff breaks. find out why
-#include <GL/gl.h>
+#include <SFML/OpenGL.hpp>
 #include <GL/freeglut.h>
 ////////////////////////////////////////////
 
@@ -100,26 +100,16 @@ namespace Engine{
                     }
                 }
                 virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
-                    // Vertex data
-
                     if(vertices.size() >= (C_MAX_POINTS)) return;
-
                     LineVertex v1, v2;
-
                     glm::vec3 _color = glm::vec3(color.x(),color.y(),color.z());
-                    v1.color = _color;
-                    v2.color = _color;
-
-                    v1.position = glm::vec3(from.x(),from.y(),from.z());
-                    v2.position = glm::vec3(to.x(),to.y(),to.z());
-
-                    vertices.push_back(v1);
-                    vertices.push_back(v2);
+                    v1.color = _color;  v2.color = _color;
+                    v1.position = glm::vec3(from.x(),from.y(),from.z());  v2.position = glm::vec3(to.x(),to.y(),to.z());
+                    vertices.push_back(v1);  vertices.push_back(v2);
                 }
                 void drawAccumulatedLines(){
                     glBindBuffer(   GL_ARRAY_BUFFER, m_VertexBuffer);
                     glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
-
                     renderLines();
                 }
                 virtual void drawAabb(const btVector3 &from, const btVector3 &to, const btVector3 &color){
