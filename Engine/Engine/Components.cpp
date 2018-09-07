@@ -487,7 +487,7 @@ ComponentBody::ComponentBody():ComponentBaseClass(){
     _physics = false;
     data.n.position = new glm::vec3(0.0f);
     data.n.scale = new glm::vec3(1.0f);
-	data.n.rotation = new glm::quat(1.0f,0.0f,0.0f,0.0f);
+    data.n.rotation = new glm::quat(1.0f,0.0f,0.0f,0.0f);
     data.n.modelMatrix = new glm::mat4(1.0f);
     Math::recalculateForwardRightUp(*data.n.rotation,_forward,_right,_up);
 }
@@ -505,7 +505,7 @@ ComponentBody::ComponentBody(Collision* _collision,Entity* owner,glm::vec3 _scal
     data.p.motionState = new btDefaultMotionState(tr);
 
     setMass(1.0f);
-    btRigidBody::btRigidBodyConstructionInfo CI(data.p.mass,data.p.motionState,data.p.collision->getCollisionShape(),*(data.p.collision->getInertia()));
+    btRigidBody::btRigidBodyConstructionInfo CI(data.p.mass,data.p.motionState,data.p.collision->getShape(),*(data.p.collision->getInertia()));
     data.p.rigidBody = new btRigidBody(CI);
 
     data.p.rigidBody->setSleepingThresholds(0.015f,0.015f);
@@ -543,45 +543,45 @@ void ComponentBody::alignTo(glm::vec3 direction,float speed){
 }
 void ComponentBody::setCollision(Collision* collision,bool emptyCollision,glm::vec3 _scale){
     data.p.collision = collision;
-	if(collision == nullptr){
+    if(collision == nullptr){
         if(m_Owner && !emptyCollision){
             auto* model = m_Owner->getComponent<ComponentModel>();
             if(model && model->models.size() > 0){
                 btCompoundShape* shape = new btCompoundShape();
-				for (auto m : model->models) {
-					btTransform t; t.setFromOpenGLMatrix(glm::value_ptr(m->model()));
-					Collision* c = nullptr;
+                for (auto m : model->models) {
+                    btTransform t; t.setFromOpenGLMatrix(glm::value_ptr(m->model()));
+                    Collision* c = nullptr;
 
-					Collision* meshCollision = m->mesh()->getCollision();
-					btCollisionShape* newShape = nullptr;
-					if (meshCollision) {
-						newShape = meshCollision->getCollisionShape();
-						if (meshCollision->getCollisionType() == CollisionType::ConvexHull) {
-							btConvexHullShape* cast = (btConvexHullShape*)meshCollision->getCollisionShape();
-							newShape = new btUniformScalingShape(cast, 1.0f);
-							newShape->setMargin(0.001f);
-							newShape->setLocalScaling(Math::btVectorFromGLM(_scale));
-							c = new Collision(newShape, CollisionType::ConvexHull);
-						}
-						if (meshCollision->getCollisionType() == CollisionType::TriangleShapeStatic) {
-							btBvhTriangleMeshShape* cast = (btBvhTriangleMeshShape*)meshCollision->getCollisionShape();
-							newShape = new btScaledBvhTriangleMeshShape(cast, Math::btVectorFromGLM(_scale));
-							c = new Collision(newShape, CollisionType::TriangleShapeStatic);
-						}
-				    }
-					if (!newShape)
-						newShape = new btEmptyShape();
-                    if(c){ shape->addChildShape(t, c->getCollisionShape()); }
+                    Collision* meshCollision = m->mesh()->getCollision();
+                    btCollisionShape* newShape = nullptr;
+                    if (meshCollision) {
+                        newShape = meshCollision->getShape();
+                        if (meshCollision->getType() == CollisionType::ConvexHull) {
+                            btConvexHullShape* cast = (btConvexHullShape*)meshCollision->getShape();
+                            newShape = new btUniformScalingShape(cast, 1.0f);
+                            newShape->setMargin(0.001f);
+                            newShape->setLocalScaling(Math::btVectorFromGLM(_scale));
+                            c = new Collision(newShape, CollisionType::ConvexHull);
+                        }
+                        if (meshCollision->getType() == CollisionType::TriangleShapeStatic) {
+                            btBvhTriangleMeshShape* cast = (btBvhTriangleMeshShape*)meshCollision->getShape();
+                            newShape = new btScaledBvhTriangleMeshShape(cast, Math::btVectorFromGLM(_scale));
+                            c = new Collision(newShape, CollisionType::TriangleShapeStatic);
+                        }
+                    }
+                    if (!newShape)
+                        newShape = new btEmptyShape();
+                    if(c){ shape->addChildShape(t, c->getShape()); }
                     else{  shape->addChildShape(t, newShape); }
                 }
                 data.p.collision = new Collision(shape,CollisionType::Compound, data.p.mass);
-                data.p.collision->getCollisionShape()->setUserPointer(this);
+                data.p.collision->getShape()->setUserPointer(this);
                 return;
             }
         }
     }
     data.p.collision = collision;
-    data.p.collision->getCollisionShape()->setUserPointer(this);
+    data.p.collision->getShape()->setUserPointer(this);
 }
 void ComponentBody::translate(glm::vec3 translation,bool local){ ComponentBody::translate(translation.x,translation.y,translation.z,local); }
 void ComponentBody::translate(float x,float y,float z,bool local){
@@ -613,10 +613,10 @@ void ComponentBody::rotate(float pitch,float yaw,float roll,bool local){
         quat = btQuaternion(glmquat.x,glmquat.y,glmquat.z,glmquat.w);
         data.p.rigidBody->getWorldTransform().setRotation(quat);
     }else{
-		glm::quat& _rotation = *data.n.rotation;
-		if (abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
-		if (abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0, 1, 0)));
-		if (abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));
+        glm::quat& _rotation = *data.n.rotation;
+        if (abs(pitch) >= 0.001f) _rotation = _rotation * (glm::angleAxis(-pitch, glm::vec3(1, 0, 0)));
+        if (abs(yaw) >= 0.001f)   _rotation = _rotation * (glm::angleAxis(-yaw, glm::vec3(0, 1, 0)));
+        if (abs(roll) >= 0.001f)  _rotation = _rotation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));
         Math::recalculateForwardRightUp(_rotation,_forward,_right,_up);
     }
 }
@@ -624,8 +624,8 @@ void ComponentBody::scale(glm::vec3 amount){ ComponentBody::scale(amount.x,amoun
 void ComponentBody::scale(float x,float y,float z){
     if(_physics){
         if(data.p.collision){
-            if(data.p.collision->getCollisionType() == CollisionType::Compound){
-                btCompoundShape* cast = ((btCompoundShape*)(data.p.collision->getCollisionShape()));
+            if(data.p.collision->getType() == CollisionType::Compound){
+                btCompoundShape* cast = ((btCompoundShape*)(data.p.collision->getShape()));
                 for(int i = 0; i < cast->getNumChildShapes(); ++i){
                     btCollisionShape* shape = cast->getChildShape(i);
                     btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
@@ -657,13 +657,13 @@ void ComponentBody::setPosition(float x,float y,float z){
         btTransform tr;
         tr.setOrigin(btVector3(x,y,z));
         tr.setRotation(data.p.rigidBody->getOrientation()); 
-        if(data.p.collision->getCollisionType() == CollisionType::TriangleShapeStatic){
+        if(data.p.collision->getType() == CollisionType::TriangleShapeStatic){
             Physics::removeRigidBody(data.p.rigidBody);
             SAFE_DELETE(data.p.rigidBody);
         }
         data.p.motionState->setWorldTransform(tr);
-        if(data.p.collision->getCollisionType() == CollisionType::TriangleShapeStatic){
-            btRigidBody::btRigidBodyConstructionInfo ci(data.p.mass,data.p.motionState,data.p.collision->getCollisionShape(),*data.p.collision->getInertia()); //use _mass instead of 0?
+        if(data.p.collision->getType() == CollisionType::TriangleShapeStatic){
+            btRigidBody::btRigidBodyConstructionInfo ci(data.p.mass,data.p.motionState,data.p.collision->getShape(),*data.p.collision->getInertia()); //use _mass instead of 0?
             data.p.rigidBody = new btRigidBody(ci);
             data.p.rigidBody->setUserPointer(this);
             Physics::addRigidBody(data.p.rigidBody);
@@ -708,8 +708,8 @@ void ComponentBody::setScale(glm::vec3 newScale){ ComponentBody::setScale(newSca
 void ComponentBody::setScale(float x,float y,float z){
     if(_physics){
         if(data.p.collision){
-            if(data.p.collision->getCollisionType() == CollisionType::Compound){
-                btCompoundShape* cast = ((btCompoundShape*)(data.p.collision->getCollisionShape()));
+            if(data.p.collision->getType() == CollisionType::Compound){
+                btCompoundShape* cast = (btCompoundShape*)data.p.collision->getShape();
                 for(int i = 0; i < cast->getNumChildShapes(); ++i){
                     btCollisionShape* shape = cast->getChildShape(i);
                     btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
@@ -750,8 +750,8 @@ glm::vec3 ComponentBody::getScreenCoordinates(){ return Math::getScreenCoordinat
 glm::vec3 ComponentBody::getScale(){
     if(_physics){
         if(data.p.collision){
-            if(data.p.collision->getCollisionType() == CollisionType::Compound){
-                btCompoundShape* cast = ((btCompoundShape*)(data.p.collision->getCollisionShape()));
+            if(data.p.collision->getType() == CollisionType::Compound){
+                btCompoundShape* cast = (btCompoundShape*)data.p.collision->getShape();
                 for(int i = 0; i < cast->getNumChildShapes(); ++i){
                     btCollisionShape* shape = cast->getChildShape(i);
                     btUniformScalingShape* convexHull = dynamic_cast<btUniformScalingShape*>(shape);
@@ -903,7 +903,7 @@ void ComponentBody::setMass(float mass){
 Entity::Entity(){
     m_Scene = nullptr;
     m_ID = m_ParentID = 0;
-	m_Components.resize(ComponentType::_TOTAL, 0);
+    m_Components.resize(ComponentType::_TOTAL, 0);
 }
 Entity::~Entity(){
     m_ID = m_ParentID = 0;

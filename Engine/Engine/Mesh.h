@@ -26,51 +26,45 @@ struct DefaultMeshUnbindFunctor;
 class MeshInstance;
 class InternalMeshPublicInterface;
 class Mesh;
-class MeshSkeleton;
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
 namespace Engine{
     namespace epriv{
-		class MeshLoader;
+        class MeshLoader;
+		class MeshSkeleton;
         class VertexFormat final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,
         _TOTAL};};
-		class VertexFormatCompressed final {public: enum Format {
-			PositionAndUV, Normal, Binormal, Tangent,
-		_TOTAL};};
+        class VertexFormatCompressed final {public: enum Format {
+            PositionAndUV, Normal, Binormal, Tangent,
+        _TOTAL};};
         class VertexFormatAnimated final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,BoneIDs,BoneWeights,
         _TOTAL};};
-		class VertexFormatAnimatedCompressed final {public: enum Format {
-			PositionAndUV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
-		_TOTAL};};
+        class VertexFormatAnimatedCompressed final {public: enum Format {
+            PositionAndUV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
+        _TOTAL};};
         struct Vertex final{
             glm::vec3 position;
             glm::vec2 uv;
             glm::vec3 normal;
-			glm::vec3 binormal;
+            glm::vec3 binormal;
             glm::vec3 tangent;
             void clear(){ position = normal = binormal = tangent = glm::vec3(0.0f); uv = glm::vec2(0.0f); }
         };
         struct Triangle final{
-			Vertex v1;
-			Vertex v2;
-			Vertex v3;
-			Triangle(){}
-			Triangle(Vertex& _v1, Vertex& _v2, Vertex& _v3){ v1 = _v1; v2 = _v2; v3 = _v3; }
-			~Triangle(){}
-		};
+            Vertex v1;
+            Vertex v2;
+            Vertex v3;
+            Triangle(){}
+            Triangle(Vertex& _v1, Vertex& _v2, Vertex& _v3){ v1 = _v1; v2 = _v2; v3 = _v3; }
+            ~Triangle(){}
+        };
         struct VertexBoneData final{
             float IDs[NUM_BONES_PER_VERTEX];
             float Weights[NUM_BONES_PER_VERTEX];
-            VertexBoneData(){
-                memset(&IDs,0,sizeof(IDs));
-                memset(&Weights,0,sizeof(Weights));  
-            }
-            ~VertexBoneData(){
-            }
             void AddBoneData(uint BoneID, float Weight){
                 uint size = sizeof(IDs) / sizeof(IDs[0]);
                 for (uint i = 0; i < size; ++i) {
@@ -78,14 +72,6 @@ namespace Engine{
                         IDs[i] = float(BoneID); Weights[i] = Weight; return;
                     } 
                 }
-            }
-        };
-        struct BoneInfo final{
-            glm::mat4 BoneOffset;
-            glm::mat4 FinalTransform;        
-            BoneInfo(){
-                BoneOffset = glm::mat4(0.0f);
-                FinalTransform = glm::mat4(1.0f);   
             }
         };
         struct ImportedMeshData final{
@@ -114,25 +100,9 @@ namespace Engine{
             private:
                 class impl; std::unique_ptr<impl> m_i;
             public:
-                AnimationData(Mesh*,aiAnimation*);
+                AnimationData(Mesh*, aiAnimation*);
                 ~AnimationData();
                 float duration();
-        };
-        class MeshSkeleton final: private Engine::epriv::noncopyable{
-            friend class ::Engine::epriv::AnimationData;
-            friend class ::Mesh;
-            friend struct ::DefaultMeshBindFunctor;
-            friend struct ::DefaultMeshUnbindFunctor;
-            private:
-                class impl; std::unique_ptr<impl> m_i;
-            public:
-                MeshSkeleton();
-                MeshSkeleton(Engine::epriv::ImportedMeshData&);
-                ~MeshSkeleton();
-
-                void fill(Engine::epriv::ImportedMeshData&);
-                void clear();
-                uint numBones();
         };
     };
 };
@@ -142,23 +112,21 @@ class InternalMeshPublicInterface final{
         static void LoadGPU(Mesh*);
         static void UnloadCPU(Mesh*);
         static void UnloadGPU(Mesh*);
-		static void UpdateInstance(Mesh*,uint _id, glm::mat4 _modelMatrix);
-		static void UpdateInstances(Mesh*, std::vector<glm::mat4>& _modelMatrices);
-		static bool SupportsInstancing();
+        static void UpdateInstance(Mesh*,uint _id, glm::mat4 _modelMatrix);
+        static void UpdateInstances(Mesh*, std::vector<glm::mat4>& _modelMatrices);
+        static bool SupportsInstancing();
 };
-
 class Mesh final: public BindableResource, public EventObserver{
     friend struct ::DefaultMeshBindFunctor;
     friend struct ::DefaultMeshUnbindFunctor;
     friend class ::Engine::epriv::AnimationData;
     friend class ::Engine::epriv::MeshSkeleton;
     friend class ::InternalMeshPublicInterface;
-	friend class ::Engine::epriv::MeshLoader;
+    friend class ::Engine::epriv::MeshLoader;
     private:
         class impl; std::unique_ptr<impl> m_i;
     public:
-        //loaded in renderer
-        static Mesh *FontPlane, *Plane, *Cube;
+        static Mesh *FontPlane, *Plane, *Cube; //loaded in renderer
 
         Mesh(std::string name,std::unordered_map<std::string,float>& grid,uint width,uint length,float threshhold);
         Mesh(std::string name,float width, float height,float threshhold);
@@ -171,7 +139,7 @@ class Mesh final: public BindableResource, public EventObserver{
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
 
-		void onEvent(const Event& e);
+        void onEvent(const Event& e);
 
         void load();
         void unload();
@@ -183,6 +151,4 @@ class Mesh final: public BindableResource, public EventObserver{
         void render(bool instancing = true,GLuint mode = GL_TRIANGLES);
         void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
-
-
 #endif

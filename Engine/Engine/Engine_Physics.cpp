@@ -49,41 +49,41 @@ namespace Engine{
                 void init(){
                     C_MAX_POINTS = 262144;
                     m_VAO = m_VertexBuffer = 0;
-					registerEvent(EventType::WindowFullscreenChanged);
+                    registerEvent(EventType::WindowFullscreenChanged);
                 }
                 void destruct(){
-					unregisterEvent(EventType::WindowFullscreenChanged);
+                    unregisterEvent(EventType::WindowFullscreenChanged);
                     glDeleteBuffers(1, &m_VertexBuffer);
-					Renderer::deleteVAO(m_VAO);
+                    Renderer::deleteVAO(m_VAO);
                     vector_clear(vertices);
                 }
-				void bindDataToGPU() {
-					glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-					glEnableVertexAttribArray(0);
-					glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
-					glEnableVertexAttribArray(1);
-					glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
-				}
+                void bindDataToGPU() {
+                    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+                    glEnableVertexAttribArray(0);
+                    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
+                    glEnableVertexAttribArray(1);
+                    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
+                }
                 void renderLines(){
                     if(m_VAO){
                         Renderer::bindVAO(m_VAO);
                         glDrawArrays(GL_LINES, 0,vertices.size());
                         Renderer::bindVAO(0);
                     }else{
-						bindDataToGPU();
+                        bindDataToGPU();
                         glDrawArrays(GL_LINES, 0,vertices.size());
                         glDisableVertexAttribArray(0);
                         glDisableVertexAttribArray(1);
                     }
                 }
-				void buildVAO() {
-					Renderer::deleteVAO(m_VAO);
-					if (epriv::RenderManager::OPENGL_VERSION >= 30) {
-						Renderer::genAndBindVAO(m_VAO);
-						bindDataToGPU();
-						Renderer::bindVAO(0);
-					}
-				}
+                void buildVAO() {
+                    Renderer::deleteVAO(m_VAO);
+                    if (epriv::RenderManager::OPENGL_VERSION >= 30) {
+                        Renderer::genAndBindVAO(m_VAO);
+                        bindDataToGPU();
+                        Renderer::bindVAO(0);
+                    }
+                }
                 void postRender(){
                     vector_clear(vertices);
                 }
@@ -97,7 +97,7 @@ namespace Engine{
                     glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * C_MAX_POINTS, &temp1[0], GL_DYNAMIC_DRAW);
 
                     //support vao's
-					buildVAO();
+                    buildVAO();
                 }
                 virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color){
                     if(vertices.size() >= (C_MAX_POINTS)) return;
@@ -112,11 +112,11 @@ namespace Engine{
                     glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
                     renderLines();
                 }
-				void onEvent(const Event& e) {
-					if (e.type == EventType::WindowFullscreenChanged) {
-						buildVAO();
-					}
-				}
+                void onEvent(const Event& e) {
+                    if (e.type == EventType::WindowFullscreenChanged) {
+                        buildVAO();
+                    }
+                }
                 virtual void drawAabb(const btVector3 &from, const btVector3 &to, const btVector3 &color){
                 }
                 virtual void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform &transform, const btVector3 &color){
@@ -241,7 +241,6 @@ vector<glm::vec3> _rayCastInternal(const btVector3& start, const btVector3& end)
     }
     return result;
 }
-
 epriv::PhysicsManager::PhysicsManager(const char* name,uint w,uint h):m_i(new impl){ m_i->_init(name,w,h); physicsManager = m_i.get(); }
 epriv::PhysicsManager::~PhysicsManager(){ m_i->_destruct(); }
 void epriv::PhysicsManager::_init(const char* name,uint w,uint h){ m_i->_postInit(name,w,h); }
@@ -257,9 +256,7 @@ void Physics::setGravity(glm::vec3& gravity){ Physics::setGravity(gravity.x,grav
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ physicsManager->m_World->addRigidBody(rigidBody,group,mask); }
 void Physics::addRigidBody(btRigidBody* body){ physicsManager->m_World->addRigidBody(body); }
 void Physics::removeRigidBody(btRigidBody* body){ physicsManager->m_World->removeRigidBody(body); }
-void Physics::updateRigidBody(btRigidBody* body){ 
-	physicsManager->m_World->updateSingleAabb(body);
-}
+void Physics::updateRigidBody(btRigidBody* body){ physicsManager->m_World->updateSingleAabb(body); }
 
 vector<glm::vec3> Physics::rayCast(const btVector3& s, const btVector3& e,btRigidBody* ignored){
     if(ignored){
@@ -305,8 +302,8 @@ vector<glm::vec3> Physics::rayCast(const glm::vec3& s, const glm::vec3& e,vector
     return Engine::Physics::rayCast(_s,_e,objs);
 }
 Collision::Collision(btCollisionShape* shape,CollisionType::Type type, float mass){
-    m_CollisionShape = shape;
-    m_CollisionType = type;
+    m_Shape = shape;
+    m_Type = type;
     _init(type,mass);
 }
 Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, float mass,glm::vec3 scale){ 
@@ -316,8 +313,7 @@ Collision::Collision(epriv::ImportedMeshData& data,CollisionType::Type type, flo
 void Collision::_init(CollisionType::Type type, float mass){
     if(!m_Inertia){
         m_Inertia = new btVector3(0.0f,0.0f,0.0f);
-    }
-    else{
+    }else{
         m_Inertia->setX(0.0f);m_Inertia->setY(0.0f);m_Inertia->setZ(0.0f);
     }
     setMass(mass);
@@ -326,40 +322,39 @@ void Collision::_init(CollisionType::Type type, float mass){
 Collision::~Collision(){ 
     SAFE_DELETE(m_Inertia);
     SAFE_DELETE(m_InternalMeshData);
-    SAFE_DELETE(m_CollisionShape);
-    m_CollisionType = CollisionType::None;
+    SAFE_DELETE(m_Shape);
+    m_Type = CollisionType::None;
 }
 void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisionType,glm::vec3 _scale){
-	if(m_CollisionShape){
-		SAFE_DELETE(m_CollisionShape);
-	}
-	if(m_InternalMeshData){
-		SAFE_DELETE(m_InternalMeshData);
-	}
+    if(m_Shape){
+        SAFE_DELETE(m_Shape);
+    }
+    if(m_InternalMeshData){
+        SAFE_DELETE(m_InternalMeshData);
+    }
 
     m_InternalMeshData = nullptr;
     btCollisionShape* shape = nullptr;
-    m_CollisionType = collisionType;
+    m_Type = collisionType;
     switch(collisionType){
         case CollisionType::ConvexHull:{
             shape = new btConvexHullShape();
-			btConvexHullShape& convexCast = *((btConvexHullShape*)shape);
+            btConvexHullShape& convexCast = *(btConvexHullShape*)shape;
             for(auto vertex:data.points){ 
-				convexCast.addPoint(btVector3(vertex.x * _scale.x,vertex.y * _scale.y,vertex.z * _scale.z)); 
-			}
+                convexCast.addPoint(btVector3(vertex.x * _scale.x,vertex.y * _scale.y,vertex.z * _scale.z)); 
+            }
             btShapeHull hull = btShapeHull(&convexCast);
             hull.buildHull(convexCast.getMargin());
             SAFE_DELETE(shape);
             const btVector3* ptsArray = hull.getVertexPointer();
             shape = new btConvexHullShape();
-			btConvexHullShape& convexShape = *((btConvexHullShape*)shape);
+            btConvexHullShape& convexShape = *(btConvexHullShape*)shape;
             for(int i = 0; i < hull.numVertices(); ++i){
                 convexShape.addPoint(btVector3(ptsArray[i].x(),ptsArray[i].y(),ptsArray[i].z()));
             }
-			convexShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-			convexShape.setMargin(0.001f);
-			convexShape.recalcLocalAabb();
-            m_CollisionShape = shape;
+            convexShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+            convexShape.setMargin(0.001f);
+            convexShape.recalcLocalAabb();
             break;
         }
         case CollisionType::TriangleShape:{
@@ -375,7 +370,6 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
             giShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             giShape.setMargin(0.001f);
             giShape.updateBound();
-            m_CollisionShape = shape;
             break;
         }
         case CollisionType::TriangleShapeStatic:{
@@ -387,11 +381,10 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
                 m_InternalMeshData->addTriangle(v1, v2, v3,true);
             }
             shape = new btBvhTriangleMeshShape(m_InternalMeshData,true);
-			btBvhTriangleMeshShape& triShape = *((btBvhTriangleMeshShape*)shape);
+            btBvhTriangleMeshShape& triShape = *((btBvhTriangleMeshShape*)shape);
             triShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
             triShape.setMargin(0.001f);
-			triShape.recalcLocalAabb();
-            m_CollisionShape = shape;
+            triShape.recalcLocalAabb();
             break;
         }
         case CollisionType::Sphere:{
@@ -403,10 +396,9 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
                 }
             }
             shape = new btSphereShape(radius * _scale.x);
-			btSphereShape& sphere = *((btSphereShape*)shape);
-			sphere.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-			sphere.setMargin(0.001f);
-            m_CollisionShape = shape;
+            btSphereShape& sphere = *((btSphereShape*)shape);
+            sphere.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+            sphere.setMargin(0.001f);
             break;
         };
         case CollisionType::Box:{
@@ -416,24 +408,27 @@ void Collision::_load(epriv::ImportedMeshData& data, CollisionType::Type collisi
                 if(x > max.x) max.x = x; if(y > max.y) max.y = y; if(z > max.z) max.z = z;
             }
             shape = new btBoxShape(btVector3(max.x * _scale.x,max.y * _scale.y,max.z * _scale.z));
-			btBoxShape& boxShape = *((btBoxShape*)shape);
-			boxShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
-			boxShape.setMargin(0.001f);
-            m_CollisionShape = shape;
+            btBoxShape& boxShape = *(btBoxShape*)shape;
+            boxShape.setLocalScaling(btVector3(1.0f,1.0f,1.0f));
+            boxShape.setMargin(0.001f);
             break;
         }
         default:{
             break;
         }
     }
+    m_Shape = shape;
 }
 void Collision::setMass(float mass){
-    if(!m_CollisionShape || m_CollisionType == CollisionType::TriangleShapeStatic || m_CollisionType == CollisionType::None) return;
+    if(!m_Shape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) return;
 
-    if(m_CollisionType != CollisionType::TriangleShape){
-        m_CollisionShape->calculateLocalInertia(mass,*m_Inertia);
+    if(m_Type != CollisionType::TriangleShape){
+        m_Shape->calculateLocalInertia(mass,*m_Inertia);
     }
     else{
-        ((btGImpactMeshShape*)m_CollisionShape)->calculateLocalInertia(mass,*m_Inertia);
+        ((btGImpactMeshShape*)m_Shape)->calculateLocalInertia(mass,*m_Inertia);
     }
 }
+btVector3* Collision::getInertia() const { return m_Inertia; }
+btCollisionShape* Collision::getShape() const { return m_Shape; }
+const uint Collision::getType() const { return m_Type; }

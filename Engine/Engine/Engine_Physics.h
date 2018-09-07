@@ -18,7 +18,7 @@ class btTriangleMesh;
 namespace Engine{
     namespace epriv{
         struct ImportedMeshData;
-		class GLDebugDrawer;
+        class GLDebugDrawer;
     };
 };
 typedef float btScalar;
@@ -37,8 +37,8 @@ class Collision final{
     private:
         btTriangleMesh* m_InternalMeshData;
         btVector3* m_Inertia;
-        uint m_CollisionType;
-        btCollisionShape* m_CollisionShape;
+        uint m_Type;
+        btCollisionShape* m_Shape;
         void _init(CollisionType::Type = CollisionType::None, float mass = 0);
         void _load(Engine::epriv::ImportedMeshData&, CollisionType::Type,glm::vec3 scale = glm::vec3(1.0f));
     public:
@@ -47,17 +47,16 @@ class Collision final{
         ~Collision();
 
         void setMass(float mass);
-        btVector3* getInertia() const { return m_Inertia; }
-
-        btCollisionShape* getCollisionShape() const { return m_CollisionShape; }
-        const uint getCollisionType() const { return m_CollisionType; }
+        btVector3* getInertia() const;
+        btCollisionShape* getShape() const;
+        const uint getType() const;
 };
 
 namespace Engine{
     namespace epriv{
         class PhysicsManager final: private Engine::epriv::noncopyable{
             public:
-				class impl;
+                class impl;
                 std::unique_ptr<impl> m_i;
 
                 PhysicsManager(const char* name,uint w,uint h);
@@ -92,7 +91,7 @@ namespace Engine{
         void addRigidBody(btRigidBody*, short group, short mask);
         void addRigidBody(btRigidBody*);
         void removeRigidBody(btRigidBody*);
-		void updateRigidBody(btRigidBody*);
+        void updateRigidBody(btRigidBody*);
     };
 };
 #endif
