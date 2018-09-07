@@ -2,6 +2,7 @@
 #include "Engine_Renderer.h"
 #include "Engine_Resources.h"
 #include "Light.h"
+#include "MeshInstance.h"
 
 #include "SolarSystem.h"
 #include "ResourceManifest.h"
@@ -253,13 +254,7 @@ void SolarSystem::_loadFromFile(string filename){
     auto& body = *player->getComponent<ComponentBody>();
     float xPos = body.position().x;
     float zPos = body.position().z;
-
-    /*
-    ObjectDisplay* _s = new ObjectDisplay(ResourceManifest::TestMesh,ResourceManifest::MirandaMaterial,glm::vec3(xPos+4,0,zPos-2),glm::vec3(1.0f),"TestObject1",nullptr);
-    _s->playAnimation("Skeleton|fire",0.0f,-1.0f,0);
-    _s->playAnimation("Skeleton|fire_top",0.0f,-1.0f,0);
-    _s->playAnimation("Skeleton|fire_hammer",0.0f,-1.0f,0);
-    */
+	
     for(uint k = 0; k < 1; ++k){
         Ship* _starbase = new Ship(ResourceManifest::StarbaseMesh,ResourceManifest::StarbaseMaterial,false,"Starfleet Command " + to_string(k),glm::vec3(xPos+50+(k*5),0,zPos+50+(k*5)),glm::vec3(1.0f),nullptr,this);
     }

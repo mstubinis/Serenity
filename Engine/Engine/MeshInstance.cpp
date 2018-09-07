@@ -23,14 +23,19 @@ class MeshInstanceAnimation::impl{
         string m_AnimationName;
         Mesh* m_Mesh;
 
-        void _init(Mesh* _mesh,const string& _animName,float _startTime,float _endTime,uint _requestedLoops){
-            m_CurrentLoops = 0;
-            m_RequestedLoops = _requestedLoops;
-            m_CurrentTime = 0;
-            m_StartTime = _startTime;
-            m_EndTime = _endTime;
-            m_AnimationName = _animName;
-            m_Mesh = _mesh;
+		void _init(Mesh* _mesh, const string& _animName, float _startTime, float _endTime, uint _requestedLoops) {
+			m_CurrentLoops = 0;
+			m_RequestedLoops = _requestedLoops;
+			m_CurrentTime = 0;
+			m_StartTime = _startTime;
+			m_AnimationName = _animName;
+			m_Mesh = _mesh;
+			if (_endTime < 0) {
+				m_EndTime = m_Mesh->animationData().at(_animName)->duration();
+			}
+			else {
+			    m_EndTime = _endTime;
+		    }
         }
 };
 class MeshInstance::impl{
@@ -173,7 +178,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         vector<glm::mat4> transforms;
         //process the animation here
         for(uint j = 0; j < animationQueue.size(); ++j){
-            MeshInstanceAnimation::impl& a = *(animationQueue.at(j)->m_i.get());
+            auto& a = *(animationQueue.at(j)->m_i);
             if(a.m_Mesh == i.m_Mesh){
                 a.m_CurrentTime += Resources::dt();
                 a.m_Mesh->playAnimation(transforms,a.m_AnimationName,a.m_CurrentTime);
@@ -189,7 +194,7 @@ struct epriv::DefaultMeshInstanceBindFunctor{void operator()(EngineResource* r) 
         //cleanup the animation queue
         for (auto it = animationQueue.cbegin(); it != animationQueue.cend();){
             MeshInstanceAnimation* anim = (*it);
-            MeshInstanceAnimation::impl& a = *(anim->m_i.get());
+            auto& a = *(anim->m_i);
             if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)){
                 SAFE_DELETE(anim); //do we need this?
                 it = animationQueue.erase(it);

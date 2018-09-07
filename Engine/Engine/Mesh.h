@@ -37,15 +37,21 @@ namespace Engine{
         class VertexFormat final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,
         _TOTAL};};
+		class VertexFormatCompressed final {public: enum Format {
+			PositionAndUV, Normal, Binormal, Tangent,
+		_TOTAL};};
         class VertexFormatAnimated final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,BoneIDs,BoneWeights,
         _TOTAL};};
+		class VertexFormatAnimatedCompressed final {public: enum Format {
+			PositionAndUV, Normal, Binormal, Tangent, BoneIDs, BoneWeights,
+		_TOTAL};};
         struct Vertex final{
             glm::vec3 position;
             glm::vec2 uv;
             glm::vec3 normal;
+			glm::vec3 binormal;
             glm::vec3 tangent;
-            glm::vec3 binormal;
             void clear(){ position = normal = binormal = tangent = glm::vec3(0.0f); uv = glm::vec2(0.0f); }
         };
         struct Triangle final{

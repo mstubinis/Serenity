@@ -70,18 +70,24 @@ namespace Engine{
             glm::vec3 position;
             //float uv;
             glm::vec2 uv;
-            GLuint normal;
-            GLuint binormal;
-            GLuint tangent;
+            GLuint normal, binormal, tangent;
             MeshVertexData(){ }
             MeshVertexData(const MeshVertexData& c){
                 position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
             }
             ~MeshVertexData(){ }
         };
+		struct MeshVertexDataCompressed {
+			glm::vec4 positionAndUV;
+			GLuint normal, binormal, tangent;
+			MeshVertexDataCompressed() { }
+			MeshVertexDataCompressed(const MeshVertexDataCompressed& c) {
+				positionAndUV = c.positionAndUV; normal = c.normal; binormal = c.binormal; tangent = c.tangent;
+			}
+			~MeshVertexDataCompressed() { }
+		};
         struct MeshVertexDataAnimated final: public MeshVertexData{
-            glm::vec4 boneIDs;
-            glm::vec4 boneWeights;
+            glm::vec4 boneIDs, boneWeights;
             MeshVertexDataAnimated():MeshVertexData(){ }
             MeshVertexDataAnimated(const MeshVertexData& c){
                 position=c.position; uv=c.uv; normal=c.normal; binormal=c.binormal; tangent=c.tangent;
@@ -91,10 +97,20 @@ namespace Engine{
             }
             ~MeshVertexDataAnimated(){ }
         };
+		struct MeshVertexDataAnimatedCompressed final : public MeshVertexDataCompressed {
+			glm::vec4 boneIDs, boneWeights;
+			MeshVertexDataAnimatedCompressed() :MeshVertexDataCompressed() { }
+			MeshVertexDataAnimatedCompressed(const MeshVertexDataCompressed& c) {
+				positionAndUV = c.positionAndUV; normal = c.normal; binormal = c.binormal; tangent = c.tangent;
+			}
+			MeshVertexDataAnimatedCompressed(const MeshVertexDataAnimatedCompressed& c) {
+				positionAndUV = c.positionAndUV; normal = c.normal; binormal = c.binormal; tangent = c.tangent; boneIDs = c.boneIDs; boneWeights = c.boneWeights;
+			}
+			~MeshVertexDataAnimatedCompressed() { }
+		};
         unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> VERTEX_ANIMATED_FORMAT_DATA = [](){
             unordered_map<uint,boost::tuple<uint,GLuint,GLuint,GLuint>> m;
             m[VertexFormatAnimated::Position]    = boost::make_tuple(3,        GL_FLOAT,              GL_FALSE,  0);
-            //m[VertexFormatAnimated::UV]        = boost::make_tuple(1,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
             m[VertexFormatAnimated::UV]          = boost::make_tuple(2,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,uv));
             m[VertexFormatAnimated::Normal]      = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,normal));
             m[VertexFormatAnimated::Binormal]    = boost::make_tuple(GL_BGRA,  GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimated,binormal));
@@ -103,6 +119,16 @@ namespace Engine{
             m[VertexFormatAnimated::BoneWeights] = boost::make_tuple(4,        GL_FLOAT,              GL_FALSE,  offsetof(MeshVertexDataAnimated,boneWeights));
             return m;
         }();
+		unordered_map<uint, boost::tuple<uint, GLuint, GLuint, GLuint>> VERTEX_ANIMATED_FORMAT_DATA_COMPRESSED = []() {
+			unordered_map<uint, boost::tuple<uint, GLuint, GLuint, GLuint>> m;
+			m[VertexFormatAnimatedCompressed::PositionAndUV]  = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               0);
+			m[VertexFormatAnimatedCompressed::Normal]         = boost::make_tuple(GL_BGRA, GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimatedCompressed, normal));
+			m[VertexFormatAnimatedCompressed::Binormal]       = boost::make_tuple(GL_BGRA, GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimatedCompressed, binormal));
+			m[VertexFormatAnimatedCompressed::Tangent]        = boost::make_tuple(GL_BGRA, GL_INT_2_10_10_10_REV, GL_TRUE,   offsetof(MeshVertexDataAnimatedCompressed, tangent));
+			m[VertexFormatAnimatedCompressed::BoneIDs]        = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               offsetof(MeshVertexDataAnimatedCompressed, boneIDs));
+			m[VertexFormatAnimatedCompressed::BoneWeights]    = boost::make_tuple(4,       GL_FLOAT, GL_FALSE,               offsetof(MeshVertexDataAnimatedCompressed, boneWeights));
+			return m;
+		}();
 
         class MeshLoader final {
             friend class ::Mesh;
@@ -516,20 +542,17 @@ class Mesh::impl final{
                 if(aimesh.mNumBones > 0){
                     auto& skeleton = *m_Skeleton->m_i;
                     for (uint i = 0; i < aimesh.mNumBones; ++i) { 
-                        uint BoneIndex = 0; 
+                        uint BoneIndex(0); 
                         string BoneName(aimesh.mBones[i]->mName.data);
                         if(!skeleton.m_BoneMapping.count(BoneName)) {
                             BoneIndex = skeleton.m_NumBones;
-                            skeleton.m_NumBones++; 
-                            epriv::BoneInfo bi;
-                            skeleton.m_BoneInfo.push_back(bi);
-                        }
-                        else{
+                            ++skeleton.m_NumBones; 
+                            skeleton.m_BoneInfo.emplace_back();
+                        }else{
                             BoneIndex = skeleton.m_BoneMapping.at(BoneName);
                         }
                         skeleton.m_BoneMapping.emplace(BoneName,BoneIndex);
-                        aiMatrix4x4 n = aimesh.mBones[i]->mOffsetMatrix;
-                        skeleton.m_BoneInfo.at(BoneIndex).BoneOffset = Math::assimpToGLMMat4(n);
+                        skeleton.m_BoneInfo.at(BoneIndex).BoneOffset = Math::assimpToGLMMat4(aimesh.mBones[i]->mOffsetMatrix);
                         for (uint j = 0; j < aimesh.mBones[i]->mNumWeights; ++j) {
                             uint VertexID = aimesh.mBones[i]->mWeights[j].mVertexId;
                             float Weight = aimesh.mBones[i]->mWeights[j].mWeight; 
@@ -546,8 +569,7 @@ class Mesh::impl final{
                                  key = "Animation " + to_string(skeleton.m_AnimationData.size());
                              }
                              if(!skeleton.m_AnimationData.count(key)){
-                                auto* animData = new epriv::AnimationData(mesh,anim);
-                                skeleton.m_AnimationData.emplace(key,animData);
+                                skeleton.m_AnimationData.emplace(key, new epriv::AnimationData(mesh, anim));
                              }
                         }
                     }
@@ -633,24 +655,6 @@ class Mesh::impl final{
 				}
 			}
 			for (uint i = 0; i < m_Vertices.size(); ++i) {
-				/*
-				if(m_Skeleton){
-					auto& vert = (epriv::MeshVertexDataAnimated)m_Vertices.at(i);
-					//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
-					vert.uv = temp_uvs.at(i);
-					vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
-					vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
-					vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
-				}
-				else{
-					auto& vert = m_Vertices.at(i);
-					//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
-					vert.uv = temp_uvs.at(i);
-					vert.normal = Math::pack3NormalsInto32Int(temp_normals.at(i));
-					vert.binormal = Math::pack3NormalsInto32Int(temp_binormals.at(i));
-					vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
-				}
-				*/
 				auto& vert = m_Vertices.at(i);
 				//vert.uv = Math::pack2FloatsInto1Float(temp_uvs.at(i));
 				vert.uv = temp_uvs.at(i);
@@ -1140,8 +1144,7 @@ class epriv::AnimationData::impl{
             m_TicksPerSecond = anim->mTicksPerSecond;
             m_DurationInTicks = anim->mDuration;
             for(uint i = 0; i < anim->mNumChannels; ++i){
-                string key(anim->mChannels[i]->mNodeName.data);
-                m_KeyframeData.emplace(key,anim->mChannels[i]);
+                m_KeyframeData.emplace(anim->mChannels[i]->mNodeName.data,anim->mChannels[i]);
             }
         }
         void _ReadNodeHeirarchy(const string& animationName,float time, const aiNode* n,glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){
@@ -1152,7 +1155,7 @@ class epriv::AnimationData::impl{
                 if(keyframes){
                     glm::vec3 s; _CalcInterpolatedScaling(s, time, keyframes);
                     aiQuaternion q; _CalcInterpolatedRotation(q, time, keyframes);
-                    glm::mat4 rotation(glm::mat4(Math::assimpToGLMMat3(q.GetMatrix())));
+                    glm::mat4 rotation(Math::assimpToGLMMat3(q.GetMatrix()));
                     glm::vec3 t; _CalcInterpolatedPosition(t, time, keyframes);
                     NodeTransform = glm::mat4(1.0f);
                     NodeTransform = glm::translate(NodeTransform,t);
@@ -1161,11 +1164,11 @@ class epriv::AnimationData::impl{
                 }
             }
             glm::mat4 Transform(ParentTransform * NodeTransform);
-            auto& skeleton = *m_Mesh->m_i->m_Skeleton;
-            if(skeleton.m_i->m_BoneMapping.count(BoneName)){
-                uint BoneIndex(skeleton.m_i->m_BoneMapping.at(BoneName));
-                glm::mat4& Final(skeleton.m_i->m_BoneInfo.at(BoneIndex).FinalTransform);
-                Final = skeleton.m_i->m_GlobalInverseTransform * Transform * skeleton.m_i->m_BoneInfo.at(BoneIndex).BoneOffset;
+            auto& skeleton = *m_Mesh->m_i->m_Skeleton->m_i;
+            if(skeleton.m_BoneMapping.count(BoneName)){
+                uint BoneIndex(skeleton.m_BoneMapping.at(BoneName));
+                glm::mat4& Final = skeleton.m_BoneInfo.at(BoneIndex).FinalTransform;
+                Final = skeleton.m_GlobalInverseTransform * Transform * skeleton.m_BoneInfo.at(BoneIndex).BoneOffset;
                 //this line allows for animation combinations. only works when additional animations start off in their resting places...
                 Final = Transforms.at(BoneIndex) * Final;
             }
@@ -1177,7 +1180,7 @@ class epriv::AnimationData::impl{
             float TicksPerSecond = float(m_TicksPerSecond != 0 ? m_TicksPerSecond : 25.0f);
             float TimeInTicks(TimeInSeconds * TicksPerSecond);
             float AnimationTime(float(fmod(TimeInTicks, m_DurationInTicks)));
-            glm::mat4 Identity(glm::mat4(1.0f));
+            glm::mat4 Identity(1.0f);
             _ReadNodeHeirarchy(animationName,AnimationTime, m_Mesh->m_i->m_aiScene->mRootNode, Identity,Transforms);
             auto& skeleton = *m_Mesh->m_i->m_Skeleton;
             for(uint i = 0; i < skeleton.m_i->m_NumBones; ++i){
