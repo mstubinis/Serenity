@@ -771,12 +771,18 @@ class Mesh::impl final{
                 vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
             }
         }
-        void _loadFromFile(Mesh* super,string& file,CollisionType::Type type,float threshold){
+		void _loadFromFile(Mesh* super, string& file, CollisionType::Type type, float threshold) {
 			string extention = boost::filesystem::extension(file);
-            epriv::ImportedMeshData d;
-            _loadInternal(super,d,m_File);
-            _finalizeData(d, threshold);
+			epriv::ImportedMeshData d;
 
+			if (extention == ".objc") {
+				_readFromObjCompressed(file, d);
+				_finalizeData(d, threshold);
+			}
+			else {
+				_loadInternal(super, d, m_File);
+				_finalizeData(d, threshold);
+			}
             if(type == CollisionType::None){
                 m_Collision = new Collision(new btEmptyShape());
             }else{
@@ -1072,137 +1078,168 @@ class Mesh::impl final{
             cout << "(Mesh) ";
         }
 
-		void _readFromObjCompressed(string& filename) {
+		void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
+			ifstream fileparser(filename.c_str(), ios::binary);
 
+			char headerBuffer[24];
+			fileparser.read(headerBuffer, 24);
+
+			//pos,uv,norm,indices sizes
+			uint32_t posSize, uvSize, normSize, posIndiceSize,uvIndiceSize,normIndiceSize;
+			posSize = *(uint32_t*)&headerBuffer[0];
+			uvSize = *(uint32_t*)&headerBuffer[4];
+			normSize = *(uint32_t*)&headerBuffer[8];
+
+			posIndiceSize = *(uint32_t*)&headerBuffer[12];
+			uvIndiceSize = *(uint32_t*)&headerBuffer[16];
+			normIndiceSize = *(uint32_t*)&headerBuffer[20];
+
+			//base
+			uint32_t numOfPoints = posSize / 6;
+			uint32_t numOfUvs = uvSize / 4;
+			uint32_t numOfNormals = normSize / 6;
+			data.file_points.resize(numOfPoints);
+			data.file_uvs.resize(numOfUvs);
+			data.file_normals.resize(numOfNormals);
+
+
+			vector<uint> positionIndices;
+			vector<uint> uvIndices;
+			vector<uint> normalIndices;
+			positionIndices.resize(posIndiceSize);
+			uvIndices.resize(uvIndiceSize);
+			normalIndices.resize(normIndiceSize);
+
+
+			//positions
+			for (uint i = 0; i < numOfPoints; ++i) {
+				float xOut, yOut, zOut;
+				uint16_t xIn, yIn, zIn;
+				fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
+				fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
+				fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
+				float32(&xOut, xIn);
+				float32(&yOut, yIn);
+				float32(&zOut, zIn);
+				data.file_points.at(i) = glm::vec3(xOut, yOut, zOut);
+			}
+			//uvs
+			for (uint i = 0; i < numOfUvs; ++i) {
+				float xOut, yOut;
+				uint16_t xIn, yIn;
+				fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
+				fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
+				float32(&xOut, xIn);
+				float32(&yOut, yIn);
+				data.file_uvs.at(i) = glm::vec2(xOut, yOut);
+			}
+			//normals
+			for (uint i = 0; i < numOfNormals; ++i) {
+				float xOut, yOut, zOut;
+				uint16_t xIn, yIn, zIn;
+				fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
+				fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
+				fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
+				float32(&xOut, xIn);
+				float32(&yOut, yIn);
+				float32(&zOut, zIn);
+				data.file_normals.at(i) = glm::vec3(xOut, yOut, zOut);
+			}
+			//indices
+			for (uint i = 0; i < posIndiceSize; ++i) {
+				ushort c;
+				fileparser.read(reinterpret_cast<char *>(&c), sizeof(char)*2);
+				positionIndices.at(i) = c;
+			}
+			for (uint i = 0; i < uvIndiceSize; ++i) {
+				ushort c;
+				fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
+				uvIndices.at(i) = c;
+			}
+			for (uint i = 0; i < normIndiceSize; ++i) {
+				ushort c;
+				fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
+				normalIndices.at(i) = c;
+			}
+			fileparser.close();
+			_loadDataIntoTriangles(data, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
+			epriv::MeshLoader::CalculateTBNAssimp(data);
 		}
-        void _writeToObjCompressed(epriv::ImportedMeshData& data) {
+        void _writeToObjCompressed() {
+			epriv::ImportedMeshData d;
+
+			vector<uint> positionIndices;
+			vector<uint> uvIndices;
+			vector<uint> normalIndices;
+
+			ifstream input(m_File);
+
+			//first read in all data
+			for (string line; getline(input, line, '\n');) {
+				_loadObjDataFromLine(line, d, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
+			}
             //header:
-            //faces example f 372/688/534 435/860/656 368/686/532
-            //number of chars used to represent a face, faces MUST be triangleized
             string f = m_File;
             string ext = boost::filesystem::extension(m_File);
             f = f.substr(0, f.size() - ext.size());
             f += ".objc";
-            ofstream stream;
-            stream.open(f, ios::out | ios::binary);
-
+            ofstream stream(f,ios::binary);
 
             //header
-            uint32_t posSize = data.points.size() * 6;
-            uint32_t uvSize = data.uvs.size() * 4;
-            uint32_t normSize = data.normals.size() * 6;
-            uint32_t indiceSize = data.indices.size() * 2;
+			unsigned posSize = d.file_points.size() * 6;
+			unsigned uvSize = d.file_uvs.size() * 4;
+			unsigned normSize = d.file_normals.size() * 6;
 
-            char* header = new char[16];
-            header[0] = (posSize >> 24) & 0xFF;
-            header[1] = (posSize >> 16) & 0xFF;
-            header[2] = (posSize >> 8) & 0xFF;
-            header[3] = posSize & 0xFF;
+			unsigned positionIndicesSize = positionIndices.size();
+			unsigned uvIndicesSize = uvIndices.size();
+			unsigned normalIndicesSize = normalIndices.size();
 
-            header[4] = (uvSize >> 24) & 0xFF;
-            header[5] = (uvSize >> 16) & 0xFF;
-            header[6] = (uvSize >> 8) & 0xFF;
-            header[7] = uvSize & 0xFF;
+			stream.write(reinterpret_cast<const char*>(&posSize), sizeof(posSize));
+			stream.write(reinterpret_cast<const char*>(&uvSize), sizeof(uvSize));
+			stream.write(reinterpret_cast<const char*>(&normSize), sizeof(normSize));
 
-            header[8] = (normSize >> 24) & 0xFF;
-            header[9] = (normSize >> 16) & 0xFF;
-            header[10] = (normSize >> 8) & 0xFF;
-            header[11] = normSize & 0xFF;
+			stream.write(reinterpret_cast<const char*>(&positionIndicesSize), sizeof(positionIndicesSize));
+			stream.write(reinterpret_cast<const char*>(&uvIndicesSize), sizeof(uvIndicesSize));
+			stream.write(reinterpret_cast<const char*>(&normalIndicesSize), sizeof(normalIndicesSize));
 
-            header[12] = (indiceSize >> 24) & 0xFF;
-            header[13] = (indiceSize >> 16) & 0xFF;
-            header[14] = (indiceSize >> 8) & 0xFF;
-            header[15] = indiceSize & 0xFF;
-
-            stream.write(header, 16);
-            delete[] header;
-
-            char* positionBuffer = new char[posSize];
-            uint count = 0;
-            for (auto pos : data.points) {
+            for (auto pos : d.file_points) {
                 uint16_t outX, outY, outZ;
                 float16(&outX, pos.x);
                 float16(&outY, pos.y);
                 float16(&outZ, pos.z);
-                uchar x_part1, x_part2, y_part1, y_part2, z_part1, z_part2;
-                x_part1 = outX & 0xF; // bits 0..3
-                x_part2 = (outX >> 4) & 0xF; // bits 4..7
-                y_part1 = outY & 0xF; // bits 0..3
-                y_part2 = (outY >> 4) & 0xF; // bits 4..7
-                z_part1 = outZ & 0xF; // bits 0..3
-                z_part2 = (outZ >> 4) & 0xF; // bits 4..7    
-                positionBuffer[(count * 6) + 0] = x_part1;
-                positionBuffer[(count * 6) + 1] = x_part2;
-                positionBuffer[(count * 6) + 2] = y_part1;
-                positionBuffer[(count * 6) + 3] = y_part2;
-                positionBuffer[(count * 6) + 4] = z_part1;
-                positionBuffer[(count * 6) + 5] = z_part2;
-                ++count;
+				stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
+				stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+				stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
             }
-
-            stream.write(positionBuffer, posSize);
-            delete[] positionBuffer;
-
-            count = 0;
-            char* uvBuffer = new char[uvSize];
-            for (auto uv : data.uvs) {
-                uint16_t outX, outY;
-                float16(&outX, uv.x);
-                float16(&outY, uv.y);
-                uchar x_part1, x_part2, y_part1, y_part2;
-                x_part1 = outX & 0xF; // bits 0..3
-                x_part2 = (outX >> 4) & 0xF; // bits 4..7
-                y_part1 = outY & 0xF; // bits 0..3
-                y_part2 = (outY >> 4) & 0xF; // bits 4..7 
-                uvBuffer[(count * 4) + 0] = x_part1;
-                uvBuffer[(count * 4) + 1] = x_part2;
-                uvBuffer[(count * 4) + 2] = y_part1;
-                uvBuffer[(count * 4) + 3] = y_part2;
-                ++count;
-            }
-            stream.write(uvBuffer, uvSize);
-            delete[] uvBuffer;
-
-
-            count = 0;
-            char* normBuffer = new char[normSize];
-            for (auto norm : data.normals) {
-                uint16_t outX, outY,outZ;
-                float16(&outX, norm.x);
-                float16(&outY, norm.y);
-                float16(&outZ, norm.z);
-                uchar x_part1, x_part2, y_part1, y_part2, z_part1, z_part2;
-                x_part1 = outX & 0xF; // bits 0..3
-                x_part2 = (outX >> 4) & 0xF; // bits 4..7
-                y_part1 = outY & 0xF; // bits 0..3
-                y_part2 = (outY >> 4) & 0xF; // bits 4..7 
-                z_part1 = outZ & 0xF; // bits 0..3
-                z_part2 = (outZ >> 4) & 0xF; // bits 4..7 
-                normBuffer[(count * 6) + 0] = x_part1;
-                normBuffer[(count * 6) + 1] = x_part2;
-                normBuffer[(count * 6) + 2] = y_part1;
-                normBuffer[(count * 6) + 3] = y_part2;
-                normBuffer[(count * 6) + 4] = z_part1;
-                normBuffer[(count * 6) + 5] = z_part2;
-                ++count;
-            }
-            stream.write(normBuffer, normSize);
-            delete[] normBuffer;
-
+			for (auto uv : d.file_uvs) {
+				uint16_t outX, outY;
+				float16(&outX, uv.x);
+				float16(&outY, uv.y);
+				stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
+				stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+			}
+			for (auto norm : d.file_normals) {
+				uint16_t outX, outY, outZ;
+				float16(&outX, norm.x);
+				float16(&outY, norm.y);
+				float16(&outZ, norm.z);
+				stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
+				stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+				stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
+			}
             //pack indices normally, unpack normally too
-            count = 0;
-            char* indiceBuffer = new char[indiceSize];
-            for (auto ind : data.indices) {
-                uchar x_part1, x_part2;
-                x_part1 = ind & 0xF; // bits 0..3
-                x_part2 = (ind >> 4) & 0xF; // bits 4..7
-                indiceBuffer[(count * 2) + 0] = x_part1;
-                indiceBuffer[(count * 2) + 1] = x_part2;
-                ++count;
+            for (auto ind : positionIndices) {
+				ushort _ind = (ushort)ind;
+				stream.write((const char*)&_ind, sizeof(_ind));
             }
-            stream.write(indiceBuffer, indiceSize);
-            delete[] indiceBuffer;
-
+			for (auto ind : uvIndices) {
+				ushort _ind = (ushort)ind;
+				stream.write((const char*)&_ind, sizeof(_ind));
+			}
+			for (auto ind : normalIndices) {
+				ushort _ind = (ushort)ind;
+				stream.write((const char*)&_ind, sizeof(_ind));
+			}
             stream.close();
         }
         
