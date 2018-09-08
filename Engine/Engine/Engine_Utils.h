@@ -2,11 +2,15 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <unordered_map>
 #include <boost/lexical_cast.hpp>
 #include <boost/container/vector.hpp>
+
+typedef unsigned char uchar;
+typedef unsigned int uint;
 
 namespace Engine{
 	namespace epriv{
@@ -26,6 +30,17 @@ namespace Engine{
 	};
 };
 
+//returns true if the system is little endian, false if it is big endian
+constexpr bool isLittleEndian() {
+	uint16_t x = 0x0001;
+	auto p = reinterpret_cast<uint8_t*>(&x);
+	return *p != 0;
+}
+//swaps the bytes of the parameter
+template <class T> void endianSwap(T* objp) {
+	uchar *memp = reinterpret_cast<uchar*>(objp);
+	std::reverse(memp, memp + sizeof(T));
+}
 
 
 //removes a specific element from a vector

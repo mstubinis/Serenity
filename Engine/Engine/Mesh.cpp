@@ -1079,6 +1079,7 @@ class Mesh::impl final{
         }
 
         void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
+			bool bigEndian = !isLittleEndian();
             ifstream fileparser(filename.c_str(), ios::binary);
 
             char headerBuffer[24];
@@ -1093,6 +1094,15 @@ class Mesh::impl final{
             posIndiceSize = *(uint32_t*)&headerBuffer[12];
             uvIndiceSize = *(uint32_t*)&headerBuffer[16];
             normIndiceSize = *(uint32_t*)&headerBuffer[20];
+
+			if (bigEndian) {
+				endianSwap(&numOfPoints);
+				endianSwap(&numOfUvs);
+				endianSwap(&numOfNormals);
+				endianSwap(&posIndiceSize);
+				endianSwap(&uvIndiceSize);
+				endianSwap(&normIndiceSize);
+			}
 
             //base
             data.file_points.resize(numOfPoints);
@@ -1111,6 +1121,11 @@ class Mesh::impl final{
                 fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
                 fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
                 fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
+				if (bigEndian) {
+					endianSwap(&xIn);
+					endianSwap(&yIn);
+					endianSwap(&zIn);
+				}
                 float32(&xOut, xIn);
                 float32(&yOut, yIn);
                 float32(&zOut, zIn);
@@ -1133,6 +1148,11 @@ class Mesh::impl final{
                 fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
                 fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
                 fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
+				if (bigEndian) {
+					endianSwap(&xIn);
+					endianSwap(&yIn);
+					endianSwap(&zIn);
+				}
                 float32(&xOut, xIn);
                 float32(&yOut, yIn);
                 float32(&zOut, zIn);
@@ -1141,17 +1161,26 @@ class Mesh::impl final{
             //indices
             for (uint i = 0; i < posIndiceSize; ++i) {
                 ushort c;
-                fileparser.read(reinterpret_cast<char *>(&c), sizeof(c));
+                fileparser.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (bigEndian) {
+					endianSwap(&c);
+				}
                 positionIndices.at(i) = c;
             }
             for (uint i = 0; i < uvIndiceSize; ++i) {
                 ushort c;
-                fileparser.read(reinterpret_cast<char *>(&c), sizeof(c));
+                fileparser.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (bigEndian) {
+					endianSwap(&c);
+				}
                 uvIndices.at(i) = c;
             }
             for (uint i = 0; i < normIndiceSize; ++i) {
                 ushort c;
-                fileparser.read(reinterpret_cast<char *>(&c), sizeof(c));
+                fileparser.read(reinterpret_cast<char*>(&c), sizeof(c));
+				if (bigEndian) {
+					endianSwap(&c);
+				}
                 normalIndices.at(i) = c;
             }
             fileparser.close();

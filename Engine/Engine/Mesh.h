@@ -27,9 +27,6 @@ class MeshInstance;
 class InternalMeshPublicInterface;
 class Mesh;
 
-typedef unsigned int uint;
-typedef unsigned short ushort;
-
 namespace Engine{
     namespace epriv{
         class MeshLoader;
