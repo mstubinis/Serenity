@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "Engine_Utils.h"
+#include <Bullet/LinearMath/btVector3.h>
 
 class Entity;
 class btCollisionDispatcher;
@@ -13,7 +14,6 @@ class btDynamicsWorld;
 class btDiscreteDynamicsWorld;
 class btCollisionShape;
 class btRigidBody;
-class btVector3;
 class btTriangleMesh;
 namespace Engine{
     namespace epriv{
@@ -36,10 +36,10 @@ _TOTAL,};};
 class Collision final{
     private:
         btTriangleMesh* m_InternalMeshData;
-        btVector3* m_Inertia;
+        btVector3 m_Inertia;
         uint m_Type;
         btCollisionShape* m_Shape;
-        void _init(CollisionType::Type = CollisionType::None, float mass = 0);
+        void _init(float mass);
         void _load(Engine::epriv::ImportedMeshData&, CollisionType::Type,glm::vec3 scale = glm::vec3(1.0f));
     public:
         Collision(btCollisionShape* shape = nullptr,CollisionType::Type = CollisionType::None, float mass = 0);
@@ -47,7 +47,7 @@ class Collision final{
         ~Collision();
 
         void setMass(float mass);
-        btVector3* getInertia() const;
+		const btVector3& getInertia() const;
         btCollisionShape* getShape() const;
         const uint getType() const;
 };
