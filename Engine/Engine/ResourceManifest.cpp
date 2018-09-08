@@ -69,14 +69,14 @@ void ResourceManifest::init(){
     StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objc",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
     RingMesh = Resources::addMeshAsync("data/Models/ring.objc",CollisionType::None);
     DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc",CollisionType::ConvexHull);
-    /*
+    
     AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc",CollisionType::ConvexHull);
     MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objc",CollisionType::ConvexHull);
     IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objc",CollisionType::ConvexHull);
     NorwayMesh = Resources::addMeshAsync("data/Models/norway.objc",CollisionType::ConvexHull);
     VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objc",CollisionType::ConvexHull);
     OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc",CollisionType::ConvexHull);
-    */
+    
     CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc",CollisionType::None);
     CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objc",CollisionType::None);
 

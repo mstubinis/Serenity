@@ -1079,126 +1079,81 @@ class Mesh::impl final{
         }
 
         void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
-			bool bigEndian = !isLittleEndian();
-            ifstream fileparser(filename.c_str(), ios::binary);
+            ifstream stream(filename.c_str(), ios::binary);
 
-            char headerBuffer[24];
-            fileparser.read(headerBuffer, 24);
-
-            //pos,uv,norm,indices sizes
-            uint32_t numOfPoints, numOfUvs, numOfNormals, posIndiceSize,uvIndiceSize,normIndiceSize;
-			numOfPoints = *(uint32_t*)&headerBuffer[0];
-			numOfUvs = *(uint32_t*)&headerBuffer[4];
-			numOfNormals = *(uint32_t*)&headerBuffer[8];
-
-            posIndiceSize = *(uint32_t*)&headerBuffer[12];
-            uvIndiceSize = *(uint32_t*)&headerBuffer[16];
-            normIndiceSize = *(uint32_t*)&headerBuffer[20];
-
-			if (bigEndian) {
-				endianSwap(&numOfPoints);
-				endianSwap(&numOfUvs);
-				endianSwap(&numOfNormals);
-				endianSwap(&posIndiceSize);
-				endianSwap(&uvIndiceSize);
-				endianSwap(&normIndiceSize);
+			uint32_t sizes[6];
+			for (uint i = 0; i < 6; ++i) {
+				readUint32tBigEndian(sizes[i], stream);
 			}
-
             //base
-            data.file_points.resize(numOfPoints);
-            data.file_uvs.resize(numOfUvs);
-            data.file_normals.resize(numOfNormals);
+            data.file_points.resize(sizes[0]);
+            data.file_uvs.resize(sizes[1]);
+            data.file_normals.resize(sizes[2]);
 
-            vector<uint> positionIndices, uvIndices, normalIndices;
-            positionIndices.resize(posIndiceSize);
-            uvIndices.resize(uvIndiceSize);
-            normalIndices.resize(normIndiceSize);
+			vector<vector<uint>> _indices;
+			_indices.resize(3);
+			_indices.at(0).resize(sizes[3]);
+			_indices.at(1).resize(sizes[4]);
+			_indices.at(2).resize(sizes[5]);
 
             //positions
-            for (uint i = 0; i < numOfPoints; ++i) {
-                float xOut, yOut, zOut;
-                uint16_t xIn, yIn, zIn;
-                fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
-                fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
-                fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
-				if (bigEndian) {
-					endianSwap(&xIn);
-					endianSwap(&yIn);
-					endianSwap(&zIn);
+            for (uint i = 0; i < sizes[0]; ++i) {
+				float out[3];
+				uint16_t in[3];
+				for (uint i = 0; i < 3; ++i) {
+					readUint16tBigEndian(in[i], stream);
 				}
-                float32(&xOut, xIn);
-                float32(&yOut, yIn);
-                float32(&zOut, zIn);
-                data.file_points.at(i) = glm::vec3(xOut, yOut, zOut);
+                float32(&out[0], in[0]);
+                float32(&out[1], in[1]);
+                float32(&out[2], in[2]);
+                data.file_points.at(i) = glm::vec3(out[0], out[1], out[2]);
             }
             //uvs
-            for (uint i = 0; i < numOfUvs; ++i) {
-                float xOut, yOut;
-                uint16_t xIn, yIn;
-                fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
-                fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
-                float32(&xOut, xIn);
-                float32(&yOut, yIn);
-                data.file_uvs.at(i) = glm::vec2(xOut, yOut);
+            for (uint i = 0; i < sizes[1]; ++i) {
+				float out[2];
+				uint16_t in[2];
+				for (uint i = 0; i < 2; ++i) {
+					readUint16tBigEndian(in[i], stream);
+				}
+				float32(&out[0], in[0]);
+				float32(&out[1], in[1]);
+				data.file_uvs.at(i) = glm::vec2(out[0], out[1]);
             }
             //normals
-            for (uint i = 0; i < numOfNormals; ++i) {
-                float xOut, yOut, zOut;
-                uint16_t xIn, yIn, zIn;
-                fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
-                fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
-                fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
-				if (bigEndian) {
-					endianSwap(&xIn);
-					endianSwap(&yIn);
-					endianSwap(&zIn);
+            for (uint i = 0; i < sizes[2]; ++i) {
+				float out[3];
+				uint16_t in[3];
+				for (uint i = 0; i < 3; ++i) {
+					readUint16tBigEndian(in[i], stream);
 				}
-                float32(&xOut, xIn);
-                float32(&yOut, yIn);
-                float32(&zOut, zIn);
-                data.file_normals.at(i) = glm::vec3(xOut, yOut, zOut);
+				float32(&out[0], in[0]);
+				float32(&out[1], in[1]);
+				float32(&out[2], in[2]);
+				data.file_normals.at(i) = glm::vec3(out[0], out[1], out[2]);
             }
             //indices
-            for (uint i = 0; i < posIndiceSize; ++i) {
-                ushort c;
-                fileparser.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (bigEndian) {
-					endianSwap(&c);
+			for (uint i = 0; i < _indices.size(); ++i) {
+				for (uint j = 0; j < sizes[3+i]; ++j) {
+					uint16_t c;
+					readUint16tBigEndian(c, stream);
+					_indices.at(i).at(j) = c;
 				}
-                positionIndices.at(i) = c;
-            }
-            for (uint i = 0; i < uvIndiceSize; ++i) {
-                ushort c;
-                fileparser.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (bigEndian) {
-					endianSwap(&c);
-				}
-                uvIndices.at(i) = c;
-            }
-            for (uint i = 0; i < normIndiceSize; ++i) {
-                ushort c;
-                fileparser.read(reinterpret_cast<char*>(&c), sizeof(c));
-				if (bigEndian) {
-					endianSwap(&c);
-				}
-                normalIndices.at(i) = c;
-            }
-            fileparser.close();
-            _loadDataIntoTriangles(data, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
+			}
+			stream.close();
+            _loadDataIntoTriangles(data, _indices.at(0), _indices.at(1), _indices.at(2), epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
             epriv::MeshLoader::CalculateTBNAssimp(data);
         }
         void _writeToObjCompressed() {
             epriv::ImportedMeshData d;
 
-            vector<uint> positionIndices;
-            vector<uint> uvIndices;
-            vector<uint> normalIndices;
+			vector<vector<uint>> _indices;
+			_indices.resize(3);
 
             ifstream input(m_File);
 
             //first read in all data
             for (string line; getline(input, line, '\n');) {
-                _loadObjDataFromLine(line, d, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
+                _loadObjDataFromLine(line, d, _indices.at(0), _indices.at(1), _indices.at(2), epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
             }
             //header:
             string f = m_File;
@@ -1208,60 +1163,50 @@ class Mesh::impl final{
             ofstream stream(f,ios::binary);
 
             //header
-            unsigned posSize = d.file_points.size();
-            unsigned uvSize = d.file_uvs.size();
-            unsigned normSize = d.file_normals.size();
+			uint32_t sizes[6];
+			sizes[0] = d.file_points.size();
+			sizes[1] = d.file_uvs.size();
+			sizes[2] = d.file_normals.size();
+			for (uint i = 0; i < _indices.size(); ++i) {
+				sizes[3+i] = _indices.at(i).size();
+			}
 
-            unsigned positionIndicesSize = positionIndices.size();
-            unsigned uvIndicesSize = uvIndices.size();
-            unsigned normalIndicesSize = normalIndices.size();
-
-            stream.write(reinterpret_cast<const char*>(&posSize), sizeof(posSize));
-            stream.write(reinterpret_cast<const char*>(&uvSize), sizeof(uvSize));
-            stream.write(reinterpret_cast<const char*>(&normSize), sizeof(normSize));
-
-            stream.write(reinterpret_cast<const char*>(&positionIndicesSize), sizeof(positionIndicesSize));
-            stream.write(reinterpret_cast<const char*>(&uvIndicesSize), sizeof(uvIndicesSize));
-            stream.write(reinterpret_cast<const char*>(&normalIndicesSize), sizeof(normalIndicesSize));
-
+			for (uint i = 0; i < 6; ++i) {
+				writeUint32tBigEndian(sizes[i], stream);
+			}
             for (auto pos : d.file_points) {
-                uint16_t outX, outY, outZ;
-                float16(&outX, pos.x);
-                float16(&outY, pos.y);
-                float16(&outZ, pos.z);
-                stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
-                stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
-                stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
+                uint16_t out[3];
+                float16(&out[0], pos.x);
+                float16(&out[1], pos.y);
+                float16(&out[2], pos.z);
+				for (uint i = 0; i < 3; ++i) {
+					writeUint16tBigEndian(out[i], stream);
+				}
             }
             for (auto uv : d.file_uvs) {
-                uint16_t outX, outY;
-                float16(&outX, uv.x);
-                float16(&outY, uv.y);
-                stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
-                stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+                uint16_t out[2];
+                float16(&out[0], uv.x);
+                float16(&out[1], uv.y);
+				for (uint i = 0; i < 2; ++i) {
+					writeUint16tBigEndian(out[i], stream);
+				}
             }
             for (auto norm : d.file_normals) {
-                uint16_t outX, outY, outZ;
-                float16(&outX, norm.x);
-                float16(&outY, norm.y);
-                float16(&outZ, norm.z);
-                stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
-                stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
-                stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
+				uint16_t out[3];
+				float16(&out[0], norm.x);
+				float16(&out[1], norm.y);
+				float16(&out[2], norm.z);
+				for (uint i = 0; i < 3; ++i) {
+					writeUint16tBigEndian(out[i], stream);
+				}
             }
-            //pack indices normally, unpack normally too
-            for (auto ind : positionIndices) {
-                ushort _ind = (ushort)ind;
-                stream.write((const char*)&_ind, sizeof(_ind));
-            }
-            for (auto ind : uvIndices) {
-                ushort _ind = (ushort)ind;
-                stream.write((const char*)&_ind, sizeof(_ind));
-            }
-            for (auto ind : normalIndices) {
-                ushort _ind = (ushort)ind;
-                stream.write((const char*)&_ind, sizeof(_ind));
-            }
+			//indices
+			for (uint i = 0; i < _indices.size(); ++i) {
+				for (auto ind : _indices.at(i)) {
+					uint16_t _ind = (uint16_t)ind;
+					writeUint16tBigEndian(_ind, stream);
+				}
+			}
             stream.close();
         }
         
