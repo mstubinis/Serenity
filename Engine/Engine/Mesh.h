@@ -33,7 +33,7 @@ typedef unsigned short ushort;
 namespace Engine{
     namespace epriv{
         class MeshLoader;
-		class MeshSkeleton;
+        class MeshSkeleton;
         class VertexFormat final{ public: enum Format{
             Position,UV,Normal,Binormal,Tangent,
         _TOTAL};};

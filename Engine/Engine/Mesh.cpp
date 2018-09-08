@@ -65,13 +65,13 @@ namespace Engine{
             LOAD_FACES   = 8,
             LOAD_TBN     = 16,
                        //= 32,
-					   //= 64,
-					   //= 128,
-					   //= 256,
-					   //= 512,
-					   //= 1024,
-					   //= 2048,
-					   //= 4096,
+                       //= 64,
+                       //= 128,
+                       //= 256,
+                       //= 512,
+                       //= 1024,
+                       //= 2048,
+                       //= 4096,
         };
         struct MeshVertexData{
             glm::vec3 position;
@@ -262,91 +262,91 @@ namespace Engine{
                     }
                 }
         };
-		struct BoneInfo final {
-			glm::mat4 BoneOffset, FinalTransform;
-			BoneInfo() {
-				BoneOffset = glm::mat4(0.0f);
-				FinalTransform = glm::mat4(1.0f);
-			}
-		};
-		struct BoneNode final {
-			string Name;
-			BoneNode* Parent;
-			vector<BoneNode*> Children;
-			glm::mat4 Transform;
-			BoneNode(){
-				Name = "";
-				Parent = nullptr;
-				Transform = glm::mat4(1.0f);
-			}
-			~BoneNode(){
-			}
-		};
-		struct Vector3Key final {
-			glm::vec3 value;
-			double time;
-			Vector3Key(double _time, glm::vec3 _value) { value = _value; time = _time; }
-		};
-		struct QuatKey final {
-			aiQuaternion value;
-			double time;
-			QuatKey(double _time, aiQuaternion _value) { value = _value; time = _time; }
-		};
-		struct AnimationChannel final {
-			vector<Vector3Key> PositionKeys;
-			vector<QuatKey>    RotationKeys;
-			vector<Vector3Key> ScalingKeys;
-			AnimationChannel() {
-			}
-			~AnimationChannel() {
-			}
-		};
+        struct BoneInfo final {
+            glm::mat4 BoneOffset, FinalTransform;
+            BoneInfo() {
+                BoneOffset = glm::mat4(0.0f);
+                FinalTransform = glm::mat4(1.0f);
+            }
+        };
+        struct BoneNode final {
+            string Name;
+            BoneNode* Parent;
+            vector<BoneNode*> Children;
+            glm::mat4 Transform;
+            BoneNode(){
+                Name = "";
+                Parent = nullptr;
+                Transform = glm::mat4(1.0f);
+            }
+            ~BoneNode(){
+            }
+        };
+        struct Vector3Key final {
+            glm::vec3 value;
+            double time;
+            Vector3Key(double _time, glm::vec3 _value) { value = _value; time = _time; }
+        };
+        struct QuatKey final {
+            aiQuaternion value;
+            double time;
+            QuatKey(double _time, aiQuaternion _value) { value = _value; time = _time; }
+        };
+        struct AnimationChannel final {
+            vector<Vector3Key> PositionKeys;
+            vector<QuatKey>    RotationKeys;
+            vector<Vector3Key> ScalingKeys;
+            AnimationChannel() {
+            }
+            ~AnimationChannel() {
+            }
+        };
 
-		class MeshSkeleton final : private Engine::epriv::noncopyable {
-			friend class ::Engine::epriv::AnimationData;
-			friend class ::Mesh;
-			friend struct ::DefaultMeshBindFunctor;
-			friend struct ::DefaultMeshUnbindFunctor;
-			private:
-				BoneNode*                              m_RootNode;
-				uint                                   m_NumBones;
-				vector<BoneInfo*>                      m_BoneInfo;
-				vector<glm::vec4*>                     m_BoneIDs, m_BoneWeights;
-				unordered_map<string, uint>            m_BoneMapping; // maps a bone name to its index
-				unordered_map<string, AnimationData*>  m_AnimationData;
-				glm::mat4                              m_GlobalInverseTransform;
-				void fill(Engine::epriv::ImportedMeshData& data) {
-					for (auto bone : data.m_Bones) {
-						VertexBoneData& b = bone.second;
-						m_BoneIDs.push_back(new glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
-						m_BoneWeights.push_back(new glm::vec4(b.Weights[0], b.Weights[1], b.Weights[2], b.Weights[3]));
-					}
-				}
-				void populateCleanupMap(BoneNode* node, unordered_map<string, BoneNode*>& _map) {
-					if (!_map.count(node->Name)) _map.emplace(node->Name, node);
-					for (auto child : node->Children) {
-					    populateCleanupMap(child, _map);
-				    }
-				}
-				void cleanup() {
-					unordered_map<string, BoneNode*> nodes;
-					populateCleanupMap(m_RootNode, nodes);
-					SAFE_DELETE_MAP(nodes);
-				}
-				void clear() {
-					SAFE_DELETE_MAP(m_AnimationData);
-					SAFE_DELETE_VECTOR(m_BoneInfo);
-					SAFE_DELETE_VECTOR(m_BoneIDs);
-					SAFE_DELETE_VECTOR(m_BoneWeights);
-					m_NumBones = 0;
-					m_BoneMapping.clear();
-				}
-			public:
-				MeshSkeleton() { m_RootNode = nullptr; clear(); }
-				MeshSkeleton(Engine::epriv::ImportedMeshData& data) { fill(data); }
-				~MeshSkeleton() { clear();cleanup(); }
-				uint numBones() { return m_NumBones; }
-		};
+        class MeshSkeleton final : private Engine::epriv::noncopyable {
+            friend class ::Engine::epriv::AnimationData;
+            friend class ::Mesh;
+            friend struct ::DefaultMeshBindFunctor;
+            friend struct ::DefaultMeshUnbindFunctor;
+            private:
+                BoneNode*                              m_RootNode;
+                uint                                   m_NumBones;
+                vector<BoneInfo*>                      m_BoneInfo;
+                vector<glm::vec4*>                     m_BoneIDs, m_BoneWeights;
+                unordered_map<string, uint>            m_BoneMapping; // maps a bone name to its index
+                unordered_map<string, AnimationData*>  m_AnimationData;
+                glm::mat4                              m_GlobalInverseTransform;
+                void fill(Engine::epriv::ImportedMeshData& data) {
+                    for (auto bone : data.m_Bones) {
+                        VertexBoneData& b = bone.second;
+                        m_BoneIDs.push_back(new glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
+                        m_BoneWeights.push_back(new glm::vec4(b.Weights[0], b.Weights[1], b.Weights[2], b.Weights[3]));
+                    }
+                }
+                void populateCleanupMap(BoneNode* node, unordered_map<string, BoneNode*>& _map) {
+                    if (!_map.count(node->Name)) _map.emplace(node->Name, node);
+                    for (auto child : node->Children) {
+                        populateCleanupMap(child, _map);
+                    }
+                }
+                void cleanup() {
+                    unordered_map<string, BoneNode*> nodes;
+                    populateCleanupMap(m_RootNode, nodes);
+                    SAFE_DELETE_MAP(nodes);
+                }
+                void clear() {
+                    SAFE_DELETE_MAP(m_AnimationData);
+                    SAFE_DELETE_VECTOR(m_BoneInfo);
+                    SAFE_DELETE_VECTOR(m_BoneIDs);
+                    SAFE_DELETE_VECTOR(m_BoneWeights);
+                    m_NumBones = 0;
+                    m_BoneMapping.clear();
+                }
+            public:
+                MeshSkeleton() { m_RootNode = nullptr; clear(); }
+                MeshSkeleton(Engine::epriv::ImportedMeshData& data) { fill(data); }
+                ~MeshSkeleton() { clear();cleanup(); }
+                uint numBones() { return m_NumBones; }
+        };
     };
 };
 
@@ -522,15 +522,15 @@ class Mesh::impl final{
             }
         }
         void _loadInternal(Mesh* mesh,epriv::ImportedMeshData& data,string& file){
-			Assimp::Importer importer;
-			const aiScene* AssimpScene = importer.ReadFile(file,aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            Assimp::Importer importer;
+            const aiScene* AssimpScene = importer.ReadFile(file,aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
             if(!AssimpScene || AssimpScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !AssimpScene->mRootNode){
                 return;
             }
             //animation stuff
             aiMatrix4x4 m = AssimpScene->mRootNode->mTransformation; // node->mTransformation?
             m.Inverse();
-			unordered_map<string, epriv::BoneNode*> map;
+            unordered_map<string, epriv::BoneNode*> map;
             if(AssimpScene->mAnimations && AssimpScene->mNumAnimations > 0 && !m_Skeleton){
                 m_Skeleton = new epriv::MeshSkeleton();
                 m_Skeleton->m_GlobalInverseTransform = Math::assimpToGLMMat4(m);
@@ -542,10 +542,10 @@ class Mesh::impl final{
         }
         void _processNode(Mesh* mesh,epriv::ImportedMeshData& data, const aiScene* scene,aiNode* node, aiNode* root, unordered_map<string, epriv::BoneNode*>& _map){
 
-			//yes this is needed
-			if (m_Skeleton && node == root) {
-				_populateGlobalNodes(root, _map);
-			}
+            //yes this is needed
+            if (m_Skeleton && node == root) {
+                _populateGlobalNodes(root, _map);
+            }
 
             for(uint i = 0; i < node->mNumMeshes; ++i){
                 aiMesh& aimesh = *scene->mMeshes[node->mMeshes[i]];
@@ -609,11 +609,11 @@ class Mesh::impl final{
                 #pragma region Skeleton
                 if(aimesh.mNumBones > 0){
                     auto& skeleton = *m_Skeleton;
-					#pragma region IndividualBones
-					//build bone information
-					for (uint k = 0; k < aimesh.mNumBones; ++k) {
-						auto* boneNode = _map.at(aimesh.mBones[k]->mName.data);
-						auto& assimpBone = *aimesh.mBones[k];
+                    #pragma region IndividualBones
+                    //build bone information
+                    for (uint k = 0; k < aimesh.mNumBones; ++k) {
+                        auto* boneNode = _map.at(aimesh.mBones[k]->mName.data);
+                        auto& assimpBone = *aimesh.mBones[k];
                         uint BoneIndex(0);
                         if(!skeleton.m_BoneMapping.count(boneNode->Name)) {
                             BoneIndex = skeleton.m_NumBones;
@@ -632,64 +632,64 @@ class Mesh::impl final{
                             data.m_Bones.emplace(VertexID,d);
                         }
                     }	
-					//build skeleton parent child relationship
-					for (auto node : _map) {
-						const auto& assimpNode = root->FindNode(node.first.c_str());
-						auto iter = assimpNode;
-						while (iter != 0 && iter->mParent != 0){
-							if (_map.count(iter->mParent->mName.data)) {
-								node.second->Parent = _map.at(iter->mParent->mName.data);
-								node.second->Parent->Children.push_back(node.second);
-								break; //might need to double check this
-							}
-							iter = iter->mParent;
-						}
-					}
-					//and finalize the root node
-					if (!skeleton.m_RootNode) {
-						for (auto node : _map) {
-							if (!node.second->Parent) {
-								skeleton.m_RootNode = node.second;
-								break;
-							}
-						}
-					}
-					#pragma endregion
+                    //build skeleton parent child relationship
+                    for (auto node : _map) {
+                        const auto& assimpNode = root->FindNode(node.first.c_str());
+                        auto iter = assimpNode;
+                        while (iter != 0 && iter->mParent != 0){
+                            if (_map.count(iter->mParent->mName.data)) {
+                                node.second->Parent = _map.at(iter->mParent->mName.data);
+                                node.second->Parent->Children.push_back(node.second);
+                                break; //might need to double check this
+                            }
+                            iter = iter->mParent;
+                        }
+                    }
+                    //and finalize the root node
+                    if (!skeleton.m_RootNode) {
+                        for (auto node : _map) {
+                            if (!node.second->Parent) {
+                                skeleton.m_RootNode = node.second;
+                                break;
+                            }
+                        }
+                    }
+                    #pragma endregion
 
-					#pragma region Animations
+                    #pragma region Animations
                     if(scene->mAnimations && scene->mNumAnimations > 0){
                         for(uint j = 0; j < scene->mNumAnimations; ++j){			 
-							 aiAnimation* anim = scene->mAnimations[j];
+                             aiAnimation* anim = scene->mAnimations[j];
                              string key(anim->mName.C_Str());
                              if(key == ""){
                                  key = "Animation " + to_string(skeleton.m_AnimationData.size());
                              }
                              if(!skeleton.m_AnimationData.count(key)){
-								epriv::AnimationData* animData = new epriv::AnimationData(mesh, anim);
+                                epriv::AnimationData* animData = new epriv::AnimationData(mesh, anim);
                                 skeleton.m_AnimationData.emplace(key, animData);
                              }
                         }
                     }
-					#pragma endregion
+                    #pragma endregion
                 }
                 #pragma endregion
                 epriv::MeshLoader::CalculateTBNAssimp(data);
             }
             for(uint i = 0; i < node->mNumChildren; ++i){
-				_processNode(mesh, data, scene, node->mChildren[i],scene->mRootNode, _map);
+                _processNode(mesh, data, scene, node->mChildren[i],scene->mRootNode, _map);
             }
         }
-		void _populateGlobalNodes(aiNode* node, unordered_map<string, epriv::BoneNode*>& _map) {
-			if (!_map.count(node->mName.data)) {
-				epriv::BoneNode* bone_node = new epriv::BoneNode();
-				bone_node->Name = node->mName.data;
-				bone_node->Transform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node->mTransformation));
-				_map.emplace(node->mName.data, bone_node);
-			}
-			for (uint y = 0; y < node->mNumChildren; ++y) {
-				_populateGlobalNodes(node->mChildren[y], _map);
-			}
-		}
+        void _populateGlobalNodes(aiNode* node, unordered_map<string, epriv::BoneNode*>& _map) {
+            if (!_map.count(node->mName.data)) {
+                epriv::BoneNode* bone_node = new epriv::BoneNode();
+                bone_node->Name = node->mName.data;
+                bone_node->Transform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node->mTransformation));
+                _map.emplace(node->mName.data, bone_node);
+            }
+            for (uint y = 0; y < node->mNumChildren; ++y) {
+                _populateGlobalNodes(node->mChildren[y], _map);
+            }
+        }
         void _finalizeData(epriv::ImportedMeshData& data,float threshold){
             m_threshold = threshold;
 
@@ -771,18 +771,18 @@ class Mesh::impl final{
                 vert.tangent = Math::pack3NormalsInto32Int(temp_tangents.at(i));
             }
         }
-		void _loadFromFile(Mesh* super, string& file, CollisionType::Type type, float threshold) {
-			string extention = boost::filesystem::extension(file);
-			epriv::ImportedMeshData d;
+        void _loadFromFile(Mesh* super, string& file, CollisionType::Type type, float threshold) {
+            string extention = boost::filesystem::extension(file);
+            epriv::ImportedMeshData d;
 
-			if (extention == ".objc") {
-				_readFromObjCompressed(file, d);
-				_finalizeData(d, threshold);
-			}
-			else {
-				_loadInternal(super, d, m_File);
-				_finalizeData(d, threshold);
-			}
+            if (extention == ".objc") {
+                _readFromObjCompressed(file, d);
+                _finalizeData(d, threshold);
+            }
+            else {
+                _loadInternal(super, d, m_File);
+                _finalizeData(d, threshold);
+            }
             if(type == CollisionType::None){
                 m_Collision = new Collision(new btEmptyShape());
             }else{
@@ -1078,106 +1078,106 @@ class Mesh::impl final{
             cout << "(Mesh) ";
         }
 
-		void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
-			ifstream fileparser(filename.c_str(), ios::binary);
+        void _readFromObjCompressed(string& filename, epriv::ImportedMeshData& data) {
+            ifstream fileparser(filename.c_str(), ios::binary);
 
-			char headerBuffer[24];
-			fileparser.read(headerBuffer, 24);
+            char headerBuffer[24];
+            fileparser.read(headerBuffer, 24);
 
-			//pos,uv,norm,indices sizes
-			uint32_t posSize, uvSize, normSize, posIndiceSize,uvIndiceSize,normIndiceSize;
-			posSize = *(uint32_t*)&headerBuffer[0];
-			uvSize = *(uint32_t*)&headerBuffer[4];
-			normSize = *(uint32_t*)&headerBuffer[8];
+            //pos,uv,norm,indices sizes
+            uint32_t posSize, uvSize, normSize, posIndiceSize,uvIndiceSize,normIndiceSize;
+            posSize = *(uint32_t*)&headerBuffer[0];
+            uvSize = *(uint32_t*)&headerBuffer[4];
+            normSize = *(uint32_t*)&headerBuffer[8];
 
-			posIndiceSize = *(uint32_t*)&headerBuffer[12];
-			uvIndiceSize = *(uint32_t*)&headerBuffer[16];
-			normIndiceSize = *(uint32_t*)&headerBuffer[20];
+            posIndiceSize = *(uint32_t*)&headerBuffer[12];
+            uvIndiceSize = *(uint32_t*)&headerBuffer[16];
+            normIndiceSize = *(uint32_t*)&headerBuffer[20];
 
-			//base
-			uint32_t numOfPoints = posSize / 6;
-			uint32_t numOfUvs = uvSize / 4;
-			uint32_t numOfNormals = normSize / 6;
-			data.file_points.resize(numOfPoints);
-			data.file_uvs.resize(numOfUvs);
-			data.file_normals.resize(numOfNormals);
-
-
-			vector<uint> positionIndices;
-			vector<uint> uvIndices;
-			vector<uint> normalIndices;
-			positionIndices.resize(posIndiceSize);
-			uvIndices.resize(uvIndiceSize);
-			normalIndices.resize(normIndiceSize);
+            //base
+            uint32_t numOfPoints = posSize / 6;
+            uint32_t numOfUvs = uvSize / 4;
+            uint32_t numOfNormals = normSize / 6;
+            data.file_points.resize(numOfPoints);
+            data.file_uvs.resize(numOfUvs);
+            data.file_normals.resize(numOfNormals);
 
 
-			//positions
-			for (uint i = 0; i < numOfPoints; ++i) {
-				float xOut, yOut, zOut;
-				uint16_t xIn, yIn, zIn;
-				fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
-				fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
-				fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
-				float32(&xOut, xIn);
-				float32(&yOut, yIn);
-				float32(&zOut, zIn);
-				data.file_points.at(i) = glm::vec3(xOut, yOut, zOut);
-			}
-			//uvs
-			for (uint i = 0; i < numOfUvs; ++i) {
-				float xOut, yOut;
-				uint16_t xIn, yIn;
-				fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
-				fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
-				float32(&xOut, xIn);
-				float32(&yOut, yIn);
-				data.file_uvs.at(i) = glm::vec2(xOut, yOut);
-			}
-			//normals
-			for (uint i = 0; i < numOfNormals; ++i) {
-				float xOut, yOut, zOut;
-				uint16_t xIn, yIn, zIn;
-				fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
-				fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
-				fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
-				float32(&xOut, xIn);
-				float32(&yOut, yIn);
-				float32(&zOut, zIn);
-				data.file_normals.at(i) = glm::vec3(xOut, yOut, zOut);
-			}
-			//indices
-			for (uint i = 0; i < posIndiceSize; ++i) {
-				ushort c;
-				fileparser.read(reinterpret_cast<char *>(&c), sizeof(char)*2);
-				positionIndices.at(i) = c;
-			}
-			for (uint i = 0; i < uvIndiceSize; ++i) {
-				ushort c;
-				fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
-				uvIndices.at(i) = c;
-			}
-			for (uint i = 0; i < normIndiceSize; ++i) {
-				ushort c;
-				fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
-				normalIndices.at(i) = c;
-			}
-			fileparser.close();
-			_loadDataIntoTriangles(data, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-			epriv::MeshLoader::CalculateTBNAssimp(data);
-		}
+            vector<uint> positionIndices;
+            vector<uint> uvIndices;
+            vector<uint> normalIndices;
+            positionIndices.resize(posIndiceSize);
+            uvIndices.resize(uvIndiceSize);
+            normalIndices.resize(normIndiceSize);
+
+
+            //positions
+            for (uint i = 0; i < numOfPoints; ++i) {
+                float xOut, yOut, zOut;
+                uint16_t xIn, yIn, zIn;
+                fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
+                fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
+                fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
+                float32(&xOut, xIn);
+                float32(&yOut, yIn);
+                float32(&zOut, zIn);
+                data.file_points.at(i) = glm::vec3(xOut, yOut, zOut);
+            }
+            //uvs
+            for (uint i = 0; i < numOfUvs; ++i) {
+                float xOut, yOut;
+                uint16_t xIn, yIn;
+                fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
+                fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
+                float32(&xOut, xIn);
+                float32(&yOut, yIn);
+                data.file_uvs.at(i) = glm::vec2(xOut, yOut);
+            }
+            //normals
+            for (uint i = 0; i < numOfNormals; ++i) {
+                float xOut, yOut, zOut;
+                uint16_t xIn, yIn, zIn;
+                fileparser.read(reinterpret_cast<char*>(&xIn), sizeof(xIn));
+                fileparser.read(reinterpret_cast<char*>(&yIn), sizeof(yIn));
+                fileparser.read(reinterpret_cast<char*>(&zIn), sizeof(zIn));
+                float32(&xOut, xIn);
+                float32(&yOut, yIn);
+                float32(&zOut, zIn);
+                data.file_normals.at(i) = glm::vec3(xOut, yOut, zOut);
+            }
+            //indices
+            for (uint i = 0; i < posIndiceSize; ++i) {
+                ushort c;
+                fileparser.read(reinterpret_cast<char *>(&c), sizeof(char)*2);
+                positionIndices.at(i) = c;
+            }
+            for (uint i = 0; i < uvIndiceSize; ++i) {
+                ushort c;
+                fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
+                uvIndices.at(i) = c;
+            }
+            for (uint i = 0; i < normIndiceSize; ++i) {
+                ushort c;
+                fileparser.read(reinterpret_cast<char *>(&c), sizeof(char) * 2);
+                normalIndices.at(i) = c;
+            }
+            fileparser.close();
+            _loadDataIntoTriangles(data, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
+            epriv::MeshLoader::CalculateTBNAssimp(data);
+        }
         void _writeToObjCompressed() {
-			epriv::ImportedMeshData d;
+            epriv::ImportedMeshData d;
 
-			vector<uint> positionIndices;
-			vector<uint> uvIndices;
-			vector<uint> normalIndices;
+            vector<uint> positionIndices;
+            vector<uint> uvIndices;
+            vector<uint> normalIndices;
 
-			ifstream input(m_File);
+            ifstream input(m_File);
 
-			//first read in all data
-			for (string line; getline(input, line, '\n');) {
-				_loadObjDataFromLine(line, d, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
-			}
+            //first read in all data
+            for (string line; getline(input, line, '\n');) {
+                _loadObjDataFromLine(line, d, positionIndices, uvIndices, normalIndices, epriv::LOAD_FACES | epriv::LOAD_UVS | epriv::LOAD_NORMALS | epriv::LOAD_TBN);
+            }
             //header:
             string f = m_File;
             string ext = boost::filesystem::extension(m_File);
@@ -1186,60 +1186,60 @@ class Mesh::impl final{
             ofstream stream(f,ios::binary);
 
             //header
-			unsigned posSize = d.file_points.size() * 6;
-			unsigned uvSize = d.file_uvs.size() * 4;
-			unsigned normSize = d.file_normals.size() * 6;
+            unsigned posSize = d.file_points.size() * 6;
+            unsigned uvSize = d.file_uvs.size() * 4;
+            unsigned normSize = d.file_normals.size() * 6;
 
-			unsigned positionIndicesSize = positionIndices.size();
-			unsigned uvIndicesSize = uvIndices.size();
-			unsigned normalIndicesSize = normalIndices.size();
+            unsigned positionIndicesSize = positionIndices.size();
+            unsigned uvIndicesSize = uvIndices.size();
+            unsigned normalIndicesSize = normalIndices.size();
 
-			stream.write(reinterpret_cast<const char*>(&posSize), sizeof(posSize));
-			stream.write(reinterpret_cast<const char*>(&uvSize), sizeof(uvSize));
-			stream.write(reinterpret_cast<const char*>(&normSize), sizeof(normSize));
+            stream.write(reinterpret_cast<const char*>(&posSize), sizeof(posSize));
+            stream.write(reinterpret_cast<const char*>(&uvSize), sizeof(uvSize));
+            stream.write(reinterpret_cast<const char*>(&normSize), sizeof(normSize));
 
-			stream.write(reinterpret_cast<const char*>(&positionIndicesSize), sizeof(positionIndicesSize));
-			stream.write(reinterpret_cast<const char*>(&uvIndicesSize), sizeof(uvIndicesSize));
-			stream.write(reinterpret_cast<const char*>(&normalIndicesSize), sizeof(normalIndicesSize));
+            stream.write(reinterpret_cast<const char*>(&positionIndicesSize), sizeof(positionIndicesSize));
+            stream.write(reinterpret_cast<const char*>(&uvIndicesSize), sizeof(uvIndicesSize));
+            stream.write(reinterpret_cast<const char*>(&normalIndicesSize), sizeof(normalIndicesSize));
 
             for (auto pos : d.file_points) {
                 uint16_t outX, outY, outZ;
                 float16(&outX, pos.x);
                 float16(&outY, pos.y);
                 float16(&outZ, pos.z);
-				stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
-				stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
-				stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
+                stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
+                stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+                stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
             }
-			for (auto uv : d.file_uvs) {
-				uint16_t outX, outY;
-				float16(&outX, uv.x);
-				float16(&outY, uv.y);
-				stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
-				stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
-			}
-			for (auto norm : d.file_normals) {
-				uint16_t outX, outY, outZ;
-				float16(&outX, norm.x);
-				float16(&outY, norm.y);
-				float16(&outZ, norm.z);
-				stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
-				stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
-				stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
-			}
+            for (auto uv : d.file_uvs) {
+                uint16_t outX, outY;
+                float16(&outX, uv.x);
+                float16(&outY, uv.y);
+                stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
+                stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+            }
+            for (auto norm : d.file_normals) {
+                uint16_t outX, outY, outZ;
+                float16(&outX, norm.x);
+                float16(&outY, norm.y);
+                float16(&outZ, norm.z);
+                stream.write(reinterpret_cast<const char*>(&outX), sizeof(outX));
+                stream.write(reinterpret_cast<const char*>(&outY), sizeof(outY));
+                stream.write(reinterpret_cast<const char*>(&outZ), sizeof(outZ));
+            }
             //pack indices normally, unpack normally too
             for (auto ind : positionIndices) {
-				ushort _ind = (ushort)ind;
-				stream.write((const char*)&_ind, sizeof(_ind));
+                ushort _ind = (ushort)ind;
+                stream.write((const char*)&_ind, sizeof(_ind));
             }
-			for (auto ind : uvIndices) {
-				ushort _ind = (ushort)ind;
-				stream.write((const char*)&_ind, sizeof(_ind));
-			}
-			for (auto ind : normalIndices) {
-				ushort _ind = (ushort)ind;
-				stream.write((const char*)&_ind, sizeof(_ind));
-			}
+            for (auto ind : uvIndices) {
+                ushort _ind = (ushort)ind;
+                stream.write((const char*)&_ind, sizeof(_ind));
+            }
+            for (auto ind : normalIndices) {
+                ushort _ind = (ushort)ind;
+                stream.write((const char*)&_ind, sizeof(_ind));
+            }
             stream.close();
         }
         
@@ -1278,31 +1278,31 @@ class epriv::AnimationData::impl{
 
         void _Init(Mesh* mesh, aiAnimation* assimpAnimation){
             m_Mesh = mesh;
-			m_TicksPerSecond = assimpAnimation->mTicksPerSecond;
+            m_TicksPerSecond = assimpAnimation->mTicksPerSecond;
             m_DurationInTicks = assimpAnimation->mDuration;
-			for (uint o = 0; o < assimpAnimation->mNumChannels; ++o) {
-				aiNodeAnim& aiAnimNode = *assimpAnimation->mChannels[o];
-				if (!m_KeyframeData.count(aiAnimNode.mNodeName.data)) {
-					epriv::AnimationChannel* animChannel = new epriv::AnimationChannel();	
-					for (uint b = 0; b < aiAnimNode.mNumPositionKeys; ++b) {
-						animChannel->PositionKeys.emplace_back(aiAnimNode.mPositionKeys[b].mTime, Math::assimpToGLMVec3(aiAnimNode.mPositionKeys[b].mValue));
-					}
-					for (uint b = 0; b < aiAnimNode.mNumRotationKeys; ++b) {
-						animChannel->RotationKeys.emplace_back(aiAnimNode.mRotationKeys[b].mTime, aiAnimNode.mRotationKeys[b].mValue);
-					}
-					for (uint b = 0; b < aiAnimNode.mNumScalingKeys; ++b) {
-						animChannel->ScalingKeys.emplace_back(aiAnimNode.mScalingKeys[b].mTime, Math::assimpToGLMVec3(aiAnimNode.mScalingKeys[b].mValue));
-					}
-					m_KeyframeData.emplace(aiAnimNode.mNodeName.data, animChannel);
-				}
-			}
+            for (uint o = 0; o < assimpAnimation->mNumChannels; ++o) {
+                aiNodeAnim& aiAnimNode = *assimpAnimation->mChannels[o];
+                if (!m_KeyframeData.count(aiAnimNode.mNodeName.data)) {
+                    epriv::AnimationChannel* animChannel = new epriv::AnimationChannel();	
+                    for (uint b = 0; b < aiAnimNode.mNumPositionKeys; ++b) {
+                        animChannel->PositionKeys.emplace_back(aiAnimNode.mPositionKeys[b].mTime, Math::assimpToGLMVec3(aiAnimNode.mPositionKeys[b].mValue));
+                    }
+                    for (uint b = 0; b < aiAnimNode.mNumRotationKeys; ++b) {
+                        animChannel->RotationKeys.emplace_back(aiAnimNode.mRotationKeys[b].mTime, aiAnimNode.mRotationKeys[b].mValue);
+                    }
+                    for (uint b = 0; b < aiAnimNode.mNumScalingKeys; ++b) {
+                        animChannel->ScalingKeys.emplace_back(aiAnimNode.mScalingKeys[b].mTime, Math::assimpToGLMVec3(aiAnimNode.mScalingKeys[b].mValue));
+                    }
+                    m_KeyframeData.emplace(aiAnimNode.mNodeName.data, animChannel);
+                }
+            }
         }
-		void _Destruct() {
-			SAFE_DELETE_MAP(m_KeyframeData);
-		}
+        void _Destruct() {
+            SAFE_DELETE_MAP(m_KeyframeData);
+        }
         void _ReadNodeHeirarchy(const string& animationName,float time, const BoneNode* node,glm::mat4& ParentTransform,vector<glm::mat4>& Transforms){
             string BoneName(node->Name);
-			glm::mat4 NodeTransform(node->Transform);
+            glm::mat4 NodeTransform(node->Transform);
             if(m_KeyframeData.count(BoneName)){
                 const auto* keyframes(m_KeyframeData.at(BoneName));
                 if(keyframes){
@@ -1320,7 +1320,7 @@ class epriv::AnimationData::impl{
             auto& skeleton = *m_Mesh->m_i->m_Skeleton;
             if(skeleton.m_BoneMapping.count(BoneName)){
                 uint BoneIndex(skeleton.m_BoneMapping.at(BoneName));
-				BoneInfo& boneInfo = *skeleton.m_BoneInfo.at(BoneIndex);
+                BoneInfo& boneInfo = *skeleton.m_BoneInfo.at(BoneIndex);
                 glm::mat4& Final = boneInfo.FinalTransform;
                 Final = skeleton.m_GlobalInverseTransform * Transform * boneInfo.BoneOffset;
                 //this line allows for animation combinations. only works when additional animations start off in their resting places...
@@ -1335,7 +1335,7 @@ class epriv::AnimationData::impl{
             float TimeInTicks(TimeInSeconds * TicksPerSecond);
             float AnimationTime(float(fmod(TimeInTicks, m_DurationInTicks)));
             glm::mat4 ParentIdentity(1.0f);
-			auto& skeleton = *m_Mesh->m_i->m_Skeleton;
+            auto& skeleton = *m_Mesh->m_i->m_Skeleton;
             _ReadNodeHeirarchy(animationName,AnimationTime, skeleton.m_RootNode,ParentIdentity,Transforms);
             for(uint i = 0; i < skeleton.m_NumBones; ++i){
                 Transforms.at(i) = skeleton.m_BoneInfo.at(i)->FinalTransform;
@@ -1354,9 +1354,9 @@ class epriv::AnimationData::impl{
             Out = Start + Factor * (End - Start);
         }
         void _CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const epriv::AnimationChannel* node){
-			if (node->RotationKeys.size() == 1) {
-				Out = node->RotationKeys.at(0).value; return;
-			}
+            if (node->RotationKeys.size() == 1) {
+                Out = node->RotationKeys.at(0).value; return;
+            }
             uint RotationIndex(_FindRotation(AnimationTime, node));
             uint NextIndex(RotationIndex + 1);
             float DeltaTime((float)(node->RotationKeys.at(NextIndex).time - node->RotationKeys.at(RotationIndex).time));
@@ -1392,10 +1392,10 @@ class epriv::AnimationData::impl{
         }
 };
 epriv::AnimationData::AnimationData(Mesh* m, aiAnimation* aiAnim):m_i(new impl) {
-	m_i->_Init(m, aiAnim);
+    m_i->_Init(m, aiAnim);
 }
 epriv::AnimationData::~AnimationData() { 
-	m_i->_Destruct();
+    m_i->_Destruct();
 }
 float epriv::AnimationData::duration() { return m_i->_Duration(); }
 

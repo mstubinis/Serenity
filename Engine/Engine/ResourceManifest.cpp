@@ -69,14 +69,14 @@ void ResourceManifest::init(){
     StarbaseMesh = Resources::addMeshAsync("data/Models/starbase.objc",CollisionType::TriangleShapeStatic); //6950 meters in height (6.95 km)
     RingMesh = Resources::addMeshAsync("data/Models/ring.objc",CollisionType::None);
     DreadnaughtMesh = Resources::addMeshAsync("data/Models/dreadnaught.objc",CollisionType::ConvexHull);
-	/*
-	AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc",CollisionType::ConvexHull);
-	MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objc",CollisionType::ConvexHull);
-	IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objc",CollisionType::ConvexHull);
-	NorwayMesh = Resources::addMeshAsync("data/Models/norway.objc",CollisionType::ConvexHull);
+    /*
+    AkiraMesh = Resources::addMeshAsync("data/Models/akira.objc",CollisionType::ConvexHull);
+    MirandaMesh = Resources::addMeshAsync("data/Models/miranda.objc",CollisionType::ConvexHull);
+    IntrepidMesh = Resources::addMeshAsync("data/Models/intrepid.objc",CollisionType::ConvexHull);
+    NorwayMesh = Resources::addMeshAsync("data/Models/norway.objc",CollisionType::ConvexHull);
     VenerexMesh = Resources::addMeshAsync("data/Models/venerex.objc",CollisionType::ConvexHull);
     OberthMesh = Resources::addMeshAsync("data/Models/oberth.objc",CollisionType::ConvexHull);
-	*/
+    */
     CapsuleTunnelMesh = Resources::addMeshAsync("data/Models/capsuleTunnel.objc",CollisionType::None);
     CapsuleRibbonMesh = Resources::addMeshAsync("data/Models/capsuleRibbon.objc",CollisionType::None);
 
@@ -103,19 +103,19 @@ void ResourceManifest::init(){
     Resources::getMaterial(StarFlareMaterial)->setShadeless(true);
 
     GoldMaterial = Resources::addMaterial("Gold","");
-	((Material*)GoldMaterial.get())->setMaterialPhysics(MaterialPhysics::Gold);
+    ((Material*)GoldMaterial.get())->setMaterialPhysics(MaterialPhysics::Gold);
 
     PBCSound = Resources::addSoundData("data/Sounds/Effects/pbc.ogg","pbc");
     SniperSound = Resources::addSoundData("data/Sounds/Effects/snipercannon.ogg","sniper");
 
     CapsuleA = Resources::addMaterial("Capsule_A","data/Textures/Effects/capsule_a.dds");
-	((Material*)CapsuleA.get())->setShadeless(true);
+    ((Material*)CapsuleA.get())->setShadeless(true);
     CapsuleB = Resources::addMaterial("Capsule_B","data/Textures/Effects/capsule_b.dds");
-	((Material*)CapsuleB.get())->setShadeless(true);
+    ((Material*)CapsuleB.get())->setShadeless(true);
     CapsuleC = Resources::addMaterial("Capsule_C","data/Textures/Effects/capsule_c.dds");
-	((Material*)CapsuleC.get())->setShadeless(true);
-	((Material*)CapsuleC.get())->setGlow(0.01f);
+    ((Material*)CapsuleC.get())->setShadeless(true);
+    ((Material*)CapsuleC.get())->setGlow(0.01f);
     CapsuleD = Resources::addMaterial("Capsule_D","data/Textures/Effects/capsule_d.dds");
-	((Material*)CapsuleD.get())->setShadeless(true);
+    ((Material*)CapsuleD.get())->setShadeless(true);
 
 }
